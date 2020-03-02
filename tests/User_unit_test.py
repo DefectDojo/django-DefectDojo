@@ -9,16 +9,14 @@ import os
 
 class UserTest(unittest.TestCase):
     def setUp(self):
-        # Initialize the driver
-        # When used with Travis, chromdriver is stored in the same
-        # directory as the unit tests
+        # change path of chromedriver according to which directory you have chromedriver.
         self.options = Options()
         self.options.add_argument("--headless")
+        # self.options.add_argument("--no-sandbox")
+        # self.options.add_argument("--disable-dev-shm-usage")
         self.driver = webdriver.Chrome('chromedriver', chrome_options=self.options)
-        # Allow a little time for the driver to initialize
         self.driver.implicitly_wait(30)
-        # Set the base address of the dojo
-        self.base_url = "http://localhost:8080/"
+        self.base_url = os.environ['DD_BASE_URL']
         self.verificationErrors = []
         self.accept_next_alert = True
 

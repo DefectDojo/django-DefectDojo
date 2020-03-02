@@ -146,7 +146,7 @@
                           </div>
                         </sup>
                         {% endif %}
-                        {% if eng|count_findings_eng_all == 0 %}
+                        {% if eng.count_findings_all == 0 %}
                         &nbsp;<sup>
                           <div class="tag-label amber-color">
                             no findings
@@ -175,9 +175,9 @@
                       {% endif %}
                       </div>
                     </td>
-                    <td>{{ eng|count_findings_eng_open }}</td>
-                    <td>{{ eng|count_findings_eng_all }}</td>
-                    <td>{{ eng|count_findings_eng_duplicate }}</td>
+                    <td>{{ eng.count_findings_open }}</td>
+                    <td>{{ eng.count_findings_all }}</td>
+                    <td>{{ eng.count_findings_duplicate }}</td>
                     <td><a target="_blank" data-toggle="tooltip" data-placement="bottom" title="{{ eng.updated|default_if_none:"" }}">
                     {{ eng.updated|naturaltime|default_if_none:"" }}</a>
                     </td>

@@ -198,26 +198,23 @@ docker-compose down --volumes
 ```
 
 # Run with docker using https
+## use your own  Credentials
 To secure the application by https, follow those steps
 *  Generate a private key without password
 *  Generate a CSR (Certificate Signing Request)
 *  Have the CSR signed by a certificate authority
 *  Place the private key and the certificate under the nginx folder
-*  Replace nginx/nginx.conf by nginx/nginx_TLS.conf
-*  In nginx.conf, update that part: 
+*  copy your secrets into: 
 ```
         server_name                 your.servername.com;
-        ssl_certificate             /yourCertificate.cer;
-        ssl_certificate_key         /yourPrivateKey.key;
+        ssl_certificate             /etc/nginx/ssl/nginx.crt
+        ssl_certificate_key        /etc/nginx/ssl/nginx.key;
 ```
+*set the GENERATE_TLS_CERTIFICATE != True in the docker-compose.override.https.yml
 * Protect your private key from other users: 
 ```
 chmod 400 nginx/*.key
 ```
-* Rebuild the nginx image in order to place the private key and the certificate where nginx will find them (under / in the nginx container):
-
-```docker build  -t defectdojo/defectdojo-nginx -f Dockerfile.nginx .```
-
 
 * Run defectDojo with: 
 ```
@@ -226,7 +223,17 @@ ln -s docker-compose.override.https.yml docker-compose.override.yml
 docker-compose up
 ```
 
-The default https port is 8083.
+## create Credentials on the fly
+* you can generate a Certificate on the fly (without valid domainname etc.)
+
+* Run defectDojo with: 
+```
+rm -f docker-compose.override.yml
+ln -s docker-compose.override.https.yml docker-compose.override.yml
+docker-compose up
+```
+
+The default https port is 8443.
 
 To change the port:
 - update `nginx.conf`

@@ -13,7 +13,6 @@ from django.urls import reverse
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import Q
 from django.utils.deconstruct import deconstructible
 from django.utils.timezone import now
 from imagekit.models import ImageSpecField
@@ -374,20 +373,23 @@ class Product_Type(models.Model):
         else:
             return health
 
-    def findings_count(self):
-        return Finding.objects.filter(mitigated__isnull=True,
-                                      verified=True,
-                                      false_p=False,
-                                      duplicate=False,
-                                      out_of_scope=False,
-                                      test__engagement__product__prod_type=self).filter(
-            Q(severity="Critical") |
-            Q(severity="High") |
-            Q(severity="Medium") |
-            Q(severity="Low")).count()
+    # def findings_count(self):
+    #     return Finding.objects.filter(mitigated__isnull=True,
+    #                                   verified=True,
+    #                                   false_p=False,
+    #                                   duplicate=False,
+    #                                   out_of_scope=False,
+    #                                   test__engagement__product__prod_type=self).filter(
+    #         Q(severity="Critical") |
+    #         Q(severity="High") |
+    #         Q(severity="Medium") |
+    #         Q(severity="Low")).count()
 
-    def products_count(self):
-        return Product.objects.filter(prod_type=self).count()
+    # def products_count(self):
+    #     return Product.objects.filter(prod_type=self).count()
+
+    class Meta:
+        ordering = ('name',)
 
     def __unicode__(self):
         return self.name
@@ -576,32 +578,40 @@ class Product(models.Model):
 
     @property
     def findings_count(self):
-        return Finding.objects.filter(mitigated__isnull=True,
-                                      verified=True,
-                                      false_p=False,
-                                      duplicate=False,
-                                      out_of_scope=False,
-                                      test__engagement__product=self).count()
+        try:
+            # if prefetched, it's already there
+            return self.active_finding_count
+        except AttributeError:
+            # ideally it's always prefetched and we can remove this code in the future
+            self.active_finding_count = Finding.objects.filter(mitigated__isnull=True,
+                                            active=True,
+                                            false_p=False,
+                                            duplicate=False,
+                                            out_of_scope=False,
+                                            test__engagement__product=self).count()
+            return self.active_finding_count
 
-    @property
-    def active_engagement_count(self):
-        return Engagement.objects.filter(active=True, product=self).count()
+    # @property
+    # def active_engagement_count(self):
+    #     return Engagement.objects.filter(active=True, product=self).count()
 
-    @property
-    def closed_engagement_count(self):
-        return Engagement.objects.filter(active=False, product=self).count()
+    # @property
+    # def closed_engagement_count(self):
+    #     return Engagement.objects.filter(active=False, product=self).count()
 
-    @property
-    def last_engagement_date(self):
-        return Engagement.objects.filter(product=self).first()
+    # @property
+    # def last_engagement_date(self):
+    #     return Engagement.objects.filter(product=self).first()
 
     @property
     def endpoint_count(self):
-        endpoints = Endpoint.objects.filter(
-            finding__test__engagement__product=self,
-            finding__active=True,
-            finding__verified=True,
-            finding__mitigated__isnull=True)
+        # endpoints = Endpoint.objects.filter(
+        #     finding__test__engagement__product=self,
+        #     finding__active=True,
+        #     finding__verified=True,
+        #     finding__mitigated__isnull=True)
+
+        endpoints = self.active_endpoints
 
         hosts = []
         ids = []
@@ -1229,9 +1239,10 @@ class Finding(models.Model):
     title = models.CharField(max_length=511)
     date = models.DateField(default=get_current_date)
     cwe = models.IntegerField(default=0, null=True, blank=True)
-    cve_regex = RegexValidator(regex=r'^[A-Z]{1,10}-\d{4}-\d{4,12}$',
-                                 message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'. ")
-    cve = models.CharField(validators=[cve_regex], max_length=28, null=True)
+    cve_regex = RegexValidator(regex=r'^[A-Z]{1,10}(-\d+)+$',
+                               message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'.")
+    cve = models.CharField(validators=[cve_regex], max_length=28, null=True,
+                           help_text="CVE or other vulnerability identifier")
     url = models.TextField(null=True, blank=True, editable=False)
     severity = models.CharField(max_length=200, help_text="The severity level of this flaw (Critical, High, Medium, Low, Informational)")
     description = models.TextField()
@@ -1353,7 +1364,8 @@ class Finding(models.Model):
             filtered = filtered.filter(file_path=self.file_path)
         if self.line:
             filtered = filtered.filter(line=self.line)
-
+        if self.unique_id_from_tool:
+            filtered = filtered.filter(unique_id_from_tool=self.unique_id_from_tool)
         return filtered.exclude(pk=self.pk)[:10]
 
     def compute_hash_code(self):
@@ -1444,8 +1456,7 @@ class Finding(models.Model):
         return hashlib.sha256(hash_string).hexdigest()
 
     def remove_from_any_risk_acceptance(self):
-        risk_acceptances = Risk_Acceptance.objects.filter(accepted_findings__in=[self])
-        for r in risk_acceptances:
+        for r in self.risk_acceptance_set.all():
             r.accepted_findings.remove(self)
             if not r.accepted_findings.exists():
                 r.delete()
@@ -1518,7 +1529,7 @@ class Finding(models.Model):
             status += ['Out Of Scope']
         if self.duplicate:
             status += ['Duplicate']
-        if len(self.risk_acceptance_set.all()) > 0:
+        if self.risk_acceptance_set.exists():
             status += ['Accepted']
 
         if not len(status):
@@ -1552,11 +1563,16 @@ class Finding(models.Model):
 
     def jira(self):
         try:
-            jissue = JIRA_Issue.objects.get(finding=self)
-        except:
-            jissue = None
-            pass
-        return jissue
+            return self.jira_issue
+        except JIRA_Issue.DoesNotExist:
+            return None
+
+    def has_jira_issue(self):
+        try:
+            issue = self.jira_issue
+            return True
+        except JIRA_Issue.DoesNotExist:
+            return False
 
     def jira_conf(self):
         try:
@@ -1566,6 +1582,14 @@ class Finding(models.Model):
             jconf = None
             pass
         return jconf
+
+    # newer version that can work with prefetching
+    def jira_conf_new(self):
+        try:
+            return self.test.engagement.product.jira_pkey_set.all()[0].conf
+        except:
+            return None
+            pass
 
     def long_desc(self):
         long_desc = ''
@@ -1726,10 +1750,6 @@ class Finding(models.Model):
         res = re.sub(r'\n\s*\n', '\n', res)
         return res
 
-    def get_found_by(self):
-        scanners = self.found_by.all().distinct()
-        return ", ".join([str(scanner) for scanner in scanners])
-
 
 Finding.endpoints.through.__unicode__ = lambda \
     x: "Endpoint: " + x.endpoint.host
@@ -1762,8 +1782,8 @@ class Stub_Finding(models.Model):
 class Finding_Template(models.Model):
     title = models.TextField(max_length=1000)
     cwe = models.IntegerField(default=None, null=True, blank=True)
-    cve_regex = RegexValidator(regex=r'^[A-Z]{1,10}-\d{4}-\d{4,12}$',
-                                 message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'. ")
+    cve_regex = RegexValidator(regex=r'^[A-Z]{1,10}(-\d+)+$',
+                               message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'.")
     cve = models.CharField(validators=[cve_regex], max_length=28, null=True)
     severity = models.CharField(max_length=200, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
