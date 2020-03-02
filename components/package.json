@@ -17,7 +17,7 @@
     "@yarn_components/fontawesome": "FortAwesome/Font-Awesome#~4.5.0",
     "@yarn_components/fullcalendar": "fullcalendar/fullcalendar#3.9.0",
     "@yarn_components/google-code-prettify": "tcollard/google-code-prettify#~1.0.4",
-    "@yarn_components/holderjs": "imsky/holder#~2.4.1",
+    "@yarn_components/holderjs": "imsky/holder#~2.9.6",
     "@yarn_components/jquery": "jquery/jquery-dist#~3.3.1",
     "@yarn_components/jquery-cookie": "carhartl/jquery-cookie#*",
     "@yarn_components/jquery-highlight": "knownasilya/jquery-highlight#*",
