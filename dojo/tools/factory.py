@@ -71,6 +71,7 @@ from dojo.tools.h1.parser import HackerOneJSONParser
 from dojo.tools.xanitizer.parser import XanitizerXMLParser
 from dojo.tools.trivy.parser import TrivyParser
 from dojo.tools.outpost24.parser import Outpost24Parser
+from dojo.tools.burp_enterprise.parser import BurpEnterpriseHtmlParser
 
 
 
@@ -83,6 +84,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         scan_type = test.test_type.name
     if scan_type == "Burp Scan":
         parser = BurpXmlParser(file, test)
+    elif scan_type == "Burp Enterprise Scan":
+        parser = BurpEnterpriseHtmlParser(file, test)
     elif scan_type == "Nessus Scan":
         filename = file.name.lower()
         if filename.endswith("csv"):
