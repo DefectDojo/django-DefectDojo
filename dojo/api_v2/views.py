@@ -121,15 +121,7 @@ class EngagementViewSet(mixins.ListModelMixin,
     @action(methods=['post'], detail=True, permission_classes=[IsAdminUser],
             serializer_class=ra_api.AcceptedRiskSerializer)
     def accept_risks(self, request, pk=None):
-        engagement = get_object_or_404(Engagement, id=pk)
-        serializer = ra_api.AcceptedRiskSerializer(data=request.data, many=True)
-        if serializer.is_valid():
-            accepted_risks = serializer.save()
-        else:
-            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        risks = ra_api.accept_findings_matching(accepted_risks, request.user, engagement)
-        result = serializers.RiskAcceptanceSerializer(instance=risks, many=True)
-        return Response(result.data)
+        return _accept_risks(Engagement, request, pk)
 
 
 class FindingTemplatesViewSet(mixins.ListModelMixin,
@@ -312,14 +304,7 @@ class FindingViewSet(mixins.ListModelMixin,
     @action(methods=['post'], detail=False, permission_classes=[IsAdminUser],
             serializer_class=ra_api.AcceptedRiskSerializer)
     def accept_risks(self, request):
-        serializer = ra_api.AcceptedRiskSerializer(data=request.data, many=True)
-        if serializer.is_valid():
-            accepted_risks = serializer.save()
-        else:
-            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        risks = ra_api.accept_findings_matching(accepted_risks, request.user, None)
-        result = serializers.RiskAcceptanceSerializer(instance=risks, many=True)
-        return Response(result.data)
+        return _accept_risks(None, request, None)
 
 
 class JiraConfigurationsViewSet(mixins.ListModelMixin,
@@ -416,15 +401,7 @@ class ProductViewSet(mixins.ListModelMixin,
     @action(methods=['post'], detail=True, permission_classes=[IsAdminUser],
             serializer_class=ra_api.AcceptedRiskSerializer)
     def accept_risks(self, request, pk=None):
-        product = get_object_or_404(Product, id=pk)
-        serializer = ra_api.AcceptedRiskSerializer(data=request.data, many=True)
-        if serializer.is_valid():
-            accepted_risks = serializer.save()
-        else:
-            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        risks = ra_api.accept_findings_matching(accepted_risks, request.user, product)
-        result = serializers.RiskAcceptanceSerializer(instance=risks, many=True)
-        return Response(result.data)
+        return _accept_risks(Product, request, pk)
 
 
 class ProductTypeViewSet(mixins.ListModelMixin,
@@ -467,15 +444,7 @@ class ProductTypeViewSet(mixins.ListModelMixin,
     @action(methods=['post'], detail=True, permission_classes=[IsAdminUser],
             serializer_class=ra_api.AcceptedRiskSerializer)
     def accept_risks(self, request, pk=None):
-        product_type = get_object_or_404(Product_Type, id=pk)
-        serializer = ra_api.AcceptedRiskSerializer(data=request.data, many=True)
-        if serializer.is_valid():
-            accepted_risks = serializer.save()
-        else:
-            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        risks = ra_api.accept_findings_matching(accepted_risks, request.user, product_type)
-        result = serializers.RiskAcceptanceSerializer(instance=risks, many=True)
-        return Response(result.data)
+        return _accept_risks(Product_Type, request, pk)
 
 
 class ScanSettingsViewSet(mixins.ListModelMixin,
@@ -608,15 +577,7 @@ class TestsViewSet(mixins.ListModelMixin,
 
     @action(methods=['post'], detail=True, permission_classes=[IsAdminUser])
     def accept_risks(self, request, pk=None):
-        test = get_object_or_404(Test, id=pk)
-        serializer = ra_api.AcceptedRiskSerializer(data=request.data, many=True)
-        if serializer.is_valid():
-            accepted_risks = serializer.save()
-        else:
-            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        risks = ra_api.accept_findings_matching(accepted_risks, request.user, test)
-        result = serializers.RiskAcceptanceSerializer(instance=risks, many=True)
-        return Response(result.data)
+        return _accept_risks(Test, request, pk)
 
 
 class TestTypesViewSet(mixins.ListModelMixin,
@@ -1017,3 +978,25 @@ def report_generate(request, obj, options):
         result['executive_summary'] = executive_summary
 
     return result
+
+
+def _accept_risks(klass, request, pk):
+    """
+    Bulk risk acceptance API.
+    :param klass: one of Product_Type, Product, Engagement, Test, or None
+    :param request: HTTP request containing list of AcceptedRisk data
+    :param pk: private key for klass if defined or None
+    :return: HTTP response with created Risk_Acceptance data
+    """
+    if klass is None:
+        model = None
+    else:
+        model = get_object_or_404(klass, id=pk)
+    serializer = ra_api.AcceptedRiskSerializer(data=request.data, many=True)
+    if serializer.is_valid():
+        accepted_risks = serializer.save()
+    else:
+        return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    risks = ra_api.accept_findings_matching(accepted_risks, request.user, model)
+    result = serializers.RiskAcceptanceSerializer(instance=risks, many=True)
+    return Response(result.data)
