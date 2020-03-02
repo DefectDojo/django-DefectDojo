@@ -1,6 +1,5 @@
 from lxml import etree
 from dojo.models import Finding
-from django.utils.html import strip_tags
 import logging
 import re
 
@@ -28,82 +27,150 @@ class BurpEnterpriseHtmlParser(object):
         if tree:
             self.items = self.get_items(tree)
         else:
-            self.items = []
+            self.items = dict()
+
+    def get_content(self, container):
+        # print('\ncontent')
+        s = ''
+        for elem in container.iterchildren():
+            # print(elem.tag, ' : ', elem.text, '\n')
+            if elem.text is not None and elem.text.strip() != '':
+                if elem.tag == 'a':
+                    s += '(' + elem.text + ')[' + elem.attrib['href'] + ']' + '\n'
+                elif elem.tag == 'p':
+                    s += elem.text + '\n'
+                elif elem.tag == 'li':
+                    s += '* '
+                    if elem.text is not None:
+                        s += elem.text + '\n'
+                elif elem.text.isspace():
+                    s += list(elem.itertext())[0]
+                elif elem.tag == 'div' or elem.tag == 'span':
+                    s += elem.text.strip() + '\n'
+                else:
+                    continue
+            else:
+                return s + self.get_content(elem)
+
+        if s == '' and container.tag == 'div' and container.text is not None and len(container.text) > 0:
+            if container.text[0] == '<':
+                s += etree.tostring(container, encoding='unicode') + '\n'
+            else:
+                s += container.text.strip() + '\n'
+
+        print('Returning :: ', s)
+        return s
 
     def get_items(self, tree):
         # Check that there is at least one vulnerability (the vulnerabilities table is absent when no vuln are found)
         items = dict()
-        severities = tree.xpath("/html/body/div/table[contains(@class, 'issue-table')]/tbody")
-        sev_table = list(severities.iter("tr"))
+        severities = tree.xpath("/html/body/div/div[contains(@class, 'section')]/table[contains(@class, 'issue-table')]/tbody")
+        
+        sev_table = list(severities[0].iter("tr"))
+        # for sev in sev_table:
         for item in range(0, len(sev_table), 2):
-            title = list(vuln.iter("td"))[0].text.strip()[:-4]
-            severity = list(vuln.iter("td"))[1].text.strip()
+            title = list(sev_table[item].iter("td"))[0].text.strip()[:-4]
+            severity = list(sev_table[item + 1].iter("td"))[1].text.strip()
             vuln = dict()
-            
-
+            vuln['Severity'] = severity
+            vuln['Title'] = title
+            vuln['Description'] = ''
+            vuln['Impact'] = ''
+            vuln['Mitigation'] = ''
+            vuln['References'] = ''
+            vuln['CWE'] = ''
+            items[title] = vuln
 
         vulns = tree.xpath("/html/body/div/div[contains(@class, 'section details')]/div[contains(@class, 'issue-container')]")
-        print('length of vulns :: ', len(vulns))
-        if(len(vulns) > 1):
-            itemsDict = dict()
-            for vuln in vulns:
-                items = vuln.iterchildren()
-                title = items[1].text.strip()
-                # Description
+        if(len(vulns) > 0):
+            for issue in vulns:
+                elems = list(issue.iterchildren())
+                title = elems[1].text.strip()
+                items[title]['Endpoint'] = elems[2].text.strip()
+                description = ['Issue detail:', 'Issue description', 'Request:', 'Response:']
 
+                for index in range(3, len(elems), 2):
+                    primary, secondary = elems[index].text.strip(), elems[index + 1]
 
+                    # print('pri')
+                    # print(index, ' : tag  :: ', elems[index].tag)
+                    # print(index, ' : text :: ', elems[index].text, '\n')
+                    # if elems[index].text is not None and elems[index].text.strip() == '':
+                    #     print(self.get_content(elems[index]))
+                    # print('sec')
+                    # print(index + 1, ' : tag  :: ', elems[index + 1].tag)
+                    # print(index + 1, ' : text :: ', elems[index + 1].text, '\n')
+                    # if elems[index + 1].text is not None and elems[index + 1].text.strip() == '':
+                    #     print(self.get_content(elems[index + 1]))
 
-                for item in items:
-                    print('tag  :: ', item.tag)
-                    print('text :: ', item.text, '\n')
-                    if item.text == '':
-                        for p_text in item.iterchildren():
-                            print('tag  :: ', item.tag)
-                            print('text :: ', item.text.strip())
+                    # Description
+                    if primary in description:
+                        print('\"', primary, '\"')
+                        print('sec')
+                        print(index + 1, ' : tag  :: ', elems[index + 1].tag)
+                        print(index + 1, ' : text :: ', elems[index + 1].text, '\n')
+                        if elems[index + 1].text is not None and elems[index + 1].text.strip() == '':
+                            print(self.get_content(elems[index + 1]))
+
+                        print('************************************************')
+                        s = str(items[title]['Description']) + str(self.get_content(secondary))
+                        items[title]['Description'] = s
+                    # Impact
+                    if primary == 'Issue background':
+                        items[title]['Impact'] = items[title]['Impact'] + self.get_content(secondary)
+                    # Mitigation
+                    if primary == 'Issue remediation':
+                        items[title]['Mitigation'] = items[title]['Mitigation'] + self.get_content(secondary)
+                    # References
+                    if primary == 'References':
+                        items[title]['References'] += items[title]['References'] + self.get_content(secondary)
+                    # CWE
+                    if primary == 'Vulnerability classifications':
+                        items[title]['CWE'] += items[title]['CWE'] + self.get_content(secondary)
+
+            print('Printing vulns\n\n')
+            for k, v in items.items():
+                for key, value in v.items():
+                    print(key, ' :: ', value)
+                print()
 
             raise Exception("Stop")
-
-        # # iterate over the rules once to get the information we need
-        # rulesDic = dict()
-        # for rule in rules_table:
-        #     rule_properties = list(rule.iter("td"))
-        #     rule_name = list(rule_properties[0].iter("a"))[0].text
-        #     rule_details = list(rule_properties[1].iter("details"))[0]
-        #     rulesDic[rule_name] = rule_details
-
-        # for vuln in vulnerabilities_table:
-        #     vuln_properties = list(vuln.iter("td"))
-        #     vuln_rule_name = list(vuln_properties[0].iter("a"))[0].text
-        #     vuln_severity = self.convert_sonar_severity(vuln_properties[1].text)
-        #     vuln_file_path = vuln_properties[2].text
-        #     vuln_line = vuln_properties[3].text
-        #     vuln_title = vuln_properties[4].text
-        #     vuln_mitigation = vuln_properties[5].text
-        #     vuln_key = vuln_properties[6].text
-        #     if vuln_title is None or vuln_mitigation is None:
-        #         raise Exception("Parser ValueError: can't find a title or a mitigation for vulnerability of name " + vuln_rule_name)
-        #     try:
-        #         vuln_details = rulesDic[vuln_rule_name]
-        #         vuln_description = self.get_description(vuln_details)
-        #         vuln_references = self.get_references(vuln_rule_name, vuln_details)
-        #         vuln_cwe = self.get_cwe(vuln_references)
-        #     except KeyError:
-        #         vuln_description = "No description provided"
-        #         vuln_references = ""
-        #         vuln_cwe = 0
-        #     if(self.mode is None):
-        #         self.process_result_file_name_aggregated(
-        #             vuln_title, vuln_cwe, vuln_description, vuln_file_path, vuln_line, vuln_severity, vuln_mitigation, vuln_references)
-        #     elif (self.mode == 'detailed'):
-        #         self.process_result_detailed(
-        #             vuln_title, vuln_cwe, vuln_description, vuln_file_path, vuln_line, vuln_severity, vuln_mitigation, vuln_references, vuln_key)
-        # items = list(self.dupes.values())
-
-            
-
+            self.create_findings(items)
+            findings = list(self.dupes.values())
         else:
-            # No vuln were found
-            items = list()
-        return items
+            findings = dict()
+        return findings
 
+    def get_cwe(self, vuln_references):
+        # Match only the first CWE!
+        cweSearch = re.search("CWE-([0-9]*)", vuln_references, re.IGNORECASE)
+        if cweSearch:
+            return cweSearch.group(1)
+        else:
+            return 0
 
+    def create_findings(self, items):
+        for title, details in items.items():
+            cwe = self.get_cwe(details.get('CWE'))
+            aggregateKeys = "{}{}{}".format(title, details.get('Description'), cwe)
+            find = Finding(title=title,
+                           description=details.get('Description'),
+                           test=self.test,
+                           severity=details.get('Severity'),
+                           mitigation=details.get('Mitigation'),
+                           references=details.get('References'),
+                           impact=details.get('Impact'),
+                           cwe=int(cwe),
+                           active=False,
+                           verified=False,
+                           false_p=False,
+                           duplicate=False,
+                           out_of_scope=False,
+                           mitigated=None,
+                           numerical_severity=Finding.get_numerical_severity(details.get('Severity')),
+                           static_finding=False,
+                           dynamic_finding=True,
+                           nb_occurences=1)
+            self.dupes[aggregateKeys] = find
+        return list(self.dupes.values())
+            
