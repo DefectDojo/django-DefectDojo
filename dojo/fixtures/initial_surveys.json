@@ -117,7 +117,7 @@
       "polymorphic_ctype": 18
     },
     "model": "defectDojo_engagement_survey.question",
-    "pk": 18
+    "pk": 12
   },
   {
     "fields": {
@@ -539,7 +539,7 @@
   {
     "fields": {},
     "model": "defectDojo_engagement_survey.textquestion",
-    "pk": 18
+    "pk": 12
   },
   {
     "fields": {},
@@ -710,7 +710,7 @@
         9,
         10,
         11,
-        18
+        12
       ],
       "description": "Questions regarding the products physical infrastructure."
     },
