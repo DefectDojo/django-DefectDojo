@@ -81,11 +81,11 @@ env = environ.Env(
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_SECRET=(str, ''),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID=(str, ''),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE=(str, 'https://graph.microsoft.com/'),
-    DD_SOCIAL_AUTH_GITLAB_OAUTH2_ENABLED = (bool, 'False'),
-    DD_SOCIAL_AUTH_GITLAB_KEY = (str, ''),
-    DD_SOCIAL_AUTH_GITLAB_SECRET = (str, ''),
-    DD_SOCIAL_AUTH_GITLAB_API_URL = (str, 'https://gitlab.com'),
-    DD_SOCIAL_AUTH_GITLAB_SCOPE = (list, ['api', 'read_user', 'openid', 'profile', 'email']),
+    DD_SOCIAL_AUTH_GITLAB_OAUTH2_ENABLED=(bool, 'False'),
+    DD_SOCIAL_AUTH_GITLAB_KEY=(str, ''),
+    DD_SOCIAL_AUTH_GITLAB_SECRET=(str, ''),
+    DD_SOCIAL_AUTH_GITLAB_API_URL=(str, 'https://gitlab.com'),
+    DD_SOCIAL_AUTH_GITLAB_SCOPE=(list, ['api', 'read_user', 'openid', 'profile', 'email']),
 )
 
 
