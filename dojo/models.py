@@ -26,6 +26,8 @@ from django import forms
 from django.utils.translation import gettext as _
 from dojo.signals import dedupe_signal
 from dojo.tag.prefetching_tag_descriptor import PrefetchingTagDescriptor
+from django.contrib.contenttypes.fields import GenericRelation
+from tagging.models import Tag, TaggedItem
 
 fmt = getattr(settings, 'LOG_FORMAT', None)
 lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
@@ -572,6 +574,9 @@ class Product(models.Model):
     internet_accessible = models.BooleanField(default=False, help_text=_('Specify if the application is accessible from the public internet.'))
     regulations = models.ManyToManyField(Regulation, blank=True)
 
+    # used for prefetching tags because django-tagging doesn't support that out of the box
+    tagged_items = GenericRelation(TaggedItem)
+
     def __unicode__(self):
         return self.name
 
@@ -910,6 +915,9 @@ class Engagement(models.Model):
     orchestration_engine = models.ForeignKey(Tool_Configuration, verbose_name="Orchestration Engine", help_text="Orchestration service responsible for CI/CD test", null=True, blank=True, related_name='orchestration', on_delete=models.CASCADE)
     deduplication_on_engagement = models.BooleanField(default=False)
 
+    # used for prefetching tags because django-tagging doesn't support that out of the box
+    tagged_items = GenericRelation(TaggedItem)
+
     class Meta:
         ordering = ['-target_start']
 
@@ -966,6 +974,9 @@ class Endpoint(models.Model):
     endpoint_params = models.ManyToManyField(Endpoint_Params, blank=True,
                                              editable=False)
     remediated = models.BooleanField(default=False, blank=True)
+
+    # used for prefetching tags because django-tagging doesn't support that out of the box
+    tagged_items = GenericRelation(TaggedItem)
 
     class Meta:
         ordering = ['product', 'protocol', 'host', 'path', 'query', 'fragment']
@@ -1174,6 +1185,9 @@ class Test(models.Model):
     updated = models.DateTimeField(auto_now=True, null=True)
     created = models.DateTimeField(auto_now_add=True, null=True)
 
+    # used for prefetching tags because django-tagging doesn't support that out of the box
+    tagged_items = GenericRelation(TaggedItem)
+
     def test_type_name(self):
         return self.test_type.name
 
@@ -1336,6 +1350,9 @@ class Finding(models.Model):
     nb_occurences = models.IntegerField(null=True, blank=True,
                                verbose_name="Number of occurences",
                                help_text="Number of occurences in the source tool when several vulnerabilites were found and aggregated by the scanner")
+
+    # used for prefetching tags because django-tagging doesn't support that out of the box
+    tagged_items = GenericRelation(TaggedItem)
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
@@ -1801,6 +1818,9 @@ class Finding_Template(models.Model):
     numerical_severity = models.CharField(max_length=4, null=True, blank=True, editable=False)
     template_match = models.BooleanField(default=False, verbose_name='Template Match Enabled', help_text="Enables this template for matching remediation advice. Match will be applied to all active, verified findings by CWE.")
     template_match_title = models.BooleanField(default=False, verbose_name='Match Template by Title and CWE', help_text="Matches by title text (contains search) and CWE.")
+
+    # used for prefetching tags because django-tagging doesn't support that out of the box
+    tagged_items = GenericRelation(TaggedItem)
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
@@ -2276,6 +2296,9 @@ class App_Analysis(models.Model):
     website_found = models.URLField(max_length=400, null=True, blank=True)
     created = models.DateTimeField(null=False, editable=False, default=now)
 
+    # used for prefetching tags because django-tagging doesn't support that out of the box
+    tagged_items = GenericRelation(TaggedItem)
+
     def __unicode__(self):
         return self.name + " | " + self.product.name
 
@@ -2305,6 +2328,9 @@ class Objects(models.Model):
                                 null=True, blank=True)
     review_status = models.ForeignKey(Objects_Review, on_delete=models.CASCADE)
     created = models.DateTimeField(null=False, editable=False, default=now)
+
+    # used for prefetching tags because django-tagging doesn't support that out of the box
+    tagged_items = GenericRelation(TaggedItem)
 
     def __unicode__(self):
         name = None

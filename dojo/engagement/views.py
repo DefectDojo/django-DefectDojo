@@ -34,6 +34,7 @@ from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, message, get_system_setting, create_notification, Product_Tab
 from dojo.tasks import update_epic_task, add_epic_task
 from functools import reduce
+from dojo.tag.prefetching_tag_descriptor import PrefetchingTagDescriptor
 
 logger = logging.getLogger(__name__)
 parse_logger = logging.getLogger('dojo')
@@ -84,6 +85,8 @@ def engagement(request):
         top_level=not len(request.GET),
         request=request)
 
+    prods.object_list = prefetch_for_products_with_engagments(prods.object_list)
+
     return render(
         request, 'dojo/engagement.html', {
             'products': prods,
@@ -115,6 +118,8 @@ def engagements_all(request):
         top_level=not len(request.GET),
         request=request)
 
+    prods.object_list = prefetch_for_products_with_engagments(prods.object_list)
+
     return render(
         request, 'dojo/engagements_all.html', {
             'products': prods,
@@ -123,6 +128,10 @@ def engagements_all(request):
             'eng_words': sorted(set(eng_words)),
         })
 
+def prefetch_for_products_with_engagments(products_with_engagements):
+    return products_with_engagements.prefetch_related('tagged_items', 'tagged_items__tag', 
+        'engagement_set__tagged_items', 'engagement_set__tagged_items__tag'
+        'engagement_set__test_set__tagged_items', 'engagement_set__test_set__tagged_items__tag')
 
 @user_passes_test(lambda u: u.is_staff)
 def new_engagement(request):

@@ -86,8 +86,9 @@ def prefetch_for_product(prods):
             finding__verified=True,
             finding__mitigated__isnull=True)
     prefetched_prods = prefetched_prods.prefetch_related(Prefetch('endpoint_set', queryset=active_endpoint_query, to_attr='active_endpoints'))
-    prefetched_prods = PrefetchingTagDescriptor.prefetch_tags(prefetched_prods)
-    print('prefetched_prods: ', prefetched_prods)
+    # prefetched_prods = PrefetchingTagDescriptor.prefetch_tags(prefetched_prods)
+    prefetched_prods = prefetched_prods.prefetch_related('tagged_items', 'tagged_items__tag')
+    # print('prefetched_prods: ', prefetched_prods)
     return prefetched_prods
 
 
