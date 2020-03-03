@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% load navigation_tags %}
 {% load display_tags %}
-{% load get_system_setting %}
 {% load static from staticfiles %}
 {% block content %}
     <div class="row">
@@ -65,7 +64,7 @@
                                     <input id="id_is_Mitigated" name="is_Mitigated" type="checkbox" disabled/>
                                     <span>Mitigated</span>
                                 </label>
-                                {% if "enable_jira"|get_system_setting %}
+                                {% if system_settings.enable_jira %}
                                 <b>Push to JIRA</b> <input id="id_push_tojira" name="push_to_jira" type="checkbox" alt="Select to push to JIRA"/><br/>
                                 {% endif %}
                                 <label style="display: block">Tags</label>
@@ -130,14 +129,14 @@
                             <th>CWE</th>
                             <th class="nowrap">{% dojo_sort request 'Date' 'date'%}</th>
                             <th class="nowrap">Age</th>
-                            {% if 'enable_finding_sla'|fetch_system_setting %}
+                            {% if system_settings.enable_finding_sla %}
                             <th>SLA</th>
                             {% endif %}
                             <th>Reporter</th>
                             <th>Found By</th>
                             <th>Status</th>
                             <th>Jira</th>
-                            {% if "enable_jira"|get_system_setting %}
+                            {% if system_settings.enable_jira %}
                               {% if jira_config and product_tab or not product_tab %}
                                 <th>JIRA Age</th>
                                 <th>JIRA Change</th>
@@ -289,7 +288,7 @@
                                 </td>
                                 <td class="nowrap">{{ finding.date }}</td>
                                 <td>{{ finding.age }}</td>
-                                {% if 'enable_finding_sla'|fetch_system_setting %}
+                                {% if system_settings.enable_finding_sla %}
                                 <td>
                                   {{ finding|finding_sla }}
                                 </td>
@@ -308,7 +307,7 @@
                                   {% endif %}
                                 </td>
                                 <td class="nowrap">
-                                  {% if "enable_jira"|get_system_setting %}
+                                  {% if system_settings.enable_jira %}
                                     {% if finding.has_jira_issue %}
                                       <a href="{{finding.jira_conf_new.url}}/browse/{{finding.jira_issue.jira_key}}" target="_blank" 
                                            alt="Jira Bug - {{finding.jira_issue.jira_key}}" data-toggle="tooltip" data-placement="bottom" title="{{finding.jira_issue.jira_key}}"><i class="fa fa-bug fa-fw"></i></a>
@@ -320,7 +319,7 @@
                                     {% endif %}
                                   {% endif %}
                                 </td>
-                                {% if "enable_jira"|get_system_setting %}
+                                {% if system_settings.enable_jira %}
                                   {% if jira_config and product_tab or not product_tab %}
                                       <td class="nowrap">
                                         {% if finding.jira_creation %}
@@ -420,7 +419,7 @@
                     { "data": "jira_id", render: function (data, type, row) {
                             return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
                     }},
-                    {% if "enable_jira"|get_system_setting %}
+                    {% if system_settings.enable_jira %}
                         { "data": "jira_age", render: function (data, type, row) {
                                 return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
                         }},
