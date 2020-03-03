@@ -80,14 +80,15 @@ def prefetch_for_product(prods):
     prefetched_prods = prefetched_prods.annotate(closed_engagement_count=Count('engagement__id', filter=Q(engagement__active=False)))
     prefetched_prods = prefetched_prods.annotate(last_engagement_date=Max('engagement__target_start'))
     prefetched_prods = prefetched_prods.annotate(active_finding_count=Count('engagement__test__finding__id', filter=Q(engagement__test__finding__active=True)))
-    prefetched_prods = prefetched_prods.prefetch_related(Prefetch('jira_pkey_set', queryset=JIRA_PKey.objects.all(), to_attr='jira_confs'))
+    prefetched_prods = prefetched_prods.prefetch_related(Prefetch('jira_pkey_set', queryset=JIRA_PKey.objects.all().select_related('conf'), to_attr='jira_confs'))
     active_endpoint_query = Endpoint.objects.filter(
             finding__active=True,
             finding__verified=True,
             finding__mitigated__isnull=True)
     prefetched_prods = prefetched_prods.prefetch_related(Prefetch('endpoint_set', queryset=active_endpoint_query, to_attr='active_endpoints'))
-    prefetched_prods = PrefetchingTagDescriptor.prefetch_tags(prefetched_prods)
-    print('prefetched_prods: ', prefetched_prods)
+    # prefetched_prods = PrefetchingTagDescriptor.prefetch_tags(prefetched_prods)
+    prefetched_prods = prefetched_prods.prefetch_related('tagged_items', 'tagged_items__tag')
+    # print('prefetched_prods: ', prefetched_prods)
     return prefetched_prods
 
 
