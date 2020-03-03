@@ -80,6 +80,11 @@ env = environ.Env(
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_SECRET=(str, ''),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID=(str, ''),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE=(str, 'https://graph.microsoft.com/'),
+    DD_SOCIAL_AUTH_GITLAB_OAUTH2_ENABLED = (bool, 'False'),
+    DD_SOCIAL_AUTH_GITLAB_KEY = (str, ''),
+    DD_SOCIAL_AUTH_GITLAB_SECRET = (str, ''),
+    DD_SOCIAL_AUTH_GITLAB_API_URL = (str, 'https://gitlab.com'),
+    DD_SOCIAL_AUTH_GITLAB_SCOPE = (list, ['api', 'read_user', 'openid', 'profile', 'email']),
 )
 
 
@@ -256,6 +261,7 @@ AUTHENTICATION_BACKENDS = (
     'social_core.backends.google.GoogleOAuth2',
     'dojo.okta.OktaOAuth2',
     'social_core.backends.azuread_tenant.AzureADTenantOAuth2',
+    'social_core.backends.gitlab.GitLabOAuth2',
     'django.contrib.auth.backends.RemoteUserBackend',
     'django.contrib.auth.backends.ModelBackend',
 )
@@ -298,6 +304,12 @@ SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_SECRET = env('DD_SOCIAL_AUTH_AZUREAD_TENANT_OA
 SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID = env('DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID')
 SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE = env('DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE')
 
+GITLAB_OAUTH2_ENABLED = env('DD_SOCIAL_AUTH_GITLAB_OAUTH2_ENABLED')
+SOCIAL_AUTH_GITLAB_KEY = env('DD_SOCIAL_AUTH_GITLAB_KEY')
+SOCIAL_AUTH_GITLAB_SECRET = env('DD_SOCIAL_AUTH_GITLAB_SECRET')
+SOCIAL_AUTH_GITLAB_API_URL = env('DD_SOCIAL_AUTH_GITLAB_API_URL')
+SOCIAL_AUTH_GITLAB_SCOPE = env('DD_SOCIAL_AUTH_GITLAB_SCOPE')
+
 LOGIN_EXEMPT_URLS = (
     r'^%sstatic/' % URL_PREFIX,
     r'^%swebhook/' % URL_PREFIX,
@@ -307,6 +319,7 @@ LOGIN_EXEMPT_URLS = (
     r'^%sapi/v2/' % URL_PREFIX,
     r'complete/google-oauth2/',
     r'complete/okta-oauth2/',
+    r'complete/gitlab-oauth2/',
     r'empty_survey/([\d]+)/answer'
     r'complete/azuread-tenant-oauth2/',
 )
