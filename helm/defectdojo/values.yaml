@@ -29,7 +29,7 @@ admin:
   mail: admin@defectdojo.local
 
 monitoring:
-  enabled: true
+  enabled: false
 
 # Components
 celery:

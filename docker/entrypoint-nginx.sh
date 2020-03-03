@@ -13,6 +13,11 @@ then
       -subj "/C=DE/ST=City/L=City/O=Global Security/OU=IT Department/CN=nginx"
 fi
 
+if [ "${NGINX_METRICS_ENABLED}" = True ]; then
+  sed -i "s/#stub_status/stub_status/g;" /etc/nginx/nginx.conf
+  echo "Nginx metrics are enabled"
+fi
+
 if [ "${METRICS_HTTP_AUTH_PASSWORD}" != "" ]; then
   sed -i "s/#auth_basic/auth_basic/g;" /etc/nginx/nginx.conf
   rm -rf /etc/nginx/.htpasswd
