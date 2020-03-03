@@ -72,14 +72,17 @@ RUN \
   chmod -R g=u /var/cache/nginx && \
   chmod -R g=u /var/run && \
   mkdir -p /etc/nginx/ssl && \
-  chown 1001 /etc/nginx/ssl/ &&\
+  chmod -R g=u /etc/nginx && \
   true
 ENV \
   DD_UWSGI_PASS="uwsgi_server" \
   DD_UWSGI_HOST="uwsgi" \
   DD_UWSGI_PORT="3031" \
   GENERATE_TLS_CERTIFICATE="False" \
-  USE_TLS="False"
+  USE_TLS="False" \
+  NGINX_METRICS_ENABLED="False" \
+  METRICS_HTTP_AUTH_USER="" \
+  METRICS_HTTP_AUTH_PASSWORD=""
 USER 1001
 EXPOSE 8080
 ENTRYPOINT ["/entrypoint-nginx.sh"]

@@ -189,6 +189,10 @@ urlpatterns = [
 
 urlpatterns += survey_urls
 
+if hasattr(settings, 'DJANGO_METRICS_ENABLED'):
+    if settings.DJANGO_METRICS_ENABLED:
+        urlpatterns += [url(r'^%sdjango_metrics/' % get_system_setting('url_prefix'), include('django_prometheus.urls'))]
+
 if hasattr(settings, 'DJANGO_ADMIN_ENABLED'):
     if settings.DJANGO_ADMIN_ENABLED:
         #  django admin
