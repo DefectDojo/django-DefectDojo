@@ -4,22 +4,13 @@ update_configs:
     directory: "/"
     target_branch: "dev"
     update_schedule: "weekly"
-    default_labels:
-    - dependencies
-    - python    
 
   - package_manager: "javascript"
     directory: "/components"
     target_branch: "dev"
     update_schedule: "weekly"
-    default_labels:
-    - dependencies
-    - javascript    
 
   - package_manager: "docker"
     directory: "/"
     target_branch: "dev"
     update_schedule: "weekly"
-    default_labels:
-    - dependencies
-    - docker
