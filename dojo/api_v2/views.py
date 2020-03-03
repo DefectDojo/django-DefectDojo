@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
-from rest_framework.permissions import DjangoModelPermissions
+from rest_framework.permissions import DjangoModelPermissions, IsAdminUser
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser
 from django_filters.rest_framework import DjangoFilterBackend
@@ -22,9 +22,8 @@ from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from datetime import datetime
 from dojo.utils import get_period_counts_legacy
-
 from dojo.api_v2 import serializers, permissions
-
+from django.db.models import Count, Q
 
 class EndPointViewSet(mixins.ListModelMixin,
                       mixins.RetrieveModelMixin,
@@ -362,10 +361,11 @@ class ProductViewSet(mixins.ListModelMixin,
     serializer_class = serializers.ProductSerializer
     # TODO: prefetch
     queryset = Product.objects.all()
+    queryset = queryset.annotate(active_finding_count=Count('engagement__test__finding__id', filter=Q(engagement__test__finding__active=True)))
     filter_backends = (DjangoFilterBackend,)
     permission_classes = (permissions.UserHasProductPermission,
                           DjangoModelPermissions)
-    # TODO: findings count field
+
     filter_fields = ('id', 'name', 'prod_type', 'created', 'authorized_users')
 
     @property
@@ -374,10 +374,10 @@ class ProductViewSet(mixins.ListModelMixin,
 
     def get_queryset(self):
         if not self.request.user.is_staff:
-            return Product.objects.filter(
+            return self.queryset.filter(
                 authorized_users__in=[self.request.user])
         else:
-            return Product.objects.all()
+            return self.queryset
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.UserHasReportGeneratePermission])
     def generate_report(self, request, pk=None):
@@ -638,6 +638,7 @@ class ImportScanView(mixins.CreateModelMixin,
     serializer_class = serializers.ImportScanSerializer
     parser_classes = [MultiPartParser]
     queryset = Test.objects.all()
+    permission_classes = [IsAdminUser]
 
 
 class ReImportScanView(mixins.CreateModelMixin,

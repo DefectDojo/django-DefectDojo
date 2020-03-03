@@ -61,6 +61,8 @@ class BlackduckHubCSVParser(object):
                                   references=references,
                                   url=i.url,
                                   file_path=i.locations,
+                                  component_name=i.component_name,
+                                  component_version=i.component_version,
                                   static_finding=True
                                   )
 

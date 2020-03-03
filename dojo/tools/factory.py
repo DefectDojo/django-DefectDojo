@@ -1,4 +1,5 @@
 from dojo.tools.burp.parser import BurpXmlParser
+from dojo.tools.dsop.parser import DsopParser
 from dojo.tools.nessus.parser import NessusCSVParser, NessusXMLParser
 from dojo.tools.nmap.parser import NmapXMLParser
 from dojo.tools.nexpose.parser import NexposeFullXmlParser
@@ -70,6 +71,7 @@ from dojo.tools.h1.parser import HackerOneJSONParser
 from dojo.tools.xanitizer.parser import XanitizerXMLParser
 from dojo.tools.trivy.parser import TrivyParser
 from dojo.tools.outpost24.parser import Outpost24Parser
+from dojo.tools.burp_enterprise.parser import BurpEnterpriseHtmlParser
 
 
 
@@ -82,6 +84,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         scan_type = test.test_type.name
     if scan_type == "Burp Scan":
         parser = BurpXmlParser(file, test)
+    elif scan_type == "Burp Enterprise Scan":
+        parser = BurpEnterpriseHtmlParser(file, test)
     elif scan_type == "Nessus Scan":
         filename = file.name.lower()
         if filename.endswith("csv"):
@@ -230,6 +234,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = TrivyParser(file, test)
     elif scan_type == 'Outpost24 Scan':
         parser = Outpost24Parser(file, test)
+    elif scan_type == 'DSOP Scan':
+        parser = DsopParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 

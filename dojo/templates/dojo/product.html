@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% load navigation_tags %}
 {% load display_tags %}
-{% load get_system_setting %}
 {% block content %}
     <div class="row">
         <div class="col-md-12">
@@ -17,7 +16,7 @@
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu"
                                 aria-labelledby="dropdownMenu1">
-                                {% if request.user.is_staff %}
+                                {% if user.is_staff %}
                                     <li role="presentation">
                                         <a href="{% url 'new_product' %}">
                                             <i class="fa fa-plus"></i> Add Product
@@ -35,7 +34,7 @@
                     </h3>
                 </div>
                 <div id="the-filters" class="panel-body collapse {% if request.META.QUERY_STRING %}in{% endif %}">
-                    {% include "dojo/filter_snippet.html" with form=prods.form %}
+                    {% include "dojo/filter_snippet.html" with form=prod_filter.form %}
                 </div>
             </div>
             {% if prod_list %}
@@ -53,7 +52,7 @@
                             <th> Criticality</th>
                             <th> Metadata</th>
                             <th>Eng.</th>
-                            {% if "enable_jira"|get_system_setting %}
+                            {% if system_settings.enable_jira %}
                             <th>Jira</th>
                             {% endif %}
                             <th> Findings</th>
@@ -193,16 +192,16 @@
                                     data-content="No Engagements Exist"></i>
                                   {% endif %}
                                 </td>
-                                {% if "enable_jira"|get_system_setting %}
+                                {% if system_settings.enable_jira %}
                                 <td class="text-center">
-                                {% for jira in prod.id|get_jira_conf %}
+                                {% for jira_conf in prod.jira_confs %}
                                 <i class="fa fa-bug has-popover" title="<i class='fa fa-bug'></i> <b>Jira Configuration</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="bottom"
-                                  data-content="<b>Jira:</b> {{ jira.conf }}<br/>
-                                  <b>Project Key:</b> {{ jira.project_key }}<br/>
-                                  <b>Component:</b> {{ jira.component }}<br/>
-                                  <b>Push All Issues:</b> {{ jira.push_all_issues }}<br/>
-                                  <b>Engagement Epic Mapping:</b> {{ jira.enable_engagement_epic_mapping }}<br/>
-                                  <b>Push Notes:</b> {{ jira.push_notes }}">
+                                  data-content="<b>Jira:</b> {{ jira_conf.conf }}<br/>
+                                  <b>Project Key:</b> {{ jira_conf.project_key }}<br/>
+                                  <b>Component:</b> {{ jira_conf.component }}<br/>
+                                  <b>Push All Issues:</b> {{ jira_conf.push_all_issues }}<br/>
+                                  <b>Engagement Epic Mapping:</b> {{ jira_conf.enable_engagement_epic_mapping }}<br/>
+                                  <b>Push Notes:</b> {{ jira_conf.push_notes }}">
                                 </i>
                                 {% endfor %}
                                 </td>
@@ -215,7 +214,7 @@
                                     {% endif %}
                                 </td>
                                 <td class="text-center">
-                                  {% if prod.findings_count %}
+                                  {% if prod.endpoints_count %}
                                     <a href="{% url 'vulnerable_endpoints' %}?product={{ prod.id }}"><b>{{ prod.endpoint_count }}</b></a>
                                   {% else %}
                                       0
