@@ -1,8 +1,15 @@
-from typing import List, NamedTuple, Union
+from abc import ABC, abstractmethod
+from typing import NamedTuple, List
 
-from rest_framework import serializers
+from django.db.models import QuerySet
+from django.shortcuts import get_object_or_404
+from rest_framework import serializers, status
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAdminUser
+from rest_framework.response import Response
 
-from dojo.models import Product_Type, Product, Engagement, Test, Finding, Risk_Acceptance, User
+from dojo.api_v2.serializers import RiskAcceptanceSerializer
+from dojo.models import Engagement, Finding, Risk_Acceptance, User
 
 AcceptedRisk = NamedTuple('AcceptedRisk', (('cve', str), ('justification', str), ('accepted_by', str)))
 
@@ -16,15 +23,50 @@ class AcceptedRiskSerializer(serializers.Serializer):
         return AcceptedRisk(**validated_data)
 
 
-def accept_findings_matching(risks: List[AcceptedRisk], reporter: User,
-                             model: Union[Product_Type, Product, Engagement, Test, None]) \
-        -> List[Risk_Acceptance]:
-    if model is None:
-        base_findings = Finding.unaccepted_open_findings()
-    else:
+class AcceptedRisksMixin(ABC):
+
+    @property
+    @abstractmethod
+    def risk_application_model_class(self):
+        pass
+
+    @action(methods=['post'], detail=True, permission_classes=[IsAdminUser], serializer_class=AcceptedRiskSerializer)
+    def accept_risks(self, request, pk=None):
+        model = get_object_or_404(self.risk_application_model_class, pk=pk)
+        serializer = AcceptedRiskSerializer(data=request.data, many=True)
+        if serializer.is_valid():
+            accepted_risks = serializer.save()
+        else:
+            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         base_findings = model.unaccepted_open_findings
+        reporter = request.user
+        accepted = _accept_risks(accepted_risks, base_findings, reporter)
+        model.accept_risks(accepted)
+        result = RiskAcceptanceSerializer(instance=accepted, many=True)
+        return Response(result.data)
+
+
+class AcceptedFindingsMixin(ABC):
+
+    @action(methods=['post'], detail=False, permission_classes=[IsAdminUser], serializer_class=AcceptedRiskSerializer)
+    def accept_risks(self, request):
+        serializer = AcceptedRiskSerializer(data=request.data, many=True)
+        if serializer.is_valid():
+            accepted_risks = serializer.save()
+        else:
+            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        base_findings = Finding.unaccepted_open_findings()
+        reporter = request.user
+        accepted = _accept_risks(accepted_risks, base_findings, reporter)
+        for engagement in Engagement.objects.all():
+            engagement.accept_risks(accepted)
+        result = RiskAcceptanceSerializer(instance=accepted, many=True)
+        return Response(result.data)
+
+
+def _accept_risks(accepted_risks: List[AcceptedRisk], base_findings: QuerySet, reporter: User):
     accepted = []
-    for risk in risks:
+    for risk in accepted_risks:
         findings = base_findings.filter(cve=risk.cve)
         if findings.exists():
             acceptance = Risk_Acceptance.objects.create(reporter=reporter,
@@ -33,11 +75,4 @@ def accept_findings_matching(risks: List[AcceptedRisk], reporter: User,
             acceptance.accepted_findings.set(findings)
             acceptance.save()
             accepted.append(acceptance)
-
-    if model is None:
-        for engagement in Engagement.objects.all():
-            engagement.accept_risks(accepted)
-    else:
-        model.accept_risks(accepted)
-
     return accepted

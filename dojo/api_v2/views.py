@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
-from rest_framework.permissions import DjangoModelPermissions, IsAdminUser
+from rest_framework.permissions import DjangoModelPermissions
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser
 from django_filters.rest_framework import DjangoFilterBackend
@@ -12,7 +12,7 @@ from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Finding, \
     User, ScanSettings, Scan, Stub_Finding, Finding_Template, Notes, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
-    Endpoint, JIRA_PKey, JIRA_Conf, DojoMeta, Development_Environment, Dojo_User, Risk_Acceptance
+    Endpoint, JIRA_PKey, JIRA_Conf, DojoMeta, Development_Environment, Dojo_User
 
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import report_url_resolver
@@ -70,6 +70,7 @@ class EngagementViewSet(mixins.ListModelMixin,
                         mixins.UpdateModelMixin,
                         mixins.DestroyModelMixin,
                         mixins.CreateModelMixin,
+                        ra_api.AcceptedRisksMixin,
                         viewsets.GenericViewSet):
     serializer_class = serializers.EngagementSerializer
     queryset = Engagement.objects.all()
@@ -78,6 +79,10 @@ class EngagementViewSet(mixins.ListModelMixin,
                      'target_end', 'requester', 'report_type',
                      'updated', 'threat_model', 'api_test',
                      'pen_test', 'status', 'product', 'name')
+
+    @property
+    def risk_application_model_class(self):
+        return Engagement
 
     def get_queryset(self):
         if not self.request.user.is_staff:
@@ -118,11 +123,6 @@ class EngagementViewSet(mixins.ListModelMixin,
         report = serializers.ReportGenerateSerializer(data)
         return Response(report.data)
 
-    @action(methods=['post'], detail=True, permission_classes=[IsAdminUser],
-            serializer_class=ra_api.AcceptedRiskSerializer)
-    def accept_risks(self, request, pk=None):
-        return _accept_risks(Engagement, request, pk)
-
 
 class FindingTemplatesViewSet(mixins.ListModelMixin,
                               mixins.RetrieveModelMixin,
@@ -148,6 +148,7 @@ class FindingViewSet(mixins.ListModelMixin,
                      mixins.UpdateModelMixin,
                      mixins.DestroyModelMixin,
                      mixins.CreateModelMixin,
+                     ra_api.AcceptedFindingsMixin,
                      viewsets.GenericViewSet):
     serializer_class = serializers.FindingSerializer
     queryset = Finding.objects.all()
@@ -301,11 +302,6 @@ class FindingViewSet(mixins.ListModelMixin,
         report = serializers.ReportGenerateSerializer(data)
         return Response(report.data)
 
-    @action(methods=['post'], detail=False, permission_classes=[IsAdminUser],
-            serializer_class=ra_api.AcceptedRiskSerializer)
-    def accept_risks(self, request):
-        return _accept_risks(None, request, None)
-
 
 class JiraConfigurationsViewSet(mixins.ListModelMixin,
                                 mixins.RetrieveModelMixin,
@@ -361,6 +357,7 @@ class ProductViewSet(mixins.ListModelMixin,
                      mixins.RetrieveModelMixin,
                      mixins.CreateModelMixin,
                      mixins.UpdateModelMixin,
+                     ra_api.AcceptedRisksMixin,
                      viewsets.GenericViewSet):
     serializer_class = serializers.ProductSerializer
     # TODO: prefetch
@@ -370,6 +367,10 @@ class ProductViewSet(mixins.ListModelMixin,
                           DjangoModelPermissions)
     # TODO: findings count field
     filter_fields = ('id', 'name', 'prod_type', 'created', 'authorized_users')
+
+    @property
+    def risk_application_model_class(self):
+        return Product
 
     def get_queryset(self):
         if not self.request.user.is_staff:
@@ -398,21 +399,21 @@ class ProductViewSet(mixins.ListModelMixin,
         report = serializers.ReportGenerateSerializer(data)
         return Response(report.data)
 
-    @action(methods=['post'], detail=True, permission_classes=[IsAdminUser],
-            serializer_class=ra_api.AcceptedRiskSerializer)
-    def accept_risks(self, request, pk=None):
-        return _accept_risks(Product, request, pk)
-
 
 class ProductTypeViewSet(mixins.ListModelMixin,
                          mixins.RetrieveModelMixin,
                          mixins.CreateModelMixin,
                          mixins.UpdateModelMixin,
+                         ra_api.AcceptedRisksMixin,
                          viewsets.GenericViewSet):
     serializer_class = serializers.ProductTypeSerializer
     queryset = Product_Type.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'name', 'critical_product', 'key_product', 'created', 'updated')
+
+    @property
+    def risk_application_model_class(self):
+        return Product_Type
 
     def get_queryset(self):
         if not self.request.user.is_staff:
@@ -440,11 +441,6 @@ class ProductTypeViewSet(mixins.ListModelMixin,
         data = report_generate(request, product_type, options)
         report = serializers.ReportGenerateSerializer(data)
         return Response(report.data)
-
-    @action(methods=['post'], detail=True, permission_classes=[IsAdminUser],
-            serializer_class=ra_api.AcceptedRiskSerializer)
-    def accept_risks(self, request, pk=None):
-        return _accept_risks(Product_Type, request, pk)
 
 
 class ScanSettingsViewSet(mixins.ListModelMixin,
@@ -532,6 +528,7 @@ class TestsViewSet(mixins.ListModelMixin,
                    mixins.UpdateModelMixin,
                    mixins.DestroyModelMixin,
                    mixins.CreateModelMixin,
+                   ra_api.AcceptedRisksMixin,
                    viewsets.GenericViewSet):
     serializer_class = serializers.TestSerializer
     queryset = Test.objects.all()
@@ -539,6 +536,10 @@ class TestsViewSet(mixins.ListModelMixin,
     filter_fields = ('id', 'title', 'test_type', 'target_start',
                      'target_end', 'notes', 'percent_complete',
                      'actual_time', 'engagement')
+
+    @property
+    def risk_application_model_class(self):
+        return Test
 
     def get_queryset(self):
         if not self.request.user.is_staff:
@@ -574,10 +575,6 @@ class TestsViewSet(mixins.ListModelMixin,
         data = report_generate(request, test, options)
         report = serializers.ReportGenerateSerializer(data)
         return Response(report.data)
-
-    @action(methods=['post'], detail=True, permission_classes=[IsAdminUser])
-    def accept_risks(self, request, pk=None):
-        return _accept_risks(Test, request, pk)
 
 
 class TestTypesViewSet(mixins.ListModelMixin,
@@ -978,25 +975,3 @@ def report_generate(request, obj, options):
         result['executive_summary'] = executive_summary
 
     return result
-
-
-def _accept_risks(klass, request, pk):
-    """
-    Bulk risk acceptance API.
-    :param klass: one of Product_Type, Product, Engagement, Test, or None
-    :param request: HTTP request containing list of AcceptedRisk data
-    :param pk: private key for klass if defined or None
-    :return: HTTP response with created Risk_Acceptance data
-    """
-    if klass is None:
-        model = None
-    else:
-        model = get_object_or_404(klass, id=pk)
-    serializer = ra_api.AcceptedRiskSerializer(data=request.data, many=True)
-    if serializer.is_valid():
-        accepted_risks = serializer.save()
-    else:
-        return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    risks = ra_api.accept_findings_matching(accepted_risks, request.user, model)
-    result = serializers.RiskAcceptanceSerializer(instance=risks, many=True)
-    return Response(result.data)
