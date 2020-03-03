@@ -363,6 +363,7 @@ class ImportScanForm(forms.Form):
                          ("HackerOne Cases", "HackerOne Cases"),
                          ("Xanitizer Scan", "Xanitizer Scan"),
                          ("Outpost24 Scan", "Outpost24 Scan"),
+                         ("Burp Enterprise Scan", "Burp Enterprise Scan"),
                          ("DSOP Scan", "DSOP Scan"),
                          ("Trivy Scan", "Trivy Scan"))
 
