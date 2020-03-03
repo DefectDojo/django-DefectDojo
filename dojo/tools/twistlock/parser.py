@@ -72,6 +72,8 @@ def get_item(vulnerability, test):
             vulnerability['packageVersion']) + "</p>",
         mitigation=status.title(),
         references=vulnerability['link'],
+        component_name=vulnerability['packageName'],
+        component_version=vulnerability['packageVersion'],
         active=False,
         verified=False,
         false_p=False,
