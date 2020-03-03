@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+ name: defectdojo-claim
+spec:
+ accessModes:
+ - ReadWriteMany
+ resources:
+  requests:
+    storage: 10Gi
+ storageClassName: nfs-client-generic

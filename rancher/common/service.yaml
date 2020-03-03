@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ddnginx
+spec:
+  ports:
+  - name: default
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: defectdojo
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: uwsgi
+spec:
+  ports:
+  - port: 3031
+    protocol: TCP
+    targetPort: 3031
+  selector:
+    app: defectdojo
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+spec:
+  ports:
+  - port: 3306
+    protocol: TCP
+    targetPort: 3306
+  selector:
+    app: defectdojo
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq 
+spec:
+  ports:
+  - port: 5672
+    protocol: TCP
+    targetPort: 5672
+  selector:
+    app: defectdojo
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}
+

@@ -1,0 +1,139 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  labels:
+    app: defectdojo
+  name: defectdojo-deployment
+  namespace: defectdojo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: defectdojo
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: defectdojo
+    spec:
+      containers:
+        - image: defectdojo/defectdojo-nginx:latest
+          imagePullPolicy: Always
+          name: ddnginx
+          command: ['/bin/bash']
+          args: ['-c', 'sleep 50 &&  /entrypoint-nginx.sh']
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+        - image: defectdojo/defectdojo-django:latest
+          imagePullPolicy: Always
+          name: uwsgi 
+          ports:
+            - containerPort: 3031
+              protocol: TCP
+          command: ['/bin/bash']
+          args: ['-c', 'sleep 30 && /wait-for-it.sh mysql:3306 && /entrypoint-uwsgi.sh && tail -f /var/log/faillog']
+          env:
+            - name: DD_DEBUG 
+              value: 'False'
+            - name: DD_ALLOWED_HOSTS
+              value: '*'
+            - name: DD_DATABASE_URL
+              value: 'mysql://defectdojo:defectdojo@mysql:3306/defectdojo'
+            - name: DD_CELERY_BROKER_USER
+              value: 'guest'
+            - name: DD_CELERY_BROKER_PASSWORD
+              value: 'guest'
+            - name: DD_SECRET_KEY
+              value: 'hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq'
+            - name: DD_CREDENTIAL_AES_256_KEY
+              value: '&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw'
+        - image: defectdojo/defectdojo-django:latest
+          imagePullPolicy: Always
+          name: defectdojo-celerybeat
+          command: ['/bin/bash']
+          args: ['-c', 'sleep 60 && /wait-for-it.sh mysql:3306 && /entrypoint-celery-beat.sh && tail -f /var/log/faillog']
+          env:
+            - name: DD_DATABASE_URL
+              value: 'mysql://defectdojo:defectdojo@mysql:3306/defectdojo'
+            - name: DD_CELERY_BROKER_USER
+              value: 'guest'
+            - name: DD_CELERY_BROKER_PASSWORD
+              value: 'guest'
+            - name: DD_SECRET_KEY
+              value: 'hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq'
+            - name: DD_CREDENTIAL_AES_256_KEY
+              value: '&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw'
+        - image: /defectdojo/defectdojo-django:latest
+          imagePullPolicy: Always
+          name: defectdojo-celeryworker
+          command: ['/bin/bash']
+          args: ['-c', 'sleep 60 && /wait-for-it.sh mysql:3306 && /entrypoint-celery-worker.sh && tail -f /var/log/faillog']
+          env:
+            - name: DD_DATABASE_URL
+              value: 'mysql://defectdojo:defectdojo@mysql:3306/defectdojo'
+            - name: DD_CELERY_BROKER_USER
+              value: 'guest'
+            - name: DD_CELERY_BROKER_PASSWORD
+              value: 'guest'
+            - name: DD_SECRET_KEY
+              value: 'hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq'
+            - name: DD_CREDENTIAL_AES_256_KEY
+              value: '&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw'
+        - image: rabbitmq:3.7.17@sha256:12202c13c8e1d7f5688e733e04f3713cf25c4478dde62be691e0a1d2c9346d1c
+          name: rabbitmq
+          ports:
+            - containerPort: 5672
+              protocol: TCP
+        - image: mysql:5.7.27
+          env:
+            - name: MYSQL_RANDOM_ROOT_PASSWORD
+              value: 'yes'
+            - name: DD_DATABASE_URL
+              value: 'mysql://defectdojo:defectdojo@mysql:3306/defectdojo'
+            - name: MYSQL_USER
+              value: 'defectdojo'
+            - name: MYSQL_PASSWORD
+              value: 'defectdojo'
+            - name: MYSQL_DATABASE
+              value: 'defectdojo'
+          imagePullPolicy: IfNotPresent
+          name: mysql
+          ports:
+            - containerPort: 3306
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /var/lib/mysql 
+              name: defectdojo-storage
+              subPath: mysql
+        - image: defectdojo/defectdojo-django:latest
+          imagePullPolicy: Always
+          name: defectdojo-initializer
+          command: ['/bin/bash']
+          args: ['-c', 'sleep 60 && /wait-for-it.sh mysql:3306 && /entrypoint-initializer.sh && tail -f /var/log/faillog']
+          env:
+            - name: DD_DATABASE_URL
+              value: 'mysql://defectdojo:defectdojo@mysql:3306/defectdojo'
+            - name: DD_ADMIN_USER
+              value: 'admin'
+            - name: DD_ADMIN_MAIL
+              value: 'admin@defectdojo.local'
+            - name: DD_ADMIN_FIRST_NAME
+              value: 'Admin'
+            - name: DD_ADMIN_LAST_NAME
+              value: 'User'
+            - name: DD_INITIALIZE
+              value: 'true'
+            - name: DD_SECRET_KEY
+              value: 'hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq'
+            - name: DD_CREDENTIAL_AES_256_KEY
+              value: '&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw'
+      volumes:
+        - name: defectdojo-storage
+          persistentVolumeClaim:
+            claimName: defectdojo-claim
