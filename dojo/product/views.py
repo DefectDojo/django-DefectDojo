@@ -34,7 +34,6 @@ logger = logging.getLogger(__name__)
 
 
 def product(request):
-
     # validate prod_type param
     product_type = None
     if 'prod_type' in request.GET:
@@ -194,7 +193,7 @@ def view_product_metrics(request, pid):
 
     end_date = timezone.now()
 
-    tests = Test.objects.filter(engagement__product=prod)
+    tests = Test.objects.filter(engagement__product=prod).prefetch_related('finding_set')
 
     risk_acceptances = Risk_Acceptance.objects.filter(engagement__in=Engagement.objects.filter(product=prod))
 

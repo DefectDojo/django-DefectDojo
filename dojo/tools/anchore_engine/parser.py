@@ -68,6 +68,8 @@ class AnchoreEngineScanParser(object):
                     impact=impact,
                     references=references,
                     file_path=item["package_path"],
+                    component_name=item['package_name'],
+                    component_version=item['package_version'],
                     url=item['url'],
                     date=find_date,
                     static_finding=True,

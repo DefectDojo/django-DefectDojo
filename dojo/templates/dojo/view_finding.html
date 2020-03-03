@@ -177,7 +177,7 @@
                 {% endif %}
                 <tr>
                     <th>Severity</th>
-                    {% if 'enable_finding_sla'|fetch_system_setting %}
+                    {% if system_settings.enable_finding_sla %}
                     <th>SLA</th>
                     {% endif %}
                     {% if finding.scanner_confidence %}
@@ -216,7 +216,7 @@
                             {% endif %}
                         </span>
                     </td>
-                    {% if 'enable_finding_sla'|fetch_system_setting %}
+                    {% if system_settings.enable_finding_sla %}
                     <td>
                       {{ finding|finding_sla }}
                     </td>
@@ -429,6 +429,12 @@
                     {% if finding.nb_occurences %}
                     <th>Nb occurences</th>
                     {% endif %}
+                    {% if finding.component_name %}
+                    <th>Component Name</th>
+                    {% endif %}
+                    {% if finding.component_version %}
+                    <th>Component Version</th>
+                    {% endif %}
                 </tr>
                 <tr>
                     <td>
@@ -445,6 +451,20 @@
                     <td>
                         <span>
                            {{ finding.nb_occurences }}
+                        </span>
+                    </td>
+                    {% endif %}
+                    {% if finding.component_name %}
+                    <td>
+                        <span>
+                            {{ finding.component_name }}
+                        </span>
+                    </td>
+                    {% endif %}
+                    {% if finding.component_version %}
+                    <td>
+                        <span>
+                            {{ finding.component_version }}
                         </span>
                     </td>
                     {% endif %}

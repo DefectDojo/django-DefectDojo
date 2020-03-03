@@ -227,11 +227,6 @@ def version_num(value):
     return version
 
 
-@register.filter(name='fetch_system_setting')
-def fetch_system_setting(name):
-    return get_system_setting(name)
-
-
 @register.filter(name='count_findings_test_all')
 def count_findings_test_all(test):
     open_findings = Finding.objects.filter(test=test).count()

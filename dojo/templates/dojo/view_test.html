@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% load display_tags %}
-{% load get_system_setting %}
 {% load static from staticfiles %}
 {% load humanize %}
 {% block add_styles %}
@@ -157,14 +156,14 @@
     </div>
     {% endif %}
 
-    <div class="panel panel-default">   
+    <div class="panel panel-default">
         <div class="panel-heading tight">
             <div class="clearfix">
                 <h4 class="has-filters"> Findings ({{findings_count}}) <small>{{ test.id|get_severity_count:"test" }}</small>
                     <div class="dropdown pull-right">
-                        <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary"> 
-                            <i class="fa fa-filter"></i> 
-                            <i class="caret"></i> 
+                        <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary">
+                            <i class="fa fa-filter"></i>
+                            <i class="caret"></i>
                         </button>
                     </div>
                     <div id="test-pulldown" class="dropdown pull-right">
@@ -250,7 +249,7 @@
                             <input id="id_is_Mitigated" name="is_Mitigated" type="checkbox" disabled/>
                             <span>Mitigated</span>
                         </label>
-                        {% if "enable_jira"|get_system_setting %}
+                        {% if system_settings.enable_jira %}
                             <b>Push to JIRA</b> <input id="id_push_tojira" name="push_to_jira" type="checkbox" alt="Select to push to JIRA" title="Push_To_Jira"/><br/>
                         {% endif %}
                         <label style="display: block">Tags</label>
@@ -299,12 +298,12 @@
                             <th>CWE</th>
                             <th>Date</th>
                             <th>Age</th>
-                            {% if 'enable_finding_sla'|fetch_system_setting %}
+                            {% if system_settings.enable_finding_sla %}
                             <th>SLA</th>
                             {% endif %}
                             <th>Reporter</th>
                             <th>Status</th>
-                            {% if "enable_jira"|get_system_setting %}
+                            {% if system_settings.enable_jira %}
                                 {% if jira_config and product_tab or not product_tab %}
                                     <th>Jira</th>
                                     <th>Jira Age</th>
@@ -410,17 +409,21 @@
                         </td>
                         <td class="nowrap"><a href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a>
                           {% if finding.file_path %}
-                          <i class="fa dojo-sup fa-code has-popover" data-trigger="hover" data-content="{{ finding.file_path }}" data-placement="right" data-container="body" data-original-title="Files" title="">
+                          <i class="fa dojo-sup fa-code has-popover" data-trigger="hover" data-content="{{ finding.file_path }}" data-placement="right" data-container="body" data-original-title="Files" title=""></i>
+                            {% if finding.component_name %}
+                            <i class="fa dojo-sup fa-file has-popover" data-trigger="hover" data-placement="right"
+                                data-content="{{ finding.component_name }} - {{ finding.component_version }}"
+                                data-container="body" data-original-title="Component" title=""></i>
+                            {% endif %}
                             {% else %}
                               {% if finding.endpoints.all %}
                                 <i class="fa dojo-sup fa-sitemap has-popover" data-html="true" data-trigger="hover" data-content="
                                 {% for endpoint in finding.endpoints.all %}
                                   {{ endpoint }}<br/>
                                 {% endfor %}
-                                " data-placement="right" data-container="body" data-original-title="Endpoints" title="">
+                                " data-placement="right" data-container="body" data-original-title="Endpoints" title=""></i>
                               {% endif %}
                             {% endif %}
-                                </i>
                              {% if finding.notes.all %}
                                     <i class="fa fa-comment has-popover" data-trigger="hover" data-content="{{ finding.notes.all.0 }}" data-placement="left" data-container="body" data-original-title="Most Recent Note" title=""></i>
                              {% endif %}
@@ -441,7 +444,7 @@
                         </td>
                         <td class="nowrap">{{ finding.date }}</td>
                         <td>{{ finding.age }}</td>
-                        {% if 'enable_finding_sla'|fetch_system_setting %}
+                        {% if system_settings.enable_finding_sla %}
                         <td>
                           {{ finding|finding_sla }}
                         </td>
@@ -456,7 +459,7 @@
                         <td>{% if finding.under_review %}Under Review, {% endif %}{{ finding.status }}{% if finding.duplicate_finding.id %}, <a href="{% url 'view_finding' finding.duplicate_finding.id%}" data-toggle="tooltip" data-placement="top" title="{{ finding.title }}, {{ finding.created }}">Original</a>
                         {% endif %}
                         </td>
-                        {% if "enable_jira"|get_system_setting %}
+                        {% if system_settings.enable_jira %}
                             {% if jira_config and product_tab or not product_tab %}
                                 <td>
                                     <a href="{{finding.jira_conf.url}}/browse/{{finding.jira.jira_key}}" target="_blank"> {{finding.jira.jira_key}} </a>
