@@ -64,6 +64,10 @@ class CrashtestSecurityXmlParser(object):
             if severity == "Error":
                 continue
 
+            # This denotes a skipped scan and not a vulnerability
+            if severity == "Skipped":
+                continue
+
             find = Finding(title=title,
                            description=description,
                            test=test,
