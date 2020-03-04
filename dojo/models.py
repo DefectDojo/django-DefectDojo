@@ -1240,7 +1240,7 @@ class Test(models.Model):
         return bc
 
     def verified_finding_count(self):
-        return Finding.objects.filter(test=self, verified=True).count()
+        return self.finding_set.filter(verified=True).count()
 
 
 class VA(models.Model):
@@ -1360,6 +1360,10 @@ class Finding(models.Model):
         blank=True,
         max_length=4000,
         help_text="File name with path. For SAST, when source (start of the attack vector) and sink (end of the attack vector) information are available, put sink information here")
+    component_name = models.CharField(null=True, blank=True, max_length=200,
+                                     help_text="Name of the component containing the finding. ")
+    component_version = models.CharField(null=True, blank=True, max_length=100,
+                                        help_text="Version of the component.")
     found_by = models.ManyToManyField(Test_Type, editable=False)
     static_finding = models.BooleanField(default=False)
     dynamic_finding = models.BooleanField(default=True)

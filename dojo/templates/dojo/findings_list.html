@@ -263,20 +263,24 @@
                                                       href="{% url 'view_finding' finding.id %}">{{ finding.id }}</a>
                                   {% endif %}
                                   {% if finding.file_path %}
-                                  <i class="fa dojo-sup fa-code has-popover" data-trigger="hover" data-content="{{ finding.file_path }}" data-placement="right" data-container="body" data-original-title="Files" title="">
+                                  <i class="fa dojo-sup fa-code has-popover" data-trigger="hover" data-content="{{ finding.file_path }}" data-placement="right" data-container="body" data-original-title="Files" title=""></i>
                                   {% else %}
                                     {% if finding.endpoints.all %}
                                       <i class="fa dojo-sup fa-sitemap has-popover" data-html="true" data-trigger="hover" data-content="
                                       {% for endpoint in finding.endpoints.all %}
                                         {{ endpoint }}<br/>
                                       {% endfor %}
-                                      " data-placement="right" data-container="body" data-original-title="Endpoints" title="">
+                                      " data-placement="right" data-container="body" data-original-title="Endpoints" title=""></i>
                                     {% endif %}
                                   {% endif %}
-                                  {% if finding.notes.all %}
-                                    <i class="fa fa-comment has-popover" data-trigger="hover" data-content="{{ finding.notes.all.0 }}" data-placement="left" data-container="body" data-original-title="Most Recent Note" title="">
+                                  {% if finding.component_name %}
+                                    <i class="fa dojo-sup fa-file has-popover" data-trigger="hover" data-placement="right"
+                                       data-content="{{ finding.component_name }} - {{ finding.component_version }}"
+                                       data-container="body" data-original-title="Component" title=""></i>
                                   {% endif %}
-                                  </i>
+                                  {% if finding.notes.all %}
+                                    <i class="fa fa-comment has-popover" data-trigger="hover" data-content="{{ finding.notes.all.0 }}" data-placement="left" data-container="body" data-original-title="Most Recent Note" title=""></i>
+                                  {% endif %}
                                     <sup>
                                         {% for tag in finding.tags %}
                                         <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
