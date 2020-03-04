@@ -29,7 +29,6 @@ from dojo.tasks import add_epic_task, add_issue_task
 from tagging.models import Tag
 from tagging.utils import get_tag_list
 from django.db.models import Prefetch
-from dojo.tag.prefetching_tag_descriptor import PrefetchingTagDescriptor
 
 logger = logging.getLogger(__name__)
 
@@ -86,9 +85,7 @@ def prefetch_for_product(prods):
             finding__verified=True,
             finding__mitigated__isnull=True)
     prefetched_prods = prefetched_prods.prefetch_related(Prefetch('endpoint_set', queryset=active_endpoint_query, to_attr='active_endpoints'))
-    # prefetched_prods = PrefetchingTagDescriptor.prefetch_tags(prefetched_prods)
-    prefetched_prods = prefetched_prods.prefetch_related('tagged_items', 'tagged_items__tag')
-    # print('prefetched_prods: ', prefetched_prods)
+    prefetched_prods = prefetched_prods.prefetch_related('tagged_items__tag')
     return prefetched_prods
 
 

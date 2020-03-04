@@ -29,7 +29,7 @@ from dateutil.relativedelta import relativedelta
 from django.core.cache import cache
 from dojo.tag.prefetching_tag_descriptor import PrefetchingTagDescriptor
 from django.contrib.contenttypes.fields import GenericRelation
-from tagging.models import Tag, TaggedItem
+from tagging.models import TaggedItem
 
 fmt = getattr(settings, 'LOG_FORMAT', None)
 lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
@@ -1618,13 +1618,6 @@ class Finding(models.Model):
             return self.jira_issue
         except JIRA_Issue.DoesNotExist:
             return None
-
-    def has_jira_issue(self):
-        try:
-            issue = self.jira_issue
-            return True
-        except JIRA_Issue.DoesNotExist:
-            return False
 
     def has_jira_issue(self):
         try:
