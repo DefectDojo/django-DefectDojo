@@ -27,7 +27,7 @@ from django.utils.translation import gettext as _
 from dojo.signals import dedupe_signal
 from dojo.tag.prefetching_tag_descriptor import PrefetchingTagDescriptor
 from django.contrib.contenttypes.fields import GenericRelation
-from tagging.models import Tag, TaggedItem
+from tagging.models import TaggedItem
 
 fmt = getattr(settings, 'LOG_FORMAT', None)
 lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
