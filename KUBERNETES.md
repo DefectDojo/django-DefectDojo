@@ -167,10 +167,12 @@ docker build --build-arg http_proxy=http://myproxy.com:8080 --build-arg https_pr
 ### Upgrade the chart
 If you want to change kubernetes configuration of use an updated docker image (evolution of defectDojo code), upgrade the application:
 ```
+kubectl delete job defectdojo-initializer 
 helm upgrade  defectdojo ./helm/defectdojo/ \
    --set django.ingress.enabled=${DJANGO_INGRESS_ENABLED} \
    --set django.ingress.activateTLS=${DJANGO_INGRESS_ACTIVATE_TLS}
 ```
+
 
 ### Re-install the chart
 In case of issue or in any other situation where you need to re-install the chart, you can do it and re-use the same secrets.
