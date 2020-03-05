@@ -26,10 +26,6 @@ from django import forms
 from django.utils.translation import gettext as _
 from dojo.signals import dedupe_signal
 from dateutil.relativedelta import relativedelta
-from django.core.cache import cache
-from dojo.tag.prefetching_tag_descriptor import PrefetchingTagDescriptor
-from django.contrib.contenttypes.fields import GenericRelation
-from tagging.models import TaggedItem
 
 fmt = getattr(settings, 'LOG_FORMAT', None)
 lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
@@ -2229,6 +2225,7 @@ class Alerts(models.Model):
     def save(self, *args, **kwargs):
         self.title = self.title[:200]
         super(Alerts, self).save(*args, **kwargs)
+
 
 
 class Cred_User(models.Model):

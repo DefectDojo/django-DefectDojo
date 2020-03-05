@@ -7,7 +7,7 @@ from dojo.models import Product, Engagement, Test, Finding, \
 from dojo.forms import ImportScanForm, SEVERITY_CHOICES
 from dojo.tools import requires_file
 from dojo.tools.factory import import_parser_factory
-from dojo.utils import create_notification
+from dojo.utils import create_notification, max_safe
 from django.urls import reverse
 from tagging.models import Tag
 from django.core.validators import URLValidator, validate_ipv46_address
@@ -574,10 +574,10 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
 
         test.save()
 
-        test.engagement.updated = max(scan_date_time, test.engagement.updated)
+        test.engagement.updated = max_safe([scan_date_time, test.engagement.updated])
 
         if test.engagement.engagement_type == 'CI/CD':
-            test.engagement.target_end = max(scan_date, test.engagement.target_end)
+            test.engagement.target_end = max_safe([scan_date, test.engagement.target_end])
 
         test.engagement.save()
 
@@ -865,12 +865,12 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     finding.notes.add(note)
                     mitigated_count += 1
 
-            test.updated = max(scan_date_time, test.updated)
-            test.engagement.updated = max(scan_date_time, test.engagement.updated)
+            test.updated = max_safe([scan_date_time, test.updated])
+            test.engagement.updated = max_safe([scan_date_time, test.engagement.updated])
 
             if test.engagement.engagement_type == 'CI/CD':
-                test.target_end = max(scan_date_time, test.target_end)
-                test.engagement.target_end = max(scan_date, test.engagement.target_end)
+                test.target_end = max_safe([scan_date_time, test.target_end])
+                test.engagement.target_end = max_safe([scan_date, test.engagement.target_end])
 
             test.save()
             test.engagement.save()
