@@ -9,8 +9,8 @@ class PrefetchingTagDescriptor(object):
             # if getattr(instance, 'tagged_items', None) is not None:
 
             # print('returning prefetched tags')
-            return [ti.tag for ti in instance.tagged_items.all()]
-            # return [ti.tag.name for ti in instance.tagged_items.all()]
+            # return [ti.tag for ti in instance.tagged_items.all()]
+            return [ti.tag.name for ti in instance.tagged_items.all()]
 
         return self.__old__get__(instance, owner)
 
