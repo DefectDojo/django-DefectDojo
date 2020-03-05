@@ -1,7 +1,7 @@
 from dojo.models import Product, Engagement, Test, Finding, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     User, ScanSettings, Scan, Stub_Finding, Endpoint, JIRA_PKey, JIRA_Conf, \
-    Finding_Template
+    Finding_Template, App_Analysis
 
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraConfigurationsViewSet, \
@@ -42,12 +42,26 @@ class BaseClass():
 
         @skipIfNotSubclass('ListModelMixin')
         def test_list(self):
+            # setting tags in create/update doesn't work, so for now we manually add some tags. this makes sure there is no 500 error on listing models with tags
+            tagged = False
+            our_tags = ["ci/cd", "api"]
+            if self.endpoint_model in (Engagement, Test, Product, Finding, Endpoint, App_Analysis):
+                for obj in self.endpoint_model.objects.all():
+                    obj.tags=",".join(our_tags) # taggit doesn't accept list
+                    obj.save()
+                    tagged = True
+                
+
             response = self.client.get(self.url, format='json')
+            if tagged:
+                self.assertEqual(sorted(response.data['results'][0]['tags']), sorted(our_tags))
             self.assertEqual(200, response.status_code)
+
 
         @skipIfNotSubclass('CreateModelMixin')
         def test_create(self):
             length = self.endpoint_model.objects.count()
+            print('payload: ', self.payload)
             response = self.client.post(self.url, self.payload)
             self.assertEqual(201, response.status_code, response.data)
             self.assertEqual(self.endpoint_model.objects.count(), length + 1)
@@ -57,6 +71,7 @@ class BaseClass():
             current_objects = self.client.get(self.url, format='json').data
             relative_url = self.url + '%s/' % current_objects['results'][0]['id']
             response = self.client.get(relative_url)
+            print(response.data)
             self.assertEqual(200, response.status_code)
 
         @skipIfNotSubclass('DestroyModelMixin')
@@ -93,6 +108,7 @@ class EndpointTest(BaseClass.RESTEndpointTest):
             'query': 'test=true',
             'fragment': 'test-1',
             'product': 1,
+            "tags": "mytag"            
         }
         self.update_fields = {'protocol': 'ftp'}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
@@ -116,7 +132,7 @@ class EngagementTest(BaseClass.RESTEndpointTest):
             "reason": "",
             "test_strategy": "",
             "product": "1",
-            "tags": ["mytag"]
+            "tags": "mytag"
         }
         self.update_fields = {'version': 'latest'}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
@@ -482,6 +498,7 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
             "file": open('tests/zap_sample.xml'),
             "engagement": 1,
             "lead": 2,
+            "tags": ["'ci/cd, api"]
         }
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
