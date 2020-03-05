@@ -3,6 +3,7 @@ import logging
 import os
 from datetime import datetime
 import operator
+import base64
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.contrib import messages
@@ -607,8 +608,8 @@ def import_scan_results(request, eid=None, pid=None):
                     if item.unsaved_request is not None and item.unsaved_response is not None:
                         burp_rr = BurpRawRequestResponse(
                             finding=item,
-                            burpRequestBase64=item.unsaved_request.encode("utf-8"),
-                            burpResponseBase64=item.unsaved_response.encode("utf-8"),
+                            burpRequestBase64=base64.b64encode(item.unsaved_request.encode()),
+                            burpResponseBase64=base64.b64encode(item.unsaved_response.encode()),
                         )
                         burp_rr.clean()
                         burp_rr.save()
