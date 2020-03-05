@@ -130,7 +130,7 @@ def engagements_all(request):
 
 def prefetch_for_products_with_engagments(products_with_engagements):
     return products_with_engagements.prefetch_related('tagged_items__tag',
-        'engagement_set__tagged_items__tag'
+        'engagement_set__tagged_items__tag',
         'engagement_set__test_set__tagged_items__tag')
 
 
