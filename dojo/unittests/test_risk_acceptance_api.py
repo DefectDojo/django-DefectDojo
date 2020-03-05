@@ -36,7 +36,6 @@ class TestRiskAcceptanceApi(APITestCase):
         cls.test_e = Test.objects.create(engagement=cls.engagement_2b, test_type=cls.test_type,
                                          target_start=datetime.date(2000, 1, 1), target_end=datetime.date(2000, 2, 1))
 
-
         def create_finding(test: Test, reporter: User, cve: str) -> Finding:
             return Finding(test=test, title='Finding {}'.format(cve), cve=cve, severity='High',
                            description='Hello world!', mitigation='Delete system32', impact='Everything',
@@ -53,7 +52,6 @@ class TestRiskAcceptanceApi(APITestCase):
             map(lambda i: create_finding(cls.test_d, cls.user, 'CVE-2000-{}'.format(i)), range(50, 150, 3)))
         Finding.objects.bulk_create(
             map(lambda i: create_finding(cls.test_e, cls.user, 'CVE-1999-{}'.format(i)), range(50, 150, 3)))
-
 
     def setUp(self) -> None:
         self.client = APIClient()
@@ -96,5 +94,3 @@ class TestRiskAcceptanceApi(APITestCase):
         for ra in self.engagement_2b.risk_acceptance.all():
             for finding in ra.accepted_findings.all():
                 self.assertEquals(self.engagement_2a.product, finding.test.engagement.product)
-
-
