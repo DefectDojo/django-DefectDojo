@@ -50,7 +50,6 @@ class BaseClass():
                     obj.tags=",".join(our_tags) # taggit doesn't accept list
                     obj.save()
                     tagged = True
-                
 
             response = self.client.get(self.url, format='json')
             if tagged:
@@ -71,7 +70,6 @@ class BaseClass():
             current_objects = self.client.get(self.url, format='json').data
             relative_url = self.url + '%s/' % current_objects['results'][0]['id']
             response = self.client.get(relative_url)
-            print(response.data)
             self.assertEqual(200, response.status_code)
 
         @skipIfNotSubclass('DestroyModelMixin')
@@ -108,7 +106,7 @@ class EndpointTest(BaseClass.RESTEndpointTest):
             'query': 'test=true',
             'fragment': 'test-1',
             'product': 1,
-            "tags": "mytag"            
+            "tags": ["mytag"]
         }
         self.update_fields = {'protocol': 'ftp'}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
@@ -132,7 +130,7 @@ class EngagementTest(BaseClass.RESTEndpointTest):
             "reason": "",
             "test_strategy": "",
             "product": "1",
-            "tags": "mytag"
+            "tags": ["mytag"]
         }
         self.update_fields = {'version': 'latest'}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
