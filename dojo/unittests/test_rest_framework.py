@@ -13,7 +13,7 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase, APIClient
-
+from dojo.tag.prefetching_tag_descriptor import PrefetchingTagDescriptor
 
 def skipIfNotSubclass(baseclass_name):
     def decorate(f):
@@ -51,6 +51,16 @@ class BaseClass():
                     obj.save()
                     tagged = True
 
+            if self.endpoint_model in (Engagement, Test, Product, Finding, Endpoint, App_Analysis):
+                for obj in self.endpoint_model.objects.all():
+                    print('\nprefetched: ', obj.tags, type(obj.tags))
+
+            # PrefetchingTagDescriptor.unpatch()
+            # if self.endpoint_model in (Engagement, Test, Product, Finding, Endpoint, App_Analysis):
+            #     for obj in self.endpoint_model.objects.all():
+            #         print('\nunpatched: ', obj.tags, type(obj.tags))
+
+
             response = self.client.get(self.url, format='json')
             if tagged:
                 self.assertEqual(sorted(response.data['results'][0]['tags']), sorted(our_tags))
@@ -59,6 +69,24 @@ class BaseClass():
 
         @skipIfNotSubclass('CreateModelMixin')
         def test_create(self):
+            # setting tags in create/update doesn't work, so for now we manually add some tags. this makes sure there is no 500 error on listing models with tags
+            tagged = False
+            our_tags = ["ci/cd", "api"]
+            if self.endpoint_model in (Engagement, Test, Product, Finding, Endpoint, App_Analysis):
+                for obj in self.endpoint_model.objects.all():
+                    obj.tags=",".join(our_tags) # taggit doesn't accept list
+                    obj.save()
+                    tagged = True
+
+            if self.endpoint_model in (Engagement, Test, Product, Finding, Endpoint, App_Analysis):
+                for obj in self.endpoint_model.objects.all():
+                    print('\nprefetched: ', obj.tags, type(obj.tags))
+
+            # PrefetchingTagDescriptor.unpatch()
+            # if self.endpoint_model in (Engagement, Test, Product, Finding, Endpoint, App_Analysis):
+            #     for obj in self.endpoint_model.objects.all():
+            #         print('\nunpatched: ', obj.tags, type(obj.tags))
+
             length = self.endpoint_model.objects.count()
             print('payload: ', self.payload)
             response = self.client.post(self.url, self.payload)
