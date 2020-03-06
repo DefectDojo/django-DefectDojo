@@ -47,6 +47,7 @@ class TagList(list):
 
 
 class TagListSerializerField(serializers.ListField):
+    # print('TagListSerializerField')
     child = serializers.CharField()
     default_error_messages = {
         'not_a_list': _(
@@ -58,6 +59,7 @@ class TagListSerializerField(serializers.ListField):
     order_by = None
 
     def __init__(self, **kwargs):
+        # print('TagListSerializerField.init')
         pretty_print = kwargs.pop("pretty_print", True)
 
         style = kwargs.pop("style", {})
@@ -69,6 +71,7 @@ class TagListSerializerField(serializers.ListField):
         self.pretty_print = pretty_print
 
     def to_internal_value(self, data):
+        # print('TagListSerializerField.to_internal_value')
         if isinstance(data, six.string_types):
             if not data:
                 data = []
@@ -89,15 +92,28 @@ class TagListSerializerField(serializers.ListField):
         return data
 
     def to_representation(self, value):
+        # print('TagListSerializerField.to_representation')
+        # print('type(value):', type(value))
+        # print('value:', value)
+
         if not isinstance(value, TagList):
             if not isinstance(value, list):
+                # print('not a list')
+                # this will trigger when a queryset is found...
                 if self.order_by:
                     tags = value.all().order_by(*self.order_by)
                 else:
                     tags = value.all()
                 value = [tag.name for tag in tags]
+            elif len(value) > 0 and isinstance(value[0], Tag):
+                # print('list of Tags')
+                # .. but sometimes the queryset already has been converted into a list, i.e. by prefetch_related
+                tags = value
+                value = [tag.name for tag in tags]
+                if self.order_by:
+                    # the only ordering that makes since is by name, so we order after creating the list
+                    value = sorted(value)
             value = TagList(value, pretty_print=self.pretty_print)
-
         return value
 
 
@@ -240,6 +256,7 @@ class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
         fields = '__all__'
 
     def validate(self, data):
+        # print('EndpointSerialize.validate')
         port_re = "(:[0-9]{1,5}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}" \
                   "|655[0-2][0-9]|6553[0-5])"
 

@@ -42,26 +42,15 @@ class BaseClass():
 
         @skipIfNotSubclass('ListModelMixin')
         def test_list(self):
-            # setting tags in create/update doesn't work, so for now we manually add some tags. this makes sure there is no 500 error on listing models with tags
-            tagged = False
-            our_tags = ["ci/cd", "api"]
-            if self.endpoint_model in (Engagement, Test, Product, Finding, Endpoint, App_Analysis):
-                for obj in self.endpoint_model.objects.all():
-                    obj.tags=",".join(our_tags) # taggit doesn't accept list
-                    obj.save()
-                    tagged = True
-                
+            # create a new instance first to make sure there's at least 1 instance with tags set by payload to trigger tag handling code
+            response = self.client.post(self.url, self.payload)
 
             response = self.client.get(self.url, format='json')
-            if tagged:
-                self.assertEqual(sorted(response.data['results'][0]['tags']), sorted(our_tags))
             self.assertEqual(200, response.status_code)
-
 
         @skipIfNotSubclass('CreateModelMixin')
         def test_create(self):
             length = self.endpoint_model.objects.count()
-            print('payload: ', self.payload)
             response = self.client.post(self.url, self.payload)
             self.assertEqual(201, response.status_code, response.data)
             self.assertEqual(self.endpoint_model.objects.count(), length + 1)
@@ -71,7 +60,6 @@ class BaseClass():
             current_objects = self.client.get(self.url, format='json').data
             relative_url = self.url + '%s/' % current_objects['results'][0]['id']
             response = self.client.get(relative_url)
-            print(response.data)
             self.assertEqual(200, response.status_code)
 
         @skipIfNotSubclass('DestroyModelMixin')
@@ -108,7 +96,7 @@ class EndpointTest(BaseClass.RESTEndpointTest):
             'query': 'test=true',
             'fragment': 'test-1',
             'product': 1,
-            "tags": "mytag"            
+            "tags": ["mytag", "yourtag"]
         }
         self.update_fields = {'protocol': 'ftp'}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
@@ -132,7 +120,7 @@ class EngagementTest(BaseClass.RESTEndpointTest):
             "reason": "",
             "test_strategy": "",
             "product": "1",
-            "tags": "mytag"
+            "tags": ["mytag"]
         }
         self.update_fields = {'version': 'latest'}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
@@ -279,7 +267,7 @@ class ProductTest(BaseClass.RESTEndpointTest):
             "prod_type": 1,
             "name": "Test Product",
             "description": "test product",
-            "tags": ["mytag"]
+            "tags": ["mytag", "yourtag"]
         }
         self.update_fields = {'prod_type': 2}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
@@ -351,6 +339,7 @@ class TestsTest(BaseClass.RESTEndpointTest):
             "target_end": "2017-01-12T00:00",
             "percent_complete": 0,
             "lead": 2,
+            "tags": []
         }
         self.update_fields = {'percent_complete': 100}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
