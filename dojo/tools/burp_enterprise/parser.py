@@ -1,8 +1,7 @@
 from lxml import etree
-from dojo.models import Endpoint, Finding, BurpRawRequestResponse
+from dojo.models import Endpoint, Finding
 import logging
 import re
-import base64
 from urllib.parse import urlparse
 
 
