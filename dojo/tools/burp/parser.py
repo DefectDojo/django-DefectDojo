@@ -222,7 +222,6 @@ def get_item(item_node, test):
                 collab_details[0] + " request at " + collab_details[2] + \
                 " originating from " + collab_details[1] + " ."
 
-
     try:
         dupe_endpoint = Endpoint.objects.get(
             protocol=protocol,

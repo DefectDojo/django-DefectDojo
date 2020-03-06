@@ -34,7 +34,7 @@ class BurpEnterpriseHtmlParser(object):
     def get_content(self, container):
         s = ''
         if container.tag == 'div' and container.text is not None and not container.text.isspace() and len(container.text) > 0:
-            s += ''.join(container.itertext()).strip().replace('Snip', '<-------------- Snip -------------->').replace('\t', '')
+            s += ''.join(container.itertext()).strip().replace('Snip', '\n<-------------- Snip -------------->').replace('\t', '')
         else:
             for elem in container.iterchildren():
                 # print(elem.tag, ' : ', elem.text, '\n')
@@ -135,9 +135,9 @@ class BurpEnterpriseHtmlParser(object):
                     # Request and Response pairs
                     if webinfo in reqrsp:
                         if webinfo == 'Request':
-                            vuln['Request'] = vuln['Request'] + field + '\n\n'
+                            vuln['Request'] = vuln['Request'] + field + 'SPLITTER'
                         else:
-                            vuln['Response'] = vuln['Response'] + field + '\n\n'
+                            vuln['Response'] = vuln['Response'] + field + 'SPLITTER'
 
                 dict_index += 1
 
@@ -181,8 +181,12 @@ class BurpEnterpriseHtmlParser(object):
                            nb_occurences=1)
 
             if len(details.get('Request')) > 0:
-                find.unsaved_request = str(details.get('Request'))
-                find.unsaved_response = str(details.get('Response'))
+                requests = details.get('Request').split('SPLITTER')[:-1]
+                responses = details.get('Response').split('SPLITTER')[:-1]
+                unsaved_req_resp = list()
+                for index in range(0, len(requests)):
+                    unsaved_req_resp.append({"req": requests[index], "resp": responses[index]})
+                find.unsaved_req_resp = unsaved_req_resp
 
             url = details.get('Endpoint')
             parsedUrl = urlparse(url)
