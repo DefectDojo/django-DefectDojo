@@ -880,7 +880,7 @@
     </div>
 
     <div class="protip">
-       <i class="fa fa-lightbulb-o"></i> <strong>ProTip!</strong> Type <kbd>e</kbd> to edit any finding.
+       <i class="fa fa-lightbulb-o"></i> <strong>ProTip!</strong> Type <kbd>e</kbd> to edit any finding, <kbd>p</kbd> and <kbd>n</kbd> to navigate to the previous or next finding.
     </div>
 {% endblock %}
 {% block postscript %}
@@ -931,8 +931,17 @@
             $('[data-toggle="tooltip"]').tooltip()
         });
 
+        // keyboard shortcuts
         $(document).on('keypress', null, 'e', function () {
             window.location.assign('{% url 'edit_finding' finding.id %}');
+        });
+        
+        $(document).on('keypress', null, 'p', function () {
+            window.location.assign('{% url 'view_finding' prev_finding.id %}');
+        });
+        
+        $(document).on('keypress', null, 'n', function () {
+            window.location.assign('{% url 'view_finding' next_finding.id %}');
         });
 
         $('a.delete-finding').on('click', function (e) {
