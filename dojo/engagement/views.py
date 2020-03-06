@@ -606,8 +606,8 @@ def import_scan_results(request, eid=None, pid=None):
                             else:
                                 burp_rr = BurpRawRequestResponse(
                                     finding=item,
-                                    burpRequestBase64=req_resp["req"].encode("utf-8"),
-                                    burpResponseBase64=req_resp["resp"].encode("utf-8"),
+                                    burpRequestBase64=base64.b64encode(req_resp["req"].encode("utf-8")),
+                                    burpResponseBase64=base64.b64encode(req_resp["resp"].encode("utf-8")),
                                 )
                             burp_rr.clean()
                             burp_rr.save()
