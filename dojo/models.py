@@ -2231,7 +2231,6 @@ class Cred_User(models.Model):
     def __str__(self):
         return self.name + " (" + self.role + ")"
 
-
 class Cred_Mapping(models.Model):
     cred_id = models.ForeignKey(Cred_User, null=False,
                                 related_name="cred_user",
