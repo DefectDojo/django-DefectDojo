@@ -56,13 +56,15 @@ We've also created some example
 [workflows](https://defectdojo.readthedocs.io/en/latest/workflows.html) that
 should give you an idea of how to use DefectDojo for your own team.
 
-## Client APIs
+## Client APIs and wrappers
+This section presents different ways to programmatically interact with defectdojo APIs.
 
-* Install the DefectDojo Python API via `pip install defectdojo_api` or clone
-  the [repository](https://github.com/aaronweaver/defectdojo_api).
-* Browse the API on
-  [SwaggerHub](https://app.swaggerhub.com/apis/DefectDojo/defect-dojo_api_v_2/1.0.0).
-  [![Swagger Status](http://online.swagger.io/validator?url=https://api.swaggerhub.com/apis/DefectDojo/defect-dojo_api_v_2/1.0.0)](https://app.swaggerhub.com/apis/DefectDojo/defect-dojo_api_v_2/1.0.0)
+See [Wrappers](WRAPPERS.MD)
+
+
+## Release and branch model
+See [Release and branch model](BRANCHING-MODEL.MD)
+
 
 ## Getting Involved
 
