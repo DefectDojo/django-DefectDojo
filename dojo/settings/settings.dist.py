@@ -483,7 +483,7 @@ INSTALLED_APPS = (
     'rest_framework.authtoken',
     'rest_framework_swagger',
     'dbbackup',
-    'taggit_serializer',
+    # 'taggit_serializer',
     # 'axes'
     'django_celery_results',
     'social_django',

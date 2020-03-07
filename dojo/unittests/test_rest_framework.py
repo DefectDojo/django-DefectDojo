@@ -42,8 +42,10 @@ class BaseClass():
 
         @skipIfNotSubclass('ListModelMixin')
         def test_list(self):
-            # create a new instance first to make sure there's at least 1 instance with tags set by payload to trigger tag handling code
-            response = self.client.post(self.url, self.payload)
+            
+            if hasattr(self.endpoint_model, 'tags') and self.payload:
+                # create a new instance first to make sure there's at least 1 instance with tags set by payload to trigger tag handling code
+                response = self.client.post(self.url, self.payload)
 
             response = self.client.get(self.url, format='json')
             self.assertEqual(200, response.status_code)
