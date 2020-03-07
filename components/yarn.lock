@@ -2,101 +2,9 @@
 # yarn lockfile v1
 
 
-"@yarn_components/JUMFlot@jumjum123/JUMFlot#*":
+JUMFlot@jumjum123/JUMFlot#*:
   version "0.0.0"
   resolved "https://codeload.github.com/jumjum123/JUMFlot/tar.gz/203147fa2ace27db89e2defcde0800654015ae23"
-
-"@yarn_components/bootstrap-wysiwyg-steveathon@steveathon/bootstrap-wysiwyg#*":
-  version "2.0.1"
-  resolved "https://codeload.github.com/steveathon/bootstrap-wysiwyg/tar.gz/8e0e34d5ec43e424aedd6b47f2c3bc39e2def1aa"
-
-"@yarn_components/bootswatch-dist@dbtek/bootswatch-dist#readable":
-  version "3.3.7-readable"
-  resolved "https://codeload.github.com/dbtek/bootswatch-dist/tar.gz/31c0140b16ae271210195dea0b13002a7aa18cc1"
-
-"@yarn_components/chosen-bootstrap@dbtek/chosen-bootstrap#*":
-  version "0.0.0"
-  resolved "https://codeload.github.com/dbtek/chosen-bootstrap/tar.gz/12dcd363d1482c54c740ed9fe0e92549d81e9176"
-
-"@yarn_components/chosen@harvesthq/bower-chosen#~1.4.0":
-  version "0.0.0"
-  resolved "https://codeload.github.com/harvesthq/bower-chosen/tar.gz/d7eba35cf214d2416fabee25c5d4619542a23d8d"
-
-"@yarn_components/flot-axis@markrcote/flot-axislabels#*":
-  version "0.0.0"
-  resolved "https://codeload.github.com/markrcote/flot-axislabels/tar.gz/a181e09d04d120d05e5bc2baaa8738b5b3670428"
-
-"@yarn_components/flot.tooltip@krzysu/flot.tooltip#~0.8.4":
-  version "0.8.7"
-  resolved "https://codeload.github.com/krzysu/flot.tooltip/tar.gz/fe97782119656c12d981e403483948c3bfdbb84b"
-
-"@yarn_components/flot@flot/flot#~0.8.3":
-  version "0.8.3"
-  resolved "https://codeload.github.com/flot/flot/tar.gz/453b017cc5acfd75e252b93e8635f57f4196d45d"
-
-"@yarn_components/google-code-prettify@tcollard/google-code-prettify#~1.0.4":
-  version "1.0.5"
-  resolved "https://codeload.github.com/tcollard/google-code-prettify/tar.gz/5e0b27bba2583a386c08ead942bbf25418c28784"
-
-"@yarn_components/jquery-cookie@carhartl/jquery-cookie#*":
-  version "1.4.1"
-  resolved "https://codeload.github.com/carhartl/jquery-cookie/tar.gz/7f88a4e631aba8a8c688fd8999ce6b9bcfd50718"
-
-"@yarn_components/jquery-highlight@knownasilya/jquery-highlight#*":
-  version "3.5.0"
-  resolved "https://codeload.github.com/knownasilya/jquery-highlight/tar.gz/7f01bf5dad7bfc8dd309b3905927d24df31e4e3b"
-  dependencies:
-    jquery ">= 1.0.0"
-
-"@yarn_components/jquery-ui@components/jqueryui#*":
-  version "1.12.1"
-  resolved "https://codeload.github.com/components/jqueryui/tar.gz/44ecf3794cc56b65954cc19737234a3119d036cc"
-
-"@yarn_components/jquery.hotkeys@jeresig/jquery.hotkeys#master":
-  version "0.2.0"
-  resolved "https://codeload.github.com/jeresig/jquery.hotkeys/tar.gz/f24f1da275aab7881ab501055c256add6f690de4"
-
-"@yarn_components/justgage@toorshia/justgage#*":
-  version "1.3.5"
-  resolved "https://codeload.github.com/toorshia/justgage/tar.gz/70df4154295d34da755ab69b930520ef7d286377"
-  dependencies:
-    raphael "^2.2.8"
-
-"@yarn_components/metisMenu@onokumus/metisMenu#~3.0.4":
-  version "3.0.5"
-  resolved "https://codeload.github.com/onokumus/metisMenu/tar.gz/85f027f2eb9cb6e9352093ace833e9702d86fe67"
-
-"@yarn_components/mocha@mochajs/mocha#~1.17.1":
-  version "1.17.1"
-  resolved "https://codeload.github.com/mochajs/mocha/tar.gz/7fc565ee3e225cb7a66bf39ae9c2c05b346675c1"
-  dependencies:
-    commander "2.0.0"
-    debug "*"
-    diff "1.0.7"
-    glob "3.2.3"
-    growl "1.7.x"
-    jade "0.26.3"
-    mkdirp "0.3.5"
-
-"@yarn_components/moment@moment/moment#^2.9.0":
-  version "2.24.0"
-  resolved "https://codeload.github.com/moment/moment/tar.gz/96d0d6791ab495859d09a868803d31a55c917de1"
-
-"@yarn_components/morrisjs@morrisjs/morris.js#~0.5.1":
-  version "0.5.0"
-  resolved "https://codeload.github.com/morrisjs/morris.js/tar.gz/d5cf1410eda7055eaf2c7d218d4cb24ec5ed55c8"
-
-"@yarn_components/simplemde@sparksuite/simplemde-markdown-editor#1.11.2":
-  version "1.11.2"
-  resolved "https://codeload.github.com/sparksuite/simplemde-markdown-editor/tar.gz/6abda7ab68cc20f4aca870eb243747951b90ab04"
-  dependencies:
-    codemirror "*"
-    codemirror-spell-checker "*"
-    marked "*"
-
-"@yarn_components/startbootstrap-sb-admin-2@BlackrockDigital/startbootstrap-sb-admin-2#~3.3.7+1":
-  version "0.0.0"
-  resolved "https://codeload.github.com/BlackrockDigital/startbootstrap-sb-admin-2/tar.gz/49fbecb507c36e83de055bdd836ef2d03352300e"
 
 bootstrap-social@~4.8.0:
   version "4.8.0"
@@ -106,10 +14,26 @@ bootstrap-social@~4.8.0:
     bootstrap "~3"
     font-awesome "~4.3"
 
+bootstrap-wysiwyg-steveathon@steveathon/bootstrap-wysiwyg#*:
+  version "2.0.1"
+  resolved "https://codeload.github.com/steveathon/bootstrap-wysiwyg/tar.gz/8e0e34d5ec43e424aedd6b47f2c3bc39e2def1aa"
+
 bootstrap@^3.4.1, bootstrap@~3:
   version "3.4.1"
   resolved "https://registry.yarnpkg.com/bootstrap/-/bootstrap-3.4.1.tgz#c3a347d419e289ad11f4033e3c4132b87c081d72"
   integrity sha512-yN5oZVmRCwe5aKwzRj6736nSmKDX7pLYwsXiCj/EYmo16hODaBiT4En5btW/jhBF/seV+XMx3aYwukYC3A49DA==
+
+bootswatch-dist@dbtek/bootswatch-dist#readable:
+  version "3.3.7-readable"
+  resolved "https://codeload.github.com/dbtek/bootswatch-dist/tar.gz/31c0140b16ae271210195dea0b13002a7aa18cc1"
+
+chosen-bootstrap@dbtek/chosen-bootstrap#*:
+  version "0.0.0"
+  resolved "https://codeload.github.com/dbtek/chosen-bootstrap/tar.gz/12dcd363d1482c54c740ed9fe0e92549d81e9176"
+
+chosen@harvesthq/bower-chosen#~1.4.0:
+  version "0.0.0"
+  resolved "https://codeload.github.com/harvesthq/bower-chosen/tar.gz/d7eba35cf214d2416fabee25c5d4619542a23d8d"
 
 codemirror-spell-checker@*:
   version "1.1.2"
@@ -119,9 +43,9 @@ codemirror-spell-checker@*:
     typo-js "*"
 
 codemirror@*:
-  version "5.51.0"
-  resolved "https://registry.yarnpkg.com/codemirror/-/codemirror-5.51.0.tgz#7746caaf5223e68f5c55ea11e2f3cc82a9a3929e"
-  integrity sha512-vyuYYRv3eXL0SCuZA4spRFlKNzQAewHcipRQCOKgRy7VNAvZxTKzbItdbCl4S5AgPZ5g3WkHp+ibWQwv9TLG7Q==
+  version "5.52.0"
+  resolved "https://registry.yarnpkg.com/codemirror/-/codemirror-5.52.0.tgz#4dbd6aef7f0e63db826b9a23922f0c03ac75c0a7"
+  integrity sha512-K2UB6zjscrfME03HeRe/IuOmCeqNpw7PLKGHThYpLbZEuKf+ZoujJPhxZN4hHJS1O7QyzEsV7JJZGxuQWVaFCg==
 
 commander@0.6.1:
   version "0.6.1"
@@ -171,6 +95,18 @@ eve-raphael@0.5.0:
   resolved "https://registry.yarnpkg.com/eve-raphael/-/eve-raphael-0.5.0.tgz#17c754b792beef3fa6684d79cf5a47c63c4cda30"
   integrity sha1-F8dUt5K+7z+maE15z1pHxjxM2jA=
 
+flot-axis@markrcote/flot-axislabels#*:
+  version "0.0.0"
+  resolved "https://codeload.github.com/markrcote/flot-axislabels/tar.gz/a181e09d04d120d05e5bc2baaa8738b5b3670428"
+
+flot.tooltip@krzysu/flot.tooltip#~0.8.4:
+  version "0.8.7"
+  resolved "https://codeload.github.com/krzysu/flot.tooltip/tar.gz/fe97782119656c12d981e403483948c3bfdbb84b"
+
+flot@flot/flot#~0.8.3:
+  version "0.8.3"
+  resolved "https://codeload.github.com/flot/flot/tar.gz/453b017cc5acfd75e252b93e8635f57f4196d45d"
+
 font-awesome@4.5.0:
   version "4.5.0"
   resolved "https://registry.yarnpkg.com/font-awesome/-/font-awesome-4.5.0.tgz#1e9d7ccf7d63bdbe57000e18d5188cb2557e70f8"
@@ -197,6 +133,10 @@ glob@3.2.3:
     graceful-fs "~2.0.0"
     inherits "2"
     minimatch "~0.2.11"
+
+google-code-prettify@tcollard/google-code-prettify#~1.0.4:
+  version "1.0.5"
+  resolved "https://codeload.github.com/tcollard/google-code-prettify/tar.gz/5e0b27bba2583a386c08ead942bbf25418c28784"
 
 graceful-fs@~2.0.0:
   version "2.0.3"
@@ -226,10 +166,34 @@ jade@0.26.3:
     commander "0.6.1"
     mkdirp "0.3.0"
 
+jquery-cookie@carhartl/jquery-cookie#*:
+  version "1.4.1"
+  resolved "https://codeload.github.com/carhartl/jquery-cookie/tar.gz/7f88a4e631aba8a8c688fd8999ce6b9bcfd50718"
+
+jquery-highlight@knownasilya/jquery-highlight#*:
+  version "3.5.0"
+  resolved "https://codeload.github.com/knownasilya/jquery-highlight/tar.gz/7f01bf5dad7bfc8dd309b3905927d24df31e4e3b"
+  dependencies:
+    jquery ">= 1.0.0"
+
+jquery-ui@components/jqueryui#*:
+  version "1.12.1"
+  resolved "https://codeload.github.com/components/jqueryui/tar.gz/44ecf3794cc56b65954cc19737234a3119d036cc"
+
+jquery.hotkeys@jeresig/jquery.hotkeys#master:
+  version "0.2.0"
+  resolved "https://codeload.github.com/jeresig/jquery.hotkeys/tar.gz/f24f1da275aab7881ab501055c256add6f690de4"
+
 "jquery@2 - 3", "jquery@>= 1.0.0", jquery@>=1.7, jquery@>=1.7.0, jquery@^3.4.1:
   version "3.4.1"
   resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.4.1.tgz#714f1f8d9dde4bdfa55764ba37ef214630d80ef2"
   integrity sha512-36+AdBzCL+y6qjw5Tx7HgzeGCzC81MDDgaUP8ld2zhx58HdqXGoBd+tHdrBMiyjGQs0Hxs/MLZTu/eHNJJuWPw==
+
+justgage@toorshia/justgage#*:
+  version "1.3.5"
+  resolved "https://codeload.github.com/toorshia/justgage/tar.gz/70df4154295d34da755ab69b930520ef7d286377"
+  dependencies:
+    raphael "^2.2.8"
 
 lru-cache@2:
   version "2.7.3"
@@ -240,6 +204,10 @@ marked@*:
   version "0.8.0"
   resolved "https://registry.yarnpkg.com/marked/-/marked-0.8.0.tgz#ec5c0c9b93878dc52dd54be8d0e524097bd81a99"
   integrity sha512-MyUe+T/Pw4TZufHkzAfDj6HarCBWia2y27/bhuYkTaiUnfDYFnCP3KUN+9oM7Wi6JA2rymtVYbQu3spE0GCmxQ==
+
+metisMenu@onokumus/metisMenu#~3.0.4:
+  version "3.0.5"
+  resolved "https://codeload.github.com/onokumus/metisMenu/tar.gz/85f027f2eb9cb6e9352093ace833e9702d86fe67"
 
 minimatch@~0.2.11:
   version "0.2.14"
@@ -259,10 +227,25 @@ mkdirp@0.3.5:
   resolved "https://registry.yarnpkg.com/mkdirp/-/mkdirp-0.3.5.tgz#de3e5f8961c88c787ee1368df849ac4413eca8d7"
   integrity sha1-3j5fiWHIjHh+4TaN+EmsRBPsqNc=
 
-moment@^2.20.1:
+mocha@mochajs/mocha#~1.17.1:
+  version "1.17.1"
+  resolved "https://codeload.github.com/mochajs/mocha/tar.gz/7fc565ee3e225cb7a66bf39ae9c2c05b346675c1"
+  dependencies:
+    commander "2.0.0"
+    debug "*"
+    diff "1.0.7"
+    glob "3.2.3"
+    growl "1.7.x"
+    jade "0.26.3"
+    mkdirp "0.3.5"
+
+moment@^2.20.1, moment@moment/moment#^2.9.0:
   version "2.24.0"
-  resolved "https://registry.yarnpkg.com/moment/-/moment-2.24.0.tgz#0d055d53f5052aa653c9f6eb68bb5d12bf5c2b5b"
-  integrity sha512-bV7f+6l2QigeBBZSM/6yTNq4P2fNpSWj/0e7jQcy87A8e7o2nAfP/34/2ky5Vw4B9S446EtIhodAzkFCcR4dQg==
+  resolved "https://codeload.github.com/moment/moment/tar.gz/96d0d6791ab495859d09a868803d31a55c917de1"
+
+morrisjs@morrisjs/morris.js#~0.5.1:
+  version "0.5.0"
+  resolved "https://codeload.github.com/morrisjs/morris.js/tar.gz/d5cf1410eda7055eaf2c7d218d4cb24ec5ed55c8"
 
 ms@^2.1.1:
   version "2.1.2"
@@ -280,6 +263,18 @@ sigmund@~1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/sigmund/-/sigmund-1.0.1.tgz#3ff21f198cad2175f9f3b781853fd94d0d19b590"
   integrity sha1-P/IfGYytIXX587eBhT/ZTQ0ZtZA=
+
+simplemde@sparksuite/simplemde-markdown-editor#1.11.2:
+  version "1.11.2"
+  resolved "https://codeload.github.com/sparksuite/simplemde-markdown-editor/tar.gz/6abda7ab68cc20f4aca870eb243747951b90ab04"
+  dependencies:
+    codemirror "*"
+    codemirror-spell-checker "*"
+    marked "*"
+
+startbootstrap-sb-admin-2@BlackrockDigital/startbootstrap-sb-admin-2#~3.3.7+1:
+  version "0.0.0"
+  resolved "https://codeload.github.com/BlackrockDigital/startbootstrap-sb-admin-2/tar.gz/49fbecb507c36e83de055bdd836ef2d03352300e"
 
 typo-js@*:
   version "1.1.0"
