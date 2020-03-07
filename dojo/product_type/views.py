@@ -10,6 +10,7 @@ from dojo.forms import Product_TypeForm, Product_TypeProductForm, Delete_Product
 from dojo.models import Product_Type
 from dojo.utils import get_page_items, add_breadcrumb, create_notification
 from django.db.models import Count, Q
+from django.db.models.query import QuerySet
 
 logger = logging.getLogger(__name__)
 
@@ -43,16 +44,17 @@ def product_type(request):
 
 def prefetch_for_product_type(prod_types):
     prefetch_prod_types = prod_types
+    
+    if isinstance(prefetch_prod_types, QuerySet):  # old code can arrive here with prods being a list because the query was already executed
+        active_findings_query = Q(prod_type__engagement__test__finding__active=True,
+                                prod_type__engagement__test__finding__mitigated__isnull=True,
+                                prod_type__engagement__test__finding__verified=True,
+                                prod_type__engagement__test__finding__false_p=False,
+                                prod_type__engagement__test__finding__duplicate=False,
+                                prod_type__engagement__test__finding__out_of_scope=False)
 
-    active_findings_query = Q(prod_type__engagement__test__finding__active=True,
-                            prod_type__engagement__test__finding__mitigated__isnull=True,
-                            prod_type__engagement__test__finding__verified=True,
-                            prod_type__engagement__test__finding__false_p=False,
-                            prod_type__engagement__test__finding__duplicate=False,
-                            prod_type__engagement__test__finding__out_of_scope=False)
-
-    prefetch_prod_types = prefetch_prod_types.annotate(findings_count=Count('prod_type__engagement__test__finding__id', filter=active_findings_query))
-    prefetch_prod_types = prefetch_prod_types.annotate(prod_count=Count('prod_type', distinct=True))
+        prefetch_prod_types = prefetch_prod_types.annotate(findings_count=Count('prod_type__engagement__test__finding__id', filter=active_findings_query))
+        prefetch_prod_types = prefetch_prod_types.annotate(prod_count=Count('prod_type', distinct=True))
 
     return prefetch_prod_types
 
