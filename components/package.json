@@ -18,7 +18,7 @@
     "holderjs": "2.4.0",
     "jquery": "^3.4.1",
     "jquery-highlight": "3.5.0",
-    "jquery-ui": "1.12.1",
+    "components-jqueryui": "1.12.1",
     "jquery.cookie": "1.4.1",
     "jquery.flot.tooltip": "0.9.0",
     "jquery.hotkeys": "jeresig/jquery.hotkeys#master",

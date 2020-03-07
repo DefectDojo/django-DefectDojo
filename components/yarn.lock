@@ -59,6 +59,11 @@ commander@2.0.0:
   resolved "https://registry.yarnpkg.com/commander/-/commander-2.0.0.tgz#d1b86f901f8b64bd941bdeadaf924530393be928"
   integrity sha1-0bhvkB+LZL2UG96tr5JFMDk76Sg=
 
+components-jqueryui@1.12.1:
+  version "1.12.1"
+  resolved "https://registry.yarnpkg.com/components-jqueryui/-/components-jqueryui-1.12.1.tgz#617076f128f3be4c265f3e2db50471ef96cd9cee"
+  integrity sha1-YXB28SjzvkwmXz4ttQRx75bNnO4=
+
 datatables@1.10.18:
   version "1.10.18"
   resolved "https://registry.yarnpkg.com/datatables/-/datatables-1.10.18.tgz#fee16e82aa70b17c5faf1a6954ac68f404f33a70"
@@ -172,10 +177,10 @@ jquery-highlight@3.5.0:
   dependencies:
     jquery ">= 1.0.0"
 
-jquery-ui@1.12.1:
+jquery-ui-dist@1.12.1:
   version "1.12.1"
-  resolved "https://registry.yarnpkg.com/jquery-ui/-/jquery-ui-1.12.1.tgz#bcb4045c8dd0539c134bc1488cdd3e768a7a9e51"
-  integrity sha1-vLQEXI3QU5wTS8FIjN0+dop6nlE=
+  resolved "https://registry.yarnpkg.com/jquery-ui-dist/-/jquery-ui-dist-1.12.1.tgz#5c0815d3cc6f90ff5faaf5b268a6e23b4ca904fa"
+  integrity sha1-XAgV08xvkP9fqvWyaKbiO0ypBPo=
 
 jquery.cookie@1.4.1:
   version "1.4.1"
