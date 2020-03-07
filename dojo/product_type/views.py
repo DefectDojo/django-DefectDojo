@@ -44,7 +44,7 @@ def product_type(request):
 
 def prefetch_for_product_type(prod_types):
     prefetch_prod_types = prod_types
-    
+
     if isinstance(prefetch_prod_types, QuerySet):  # old code can arrive here with prods being a list because the query was already executed
         active_findings_query = Q(prod_type__engagement__test__finding__active=True,
                                 prod_type__engagement__test__finding__mitigated__isnull=True,
