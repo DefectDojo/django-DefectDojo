@@ -34,7 +34,7 @@ class BurpEnterpriseHtmlParser(object):
     def get_content(self, container):
         s = ''
         if container.tag == 'div' and container.text is not None and not container.text.isspace() and len(container.text) > 0:
-            s += ''.join(container.itertext()).strip().replace('Snip', '<-------------- Snip -------------->').replace('\t', '')
+            s += ''.join(container.itertext()).strip().replace('Snip', '\n<-------------- Snip -------------->').replace('\t', '')
         else:
             for elem in container.iterchildren():
                 # print(elem.tag, ' : ', elem.text, '\n')
@@ -63,104 +63,93 @@ class BurpEnterpriseHtmlParser(object):
         endpoint_text = tree.xpath("/html/body/div/div[contains(@class, 'section')]/h1")
         severities = tree.xpath("/html/body/div/div[contains(@class, 'section')]/table[contains(@class, 'issue-table')]/tbody")
         endpoint_text = [endpoint for endpoint in endpoint_text if ('Issues found' in ''.join(endpoint.itertext()).strip())]
-        # print('num endpoints :: ', len(endpoint_text))
-        # for container in endpoint_text:
-        #     print(''.join(container.itertext()).strip())
-        # print('num severities :: ', len(severities))
-        # for container in severities:
-        #     print('Count')
-        #     print(''.join(container.itertext()).strip())
 
         for index in range(0, len(severities)):
             url = endpoint_text[index].text[16:]
             sev_table = list(severities[index].iter("tr"))
-            # print('url :: ', url)
-            # print('table size :: ', len(sev_table))
-            for item in range(0, len(sev_table), 2):
-                title = list(sev_table[item].iter("td"))[0].text.strip()[:-4]
-                severity = list(sev_table[item + 1].iter("td"))[1].text.strip()
-                vuln = dict()
-                vuln['Severity'] = severity
-                vuln['Title'] = title
-                vuln['Description'] = ''
-                vuln['Impact'] = ''
-                vuln['Mitigation'] = ''
-                vuln['References'] = ''
-                vuln['CWE'] = ''
-                vuln['Endpoint'] = url
-                items.append(vuln)
+
+            title = ''
+            endpoint = ''
+            for item in sev_table:
+                item_list = list(item.iter("td"))
+                if len(item_list) == 1:
+                    title_list = item_list[0].text.strip().split(' ')
+                    title = ' '.join(title_list[:-1])
+                else:
+                    endpoint = item_list[0].text.strip()
+                    severity = item_list[1].text.strip()
+                    vuln = dict()
+                    vuln['Severity'] = severity
+                    vuln['Title'] = title
+                    vuln['Description'] = ''
+                    vuln['Impact'] = ''
+                    vuln['Mitigation'] = ''
+                    vuln['References'] = ''
+                    vuln['CWE'] = ''
+                    vuln['Response'] = ''
+                    vuln['Request'] = ''
+                    vuln['Endpoint'] = url + endpoint
+                    items.append(vuln)
 
         vulns = tree.xpath("/html/body/div/div[contains(@class, 'section details')]/div[contains(@class, 'issue-container')]")
         if(len(vulns) > 0):
             dict_index = 0
-            description = ['Issue detail:', 'Issue description', 'Request:', 'Response:']
+            description = ['Issue detail:', 'Issue description']
+            reqrsp = ['Request', 'Response']
+            impact = ['Issue background', 'Issue remediation']
+            mitigation = ['Remediation detail:', 'Remediation background']
+            references = ['Vulnerability classifications', 'References']
+            vuln = None
+            merge = False
             for issue in vulns:
                 elems = list(issue.iterchildren())
-                vuln = items[dict_index]
-                vuln['Endpoint'] = vuln['Endpoint'] + elems[2].text.strip()
+                curr_vuln = items[dict_index]
+                if vuln is None or curr_vuln['Endpoint'] != vuln['Endpoint']:
+                    vuln = curr_vuln
+                    merge = False
+                else:
+                    merge = True
 
                 for index in range(3, len(elems), 2):
                     primary, secondary = elems[index].text.strip(), elems[index + 1]
+                    field = self.get_content(secondary)
+                    webinfo = primary.split(':')[0]
+                    details = '**' + primary + '**\n' + field + '\n\n'
                     # Description
                     if primary in description:
-                        s = self.get_content(secondary)
-                        if primary == 'Request:' or primary == 'Response:':
-                            s = '\n\n' + primary + '\n' + s
-                        vuln['Description'] = vuln['Description'] + s
+                        if merge:
+                            vuln['Description'] = vuln['Description'] + field + '\n\n'
+                        else:
+                            vuln['Description'] = vuln['Description'] + details
                     # Impact
-                    if primary == 'Issue background':
-                        vuln['Impact'] = vuln['Impact'] + self.get_content(secondary)
+                    if primary in impact and not merge:
+                        vuln['Impact'] = vuln['Impact'] + details
                     # Mitigation
-                    if primary == 'Issue remediation':
-                        vuln['Mitigation'] = vuln['Mitigation'] + self.get_content(secondary)
-                    # References
-                    if primary == 'References':
-                        vuln['References'] = vuln['References'] + self.get_content(secondary)
-                    # CWE
-                    if primary == 'Vulnerability classifications':
-                        s = self.get_content(secondary)
-                        if len(vuln['CWE']) < 1:
-                            vuln['CWE'] += vuln['CWE'] + s
-                        vuln['References'] = vuln['References'] + s
+                    if primary in mitigation and not merge:
+                        vuln['Mitigation'] = vuln['Mitigation'] + details
+                    # References and CWE
+                    if primary in references and not merge:
+                        if len(vuln['CWE']) < 1 and field.find('CWE') != -1:
+                            vuln['CWE'] += str(self.get_cwe(field))
+                        vuln['References'] = vuln['References'] + details
+                    # Request and Response pairs
+                    if webinfo in reqrsp:
+                        if webinfo == 'Request':
+                            vuln['Request'] = vuln['Request'] + field + 'SPLITTER'
+                        else:
+                            vuln['Response'] = vuln['Response'] + field + 'SPLITTER'
 
                 dict_index += 1
-
-            # print('Printing vulns\n\n')
-            # for v in items:
-            #     for key, value in v.items():
-            #         # print(key, ' :: ', value)
-            #         if key == 'Endpoint':
-            #             url = value
-            #             parsedUrl = urlparse(url)
-            #             protocol = parsedUrl.scheme
-            #             query = parsedUrl.query
-            #             fragment = parsedUrl.fragment
-            #             path = parsedUrl.path
-            #             port = ""  # Set port to empty string by default
-            #             # Split the returned network address into host and
-            #             try:  # If there is port number attached to host address
-            #                 host, port = parsedUrl.netloc.split(':')
-            #             except:  # there's no port attached to address
-            #                 host = parsedUrl.netloc
-
-            #             print('host :: ', host)
-            #             print('port :: ', port)
-            #             print('path :: ', path)
-            #             print('protocol :: ', protocol)
-            #             print('query :: ', query)
-            #             print('fragment :: ', fragment)
-            #     print()
-
-            # raise Exception("stop")
 
             self.create_findings(items)
             findings = list(self.dupes.values())
         else:
-            findings = dict()
+            findings = list()
         return findings
 
     def get_cwe(self, vuln_references):
         # Match only the first CWE!
+        vuln_references = vuln_references.split(':')[0]
         cweSearch = re.search("CWE-([0-9]*)", vuln_references, re.IGNORECASE)
         if cweSearch:
             return cweSearch.group(1)
@@ -169,8 +158,9 @@ class BurpEnterpriseHtmlParser(object):
 
     def create_findings(self, items):
         for details in items:
-            cwe = self.get_cwe(details.get('CWE'))
-            aggregateKeys = "{}{}{}{}".format(details.get('Title'), details.get('Description'), cwe, details.get('Endpoint'))
+            if details.get('Description') == '':
+                continue
+            aggregateKeys = "{}{}{}{}".format(details.get('Title'), details.get('Description'), details.get('CWE'), details.get('Endpoint'))
             find = Finding(title=details.get('Title'),
                            description=details.get('Description'),
                            test=self.test,
@@ -178,7 +168,7 @@ class BurpEnterpriseHtmlParser(object):
                            mitigation=details.get('Mitigation'),
                            references=details.get('References'),
                            impact=details.get('Impact'),
-                           cwe=int(cwe),
+                           cwe=int(details.get('CWE')),
                            active=False,
                            verified=False,
                            false_p=False,
@@ -189,6 +179,14 @@ class BurpEnterpriseHtmlParser(object):
                            static_finding=False,
                            dynamic_finding=True,
                            nb_occurences=1)
+
+            if len(details.get('Request')) > 0:
+                requests = details.get('Request').split('SPLITTER')[:-1]
+                responses = details.get('Response').split('SPLITTER')[:-1]
+                unsaved_req_resp = list()
+                for index in range(0, len(requests)):
+                    unsaved_req_resp.append({"req": requests[index], "resp": responses[index]})
+                find.unsaved_req_resp = unsaved_req_resp
 
             url = details.get('Endpoint')
             parsedUrl = urlparse(url)

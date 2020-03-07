@@ -83,8 +83,11 @@ def is_deduplication_on_engagement_mismatch(new_finding, to_duplicate_finding):
 
 @receiver(dedupe_signal, sender=Finding)
 def sync_dedupe(sender, *args, **kwargs):
-    system_settings = System_Settings.objects.get()
-    if system_settings.enable_deduplication:
+    try:
+        enabled = System_Settings.objects.get().enable_deduplication
+    except System_Settings.DoesNotExist:
+        enabled = False
+    if enabled:
         new_finding = kwargs['new_finding']
         deduplicationLogger.debug('sync_dedupe for: ' + str(new_finding.id) +
                     ":" + str(new_finding.title))
