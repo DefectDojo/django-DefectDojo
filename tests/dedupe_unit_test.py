@@ -29,9 +29,14 @@ class DedupeTest(unittest.TestCase):
     def setUp(self):
         self.options = Options()
         self.options.add_argument("--headless")
+        # self.options.add_experimental_option("detach", True)
         self.options.add_argument("--window-size=1280,768")
         # self.options.add_argument("--no-sandbox")
-        self.driver = webdriver.Chrome('chromedriver', chrome_options=self.options)
+
+        desired = webdriver.DesiredCapabilities.CHROME
+        desired['loggingPrefs'] = {'browser': 'ALL'}
+
+        self.driver = webdriver.Chrome('chromedriver', chrome_options=self.options, desired_capabilities=desired)
         self.driver.implicitly_wait(30)
         self.base_url = os.environ['DD_BASE_URL']
         self.verificationErrors = []
@@ -76,15 +81,10 @@ class DedupeTest(unittest.TestCase):
         driver = self.login_page()
         driver.get(self.base_url + "finding")
         text = driver.find_element_by_tag_name("BODY").text
-        print('test_delete_findings1: ', driver.page_source)
         if 'No findings found.' in text:
             return
         else:
             driver.find_element_by_id("select_all").click()
-            try:
-                print('test_delete_findings2: ', driver.find_element_by_css_selector("i.fa.fa-trash").get_attribute('innerHTML'))                    
-            except: 
-                pass
             driver.find_element_by_css_selector("i.fa.fa-trash").click()
             try:
                 WebDriverWait(driver, 1).until(EC.alert_is_present(),
