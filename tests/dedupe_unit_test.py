@@ -81,16 +81,10 @@ class DedupeTest(unittest.TestCase):
         driver = self.login_page()
         driver.get(self.base_url + "finding")
         text = driver.find_element_by_tag_name("BODY").text
-        print('test_delete_findings1: ', driver.page_source)
         if 'No findings found.' in text:
             return
         else:
             driver.find_element_by_id("select_all").click()
-            try:
-                print('test_delete_findings2: ', driver.find_element_by_id("bulk_edit_menu").get_attribute('innerHTML'))
-                print(self.driver.get_log('browser'))
-            except:
-                pass
             driver.find_element_by_css_selector("i.fa.fa-trash").click()
             try:
                 WebDriverWait(driver, 1).until(EC.alert_is_present(),
@@ -418,7 +412,6 @@ class DedupeTest(unittest.TestCase):
         self.check_nb_duplicates(1)
 
     def tearDown(self):
-        print(self.driver.get_log('browser'))
         self.driver.quit()
         self.assertEqual([], self.verificationErrors)
 
