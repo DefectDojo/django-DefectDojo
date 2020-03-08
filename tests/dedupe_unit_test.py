@@ -32,9 +32,9 @@ class DedupeTest(unittest.TestCase):
         # self.options.add_experimental_option("detach", True)
         self.options.add_argument("--window-size=1280,768")
         # self.options.add_argument("--no-sandbox")
-        
+
         desired = webdriver.DesiredCapabilities.CHROME
-        desired['loggingPrefs'] = {'browser' : 'ALL'}
+        desired['loggingPrefs'] = {'browser': 'ALL'}
 
         self.driver = webdriver.Chrome('chromedriver', chrome_options=self.options, desired_capabilities=desired)
         self.driver.implicitly_wait(30)
@@ -418,7 +418,7 @@ class DedupeTest(unittest.TestCase):
         self.check_nb_duplicates(1)
 
     def tearDown(self):
-        print(self.driver.get_log('browser'))        
+        print(self.driver.get_log('browser'))
         self.driver.quit()
         self.assertEqual([], self.verificationErrors)
 
