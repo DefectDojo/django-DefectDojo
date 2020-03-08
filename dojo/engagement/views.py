@@ -495,9 +495,17 @@ def import_scan_results(request, eid=None, pid=None):
     form = ImportScanForm()
     cred_form = CredMappingForm()
     finding_count = 0
+    enabled = False
+    jform = None
+
     if eid:
         engagement = get_object_or_404(Engagement, id=eid)
         cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(engagement=engagement).order_by('cred_id')
+
+    if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(
+            product=engagement.product) != 0:
+        enabled = JIRA_PKey.objects.get(product=engagement.product).push_all_issues
+        jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
 
     if request.method == "POST":
         form = ImportScanForm(request.POST, request.FILES)
@@ -596,7 +604,16 @@ def import_scan_results(request, eid=None, pid=None):
                     if not handles_active_verified_statuses(form.get_scan_type()):
                         item.active = active
                         item.verified = verified
-                    item.save(dedupe_option=False, false_history=True)
+
+                    # Push to Jira?
+                    push_to_jira = False
+                    if 'jiraform-push_to_jira' in request.POST:
+                        jform = JIRAFindingForm(request.POST, prefix='jiraform',
+                                                enabled=enabled)
+                        if jform.is_valid():
+                            push_to_jira = jform.cleaned_data.get('push_to_jira')
+
+                    item.save(dedupe_option=False, false_history=True, push_to_jira=push_to_jira)
 
                     if hasattr(item, 'unsaved_req_resp') and len(
                             item.unsaved_req_resp) > 0:
@@ -694,6 +711,7 @@ def import_scan_results(request, eid=None, pid=None):
         'custom_breadcrumb': custom_breadcrumb,
         'title': title,
         'cred_form': cred_form,
+        'jform': jform
     })
 
 
