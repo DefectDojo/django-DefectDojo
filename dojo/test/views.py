@@ -585,6 +585,14 @@ def re_import_scan_results(request, tid):
     scan_type = t.test_type.name
     engagement = t.engagement
     form = ReImportScanForm()
+    jform = None
+    enabled = False
+
+    # Decide if we need to present the Push to JIRA form
+    if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(
+            product=engagement.product) != 0:
+        enabled = JIRA_PKey.objects.get(product=engagement.product).push_all_issues
+        jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
 
     form.initial['tags'] = [tag.name for tag in t.tags]
     if request.method == "POST":
@@ -627,9 +635,13 @@ def re_import_scan_results(request, tid):
                         sev = 'Info'
                         item.severity = sev
 
+                    # If it doesn't clear minimum severity, move on
                     if Finding.SEVERITIES[sev] > Finding.SEVERITIES[min_sev]:
                         continue
 
+                    # Try to find the existing finding
+                    # If it's Veracode or Arachni, then we consider the description for some
+                    # reason...
                     if scan_type == 'Veracode Scan' or scan_type == 'Arachni Scan':
                         find = Finding.objects.filter(title=item.title,
                                                       test__id=t.id,
@@ -643,8 +655,9 @@ def re_import_scan_results(request, tid):
                                                       severity=sev,
                                                       numerical_severity=Finding.get_numerical_severity(sev),
                                                       )
-
+                    # Did we find one?
                     if len(find) == 1:
+                        # Yes
                         find = find[0]
                         if find.mitigated:
                             # it was once fixed, but now back
@@ -658,8 +671,10 @@ def re_import_scan_results(request, tid):
                             note.save()
                             find.notes.add(note)
                             reactivated_count += 1
+                        # Add this finding to our list of new items.
                         new_items.append(find.id)
                     else:
+                        # Didn't find it, so this one is brand new
                         item.test = t
                         if item.date == timezone.now().date():
                             item.date = t.target_start
@@ -668,8 +683,10 @@ def re_import_scan_results(request, tid):
                         item.last_reviewed_by = request.user
                         item.verified = verified
                         item.active = active
+                        # Save it
                         item.save(dedupe_option=False)
                         finding_added_count += 1
+                        # Add it to the new items
                         new_items.append(item.id)
                         find = item
 
@@ -697,6 +714,8 @@ def re_import_scan_results(request, tid):
                                                              )
                             burp_rr.clean()
                             burp_rr.save()
+
+                    # Get those endpoints
                     if find:
                         finding_count += 1
                         for endpoint in item.unsaved_endpoints:
@@ -719,7 +738,16 @@ def re_import_scan_results(request, tid):
                         if item.unsaved_tags is not None:
                             find.tags = item.unsaved_tags
 
-                    find.save()
+                    # Push to Jira?
+                    push_to_jira = False
+                    if 'jiraform-push_to_jira' in request.POST:
+                        jform = JIRAFindingForm(request.POST, prefix='jiraform',
+                                                enabled=enabled)
+                        if jform.is_valid():
+                            push_to_jira = jform.cleaned_data.get('push_to_jira')
+
+                    # Save it. This may be the second time we save it in this function.
+                    find.save(push_to_jira)
                 # calculate the difference
                 to_mitigate = set(original_items) - set(new_items)
                 for finding_id in to_mitigate:
@@ -775,4 +803,5 @@ def re_import_scan_results(request, tid):
                    'product_tab': product_tab,
                    'eid': engagement.id,
                    'additional_message': additional_message,
+                   'jform': jform,
                    })
