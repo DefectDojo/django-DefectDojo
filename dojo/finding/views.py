@@ -1058,19 +1058,16 @@ def edit_finding(request, fid):
             tags = request.POST.getlist('tags')
             t = ", ".join('"{0}"'.format(w) for w in tags)
             new_finding.tags = t
-            new_finding.save()
+
+            # Push to Jira?
+            push_to_jira = False
             if 'jiraform-push_to_jira' in request.POST:
-                jform = JIRAFindingForm(
-                    request.POST, prefix='jiraform', enabled=enabled)
+                jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=enabled)
                 if jform.is_valid():
-                    if JIRA_Issue.objects.filter(finding=new_finding).exists():
-                        update_issue_task.delay(
-                            new_finding, old_status,
-                            jform.cleaned_data.get('push_to_jira'))
-                    else:
-                        add_issue_task.delay(
-                            new_finding,
-                            jform.cleaned_data.get('push_to_jira'))
+                    push_to_jira = jform.cleaned_data.get('push_to_jira')
+
+            new_finding.save(push_to_jira=push_to_jira)
+
             tags = request.POST.getlist('tags')
             t = ", ".join('"{0}"'.format(w) for w in tags)
             new_finding.tags = t
@@ -2080,14 +2077,15 @@ def finding_bulk_update_all(request, pid=None):
                 for finding in finds:
                     from dojo.tools import tool_issue_updater
                     tool_issue_updater.async_tool_issue_update(finding)
+                    push_anyway = JIRA_PKey.objects.get(
+                        product=finding.test.engagement.product).push_all_issues
 
                     if JIRA_PKey.objects.filter(product=finding.test.engagement.product).count() == 0:
                         log_jira_alert('Finding cannot be pushed to jira as there is no jira configuration for this product.', finding)
                     else:
-                        old_status = finding.status()
-                        if form.cleaned_data['push_to_jira']:
+                        if form.cleaned_data['push_to_jira'] or push_anyway:
                             if JIRA_Issue.objects.filter(finding=finding).exists():
-                                update_issue_task.delay(finding, old_status, True)
+                                update_issue_task.delay(finding, True)
                             else:
                                 add_issue_task.delay(finding, True)
 

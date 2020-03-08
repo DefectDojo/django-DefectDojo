@@ -394,6 +394,7 @@ class FindingImageSerializer(serializers.ModelSerializer):
 class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     images = FindingImageSerializer(many=True, read_only=True)
     tags = TagListSerializerField(required=False)
+    push_to_jira = serializers.BooleanField(default=False)
 
     class Meta:
         model = Finding
