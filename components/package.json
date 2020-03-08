@@ -25,7 +25,7 @@
     "metismenu": "~3.0.5",
     "moment": "^2.0.0",
     "morris.js": "morrisjs/morris.js",
-    "simplemde": "^1.0.0",
+    "simplemde": "sparksuite/simplemde-markdown-editor#1.11.2",
     "startbootstrap-sb-admin-2": "1.0.7"
   },
   "engines": {
