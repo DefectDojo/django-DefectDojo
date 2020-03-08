@@ -622,7 +622,15 @@ def import_scan_results(request, eid=None, pid=None):
                         item.active = active
                         item.verified = verified
 
-                    item.save(dedupe_option=False, false_history=True)
+                    # Push to Jira?
+                    push_to_jira = False
+                    if 'jiraform-push_to_jira' in request.POST:
+                        jform = JIRAFindingForm(request.POST, prefix='jiraform',
+                                                enabled=enabled)
+                        if jform.is_valid():
+                            push_to_jira = jform.cleaned_data.get('push_to_jira')
+
+                    item.save(dedupe_option=False, false_history=True, push_to_jira=push_to_jira)
 
                     if hasattr(item, 'unsaved_req_resp') and len(
                             item.unsaved_req_resp) > 0:
