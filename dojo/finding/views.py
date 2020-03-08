@@ -2093,15 +2093,20 @@ def finding_bulk_update_all(request, pid=None):
                 for finding in finds:
                     from dojo.tools import tool_issue_updater
                     tool_issue_updater.async_tool_issue_update(finding)
+                    push_anyway = JIRA_PKey.objects.get(
+                        product=finding.test.engagement.product).push_all_issues
 
                     # Because we never call finding.save() in a bulk update, we need to actually
                     # push the JIRA stuff here, rather than in finding.save()
                     if JIRA_PKey.objects.filter(product=finding.test.engagement.product).count() == 0:
                         log_jira_alert('Finding cannot be pushed to jira as there is no jira configuration for this product.', finding)
                     else:
+<<<<<<< HEAD
                         push_anyway = finding.jira_conf_new().jira_pkey_set.first().push_all_issues
                         # push_anyway = JIRA_PKey.objects.get(
                         #     product=finding.test.engagement.product).push_all_issues
+=======
+>>>>>>> First pass at changes for jira overhaul
                         if form.cleaned_data['push_to_jira'] or push_anyway:
                             if JIRA_Issue.objects.filter(finding=finding).exists():
                                 update_issue_task.delay(finding, True)

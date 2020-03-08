@@ -175,6 +175,13 @@ class FindingViewSet(mixins.ListModelMixin,
             push_to_jira = True
 
         # add a check for the product having push all issues enabled right here.
+        push_to_jira = serializer.validated_data.get('push_to_jira')
+        serializer.save(push_to_jira=push_to_jira)
+
+    # Overriding mixins.CreateModeMixin perform_create() method to grab push_to_jira
+    # data and add that as a parameter to .save()
+    def perform_create(self, serializer):
+        push_to_jira = serializer.validated_data.get('push_to_jira')
         serializer.save(push_to_jira=push_to_jira)
 
     def get_queryset(self):
