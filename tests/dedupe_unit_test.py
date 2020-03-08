@@ -28,7 +28,8 @@ class DedupeTest(unittest.TestCase):
     # --------------------------------------------------------------------------------------------------------
     def setUp(self):
         self.options = Options()
-        self.options.add_argument("--headless")
+        # self.options.add_argument("--headless")
+        self.options.add_experimental_option("detach", True)
         self.options.add_argument("--window-size=1280,768")
         # self.options.add_argument("--no-sandbox")
         
