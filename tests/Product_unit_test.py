@@ -339,7 +339,7 @@ class ProductTest(unittest.TestCase):
         self.assertTrue(re.search(r'Product and relationships removed.', productTxt))
 
     def tearDown(self):
-        # self.driver.quit()
+        self.driver.quit()
         self.assertEqual([], self.verificationErrors)
 
 

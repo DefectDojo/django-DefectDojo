@@ -66,7 +66,7 @@ class ProductTypeTest(unittest.TestCase):
         self.assertTrue(re.search(r'Product type Deleted successfully.', productTxt))
 
     def tearDown(self):
-        # self.driver.quit()
+        self.driver.quit()
         self.assertEqual([], self.verificationErrors)
 
 

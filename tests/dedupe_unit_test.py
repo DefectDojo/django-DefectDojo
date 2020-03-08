@@ -88,7 +88,7 @@ class DedupeTest(unittest.TestCase):
             driver.find_element_by_id("select_all").click()
             try:
                 print('test_delete_findings2: ', driver.find_element_by_id("bulk_edit_menu").get_attribute('innerHTML'))
-                print(driver.get_log('browser'))
+                print(self.driver.get_log('browser'))
             except:
                 pass
             driver.find_element_by_css_selector("i.fa.fa-trash").click()
@@ -418,7 +418,7 @@ class DedupeTest(unittest.TestCase):
         self.check_nb_duplicates(1)
 
     def tearDown(self):
-        print(driver.get_log('browser'))        
+        print(self.driver.get_log('browser'))        
         self.driver.quit()
         self.assertEqual([], self.verificationErrors)
 
