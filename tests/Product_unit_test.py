@@ -37,6 +37,7 @@ class ProductTest(unittest.TestCase):
         # change path of chromedriver according to which directory you have chromedriver.
         self.options = Options()
         self.options.add_argument("--headless")
+        # self.options.add_experimental_option("detach", True)
         # self.options.add_argument("--no-sandbox")
         # self.options.add_argument("--disable-dev-shm-usage")
         self.driver = webdriver.Chrome('chromedriver', chrome_options=self.options)
@@ -338,7 +339,7 @@ class ProductTest(unittest.TestCase):
         self.assertTrue(re.search(r'Product and relationships removed.', productTxt))
 
     def tearDown(self):
-        self.driver.quit()
+        # self.driver.quit()
         self.assertEqual([], self.verificationErrors)
 
 
