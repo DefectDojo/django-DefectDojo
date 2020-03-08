@@ -167,10 +167,9 @@ raphael@^2.2.8:
   dependencies:
     eve-raphael "0.5.0"
 
-simplemde@^1.0.0:
+simplemde@sparksuite/simplemde-markdown-editor#1.11.2:
   version "1.11.2"
-  resolved "https://registry.yarnpkg.com/simplemde/-/simplemde-1.11.2.tgz#a23a35d978d2c40ef07dec008c92f070d8e080e3"
-  integrity sha1-ojo12XjSxA7wfewAjJLwcNjggOM=
+  resolved "https://codeload.github.com/sparksuite/simplemde-markdown-editor/tar.gz/6abda7ab68cc20f4aca870eb243747951b90ab04"
   dependencies:
     codemirror "*"
     codemirror-spell-checker "*"
