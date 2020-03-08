@@ -26,7 +26,7 @@
     "metismenu": "~3.0.5",
     "mocha": "^1.0.0",
     "moment": "^2.0.0",
-    "morris.js": "^0.5.0",
+    "morris.js": "morrisjs/morris.js",
     "simplemde": "^1.0.0",
     "startbootstrap-sb-admin-2": "1.0.7"
   },
