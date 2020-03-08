@@ -159,6 +159,18 @@ class FindingViewSet(mixins.ListModelMixin,
                      'duplicate', 'test__engagement__product',
                      'test__engagement')
 
+    # Overriding mixins.UpdateModeMixin perform_update() method to grab push_to_jira
+    # data and add that as a parameter to .save()
+    def perform_update(self, serializer):
+        push_to_jira = serializer.validated_data.get('push_to_jira')
+        serializer.save(push_to_jira=push_to_jira)
+
+    # Overriding mixins.CreateModeMixin perform_create() method to grab push_to_jira
+    # data and add that as a parameter to .save()
+    def perform_create(self, serializer):
+        push_to_jira = serializer.validated_data.get('push_to_jira')
+        serializer.save(push_to_jira=push_to_jira)
+
     def get_queryset(self):
         if not self.request.user.is_staff:
             return Finding.objects.filter(

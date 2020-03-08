@@ -404,6 +404,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     images = FindingImageSerializer(many=True, read_only=True)
     tags = TagListSerializerField(required=False)
     accepted_risks = RiskAcceptanceSerializer(many=True, read_only=True, source='risk_acceptance_set')
+    push_to_jira = serializers.BooleanField(default=False)
 
     class Meta:
         model = Finding

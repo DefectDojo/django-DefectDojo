@@ -1703,9 +1703,16 @@ class Finding(models.Model):
         long_desc += '*References*:' + self.references
         return long_desc
 
-    def save(self, dedupe_option=True, false_history=False, rules_option=True, issue_updater_option=True, *args, **kwargs):
+    def save(self, dedupe_option=True, false_history=False, rules_option=True,
+             issue_updater_option=True, push_to_jira=False, *args, **kwargs):
         # Make changes to the finding before it's saved to add a CWE template
         new_finding = False
+        # If the product has "Push_all_issues" enabled, then we're pushing this to JIRA no matter
+        # what.
+        if not push_to_jira:
+            push_to_jira = JIRA_PKey.objects.get(
+                product=self.test.engagement.product).push_all_issues
+
         if self.pk is None:
             # We enter here during the first call from serializers.py
             logger.debug("Saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is None)")
@@ -1787,6 +1794,14 @@ class Finding(models.Model):
 
         from dojo.utils import calculate_grade
         calculate_grade(self.test.engagement.product)
+
+        # Adding a snippet here for push to JIRA so that it's in one place
+        if push_to_jira:
+            from dojo.tasks import update_issue_task, add_issue_task
+            if JIRA_Issue.objects.filter(finding=self).exists():
+                update_issue_task.delay(self, True)
+            else:
+                add_issue_task.delay(self, True)
 
     def delete(self, *args, **kwargs):
         for find in self.original_finding.all():
@@ -2197,7 +2212,8 @@ class JIRA_PKey(models.Model):
     conf = models.ForeignKey(JIRA_Conf, verbose_name="JIRA Configuration",
                              null=True, blank=True, on_delete=models.CASCADE)
     component = models.CharField(max_length=200, blank=True)
-    push_all_issues = models.BooleanField(default=False, blank=True)
+    push_all_issues = models.BooleanField(default=False, blank=True,
+         help_text="Automatically maintain parity with JIRA. Always create and update JIRA tickets for findings in this Product.")
     enable_engagement_epic_mapping = models.BooleanField(default=False,
                                                          blank=True)
     push_notes = models.BooleanField(default=False, blank=True)
