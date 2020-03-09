@@ -213,7 +213,6 @@ def deduplicate_unique_id_from_tool(new_finding):
         except Exception as e:
             deduplicationLogger.debug(str(e))
             continue
-                
         break
 
 
@@ -244,7 +243,6 @@ def deduplicate_hash_code(new_finding):
         except Exception as e:
             deduplicationLogger.debug(str(e))
             continue
-                
         break
 
 
@@ -277,7 +275,6 @@ def deduplicate_uid_or_hash_code(new_finding):
         except Exception as e:
             deduplicationLogger.debug(str(e))
             continue
-                
         break
 
 

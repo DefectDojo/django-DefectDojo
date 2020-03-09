@@ -1451,7 +1451,6 @@ class Finding(models.Model):
             return Finding.objects.get(id=self.duplicate_finding.id).original_finding.all().order_by('title')
         else:
             return self.original_finding.all().order_by('title')
-        
 
     def get_scanner_confidence_text(self):
         scanner_confidence_text = ""

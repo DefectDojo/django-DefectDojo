@@ -9,6 +9,7 @@ class TestUtils(TestCase):
         test_output = prepare_for_view(encrypt)
         self.assertEqual(test_input, test_output)
 
+
 class TestDuplication(TestCase):
     fixtures = ['dojo_testdata.json']
 
@@ -28,7 +29,6 @@ class TestDuplication(TestCase):
         self.finding_c.duplicate_finding = None
         self.finding_c.pk = None
         self.finding_c.save()
-
 
     def tearDown(self):
         if self.finding_a.id:
@@ -80,7 +80,7 @@ class TestDuplication(TestCase):
         self.assertTrue(self.finding_a.duplicate)
         self.assertFalse(self.finding_c.duplicate)
         self.assertEqual(self.finding_b.duplicate_finding.id, self.finding_c.id)
-        self.assertEqual(self.finding_a.duplicate_finding.id, self.finding_c.id) 
+        self.assertEqual(self.finding_a.duplicate_finding.id, self.finding_c.id)
         self.assertEqual(self.finding_c.duplicate_finding, None)
         self.assertEqual(self.finding_a.duplicate_finding_set().count(), 2)
         self.assertEqual(self.finding_b.duplicate_finding_set().count(), 2)
