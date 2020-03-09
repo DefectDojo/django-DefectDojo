@@ -28,6 +28,7 @@ from dojo.signals import dedupe_signal
 from dojo.tag.prefetching_tag_descriptor import PrefetchingTagDescriptor
 from django.contrib.contenttypes.fields import GenericRelation
 from tagging.models import TaggedItem
+from django.core.cache import cache
 
 fmt = getattr(settings, 'LOG_FORMAT', None)
 lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
@@ -97,7 +98,7 @@ class SystemSettingsManager(models.Manager):
 
     def get(self, no_cache=False, *args, **kwargs):
         # cache only 30s because django default cache backend is local per process
-        if no_cache:
+        if no_cache or cache is None:
             return super(SystemSettingsManager, self).get(*args, **kwargs)
         return cache.get_or_set(self.CACHE_KEY, lambda: super(SystemSettingsManager, self).get(*args, **kwargs), timeout=30)
 
@@ -2229,7 +2230,6 @@ class Alerts(models.Model):
         super(Alerts, self).save(*args, **kwargs)
 
 
-
 class Cred_User(models.Model):
     name = models.CharField(max_length=200, null=False)
     username = models.CharField(max_length=200, null=False)
@@ -2265,6 +2265,7 @@ class Cred_User(models.Model):
 
     def __str__(self):
         return self.name + " (" + self.role + ")"
+
 
 class Cred_Mapping(models.Model):
     cred_id = models.ForeignKey(Cred_User, null=False,
