@@ -113,9 +113,9 @@ class TestDuplication(TestCase):
         candidates = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).count()
         self.assertEqual(candidates, 0)
 
-
     # if two findings are connected with each other the fix_loop function should detect and remove the loop
     def test_loop_relations_for_two(self):
+
         set_duplicate(self.finding_a, self.finding_b)
         self.finding_b.duplicate = True
         self.finding_b.duplicate_finding = self.finding_a
@@ -127,7 +127,7 @@ class TestDuplication(TestCase):
 
         candidates = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).count()
         self.assertEqual(candidates, 0)
-        
+
         # Get latest status
         self.finding_a = Finding.objects.get(id=self.finding_a.id)
         self.finding_b = Finding.objects.get(id=self.finding_b.id)
@@ -138,7 +138,7 @@ class TestDuplication(TestCase):
         else:
             self.assertFalse(self.finding_a.duplicate)
             self.assertEqual(self.finding_a.original_finding.count(), 1)
-            
+
         if self.finding_b.duplicate_finding:
             self.assertTrue(self.finding_b.duplicate)
             self.assertEqual(self.finding_b.original_finding.count(), 0)
@@ -160,7 +160,7 @@ class TestDuplication(TestCase):
         super(Finding, self.finding_c).save()
 
         fix_loop_duplicates()
-        
+
         # Get latest status
         self.finding_a = Finding.objects.get(id=self.finding_a.id)
         self.finding_b = Finding.objects.get(id=self.finding_b.id)
@@ -179,7 +179,7 @@ class TestDuplication(TestCase):
         else:
             self.assertFalse(self.finding_b.duplicate)
             self.assertEqual(self.finding_b.original_finding.count(), 2)
-            
+
         if self.finding_c.duplicate_finding:
             self.assertTrue(self.finding_c.duplicate)
             self.assertEqual(self.finding_c.original_finding.count(), 0)
@@ -195,7 +195,6 @@ class TestDuplication(TestCase):
         self.finding_d.duplicate_finding = None
         self.finding_d.save()
 
-
         set_duplicate(self.finding_a, self.finding_b)
         self.finding_b.duplicate = True
         self.finding_b.duplicate_finding = self.finding_c
@@ -203,14 +202,14 @@ class TestDuplication(TestCase):
         self.finding_c.duplicate_finding = self.finding_d
         self.finding_d.duplicate = True
         self.finding_d.duplicate_finding = self.finding_a
-        
+
         super(Finding, self.finding_a).save()
         super(Finding, self.finding_b).save()
         super(Finding, self.finding_c).save()
         super(Finding, self.finding_d).save()
 
         fix_loop_duplicates()
-        
+
         # Get latest status
         self.finding_a = Finding.objects.get(id=self.finding_a.id)
         self.finding_b = Finding.objects.get(id=self.finding_b.id)
@@ -223,14 +222,14 @@ class TestDuplication(TestCase):
         else:
             self.assertFalse(self.finding_a.duplicate)
             self.assertEqual(self.finding_a.original_finding.count(), 3)
-            
+
         if self.finding_b.duplicate_finding:
             self.assertTrue(self.finding_b.duplicate)
             self.assertEqual(self.finding_b.original_finding.count(), 0)
         else:
             self.assertFalse(self.finding_b.duplicate)
             self.assertEqual(self.finding_b.original_finding.count(), 3)
-            
+
         if self.finding_c.duplicate_finding:
             self.assertTrue(self.finding_c.duplicate)
             self.assertEqual(self.finding_c.original_finding.count(), 0)
@@ -241,7 +240,7 @@ class TestDuplication(TestCase):
         if self.finding_d.duplicate_finding:
             self.assertTrue(self.finding_d.duplicate)
             self.assertEqual(self.finding_d.original_finding.count(), 0)
-        else: 
+        else:
             self.assertFalse(self.finding_d.duplicate)
             self.assertEqual(self.finding_d.original_finding.count(), 3)
 
@@ -270,7 +269,6 @@ class TestDuplication(TestCase):
         self.assertEqual(self.finding_c.duplicate_finding, None)
         self.assertEqual(self.finding_a.duplicate_finding_set().count(), 2)
         self.assertEqual(self.finding_b.duplicate_finding_set().count(), 2)
-
 
     def test_list_relations_for_three_reverse(self):
         set_duplicate(self.finding_c, self.finding_b)

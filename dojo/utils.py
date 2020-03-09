@@ -303,6 +303,7 @@ def set_duplicate(new_finding, existing_finding):
     super(Finding, new_finding).save()
     super(Finding, existing_finding).save()
 
+
 def removeLoop(finding_id, counter):
     # get latest status
     finding = Finding.objects.get(id=finding_id)
@@ -336,6 +337,7 @@ def removeLoop(finding_id, counter):
         super(Finding, f).save()
         super(Finding, real_original).save()
         removeLoop(f.id, counter - 1)
+
 
 def fix_loop_duplicates():
     candidates = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).all().order_by("-id")

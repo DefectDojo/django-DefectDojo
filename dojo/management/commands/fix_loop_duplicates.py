@@ -9,6 +9,7 @@ Author: Marian Gawron
 This script will identify loop dependencies in findings
 """
 
+
 class Command(BaseCommand):
     help = 'No input commands for fixing Loop findings.'
 

@@ -222,6 +222,7 @@ def async_custom_pdf_report(self,
 
     return True
 
+
 @task(name='fix_loop_task')
 def fix_loop_task(*args, **kwargs):
     logger.info("Executing Loop Duplicate Fix Job")
