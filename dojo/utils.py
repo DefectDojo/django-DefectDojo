@@ -29,7 +29,7 @@ from dojo.signals import dedupe_signal
 
 from dojo.models import Finding, Engagement, Finding_Template, Product, JIRA_PKey, JIRA_Issue, \
     Dojo_User, User, Alerts, System_Settings, Notifications, UserContactInfo, Endpoint, Benchmark_Type, \
-    Language_Type, Languages, Rule
+    Language_Type, Languages, Rule, Finding, Test_Type
 from asteval import Interpreter
 from requests.auth import HTTPBasicAuth
 
@@ -175,8 +175,12 @@ def deduplicate_legacy(new_finding):
         #    and (endpoints or (line and file_path)
         # ---------------------------------------------------------
         if ((flag_endpoints or flag_line_path) and flag_hash):
-            set_duplicate(new_finding, find)
-            super(Finding, new_finding).save()
+            try:
+                set_duplicate(new_finding, find)
+            except Exception as e:
+                deduplicationLogger.debug(str(e))
+                continue
+
             break
 
 
@@ -204,8 +208,12 @@ def deduplicate_unique_id_from_tool(new_finding):
             deduplicationLogger.debug(
                 'deduplication_on_engagement_mismatch, skipping dedupe.')
             continue
-        set_duplicate(new_finding, find)
-        super(Finding, new_finding).save()
+        try:
+            set_duplicate(new_finding, find)
+        except Exception as e:
+            deduplicationLogger.debug(str(e))
+            continue
+                
         break
 
 
@@ -231,8 +239,12 @@ def deduplicate_hash_code(new_finding):
             deduplicationLogger.debug(
                 'deduplication_on_engagement_mismatch, skipping dedupe.')
             continue
-        set_duplicate(new_finding, find)
-        super(Finding, new_finding).save()
+        try:
+            set_duplicate(new_finding, find)
+        except Exception as e:
+            deduplicationLogger.debug(str(e))
+            continue
+                
         break
 
 
@@ -260,12 +272,20 @@ def deduplicate_uid_or_hash_code(new_finding):
             deduplicationLogger.debug(
                 'deduplication_on_engagement_mismatch, skipping dedupe.')
             continue
-        set_duplicate(new_finding, find)
-        super(Finding, new_finding).save()
+        try:
+            set_duplicate(new_finding, find)
+        except Exception as e:
+            deduplicationLogger.debug(str(e))
+            continue
+                
         break
 
 
 def set_duplicate(new_finding, existing_finding):
+    if existing_finding.duplicate:
+        raise Exception("Existing finding is a duplicate")
+    if existing_finding.id == new_finding.id:
+        raise Exception("Can not add duplicate to itself")
     deduplicationLogger.debug('New finding ' + str(new_finding.id) + ' is a duplicate of existing finding ' + str(existing_finding.id))
     if (existing_finding.is_Mitigated or existing_finding.mitigated) and new_finding.active and not new_finding.is_Mitigated:
         existing_finding.mitigated = new_finding.mitigated
@@ -279,8 +299,12 @@ def set_duplicate(new_finding, existing_finding):
     new_finding.active = False
     new_finding.verified = False
     new_finding.duplicate_finding = existing_finding
-    existing_finding.duplicate_list.add(new_finding)
+    for find in new_finding.original_finding.all():
+        new_finding.original_finding.remove(find)
+        set_duplicate(find, existing_finding)
     existing_finding.found_by.add(new_finding.test.test_type)
+    super(Finding, new_finding).save()
+    super(Finding, existing_finding).save()
 
 
 def sync_rules(new_finding, *args, **kwargs):
