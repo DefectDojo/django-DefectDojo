@@ -285,6 +285,7 @@ def set_duplicate(new_finding, existing_finding):
     existing_finding.duplicate_list.add(new_finding)
     existing_finding.found_by.add(new_finding.test.test_type)
 
+
 def rename_whitesource_finding():
     whitesource_id = Test_Type.objects.get(name="Whitesource Scan").id
     findings = Finding.objects.filter(found_by=whitesource_id)
@@ -292,9 +293,9 @@ def rename_whitesource_finding():
     logger.info("######## Updating Hashcodes - deduplication is done in background using django signals upon finding save ########")
     for finding in findings:
         logger.info("Updating Whitesource Finding with id: %d" % finding.id)
-        lib_name_begin = re.search('\*\*Library Filename\*\* : ', finding.description).span(0)[1]
-        lib_name_end = re.search('\*\*Library Description\*\*', finding.description).span(0)[0]
-        lib_name = finding.description[lib_name_begin:lib_name_end-1]
+        lib_name_begin = re.search('\\*\\*Library Filename\\*\\* : ', finding.description).span(0)[1]
+        lib_name_end = re.search('\\*\\*Library Description\\*\\*', finding.description).span(0)[0]
+        lib_name = finding.description[lib_name_begin:lib_name_end - 1]
         if finding.cve is None:
             finding.title = "CVE-None | " + lib_name
         else:
@@ -302,7 +303,7 @@ def rename_whitesource_finding():
         if not finding.cwe:
             logger.debug('Set cwe for finding %d to 1035 if not an cwe Number is set' % finding.id)
             finding.cwe = 1035
-        finding.title = finding.title.rstrip() # delete \n at the end of the title
+        finding.title = finding.title.rstrip()  # delete \n at the end of the title
         from titlecase import titlecase
         finding.title = titlecase(finding.title)
         finding.hash_code = finding.compute_hash_code()

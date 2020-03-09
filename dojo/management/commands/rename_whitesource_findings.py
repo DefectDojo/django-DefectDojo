@@ -16,4 +16,3 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         rename_whitesource_finding()
-        
