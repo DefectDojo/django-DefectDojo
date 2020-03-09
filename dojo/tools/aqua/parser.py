@@ -36,41 +36,18 @@ class AquaJSONParser(object):
 
                 for vuln in vulnerabilities:
                     item = get_item(resource, vuln, test)
-                    if 'name' in vuln:
-                        unique_key = resource.get('cpe') + vuln.get('name')
-                    else:
-                        unique_key = resource.get('cpe') + "None"
-
+                    unique_key = resource.get('cpe') + vuln.get('name', 'None')
                     items[unique_key] = item
 
         return list(items.values())
 
 
 def get_item(resource, vuln, test):
-    if 'name' in resource:
-        resource_name = resource.get('name')
-    else:
-        resource_name = resource.get('path')
-
-    if 'version' in resource:
-        resource_version = resource.get('version')
-    else:
-        resource_version = "No version"
-
-    if 'name' in vuln:
-        cve = vuln.get('name')
-    else:
-        cve = "No CVE"
-
-    if 'fix_version' in vuln:
-        fix_version = vuln['fix_version']
-    else:
-        fix_version = "None"
-
-    if 'description' in vuln:
-        description = vuln.get('description')
-    else:
-        description = "No description."
+    resource_name = resource.get('name', resource.get('path'))
+    resource_version = resource.get('version', 'No version')
+    cve = vuln.get('name', 'No CVE')
+    fix_version = vuln.get('fix_version', 'None')
+    description = vuln.get('description', 'No description.')
 
     url = ""
     if 'nvd_url' in vuln:
@@ -116,10 +93,11 @@ def get_item(resource, vuln, test):
         severity_justification=severity_justification,
         cwe=0,
         cve=cve,
-        description=description,
+        description=description.strip(),
         mitigation=fix_version,
         references=url,
+        component_name=resource.get('name'),
+        component_version=resource.get('version'),
         impact=severity)
 
-    finding.description = finding.description.strip()
     return finding

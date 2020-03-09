@@ -21,8 +21,8 @@ from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from datetime import datetime
 from dojo.utils import get_period_counts_legacy
-
 from dojo.api_v2 import serializers, permissions
+from django.db.models import Count, Q
 
 
 class EndPointViewSet(mixins.ListModelMixin,
@@ -354,18 +354,19 @@ class ProductViewSet(mixins.ListModelMixin,
     serializer_class = serializers.ProductSerializer
     # TODO: prefetch
     queryset = Product.objects.all()
+    queryset = queryset.annotate(active_finding_count=Count('engagement__test__finding__id', filter=Q(engagement__test__finding__active=True)))
     filter_backends = (DjangoFilterBackend,)
     permission_classes = (permissions.UserHasProductPermission,
                           DjangoModelPermissions)
-    # TODO: findings count field
+
     filter_fields = ('id', 'name', 'prod_type', 'created', 'authorized_users')
 
     def get_queryset(self):
         if not self.request.user.is_staff:
-            return Product.objects.filter(
+            return self.queryset.filter(
                 authorized_users__in=[self.request.user])
         else:
-            return Product.objects.all()
+            return self.queryset
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.UserHasReportGeneratePermission])
     def generate_report(self, request, pk=None):

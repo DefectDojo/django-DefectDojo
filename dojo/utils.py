@@ -16,7 +16,7 @@ from dateutil.relativedelta import relativedelta, MO, SU
 from django.conf import settings
 from django.core.mail import send_mail
 from django.core.mail import EmailMessage
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.paginator import Paginator
 from django.urls import get_resolver, reverse
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
 from django.template.defaultfilters import pluralize
@@ -82,8 +82,11 @@ def is_deduplication_on_engagement_mismatch(new_finding, to_duplicate_finding):
 
 @receiver(dedupe_signal, sender=Finding)
 def sync_dedupe(sender, *args, **kwargs):
-    system_settings = System_Settings.objects.get()
-    if system_settings.enable_deduplication:
+    try:
+        enabled = System_Settings.objects.get().enable_deduplication
+    except System_Settings.DoesNotExist:
+        enabled = False
+    if enabled:
         new_finding = kwargs['new_finding']
         deduplicationLogger.debug('sync_dedupe for: ' + str(new_finding.id) +
                     ":" + str(new_finding.title))
@@ -1068,16 +1071,8 @@ def get_page_items(request, items, page_size, param_name='page'):
     paginator = Paginator(items, size)
     page = request.GET.get(param_name)
 
-    try:
-        page = paginator.page(page)
-    except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
-        page = paginator.page(1)
-    except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
-        page = paginator.page(paginator.num_pages)
-
-    return page
+    # new get_page method will handle invalid page value, out of bounds pages, etc
+    return paginator.get_page(page)
 
 
 def handle_uploaded_threat(f, eng):

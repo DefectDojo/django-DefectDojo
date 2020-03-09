@@ -227,47 +227,6 @@ def version_num(value):
     return version
 
 
-@register.filter(name='count_findings_eng')
-def count_findings_eng(tests):
-    findings = None
-    for test in tests:
-        if findings:
-            findings = findings | test.finding_set.all()
-        else:
-            findings = test.finding_set.all()
-    return findings
-
-
-@register.filter(name='count_findings_eng_open')
-def count_findings_eng_open(engagement):
-    open_findings = Finding.objects.filter(test__engagement=engagement,
-                                           false_p=False,
-                                           verified=True,
-                                           duplicate=False,
-                                           out_of_scope=False,
-                                           active=True,
-                                           mitigated__isnull=True).count()
-    return open_findings
-
-
-@register.filter(name='count_findings_eng_all')
-def count_findings_eng_all(engagement):
-    all_findings = Finding.objects.filter(test__engagement=engagement).count()
-    return all_findings
-
-
-@register.filter(name='fetch_system_setting')
-def fetch_system_setting(name):
-    return get_system_setting(name)
-
-
-@register.filter(name='count_findings_eng_duplicate')
-def count_findings_eng_duplicate(engagement):
-    duplicate_findings = Finding.objects.filter(test__engagement=engagement,
-                                                duplicate=True).count()
-    return duplicate_findings
-
-
 @register.filter(name='count_findings_test_all')
 def count_findings_test_all(test):
     open_findings = Finding.objects.filter(test=test).count()
