@@ -95,8 +95,8 @@ def get_item(vulnerability, test):
         title = vulnerability['id'] + " - " + str(cve) + " - " + vulnerability['component']
     else:
         title = str(cve) + " - " + vulnerability['component']
-    component_name = vulnerability['component']
-    component_version = vulnerability['source_comp_id'][len(vulnerability['source_id'])+1:]
+    component_name = vulnerability.get('component')
+    component_version = vulnerability.get('source_comp_id')[len(vulnerability.get('source_id', '')) + 1:]
 
     # create the finding object
     finding = Finding(
