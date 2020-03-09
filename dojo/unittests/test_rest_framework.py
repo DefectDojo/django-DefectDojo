@@ -1,7 +1,7 @@
 from dojo.models import Product, Engagement, Test, Finding, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     User, ScanSettings, Scan, Stub_Finding, Endpoint, JIRA_PKey, JIRA_Conf, \
-    Finding_Template, App_Analysis
+    Finding_Template
 
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraConfigurationsViewSet, \
@@ -42,7 +42,7 @@ class BaseClass():
 
         @skipIfNotSubclass('ListModelMixin')
         def test_list(self):
-            
+
             if hasattr(self.endpoint_model, 'tags') and self.payload:
                 # create a new instance first to make sure there's at least 1 instance with tags set by payload to trigger tag handling code
                 response = self.client.post(self.url, self.payload)
