@@ -195,6 +195,7 @@ echo "Running test ${TEST}"
       CR=$(curl -s -m 10 -I http://localhost:8080/login?next= | egrep "^HTTP" | cut  -d' ' -f2)
       if [ "$CR" != 200 ]; then
         echo "ERROR: cannot display login screen; got HTTP code $CR"
+        docker-compose logs  --tail="all" uwsgi
         exit 1
       fi
       echo "Docker compose container status"

@@ -29,6 +29,7 @@ from dojo.tasks import add_epic_task, add_issue_task
 from tagging.models import Tag
 from tagging.utils import get_tag_list
 from django.db.models import Prefetch
+from django.db.models.query import QuerySet
 
 logger = logging.getLogger(__name__)
 
@@ -74,17 +75,20 @@ def product(request):
 
 
 def prefetch_for_product(prods):
-    prefetched_prods = prods.select_related('technical_contact').select_related('product_manager').select_related('prod_type').select_related('team_manager')
-    prefetched_prods = prefetched_prods.annotate(active_engagement_count=Count('engagement__id', filter=Q(engagement__active=True)))
-    prefetched_prods = prefetched_prods.annotate(closed_engagement_count=Count('engagement__id', filter=Q(engagement__active=False)))
-    prefetched_prods = prefetched_prods.annotate(last_engagement_date=Max('engagement__target_start'))
-    prefetched_prods = prefetched_prods.annotate(active_finding_count=Count('engagement__test__finding__id', filter=Q(engagement__test__finding__active=True)))
-    prefetched_prods = prefetched_prods.prefetch_related(Prefetch('jira_pkey_set', queryset=JIRA_PKey.objects.all(), to_attr='jira_confs'))
-    active_endpoint_query = Endpoint.objects.filter(
-            finding__active=True,
-            finding__verified=True,
-            finding__mitigated__isnull=True)
-    prefetched_prods = prefetched_prods.prefetch_related(Prefetch('endpoint_set', queryset=active_endpoint_query, to_attr='active_endpoints'))
+    prefetched_prods = prods
+    if isinstance(prods, QuerySet):  # old code can arrive here with prods being a list because the query was already executed
+        prefetched_prods = prefetched_prods.select_related('technical_contact').select_related('product_manager').select_related('prod_type').select_related('team_manager')
+        prefetched_prods = prefetched_prods.annotate(active_engagement_count=Count('engagement__id', filter=Q(engagement__active=True)))
+        prefetched_prods = prefetched_prods.annotate(closed_engagement_count=Count('engagement__id', filter=Q(engagement__active=False)))
+        prefetched_prods = prefetched_prods.annotate(last_engagement_date=Max('engagement__target_start'))
+        prefetched_prods = prefetched_prods.annotate(active_finding_count=Count('engagement__test__finding__id', filter=Q(engagement__test__finding__active=True)))
+        prefetched_prods = prefetched_prods.prefetch_related(Prefetch('jira_pkey_set', queryset=JIRA_PKey.objects.all().select_related('conf'), to_attr='jira_confs'))
+        active_endpoint_query = Endpoint.objects.filter(
+                finding__active=True,
+                finding__verified=True,
+                finding__mitigated__isnull=True)
+        prefetched_prods = prefetched_prods.prefetch_related(Prefetch('endpoint_set', queryset=active_endpoint_query, to_attr='active_endpoints'))
+
     return prefetched_prods
 
 

@@ -13,3 +13,10 @@ def globalize_oauth_vars(request):
 def bind_system_settings(request):
     from dojo.models import System_Settings
     return {'system_settings': System_Settings.objects.get()}
+
+
+def bind_alert_count(request):
+    from dojo.models import Alerts
+    if not request.user.is_authenticated:
+        return {}
+    return {'alert_count': Alerts.objects.filter(user_id=request.user).count()}
