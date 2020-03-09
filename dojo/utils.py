@@ -32,8 +32,9 @@ from dojo.models import Finding, Engagement, Finding_Template, Product, JIRA_PKe
     Language_Type, Languages, Rule
 from asteval import Interpreter
 from requests.auth import HTTPBasicAuth
-
 import logging
+
+
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
