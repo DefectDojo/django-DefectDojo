@@ -1,6 +1,6 @@
 from django.test import TestCase
-from dojo.utils import dojo_crypto_encrypt, prepare_for_view
-
+from dojo.utils import dojo_crypto_encrypt, prepare_for_view, set_duplicate
+from dojo.models import Finding
 
 class TestUtils(TestCase):
     def test_encryption(self):
