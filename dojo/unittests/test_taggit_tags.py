@@ -1,15 +1,5 @@
 from django.test import TestCase
-from dojo.models import Product, Engagement, Test, Finding, \
-    JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
-    User, ScanSettings, Scan, Stub_Finding, Endpoint, JIRA_PKey, JIRA_Conf, \
-    Finding_Template, App_Analysis
-
-from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
-    FindingTemplatesViewSet, FindingViewSet, JiraConfigurationsViewSet, \
-    JiraIssuesViewSet, JiraViewSet, ProductViewSet, ScanSettingsViewSet, \
-    ScansViewSet, StubFindingsViewSet, TestsViewSet, \
-    ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
-    UsersViewSet, ImportScanView
+from dojo.models import Product
 
 
 class TaggitTests(TestCase):
@@ -39,12 +29,10 @@ class TaggitTests(TestCase):
         # print('testing tags for correctness with nested prefetching')
         self.check_tags(Product.objects.all().prefetch_related('tagged_items__tag', 'engagement_set__tagged_items__tag'))
 
-
     def add_tags(self, curr_tags, extra_tags):
-            print(curr_tags)
-            for tag in extra_tags:
-                curr_tags.append(tag)
-            return ", ".join(curr_tags)
+        for tag in extra_tags:
+            curr_tags.append(tag)
+        return ", ".join(curr_tags)
 
     def check_tags(self, queryset):
         for product in queryset:

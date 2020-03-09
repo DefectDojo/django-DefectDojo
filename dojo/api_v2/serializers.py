@@ -98,7 +98,6 @@ class TagListSerializerField(serializers.ListField):
 
         if not isinstance(value, TagList):
             if not isinstance(value, list):
-                # print('not a list')
                 # this will trigger when a queryset is found...
                 if self.order_by:
                     tags = value.all().order_by(*self.order_by)
@@ -106,12 +105,11 @@ class TagListSerializerField(serializers.ListField):
                     tags = value.all()
                 value = [tag.name for tag in tags]
             elif len(value) > 0 and isinstance(value[0], Tag):
-                # print('list of Tags')
                 # .. but sometimes the queryset already has been converted into a list, i.e. by prefetch_related
                 tags = value
                 value = [tag.name for tag in tags]
                 if self.order_by:
-                    # the only ordering that makes since is by name, so we order after creating the list
+                    # the only possible ordering is by name, so we order after creating the list
                     value = sorted(value)
             value = TagList(value, pretty_print=self.pretty_print)
         return value

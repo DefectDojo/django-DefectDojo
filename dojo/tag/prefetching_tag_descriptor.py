@@ -15,8 +15,3 @@ class PrefetchingTagDescriptor(object):
         print('patching TagDescriptor')
         TagDescriptor.__old__get__ = TagDescriptor.__get__
         TagDescriptor.__get__ = PrefetchingTagDescriptor.get_with_prefetch
-
-    def unpatch():
-        # can be used in unit tests to compare old and new behaviour
-        print('unpatching TagDescriptor')
-        TagDescriptor.__get__ = TagDescriptor.__old__get__
