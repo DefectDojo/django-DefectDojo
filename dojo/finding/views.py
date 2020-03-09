@@ -1023,12 +1023,11 @@ def edit_finding(request, fid):
                 if parent_find_string:
                     parent_find = Finding.objects.get(id=int(parent_find_string.split(':')[0]))
                     new_finding.duplicate_finding = parent_find
-                    parent_find.duplicate_list.add(new_finding)
                     parent_find.found_by.add(new_finding.test.test_type)
             if not new_finding.duplicate and new_finding.duplicate_finding:
                 parent_find = new_finding.duplicate_finding
                 if parent_find.found_by is not new_finding.found_by:
-                    parent_find.duplicate_list.remove(new_finding)
+                    parent_find.original_finding.remove(new_finding)
                 parent_find.found_by.remove(new_finding.test.test_type)
                 new_finding.duplicate_finding = None
 
@@ -2134,7 +2133,6 @@ def mark_finding_duplicate(request, original_id, duplicate_id):
     duplicate.last_reviewed = timezone.now()
     duplicate.last_reviewed_by = request.user
     duplicate.save()
-    original.duplicate_list.add(duplicate)
     original.found_by.add(duplicate.test.test_type)
     original.save()
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
@@ -2147,7 +2145,7 @@ def reset_finding_duplicate_status(request, duplicate_id):
     duplicate.duplicate = False
     duplicate.active = True
     if duplicate.duplicate_finding:
-        duplicate.duplicate_finding.duplicate_list.remove(duplicate)
+        duplicate.duplicate_finding.original_finding.remove(duplicate)
         duplicate.duplicate_finding = None
     duplicate.last_reviewed = timezone.now()
     duplicate.last_reviewed_by = request.user
