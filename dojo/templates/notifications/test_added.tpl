@@ -1,5 +1,3 @@
-{% load get_system_setting %}
-
 {% if type == 'mail' %}
     Greetings,
 
@@ -9,7 +7,7 @@
     You can find details here: {{ url }}
 
     Kind regards,
-    {{ "team_name"|get_system_setting }}
+    {{ system_settings.team_name }}
 {% elif type == 'alert' %}
     New test added for engagement {{ engagement.product }}: {{ test.test_type }}.
 {% elif type == 'slack' %}

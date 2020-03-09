@@ -43,6 +43,7 @@ from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_
 from dojo.tasks import add_issue_task, update_issue_task, add_comment_task
 from django.template.defaultfilters import pluralize
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -478,22 +479,24 @@ def open_findings(request, pid=None, eid=None, view=None):
         else:
             findings = Finding.objects.filter(active=True, duplicate=False).order_by('numerical_severity')
 
-    if request.user.is_staff:
-        findings = OpenFingingSuperFilter(
-            request.GET, queryset=findings, user=request.user, pid=pid)
-    else:
+    if not request.user.is_staff:
         findings = findings.filter(
             test__engagement__product__authorized_users__in=[request.user])
-        findings = OpenFindingFilter(
-            request.GET, queryset=findings, user=request.user, pid=pid)
 
     title_words = [
-        word for finding in findings.qs for word in finding.title.split()
+        word for finding in findings for word in finding.title.split()
         if len(word) > 2
     ]
-
     title_words = sorted(set(title_words))
-    paged_findings = get_page_items(request, findings.qs, 25)
+
+    if request.user.is_staff:
+        findings_filter = OpenFingingSuperFilter(
+            request.GET, queryset=findings, user=request.user, pid=pid)
+    else:
+        findings_filter = OpenFindingFilter(
+            request.GET, queryset=findings, user=request.user, pid=pid)
+
+    paged_findings = get_page_items(request, findings_filter.qs, 25)
 
     product_type = None
     if 'test__engagement__product__prod_type' in request.GET:
@@ -513,7 +516,7 @@ def open_findings(request, pid=None, eid=None, view=None):
 
     found_by = None
     try:
-        found_by = findings.found_by.all().distinct()
+        found_by = findings_filter.found_by.all().distinct()
     except:
         found_by = None
         pass
@@ -535,12 +538,15 @@ def open_findings(request, pid=None, eid=None, view=None):
         add_breadcrumb(title="Findings", top_level=not len(request.GET), request=request)
     if jira_config:
         jira_config = jira_config.conf_id
+
+    paged_findings.object_list = prefetch_for_open_findings(paged_findings.object_list)
+
     return render(
         request, 'dojo/findings_list.html', {
             'show_product_column': show_product_column,
             "product_tab": product_tab,
             "findings": paged_findings,
-            "filtered": findings,
+            "filtered": findings_filter,
             "title_words": title_words,
             'found_by': found_by,
             'custom_breadcrumb': custom_breadcrumb,
@@ -549,6 +555,17 @@ def open_findings(request, pid=None, eid=None, view=None):
             'tag_input': tags,
             'jira_config': jira_config,
         })
+
+
+def prefetch_for_open_findings(findings):
+    prefetched_findings = findings
+    prefetched_findings = prefetched_findings.select_related('jira_issue')
+    prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__jira_pkey_set__conf')
+    prefetched_findings = prefetched_findings.prefetch_related('found_by')
+    prefetched_findings = prefetched_findings.prefetch_related('risk_acceptance_set')
+    # we could try to prefetch only the latest note with SubQuery and OuterRef, but I'm getting that MySql doesn't support limits in subqueries.
+    prefetched_findings = prefetched_findings.prefetch_related('notes')
+    return prefetched_findings
 
 
 """
