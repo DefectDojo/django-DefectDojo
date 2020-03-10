@@ -852,12 +852,11 @@ def ad_hoc_finding(request, pid):
     enabled = False
     jform = None
     form = AdHocFindingForm(initial={'date': timezone.now().date()})
-    if get_system_setting('enable_jira'):
-        if JIRA_PKey.objects.filter(product=test.engagement.product).count() != 0:
-            enabled = test.engagement.product.jira_pkey_set.first().push_all_issues
-            jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
-    else:
-        jform = None
+    if get_system_setting('enable_jira') and \
+            test.engagement.product.jira_pkey_set.first() is not None:
+        enabled = test.engagement.product.jira_pkey_set.first().push_all_issues
+        jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
+
     if request.method == 'POST':
         form = AdHocFindingForm(request.POST)
         if (form['active'].value() is False or form['false_p'].value()) and form['duplicate'].value() is False:
