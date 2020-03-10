@@ -748,9 +748,12 @@ def new_eng_for_app(request, pid, cicd=False):
                 return HttpResponseRedirect(reverse('view_engagement', args=(new_eng.id,)))
     else:
         form = EngForm(initial={'lead': request.user, 'target_start': timezone.now().date(), 'target_end': timezone.now().date() + timedelta(days=7), 'product': prod.id}, cicd=cicd, product=prod.id)
-        if(get_system_setting('enable_jira')):
+        if get_system_setting('enable_jira'):
             if JIRA_PKey.objects.filter(product=prod).count() != 0:
                 jform = JIRAFindingForm(prefix='jiraform', enabled=JIRA_PKey.objects.get(product=prod).push_all_issues)
+                # Feels like we should probably inform the user that this particular checkbox
+                # is more about epics and engagements than findings and issues.
+                jform.fields['push_to_jira'].help_text = "Checking this will add an EPIC for this engagement."
 
     product_tab = Product_Tab(pid, title="New Engagement", tab="engagements")
     return render(request, 'dojo/new_eng.html',
@@ -883,15 +886,19 @@ def ad_hoc_finding(request, pid):
             new_finding.is_template = False
             new_finding.save()
             new_finding.endpoints.set(form.cleaned_data['endpoints'])
-            new_finding.save()
-            if 'jiraform-push_to_jira' in request.POST:
-                jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=enabled)
+
+            # Push to Jira?
+            push_to_jira = False
+            if enabled:
+                push_to_jira = True
+            elif 'jiraform-push_to_jira' in request.POST:
+                jform = JIRAFindingForm(request.POST, prefix='jiraform',
+                                        enabled=enabled)
                 if jform.is_valid():
-                    add_issue_task.delay(new_finding, jform.cleaned_data.get('push_to_jira'))
-                messages.add_message(request,
-                                     messages.SUCCESS,
-                                     'Finding added successfully.',
-                                     extra_tags='alert-success')
+                    push_to_jira = jform.cleaned_data.get('push_to_jira')
+
+            new_finding.save(push_to_jira=push_to_jira)
+
             if create_template:
                 templates = Finding_Template.objects.filter(title=new_finding.title)
                 if len(templates) > 0:

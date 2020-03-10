@@ -1089,8 +1089,15 @@ class FindingBulkUpdateForm(forms.ModelForm):
                            required=False)
 
     def __init__(self, *args, **kwargs):
+        self.enabled = kwargs.pop("jira_enabled")
         super(FindingBulkUpdateForm, self).__init__(*args, **kwargs)
         self.fields['severity'].required = False
+        if self.enabled:
+            self.fields['push_to_jira'].help_text = \
+                "Push all issues is enabled on this product. If you do not wish to push all issues" \
+                " to JIRA, please disable Push all issues on this product."
+            self.fields['push_to_jira'].widget.attrs['checked'] = 'checked'
+            self.fields['push_to_jira'].disabled = True
 
     def clean(self):
         cleaned_data = super(FindingBulkUpdateForm, self).clean()
@@ -1917,13 +1924,22 @@ class JIRAPKeyForm(forms.ModelForm):
 
 class JIRAFindingForm(forms.Form):
     def __init__(self, *args, **kwargs):
-        self.enabled = kwargs.pop('enabled')
+        self.enabled = kwargs.pop('enabled') or False
         super(JIRAFindingForm, self).__init__(*args, **kwargs)
         self.fields['push_to_jira'] = forms.BooleanField()
         self.fields['push_to_jira'].required = False
         self.fields['push_to_jira'].help_text = "Checking this will overwrite content of your JIRA issue, or create one."
+        self.fields['push_to_jira'].label = "Push to JIRA"
+        if self.enabled:
+            # This will show the checkbox as checked and greyed out, this way the user is aware
+            # that issues will be pushed to JIRA, given their product-level settings.
+            self.fields['push_to_jira'].help_text = \
+                "Push all issues is enabled on this product. If you do not wish to push all issues" \
+                " to JIRA, please disable Push all issues on this product."
+            self.fields['push_to_jira'].widget.attrs['checked'] = 'checked'
+            self.fields['push_to_jira'].disabled = True
 
-    push_to_jira = forms.BooleanField(required=False)
+    push_to_jira = forms.BooleanField(required=False, label="Push to JIRA")
 
 
 class GoogleSheetFieldsForm(forms.Form):

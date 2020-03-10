@@ -15,6 +15,8 @@
 	{% include "dojo/form_fields.html" with form=form %}
 	{% include "dojo/form_fields.html" with form=cred_form %}
     {%  if jform %}
+        <h4> JIRA </h4>
+        <hr>
         {% include "dojo/form_fields.html" with form=jform %}
     {% endif %}
 	<div class="form-group">
