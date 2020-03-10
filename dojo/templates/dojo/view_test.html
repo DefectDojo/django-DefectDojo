@@ -707,11 +707,11 @@
             check_checked_finding();
             $('#id_status').on('click', function (e) {
                 var checked = this.checked;
-                $('#id_active').prop('disabled', !checked);
-                $('#id_verified').prop('disabled', !checked);
-                $('#id_false_p').prop('disabled', !checked);
-                $('#id_out_of_scope').prop('disabled', !checked);
-                $('#id_is_Mitigated').prop('disabled', !checked);
+                $('#bulk_edit_menu #id_active').prop('disabled', !checked);
+                $('#bulk_edit_menu #id_verified').prop('disabled', !checked);
+                $('#bulk_edit_menu #id_false_p').prop('disabled', !checked);
+                $('#bulk_edit_menu #id_out_of_scope').prop('disabled', !checked);
+                $('#bulk_edit_menu #id_is_Mitigated').prop('disabled', !checked);
             })
             //Ensures dropdown has proper zindex
             $('.table-responsive').on('show.bs.dropdown', function () {
