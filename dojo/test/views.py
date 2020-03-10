@@ -749,7 +749,6 @@ def re_import_scan_results(request, tid):
                         if item.unsaved_tags is not None:
                             find.tags = item.unsaved_tags
 
-
                     # Save it. This may be the second time we save it in this function.
                     find.save(push_to_jira=push_to_jira)
                 # calculate the difference
