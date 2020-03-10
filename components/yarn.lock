@@ -176,10 +176,10 @@ simplemde@^1.0.0:
     codemirror-spell-checker "*"
     marked "*"
 
-startbootstrap-sb-admin-2@1.0.7:
-  version "1.0.7"
-  resolved "https://registry.yarnpkg.com/startbootstrap-sb-admin-2/-/startbootstrap-sb-admin-2-1.0.7.tgz#ef36a90903afb4a84a25c329b0292d06bf05b130"
-  integrity sha1-7zapCQOvtKhKJcMpsCktBr8FsTA=
+startbootstrap-sb-admin-2@3.3.7:
+  version "3.3.7"
+  resolved "https://registry.yarnpkg.com/startbootstrap-sb-admin-2/-/startbootstrap-sb-admin-2-3.3.7.tgz#0b8f5f1a90f807a42c041c747ed97b4fde7ad681"
+  integrity sha1-C49fGpD4B6QsBBx0ftl7T9561oE=
 
 typo-js@*:
   version "1.1.0"
