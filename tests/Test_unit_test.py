@@ -54,6 +54,38 @@ class TestUnitTest(unittest.TestCase):
         driver.find_element_by_css_selector("button.btn.btn-success").click()
         return driver
 
+    def test_view_test(self):
+        # View existing test from ProductTest()
+        # Login to the site.
+        driver = self.login_page()
+
+        driver.get(self.base_url + "engagements_all")
+        # Select a previously created engagement title
+        driver.find_element_by_partial_link_text("Ad Hoc Engagement").click()
+
+        driver.find_element_by_partial_link_text("Pen Test").click()
+
+        driver.find_element_by_id("select_all").click()
+
+        # bulk edit dropdown menu
+        driver.find_element_by_id("dropdownMenu2").click()
+
+        bulk_edit_menu = driver.find_element_by_id("bulk_edit_menu")
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_active").is_enabled(), False)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_verified").is_enabled(), False)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_false_p").is_enabled(), False)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_out_of_scope").is_enabled(), False)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_is_Mitigated").is_enabled(), False)
+
+        driver.find_element_by_id("id_status").click()
+
+        bulk_edit_menu = driver.find_element_by_id("bulk_edit_menu")
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_active").is_enabled(), True)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_verified").is_enabled(), True)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_false_p").is_enabled(), True)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_out_of_scope").is_enabled(), True)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_is_Mitigated").is_enabled(), True)
+
     def test_create_test(self):
         # To create test for a product
         # You must have an engagement and then tests are packed in engagements
@@ -177,6 +209,8 @@ def suite():
     # Add each test the the suite to be run
     # success and failure is output by the test
     suite.addTest(product_unit_test.ProductTest('test_create_product'))
+    suite.addTest(product_unit_test.ProductTest('test_add_product_finding'))
+    suite.addTest(TestUnitTest('test_view_test'))
     suite.addTest(TestUnitTest('test_create_test'))
     suite.addTest(TestUnitTest('test_edit_test'))
     # suite.addTest(TestUnitTest('test_add_note'))
