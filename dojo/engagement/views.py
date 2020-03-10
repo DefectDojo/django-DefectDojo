@@ -508,8 +508,7 @@ def import_scan_results(request, eid=None, pid=None):
         engagement = get_object_or_404(Engagement, id=eid)
         cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(engagement=engagement).order_by('cred_id')
 
-    if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(
-            product=engagement.product) != 0:
+    if get_system_setting('enable_jira') and engagement.product.jira_pkey_set.first() is not None:
         enabled = engagement.product.jira_pkey_set.first().push_all_issues
         jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
 
