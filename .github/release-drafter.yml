@@ -15,7 +15,7 @@ categories:
       - 'bugfix'
       - 'bug'
   - title: '🧰 Maintenance'
-    labels: 
+    labels:
       - 'dependencies'
       - 'maintenance'
   - title: '🚩 Requires settings change'
