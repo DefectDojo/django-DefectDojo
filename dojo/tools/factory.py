@@ -241,7 +241,7 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
     elif scan_type == 'DSOP Scan':
         parser = DsopParser(file, test)
     elif scan_type == 'Anchore Enterprise Policy Check':
-        parser = AnchoreEngineScanParser(file, test)
+        parser = AnchoreEnterprisePolicyCheckParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 
