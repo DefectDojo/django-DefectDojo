@@ -1,6 +1,9 @@
 from django.test import TestCase
-from dojo.tools.anchore_enterprise.parser import AnchoreEnterprisePolicyCheckParser, extract_cve
+from dojo.tools.anchore_enterprise.parser import AnchoreEnterprisePolicyCheckParser
+from dojo.tools.anchore_enterprise.parser import extract_cve, search_filepath
 from dojo.models import Test
+
+# pylint: disable=C0103,C0301
 
 
 class TestAnchoreEnterprisePolicyCheckParser(TestCase):
@@ -33,3 +36,15 @@ class TestAnchoreEnterprisePolicyCheckParser(TestCase):
         self.assertEqual("", cve)
         cve = extract_cve("")
         self.assertEqual("", cve)
+
+    def test_anchore_policy_check_parser_search_filepath(self):
+        file_path = search_filepath("MEDIUM Vulnerability found in non-os package type (python) - /usr/lib64/python2.7/lib-dynload/Python (CVE-2014-4616 - https://nvd.nist.gov/vuln/detail/CVE-2014-4616)")
+        self.assertEqual('/usr/lib64/python2.7/lib-dynload/Python', file_path)
+        file_path = search_filepath("HIGH Vulnerability found in non-os package type (java) - /root/.m2/repository/org/apache/struts/struts-core/1.3.8/struts-core-1.3.8.jar (CVE-2015-0899 - https://nvd.nist.gov/vuln/detail/CVE-2015-0899)")
+        self.assertEqual('/root/.m2/repository/org/apache/struts/struts-core/1.3.8/struts-core-1.3.8.jar', file_path)
+        file_path = search_filepath("test /usr/local/bin/ag package type (java) - /root/.m2/repository/org/apache/struts/struts-core/1.3.8/struts-core-1.3.8.jar (CVE-2015-0899 - https://nvd.nist.gov/vuln/detail/CVE-2015-0899)")
+        self.assertEqual('/usr/local/bin/ag', file_path)
+        file_path = search_filepath("HIGH Vulnerability found in os package type (rpm) - kernel-headers (RHSA-2017:0372 - https://access.redhat.com/errata/RHSA-2017:0372)")
+        self.assertEqual('', file_path)
+        file_path = search_filepath("test")
+        self.assertEqual('', file_path)

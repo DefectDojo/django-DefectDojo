@@ -1,4 +1,5 @@
 import json
+import re
 from json.decoder import JSONDecodeError
 from datetime import datetime
 from dojo.models import Finding
@@ -45,6 +46,7 @@ class AnchoreEnterprisePolicyCheckParser:
                                     severity=severity,
                                     numerical_severity=Finding.get_number_severity(severity),
                                     references="Policy ID: {}\nTrigger ID: {}".format(policyid, triggerid),
+                                    file_path=search_filepath(description),
                                     component_name=repo,
                                     component_version=tag,
                                     date=find_date,
@@ -80,3 +82,14 @@ def extract_cve(trigger_id):
         return ""
     except ValueError:
         return ""
+
+
+def search_filepath(text):
+    match = re.search(r' (/[^/ ]*)+/?', text)
+    path = ""
+    if match:
+        try:
+            path = match.group(0)
+        except IndexError:
+            path = ""
+    return path.strip()
