@@ -2,7 +2,7 @@
   "dependencies": {
     "JUMFlot": "jumjum123/JUMFlot#*",
     "bootstrap": "^3.4.0",
-    "bootstrap-social": "^4.0.0",
+    "bootstrap-social": "^5.1.1",
     "bootstrap-wysiwyg": "^2.0.0",
     "bootswatch": "3.3.7",
     "chosen": "harvesthq/bower-chosen#~1.4.0",

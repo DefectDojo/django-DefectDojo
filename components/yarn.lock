@@ -6,13 +6,13 @@ JUMFlot@jumjum123/JUMFlot#*:
   version "0.0.0"
   resolved "https://codeload.github.com/jumjum123/JUMFlot/tar.gz/203147fa2ace27db89e2defcde0800654015ae23"
 
-bootstrap-social@^4.0.0:
-  version "4.11.0"
-  resolved "https://registry.yarnpkg.com/bootstrap-social/-/bootstrap-social-4.11.0.tgz#7896d176fe366b06992196945a13fc9bfa6061b2"
-  integrity sha1-eJbRdv42awaZIZaUWhP8m/pgYbI=
+bootstrap-social@^5.1.1:
+  version "5.1.1"
+  resolved "https://registry.yarnpkg.com/bootstrap-social/-/bootstrap-social-5.1.1.tgz#7530c678adf56cf8fad3fa82c29d4d3e5d027501"
+  integrity sha1-dTDGeK31bPj60/qCwp1NPl0CdQE=
   dependencies:
     bootstrap "~3"
-    font-awesome "~4.4"
+    font-awesome "~4.7"
 
 bootstrap-wysiwyg@^2.0.0:
   version "2.0.1"
@@ -88,15 +88,10 @@ flot@flot/flot#~0.8.3:
   version "0.8.3"
   resolved "https://codeload.github.com/flot/flot/tar.gz/453b017cc5acfd75e252b93e8635f57f4196d45d"
 
-font-awesome@^4.0.0:
+font-awesome@^4.0.0, font-awesome@~4.7:
   version "4.7.0"
   resolved "https://registry.yarnpkg.com/font-awesome/-/font-awesome-4.7.0.tgz#8fa8cf0411a1a31afd07b06d2902bb9fc815a133"
   integrity sha1-j6jPBBGhoxr9B7BtKQK7n8gVoTM=
-
-font-awesome@~4.4:
-  version "4.4.0"
-  resolved "https://registry.yarnpkg.com/font-awesome/-/font-awesome-4.4.0.tgz#9fe43f82cf72726badcbdb2704407aadaca17da9"
-  integrity sha1-n+Q/gs9ycmuty9snBEB6rayhfak=
 
 fullcalendar@^3.0.0:
   version "3.10.1"
