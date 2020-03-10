@@ -175,13 +175,28 @@ class FindingViewSet(mixins.ListModelMixin,
             push_to_jira = True
 
         # add a check for the product having push all issues enabled right here.
-        push_to_jira = serializer.validated_data.get('push_to_jira')
         serializer.save(push_to_jira=push_to_jira)
 
     # Overriding mixins.CreateModeMixin perform_create() method to grab push_to_jira
     # data and add that as a parameter to .save()
     def perform_create(self, serializer):
+        enabled = False
         push_to_jira = serializer.validated_data.get('push_to_jira')
+        # If the product has Push All Issues enabled, then we need to ignore the user input
+        # and set push_to_jira to True
+
+        # IF JIRA is enabled and this product has a JIRA configuration
+        if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(
+                product=serializer.instance.test.engagement.product) != 0:
+            # Check if push_all_issues is set on this product
+            enabled = JIRA_PKey.objects.get(
+                product=serializer.instance.test.engagement.product).push_all_issues
+
+        # If push_all_issues is set:
+        if enabled:
+            push_to_jira = True
+
+        # add a check for the product having push all issues enabled right here.
         serializer.save(push_to_jira=push_to_jira)
 
     def get_queryset(self):
@@ -666,6 +681,22 @@ class ImportScanView(mixins.CreateModelMixin,
         if get_system_setting('enable_jira') and jira_config:
             # Check if push_all_issues is set on this product
             enabled = engagement.product.jira_pkey_set.first().push_all_issues
+
+        # If push_all_issues is set:
+        if enabled:
+            push_to_jira = True
+        serializer.save(push_to_jira=push_to_jira)
+
+    def perform_create(self, serializer):
+        # Override CreateModeMixin to pass in push_to_jira if needed.
+        enabled = False
+        push_to_jira = serializer.validated_data.get('push_to_jira')
+        # IF JIRA is enabled and this product has a JIRA configuration
+        if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(
+                product=serializer.instance.engagement.product) != 0:
+            # Check if push_all_issues is set on this product
+            enabled = JIRA_PKey.objects.get(
+                product=serializer.instance.engagement.product).push_all_issues
 
         # If push_all_issues is set:
         if enabled:

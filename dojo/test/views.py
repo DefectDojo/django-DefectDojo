@@ -567,8 +567,6 @@ def finding_bulk_update(request, tid):
                 for finding in finds:
                     from dojo.tools import tool_issue_updater
                     tool_issue_updater.async_tool_issue_update(finding)
-                    push_anyway = JIRA_PKey.objects.get(
-                        product=finding.test.engagement.product).push_all_issues
 
                     if JIRA_PKey.objects.filter(product=finding.test.engagement.product).count() == 0:
                         log_jira_alert('Finding cannot be pushed to jira as there is no jira configuration for this product.', finding)
@@ -767,16 +765,8 @@ def re_import_scan_results(request, tid):
                         if item.unsaved_tags is not None:
                             find.tags = item.unsaved_tags
 
-                    # Push to Jira?
-                    push_to_jira = False
-                    if 'jiraform-push_to_jira' in request.POST:
-                        jform = JIRAFindingForm(request.POST, prefix='jiraform',
-                                                enabled=enabled)
-                        if jform.is_valid():
-                            push_to_jira = jform.cleaned_data.get('push_to_jira')
-
-                # Save it. This may be the second time we save it in this function.
-                find.save(push_to_jira=push_to_jira)
+                    # Save it. This may be the second time we save it in this function.
+                    find.save(push_to_jira=push_to_jira)
                 # calculate the difference
                 to_mitigate = set(original_items) - set(new_items)
                 for finding_id in to_mitigate:

@@ -2093,8 +2093,6 @@ def finding_bulk_update_all(request, pid=None):
                 for finding in finds:
                     from dojo.tools import tool_issue_updater
                     tool_issue_updater.async_tool_issue_update(finding)
-                    push_anyway = JIRA_PKey.objects.get(
-                        product=finding.test.engagement.product).push_all_issues
 
                     # Because we never call finding.save() in a bulk update, we need to actually
                     # push the JIRA stuff here, rather than in finding.save()

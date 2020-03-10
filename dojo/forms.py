@@ -1091,8 +1091,15 @@ class FindingBulkUpdateForm(forms.ModelForm):
                            required=False)
 
     def __init__(self, *args, **kwargs):
+        self.enabled = kwargs.pop("jira_enabled")
         super(FindingBulkUpdateForm, self).__init__(*args, **kwargs)
         self.fields['severity'].required = False
+        if self.enabled:
+            self.fields['push_to_jira'].help_text = \
+                "Push all issues is enabled on this product. If you do not wish to push all issues" \
+                " to JIRA, please disable Push all issues on this product."
+            self.fields['push_to_jira'].widget.attrs['checked'] = 'checked'
+            self.fields['push_to_jira'].disabled = True
 
     def clean(self):
         cleaned_data = super(FindingBulkUpdateForm, self).clean()
