@@ -12,48 +12,6 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 class FindingTest(BaseTestCase):
 
-    def login_page(self):
-        # Make a member reference to the driver
-        driver = self.driver
-        # Navigate to the login page
-        driver.get(self.base_url + "login")
-        # Good practice to clear the entry before typing
-        driver.find_element_by_id("id_username").clear()
-        # These credentials will be used by Travis when testing new PRs
-        # They will not work when testing on your own build
-        # Be sure to change them before submitting a PR
-        driver.find_element_by_id("id_username").send_keys(os.environ['DD_ADMIN_USER'])
-        driver.find_element_by_id("id_password").clear()
-        driver.find_element_by_id("id_password").send_keys(os.environ['DD_ADMIN_PASSWORD'])
-        # "Click" the but the login button
-        driver.find_element_by_css_selector("button.btn.btn-success").click()
-        return driver
-
-    def test_list_finding(self):
-        # bulk edit dropdown menu
-        driver = self.login_page()
-        driver.get(self.base_url + "finding")
-
-        driver.find_element_by_id("select_all").click()
-
-        driver.find_element_by_id("dropdownMenu2").click()
-
-        bulk_edit_menu = driver.find_element_by_id("bulk_edit_menu")
-        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_active").is_enabled(), False)
-        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_verified").is_enabled(), False)
-        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_false_p").is_enabled(), False)
-        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_out_of_scope").is_enabled(), False)
-        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_is_Mitigated").is_enabled(), False)
-
-        driver.find_element_by_id("id_bulk_status").click()
-
-        bulk_edit_menu = driver.find_element_by_id("bulk_edit_menu")
-        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_active").is_enabled(), True)
-        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_verified").is_enabled(), True)
-        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_false_p").is_enabled(), True)
-        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_out_of_scope").is_enabled(), True)
-        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_is_Mitigated").is_enabled(), True)
-
     def test_edit_finding(self):
         # The Name of the Finding created by test_add_product_finding => 'App Vulnerable to XSS'
         # Test To Add Finding To product
