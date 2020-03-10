@@ -33,9 +33,10 @@ chosen-bootstrap@dbtek/chosen-bootstrap#~1.1.0:
   version "0.0.0"
   resolved "https://codeload.github.com/dbtek/chosen-bootstrap/tar.gz/12dcd363d1482c54c740ed9fe0e92549d81e9176"
 
-chosen@harvesthq/bower-chosen#~1.4.0:
-  version "0.0.0"
-  resolved "https://codeload.github.com/harvesthq/bower-chosen/tar.gz/d7eba35cf214d2416fabee25c5d4619542a23d8d"
+chosen@harvesthq/bower-chosen#~1.8.7:
+  version "1.8.7"
+  uid ad86732b668627c131e61ee8f0e6e9ed52e4db8d
+  resolved "https://codeload.github.com/harvesthq/bower-chosen/tar.gz/ad86732b668627c131e61ee8f0e6e9ed52e4db8d"
 
 codemirror-spell-checker@*:
   version "1.1.2"
