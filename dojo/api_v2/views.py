@@ -189,8 +189,8 @@ class FindingViewSet(mixins.ListModelMixin,
         if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(
                 product=serializer.instance.test.engagement.product) != 0:
             # Check if push_all_issues is set on this product
-            enabled = JIRA_PKey.objects.get(
-                product=serializer.instance.test.engagement.product).push_all_issues
+            enabled = serializer.instance.test.engagement.product.\
+                jira_pkey_set.first().push_all_issues
 
         # If push_all_issues is set:
         if enabled:
@@ -681,22 +681,6 @@ class ImportScanView(mixins.CreateModelMixin,
         if get_system_setting('enable_jira') and jira_config:
             # Check if push_all_issues is set on this product
             enabled = engagement.product.jira_pkey_set.first().push_all_issues
-
-        # If push_all_issues is set:
-        if enabled:
-            push_to_jira = True
-        serializer.save(push_to_jira=push_to_jira)
-
-    def perform_create(self, serializer):
-        # Override CreateModeMixin to pass in push_to_jira if needed.
-        enabled = False
-        push_to_jira = serializer.validated_data.get('push_to_jira')
-        # IF JIRA is enabled and this product has a JIRA configuration
-        if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(
-                product=serializer.instance.engagement.product) != 0:
-            # Check if push_all_issues is set on this product
-            enabled = JIRA_PKey.objects.get(
-                product=serializer.instance.engagement.product).push_all_issues
 
         # If push_all_issues is set:
         if enabled:
