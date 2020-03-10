@@ -1009,9 +1009,8 @@ def edit_finding(request, fid):
     jform = None
     enabled = False
 
-    if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(
-            product=finding.test.engagement.product) != 0:
-        enabled = finding.jira_conf_new().jira_pkey_set.first().push_all_issues
+    if get_system_setting('enable_jira') and finding.jira_conf_new() is not None:
+        enabled = finding.test.engagement.product.jira_pkey_set.first().push_all_issues
         jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
 
     if request.method == 'POST':
@@ -1513,14 +1512,11 @@ def promote_to_finding(request, fid):
     form_error = False
     jira_available = False
     enabled = False
+    jform = None
 
-    if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(
-            product=test.engagement.product) != 0:
+    if get_system_setting('enable_jira') and test.engagement.product.jira_pkey_set.first() is not None:
         enabled = test.engagement.product.jira_pkey_set.first().push_all_issues
         jform = JIRAFindingForm(prefix='jiraform', enabled=enabled)
-        # jira_available = True
-    else:
-        jform = None
 
     product_tab = Product_Tab(finding.test.engagement.product.id, title="Promote Finding", tab="findings")
 
