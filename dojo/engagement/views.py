@@ -622,7 +622,7 @@ def import_scan_results(request, eid=None, pid=None):
                         item.active = active
                         item.verified = verified
 
-                    item.save(dedupe_option=False, false_history=True, push_to_jira=push_to_jira)
+                    item.save(dedupe_option=False, false_history=True)
 
                     if hasattr(item, 'unsaved_req_resp') and len(
                             item.unsaved_req_resp) > 0:
