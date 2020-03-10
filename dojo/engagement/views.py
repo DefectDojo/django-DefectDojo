@@ -180,6 +180,7 @@ def edit_engagement(request, eid):
     if eng.engagement_type == "CI/CD":
         ci_cd_form = True
     jform = None
+
     if request.method == 'POST':
         form = EngForm(request.POST, instance=eng, cicd=ci_cd_form, product=eng.product.id)
         if 'jiraform-push_to_jira' in request.POST:
@@ -229,6 +230,9 @@ def edit_engagement(request, eid):
         if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(
                 product=eng.product).count() != 0:
             jform = JIRAFindingForm(prefix='jiraform', enabled=enabled)
+            # Feels like we should probably inform the user that this particular checkbox
+            # is more about epics and engagements than findings and issues.
+            jform.fields['push_to_jira'].help_text = "Checking this will add an EPIC for this engagement."
         else:
             jform = None
 
@@ -512,6 +516,8 @@ def import_scan_results(request, eid=None, pid=None):
         cred_form = CredMappingForm(request.POST)
         cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(
             engagement=engagement).order_by('cred_id')
+
+
         if form.is_valid():
             # Allows for a test to be imported with an engagement created on the fly
             if engagement is None:
@@ -582,6 +588,16 @@ def import_scan_results(request, eid=None, pid=None):
                 return HttpResponseRedirect(reverse('import_scan_results', args=(eid,)))
 
             try:
+                # Push to Jira?
+                push_to_jira = False
+                if enabled:
+                    push_to_jira = True
+                elif 'jiraform-push_to_jira' in request.POST:
+                    jform = JIRAFindingForm(request.POST, prefix='jiraform',
+                                            enabled=enabled)
+                    if jform.is_valid():
+                        push_to_jira = jform.cleaned_data.get('push_to_jira')
+
                 for item in parser.items:
                     print("item blowup")
                     print(item)
@@ -604,14 +620,6 @@ def import_scan_results(request, eid=None, pid=None):
                     if not handles_active_verified_statuses(form.get_scan_type()):
                         item.active = active
                         item.verified = verified
-
-                    # Push to Jira?
-                    push_to_jira = False
-                    if 'jiraform-push_to_jira' in request.POST:
-                        jform = JIRAFindingForm(request.POST, prefix='jiraform',
-                                                enabled=enabled)
-                        if jform.is_valid():
-                            push_to_jira = jform.cleaned_data.get('push_to_jira')
 
                     item.save(dedupe_option=False, false_history=True, push_to_jira=push_to_jira)
 
@@ -663,7 +671,7 @@ def import_scan_results(request, eid=None, pid=None):
 
                         item.endpoints.add(ep)
 
-                    item.save(false_history=True)
+                    item.save(false_history=True, push_to_jira=push_to_jira)
 
                     if item.unsaved_tags is not None:
                         item.tags = item.unsaved_tags

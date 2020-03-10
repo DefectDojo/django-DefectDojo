@@ -1346,9 +1346,10 @@ def add_issue(find, push_to_jira):
                     j_issue = JIRA_Issue(
                         jira_id=new_issue.id, jira_key=new_issue, finding=find)
                     j_issue.save()
-                    find.jira_creation = timezone.now()
-                    find.jira_change = find.jira_creation
-                    find.save()
+                    # Moving this to the save function
+                    # find.jira_creation = timezone.now()
+                    # find.jira_change = find.jira_creation
+                    # find.save()
                     issue = jira.issue(new_issue.id)
 
                     # Add labels (security & product)
@@ -1446,8 +1447,9 @@ def update_issue(find, push_to_jira):
                 priority={'name': jira_conf.get_priority(find.severity)},
                 fields=fields)
             print('\n\nSaving jira_change\n\n')
-            find.jira_change = timezone.now()
-            find.save()
+            # Moving this to finding.save()
+            # find.jira_change = timezone.now()
+            # find.save()
             # Add labels(security & product)
             add_labels(find, issue)
         except JIRAError as e:
