@@ -180,16 +180,14 @@ def edit_engagement(request, eid):
         form = EngForm(request.POST, instance=eng, cicd=ci_cd_form, product=eng.product.id)
         if 'jiraform-push_to_jira' in request.POST:
             jform = JIRAFindingForm(
-                request.POST, prefix='jiraform', enabled=True)
+                request.POST, prefix='jiraform', enabled=False)
 
         if (form.is_valid() and jform is None) or (form.is_valid() and jform and jform.is_valid()):
             if 'jiraform-push_to_jira' in request.POST:
                 if JIRA_Issue.objects.filter(engagement=eng).exists():
                     update_epic_task.delay(
                         eng, jform.cleaned_data.get('push_to_jira'))
-                    enabled = True
                 else:
-                    enabled = False
                     add_epic_task.delay(eng,
                                         jform.cleaned_data.get('push_to_jira'))
             temp_form = form.save(commit=False)
@@ -224,10 +222,13 @@ def edit_engagement(request, eid):
 
         if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(
                 product=eng.product).count() != 0:
-            jform = JIRAFindingForm(prefix='jiraform', enabled=enabled)
+            # Enabled must be false in this case, because this Push-to-jira is more about
+            # epics then findings.
+            jform = JIRAFindingForm(prefix='jiraform', enabled=False)
             # Feels like we should probably inform the user that this particular checkbox
             # is more about epics and engagements than findings and issues.
             jform.fields['push_to_jira'].help_text = "Checking this will add an EPIC for this engagement."
+            jform.fields['push_to_jira'].label = "Create EPIC"
         else:
             jform = None
 
