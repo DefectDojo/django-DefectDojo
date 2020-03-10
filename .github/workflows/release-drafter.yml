@@ -11,7 +11,6 @@ jobs:
   update_release_draft:
     runs-on: ubuntu-latest
     steps:
-      # Drafts your next Release notes as Pull Requests are merged into "master"
       - uses: release-drafter/release-drafter@v5.6.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
