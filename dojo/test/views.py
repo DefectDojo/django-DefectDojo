@@ -636,7 +636,7 @@ def re_import_scan_results(request, tid):
                                                       numerical_severity=Finding.get_numerical_severity(sev),
                                                       description=item.description
                                                       )
-                    elif scan_type == 'Checkmarx scan detailed':
+                    elif scan_type == 'Checkmarx Scan detailed':
                         find = Finding.objects.filter(title=item.title,
                                                       test__id=t.id,
                                                       severity=sev,
