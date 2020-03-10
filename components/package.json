@@ -4,7 +4,7 @@
     "bootstrap": "^3.4.0",
     "bootstrap-social": "^4.0.0",
     "bootstrap-wysiwyg": "^2.0.0",
-    "bootswatch": "3.3.7",
+    "bootswatch": "3.4.1",
     "chosen": "harvesthq/bower-chosen#~1.4.0",
     "chosen-bootstrap": "dbtek/chosen-bootstrap#~1.1.0",
     "components-jqueryui": "^1.0.0",
