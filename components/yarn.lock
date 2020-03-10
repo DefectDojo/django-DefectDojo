@@ -68,10 +68,10 @@ drmonty-datatables-plugins@^1.0.0:
   dependencies:
     jquery ">=1.7"
 
-drmonty-datatables-responsive@^1.0.0:
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/drmonty-datatables-responsive/-/drmonty-datatables-responsive-1.0.6.tgz#1c5c1de5ece54eefacf39f95daf75c43b7fffefd"
-  integrity sha1-HFwd5ezlTu+s85+V2vdcQ7f//v0=
+drmonty-datatables-responsive@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/drmonty-datatables-responsive/-/drmonty-datatables-responsive-2.1.0.tgz#6febe5aa1e5507a4475a1e3373582f8052d51ab0"
+  integrity sha1-b+vlqh5VB6RHWh4zc1gvgFLVGrA=
   dependencies:
     jquery ">=1.7.0"
 
