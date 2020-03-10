@@ -227,8 +227,9 @@ def edit_engagement(request, eid):
             jform = JIRAFindingForm(prefix='jiraform', enabled=False)
             # Feels like we should probably inform the user that this particular checkbox
             # is more about epics and engagements than findings and issues.
-            jform.fields['push_to_jira'].help_text = "Checking this will add an EPIC for this engagement."
-            jform.fields['push_to_jira'].label = "Create EPIC"
+            jform.fields['push_to_jira'].help_text = \
+                "Checking this will add an EPIC or update and existing EPIC for this engagement."
+            jform.fields['push_to_jira'].label = "Create or update EPIC"
         else:
             jform = None
 
