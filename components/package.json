@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "JUMFlot": "jumjum123/JUMFlot#*",
-    "bootstrap": "^3.4.0",
+    "bootstrap": "^4.1.2",
     "bootstrap-social": "^4.0.0",
     "bootstrap-wysiwyg": "^2.0.0",
     "bootswatch": "3.3.7",
