@@ -262,9 +262,9 @@ def test_ics(request, tid):
 def add_findings(request, tid):
     test = Test.objects.get(id=tid)
     form_error = False
-    enabled = False
     jform = None
     form = AddFindingForm(initial={'date': timezone.now().date()})
+    enabled = False
 
     if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(product=test.engagement.product).count() != 0:
         enabled = JIRA_PKey.objects.get(product=test.engagement.product).push_all_issues
@@ -564,12 +564,12 @@ def finding_bulk_update(request, tid):
                 for finding in finds:
                     from dojo.tools import tool_issue_updater
                     tool_issue_updater.async_tool_issue_update(finding)
-                    push_anyway = JIRA_PKey.objects.get(
-                        product=finding.test.engagement.product).push_all_issues
 
                     if JIRA_PKey.objects.filter(product=finding.test.engagement.product).count() == 0:
                         log_jira_alert('Finding cannot be pushed to jira as there is no jira configuration for this product.', finding)
                     else:
+                        push_anyway = JIRA_PKey.objects.get(
+                            product=finding.test.engagement.product).push_all_issues
                         if form.cleaned_data['push_to_jira'] or push_anyway:
                             if JIRA_Issue.objects.filter(finding=finding).exists():
                                 update_issue_task.delay(finding, True)
@@ -642,7 +642,18 @@ def re_import_scan_results(request, tid):
                 finding_count = 0
                 finding_added_count = 0
                 reactivated_count = 0
+                # Push to Jira?
+
+                push_to_jira = False
+                if enabled:
+                    push_to_jira = True
+                elif 'jiraform-push_to_jira' in request.POST:
+                    jform = JIRAFindingForm(request.POST, prefix='jiraform',
+                                            enabled=enabled)
+                    if jform.is_valid():
+                        push_to_jira = jform.cleaned_data.get('push_to_jira')
                 for item in items:
+
                     sev = item.severity
                     if sev == 'Information' or sev == 'Informational':
                         sev = 'Info'
@@ -751,16 +762,9 @@ def re_import_scan_results(request, tid):
                         if item.unsaved_tags is not None:
                             find.tags = item.unsaved_tags
 
-                    # Push to Jira?
-                    push_to_jira = False
-                    if 'jiraform-push_to_jira' in request.POST:
-                        jform = JIRAFindingForm(request.POST, prefix='jiraform',
-                                                enabled=enabled)
-                        if jform.is_valid():
-                            push_to_jira = jform.cleaned_data.get('push_to_jira')
 
                     # Save it. This may be the second time we save it in this function.
-                    find.save(push_to_jira)
+                    find.save(push_to_jira=push_to_jira)
                 # calculate the difference
                 to_mitigate = set(original_items) - set(new_items)
                 for finding_id in to_mitigate:
@@ -768,7 +772,7 @@ def re_import_scan_results(request, tid):
                     finding.mitigated = datetime.combine(scan_date, timezone.now().time())
                     finding.mitigated_by = request.user
                     finding.active = False
-                    finding.save()
+                    finding.save(push_to_jira=push_to_jira)
                     note = Notes(entry="Mitigated by %s re-upload." % scan_type,
                                  author=request.user)
                     note.save()

@@ -1702,11 +1702,12 @@ class Finding(models.Model):
              issue_updater_option=True, push_to_jira=False, *args, **kwargs):
         # Make changes to the finding before it's saved to add a CWE template
         new_finding = False
-        # If the product has "Push_all_issues" enabled, then we're pushing this to JIRA no matter
-        # what.
-        if not push_to_jira:
-            push_to_jira = JIRA_PKey.objects.get(
-                product=self.test.engagement.product).push_all_issues
+
+        jira_issue_exists = JIRA_Issue.objects.filter(finding=self).exists()
+        if push_to_jira:
+            self.jira_update = timezone.now()
+            if not jira_issue_exists:
+                self.jira_creation = timezone.now()
 
         if self.pk is None:
             # We enter here during the first call from serializers.py
@@ -1791,7 +1792,7 @@ class Finding(models.Model):
         # Adding a snippet here for push to JIRA so that it's in one place
         if push_to_jira:
             from dojo.tasks import update_issue_task, add_issue_task
-            if JIRA_Issue.objects.filter(finding=self).exists():
+            if jira_issue_exists:
                 update_issue_task.delay(self, True)
             else:
                 add_issue_task.delay(self, True)
