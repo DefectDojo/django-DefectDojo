@@ -160,7 +160,7 @@ class FindingViewSet(mixins.ListModelMixin,
         if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(
                 product=serializer.instance.test.engagement.product) != 0:
             # Check if push_all_issues is set on this product
-            enabled = JIRA_PKey.objects.get(product=serializer.instance.test.engagement.product).push_all_issues
+            enabled = serializer.instance.test.engagement.product.jira_pkey_set.first().push_all_issues
 
         # If push_all_issues is set:
         if enabled:
@@ -181,8 +181,8 @@ class FindingViewSet(mixins.ListModelMixin,
         if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(
                 product=serializer.instance.test.engagement.product) != 0:
             # Check if push_all_issues is set on this product
-            enabled = JIRA_PKey.objects.get(
-                product=serializer.instance.test.engagement.product).push_all_issues
+            enabled = serializer.instance.test.engagement.product.\
+                jira_pkey_set.first().push_all_issues
 
         # If push_all_issues is set:
         if enabled:
@@ -664,8 +664,7 @@ class ImportScanView(mixins.CreateModelMixin,
         if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(
                 product=serializer.instance.engagement.product) != 0:
             # Check if push_all_issues is set on this product
-            enabled = JIRA_PKey.objects.get(
-                product=serializer.instance.engagement.product).push_all_issues
+            enabled = serializer.instance.engagement.product.jira_pkey_set.first().push_all_issues
 
         # If push_all_issues is set:
         if enabled:
@@ -687,8 +686,7 @@ class ReImportScanView(mixins.CreateModelMixin,
         if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(
                 product=serializer.instance.engagement.product) != 0:
             # Check if push_all_issues is set on this product
-            enabled = JIRA_PKey.objects.get(
-                product=serializer.instance.engagement.product).push_all_issues
+            enabled = serializer.instance.engagement.product.jira_pkey_set.first().push_all_issues
 
         # If push_all_issues is set:
         if enabled:

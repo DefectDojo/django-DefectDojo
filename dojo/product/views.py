@@ -854,7 +854,7 @@ def ad_hoc_finding(request, pid):
     form = AdHocFindingForm(initial={'date': timezone.now().date()})
     if get_system_setting('enable_jira'):
         if JIRA_PKey.objects.filter(product=test.engagement.product).count() != 0:
-            enabled = JIRA_PKey.objects.get(product=test.engagement.product).push_all_issues
+            enabled = test.engagement.product.jira_pkey_set.first().push_all_issues
             jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
     else:
         jform = None

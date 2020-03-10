@@ -990,7 +990,7 @@ def edit_finding(request, fid):
 
     if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(
             product=finding.test.engagement.product) != 0:
-        enabled = JIRA_PKey.objects.get(product=finding.test.engagement.product).push_all_issues
+        enabled = finding.jira_conf_new().jira_pkey_set.first().push_all_issues
         jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
 
     if request.method == 'POST':
@@ -1496,7 +1496,7 @@ def promote_to_finding(request, fid):
 
     if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(
             product=test.engagement.product) != 0:
-        enabled = JIRA_PKey.objects.get(product=test.engagement.product).push_all_issues
+        enabled = test.engagement.product.jira_pkey_set.first().push_all_issues
         jform = JIRAFindingForm(prefix='jiraform', enabled=enabled)
         # jira_available = True
     else:
@@ -2083,8 +2083,9 @@ def finding_bulk_update_all(request, pid=None):
                     if JIRA_PKey.objects.filter(product=finding.test.engagement.product).count() == 0:
                         log_jira_alert('Finding cannot be pushed to jira as there is no jira configuration for this product.', finding)
                     else:
-                        push_anyway = JIRA_PKey.objects.get(
-                            product=finding.test.engagement.product).push_all_issues
+                        push_anyway = finding.jira_conf_new().jira_pkey_set.first().push_all_issues
+                        # push_anyway = JIRA_PKey.objects.get(
+                        #     product=finding.test.engagement.product).push_all_issues
                         if form.cleaned_data['push_to_jira'] or push_anyway:
                             if JIRA_Issue.objects.filter(finding=finding).exists():
                                 update_issue_task.delay(finding, True)

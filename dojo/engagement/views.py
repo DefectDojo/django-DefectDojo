@@ -505,7 +505,7 @@ def import_scan_results(request, eid=None, pid=None):
 
     if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(
             product=engagement.product) != 0:
-        enabled = JIRA_PKey.objects.get(product=engagement.product).push_all_issues
+        enabled = engagement.product.jira_pkey_set.first().push_all_issues
         jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
 
     if request.method == "POST":
