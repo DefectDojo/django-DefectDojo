@@ -267,7 +267,7 @@ def add_findings(request, tid):
     enabled = False
 
     if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(product=test.engagement.product).count() != 0:
-        enabled = JIRA_PKey.objects.get(product=test.engagement.product).push_all_issues
+        enabled = test.engagement.product.jira_pkey_set.first().push_all_issues
         jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
     else:
         jform = None
@@ -483,7 +483,7 @@ def add_temp_finding(request, tid, fid):
                                     'numerical_severity': finding.numerical_severity,
                                     'tags': [tag.name for tag in finding.tags]})
         if get_system_setting('enable_jira'):
-            enabled = JIRA_PKey.objects.get(product=test.engagement.product).push_all_issues
+            enabled = test.engagement.product.jira_pkey_set.first().push_all_issues
             jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
         else:
             jform = None
@@ -568,8 +568,9 @@ def finding_bulk_update(request, tid):
                     if JIRA_PKey.objects.filter(product=finding.test.engagement.product).count() == 0:
                         log_jira_alert('Finding cannot be pushed to jira as there is no jira configuration for this product.', finding)
                     else:
-                        push_anyway = JIRA_PKey.objects.get(
-                            product=finding.test.engagement.product).push_all_issues
+                        push_anyway = finding.jira_conf_new().jira_pkey_set.first().push_all_issues
+                        # push_anyway = JIRA_PKey.objects.get(
+                        #     product=finding.test.engagement.product).push_all_issues
                         if form.cleaned_data['push_to_jira'] or push_anyway:
                             if JIRA_Issue.objects.filter(finding=finding).exists():
                                 update_issue_task.delay(finding, True)
@@ -604,7 +605,7 @@ def re_import_scan_results(request, tid):
     # Decide if we need to present the Push to JIRA form
     if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(
             product=engagement.product) != 0:
-        enabled = JIRA_PKey.objects.get(product=engagement.product).push_all_issues
+        enabled = engagement.product.jira_pkey_set.first().push_all_issues
         jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
 
     form.initial['tags'] = [tag.name for tag in t.tags]
