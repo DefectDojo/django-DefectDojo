@@ -697,7 +697,7 @@ def new_eng_for_app(request, pid, cicd=False):
             if get_system_setting('enable_jira'):
                 # Test to make sure there is a Jira project associated the product
                 try:
-                    jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=JIRA_PKey.objects.get(product=prod).push_all_issues)
+                    jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=False)
                     if jform.is_valid():
                         add_epic_task.delay(new_eng, jform.cleaned_data.get('push_to_jira'))
                 except JIRA_PKey.DoesNotExist:
@@ -720,10 +720,13 @@ def new_eng_for_app(request, pid, cicd=False):
         form = EngForm(initial={'lead': request.user, 'target_start': timezone.now().date(), 'target_end': timezone.now().date() + timedelta(days=7), 'product': prod.id}, cicd=cicd, product=prod.id)
         if get_system_setting('enable_jira'):
             if JIRA_PKey.objects.filter(product=prod).count() != 0:
-                jform = JIRAFindingForm(prefix='jiraform', enabled=JIRA_PKey.objects.get(product=prod).push_all_issues)
+                # Enabled must be false in this case, because this Push-to-jira is more about
+                # epics then findings.
+                jform = JIRAFindingForm(prefix='jiraform', enabled=False)
                 # Feels like we should probably inform the user that this particular checkbox
                 # is more about epics and engagements than findings and issues.
                 jform.fields['push_to_jira'].help_text = "Checking this will add an EPIC for this engagement."
+                jform.fields['push_to_jira'].label = "Create EPIC"
 
     product_tab = Product_Tab(pid, title="New Engagement", tab="engagements")
     return render(request, 'dojo/new_eng.html',
