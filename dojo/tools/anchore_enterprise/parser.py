@@ -45,6 +45,7 @@ class AnchoreEnterprisePolicyCheckParser:
                                     severity=severity,
                                     numerical_severity=Finding.get_number_severity(severity),
                                     references="Policy ID: {}\nTirgger ID: {}".format(policyid, triggerid),
+                                    unique_id_from_tool=triggerid,
                                     component_name=repo,
                                     component_version=tag,
                                     date=find_date,
