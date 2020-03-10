@@ -76,4 +76,8 @@ REM REM fi
 
 echo "Done Running all configured integration tests."
 
+<<<<<<< HEAD
 :END
+=======
+:END
+>>>>>>> simplify and speedup integration tests
