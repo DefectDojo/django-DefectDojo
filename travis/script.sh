@@ -71,27 +71,27 @@ if [ -z "${TEST}" ]; then
   sudo helm dependency update ./helm/defectdojo
 
   # Set Helm settings for the broker
-  case "${BROKER}" in
+  case "${BROKER}" in 
     rabbitmq)
       HELM_BROKER_SETTINGS=" \
         --set redis.enabled=false \
         --set rabbitmq.enabled=true \
         --set celery.broker=rabbitmq \
         --set createRabbitMqSecret=true \
-    "
-    ;;
+      "
+      ;;
     redis)
       HELM_BROKER_SETTINGS=" \
         --set redis.enabled=true \
         --set rabbitmq.enabled=false \
         --set celery.broker=redis \
         --set createRedisSecret=true \
-    "
-    ;;
-      *)
-	  (>&2 echo "ERROR: 'BROKER' must be 'redis' or 'rabbitmq'")
-	  exit 1
-	  ;;
+      "
+      ;;
+    *)
+      (>&2 echo "ERROR: 'BROKER' must be 'redis' or 'rabbitmq'")
+      exit 1
+      ;;
   esac
 
   # Set Helm settings for the database
@@ -110,12 +110,12 @@ if [ -z "${TEST}" ]; then
         --set postgresql.enabled=true \
         --set mysql.enabled=false \
         --set createPostgresqlSecret=true \
-  "
-  ;;
-      *)
-	  (>&2 echo "ERROR: 'DATABASE' must be 'mysql' or 'postgresql'")
-	  exit 1
-	  ;;
+      "
+      ;;
+    *)
+      (>&2 echo "ERROR: 'DATABASE' must be 'mysql' or 'postgresql'")
+      exit 1
+      ;;
   esac
 
   # Install DefectDojo into Kubernetes and wait for it
