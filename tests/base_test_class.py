@@ -19,8 +19,8 @@ class BaseTestCase(unittest.TestCase):
             dd_driver_options = Options()
 
             # headless means no UI, if you want to see what is happening remove headless. Adding detach will leave the window open after the test
-            # dd_driver_options.add_argument("--headless")
-            dd_driver_options.add_experimental_option("detach", True)
+            dd_driver_options.add_argument("--headless")
+            # dd_driver_options.add_experimental_option("detach", True)
 
             # the next 2 maybe needed in some scenario's for example on WSL or other headless situations
             # dd_driver_options.add_argument("--no-sandbox")
@@ -94,6 +94,9 @@ class BaseTestCase(unittest.TestCase):
         {'level': 'SEVERE', 'message': 'http://localhost:8080/product/type/4/edit 563:16 "error"', 'source': 'console-api', 'timestamp': 1583952828410}
         """
         for entry in self.driver.get_log('browser'):
+            if (entry['level'] == 'SEVERE'):
+                print(self.driver.current_url)
+                print(entry)
             self.assertNotEqual(entry['level'], 'SEVERE')
 
     def tearDown(self):
