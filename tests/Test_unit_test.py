@@ -29,8 +29,10 @@ class TestUnitTest(unittest.TestCase):
         # change path of chromedriver according to which directory you have chromedriver.
         self.options = Options()
         self.options.add_argument("--headless")
+        # self.options.add_experimental_option("detach", True)
         # self.options.add_argument("--no-sandbox")
         # self.options.add_argument("--disable-dev-shm-usage")
+        self.options.add_argument("--window-size=1280,768")
         self.driver = webdriver.Chrome('chromedriver', chrome_options=self.options)
         self.driver.implicitly_wait(30)
         self.base_url = os.environ['DD_BASE_URL']
