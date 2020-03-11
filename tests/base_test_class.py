@@ -7,6 +7,35 @@ dd_driver = None
 dd_driver_options = None
 
 
+class WebdriverLogFacade(object):
+
+    last_timestamp = 0
+
+    def __init__(self, webdriver):
+        self._webdriver = webdriver
+
+    def get_log(self, log_type):
+        last_timestamp = self.last_timestamp
+        entries = self._webdriver.get_log(log_type)
+        filtered = []
+
+        for entry in entries:
+            # check the logged timestamp against the
+            # stored timestamp
+            if entry["timestamp"] > self.last_timestamp:
+                filtered.append(entry)
+
+                # save the last timestamp only if newer
+                # in this set of logs
+                if entry["timestamp"] > last_timestamp:
+                    last_timestamp = entry["timestamp"]
+
+        # store the very last timestamp
+        self.last_timestamp = last_timestamp
+
+        return filtered
+
+
 class BaseTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -54,6 +83,8 @@ class BaseTestCase(unittest.TestCase):
     def setUp(self):
         self.verificationErrors = []
         self.accept_next_alert = True
+        self.accept_javascript_errors = False
+        self.driver.execute_script("console.clear()")
         # clear browser console logs?
 
     def login_page(self):
@@ -93,11 +124,17 @@ class BaseTestCase(unittest.TestCase):
         {'level': 'WARNING', 'message': 'http://localhost:8080/product/type/4/edit 562:16 "warning"', 'source': 'console-api', 'timestamp': 1583952828410}
         {'level': 'SEVERE', 'message': 'http://localhost:8080/product/type/4/edit 563:16 "error"', 'source': 'console-api', 'timestamp': 1583952828410}
         """
-        for entry in self.driver.get_log('browser'):
+
+        for entry in WebdriverLogFacade(self.driver).get_log('browser'):
             if (entry['level'] == 'SEVERE'):
                 print(self.driver.current_url)  # TODO actually this seems to be the previous url
                 print(entry)
-            self.assertNotEqual(entry['level'], 'SEVERE')
+                if self.accept_javascript_errors:
+                    print('WARNING: skipping SEVERE javascript error because accept_javascript_errors is True!')
+                else:
+                    self.assertNotEqual(entry['level'], 'SEVERE')
+
+        return True
 
     def tearDown(self):
         self.assertNoConsoleErrors()

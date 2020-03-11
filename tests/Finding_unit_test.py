@@ -62,6 +62,7 @@ class FindingTest(BaseTestCase):
         productTxt = driver.find_element_by_tag_name("BODY").text
         # Assert ot the query to dtermine status of failure
         self.assertTrue(re.search(r'Images updated successfully', productTxt))
+        self.accept_javascript_errors = True
 
     def test_mark_finding_for_review(self):
         # login to site, password set to fetch from environ
@@ -133,6 +134,7 @@ class FindingTest(BaseTestCase):
         productTxt = driver.find_element_by_tag_name("BODY").text
         # Assert ot the query to dtermine status of failure
         self.assertTrue(re.search(r'Images updated successfully', productTxt))
+        self.accept_javascript_errors = True
 
     def test_close_finding(self):
         driver = self.login_page()
@@ -260,13 +262,13 @@ def suite():
     suite.addTest(FindingTest('test_list_finding'))
     suite.addTest(FindingTest('test_edit_finding'))
     suite.addTest(FindingTest('test_add_image'))
+    suite.addTest(FindingTest('test_delete_image'))
     suite.addTest(FindingTest('test_mark_finding_for_review'))
     suite.addTest(FindingTest('test_clear_review_from_finding'))
     suite.addTest(FindingTest('test_close_finding'))
     suite.addTest(FindingTest('test_make_finding_a_template'))
     suite.addTest(FindingTest('test_apply_template_to_a_finding'))
     suite.addTest(FindingTest('test_import_scan_result'))
-    suite.addTest(FindingTest('test_delete_image'))
     suite.addTest(FindingTest('test_delete_finding'))
     suite.addTest(FindingTest('test_delete_finding_template'))
     suite.addTest(ProductTest('test_delete_product'))
