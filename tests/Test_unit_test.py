@@ -31,6 +31,10 @@ class TestUnitTest(unittest.TestCase):
         # directory as the unit tests
         self.options = Options()
         self.options.add_argument("--headless")
+        # self.options.add_experimental_option("detach", True)
+        # self.options.add_argument("--no-sandbox")
+        # self.options.add_argument("--disable-dev-shm-usage")
+        self.options.add_argument("--window-size=1280,768")
         self.driver = webdriver.Chrome('chromedriver', chrome_options=self.options)
         # Allow a little time for the driver to initialize
         self.driver.implicitly_wait(30)
