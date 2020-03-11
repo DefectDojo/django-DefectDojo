@@ -77,20 +77,20 @@ class TestUnitTest(unittest.TestCase):
         driver.find_element_by_id("dropdownMenu2").click()
 
         bulk_edit_menu = driver.find_element_by_id("bulk_edit_menu")
-        self.assertEqual(bulk_edit_menu.find_element_by_id("id_active").is_enabled(), False)
-        self.assertEqual(bulk_edit_menu.find_element_by_id("id_verified").is_enabled(), False)
-        self.assertEqual(bulk_edit_menu.find_element_by_id("id_false_p").is_enabled(), False)
-        self.assertEqual(bulk_edit_menu.find_element_by_id("id_out_of_scope").is_enabled(), False)
-        self.assertEqual(bulk_edit_menu.find_element_by_id("id_is_Mitigated").is_enabled(), False)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_active").is_enabled(), False)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_verified").is_enabled(), False)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_false_p").is_enabled(), False)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_out_of_scope").is_enabled(), False)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_is_Mitigated").is_enabled(), False)
 
-        driver.find_element_by_id("id_status").click()
+        driver.find_element_by_id("id_bulk_status").click()
 
         bulk_edit_menu = driver.find_element_by_id("bulk_edit_menu")
-        self.assertEqual(bulk_edit_menu.find_element_by_id("id_active").is_enabled(), True)
-        self.assertEqual(bulk_edit_menu.find_element_by_id("id_verified").is_enabled(), True)
-        self.assertEqual(bulk_edit_menu.find_element_by_id("id_false_p").is_enabled(), True)
-        self.assertEqual(bulk_edit_menu.find_element_by_id("id_out_of_scope").is_enabled(), True)
-        self.assertEqual(bulk_edit_menu.find_element_by_id("id_is_Mitigated").is_enabled(), True)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_active").is_enabled(), True)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_verified").is_enabled(), True)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_false_p").is_enabled(), True)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_out_of_scope").is_enabled(), True)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_is_Mitigated").is_enabled(), True)
 
     def test_create_test(self):
         # To create test for a product
