@@ -177,28 +177,6 @@ class FindingViewSet(mixins.ListModelMixin,
         # add a check for the product having push all issues enabled right here.
         serializer.save(push_to_jira=push_to_jira)
 
-    # Overriding mixins.CreateModeMixin perform_create() method to grab push_to_jira
-    # data and add that as a parameter to .save()
-    def perform_create(self, serializer):
-        enabled = False
-        push_to_jira = serializer.validated_data.get('push_to_jira')
-        # If the product has Push All Issues enabled, then we need to ignore the user input
-        # and set push_to_jira to True
-
-        # IF JIRA is enabled and this product has a JIRA configuration
-        if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(
-                product=serializer.instance.test.engagement.product) != 0:
-            # Check if push_all_issues is set on this product
-            enabled = serializer.instance.test.engagement.product.\
-                jira_pkey_set.first().push_all_issues
-
-        # If push_all_issues is set:
-        if enabled:
-            push_to_jira = True
-
-        # add a check for the product having push all issues enabled right here.
-        serializer.save(push_to_jira=push_to_jira)
-
     def get_queryset(self):
         if not self.request.user.is_staff:
             return Finding.objects.filter(
