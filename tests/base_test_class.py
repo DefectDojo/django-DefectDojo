@@ -31,11 +31,11 @@ class BaseTestCase(unittest.TestCase):
             # dd_driver_options.add_argument("--start-maximized")
 
             # some extra logging can be turned on if you want to query the browser javascripe console in your tests
-            # desired = webdriver.DesiredCapabilities.CHROME
-            # desired['loggingPrefs'] = {'browser': 'ALL'}
+            desired = webdriver.DesiredCapabilities.CHROME
+            desired['goog:loggingPrefs'] = {'browser': 'ALL'}
 
             # change path of chromedriver according to which directory you have chromedriver.
-            dd_driver = webdriver.Chrome('chromedriver', chrome_options=dd_driver_options)
+            dd_driver = webdriver.Chrome('chromedriver', chrome_options=dd_driver_options, desired_capabilities=desired)
             dd_driver.implicitly_wait(30)
 
         cls.driver = dd_driver
@@ -85,7 +85,20 @@ class BaseTestCase(unittest.TestCase):
         finally:
             self.accept_next_alert = True
 
+    def assertNoConsoleErrors(self):
+        """
+        Sample output for levels (i.e. errors are SEVERE)
+        {'level': 'DEBUG', 'message': 'http://localhost:8080/product/type/4/edit 560:12 "debug"', 'source': 'console-api', 'timestamp': 1583952828410}
+        {'level': 'INFO', 'message': 'http://localhost:8080/product/type/4/edit 561:16 "info"', 'source': 'console-api', 'timestamp': 1583952828410}
+        {'level': 'WARNING', 'message': 'http://localhost:8080/product/type/4/edit 562:16 "warning"', 'source': 'console-api', 'timestamp': 1583952828410}
+        {'level': 'SEVERE', 'message': 'http://localhost:8080/product/type/4/edit 563:16 "error"', 'source': 'console-api', 'timestamp': 1583952828410}
+        """
+        for entry in self.driver.get_log('browser'):
+            self.assertNotEqual(entry['level'], 'SEVERE')
+
     def tearDown(self):
+        self.assertNoConsoleErrors()
+
         self.assertEqual([], self.verificationErrors)
 
     @classmethod
