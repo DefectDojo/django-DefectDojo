@@ -44,9 +44,9 @@ class BaseTestCase(unittest.TestCase):
         # # change path of chromedriver according to which directory you have chromedriver.
         # cls.options = Options()
         # cls.options.add_argument("--headless")
-        # # cls.options.add_experimental_option("detach", True)
-        # # cls.options.add_argument("--no-sandbox")
-        # # cls.options.add_argument("--disable-dev-shm-usage")
+        # cls.options.add_experimental_option("detach", True)
+        # cls.options.add_argument("--no-sandbox")
+        # cls.options.add_argument("--disable-dev-shm-usage")
         # cls.driver = webdriver.Chrome('chromedriver', chrome_options=cls.options)
         # cls.driver.implicitly_wait(30)
         cls.base_url = os.environ['DD_BASE_URL']
@@ -95,7 +95,7 @@ class BaseTestCase(unittest.TestCase):
         """
         for entry in self.driver.get_log('browser'):
             if (entry['level'] == 'SEVERE'):
-                print(self.driver.current_url)
+                print(self.driver.current_url)  # TODO actually this seems to be the previous url
                 print(entry)
             self.assertNotEqual(entry['level'], 'SEVERE')
 
