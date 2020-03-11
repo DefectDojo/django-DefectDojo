@@ -416,9 +416,13 @@
                     { "data": "finding_age", render: function (data, type, row) {
                             return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
                     } },
+                    
+                    {% if system_settings.enable_finding_sla %}
                     { "data": "finding_sla", render: function (data, type, row) {
                             return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
                     }},
+                    {% endif %}                    
+
                     { "data": "reported_by", render: function (data, type, row) {
                             return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
                     }},
