@@ -28,6 +28,9 @@ admin:
   lastName: User
   mail: admin@defectdojo.local
 
+monitoring:
+  enabled: false
+
 # Components
 celery:
   broker: rabbitmq

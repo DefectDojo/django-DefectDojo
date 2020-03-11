@@ -42,6 +42,7 @@ from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_
 
 from dojo.tasks import add_issue_task, update_issue_task, add_comment_task
 from django.template.defaultfilters import pluralize
+from django.db.models.query import QuerySet
 
 
 logger = logging.getLogger(__name__)
@@ -132,6 +133,9 @@ def verified_findings(request, pid=None, eid=None, view=None):
         add_breadcrumb(title="Findings", top_level=not len(request.GET), request=request)
     if jira_config:
         jira_config = jira_config.conf_id
+
+    paged_findings.object_list = prefetch_for_findings(paged_findings.object_list)
+
     return render(
         request, 'dojo/findings_list.html', {
             'show_product_column': show_product_column,
@@ -233,6 +237,9 @@ def out_of_scope_findings(request, pid=None, eid=None, view=None):
         add_breadcrumb(title="Findings", top_level=not len(request.GET), request=request)
     if jira_config:
         jira_config = jira_config.conf_id
+
+    paged_findings.object_list = prefetch_for_findings(paged_findings.object_list)
+
     return render(
         request, 'dojo/findings_list.html', {
             'show_product_column': show_product_column,
@@ -334,6 +341,9 @@ def false_positive_findings(request, pid=None, eid=None, view=None):
         add_breadcrumb(title="Findings", top_level=not len(request.GET), request=request)
     if jira_config:
         jira_config = jira_config.conf_id
+
+    paged_findings.object_list = prefetch_for_findings(paged_findings.object_list)
+
     return render(
         request, 'dojo/findings_list.html', {
             'show_product_column': show_product_column,
@@ -435,6 +445,9 @@ def inactive_findings(request, pid=None, eid=None, view=None):
         add_breadcrumb(title="Findings", top_level=not len(request.GET), request=request)
     if jira_config:
         jira_config = jira_config.conf_id
+
+    paged_findings.object_list = prefetch_for_findings(paged_findings.object_list)
+
     return render(
         request, 'dojo/findings_list.html', {
             'show_product_column': show_product_column,
@@ -539,7 +552,7 @@ def open_findings(request, pid=None, eid=None, view=None):
     if jira_config:
         jira_config = jira_config.conf_id
 
-    paged_findings.object_list = prefetch_for_open_findings(paged_findings.object_list)
+    paged_findings.object_list = prefetch_for_findings(paged_findings.object_list)
 
     return render(
         request, 'dojo/findings_list.html', {
@@ -557,14 +570,17 @@ def open_findings(request, pid=None, eid=None, view=None):
         })
 
 
-def prefetch_for_open_findings(findings):
+def prefetch_for_findings(findings):
     prefetched_findings = findings
-    prefetched_findings = prefetched_findings.select_related('jira_issue')
-    prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__jira_pkey_set__conf')
-    prefetched_findings = prefetched_findings.prefetch_related('found_by')
-    prefetched_findings = prefetched_findings.prefetch_related('risk_acceptance_set')
-    # we could try to prefetch only the latest note with SubQuery and OuterRef, but I'm getting that MySql doesn't support limits in subqueries.
-    prefetched_findings = prefetched_findings.prefetch_related('notes')
+    if isinstance(findings, QuerySet):  # old code can arrive here with prods being a list because the query was already executed
+        prefetched_findings = prefetched_findings.select_related('reporter')
+        prefetched_findings = prefetched_findings.select_related('jira_issue')
+        prefetched_findings = prefetched_findings.prefetch_related('test__test_type')
+        prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__jira_pkey_set__conf')
+        prefetched_findings = prefetched_findings.prefetch_related('found_by')
+        prefetched_findings = prefetched_findings.prefetch_related('risk_acceptance_set')
+        # we could try to prefetch only the latest note with SubQuery and OuterRef, but I'm getting that MySql doesn't support limits in subqueries.
+        prefetched_findings = prefetched_findings.prefetch_related('notes')
     return prefetched_findings
 
 
@@ -590,7 +606,9 @@ def accepted_findings(request, pid=None):
 
     product_tab = None
     if pid:
-        product_tab = Product_Tab(pid, title="Closed Findings", tab="findings")
+        product_tab = Product_Tab(pid, title="Accepted Findings", tab="findings")
+
+    paged_findings.object_list = prefetch_for_findings(paged_findings.object_list)
 
     return render(
         request, 'dojo/findings_list.html', {
@@ -612,11 +630,13 @@ def closed_findings(request, pid=None):
     ]
 
     title_words = sorted(set(title_words))
-    paged_findings = get_page_items(request, findings.qs, 25)
+    paged_findings = get_page_items(request, findings.qs.order_by('-mitigated'), 25)
 
     product_tab = None
     if pid:
         product_tab = Product_Tab(pid, title="Closed Findings", tab="findings")
+
+    paged_findings.object_list = prefetch_for_findings(paged_findings.object_list)
 
     return render(
         request, 'dojo/findings_list.html', {

@@ -300,7 +300,8 @@ class ImportScanForm(forms.Form):
                          ("Veracode Scan", "Veracode Scan"),
                          ("Checkmarx Scan", "Checkmarx Scan"),
                          ("Checkmarx Scan detailed", "Checkmarx Scan detailed"),
-                         ("Crashtest Security Scan", "Crashtest Security Scan"),
+                         ("Crashtest Security JSON File", "Crashtest Security JSON File"),
+                         ("Crashtest Security XML File", "Crashtest Security XML File"),
                          ("ZAP Scan", "ZAP Scan"),
                          ("Arachni Scan", "Arachni Scan"),
                          ("VCG Scan", "VCG Scan"),
@@ -365,7 +366,8 @@ class ImportScanForm(forms.Form):
                          ("Outpost24 Scan", "Outpost24 Scan"),
                          ("Burp Enterprise Scan", "Burp Enterprise Scan"),
                          ("DSOP Scan", "DSOP Scan"),
-                         ("Trivy Scan", "Trivy Scan"))
+                         ("Trivy Scan", "Trivy Scan"),
+                         ("Anchore Enterprise Policy Check", "Anchore Enterprise Policy Check"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
     scan_date = forms.DateTimeField(

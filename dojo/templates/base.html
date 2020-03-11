@@ -1,6 +1,5 @@
 {% load navigation_tags %}
 {% load display_tags %}
-{% load get_system_setting %}
 {% load static from staticfiles %}
 <!DOCTYPE html>
 <html lang="en">
@@ -28,7 +27,7 @@
     <link href="{% static "bootstrap/dist/css/bootstrap.min.css" %}" rel="stylesheet">
 
     <!-- MetisMenu CSS -->
-    <link href="{% static "metisMenu/dist/metisMenu.min.css" %}" rel="stylesheet">
+    <link href="{% static "metismenu/dist/metisMenu.min.css" %}" rel="stylesheet">
 
     <!-- Custom CSS -->
     <link href="{% static "startbootstrap-sb-admin-2/dist/css/sb-admin-2.css" %}" rel="stylesheet">
@@ -38,7 +37,7 @@
 
     {% block add_css %}
     {% endblock %}
-    <link rel="stylesheet" href="{% static "jquery-ui/themes/flick/jquery-ui.min.css" %}">
+    <link rel="stylesheet" href="{% static "components-jqueryui/themes/flick/jquery-ui.min.css" %}">
     <link rel="shortcut icon" href="{% static "dojo/img/favicon.ico" %}"/>
     <link rel="stylesheet" href="{% static "chosen-bootstrap/chosen.bootstrap.min.css" %}">
     <link rel="stylesheet" href="{% static "fullcalendar/dist/fullcalendar.min.css" %}">
@@ -90,9 +89,9 @@
                     <!-- /input-group -->
                 </li>
                 <li class="dropdown">
-                    <a class="dropdown-toggle dropdown-toggle-h{% alert_count %}" data-toggle="dropdown" href="#" aria-expanded="false" aria-label="{% alert_count %} Alerts">
+                    <a class="dropdown-toggle dropdown-toggle-h{{ alert_count }}" data-toggle="dropdown" href="#" aria-expanded="false" aria-label="{{ alert_count }} Alerts">
                         <i class="fa fa-bell fa-fw"></i>
-                        <span id="alert_count" class="badge badge-count badge-count{% alert_count %}">{% alert_count %}</span>
+                        <span id="alert_count" class="badge badge-count badge-count{{ alert_count }}">{{ alert_count }}</span>
                         <i class="fa fa-caret-down"></i>
                     </a>
                     <ul class="dropdown-menu dropdown-alerts">
@@ -290,7 +289,7 @@
                                     </a>
                                     <ul class="nav nav-second-level">
                                         <li><a href="{% url 'cred' %}">Credential Manager </a></li>
-                                        {% if "enable_jira"|get_system_setting %}
+                                        {% if system_settings.enable_jira %}
                                         <li><a href="{% url 'jira' %}">JIRA </a></li>
                                         {% endif %}
                                         <li><a href="{% url 'tool_config' %}">Tool Configuration </a></li>
@@ -407,7 +406,7 @@
                     </ul>
                   </li>
                   <!-- Benchmarks Tab -->
-                  {% if "enable_benchmark"|get_system_setting %}
+                  {% if system_settings.enable_benchmark %}
                   <li role="presentation" class="dropdown{% if product_tab.tab == 'benchmarks' %} active{% endif %}">
                     <a class="dropdown-toggle" data-toggle="dropdown" href=""><span class="fa fa-balance-scale" aria-hidden="true"></span>
                     <span class="hidden-xs"> Benchmarks</span>
@@ -572,12 +571,12 @@
 <!-- jQuery -->
 <script src="{% static "jquery/dist/jquery.js" %}"></script>
 <!--  jQuery UI -->
-<script src="{% static "jquery-ui/jquery-ui.min.js" %}"></script>
+<script src="{% static "components-jqueryui/jquery-ui.min.js" %}"></script>
 <!-- Bootstrap Core JavaScript -->
 <script src="{% static "bootstrap/dist/js/bootstrap.min.js" %}"></script>
 
 <!-- Metis Menu Plugin JavaScript -->
-<script src="{% static "metisMenu/dist/metisMenu.min.js" %}"></script>
+<script src="{% static "metismenu/dist/metisMenu.min.js" %}"></script>
 
 <!-- Custom Theme JavaScript -->
 <script src="{% static "startbootstrap-sb-admin-2/dist/js/sb-admin-2.js" %}"></script>
@@ -585,7 +584,7 @@
 <script src="{% static "moment/min/moment.min.js" %}"></script>
 <script src="{% static "fullcalendar/dist/fullcalendar.min.js" %}"></script>
 <!-- jquery cookie -->
-<script src="{% static "jquery-cookie/jquery.cookie.js" %}"></script>
+<script src="{% static "jquery.cookie/jquery.cookie.js" %}"></script>
 <!-- DataTables Javascript -->
 <script src="{% static "dojo/js/datatables.min.js" %}"></script>
 <!-- our JS -->

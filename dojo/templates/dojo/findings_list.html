@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% load navigation_tags %}
 {% load display_tags %}
-{% load get_system_setting %}
 {% load static from staticfiles %}
 {% block content %}
     <div class="row">
@@ -65,7 +64,7 @@
                                     <input id="id_is_Mitigated" name="is_Mitigated" type="checkbox" disabled/>
                                     <span>Mitigated</span>
                                 </label>
-                                {% if "enable_jira"|get_system_setting %}
+                                {% if system_settings.enable_jira %}
                                 <b>Push to JIRA</b> <input id="id_push_tojira" name="push_to_jira" type="checkbox" alt="Select to push to JIRA"/><br/>
                                 {% endif %}
                                 <label style="display: block">Tags</label>
@@ -128,16 +127,20 @@
                             <th class="nowrap">{% dojo_sort request 'Severity' 'numerical_severity' 'asc' %}</th>
                             <th class="nowrap">{% dojo_sort request 'Name' 'title' %}</th>
                             <th>CWE</th>
+                            {% if filter_name == 'Closed' %}
+                            <th class="nowrap">{% dojo_sort request 'Closed Date' 'mitigated'%}</th>
+                            {% else %}
                             <th class="nowrap">{% dojo_sort request 'Date' 'date'%}</th>
+                            {% endif %}
                             <th class="nowrap">Age</th>
-                            {% if 'enable_finding_sla'|fetch_system_setting %}
+                            {% if system_settings.enable_finding_sla %}
                             <th>SLA</th>
                             {% endif %}
                             <th>Reporter</th>
                             <th>Found By</th>
                             <th>Status</th>
                             <th>Jira</th>
-                            {% if "enable_jira"|get_system_setting %}
+                            {% if system_settings.enable_jira %}
                               {% if jira_config and product_tab or not product_tab %}
                                 <th>JIRA Age</th>
                                 <th>JIRA Change</th>
@@ -260,20 +263,24 @@
                                                       href="{% url 'view_finding' finding.id %}">{{ finding.id }}</a>
                                   {% endif %}
                                   {% if finding.file_path %}
-                                  <i class="fa dojo-sup fa-code has-popover" data-trigger="hover" data-content="{{ finding.file_path }}" data-placement="right" data-container="body" data-original-title="Files" title="">
+                                  <i class="fa dojo-sup fa-code has-popover" data-trigger="hover" data-content="{{ finding.file_path }}" data-placement="right" data-container="body" data-original-title="Files" title=""></i>
                                   {% else %}
                                     {% if finding.endpoints.all %}
                                       <i class="fa dojo-sup fa-sitemap has-popover" data-html="true" data-trigger="hover" data-content="
                                       {% for endpoint in finding.endpoints.all %}
                                         {{ endpoint }}<br/>
                                       {% endfor %}
-                                      " data-placement="right" data-container="body" data-original-title="Endpoints" title="">
+                                      " data-placement="right" data-container="body" data-original-title="Endpoints" title=""></i>
                                     {% endif %}
                                   {% endif %}
-                                  {% if finding.notes.all %}
-                                    <i class="fa fa-comment has-popover" data-trigger="hover" data-content="{{ finding.notes.all.0 }}" data-placement="left" data-container="body" data-original-title="Most Recent Note" title="">
+                                  {% if finding.component_name %}
+                                    <i class="fa dojo-sup fa-file has-popover" data-trigger="hover" data-placement="right"
+                                       data-content="{{ finding.component_name }} - {{ finding.component_version }}"
+                                       data-container="body" data-original-title="Component" title=""></i>
                                   {% endif %}
-                                  </i>
+                                  {% if finding.notes.all %}
+                                    <i class="fa fa-comment has-popover" data-trigger="hover" data-content="{{ finding.notes.all.0 }}" data-placement="left" data-container="body" data-original-title="Most Recent Note" title=""></i>
+                                  {% endif %}
                                     <sup>
                                         {% for tag in finding.tags %}
                                         <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
@@ -287,9 +294,13 @@
                                   </a>
                                 {% endif %}
                                 </td>
+                                {% if filter_name == 'Closed' %}
+                                <td class="nowrap">{{ finding.mitigated|date }}</td>
+                                {% else %}
                                 <td class="nowrap">{{ finding.date }}</td>
+                                {% endif %}
                                 <td>{{ finding.age }}</td>
-                                {% if 'enable_finding_sla'|fetch_system_setting %}
+                                {% if system_settings.enable_finding_sla %}
                                 <td>
                                   {{ finding|finding_sla }}
                                 </td>
@@ -308,7 +319,7 @@
                                   {% endif %}
                                 </td>
                                 <td class="nowrap">
-                                  {% if "enable_jira"|get_system_setting %}
+                                  {% if system_settings.enable_jira %}
                                     {% if finding.has_jira_issue %}
                                       <a href="{{finding.jira_conf_new.url}}/browse/{{finding.jira_issue.jira_key}}" target="_blank" 
                                            alt="Jira Bug - {{finding.jira_issue.jira_key}}" data-toggle="tooltip" data-placement="bottom" title="{{finding.jira_issue.jira_key}}"><i class="fa fa-bug fa-fw"></i></a>
@@ -320,7 +331,7 @@
                                     {% endif %}
                                   {% endif %}
                                 </td>
-                                {% if "enable_jira"|get_system_setting %}
+                                {% if system_settings.enable_jira %}
                                   {% if jira_config and product_tab or not product_tab %}
                                       <td class="nowrap">
                                         {% if finding.jira_creation %}
@@ -420,7 +431,7 @@
                     { "data": "jira_id", render: function (data, type, row) {
                             return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
                     }},
-                    {% if "enable_jira"|get_system_setting %}
+                    {% if system_settings.enable_jira %}
                         { "data": "jira_age", render: function (data, type, row) {
                                 return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
                         }},
