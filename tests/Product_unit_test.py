@@ -297,19 +297,27 @@ class ProductTest(BaseTestCase):
     def test_delete_product(self):
         # Login to the site. Password will have to be modified
         # to match an admin password in your own container
+        print('1:', self.driver.get_log('browser'))
         driver = self.login_page()
         # Navigate to the product page
         driver.get(self.base_url + "product")
+        print('2:', self.driver.get_log('browser'))
+
         # Select the specific product to delete
         driver.find_element_by_link_text("QA Test").click()
         # Click the drop down menu
+        print('3:', self.driver.get_log('browser'))
         driver.find_element_by_id('dropdownMenu1').click()
         # "Click" the Delete option
+        print('4:', self.driver.get_log('browser'))
         driver.find_element_by_link_text("Delete").click()
         # "Click" the delete button to complete the transaction
+        print('5:', self.driver.get_log('browser'))
         driver.find_element_by_css_selector("button.btn.btn-danger").click()
+        print('6:', self.driver.get_log('browser'))
         # Query the site to determine if the product has been added
         productTxt = driver.find_element_by_tag_name("BODY").text
+        print('7:', self.driver.get_log('browser'))
         # Assert ot the query to dtermine status of failure
         self.assertTrue(re.search(r'Product and relationships removed.', productTxt))
 

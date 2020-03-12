@@ -7,35 +7,6 @@ dd_driver = None
 dd_driver_options = None
 
 
-class WebdriverLogFacade(object):
-
-    last_timestamp = 0
-
-    def __init__(self, webdriver):
-        self._webdriver = webdriver
-
-    def get_log(self, log_type):
-        last_timestamp = self.last_timestamp
-        entries = self._webdriver.get_log(log_type)
-        filtered = []
-
-        for entry in entries:
-            # check the logged timestamp against the
-            # stored timestamp
-            if entry["timestamp"] > self.last_timestamp:
-                filtered.append(entry)
-
-                # save the last timestamp only if newer
-                # in this set of logs
-                if entry["timestamp"] > last_timestamp:
-                    last_timestamp = entry["timestamp"]
-
-        # store the very last timestamp
-        self.last_timestamp = last_timestamp
-
-        return filtered
-
-
 class BaseTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -125,9 +96,13 @@ class BaseTestCase(unittest.TestCase):
         {'level': 'SEVERE', 'message': 'http://localhost:8080/product/type/4/edit 563:16 "error"', 'source': 'console-api', 'timestamp': 1583952828410}
         """
 
-        for entry in WebdriverLogFacade(self.driver).get_log('browser'):
+        for entry in WebdriverOnlyNewLogFacade(self.driver).get_log('browser'):
             if (entry['level'] == 'SEVERE'):
                 print(self.driver.current_url)  # TODO actually this seems to be the previous url
+                self.driver.save_screenshot("C:\\Data\\django-DefectDojo\\tests\\javascript-errors.png")
+                with open("C:\\Data\\django-DefectDojo\\tests\\javascript-errors.html", "w") as f:
+                    f.write(self.driver.page_source)
+
                 print(entry)
                 if self.accept_javascript_errors:
                     print('WARNING: skipping SEVERE javascript error because accept_javascript_errors is True!')
@@ -149,3 +124,32 @@ class BaseTestCase(unittest.TestCase):
             if not dd_driver_options.experimental_options or not dd_driver_options.experimental_options['detach']:
                 print('closing browser')
                 dd_driver.quit()
+
+
+class WebdriverOnlyNewLogFacade(object):
+
+    last_timestamp = 0
+
+    def __init__(self, webdriver):
+        self._webdriver = webdriver
+
+    def get_log(self, log_type):
+        last_timestamp = self.last_timestamp
+        entries = self._webdriver.get_log(log_type)
+        filtered = []
+
+        for entry in entries:
+            # check the logged timestamp against the
+            # stored timestamp
+            if entry["timestamp"] > self.last_timestamp:
+                filtered.append(entry)
+
+                # save the last timestamp only if newer
+                # in this set of logs
+                if entry["timestamp"] > last_timestamp:
+                    last_timestamp = entry["timestamp"]
+
+        # store the very last timestamp
+        self.last_timestamp = last_timestamp
+
+        return filtered
