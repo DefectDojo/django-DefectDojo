@@ -26,8 +26,10 @@ class FindingTest(unittest.TestCase):
     def setUp(self):
         self.options = Options()
         self.options.add_argument("--headless")
+        # self.options.add_experimental_option("detach", True)
         # self.options.add_argument("--no-sandbox")
         # self.options.add_argument("--disable-dev-shm-usage")
+        self.options.add_argument("--window-size=1280,768")
         self.driver = webdriver.Chrome('chromedriver', chrome_options=self.options)
         self.driver.implicitly_wait(30)
         self.base_url = os.environ['DD_BASE_URL']
@@ -50,6 +52,31 @@ class FindingTest(unittest.TestCase):
         # "Click" the but the login button
         driver.find_element_by_css_selector("button.btn.btn-success").click()
         return driver
+
+    def test_list_finding(self):
+        # bulk edit dropdown menu
+        driver = self.login_page()
+        driver.get(self.base_url + "finding")
+
+        driver.find_element_by_id("select_all").click()
+
+        driver.find_element_by_id("dropdownMenu2").click()
+
+        bulk_edit_menu = driver.find_element_by_id("bulk_edit_menu")
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_active").is_enabled(), False)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_verified").is_enabled(), False)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_false_p").is_enabled(), False)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_out_of_scope").is_enabled(), False)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_is_Mitigated").is_enabled(), False)
+
+        driver.find_element_by_id("id_bulk_status").click()
+
+        bulk_edit_menu = driver.find_element_by_id("bulk_edit_menu")
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_active").is_enabled(), True)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_verified").is_enabled(), True)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_false_p").is_enabled(), True)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_out_of_scope").is_enabled(), True)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_is_Mitigated").is_enabled(), True)
 
     def test_edit_finding(self):
         # The Name of the Finding created by test_add_product_finding => 'App Vulnerable to XSS'
@@ -300,6 +327,7 @@ def suite():
     # success and failure is output by the test
     suite.addTest(product_unit_test.ProductTest('test_create_product'))
     suite.addTest(product_unit_test.ProductTest('test_add_product_finding'))
+    suite.addTest(FindingTest('test_list_finding'))
     suite.addTest(FindingTest('test_edit_finding'))
     suite.addTest(FindingTest('test_add_image'))
     suite.addTest(FindingTest('test_mark_finding_for_review'))
@@ -316,6 +344,6 @@ def suite():
 
 
 if __name__ == "__main__":
-    runner = unittest.TextTestRunner(descriptions=True, failfast=True)
+    runner = unittest.TextTestRunner(descriptions=True, failfast=True, verbosity=2)
     ret = not runner.run(suite()).wasSuccessful()
     sys.exit(ret)
