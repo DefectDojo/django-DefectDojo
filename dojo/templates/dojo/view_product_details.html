@@ -343,7 +343,7 @@
         $('input#simple_search').val(terms);
       }
 
-      {% if languages %}
+      {% if languages and langSummary.files__count > 0 %}
       severity_pie();
       function severity_pie() {
           var data = [
