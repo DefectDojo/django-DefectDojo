@@ -58,6 +58,12 @@ class ProductTest(BaseTestCase):
         self.assertTrue(re.search(r'Product added successfully', productTxt) or
             re.search(r'Product with this Name already exists.', productTxt))
 
+    def test_list_products(self):
+        driver = self.login_page()
+        # Navigate to the product page
+        driver.get(self.base_url + "product")
+        # list products which will make sure there are no javascript errors such as before in https://github.com/DefectDojo/django-DefectDojo/issues/2050
+
     # For product consistency sake, We won't be editting the product title
     # instead We can edit the product description
     def test_edit_product_description(self):
@@ -319,6 +325,7 @@ def suite():
     suite.addTest(ProductTest('test_edit_product_custom_field'))
     suite.addTest(ProductTest('test_add_product_tracking_files'))
     suite.addTest(ProductTest('test_edit_product_tracking_files'))
+    suite.addTest(ProductTest('test_list_products'))
     suite.addTest(ProductTest('test_delete_product'))
     return suite
 
