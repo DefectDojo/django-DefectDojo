@@ -639,10 +639,11 @@ class ImportScanView(mixins.CreateModelMixin,
         enabled = False
         push_to_jira = serializer.validated_data.get('push_to_jira')
         # IF JIRA is enabled and this product has a JIRA configuration
-        if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(
-                product=serializer.instance.engagement.product) != 0:
+        engagement = serializer.validated_data['engagement']
+        jira_config = engagement.product.jira_pkey_set.first() is not None
+        if get_system_setting('enable_jira') and jira_config:
             # Check if push_all_issues is set on this product
-            enabled = serializer.instance.engagement.product.jira_pkey_set.first().push_all_issues
+            enabled = engagement.product.jira_pkey_set.first().push_all_issues
 
         # If push_all_issues is set:
         if enabled:
@@ -660,11 +661,12 @@ class ReImportScanView(mixins.CreateModelMixin,
         # Override CreateModeMixin to pass in push_to_jira if needed.
         enabled = False
         push_to_jira = serializer.validated_data.get('push_to_jira')
+        test = serializer.validated_data['test']
+        jira_config = test.engagement.product.jira_pkey_set.first() is not None
         # IF JIRA is enabled and this product has a JIRA configuration
-        if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(
-                product=serializer.instance.engagement.product) != 0:
+        if get_system_setting('enable_jira') and jira_config:
             # Check if push_all_issues is set on this product
-            enabled = serializer.instance.engagement.product.jira_pkey_set.first().push_all_issues
+            enabled = test.engagement.product.jira_pkey_set.first().push_all_issues
 
         # If push_all_issues is set:
         if enabled:
