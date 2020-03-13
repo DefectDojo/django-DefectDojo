@@ -42,7 +42,7 @@ For detailed documentation you can visit
 
 ## Supported Installation Options
 * [Kubernetes](KUBERNETES.md)
-* [Setup.bash](https://github.com/DefectDojo/django-DefectDojo/blob/dev/setup/README.MD)
+* [Setup.bash](https://github.com/DefectDojo/django-DefectDojo/blob/dev/setup/README.md)
 * [Docker](DOCKER.md)
 
 ## Getting Started
@@ -59,11 +59,11 @@ should give you an idea of how to use DefectDojo for your own team.
 ## Client APIs and wrappers
 This section presents different ways to programmatically interact with defectdojo APIs.
 
-See [Wrappers](WRAPPERS.MD)
+See [Wrappers](WRAPPERS.md)
 
 
 ## Release and branch model
-See [Release and branch model](BRANCHING-MODEL.MD)
+See [Release and branch model](BRANCHING-MODEL.md)
 
 
 ## Getting Involved
