@@ -456,6 +456,7 @@ def prefetch_for_view_engagements(engs):
     if isinstance(engs, QuerySet):  # old code can arrive here with prods being a list because the query was already executed
         prefetched_engs = prefetched_engs.select_related('lead')
         prefetched_engs = prefetched_engs.prefetch_related('test_set')
+        prefetched_engs = prefetched_engs.prefetch_related('test_set__test_type')  # test.name uses test_type
         prefetched_engs = prefetched_engs.annotate(count_findings_all=Count('test__finding__id'))
         prefetched_engs = prefetched_engs.annotate(count_findings_open=Count('test__finding__id', filter=Q(test__finding__active=True)))
         prefetched_engs = prefetched_engs.annotate(count_findings_duplicate=Count('test__finding__id', filter=Q(test__finding__duplicate=True)))
