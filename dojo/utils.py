@@ -1149,7 +1149,7 @@ def log_jira_alert(error, finding):
     prod_name = finding.test.engagement.product.name
     create_notification(
         event='jira_update',
-        title='Jira update issue (' + (prod_name[:22] + '...' if len(prod_name > 25) else prod_name) + ')',
+        title='Jira update issue (' + truncate_with_dots(prod_name, 25) + ')',
         description='Finding: ' + str(finding.id) + ', ' + error,
         url=reverse('view_finding', args=(finding.id, )),
         icon='bullseye',
@@ -1967,3 +1967,9 @@ def apply_cwe_to_template(finding, override=False):
 
 def max_safe(list):
     return max(i for i in list if i is not None)
+
+
+def truncate_with_dots(the_string, max_length_including_dots):
+    if not the_string:
+        return the_string
+    return (the_string[:22] + '...' if len(the_string) > 25 else the_string)
