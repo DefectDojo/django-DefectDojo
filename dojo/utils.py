@@ -1148,7 +1148,7 @@ def log_jira_generic_alert(title, description):
 def log_jira_alert(error, finding):
     create_notification(
         event='jira_update',
-        title='Jira update issue (' + finding.product.name[:25] + ')',
+        title='Jira update issue (' + finding.test.engagement.product.name[:25] + ')',
         description='Finding: ' + str(finding.id) + ', ' + error,
         url=reverse('view_finding', args=(finding.id, )),
         icon='bullseye',
