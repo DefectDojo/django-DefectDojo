@@ -21,7 +21,7 @@ from dojo.filters import ProductFilter, ProductFindingFilter, EngagementFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAPKeyForm, JIRAFindingForm, AdHocFindingForm, \
                        EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm
 from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, Finding_Template, \
-    Tool_Product_Settings, Cred_Mapping, Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, \
+    Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, \
     Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product
 from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, create_notification, Product_Tab, get_punchcard_data
 from custom_field.models import CustomFieldValue, CustomField
@@ -465,43 +465,6 @@ def view_engagements_cicd(request, pid):
 def import_scan_results_prod(request, pid=None):
     from dojo.engagement.views import import_scan_results
     return import_scan_results(request, pid=pid)
-
-
-def view_product_details(request, pid):
-    prod = get_object_or_404(Product, id=pid)
-    scan_sets = ScanSettings.objects.filter(product=prod)
-    tools = Tool_Product_Settings.objects.filter(product=prod).order_by('name')
-    auth = request.user.is_staff or request.user in prod.authorized_users.all()
-    creds = Cred_Mapping.objects.filter(product=prod).select_related('cred_id').order_by('cred_id')
-    langSummary = Languages.objects.filter(product=prod).aggregate(Sum('files'), Sum('code'), Count('files'))
-    languages = Languages.objects.filter(product=prod).order_by('-code')
-    app_analysis = App_Analysis.objects.filter(product=prod).order_by('name')
-    benchmark_type = Benchmark_Type.objects.filter(enabled=True).order_by('name')
-    benchmarks = Benchmark_Product_Summary.objects.filter(product=prod, publish=True, benchmark_type__enabled=True).order_by('benchmark_type__name')
-    system_settings = System_Settings.objects.get()
-
-    if not auth:
-        # will render 403
-        raise PermissionDenied
-
-    product_metadata = dict(prod.product_meta.values_list('name', 'value'))
-
-    add_breadcrumb(parent=product, title="Details", top_level=False, request=request)
-    return render(request,
-                  'dojo/view_product_details.html',
-                  {'prod': prod,
-                   'benchmark_type': benchmark_type,
-                   'benchmarks': benchmarks,
-                   'product_metadata': product_metadata,
-                   'scan_sets': scan_sets,
-                   'tools': tools,
-                   'creds': creds,
-                   'user': request.user,
-                   'languages': languages,
-                   'langSummary': langSummary,
-                   'app_analysis': app_analysis,
-                   'system_settings': system_settings,
-                   'authorized': auth})
 
 
 @user_passes_test(lambda u: u.is_staff)
