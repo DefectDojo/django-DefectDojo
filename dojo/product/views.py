@@ -451,10 +451,13 @@ def view_engagements(request, pid, engagement_type="Interactive"):
 
 
 def prefetch_for_view_engagements(engs):
-    prefetched_engs = engs.prefetch_related('test_set')
-    prefetched_engs = prefetched_engs.annotate(count_findings_all=Count('test__finding__id'))
-    prefetched_engs = prefetched_engs.annotate(count_findings_open=Count('test__finding__id', filter=Q(test__finding__active=True)))
-    prefetched_engs = prefetched_engs.annotate(count_findings_duplicate=Count('test__finding__id', filter=Q(test__finding__duplicate=True)))
+    prefetched_engs = engs
+    if isinstance(engs, QuerySet):  # old code can arrive here with prods being a list because the query was already executed
+        prefetched_engs = prefetched_engs.prefetch_related('test_set')
+        prefetched_engs = prefetched_engs.annotate(count_findings_all=Count('test__finding__id'))
+        prefetched_engs = prefetched_engs.annotate(count_findings_open=Count('test__finding__id', filter=Q(test__finding__active=True)))
+        prefetched_engs = prefetched_engs.annotate(count_findings_duplicate=Count('test__finding__id', filter=Q(test__finding__duplicate=True)))
+        prefetched_engs = prefetched_engs.prefetch_related('tagged_items__tag')
     return prefetched_engs
 
 
