@@ -1150,6 +1150,7 @@ def log_jira_alert(error, finding):
         event='jira_update',
         title='Jira update issue',
         description='Finding: ' + str(finding.id) + ', ' + error,
+        url=reverse('view_finding', args=(finding.id, )),
         icon='bullseye',
         source='Jira')
 
