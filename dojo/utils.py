@@ -1145,10 +1145,12 @@ def log_jira_generic_alert(title, description):
 
 # Logs the error to the alerts table, which appears in the notification toolbar
 def log_jira_alert(error, finding):
+    prod_name = finding.test.engagement.product.name
     create_notification(
         event='jira_update',
-        title='Jira update issue',
+        title='Jira update issue (' + truncate_with_dots(prod_name, 25) + ')',
         description='Finding: ' + str(finding.id) + ', ' + error,
+        url=reverse('view_finding', args=(finding.id, )),
         icon='bullseye',
         source='Jira')
 
@@ -1960,3 +1962,9 @@ def apply_cwe_to_template(finding, override=False):
             template.save()
 
     return finding
+
+
+def truncate_with_dots(the_string, max_length_including_dots):
+    if not the_string:
+        return the_string
+    return (the_string[:max_length_including_dots - 3] + '...' if len(the_string) > max_length_including_dots else the_string)
