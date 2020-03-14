@@ -1146,9 +1146,10 @@ def log_jira_generic_alert(title, description):
 
 # Logs the error to the alerts table, which appears in the notification toolbar
 def log_jira_alert(error, finding):
+    prod_name = finding.test.engagement.product.name
     create_notification(
         event='jira_update',
-        title='Jira update issue (' + finding.test.engagement.product.name[:25] + ')',
+        title='Jira update issue (' + (prod_name[:22] + '...' if len(prod_nam > 25) else prod_name) + ')',
         description='Finding: ' + str(finding.id) + ', ' + error,
         url=reverse('view_finding', args=(finding.id, )),
         icon='bullseye',
