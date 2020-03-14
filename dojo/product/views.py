@@ -99,7 +99,8 @@ def iso_to_gregorian(iso_year, iso_week, iso_day):
 
 
 def view_product(request, pid):
-    prod = get_object_or_404(Product, id=pid)
+    prod_query = Product.objects.all().select_related('product_manager', 'technical_contact', 'team_manager')
+    prod = get_object_or_404(prod_query, id=pid)
     auth = request.user.is_staff or request.user in prod.authorized_users.all()
     if not auth:
         # will render 403
