@@ -404,7 +404,6 @@ class ProductTypeViewSet(mixins.ListModelMixin,
                          mixins.RetrieveModelMixin,
                          mixins.CreateModelMixin,
                          mixins.UpdateModelMixin,
-                         ra_api.AcceptedRisksMixin,
                          viewsets.GenericViewSet):
     serializer_class = serializers.ProductTypeSerializer
     queryset = Product_Type.objects.all()

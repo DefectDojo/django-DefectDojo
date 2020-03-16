@@ -398,10 +398,6 @@ class Product_Type(models.Model):
         return Finding.objects.filter(active=True, verified=True, duplicate=False,
                                       test__engagement__product__prod_type=self).exclude(id__in=accepted_ids)
 
-    def accept_risks(self, accepted_risks):
-        for engagement in Engagement.objects.filter(product__prod_type=self):
-            engagement.risk_acceptance.add(*accepted_risks)
-
     # def products_count(self):
     #     return Product.objects.filter(prod_type=self).count()
 
