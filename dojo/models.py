@@ -2577,6 +2577,15 @@ class FieldRule(models.Model):
     text = models.CharField(max_length=200)
 
 
+class CommonNote(models.Model):
+    notes = models.ManyToManyField(Notes, blank=True,
+                                   editable=False)
+    title = models.TextField(max_length=1000)
+    scanner = models.TextField(max_length=100)
+    product = models.TextField(max_length=100)
+    cwe = models.IntegerField(default=0, null=True, blank=True)
+
+
 # Register for automatic logging to database
 auditlog.register(Dojo_User)
 auditlog.register(Endpoint)
