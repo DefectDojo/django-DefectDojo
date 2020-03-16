@@ -34,6 +34,7 @@ from functools import reduce
 logger = logging.getLogger(__name__)
 parse_logger = logging.getLogger('dojo')
 
+
 def view_test(request, tid):
     test = get_object_or_404(Test, pk=tid)
     prod = test.engagement.product
@@ -723,15 +724,16 @@ def re_import_scan_results(request, tid):
                 to_mitigate = set(original_items) - set(new_items)
                 for finding_id in to_mitigate:
                     finding = Finding.objects.get(id=finding_id)
-                    finding.mitigated = datetime.combine(scan_date, timezone.now().time())
-                    finding.mitigated_by = request.user
-                    finding.active = False
-                    finding.save()
-                    note = Notes(entry="Mitigated by %s re-upload." % scan_type,
-                                 author=request.user)
-                    note.save()
-                    finding.notes.add(note)
-                    mitigated_count += 1
+                    if not finding.mitigated or not finding.is_Mitigated:
+                        finding.mitigated = datetime.combine(scan_date, timezone.now().time())
+                        finding.mitigated_by = request.user
+                        finding.active = False
+                        finding.save()
+                        note = Notes(entry="Mitigated by %s re-upload." % scan_type,
+                                    author=request.user)
+                        note.save()
+                        finding.notes.add(note)
+                        mitigated_count += 1
                 messages.add_message(request,
                                      messages.SUCCESS,
                                      '%s processed, a total of ' % scan_type + message(finding_count, 'finding',
