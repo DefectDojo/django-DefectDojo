@@ -85,7 +85,7 @@ class TestRiskAcceptanceApi(APITestCase):
         accepted_risks = [{'cve': 'CVE-1999-{}'.format(i), 'justification': 'Demonstration purposes',
                            'accepted_by': 'King of the Internet'} for i in range(60, 140)]
         result = self.client.post(reverse('finding-accept-risks'), data=accepted_risks, format='json')
-        self.assertEquals(len(result.json()), 80)
+        self.assertEquals(len(result.json()), 106)
         self.assertEquals(Finding.unaccepted_open_findings().count(), 62)
 
         self.assertEquals(self.engagement_2a.risk_acceptance.count(), 0)

@@ -55,12 +55,14 @@ class AcceptedFindingsMixin(ABC):
             accepted_risks = serializer.save()
         else:
             return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        base_findings = Finding.unaccepted_open_findings()
         reporter = request.user
-        accepted = _accept_risks(accepted_risks, base_findings, reporter)
+        accepted_result = []
         for engagement in Engagement.objects.all():
+            base_findings = engagement.unaccepted_open_findings
+            accepted = _accept_risks(accepted_risks, base_findings, reporter)
             engagement.accept_risks(accepted)
-        result = RiskAcceptanceSerializer(instance=accepted, many=True)
+            accepted_result.extend(accepted)
+        result = RiskAcceptanceSerializer(instance=accepted_result, many=True)
         return Response(result.data)
 
 

@@ -604,17 +604,6 @@ class Product(models.Model):
                                             test__engagement__product=self).count()
             return self.active_finding_count
 
-    @property
-    def unaccepted_open_findings(self):
-        accepted_findings = Finding.objects.filter(risk_acceptance__engagement__in=self.engagement_set)
-        accepted_ids = [f.id for f in accepted_findings.only('id')]
-        return Finding.objects.filter(active=True, verified=True, duplicate=False,
-                                      test__engagement__product=self).exclude(id__in=accepted_ids)
-
-    def accept_risks(self, accepted_risks):
-        for engagement in self.engagement_set:
-            engagement.risk_acceptance.add(*accepted_risks)
-
     # @property
     # def active_engagement_count(self):
     #     return Engagement.objects.filter(active=True, product=self).count()
