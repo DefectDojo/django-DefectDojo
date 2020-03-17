@@ -9,7 +9,7 @@ from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 
 from dojo.api_v2.serializers import RiskAcceptanceSerializer
-from dojo.models import Engagement, Finding, Risk_Acceptance, User
+from dojo.models import Engagement, Risk_Acceptance, User
 
 AcceptedRisk = NamedTuple('AcceptedRisk', (('cve', str), ('justification', str), ('accepted_by', str)))
 
