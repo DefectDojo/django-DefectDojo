@@ -18,7 +18,7 @@
 {% endfor %}
 
 {% for field in form.visible_fields %}
-    {% with template_value=template|get_attribute:field.name %}
+    {% with template_value=template|get_attribute:field.name|default_if_none:'' %}
     <div class="form-group{% if field.errors %} has-error{% endif %}">
         <label class="col-sm-2 control-label">{{ field.label }} Option</label>
         <div class="col-sm-10 {{ classes.value }}">

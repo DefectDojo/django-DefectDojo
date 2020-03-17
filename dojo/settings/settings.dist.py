@@ -216,8 +216,7 @@ STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    os.path.join(os.path.dirname(DOJO_ROOT), 'components', 'node_modules',
-                 '@yarn_components'),
+    os.path.join(os.path.dirname(DOJO_ROOT), 'components', 'node_modules'),
 )
 
 # List of finder classes that know how to find static files in
@@ -446,7 +445,7 @@ TEMPLATES = [
                 'social_django.context_processors.backends',
                 'social_django.context_processors.login_redirect',
                 'dojo.context_processors.globalize_oauth_vars',
-                'dojo.context_processors.bind_system_settings',
+                'dojo.context_processors.bind_alert_count',
             ],
         },
     },
