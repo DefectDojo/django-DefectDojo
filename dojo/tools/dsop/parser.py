@@ -35,7 +35,7 @@ class DsopParser:
             impact = row.rationale
             date = row.scanned_date.date()
             tags = "disa"
-            
+
             finding = Finding(title=title, date=date, cve=cve, severity=severity, description=description,
                         impact=impact, references=references, test=self._test, unique_id_from_tool=unique_id)
             finding.unsaved_tags = tags
@@ -64,7 +64,7 @@ class DsopParser:
             cve = row.ref
             tags = "oval"
 
-            finding = Finding(title=title, cve=cve, severity=severity, unique_id_from_tool=unique_id, 
+            finding = Finding(title=title, cve=cve, severity=severity, unique_id_from_tool=unique_id,
                     test=self._test)
             finding.unsaved_tags = tags
             self._items.append(finding)
