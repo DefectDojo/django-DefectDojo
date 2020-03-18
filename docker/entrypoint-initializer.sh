@@ -9,8 +9,6 @@ then
 fi
 echo "Initializing."
 
-echo "Admin user: ${DD_ADMIN_USER}"
-
 echo -n "Waiting for database to be reachable "
 until echo "select 1;" | python3 manage.py dbshell > /dev/null
 do
@@ -22,6 +20,7 @@ echo
 python3 manage.py makemigrations dojo
 python3 manage.py migrate
 
+echo "Admin user: ${DD_ADMIN_USER}"
 ADMIN_EXISTS=$(echo "SELECT * from auth_user;" | python manage.py dbshell | grep admin)
 # Abort if the admin user already exists, instead of giving a new fake password that won't work
 if [ ! -z "$ADMIN_EXISTS" ]
