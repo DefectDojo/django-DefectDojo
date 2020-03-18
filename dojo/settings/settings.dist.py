@@ -445,6 +445,7 @@ TEMPLATES = [
                 'social_django.context_processors.backends',
                 'social_django.context_processors.login_redirect',
                 'dojo.context_processors.globalize_oauth_vars',
+                'dojo.context_processors.bind_system_settings',
                 'dojo.context_processors.bind_alert_count',
             ],
         },
@@ -504,6 +505,7 @@ DJANGO_MIDDLEWARE_CLASSES = [
     'dojo.middleware.TimezoneMiddleware',
     'social_django.middleware.SocialAuthExceptionMiddleware',
     'watson.middleware.SearchContextMiddleware',
+    'auditlog.middleware.AuditlogMiddleware',
 ]
 
 MIDDLEWARE = DJANGO_MIDDLEWARE_CLASSES
