@@ -11,13 +11,6 @@ echo "Initializing."
 
 echo "Admin user: ${DD_ADMIN_USER}"
 
-if [ -z "${DD_ADMIN_PASSWORD}" ]
-then
-  export DD_ADMIN_PASSWORD="$(cat /dev/urandom | LC_ALL=C tr -dc a-zA-Z0-9 | \
-    head -c 22)"
-  echo "Admin password: ${DD_ADMIN_PASSWORD}"
-fi
-
 echo -n "Waiting for database to be reachable "
 until echo "select 1;" | python3 manage.py dbshell > /dev/null
 do
@@ -30,6 +23,21 @@ python3 manage.py makemigrations dojo
 python3 manage.py migrate
 
 ADMIN_EXISTS=$(echo "SELECT * from auth_user;" | python manage.py dbshell | grep admin)
+# Abort if the admin user already exists, instead of giving a new fake password that won't work
+if [ ! -z "$ADMIN_EXISTS" ]
+then
+    echo "Initialization detected that the admin user ${DD_ADMIN_USER} already exists in your database."
+    echo "If you don't remember the password for, you can create a new superuser with:"
+    echo "$ docker-compose exec uswgi /bin/bash -c 'python manage.py createsuperuser'"
+    exit
+fi
+
+if [ -z "${DD_ADMIN_PASSWORD}" ]
+then
+  export DD_ADMIN_PASSWORD="$(cat /dev/urandom | LC_ALL=C tr -dc a-zA-Z0-9 | \
+    head -c 22)"
+  echo "Admin password: ${DD_ADMIN_PASSWORD}"
+fi
 
 if [ -z "${ADMIN_EXISTS}" ]
 then
