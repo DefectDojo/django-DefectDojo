@@ -504,6 +504,7 @@ DJANGO_MIDDLEWARE_CLASSES = [
     'dojo.middleware.LoginRequiredMiddleware',
     'dojo.middleware.TimezoneMiddleware',
     'social_django.middleware.SocialAuthExceptionMiddleware',
+    'auditlog.middleware.AuditlogMiddleware',
 ]
 
 MIDDLEWARE = DJANGO_MIDDLEWARE_CLASSES
