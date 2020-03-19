@@ -22,7 +22,7 @@ class DsopParser:
     def __parse_disa(self, df: pd.DataFrame):
         for row in df.itertuples(index=False):
             if row.result not in ('fail', 'notchecked'):
-                pass
+                continue
             title = row.title
             unique_id = row.ruleid
             if row.severity == 'unknown':
@@ -34,15 +34,18 @@ class DsopParser:
             description = row.desc
             impact = row.rationale
             date = row.scanned_date.date()
-            self._items.append(
-                Finding(title=title, date=date, cve=cve, severity=severity, description=description,
-                        impact=impact, references=references, test=self._test, unique_id_from_tool=unique_id))
+            tags = "disa"
+
+            finding = Finding(title=title, date=date, cve=cve, severity=severity, description=description,
+                        impact=impact, references=references, test=self._test, unique_id_from_tool=unique_id)
+            finding.unsaved_tags = tags
+            self._items.append(finding)
 
     def __parse_oval(self, df: pd.DataFrame):
         severity_pattern = re.compile(r'\((.*)\)')
         for row in df.itertuples(index=False):
-            if not row.result:
-                pass
+            if not row.result or row.result in ('false'):
+                continue
             title = row.title
             match = severity_pattern.search(title)
             if match:
@@ -59,15 +62,18 @@ class DsopParser:
                 severity = 'Info'
             unique_id = row.id
             cve = row.ref
-            self._items.append(
-                Finding(title=title, cve=cve, severity=severity, unique_id_from_tool=unique_id, test=self._test))
+            tags = "oval"
+
+            finding = Finding(title=title, cve=cve, severity=severity, unique_id_from_tool=unique_id,
+                    test=self._test)
+            finding.unsaved_tags = tags
+            self._items.append(finding)
 
     def __parse_twistlock(self, df: pd.DataFrame):
         for row in df.itertuples(index=False):
-            if row.status != 'affected':
-                pass
-            cve = row.cve
+            cve = row.id
             description = row.desc
+            mitigation = row.status
             url = row.link
             component_name = row.packageName
             component_version = row.packageVersion
@@ -79,17 +85,27 @@ class DsopParser:
             else:
                 severity = row.severity.title()
             severity_justification = row.vecStr
-            self._items.append(Finding(title=title, cve=cve, url=url, severity=severity, description=description,
-                                       severity_justification=severity_justification, test=self._test))
+            tags = "twistlock"
+
+            finding = Finding(title=title, cve=cve, url=url, severity=severity, description=description,
+                                       severity_justification=severity_justification, test=self._test)
+            finding.unsaved_tags = tags
+            self._items.append(finding)
 
     def __parse_anchore(self, df: pd.DataFrame):
         for row in df.itertuples(index=False):
-            tag = row.tag
             cve = row.cve
             severity = row.severity
             component = row.vuln
+            mitigation = row.fix
+            description = "Image affected: {}".format(row.tag)
             title = '{}: {}'.format(cve, component)
-            self._items.append(Finding(title=title, cve=cve, severity=severity, impact=tag, test=self._test))
+            tags = "anchore"
+
+            finding = Finding(title=title, cve=cve, severity=severity,
+                                    description=description, test=self._test)
+            finding.unsaved_tags = tags
+            self._items.append(finding)
 
     @property
     def items(self):
