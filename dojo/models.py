@@ -25,6 +25,7 @@ from multiselectfield import MultiSelectField
 from django import forms
 from django.utils.translation import gettext as _
 from dojo.signals import dedupe_signal
+from django.core.cache import cache
 
 fmt = getattr(settings, 'LOG_FORMAT', None)
 lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
@@ -87,6 +88,16 @@ class Regulation(models.Model):
 
     def __str__(self):
         return self.acronym + ' (' + self.jurisdiction + ')'
+
+
+class SystemSettingsManager(models.Manager):
+    CACHE_KEY = 'defect_dojo_cache.system_settings'
+
+    def get(self, no_cache=False, *args, **kwargs):
+        # cache only 30s because django default cache backend is local per process
+        if no_cache:
+            return super(SystemSettingsManager, self).get(*args, **kwargs)
+        return cache.get_or_set(self.CACHE_KEY, lambda: super(SystemSettingsManager, self).get(*args, **kwargs), timeout=30)
 
 
 class System_Settings(models.Model):
@@ -254,6 +265,12 @@ class System_Settings(models.Model):
     column_widths = models.CharField(max_length=1500, blank=True)
     drive_folder_ID = models.CharField(max_length=100, blank=True)
     enable_google_sheets = models.BooleanField(default=False, null=True, blank=True)
+
+    objects = SystemSettingsManager()
+
+    def save(self, *args, **kwargs):
+        super(System_Settings, self).save(*args, **kwargs)
+        cache.delete(SystemSettingsManager.CACHE_KEY)
 
 
 class SystemSettingsFormAdmin(forms.ModelForm):
