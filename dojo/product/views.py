@@ -85,7 +85,6 @@ def prefetch_for_product(prods):
         prefetched_prods = prefetched_prods.prefetch_related(Prefetch('jira_pkey_set', queryset=JIRA_PKey.objects.all().select_related('conf'), to_attr='jira_confs'))
         active_endpoint_query = Endpoint.objects.filter(
                 finding__active=True,
-                finding__verified=True,
                 finding__mitigated__isnull=True)
         prefetched_prods = prefetched_prods.prefetch_related(Prefetch('endpoint_set', queryset=active_endpoint_query, to_attr='active_endpoints'))
 
@@ -207,6 +206,7 @@ def view_product_metrics(request, pid):
     verified_findings = Finding.objects.filter(test__engagement__product=prod,
                                                date__range=[start_date, end_date],
                                                false_p=False,
+                                               active=True,
                                                verified=True,
                                                duplicate=False,
                                                out_of_scope=False).order_by("date")
@@ -226,7 +226,6 @@ def view_product_metrics(request, pid):
                                            duplicate=False,
                                            out_of_scope=False,
                                            active=True,
-                                           verified=False,
                                            mitigated__isnull=True)
 
     inactive_findings = Finding.objects.filter(test__engagement__product=prod,
@@ -261,7 +260,6 @@ def view_product_metrics(request, pid):
     open_vulnerabilities = Finding.objects.filter(
         test__engagement__product=prod,
         false_p=False,
-        verified=False,
         duplicate=False,
         out_of_scope=False,
         active=True,
@@ -685,8 +683,7 @@ def all_product_findings(request, pid):
     result = ProductFindingFilter(
         request.GET,
         queryset=Finding.objects.filter(test__engagement__product=p,
-                                        active=True,
-                                        verified=True))
+                                        active=True))
     page = get_page_items(request, result.qs, 25)
 
     add_breadcrumb(title="Open findings", top_level=False, request=request)
