@@ -69,19 +69,25 @@ env = environ.Env(
     DD_SECRET_KEY=(str, '.'),
     DD_CREDENTIAL_AES_256_KEY=(str, '.'),
     DD_DATA_UPLOAD_MAX_MEMORY_SIZE=(int, 8388608),  # Max post size set to 8mb
-    DD_SOCIAL_AUTH_GOOGLE_OAUTH2_ENABLE=(bool, 'False'),
+    DD_SOCIAL_AUTH_TRAILING_SLASH=(bool, False),
+    DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED=(bool, False),
+    DD_SOCIAL_AUTH_AUTH0_KEY=(str, ''),
+    DD_SOCIAL_AUTH_AUTH0_SECRET=(str, ''),
+    DD_SOCIAL_AUTH_AUTH0_DOMAIN=(str, ''),
+    DD_SOCIAL_AUTH_AUTH0_SCOPE=(list, ['openid', 'profile', 'email']),
+    DD_SOCIAL_AUTH_GOOGLE_OAUTH2_ENABLE=(bool, False),
     DD_SOCIAL_AUTH_GOOGLE_OAUTH2_KEY=(str, ''),
     DD_SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET=(str, ''),
-    DD_SOCIAL_AUTH_OKTA_OAUTH2_ENABLED=(bool, 'False'),
+    DD_SOCIAL_AUTH_OKTA_OAUTH2_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_OKTA_OAUTH2_KEY=(str, ''),
     DD_SOCIAL_AUTH_OKTA_OAUTH2_SECRET=(str, ''),
     DD_SOCIAL_AUTH_OKTA_OAUTH2_API_URL=(str, 'https://{your-org-url}/oauth2/default'),
-    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_ENABLED=(bool, 'False'),
+    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_KEY=(str, ''),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_SECRET=(str, ''),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID=(str, ''),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE=(str, 'https://graph.microsoft.com/'),
-    DD_SOCIAL_AUTH_GITLAB_OAUTH2_ENABLED=(bool, 'False'),
+    DD_SOCIAL_AUTH_GITLAB_OAUTH2_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_GITLAB_KEY=(str, ''),
     DD_SOCIAL_AUTH_GITLAB_SECRET=(str, ''),
     DD_SOCIAL_AUTH_GITLAB_API_URL=(str, 'https://gitlab.com'),
@@ -258,6 +264,7 @@ LOGIN_URL = '/login'
 
 # These are the individidual modules supported by social-auth
 AUTHENTICATION_BACKENDS = (
+    'social_core.backends.auth0.Auth0OAuth2',
     'social_core.backends.google.GoogleOAuth2',
     'dojo.okta.OktaOAuth2',
     'social_core.backends.azuread_tenant.AzureADTenantOAuth2',
@@ -310,6 +317,13 @@ SOCIAL_AUTH_GITLAB_SECRET = env('DD_SOCIAL_AUTH_GITLAB_SECRET')
 SOCIAL_AUTH_GITLAB_API_URL = env('DD_SOCIAL_AUTH_GITLAB_API_URL')
 SOCIAL_AUTH_GITLAB_SCOPE = env('DD_SOCIAL_AUTH_GITLAB_SCOPE')
 
+AUTH0_OAUTH2_ENABLED = env('DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED')
+SOCIAL_AUTH_AUTH0_KEY = env('DD_SOCIAL_AUTH_AUTH0_KEY')
+SOCIAL_AUTH_AUTH0_SECRET = env('DD_SOCIAL_AUTH_AUTH0_SECRET')
+SOCIAL_AUTH_AUTH0_DOMAIN = env('DD_SOCIAL_AUTH_AUTH0_DOMAIN')
+SOCIAL_AUTH_AUTH0_SCOPE = env('DD_SOCIAL_AUTH_AUTH0_SCOPE')
+SOCIAL_AUTH_TRAILING_SLASH = env('DD_SOCIAL_AUTH_TRAILING_SLASH')
+
 LOGIN_EXEMPT_URLS = (
     r'^%sstatic/' % URL_PREFIX,
     r'^%swebhook/' % URL_PREFIX,
@@ -317,6 +331,7 @@ LOGIN_EXEMPT_URLS = (
     r'^%sreports/cover$' % URL_PREFIX,
     r'^%sfinding/image/(?P<token>[^/]+)$' % URL_PREFIX,
     r'^%sapi/v2/' % URL_PREFIX,
+    r'complete/auth0-oauth2/',
     r'complete/google-oauth2/',
     r'complete/okta-oauth2/',
     r'complete/gitlab-oauth2/',
