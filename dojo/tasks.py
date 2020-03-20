@@ -223,6 +223,12 @@ def async_custom_pdf_report(self,
     return True
 
 
+@task(name='rename_whitesource_finding_task')
+def rename_whitesource_finding_task(*args, **kwargs):
+    logger.info("Executing Whitesource renaming and rehashing started.")
+    rename_whitesource_finding()
+
+
 @task(name='add_issue_task')
 def add_issue_task(find, push_to_jira):
     logger.info("add issue task")
