@@ -1479,14 +1479,16 @@ class Finding(models.Model):
     # This sometimes reports "None" for some endpoints but we keep it to avoid hash_code change due to this historically behavior
     def get_endpoints(self):
         endpoint_str = ''
-        if len(self.unsaved_endpoints) > 0 and self.id is None:
-            deduplicationLogger.debug("get_endpoints: there are unsaved_endpoints and self.id is None")
+        if len(self.unsaved_endpoints) > 0:
+            deduplicationLogger.debug("get_endpoints: there are unsaved_endpoints")
             for e in self.unsaved_endpoints:
                 endpoint_str += str(e.host_with_port)
         else:
-            deduplicationLogger.debug("get_endpoints: there aren't unsaved_endpoints or self.id is not None. endpoints count: " + str(self.endpoints.count()))
-            for e in self.endpoints.all():
-                endpoint_str += str(e.host_with_port)
+            deduplicationLogger.debug("get_endpoints: there aren't unsaved_endpoints. endpoints count: " + str(len(self.endpoints.all())))
+
+        for e in self.endpoints.all():
+            endpoint_str += str(e.host_with_port)
+
         return endpoint_str
 
     # Compute the hash_code from the fields to hash
@@ -1661,26 +1663,27 @@ class Finding(models.Model):
 
     def save(self, dedupe_option=True, false_history=False, rules_option=True, issue_updater_option=True, *args, **kwargs):
         # Make changes to the finding before it's saved to add a CWE template
-        new_finding = False
         if self.pk is None:
             # We enter here during the first call from serializers.py
             logger.debug("Saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is None)")
             false_history = True
             from dojo.utils import apply_cwe_to_template
             self = apply_cwe_to_template(self)
-            # calling django.db.models superclass save method
-            super(Finding, self).save(*args, **kwargs)
-        else:
-            # We enter here during the second call from serializers.py
-            logger.debug("Saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is not None)")
-            # calling django.db.models superclass save method
-            super(Finding, self).save(*args, **kwargs)
 
-            # Run async the tool issue update to update original issue with Defect Dojo updates
-            if issue_updater_option:
-                from dojo.tools import tool_issue_updater
-                tool_issue_updater.async_tool_issue_update(self)
-        if (self.file_path is not None) and (self.endpoints.count() == 0):
+        #     # calling django.db.models superclass save method
+        #     super(Finding, self).save(*args, **kwargs)
+        # else:
+        #     # We enter here during the second call from serializers.py
+        #     logger.debug("Saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is not None)")
+        #     # calling django.db.models superclass save method
+        #     super(Finding, self).save(*args, **kwargs)
+
+        # Title Casing
+        from titlecase import titlecase
+        self.title = titlecase(self.title)
+
+        #     # Run async the tool issue update to update original issue with Defect Dojo updates
+        if (self.file_path is not None) and (self.endpoints.count() == 0) and (len(self.unsaved_endpoints) == 0):
             self.static_finding = True
             self.dynamic_finding = False
         elif (self.file_path is not None):
@@ -1688,12 +1691,11 @@ class Finding(models.Model):
 
         # Finding.save is called once from serializers.py with dedupe_option=False because the finding is not ready yet, for example the endpoints are not built
         # It is then called a second time with dedupe_option defaulted to true; now we can compute the hash_code and run the deduplication
-        if(dedupe_option):
-            if (self.hash_code is not None):
-                deduplicationLogger.debug("Hash_code already computed for finding")
-            else:
-                self.hash_code = self.compute_hash_code()
-        self.found_by.add(self.test.test_type)
+        # if(dedupe_option):
+        if (self.hash_code is not None):
+            deduplicationLogger.debug("Hash_code already computed for finding")
+        else:
+            self.hash_code = self.compute_hash_code()
 
         if rules_option:
             from dojo.tasks import async_rules
@@ -1711,6 +1713,50 @@ class Finding(models.Model):
         # Assign the numerical severity for correct sorting order
         self.numerical_severity = Finding.get_numerical_severity(self.severity)
         super(Finding, self).save()
+
+        if (hasattr(self, 'unsaved_req_resp') and
+                len(self.unsaved_req_resp) > 0):
+            for req_resp in self.unsaved_req_resp:
+                burp_rr = BurpRawRequestResponse(
+                    finding=self,
+                    burpRequestBase64=req_resp["req"],
+                    burpResponseBase64=req_resp["resp"])
+                burp_rr.clean()
+                burp_rr.save()
+
+        if (self.unsaved_request is not None and
+                self.unsaved_response is not None):
+
+            if self.test.test_type.name == "Arachni Scan":
+                burp_rr = BurpRawRequestResponse(
+                    finding=self,
+                    burpRequestBase64=req_resp["req"],
+                    burpResponseBase64=req_resp["resp"],
+                )
+            else:
+                burp_rr = BurpRawRequestResponse(
+                    finding=item,
+                    burpRequestBase64=base64.b64encode(req_resp["req"].encode("utf-8")),
+                    burpResponseBase64=base64.b64encode(req_resp["resp"].encode("utf-8")),
+                )
+            burp_rr.clean()
+            burp_rr.save()
+
+        for endpoint in self.unsaved_endpoints:
+            ep, created = Endpoint.objects.get_or_create(
+                protocol=endpoint.protocol,
+                host=endpoint.host,
+                path=endpoint.path,
+                query=endpoint.query,
+                fragment=endpoint.fragment,
+                product=self.test.engagement.product)
+
+            self.endpoints.add(ep)
+
+        if self.unsaved_tags is not None:
+            self.tags = self.unsaved_tags
+
+        self.found_by.add(self.test.test_type)
         system_settings = System_Settings.objects.get()
         if dedupe_option and self.hash_code is not None:
             if system_settings.enable_deduplication:
@@ -1735,9 +1781,9 @@ class Finding(models.Model):
                 async_false_history.delay(self, *args, **kwargs)
                 pass
 
-        # Title Casing
-        from titlecase import titlecase
-        self.title = titlecase(self.title)
+        if issue_updater_option:
+            from dojo.tools import tool_issue_updater
+            tool_issue_updater.async_tool_issue_update(self)
 
         from dojo.utils import calculate_grade
         calculate_grade(self.test.engagement.product)

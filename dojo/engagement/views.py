@@ -3,7 +3,6 @@ import logging
 import os
 from datetime import datetime
 import operator
-import base64
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.contrib import messages
@@ -27,7 +26,7 @@ from dojo.forms import CheckForm, \
     JIRAFindingForm, CredMappingForm
 from dojo.models import Finding, Product, Engagement, Test, \
     Check_List, Test_Type, Notes, \
-    Risk_Acceptance, Development_Environment, BurpRawRequestResponse, Endpoint, \
+    Risk_Acceptance, Development_Environment, Endpoint, \
     JIRA_PKey, JIRA_Issue, Cred_Mapping, Dojo_User, System_Settings
 from dojo.tools import handles_active_verified_statuses
 from dojo.tools.factory import import_parser_factory
@@ -583,45 +582,8 @@ def import_scan_results(request, eid=None, pid=None):
                     if not handles_active_verified_statuses(form.get_scan_type()):
                         item.active = active
                         item.verified = verified
-                    item.save(dedupe_option=False, false_history=True)
+                    item.save(false_history=True)
 
-                    if hasattr(item, 'unsaved_req_resp') and len(
-                            item.unsaved_req_resp) > 0:
-                        for req_resp in item.unsaved_req_resp:
-                            if form.get_scan_type() == "Arachni Scan":
-                                burp_rr = BurpRawRequestResponse(
-                                    finding=item,
-                                    burpRequestBase64=req_resp["req"],
-                                    burpResponseBase64=req_resp["resp"],
-                                )
-                            else:
-                                burp_rr = BurpRawRequestResponse(
-                                    finding=item,
-                                    burpRequestBase64=base64.b64encode(req_resp["req"].encode("utf-8")),
-                                    burpResponseBase64=base64.b64encode(req_resp["resp"].encode("utf-8")),
-                                )
-                            burp_rr.clean()
-                            burp_rr.save()
-
-                    if item.unsaved_request is not None and item.unsaved_response is not None:
-                        burp_rr = BurpRawRequestResponse(
-                            finding=item,
-                            burpRequestBase64=base64.b64encode(item.unsaved_request.encode()),
-                            burpResponseBase64=base64.b64encode(item.unsaved_response.encode()),
-                        )
-                        burp_rr.clean()
-                        burp_rr.save()
-
-                    for endpoint in item.unsaved_endpoints:
-                        ep, created = Endpoint.objects.get_or_create(
-                            protocol=endpoint.protocol,
-                            host=endpoint.host,
-                            path=endpoint.path,
-                            query=endpoint.query,
-                            fragment=endpoint.fragment,
-                            product=t.engagement.product)
-
-                        item.endpoints.add(ep)
                     for endpoint in form.cleaned_data['endpoints']:
                         ep, created = Endpoint.objects.get_or_create(
                             protocol=endpoint.protocol,
@@ -632,11 +594,6 @@ def import_scan_results(request, eid=None, pid=None):
                             product=t.engagement.product)
 
                         item.endpoints.add(ep)
-
-                    item.save(false_history=True)
-
-                    if item.unsaved_tags is not None:
-                        item.tags = item.unsaved_tags
 
                     finding_count += 1
 

@@ -612,44 +612,8 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 item.last_reviewed_by = self.context['request'].user
                 item.active = data['active']
                 item.verified = data['verified']
-                item.save(dedupe_option=False)
 
-                if (hasattr(item, 'unsaved_req_resp') and
-                        len(item.unsaved_req_resp) > 0):
-                    for req_resp in item.unsaved_req_resp:
-                        burp_rr = BurpRawRequestResponse(
-                            finding=item,
-                            burpRequestBase64=req_resp["req"],
-                            burpResponseBase64=req_resp["resp"])
-                        burp_rr.clean()
-                        burp_rr.save()
-
-                if (item.unsaved_request is not None and
-                        item.unsaved_response is not None):
-                    burp_rr = BurpRawRequestResponse(
-                        finding=item,
-                        burpRequestBase64=item.unsaved_request,
-                        burpResponseBase64=item.unsaved_response)
-                    burp_rr.clean()
-                    burp_rr.save()
-
-                for endpoint in item.unsaved_endpoints:
-                    ep, created = Endpoint.objects.get_or_create(
-                        protocol=endpoint.protocol,
-                        host=endpoint.host,
-                        path=endpoint.path,
-                        query=endpoint.query,
-                        fragment=endpoint.fragment,
-                        product=test.engagement.product)
-
-                    item.endpoints.add(ep)
-
-                if endpoint_to_add:
-                    item.endpoints.add(endpoint_to_add)
-
-                if item.unsaved_tags is not None:
-                    item.tags = item.unsaved_tags
-
+                # save() should be called only once, so make sure the code is on the right side of the save. code below it needs finding to exists in db.
                 item.save()
 
         except SyntaxError:

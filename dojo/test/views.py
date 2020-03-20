@@ -25,7 +25,7 @@ from dojo.filters import TemplateFindingFilter, OpenFindingFilter
 from dojo.forms import NoteForm, TestForm, FindingForm, \
     DeleteTestForm, AddFindingForm, \
     ImportScanForm, ReImportScanForm, FindingBulkUpdateForm, JIRAFindingForm
-from dojo.models import Product, Finding, Test, Notes, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, Finding_Template, JIRA_PKey, Cred_Mapping, Dojo_User, JIRA_Issue, System_Settings
+from dojo.models import Product, Finding, Test, Notes, Note_Type, Endpoint, Stub_Finding, Finding_Template, JIRA_PKey, Cred_Mapping, Dojo_User, JIRA_Issue, System_Settings
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting, create_notification, Product_Tab, calculate_grade, log_jira_alert, max_safe
 from dojo.tasks import add_issue_task, update_issue_task
@@ -678,51 +678,8 @@ def re_import_scan_results(request, tid):
                         new_items.append(item.id)
                         find = item
 
-                        if hasattr(item, 'unsaved_req_resp') and len(item.unsaved_req_resp) > 0:
-                            for req_resp in item.unsaved_req_resp:
-                                if scan_type == "Arachni Scan":
-                                    burp_rr = BurpRawRequestResponse(
-                                        finding=item,
-                                        burpRequestBase64=req_resp["req"],
-                                        burpResponseBase64=req_resp["resp"],
-                                    )
-                                else:
-                                    burp_rr = BurpRawRequestResponse(
-                                        finding=item,
-                                        burpRequestBase64=base64.b64encode(req_resp["req"].encode("utf-8")),
-                                        burpResponseBase64=base64.b64encode(req_resp["resp"].encode("utf-8")),
-                                    )
-                                burp_rr.clean()
-                                burp_rr.save()
-
-                        if item.unsaved_request is not None and item.unsaved_response is not None:
-                            burp_rr = BurpRawRequestResponse(finding=find,
-                                                             burpRequestBase64=base64.b64encode(item.unsaved_request.encode()),
-                                                             burpResponseBase64=base64.b64encode(item.unsaved_response.encode()),
-                                                             )
-                            burp_rr.clean()
-                            burp_rr.save()
                     if find:
                         finding_count += 1
-                        for endpoint in item.unsaved_endpoints:
-                            ep, created = Endpoint.objects.get_or_create(protocol=endpoint.protocol,
-                                                                         host=endpoint.host,
-                                                                         path=endpoint.path,
-                                                                         query=endpoint.query,
-                                                                         fragment=endpoint.fragment,
-                                                                         product=t.engagement.product)
-                            find.endpoints.add(ep)
-                        for endpoint in form.cleaned_data['endpoints']:
-                            ep, created = Endpoint.objects.get_or_create(protocol=endpoint.protocol,
-                                                                         host=endpoint.host,
-                                                                         path=endpoint.path,
-                                                                         query=endpoint.query,
-                                                                         fragment=endpoint.fragment,
-                                                                         product=t.engagement.product)
-                            find.endpoints.add(ep)
-
-                        if item.unsaved_tags is not None:
-                            find.tags = item.unsaved_tags
 
                     find.save()
                 # calculate the difference
