@@ -1503,9 +1503,10 @@ class Finding(models.Model):
             for e in self.unsaved_endpoints:
                 endpoint_str += str(e.host_with_port)
         else:
-            deduplicationLogger.debug("get_endpoints: there aren't unsaved_endpoints or self.id is not None. endpoints count: " + str(self.endpoints.count()))
-            for e in self.endpoints.all():
-                endpoint_str += str(e.host_with_port)
+            if self.id:
+                deduplicationLogger.debug("get_endpoints: there aren't unsaved_endpoints or self.id is not None. endpoints count: " + str(self.endpoints.count()))
+                for e in self.endpoints.all():
+                    endpoint_str += str(e.host_with_port)
         return endpoint_str
 
     # Compute the hash_code from the fields to hash
