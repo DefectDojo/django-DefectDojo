@@ -762,6 +762,13 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                         severity=sev,
                         numerical_severity=Finding.get_numerical_severity(sev),
                         description=item.description).all()
+                elif scan_type == 'Checkmarx Scan detailed':
+                    findings = Finding.objects.filter(
+                        title=item.title,
+                        test=test,
+                        severity=sev,
+                        unique_id_from_tool=item.unique_id_from_tool,
+                        numerical_severity=Finding.get_numerical_severity(sev)).all()
                 else:
                     findings = Finding.objects.filter(
                         title=item.title,
