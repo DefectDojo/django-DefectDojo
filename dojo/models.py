@@ -1683,7 +1683,7 @@ class Finding(models.Model):
         self.title = titlecase(self.title)
 
         #     # Run async the tool issue update to update original issue with Defect Dojo updates
-        if (self.file_path is not None) and (self.endpoints.count() == 0) and (len(self.unsaved_endpoints) == 0):
+        if (self.file_path is not None) and (self.id is None or self.endpoints.count() == 0) and (self.id is not None or len(self.unsaved_endpoints) == 0):
             self.static_finding = True
             self.dynamic_finding = False
         elif (self.file_path is not None):
