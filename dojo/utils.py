@@ -286,6 +286,29 @@ def set_duplicate(new_finding, existing_finding):
     existing_finding.found_by.add(new_finding.test.test_type)
 
 
+def rename_whitesource_finding():
+    whitesource_id = Test_Type.objects.get(name="Whitesource Scan").id
+    findings = Finding.objects.filter(found_by=whitesource_id)
+    findings = findings.order_by('-pk')
+    logger.info("######## Updating Hashcodes - deduplication is done in background using django signals upon finding save ########")
+    for finding in findings:
+        logger.info("Updating Whitesource Finding with id: %d" % finding.id)
+        lib_name_begin = re.search('\\*\\*Library Filename\\*\\* : ', finding.description).span(0)[1]
+        lib_name_end = re.search('\\*\\*Library Description\\*\\*', finding.description).span(0)[0]
+        lib_name = finding.description[lib_name_begin:lib_name_end - 1]
+        if finding.cve is None:
+            finding.title = "CVE-None | " + lib_name
+        else:
+            finding.title = finding.cve + " | " + lib_name
+        if not finding.cwe:
+            logger.debug('Set cwe for finding %d to 1035 if not an cwe Number is set' % finding.id)
+            finding.cwe = 1035
+        finding.title = finding.title.rstrip()  # delete \n at the end of the title
+        from titlecase import titlecase
+        finding.title = titlecase(finding.title)
+        finding.hash_code = finding.compute_hash_code()
+        finding.save()
+
 def sync_rules(new_finding, *args, **kwargs):
     rules = Rule.objects.filter(applies_to='Finding', parent_rule=None)
     for rule in rules:
@@ -1145,10 +1168,12 @@ def log_jira_generic_alert(title, description):
 
 # Logs the error to the alerts table, which appears in the notification toolbar
 def log_jira_alert(error, finding):
+    prod_name = finding.test.engagement.product.name
     create_notification(
         event='jira_update',
-        title='Jira update issue',
+        title='Jira update issue (' + truncate_with_dots(prod_name, 25) + ')',
         description='Finding: ' + str(finding.id) + ', ' + error,
+        url=reverse('view_finding', args=(finding.id, )),
         icon='bullseye',
         source='Jira')
 
@@ -1960,3 +1985,9 @@ def apply_cwe_to_template(finding, override=False):
             template.save()
 
     return finding
+
+
+def truncate_with_dots(the_string, max_length_including_dots):
+    if not the_string:
+        return the_string
+    return (the_string[:max_length_including_dots - 3] + '...' if len(the_string) > max_length_including_dots else the_string)

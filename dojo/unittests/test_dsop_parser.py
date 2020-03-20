@@ -14,4 +14,4 @@ class TestDsopParser(TestCase):
     def test_many_findings(self):
         with open('dojo/unittests/scans/dsop/many_vuln.xlsx', 'rb') as file:
             parser = DsopParser(file, Test())
-        self.assertEquals(len(parser.items), 4984)
+        self.assertEquals(len(parser.items), 4)

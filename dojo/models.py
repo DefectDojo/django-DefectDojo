@@ -26,6 +26,7 @@ from multiselectfield import MultiSelectField
 from django import forms
 from django.utils.translation import gettext as _
 from dojo.signals import dedupe_signal
+from django.core.cache import cache
 
 fmt = getattr(settings, 'LOG_FORMAT', None)
 lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
@@ -90,7 +91,26 @@ class Regulation(models.Model):
         return self.acronym + ' (' + self.jurisdiction + ')'
 
 
+class SystemSettingsManager(models.Manager):
+    CACHE_KEY = 'defect_dojo_cache.system_settings'
+
+    def get(self, no_cache=False, *args, **kwargs):
+        # cache only 30s because django default cache backend is local per process
+        if no_cache:
+            return super(SystemSettingsManager, self).get(*args, **kwargs)
+        return cache.get_or_set(self.CACHE_KEY, lambda: super(SystemSettingsManager, self).get(*args, **kwargs), timeout=30)
+
+
 class System_Settings(models.Model):
+    enable_auditlog = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name='Enable audit logging',
+        help_text="With this setting turned on, Dojo maintains an audit log "
+                  "of changes made to entities (Findings, Tests, Engagements, Procuts, ...)"
+                  "If you run big import you may want to disable this "
+                  "because the way django-auditlog currently works, there's a "
+                  "big performance hit. Especially during (re-)imports.")
     enable_deduplication = models.BooleanField(
         default=False,
         blank=False,
@@ -246,6 +266,12 @@ class System_Settings(models.Model):
     column_widths = models.CharField(max_length=1500, blank=True)
     drive_folder_ID = models.CharField(max_length=100, blank=True)
     enable_google_sheets = models.BooleanField(default=False, null=True, blank=True)
+
+    objects = SystemSettingsManager()
+
+    def save(self, *args, **kwargs):
+        super(System_Settings, self).save(*args, **kwargs)
+        cache.delete(SystemSettingsManager.CACHE_KEY)
 
 
 class SystemSettingsFormAdmin(forms.ModelForm):
@@ -2610,16 +2636,35 @@ class FieldRule(models.Model):
     text = models.CharField(max_length=200)
 
 
-# Register for automatic logging to database
-auditlog.register(Dojo_User)
-auditlog.register(Endpoint)
-auditlog.register(Engagement)
-auditlog.register(Finding)
-auditlog.register(Product)
-auditlog.register(Test)
-auditlog.register(Risk_Acceptance)
-auditlog.register(Finding_Template)
-auditlog.register(Cred_User)
+def enable_disable_auditlog(enable=True):
+    if enable:
+        # Register for automatic logging to database
+        logger.info('enabling audit logging')
+        auditlog.register(Dojo_User)
+        auditlog.register(Endpoint)
+        auditlog.register(Engagement)
+        auditlog.register(Finding)
+        auditlog.register(Product)
+        auditlog.register(Test)
+        auditlog.register(Risk_Acceptance)
+        auditlog.register(Finding_Template)
+        auditlog.register(Cred_User)
+    else:
+        logger.info('disabling audit logging')
+        auditlog.unregister(Dojo_User)
+        auditlog.unregister(Endpoint)
+        auditlog.unregister(Engagement)
+        auditlog.unregister(Finding)
+        auditlog.unregister(Product)
+        auditlog.unregister(Test)
+        auditlog.unregister(Risk_Acceptance)
+        auditlog.unregister(Finding_Template)
+        auditlog.unregister(Cred_User)
+
+
+from dojo.utils import get_system_setting
+enable_disable_auditlog(enable=get_system_setting('enable_auditlog'))  # on startup choose safe to retrieve system settiung)
+
 
 # Register tagging for models
 tag_register(Product)
