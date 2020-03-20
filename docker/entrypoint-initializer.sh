@@ -21,7 +21,7 @@ python3 manage.py makemigrations dojo
 python3 manage.py migrate
 
 echo "Admin user: ${DD_ADMIN_USER}"
-ADMIN_EXISTS=$(echo "SELECT * from auth_user;" | python manage.py dbshell | grep admin)
+ADMIN_EXISTS=$(echo "SELECT * from auth_user;" | python manage.py dbshell | grep "${DD_ADMIN_USER}")
 # Abort if the admin user already exists, instead of giving a new fake password that won't work
 if [ ! -z "$ADMIN_EXISTS" ]
 then
