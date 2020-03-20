@@ -368,10 +368,6 @@ class ProductViewSet(mixins.ListModelMixin,
 
     filter_fields = ('id', 'name', 'prod_type', 'created', 'authorized_users')
 
-    @property
-    def risk_application_model_class(self):
-        return Product
-
     def get_queryset(self):
         if not self.request.user.is_staff:
             return self.queryset.filter(
@@ -409,10 +405,6 @@ class ProductTypeViewSet(mixins.ListModelMixin,
     queryset = Product_Type.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'name', 'critical_product', 'key_product', 'created', 'updated')
-
-    @property
-    def risk_application_model_class(self):
-        return Product_Type
 
     def get_queryset(self):
         if not self.request.user.is_staff:
