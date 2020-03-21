@@ -159,6 +159,7 @@ def suite():
     # Add each test the the suite to be run
     # success and failure is output by the test
     suite.addTest(ProductTest('test_create_product'))
+    suite.addTest(ProductTest('test_add_product_finding'))
     suite.addTest(TestUnitTest('test_view_test'))
     suite.addTest(TestUnitTest('test_create_test'))
     suite.addTest(TestUnitTest('test_edit_test'))
