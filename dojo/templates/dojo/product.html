@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% load navigation_tags %}
 {% load display_tags %}
-{% load get_system_setting %}
 {% block content %}
     <div class="row">
         <div class="col-md-12">
@@ -17,7 +16,7 @@
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu"
                                 aria-labelledby="dropdownMenu1">
-                                {% if request.user.is_staff %}
+                                {% if user.is_staff %}
                                     <li role="presentation">
                                         <a href="{% url 'new_product' %}">
                                             <i class="fa fa-plus"></i> Add Product
@@ -53,7 +52,7 @@
                             <th> Criticality</th>
                             <th> Metadata</th>
                             <th>Eng.</th>
-                            {% if "enable_jira"|get_system_setting %}
+                            {% if system_settings.enable_jira %}
                             <th>Jira</th>
                             {% endif %}
                             <th> Findings</th>
@@ -193,7 +192,7 @@
                                     data-content="No Engagements Exist"></i>
                                   {% endif %}
                                 </td>
-                                {% if "enable_jira"|get_system_setting %}
+                                {% if system_settings.enable_jira %}
                                 <td class="text-center">
                                 {% for jira_conf in prod.jira_confs %}
                                 <i class="fa fa-bug has-popover" title="<i class='fa fa-bug'></i> <b>Jira Configuration</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="bottom"
@@ -215,7 +214,7 @@
                                     {% endif %}
                                 </td>
                                 <td class="text-center">
-                                  {% if prod.findings_count %}
+                                  {% if prod.endpoints_count %}
                                     <a href="{% url 'vulnerable_endpoints' %}?product={{ prod.id }}"><b>{{ prod.endpoint_count }}</b></a>
                                   {% else %}
                                       0

@@ -177,7 +177,7 @@
                 {% endif %}
                 <tr>
                     <th>Severity</th>
-                    {% if 'enable_finding_sla'|fetch_system_setting %}
+                    {% if system_settings.enable_finding_sla %}
                     <th>SLA</th>
                     {% endif %}
                     {% if finding.scanner_confidence %}
@@ -216,7 +216,7 @@
                             {% endif %}
                         </span>
                     </td>
-                    {% if 'enable_finding_sla'|fetch_system_setting %}
+                    {% if system_settings.enable_finding_sla %}
                     <td>
                       {{ finding|finding_sla }}
                     </td>
@@ -429,6 +429,12 @@
                     {% if finding.nb_occurences %}
                     <th>Nb occurences</th>
                     {% endif %}
+                    {% if finding.component_name %}
+                    <th>Component Name</th>
+                    {% endif %}
+                    {% if finding.component_version %}
+                    <th>Component Version</th>
+                    {% endif %}
                 </tr>
                 <tr>
                     <td>
@@ -445,6 +451,20 @@
                     <td>
                         <span>
                            {{ finding.nb_occurences }}
+                        </span>
+                    </td>
+                    {% endif %}
+                    {% if finding.component_name %}
+                    <td>
+                        <span>
+                            {{ finding.component_name }}
+                        </span>
+                    </td>
+                    {% endif %}
+                    {% if finding.component_version %}
+                    <td>
+                        <span>
+                            {{ finding.component_version }}
                         </span>
                     </td>
                     {% endif %}
@@ -860,7 +880,7 @@
     </div>
 
     <div class="protip">
-       <i class="fa fa-lightbulb-o"></i> <strong>ProTip!</strong> Type <kbd>e</kbd> to edit any finding.
+       <i class="fa fa-lightbulb-o"></i> <strong>ProTip!</strong> Type <kbd>e</kbd> to edit any finding, <kbd>p</kbd> and <kbd>n</kbd> to navigate to the previous or next finding.
     </div>
 {% endblock %}
 {% block postscript %}
@@ -911,8 +931,17 @@
             $('[data-toggle="tooltip"]').tooltip()
         });
 
+        // keyboard shortcuts
         $(document).on('keypress', null, 'e', function () {
             window.location.assign('{% url 'edit_finding' finding.id %}');
+        });
+        
+        $(document).on('keypress', null, 'p', function () {
+            window.location.assign('{% url 'view_finding' prev_finding.id %}');
+        });
+        
+        $(document).on('keypress', null, 'n', function () {
+            window.location.assign('{% url 'view_finding' next_finding.id %}');
         });
 
         $('a.delete-finding').on('click', function (e) {

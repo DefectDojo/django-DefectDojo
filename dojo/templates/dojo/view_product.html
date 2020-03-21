@@ -112,9 +112,9 @@
                                 <i class="fa fa-bug fa-2x"></i>
 
                                 <div class="pull-right inline-block text-right">
-                                    <span class=" fa-2x">{{ open_findings|length }}</span>
+                                    <span class=" fa-2x">{{ open_findings.count }}</span>
                                     <span><a href="{% url 'open_findings' %}?test__engagement__product={{ prod.id }}">open
-                                        finding{{ open_findings|length|pluralize }} <i
+                                        finding{{ open_findings.count|pluralize }} <i
                                                 class="fa fa-arrow-circle-right"></i></a>
                                     </span>
                                 </div>
@@ -139,9 +139,9 @@
                                 <i class="fa fa-fire-extinguisher fa-2x"></i>
 
                                 <div class="text-right pull-right">
-                                    <span class="fa-2x">{{ closed_findings|length }}</span>
+                                    <span class="fa-2x">{{ closed_findings.count }}</span>
                                     <span><a href="{% url 'closed_findings' %}?test__engagement__product={{ prod.id }}">closed
-                                        finding{{ closed_findings|length|pluralize }}. <i
+                                        finding{{ closed_findings.count|pluralize }}. <i
                                                 class="fa fa-arrow-circle-right"></i></a>
                                     </span>
                                 </div>
@@ -166,7 +166,7 @@
                                 <i class="fa fa-check fa-2x"></i>
 
                                 <div class="pull-right text-right">
-                                    <span class="fa-2x">{{ accepted_findings|length }}</span>
+                                    <span class="fa-2x">{{ accepted_findings.count }}</span>
                                     <span><a
                                             href="{% url 'accepted_findings' %}?test__engagement__product={{ prod.id }}">Accepted
                                     findings. <i class="fa fa-arrow-circle-right"></i></a>
@@ -193,10 +193,10 @@
                                 <i class="fa fa-crosshairs fa-2x"></i>
 
                                 <div class="pull-right inline-block text-right">
-                                    <span class=" fa-2x">{{ new_findings|length }}</span>
+                                    <span class=" fa-2x">{{ new_findings.count }}</span>
                                     <span><a
                                             href="{% url 'open_findings' %}?test__engagement__product={{ prod.id }}&amp;date=2">new
-                                        finding{{ new_findings|length|pluralize }} <i
+                                        finding{{ new_findings.count|pluralize }} <i
                                                 class="fa fa-arrow-circle-right"></i></a>
                                     </span>
                                 </div>
@@ -331,8 +331,8 @@
                     <div class="panel-footer">
                         <i title="Weeks are only displayed if findings are available."
                            class="text-info fa fa-info-circle"></i>
-                        <small>Finding age of {{ verified_findings|length|apnumber }} verified
-                            finding{{ verified_findings|length|pluralize }}</small>
+                        <small>Finding age of {{ verified_findings.count|apnumber }} verified
+                            finding{{ verified_findings.count|pluralize }}</small>
                     </div>
                 </div>
             </div>
@@ -391,7 +391,7 @@
         <script src="{% static "JUMFlot/javascripts/jquery.flot.bubbles.js" %}"></script>
     {% endif %}
     <script src="{% static "flot/jquery.flot.time.js" %}"></script>
-    <script src="{% static "flot.tooltip/js/jquery.flot.tooltip.min.js" %}"></script>
+    <script src="{% static "jquery.flot.tooltip/js/jquery.flot.tooltip.min.js" %}"></script>
     <script type="text/javascript">
         $(function () {
             if (document.referrer.indexOf('simple_search') > 0) {

@@ -1,12 +1,10 @@
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.keys import Keys
 import unittest
 import re
 import sys
-import os
 import time
+from base_test_class import BaseTestCase
 
 
 class WaitForPageLoad(object):
@@ -32,37 +30,15 @@ class WaitForPageLoad(object):
         )
 
 
-class ProductTest(unittest.TestCase):
-    def setUp(self):
-        # change path of chromedriver according to which directory you have chromedriver.
-        self.options = Options()
-        self.options.add_argument("--headless")
-        # self.options.add_argument("--no-sandbox")
-        # self.options.add_argument("--disable-dev-shm-usage")
-        self.driver = webdriver.Chrome('chromedriver', chrome_options=self.options)
-        self.driver.implicitly_wait(30)
-        self.base_url = os.environ['DD_BASE_URL']
-        self.verificationErrors = []
-        self.accept_next_alert = True
-
-    def login_page(self):
-        # Make a member reference to the driver
-        driver = self.driver
-        # Navigate to the login page
-        driver.get(self.base_url + "login")
-        # Good practice to clear the entry before typing
-        driver.find_element_by_id("id_username").clear()
-        # Set the user to an admin account
-        # os.environ['DD_ADMIN_USER']
-        driver.find_element_by_id("id_username").clear()
-        driver.find_element_by_id("id_username").send_keys(os.environ['DD_ADMIN_USER'])
-        driver.find_element_by_id("id_password").clear()
-        driver.find_element_by_id("id_password").send_keys(os.environ['DD_ADMIN_PASSWORD'])
-        # "Click" the but the login button
-        driver.find_element_by_css_selector("button.btn.btn-success").click()
-        return driver
+class ProductTest(BaseTestCase):
 
     def test_create_product(self):
+        # try:
+        #     # sometimes the product is left behind from previous test run
+        #     self.test_delete_product()
+        # except:
+        #     print('failed to delete possible existing product, assuming it was already gone')
+
         # Login to the site. Password will have to be modified
         # to match an admin password in your own container
         driver = self.login_page()
@@ -337,10 +313,6 @@ class ProductTest(unittest.TestCase):
         # Assert ot the query to dtermine status of failure
         self.assertTrue(re.search(r'Product and relationships removed.', productTxt))
 
-    def tearDown(self):
-        self.driver.quit()
-        self.assertEqual([], self.verificationErrors)
-
 
 def suite():
     suite = unittest.TestSuite()
@@ -360,6 +332,7 @@ def suite():
 
 
 if __name__ == "__main__":
-    runner = unittest.TextTestRunner(descriptions=True, failfast=True)
+    runner = unittest.TextTestRunner(descriptions=True, failfast=True, verbosity=2)
     ret = not runner.run(suite()).wasSuccessful()
+    BaseTestCase.tearDownDriver()
     sys.exit(ret)

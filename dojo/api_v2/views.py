@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
-from rest_framework.permissions import DjangoModelPermissions, IsAdminUser
+from rest_framework.permissions import DjangoModelPermissions
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser
 from django_filters.rest_framework import DjangoFilterBackend
@@ -23,6 +23,7 @@ from datetime import datetime
 from dojo.utils import get_period_counts_legacy
 from dojo.api_v2 import serializers, permissions
 from django.db.models import Count, Q
+
 
 class EndPointViewSet(mixins.ListModelMixin,
                       mixins.RetrieveModelMixin,
@@ -75,7 +76,7 @@ class EngagementViewSet(mixins.ListModelMixin,
     filter_fields = ('id', 'active', 'eng_type', 'target_start',
                      'target_end', 'requester', 'report_type',
                      'updated', 'threat_model', 'api_test',
-                     'pen_test', 'status', 'product', 'name')
+                     'pen_test', 'status', 'product', 'name', 'version')
 
     def get_queryset(self):
         if not self.request.user.is_staff:
@@ -614,7 +615,6 @@ class ImportScanView(mixins.CreateModelMixin,
     serializer_class = serializers.ImportScanSerializer
     parser_classes = [MultiPartParser]
     queryset = Test.objects.all()
-    permission_classes = [IsAdminUser]
 
 
 class ReImportScanView(mixins.CreateModelMixin,

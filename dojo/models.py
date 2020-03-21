@@ -15,6 +15,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.deconstruct import deconstructible
 from django.utils.timezone import now
+from django.utils.functional import cached_property
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToCover
 from django.utils import timezone
@@ -24,6 +25,7 @@ from multiselectfield import MultiSelectField
 from django import forms
 from django.utils.translation import gettext as _
 from dojo.signals import dedupe_signal
+from django.core.cache import cache
 
 fmt = getattr(settings, 'LOG_FORMAT', None)
 lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
@@ -88,7 +90,26 @@ class Regulation(models.Model):
         return self.acronym + ' (' + self.jurisdiction + ')'
 
 
+class SystemSettingsManager(models.Manager):
+    CACHE_KEY = 'defect_dojo_cache.system_settings'
+
+    def get(self, no_cache=False, *args, **kwargs):
+        # cache only 30s because django default cache backend is local per process
+        if no_cache:
+            return super(SystemSettingsManager, self).get(*args, **kwargs)
+        return cache.get_or_set(self.CACHE_KEY, lambda: super(SystemSettingsManager, self).get(*args, **kwargs), timeout=30)
+
+
 class System_Settings(models.Model):
+    enable_auditlog = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name='Enable audit logging',
+        help_text="With this setting turned on, Dojo maintains an audit log "
+                  "of changes made to entities (Findings, Tests, Engagements, Procuts, ...)"
+                  "If you run big import you may want to disable this "
+                  "because the way django-auditlog currently works, there's a "
+                  "big performance hit. Especially during (re-)imports.")
     enable_deduplication = models.BooleanField(
         default=False,
         blank=False,
@@ -246,6 +267,12 @@ class System_Settings(models.Model):
     enable_google_sheets = models.BooleanField(default=False, null=True, blank=True)
     gmail_address = models.EmailField(max_length=100, blank=True)
 
+    objects = SystemSettingsManager()
+
+    def save(self, *args, **kwargs):
+        super(System_Settings, self).save(*args, **kwargs)
+        cache.delete(SystemSettingsManager.CACHE_KEY)
+
 
 class SystemSettingsFormAdmin(forms.ModelForm):
     product_grade = forms.CharField(widget=forms.Textarea)
@@ -344,18 +371,21 @@ class Product_Type(models.Model):
     updated = models.DateTimeField(auto_now=True, null=True)
     created = models.DateTimeField(auto_now_add=True, null=True)
 
+    @cached_property
     def critical_present(self):
         c_findings = Finding.objects.filter(
             test__engagement__product__prod_type=self, severity='Critical')
         if c_findings.count() > 0:
             return True
 
+    @cached_property
     def high_present(self):
         c_findings = Finding.objects.filter(
             test__engagement__product__prod_type=self, severity='High')
         if c_findings.count() > 0:
             return True
 
+    @cached_property
     def calc_health(self):
         h_findings = Finding.objects.filter(
             test__engagement__product__prod_type=self, severity='High')
@@ -577,7 +607,7 @@ class Product(models.Model):
     class Meta:
         ordering = ('name',)
 
-    @property
+    @cached_property
     def findings_count(self):
         try:
             # if prefetched, it's already there
@@ -604,7 +634,7 @@ class Product(models.Model):
     # def last_engagement_date(self):
     #     return Engagement.objects.filter(product=self).first()
 
-    @property
+    @cached_property
     def endpoint_count(self):
         # endpoints = Endpoint.objects.filter(
         #     finding__test__engagement__product=self,
@@ -1035,6 +1065,7 @@ class Endpoint(models.Model):
         else:
             return NotImplemented
 
+    @cached_property
     def finding_count(self):
         host = self.host_no_port
 
@@ -1061,6 +1092,7 @@ class Endpoint(models.Model):
                                       duplicate=False).distinct().order_by(
             'numerical_severity')
 
+    @cached_property
     def finding_count_endpoint(self):
         findings = Finding.objects.filter(endpoints=self,
                                           active=True,
@@ -1188,7 +1220,7 @@ class Test(models.Model):
         return bc
 
     def verified_finding_count(self):
-        return Finding.objects.filter(test=self, verified=True).count()
+        return self.finding_set.filter(verified=True).count()
 
 
 class VA(models.Model):
@@ -1308,6 +1340,10 @@ class Finding(models.Model):
         blank=True,
         max_length=4000,
         help_text="File name with path. For SAST, when source (start of the attack vector) and sink (end of the attack vector) information are available, put sink information here")
+    component_name = models.CharField(null=True, blank=True, max_length=200,
+                                     help_text="Name of the component containing the finding. ")
+    component_version = models.CharField(null=True, blank=True, max_length=100,
+                                        help_text="Version of the component.")
     found_by = models.ManyToManyField(Test_Type, editable=False)
     static_finding = models.BooleanField(default=False)
     dynamic_finding = models.BooleanField(default=True)
@@ -2568,16 +2604,35 @@ class FieldRule(models.Model):
     text = models.CharField(max_length=200)
 
 
-# Register for automatic logging to database
-auditlog.register(Dojo_User)
-auditlog.register(Endpoint)
-auditlog.register(Engagement)
-auditlog.register(Finding)
-auditlog.register(Product)
-auditlog.register(Test)
-auditlog.register(Risk_Acceptance)
-auditlog.register(Finding_Template)
-auditlog.register(Cred_User)
+def enable_disable_auditlog(enable=True):
+    if enable:
+        # Register for automatic logging to database
+        logger.info('enabling audit logging')
+        auditlog.register(Dojo_User)
+        auditlog.register(Endpoint)
+        auditlog.register(Engagement)
+        auditlog.register(Finding)
+        auditlog.register(Product)
+        auditlog.register(Test)
+        auditlog.register(Risk_Acceptance)
+        auditlog.register(Finding_Template)
+        auditlog.register(Cred_User)
+    else:
+        logger.info('disabling audit logging')
+        auditlog.unregister(Dojo_User)
+        auditlog.unregister(Endpoint)
+        auditlog.unregister(Engagement)
+        auditlog.unregister(Finding)
+        auditlog.unregister(Product)
+        auditlog.unregister(Test)
+        auditlog.unregister(Risk_Acceptance)
+        auditlog.unregister(Finding_Template)
+        auditlog.unregister(Cred_User)
+
+
+from dojo.utils import get_system_setting
+enable_disable_auditlog(enable=get_system_setting('enable_auditlog'))  # on startup choose safe to retrieve system settiung)
+
 
 # Register tagging for models
 tag_register(Product)
