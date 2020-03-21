@@ -25,8 +25,8 @@ ADMIN_EXISTS=$(echo "SELECT * from auth_user;" | python manage.py dbshell | grep
 # Abort if the admin user already exists, instead of giving a new fake password that won't work
 if [ ! -z "$ADMIN_EXISTS" ]
 then
-    echo "Initialization detected that the admin user ${DD_ADMIN_USER} already exists in your database."
-    echo "If you don't remember the password, you can create a new superuser with:"
+    echo "Admin password: Initialization detected that the admin user ${DD_ADMIN_USER} already exists in your database."
+    echo "If you don't remember the ${DD_ADMIN_USER} password, you can create a new superuser with:"
     echo "$ docker-compose exec uswgi /bin/bash -c 'python manage.py createsuperuser'"
     exit
 fi
