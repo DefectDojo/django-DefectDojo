@@ -43,7 +43,45 @@ $(function () {
         return false;
     });
 
+    // Submit bulk actions
+    $(".bulk-action-button").click(function (e) {
+        var target = $(e.target);
+        var hook = target.attr("data-hook");
+        if (hook && eval(hook) == false) {
+            return;
+        }
+        target.closest(".bulk-action-input").val(target.attr("data-bulk-action"));
+        target.closest("form")
+            .attr("method", "post")
+            .append($(csrf_input))
+            .submit();
+    });
+
+    // React to changes of page/page size with submitting the form
+    $(".pagination .page-select").change(function (e) {
+        var target = $(e.target);
+        var pagination = target.closest(".pagination");
+        $(pagination.attr("data-page-field")).val(target.val());
+        pagination.closest("form").submit();
+    });
+    $(".pagination .page-size-select").change(function (e) {
+        var target = $(e.target);
+        var pagination = target.closest(".pagination");
+        $(pagination.attr("data-page-size-field")).val(target.val());
+        $(pagination.attr("data-page-field")).val("1");
+        pagination.closest("form").submit();
+    });
+
+    // On filter panel show/hide, store state in the panel_open input
+    $(".filter-panel-collapse.collapse").on("show.bs.collapse", function (e) {
+        $(e.target).find(".panel-open-input").val("true");
+    });
+    $(".filter-panel-collapse.collapse").on("hide.bs.collapse", function (e) {
+        $(e.target).find(".panel-open-input").val("false");
+    });
+
 });
+
 
 $.fn.serializeObject = function()
 {

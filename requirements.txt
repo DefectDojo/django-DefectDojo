@@ -58,3 +58,13 @@ google-api-python-client==1.8.0
 google-auth==1.11.3
 google-auth-oauthlib==0.4.1
 drf_yasg==1.17.1
+# Queryset filtering for permission enforcement
+django-flexquery ~= 4.1
+# Time and space-efficient binary serializing db field
+git+https://github.com/efficiosoft/django-msgpackfield@master
+# Used by the form field templates to flexibly render form fields
+django-widget-tweaks ~= 1.4
+# Human-writable config input in ReportNG
+pyyaml ~= 5.3
+# Compact and mature framework for unified permission checking
+rules ~= 2.2

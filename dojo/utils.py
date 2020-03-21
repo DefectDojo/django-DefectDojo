@@ -13,6 +13,7 @@ from math import pi, sqrt
 import vobject
 import requests
 from dateutil.relativedelta import relativedelta, MO, SU
+from django import http
 from django.conf import settings
 from django.core.mail import send_mail
 from django.core.mail import EmailMessage
@@ -41,6 +42,16 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 """
 Helper functions for DefectDojo
 """
+
+
+def dict2querydict(data, prefix=None):
+    """Converts a dict into a django http QueryDict. Prefix is prepended to all keys."""
+    qdict = http.QueryDict("", mutable=True)
+    for key, values in data.items():
+        if prefix:
+            key = "%s-%s" % (prefix, key)
+        qdict.setlist(key, values)
+    return qdict
 
 
 def sync_false_history(new_finding, *args, **kwargs):

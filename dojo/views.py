@@ -5,11 +5,29 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib import messages
 from django.http import Http404
 from django.shortcuts import render
+from django_filters.views import FilterView
 from dojo.models import Engagement, Test, Finding, Endpoint, Product
 from dojo.filters import LogEntryFilter
 from dojo.utils import get_page_items, Product_Tab, get_system_setting
 
 logger = logging.getLogger(__name__)
+
+
+class DojoFilterView(FilterView):
+    """
+    Extension of django_filters.views.FilterView that supports GET and POST.
+
+    POST is needed for CSRF protection of bulk actions on DojoFilterSetNew.
+    """
+
+    @property
+    def model(self):
+        """DojoPermissionViewMixin relies on the model attribute."""
+        return self.get_filterset_class()._meta.model
+
+    def post(self, request, *args, **kwargs):
+        self.request.GET = self.request.POST
+        return self.get(request, *args, **kwargs)
 
 
 def action_history(request, cid, oid):

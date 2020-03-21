@@ -1,0 +1,21 @@
+{% extends "./snippets/filter_row_base.html" %}
+{% block tr_class %}{% if object.status == object.STATUS_REQUESTED or object.status == object.STATUS_BUILDING %}active{% elif object.status == object.STATUS_READY %}success{% elif object.status == object.STATUS_FAILED %}warning{% endif %}{% endblock %}
+{% block cols %}
+    <th scope="row">{% include "./snippets/dojo_obj.html" %}</th>
+    <td>{% include "./snippets/dojo_obj_list.html" with objects=object.engagements.all %}</td>
+    <td>{{ object.requester }}</td>
+    <td>{{ object.created }}</td>
+    <td>
+        {{ object.get_status_display }}
+        {% if object.status == object.STATUS_FAILED and object.error_message %}
+            {% block error_msg_dropdown %}
+                {% as button %}<i class="fa fa-question"></i>{% endas %}
+                {% as menu %}<li>{{ object.error_message }}</li>{% endas %}
+                {% include "./snippets/dropdown_menu.html" with label="Show error message" button=button button_class="btn btn-sm btn-info" menu=menu dropdown_class="inline-block" only %}
+            {% endblock %}
+        {% endif %}
+        {% if object.is_downloadable %}
+            <a class="btn btn-info" href="{% url "reportng_download" pk=object.pk %}" title="Download"><i class="fa fa-download"></i></a>
+        {% endif %}
+    </td>
+{% endblock %}

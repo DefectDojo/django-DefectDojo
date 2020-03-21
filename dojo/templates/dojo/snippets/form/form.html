@@ -1,0 +1,29 @@
+{% comment %}
+This snippet displays a form, both visible and hidden fields.
+
+Parameters:
+* Form form:
+  The form to display.
+* str error_class ("alert alert-warning"):
+  CSS class for the field-independent <ul/> error list.
+* str field_error_class (""):
+  Passed as error_class to the field.html snippet.
+
+All parameters of field.html are supported and passed through when including the
+individual form fields.
+{% endcomment %}
+
+
+<div class="{% if inline %}form-inline{% endif %}">
+    {% if not hide_errors and form.non_field_errors %}
+        <ul class="{{ error_class|default:"alert alert-warning" }}">
+            {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% for field in form %}
+        {% include "./field.html" with error_class=field_error_class field=field %}
+    {% endfor %}
+</div>

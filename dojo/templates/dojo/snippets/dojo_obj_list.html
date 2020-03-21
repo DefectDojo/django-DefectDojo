@@ -1,0 +1,16 @@
+{% comment %}
+Displays a list of objects using the dojo_obj.html snippet.
+
+Parameters:
+* Iterable<object> objects:
+  List of objects to display.
+* str ul_class (""):
+* str li_class (""):
+{% endcomment %}
+
+
+<ul class="{{ ul_class }}" style="margin-top:0; margin-bottom:0;">
+    {% for object in objects %}
+        <li class="{{ li_class }}">{% include "./dojo_obj.html" %}</li>
+    {% endfor %}
+</ul>

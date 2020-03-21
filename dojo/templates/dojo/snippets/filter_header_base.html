@@ -1,0 +1,42 @@
+{% comment %}
+Use this snippet as base for the "<modelname>_filter_header.html" templates.
+It adds the first column with Select/Deselect all buttons and bulk actions.
+
+Blocks:
+* cols
+  Columns of the header row, best specified using <th/>.
+* tr_class (""):
+  Additional CSS classes for the <tr/> tag.
+* bulk_actions (""):
+  Add additional <li>...</li> items for model-specific bulk actions to the bulk
+  actions menu. See the predefined ones below for examples.
+
+Parameters:
+* bool tickable (True):
+  Whether to add the first column with checkboxes and bulk actions.
+{% endcomment %}
+
+
+<tr class="{% block tr_class %}{% endblock %}">
+    {% if tickable|if_unset:True %}
+        <th scope="col" class="col-sm-1">
+            <button class="btn btn-sm btn-secondary" type="submit" name="{{ filter.meta_form.select_all.html_name }}" value="true" title="Select all" aria-label="Select all"><i class="fa fa-check-square-o"></i></button>
+            <button class="btn btn-sm btn-secondary" type="submit" name="{{ filter.meta_form.deselect_all.html_name }}" value="true" title="Deselect all" aria-label="Deselect all"><i class="fa fa-square-o"></i></button>
+            {% if filter.bulk_actions %}
+                {# The actual bulk action is inserted by JS #}
+                <input class="bulk-action-input" type="hidden" name="{{ filter.meta_form.bulk_action.html_name }}" value="" />
+                <script type="text/javascript">
+                    var csrf_input = `{% csrf_token %}`;
+                </script>
+                {% as menu %}
+                    {% block bulk_actions %}{% endblock %}
+                    {% if "delete" in filter.bulk_actions %}
+                    <li><a class="btn btn-danger bulk-action-button" href="#" data-bulk-action="delete" data-hook="confirm('Are you sure you want to delete all selected objects?')"><i class="fa fa-trash"></i> Delete</a></li>
+                    {% endif %}
+                {% endas %}
+                {% include "./dropdown_menu.html" with label="Perform action on all ticked objects" menu=menu dropdown_class="inline-block" only %}
+            {% endif %}
+        </th>
+    {% endif %}
+    {% block cols %}{% endblock %}
+</tr>

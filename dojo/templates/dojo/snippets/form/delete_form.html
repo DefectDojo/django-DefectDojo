@@ -1,0 +1,20 @@
+{% comment %}
+Include this snippet in *_confirm_delete.html templates. It adds a confirmation
+message and buttons for submission and cancelling. It already contains a surrounding
+<form method="POST"/> tag and the necessary markup for SuccessRedirectBackViewMixin.
+
+Parameters:
+* str success_url:
+  The parameter for the included success_redirect_back.html snippet.
+{% endcomment %}
+
+
+<form method="POST">
+    {% csrf_token %}
+    {% include "./success_redirect_back.html" %}
+    <div class="alert alert-danger form-group">
+        Are you sure you want to irrevocably delete this object?
+        <button type="submit" class="btn btn-danger">Yes, delete</button>
+        <a class="btn btn-info" href="javascript:history.back()">No, thanks</a>
+    </div>
+</form>

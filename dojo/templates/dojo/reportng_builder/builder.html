@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% load rules %}
+
+
+{% block content %}
+<h1>
+    {{ builder.name }} &dash;
+
+    {% if draft %}
+        {% if draft.status == draft.STATUS_DRAFT %}
+            Draft <span class="draft-title">{{ draft.title }}</span>
+        {% else %}
+            New Report Based on <span class="draft-title">{{ draft.title }}</span>
+        {% endif %}
+        <small>created {{ draft.created }}</small>
+    {% else %}
+        New Report
+    {% endif %}
+</h1>
+
+<form id="id_builder_form" action="" method="POST" novalidate>
+
+    {% as collapse_parent %}#id_builder_form{% endas %}
+
+    {% csrf_token %}
+
+    {{ control_form.step }}
+
+    {# This invisible button will catch RETURN without triggering any step-specific action #}
+    <button type="submit" class="sr-only" aria-hidden="true"></button>
+
+    {% block builder_config %}
+        {% as extra_heading %}
+            {% if not builder_config_form.is_valid %}
+                <div class="alert alert-warning panel-header-alert">
+                    Action required
+                </div>
+            {% endif %}
+        {% endas %}
+        {% as body %}
+            {% include builder_config_form.template_name with form=builder_config_form %}
+        {% endas %}
+        {% include "./step_panel.html" with title="Report Settings" step=1 %}
+    {% endblock %}
+
+    {% include "./filter_step_panel.html" with title="Products" step=2 filter=products_filter %}
+
+    {% include "./filter_step_panel.html" with title="Engagements" step=3 filter=engagements_filter %}
+
+    {% include "./filter_step_panel.html" with title="Tests" step=4 filter=tests_filter %}
+
+    {% include "./filter_step_panel.html" with title="Findings" step=5 filter=findings_filter %}
+
+    <div class="form-inline form-group builder-submit">
+        <button type="submit" name="{{ control_form.build.html_name }}" value="true" class="btn btn-primary">Build report</button>
+        <button type="submit" name="{{ control_form.save_draft.html_name }}" value="true" class="btn btn-primary">Save draft</button>
+        {% if draft and draft.status == draft.STATUS_DRAFT %}
+            {% has_perm draft|get_perm:"change" user draft as can_change %}
+            {% if can_change %}
+                {% include "../snippets/form/field.html" with field=control_form.overwrite_draft inline=True only %}
+            {% endif %}
+        {% endif %}
+        <a class="btn btn-danger" href="">Reset &amp; start again</a>
+    </div>
+
+</form>
+{% endblock %}
+
+
+{% block postscript %}
+<script type="text/javascript">
+    {# Set the control_form.step field when a step panel is expanded #}
+    $(".step-panel-collapse.collapse").on("show.bs.collapse", function (e) {
+        var step = $(e.target).find(".builder-step-id").html();
+        $("#{{ control_form.step.auto_id }}").val(step);
+        $("#id_builder_form").submit();
+    });
+
+    {# Scroll to the expanded panel on site load #}
+    $("html, body").animate({
+        scrollTop: ($(".collapse.in").parent().offset().top - 75)
+    }, 0);
+</script>
+{% endblock %}
+
+
+{% block add_styles %}
+span.draft-title {
+    font-family: monospace;
+    font-size: 0.8em;
+    margin: 0 0.8em;
+}
+
+.builder-step-id {
+    display: none;
+}
+
+div.builder-submit {
+    margin-top: 2em;
+    text-align: right;
+}
+{% endblock %}

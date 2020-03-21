@@ -1,0 +1,18 @@
+{% as id %}builder_step{{ step }}{% endas %}
+
+{% as title %}{{ step }}. {{ title }}{% endas %}
+
+{% as body %}
+    {# Needed to get the step id of an expanded panel from JS #}
+    <div class="builder-step-id">{{ step }}</div>
+    {{ body }}
+{% endas %}
+
+{% if current_step == step %}
+    {% as open %}x{% endas %}
+{% endif %}
+
+{% as panel_template %}{{ panel_template|if_unset:"dojo/snippets/panel.html" }}{% endas %}
+
+{# We pass all arguments from the parent through to the panel snippet intentionally #}
+{% include panel_template with heading_level=2 collapse_objects=True open=open|default:False panel_collapse_class=panel_collapse_class|addstr:" step-panel-collapse" %}

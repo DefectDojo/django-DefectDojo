@@ -23,7 +23,10 @@ ignore =
     E402
     E126
     E128
-    # line break after binary operator
+    # whitespace before ':' (performed by black e.g.: x[i + 3 :])
+    E203
+    # line break before/after binary operator
+    W503
     W504
     # undefined file name excpetion
     F821

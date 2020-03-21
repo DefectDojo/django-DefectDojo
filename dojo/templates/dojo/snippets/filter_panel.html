@@ -1,0 +1,93 @@
+{% comment %}
+This is a wrapper around the panel.html snippet which displays a filterset
+above the filtered items, including full pagination support.
+
+Note: This snippet doesn't create its own <form/> and needs to be wrapped manually.
+
+Parameters:
+* DojoFilterSetNew filter:
+  The filterset to act on. This needs to be an instance of DojoFilterSetNew.
+* bool collapse_objects (False):
+  If set to True, the table of filtered items will collapse together with the filters
+  area. Otherwise, it'll be always visible. This setting is passed through to
+  panel.html as collapse_footer.
+* bool open (previous state):
+  Overwrite this to always have the panel expanded/collapsed. Doing so is not
+  recommended, better subclass the FilterSet and configure an initial value via the
+  panel_open_initially attribute to have the previous state remembered when the user
+  applies the filter form.
+* str header_template (""):
+  Path of the template to insert as header of the table of filtered objects. If
+  omitted, a template named "dojo/<modelname>_filter_header.html" will be loaded
+  with the full context.
+* str row_template (""):
+  Path of the template used to represent an object in the table of filtered objects.
+  If omitted, a template named "dojo/<modelname>_filter_row.html" will be rendered
+  for each item to be displayed with the full context + the item to display passed
+  under the name "object".
+* str table_class ("table-hover table-responsive table-striped"):
+
+For convenience, all context variables passed to this snippet get handed through to
+included snippets as well, allowing you to change any setting of panel.html and the
+header/row templates you like. For instance, you can disable collapsing entirely by
+passing collapsible=False, add more buttons to the panel header using extra_heading
+or disable ticking objects using tickable=False.
+{% endcomment %}
+
+
+{% as extra_heading %}
+    {% if filter.paginator.count %}
+        <div class="alert alert-info panel-header-alert">
+            Showing {{ filter.page.start_index }}&nbsp;&dash;&nbsp;{{ filter.page.end_index }} of {{ filter.paginator.count }}
+        </div>
+        {% if filter.ticked_qs %}
+            <div class="alert alert-info panel-header-alert">
+                {% if filter.ticked_qs.count == filter.paginator.count %}
+                    All selected
+                {% else %}
+                    {{ filter.ticked_qs.count }} selected
+                {% endif %}
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="alert alert-warning panel-header-alert">
+            No objects found
+        </div>
+    {% endif %}
+    {{ extra_heading }}
+{% endas %}
+
+
+{% as body %}
+    {{ body }}
+    {% include "./form/filter_form.html" with filter=filter only %}
+{% endas %}
+
+{% as footer %}
+    {% include "./pagination.html" with filter=filter only %}
+    <table class="table {{ table_class|if_unset:"table-hover table-responsive table-striped" }}">
+        <thead>
+            {% if not header_template %}
+                {% as header_template %}dojo/{{ filter.model_name }}_filter_header.html{% endas %}
+            {% endif %}
+            {% include header_template %}
+        </thead>
+        <tbody>
+            {% if not row_template %}
+                {% as row_template %}dojo/{{ filter.model_name }}_filter_row.html{% endas %}
+            {% endif %}
+            {% for object in filter.page %}
+                {% include row_template with object=object %}
+            {% empty %}
+                <tr>
+                    <td colspan="100" style="padding-top:3em; text-align:center;">No items available.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% include "./pagination.html" with filter=filter only %}
+    {{ footer }}
+{% endas %}
+
+{# The .filter-panel-collapse and .filter-panel-footer classes are added to allow reacting to collapse events from JS and apply custom footer styling. #}
+{% include "./panel.html" with collapse_footer=collapse_objects|if_unset:False open=open|if_unset:filter.panel_open panel_collapse_class=panel_collapse_class|addstr:" filter-panel-collapse" panel_footer_class=panel_footer_class|addstr:" filter-panel-footer" %}

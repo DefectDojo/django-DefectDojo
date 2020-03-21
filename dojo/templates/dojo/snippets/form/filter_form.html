@@ -1,0 +1,56 @@
+{% comment %}
+This snippet displays the form of a DojoFilterSetNew object.
+All filter and ordering controls are displayed as an inline form.
+
+This snippet is normally not used directly as it doesn't show the filtered
+results. Better use filter_panel.html to get a fully-fledged panel with filter
+controls, results and pagination.
+
+Parameters:
+* DojoFilterSetNew filter:
+  The filterset which's form should be displayed.
+{% endcomment %}
+
+
+{# Catches RETURN presses inside the form without resetting page etc. #}
+<button type="submit" class="sr-only" aria-hidden="true"></button>
+
+{% include "./field.html" with field=filter.meta_form.page only %}
+{% include "./field.html" with field=filter.meta_form.page_size only %}
+
+{# The .panel-open-input class is added to make the field identifiable by JS #}
+{% include "./field.html" with field=filter.meta_form.panel_open field_class="panel-open-input" only %}
+
+{# Keep pk's the filter is explicitly restricted to #}
+{% if filter.meta_form.is_bound %}
+    {% for pk in filter.meta_form.cleaned_data.pk %}
+        <input type="hidden" name="{{ filter.meta_form.pk.html_name }}" value="{{ pk }}" />
+    {% endfor %}
+{% endif %}
+
+{# Ticks on other pages must be retained somewhere #}
+{% for pk in filter.out_of_page_ticks %}
+    <input type="hidden" name="{{ filter.meta_form.tick.html_name }}" value="{{ pk }}" />
+{% endfor %}
+
+{# Individual filter fields #}
+<div class="form-inline">
+    {% for field in filter.form.visible_fields %}
+        {% include "./field.html" with field=field inline=True label_as_block=True only %}
+    {% endfor %}
+</div>
+
+{# Ordering and buttons #}
+<div class="form-inline">
+    {% for field in filter.deep_ordering_fields %}
+        {% if forloop.first %}
+            <strong>Ordering:</strong>
+        {% endif %}
+        {% include "./field.html" with field=field hide_label=True inline=True only %}
+        {% if forloop.last %}
+            {# Reset page number when applying filters #}
+            <button type="submit" class="btn btn-secondary" name="{{ filter.meta_form.page.html_name }}" value="1">Apply</button>
+            <button type="submit" class="btn btn-warning" name="{{ filter.meta_form.reset.html_name }}" value="true">Reset filters</button>
+        {% endif %}
+    {% endfor %}
+</div>

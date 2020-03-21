@@ -1,0 +1,48 @@
+{% comment %}
+This snippet generates a pagination bar to be shown above and/or below a list of
+filtered, paginated items.
+
+The snippet must be included inside the <form/> holding the filter controls. When
+the user changes page or page size, the form will automatically be submitted. The
+pagination bar <div/> will have a class of .pagination.
+    
+Including multiple of these pagination bars for the same filterset is supported.
+
+Parameters:
+* DojoFilterSetNew filter:
+  The filterset to act on. This needs to be an instance of DojoFilterSetNew.
+* bool force_show (False):
+  By default, the pagination bar will only be shown when the number of filtered
+  items is larger than the minimum selectable page size. Enable this setting to
+  always show the pagination bar regardless of the number of available items.
+{% endcomment %}
+
+
+{% if filter.pagination %}
+    {% with page=filter.page paginator=filter.paginator %}
+        {% if force_show or paginator.count > filter.min_page_size %}
+            <div class="form-group pagination" data-page-field="#{{ filter.meta_form.page.auto_id }}" data-page-size-field="#{{ filter.meta_form.page_size.auto_id }}">
+                {% if page.has_other_pages %}
+                    <button type="submit" class="btn btn-sm btn-secondary" {% if page.has_previous %}name="{{ filter.meta_form.page.html_name }}" value="1"{% else %}disabled{% endif %}>1&nbsp;&nbsp;&lt;&lt;</button>
+                    <button type="submit" class="btn btn-sm btn-secondary" {% if page.has_previous %}name="{{ filter.meta_form.page.html_name }}" value="{{ page.previous_page_number }}"{% else %}disabled{% endif %}>{% if page.has_previous %}{{ page.previous_page_number }}{% else %}&dash;{% endif %}&nbsp;&nbsp;&lt;</button>
+                    <select class="form-control form-control-sm page-select">
+                        {% for num in paginator.page_range %}
+                            <option value="{{ num }}"{% if num == page.number %} selected{% endif %}>{{ num }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn btn-sm btn-secondary" {% if page.has_next %}name="{{ filter.meta_form.page.html_name }}" value="{{ page.next_page_number }}"{% else %}disabled{% endif %}>&gt;&nbsp;&nbsp;{% if page.has_next %}{{ page.next_page_number }}{% else %}&dash;{% endif %}</button>
+                    <button type="submit" class="btn btn-sm btn-secondary" {% if page.number < paginator.num_pages %}name="{{ filter.meta_form.page.html_name }}" value="{{ paginator.num_pages }}"{% else %}disabled{% endif %}>&gt;&gt;&nbsp;&nbsp;{{ paginator.num_pages }}</button>
+                {% endif %}
+
+                <label class="form-label">
+                    Items per Page:
+                    <select class="form-control form-control-sm page-size-select">
+                        {% for value, label in filter.meta_form.page_size.field.choices %}
+                            <option value="{{ value }}"{% if value == paginator.per_page %} selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+            </div>
+        {% endif %}
+    {% endwith %}
+{% endif %}

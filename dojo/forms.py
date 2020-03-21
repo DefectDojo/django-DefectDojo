@@ -34,6 +34,29 @@ SEVERITY_CHOICES = (('Info', 'Info'), ('Low', 'Low'), ('Medium', 'Medium'),
                     ('High', 'High'), ('Critical', 'Critical'))
 
 
+class TypedMultipleValueField(forms.TypedMultipleChoiceField):
+    """
+    A field which can store multiple values sent in a query under the same name.
+    Each value is passed through the given coerce() function as part of the cleaning
+    process, which should raise a ValueError or ValidationError for invalid values.
+    Other than TypedMultipleChoiceField, this field offers no set of choices to pick
+    values from. The only validation a value has to pass in order to be accepted is
+    the coerce() function.
+    The default widget is a SelectMultiple, but with input_type set to hidden.
+    """
+
+    def __init__(self, **kwargs):
+        kwargs.setdefault("choices", ())
+        default_widget = kwargs.get("widget") is None
+        super(TypedMultipleValueField, self).__init__(**kwargs)
+        if default_widget:
+            self.widget.input_type = "hidden"
+
+    def valid_value(self, value):
+        """Always returns True since coerce() is our only validator."""
+        return True
+
+
 class SelectWithPop(forms.Select):
     def render(self, name, *args, **kwargs):
         html = super(SelectWithPop, self).render(name, *args, **kwargs)

@@ -1,0 +1,9 @@
+{% extends "./snippets/filter_row_base.html" %}
+{% block cols %}
+    <td scope="row">{% include "./snippets/dojo_obj.html" %}</td>
+    <td>{% include "./snippets/dojo_obj.html" with object=object.test %}</td>
+    <td>{{ object.date }}</td>
+    <td>{{ object.severity }}</td>
+    <td>{{ object.active|yesno }}</td>
+    <td>{{ object.duplicate|yesno }}</td>
+{% endblock %}

@@ -1,0 +1,76 @@
+{% comment %}
+Displays a single form field and field errors with the correct bootstrap form markup.
+Hidden fields are supported as well.
+
+Parameters:
+* BoundField field:
+  The form field to display.
+* bool hide_errors (False):
+  Whether to hide the list of field errors.
+* bool hide_label (False):
+  Whether to hide the field's label for non-screenreader users.
+* bool inline (False):
+  Whether to use bootstrap's form-inline class.
+* bool label_as_block (False):
+  When inline and this option are both enabled, <label/> tags are displayed with
+  "display: block" instead of "display: inline-block", which may be desirable for
+  inline forms.
+* str placeholder (""):
+  Placeholder to use for text inputs.
+* str size (""):
+  If given, the corresponding bootstrap form-control-* classes are applied.
+  One of: "sm", "lg"
+* str field_class (""):
+* str label_class (""):
+* str error_class ("alert alert-warning"):
+  CSS class for the <ul/> error list.
+* str wrapper_class (""):
+  Additional CSS class for the <div/> tag wrapping the form field.
+{% endcomment %}
+
+
+{% load widget_tweaks %}
+
+{% if field.is_hidden %}
+    {# TODO: Can we pass non-existing variables to render_field directly? #}
+    {% as field_class %}{{ field_class }}{% endas %}
+    {% render_field field class+=field_class %}
+{% else %}
+    {# Render errors here to be able to include them at multiple places #}
+    {% as errors_block %}
+        {% if not hide_errors and field.errors %}
+            {# TODO: Add .mb-0 as default after migrating to bootstrap 4 #}
+            <ul class="{{ error_class|if_unset:"alert alert-warning" }}" style="margin-bottom:0;">
+                {% for error in field.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endas %}
+
+    {% if field.field.widget.input_type == "checkbox" or field.field.widget.input_type == "radio" %}
+        {# TODO: Switch to .align-top .mb-1 .mr-2 after migrating to bootstrap 4 #}
+        <div id="div_{{ field.auto_id }}" class="form-group form-check{% if inline %} form-check-inline{% endif %} {{ wrapper_class }}"{% if inline %} style="vertical-align:top; margin-bottom:10px; margin-right: 25px;"{% endif %}>
+            {% as field_class %}form-check-input{% if hide_label %} position-static{% endif %} {{ field_class }}{% endas %}
+            {% render_field field class+=field_class %}
+            <label for="{{ field.id_for_label }}" class="{{ label_class }}{% if hide_label %} sr-only{% endif %}">
+                {{ field.label }}
+            </label>
+            {{ errors_block }}
+        </div>
+    {% else %}
+        {# TODO: Switch to .align-top .mb-1 .mr-2 after migrating to bootstrap 4 #}
+        <div id="div_{{ field.auto_id }}" class="form-group {{ wrapper_class }}"{% if inline %} style="vertical-align:top; margin-bottom:10px; margin-right:25px;"{% endif %}>
+            <label for="{{ field.id_for_label }}" class="{{ label_class }}{% if hide_label %} sr-only{% endif %}"{% if label_as_block %} style="display:block;"{% endif %}>
+                {{ field.label }}
+            </label>
+            {% as field_class %}form-control{% if size %} form-control-{{ size }}{% endif %} {{ field_class }}{% endas %}
+            {% if placeholder %}
+                {% render_field field class+=field_class placeholder=placeholder %}
+            {% else %}
+                {% render_field field class+=field_class %}
+            {% endif %}
+            {{ errors_block }}
+        </div>
+    {% endif %}
+{% endif %}

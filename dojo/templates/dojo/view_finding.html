@@ -639,12 +639,12 @@
                     {% for pic in finding.images.all %}
                         <div class="col-md-1">
                             <a href="#"
-                               data-imageurl="{{ request.scheme }}://{{ request.get_host }}{{ pic.image_large.url }}"
-                               data-origurl="{{ request.scheme }}://{{ request.get_host }}{{ pic.image.url }}"
+                               data-imageurl="{% url "finding_image" pic.pk "l" %}"
+                               data-origurl="{% url "finding_image" pic.pk "o" %}"
                                data-caption="{{ pic.caption }}"
                                class="thumbnail" data-toggle="modal"
                                data-target="#findingImageModal" id="finding_pic">
-                                <img src="{{ request.scheme }}://{{ request.get_host }}{{ pic.image_thumbnail.url }}" alt="{{ pic.caption }}" title="{{ pic.caption }}" />
+                                <img src="{% url "finding_image" pic.pk "t" %}" alt="{{ pic.caption }}" title="{{ pic.caption }}" />
                             </a>
                         </div>
                     {% endfor %}
@@ -666,9 +666,9 @@
                                 class="fa fa-close"></span></button>
                     </div>
                     <div class="modal-body">
-                        <a id="a_to_replace" class="modal_finding_pic" href="{{ pic.image.url }}" target="_blank"
+                        <a id="a_to_replace" class="modal_finding_pic" href="" target="_blank"
                            title="View original image.">
-                            <img id="to_replace" src="{{ pic.image_large.url }}" class="img-responsive"/>
+                            <img id="to_replace" src="" class="img-responsive"/>
                         </a>
                         <p id="caption_to_replace">{{ pic.caption }}</p>
                     </div>

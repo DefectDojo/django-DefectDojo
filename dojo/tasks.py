@@ -1,14 +1,15 @@
 import tempfile
 from datetime import timedelta
+
+from celery import shared_task
+from celery.utils.log import get_task_logger
+from celery.decorators import task
 from django.db.models import Count
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.urls import reverse
 from django.template.loader import render_to_string
 from django.utils.http import urlencode
-from celery.utils.log import get_task_logger
-from celery.decorators import task
-from dojo.models import Product, Finding, Engagement, System_Settings
 from django.utils import timezone
 from dojo.signals import dedupe_signal
 
@@ -19,6 +20,9 @@ from dojo.utils import sync_false_history, calculate_grade
 from dojo.reports.widgets import report_widget_factory
 from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_issue, \
                        close_epic, create_notification, sync_rules
+
+# Import tasks from submodules to be discovered by celery
+from dojo.reportng.builders.base import async_build_report  # noqa: F401
 
 import logging
 fmt = getattr(settings, 'LOG_FORMAT', None)
@@ -35,7 +39,7 @@ def log_generic_alert(source, title, description):
                         icon='bullseye', source=source)
 
 
-@app.task(bind=True)
+@shared_task(bind=True)
 def add_alerts(self, runinterval):
     now = timezone.now()
 
@@ -81,7 +85,7 @@ def add_alerts(self, runinterval):
             calculate_grade(product)
 
 
-@app.task(bind=True)
+@shared_task(bind=True)
 def async_pdf_report(self,
                      report=None,
                      template="None",
@@ -133,7 +137,7 @@ def async_pdf_report(self,
     return True
 
 
-@app.task(bind=True)
+@shared_task(bind=True)
 def async_custom_pdf_report(self,
                             report=None,
                             template="None",
@@ -265,19 +269,19 @@ def add_comment_task(find, note):
     add_comment(find, note)
 
 
-@app.task(name='async_dedupe')
+@shared_task(name='async_dedupe')
 def async_dedupe(new_finding, *args, **kwargs):
     deduplicationLogger.debug("running deduplication")
     dedupe_signal.send(sender=new_finding.__class__, new_finding=new_finding)
 
 
-@app.task(name='applying rules')
+@shared_task(name='applying rules')
 def async_rules(new_finding, *args, **kwargs):
     logger.info("applying rules")
     sync_rules(new_finding, *args, **kwargs)
 
 
-@app.task(name='async_false_history')
+@shared_task(name='async_false_history')
 def async_false_history(new_finding, *args, **kwargs):
     logger.info("running false_history")
     sync_false_history(new_finding, *args, **kwargs)

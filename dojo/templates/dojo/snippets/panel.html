@@ -1,0 +1,75 @@
+{% comment %}
+This is a very generic and highly configurable snippet to be used everywhere
+throughout dojo. It creates a bootstrap panel <div/> with unified look and feel,
+but all-customizable content.
+
+Most parameters have sensible default values for many use cases, making using this
+panel snippet easy.
+
+Parameters:
+* str id:
+  A per page unique string to prepend to the HTML id's of this panel's DOM elements.
+* str title:
+  A title to show in the panel's heading area. This is also spoken to screenreader
+  users as label for the expand/collapse button.
+* str extra_heading (""):
+  Additional HTML, such as a dropdown menu, to add to the heading.
+* str body (""):
+  HTML to show in the panel's body area. If omitted, no body is created at all.
+* str footer (""):
+  HTML to show in the panel's footer area. If omitted, no footer is created at all.
+* bool collapsible (True):
+  Whether the panel should be collapsible.
+* bool collapse_footer (True):
+  Whether the panel's footer area should collapse together with the body (ignored
+  when collapsible=False).
+* bool open (True):
+  Whether the panel should be expanded by default (ignored when collapsible=False).
+* str panel_class (""):
+* str panel_heading_class (""):
+* str panel_collapse_class (""):
+* str panel_body_class (""):
+* str panel_footer_class (""):
+{% endcomment %}
+
+
+<div class="panel panel-default {{ panel_class }}" id="{{ id }}">
+    {% if add_heading|if_unset:True %}
+        <div class="panel-heading {{ panel_heading_class }}">
+            <h{{ heading_level|default:4 }}>
+                {% if collapsible|if_unset:True %}
+                    <a style="color:inherit; text-decoration:none;" data-toggle="collapse" href="#{{ id }}_collapse" {% if collapse_parent %}data-parent="{{ collapse_parent }}"{% endif %} aria-expanded="{% if open|if_unset:True %}true{% else %}false{% endif %}">
+                        {{ title }}
+                    </a>
+                {% else %}
+                    {{ title }}
+                {% endif %}
+                {{ extra_heading }}
+                {% if collapsible|if_unset:True %}
+                    <div class="pull-right">
+                        <a class="btn btn-primary" data-toggle="collapse" href="#{{ id }}_collapse" {% if collapse_parent %}data-parent="{{ collapse_parent }}"{% endif %} aria-expanded="{% if open|if_unset:True %}true{% else %}false{% endif %}" aria-label="{{ title }}">
+                            <i class="fa fa-caret-down"></i>
+                        </a>
+                    </div>
+                {% endif %}
+            </h{{ heading_level|default:4 }}>
+        </div>
+    {% endif %}
+    <div class="panel-collapse {% if collapsible|if_unset:True %}collapse{% if open|if_unset:True %} in{% endif %}{% endif %} {{ panel_collapse_class }}" id="{{ id }}_collapse">
+        {% if body %}
+            <div class="panel-body {{ panel_body_class }}" id="{{ id }}_body">
+                {{ body }}
+            </div>
+        {% endif %}
+        {% if footer and collapse_footer|if_unset:True %}
+            <div class="panel-footer {{ panel_footer_class }}" id="{{ id }}_footer">
+                {{ footer }}
+            </div>
+        {% endif %}
+    </div>
+    {% if footer and collapsible|if_unset:True and not collapse_footer|if_unset:True %}
+        <div class="panel-footer {{ panel_footer_class }}" id="{{ id }}_footer">
+            {{ footer }}
+        </div>
+    {% endif %}
+</div>

@@ -14,14 +14,12 @@ You made changes to the models without creating a DB migration for them.
 
 If you're not familiar with migrations in Django, please read the
 great documentation thoroughly:
-https://docs.djangoproject.com/en/1.11/topics/migrations/
+https://docs.djangoproject.com/en/2.2/topics/migrations/
 
 ********************************************************************************
 
 EOF
     exit 1
 }
-
-./manage.py migrate
 
 exec ./manage.py test dojo.unittests

@@ -50,7 +50,7 @@ def report_url_resolver(request):
 def report_builder(request):
     add_breadcrumb(title="Report Builder", top_level=True, request=request)
     findings = Finding.objects.all()
-    findings = ReportAuthedFindingFilter(request.GET, queryset=findings, user=request.user)
+    findings = ReportAuthedFindingFilter(request.GET, queryset=findings, request=request)
     endpoints = Endpoint.objects.filter(finding__active=True,
                                         finding__verified=True,
                                         finding__false_p=False,
@@ -137,7 +137,7 @@ def custom_report(request):
 def report_findings(request):
     findings = Finding.objects.filter()
 
-    findings = ReportAuthedFindingFilter(request.GET, queryset=findings, user=request.user)
+    findings = ReportAuthedFindingFilter(request.GET, queryset=findings, request=request)
 
     title_words = [word
                    for finding in findings.qs
@@ -751,7 +751,7 @@ def generate_report(request, obj):
                                              queryset=obj.prefetch_related('test',
                                                                            'test__engagement__product',
                                                                            'test__engagement__product__prod_type').distinct(),
-                                             user=request.user)
+                                             request=request)
         filename = "finding_report.pdf"
         report_name = 'Finding'
         report_type = 'Finding'

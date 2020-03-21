@@ -1,0 +1,22 @@
+{% comment %}
+Use this snippet as base for the "<modelname>_filter_row.html" templates.
+It adds the first column with a checkbox to tick the object of this row.
+
+Blocks:
+* cols
+  Columns of the row, best specified using <td/>.
+* tr_class (""):
+  Additional CSS classes for the <tr/> tag.
+
+Parameters:
+* bool tickable (True):
+  Whether to add the first column with checkboxes and bulk actions.
+{% endcomment %}
+
+
+<tr class="{% block tr_class %}{% endblock %}">
+    {% if tickable|if_unset:True %}
+        <td><input class="form-check" type="checkbox" name="{{ filter.meta_form.tick.html_name }}" value="{{ object.pk }}"{% if object in filter.ticked_qs %} checked{% endif %} /></td>
+    {% endif %}
+    {% block cols %}{% endblock %}
+</tr>

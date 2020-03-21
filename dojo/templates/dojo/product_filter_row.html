@@ -1,0 +1,8 @@
+{% extends "./snippets/filter_row_base.html" %}
+{% block cols %}
+    <td scope="row">{% include "./snippets/dojo_obj.html" %}</td>
+    <td>{% include "./snippets/dojo_obj.html" with object=object.prod_type %}</td>
+    <td>{% include "./snippets/dojo_obj_list.html" with objects=object.authorized_users.all %}</td>
+    <td>{{ object.get_platform_display }}</td>
+    <td>{{ object.get_business_criticality_display }}</td>
+{% endblock %}

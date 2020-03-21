@@ -1,0 +1,183 @@
+{% comment %}
+Displays a dojo-specific object, hyperlinking the representation to its detail page,
+if available for the type of object.
+
+Supported object types are:
+* Product
+* Product_Type
+* Engagement
+* Test
+* Test_Type
+* Finding
+* ReportNG
+* User
+
+Parameters:
+* object object:
+  The object to display.
+* bool show_object_name (True):
+  Whether to display the object's representation. If disabled, only the actions menu
+  is shown.
+* bool show_extra_repr (True):
+  Whether to display the extra object representation, if any, below the object's
+  name. This is ignored when show_object_name is False.
+* bool show_actions_menu (True):
+  Whether to display the object-specific actions menu. If this is disabled, only
+  the object name, linked to the view_url, is shown.
+* bool link_name_to_view (True):
+  Whether to link the object name to the corresponding view url.
+{% endcomment %}
+
+
+{% load rules %}
+
+
+{% if object is not None %}
+    {% as model_name %}{{ object|model_name|safe }}{% endas %}
+
+    {% if model_name == "product" %}
+        {% as object_name %}{{ object.name }}{% endas %}
+        {% as view_url %}{% url "view_product" pid=object.pk %}{% endas %}
+        {% as edit_url %}{% url "edit_product" pid=object.pk %}{% endas %}
+        {% as delete_url %}{% url "delete_product" pid=object.pk %}{% endas %}
+
+    {% elif model_name == "product_type" %}
+        {% as object_name %}{{ object.name }}{% endas %}
+        {% as edit_url %}{% url "edit_product_type" ptid=object.pk %}{% endas %}
+
+    {% elif model_name == "engagement" %}
+        {% as object_name %}{{ object.name }}{% endas %}
+        {% as view_url %}{% url "view_engagement" eid=object.pk %}{% endas %}
+        {% as edit_url %}{% url "edit_engagement" eid=object.pk %}{% endas %}
+        {% as delete_url %}{% url "delete_engagement" eid=object.pk %}{% endas %}
+
+    {% elif model_name == "test" %}
+        {% as object_name %}{% if object.title %}{{ object.title }} ({{ object.test_type.name }}){% else %}{{ object.test_type.name }}{% endif %}{% endas %}
+        {% as view_url %}{% url "view_test" tid=object.pk %}{% endas %}
+        {% as edit_url %}{% url "edit_test" tid=object.pk %}{% endas %}
+        {% as delete_url %}{% url "delete_test" tid=object.pk %}{% endas %}
+
+    {% elif model_name == "test_type" %}
+        {% as object_name %}{{ object.name }}{% endas %}
+        {% as edit_url %}{% url "edit_test_type" ptid=object.pk %}{% endas %}
+
+    {% elif model_name == "finding" %}
+        {% as object_name %}{{ object.title }}{% endas %}
+        {% as view_url %}{% url "view_finding" fid=object.pk %}{% endas %}
+        {% as edit_url %}{% url "edit_finding" fid=object.pk %}{% endas %}
+        {% as delete_url %}{% url "delete_finding" fid=object.pk %}{% endas %}
+        {% has_perm "finding"|get_perm:"add" user as can_add %}
+        {% has_perm "finding"|get_perm:"change" user object as can_change %}
+        {% as actions_menu %}
+            {% if can_change %}
+                <li role="presentation">
+                    <a class="text-info" href="{% url "manage_images" object.pk %}">
+                        <i class="fa fa-file-image-o"></i> Manage Images
+                    </a>
+                </li>
+                <li role="separator" class="divider"></li>
+                {% if object.under_review and dojo_user in object.reviewers.all or dojo_user == object.review_requested_by and object.under_review %}
+                    <li role="presentation">
+                        <a class="text-info" href="{% url "clear_finding_review" object.pk %}">
+                            <i class="icon-user-check"></i> Clear Review
+                        </a>
+                    </li>
+                {% elif not object.under_review %}
+                    <li role="presentation">
+                        <a class="text-info" href="{% url "request_finding_review" object.pk %}">
+                            <i class="icon-user-check"></i> Request Peer Review
+                        </a>
+                    </li>
+                {% endif %}
+                <li role="presentation">
+                    <a class="text-info" href="{% url "touch_finding" object.pk %}">
+                        <i class="fa fa-clock-o"></i> Touch Finding
+                    </a>
+                </li>
+                <li role="separator" class="divider"></li>
+            {% endif %}
+        {% endas %}
+
+    {% elif model_name == "reportng" %}
+        {% as object_name %}{{ object.title }}{% endas %}
+        {% as extra_repr %}
+            <small><strong>{{ object.builder.name }}</strong></small>
+            {% if object.status == object.STATUS_DRAFT %}
+                <small><strong>· Draft</strong></small>
+            {% endif %}
+        {% endas %}
+        {% as delete_url %}{% url "reportng_delete" pk=object.pk %}{% endas %}
+        {% has_perm "reportng"|get_perm:"add" user as can_add %}
+        {% as actions_menu %}
+            {% if can_add %}
+                <li>
+                    <a class="text-info" href="{% url "reportng_builder" builder_code=object.builder_code draft_pk=object.pk %}">
+                        <i class="fa fa-edit"></i> Open in Report Builder
+                    </a>
+                </li>
+            {% endif %}
+            {% if object.is_downloadable %}
+                <li role="separator" class="divider"></li>
+                <li>
+                    <a class="text-info" href="{% url "reportng_download" pk=object.pk %}">
+                        <i class="fa fa-download"></i> Download
+                    </a>
+                </li>
+                <li role="separator" class="divider"></li>
+            {% endif %}
+        {% endas %}
+
+    {% elif model_name == "user" %}
+        {% as object_name %}{{ object.username }}{% endas %}
+
+    {% else %}
+        <strong class="text-danger">INVALID OBJECT passed to dojo_obj.html: {{ object }}</strong>
+
+    {% endif %}
+
+
+    {% if object_name %}
+        {% if not view_url %}
+            {% as view_url %}{{ object.get_absolute_url }}{% endas %}
+        {% endif %}
+        <div class="inline-block" style="whitespace: nowrap;">
+            {% if show_actions_menu|if_unset:True %}
+                {% as actions_label %}Actions for {{ object_name }}{% endas %}
+                {% as actions_menu %}
+                    {% if view_url %}
+                        <li><a class="text-info" href="{{ view_url }}"><i class="fa fa-info-circle"></i>View</a></li>
+                    {% endif %}
+                    {% if edit_url %}
+                        {% has_perm model_name|get_perm:"change" user object as can_change %}
+                        {% if can_change %}
+                            <li><a class="text-info" href="{{ edit_url }}"><i class="fa fa-edit"></i>Edit</a></li>
+                        {% endif %}
+                    {% endif %}
+                    {{ actions_menu }}
+                    {% if delete_url %}
+                        {% has_perm model_name|get_perm:"delete" user object as can_delete %}
+                        {% if can_delete %}
+                            <li><a class="text-danger" href="{{ delete_url }}"><i class="fa fa-trash"></i>Delete</a></li>
+                        {% endif %}
+                    {% endif %}
+                {% endas %}
+                {% if actions_menu|strip %}
+                    {% include "./dropdown_menu.html" with label=actions_label menu=actions_menu dropdown_class="inline-block" button_class="text-info" only %}
+                    &nbsp;
+                {% endif %}
+            {% endif %}
+            {% if show_object_name|if_unset:True %}
+                <div class="inline-block" style="vertical-align: top;">
+                    {% if view_url and link_name_to_view|if_unset:True %}
+                        <a href="{{ view_url }}">{{ object_name }}</a>
+                    {% else %}
+                        {{ object_name }}
+                    {% endif %}
+                    {% if show_extra_repr|if_unset:True and extra_repr|default:""|strip %}
+                        <br/>{{ extra_repr }}
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+{% endif %}

@@ -1,0 +1,9 @@
+{% extends "./snippets/filter_row_base.html" %}
+{% block cols %}
+    <td scope="row">{% include "./snippets/dojo_obj.html" %}</td>
+    <td>{% include "./snippets/dojo_obj.html" with object=object.product %}</td>
+    <td>{{ object.eng_type }}</td>
+    <td>{% include "./snippets/dojo_obj.html" with object=object.lead %}</td>
+    <td>{{ object.target_start }}</td>
+    <td>{{ object.target_end }}</td>
+{% endblock %}

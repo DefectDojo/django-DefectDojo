@@ -3,12 +3,34 @@ from django.conf import settings
 from django.utils import timezone
 from django.utils.http import urlquote
 from dojo.utils import get_system_setting
+import functools
 from re import compile
 
 
 EXEMPT_URLS = [compile(settings.LOGIN_URL.lstrip('/'))]
 if hasattr(settings, 'LOGIN_EXEMPT_URLS'):
     EXEMPT_URLS += [compile(expr) for expr in settings.LOGIN_EXEMPT_URLS]
+
+
+def patch_user(get_response):
+    """Middleware patching request.user with some Dojo-specific functionality.
+
+    This is necessary because Django doesn't allow using a proxy model as
+    AUTH_USER_MODEL, which clearly would be the right way for doing these things.
+    """
+
+    def _patch_user(request):
+        try:
+            user = request.user
+        except AttributeError:
+            pass
+        else:
+            if user is not None:
+                # Cache permission check results for the duration of the request
+                user.has_perm = functools.lru_cache(maxsize=None)(user.has_perm)
+        return get_response(request)
+
+    return _patch_user
 
 
 class LoginRequiredMiddleware:

@@ -1,0 +1,13 @@
+{% comment %}
+This snippet inserts a hidden <input/> storing the URL to redirect to upon
+successful form submission. It's meant to be included in forms with views using
+SuccessRedirectBackViewMixin.
+
+Parameters:
+* str success_url:
+  The URL to redirect to upon successful form submission. This is provided by
+  SuccessRedirectBackViewMixin as success_url in the context.
+{% endcomment %}
+
+
+<input type="hidden" name="_success_url" value="{{ success_url }}" />

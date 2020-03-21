@@ -1,4 +1,5 @@
 from django.conf.urls import url
+from django.urls import path
 
 from dojo.finding import views
 
@@ -68,8 +69,10 @@ urlpatterns = [
         name='reopen_finding'),
     url(r'^finding/(?P<fid>\d+)/manage_images', views.manage_images,
         name='manage_images'),
-    url(r'^finding/image/(?P<token>[^/]+)$', views.download_finding_pic,
+    url(r'^finding/image/token/(?P<token>[^/]+)$', views.download_finding_pic,
         name='download_finding_pic'),
+    path('finding/image/<int:pk>/<str:size>', views.FindingImageView.as_view(),
+        name='finding_image'),
     url(r'^finding/(?P<fid>\d+)/merge$',
         views.merge_finding_product, name='merge_finding'),
     url(r'^product/(?P<pid>\d+)/merge$', views.merge_finding_product,

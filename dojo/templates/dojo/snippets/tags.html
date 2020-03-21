@@ -1,0 +1,16 @@
+{% comment %}
+This snippet shows a list of tags in a superscripted, unified design.
+
+Parameters:
+* Iterable<Tag> tags:
+  List of tag objects to show.
+{% endcomment %}
+
+
+{% if tags %}
+    <sup>
+        {% for tag in tags %}
+            <a title="Search for tag {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+        {% endfor %}
+    </sup>
+{% endif %}

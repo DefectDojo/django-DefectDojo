@@ -1,0 +1,30 @@
+{% comment %}
+This snippet inserts a button (using <a/>) with associated dropdown menu. It could
+be used in extra_heading of the panel.html snippet or as an actions menu in rows of
+filtered objects, for instance.
+
+Parameters:
+* str label ("Actions"):
+  Label for screenreader users when accessing the expand/collapse <button/> element.
+* str button (default dropdown icon):
+  HTML to use as content of <a/>.
+* str menu (""):
+  HTML to use as content of <ul/>.
+* str dropdown_class (""):
+* str button_class ("btn btn-sm btn-primary"):
+* str menu_class (""):
+{% endcomment %}
+
+
+<div class="dropdown {{ dropdown_class }}">
+    <a class="dropdown-toggle {{ button_class|default:'btn btn-sm btn-primary' }}" data-toggle="dropdown" href="#" aria-expanded="false" aria-label="{{ label|if_unset:"Actions" }}">
+        {% if button %}
+            {{ button }}
+        {% else %}
+            <i class="fa fa-bars"></i>
+        {% endif %}
+    </a>
+    <ul class="dropdown-menu {{ menu_class }}" role="menu">
+        {{ menu }}
+    </ul>
+</div>

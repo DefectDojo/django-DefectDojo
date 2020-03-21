@@ -1,0 +1,24 @@
+{% extends "../base.html" %}
+
+
+{% block content %}
+<form>
+    {% as extra_heading %}
+        {% block reportng_filter_add_menu %}
+            {% as button %}<i class="fa fa-plus"></i>{% endas %}
+            {% as menu %}
+                {% for builder_code, builder in BUILDER_REGISTRY.items %}
+                    <li>
+                        <a href="{% url "reportng_builder" builder_code=builder_code %}">
+                            <i class="fa fa-plus"></i>
+                            {{ builder.name }}
+                        </a>
+                    </li>
+                {% endfor %}
+            {% endas %}
+            {% include "./snippets/dropdown_menu.html" with label="New Report" dropdown_class="pull-right" %}
+        {% endblock %}
+    {% endas %}
+    {% include "./snippets/filter_panel.html" with id="reports" heading_level=1 %}
+</form>
+{% endblock %}

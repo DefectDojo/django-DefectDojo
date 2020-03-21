@@ -1578,3 +1578,45 @@ small {
   font-size:12px;
   font-weight:400;
 }
+
+
+/********** VARIOUS **********/
+.monospace {
+    font-family: monospace;
+}
+
+div.panel-header-alert {
+    border-radius: 0.8em;
+    display: inline-block;
+    font-size: 0.75em;
+    margin: 0;
+    margin-left: 30px;
+    padding-top: 0em;
+    padding-left: 0.5em;
+    padding-bottom: 0.25em;
+    padding-right: 0.5em;
+    vertical-align: middle;
+}
+
+div.filter-panel-footer {
+    background-color: inherit !important;
+}
+
+
+/********** PAGINATION **********/
+div.pagination {
+    text-align: center;
+    width: 100%;
+}
+div.pagination button {
+    display: inline-block;
+    margin-left: 8px;
+    margin-right: 8px;
+    width: auto;
+}
+div.pagination select {
+    display: inline-block;
+    margin-left: 0px;
+    margin-right: 0px;
+    width: auto;
+}

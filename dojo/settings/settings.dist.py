@@ -92,6 +92,7 @@ env = environ.Env(
     DD_SOCIAL_AUTH_GITLAB_SECRET=(str, ''),
     DD_SOCIAL_AUTH_GITLAB_API_URL=(str, 'https://gitlab.com'),
     DD_SOCIAL_AUTH_GITLAB_SCOPE=(list, ['api', 'read_user', 'openid', 'profile', 'email']),
+    DD_REPORTNG_BUILDERS=environ.json.loads,
 )
 
 
@@ -243,10 +244,6 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = env('DD_DATA_UPLOAD_MAX_MEMORY_SIZE')
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#root-urlconf
 
-# AUTHENTICATION_BACKENDS = [
-# 'axes.backends.AxesModelBackend',
-# ]
-
 ROOT_URLCONF = 'dojo.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
@@ -262,15 +259,16 @@ URL_PREFIX = env('DD_URL_PREFIX')
 LOGIN_REDIRECT_URL = env('DD_LOGIN_REDIRECT_URL')
 LOGIN_URL = '/login'
 
-# These are the individidual modules supported by social-auth
 AUTHENTICATION_BACKENDS = (
+    'rules.permissions.ObjectPermissionBackend',
+    'django.contrib.auth.backends.RemoteUserBackend',
+    'django.contrib.auth.backends.ModelBackend',
+    # These are the individual modules supported by social-auth
     'social_core.backends.auth0.Auth0OAuth2',
     'social_core.backends.google.GoogleOAuth2',
     'dojo.okta.OktaOAuth2',
     'social_core.backends.azuread_tenant.AzureADTenantOAuth2',
     'social_core.backends.gitlab.GitLabOAuth2',
-    'django.contrib.auth.backends.RemoteUserBackend',
-    'django.contrib.auth.backends.ModelBackend',
 )
 
 SOCIAL_AUTH_PIPELINE = (
@@ -453,6 +451,9 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'APP_DIRS': True,
         'OPTIONS': {
+            'builtins': [
+                'dojo.templatetags.dojo_util_tags',
+            ],
             'debug': env('DD_DEBUG'),
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -504,6 +505,8 @@ INSTALLED_APPS = (
     'django_celery_results',
     'social_django',
     'drf_yasg',
+    'rules',
+    'widget_tweaks',
 )
 
 # ------------------------------------------------------------------------------
@@ -516,6 +519,7 @@ DJANGO_MIDDLEWARE_CLASSES = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'dojo.middleware.patch_user',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'dojo.middleware.LoginRequiredMiddleware',
@@ -682,6 +686,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'DSOP Scan': DEDUPE_ALGO_HASH_CODE,
 }
 
+
 # ------------------------------------------------------------------------------
 # JIRA
 # ------------------------------------------------------------------------------
@@ -760,3 +765,13 @@ SILENCED_SYSTEM_CHECKS = ['mysql.E001']
 
 # Issue on benchmark : "The number of GET/POST parameters exceeded settings.DATA_UPLOAD_MAX_NUMBER_FIELD S"
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
+
+
+# ------------------------------------------------------------------------------
+# ReportNG Configuration
+# ------------------------------------------------------------------------------
+REPORTNG_BUILDERS = env('DD_REPORTNG_BUILDERS', default=[
+    # List of builder classes to activate by default
+    "dojo.reportng.builders.html.HTMLReportBuilder",
+    "dojo.reportng.builders.tex.TeXReportBuilder",
+])

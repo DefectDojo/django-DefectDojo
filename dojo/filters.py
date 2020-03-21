@@ -3,17 +3,25 @@ import collections
 from datetime import timedelta, datetime
 
 from auditlog.models import LogEntry
+from django import forms
 from django.contrib.auth.models import User
+from django.core.exceptions import SuspiciousOperation
+from django.core.paginator import Paginator
 from django.utils import six
+from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
-from django_filters import FilterSet, CharFilter, OrderingFilter, \
-    ModelMultipleChoiceFilter, ModelChoiceFilter, MultipleChoiceFilter, \
-    BooleanFilter
-from django_filters.filters import ChoiceFilter, _truncate, DateTimeFilter
+from django_filters import (
+    FilterSet, CharFilter, ChoiceFilter, DateTimeFilter, OrderingFilter,
+    ModelMultipleChoiceFilter, ModelChoiceFilter, MultipleChoiceFilter,
+    TypedChoiceFilter, BooleanFilter,
+)
+from django_filters.filters import _truncate
 from pytz import timezone
 
-from dojo.models import Dojo_User, Product_Type, Finding, Product, Test_Type, \
+from dojo.models import Dojo_User, Product_Type, Engagement, Finding, Product, Test_Type, \
     Endpoint, Development_Environment, Finding_Template, Report, Note_Type
+from dojo.forms import TypedMultipleValueField
+from dojo.models_base import get_perm
 from dojo.utils import get_system_setting
 
 local_tz = timezone(get_system_setting('time_zone'))
@@ -39,6 +47,293 @@ def get_earliest_finding():
     except Finding.DoesNotExist:
         EARLIEST_FINDING = None
     return EARLIEST_FINDING
+
+
+def get_ordering_filter(ordering_fields):
+    """Shortcut for generating OrderingFilter objects using HiddenInput.
+
+    It takes a dict with field names as keys and labels as values.
+    """
+    return OrderingFilter(
+        fields=list(ordering_fields),
+        field_labels={
+            field: label for field, label in ordering_fields.items()
+        },
+        help_text=None,
+        widget=forms.HiddenInput,
+    )
+
+
+class OptionalBooleanFilter(TypedChoiceFilter):
+    str2bool = lambda s: {"true": True, "false": False}.get(s.lower(), None)
+
+    def __init__(self, **kwargs):
+        kwargs.setdefault("choices", (("", "Any"), ("true", "True"), ("false", "False")))
+        kwargs.setdefault("coerce", self.str2bool)
+        super(OptionalBooleanFilter, self).__init__(**kwargs)
+
+
+class DojoFilterSetNew(FilterSet):
+    """
+    Base for all filter sets that adds permission checks, ordering and pagination.
+    """
+
+    # Bulk actions to provide when showing this filterset.
+    # See the implementation of bulk_delete() to learn how to add custom ones.
+    # Natively supported are: "delete"
+    bulk_actions = ()
+
+    # When this is enabled, the base queryset is restricted for the requesting
+    # user in order to apply permission restrictions. The model's default manager
+    # needs to be derived from DojoQuerySet for this setting to work.
+    restrict_for_user = True
+
+    # Number of ordering filters to show
+    ordering_depth = 3
+
+    # Whether to add pagination support
+    pagination = True
+    page_sizes = (10, 25, 50, 75, 100, 125, 150, 175, 200)
+    default_page_size = 25
+
+    # When the filterset is shown in a collapsible panel, should that be expanded?
+    panel_open_initially = False
+
+    def __init__(self, data=None, *args, **kwargs):
+        # Create a mutable copy of the submitted form data to allow manipulating it
+        if data is not None:
+            data = data.copy()
+
+        super(DojoFilterSetNew, self).__init__(data=data, *args, **kwargs)
+
+        # Separate special fields from the main filter form
+        self.meta_form = forms.Form(data=self.form.data, prefix=self.form.prefix)
+
+        # Allow filtering for specific pk's
+        self.meta_form.fields["pk"] = TypedMultipleValueField(
+            coerce=int, required=False,
+        )
+
+        # Allow ticking a subset of the rows explicitly
+        self.meta_form.fields["tick"] = TypedMultipleValueField(
+            coerce=int, required=False,
+        )
+
+        if "o" in self.filters and self.ordering_depth:
+            for index in range(1, self.ordering_depth + 1):
+                self.meta_form.fields["o_{}".format(index)] = forms.ChoiceField(
+                    choices=self.form.fields["o"].choices,
+                    required=False, label="Order by {}.".format(index),
+                )
+
+        if self.pagination:
+            assert self.default_page_size in self.page_sizes
+            self.meta_form.fields["page_size"] = forms.ChoiceField(
+                choices=((size, size) for size in self.page_sizes),
+                required=False, widget=forms.HiddenInput(),
+            )
+            self.meta_form.fields["page"] = forms.IntegerField(
+                min_value=1, required=False, widget=forms.HiddenInput(),
+            )
+
+        # For filters displayed in a collapsible panel, this field stores its state
+        self.meta_form.fields["panel_open"] = forms.BooleanField(
+            initial=self.panel_open_initially,
+            required=False, widget=forms.HiddenInput(),
+        )
+
+        # Helper field which is submitted when the filters should be cleared
+        self.meta_form.fields["reset"] = forms.BooleanField(
+            required=False, widget=forms.HiddenInput(),
+        )
+        if self.meta_form["reset"].data:
+            # Clear out all query data related to this filterset
+            for name in self.form.fields:
+                self.form.data.pop(self.form[name].html_name, None)
+            for name in self.meta_form.fields:
+                if name == "panel_open":
+                    continue
+                self.meta_form.data.pop(self.meta_form[name].html_name, None)
+
+        # Helper fields for selecting/deselecting all items across pages
+        self.meta_form.fields["select_all"] = forms.BooleanField(
+            required=False, widget=forms.HiddenInput(),
+        )
+        self.meta_form.fields["deselect_all"] = forms.BooleanField(
+            required=False, widget=forms.HiddenInput(),
+        )
+
+        # Allow performing bulk actions on all ticked objects
+        self.meta_form.fields["bulk_action"] = forms.CharField(
+            required=False, widget=forms.HiddenInput(),
+        )
+        if self.meta_form["bulk_action"].data:
+            if self.request and self.request.method != "POST":
+                raise SuspiciousOperation("bulk actions require POST")
+            self.do_bulk_action()
+
+    @property
+    def queryset(self):
+        """Filters the initially provided queryset, even before evaluating any filter.
+
+        If the filterset was initialized with a request, the original queryset is
+        filtered for the current user using DojoQuerySet.for_user().
+        """
+        try:
+            return self._filtered_initial_queryset
+        except AttributeError:
+            try:
+                qs = self._initial_queryset
+            except AttributeError:
+                raise AttributeError("queryset wasn't set yet")
+            # Only filter and cache after self.request is available
+            if self.restrict_for_user and self.request:
+                qs = qs.for_user(self.request)
+                self._filtered_initial_queryset = qs
+        return qs
+
+    @queryset.setter
+    def queryset(self, qs):
+        self._initial_queryset = qs
+        # Invalidate an eventualy cached value
+        self.__dict__.pop("_filtered_initial_queryset", None)
+
+    def filter_queryset(self, queryset):
+        """Does some filtering on the queryset not related to a particular filter.
+
+        it patches the ordering filter's value to support deep ordering.
+        """
+        self.meta_form.is_valid()
+        pks = self.meta_form.cleaned_data.get("pk")
+        if pks:
+            queryset = queryset.filter(pk__in=pks)
+
+        if "o" in self.filters:
+            values = []
+            for field in self.deep_ordering_fields:
+                value = self.meta_form.cleaned_data.get(field.name)
+                if value:
+                    values.append(value)
+            self.form.cleaned_data["o"] = values
+
+        return super().filter_queryset(queryset)
+
+    @cached_property
+    def ticked_qs(self):
+        """Returns self.qs, restricted to only ticked objects.
+
+        If none are ticked, an empty QuerySet is returned.
+        """
+        qs = self.qs
+        self.meta_form.is_valid()
+        if self.meta_form.cleaned_data["select_all"]:
+            # Simulate all objects being ticked
+            return qs
+        if not self.meta_form.cleaned_data["deselect_all"]:
+            pks = self.meta_form.cleaned_data["tick"]
+            if pks:
+                return qs.filter(pk__in=pks)
+        # None ticked, more performant than qs.filter(pk__in=[])
+        return qs.none()
+
+    @cached_property
+    def out_of_page_ticks(self):
+        """Returns an iterable of ticked pk's on other pages."""
+        if self.page is None:
+            return ()
+        page_pks = (obj.pk for obj in self.page)
+        return (
+            pk for pk in self.ticked_qs.values_list("pk", flat=True)
+            if pk not in page_pks
+        )
+
+    def do_bulk_action(self):
+        """Runs the bulk action, if one was requested.
+
+        Returns whether a bulk action has been performed.
+        """
+        if not self.meta_form.is_valid():
+            return False
+        action = self.meta_form.cleaned_data["bulk_action"]
+        if action not in self.bulk_actions:
+            return False
+        try:
+            handler = getattr(self, "bulk_%s" % action)
+        except AttributeError:
+            return False
+
+        try:
+            # Execute handler for the requested action
+            handler()
+            return True
+        finally:
+            # Force reevaluation of the filters to account for changed objects
+            for attr in ("_filtered_initial_queryset", "_qs", "qs", "ticked_qs", "paginator", "page"):
+                self.__dict__.pop(attr, None)
+
+    def bulk_delete(self):
+        """Deletes all ticked objects.
+
+        The user is checked for "delete" permission for each object.
+        """
+        user = self.request.user if self.request else None
+        perm = get_perm("delete", self.ticked_qs.model)
+        for obj in self.ticked_qs:
+            if user is None or user.has_perm(perm, obj):
+                obj.delete()
+
+    @cached_property
+    def deep_ordering_fields(self):
+        """Returns a tuple of bound deep-ordering form fields of this filterset."""
+        return tuple(
+            self.meta_form["o_{}".format(index)]
+            for index in range(1, self.ordering_depth + 1)
+        )
+
+    @cached_property
+    def model_name(self):
+        """Returns the _meta.model_name attribute of the underlying model.
+
+        This is used to get the model name in templates.
+        """
+        return self._meta.model._meta.model_name
+
+    @cached_property
+    def min_page_size(self):
+        """Returns the minimum selectable page size for use in templates."""
+        if self.page_sizes:
+            return min(self.page_sizes)
+        return 0
+
+    @cached_property
+    def page(self):
+        """Returns the current Page object or None, if pagination is disabled."""
+        paginator = self.paginator
+        if paginator is None:
+            return None
+        self.meta_form.is_valid()
+        return paginator.get_page(self.meta_form.cleaned_data.get("page"))
+
+    @cached_property
+    def paginator(self):
+        """Creates and returns a Paginator object for the current queryset.
+
+        It returns None if pagination has been disabled via the pagination attribute.
+        """
+        if not self.pagination:
+            return None
+        page_size = self.default_page_size
+        if self.meta_form.is_valid():
+            page_size = int(self.meta_form.cleaned_data["page_size"] or page_size)
+        return Paginator(self.qs, page_size)
+
+    @cached_property
+    def panel_open(self):
+        """Returns whether a collapsible displaying the filterset should be open."""
+        if self.meta_form["panel_open"].data:
+            self.meta_form.is_valid()
+            return self.meta_form.cleaned_data["panel_open"]
+        return self.meta_form["panel_open"].initial
 
 
 class DojoFilter(FilterSet):
@@ -250,6 +545,34 @@ class MetricsDateRangeFilter(ChoiceFilter):
 
 
 class EngagementFilter(DojoFilter):
+    name = CharFilter(lookup_expr='icontains')
+    product = ModelMultipleChoiceFilter(
+        queryset=Product.objects.for_user,
+        label="Product")
+    lead = ModelChoiceFilter(
+        queryset=User.objects.filter(
+            engagement__lead__isnull=False).distinct(),
+        label="Lead")
+
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ('name', 'name'),
+            ('product__name', 'product__name'),
+        ),
+        field_labels={
+            'name': 'Product Name',
+            'product__name': 'Product',
+        }
+
+    )
+
+    class Meta:
+        model = Engagement
+        fields = ['name', 'product']
+
+
+class EngagementFilter(DojoFilter):
     engagement__lead = ModelChoiceFilter(
         queryset=User.objects.filter(
             engagement__lead__isnull=False).distinct(),
@@ -326,12 +649,6 @@ class ProductFilter(DojoFilter):
             self.form.fields[
                 'prod_type'].queryset = Product_Type.objects.filter(
                 prod_type__authorized_users__in=[self.user])
-
-    class Meta:
-        model = Product
-        fields = ['name', 'prod_type', 'business_criticality', 'platform', 'lifecycle', 'origin', 'external_audience',
-                  'internet_accessible', ]
-        exclude = ['tags']
 
 
 class OpenFindingFilter(DojoFilter):
@@ -794,7 +1111,8 @@ class ReportFindingFilter(DojoFilter):
 class ReportAuthedFindingFilter(DojoFilter):
     title = CharFilter(lookup_expr='icontains', label='Name')
     test__engagement__product = ModelMultipleChoiceFilter(
-        queryset=Product.objects.all(), label="Product")
+        queryset=Product.objects.for_user,
+        label="Product")
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.all(),
         label="Product Type")
@@ -808,24 +1126,12 @@ class ReportAuthedFindingFilter(DojoFilter):
     duplicate = ReportBooleanFilter()
     out_of_scope = ReportBooleanFilter()
 
-    def __init__(self, *args, **kwargs):
-        self.user = None
-        if 'user' in kwargs:
-            self.user = kwargs.pop('user')
-        super(ReportAuthedFindingFilter, self).__init__(*args, **kwargs)
-        if not self.user.is_staff:
-            self.form.fields[
-                'test__engagement__product'].queryset = Product.objects.filter(
-                authorized_users__in=[self.user])
-
     @property
     def qs(self):
         parent = super(ReportAuthedFindingFilter, self).qs
-        if self.user.is_staff:
-            return parent
-        else:
-            return parent.filter(
-                test__engagement__product__authorized_users__in=[self.user])
+        return parent.filter(
+            test__engagement__product__authorized_users__in=[self.request.user],
+        )
 
     class Meta:
         model = Finding
