@@ -1678,11 +1678,6 @@ class Finding(models.Model):
         #     # calling django.db.models superclass save method
         #     super(Finding, self).save(*args, **kwargs)
 
-        # Title Casing
-        from titlecase import titlecase
-        self.title = titlecase(self.title)
-
-        #     # Run async the tool issue update to update original issue with Defect Dojo updates
         if (self.file_path is not None) and (self.id is None or self.endpoints.count() == 0) and (self.id is not None or len(self.unsaved_endpoints) == 0):
             self.static_finding = True
             self.dynamic_finding = False
@@ -1696,6 +1691,10 @@ class Finding(models.Model):
             deduplicationLogger.debug("Hash_code already computed for finding")
         else:
             self.hash_code = self.compute_hash_code()
+
+        # Title Casing after hash_code for legacy reasons. It might generate different hash_code due to the casing
+        from titlecase import titlecase
+        self.title = titlecase(self.title)
 
         if rules_option:
             from dojo.tasks import async_rules
@@ -1781,6 +1780,7 @@ class Finding(models.Model):
                 async_false_history.delay(self, *args, **kwargs)
                 pass
 
+        # Run async the tool issue update to update original issue with Defect Dojo updates
         if issue_updater_option:
             from dojo.tools import tool_issue_updater
             tool_issue_updater.async_tool_issue_update(self)
