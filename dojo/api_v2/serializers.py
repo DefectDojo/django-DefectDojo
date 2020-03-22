@@ -588,6 +588,8 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
             pass
 
         test.save()
+        # return the id of the created test, can't find a better way because this is not a ModelSerializer....
+        self.fields['test'] = serializers.IntegerField(read_only=True, default=test.id)
 
         test.engagement.updated = max_safe([scan_date_time, test.engagement.updated])
 
