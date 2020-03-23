@@ -721,7 +721,7 @@ def re_import_scan_results(request, tid):
                                                                          path=endpoint.path,
                                                                          query=endpoint.query,
                                                                          fragment=endpoint.fragment,
-                                                                         product=t.engagement.product)
+                                                                         product=test.engagement.product)
                             finding.endpoints.add(ep)
                         for endpoint in form.cleaned_data['endpoints']:
                             ep, created = Endpoint.objects.get_or_create(protocol=endpoint.protocol,
@@ -729,8 +729,8 @@ def re_import_scan_results(request, tid):
                                                                          path=endpoint.path,
                                                                          query=endpoint.query,
                                                                          fragment=endpoint.fragment,
-                                                                         product=t.engagement.product)
-                            findeing.endpoints.add(ep)
+                                                                         product=test.engagement.product)
+                            finding.endpoints.add(ep)
 
                         if item.unsaved_tags is not None:
                             finding.tags = item.unsaved_tags
