@@ -188,6 +188,7 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
     def get_findings_list(self, obj):
         return obj.open_findings_list()
 
+
 class ProductTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product_Type
@@ -566,6 +567,9 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
             pass
 
         test.save()
+        # return the id of the created test, can't find a better way because this is not a ModelSerializer....
+        self.fields['test'] = serializers.IntegerField(read_only=True, default=test.id)
+
         if 'tags' in data:
             test.tags = ' '.join(data['tags'])
         try:

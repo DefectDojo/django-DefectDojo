@@ -69,7 +69,7 @@ should give you an idea of how to use DefectDojo for your own team.
 ![Slack](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/slack_rgb.png)
 
 Realtime discussion is done in the OWASP Slack Channel, #defectdojo.
-[Get Access.](https://join.slack.com/t/owasp/shared_invite/enQtNjExMTc3MTg0MzU4LWQ2Nzg3NGJiZGQ2MjRmNzkzN2Q4YzU1MWYyZTdjYjA2ZTA5M2RkNzE2ZjdkNzI5ZThhOWY5MjljYWZmYmY4ZjM)
+[Get Access.](https://owasp-slack.herokuapp.com/)
 
 ![Twitter](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/Twitter_Logo.png)
 
@@ -108,7 +108,7 @@ Project Moderators can help you with pull requests or feedback on dev ideas.
 * [Fred Blaise](https://www.linkedin.com/in/fredblaise/)
 * Saurabh kumar
 * Cody Maffucci 
-
+* Pascal Trovatelli / [Sopra Steria](https://www.soprasteria.com/)
 
 ## Hall of Fame
 

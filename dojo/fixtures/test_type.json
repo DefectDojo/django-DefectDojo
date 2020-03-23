@@ -59,13 +59,13 @@
 		"model": "dojo.test_type",
 		"pk": 100
 	},
-	{
-    "fields": {
-      "name": "Anchore Engine Scan"
+    {
+        "fields": {
+            "name": "Anchore Engine Scan"
+        },
+        "model": "dojo.test_type",
+        "pk": 101
     },
-    "model": "dojo.test_type",
-    "pk": 101
-	},
 	{
 		"fields": {
 			"name": "AppSpider Scan"
@@ -542,6 +542,27 @@
 		},
 		"model": "dojo.test_type",
 		"pk": 169
-	}
+	},
+	{
+		"fields": {
+			"name": "DSOP Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 170
+	},
+	{
+		"fields": {
+			"name": "Burp Suite Enterprise"
+		},
+		"model": "dojo.test_type",
+		"pk": 171
+	},
+    {
+        "fields": {
+            "name": "Anchore Enterprise Policy Check"
+        },
+        "model": "dojo.test_type",
+        "pk": 172
+    }
 ]
 

@@ -344,7 +344,7 @@ class OpenFindingFilter(DojoFilter):
     date = DateRangeFilter()
     last_reviewed = DateRangeFilter()
     cwe = MultipleChoiceFilter(choices=[])
-    severity = MultipleChoiceFilter(choices=[])
+    severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     test__test_type = ModelMultipleChoiceFilter(
         queryset=Test_Type.objects.all())
     test__engagement__product = ModelMultipleChoiceFilter(
@@ -371,8 +371,8 @@ class OpenFindingFilter(DojoFilter):
 
     class Meta:
         model = Finding
-        exclude = ['url', 'description', 'mitigation', 'impact', 'active',
-                   'endpoint', 'references', 'test', 'is_template', 'verified',
+        exclude = ['url', 'description', 'mitigation', 'impact',
+                   'endpoint', 'references', 'test', 'is_template',
                    'thread_id', 'notes', 'scanner_confidence', 'mitigated',
                    'numerical_severity', 'reporter', 'last_reviewed', 'line',
                    'duplicate_list', 'duplicate_finding', 'hash_code', 'images',
@@ -394,9 +394,6 @@ class OpenFindingFilter(DojoFilter):
                    if type(finding.cwe) is int and finding.cwe is not None and finding.cwe > 0 and finding.cwe not in cwe)
         cwe = collections.OrderedDict(sorted(cwe.items()))
         self.form.fields['cwe'].choices = list(cwe.items())
-        self.form.fields['severity'].choices = self.queryset.order_by(
-            'numerical_severity'
-        ).values_list('severity', 'severity').distinct()
         if self.user is not None and not self.user.is_staff:
             if self.form.fields.get('test__engagement__product'):
                 qs = Product.objects.filter(authorized_users__in=[self.user])
@@ -425,7 +422,7 @@ class ClosedFindingFilter(DojoFilter):
     payload = CharFilter(lookup_expr='icontains')
     mitigated = DateRangeFilter(label="Mitigated Date")
     cwe = MultipleChoiceFilter(choices=[])
-    severity = MultipleChoiceFilter(choices=[])
+    severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     test__test_type = ModelMultipleChoiceFilter(
         queryset=Test_Type.objects.all())
     test__engagement__product = ModelMultipleChoiceFilter(
@@ -473,9 +470,6 @@ class ClosedFindingFilter(DojoFilter):
                    if type(finding.cwe) is int and finding.cwe is not None and finding.cwe > 0 and finding.cwe not in cwe)
         cwe = collections.OrderedDict(sorted(cwe.items()))
         self.form.fields['cwe'].choices = list(cwe.items())
-        self.form.fields['severity'].choices = self.queryset.order_by(
-            'numerical_severity'
-        ).values_list('severity', 'severity').distinct()
 
 
 class ClosedFingingSuperFilter(ClosedFindingFilter):
@@ -493,7 +487,7 @@ class AcceptedFindingFilter(DojoFilter):
         DateRangeFilter(label="Acceptance Date")
     date = DateRangeFilter(label="Finding Date")
     cwe = MultipleChoiceFilter(choices=[])
-    severity = MultipleChoiceFilter(choices=[])
+    severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     test__test_type = ModelMultipleChoiceFilter(
         queryset=Test_Type.objects.all())
     test__engagement__product = ModelMultipleChoiceFilter(
@@ -542,9 +536,6 @@ class AcceptedFindingFilter(DojoFilter):
                    if type(finding.cwe) is int and finding.cwe is not None and finding.cwe > 0 and finding.cwe not in cwe)
         cwe = collections.OrderedDict(sorted(cwe.items()))
         self.form.fields['cwe'].choices = list(cwe.items())
-        self.form.fields['severity'].choices = self.queryset.order_by(
-            'numerical_severity'
-        ).values_list('severity', 'severity').distinct()
 
 
 class AcceptedFingingSuperFilter(AcceptedFindingFilter):
@@ -562,7 +553,7 @@ class ProductFindingFilter(DojoFilter):
     payload = CharFilter(lookup_expr='icontains')
     date = DateRangeFilter()
     cwe = MultipleChoiceFilter(choices=[])
-    severity = MultipleChoiceFilter(choices=[])
+    severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     test__test_type = ModelMultipleChoiceFilter(
         queryset=Test_Type.objects.all())
 
@@ -604,9 +595,6 @@ class ProductFindingFilter(DojoFilter):
                    if type(finding.cwe) is int and finding.cwe is not None and finding.cwe > 0 and finding.cwe not in cwe)
         cwe = collections.OrderedDict(sorted(cwe.items()))
         self.form.fields['cwe'].choices = list(cwe.items())
-        self.form.fields['severity'].choices = self.queryset.order_by(
-            'numerical_severity'
-        ).values_list('severity', 'severity').distinct()
 
 
 class TemplateFindingFilter(DojoFilter):
@@ -706,7 +694,7 @@ class MetricsFindingFilter(FilterSet):
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.all().order_by('name'),
         label="Product Type")
-    severity = MultipleChoiceFilter(choices=[])
+    severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     status = FindingStatusFilter(label='Status')
 
     def __init__(self, *args, **kwargs):

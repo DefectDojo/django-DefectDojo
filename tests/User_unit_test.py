@@ -1,43 +1,11 @@
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 # from selenium.webdriver.support.ui import Select
 import unittest
 import re
 import sys
-import os
+from base_test_class import BaseTestCase
 
 
-class UserTest(unittest.TestCase):
-    def setUp(self):
-        # Initialize the driver
-        # When used with Travis, chromdriver is stored in the same
-        # directory as the unit tests
-        self.options = Options()
-        self.options.add_argument("--headless")
-        self.driver = webdriver.Chrome('chromedriver', chrome_options=self.options)
-        # Allow a little time for the driver to initialize
-        self.driver.implicitly_wait(30)
-        # Set the base address of the dojo
-        self.base_url = "http://localhost:8080/"
-        self.verificationErrors = []
-        self.accept_next_alert = True
-
-    def login_page(self):
-        # Make a member reference to the driver
-        driver = self.driver
-        # Navigate to the login page
-        driver.get(self.base_url + "login")
-        # Good practice to clear the entry before typing
-        driver.find_element_by_id("id_username").clear()
-        # These credentials will be used by Travis when testing new PRs
-        # They will not work when testing on your own build
-        # Be sure to change them before submitting a PR
-        driver.find_element_by_id("id_username").send_keys(os.environ['DD_ADMIN_USER'])
-        driver.find_element_by_id("id_password").clear()
-        driver.find_element_by_id("id_password").send_keys(os.environ['DD_ADMIN_PASSWORD'])
-        # "Click" the but the login button
-        driver.find_element_by_css_selector("button.btn.btn-success").click()
-        return driver
+class UserTest(BaseTestCase):
 
     def test_create_user(self):
         # Login to the site.
@@ -127,10 +95,6 @@ class UserTest(unittest.TestCase):
         # Assert ot the query to dtermine status of failure
         self.assertTrue(re.search(r'User and relationships removed.', productTxt))
 
-    def tearDown(self):
-        self.driver.quit()
-        self.assertEqual([], self.verificationErrors)
-
 
 def suite():
     suite = unittest.TestSuite()
@@ -143,6 +107,7 @@ def suite():
 
 
 if __name__ == "__main__":
-    runner = unittest.TextTestRunner(descriptions=True, failfast=True)
+    runner = unittest.TextTestRunner(descriptions=True, failfast=True, verbosity=2)
     ret = not runner.run(suite()).wasSuccessful()
+    BaseTestCase.tearDownDriver()
     sys.exit(ret)

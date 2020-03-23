@@ -135,8 +135,8 @@ def validate_drive_authentication(request, cred_str, drive_folder_ID):
             extra_tags='alert-danger')
         return False
     else:
-        sheets_service = googleapiclient.discovery.build('sheets', 'v4', credentials=credentials)
-        drive_service = googleapiclient.discovery.build('drive', 'v3', credentials=credentials)
+        sheets_service = googleapiclient.discovery.build('sheets', 'v4', credentials=credentials, cache_discovery=False)
+        drive_service = googleapiclient.discovery.build('drive', 'v3', credentials=credentials, cache_discovery=False)
         spreadsheet = {
             'properties': {
                 'title': 'Test spreadsheet'
@@ -204,7 +204,7 @@ def export_to_sheet(request, tid):
     SCOPES = ['https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/spreadsheets']
     credentials = service_account.Credentials.from_service_account_info(service_account_info, scopes=SCOPES)
     try:
-        drive_service = googleapiclient.discovery.build('drive', 'v3', credentials=credentials)
+        drive_service = googleapiclient.discovery.build('drive', 'v3', credentials=credentials, cache_discovery=False)
         folder_id = system_settings.drive_folder_ID
         files = drive_service.files().list(q="mimeType='application/vnd.google-apps.spreadsheet' and parents in '%s' and name='%s'" % (folder_id, spreadsheet_name),
                                               spaces='drive',
@@ -269,8 +269,8 @@ def create_googlesheet(request, tid):
     service_account_info = json.loads(system_settings.credentials)
     SCOPES = ['https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/spreadsheets']
     credentials = service_account.Credentials.from_service_account_info(service_account_info, scopes=SCOPES)
-    sheets_service = googleapiclient.discovery.build('sheets', 'v4', credentials=credentials)
-    drive_service = googleapiclient.discovery.build('drive', 'v3', credentials=credentials)
+    sheets_service = googleapiclient.discovery.build('sheets', 'v4', credentials=credentials, cache_discovery=False)
+    drive_service = googleapiclient.discovery.build('drive', 'v3', credentials=credentials, cache_discovery=False)
     # Create a new spreadsheet
     spreadsheet_name = test.engagement.product.name + "-" + test.engagement.name + "-" + str(test.id)
     spreadsheet = {
@@ -300,7 +300,7 @@ def sync_findings(request, tid, spreadsheetId):
     service_account_info = json.loads(system_settings.credentials)
     SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
     credentials = service_account.Credentials.from_service_account_info(service_account_info, scopes=SCOPES)
-    sheets_service = googleapiclient.discovery.build('sheets', 'v4', credentials=credentials)
+    sheets_service = googleapiclient.discovery.build('sheets', 'v4', credentials=credentials, cache_discovery=False)
     res = {}
     spreadsheet = sheets_service.spreadsheets().get(spreadsheetId=spreadsheetId).execute()
     sheet_names = []
@@ -445,7 +445,7 @@ def populate_sheet(tid, spreadsheetId):
     service_account_email = service_account_info['client_email']
     SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
     credentials = service_account.Credentials.from_service_account_info(service_account_info, scopes=SCOPES)
-    sheets_service = googleapiclient.discovery.build('sheets', 'v4', credentials=credentials)
+    sheets_service = googleapiclient.discovery.build('sheets', 'v4', credentials=credentials, cache_discovery=False)
     findings_list = get_findings_list(tid)
     row_count = len(findings_list)
     column_count = len(findings_list[0])

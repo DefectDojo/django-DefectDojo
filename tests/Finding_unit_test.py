@@ -1,41 +1,16 @@
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.keys import Keys
 import unittest
 import re
 import sys
 import os
+from base_test_class import BaseTestCase
+from Product_unit_test import ProductTest, WaitForPageLoad
 
-# importing Product_unit_test as a module
-# set relative path
 dir_path = os.path.dirname(os.path.realpath(__file__))
-try:  # First Try for python 3
-    import importlib.util
-    product_unit_test_module = importlib.util.spec_from_file_location("Product_unit_test",
-        os.path.join(dir_path, 'Product_unit_test.py'))  # using ',' allows python to determine the type of separator to use.
-    product_unit_test = importlib.util.module_from_spec(product_unit_test_module)
-    product_unit_test_module.loader.exec_module(product_unit_test)
-except:  # This will work for python2 if above fails
-    import imp
-    product_unit_test = imp.load_source('Product_unit_test',
-        os.path.join(dir_path, 'Product_unit_test.py'))
 
 
-class FindingTest(unittest.TestCase):
-    def setUp(self):
-        # Initialize the driver
-        # When used with Travis, chromdriver is stored in the same
-        # directory as the unit tests
-        self.options = Options()
-        self.options.add_argument("--headless")  # comment out this Line To allow this run with browser visible
-        self.driver = webdriver.Chrome('chromedriver', chrome_options=self.options)
-        # Allow a little time for the driver to initialize
-        self.driver.implicitly_wait(30)
-        # Set the base address of the dojo
-        self.base_url = "http://localhost:8080/"
-        self.verificationErrors = []
-        self.accept_next_alert = True
+class FindingTest(BaseTestCase):
 
     def login_page(self):
         # Make a member reference to the driver
@@ -53,6 +28,31 @@ class FindingTest(unittest.TestCase):
         # "Click" the but the login button
         driver.find_element_by_css_selector("button.btn.btn-success").click()
         return driver
+
+    def test_list_finding(self):
+        # bulk edit dropdown menu
+        driver = self.login_page()
+        driver.get(self.base_url + "finding")
+
+        driver.find_element_by_id("select_all").click()
+
+        driver.find_element_by_id("dropdownMenu2").click()
+
+        bulk_edit_menu = driver.find_element_by_id("bulk_edit_menu")
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_active").is_enabled(), False)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_verified").is_enabled(), False)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_false_p").is_enabled(), False)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_out_of_scope").is_enabled(), False)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_is_Mitigated").is_enabled(), False)
+
+        driver.find_element_by_id("id_bulk_status").click()
+
+        bulk_edit_menu = driver.find_element_by_id("bulk_edit_menu")
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_active").is_enabled(), True)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_verified").is_enabled(), True)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_false_p").is_enabled(), True)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_out_of_scope").is_enabled(), True)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_is_Mitigated").is_enabled(), True)
 
     def test_edit_finding(self):
         # The Name of the Finding created by test_add_product_finding => 'App Vulnerable to XSS'
@@ -98,7 +98,7 @@ class FindingTest(unittest.TestCase):
         image_path = os.path.join(dir_path, 'finding_image.png')
         driver.find_element_by_id("id_form-0-image").send_keys(image_path)
         # Save uploaded image
-        with product_unit_test.WaitForPageLoad(driver, timeout=50):
+        with WaitForPageLoad(driver, timeout=50):
             driver.find_element_by_css_selector("button.btn.btn-success").click()
         # Query the site to determine if the finding has been added
         productTxt = driver.find_element_by_tag_name("BODY").text
@@ -263,7 +263,7 @@ class FindingTest(unittest.TestCase):
         file_path = os.path.join(dir_path, 'zap_sample.xml')
         driver.find_element_by_name("file").send_keys(file_path)
         # Click Submit button
-        with product_unit_test.WaitForPageLoad(driver, timeout=50):
+        with WaitForPageLoad(driver, timeout=50):
             driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
         # Query the site to determine if the finding has been added
         productTxt = driver.find_element_by_tag_name("BODY").text
@@ -292,17 +292,14 @@ class FindingTest(unittest.TestCase):
         # Assert ot the query to dtermine status of failure
         self.assertTrue(re.search(r'Finding deleted successfully', productTxt))
 
-    def tearDown(self):
-        self.driver.quit()
-        self.assertEqual([], self.verificationErrors)
-
 
 def suite():
     suite = unittest.TestSuite()
     # Add each test the the suite to be run
     # success and failure is output by the test
-    suite.addTest(product_unit_test.ProductTest('test_create_product'))
-    suite.addTest(product_unit_test.ProductTest('test_add_product_finding'))
+    suite.addTest(ProductTest('test_create_product'))
+    suite.addTest(ProductTest('test_add_product_finding'))
+    suite.addTest(FindingTest('test_list_finding'))
     suite.addTest(FindingTest('test_edit_finding'))
     suite.addTest(FindingTest('test_add_image'))
     suite.addTest(FindingTest('test_mark_finding_for_review'))
@@ -314,11 +311,12 @@ def suite():
     suite.addTest(FindingTest('test_delete_image'))
     suite.addTest(FindingTest('test_delete_finding'))
     suite.addTest(FindingTest('test_delete_finding_template'))
-    suite.addTest(product_unit_test.ProductTest('test_delete_product'))
+    suite.addTest(ProductTest('test_delete_product'))
     return suite
 
 
 if __name__ == "__main__":
-    runner = unittest.TextTestRunner(descriptions=True, failfast=True)
+    runner = unittest.TextTestRunner(descriptions=True, failfast=True, verbosity=2)
     ret = not runner.run(suite()).wasSuccessful()
+    BaseTestCase.tearDownDriver()
     sys.exit(ret)

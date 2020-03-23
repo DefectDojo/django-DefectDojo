@@ -21,7 +21,7 @@ from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
 from tagging.models import Tag
 
-from dojo.filters import TemplateFindingFilter
+from dojo.filters import TemplateFindingFilter, OpenFindingFilter
 from dojo.forms import NoteForm, TestForm, FindingForm, \
     DeleteTestForm, AddFindingForm, \
     ImportScanForm, ReImportScanForm, FindingBulkUpdateForm, JIRAFindingForm
@@ -45,6 +45,7 @@ def view_test(request, tid):
     notes = test.notes.all()
     person = request.user.username
     findings = Finding.objects.filter(test=test).order_by('numerical_severity')
+    findings = OpenFindingFilter(request.GET, queryset=findings)
     stub_findings = Stub_Finding.objects.filter(test=test)
     cred_test = Cred_Mapping.objects.filter(test=test).select_related('cred_id').order_by('cred_id')
     creds = Cred_Mapping.objects.filter(engagement=test.engagement).select_related('cred_id').order_by('cred_id')
@@ -68,7 +69,7 @@ def view_test(request, tid):
     else:
         form = NoteForm()
 
-    fpage = get_page_items(request, findings, 25)
+    fpage = get_page_items(request, findings.qs, 25)
     sfpage = get_page_items(request, stub_findings, 25)
     show_re_upload = any(test.test_type.name in code for code in ImportScanForm.SCAN_TYPE_CHOICES)
 
@@ -87,7 +88,7 @@ def view_test(request, tid):
         SCOPES = ['https://www.googleapis.com/auth/drive']
         credentials = service_account.Credentials.from_service_account_info(service_account_info, scopes=SCOPES)
         try:
-            drive_service = googleapiclient.discovery.build('drive', 'v3', credentials=credentials)
+            drive_service = googleapiclient.discovery.build('drive', 'v3', credentials=credentials, cache_discovery=False)
             folder_id = system_settings.drive_folder_ID
             files = drive_service.files().list(q="mimeType='application/vnd.google-apps.spreadsheet' and parents in '%s' and name='%s'" % (folder_id, spreadsheet_name),
                                                   spaces='drive',
@@ -117,7 +118,8 @@ def view_test(request, tid):
                   {'test': test,
                    'product_tab': product_tab,
                    'findings': fpage,
-                   'findings_count': findings.count(),
+                   'filtered': findings,
+                   'findings_count': findings.qs.count(),
                    'stub_findings': sfpage,
                    'form': form,
                    'notes': notes,
@@ -681,16 +683,16 @@ def re_import_scan_results(request, tid):
                                 else:
                                     burp_rr = BurpRawRequestResponse(
                                         finding=item,
-                                        burpRequestBase64=req_resp["req"].encode("utf-8"),
-                                        burpResponseBase64=req_resp["resp"].encode("utf-8"),
+                                        burpRequestBase64=base64.b64encode(req_resp["req"].encode("utf-8")),
+                                        burpResponseBase64=base64.b64encode(req_resp["resp"].encode("utf-8")),
                                     )
                                 burp_rr.clean()
                                 burp_rr.save()
 
                         if item.unsaved_request is not None and item.unsaved_response is not None:
                             burp_rr = BurpRawRequestResponse(finding=find,
-                                                             burpRequestBase64=item.unsaved_request.encode("utf-8"),
-                                                             burpResponseBase64=item.unsaved_response.encode("utf-8"),
+                                                             burpRequestBase64=base64.b64encode(item.unsaved_request.encode()),
+                                                             burpResponseBase64=base64.b64encode(item.unsaved_response.encode()),
                                                              )
                             burp_rr.clean()
                             burp_rr.save()

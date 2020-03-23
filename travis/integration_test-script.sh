@@ -32,10 +32,13 @@ echo "export DD_ADMIN_USER=admin" >> ~/.profile && \
 # If any script is unsuccessful a failure message is printed and the test script
 # Exits with status code of 1
 
+export DD_BASE_URL='http://localhost:8080/'
+
 echo "Running Product type integration tests"
 if python3 tests/Product_type_unit_test.py ; then
     echo "Success: Product type integration tests passed"
 else
+    docker-compose logs --tail="all" uwsgi
     echo "Error: Product type integration test failed."; exit 1
 fi
 

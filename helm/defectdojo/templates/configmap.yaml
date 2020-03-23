@@ -19,7 +19,7 @@ data:
   DD_CELERY_BROKER_HOST: {{ $fullName }}-{{ if eq .Values.celery.broker "rabbitmq" }}rabbitmq{{ end }}{{ if eq .Values.celery.broker "redis" }}redis-master{{ end }}
   DD_CELERY_BROKER_PORT: '{{ if eq .Values.celery.broker "rabbitmq" }}5672{{ end }}{{ if eq .Values.celery.broker "redis" }}6379{{ end }}'
   DD_CELERY_LOG_LEVEL: {{ .Values.celery.logLevel }}
-  DD_DATABASE_ENGINE: django.db.backends.{{ if eq .Values.database "postgresql" }}postgresql_psycopg2{{ end }}{{ if eq .Values.database "mysql" }}mysql{{ end }}
+  DD_DATABASE_ENGINE: django.db.backends.{{ if eq .Values.database "postgresql" }}postgresql{{ end }}{{ if eq .Values.database "mysql" }}mysql{{ end }}
   DD_DATABASE_HOST: {{ if eq .Values.database "postgresql" }}{{ template "postgresql.hostname" . }}{{ end }}{{ if eq .Values.database "mysql" }}{{ template "mysql.hostname" . }}{{ end }}
   DD_DATABASE_PORT: '{{ if eq .Values.database "postgresql" }}{{ .Values.postgresql.service.port }}{{ end }}{{ if eq .Values.database "mysql" }}{{ .Values.mysql.service.port }}{{ end }}'
   DD_DATABASE_USER: {{ if eq .Values.database "postgresql" }}{{ .Values.postgresql.postgresqlUsername }}{{ end }}{{ if eq .Values.database "mysql" }}{{ .Values.mysql.mysqlUser }}{{ end }}
@@ -27,3 +27,6 @@ data:
   DD_UWSGI_ENDPOINT: /run/uwsgi.sock
   DD_UWSGI_HOST: localhost
   DD_UWSGI_PASS: unix:///run/uwsgi.sock
+  DD_DJANGO_METRICS_ENABLED: '{{ .Values.monitoring.enabled }}'
+  NGINX_METRICS_ENABLED: '{{ .Values.monitoring.enabled }}'
+  METRICS_HTTP_AUTH_USER: {{ .Values.monitoring.user | default "monitoring" }}
