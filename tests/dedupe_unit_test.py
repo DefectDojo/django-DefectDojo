@@ -27,8 +27,10 @@ class DedupeTest(BaseTestCase):
         dupe_count = 0
         # iterate over the rows of the findings table and concatenates all columns into td.text
         trs = driver.find_elements_by_xpath('//*[@id="open_findings"]/tbody/tr')
+        print("===========DEBUG==============")
         for row in trs:
             concatRow = ' '.join([td.text for td in row.find_elements_by_xpath(".//td")])
+            print(concatRow)
             if '(DUPE)' and 'Duplicate' in concatRow:
                 dupe_count += 1
         self.assertEqual(dupe_count, expected_number_of_duplicates)
