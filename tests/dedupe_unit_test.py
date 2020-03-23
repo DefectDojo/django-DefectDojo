@@ -8,6 +8,7 @@ import sys
 import os
 from base_test_class import BaseTestCase
 from Product_unit_test import ProductTest
+import time
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -25,6 +26,10 @@ class DedupeTest(BaseTestCase):
         driver = self.login_page()
         driver.get(self.base_url + "finding")
         dupe_count = 0
+        # Wait 10 seconds for the dedup-job
+        wait_time = 10
+        print("waiting %d seconds for deduplication job" % wait_time)
+        time.sleep(wait_time)
         # iterate over the rows of the findings table and concatenates all columns into td.text
         trs = driver.find_elements_by_xpath('//*[@id="open_findings"]/tbody/tr')
         for row in trs:
