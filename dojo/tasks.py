@@ -307,11 +307,11 @@ def async_dupe_delete(*args, **kwargs):
         logger.info("delete excess duplicates")
         deduplicationLogger.info("delete excess duplicates")
         findings = Finding.objects \
-                .filter(duplicate_list__duplicate=True) \
-                .annotate(num_dupes=Count('duplicate_list')) \
+                .filter(original_finding__duplicate=True) \
+                .annotate(num_dupes=Count('original_finding')) \
                 .filter(num_dupes__gt=dupe_max)
         for finding in findings:
-            duplicate_list = finding.duplicate_list \
+            duplicate_list = finding.original_finding \
                     .filter(duplicate=True).order_by('date')
             dupe_count = len(duplicate_list) - dupe_max
             for finding in duplicate_list:
