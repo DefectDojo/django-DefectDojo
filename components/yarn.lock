@@ -146,10 +146,10 @@ marked@*:
   resolved "https://registry.yarnpkg.com/marked/-/marked-0.8.0.tgz#ec5c0c9b93878dc52dd54be8d0e524097bd81a99"
   integrity sha512-MyUe+T/Pw4TZufHkzAfDj6HarCBWia2y27/bhuYkTaiUnfDYFnCP3KUN+9oM7Wi6JA2rymtVYbQu3spE0GCmxQ==
 
-metismenu@~3.0.5:
-  version "3.0.5"
-  resolved "https://registry.yarnpkg.com/metismenu/-/metismenu-3.0.5.tgz#b7229ef17a305edf1f462bb18dac79082c04024f"
-  integrity sha512-s5rTYsejjLQO+uEbce6uVGVyGSVMPuN9jvGkWbNN7o8FVV50jHAX2DZlx9mqNnSI/uZIeOf+GduXaSYoSdAUOw==
+metismenu@~3.0.6:
+  version "3.0.6"
+  resolved "https://registry.yarnpkg.com/metismenu/-/metismenu-3.0.6.tgz#595ead90ccb88037ef8af5e5316598a3c57b7e54"
+  integrity sha512-aO2XoKWMLNGAw3skRPWcAhZUtootPhEk6Lz5Jamc9RlulhThp4h09AoeXevhg4vVQvwQjl8UenN09Wnr2QeM5w==
 
 moment@^2.0.0:
   version "2.24.0"

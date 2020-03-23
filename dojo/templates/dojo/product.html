@@ -316,6 +316,11 @@
                     { "data": "engagements", render: function (data, type, row) {
                             return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
                     }},
+                    {% if system_settings.enable_jira %}
+                    { "data": "jira", render: function (data, type, row) {
+                            return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
+                    }},
+                    {% endif %}
                     { "data": "findings" , render: function (data, type, row) {
                             return type === 'export' ? getDojoExportValueFromTag(data, 'b') :  data;
                     }},
@@ -325,7 +330,7 @@
                     { "data": "contacts" },
                     { "data": "product_type" },
                 ],
-                order: [1],
+                order: [1, asc],
                 "columnDefs": [
                     { "orderable": false, "targets": [0] }
                 ],
