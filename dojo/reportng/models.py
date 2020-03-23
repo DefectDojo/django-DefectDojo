@@ -177,7 +177,6 @@ class ReportNG(DojoModel):
         verbose_name = "report"
         ordering = ["-created"]
         rules_permissions = {
-            "add": rules.is_authenticated,
             "change": rules.is_staff | rules.is_authenticated & is_report_requester,
         }
 

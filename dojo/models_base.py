@@ -50,15 +50,19 @@ class DojoModel(RulesModelMixin, Model, metaclass=RulesModelBase):
     def preprocess_rules_permissions(perms):
         """Sets defaults for unspecified permissions.
 
-        - "add": rules.is_staff
-        - "change": rules.is_staff
+        The base queryset already gets restricted for the current user, hence this
+        just allows a user to write everything he has access to via its base queryset,
+        aka everything he can read.
+
+        - "add": rules.is_authenticated
+        - "change": rules.is_authenticated
         - "delete": the same as "change"
         - "filter": rules.is_authenticated, since the base queryset already gets
           restricted for the particular user and you usually don't want to forbid
           filtering entirely unless a model should be totally hidden to some users.
         """
-        perms.setdefault("add", rules.is_staff)
-        perms.setdefault("delete", perms.setdefault("change", rules.is_staff))
+        perms.setdefault("add", rules.is_authenticated)
+        perms.setdefault("delete", perms.setdefault("change", rules.is_authenticated))
         perms.setdefault("filter", rules.is_authenticated)
 
     class Meta:
