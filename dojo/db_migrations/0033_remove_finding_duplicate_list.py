@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0031_finding_component'),
+        ('dojo', '0032_system_settings_enable_auditlog'),
     ]
 
     operations = [
