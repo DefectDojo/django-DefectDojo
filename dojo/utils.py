@@ -57,7 +57,7 @@ def dict2querydict(data, prefix=None):
     return qdict
 
 
-def ensure_permission(model, perm_type=None, arg=0, lookup="pk", view_func=None):
+def ensure_permission(model, perm_type=None, arg=None, lookup="pk", view_func=None):
     """Decorator for view functions that ensures the user has permission on an object.
 
     It looks up the requested object in the user-restricted base queryset, checks
