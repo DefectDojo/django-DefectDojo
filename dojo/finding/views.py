@@ -38,7 +38,7 @@ from dojo.mixins import DojoPermissionViewMixin
 from dojo.models import Product_Type, Finding, Notes, NoteHistory, Note_Type, \
     Risk_Acceptance, BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, \
     FindingImageAccessToken, JIRA_Issue, JIRA_PKey, Dojo_User, Cred_Mapping, Test, Product, User, Engagement
-from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_notifications, \
+from dojo.utils import ensure_permission, get_page_items, add_breadcrumb, FileIterWrapper, process_notifications, \
     add_comment, jira_get_resolution_id, jira_change_resolution_id, get_jira_connection, \
     get_system_setting, create_notification, apply_cwe_to_template, Product_Tab, calculate_grade, log_jira_alert
 
@@ -967,9 +967,8 @@ def apply_template_cwe(request, fid):
         return HttpResponseForbidden()
 
 
-def delete_finding(request, fid):
-    finding = get_object_or_404(Finding, id=fid)
-
+@ensure_permission(Finding, "delete", "fid")
+def delete_finding(request, finding):
     if request.method == 'POST':
         form = DeleteFindingForm(request.POST, instance=finding)
         if form.is_valid():
@@ -1000,9 +999,8 @@ def delete_finding(request, fid):
         return HttpResponseForbidden()
 
 
-@user_passes_test(lambda u: u.is_staff)
-def edit_finding(request, fid):
-    finding = get_object_or_404(Finding, id=fid)
+@ensure_permission(Finding, "change", "fid")
+def edit_finding(request, finding):
     old_status = finding.status()
     form = FindingForm(instance=finding, template=False)
     form.initial['tags'] = [tag.name for tag in finding.tags]

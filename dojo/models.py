@@ -25,7 +25,7 @@ from django.utils.translation import gettext as _
 from dojo.signals import dedupe_signal
 from django.core.cache import cache
 
-from .models_base import DojoQuerySet, Q, UniqueUploadNameProvider, User
+from .models_base import DojoModel, DojoQuerySet, Q, UniqueUploadNameProvider, User
 from .reportng import models as reportng_models  # noqa: F401
 
 
@@ -1257,7 +1257,7 @@ class Sonarqube_Product(models.Model):
         return '{} | {}'.format(self.product.name, self.sonarqube_project_key)
 
 
-class Finding(models.Model):
+class Finding(DojoModel):
     @DojoQuerySet.manager_with_for_user
     def objects(base, user):
         return Test.objects.for_user.as_q(user).prefix("test")
