@@ -395,6 +395,7 @@ class FindingImageSerializer(serializers.ModelSerializer):
 class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     images = FindingImageSerializer(many=True, read_only=True)
     tags = TagListSerializerField(required=False)
+    accepted_risks = RiskAcceptanceSerializer(many=True, read_only=True, source='risk_acceptance_set')
 
     class Meta:
         model = Finding
@@ -418,6 +419,11 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
             raise serializers.ValidationError('False positive findings cannot '
                                               'be verified.')
         return data
+
+    def build_relational_field(self, field_name, relation_info):
+        if field_name == 'notes':
+            return NoteSerializer, {'many': True, 'read_only': True}
+        return super().build_relational_field(field_name, relation_info)
 
 
 class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):

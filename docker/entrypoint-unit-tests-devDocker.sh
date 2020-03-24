@@ -9,7 +9,7 @@ unset DD_DATABASE_URL
 python3 manage.py makemigrations dojo
 python3 manage.py migrate
 
-python3 manage.py test dojo.unittests --keepdb
+python3 manage.py test dojo.unittests --keepdb -v 2
 
 echo "End of tests. Leaving the container up"
 tail -f /dev/null
