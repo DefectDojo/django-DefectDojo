@@ -88,7 +88,8 @@ class DsopParser:
             tags = "twistlock"
 
             finding = Finding(title=title, cve=cve, url=url, severity=severity, description=description,
-                                       severity_justification=severity_justification, test=self._test)
+                                    component_name=component_name, component_version=component_version,
+                                    severity_justification=severity_justification, test=self._test)
             finding.unsaved_tags = tags
             self._items.append(finding)
 
@@ -103,6 +104,7 @@ class DsopParser:
             tags = "anchore"
 
             finding = Finding(title=title, cve=cve, severity=severity,
+                                    mitigation=mitigation, component_name=component,
                                     description=description, test=self._test)
             finding.unsaved_tags = tags
             self._items.append(finding)
