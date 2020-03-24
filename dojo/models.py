@@ -405,9 +405,6 @@ class Product_Type(models.Model):
                'url': reverse('edit_product_type', args=(self.id,))}]
         return bc
 
-    class Meta:
-        ordering = ('name',)
-
 
 class Product_Line(models.Model):
     name = models.CharField(max_length=300)

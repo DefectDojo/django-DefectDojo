@@ -18,7 +18,7 @@ from django_filters import (
 from django_filters.filters import _truncate
 from pytz import timezone
 
-from dojo.models import Dojo_User, Product_Type, Engagement, Finding, Product, Test_Type, \
+from dojo.models import Dojo_User, Product_Type, Finding, Product, Test_Type, \
     Endpoint, Development_Environment, Finding_Template, Report, Note_Type
 from dojo.forms import TypedMultipleValueField
 from dojo.models_base import get_perm
@@ -542,34 +542,6 @@ class MetricsDateRangeFilter(ChoiceFilter):
         except (ValueError, TypeError):
             value = ''
         return self.options[value][1](self, qs, self.field_name)
-
-
-class EngagementFilter(DojoFilter):
-    name = CharFilter(lookup_expr='icontains')
-    product = ModelMultipleChoiceFilter(
-        queryset=Product.objects.for_user,
-        label="Product")
-    lead = ModelChoiceFilter(
-        queryset=User.objects.filter(
-            engagement__lead__isnull=False).distinct(),
-        label="Lead")
-
-    o = OrderingFilter(
-        # tuple-mapping retains order
-        fields=(
-            ('name', 'name'),
-            ('product__name', 'product__name'),
-        ),
-        field_labels={
-            'name': 'Product Name',
-            'product__name': 'Product',
-        }
-
-    )
-
-    class Meta:
-        model = Engagement
-        fields = ['name', 'product']
 
 
 class EngagementFilter(DojoFilter):

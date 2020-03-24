@@ -7,7 +7,6 @@ from ..base import (
     FilesystemTemplateLoader,
     ReportBuilder,
     ReportBuilderConfigForm,
-    ReportGenerationError,
     TemplateBasedReportBuilderConfigFormMixin,
     TemplateBasedReportBuilderMixin,
     build_template_context,

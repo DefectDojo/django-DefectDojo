@@ -341,6 +341,7 @@ def rename_whitesource_finding():
         finding.hash_code = finding.compute_hash_code()
         finding.save()
 
+
 def sync_rules(new_finding, *args, **kwargs):
     rules = Rule.objects.filter(applies_to='Finding', parent_rule=None)
     for rule in rules:
