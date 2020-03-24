@@ -17,6 +17,7 @@ from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Find
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import report_url_resolver
 from dojo.filters import ReportFindingFilter, ReportAuthedFindingFilter
+from dojo.risk_acceptance import api as ra_api
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from datetime import datetime
@@ -69,6 +70,7 @@ class EngagementViewSet(mixins.ListModelMixin,
                         mixins.UpdateModelMixin,
                         mixins.DestroyModelMixin,
                         mixins.CreateModelMixin,
+                        ra_api.AcceptedRisksMixin,
                         viewsets.GenericViewSet):
     serializer_class = serializers.EngagementSerializer
     queryset = Engagement.objects.all()
@@ -77,6 +79,10 @@ class EngagementViewSet(mixins.ListModelMixin,
                      'target_end', 'requester', 'report_type',
                      'updated', 'threat_model', 'api_test',
                      'pen_test', 'status', 'product', 'name', 'version')
+
+    @property
+    def risk_application_model_class(self):
+        return Engagement
 
     def get_queryset(self):
         if not self.request.user.is_staff:
@@ -142,6 +148,7 @@ class FindingViewSet(mixins.ListModelMixin,
                      mixins.UpdateModelMixin,
                      mixins.DestroyModelMixin,
                      mixins.CreateModelMixin,
+                     ra_api.AcceptedFindingsMixin,
                      viewsets.GenericViewSet):
     serializer_class = serializers.FindingSerializer
     queryset = Finding.objects.all()
@@ -512,6 +519,7 @@ class TestsViewSet(mixins.ListModelMixin,
                    mixins.UpdateModelMixin,
                    mixins.DestroyModelMixin,
                    mixins.CreateModelMixin,
+                   ra_api.AcceptedRisksMixin,
                    viewsets.GenericViewSet):
     serializer_class = serializers.TestSerializer
     queryset = Test.objects.all()
@@ -519,6 +527,10 @@ class TestsViewSet(mixins.ListModelMixin,
     filter_fields = ('id', 'title', 'test_type', 'target_start',
                      'target_end', 'notes', 'percent_complete',
                      'actual_time', 'engagement')
+
+    @property
+    def risk_application_model_class(self):
+        return Test
 
     def get_queryset(self):
         if not self.request.user.is_staff:
@@ -529,6 +541,8 @@ class TestsViewSet(mixins.ListModelMixin,
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
+            if self.action == 'accept_risks':
+                return ra_api.AcceptedRiskSerializer
             return serializers.TestCreateSerializer
         else:
             return serializers.TestSerializer

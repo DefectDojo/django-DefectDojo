@@ -13,6 +13,7 @@ from django.urls import reverse
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import Q
 from django.utils.deconstruct import deconstructible
 from django.utils.timezone import now
 from django.utils.functional import cached_property
@@ -414,6 +415,14 @@ class Product_Type(models.Model):
     #         Q(severity="High") |
     #         Q(severity="Medium") |
     #         Q(severity="Low")).count()
+
+    @property
+    def unaccepted_open_findings(self):
+        engagements = Engagement.objects.filter(product__prod_type=self)
+        accepted_findings = Finding.objects.filter(risk_acceptance__engagement__in=engagements)
+        accepted_ids = [f.id for f in accepted_findings.only('id')]
+        return Finding.objects.filter(active=True, verified=True, duplicate=False,
+                                      test__engagement__product__prod_type=self).exclude(id__in=accepted_ids)
 
     # def products_count(self):
     #     return Product.objects.filter(prod_type=self).count()
@@ -954,6 +963,16 @@ class Engagement(models.Model):
                 'url': reverse('view_engagement', args=(self.id,))}]
         return bc
 
+    @property
+    def unaccepted_open_findings(self):
+        accepted_findings = Finding.objects.filter(risk_acceptance__engagement=self)
+        accepted_ids = [f.id for f in accepted_findings.only('id')]
+        return Finding.objects.filter(active=True, verified=True, duplicate=False,
+                                      test__engagement=self).exclude(id__in=accepted_ids)
+
+    def accept_risks(self, accepted_risks):
+        self.risk_acceptance.add(*accepted_risks)
+
 
 class CWE(models.Model):
     url = models.CharField(max_length=1000)
@@ -1221,6 +1240,16 @@ class Test(models.Model):
     def verified_finding_count(self):
         return self.finding_set.filter(verified=True).count()
 
+    @property
+    def unaccepted_open_findings(self):
+        accepted_findings = Finding.objects.filter(risk_acceptance__engagement=self.engagement)
+        accepted_ids = [f.id for f in accepted_findings.only('id')]
+        return Finding.objects.filter(active=True, verified=True, duplicate=False, test=self).exclude(
+            id__in=accepted_ids)
+
+    def accept_risks(self, accepted_risks):
+        self.engagement.risk_acceptance.add(*accepted_risks)
+
 
 class VA(models.Model):
     address = models.TextField(editable=False, default="none")
@@ -1377,6 +1406,10 @@ class Finding(models.Model):
             models.Index(fields=['date']),
             models.Index(fields=['title']),
         ]
+
+    @classmethod
+    def unaccepted_open_findings(cls):
+        return cls.objects.filter(active=True, verified=True, duplicate=False, risk_acceptance__isnull=True)
 
     @property
     def similar_findings(self):
