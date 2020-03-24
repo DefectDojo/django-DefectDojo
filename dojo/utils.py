@@ -1,4 +1,5 @@
 import calendar as tcalendar
+import functools
 import re
 import binascii
 import os
@@ -15,11 +16,13 @@ import requests
 from dateutil.relativedelta import relativedelta, MO, SU
 from django import http
 from django.conf import settings
+from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
 from django.core.mail import EmailMessage
 from django.core.paginator import Paginator
 from django.urls import get_resolver, reverse
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
+from django.shortcuts import get_object_or_404
 from django.template.defaultfilters import pluralize
 from django.template.loader import render_to_string
 from django.utils import timezone
@@ -52,6 +55,77 @@ def dict2querydict(data, prefix=None):
             key = "%s-%s" % (prefix, key)
         qdict.setlist(key, values)
     return qdict
+
+
+def ensure_permission(model, perm_type=None, arg=0, lookup="pk", view_func=None):
+    """Decorator for view functions that ensures the user has permission on an object.
+
+    It looks up the requested object in the user-restricted base queryset, checks
+    for the object-level permission with given type and, if all went well, passes the
+    retrieved object through to the view function. The object retrieved is passed
+    as positional argument, directly after ``request``, the original lookup value
+    (such as a primary key from URL) is removed from the arguments.
+
+    This unifies (and simplifies) the typical ``get_object_or_404()`` + permission
+    checking workflow, so that the view function doesn't have to deal with permissions
+    and object retrival at all.
+
+    :param model: The model to fetch objects of and do permission checking for
+    :type  model: DojoModel
+    :param perm_type:
+        If given, it'll be checked for this permission type (such as "add" or
+        "change"); the full permission name is retrieved by passing the type to
+        ``DojoModel.get_perm()``
+    :type  perm_type: str, optional
+    :param arg:
+        Index of the function argument containing the value to look up in database
+        (i.e. the object's primary key), not counting the first argument (``request``).
+        If this is a keyword-argument rather than a positional one, specify its name
+        as a string.
+        ``None`` will disable object fetching entirely and only do model-level
+        permission checking (usable for permission types like "add" that aren't
+        related to a specific object).
+    :type  arg: int, str, None, optional
+    :param lookup: Db lookup for selecting the requested object
+    :type  lookup: str, optional
+    :param view_func: The view function to wrap, not required for use as a decorator
+    :type  view_func: callable, optional
+    :raises Http404:
+        if requested object isn't contained in the user's restricted base queryset
+    :raises PermissionDenied: If object-/model-level permission check fails
+    """
+    if view_func is None:
+        return functools.partial(ensure_permission, model, perm_type, arg, lookup)
+
+    # Retrieve full permission name only once and reuse later
+    perm = None if perm_type is None else model.get_perm(perm_type)
+
+    @functools.wraps(view_func)
+    def _wrapped(request, *args, **kwargs):
+        if arg is None:
+            # No object to fetch, only check model-level permission
+            if perm is not None and not request.user.has_perm(perm):
+                raise PermissionDenied()
+            return view_func(request, *args, **kwargs)
+
+        # Fetch object from database
+        if isinstance(arg, int):
+            # Lookup value came as a positional argument
+            args = list(args)
+            lookup_value = args.pop(arg)
+        else:
+            # Lookup value was passed as keyword argument
+            lookup_value = kwargs.pop(arg)
+        obj = get_object_or_404(
+            model.objects.for_user(request), **{lookup: lookup_value}
+        )
+        # Check object-level permission
+        if perm is not None and not request.user.has_perm(perm, obj):
+            raise PermissionDenied()
+        # Forward the actual retrieved object for the view function to reuse it
+        return view_func(request, obj, *args, **kwargs)
+
+    return _wrapped
 
 
 def sync_false_history(new_finding, *args, **kwargs):
