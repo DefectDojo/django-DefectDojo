@@ -532,6 +532,8 @@ class Product(models.Model):
 
     @DojoQuerySet.manager_with_for_user
     def objects(base, user):
+        # Q object without restrictions if user is staff member, otherwise restricting
+        # to those products the user is authorized for
         return Q() if user.is_staff else Q(authorized_users__in=[user])
 
     name = models.CharField(max_length=255, unique=True)
@@ -858,6 +860,7 @@ class Engagement_Type(models.Model):
 class Engagement(models.Model):
     @DojoQuerySet.manager_with_for_user
     def objects(base, user):
+        # Q object restricting to only engagements of products the user has access to
         return Product.objects.for_user.as_q(user).prefix("product")
 
     name = models.CharField(max_length=300, null=True, blank=True)
@@ -1165,6 +1168,7 @@ class Development_Environment(models.Model):
 class Test(models.Model):
     @DojoQuerySet.manager_with_for_user
     def objects(base, user):
+        # Q object restricting to only tests of engagements the user has access to
         return Engagement.objects.for_user.as_q(user).prefix("engagement")
 
     engagement = models.ForeignKey(Engagement, editable=False, on_delete=models.CASCADE)
@@ -1260,6 +1264,7 @@ class Sonarqube_Product(models.Model):
 class Finding(DojoModel):
     @DojoQuerySet.manager_with_for_user
     def objects(base, user):
+        # Q object restricting to only findings of tests the user has access to
         return Test.objects.for_user.as_q(user).prefix("test")
 
     title = models.CharField(max_length=511)
