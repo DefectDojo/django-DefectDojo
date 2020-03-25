@@ -597,7 +597,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 item.last_reviewed = timezone.now()
                 item.last_reviewed_by = self.context['request'].user
                 item.active = data['active']
-                if scan_type == 'Checkmarx Scan detailed' :
+                if scan_type == 'Checkmarx Scan detailed':
                     verified = item.verified
                     item.verified = verified
                 else:
@@ -755,13 +755,11 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 sev = item.severity
                 if sev == 'Information' or sev == 'Informational':
                     sev = 'Info'
-
                 if scan_type == 'Checkmarx Scan detailed':
                     verified = item.verified
                     item.verified = verified
                 else:
                     verified = data['verified']
-
                 if (Finding.SEVERITIES[sev] >
                         Finding.SEVERITIES[min_sev]):
                     continue
