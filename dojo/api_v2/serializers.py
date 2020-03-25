@@ -21,7 +21,6 @@ import six
 from django.utils.translation import ugettext_lazy as _
 import json
 
-
 class TagList(list):
     def __init__(self, *args, **kwargs):
         pretty_print = kwargs.pop("pretty_print", True)
@@ -520,6 +519,7 @@ class ScanSerializer(serializers.ModelSerializer):
 
 
 class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
+
     scan_date = serializers.DateField(default=datetime.date.today)
     minimum_severity = serializers.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -547,6 +547,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         close_old_findings = data['close_old_findings']
         active = data['active']
         verified = data['verified']
+        scan_type = data['scan_type']
         test_type, created = Test_Type.objects.get_or_create(
             name=data.get('test_type', data['scan_type']))
         endpoint_to_add = data['endpoint_to_add']
@@ -596,7 +597,12 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 item.last_reviewed = timezone.now()
                 item.last_reviewed_by = self.context['request'].user
                 item.active = data['active']
-                item.verified = data['verified']
+                if scan_type == 'Checkmarx Scan detailed' :
+                    verified = item.verified
+                    item.verified = verified
+                else:
+                    item.verified = date['verified']
+
                 item.save(dedupe_option=False)
 
                 if (hasattr(item, 'unsaved_req_resp') and
@@ -751,6 +757,12 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 if sev == 'Information' or sev == 'Informational':
                     sev = 'Info'
 
+                if scan_type == 'Checkmarx Scan detailed':
+                    verified = item.verified
+                    item.verified = verified
+                else:
+                    verified = data['verified']
+
                 if (Finding.SEVERITIES[sev] >
                         Finding.SEVERITIES[min_sev]):
                     continue
@@ -762,6 +774,13 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                         severity=sev,
                         numerical_severity=Finding.get_numerical_severity(sev),
                         description=item.description).all()
+                elif scan_type == 'Checkmarx Scan detailed':
+                    findings = Finding.objects.filter(
+                        title=item.title,
+                        test=test,
+                        severity=sev,
+                        unique_id_from_tool=item.unique_id_from_tool,
+                        numerical_severity=Finding.get_numerical_severity(sev)).all()
                 else:
                     findings = Finding.objects.filter(
                         title=item.title,
