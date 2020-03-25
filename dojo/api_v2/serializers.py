@@ -21,6 +21,7 @@ import six
 from django.utils.translation import ugettext_lazy as _
 import json
 
+
 class TagList(list):
     def __init__(self, *args, **kwargs):
         pretty_print = kwargs.pop("pretty_print", True)
@@ -519,7 +520,6 @@ class ScanSerializer(serializers.ModelSerializer):
 
 
 class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
-
     scan_date = serializers.DateField(default=datetime.date.today)
     minimum_severity = serializers.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -602,7 +602,6 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     item.verified = verified
                 else:
                     item.verified = date['verified']
-
                 item.save(dedupe_option=False)
 
                 if (hasattr(item, 'unsaved_req_resp') and
@@ -762,7 +761,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     item.verified = verified
                 else:
                     verified = data['verified']
-
+                    
                 if (Finding.SEVERITIES[sev] >
                         Finding.SEVERITIES[min_sev]):
                     continue
