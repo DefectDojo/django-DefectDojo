@@ -601,7 +601,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     verified = item.verified
                     item.verified = verified
                 else:
-                    item.verified = date['verified']
+                    item.verified = data['verified']
                 item.save(dedupe_option=False)
 
                 if (hasattr(item, 'unsaved_req_resp') and
@@ -761,7 +761,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     item.verified = verified
                 else:
                     verified = data['verified']
-                    
+
                 if (Finding.SEVERITIES[sev] >
                         Finding.SEVERITIES[min_sev]):
                     continue
