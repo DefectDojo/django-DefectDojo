@@ -87,6 +87,7 @@ def prefetch_for_product(prods):
                 finding__active=True,
                 finding__mitigated__isnull=True)
         prefetched_prods = prefetched_prods.prefetch_related(Prefetch('endpoint_set', queryset=active_endpoint_query, to_attr='active_endpoints'))
+        prefetched_prods = prefetched_prods.prefetch_related('tagged_items__tag')
 
     return prefetched_prods
 
@@ -98,7 +99,8 @@ def iso_to_gregorian(iso_year, iso_week, iso_day):
 
 
 def view_product(request, pid):
-    prod = get_object_or_404(Product, id=pid)
+    prod_query = Product.objects.all().select_related('product_manager', 'technical_contact', 'team_manager').prefetch_related('authorized_users')
+    prod = get_object_or_404(prod_query, id=pid)
     auth = request.user.is_staff or request.user in prod.authorized_users.all()
     if not auth:
         # will render 403
@@ -448,10 +450,15 @@ def view_engagements(request, pid, engagement_type="Interactive"):
 
 
 def prefetch_for_view_engagements(engs):
-    prefetched_engs = engs.prefetch_related('test_set')
-    prefetched_engs = prefetched_engs.annotate(count_findings_all=Count('test__finding__id'))
-    prefetched_engs = prefetched_engs.annotate(count_findings_open=Count('test__finding__id', filter=Q(test__finding__active=True)))
-    prefetched_engs = prefetched_engs.annotate(count_findings_duplicate=Count('test__finding__id', filter=Q(test__finding__duplicate=True)))
+    prefetched_engs = engs
+    if isinstance(engs, QuerySet):  # old code can arrive here with prods being a list because the query was already executed
+        prefetched_engs = prefetched_engs.select_related('lead')
+        prefetched_engs = prefetched_engs.prefetch_related('test_set')
+        prefetched_engs = prefetched_engs.prefetch_related('test_set__test_type')  # test.name uses test_type
+        prefetched_engs = prefetched_engs.annotate(count_findings_all=Count('test__finding__id'))
+        prefetched_engs = prefetched_engs.annotate(count_findings_open=Count('test__finding__id', filter=Q(test__finding__active=True)))
+        prefetched_engs = prefetched_engs.annotate(count_findings_duplicate=Count('test__finding__id', filter=Q(test__finding__duplicate=True)))
+        prefetched_engs = prefetched_engs.prefetch_related('tagged_items__tag')
     return prefetched_engs
 
 
