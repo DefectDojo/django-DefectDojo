@@ -37,7 +37,8 @@ class DsopParser:
             tags = "disa"
 
             finding = Finding(title=title, date=date, cve=cve, severity=severity, description=description,
-                        impact=impact, references=references, test=self._test, unique_id_from_tool=unique_id)
+                        impact=impact, references=references, test=self._test, unique_id_from_tool=unique_id,
+                         static_finding=True, dynamic_finding=False)
             finding.unsaved_tags = tags
             self._items.append(finding)
 
@@ -65,7 +66,7 @@ class DsopParser:
             tags = "oval"
 
             finding = Finding(title=title, cve=cve, severity=severity, unique_id_from_tool=unique_id,
-                    test=self._test)
+                    test=self._test, static_finding=True, dynamic_finding=False)
             finding.unsaved_tags = tags
             self._items.append(finding)
 
@@ -88,7 +89,9 @@ class DsopParser:
             tags = "twistlock"
 
             finding = Finding(title=title, cve=cve, url=url, severity=severity, description=description,
-                                       severity_justification=severity_justification, test=self._test)
+                                    component_name=component_name, component_version=component_version,
+                                    severity_justification=severity_justification, test=self._test,
+                                    static_finding=True, dynamic_finding=False)
             finding.unsaved_tags = tags
             self._items.append(finding)
 
@@ -103,7 +106,9 @@ class DsopParser:
             tags = "anchore"
 
             finding = Finding(title=title, cve=cve, severity=severity,
-                                    description=description, test=self._test)
+                                    mitigation=mitigation, component_name=component,
+                                    description=description, test=self._test,
+                                    static_finding=True, dynamic_finding=False)
             finding.unsaved_tags = tags
             self._items.append(finding)
 

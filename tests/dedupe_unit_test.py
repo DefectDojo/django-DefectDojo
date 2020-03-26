@@ -8,6 +8,7 @@ import sys
 import os
 from base_test_class import BaseTestCase
 from Product_unit_test import ProductTest
+import time
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -22,15 +23,24 @@ class DedupeTest(BaseTestCase):
 
     def check_nb_duplicates(self, expected_number_of_duplicates):
         print("checking duplicates...")
-        driver = self.login_page()
-        driver.get(self.base_url + "finding")
-        dupe_count = 0
-        # iterate over the rows of the findings table and concatenates all columns into td.text
-        trs = driver.find_elements_by_xpath('//*[@id="open_findings"]/tbody/tr')
-        for row in trs:
-            concatRow = ' '.join([td.text for td in row.find_elements_by_xpath(".//td")])
-            if '(DUPE)' and 'Duplicate' in concatRow:
-                dupe_count += 1
+        retries = 0
+        for i in range(0, 3):
+            time.sleep(5)  # wait bit for celery dedupe task which can be slow on travis
+            driver = self.login_page()
+            driver.get(self.base_url + "finding")
+            dupe_count = 0
+            # iterate over the rows of the findings table and concatenates all columns into td.text
+            trs = driver.find_elements_by_xpath('//*[@id="open_findings"]/tbody/tr')
+            for row in trs:
+                concatRow = ' '.join([td.text for td in row.find_elements_by_xpath(".//td")])
+                if '(DUPE)' and 'Duplicate' in concatRow:
+                    dupe_count += 1
+
+            if (dupe_count != expected_number_of_duplicates):
+                print("duplicate count mismatch, let's wait a bit for the celery dedupe task to finish and try again (5s)")
+            else:
+                break
+
         self.assertEqual(dupe_count, expected_number_of_duplicates)
 
     def test_enable_deduplication(self):

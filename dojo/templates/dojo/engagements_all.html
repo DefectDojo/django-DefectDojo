@@ -57,8 +57,15 @@
                                     <td>
                                         <a style="display: inline" class="eng_link"
                                            href="{% url 'view_engagement' e.id %}">
-                                            {% if e.name %}{{ e.name }} {% endif %}<br>
+                                            {% if e.name %}{{ e.name }} {% endif %}
                                         </a>
+                                        <sup>
+                                            {% for tag in e.tags %}
+                                            <a title="Search {{ tag }}" class="tag-label tag-color"
+                                            href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                            {% endfor %}
+                                        </sup>
+                                        <br>
                                     </td>
                                     <td> {{ e.status }} </td>
                                     <td> {{ e.target_start|date }} - {{ e.target_end|date }} 
@@ -74,12 +81,7 @@
                                         {% endif %}
                                         <br>
                                     {% endfor %}
-                                        <sup>
-                                            {% for tag in e.tags %}
-                                                <a title="Search {{ tag }}" class="tag-label tag-color"
-                                                   href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
-                                            {% endfor %}
-                                        </sup></td>
+                                    </td>
                                     {% if user.is_staff %}
                                         <td>
                                             <a class="btn btn-sm btn-success" href="{% url 'new_eng_for_prod' p.id %}">

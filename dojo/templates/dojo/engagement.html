@@ -53,6 +53,11 @@
 						<div class="lineContainer">
 							<a  style="display: inline" class="eng_link" href="{% url 'view_engagement' e.id %}">
                                                 {% if e.name %}{{ e.name }} {% endif %}{{ e.target_start|date }} - {{ e.target_end|date }}</a>
+                                                <sup>
+                                                    {% for tag in e.tags %}
+                                                         <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                                     {% endfor %}
+                                                </sup>                                                
                                                 {% if e.is_overdue %}<sup><div class="tag-label warning-color">{{ e.target_end|overdue }} overdue</div></sup>
                                                 {% endif %}                                                
 							| Lead: {{ e.lead.first_name }}
@@ -65,11 +70,7 @@
 								{% endif %}
                                                         {% endfor %}
 						</div>
-                                                <sup>
-                                                 {% for tag in e.tags %}
-                                                      <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
-                                                  {% endfor %}
-                                                </sup>
+
                                         {% endif %}
                                     {% endfor %}
                                 </td>
