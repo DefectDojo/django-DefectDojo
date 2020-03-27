@@ -1,5 +1,4 @@
 # Standard library imports
-import json
 import logging
 
 # Third party imports
@@ -10,16 +9,13 @@ from django.urls import reverse
 from django.db import DEFAULT_DB_ALIAS
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, get_object_or_404
-from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
-from django.core.exceptions import PermissionDenied
 from github import Github
-import requests
 
 # Local application/library imports
-from dojo.forms import GITHUBForm, DeleteGITHUBConfForm, ExpressGITHUBForm
-from dojo.models import User, GITHUB_Conf, GITHUB_Issue, Notes, Risk_Acceptance
-from dojo.utils import add_breadcrumb, get_system_setting, create_notification
+from dojo.forms import GITHUBForm, DeleteGITHUBConfForm
+from dojo.models import GITHUB_Conf
+from dojo.utils import add_breadcrumb
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +23,7 @@ logger = logging.getLogger(__name__)
 @csrf_exempt
 def webhook(request):
     return HttpResponse('')
+
 
 @user_passes_test(lambda u: u.is_staff)
 def express_new_github(request):
@@ -40,9 +37,7 @@ def new_github(request):
         if jform.is_valid():
             try:
                 api_key = jform.cleaned_data.get('api_key')
-                
-                # Try to connect to github with provided api key 
-                g = Github(api_key)      
+                g = Github(api_key)
                 user = g.get_user()
                 logger.debug('Using user ' + user.login)
 
@@ -53,12 +48,6 @@ def new_github(request):
                                      messages.SUCCESS,
                                      'Github Configuration Successfully Created.',
                                      extra_tags='alert-success')
-                #create_notification(event='other',
-                #                    title='New addition of JIRA URL %s' % jform.cleaned_data.get('url').rstrip('/'),
-                #                    description='JIRA url "%s" was added by %s' %
-                #                                (jform.cleaned_data.get('url').rstrip('/'), request.user),
-                #                    url=request.build_absolute_uri(reverse('jira')),
-                #                    )
                 return HttpResponseRedirect(reverse('github', ))
             except Exception as info:
                 print(info)
@@ -118,5 +107,3 @@ def delete_github(request, tid):
                    'rels': rels,
                    'deletable_objects': rels,
                    })
-
-

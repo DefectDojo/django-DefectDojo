@@ -817,7 +817,7 @@ def close_finding(request, fid):
             new_note.date = now
             new_note.save()
             finding.notes.add(new_note)
-            
+
             messages.add_message(
                 request,
                 messages.SUCCESS,
@@ -1038,7 +1038,7 @@ def edit_finding(request, fid):
     except:
         enabled = False
         pass
-    
+
     try:
         gissue = GITHUB_Issue.objects.get(finding=finding)
         enabled = True
@@ -1049,7 +1049,7 @@ def edit_finding(request, fid):
     if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(
             product=finding.test.engagement.product) != 0:
         jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
-    
+
     if get_system_setting('enable_github') and GITHUB_PKey.objects.filter(
             product=finding.test.engagement.product) != 0:
         gform = GITHUBFindingForm(enabled=enabled, prefix='githubform')
@@ -2156,7 +2156,6 @@ def finding_bulk_update_all(request, pid=None):
                                 update_issue_task.delay(finding, old_status, True)
                             else:
                                 add_external_issue_task.delay(finding, 'github')
-
 
                 if form.cleaned_data['tags']:
                     for finding in finds:
