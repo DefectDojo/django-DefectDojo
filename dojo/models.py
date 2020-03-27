@@ -13,7 +13,6 @@ from django.urls import reverse
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import Q
 from django.utils.deconstruct import deconstructible
 from django.utils.timezone import now
 from django.utils.functional import cached_property
@@ -1657,14 +1656,12 @@ class Finding(models.Model):
         except GITHUB_Issue.DoesNotExist:
             return None
 
-
     def has_github_issue(self):
         try:
             issue = self.jira_issue
             return True
         except GITHUB_Issue.DoesNotExist:
             return False
-
 
     def github_conf(self):
         try:
@@ -2131,6 +2128,7 @@ class GITHUB_Conf(models.Model):
 
     def __str__(self):
         return self.configuration_name
+
 
 class GITHUB_Issue(models.Model):
     issue_id = models.CharField(max_length=200)

@@ -3,21 +3,21 @@ import logging
 import sys
 
 # External libs
-from github import Github, Issue
+from github import Github
 
 # Dojo related imports
-from dojo.models import Finding, Engagement, Product, GITHUB_PKey, GITHUB_Issue
+from dojo.models import Engagement, Product, GITHUB_PKey, GITHUB_Issue
 
 # Create global
 logger = logging.getLogger(__name__)
 
 
 def reopen_external_issue_github(find, note, prod, eng):
-    
+
     # Check if we have github info related to the product
     if GITHUB_PKey.objects.filter(product=prod).count() == 0:
         return
-    
+
     github_product = GITHUB_PKey.objects.get(product=prod)
     github_conf = github_product.conf
     g_issue = GITHUB_Issue.objects.get(finding=find)
@@ -34,12 +34,13 @@ def reopen_external_issue_github(find, note, prod, eng):
     issue.edit(state='open')
     issue.create_comment(note)
 
+
 def close_external_issue_github(find, note, prod, eng):
-    
+
     # Check if we have github info related to the product
     if GITHUB_PKey.objects.filter(product=prod).count() == 0:
         return
-    
+
     github_product = GITHUB_PKey.objects.get(product=prod)
     github_conf = github_product.conf
     g_issue = GITHUB_Issue.objects.get(finding=find)
@@ -56,12 +57,13 @@ def close_external_issue_github(find, note, prod, eng):
     issue.edit(state='closed')
     issue.create_comment(note)
 
+
 def update_external_issue_github(find, prod, eng):
-    
+
     # Check if we have github info related to the product
     if GITHUB_PKey.objects.filter(product=prod).count() == 0:
         return
-    
+
     github_product = GITHUB_PKey.objects.get(product=prod)
     github_conf = github_product.conf
     g_issue = GITHUB_Issue.objects.get(finding=find)
@@ -80,7 +82,7 @@ def add_external_issue_github(find, prod, eng):
 
     # Check if we have github info related to the product
     if GITHUB_PKey.objects.filter(product=prod).count() == 0:
-            return
+        return
 
     github_pkey = GITHUB_PKey.objects.get(product=prod)
     github_conf = github_pkey.conf
@@ -93,7 +95,7 @@ def add_external_issue_github(find, prod, eng):
         github_conf = github_product_key.conf
         logger.debug('Create issue with github profile: ' + str(github_conf) + ' on product: ' + str(github_product_key))
 
-        try:        
+        try:
             g = Github(github_conf.api_key)
             user = g.get_user()
             logger.debug('logged in with github user: ' + user.login)

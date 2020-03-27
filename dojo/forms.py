@@ -1611,6 +1611,7 @@ class AddFindingImageForm(forms.ModelForm):
 
 FindingImageFormSet = modelformset_factory(FindingImage, extra=3, max_num=10, exclude=[''], can_delete=True)
 
+
 class GITHUB_IssueForm(forms.ModelForm):
 
     class Meta:
@@ -1625,6 +1626,7 @@ class GITHUBForm(forms.ModelForm):
         model = GITHUB_Conf
         exclude = ['product']
 
+
 class DeleteGITHUBConfForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
                             widget=forms.widgets.HiddenInput())
@@ -1632,7 +1634,6 @@ class DeleteGITHUBConfForm(forms.ModelForm):
     class Meta:
         model = GITHUB_Conf
         fields = ('id',)
-
 
 
 class ExpressGITHUBForm(forms.ModelForm):
@@ -1645,6 +1646,7 @@ class ExpressGITHUBForm(forms.ModelForm):
                     'close_status_key', 'info_mapping_severity',
                     'low_mapping_severity', 'medium_mapping_severity',
                     'high_mapping_severity', 'critical_mapping_severity', 'finding_text']
+
 
 class JIRA_IssueForm(forms.ModelForm):
 
@@ -1944,7 +1946,6 @@ class CredUserForm(forms.ModelForm):
         # fields = ['selenium_script']
 
 
-
 class GITHUB_Product_Form(forms.ModelForm):
     conf = forms.ModelChoiceField(queryset=GITHUB_Conf.objects.all(), label='GITHUB Configuration', required=False)
 
@@ -1952,12 +1953,14 @@ class GITHUB_Product_Form(forms.ModelForm):
         model = GITHUB_PKey
         exclude = ['product']
 
+
 class JIRAPKeyForm(forms.ModelForm):
     conf = forms.ModelChoiceField(queryset=JIRA_Conf.objects.all(), label='JIRA Configuration', required=False)
 
     class Meta:
         model = JIRA_PKey
         exclude = ['product']
+
 
 class GITHUBFindingForm(forms.Form):
     def __init__(self, *args, **kwargs):
@@ -1968,6 +1971,7 @@ class GITHUBFindingForm(forms.Form):
         self.fields['push_to_github'].help_text = "Checking this will overwrite content of your Github issue, or create one."
 
     push_to_github = forms.BooleanField(required=False)
+
 
 class JIRAFindingForm(forms.Form):
     def __init__(self, *args, **kwargs):
