@@ -1,8 +1,6 @@
 from django.http import HttpResponseRedirect
 from django.conf import settings
-from django.utils import timezone
 from django.utils.http import urlquote
-from dojo.utils import get_system_setting
 from re import compile
 
 
@@ -42,18 +40,4 @@ class LoginRequiredMiddleware:
                 else:
                     fullURL = "%s?next=%s" % (settings.LOGIN_URL, urlquote(request.get_full_path()))
                 return HttpResponseRedirect(fullURL)
-        return response
-
-
-class TimezoneMiddleware:
-    """
-    Middleware that checks the configured timezone to use in each request
-    """
-
-    def __init__(self, get_response):
-        self.get_response = get_response
-
-    def __call__(self, request):
-        response = self.get_response(request)
-        timezone.activate(get_system_setting('time_zone'))
         return response
