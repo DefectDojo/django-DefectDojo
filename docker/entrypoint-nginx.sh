@@ -1,7 +1,7 @@
 #!/bin/bash
 
 umask 0002
-if [ "${GENERATE_TLS_CERTIFICATE}" == "True" ]
+if [ "${GENERATE_TLS_CERTIFICATE}" = true ]
 then
   openssl req  \
       -x509 \
@@ -13,7 +13,7 @@ then
       -subj "/C=DE/ST=City/L=City/O=Global Security/OU=IT Department/CN=nginx"
 fi
 
-if [ "${NGINX_METRICS_ENABLED}" = True ]; then
+if [ "${NGINX_METRICS_ENABLED}" = true ]; then
   sed -i "s/#stub_status/stub_status/g;" /etc/nginx/nginx.conf
   echo "Nginx metrics are enabled"
 fi
@@ -29,7 +29,7 @@ fi
 
 echo "uwsgi_pass ${DD_UWSGI_PASS};" > /run/uwsgi_pass
 echo "server ${DD_UWSGI_HOST}:${DD_UWSGI_PORT};" > /run/uwsgi_server
-if [ "${USE_TLS}" == "True" ]
+if [ "${USE_TLS}" = true ]
 then
   exec nginx -c /etc/nginx/nginx_TLS.conf -g "daemon off;"
 else

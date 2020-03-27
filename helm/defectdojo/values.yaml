@@ -70,6 +70,9 @@ django:
       # Restricts the type of ingress controller that can interact with our chart (nginx, traefik, ...)
       #kubernetes.io/ingress.class: nginx
   nginx:
+    tls:
+      enabled: false
+      generateCertificate: false
     resources:
       requests:
         cpu: 100m
