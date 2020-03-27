@@ -17,13 +17,9 @@ from dojo.celery import app
 from dojo.tools.tool_issue_updater import tool_issue_updater, update_findings_from_source_issues
 from dojo.utils import sync_false_history, calculate_grade
 from dojo.reports.widgets import report_widget_factory
-<<<<<<< HEAD
 from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_issue, \
-                       close_epic, create_notification, sync_rules, fix_loop_duplicates
-=======
-from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_issue, update_external_issue, \
-                       close_epic, create_notification, sync_rules, add_external_issue, close_external_issue, reopen_external_issue
->>>>>>> Add code for github integration
+                       close_epic, create_notification, sync_rules, fix_loop_duplicates, add_external_issue, close_external_issue, reopen_external_issue
+
 
 import logging
 fmt = getattr(settings, 'LOG_FORMAT', None)
