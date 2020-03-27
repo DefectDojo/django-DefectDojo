@@ -13,7 +13,7 @@ from tagging.models import Tag
 from django.core.validators import URLValidator, validate_ipv46_address
 from django.conf import settings
 from rest_framework import serializers
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.utils import timezone
 import base64
 import datetime
@@ -21,6 +21,15 @@ import six
 from django.utils.translation import ugettext_lazy as _
 import json
 
+
+class CreatableSlugRelatedField(serializers.SlugRelatedField):
+    def to_internal_value(self, data):
+        try:
+            return self.get_queryset().get(**{self.slug_field: data})
+        except ObjectDoesNotExist:
+            return self.get_queryset().create(**{self.slug_field: data})  # to create the object
+        except (TypeError, ValueError):
+            self.fail('invalid')
 
 class TagList(list):
     def __init__(self, *args, **kwargs):
@@ -888,10 +897,8 @@ class NoteHistorySerializer(serializers.ModelSerializer):
 
 
 class NoteSerializer(serializers.ModelSerializer):
-    author = UserSerializer(
-        many=False, read_only=False)
-    editor = UserSerializer(
-        read_only=False, many=False, allow_null=True)
+    author = CreatableSlugRelatedField(many=False, slug_field='username', queryset=User.objects.all())
+    editor = CreatableSlugRelatedField(many=False, allow_null=True, slug_field='username', queryset=User.objects.all())
 
     history = NoteHistorySerializer(read_only=True, many=True)
 

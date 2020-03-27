@@ -641,6 +641,7 @@ class ReImportScanView(mixins.CreateModelMixin,
 class NotesViewSet(mixins.ListModelMixin,
                    mixins.RetrieveModelMixin,
                    mixins.UpdateModelMixin,
+                   mixins.CreateModelMixin,
                    viewsets.GenericViewSet):
     serializer_class = serializers.NoteSerializer
     queryset = Notes.objects.all()
