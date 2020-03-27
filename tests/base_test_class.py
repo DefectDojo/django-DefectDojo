@@ -23,12 +23,14 @@ class BaseTestCase(unittest.TestCase):
             # dd_driver_options.add_experimental_option("detach", True)
 
             # the next 2 maybe needed in some scenario's for example on WSL or other headless situations
-            # dd_driver_options.add_argument("--no-sandbox")
+            dd_driver_options.add_argument("--no-sandbox")
             # dd_driver_options.add_argument("--disable-dev-shm-usage")
 
             # start maximized or at least with sufficient with because datatables will hide certain controls when the screen is too narrow
             dd_driver_options.add_argument("--window-size=1280,768")
             # dd_driver_options.add_argument("--start-maximized")
+
+            dd_driver_options.set_capability("acceptInsecureCerts", True)
 
             # some extra logging can be turned on if you want to query the browser javascripe console in your tests
             # desired = webdriver.DesiredCapabilities.CHROME
