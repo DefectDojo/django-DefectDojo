@@ -1,10 +1,10 @@
-import calendar as tcalendar
 import re
 import binascii
 import os
 import hashlib
 import json
 import io
+import sys
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 from calendar import monthrange
@@ -26,8 +26,10 @@ from jira import JIRA
 from jira.exceptions import JIRAError
 from django.dispatch import receiver
 from dojo.signals import dedupe_signal
+import calendar as tcalendar
+from dojo.github import add_external_issue_github, update_external_issue_github, close_external_issue_github, reopen_external_issue_github
 
-from dojo.models import Finding, Engagement, Finding_Template, Product, JIRA_PKey, JIRA_Issue, \
+from dojo.models import Finding, Engagement, Finding_Template, Product, JIRA_PKey, JIRA_Issue,\
     Dojo_User, User, Alerts, System_Settings, Notifications, UserContactInfo, Endpoint, Benchmark_Type, \
     Language_Type, Languages, Rule, Finding, Test_Type
 from asteval import Interpreter
@@ -1286,20 +1288,48 @@ def jira_long_description(find_description, find_id, jira_conf_finding_text):
         find_id) + "\n\n" + jira_conf_finding_text
 
 
+def add_external_issue(find, external_issue_provider):
+    eng = Engagement.objects.get(test=find.test)
+    prod = Product.objects.get(engagement=eng)
+    logger.debug('adding external issue with provider: ' + external_issue_provider)
+
+    if external_issue_provider == 'github':
+        add_external_issue_github(find, prod, eng)
+                
+def update_external_issue(find, old_status, external_issue_provider):
+    prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))               
+    eng = Engagement.objects.get(test=find.test)
+
+    if external_issue_provider == 'github':
+        update_external_issue_github(find, prod, eng)
+
+def close_external_issue(find, note, external_issue_provider):
+    prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))               
+    eng = Engagement.objects.get(test=find.test)
+    
+    if external_issue_provider == 'github':
+        close_external_issue_github(find, note, prod, eng)
+
+
+def reopen_external_issue(find, note, external_issue_provider):
+    prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))               
+    eng = Engagement.objects.get(test=find.test)
+    
+    if external_issue_provider == 'github':
+        reopen_external_issue_github(find, note, prod, eng)
+
 def add_issue(find, push_to_jira):
-    logger.debug('adding issue: ' + str(find))
     eng = Engagement.objects.get(test=find.test)
     prod = Product.objects.get(engagement=eng)
 
-    if JIRA_PKey.objects.filter(product=prod).count() == 0:
-        log_jira_alert(
-            'Finding cannot be pushed to jira as there is no jira configuration for this product.', find)
-        return
-
-    jpkey = JIRA_PKey.objects.get(product=prod)
-    jira_conf = jpkey.conf
-
     if push_to_jira:
+        if JIRA_PKey.objects.filter(product=prod).count() == 0:
+            log_jira_alert('Finding cannot be pushed to jira as there is no jira configuration for this product.', find)
+            return
+
+        jpkey = JIRA_PKey.objects.get(product=prod)
+        jira_conf = jpkey.conf
+
         if 'Active' in find.status() and 'Verified' in find.status():
             if ((jpkey.push_all_issues and Finding.get_number_severity(
                     System_Settings.objects.get().jira_minimum_severity) >=
@@ -1362,7 +1392,7 @@ def add_issue(find, push_to_jira):
                         #      issue_list = [j_issue.jira_id,]
                         #      jira.add_issues_to_epic(epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
                 except JIRAError as e:
-                    log_jira_alert(e.text, find)
+                    log_jira_alert(e.text, find)       
         else:
             log_jira_alert("Finding not active or not verified.",
                            find)
