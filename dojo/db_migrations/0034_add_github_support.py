@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0031_finding_component'),
+        ('dojo', '0033_remove_finding_duplicate_list'),
     ]
 
     operations = [
