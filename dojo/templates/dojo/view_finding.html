@@ -517,6 +517,24 @@
             </div>
         </div>
     {% endif %}
+    {% if gissue and gconf %}
+    <div class="row to_highlight">
+        <div class="col-md-12">
+            <div class="panel panel-default endpoints table-responsive">
+                <div class="panel-heading">
+                    <h4>Github Link
+                        <span class="pull-right"><a data-toggle="collapse" href="#jira_link"><i
+                                class="glyphicon glyphicon-chevron-up"></i></a></span>
+                    </h4>
+                </div>
+                <div id="github_link" class="panel-body endpoint-panel table-responsive collapse in">
+                    <a href="{{gissue.issue_url }}"
+                       target="_blank"> {{gissue.issue_url}} </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
     {% with endpoints=finding.endpoints.all|get_vulnerable_endpoints %}
         {% if endpoints %}

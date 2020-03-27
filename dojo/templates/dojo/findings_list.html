@@ -69,6 +69,9 @@
                                 {% if system_settings.enable_jira %}
                                 <b>Push to JIRA</b> <input id="id_push_tojira" name="push_to_jira" type="checkbox" alt="Select to push to JIRA"/><br/>
                                 {% endif %}
+                                {% if system_settings.enable_github %}
+                                <b>Push to Github</b> <input id="id_push_togithub" name="push_to_github" type="checkbox" alt="Select to push to Github"/><br/>
+                                {% endif %}
                                 <label style="display: block">Tags</label>
                                 <label style="font-size: 80%; font-weight: normal; display: block; padding-right: 8px;">
                                     <select multiple class="chosen-select" style="display: none;" name="tags" id="tag_choices">
