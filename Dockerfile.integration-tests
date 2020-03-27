@@ -38,7 +38,9 @@ RUN LATEST_VERSION=$(curl -s https://chromedriver.storage.googleapis.com/LATEST_
 RUN pip install --no-cache-dir selenium requests
 
 COPY tests/ ./tests/
-COPY docker/entrypoint-integration-tests.sh /
+COPY docker/wait-for-it.sh \
+  docker/entrypoint-integration-tests.sh \
+  /
 
 RUN chmod -R 0777 /app
 USER 1001
