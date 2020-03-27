@@ -50,8 +50,8 @@ echo "Running Dedupe integration tests"
 python tests/dedupe_unit_test.py
 if %ERRORLEVEL% NEQ 0 GOTO END
 
-REM  The below tests are commented out because they are still an unstable work in progress
-REM Once Ready they can be uncommented.
+REM REM  The below tests are commented out because they are still an unstable work in progress
+REM REM Once Ready they can be uncommented.
 
 REM REM echo "Running Import Scanner integration test"
 REM REM python tests/Import_scanner_unit_test.py
@@ -74,6 +74,6 @@ REM REM else
 REM REM     echo "Error: Zap integration test failed"; exit 1
 REM REM fi
 
-echo "Done Running all configured integration tests."
+REM echo "Done Running all configured integration tests."
 
 :END

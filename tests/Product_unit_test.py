@@ -33,14 +33,6 @@ class WaitForPageLoad(object):
 class ProductTest(BaseTestCase):
 
     def test_create_product(self):
-        # try:
-        #     # sometimes the product is left behind from previous test run
-        #     self.test_delete_product()
-        # except:
-        #     print('failed to delete possible existing product, assuming it was already gone')
-
-        # Login to the site. Password will have to be modified
-        # to match an admin password in your own container
         driver = self.login_page()
         # Navigate to the product page
         driver.get(self.base_url + "product")
@@ -65,6 +57,12 @@ class ProductTest(BaseTestCase):
         # Also confirm success even if Product is returned as already exists for test sake
         self.assertTrue(re.search(r'Product added successfully', productTxt) or
             re.search(r'Product with this Name already exists.', productTxt))
+
+    def test_list_products(self):
+        driver = self.login_page()
+        # Navigate to the product page
+        driver.get(self.base_url + "product")
+        # list products which will make sure there are no javascript errors such as before in https://github.com/DefectDojo/django-DefectDojo/issues/2050
 
     # For product consistency sake, We won't be editting the product title
     # instead We can edit the product description
@@ -310,7 +308,7 @@ class ProductTest(BaseTestCase):
         driver.find_element_by_css_selector("button.btn.btn-danger").click()
         # Query the site to determine if the product has been added
         productTxt = driver.find_element_by_tag_name("BODY").text
-        # Assert ot the query to dtermine status of failure
+        # Assert ot the query to determine status of failure
         self.assertTrue(re.search(r'Product and relationships removed.', productTxt))
 
 
@@ -327,6 +325,7 @@ def suite():
     suite.addTest(ProductTest('test_edit_product_custom_field'))
     suite.addTest(ProductTest('test_add_product_tracking_files'))
     suite.addTest(ProductTest('test_edit_product_tracking_files'))
+    suite.addTest(ProductTest('test_list_products'))
     suite.addTest(ProductTest('test_delete_product'))
     return suite
 

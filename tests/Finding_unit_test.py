@@ -12,23 +12,6 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 class FindingTest(BaseTestCase):
 
-    def login_page(self):
-        # Make a member reference to the driver
-        driver = self.driver
-        # Navigate to the login page
-        driver.get(self.base_url + "login")
-        # Good practice to clear the entry before typing
-        driver.find_element_by_id("id_username").clear()
-        # These credentials will be used by Travis when testing new PRs
-        # They will not work when testing on your own build
-        # Be sure to change them before submitting a PR
-        driver.find_element_by_id("id_username").send_keys(os.environ['DD_ADMIN_USER'])
-        driver.find_element_by_id("id_password").clear()
-        driver.find_element_by_id("id_password").send_keys(os.environ['DD_ADMIN_PASSWORD'])
-        # "Click" the but the login button
-        driver.find_element_by_css_selector("button.btn.btn-success").click()
-        return driver
-
     def test_list_finding(self):
         # bulk edit dropdown menu
         driver = self.login_page()
@@ -302,13 +285,13 @@ def suite():
     suite.addTest(FindingTest('test_list_finding'))
     suite.addTest(FindingTest('test_edit_finding'))
     suite.addTest(FindingTest('test_add_image'))
+    suite.addTest(FindingTest('test_delete_image'))
     suite.addTest(FindingTest('test_mark_finding_for_review'))
     suite.addTest(FindingTest('test_clear_review_from_finding'))
     suite.addTest(FindingTest('test_close_finding'))
     suite.addTest(FindingTest('test_make_finding_a_template'))
     suite.addTest(FindingTest('test_apply_template_to_a_finding'))
     suite.addTest(FindingTest('test_import_scan_result'))
-    suite.addTest(FindingTest('test_delete_image'))
     suite.addTest(FindingTest('test_delete_finding'))
     suite.addTest(FindingTest('test_delete_finding_template'))
     suite.addTest(ProductTest('test_delete_product'))
