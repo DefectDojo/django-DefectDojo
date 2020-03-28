@@ -8,7 +8,6 @@ __author__ = "Dennis Van Elst"
 
 import argparse
 import csv
-import re
 from dojo.models import Finding, Endpoint
 
 # Non-standard libraries
@@ -31,10 +30,12 @@ except ImportError:
     print("Missing dict to csv converter custom library. utfdictcsv.py should be in the same path as this file.")
     exit()
 
+
 def htmltext(blob):
     h = html2text.HTML2Text()
     h.ignore_links = False
     return h.handle(blob)
+
 
 def report_writer(report_dic, output_filename):
     with open(output_filename, "wb") as outFile:
@@ -43,13 +44,14 @@ def report_writer(report_dic, output_filename):
         csvWriter.writerows(report_dic)
     print("Successfully parsed.")
 
+
 def issue_r(raw_row, vuln, scan_date):
     ret_rows = []
     issue_row = {}
 
     # IP ADDRESS
     issue_row['ip_address'] = raw_row.get('value')
-    
+
     # FQDN
     issue_row['fqdn'] = raw_row.get('name')
 
@@ -76,7 +78,7 @@ def issue_r(raw_row, vuln, scan_date):
 
         _result = str(vuln_details.findtext('RESULT'))
 
-        _first_found = str(scan_date) # Beware: First/Last found not working properly
+        _first_found = str(scan_date)  # Beware: First/Last found not working properly
         _last_found = str(scan_date)
         _times_found = "1"
 
@@ -88,7 +90,6 @@ def issue_r(raw_row, vuln, scan_date):
         # Vuln Description
         _description = str(vuln_details.findtext('DIAGNOSIS'))
         # Solution Strips Heading Workaround(s)
-        # _temp['solution'] = re.sub('Workaround(s)?:.+\n', '', htmltext(vuln_item.findtext('SOLUTION')))
         _temp['solution'] = htmltext(vuln_details.findtext('SOLUTION'))
 
         # Vuln_description
@@ -163,6 +164,7 @@ def issue_r(raw_row, vuln, scan_date):
         ret_rows.append(finding)
     return ret_rows
 
+
 def qualys_infrascan_parser(qualys_xml_file):
     parser = etree.XMLParser(remove_blank_text=True, no_network=True, recover=True)
     d = etree.parse(qualys_xml_file, parser)
@@ -183,8 +185,8 @@ def qualys_infrascan_parser(qualys_xml_file):
     return master_list
     # report_writer(master_list, args.outfile)
 
-if __name__ == "__main__":
 
+if __name__ == "__main__":
     # Parse args
     aparser = argparse.ArgumentParser(description='Converts Qualys XML results to .csv file.')
     aparser.add_argument('--out',
@@ -203,6 +205,7 @@ if __name__ == "__main__":
     except IOError:
         print("[!] Error processing file: {}".format(args.qualys_xml_file))
         exit()
+
 
 # still need to import this in Dojo
 class QualysInfraScanParser(object):
