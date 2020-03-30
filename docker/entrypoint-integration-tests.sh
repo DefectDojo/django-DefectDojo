@@ -1,6 +1,17 @@
 #!/bin/sh
-# Run available unittests with a simple setup
 
+echo "Waiting 60s for services to start"
+# Wait for services to become available
+sleep 60
+echo "Testing DefectDojo Service"
+curl -s -o "/dev/null" $DD_BASE_URL -m 120
+CR=$(curl -s -m 10 -I "${DD_BASE_URL}login?next=/" | egrep "^HTTP" | cut  -d' ' -f2)
+if [ "$CR" != 200 ]; then
+    echo "ERROR: cannot display login screen; got HTTP code $CR"
+    exit 1
+fi
+
+# Run available unittests with a simple setup
 echo "Running Product type integration tests"
 if python3 tests/Product_type_unit_test.py ; then
     echo "Success: Product type integration tests passed"
