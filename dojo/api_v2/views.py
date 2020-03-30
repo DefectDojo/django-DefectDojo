@@ -203,13 +203,12 @@ class FindingViewSet(mixins.ListModelMixin,
             if new_note.is_valid():
                 entry = new_note.validated_data['entry']
                 private = new_note.validated_data['private']
-                note_type = new_note.validated_data['note_type']
             else:
                 return Response(new_note.errors,
                     status=status.HTTP_400_BAD_REQUEST)
 
             author = request.user
-            note = Notes(entry=entry, author=author, private=private, note_type=note_type)
+            note = Notes(entry=entry, author=author, private=private)
             note.save()
             finding.notes.add(note)
 

@@ -912,7 +912,7 @@ class AddNewNoteOptionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Notes
-        fields = ['entry', 'private', 'note_type']
+        fields = ['entry', 'private']
 
 
 class FindingToFindingImagesSerializer(serializers.Serializer):
