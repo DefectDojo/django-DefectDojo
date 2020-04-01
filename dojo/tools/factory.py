@@ -77,7 +77,6 @@ from dojo.tools.anchore_enterprise.parser import AnchoreEnterprisePolicyCheckPar
 from dojo.tools.harbor_vulnerability.parser import HarborVulnerabilityParser
 
 
-
 __author__ = 'Jay Paz'
 
 
