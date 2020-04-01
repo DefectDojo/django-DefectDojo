@@ -74,6 +74,7 @@ from dojo.tools.trivy.parser import TrivyParser
 from dojo.tools.outpost24.parser import Outpost24Parser
 from dojo.tools.burp_enterprise.parser import BurpEnterpriseHtmlParser
 from dojo.tools.anchore_enterprise.parser import AnchoreEnterprisePolicyCheckParser
+from dojo.tools.harbor_vulnerability.parser import HarborVulnerabilityParser
 
 
 
@@ -242,6 +243,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = DsopParser(file, test)
     elif scan_type == 'Anchore Enterprise Policy Check':
         parser = AnchoreEnterprisePolicyCheckParser(file, test)
+    elif scan_type == 'Harbor Vulnerability':
+        parser = HarborVulnerabilityParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 
