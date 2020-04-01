@@ -563,6 +563,13 @@
         },
         "model": "dojo.test_type",
         "pk": 172
-    }
+    },
+	{
+		"fields": {
+			"name": "Harbor Vulnerability"
+		},
+		"model": "dojo.test_type",
+		"pk": 173
+	}
 ]
 
