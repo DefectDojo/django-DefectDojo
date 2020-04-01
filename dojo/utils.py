@@ -106,6 +106,14 @@ def sync_dedupe(sender, *args, **kwargs):
                 deduplicate_hash_code(new_finding)
             elif(deduplicationAlgorithm == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE):
                 deduplicate_uid_or_hash_code(new_finding)
+            elif(deduplicationAlgorithm == settings.DEDUPE_ALGO_ATTRIBUTE_CONFIG) and hasattr(settings, 'DEDUPLICATION_ATTRIBUTES') and hasattr(settings, 'DEDUPLICATION_ALLOWED_ATTRIBUTES'):
+                configured_attributes = settings.DEDUPLICATION_ATTRIBUTES
+                if (all(elem in settings.DEDUPLICATION_ALLOWED_ATTRIBUTES for elem in configured_attributes)):
+                    deduplication_attr_config(new_finding, configured_attributes)
+                else:
+                    deduplicationLogger.debug("configuration error: some elements of DEDUPLICATION_ATTRIBUTES are not in the allowed list DEDUPLICATION_ALLOWED_ATTRIBUTES."
+                    "using legacy algorithm")
+                    deduplicate_legacy(new_finding)
             else:
                 deduplicate_legacy(new_finding)
         else:
@@ -334,8 +342,11 @@ def deduplication_attr_config(new_finding, attributes):
             original_findings = sorted(similar_findings_with_offset , key = lambda x : x.line_diff)[0]
 
     for find in original_findings:
-        set_duplicate(new_finding, find)
-        super(Finding, new_finding).save()
+        try:
+            set_duplicate(new_finding, find)
+        except Exception as e:
+            deduplicationLogger.debug(str(e))
+            continue
         break
 
 
