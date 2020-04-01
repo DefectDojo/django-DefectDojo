@@ -1,12 +1,10 @@
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.keys import Keys
 import unittest
 import re
 import sys
-import os
 import time
+from base_test_class import BaseTestCase
 
 
 class WaitForPageLoad(object):
@@ -32,38 +30,9 @@ class WaitForPageLoad(object):
         )
 
 
-class ProductTest(unittest.TestCase):
-    def setUp(self):
-        self.options = Options()
-        self.options.add_argument("--headless")  # Comment out this line to allow test run with browser visible
-        self.driver = webdriver.Chrome('chromedriver', chrome_options=self.options)
-        # Allow a little time for the driver to initialize
-        self.driver.implicitly_wait(30)
-        # Set the base address of the dojo
-        self.base_url = "http://localhost:8080/"
-        self.verificationErrors = []
-        self.accept_next_alert = True
-
-    def login_page(self):
-        # Make a member reference to the driver
-        driver = self.driver
-        # Navigate to the login page
-        driver.get(self.base_url + "login")
-        # Good practice to clear the entry before typing
-        driver.find_element_by_id("id_username").clear()
-        # Set the user to an admin account
-        # os.environ['DD_ADMIN_USER']
-        driver.find_element_by_id("id_username").clear()
-        driver.find_element_by_id("id_username").send_keys(os.environ['DD_ADMIN_USER'])
-        driver.find_element_by_id("id_password").clear()
-        driver.find_element_by_id("id_password").send_keys(os.environ['DD_ADMIN_PASSWORD'])
-        # "Click" the but the login button
-        driver.find_element_by_css_selector("button.btn.btn-success").click()
-        return driver
+class ProductTest(BaseTestCase):
 
     def test_create_product(self):
-        # Login to the site. Password will have to be modified
-        # to match an admin password in your own container
         driver = self.login_page()
         # Navigate to the product page
         driver.get(self.base_url + "product")
@@ -78,6 +47,7 @@ class ProductTest(unittest.TestCase):
         # Couldnt find a way to get into the box with selenium
         driver.find_element_by_id("id_name").send_keys("\tThis is just a test. Be very afraid.")
         # Select an option in the poroduct type
+        # some wild guess to print some debug info
         Select(driver.find_element_by_id("id_prod_type")).select_by_visible_text("Research and Development")
         # "Click" the submit button to complete the transaction
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
@@ -87,6 +57,12 @@ class ProductTest(unittest.TestCase):
         # Also confirm success even if Product is returned as already exists for test sake
         self.assertTrue(re.search(r'Product added successfully', productTxt) or
             re.search(r'Product with this Name already exists.', productTxt))
+
+    def test_list_products(self):
+        driver = self.login_page()
+        # Navigate to the product page
+        driver.get(self.base_url + "product")
+        # list products which will make sure there are no javascript errors such as before in https://github.com/DefectDojo/django-DefectDojo/issues/2050
 
     # For product consistency sake, We won't be editting the product title
     # instead We can edit the product description
@@ -332,12 +308,8 @@ class ProductTest(unittest.TestCase):
         driver.find_element_by_css_selector("button.btn.btn-danger").click()
         # Query the site to determine if the product has been added
         productTxt = driver.find_element_by_tag_name("BODY").text
-        # Assert ot the query to dtermine status of failure
+        # Assert ot the query to determine status of failure
         self.assertTrue(re.search(r'Product and relationships removed.', productTxt))
-
-    def tearDown(self):
-        self.driver.quit()
-        self.assertEqual([], self.verificationErrors)
 
 
 def suite():
@@ -353,11 +325,13 @@ def suite():
     suite.addTest(ProductTest('test_edit_product_custom_field'))
     suite.addTest(ProductTest('test_add_product_tracking_files'))
     suite.addTest(ProductTest('test_edit_product_tracking_files'))
+    suite.addTest(ProductTest('test_list_products'))
     suite.addTest(ProductTest('test_delete_product'))
     return suite
 
 
 if __name__ == "__main__":
-    runner = unittest.TextTestRunner(descriptions=True, failfast=True)
+    runner = unittest.TextTestRunner(descriptions=True, failfast=True, verbosity=2)
     ret = not runner.run(suite()).wasSuccessful()
+    BaseTestCase.tearDownDriver()
     sys.exit(ret)

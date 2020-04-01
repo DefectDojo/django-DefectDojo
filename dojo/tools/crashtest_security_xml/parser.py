@@ -48,13 +48,25 @@ class CrashtestSecurityXmlParser(object):
             if failure is None:
                 continue
 
-            title = node.get('name').upper()
+            title = node.get('name')
+            # Remove enumeration from title
+            title = re.sub(r' \([0-9]*\)$', '', title)
+
+            # Attache CVEs
             if "CVE" in title:
-                cve = re.findall(r'CVE-\d{4}-\d{4,7}', title)[0]
+                cve = re.findall(r'CVE-\d{4}-\d{4,10}', title)[0]
             else:
                 cve = None
             description = failure.get('message')
-            severity = failure.get('type')
+            severity = failure.get('type').capitalize()
+
+            # This denotes an error of the scanner and not a vulnerability
+            if severity == "Error":
+                continue
+
+            # This denotes a skipped scan and not a vulnerability
+            if severity == "Skipped":
+                continue
 
             find = Finding(title=title,
                            description=description,

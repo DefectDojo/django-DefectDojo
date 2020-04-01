@@ -1,44 +1,12 @@
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import Select
 import unittest
 import re
 import sys
-import os
+from base_test_class import BaseTestCase
+from Product_unit_test import ProductTest
 
 
-dir_path = os.path.dirname(os.path.realpath(__file__))
-try:  # First Try for python 3
-    import importlib.util
-    product_unit_test_module = importlib.util.spec_from_file_location("Product_unit_test",
-        os.path.join(dir_path, 'Product_unit_test.py'))  # using ',' allows python to determine the type of separator to use.
-    product_unit_test = importlib.util.module_from_spec(product_unit_test_module)
-    product_unit_test_module.loader.exec_module(product_unit_test)
-except:  # This will work for python2 if above fails
-    import imp
-    product_unit_test = imp.load_source('Product_unit_test',
-        os.path.join(dir_path, 'Product_unit_test.py'))
-
-
-class EngagementTest(unittest.TestCase):
-    def setUp(self):
-        self.options = Options()
-        self.options.add_argument("--headless")
-        self.driver = webdriver.Chrome('chromedriver', chrome_options=self.options)
-        self.driver.implicitly_wait(30)
-        self.base_url = "http://localhost:8080/"
-        self.verificationErrors = []
-        self.accept_next_alert = True
-
-    def login_page(self):
-        driver = self.driver
-        driver.get(self.base_url + "login")
-        driver.find_element_by_id("id_username").clear()
-        driver.find_element_by_id("id_username").send_keys(os.environ['DD_ADMIN_USER'])
-        driver.find_element_by_id("id_password").clear()
-        driver.find_element_by_id("id_password").send_keys(os.environ['DD_ADMIN_PASSWORD'])
-        driver.find_element_by_css_selector("button.btn.btn-success").click()
-        return driver
+class EngagementTest(BaseTestCase):
 
     def test_add_new_engagement(self):
         driver = self.login_page()
@@ -105,24 +73,21 @@ class EngagementTest(unittest.TestCase):
         EngagementTXT = driver.find_element_by_tag_name("BODY").text
         self.assertTrue(re.search(r'Engagement added successfully.', EngagementTXT))
 
-    def tearDown(self):
-        self.driver.quit()
-        self.assertEqual([], self.verificationErrors)
-
 
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(product_unit_test.ProductTest('test_create_product'))
+    suite.addTest(ProductTest('test_create_product'))
     suite.addTest(EngagementTest('test_add_new_engagement'))
     suite.addTest(EngagementTest('test_edit_created_new_engagement'))
     suite.addTest(EngagementTest('test_close_new_engagement'))
     suite.addTest(EngagementTest('test_delete_new_closed_engagement'))
     suite.addTest(EngagementTest('test_new_ci_cd_engagement'))
-    suite.addTest(product_unit_test.ProductTest('test_delete_product'))
+    suite.addTest(ProductTest('test_delete_product'))
     return suite
 
 
 if __name__ == "__main__":
-    runner = unittest.TextTestRunner(descriptions=True, failfast=True)
+    runner = unittest.TextTestRunner(descriptions=True, failfast=True, verbosity=2)
     ret = not runner.run(suite()).wasSuccessful()
+    BaseTestCase.tearDownDriver()
     sys.exit(ret)

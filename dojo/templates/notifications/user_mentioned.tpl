@@ -1,5 +1,3 @@
-{% load get_system_setting %}
-
 {% if type == 'mail' %}
     Hello,
 
@@ -10,7 +8,7 @@
     It can be reviewed at {{ url }}
 
     Kind regards,
-    {{ "team_name"|get_system_setting }}
+    {{ system_settings.team_name }}
 {% elif type == 'alert' %}
     User {{ user }} jotted a note on {{ section }}:
 

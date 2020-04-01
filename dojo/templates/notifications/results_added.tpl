@@ -1,5 +1,3 @@
-{% load get_system_setting %}
-
 {% if type == 'mail' %}
     Hello,
 
@@ -11,7 +9,7 @@ They can be viewed here: {{ url }}
     {% endif %}
 
     Kind regards,
-    {{ "team_name"|get_system_setting }}
+    {{ system_settings.team_name }}
 {% elif type == 'alert' %}
     {{ description|safe }}
 {% elif type == 'slack' %}

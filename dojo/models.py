@@ -16,6 +16,7 @@ from django.db import models
 from django.db.models import Q
 from django.utils.deconstruct import deconstructible
 from django.utils.timezone import now
+from django.utils.functional import cached_property
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToCover
 from django.utils import timezone
@@ -25,6 +26,10 @@ from multiselectfield import MultiSelectField
 from django import forms
 from django.utils.translation import gettext as _
 from dojo.signals import dedupe_signal
+from django.core.cache import cache
+from dojo.tag.prefetching_tag_descriptor import PrefetchingTagDescriptor
+from django.contrib.contenttypes.fields import GenericRelation
+from tagging.models import TaggedItem
 
 fmt = getattr(settings, 'LOG_FORMAT', None)
 lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
@@ -89,7 +94,26 @@ class Regulation(models.Model):
         return self.acronym + ' (' + self.jurisdiction + ')'
 
 
+class SystemSettingsManager(models.Manager):
+    CACHE_KEY = 'defect_dojo_cache.system_settings'
+
+    def get(self, no_cache=False, *args, **kwargs):
+        # cache only 30s because django default cache backend is local per process
+        if no_cache:
+            return super(SystemSettingsManager, self).get(*args, **kwargs)
+        return cache.get_or_set(self.CACHE_KEY, lambda: super(SystemSettingsManager, self).get(*args, **kwargs), timeout=30)
+
+
 class System_Settings(models.Model):
+    enable_auditlog = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name='Enable audit logging',
+        help_text="With this setting turned on, Dojo maintains an audit log "
+                  "of changes made to entities (Findings, Tests, Engagements, Procuts, ...)"
+                  "If you run big import you may want to disable this "
+                  "because the way django-auditlog currently works, there's a "
+                  "big performance hit. Especially during (re-)imports.")
     enable_deduplication = models.BooleanField(
         default=False,
         blank=False,
@@ -246,6 +270,12 @@ class System_Settings(models.Model):
     drive_folder_ID = models.CharField(max_length=100, blank=True)
     enable_google_sheets = models.BooleanField(default=False, null=True, blank=True)
 
+    objects = SystemSettingsManager()
+
+    def save(self, *args, **kwargs):
+        super(System_Settings, self).save(*args, **kwargs)
+        cache.delete(SystemSettingsManager.CACHE_KEY)
+
 
 class SystemSettingsFormAdmin(forms.ModelForm):
     product_grade = forms.CharField(widget=forms.Textarea)
@@ -344,18 +374,21 @@ class Product_Type(models.Model):
     updated = models.DateTimeField(auto_now=True, null=True)
     created = models.DateTimeField(auto_now_add=True, null=True)
 
+    @cached_property
     def critical_present(self):
         c_findings = Finding.objects.filter(
             test__engagement__product__prod_type=self, severity='Critical')
         if c_findings.count() > 0:
             return True
 
+    @cached_property
     def high_present(self):
         c_findings = Finding.objects.filter(
             test__engagement__product__prod_type=self, severity='High')
         if c_findings.count() > 0:
             return True
 
+    @cached_property
     def calc_health(self):
         h_findings = Finding.objects.filter(
             test__engagement__product__prod_type=self, severity='High')
@@ -374,20 +407,31 @@ class Product_Type(models.Model):
         else:
             return health
 
-    def findings_count(self):
-        return Finding.objects.filter(mitigated__isnull=True,
-                                      verified=True,
-                                      false_p=False,
-                                      duplicate=False,
-                                      out_of_scope=False,
-                                      test__engagement__product__prod_type=self).filter(
-            Q(severity="Critical") |
-            Q(severity="High") |
-            Q(severity="Medium") |
-            Q(severity="Low")).count()
+    # def findings_count(self):
+    #     return Finding.objects.filter(mitigated__isnull=True,
+    #                                   verified=True,
+    #                                   false_p=False,
+    #                                   duplicate=False,
+    #                                   out_of_scope=False,
+    #                                   test__engagement__product__prod_type=self).filter(
+    #         Q(severity="Critical") |
+    #         Q(severity="High") |
+    #         Q(severity="Medium") |
+    #         Q(severity="Low")).count()
 
-    def products_count(self):
-        return Product.objects.filter(prod_type=self).count()
+    @property
+    def unaccepted_open_findings(self):
+        engagements = Engagement.objects.filter(product__prod_type=self)
+        accepted_findings = Finding.objects.filter(risk_acceptance__engagement__in=engagements)
+        accepted_ids = [f.id for f in accepted_findings.only('id')]
+        return Finding.objects.filter(active=True, verified=True, duplicate=False,
+                                      test__engagement__product__prod_type=self).exclude(id__in=accepted_ids)
+
+    # def products_count(self):
+    #     return Product.objects.filter(prod_type=self).count()
+
+    class Meta:
+        ordering = ('name',)
 
     def __unicode__(self):
         return self.name
@@ -565,6 +609,9 @@ class Product(models.Model):
     internet_accessible = models.BooleanField(default=False, help_text=_('Specify if the application is accessible from the public internet.'))
     regulations = models.ManyToManyField(Regulation, blank=True)
 
+    # used for prefetching tags because django-tagging doesn't support that out of the box
+    tagged_items = GenericRelation(TaggedItem)
+
     def __unicode__(self):
         return self.name
 
@@ -574,34 +621,42 @@ class Product(models.Model):
     class Meta:
         ordering = ('name',)
 
-    @property
+    @cached_property
     def findings_count(self):
-        return Finding.objects.filter(mitigated__isnull=True,
-                                      verified=True,
-                                      false_p=False,
-                                      duplicate=False,
-                                      out_of_scope=False,
-                                      test__engagement__product=self).count()
+        try:
+            # if prefetched, it's already there
+            return self.active_finding_count
+        except AttributeError:
+            # ideally it's always prefetched and we can remove this code in the future
+            self.active_finding_count = Finding.objects.filter(mitigated__isnull=True,
+                                            active=True,
+                                            false_p=False,
+                                            duplicate=False,
+                                            out_of_scope=False,
+                                            test__engagement__product=self).count()
+            return self.active_finding_count
 
-    @property
-    def active_engagement_count(self):
-        return Engagement.objects.filter(active=True, product=self).count()
+    # @property
+    # def active_engagement_count(self):
+    #     return Engagement.objects.filter(active=True, product=self).count()
 
-    @property
-    def closed_engagement_count(self):
-        return Engagement.objects.filter(active=False, product=self).count()
+    # @property
+    # def closed_engagement_count(self):
+    #     return Engagement.objects.filter(active=False, product=self).count()
 
-    @property
-    def last_engagement_date(self):
-        return Engagement.objects.filter(product=self).first()
+    # @property
+    # def last_engagement_date(self):
+    #     return Engagement.objects.filter(product=self).first()
 
-    @property
+    @cached_property
     def endpoint_count(self):
-        endpoints = Endpoint.objects.filter(
-            finding__test__engagement__product=self,
-            finding__active=True,
-            finding__verified=True,
-            finding__mitigated__isnull=True)
+        # endpoints = Endpoint.objects.filter(
+        #     finding__test__engagement__product=self,
+        #     finding__active=True,
+        #     finding__verified=True,
+        #     finding__mitigated__isnull=True)
+
+        endpoints = self.active_endpoints
 
         hosts = []
         ids = []
@@ -895,6 +950,9 @@ class Engagement(models.Model):
     orchestration_engine = models.ForeignKey(Tool_Configuration, verbose_name="Orchestration Engine", help_text="Orchestration service responsible for CI/CD test", null=True, blank=True, related_name='orchestration', on_delete=models.CASCADE)
     deduplication_on_engagement = models.BooleanField(default=False)
 
+    # used for prefetching tags because django-tagging doesn't support that out of the box
+    tagged_items = GenericRelation(TaggedItem)
+
     class Meta:
         ordering = ['-target_start']
 
@@ -913,6 +971,16 @@ class Engagement(models.Model):
         bc += [{'title': self.__unicode__(),
                 'url': reverse('view_engagement', args=(self.id,))}]
         return bc
+
+    @property
+    def unaccepted_open_findings(self):
+        accepted_findings = Finding.objects.filter(risk_acceptance__engagement=self)
+        accepted_ids = [f.id for f in accepted_findings.only('id')]
+        return Finding.objects.filter(active=True, verified=True, duplicate=False,
+                                      test__engagement=self).exclude(id__in=accepted_ids)
+
+    def accept_risks(self, accepted_risks):
+        self.risk_acceptance.add(*accepted_risks)
 
 
 class CWE(models.Model):
@@ -951,6 +1019,9 @@ class Endpoint(models.Model):
     endpoint_params = models.ManyToManyField(Endpoint_Params, blank=True,
                                              editable=False)
     remediated = models.BooleanField(default=False, blank=True)
+
+    # used for prefetching tags because django-tagging doesn't support that out of the box
+    tagged_items = GenericRelation(TaggedItem)
 
     class Meta:
         ordering = ['product', 'protocol', 'host', 'path', 'query', 'fragment']
@@ -1024,6 +1095,7 @@ class Endpoint(models.Model):
         else:
             return NotImplemented
 
+    @cached_property
     def finding_count(self):
         host = self.host_no_port
 
@@ -1050,6 +1122,7 @@ class Endpoint(models.Model):
                                       duplicate=False).distinct().order_by(
             'numerical_severity')
 
+    @cached_property
     def finding_count_endpoint(self):
         findings = Finding.objects.filter(endpoints=self,
                                           active=True,
@@ -1157,6 +1230,9 @@ class Test(models.Model):
     updated = models.DateTimeField(auto_now=True, null=True)
     created = models.DateTimeField(auto_now_add=True, null=True)
 
+    # used for prefetching tags because django-tagging doesn't support that out of the box
+    tagged_items = GenericRelation(TaggedItem)
+
     def test_type_name(self):
         return self.test_type.name
 
@@ -1177,7 +1253,17 @@ class Test(models.Model):
         return bc
 
     def verified_finding_count(self):
-        return Finding.objects.filter(test=self, verified=True).count()
+        return self.finding_set.filter(verified=True).count()
+
+    @property
+    def unaccepted_open_findings(self):
+        accepted_findings = Finding.objects.filter(risk_acceptance__engagement=self.engagement)
+        accepted_ids = [f.id for f in accepted_findings.only('id')]
+        return Finding.objects.filter(active=True, verified=True, duplicate=False, test=self).exclude(
+            id__in=accepted_ids)
+
+    def accept_risks(self, accepted_risks):
+        self.engagement.risk_acceptance.add(*accepted_risks)
 
 
 class VA(models.Model):
@@ -1229,9 +1315,10 @@ class Finding(models.Model):
     title = models.CharField(max_length=511)
     date = models.DateField(default=get_current_date)
     cwe = models.IntegerField(default=0, null=True, blank=True)
-    cve_regex = RegexValidator(regex=r'^[A-Z]{1,10}-\d{4}-\d{4,12}$',
-                                 message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'. ")
-    cve = models.CharField(validators=[cve_regex], max_length=28, null=True)
+    cve_regex = RegexValidator(regex=r'^[A-Z]{1,10}(-\d+)+$',
+                               message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'.")
+    cve = models.CharField(validators=[cve_regex], max_length=28, null=True,
+                           help_text="CVE or other vulnerability identifier")
     url = models.TextField(null=True, blank=True, editable=False)
     severity = models.CharField(max_length=200, help_text="The severity level of this flaw (Critical, High, Medium, Low, Informational)")
     description = models.TextField()
@@ -1255,7 +1342,6 @@ class Finding(models.Model):
     duplicate_finding = models.ForeignKey('self', editable=False, null=True,
                                           related_name='original_finding',
                                           blank=True, on_delete=models.CASCADE)
-    duplicate_list = models.ManyToManyField("self", editable=False, blank=True)
     out_of_scope = models.BooleanField(default=False)
     under_review = models.BooleanField(default=False)
     review_requested_by = models.ForeignKey(Dojo_User, null=True, blank=True,
@@ -1296,6 +1382,10 @@ class Finding(models.Model):
         blank=True,
         max_length=4000,
         help_text="File name with path. For SAST, when source (start of the attack vector) and sink (end of the attack vector) information are available, put sink information here")
+    component_name = models.CharField(null=True, blank=True, max_length=200,
+                                     help_text="Name of the component containing the finding. ")
+    component_version = models.CharField(null=True, blank=True, max_length=100,
+                                        help_text="Version of the component.")
     found_by = models.ManyToManyField(Test_Type, editable=False)
     static_finding = models.BooleanField(default=False)
     dynamic_finding = models.BooleanField(default=True)
@@ -1315,6 +1405,9 @@ class Finding(models.Model):
                                verbose_name="Number of occurences",
                                help_text="Number of occurences in the source tool when several vulnerabilites were found and aggregated by the scanner")
 
+    # used for prefetching tags because django-tagging doesn't support that out of the box
+    tagged_items = GenericRelation(TaggedItem)
+
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
 
@@ -1331,6 +1424,10 @@ class Finding(models.Model):
             models.Index(fields=['date']),
             models.Index(fields=['title']),
         ]
+
+    @classmethod
+    def unaccepted_open_findings(cls):
+        return cls.objects.filter(active=True, verified=True, duplicate=False, risk_acceptance__isnull=True)
 
     @property
     def similar_findings(self):
@@ -1441,14 +1538,16 @@ class Finding(models.Model):
         return hashlib.sha256(hash_string).hexdigest()
 
     def remove_from_any_risk_acceptance(self):
-        risk_acceptances = Risk_Acceptance.objects.filter(accepted_findings__in=[self])
-        for r in risk_acceptances:
+        for r in self.risk_acceptance_set.all():
             r.accepted_findings.remove(self)
             if not r.accepted_findings.exists():
                 r.delete()
 
     def duplicate_finding_set(self):
-        return self.duplicate_list.all().order_by('title')
+        if self.duplicate:
+            return Finding.objects.get(id=self.duplicate_finding.id).original_finding.all().order_by('title')
+        else:
+            return self.original_finding.all().order_by('title')
 
     def get_scanner_confidence_text(self):
         scanner_confidence_text = ""
@@ -1515,7 +1614,7 @@ class Finding(models.Model):
             status += ['Out Of Scope']
         if self.duplicate:
             status += ['Duplicate']
-        if len(self.risk_acceptance_set.all()) > 0:
+        if self.risk_acceptance_set.exists():
             status += ['Accepted']
 
         if not len(status):
@@ -1549,11 +1648,16 @@ class Finding(models.Model):
 
     def jira(self):
         try:
-            jissue = JIRA_Issue.objects.get(finding=self)
-        except:
-            jissue = None
-            pass
-        return jissue
+            return self.jira_issue
+        except JIRA_Issue.DoesNotExist:
+            return None
+
+    def has_jira_issue(self):
+        try:
+            issue = self.jira_issue
+            return True
+        except JIRA_Issue.DoesNotExist:
+            return False
 
     def jira_conf(self):
         try:
@@ -1563,6 +1667,14 @@ class Finding(models.Model):
             jconf = None
             pass
         return jconf
+
+    # newer version that can work with prefetching
+    def jira_conf_new(self):
+        try:
+            return self.test.engagement.product.jira_pkey_set.all()[0].conf
+        except:
+            return None
+            pass
 
     def long_desc(self):
         long_desc = ''
@@ -1670,6 +1782,9 @@ class Finding(models.Model):
         calculate_grade(self.test.engagement.product)
 
     def delete(self, *args, **kwargs):
+        for find in self.original_finding.all():
+            # Explicitely delete the duplicates
+            super(Finding, find).delete()
         super(Finding, self).delete(*args, **kwargs)
         from dojo.utils import calculate_grade
         calculate_grade(self.test.engagement.product)
@@ -1723,10 +1838,6 @@ class Finding(models.Model):
         res = re.sub(r'\n\s*\n', '\n', res)
         return res
 
-    def get_found_by(self):
-        scanners = self.found_by.all().distinct()
-        return ", ".join([str(scanner) for scanner in scanners])
-
 
 Finding.endpoints.through.__unicode__ = lambda \
     x: "Endpoint: " + x.endpoint.host
@@ -1759,8 +1870,8 @@ class Stub_Finding(models.Model):
 class Finding_Template(models.Model):
     title = models.TextField(max_length=1000)
     cwe = models.IntegerField(default=None, null=True, blank=True)
-    cve_regex = RegexValidator(regex=r'^[A-Z]{1,10}-\d{4}-\d{4,12}$',
-                                 message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'. ")
+    cve_regex = RegexValidator(regex=r'^[A-Z]{1,10}(-\d+)+$',
+                               message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'.")
     cve = models.CharField(validators=[cve_regex], max_length=28, null=True)
     severity = models.CharField(max_length=200, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
@@ -1771,6 +1882,9 @@ class Finding_Template(models.Model):
     numerical_severity = models.CharField(max_length=4, null=True, blank=True, editable=False)
     template_match = models.BooleanField(default=False, verbose_name='Template Match Enabled', help_text="Enables this template for matching remediation advice. Match will be applied to all active, verified findings by CWE.")
     template_match_title = models.BooleanField(default=False, verbose_name='Match Template by Title and CWE', help_text="Matches by title text (contains search) and CWE.")
+
+    # used for prefetching tags because django-tagging doesn't support that out of the box
+    tagged_items = GenericRelation(TaggedItem)
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
@@ -2246,6 +2360,9 @@ class App_Analysis(models.Model):
     website_found = models.URLField(max_length=400, null=True, blank=True)
     created = models.DateTimeField(null=False, editable=False, default=now)
 
+    # used for prefetching tags because django-tagging doesn't support that out of the box
+    tagged_items = GenericRelation(TaggedItem)
+
     def __unicode__(self):
         return self.name + " | " + self.product.name
 
@@ -2275,6 +2392,9 @@ class Objects(models.Model):
                                 null=True, blank=True)
     review_status = models.ForeignKey(Objects_Review, on_delete=models.CASCADE)
     created = models.DateTimeField(null=False, editable=False, default=now)
+
+    # used for prefetching tags because django-tagging doesn't support that out of the box
+    tagged_items = GenericRelation(TaggedItem)
 
     def __unicode__(self):
         name = None
@@ -2548,16 +2668,35 @@ class FieldRule(models.Model):
     text = models.CharField(max_length=200)
 
 
-# Register for automatic logging to database
-auditlog.register(Dojo_User)
-auditlog.register(Endpoint)
-auditlog.register(Engagement)
-auditlog.register(Finding)
-auditlog.register(Product)
-auditlog.register(Test)
-auditlog.register(Risk_Acceptance)
-auditlog.register(Finding_Template)
-auditlog.register(Cred_User)
+def enable_disable_auditlog(enable=True):
+    if enable:
+        # Register for automatic logging to database
+        logger.info('enabling audit logging')
+        auditlog.register(Dojo_User)
+        auditlog.register(Endpoint)
+        auditlog.register(Engagement)
+        auditlog.register(Finding)
+        auditlog.register(Product)
+        auditlog.register(Test)
+        auditlog.register(Risk_Acceptance)
+        auditlog.register(Finding_Template)
+        auditlog.register(Cred_User)
+    else:
+        logger.info('disabling audit logging')
+        auditlog.unregister(Dojo_User)
+        auditlog.unregister(Endpoint)
+        auditlog.unregister(Engagement)
+        auditlog.unregister(Finding)
+        auditlog.unregister(Product)
+        auditlog.unregister(Test)
+        auditlog.unregister(Risk_Acceptance)
+        auditlog.unregister(Finding_Template)
+        auditlog.unregister(Cred_User)
+
+
+from dojo.utils import get_system_setting
+enable_disable_auditlog(enable=get_system_setting('enable_auditlog'))  # on startup choose safe to retrieve system settiung)
+
 
 # Register tagging for models
 tag_register(Product)
@@ -2568,6 +2707,9 @@ tag_register(Endpoint)
 tag_register(Finding_Template)
 tag_register(App_Analysis)
 tag_register(Objects)
+
+# Patch to support prefetching
+PrefetchingTagDescriptor.patch()
 
 # Benchmarks
 admin.site.register(Benchmark_Type)

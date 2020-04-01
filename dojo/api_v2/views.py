@@ -17,12 +17,13 @@ from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Find
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import report_url_resolver
 from dojo.filters import ReportFindingFilter, ReportAuthedFindingFilter
+from dojo.risk_acceptance import api as ra_api
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from datetime import datetime
 from dojo.utils import get_period_counts_legacy
-
 from dojo.api_v2 import serializers, permissions
+from django.db.models import Count, Q
 
 
 class EndPointViewSet(mixins.ListModelMixin,
@@ -69,6 +70,7 @@ class EngagementViewSet(mixins.ListModelMixin,
                         mixins.UpdateModelMixin,
                         mixins.DestroyModelMixin,
                         mixins.CreateModelMixin,
+                        ra_api.AcceptedRisksMixin,
                         viewsets.GenericViewSet):
     serializer_class = serializers.EngagementSerializer
     queryset = Engagement.objects.all()
@@ -76,7 +78,11 @@ class EngagementViewSet(mixins.ListModelMixin,
     filter_fields = ('id', 'active', 'eng_type', 'target_start',
                      'target_end', 'requester', 'report_type',
                      'updated', 'threat_model', 'api_test',
-                     'pen_test', 'status', 'product', 'name')
+                     'pen_test', 'status', 'product', 'name', 'version')
+
+    @property
+    def risk_application_model_class(self):
+        return Engagement
 
     def get_queryset(self):
         if not self.request.user.is_staff:
@@ -142,6 +148,7 @@ class FindingViewSet(mixins.ListModelMixin,
                      mixins.UpdateModelMixin,
                      mixins.DestroyModelMixin,
                      mixins.CreateModelMixin,
+                     ra_api.AcceptedFindingsMixin,
                      viewsets.GenericViewSet):
     serializer_class = serializers.FindingSerializer
     queryset = Finding.objects.all()
@@ -354,18 +361,19 @@ class ProductViewSet(mixins.ListModelMixin,
     serializer_class = serializers.ProductSerializer
     # TODO: prefetch
     queryset = Product.objects.all()
+    queryset = queryset.annotate(active_finding_count=Count('engagement__test__finding__id', filter=Q(engagement__test__finding__active=True)))
     filter_backends = (DjangoFilterBackend,)
     permission_classes = (permissions.UserHasProductPermission,
                           DjangoModelPermissions)
-    # TODO: findings count field
+
     filter_fields = ('id', 'name', 'prod_type', 'created', 'authorized_users')
 
     def get_queryset(self):
         if not self.request.user.is_staff:
-            return Product.objects.filter(
+            return self.queryset.filter(
                 authorized_users__in=[self.request.user])
         else:
-            return Product.objects.all()
+            return self.queryset
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.UserHasReportGeneratePermission])
     def generate_report(self, request, pk=None):
@@ -511,6 +519,7 @@ class TestsViewSet(mixins.ListModelMixin,
                    mixins.UpdateModelMixin,
                    mixins.DestroyModelMixin,
                    mixins.CreateModelMixin,
+                   ra_api.AcceptedRisksMixin,
                    viewsets.GenericViewSet):
     serializer_class = serializers.TestSerializer
     queryset = Test.objects.all()
@@ -518,6 +527,10 @@ class TestsViewSet(mixins.ListModelMixin,
     filter_fields = ('id', 'title', 'test_type', 'target_start',
                      'target_end', 'notes', 'percent_complete',
                      'actual_time', 'engagement')
+
+    @property
+    def risk_application_model_class(self):
+        return Test
 
     def get_queryset(self):
         if not self.request.user.is_staff:
@@ -528,6 +541,8 @@ class TestsViewSet(mixins.ListModelMixin,
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
+            if self.action == 'accept_risks':
+                return ra_api.AcceptedRiskSerializer
             return serializers.TestCreateSerializer
         else:
             return serializers.TestSerializer
