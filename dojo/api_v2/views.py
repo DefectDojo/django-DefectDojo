@@ -324,7 +324,7 @@ class JiraIssuesViewSet(mixins.ListModelMixin,
     serializer_class = serializers.JIRAIssueSerializer
     queryset = JIRA_Issue.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'jira_id', 'jira_key')
+    filter_fields = ('id', 'jira_id', 'jira_key', 'finding_id')
 
 
 class JiraViewSet(mixins.ListModelMixin,
