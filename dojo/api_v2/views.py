@@ -247,7 +247,7 @@ class FindingViewSet(mixins.ListModelMixin,
         else:
             return Response({"error": "('note_id') parameter missing"},
                 status=status.HTTP_400_BAD_REQUEST)
-        if note.author.username == request.user.username or request.user.is_superuser:
+        if note.author.username == request.user.username or request.user.is_staff:
             finding.notes.remove(note)
             note.delete()
         else:
