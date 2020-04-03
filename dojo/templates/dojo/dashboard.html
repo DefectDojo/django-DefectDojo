@@ -54,9 +54,9 @@
                     </div>
                 </div>
                 {% if request.user.is_superuser %}
-                    <a href="{% url 'open_findings' %}?date=2&o=numerical_severity">
+                    <a href="{% url 'open_findings' %}?date=2&o=-date">
                 {% else %}
-                    <a href="{% url 'open_findings' %}?date=2&reporter={{ request.user.id }}&o=numerical_severity">
+                    <a href="{% url 'open_findings' %}?date=2&reporter={{ request.user.id }}&o=-date">
                 {% endif %}
                     <div class="panel-footer">
                         <span class="pull-left">View Finding Details</span>
