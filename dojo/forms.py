@@ -187,7 +187,7 @@ class ProductForm(forms.ModelForm):
     product_manager = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'))
 
     def __init__(self, *args, **kwargs):
-        non_staff = Dojo_User.objects.exclude(is_staff=True) \
+        non_staff = Dojo_User.objects \
             .exclude(is_active=False).order_by('first_name', 'last_name')
         tags = Tag.objects.usage_for_model(Product)
         t = [(tag.name, tag.name) for tag in tags]
