@@ -182,9 +182,9 @@ class ProductForm(forms.ModelForm):
         queryset=None,
         required=False, label="Authorized Users")
 
-    product_manager = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'))
-    technical_contact = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'))
-    product_manager = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'))
+    product_manager = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'), required=False)
+    technical_contact = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'), required=False)
+    product_manager = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'), required=False)
 
     def __init__(self, *args, **kwargs):
         non_staff = Dojo_User.objects \
