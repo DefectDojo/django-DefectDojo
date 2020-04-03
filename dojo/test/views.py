@@ -7,7 +7,7 @@ import httplib2
 from datetime import datetime
 import googleapiclient.discovery
 from google.oauth2 import service_account
-
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied, ValidationError
@@ -20,7 +20,6 @@ from django.utils import timezone
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
 from tagging.models import Tag
-from django.conf import settings
 
 from dojo.filters import TemplateFindingFilter, OpenFindingFilter
 from dojo.forms import NoteForm, TestForm, FindingForm, \
@@ -604,9 +603,11 @@ def re_import_scan_results(request, tid):
         form = ReImportScanForm(request.POST, request.FILES)
         if form.is_valid():
             scan_date = form.cleaned_data['scan_date']
+
             scan_date_time = datetime.combine(scan_date, timezone.now().time())
             if settings.USE_TZ:
                 scan_date_time = timezone.make_aware(scan_date_time, timezone.get_default_timezone())
+
             min_sev = form.cleaned_data['minimum_severity']
             file = request.FILES['file']
             scan_type = test.test_type.name
