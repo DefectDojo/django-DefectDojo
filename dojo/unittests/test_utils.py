@@ -1,6 +1,7 @@
 from django.test import TestCase
-from dojo.utils import dojo_crypto_encrypt, prepare_for_view, set_duplicate
+from dojo.utils import dojo_crypto_encrypt, prepare_for_view, set_duplicate, fix_loop_duplicates
 from dojo.models import Finding
+
 
 class TestUtils(TestCase):
     def test_encryption(self):
@@ -102,3 +103,194 @@ class TestDuplication(TestCase):
         with self.assertRaises(Finding.DoesNotExist):
             self.finding_a = Finding.objects.get(id=self.finding_a.id)
         self.assertEqual(self.finding_b.id, None)
+
+    def test_loop_relations_for_one(self):
+        self.finding_b.duplicate = True
+        self.finding_b.duplicate_finding = self.finding_b
+        super(Finding, self.finding_b).save()
+        candidates = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).count()
+        self.assertEqual(candidates, 1)
+        fix_loop_duplicates()
+        candidates = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).count()
+        self.assertEqual(candidates, 0)
+
+    # if two findings are connected with each other the fix_loop function should detect and remove the loop
+    def test_loop_relations_for_two(self):
+
+        set_duplicate(self.finding_a, self.finding_b)
+        self.finding_b.duplicate = True
+        self.finding_b.duplicate_finding = self.finding_a
+
+        super(Finding, self.finding_a).save()
+        super(Finding, self.finding_b).save()
+
+        fix_loop_duplicates()
+
+        candidates = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).count()
+        self.assertEqual(candidates, 0)
+
+        # Get latest status
+        self.finding_a = Finding.objects.get(id=self.finding_a.id)
+        self.finding_b = Finding.objects.get(id=self.finding_b.id)
+
+        if self.finding_a.duplicate_finding:
+            self.assertTrue(self.finding_a.duplicate)
+            self.assertEqual(self.finding_a.original_finding.count(), 0)
+        else:
+            self.assertFalse(self.finding_a.duplicate)
+            self.assertEqual(self.finding_a.original_finding.count(), 1)
+
+        if self.finding_b.duplicate_finding:
+            self.assertTrue(self.finding_b.duplicate)
+            self.assertEqual(self.finding_b.original_finding.count(), 0)
+        else:
+            self.assertFalse(self.finding_b.duplicate)
+            self.assertEqual(self.finding_b.original_finding.count(), 1)
+
+    # Similar Loop detection and deletion for three findings
+    def test_loop_relations_for_three(self):
+
+        set_duplicate(self.finding_a, self.finding_b)
+        self.finding_b.duplicate = True
+        self.finding_b.duplicate_finding = self.finding_c
+        self.finding_c.duplicate = True
+        self.finding_c.duplicate_finding = self.finding_a
+
+        super(Finding, self.finding_a).save()
+        super(Finding, self.finding_b).save()
+        super(Finding, self.finding_c).save()
+
+        fix_loop_duplicates()
+
+        # Get latest status
+        self.finding_a = Finding.objects.get(id=self.finding_a.id)
+        self.finding_b = Finding.objects.get(id=self.finding_b.id)
+        self.finding_c = Finding.objects.get(id=self.finding_c.id)
+
+        if self.finding_a.duplicate_finding:
+            self.assertTrue(self.finding_a.duplicate)
+            self.assertEqual(self.finding_a.original_finding.count(), 0)
+        else:
+            self.assertFalse(self.finding_a.duplicate)
+            self.assertEqual(self.finding_a.original_finding.count(), 2)
+
+        if self.finding_b.duplicate_finding:
+            self.assertTrue(self.finding_b.duplicate)
+            self.assertEqual(self.finding_b.original_finding.count(), 0)
+        else:
+            self.assertFalse(self.finding_b.duplicate)
+            self.assertEqual(self.finding_b.original_finding.count(), 2)
+
+        if self.finding_c.duplicate_finding:
+            self.assertTrue(self.finding_c.duplicate)
+            self.assertEqual(self.finding_c.original_finding.count(), 0)
+        else:
+            self.assertFalse(self.finding_c.duplicate)
+            self.assertEqual(self.finding_c.original_finding.count(), 2)
+
+    # Another loop-test for 4 findings
+    def test_loop_relations_for_four(self):
+        self.finding_d = Finding.objects.get(id=4)
+        self.finding_d.pk = None
+        self.finding_d.duplicate = False
+        self.finding_d.duplicate_finding = None
+        self.finding_d.save()
+
+        set_duplicate(self.finding_a, self.finding_b)
+        self.finding_b.duplicate = True
+        self.finding_b.duplicate_finding = self.finding_c
+        self.finding_c.duplicate = True
+        self.finding_c.duplicate_finding = self.finding_d
+        self.finding_d.duplicate = True
+        self.finding_d.duplicate_finding = self.finding_a
+
+        super(Finding, self.finding_a).save()
+        super(Finding, self.finding_b).save()
+        super(Finding, self.finding_c).save()
+        super(Finding, self.finding_d).save()
+
+        fix_loop_duplicates()
+
+        # Get latest status
+        self.finding_a = Finding.objects.get(id=self.finding_a.id)
+        self.finding_b = Finding.objects.get(id=self.finding_b.id)
+        self.finding_c = Finding.objects.get(id=self.finding_c.id)
+        self.finding_d = Finding.objects.get(id=self.finding_d.id)
+
+        if self.finding_a.duplicate_finding:
+            self.assertTrue(self.finding_a.duplicate)
+            self.assertEqual(self.finding_a.original_finding.count(), 0)
+        else:
+            self.assertFalse(self.finding_a.duplicate)
+            self.assertEqual(self.finding_a.original_finding.count(), 3)
+
+        if self.finding_b.duplicate_finding:
+            self.assertTrue(self.finding_b.duplicate)
+            self.assertEqual(self.finding_b.original_finding.count(), 0)
+        else:
+            self.assertFalse(self.finding_b.duplicate)
+            self.assertEqual(self.finding_b.original_finding.count(), 3)
+
+        if self.finding_c.duplicate_finding:
+            self.assertTrue(self.finding_c.duplicate)
+            self.assertEqual(self.finding_c.original_finding.count(), 0)
+        else:
+            self.assertFalse(self.finding_c.duplicate)
+            self.assertEqual(self.finding_c.original_finding.count(), 3)
+
+        if self.finding_d.duplicate_finding:
+            self.assertTrue(self.finding_d.duplicate)
+            self.assertEqual(self.finding_d.original_finding.count(), 0)
+        else:
+            self.assertFalse(self.finding_d.duplicate)
+            self.assertEqual(self.finding_d.original_finding.count(), 3)
+
+    # Similar Loop detection and deletion for three findings
+    def test_list_relations_for_three(self):
+
+        set_duplicate(self.finding_a, self.finding_b)
+        self.finding_b.duplicate = True
+        self.finding_b.duplicate_finding = self.finding_c
+
+        super(Finding, self.finding_a).save()
+        super(Finding, self.finding_b).save()
+        super(Finding, self.finding_c).save()
+
+        fix_loop_duplicates()
+
+        self.finding_a = Finding.objects.get(id=self.finding_a.id)
+        self.finding_b = Finding.objects.get(id=self.finding_b.id)
+        self.finding_c = Finding.objects.get(id=self.finding_c.id)
+
+        self.assertTrue(self.finding_b.duplicate)
+        self.assertTrue(self.finding_a.duplicate)
+        self.assertFalse(self.finding_c.duplicate)
+        self.assertEqual(self.finding_b.duplicate_finding.id, self.finding_c.id)
+        self.assertEqual(self.finding_a.duplicate_finding.id, self.finding_c.id)
+        self.assertEqual(self.finding_c.duplicate_finding, None)
+        self.assertEqual(self.finding_a.duplicate_finding_set().count(), 2)
+        self.assertEqual(self.finding_b.duplicate_finding_set().count(), 2)
+
+    def test_list_relations_for_three_reverse(self):
+        set_duplicate(self.finding_c, self.finding_b)
+        self.finding_b.duplicate = True
+        self.finding_b.duplicate_finding = self.finding_a
+
+        super(Finding, self.finding_a).save()
+        super(Finding, self.finding_b).save()
+        super(Finding, self.finding_c).save()
+
+        fix_loop_duplicates()
+
+        self.finding_a = Finding.objects.get(id=self.finding_a.id)
+        self.finding_b = Finding.objects.get(id=self.finding_b.id)
+        self.finding_c = Finding.objects.get(id=self.finding_c.id)
+
+        self.assertTrue(self.finding_b.duplicate)
+        self.assertTrue(self.finding_c.duplicate)
+        self.assertFalse(self.finding_a.duplicate)
+        self.assertEqual(self.finding_b.duplicate_finding.id, self.finding_a.id)
+        self.assertEqual(self.finding_c.duplicate_finding.id, self.finding_a.id)
+        self.assertEqual(self.finding_a.duplicate_finding, None)
+        self.assertEqual(self.finding_c.duplicate_finding_set().count(), 2)
+        self.assertEqual(self.finding_b.duplicate_finding_set().count(), 2)

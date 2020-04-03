@@ -18,7 +18,7 @@ from dojo.tools.tool_issue_updater import tool_issue_updater, update_findings_fr
 from dojo.utils import sync_false_history, calculate_grade
 from dojo.reports.widgets import report_widget_factory
 from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_issue, \
-                       close_epic, create_notification, sync_rules
+                       close_epic, create_notification, sync_rules, fix_loop_duplicates
 
 import logging
 fmt = getattr(settings, 'LOG_FORMAT', None)
@@ -221,6 +221,12 @@ def async_custom_pdf_report(self,
             temp.close()
 
     return True
+
+
+@task(name='fix_loop_task')
+def fix_loop_task(*args, **kwargs):
+    logger.info("Executing Loop Duplicate Fix Job")
+    fix_loop_duplicates()
 
 
 @task(name='rename_whitesource_finding_task')

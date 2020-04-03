@@ -368,6 +368,12 @@
                     grid: {
                         hoverable: true,
                     },
+                    tooltip:true,
+                    tooltipOpts: {
+                        content: function(label, xval, yval, flotItem) {
+                            return label+"<br>"+yval
+                        }
+                    }
                 });
             }
 

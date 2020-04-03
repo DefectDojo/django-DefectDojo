@@ -17,6 +17,7 @@ from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Find
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import report_url_resolver
 from dojo.filters import ReportFindingFilter, ReportAuthedFindingFilter
+from dojo.risk_acceptance import api as ra_api
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from datetime import datetime
@@ -69,6 +70,7 @@ class EngagementViewSet(mixins.ListModelMixin,
                         mixins.UpdateModelMixin,
                         mixins.DestroyModelMixin,
                         mixins.CreateModelMixin,
+                        ra_api.AcceptedRisksMixin,
                         viewsets.GenericViewSet):
     serializer_class = serializers.EngagementSerializer
     queryset = Engagement.objects.all()
@@ -77,6 +79,10 @@ class EngagementViewSet(mixins.ListModelMixin,
                      'target_end', 'requester', 'report_type',
                      'updated', 'threat_model', 'api_test',
                      'pen_test', 'status', 'product', 'name', 'version')
+
+    @property
+    def risk_application_model_class(self):
+        return Engagement
 
     def get_queryset(self):
         if not self.request.user.is_staff:
@@ -142,6 +148,7 @@ class FindingViewSet(mixins.ListModelMixin,
                      mixins.UpdateModelMixin,
                      mixins.DestroyModelMixin,
                      mixins.CreateModelMixin,
+                     ra_api.AcceptedFindingsMixin,
                      viewsets.GenericViewSet):
     serializer_class = serializers.FindingSerializer
     queryset = Finding.objects.all()
@@ -188,7 +195,7 @@ class FindingViewSet(mixins.ListModelMixin,
         serialized_tags = serializers.TagSerializer({"tags": tags})
         return Response(serialized_tags.data)
 
-    @action(detail=True, methods=["get", "post"])
+    @action(detail=True, methods=["get", "post", "patch"])
     def notes(self, request, pk=None):
         finding = get_object_or_404(Finding.objects, id=pk)
         if request.method == 'POST':
@@ -196,12 +203,13 @@ class FindingViewSet(mixins.ListModelMixin,
             if new_note.is_valid():
                 entry = new_note.validated_data['entry']
                 private = new_note.validated_data['private']
+                note_type = new_note.validated_data['note_type']
             else:
                 return Response(new_note.errors,
                     status=status.HTTP_400_BAD_REQUEST)
 
             author = request.user
-            note = Notes(entry=entry, author=author, private=private)
+            note = Notes(entry=entry, author=author, private=private, note_type=note_type)
             note.save()
             finding.notes.add(note)
 
@@ -227,7 +235,7 @@ class FindingViewSet(mixins.ListModelMixin,
         return Response(serialized_notes,
                 status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=["put", "patch"])
+    @action(detail=True, methods=["patch"])
     def remove_note(self, request, pk=None):
         """Remove Note From Finding Note"""
         finding = get_object_or_404(Finding.objects, id=pk)
@@ -240,7 +248,7 @@ class FindingViewSet(mixins.ListModelMixin,
         else:
             return Response({"error": "('note_id') parameter missing"},
                 status=status.HTTP_400_BAD_REQUEST)
-        if note.author.username == request.user.username:
+        if note.author.username == request.user.username or request.user.is_staff:
             finding.notes.remove(note)
             note.delete()
         else:
@@ -317,7 +325,7 @@ class JiraIssuesViewSet(mixins.ListModelMixin,
     serializer_class = serializers.JIRAIssueSerializer
     queryset = JIRA_Issue.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'jira_id', 'jira_key')
+    filter_fields = ('id', 'jira_id', 'jira_key', 'finding_id')
 
 
 class JiraViewSet(mixins.ListModelMixin,
@@ -514,6 +522,7 @@ class TestsViewSet(mixins.ListModelMixin,
                    mixins.UpdateModelMixin,
                    mixins.DestroyModelMixin,
                    mixins.CreateModelMixin,
+                   ra_api.AcceptedRisksMixin,
                    viewsets.GenericViewSet):
     serializer_class = serializers.TestSerializer
     queryset = Test.objects.all()
@@ -521,6 +530,10 @@ class TestsViewSet(mixins.ListModelMixin,
     filter_fields = ('id', 'title', 'test_type', 'target_start',
                      'target_end', 'notes', 'percent_complete',
                      'actual_time', 'engagement')
+
+    @property
+    def risk_application_model_class(self):
+        return Test
 
     def get_queryset(self):
         if not self.request.user.is_staff:
@@ -531,6 +544,8 @@ class TestsViewSet(mixins.ListModelMixin,
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
+            if self.action == 'accept_risks':
+                return ra_api.AcceptedRiskSerializer
             return serializers.TestCreateSerializer
         else:
             return serializers.TestSerializer
