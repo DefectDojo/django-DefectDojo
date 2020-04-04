@@ -25,11 +25,11 @@ from multiselectfield import MultiSelectField
 from django import forms
 from django.utils.translation import gettext as _
 from dojo.signals import dedupe_signal
+from django.core.cache import cache
+from dateutil.relativedelta import relativedelta
 from dojo.tag.prefetching_tag_descriptor import PrefetchingTagDescriptor
 from django.contrib.contenttypes.fields import GenericRelation
 from tagging.models import TaggedItem
-from django.core.cache import cache
-from dateutil.relativedelta import relativedelta
 
 fmt = getattr(settings, 'LOG_FORMAT', None)
 lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)

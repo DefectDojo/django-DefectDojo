@@ -1769,9 +1769,11 @@ def create_notification(event=None, **kwargs):
     def create_notification_message(event, notification_type):
         template = 'notifications/%s.tpl' % event.replace('/', '')
         kwargs.update({'type': notification_type})
+
         try:
             notification = render_to_string(template, kwargs)
-        except:
+        except Exception as e:
+            logger.exception(e)
             create_description(event)
             notification = render_to_string('notifications/other.tpl', kwargs)
 
@@ -1808,7 +1810,7 @@ def create_notification(event=None, **kwargs):
             log_alert(e)
             pass
 
-    def send_mail_notification(address):
+    def send_mail_notification(address, user=None):
         subject = '%s notification' % get_system_setting('team_name')
         if 'title' in kwargs:
             subject += ': %s' % kwargs['title']
@@ -1820,9 +1822,13 @@ def create_notification(event=None, **kwargs):
                 [address],
                 headers={"From": "{}".format(get_system_setting('mail_notifications_from'))}
             )
+            email.content_subtype = 'html'
+            # logger.info('sending email alert:')
+            # logger.info(create_notification_message(event, 'mail'))
             email.send(fail_silently=False)
 
         except Exception as e:
+            logger.exception(e)
             log_alert(e)
             pass
 
@@ -1849,11 +1855,27 @@ def create_notification(event=None, **kwargs):
                 source="Notifications")
             alert.save()
 
+    def enrich_findings_list(findings):
+        for finding in findings:
+            finding.absolute_url = create_full_url(reverse('view_finding', args=(finding.id,)))
+
     # Global notifications
     try:
         notifications = Notifications.objects.get(user=None)
     except Exception as e:
         notifications = Notifications()
+
+    # print(vars(notifications))
+
+    if 'url' in kwargs:
+        kwargs.update({'absolute_url': create_full_url(kwargs['url'])})
+
+    # add some info such as absolute urls to the findings for rendering templates
+    for s in ['findings', 'findings_new', 'findings_mitigated', 'findings_reactivated']:
+        if s in kwargs:
+            print(s)
+            print(kwargs[s])
+            enrich_findings_list(kwargs[s])
 
     slack_enabled = get_system_setting('enable_slack_notifications')
     hipchat_enabled = get_system_setting('enable_hipchat_notifications')
@@ -1873,14 +1895,18 @@ def create_notification(event=None, **kwargs):
 
     # Personal notifications
     if 'recipients' in kwargs:
-        users = User.objects.filter(username__in=kwargs['recipients'])
+        users = Dojo_User.objects.filter(username__in=kwargs['recipients'])
     else:
-        users = User.objects.filter(is_superuser=True)
+        users = Dojo_User.objects.filter(is_superuser=True)
     for user in users:
+        print(user)
+        kwargs.update({'user': user})
         try:
             notifications = Notifications.objects.get(user=user)
         except Exception as e:
             notifications = Notifications()
+
+        # print(notifications)
 
         if slack_enabled and 'slack' in getattr(
                 notifications,
@@ -2069,3 +2095,11 @@ def truncate_with_dots(the_string, max_length_including_dots):
     if not the_string:
         return the_string
     return (the_string[:max_length_including_dots - 3] + '...' if len(the_string) > max_length_including_dots else the_string)
+
+
+def create_full_url(relative_url):
+    if settings.SITE_URL:
+        return settings.SITE_URL + relative_url
+    else:
+        logger.warn('SITE URL undefined in settings, absolute_urls not available')
+        return relative_url
