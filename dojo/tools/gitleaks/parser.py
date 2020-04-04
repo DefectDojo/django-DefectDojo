@@ -4,10 +4,23 @@ from dojo.models import Finding
 
 
 class GitleaksJSONParser(object):
+    """
+    A class that can be used to parse the Gitleaks JSON report files
+    """
+
     def __init__(self, filename, test):
-        data = filename.read()
+        """
+        Converts a Gitleaks report to DefectDojo findings
+        """
+
         self.dupes = dict()
+        # Start with an empty findings
         self.items = ()
+        # Exit if file is not provided
+        if file is None:
+            return
+
+        data = filename.read()
 
         for issue in self.parse_json(data):
             file_path = issue["file"]
@@ -46,6 +59,7 @@ class GitleaksJSONParser(object):
         self.items = list(self.dupes.values())
 
     def parse_json(self, json_output):
+        # Load json data from the report file
         try:
             try:
                 json_data = json.loads(str(json_output, 'utf-8'))
