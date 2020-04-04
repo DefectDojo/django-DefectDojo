@@ -17,7 +17,7 @@ class GitleaksJSONParser(object):
         # Start with an empty findings
         self.items = ()
         # Exit if file is not provided
-        if file is None:
+        if filename is None:
             return
 
         data = filename.read()
