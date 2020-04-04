@@ -1768,6 +1768,8 @@ def create_notification(event=None, **kwargs):
     except Exception as e:
         notifications = Notifications()
 
+    # print(vars(notifications))
+
     if 'url' in kwargs:
         kwargs.update({'absolute_url': create_full_url(kwargs['url'])})
 
@@ -1800,11 +1802,14 @@ def create_notification(event=None, **kwargs):
     else:
         users = Dojo_User.objects.filter(is_superuser=True)
     for user in users:
+        print(user)
         kwargs.update({'user': user})
         try:
             notifications = Notifications.objects.get(user=user)
         except Exception as e:
             notifications = Notifications()
+
+        # print(notifications)
 
         if slack_enabled and 'slack' in getattr(
                 notifications,
