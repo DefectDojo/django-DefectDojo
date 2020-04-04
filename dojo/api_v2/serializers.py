@@ -779,6 +779,9 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             finding_count = 0
             finding_added_count = 0
             reactivated_count = 0
+            reactivated_items = []
+            unchanged_count = 0
+            unchanged_items = []
 
             for item in items:
                 sev = item.severity
@@ -804,6 +807,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                         numerical_severity=Finding.get_numerical_severity(sev)).all()
 
                 if findings:
+                    # existing finding found
                     finding = findings[0]
                     if finding.mitigated or finding.is_Mitigated:
                         finding.mitigated = None
@@ -817,9 +821,13 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                             author=self.context['request'].user)
                         note.save()
                         finding.notes.add(note)
+                        reactivated_items.append(finding)
                         reactivated_count += 1
-                    new_items.append(finding)
+                    else:
+                        unchanged_items.append(finding)
+                        unchanged_count += 1
                 else:
+                    # no existing finding found
                     item.test = test
                     item.date = scan_date
                     item.reporter = self.context['request'].user
@@ -829,7 +837,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     item.active = active
                     item.save(dedupe_option=False)
                     finding_added_count += 1
-                    new_items.append(item.id)
+                    new_items.append(item)
                     finding = item
 
                     if hasattr(item, 'unsaved_req_resp'):
@@ -867,7 +875,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
 
                     finding.save()
 
-            to_mitigate = set(original_items) - set(new_items)
+            to_mitigate = set(original_items) - set(reactivated_items) - set(unchanged_items)
             for finding in to_mitigate:
                 if not finding.mitigated or not finding.is_Mitigated:
                     finding.mitigated = scan_date_time
@@ -890,6 +898,18 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
 
             test.save()
             test.engagement.save()
+
+            print(len(new_items))
+            print(reactivated_count)
+            print(mitigated_count)
+            print(unchanged_count)
+
+            updated_count = mitigated_count + reactivated_count + len(new_items)
+            if updated_count > 0:
+                title = 'Updated ' + str(updated_count) + " findings for " + str(test.engagement.product) + ': ' + str(test.engagement.name) + ': ' + str(test)
+                create_notification(event='results_added', title=title, findings_new=new_items, findings_mitigated=to_mitigate, findings_reactivated=reactivated_items,
+                                    finding_count=finding_count, test=test, engagement=test.engagement, product=test.engagement.product,
+                                    url=reverse('view_test', args=(test.id,)))
 
         except SyntaxError:
             raise Exception("Parser SyntaxError")
