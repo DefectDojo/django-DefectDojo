@@ -8,12 +8,10 @@ Hello {{ user.get_full_name }},
 {{ description }}<br/>
 <br/>
 {% if finding_count is not None %}
-{{ finding_count }} findings have updated for '{{product}} / {{ engagement.name }} / {{ test }}'<br/>
+{{ finding_count }} findings have updated for '{{product}} / {{ engagement.name }} / {{ test }}': <a href="{{ absolute_url }}">findings</a><br/>
 {% else %}
-findings have updated for '{{product}} / {{ engagement.name }} / {{ test }}'<br/>
+findings have updated for '{{product}} / {{ engagement.name }} / {{ test }}': <a href="{{ absolute_url }}">findings</a><br/>
 {% endif %}
-<br/>
-View test: {{ absolute_url }}<br/>
 <br/>
 <p>
 New findings:<br/>

@@ -608,6 +608,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         except ValueError:
             raise Exception('FileParser ValueError')
 
+        new_findings = []
         skipped_hashcodes = []
         try:
             for item in parser.items:
@@ -667,6 +668,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     item.tags = item.unsaved_tags
 
                 item.save()
+                new_findings.append(item)
 
         except SyntaxError:
             raise Exception('Parser SyntaxError')
@@ -706,16 +708,16 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                                          " as it is not present anymore in recent scans.")
                 Tag.objects.add_tag(old_finding, 'stale')
                 old_finding.save()
-                title = 'An old finding has been closed for "{}".' \
-                        .format(test.engagement.product.name)
-                description = 'See <a href="{}">{}</a>' \
-                        .format(reverse('view_finding', args=(old_finding.id, )),
-                                old_finding.title)
-                create_notification(event='other',
-                                    title=title,
-                                    description=description,
-                                    icon='bullseye',
-                                    objowner=self.context['request'].user)
+
+        title = 'Test created for ' + str(test.engagement.product) + ': ' + str(test.engagement.name) + ': ' + str(test)
+        create_notification(event='test_added', title=title, test=test, engagement=test.engagement, product=test.engagement.product,
+                            url=reverse('view_test', args=(test.id,)))
+
+        updated_count = len(new_findings) + len(old_findings)
+        title = 'Updated ' + str(updated_count) + " findings for " + str(test.engagement.product) + ': ' + str(test.engagement.name) + ': ' + str(test)
+        create_notification(event='results_added', title=title, findings_new=new_findings, findings_mitigated=old_findings,
+                            finding_count=updated_count, test=test, engagement=test.engagement, product=test.engagement.product,
+                            url=reverse('view_test', args=(test.id,)))
 
         return test
 
@@ -908,7 +910,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             if updated_count > 0:
                 title = 'Updated ' + str(updated_count) + " findings for " + str(test.engagement.product) + ': ' + str(test.engagement.name) + ': ' + str(test)
                 create_notification(event='results_added', title=title, findings_new=new_items, findings_mitigated=to_mitigate, findings_reactivated=reactivated_items,
-                                    finding_count=finding_count, test=test, engagement=test.engagement, product=test.engagement.product,
+                                    finding_count=updated_count, test=test, engagement=test.engagement, product=test.engagement.product,
                                     url=reverse('view_test', args=(test.id,)))
 
         except SyntaxError:
