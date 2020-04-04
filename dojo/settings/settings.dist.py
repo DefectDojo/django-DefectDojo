@@ -7,6 +7,7 @@ root = environ.Path(__file__) - 3  # Three folders back
 
 env = environ.Env(
     # Set casting and default values
+    DD_SITE_URL=(str, 'http://localhost:8080'),
     DD_DEBUG=(bool, False),
     DD_DJANGO_METRICS_ENABLED=(bool, False),
     DD_LOGIN_REDIRECT_URL=(str, '/'),
@@ -130,6 +131,7 @@ DEBUG = env('DD_DEBUG')
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/2.0/ref/settings/#allowed-hosts
+SITE_URL = env('DD_SITE_URL')
 ALLOWED_HOSTS = tuple(env.list('DD_ALLOWED_HOSTS', default=['localhost', '127.0.0.1']))
 
 # Raises django's ImproperlyConfigured exception if SECRET_KEY not in os.environ
