@@ -1894,19 +1894,23 @@ def create_notification(event=None, **kwargs):
         send_alert_notification()
 
     # Personal notifications
+    notifications_set = Notifications.objects.filter(user__isnull=False).exclude(Q(**{"%s__exact" % event: ''})).select_related('user').prefetch_related('user__usercontactinfo')
+    # notifications_set = Notifications.objects.filter(user__isnull=False).exclude(Q(**{"%s__exact" % event: ''})).select_related('user')
     if 'recipients' in kwargs:
-        users = Dojo_User.objects.filter(username__in=kwargs['recipients'])
-    else:
-        users = Dojo_User.objects.filter(is_superuser=True)
-    for user in users:
-        print(user)
-        kwargs.update({'user': user})
-        try:
-            notifications = Notifications.objects.get(user=user)
-        except Exception as e:
-            notifications = Notifications()
+        # users = Dojo_User.objects.filter(username__in=kwargs['recipients'])
+        notifications_set = notifications_set.filter(user__username__in=kwargs['recipients'])
+    # else:
+    #     # only retrieve users which have at least one notification type enabled for this event type
+    #     notifications_set = Notifications.objects.exclude(Q(**{"%s__exact" % event: ''})).select_related('user')
 
-        # print(notifications)
+    print(notifications_set.query)
+    # users = Dojo_User.objects.filter(pk__in=[ns.user_id for ns in notifications_set])
+
+    for notifications in notifications_set.all():
+        print('notifications: ', vars(notifications))
+        user = notifications.user
+        print('user: ', user)
+        kwargs.update({'user': user})
 
         if slack_enabled and 'slack' in getattr(
                 notifications,
@@ -1924,7 +1928,7 @@ def create_notification(event=None, **kwargs):
 
         # HipChat doesn't seem to offer direct message functionality, so no HipChat PM functionality here...
 
-        if mail_enabled and 'mail' in getattr(notifications, event):
+        if mail_enabled and 'mail' in getattr(notifications, event) and user.email:
             send_mail_notification(user.email)
 
         if 'alert' in getattr(notifications, event):
