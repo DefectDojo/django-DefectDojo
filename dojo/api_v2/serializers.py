@@ -715,7 +715,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
 
         updated_count = len(new_findings) + len(old_findings)
         title = 'Updated ' + str(updated_count) + " findings for " + str(test.engagement.product) + ': ' + str(test.engagement.name) + ': ' + str(test)
-        create_notification(event='results_added', title=title, findings_new=new_findings, findings_mitigated=old_findings,
+        create_notification(event='findings_updated', title=title, findings_new=new_findings, findings_mitigated=old_findings,
                             finding_count=updated_count, test=test, engagement=test.engagement, product=test.engagement.product,
                             url=reverse('view_test', args=(test.id,)))
 
@@ -908,8 +908,9 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
 
             updated_count = mitigated_count + reactivated_count + len(new_items)
             if updated_count > 0:
+                # new_items = original_items
                 title = 'Updated ' + str(updated_count) + " findings for " + str(test.engagement.product) + ': ' + str(test.engagement.name) + ': ' + str(test)
-                create_notification(event='results_added', title=title, findings_new=new_items, findings_mitigated=to_mitigate, findings_reactivated=reactivated_items,
+                create_notification(event='findings_updated', title=title, findings_new=new_items, findings_mitigated=to_mitigate, findings_reactivated=reactivated_items,
                                     finding_count=updated_count, test=test, engagement=test.engagement, product=test.engagement.product,
                                     url=reverse('view_test', args=(test.id,)))
 

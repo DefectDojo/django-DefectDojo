@@ -9,7 +9,7 @@ Hello {{ user.get_full_name }},
     A new test has been added to the engagement {{ engagement.product }}</br>
     Title: {{test.title}}</br>
     Type: {{ test.test_type }}</br>
-    You can find details here: <a href="{{ absolute_url }}">findings</a></br>
+    You can find details here: <a href="{{ full_url }}">findings</a></br>
     More details in the next email with updated finding results.
 </br>
     Kind regards,</br>

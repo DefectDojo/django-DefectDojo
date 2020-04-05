@@ -2224,7 +2224,7 @@ class Notifications(models.Model):
     product_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     engagement_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     test_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
-    results_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
+    findings_updated = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True, help_text='Triggered whenever an (re-)import has been done that created/updated/closed findings.')
     report_created = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     jira_update = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     upcoming_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
