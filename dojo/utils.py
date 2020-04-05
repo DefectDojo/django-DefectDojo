@@ -26,6 +26,7 @@ from jira import JIRA
 from jira.exceptions import JIRAError
 from django.dispatch import receiver
 from dojo.signals import dedupe_signal
+from django.db.models.signals import post_save
 
 from dojo.models import Engagement, Finding_Template, Product, JIRA_PKey, JIRA_Issue, \
     Dojo_User, User, Alerts, System_Settings, Notifications, UserContactInfo, Endpoint, Benchmark_Type, \
@@ -239,7 +240,7 @@ def deduplicate_hash_code(new_finding):
         str(len(existing_findings)) + " findings with same hash_code")
     for find in existing_findings:
         if is_deduplication_on_engagement_mismatch(new_finding, find):
-            deduplicationLogger.debug(
+            deduplicationLoggerdebug(
                 'deduplication_on_engagement_mismatch, skipping dedupe.')
             continue
         try:
@@ -2107,3 +2108,14 @@ def create_full_url(relative_url):
     else:
         logger.warn('SITE URL undefined in settings, absolute_urls not available')
         return relative_url
+
+
+@receiver(post_save, sender=Dojo_User)
+def set_default_notifications(sender, instance, created, **kwargs):
+    # for new user we create a Notifications object so the default 'alert' notifications work
+    # this needs to be a signal to make it also work for users created via ldap, oauth and other authentication backends
+    if created:
+        logger.info('creating default set of notifications for: ' + str(instance))
+        notifications = Notifications()
+        notifications.user = instance
+        notifications.save()
