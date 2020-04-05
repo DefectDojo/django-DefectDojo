@@ -770,7 +770,7 @@ def re_import_scan_results(request, tid):
                                                                  'mitigated') + '. Please manually verify each one.',
                                          extra_tags='alert-success')
 
-                create_notification(event='results_added', title=str(finding_count) + " findings for " + engagement.product.name, finding_count=finding_count, test=t, engagement=engagement, url=reverse('view_test', args=(t.id,)))
+                create_notification(event='findings_updated', title=str(finding_count) + " findings for " + t.engagement.product.name, finding_count=finding_count, test=t, engagement=t.engagement, url=reverse('view_test', args=(t.id,)))
 
                 return HttpResponseRedirect(reverse('view_test', args=(t.id,)))
             except SyntaxError:

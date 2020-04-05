@@ -1759,10 +1759,6 @@ def create_notification(event=None, **kwargs):
                 source="Notifications")
             alert.save()
 
-    def enrich_findings_list(findings):
-        for finding in findings:
-            finding.absolute_url = create_full_url(reverse('view_finding', args=(finding.id,)))
-
     # Global notifications
     try:
         notifications = Notifications.objects.get(user=None)
@@ -1772,14 +1768,14 @@ def create_notification(event=None, **kwargs):
     # print(vars(notifications))
 
     if 'url' in kwargs:
-        kwargs.update({'absolute_url': create_full_url(kwargs['url'])})
+        kwargs.update({'full_url': get_full_url(kwargs['url'])})
 
     # add some info such as absolute urls to the findings for rendering templates
-    for s in ['findings', 'findings_new', 'findings_mitigated', 'findings_reactivated']:
-        if s in kwargs:
-            print(s)
-            print(kwargs[s])
-            enrich_findings_list(kwargs[s])
+    # for s in ['findings', 'findings_new', 'findings_mitigated', 'findings_reactivated']:
+    #     if s in kwargs:
+    #         # print(s)
+    #         # print(kwargs[s])
+    #         enrich_findings_list(kwargs[s])
 
     slack_enabled = get_system_setting('enable_slack_notifications')
     hipchat_enabled = get_system_setting('enable_hipchat_notifications')
@@ -1807,13 +1803,13 @@ def create_notification(event=None, **kwargs):
     #     # only retrieve users which have at least one notification type enabled for this event type
     #     notifications_set = Notifications.objects.exclude(Q(**{"%s__exact" % event: ''})).select_related('user')
 
-    print(notifications_set.query)
+    # print(notifications_set.query)
     # users = Dojo_User.objects.filter(pk__in=[ns.user_id for ns in notifications_set])
 
     for notifications in notifications_set.all():
-        print('notifications: ', vars(notifications))
+        # print('notifications: ', vars(notifications))
         user = notifications.user
-        print('user: ', user)
+        # print('user: ', user)
         kwargs.update({'user': user})
 
         if slack_enabled and 'slack' in getattr(
@@ -2005,11 +2001,11 @@ def max_safe(list):
     return max(i for i in list if i is not None)
 
 
-def create_full_url(relative_url):
+def get_full_url(relative_url):
     if settings.SITE_URL:
         return settings.SITE_URL + relative_url
     else:
-        logger.warn('SITE URL undefined in settings, absolute_urls not available')
+        logger.warn('SITE URL undefined in settings, full_url cannot be created')
         return relative_url
 
 

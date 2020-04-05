@@ -33,6 +33,10 @@
                     {% if field.auto_id %}
                         <tr>
                             <td>{{ field.label }}{% if field.field.required%}<sup>*</sup>{% endif %}
+                                {% if field.help_text %}
+                                <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="{{ field.help_text }}" data-placement="right" data-container="body">
+                                </i>
+                            {% endif %}
                             </td>
                     {% endif %}
                     {% for pk,c in field.field.widget.choices %}
