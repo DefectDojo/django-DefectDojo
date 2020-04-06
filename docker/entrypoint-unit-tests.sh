@@ -24,4 +24,4 @@ EOF
 
 ./manage.py migrate
 
-exec ./manage.py test dojo.unittests
+exec ./manage.py test dojo.unittests -v 2

@@ -91,13 +91,20 @@ class TagListSerializerField(serializers.ListField):
     def to_representation(self, value):
         if not isinstance(value, TagList):
             if not isinstance(value, list):
+                # this will trigger when a queryset is found...
                 if self.order_by:
                     tags = value.all().order_by(*self.order_by)
                 else:
                     tags = value.all()
                 value = [tag.name for tag in tags]
+            elif len(value) > 0 and isinstance(value[0], Tag):
+                # .. but sometimes the queryset already has been converted into a list, i.e. by prefetch_related
+                tags = value
+                value = [tag.name for tag in tags]
+                if self.order_by:
+                    # the only possible ordering is by name, so we order after creating the list
+                    value = sorted(value)
             value = TagList(value, pretty_print=self.pretty_print)
-
         return value
 
 
@@ -188,6 +195,7 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
     def get_findings_list(self, obj):
         return obj.open_findings_list()
 
+
 class ProductTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product_Type
@@ -239,6 +247,7 @@ class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
         fields = '__all__'
 
     def validate(self, data):
+        # print('EndpointSerialize.validate')
         port_re = "(:[0-9]{1,5}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}" \
                   "|655[0-2][0-9]|6553[0-5])"
 
@@ -394,6 +403,7 @@ class FindingImageSerializer(serializers.ModelSerializer):
 class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     images = FindingImageSerializer(many=True, read_only=True)
     tags = TagListSerializerField(required=False)
+    accepted_risks = RiskAcceptanceSerializer(many=True, read_only=True, source='risk_acceptance_set')
 
     class Meta:
         model = Finding
@@ -417,6 +427,11 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
             raise serializers.ValidationError('False positive findings cannot '
                                               'be verified.')
         return data
+
+    def build_relational_field(self, field_name, relation_info):
+        if field_name == 'notes':
+            return NoteSerializer, {'many': True, 'read_only': True}
+        return super().build_relational_field(field_name, relation_info)
 
 
 class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
@@ -566,6 +581,9 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
             pass
 
         test.save()
+        # return the id of the created test, can't find a better way because this is not a ModelSerializer....
+        self.fields['test'] = serializers.IntegerField(read_only=True, default=test.id)
+
         if 'tags' in data:
             test.tags = ' '.join(data['tags'])
         try:
@@ -894,7 +912,7 @@ class AddNewNoteOptionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Notes
-        fields = ['entry', 'private']
+        fields = ['entry', 'private', 'note_type']
 
 
 class FindingToFindingImagesSerializer(serializers.Serializer):

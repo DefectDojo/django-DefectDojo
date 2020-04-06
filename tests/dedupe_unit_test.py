@@ -1,5 +1,3 @@
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -8,63 +6,41 @@ import unittest
 import re
 import sys
 import os
+from base_test_class import BaseTestCase
+from Product_unit_test import ProductTest
+import time
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
-try:  # First Try for python 3
-    import importlib.util
-    product_unit_test_module = importlib.util.spec_from_file_location("Product_unit_test",
-        os.path.join(dir_path, 'Product_unit_test.py'))  # using ',' allows python to determine the type of separator to use.
-    product_unit_test = importlib.util.module_from_spec(product_unit_test_module)
-    product_unit_test_module.loader.exec_module(product_unit_test)
-except:  # This will work for python2 if above fails
-    import imp
-    product_unit_test = imp.load_source('Product_unit_test',
-        os.path.join(dir_path, 'Product_unit_test.py'))
 
 
-class DedupeTest(unittest.TestCase):
+class DedupeTest(BaseTestCase):
     # --------------------------------------------------------------------------------------------------------
     # Initialization
     # --------------------------------------------------------------------------------------------------------
     def setUp(self):
-        self.options = Options()
-        self.options.add_argument("--headless")
-        # self.options.add_experimental_option("detach", True)
-        self.options.add_argument("--window-size=1280,768")
-        # self.options.add_argument("--no-sandbox")
-
-        desired = webdriver.DesiredCapabilities.CHROME
-        desired['loggingPrefs'] = {'browser': 'ALL'}
-
-        self.driver = webdriver.Chrome('chromedriver', chrome_options=self.options, desired_capabilities=desired)
-        self.driver.implicitly_wait(30)
-        self.base_url = os.environ['DD_BASE_URL']
-        self.verificationErrors = []
-        self.accept_next_alert = True
+        super().setUp()
         self.relative_path = dir_path = os.path.dirname(os.path.realpath(__file__))
-
-    def login_page(self):
-        driver = self.driver
-        driver.get(self.base_url + "login")
-        driver.find_element_by_id("id_username").clear()
-        # os.environ['DD_ADMIN_USER']
-        driver.find_element_by_id("id_username").send_keys(os.environ['DD_ADMIN_USER'])
-        driver.find_element_by_id("id_password").clear()
-        driver.find_element_by_id("id_password").send_keys(os.environ['DD_ADMIN_PASSWORD'])
-        driver.find_element_by_css_selector("button.btn.btn-success").click()
-        return driver
 
     def check_nb_duplicates(self, expected_number_of_duplicates):
         print("checking duplicates...")
-        driver = self.login_page()
-        driver.get(self.base_url + "finding")
-        dupe_count = 0
-        # iterate over the rows of the findings table and concatenates all columns into td.text
-        trs = driver.find_elements_by_xpath('//*[@id="open_findings"]/tbody/tr')
-        for row in trs:
-            concatRow = ' '.join([td.text for td in row.find_elements_by_xpath(".//td")])
-            if '(DUPE)' and 'Duplicate' in concatRow:
-                dupe_count += 1
+        retries = 0
+        for i in range(0, 3):
+            time.sleep(5)  # wait bit for celery dedupe task which can be slow on travis
+            driver = self.login_page()
+            driver.get(self.base_url + "finding")
+            dupe_count = 0
+            # iterate over the rows of the findings table and concatenates all columns into td.text
+            trs = driver.find_elements_by_xpath('//*[@id="open_findings"]/tbody/tr')
+            for row in trs:
+                concatRow = ' '.join([td.text for td in row.find_elements_by_xpath(".//td")])
+                if '(DUPE)' and 'Duplicate' in concatRow:
+                    dupe_count += 1
+
+            if (dupe_count != expected_number_of_duplicates):
+                print("duplicate count mismatch, let's wait a bit for the celery dedupe task to finish and try again (5s)")
+            else:
+                break
+
         self.assertEqual(dupe_count, expected_number_of_duplicates)
 
     def test_enable_deduplication(self):
@@ -411,14 +387,10 @@ class DedupeTest(unittest.TestCase):
     def test_check_cross_status(self):
         self.check_nb_duplicates(1)
 
-    def tearDown(self):
-        self.driver.quit()
-        self.assertEqual([], self.verificationErrors)
-
 
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(product_unit_test.ProductTest('test_create_product'))
+    suite.addTest(ProductTest('test_create_product'))
     suite.addTest(DedupeTest('test_enable_deduplication'))
     # Test same scanners - same engagement - static - dedupe
     suite.addTest(DedupeTest('test_delete_findings'))
@@ -446,11 +418,12 @@ def suite():
     suite.addTest(DedupeTest('test_import_cross_test'))
     suite.addTest(DedupeTest('test_check_cross_status'))
     # Clean up
-    suite.addTest(product_unit_test.ProductTest('test_delete_product'))
+    suite.addTest(ProductTest('test_delete_product'))
     return suite
 
 
 if __name__ == "__main__":
-    runner = unittest.TextTestRunner(descriptions=True, failfast=True)
+    runner = unittest.TextTestRunner(descriptions=True, failfast=True, verbosity=2)
     ret = not runner.run(suite()).wasSuccessful()
+    BaseTestCase.tearDownDriver()
     sys.exit(ret)

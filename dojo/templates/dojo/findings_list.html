@@ -46,22 +46,24 @@
                                     <option value="High">High</option>
                                     <option value="Critical">Critical</option>
                                 </select><br/><br/>
-                                <b>Status</b> <input id="id_status" name="status" type="checkbox" alt="Select to enable"/><br/>
+
+                                <label><b>Status</b><input id="id_bulk_status" name="status" type="checkbox" alt="Select to enable"/></label><br/>
+
                                 <label style="font-size: 80%; font-weight: normal; display: block">
-                                    <input id="id_active" name="active" type="checkbox" disabled/> <span>Active</span>
+                                    <input id="id_bulk_active" name="active" type="checkbox" disabled/> <span>Active</span>
                                 </label>
                                 <label style="font-size: 80%; font-weight: normal; display: block">
-                                    <input id="id_verified" name="verified" type="checkbox" disabled/> <span>Verified</span>
+                                    <input id="id_bulk_verified" name="verified" type="checkbox" disabled/> <span>Verified</span>
                                 </label>
                                 <label style="font-size: 80%; font-weight: normal; display: block">
-                                    <input id="id_false_p" name="false_p" type="checkbox" disabled/> <span>False Positive</span>
+                                    <input id="id_bulk_false_p" name="false_p" type="checkbox" disabled/> <span>False Positive</span>
                                 </label>
                                 <label style="font-size: 80%; font-weight: normal; display: block">
-                                    <input id="id_out_of_scope" name="out_of_scope" type="checkbox" disabled/>
+                                    <input id="id_bulk_out_of_scope" name="out_of_scope" type="checkbox" disabled/>
                                     <span>Out of scope</span>
                                 </label>
                                 <label style="font-size: 80%; font-weight: normal; display: block">
-                                    <input id="id_is_Mitigated" name="is_Mitigated" type="checkbox" disabled/>
+                                    <input id="id_bulk_is_Mitigated" name="is_Mitigated" type="checkbox" disabled/>
                                     <span>Mitigated</span>
                                 </label>
                                 {% if system_settings.enable_jira %}
@@ -416,9 +418,13 @@
                     { "data": "finding_age", render: function (data, type, row) {
                             return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
                     } },
+                    
+                    {% if system_settings.enable_finding_sla %}
                     { "data": "finding_sla", render: function (data, type, row) {
                             return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
                     }},
+                    {% endif %}                    
+
                     { "data": "reported_by", render: function (data, type, row) {
                             return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
                     }},
@@ -518,13 +524,13 @@
             });
             check_checked_finding();
 
-            $('#id_status').on('click', function (e) {
+            $('#id_bulk_status').on('click', function (e) {
                 var checked = this.checked;
-                $('#bulk_edit_menu #id_active').prop('disabled', !checked);
-                $('#bulk_edit_menu #id_verified').prop('disabled', !checked);
-                $('#bulk_edit_menu #id_false_p').prop('disabled', !checked);
-                $('#bulk_edit_menu #id_out_of_scope').prop('disabled', !checked);
-                $('#bulk_edit_menu #id_is_Mitigated').prop('disabled', !checked);
+                $('#bulk_edit_menu #id_bulk_active').prop('disabled', !checked);
+                $('#bulk_edit_menu #id_bulk_verified').prop('disabled', !checked);
+                $('#bulk_edit_menu #id_bulk_false_p').prop('disabled', !checked);
+                $('#bulk_edit_menu #id_bulk_out_of_scope').prop('disabled', !checked);
+                $('#bulk_edit_menu #id_bulk_is_Mitigated').prop('disabled', !checked);
             })
             // Keep the dropdown menu open for selecting severity status
             $('.dropdown-menu').click(function(e) {

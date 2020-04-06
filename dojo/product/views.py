@@ -21,7 +21,7 @@ from dojo.filters import ProductFilter, ProductFindingFilter, EngagementFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAPKeyForm, JIRAFindingForm, AdHocFindingForm, \
                        EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm
 from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, Finding_Template, \
-    Tool_Product_Settings, Cred_Mapping, Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, \
+    Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, \
     Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product
 from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, create_notification, Product_Tab, get_punchcard_data
 from custom_field.models import CustomFieldValue, CustomField
@@ -85,9 +85,9 @@ def prefetch_for_product(prods):
         prefetched_prods = prefetched_prods.prefetch_related(Prefetch('jira_pkey_set', queryset=JIRA_PKey.objects.all().select_related('conf'), to_attr='jira_confs'))
         active_endpoint_query = Endpoint.objects.filter(
                 finding__active=True,
-                finding__verified=True,
                 finding__mitigated__isnull=True)
         prefetched_prods = prefetched_prods.prefetch_related(Prefetch('endpoint_set', queryset=active_endpoint_query, to_attr='active_endpoints'))
+        prefetched_prods = prefetched_prods.prefetch_related('tagged_items__tag')
 
     return prefetched_prods
 
@@ -99,7 +99,8 @@ def iso_to_gregorian(iso_year, iso_week, iso_day):
 
 
 def view_product(request, pid):
-    prod = get_object_or_404(Product, id=pid)
+    prod_query = Product.objects.all().select_related('product_manager', 'technical_contact', 'team_manager').prefetch_related('authorized_users')
+    prod = get_object_or_404(prod_query, id=pid)
     auth = request.user.is_staff or request.user in prod.authorized_users.all()
     if not auth:
         # will render 403
@@ -207,6 +208,7 @@ def view_product_metrics(request, pid):
     verified_findings = Finding.objects.filter(test__engagement__product=prod,
                                                date__range=[start_date, end_date],
                                                false_p=False,
+                                               active=True,
                                                verified=True,
                                                duplicate=False,
                                                out_of_scope=False).order_by("date")
@@ -226,7 +228,6 @@ def view_product_metrics(request, pid):
                                            duplicate=False,
                                            out_of_scope=False,
                                            active=True,
-                                           verified=False,
                                            mitigated__isnull=True)
 
     inactive_findings = Finding.objects.filter(test__engagement__product=prod,
@@ -261,7 +262,6 @@ def view_product_metrics(request, pid):
     open_vulnerabilities = Finding.objects.filter(
         test__engagement__product=prod,
         false_p=False,
-        verified=False,
         duplicate=False,
         out_of_scope=False,
         active=True,
@@ -450,10 +450,15 @@ def view_engagements(request, pid, engagement_type="Interactive"):
 
 
 def prefetch_for_view_engagements(engs):
-    prefetched_engs = engs.prefetch_related('test_set')
-    prefetched_engs = prefetched_engs.annotate(count_findings_all=Count('test__finding__id'))
-    prefetched_engs = prefetched_engs.annotate(count_findings_open=Count('test__finding__id', filter=Q(test__finding__active=True)))
-    prefetched_engs = prefetched_engs.annotate(count_findings_duplicate=Count('test__finding__id', filter=Q(test__finding__duplicate=True)))
+    prefetched_engs = engs
+    if isinstance(engs, QuerySet):  # old code can arrive here with prods being a list because the query was already executed
+        prefetched_engs = prefetched_engs.select_related('lead')
+        prefetched_engs = prefetched_engs.prefetch_related('test_set')
+        prefetched_engs = prefetched_engs.prefetch_related('test_set__test_type')  # test.name uses test_type
+        prefetched_engs = prefetched_engs.annotate(count_findings_all=Count('test__finding__id'))
+        prefetched_engs = prefetched_engs.annotate(count_findings_open=Count('test__finding__id', filter=Q(test__finding__active=True)))
+        prefetched_engs = prefetched_engs.annotate(count_findings_duplicate=Count('test__finding__id', filter=Q(test__finding__duplicate=True)))
+        prefetched_engs = prefetched_engs.prefetch_related('tagged_items__tag')
     return prefetched_engs
 
 
@@ -465,43 +470,6 @@ def view_engagements_cicd(request, pid):
 def import_scan_results_prod(request, pid=None):
     from dojo.engagement.views import import_scan_results
     return import_scan_results(request, pid=pid)
-
-
-def view_product_details(request, pid):
-    prod = get_object_or_404(Product, id=pid)
-    scan_sets = ScanSettings.objects.filter(product=prod)
-    tools = Tool_Product_Settings.objects.filter(product=prod).order_by('name')
-    auth = request.user.is_staff or request.user in prod.authorized_users.all()
-    creds = Cred_Mapping.objects.filter(product=prod).select_related('cred_id').order_by('cred_id')
-    langSummary = Languages.objects.filter(product=prod).aggregate(Sum('files'), Sum('code'), Count('files'))
-    languages = Languages.objects.filter(product=prod).order_by('-code')
-    app_analysis = App_Analysis.objects.filter(product=prod).order_by('name')
-    benchmark_type = Benchmark_Type.objects.filter(enabled=True).order_by('name')
-    benchmarks = Benchmark_Product_Summary.objects.filter(product=prod, publish=True, benchmark_type__enabled=True).order_by('benchmark_type__name')
-    system_settings = System_Settings.objects.get()
-
-    if not auth:
-        # will render 403
-        raise PermissionDenied
-
-    product_metadata = dict(prod.product_meta.values_list('name', 'value'))
-
-    add_breadcrumb(parent=product, title="Details", top_level=False, request=request)
-    return render(request,
-                  'dojo/view_product_details.html',
-                  {'prod': prod,
-                   'benchmark_type': benchmark_type,
-                   'benchmarks': benchmarks,
-                   'product_metadata': product_metadata,
-                   'scan_sets': scan_sets,
-                   'tools': tools,
-                   'creds': creds,
-                   'user': request.user,
-                   'languages': languages,
-                   'langSummary': langSummary,
-                   'app_analysis': app_analysis,
-                   'system_settings': system_settings,
-                   'authorized': auth})
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -685,8 +653,7 @@ def all_product_findings(request, pid):
     result = ProductFindingFilter(
         request.GET,
         queryset=Finding.objects.filter(test__engagement__product=p,
-                                        active=True,
-                                        verified=True))
+                                        active=True))
     page = get_page_items(request, result.qs, 25)
 
     add_breadcrumb(title="Open findings", top_level=False, request=request)

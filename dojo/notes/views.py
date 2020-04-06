@@ -37,7 +37,7 @@ def delete_issue(request, id, page, objid):
         reverse_url = "view_common_note"
     form = DeleteNoteForm(request.POST, instance=note)
 
-    if page is None or str(request.user) != note.author.username and not request.user.is_superuser:
+    if page is None or str(request.user) != note.author.username and not request.user.is_staff:
         raise PermissionDenied
 
     if form.is_valid():
