@@ -7,12 +7,12 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0027_jira_issue_type_settings'),
+        ('dojo', '0033_remove_finding_duplicate_list'),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Common_Note',
+            name='CommonNote',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('title', models.TextField(max_length=1000)),

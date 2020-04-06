@@ -2667,6 +2667,7 @@ class FieldRule(models.Model):
     update_type = models.CharField(max_length=30, choices=update_options)
     text = models.CharField(max_length=200)
 
+
 class CommonNote(models.Model):
     notes = models.ManyToManyField(Notes, blank=True,
                                    editable=False)
@@ -2674,6 +2675,7 @@ class CommonNote(models.Model):
     scanner = models.TextField(max_length=100)
     product = models.TextField(max_length=100)
     cwe = models.IntegerField(default=0, null=True, blank=True)
+
 
 def enable_disable_auditlog(enable=True):
     if enable:
