@@ -51,9 +51,7 @@ class GitleaksJSONParser(object):
                                   numerical_severity=Finding.get_numerical_severity(severity),
                                   mitigation="Secrets and passwords should be stored in a secure vault and/or secure storage.",
                                   impact="This weakness can lead to the exposure of resources or functionality to unintended actors, possibly providing attackers with sensitive information or even execute arbitrary code.",
-                                  references="N/A",
                                   file_path=file_path,
-                                  url='N/A',
                                   dynamic_finding=False,
                                   static_finding=True)
         self.items = list(self.dupes.values())

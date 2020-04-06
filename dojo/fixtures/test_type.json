@@ -563,13 +563,13 @@
         },
         "model": "dojo.test_type",
         "pk": 172
-		},
-	{
-			"fields": {
-					"name": "Gitleaks Scan"
-			},
-			"model": "dojo.test_type",
-			"pk": 173
-	}
+    },
+  {
+    "fields": {
+      "name": "Gitleaks Scan"
+    },
+    "model": "dojo.test_type",
+      "pk": 173
+  }
 ]
 
