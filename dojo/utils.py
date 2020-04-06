@@ -335,11 +335,11 @@ def deduplication_attr_config(new_finding, attributes):
                 original_findings.append(finding)
 
     if not original_findings and new_finding.static_finding == True and 'offset' in attributes:
-        similar_findings_with_offset = list(filter(lambda i: abs(i.line - new_finding.line) <= 100, findings_set_for_offset))
+        similar_findings_with_offset = list(filter(lambda i: abs(i.line - int(new_finding.line)) <= 100, findings_set_for_offset))
         if similar_findings_with_offset:
             for finding in similar_findings_with_offset:
-                finding.line_diff = abs(finding.line - new_finding.line)
-            original_findings = sorted(similar_findings_with_offset , key = lambda x : x.line_diff)[0]
+                finding.line_diff = abs(finding.line - int(new_finding.line))
+            original_findings = sorted(similar_findings_with_offset , key = lambda x : x.line_diff)
 
     for find in original_findings:
         try:
