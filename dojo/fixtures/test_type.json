@@ -566,10 +566,9 @@
     },
 	{
 		"fields": {
-			"name": "Harbor Vulnerability"
+			"name": "Harbor Vulnerability Scan"
 		},
 		"model": "dojo.test_type",
 		"pk": 173
 	}
 ]
-
