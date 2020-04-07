@@ -20,7 +20,7 @@ class BaseTestCase(unittest.TestCase):
             dd_driver_options = Options()
 
             # headless means no UI, if you want to see what is happening remove headless. Adding detach will leave the window open after the test
-            dd_driver_options.add_argument("--headless")
+            # dd_driver_options.add_argument("--headless")
             # dd_driver_options.add_experimental_option("detach", True)
 
             # the next 2 maybe needed in some scenario's for example on WSL or other headless situations
@@ -40,16 +40,6 @@ class BaseTestCase(unittest.TestCase):
             dd_driver.implicitly_wait(30)
 
         cls.driver = dd_driver
-
-        # print('launching browser for: ', cls.__name__)
-        # # change path of chromedriver according to which directory you have chromedriver.
-        # cls.options = Options()
-        # cls.options.add_argument("--headless")
-        # cls.options.add_experimental_option("detach", True)
-        # cls.options.add_argument("--no-sandbox")
-        # cls.options.add_argument("--disable-dev-shm-usage")
-        # cls.driver = webdriver.Chrome('chromedriver', chrome_options=cls.options)
-        # cls.driver.implicitly_wait(30)
         cls.base_url = os.environ['DD_BASE_URL']
 
     def setUp(self):
@@ -67,6 +57,8 @@ class BaseTestCase(unittest.TestCase):
         driver.find_element_by_id("id_password").clear()
         driver.find_element_by_id("id_password").send_keys(os.environ['DD_ADMIN_PASSWORD'])
         driver.find_element_by_css_selector("button.btn.btn-success").click()
+        text = driver.find_element_by_tag_name("BODY").text
+        self.assertFalse(re.search(r'Please enter a correct username and password', text))
         return driver
 
     def is_alert_present(self):
