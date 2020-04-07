@@ -368,7 +368,7 @@ class ImportScanForm(forms.Form):
                          ("DSOP Scan", "DSOP Scan"),
                          ("Trivy Scan", "Trivy Scan"),
                          ("Anchore Enterprise Policy Check", "Anchore Enterprise Policy Check"),
-                         ("Harbor Vulnerability", "Harbor Vulnerability"))
+                         ("Harbor Vulnerability Scan", "Harbor Vulnerability Scan"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
     scan_date = forms.DateTimeField(

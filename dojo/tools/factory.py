@@ -242,7 +242,7 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = DsopParser(file, test)
     elif scan_type == 'Anchore Enterprise Policy Check':
         parser = AnchoreEnterprisePolicyCheckParser(file, test)
-    elif scan_type == 'Harbor Vulnerability':
+    elif scan_type == 'Harbor Vulnerability Scan':
         parser = HarborVulnerabilityParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
