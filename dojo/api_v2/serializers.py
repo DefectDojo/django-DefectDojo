@@ -721,10 +721,11 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                             url=reverse('view_test', args=(test.id,)))
 
         updated_count = len(new_findings) + len(old_findings)
-        title = 'Updated ' + str(updated_count) + " findings for " + str(test.engagement.product) + ': ' + str(test.engagement.name) + ': ' + str(test)
-        create_notification(event='findings_updated', title=title, findings_new=new_findings, findings_mitigated=old_findings,
-                            finding_count=updated_count, test=test, engagement=test.engagement, product=test.engagement.product,
-                            url=reverse('view_test', args=(test.id,)))
+        if updated_count > 0:
+            title = 'Created ' + str(updated_count) + " findings for " + str(test.engagement.product) + ': ' + str(test.engagement.name) + ': ' + str(test)
+            create_notification(event='findings_updated', title=title, findings_new=new_findings, findings_mitigated=old_findings,
+                                finding_count=updated_count, test=test, engagement=test.engagement, product=test.engagement.product,
+                                url=reverse('view_test', args=(test.id,)))
 
         return test
 
