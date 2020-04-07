@@ -318,10 +318,9 @@ class ProductTest(BaseTestCase):
         driver.find_element_by_link_text("Delete").click()
         # "Click" the delete button to complete the transaction
         driver.find_element_by_css_selector("button.btn.btn-danger").click()
-
         # Query the site to determine if the product has been added
-        # Assert ot the query to determine status of failure
         productTxt = driver.find_element_by_tag_name("BODY").text
+        # Assert ot the query to determine status of failure
         self.assertTrue(re.search(r'Product and relationships removed.', productTxt))
 
 
