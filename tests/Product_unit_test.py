@@ -5,6 +5,7 @@ import re
 import sys
 import time
 from base_test_class import BaseTestCase
+from selenium.webdriver.common.by import By
 
 
 class WaitForPageLoad(object):
@@ -33,6 +34,9 @@ class WaitForPageLoad(object):
 class ProductTest(BaseTestCase):
 
     def test_create_product(self):
+        # make sure no left overs from previous runs are left behind
+        self.delete_product_if_exists()
+
         driver = self.login_page()
         # Navigate to the product page
         driver.get(self.base_url + "product")
@@ -292,9 +296,17 @@ class ProductTest(BaseTestCase):
         # Assert ot the query to dtermine status of failure
         self.assertTrue(re.search(r'Tool Product Configuration Successfully Updated', productTxt))
 
+    def delete_product_if_exists(self):
+        driver = self.login_page()
+        # Navigate to the product page
+        driver.get(self.base_url + "product")
+        # Select the specific product to delete
+        qa_products = driver.find_elements(By.LINK_TEXT, "QA Test")
+
+        if len(qa_products) > 0:
+            self.test_delete_product()
+
     def test_delete_product(self):
-        # Login to the site. Password will have to be modified
-        # to match an admin password in your own container
         driver = self.login_page()
         # Navigate to the product page
         driver.get(self.base_url + "product")
@@ -306,9 +318,10 @@ class ProductTest(BaseTestCase):
         driver.find_element_by_link_text("Delete").click()
         # "Click" the delete button to complete the transaction
         driver.find_element_by_css_selector("button.btn.btn-danger").click()
+
         # Query the site to determine if the product has been added
-        productTxt = driver.find_element_by_tag_name("BODY").text
         # Assert ot the query to determine status of failure
+        productTxt = driver.find_element_by_tag_name("BODY").text
         self.assertTrue(re.search(r'Product and relationships removed.', productTxt))
 
 
