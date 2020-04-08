@@ -39,7 +39,7 @@ def configure_google_sheets(request):
             else:
                 initial['Protect ' + field.name] = True
         initial['drive_folder_ID'] = system_settings.drive_folder_ID
-        initial['gamil_address'] = system_settings.gmail_address
+        initial['gamil_address'] = system_settings.email_address
         initial['enable_service'] = system_settings.enable_google_sheets
         form = GoogleSheetFieldsForm(all_fields=fields, initial=initial, credentials_required=False)
     else:
@@ -54,7 +54,7 @@ def configure_google_sheets(request):
             system_settings.column_widths = ""
             system_settings.credentials = ""
             system_settings.drive_folder_ID = ""
-            system_settings.gmail_address = ""
+            system_settings.email_address = ""
             system_settings.enable_google_sheets = False
             system_settings.save()
             messages.add_message(
@@ -94,7 +94,7 @@ def configure_google_sheets(request):
                     system_settings.column_widths = column_widths
                     system_settings.credentials = cred_str
                     system_settings.drive_folder_ID = drive_folder_ID
-                    system_settings.gmail_address = form.cleaned_data['gmail_address']
+                    system_settings.email_address = form.cleaned_data['email_address']
                     system_settings.enable_google_sheets = form.cleaned_data['enable_service']
                     system_settings.save()
                     if initial:
@@ -455,7 +455,7 @@ def populate_sheet(tid, spreadsheetId):
     system_settings = get_object_or_404(System_Settings, id=1)
     service_account_info = json.loads(system_settings.credentials)
     service_account_email = service_account_info['client_email']
-    gmail_address = system_settings.gmail_address
+    email_address = system_settings.email_address
     SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
     credentials = service_account.Credentials.from_service_account_info(service_account_info, scopes=SCOPES)
     sheets_service = googleapiclient.discovery.build('sheets', 'v4', credentials=credentials, cache_discovery=False)
@@ -561,7 +561,7 @@ def populate_sheet(tid, spreadsheetId):
                                   "editors": {
                                         "users": [
                                             service_account_email,
-                                            gmail_address
+                                            email_address
                                         ]
                                   },
                                   # "description": "Protecting total row",
@@ -632,7 +632,7 @@ def populate_sheet(tid, spreadsheetId):
                                   "editors": {
                                         "users": [
                                             service_account_email,
-                                            gmail_address
+                                            email_address
                                         ]
                                   },
                                   "warningOnly": False
@@ -760,7 +760,7 @@ def populate_sheet(tid, spreadsheetId):
                               "editors": {
                                     "users": [
                                         service_account_email,
-                                        gmail_address
+                                        email_address
                                     ]
                               },
                               "warningOnly": False

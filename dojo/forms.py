@@ -1940,10 +1940,10 @@ class GoogleSheetFieldsForm(forms.Form):
         required=True,
         label="Google Drive folder ID",
         help_text="Extract the Drive folder ID from the URL and provide it here")
-    gmail_address = forms.EmailField(
+    email_address = forms.EmailField(
         required=True,
-        label="Gmail Address",
-        help_text="Enter the same Gmail Address used to create the Service Account")
+        label="Email Address",
+        help_text="Enter the same email Address used to create the Service Account")
     enable_service = forms.BooleanField(
         initial=False,
         required=False,
