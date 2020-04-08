@@ -49,6 +49,13 @@ else
     echo "Error: Product integration test failed"; exit 1
 fi
 
+echo "Running Dedupe integration tests"
+if python3 tests/dedupe_unit_test.py ; then
+    echo "Success: Dedupe integration tests passed"
+else
+    echo "Error: Dedupe integration test failed"; exit 1
+fi
+
 echo "Running Endpoint integration tests"
 if python3 tests/Endpoint_unit_test.py ; then
     echo "Success: Endpoint integration tests passed"
@@ -110,13 +117,6 @@ if python3 tests/check_status.py ; then
     echo "Success: check status tests passed"
 else
     echo "Error: Check status tests failed"; exit 1
-fi
-
-echo "Running Dedupe integration tests"
-if python3 tests/dedupe_unit_test.py ; then
-    echo "Success: Dedupe integration tests passed"
-else
-    echo "Error: Dedupe integration test failed"; exit 1
 fi
 
 # The below tests are commented out because they are still an unstable work in progress

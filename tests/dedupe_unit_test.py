@@ -24,8 +24,8 @@ class DedupeTest(BaseTestCase):
     def check_nb_duplicates(self, expected_number_of_duplicates):
         print("checking duplicates...")
         retries = 0
-        for i in range(0, 6):
-            time.sleep(15)  # wait bit for celery dedupe task which can be slow on travis
+        for i in range(0, 18):
+            time.sleep(5)  # wait bit for celery dedupe task which can be slow on travis
             driver = self.login_page()
             driver.get(self.base_url + "finding")
             dupe_count = 0
