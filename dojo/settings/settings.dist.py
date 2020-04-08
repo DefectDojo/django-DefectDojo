@@ -69,7 +69,7 @@ env = environ.Env(
     DD_SECRET_KEY=(str, '.'),
     DD_CREDENTIAL_AES_256_KEY=(str, '.'),
     DD_DATA_UPLOAD_MAX_MEMORY_SIZE=(int, 8388608),  # Max post size set to 8mb
-    DD_SOCIAL_AUTH_TRAILING_SLASH=(bool, False),
+    DD_SOCIAL_AUTH_TRAILING_SLASH=(bool, True),
     DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_AUTH0_KEY=(str, ''),
     DD_SOCIAL_AUTH_AUTH0_SECRET=(str, ''),
@@ -333,12 +333,8 @@ LOGIN_EXEMPT_URLS = (
     r'^%sreports/cover$' % URL_PREFIX,
     r'^%sfinding/image/(?P<token>[^/]+)$' % URL_PREFIX,
     r'^%sapi/v2/' % URL_PREFIX,
-    r'complete/auth0-oauth2/',
-    r'complete/google-oauth2/',
-    r'complete/okta-oauth2/',
-    r'complete/gitlab-oauth2/',
+    r'complete/',
     r'empty_survey/([\d]+)/answer'
-    r'complete/azuread-tenant-oauth2/',
 )
 
 # ------------------------------------------------------------------------------
@@ -499,7 +495,7 @@ INSTALLED_APPS = (
     'rest_framework.authtoken',
     'rest_framework_swagger',
     'dbbackup',
-    'taggit_serializer',
+    # 'taggit_serializer',
     # 'axes'
     'django_celery_results',
     'social_django',
@@ -519,7 +515,6 @@ DJANGO_MIDDLEWARE_CLASSES = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'dojo.middleware.LoginRequiredMiddleware',
-    'dojo.middleware.TimezoneMiddleware',
     'social_django.middleware.SocialAuthExceptionMiddleware',
     'watson.middleware.SearchContextMiddleware',
     'auditlog.middleware.AuditlogMiddleware',

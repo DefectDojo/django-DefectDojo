@@ -12,7 +12,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.urls import reverse
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.cache import cache_page
@@ -33,6 +33,7 @@ from functools import reduce
 
 logger = logging.getLogger(__name__)
 parse_logger = logging.getLogger('dojo')
+
 
 def view_test(request, tid):
     test = get_object_or_404(Test, pk=tid)
@@ -69,7 +70,7 @@ def view_test(request, tid):
     else:
         form = NoteForm()
 
-    fpage = get_page_items(request, findings.qs, 25)
+    fpage = get_page_items(request, prefetch_for_findings(findings.qs), 25)
     sfpage = get_page_items(request, stub_findings, 25)
     show_re_upload = any(test.test_type.name in code for code in ImportScanForm.SCAN_TYPE_CHOICES)
 
@@ -88,7 +89,7 @@ def view_test(request, tid):
         SCOPES = ['https://www.googleapis.com/auth/drive']
         credentials = service_account.Credentials.from_service_account_info(service_account_info, scopes=SCOPES)
         try:
-            drive_service = googleapiclient.discovery.build('drive', 'v3', credentials=credentials)
+            drive_service = googleapiclient.discovery.build('drive', 'v3', credentials=credentials, cache_discovery=False)
             folder_id = system_settings.drive_folder_ID
             files = drive_service.files().list(q="mimeType='application/vnd.google-apps.spreadsheet' and parents in '%s' and name='%s'" % (folder_id, spreadsheet_name),
                                                   spaces='drive',
@@ -133,6 +134,18 @@ def view_test(request, tid):
                    'show_export': google_sheets_enabled,
                    'sheet_url': sheet_url
                    })
+
+
+def prefetch_for_findings(findings):
+    prefetched_findings = findings
+    if isinstance(findings, QuerySet):  # old code can arrive here with prods being a list because the query was already executed
+        prefetched_findings = prefetched_findings.select_related('reporter')
+        prefetched_findings = prefetched_findings.prefetch_related('risk_acceptance_set')
+        # we could try to prefetch only the latest note with SubQuery and OuterRef, but I'm getting that MySql doesn't support limits in subqueries.
+        prefetched_findings = prefetched_findings.prefetch_related('notes')
+        prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__jira_pkey_set__conf')
+        prefetched_findings = prefetched_findings.prefetch_related('tagged_items__tag')
+    return prefetched_findings
 
 
 @user_passes_test(lambda u: u.is_staff)
