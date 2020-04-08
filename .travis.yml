@@ -1,7 +1,7 @@
 dist: xenial
 language: minimal
 services:
-  - docker
+  # - docker
 env:
   global:
     - K8S_VERSION=v1.13.4
@@ -10,20 +10,20 @@ env:
     - CHANGE_MINIKUBE_NONE_USER=true
   matrix:
     - BROKER=rabbitmq DATABASE=mysql
-    - BROKER=rabbitmq DATABASE=postgresql
-    - BROKER=redis DATABASE=mysql
-    - BROKER=redis DATABASE=postgresql
+    # - BROKER=rabbitmq DATABASE=postgresql
+    # - BROKER=redis DATABASE=mysql
+    # - BROKER=redis DATABASE=postgresql
     - TEST=flake8
-    - TEST=snyk
-    - TEST=docker
+    # - TEST=snyk
+    # - TEST=docker
     - TEST=integration_tests
 matrix: 
-  allow_failures:
-    - env: TEST=snyk
+  # allow_failures:
+  #   - env: TEST=snyk
 jobs:
-  include:  
-    - stage: deploy
-      env: TEST=deploy
+  # include:  
+  #   - stage: deploy
+  #     env: TEST=deploy
 before_install: ['./travis/before-install.sh']
 before_script: ['./travis/before-script.sh']
 script: ['./travis/script.sh']
