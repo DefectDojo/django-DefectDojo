@@ -2,49 +2,49 @@ set DD_ADMIN_USER=admin
 set DD_ADMIN_PASSWORD=admin
 set DD_BASE_URL=http://localhost:8080/
 
-REM echo "Running Product type integration tests"
-REM python tests/Product_type_unit_test.py
-REM if %ERRORLEVEL% NEQ 0 GOTO END
+echo "Running Product type integration tests"
+python tests/Product_type_unit_test.py
+if %ERRORLEVEL% NEQ 0 GOTO END
 
-REM echo "Running Product integration tests"
-REM python tests/Product_unit_test.py
-REM if %ERRORLEVEL% NEQ 0 GOTO END
+echo "Running Product integration tests"
+python tests/Product_unit_test.py
+if %ERRORLEVEL% NEQ 0 GOTO END
 
-REM echo "Running Endpoint integration tests"
-REM python tests/Endpoint_unit_test.py
-REM if %ERRORLEVEL% NEQ 0 GOTO END
+echo "Running Endpoint integration tests"
+python tests/Endpoint_unit_test.py
+if %ERRORLEVEL% NEQ 0 GOTO END
 
-REM echo "Running Engagement integration tests"
-REM python tests/Engagement_unit_test.py
-REM if %ERRORLEVEL% NEQ 0 GOTO END
+echo "Running Engagement integration tests"
+python tests/Engagement_unit_test.py
+if %ERRORLEVEL% NEQ 0 GOTO END
 
-REM echo "Running Environment integration tests"
-REM python tests/Environment_unit_test.py 
-REM if %ERRORLEVEL% NEQ 0 GOTO END
+echo "Running Environment integration tests"
+python tests/Environment_unit_test.py 
+if %ERRORLEVEL% NEQ 0 GOTO END
 
-REM echo "Running Finding integration tests"
-REM python tests/Finding_unit_test.py
-REM if %ERRORLEVEL% NEQ 0 GOTO END
+echo "Running Finding integration tests"
+python tests/Finding_unit_test.py
+if %ERRORLEVEL% NEQ 0 GOTO END
 
-REM echo "Running Test integration tests"
-REM python tests/Test_unit_test.py
-REM if %ERRORLEVEL% NEQ 0 GOTO END
+echo "Running Test integration tests"
+python tests/Test_unit_test.py
+if %ERRORLEVEL% NEQ 0 GOTO END
 
-REM echo "Running User integration tests"
-REM python tests/User_unit_test.py
-REM if %ERRORLEVEL% NEQ 0 GOTO END
+echo "Running User integration tests"
+python tests/User_unit_test.py
+if %ERRORLEVEL% NEQ 0 GOTO END
 
-REM echo "Running Ibm Appscan integration test"
-REM python tests/ibm_appscan_test.py
-REM if %ERRORLEVEL% NEQ 0 GOTO END
+echo "Running Ibm Appscan integration test"
+python tests/ibm_appscan_test.py
+if %ERRORLEVEL% NEQ 0 GOTO END
 
-REM echo "Running Smoke integration test"
-REM python tests/smoke_test.py
-REM if %ERRORLEVEL% NEQ 0 GOTO END
+echo "Running Smoke integration test"
+python tests/smoke_test.py
+if %ERRORLEVEL% NEQ 0 GOTO END
 
-REM echo "Running Check Status test"
-REM python tests/check_status.py
-REM if %ERRORLEVEL% NEQ 0 GOTO END
+echo "Running Check Status test"
+python tests/check_status.py
+if %ERRORLEVEL% NEQ 0 GOTO END
 
 echo "Running Dedupe integration tests"
 python tests/dedupe_unit_test.py
