@@ -47,7 +47,9 @@ class TestUnitTest(BaseTestCase):
         # Username and password will be gotten from environ
         driver = self.login_page()
         # Navigate to the Product page to select the product we created earlier
-        driver.get(self.base_url + "product")
+        self.goto_product_overview(driver)
+        # wait for product_wrapper div as datatables javascript modifies the DOM on page load.
+        driver.find_element_by_id('products_wrapper')
         # Select and click on the particular product to create test for
         driver.find_element_by_link_text("QA Test").click()
         # "Click" the dropdown option
