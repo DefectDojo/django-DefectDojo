@@ -37,6 +37,7 @@ class BaseTestCase(unittest.TestCase):
             # desired['loggingPrefs'] = {'browser': 'ALL'}
 
             # change path of chromedriver according to which directory you have chromedriver.
+            print('starting chromedriver with options: ', vars(dd_driver_options), desired)
             dd_driver = webdriver.Chrome('chromedriver', chrome_options=dd_driver_options)
             dd_driver.implicitly_wait(30)
 
