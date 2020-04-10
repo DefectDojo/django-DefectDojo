@@ -7,7 +7,7 @@ import httplib2
 from datetime import datetime
 import googleapiclient.discovery
 from google.oauth2 import service_account
-
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied, ValidationError
@@ -27,7 +27,7 @@ from dojo.forms import NoteForm, TestForm, FindingForm, \
     ImportScanForm, ReImportScanForm, FindingBulkUpdateForm, JIRAFindingForm
 from dojo.models import Product, Finding, Test, Notes, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, Finding_Template, JIRA_PKey, Cred_Mapping, Dojo_User, JIRA_Issue, System_Settings
 from dojo.tools.factory import import_parser_factory
-from dojo.utils import get_page_items, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting, create_notification, Product_Tab, calculate_grade, log_jira_alert
+from dojo.utils import get_page_items, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting, create_notification, Product_Tab, calculate_grade, log_jira_alert, max_safe
 from dojo.tasks import add_issue_task, update_issue_task
 from functools import reduce
 
@@ -603,6 +603,11 @@ def re_import_scan_results(request, tid):
         form = ReImportScanForm(request.POST, request.FILES)
         if form.is_valid():
             scan_date = form.cleaned_data['scan_date']
+
+            scan_date_time = datetime.combine(scan_date, timezone.now().time())
+            if settings.USE_TZ:
+                scan_date_time = timezone.make_aware(scan_date_time, timezone.get_default_timezone())
+
             min_sev = form.cleaned_data['minimum_severity']
             file = request.FILES['file']
             scan_type = t.test_type.name
@@ -736,15 +741,23 @@ def re_import_scan_results(request, tid):
                 to_mitigate = set(original_items) - set(new_items)
                 for finding_id in to_mitigate:
                     finding = Finding.objects.get(id=finding_id)
-                    finding.mitigated = datetime.combine(scan_date, timezone.now().time())
-                    finding.mitigated_by = request.user
-                    finding.active = False
-                    finding.save()
-                    note = Notes(entry="Mitigated by %s re-upload." % scan_type,
-                                 author=request.user)
-                    note.save()
-                    finding.notes.add(note)
-                    mitigated_count += 1
+                    if not finding.mitigated or not finding.is_Mitigated:
+                        finding.mitigated = datetime.combine(scan_date, timezone.now().time())
+                        finding.mitigated_by = request.user
+                        finding.active = False
+                        finding.save()
+                        note = Notes(entry="Mitigated by %s re-upload." % scan_type,
+                                    author=request.user)
+                        note.save()
+                        finding.notes.add(note)
+                        mitigated_count += 1
+
+                t.updated = max_safe([scan_date_time, t.updated])
+                t.engagement.updated = max_safe([scan_date_time, t.engagement.updated])
+
+                t.save()
+                t.engagement.save()
+
                 messages.add_message(request,
                                      messages.SUCCESS,
                                      '%s processed, a total of ' % scan_type + message(finding_count, 'finding',
