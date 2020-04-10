@@ -16,7 +16,7 @@ class DojoTests(BaseTestCase):
 
     def test_create_product(self):
         driver = self.login_page()
-        driver.get(self.base_url + "product")
+        self.goto_product_overview(driver)
         driver.find_element_by_id("dropdownMenu1").click()
         driver.find_element_by_link_text("Add Product").click()
         driver.find_element_by_id("id_name").clear()
@@ -31,7 +31,7 @@ class DojoTests(BaseTestCase):
     def test_engagement(self):
         driver = self.login_page()
         driver = self.driver
-        driver.get(self.base_url + "product")
+        self.goto_product_overview(driver)
         driver.find_element_by_link_text("Product List").click()
         driver.find_element_by_xpath("//table[@id='products']/tbody/tr[1]/td[5]/a").click()
 

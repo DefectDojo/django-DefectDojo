@@ -1,8 +1,13 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+
 import unittest
 import os
 import re
+
 
 dd_driver = None
 dd_driver_options = None
@@ -40,16 +45,6 @@ class BaseTestCase(unittest.TestCase):
             dd_driver.implicitly_wait(30)
 
         cls.driver = dd_driver
-
-        # print('launching browser for: ', cls.__name__)
-        # # change path of chromedriver according to which directory you have chromedriver.
-        # cls.options = Options()
-        # cls.options.add_argument("--headless")
-        # cls.options.add_experimental_option("detach", True)
-        # cls.options.add_argument("--no-sandbox")
-        # cls.options.add_argument("--disable-dev-shm-usage")
-        # cls.driver = webdriver.Chrome('chromedriver', chrome_options=cls.options)
-        # cls.driver.implicitly_wait(30)
         cls.base_url = os.environ['DD_BASE_URL']
 
     def setUp(self):
@@ -67,7 +62,22 @@ class BaseTestCase(unittest.TestCase):
         driver.find_element_by_id("id_password").clear()
         driver.find_element_by_id("id_password").send_keys(os.environ['DD_ADMIN_PASSWORD'])
         driver.find_element_by_css_selector("button.btn.btn-success").click()
+        text = driver.find_element_by_tag_name("BODY").text
+        self.assertFalse(re.search(r'Please enter a correct username and password', text))
         return driver
+
+    def goto_product_overview(self, driver):
+        driver.get(self.base_url + "product")
+        body = driver.find_element_by_tag_name("BODY").text
+        # print('BODY:')
+        # print(body)
+        # print('re.search:', re.search(r'No products found', body))
+
+        if re.search(r'No products found', body):
+            return driver
+
+        # wait for product_wrapper div as datatables javascript modifies the DOM on page load.
+        WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.ID, "products_wrapper")))
 
     def is_alert_present(self):
         try:
@@ -165,3 +175,15 @@ class WebdriverOnlyNewLogFacade(object):
         self.last_timestamp = last_timestamp
 
         return filtered
+
+
+def on_exception_html_source_logger(func):
+    def wrapper(self, *args, **kwargs):
+        try:
+            return func(self, *args, **kwargs)
+
+        except Exception as e:
+            print(self.driver.page_source)
+            raise(e)
+
+    return wrapper
