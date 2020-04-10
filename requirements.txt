@@ -19,13 +19,13 @@ django-slack==5.14.3
 django-tagging==0.5.0
 git+https://github.com/DefectDojo/django-tastypie-swagger.git@c7c5629480dc20cadd3015490a01bd8e70393c36#egg=django-tastypie-swagger
 django-tastypie==0.14.2
-django-watson==1.5.3
+django-watson==1.5.5
 django-prometheus==2.0.0
-Django==2.2.11
+Django==2.2.12
 djangorestframework==3.11.0
 gunicorn==20.0.4
 html2text==2020.1.16
-humanize==2.2.0
+humanize==2.3.0
 jira==2.0.0
 lxml==4.5.0
 Markdown==3.2.1
@@ -33,9 +33,9 @@ mysqlclient==1.4.6
 pandas>=0.25
 xlrd>=1.0.0
 pdfkit==0.6.1
-Pillow==7.0.0  # required by django-imagekit
-psycopg2-binary==2.8.4
-cryptography==2.8
+Pillow==7.1.1  # required by django-imagekit
+psycopg2-binary==2.8.5
+cryptography==2.9
 python-dateutil==2.8.1
 python-nmap==0.6.1
 pytz==2019.3
@@ -54,6 +54,6 @@ git+https://github.com/DefectDojo/defectDojo-engagement-survey.git@8437e158fbc75
 gitpython>=2.1.13
 ptvsd>=4.2.7
 google-api-python-client==1.8.0
-google-auth==1.11.3
+google-auth==1.13.1
 google-auth-oauthlib==0.4.1
 drf_yasg==1.17.1

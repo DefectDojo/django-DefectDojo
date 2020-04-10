@@ -1,7 +1,13 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+
 import unittest
 import os
+import re
+
 
 dd_driver = None
 dd_driver_options = None
@@ -33,30 +39,22 @@ class BaseTestCase(unittest.TestCase):
             dd_driver_options.set_capability("acceptInsecureCerts", True)
 
             # some extra logging can be turned on if you want to query the browser javascripe console in your tests
-            # desired = webdriver.DesiredCapabilities.CHROME
-            # desired['loggingPrefs'] = {'browser': 'ALL'}
+            desired = webdriver.DesiredCapabilities.CHROME
+            desired['goog:loggingPrefs'] = {'browser': 'ALL'}
 
             # change path of chromedriver according to which directory you have chromedriver.
             print('starting chromedriver with options: ', vars(dd_driver_options), desired)
-            dd_driver = webdriver.Chrome('chromedriver', chrome_options=dd_driver_options)
+            dd_driver = webdriver.Chrome('chromedriver', chrome_options=dd_driver_options, desired_capabilities=desired)
             dd_driver.implicitly_wait(30)
 
         cls.driver = dd_driver
-
-        # print('launching browser for: ', cls.__name__)
-        # # change path of chromedriver according to which directory you have chromedriver.
-        # cls.options = Options()
-        # cls.options.add_argument("--headless")
-        # # cls.options.add_experimental_option("detach", True)
-        # # cls.options.add_argument("--no-sandbox")
-        # # cls.options.add_argument("--disable-dev-shm-usage")
-        # cls.driver = webdriver.Chrome('chromedriver', chrome_options=cls.options)
-        # cls.driver.implicitly_wait(30)
         cls.base_url = os.environ['DD_BASE_URL']
 
     def setUp(self):
         self.verificationErrors = []
         self.accept_next_alert = True
+        self.accept_javascript_errors = False
+        self.driver.execute_script("console.clear()")
         # clear browser console logs?
 
     def login_page(self):
@@ -67,7 +65,22 @@ class BaseTestCase(unittest.TestCase):
         driver.find_element_by_id("id_password").clear()
         driver.find_element_by_id("id_password").send_keys(os.environ['DD_ADMIN_PASSWORD'])
         driver.find_element_by_css_selector("button.btn.btn-success").click()
+        text = driver.find_element_by_tag_name("BODY").text
+        self.assertFalse(re.search(r'Please enter a correct username and password', text))
         return driver
+
+    def goto_product_overview(self, driver):
+        driver.get(self.base_url + "product")
+        body = driver.find_element_by_tag_name("BODY").text
+        # print('BODY:')
+        # print(body)
+        # print('re.search:', re.search(r'No products found', body))
+
+        if re.search(r'No products found', body):
+            return driver
+
+        # wait for product_wrapper div as datatables javascript modifies the DOM on page load.
+        WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.ID, "products_wrapper")))
 
     def is_alert_present(self):
         try:
@@ -88,7 +101,44 @@ class BaseTestCase(unittest.TestCase):
         finally:
             self.accept_next_alert = True
 
+    def assertNoConsoleErrors(self):
+        """
+        Sample output for levels (i.e. errors are SEVERE)
+        {'level': 'DEBUG', 'message': 'http://localhost:8080/product/type/4/edit 560:12 "debug"', 'source': 'console-api', 'timestamp': 1583952828410}
+        {'level': 'INFO', 'message': 'http://localhost:8080/product/type/4/edit 561:16 "info"', 'source': 'console-api', 'timestamp': 1583952828410}
+        {'level': 'WARNING', 'message': 'http://localhost:8080/product/type/4/edit 562:16 "warning"', 'source': 'console-api', 'timestamp': 1583952828410}
+        {'level': 'SEVERE', 'message': 'http://localhost:8080/product/type/4/edit 563:16 "error"', 'source': 'console-api', 'timestamp': 1583952828410}
+        """
+
+        for entry in WebdriverOnlyNewLogFacade(self.driver).get_log('browser'):
+            """
+            images are not working in current docker/travis deployment, so ignore those 404s
+            see: https://github.com/DefectDojo/django-DefectDojo/issues/2045
+            examples:
+            http://localhost:8080/static/dojo/img/zoom-in.cur - Failed to load resource: the server responded with a status of 404 (Not Found)
+            http://localhost:8080/media/CACHE/images/finding_images/1bf9c0b1-5ed1-4b4e-9551-bcbfd198b90a/7d8d9af058566b8f2fe6548d96c63237.jpg - Failed to load resource: the server responded with a status of 404 (Not Found)
+            """
+            accepted_javascript_messages = r'((zoom\-in\.cur.*)|(images\/finding_images\/.*))404\ \(Not\ Found\)'
+
+            if (entry['level'] == 'SEVERE'):
+                print(self.driver.current_url)  # TODO actually this seems to be the previous url
+                # self.driver.save_screenshot("C:\\Data\\django-DefectDojo\\tests\\javascript-errors.png")
+                # with open("C:\\Data\\django-DefectDojo\\tests\\javascript-errors.html", "w") as f:
+                #    f.write(self.driver.page_source)
+
+                print(entry)
+                if self.accept_javascript_errors:
+                    print('WARNING: skipping SEVERE javascript error because accept_javascript_errors is True!')
+                elif re.search(accepted_javascript_messages, entry['message']):
+                    print('WARNING: skipping javascript errors related to finding images, see https://github.com/DefectDojo/django-DefectDojo/issues/2045')
+                else:
+                    self.assertNotEqual(entry['level'], 'SEVERE')
+
+        return True
+
     def tearDown(self):
+        self.assertNoConsoleErrors()
+
         self.assertEqual([], self.verificationErrors)
 
     @classmethod
@@ -99,3 +149,44 @@ class BaseTestCase(unittest.TestCase):
             if not dd_driver_options.experimental_options or not dd_driver_options.experimental_options['detach']:
                 print('closing browser')
                 dd_driver.quit()
+
+
+class WebdriverOnlyNewLogFacade(object):
+
+    last_timestamp = 0
+
+    def __init__(self, webdriver):
+        self._webdriver = webdriver
+
+    def get_log(self, log_type):
+        last_timestamp = self.last_timestamp
+        entries = self._webdriver.get_log(log_type)
+        filtered = []
+
+        for entry in entries:
+            # check the logged timestamp against the
+            # stored timestamp
+            if entry["timestamp"] > self.last_timestamp:
+                filtered.append(entry)
+
+                # save the last timestamp only if newer
+                # in this set of logs
+                if entry["timestamp"] > last_timestamp:
+                    last_timestamp = entry["timestamp"]
+
+        # store the very last timestamp
+        self.last_timestamp = last_timestamp
+
+        return filtered
+
+
+def on_exception_html_source_logger(func):
+    def wrapper(self, *args, **kwargs):
+        try:
+            return func(self, *args, **kwargs)
+
+        except Exception as e:
+            print(self.driver.page_source)
+            raise(e)
+
+    return wrapper

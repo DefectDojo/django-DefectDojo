@@ -29,7 +29,7 @@ from dojo.signals import dedupe_signal
 
 from dojo.models import Finding, Engagement, Finding_Template, Product, JIRA_PKey, JIRA_Issue, \
     Dojo_User, User, Alerts, System_Settings, Notifications, UserContactInfo, Endpoint, Benchmark_Type, \
-    Language_Type, Languages, Rule, Finding, Test_Type
+    Language_Type, Languages, Rule, Test_Type
 from asteval import Interpreter
 from requests.auth import HTTPBasicAuth
 import logging
@@ -111,6 +111,8 @@ def sync_dedupe(sender, *args, **kwargs):
         else:
             deduplicationLogger.debug("no configuration per parser found; using legacy algorithm")
             deduplicate_legacy(new_finding)
+    else:
+        deduplicationLogger.debug("skipping dedupe because it's disabled in system settings get()")
 
 
 def deduplicate_legacy(new_finding):
@@ -308,6 +310,57 @@ def set_duplicate(new_finding, existing_finding):
     super(Finding, existing_finding).save()
 
 
+def removeLoop(finding_id, counter):
+    # get latest status
+    finding = Finding.objects.get(id=finding_id)
+    real_original = finding.duplicate_finding
+
+    if not real_original or real_original is None:
+        return
+
+    if finding_id == real_original.id:
+        finding.duplicate_finding = None
+        super(Finding, finding).save()
+        return
+
+    # Only modify the findings if the original ID is lower to get the oldest finding as original
+    if (real_original.id > finding_id) and (real_original.duplicate_finding is not None):
+        tmp = finding_id
+        finding_id = real_original.id
+        real_original = Finding.objects.get(id=tmp)
+        finding = Finding.objects.get(id=finding_id)
+
+    if real_original in finding.original_finding.all():
+        # remove the original from the duplicate list if it is there
+        finding.original_finding.remove(real_original)
+        super(Finding, finding).save()
+    if counter <= 0:
+        # Maximum recursion depth as safety method to circumvent recursion here
+        return
+    for f in finding.original_finding.all():
+        # for all duplicates set the original as their original, get rid of self in between
+        f.duplicate_finding = real_original
+        super(Finding, f).save()
+        super(Finding, real_original).save()
+        removeLoop(f.id, counter - 1)
+
+
+def fix_loop_duplicates():
+    candidates = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).all().order_by("-id")
+    deduplicationLogger.info("Identified %d Findings with Loops" % len(candidates))
+    for find_id in candidates.values_list('id', flat=True):
+        removeLoop(find_id, 5)
+
+    new_originals = Finding.objects.filter(duplicate_finding__isnull=True, duplicate=True)
+    for f in new_originals:
+        deduplicationLogger.info("New Original: %d " % f.id)
+        f.duplicate = False
+        super(Finding, f).save()
+
+    loop_count = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).count()
+    deduplicationLogger.info("%d Finding found with Loops" % loop_count)
+
+
 def rename_whitesource_finding():
     whitesource_id = Test_Type.objects.get(name="Whitesource Scan").id
     findings = Finding.objects.filter(found_by=whitesource_id)
@@ -330,6 +383,7 @@ def rename_whitesource_finding():
         finding.title = titlecase(finding.title)
         finding.hash_code = finding.compute_hash_code()
         finding.save()
+
 
 def sync_rules(new_finding, *args, **kwargs):
     rules = Rule.objects.filter(applies_to='Finding', parent_rule=None)

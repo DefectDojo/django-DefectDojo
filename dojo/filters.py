@@ -375,7 +375,7 @@ class OpenFindingFilter(DojoFilter):
                    'endpoint', 'references', 'test', 'is_template',
                    'thread_id', 'notes', 'scanner_confidence', 'mitigated',
                    'numerical_severity', 'reporter', 'last_reviewed', 'line',
-                   'duplicate_list', 'duplicate_finding', 'hash_code', 'images',
+                   'duplicate_finding', 'hash_code', 'images',
                    'line_number', 'reviewers', 'mitigated_by', 'sourcefile', 'jira_creation', 'jira_change']
 
     def __init__(self, *args, **kwargs):
@@ -583,7 +583,7 @@ class ProductFindingFilter(DojoFilter):
         exclude = ['url', 'description', 'mitigation', 'impact',
                    'endpoint', 'references', 'test', 'is_template',
                    'active', 'verified', 'out_of_scope', 'false_p',
-                   'duplicate_list', 'duplicate_finding', 'thread_id', 'mitigated', 'notes',
+                   'duplicate_finding', 'thread_id', 'mitigated', 'notes',
                    'numerical_severity', 'reporter', 'endpoints',
                    'last_reviewed', 'jira_creation', 'jira_change']
 
