@@ -118,12 +118,13 @@ class BaseTestCase(unittest.TestCase):
             accepted_javascript_messages = r'((zoom\-in\.cur.*)|(images\/finding_images\/.*))404\ \(Not\ Found\)'
 
             if (entry['level'] == 'SEVERE'):
-                print(self.driver.current_url)  # TODO actually this seems to be the previous url
+                # print(self.driver.current_url)  # TODO actually this seems to be the previous url
                 # self.driver.save_screenshot("C:\\Data\\django-DefectDojo\\tests\\javascript-errors.png")
                 # with open("C:\\Data\\django-DefectDojo\\tests\\javascript-errors.html", "w") as f:
                 #    f.write(self.driver.page_source)
 
-                print(entry)
+                print('There was a SEVERE javascript error in the console, please check all steps fromt the current test to see where it happens')
+                print('Currently there is no way to find out at which url the error happened.')
                 if self.accept_javascript_errors:
                     print('WARNING: skipping SEVERE javascript error because accept_javascript_errors is True!')
                 elif re.search(accepted_javascript_messages, entry['message']):
