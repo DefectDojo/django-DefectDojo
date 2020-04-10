@@ -17,7 +17,9 @@ class IBMAppScanTest(BaseTestCase):
         # Username and password will be gotten from environ
         driver = self.login_page()
         # Navigate to the Endpoint page
-        driver.get(self.base_url + "product")
+        self.goto_product_overview(driver)
+        # wait for product_wrapper div as datatables javascript modifies the DOM on page load.
+        driver.find_element_by_id('products_wrapper')
         driver.find_element_by_link_text("QA Test").click()
         # "Click" the Finding Drop down
         driver.find_element_by_partial_link_text("Findings").click()

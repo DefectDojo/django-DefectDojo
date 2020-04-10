@@ -97,11 +97,16 @@ class Regulation(models.Model):
 class SystemSettingsManager(models.Manager):
     CACHE_KEY = 'defect_dojo_cache.system_settings'
 
+    def get_from_super(self, *args, **kwargs):
+        logger.debug('getting system_settings from super because cache was empty')
+        return super(SystemSettingsManager, self).get(*args, **kwargs)
+
     def get(self, no_cache=False, *args, **kwargs):
         # cache only 30s because django default cache backend is local per process
         if no_cache or cache is None:
+            logger.debug('no cache specified, retrieving system settings from super()')
             return super(SystemSettingsManager, self).get(*args, **kwargs)
-        return cache.get_or_set(self.CACHE_KEY, lambda: super(SystemSettingsManager, self).get(*args, **kwargs), timeout=30)
+        return cache.get_or_set(self.CACHE_KEY, lambda: self.get_from_super(*args, **kwargs), timeout=30)
 
 
 class System_Settings(models.Model):
@@ -274,6 +279,7 @@ class System_Settings(models.Model):
 
     def save(self, *args, **kwargs):
         super(System_Settings, self).save(*args, **kwargs)
+        logger.debug('deleting system settings from cache after save')
         cache.delete(SystemSettingsManager.CACHE_KEY)
 
 
@@ -1776,6 +1782,8 @@ class Finding(models.Model):
                 except:
                     async_dedupe.delay(self, *args, **kwargs)
                     pass
+            else:
+                deduplicationLogger.debug("skipping dedupe because it's disabled in system settings")
         if system_settings.false_positive_history and false_history:
             from dojo.tasks import async_false_history
             from dojo.utils import sync_false_history

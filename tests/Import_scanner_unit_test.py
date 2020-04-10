@@ -197,7 +197,7 @@ class ScannerTest(BaseTestCase):
 
     def test_engagement_import_scan_result(self):
         driver = self.login_page()
-        driver.get(self.base_url + "product")
+        self.goto_product_overview(driver)
         driver.find_element_by_class_name("pull-left").click()
         driver.find_element_by_link_text("Add New Engagement").click()
         driver.find_element_by_id("id_name").send_keys('Scan type mapping')
@@ -246,7 +246,7 @@ class ScannerTest(BaseTestCase):
             if len(cases) == 0:
                 failed_tests += [test.upper() + ': No test cases']
             for case in cases:
-                driver.get(self.base_url + "product")
+                self.goto_product_overview(driver)
                 driver.find_element_by_class_name("pull-left").click()
                 driver.find_element_by_link_text("Add New Engagement").click()
                 driver.find_element_by_id("id_name").send_keys(test + ' - ' + case)
