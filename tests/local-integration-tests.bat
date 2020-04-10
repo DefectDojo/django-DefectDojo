@@ -10,6 +10,10 @@ echo "Running Product integration tests"
 python tests/Product_unit_test.py
 if %ERRORLEVEL% NEQ 0 GOTO END
 
+echo "Running Dedupe integration tests"
+python tests/dedupe_unit_test.py
+if %ERRORLEVEL% NEQ 0 GOTO END
+
 echo "Running Endpoint integration tests"
 python tests/Endpoint_unit_test.py
 if %ERRORLEVEL% NEQ 0 GOTO END
@@ -44,10 +48,6 @@ if %ERRORLEVEL% NEQ 0 GOTO END
 
 echo "Running Check Status test"
 python tests/check_status.py
-if %ERRORLEVEL% NEQ 0 GOTO END
-
-echo "Running Dedupe integration tests"
-python tests/dedupe_unit_test.py
 if %ERRORLEVEL% NEQ 0 GOTO END
 
 REM REM  The below tests are commented out because they are still an unstable work in progress
