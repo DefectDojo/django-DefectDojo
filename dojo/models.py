@@ -127,6 +127,7 @@ class System_Settings_Manager(models.Manager):
         return system_settings
 
     def cleanup(self):
+        logger.debug('removeing thread local system_settings')
         if hasattr(self._thread_local, 'system_settings'):
             del self._thread_local.system_settings
 
