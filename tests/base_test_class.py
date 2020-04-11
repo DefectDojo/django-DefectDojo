@@ -79,6 +79,26 @@ class BaseTestCase(unittest.TestCase):
         # wait for product_wrapper div as datatables javascript modifies the DOM on page load.
         WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.ID, "products_wrapper")))
 
+    def goto_active_engagements_overview(self, driver):
+        return self.goto_engagements_internal(driver, 'engagement')
+
+    def goto_all_engagements_overview(self, driver):
+        return self.goto_engagements_internal(driver, 'engagements_all')
+
+    def goto_engagements_internal(self, driver, rel_url):
+        driver.get(self.base_url + rel_url)
+        body = driver.find_element_by_tag_name("BODY").text
+        # print('BODY:')
+        # print(body)
+        # print('re.search:', re.search(r'No products found', body))
+
+        if re.search(r'No engagements found', body):
+            return driver
+
+        # wait for engagements_wrapper div as datatables javascript modifies the DOM on page load.
+        WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.ID, "engagements_wrapper")))
+        return driver
+
     def is_alert_present(self):
         try:
             self.driver.switch_to_alert()
