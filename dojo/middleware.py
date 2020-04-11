@@ -2,6 +2,7 @@ from django.http import HttpResponseRedirect
 from django.conf import settings
 from django.utils.http import urlquote
 from re import compile
+from dojo.models import System_Settings
 
 
 EXEMPT_URLS = [compile(settings.LOGIN_URL.lstrip('/'))]
@@ -41,3 +42,22 @@ class LoginRequiredMiddleware:
 
         response = self.get_response(request)
         return response
+
+
+def dojo_system_settings_middleware(get_response):
+    """
+    Middleware that caches a System_Settings model instance per request. There's lots of (legacy) code makin multiple
+    database queries to get system settings from the database. This can result in over 50 database queries when
+    rendering a view. This middleware reduces this to exactly one query. We may at some point want to refactor the
+    System_Settings mechanism, but for now it's easier to just cache it (without requiring additional software such as Redis).
+    """
+
+    def middleware(request):
+
+        System_Settings.objects.load()
+        response = get_response(request)
+        System_Settings.objects.cleanup()
+
+        return response
+
+    return middleware
