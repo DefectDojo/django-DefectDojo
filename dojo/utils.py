@@ -1732,11 +1732,9 @@ def prepare_for_view(encrypted_value):
 
 
 def get_system_setting(setting):
-    try:
-        system_settings = System_Settings.objects.get()
-    except:
-        system_settings = System_Settings()
-
+    logger.debug('getting system settings in utils.py')
+    system_settings = System_Settings.objects.get()
+    logger.debug('system settings in utils.py: %s', system_settings)
     return getattr(system_settings, setting, None)
 
 

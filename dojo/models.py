@@ -25,11 +25,10 @@ from multiselectfield import MultiSelectField
 from django import forms
 from django.utils.translation import gettext as _
 from dojo.signals import dedupe_signal
-from django.core.cache import cache
-from dateutil.relativedelta import relativedelta
 from dojo.tag.prefetching_tag_descriptor import PrefetchingTagDescriptor
 from django.contrib.contenttypes.fields import GenericRelation
 from tagging.models import TaggedItem
+from threading import local
 
 fmt = getattr(settings, 'LOG_FORMAT', None)
 lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
@@ -94,19 +93,42 @@ class Regulation(models.Model):
         return self.acronym + ' (' + self.jurisdiction + ')'
 
 
-class SystemSettingsManager(models.Manager):
-    CACHE_KEY = 'defect_dojo_cache.system_settings'
+class System_Settings_Manager(models.Manager):
+    _thread_local = local()
 
     def get_from_super(self, *args, **kwargs):
-        logger.debug('getting system_settings from super because cache was empty')
-        return super(SystemSettingsManager, self).get(*args, **kwargs)
+        logger.debug('calling super() for system_settings')
+        from_db = super(System_Settings_Manager, self).get(*args, **kwargs)
+        logger.debug('id from_db: %s', from_db.id)
+        return from_db
 
     def get(self, no_cache=False, *args, **kwargs):
-        # cache only 30s because django default cache backend is local per process
-        if no_cache or cache is None:
-            logger.debug('no cache specified, retrieving system settings from super()')
-            return super(SystemSettingsManager, self).get(*args, **kwargs)
-        return cache.get_or_set(self.CACHE_KEY, lambda: self.get_from_super(*args, **kwargs), timeout=30)
+        if no_cache:
+            logger.debug('no_cache specified or cached value found, loading system settings from db')
+            return self.load()
+
+        if not hasattr(self._thread_local, 'system_settings') or not self._thread_local.system_settings:
+            logger.debug('no cached value found, loading system settings from db')
+            return self.load()
+
+        from_cache = self._thread_local.system_settings
+        logger.debug('from_cache: %s', from_cache.id)
+        return from_cache
+
+    def load(self):
+        system_settings = self.get_from_super()
+
+        if not system_settings:
+            logger.debug('constructing default System_Settings')
+            return System_Settings()
+
+        self._thread_local.system_settings = system_settings
+        logger.debug('returning %s', system_settings)
+        return system_settings
+
+    def cleanup(self):
+        if hasattr(self._thread_local, 'system_settings'):
+            del self._thread_local.system_settings
 
 
 class System_Settings(models.Model):
@@ -275,12 +297,12 @@ class System_Settings(models.Model):
     drive_folder_ID = models.CharField(max_length=100, blank=True)
     enable_google_sheets = models.BooleanField(default=False, null=True, blank=True)
 
-    objects = SystemSettingsManager()
+    objects = System_Settings_Manager()
 
     def save(self, *args, **kwargs):
         super(System_Settings, self).save(*args, **kwargs)
-        logger.debug('deleting system settings from cache after save')
-        cache.delete(SystemSettingsManager.CACHE_KEY)
+        logger.debug('refreshing system_settings cache after save')
+        System_Settings_Manager.objects.load()
 
 
 class SystemSettingsFormAdmin(forms.ModelForm):
