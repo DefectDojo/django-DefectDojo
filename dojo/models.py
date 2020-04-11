@@ -101,11 +101,11 @@ class System_Settings_Manager(models.Manager):
         try:
             from_db = super(System_Settings_Manager, self).get(*args, **kwargs)
             logger.debug('id from_db: %s', from_db.id)
-        except Exception as e:
+        except:
             # this mimics the existing code that was in filters.py and utils.py.
             # cases I have seen triggering this is for example manage.py collectstatic inside a docker build where mysql is not available
             logger.warn('unable to get system_settings from database, constructing (new) default instance', exc_info=True)
-            return System_settings()
+            return System_Settings()
         return from_db
 
     def get(self, no_cache=False, *args, **kwargs):
