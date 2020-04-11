@@ -104,7 +104,7 @@ class System_Settings_Manager(models.Manager):
         except:
             # this mimics the existing code that was in filters.py and utils.py.
             # cases I have seen triggering this is for example manage.py collectstatic inside a docker build where mysql is not available
-            logger.warn('unable to get system_settings from database, constructing (new) default instance', exc_info=True)
+            logger.warn('unable to get system_settings from database, constructing (new) default instance. Exception was:', exc_info=True)
             return System_Settings()
         return from_db
 
@@ -309,7 +309,7 @@ class System_Settings(models.Model):
     def save(self, *args, **kwargs):
         super(System_Settings, self).save(*args, **kwargs)
         logger.debug('refreshing system_settings cache after save')
-        System_Settings_Manager.objects.load()
+        System_Settings.objects.load()
 
 
 class SystemSettingsFormAdmin(forms.ModelForm):
