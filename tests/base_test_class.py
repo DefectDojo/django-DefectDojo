@@ -123,6 +123,7 @@ class BaseTestCase(unittest.TestCase):
                 # with open("C:\\Data\\django-DefectDojo\\tests\\javascript-errors.html", "w") as f:
                 #    f.write(self.driver.page_source)
 
+                print(entry)
                 print('There was a SEVERE javascript error in the console, please check all steps fromt the current test to see where it happens')
                 print('Currently there is no way to find out at which url the error happened.')
                 if self.accept_javascript_errors:
