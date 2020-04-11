@@ -127,8 +127,6 @@ else
     fail $test
 fi
 
-<<<<<<< HEAD
-=======
 test="Dedupe integration tests"
 echo "Running: $test"
 if python3 tests/dedupe_unit_test.py ; then
@@ -139,7 +137,6 @@ fi
 
 
 
->>>>>>> upstream/dev
 # The below tests are commented out because they are still an unstable work in progress
 ## Once Ready they can be uncommented.
 

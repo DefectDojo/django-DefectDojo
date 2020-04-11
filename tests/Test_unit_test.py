@@ -13,7 +13,9 @@ class TestUnitTest(BaseTestCase):
         # Login to the site.
         driver = self.login_page()
 
-        driver.get(self.base_url + "engagements_all")
+        # goto engagemnent list (and wait for javascript to load)
+        self.goto_all_engagements_overview(driver)
+
         # Select a previously created engagement title
         driver.find_element_by_partial_link_text("Ad Hoc Engagement").click()
 
