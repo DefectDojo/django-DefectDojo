@@ -39,7 +39,7 @@ def configure_google_sheets(request):
             else:
                 initial['Protect ' + field.name] = True
         initial['drive_folder_ID'] = system_settings.drive_folder_ID
-        initial['gamil_address'] = system_settings.email_address
+        initial['email_address'] = system_settings.email_address
         initial['enable_service'] = system_settings.enable_google_sheets
         form = GoogleSheetFieldsForm(all_fields=fields, initial=initial, credentials_required=False)
     else:
