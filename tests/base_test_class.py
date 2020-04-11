@@ -80,7 +80,11 @@ class BaseTestCase(unittest.TestCase):
         WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.ID, "products_wrapper")))
 
     def goto_active_engagements_overview(self, driver):
-        return self.goto_engagements_internal(driver, 'engagement')
+        # return self.goto_engagements_internal(driver, 'engagement')
+        # engagement overview doesn't seem to have the datatables yet modifying the DOM
+        # https://github.com/DefectDojo/django-DefectDojo/issues/2173
+        driver.get(self.base_url + 'engagement')
+        return driver
 
     def goto_all_engagements_overview(self, driver):
         return self.goto_engagements_internal(driver, 'engagements_all')

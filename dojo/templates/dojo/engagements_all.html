@@ -168,12 +168,14 @@
                     { "data": "tests" , render: function (data, type, row) {
                             return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
                     }},
-                    { "data": "action", render: function (data, type, row) {
-                            return type === 'export' ?  "" :  data;
-                    }},
+                    {% if user.is_staff %}
+                        { "data": "action", render: function (data, type, row) {
+                                return type === 'export' ?  "" :  data;
+                        }},
+                    {% endif %}
                 ],
                 "columnDefs": [
-                    { "orderable": false, "targets": [8] }
+                    { "orderable": false, "targets": [0] }
                 ],
                 dom: 'Bfrtip',
                 paging: false,
