@@ -30,7 +30,7 @@ from django.db.models.signals import post_save
 
 from dojo.models import Engagement, Finding_Template, Product, JIRA_PKey, JIRA_Issue, \
     Dojo_User, User, Alerts, System_Settings, Notifications, UserContactInfo, Endpoint, Benchmark_Type, \
-    Language_Type, Languages, Rule, Test_Type
+    Language_Type, Languages, Rule, Test_Type, Finding
 from asteval import Interpreter
 from requests.auth import HTTPBasicAuth
 import logging
