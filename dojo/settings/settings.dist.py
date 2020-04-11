@@ -705,8 +705,7 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '[%(asctime)s] %(levelname)s '
-                      '[%(name)s:%(lineno)d] %(message)s',
+            'format': '[%(asctime)s] %(levelname)s [%(name)s:%(lineno)d] %(thread)d %(threadName)s %(message)s',
             'datefmt': '%d/%b/%Y %H:%M:%S',
         },
         'simple': {
@@ -739,7 +738,7 @@ LOGGING = {
         },
         'dojo': {
             'handlers': ['console'],
-            'level': 'INFO',
+            'level': 'DEBUG',
             'propagate': False,
         },
         'dojo.specific-loggers.deduplication': {
