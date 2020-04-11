@@ -663,7 +663,7 @@ def re_import_scan_results(request, tid):
                     if len(finding) == 1:
                         finding = finding[0]
                         if finding.mitigated or finding.is_Mitigated:
-							# it was once fixed, but now back
+                            # it was once fixed, but now back
                             finding.mitigated = None
                             finding.is_Mitigated = False
                             finding.mitigated_by = None
