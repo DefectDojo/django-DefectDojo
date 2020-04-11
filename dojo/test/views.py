@@ -593,12 +593,12 @@ def re_import_scan_results(request, tid):
     additional_message = "When re-uploading a scan, any findings not found in original scan will be updated as " \
                          "mitigated.  The process attempts to identify the differences, however manual verification " \
                          "is highly recommended."
-    t = get_object_or_404(Test, id=tid)
-    scan_type = t.test_type.name
-    engagement = t.engagement
+    test = get_object_or_404(Test, id=tid)
+    scan_type = test.test_type.name
+    engagement = test.engagement
     form = ReImportScanForm()
 
-    form.initial['tags'] = [tag.name for tag in t.tags]
+    form.initial['tags'] = [tag.name for tag in test.tags]
     if request.method == "POST":
         form = ReImportScanForm(request.POST, request.FILES)
         if form.is_valid():
@@ -610,14 +610,14 @@ def re_import_scan_results(request, tid):
 
             min_sev = form.cleaned_data['minimum_severity']
             file = request.FILES['file']
-            scan_type = t.test_type.name
+            scan_type = test.test_type.name
             active = form.cleaned_data['active']
             verified = form.cleaned_data['verified']
             tags = request.POST.getlist('tags')
             ts = ", ".join(tags)
-            t.tags = ts
+            test.tags = ts
             try:
-                parser = import_parser_factory(file, t, active, verified)
+                parser = import_parser_factory(file, test, active, verified)
             except ValueError:
                 raise Http404()
             except Exception as e:
@@ -628,11 +628,11 @@ def re_import_scan_results(request, tid):
                                      extra_tags='alert-danger')
                 parse_logger.exception(e)
                 parse_logger.error("Error in parser: {}".format(str(e)))
-                return HttpResponseRedirect(reverse('re_import_scan_results', args=(t.id,)))
+                return HttpResponseRedirect(reverse('re_import_scan_results', args=(test.id,)))
 
             try:
                 items = parser.items
-                original_items = t.finding_set.all().values_list("id", flat=True)
+                original_items = test.finding_set.all().values_list("id", flat=True)
                 new_items = []
                 mitigated_count = 0
                 finding_count = 0
@@ -648,38 +648,39 @@ def re_import_scan_results(request, tid):
                         continue
 
                     if scan_type == 'Veracode Scan' or scan_type == 'Arachni Scan':
-                        find = Finding.objects.filter(title=item.title,
-                                                      test__id=t.id,
-                                                      severity=sev,
-                                                      numerical_severity=Finding.get_numerical_severity(sev),
-                                                      description=item.description
-                                                      )
-                    else:
-                        find = Finding.objects.filter(title=item.title,
-                                                      test__id=t.id,
-                                                      severity=sev,
-                                                      numerical_severity=Finding.get_numerical_severity(sev),
-                                                      )
+                        finding = Finding.objects.filter(title=item.title,
+                                                        test__id=test.id,
+                                                        severity=sev,
+                                                        numerical_severity=Finding.get_numerical_severity(sev),
+                                                        description=item.description)
 
-                    if len(find) == 1:
-                        find = find[0]
-                        if find.mitigated:
-                            # it was once fixed, but now back
-                            find.mitigated = None
-                            find.mitigated_by = None
-                            find.active = True
-                            find.verified = verified
-                            find.save()
-                            note = Notes(entry="Re-activated by %s re-upload." % scan_type,
-                                         author=request.user)
-                            note.save()
-                            find.notes.add(note)
-                            reactivated_count += 1
-                        new_items.append(find.id)
                     else:
-                        item.test = t
+                        finding = Finding.objects.filter(title=item.title,
+                                                      test__id=test.id,
+                                                      severity=sev,
+                                                      numerical_severity=Finding.get_numerical_severity(sev))
+
+                    if len(finding) == 1:
+                        finding = finding[0]
+                        if finding.mitigated or finding.is_Mitigated:
+							# it was once fixed, but now back
+                            finding.mitigated = None
+                            finding.is_Mitigated = False
+                            finding.mitigated_by = None
+                            finding.active = True
+                            finding.verified = verified
+                            finding.save()
+                            note = Notes(
+                                entry="Re-activated by %s re-upload." % scan_type,
+                                author=request.user)
+                            note.save()
+                            finding.notes.add(note)
+                            reactivated_count += 1
+                        new_items.append(finding.id)
+                    else:
+                        item.test = test
                         if item.date == timezone.now().date():
-                            item.date = t.target_start
+                            item.date = test.target_start
                         item.reporter = request.user
                         item.last_reviewed = timezone.now()
                         item.last_reviewed_by = request.user
@@ -688,7 +689,7 @@ def re_import_scan_results(request, tid):
                         item.save(dedupe_option=False)
                         finding_added_count += 1
                         new_items.append(item.id)
-                        find = item
+                        finding = item
 
                         if hasattr(item, 'unsaved_req_resp') and len(item.unsaved_req_resp) > 0:
                             for req_resp in item.unsaved_req_resp:
@@ -714,7 +715,7 @@ def re_import_scan_results(request, tid):
                                                              )
                             burp_rr.clean()
                             burp_rr.save()
-                    if find:
+                    if finding:
                         finding_count += 1
                         for endpoint in item.unsaved_endpoints:
                             ep, created = Endpoint.objects.get_or_create(protocol=endpoint.protocol,
@@ -722,27 +723,28 @@ def re_import_scan_results(request, tid):
                                                                          path=endpoint.path,
                                                                          query=endpoint.query,
                                                                          fragment=endpoint.fragment,
-                                                                         product=t.engagement.product)
-                            find.endpoints.add(ep)
+                                                                         product=test.engagement.product)
+                            finding.endpoints.add(ep)
                         for endpoint in form.cleaned_data['endpoints']:
                             ep, created = Endpoint.objects.get_or_create(protocol=endpoint.protocol,
                                                                          host=endpoint.host,
                                                                          path=endpoint.path,
                                                                          query=endpoint.query,
                                                                          fragment=endpoint.fragment,
-                                                                         product=t.engagement.product)
-                            find.endpoints.add(ep)
+                                                                         product=test.engagement.product)
+                            finding.endpoints.add(ep)
 
                         if item.unsaved_tags is not None:
-                            find.tags = item.unsaved_tags
+                            finding.tags = item.unsaved_tags
 
-                    find.save()
+                    finding.save()
                 # calculate the difference
                 to_mitigate = set(original_items) - set(new_items)
                 for finding_id in to_mitigate:
                     finding = Finding.objects.get(id=finding_id)
                     if not finding.mitigated or not finding.is_Mitigated:
-                        finding.mitigated = datetime.combine(scan_date, timezone.now().time())
+                        finding.mitigated = scan_date_time
+                        finding.is_Mitigated = True
                         finding.mitigated_by = request.user
                         finding.active = False
                         finding.save()
@@ -752,11 +754,11 @@ def re_import_scan_results(request, tid):
                         finding.notes.add(note)
                         mitigated_count += 1
 
-                t.updated = max_safe([scan_date_time, t.updated])
-                t.engagement.updated = max_safe([scan_date_time, t.engagement.updated])
+                test.updated = max_safe([scan_date_time, test.updated])
+                test.engagement.updated = max_safe([scan_date_time, test.engagement.updated])
 
-                t.save()
-                t.engagement.save()
+                test.save()
+                test.engagement.save()
 
                 messages.add_message(request,
                                      messages.SUCCESS,
@@ -782,9 +784,9 @@ def re_import_scan_results(request, tid):
                                                                  'mitigated') + '. Please manually verify each one.',
                                          extra_tags='alert-success')
 
-                create_notification(event='results_added', title=str(finding_count) + " findings for " + engagement.product.name, finding_count=finding_count, test=t, engagement=engagement, url=reverse('view_test', args=(t.id,)))
+                create_notification(event='results_added', title=str(finding_count) + " findings for " + test.engagement.product.name, finding_count=finding_count, test=test, engagement=test.engagement, url=reverse('view_test', args=(test.id,)))
 
-                return HttpResponseRedirect(reverse('view_test', args=(t.id,)))
+                return HttpResponseRedirect(reverse('view_test', args=(test.id,)))
             except SyntaxError:
                 messages.add_message(request,
                                      messages.ERROR,
