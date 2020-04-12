@@ -7,6 +7,10 @@ from dojo.models import Finding
 
 class BrakemanScanParser(object):
     def __init__(self, filename, test):
+        if filename is None:
+            self.items = ()
+            return
+
         tree = filename.read()
         try:
             data = json.loads(str(tree, 'utf-8'))
