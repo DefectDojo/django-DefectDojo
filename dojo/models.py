@@ -28,7 +28,6 @@ from dojo.signals import dedupe_signal
 from dojo.tag.prefetching_tag_descriptor import PrefetchingTagDescriptor
 from django.contrib.contenttypes.fields import GenericRelation
 from tagging.models import TaggedItem
-from threading import local
 
 fmt = getattr(settings, 'LOG_FORMAT', None)
 lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
@@ -91,51 +90,6 @@ class Regulation(models.Model):
 
     def __str__(self):
         return self.acronym + ' (' + self.jurisdiction + ')'
-
-
-class System_Settings_Manager(models.Manager):
-    _thread_local = local()
-
-    def get_from_super(self, *args, **kwargs):
-        logger.debug('calling super() for system_settings')
-        try:
-            from_db = super(System_Settings_Manager, self).get(*args, **kwargs)
-            logger.debug('id from_db: %s', from_db.id)
-        except:
-            # this mimics the existing code that was in filters.py and utils.py.
-            # cases I have seen triggering this is for example manage.py collectstatic inside a docker build where mysql is not available
-            logger.warn('unable to get system_settings from database, constructing (new) default instance. Exception was:', exc_info=True)
-            return System_Settings()
-        return from_db
-
-    def get(self, no_cache=False, *args, **kwargs):
-        if no_cache:
-            logger.debug('no_cache specified or cached value found, loading system settings from db')
-            return self.load()
-
-        if not hasattr(self._thread_local, 'system_settings') or not self._thread_local.system_settings:
-            logger.debug('no cached value found, loading system settings from db')
-            return self.load()
-
-        from_cache = self._thread_local.system_settings
-        logger.debug('from_cache: %s', from_cache.id)
-        return from_cache
-
-    def load(self):
-        system_settings = self.get_from_super()
-
-        if not system_settings:
-            logger.debug('constructing default System_Settings')
-            return System_Settings()
-
-        self._thread_local.system_settings = system_settings
-        logger.debug('returning %s', system_settings)
-        return system_settings
-
-    def cleanup(self):
-        logger.debug('removeing thread local system_settings')
-        if hasattr(self._thread_local, 'system_settings'):
-            del self._thread_local.system_settings
 
 
 class System_Settings(models.Model):
@@ -304,12 +258,8 @@ class System_Settings(models.Model):
     drive_folder_ID = models.CharField(max_length=100, blank=True)
     enable_google_sheets = models.BooleanField(default=False, null=True, blank=True)
 
+    from dojo.middleware import System_Settings_Manager
     objects = System_Settings_Manager()
-
-    def save(self, *args, **kwargs):
-        super(System_Settings, self).save(*args, **kwargs)
-        logger.debug('refreshing system_settings cache after save')
-        System_Settings.objects.load()
 
 
 class SystemSettingsFormAdmin(forms.ModelForm):

@@ -2,8 +2,11 @@ from django.http import HttpResponseRedirect
 from django.conf import settings
 from django.utils.http import urlquote
 from re import compile
-from dojo.models import System_Settings
+import logging
+from threading import local
+from django.db import models
 
+logger = logging.getLogger(__name__)
 
 EXEMPT_URLS = [compile(settings.LOGIN_URL.lstrip('/'))]
 if hasattr(settings, 'LOGIN_EXEMPT_URLS'):
@@ -22,6 +25,7 @@ class LoginRequiredMiddleware:
     """
 
     def __init__(self, get_response):
+
         self.get_response = get_response
 
     def __call__(self, request):
@@ -44,20 +48,69 @@ class LoginRequiredMiddleware:
         return response
 
 
-def dojo_system_settings_middleware(get_response):
-    """
-    Middleware that caches a System_Settings model instance per request. There's lots of (legacy) code makin multiple
-    database queries to get system settings from the database. This can result in over 50 database queries when
-    rendering a view. This middleware reduces this to exactly one query. We may at some point want to refactor the
-    System_Settings mechanism, but for now it's easier to just cache it (without requiring additional software such as Redis).
-    """
+class DojoSytemSettingsMiddleware(object):
+    _thread_local = local()
 
-    def middleware(request):
+    def __init__(self, get_response):
+        self.get_response = get_response
+        # avoid circular imports
+        from dojo.models import System_Settings
+        models.signals.post_save.connect(self.cleanup, sender=System_Settings)
 
-        System_Settings.objects.load()
-        response = get_response(request)
-        System_Settings.objects.cleanup()
-
+    def __call__(self, request):
+        self.load()
+        response = self.get_response(request)
+        self.cleanup()
         return response
 
-    return middleware
+    def process_exception(self, request, exception):
+        logger.debug('cleaning up during exception')
+        self.cleanup()
+
+    @classmethod
+    def get_system_settings(cls):
+        if hasattr(cls._thread_local, 'system_settings'):
+            return cls._thread_local.system_settings
+
+        return None
+
+    @classmethod
+    def cleanup(cls, *args, **kwargs):
+        logger.debug('removing thread local system_settings')
+        if hasattr(cls._thread_local, 'system_settings'):
+            del cls._thread_local.system_settings
+
+    @classmethod
+    def load(cls):
+        from dojo.models import System_Settings
+        system_settings = System_Settings.objects.get(no_cache=True)
+        cls._thread_local.system_settings = system_settings
+        return system_settings
+
+
+class System_Settings_Manager(models.Manager):
+
+    def get_from_db(self, *args, **kwargs):
+        # logger.debug('resfreshing system_settings from db')
+        try:
+            from_db = super(System_Settings_Manager, self).get(*args, **kwargs)
+        except:
+            from dojo.models import System_Settings
+            # this mimics the existing code that was in filters.py and utils.py.
+            # cases I have seen triggering this is for example manage.py collectstatic inside a docker build where mysql is not available
+            # logger.debug('unable to get system_settings from database, constructing (new) default instance. Exception was:', exc_info=True)
+            return System_Settings()
+        return from_db
+
+    def get(self, no_cache=False, *args, **kwargs):
+        if no_cache:
+            # logger.debug('no_cache specified or cached value found, loading system settings from db')
+            return self.get_from_db(*args, **kwargs)
+
+        from_cache = DojoSytemSettingsMiddleware.get_system_settings()
+
+        if not from_cache:
+            # logger.debug('no cached value found, loading system settings from db')
+            return self.get_from_db(*args, **kwargs)
+
+        return from_cache
