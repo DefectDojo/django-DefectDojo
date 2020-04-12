@@ -77,7 +77,10 @@ def get_cwe_number(cwe):
     :param cwe:
     :return: cwe number
     """
-    return cwe.split("-")[1]
+    if cwe is None:
+        return None
+    else:
+        return cwe.split("-")[1]
 
 
 def get_severity(severity):
