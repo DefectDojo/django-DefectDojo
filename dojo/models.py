@@ -1741,13 +1741,10 @@ class Finding(models.Model):
                 from dojo.tasks import async_dedupe
                 try:
                     if self.reporter.usercontactinfo.block_execution:
-                        logger.debug('triggering signal for sync dedupe')
                         dedupe_signal.send(sender=self.__class__, new_finding=self)
                     else:
-                        logger.debug('triggering async dedupe')
                         async_dedupe.delay(self, *args, **kwargs)
                 except:
-                    logger.debug('triggering async dedupe except')
                     async_dedupe.delay(self, *args, **kwargs)
                     pass
             else:
