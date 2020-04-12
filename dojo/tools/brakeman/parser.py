@@ -17,9 +17,7 @@ class BrakemanScanParser(object):
 
         for item in data['warnings']:
             impact = ''
-            references = ''
             findingdetail = ''
-            title = ''
 
             title = item['warning_type'] + '. ' + item['message']
 
@@ -35,8 +33,6 @@ class BrakemanScanParser(object):
             if item['render_path'] is not None:
                 findingdetail += 'Render path details:\n'
                 findingdetail += json.dumps(item['render_path'], indent=4)
-                #for render_path in item['render_path']:
-                #    findingdetail += "User input coming from \"{}\" might be used for {} in {}:{} ({}:{})\n".format(item['user_input'], item['warning_type'], render_path['class'], render_path['method'], render_path['file'], str(render_path['line']))
             sev = 'Medium'
             references = item['link']
 
