@@ -38,7 +38,7 @@ class BrakemanScanParser(object):
                 findingdetail += 'User input:\n' + item['user_input'] + '\n'
             if item['render_path'] is not None:
                 findingdetail += 'Render path details:\n'
-                findingdetail += json.dumps(item['render_path'], indent=4))
+                findingdetail += json.dumps(item['render_path'], indent=4)
                 #for render_path in item['render_path']:
                 #    findingdetail += "User input coming from \"{}\" might be used for {} in {}:{} ({}:{})\n".format(item['user_input'], item['warning_type'], render_path['class'], render_path['method'], render_path['file'], str(render_path['line']))
             sev = 'Medium'
