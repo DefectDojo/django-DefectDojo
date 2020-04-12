@@ -55,6 +55,9 @@
                             {% if system_settings.enable_jira %}
                             <th>Jira</th>
                             {% endif %}
+                            {% if system_settings.enable_github %}
+                            <th>Github</th>
+                            {% endif %}
                             <th> Findings</th>
                             <th> Endpoints</th>
                             <th> Contact</th>
@@ -206,6 +209,22 @@
                                 {% endfor %}
                                 </td>
                                 {% endif %}
+
+                                {% if system_settings.enable_github %}
+                                <td class="text-center">
+                                {% for github_conf in prod.github_confs %}
+                                <i class="fa fa-bug has-popover" title="<i class='fa fa-bug'></i> <b>Github Configuration</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="bottom"
+                                  data-content="<b>Github:</b> {{ github_conf.conf }}<br/>
+                                  <b>Project Key:</b> {{ github_conf.project_key }}<br/>
+                                  <b>Component:</b> {{ github_conf.component }}<br/>
+                                  <b>Push All Issues:</b> {{ github_conf.push_all_issues }}<br/>
+                                  <b>Engagement Epic Mapping:</b> {{ github_conf.enable_engagement_epic_mapping }}<br/>
+                                  <b>Push Notes:</b> {{ github_conf.push_notes }}">
+                                </i>
+                                {% endfor %}
+                                </td>
+                                {% endif %}
+
                                 <td class="text-center">
                                     {% if prod.findings_count %}
                                         <a href="{% url 'product_open_findings' prod.id %}?test__engagement__product={{ prod.id }}"><b>{{ prod.findings_count }}</b></a>

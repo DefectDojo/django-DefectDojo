@@ -18,18 +18,20 @@ from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
 from dojo.templatetags.display_tags import get_level
 from dojo.filters import ProductFilter, ProductFindingFilter, EngagementFilter
-from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAPKeyForm, JIRAFindingForm, AdHocFindingForm, \
+from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAPKeyForm, JIRAFindingForm, AdHocFindingForm, GITHUB_Product_Form, GITHUBFindingForm, \
                        EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm
-from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, Finding_Template, \
+
+from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, GITHUB_PKey, Finding_Template, \
     Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, \
     Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product
 from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, create_notification, Product_Tab, get_punchcard_data
 from custom_field.models import CustomFieldValue, CustomField
-from dojo.tasks import add_epic_task, add_issue_task
+from dojo.tasks import add_epic_task, add_issue_task, add_external_issue_task
 from tagging.models import Tag
 from tagging.utils import get_tag_list
 from django.db.models import Prefetch
 from django.db.models.query import QuerySet
+from github import Github
 
 logger = logging.getLogger(__name__)
 
@@ -83,6 +85,7 @@ def prefetch_for_product(prods):
         prefetched_prods = prefetched_prods.annotate(last_engagement_date=Max('engagement__target_start'))
         prefetched_prods = prefetched_prods.annotate(active_finding_count=Count('engagement__test__finding__id', filter=Q(engagement__test__finding__active=True)))
         prefetched_prods = prefetched_prods.prefetch_related(Prefetch('jira_pkey_set', queryset=JIRA_PKey.objects.all().select_related('conf'), to_attr='jira_confs'))
+        prefetched_prods = prefetched_prods.prefetch_related(Prefetch('github_pkey_set', queryset=GITHUB_PKey.objects.all().select_related('conf'), to_attr='github_confs'))
         active_endpoint_query = Endpoint.objects.filter(
                 finding__active=True,
                 finding__mitigated__isnull=True)
@@ -482,6 +485,11 @@ def new_product(request):
         else:
             jform = None
 
+        if get_system_setting('enable_github'):
+            gform = GITHUB_Product_Form(request.POST, instance=GITHUB_PKey())
+        else:
+            gform = None
+
         if form.is_valid():
             product = form.save()
             tags = request.POST.getlist('tags')
@@ -502,6 +510,30 @@ def new_product(request):
                                                 'JIRA information added successfully.',
                                                 extra_tags='alert-success')
 
+            if get_system_setting('enable_github'):
+                if gform.is_valid():
+                    github_pkey = gform.save(commit=False)
+                    if github_pkey.conf is not None:
+                        github_pkey.product = product
+                        github_pkey.save()
+                        messages.add_message(request,
+                                                messages.SUCCESS,
+                                                'Github information added successfully.',
+                                                extra_tags='alert-success')
+                    # Create appropriate labels in the repo
+                    logger.info('Create label in repo: ' + github_pkey.project_key)
+                    try:
+                        g = Github(github_pkey.conf.api_key)
+                        repo = g.get_repo(github_pkey.project_key)
+                        repo.create_label(name="security", color="FF0000", description="This label is automatically applied to all issues created by defectDojo")
+                        repo.create_label(name="security / info", color="00FEFC", description="This label is automatically applied to all issues created by defectDojo")
+                        repo.create_label(name="security / low", color="B7FE00", description="This label is automatically applied to all issues created by defectDojo")
+                        repo.create_label(name="security / medium", color="FEFE00", description="This label is automatically applied to all issues created by defectDojo")
+                        repo.create_label(name="security / high", color="FE9A00", description="This label is automatically applied to all issues created by defectDojo")
+                        repo.create_label(name="security / critical", color="FE2200", description="This label is automatically applied to all issues created by defectDojo")
+                    except:
+                        logger.info('Labels cannot be created - they may already exists')
+
             # SonarQube API Configuration
             sonarqube_form = Sonarqube_ProductForm(request.POST)
             if sonarqube_form.is_valid():
@@ -517,11 +549,16 @@ def new_product(request):
             jform = JIRAPKeyForm()
         else:
             jform = None
+        if get_system_setting('enable_github'):
+            gform = GITHUB_Product_Form()
+        else:
+            gform = None
 
     add_breadcrumb(title="New Product", top_level=False, request=request)
     return render(request, 'dojo/new_product.html',
                   {'form': form,
                    'jform': jform,
+                   'gform': gform,
                    'sonarqube_form': Sonarqube_ProductForm()})
 
 
@@ -532,11 +569,19 @@ def edit_product(request, pid):
     jira_enabled = system_settings.enable_jira
     jira_inst = None
     jform = None
+    github_enabled = system_settings.enable_github
+    github_inst = None
+    gform = None
     sonarqube_form = None
     try:
         jira_inst = JIRA_PKey.objects.get(product=prod)
     except:
         jira_inst = None
+        pass
+    try:
+        github_inst = GITHUB_PKey.objects.get(product=prod)
+    except:
+        github_inst = None
         pass
 
     sonarqube_conf = Sonarqube_Product.objects.filter(product=prod).first()
@@ -571,6 +616,24 @@ def edit_product(request, pid):
                                             'JIRA information updated successfully.',
                                             extra_tags='alert-success')
 
+            if get_system_setting('enable_github') and github_inst:
+                gform = GITHUB_Product_Form(request.POST, instance=github_inst)
+                # need to handle delete
+                try:
+                    gform.save()
+                except:
+                    pass
+            elif get_system_setting('enable_github'):
+                gform = GITHUB_Product_Form(request.POST)
+                if gform.is_valid():
+                    new_conf = gform.save(commit=False)
+                    new_conf.product_id = pid
+                    new_conf.save()
+                    messages.add_message(request,
+                                            messages.SUCCESS,
+                                            'GITHUB information updated successfully.',
+                                            extra_tags='alert-success')
+
             # SonarQube API Configuration
             sonarqube_form = Sonarqube_ProductForm(request.POST, instance=sonarqube_conf)
             if sonarqube_form.is_valid():
@@ -594,6 +657,16 @@ def edit_product(request, pid):
         else:
             jform = None
 
+        if github_enabled and (github_inst is not None):
+            if github_inst is not None:
+                gform = GITHUB_Product_Form(instance=github_inst)
+            else:
+                gform = GITHUB_Product_Form()
+        elif jira_enabled:
+            gform = GITHUB_Product_Form()
+        else:
+            gform = None
+
         sonarqube_form = Sonarqube_ProductForm(instance=sonarqube_conf)
 
     form.initial['tags'] = [tag.name for tag in prod.tags]
@@ -603,6 +676,7 @@ def edit_product(request, pid):
                   {'form': form,
                    'product_tab': product_tab,
                    'jform': jform,
+                   'gform': gform,
                    'sonarqube_form': sonarqube_form,
                    'product': prod
                    })
@@ -822,6 +896,11 @@ def ad_hoc_finding(request, pid):
             jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
     else:
         jform = None
+    if get_system_setting('enable_github'):
+        if GITHUB_PKey.objects.filter(product=test.engagement.product).count() != 0:
+            gform = GITHUBFindingForm(enabled=enabled, prefix='githubform')
+    else:
+        gform = None
     if request.method == 'POST':
         form = AdHocFindingForm(request.POST)
         if (form['active'].value() is False or form['false_p'].value()) and form['duplicate'].value() is False:
@@ -857,10 +936,18 @@ def ad_hoc_finding(request, pid):
             if 'jiraform-push_to_jira' in request.POST:
                 jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=enabled)
                 if jform.is_valid():
-                    add_issue_task.delay(new_finding, jform.cleaned_data.get('push_to_jira'))
+                    add_issue_task.delay(new_finding, 'github')
                 messages.add_message(request,
                                      messages.SUCCESS,
                                      'Finding added successfully.',
+                                     extra_tags='alert-success')
+            if 'githubform-push_to_github' in request.POST:
+                gform = GITHUBFindingForm(request.POST, prefix='jiragithub', enabled=enabled)
+                if gform.is_valid():
+                    add_external_issue_task.delay(new_finding, 'github')
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     'Finding added successfully to github.',
                                      extra_tags='alert-success')
             if create_template:
                 templates = Finding_Template.objects.filter(title=new_finding.title)
@@ -908,6 +995,7 @@ def ad_hoc_finding(request, pid):
                    'pid': pid,
                    'form_error': form_error,
                    'jform': jform,
+                   'gform': gform,
                    })
 
 
