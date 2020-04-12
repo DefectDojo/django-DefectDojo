@@ -25,7 +25,6 @@ from multiselectfield import MultiSelectField
 from django import forms
 from django.utils.translation import gettext as _
 from dojo.signals import dedupe_signal
-from django.core.cache import cache
 from dojo.tag.prefetching_tag_descriptor import PrefetchingTagDescriptor
 from django.contrib.contenttypes.fields import GenericRelation
 from tagging.models import TaggedItem
@@ -91,21 +90,6 @@ class Regulation(models.Model):
 
     def __str__(self):
         return self.acronym + ' (' + self.jurisdiction + ')'
-
-
-class SystemSettingsManager(models.Manager):
-    CACHE_KEY = 'defect_dojo_cache.system_settings'
-
-    def get_from_super(self, *args, **kwargs):
-        logger.debug('getting system_settings from super because cache was empty')
-        return super(SystemSettingsManager, self).get(*args, **kwargs)
-
-    def get(self, no_cache=False, *args, **kwargs):
-        # cache only 30s because django default cache backend is local per process
-        if no_cache:
-            logger.debug('no cache specified, retrieving system settings from super()')
-            return super(SystemSettingsManager, self).get(*args, **kwargs)
-        return cache.get_or_set(self.CACHE_KEY, lambda: self.get_from_super(*args, **kwargs), timeout=30)
 
 
 class System_Settings(models.Model):
@@ -274,12 +258,8 @@ class System_Settings(models.Model):
     drive_folder_ID = models.CharField(max_length=100, blank=True)
     enable_google_sheets = models.BooleanField(default=False, null=True, blank=True)
 
-    objects = SystemSettingsManager()
-
-    def save(self, *args, **kwargs):
-        super(System_Settings, self).save(*args, **kwargs)
-        logger.debug('deleting system settings from cache after save')
-        cache.delete(SystemSettingsManager.CACHE_KEY)
+    from dojo.middleware import System_Settings_Manager
+    objects = System_Settings_Manager()
 
 
 class SystemSettingsFormAdmin(forms.ModelForm):
@@ -1761,10 +1741,13 @@ class Finding(models.Model):
                 from dojo.tasks import async_dedupe
                 try:
                     if self.reporter.usercontactinfo.block_execution:
+                        logger.debug('triggering signal for sync dedupe')
                         dedupe_signal.send(sender=self.__class__, new_finding=self)
                     else:
+                        logger.debug('triggering async dedupe')
                         async_dedupe.delay(self, *args, **kwargs)
                 except:
+                    logger.debug('triggering async dedupe except')
                     async_dedupe.delay(self, *args, **kwargs)
                     pass
             else:
