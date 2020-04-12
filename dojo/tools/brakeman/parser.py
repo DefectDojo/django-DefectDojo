@@ -16,14 +16,10 @@ class BrakemanScanParser(object):
         find_date = parser.parse(data['scan_info']['end_time'])
 
         for item in data['warnings']:
-            categories = ''
-            language = ''
             impact = ''
             references = ''
             findingdetail = ''
             title = ''
-            group = ''
-            status = ''
 
             title = item['warning_type'] + '. ' + item['message']
 
