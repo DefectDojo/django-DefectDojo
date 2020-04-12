@@ -24,5 +24,4 @@ categories:
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 template: |
   ## Changes
-
   $CHANGES
