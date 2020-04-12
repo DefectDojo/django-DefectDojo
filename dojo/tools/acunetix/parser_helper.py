@@ -77,6 +77,7 @@ def get_cwe_id(cwelist_node):
     :return:
     """
     # Assuming CWEList contains only CWE node
+    print(repr(cwelist_node))
     cwe = cwelist_node[0]
     return cwe.text
 
