@@ -18,7 +18,6 @@ class BrakemanScanParser(object):
         for item in data['warnings']:
             categories = ''
             language = ''
-            mitigation = ''
             impact = ''
             references = ''
             findingdetail = ''
@@ -32,11 +31,12 @@ class BrakemanScanParser(object):
             findingdetail += 'Filename: ' + item['file'] + '\n'
             findingdetail += 'Line number: ' + str(item['line'] or '') + '\n'
             findingdetail += 'Issue Confidence: ' + item['confidence'] + '\n\n'
-            findingdetail += 'Code:\n'
-            findingdetail += item['code'] or '' + '\n'
-
+            if item['code'] is not null:
+                findingdetail += 'Code:\n' + item['code'] + '\n'
+            if item['render_path'] is not null:
+                findingdetail += 'Render path:\n'
+                findingdetail += "User input coming from \"{}\" might be used for {} in {}:{} ({}:{})".format(item['user_input'], item['warning_type'], item['render_path']['class'], item['render_path']['method'], item['render_path']['file'], item['render_path']['line'])
             sev = 'Medium'
-            mitigation = 'coming soon'
             references = item['link']
 
             dupe_key = item['fingerprint']
@@ -54,12 +54,10 @@ class BrakemanScanParser(object):
                     description=findingdetail,
                     severity=sev,
                     numerical_severity=Finding.get_numerical_severity(sev),
-                    mitigation=mitigation,
                     impact=impact,
                     references=references,
                     file_path=item['file'],
                     line=item['line'],
-                    url='N/A',
                     date=find_date,
                     static_finding=True)
 
