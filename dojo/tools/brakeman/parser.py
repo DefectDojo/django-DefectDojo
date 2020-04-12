@@ -29,13 +29,14 @@ class BrakemanScanParser(object):
 
             # Finding details information
             findingdetail += 'Filename: ' + item['file'] + '\n'
-            findingdetail += 'Line number: ' + str(item['line'] or '') + '\n'
+            if item['line'] is not None:
+                findingdetail += 'Line number: ' + str(item['line']) + '\n'
             findingdetail += 'Issue Confidence: ' + item['confidence'] + '\n\n'
-            if item['code'] is not null:
+            if item['code'] is not None:
                 findingdetail += 'Code:\n' + item['code'] + '\n'
-            if item['render_path'] is not null:
+            if item['render_path'] is not None:
                 findingdetail += 'Render path:\n'
-                findingdetail += "User input coming from \"{}\" might be used for {} in {}:{} ({}:{})".format(item['user_input'], item['warning_type'], item['render_path']['class'], item['render_path']['method'], item['render_path']['file'], item['render_path']['line'])
+                findingdetail += "User input coming from \"{}\" might be used for {} in {}:{} ({}:{})".format(item['user_input'], item['warning_type'], item['render_path']['class'], item['render_path']['method'], item['render_path']['file'], str(item['render_path']['line']))
             sev = 'Medium'
             references = item['link']
 
