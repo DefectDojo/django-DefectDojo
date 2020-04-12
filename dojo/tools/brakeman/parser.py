@@ -34,9 +34,13 @@ class BrakemanScanParser(object):
             findingdetail += 'Issue Confidence: ' + item['confidence'] + '\n\n'
             if item['code'] is not None:
                 findingdetail += 'Code:\n' + item['code'] + '\n'
+            if item['user_input'] is not None:
+                findingdetail += 'User input:\n' + item['user_input'] + '\n'
             if item['render_path'] is not None:
-                findingdetail += 'Render path:\n'
-                findingdetail += "User input coming from \"{}\" might be used for {} in {}:{} ({}:{})".format(item['user_input'], item['warning_type'], item['render_path']['class'], item['render_path']['method'], item['render_path']['file'], str(item['render_path']['line']))
+                findingdetail += 'Render path details:\n'
+                findingdetail += json.dumps(item['render_path'], indent=4))
+                #for render_path in item['render_path']:
+                #    findingdetail += "User input coming from \"{}\" might be used for {} in {}:{} ({}:{})\n".format(item['user_input'], item['warning_type'], render_path['class'], render_path['method'], render_path['file'], str(render_path['line']))
             sev = 'Medium'
             references = item['link']
 
