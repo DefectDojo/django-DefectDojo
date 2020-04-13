@@ -9,8 +9,8 @@ env:
     - HELM_VERSION=v2.13.0
     - CHANGE_MINIKUBE_NONE_USER=true
   matrix:
-    - TEST=integration_tests
     - TEST=flake8
+    - TEST=integration_tests
     - TEST=docker
     - BROKER=rabbitmq DATABASE=mysql
     - BROKER=rabbitmq DATABASE=postgresql
