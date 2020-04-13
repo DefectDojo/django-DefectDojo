@@ -8,6 +8,14 @@ from Product_unit_test import ProductTest
 
 class EngagementTest(BaseTestCase):
 
+    def test_list_active_engagements(self):
+        driver = self.login_page()
+        self.goto_active_engagements_overview(driver)
+
+    def test_list_all_engagements(self):
+        driver = self.login_page()
+        self.goto_all_engagements_overview(driver)
+
     def test_add_new_engagement(self):
         driver = self.login_page()
         self.goto_product_overview(driver)
