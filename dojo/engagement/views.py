@@ -507,11 +507,14 @@ def import_scan_results(request, eid=None, pid=None):
     if eid:
         engagement = get_object_or_404(Engagement, id=eid)
         cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(engagement=engagement).order_by('cred_id')
-
-    product = get_object_or_404(Product, id=pid)
-    if get_system_setting('enable_jira') and product.jira_pkey_set.first() is not None:
-        enabled = product.jira_pkey_set.first().push_all_issues
-        jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
+        if get_system_setting('enable_jira') and engagement.product.jira_pkey_set.first() is not None:
+            enabled = engagement.product.jira_pkey_set.first().push_all_issues
+            jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
+    elif pid:
+        product = get_object_or_404(Product, id=pid)
+        if get_system_setting('enable_jira') and product.jira_pkey_set.first() is not None:
+            enabled = product.jira_pkey_set.first().push_all_issues
+            jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
 
     if request.method == "POST":
         form = ImportScanForm(request.POST, request.FILES)
