@@ -28,6 +28,7 @@ from dojo.signals import dedupe_signal
 from dojo.tag.prefetching_tag_descriptor import PrefetchingTagDescriptor
 from django.contrib.contenttypes.fields import GenericRelation
 from tagging.models import TaggedItem
+from dateutil.relativedelta import relativedelta
 
 fmt = getattr(settings, 'LOG_FORMAT', None)
 lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
@@ -135,6 +136,11 @@ class System_Settings(models.Model):
                                              default='None')
     jira_labels = models.CharField(max_length=200, blank=True, null=True,
                                    help_text='JIRA issue labels space seperated')
+
+    enable_github = models.BooleanField(default=False,
+                                      verbose_name='Enable GITHUB integration',
+                                      blank=False)
+
     enable_slack_notifications = \
         models.BooleanField(default=False,
                             verbose_name='Enable Slack notifications',
@@ -1645,6 +1651,36 @@ class Finding(models.Model):
                 sla_calculation = sla_age - age
         return sla_calculation
 
+    def github(self):
+        try:
+            return self.github_issue
+        except GITHUB_Issue.DoesNotExist:
+            return None
+
+    def has_github_issue(self):
+        try:
+            issue = self.jira_issue
+            return True
+        except GITHUB_Issue.DoesNotExist:
+            return False
+
+    def github_conf(self):
+        try:
+            jpkey = GITHUB_PKey.objects.get(product=self.test.engagement.product)
+            jconf = jpkey.conf
+        except:
+            jconf = None
+            pass
+        return jconf
+
+    # newer version that can work with prefetching
+    def github_conf_new(self):
+        try:
+            return self.test.engagement.product.github_pkey_set.all()[0].conf
+        except:
+            return None
+            pass
+
     def jira(self):
         try:
             return self.jira_issue
@@ -2084,6 +2120,56 @@ class FindingImageAccessToken(models.Model):
 class BannerConf(models.Model):
     banner_enable = models.BooleanField(default=False, null=True, blank=True)
     banner_message = models.CharField(max_length=500, help_text="This message will be displayed on the login page", default='')
+
+
+class GITHUB_Conf(models.Model):
+    configuration_name = models.CharField(max_length=2000, help_text="Enter a name to give to this configuration", default='')
+    api_key = models.CharField(max_length=2000, help_text="Enter your Github API Key", default='')
+
+    def __unicode__(self):
+        return self.configuration_name
+
+    def __str__(self):
+        return self.configuration_name
+
+
+class GITHUB_Issue(models.Model):
+    issue_id = models.CharField(max_length=200)
+    issue_url = models.URLField(max_length=2000, verbose_name="GitHub issue URL")
+    finding = models.OneToOneField(Finding, null=True, blank=True, on_delete=models.CASCADE)
+
+    def __unicode__(self):
+        return str(self.github_issue_id) + '| GitHub Issue URL: ' + str(self.github_issue_url)
+
+    def __str__(self):
+        return str(self.github_issue_id) + '| GitHub Issue URL: ' + str(self.github_issue_url)
+
+
+class GITHUB_Clone(models.Model):
+    github_id = models.CharField(max_length=200)
+    github_clone_id = models.CharField(max_length=200)
+
+
+class GITHUB_Details_Cache(models.Model):
+    github_id = models.CharField(max_length=200)
+    github_key = models.CharField(max_length=200)
+    github_status = models.CharField(max_length=200)
+    github_resolution = models.CharField(max_length=200)
+
+
+class GITHUB_PKey(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+    project_key = models.CharField(max_length=200, blank=True, verbose_name="Github project", help_text="Specify your project location. (:user/:repo)")
+    conf = models.ForeignKey(GITHUB_Conf, verbose_name="Github Configuration",
+                             null=True, blank=True, on_delete=models.CASCADE)
+    push_notes = models.BooleanField(default=False, blank=True, help_text="Notes added to findings will be automatically added to the corresponding github issue")
+
+    def __unicode__(self):
+        return self.product.name + " | " + self.project_key
+
+    def __str__(self):
+        return self.product.name + " | " + self.project_key
 
 
 class JIRA_Conf(models.Model):
@@ -2759,6 +2845,8 @@ admin.site.register(Alerts)
 admin.site.register(JIRA_Issue)
 admin.site.register(JIRA_Conf)
 admin.site.register(JIRA_PKey)
+admin.site.register(GITHUB_Conf)
+admin.site.register(GITHUB_PKey)
 admin.site.register(Tool_Configuration)
 admin.site.register(Tool_Product_Settings)
 admin.site.register(Tool_Type)

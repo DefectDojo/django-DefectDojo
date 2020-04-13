@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<ScanGroup>
+    <Scan>
+        <Name>VijayTest</Name>
+        <ShortName>Vijay Short Name</ShortName>
+        <StartURL>https://vijaytest.com</StartURL>
+        <StartTime>24/09/2018, 18:09:55</StartTime>
+        <FinishTime>24/09/2018, 21:42:41</FinishTime>
+        <ScanTime>212 minutes, 4 seconds</ScanTime>
+        <Aborted>False</Aborted>
+        <Responsive>True</Responsive>
+        <Banner></Banner>
+        <Os></Os>
+        <WebServer>Apache-Coyote/1.1</WebServer>
+        <ReportItems>
+            <ReportItem>
+                <Name>VijayReportItem1</Name>
+                <ModuleName>VijayTestModule</ModuleName>
+                <Details>Vijay Test</Details>
+                <Affects>Vijay Affects</Affects>
+                <Parameter></Parameter>
+                <AOP_SourceFile></AOP_SourceFile>
+                <AOP_SourceLine></AOP_SourceLine>
+                <AOP_Additional></AOP_Additional>
+                <IsFalsePositive></IsFalsePositive>
+                <Severity>medium</Severity>
+                <Type>csrf</Type>
+                <Impact>Vijay Test Imapact</Impact>
+                <DetailedInformation>Vijay Test Detail information</DetailedInformation>
+                <Recommendation>Vijay Test Recommendation</Recommendation>
+                <Description>Vijay Test Description</Description>
+                <CWEList>
+                    <CWE id="352"><![CDATA[CWE-352]]></CWE>
+                </CWEList>
+                <References>
+                    <Reference>
+                        <URL>https://vijayref.com</URL>
+                    </Reference>
+                </References>
+            </ReportItem>
+        </ReportItems>
+    </Scan>
+</ScanGroup>
