@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.RenameField(
             model_name='notifications',
             old_name='results_added',
-            new_name='findings_updated',
+            new_name='scan_added',
         ),
         migrations.AlterField(
             model_name='notifications',
