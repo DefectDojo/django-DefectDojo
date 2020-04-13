@@ -306,7 +306,7 @@ def async_dedupe(new_finding, *args, **kwargs):
 @app.task(name='async_create_notification')
 def async_create_notification(initiator=None, event=None, *args, **kwargs):
     logger.info("async_create_notification")
-    create_notification_sync(new_finding, *args, **kwargs)
+    create_notification_sync(initiator=initiator, event=event, *args, **kwargs)
 
 
 @app.task(name='applying rules')
