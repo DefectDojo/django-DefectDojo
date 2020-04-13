@@ -13,9 +13,13 @@ class HadolintParser(object):
             self.items = []
 
     def parse_json(self, json_output):
+        json_output = json_output.read().strip()
         try:
-            tree = json.load(json_output)
-        except:
+            try:
+                tree = json.loads(str(json_output, 'utf-8'))
+            except:
+                tree = json.loads(json_output)
+        except ValueError:
             raise Exception("Invalid format")
 
         return tree
@@ -48,7 +52,7 @@ def get_item(vulnerability, test):
         title=vulnerability['code'] + ": " + vulnerability['file'],
         test=test,
         severity=severity,
-        description=vulnerability['file'] + ":" + str(vulnerability['line']) + "   " + vulnerability['code'] + "  " + vulnerability['message'],
+        description="File: {}:{}\nVulnerability ID: {}\nDetails: {}\n".format(vulnerability['file'], vulnerability['line'], vulnerability['code'], vulnerability['message']),
         mitigation="No mitigation provided",
         active=False,
         verified=False,

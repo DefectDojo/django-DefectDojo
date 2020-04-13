@@ -114,7 +114,7 @@ docker-compose up
 
 This will run the application based on merged configurations from docker-compose.yml and docker-compose.override.ptvsd.yml.
 
-The default configuration assumes port 3000 by default for ptvsd, and you should access the DefectDojo UI on port 8000 instead of port 8080, as the uwsgi container will serve directly.
+The default configuration assumes port 3000 by default for ptvsd.
 
 ### VS code
 Add the following python debug configuration (You would have to install the `ms-python.python`. Other setup may work.)

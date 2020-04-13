@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0031_finding_component'),
+        ('dojo', '0034_add_github_support'),
     ]
 
     operations = [
