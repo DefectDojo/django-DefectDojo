@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 def personal_notifications(request):
     try:
-        notifications_obj = Notifications.objects.get(user=request.user)
+        notifications_obj = Notifications.objects.get(user=request.user, product__isnull=True)
     except:
         notifications_obj = Notifications(user=request.user)
 
@@ -57,7 +57,7 @@ def personal_notifications(request):
 @user_passes_test(lambda u: u.is_superuser)
 def system_notifications(request):
     try:
-        notifications_obj = Notifications.objects.get(user=None)
+        notifications_obj = Notifications.objects.get(user=None, product__isnull=True)
     except:
         notifications_obj = Notifications(user=None)
 
