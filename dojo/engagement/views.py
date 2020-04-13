@@ -508,8 +508,9 @@ def import_scan_results(request, eid=None, pid=None):
         engagement = get_object_or_404(Engagement, id=eid)
         cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(engagement=engagement).order_by('cred_id')
 
-    if get_system_setting('enable_jira') and engagement.product.jira_pkey_set.first() is not None:
-        enabled = engagement.product.jira_pkey_set.first().push_all_issues
+    product = get_object_or_404(Product, id=pid)
+    if get_system_setting('enable_jira') and product.jira_pkey_set.first() is not None:
+        enabled = product.jira_pkey_set.first().push_all_issues
         jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
 
     if request.method == "POST":
@@ -523,7 +524,7 @@ def import_scan_results(request, eid=None, pid=None):
             # Allows for a test to be imported with an engagement created on the fly
             if engagement is None:
                 engagement = Engagement()
-                product = get_object_or_404(Product, id=pid)
+                # product = get_object_or_404(Product, id=pid)
                 engagement.name = "AdHoc Import - " + strftime("%a, %d %b %Y %X", timezone.now().timetuple())
                 engagement.threat_model = False
                 engagement.api_test = False
