@@ -17,7 +17,7 @@ from django.core.mail import send_mail
 from django.core.mail import EmailMessage
 from django.core.paginator import Paginator
 from django.urls import get_resolver, reverse
-from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
+from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count, Prefetch
 from django.template.defaultfilters import pluralize
 from django.template.loader import render_to_string
 from django.utils import timezone
@@ -25,15 +25,16 @@ from jira import JIRA
 from jira.exceptions import JIRAError
 from django.dispatch import receiver
 from dojo.signals import dedupe_signal
+from django.db.models.signals import post_save
 import calendar as tcalendar
 from dojo.github import add_external_issue_github, update_external_issue_github, close_external_issue_github, reopen_external_issue_github
-
 from dojo.models import Finding, Engagement, Finding_Template, Product, JIRA_PKey, JIRA_Issue,\
     Dojo_User, User, Alerts, System_Settings, Notifications, UserContactInfo, Endpoint, Benchmark_Type, \
     Language_Type, Languages, Rule, Test_Type
 from asteval import Interpreter
 from requests.auth import HTTPBasicAuth
 import logging
+import itertools
 
 
 logger = logging.getLogger(__name__)
@@ -242,7 +243,7 @@ def deduplicate_hash_code(new_finding):
         str(len(existing_findings)) + " findings with same hash_code")
     for find in existing_findings:
         if is_deduplication_on_engagement_mismatch(new_finding, find):
-            deduplicationLogger.debug(
+            deduplicationLoggerdebug(
                 'deduplication_on_engagement_mismatch, skipping dedupe.')
             continue
         try:
@@ -1792,7 +1793,17 @@ def get_slack_user_id(user_email):
     return user_id
 
 
-def create_notification(event=None, **kwargs):
+def create_notification(initiator=None, event=None, **kwargs):
+    print('block_exec: ', vars(initiator.usercontactinfo))
+    if initiator and initiator.usercontactinfo and not initiator.usercontactinfo.block_execution:
+        from .tasks import async_create_notification
+        print('async nottttttttttttts')
+        async_create_notification.delay(initator=initiator, event=event, **kwargs)
+    else:
+        create_notification_sync(initator=initiator, event=event, **kwargs)
+
+
+def create_notification_sync(event=None, **kwargs):
     def create_description(event):
         if "description" not in kwargs.keys():
             if event == 'product_added':
@@ -1803,15 +1814,35 @@ def create_notification(event=None, **kwargs):
     def create_notification_message(event, notification_type):
         template = 'notifications/%s.tpl' % event.replace('/', '')
         kwargs.update({'type': notification_type})
+
         try:
             notification = render_to_string(template, kwargs)
-        except:
+        except Exception as e:
+            logger.exception(e)
             create_description(event)
             notification = render_to_string('notifications/other.tpl', kwargs)
 
         return notification
 
-    def send_slack_notification(channel):
+    def send_slack_notification(user=None):
+        if user is not None:
+            if user.usercontactinfo.slack_username is not None:
+                slack_user_id = user.usercontactinfo.slack_user_id
+                if user.usercontactinfo.slack_user_id is None:
+                    # Lookup the slack userid
+                    slack_user_id = get_slack_user_id(
+                        user.usercontactinfo.slack_username)
+                    slack_user_save = UserContactInfo.objects.get(user_id=user.id)
+                    slack_user_save.slack_user_id = slack_user_id
+                    slack_user_save.save()
+
+                channel = '@%s' % slack_user_id
+            else:
+                # user has no slack username, skip
+                return
+        else:
+            channel = get_system_setting('slack_channel')
+
         try:
             res = requests.request(
                 method='POST',
@@ -1826,14 +1857,19 @@ def create_notification(event=None, **kwargs):
             log_alert(e)
             pass
 
-    def send_hipchat_notification(channel):
+    def send_hipchat_notification(user=None):
+        if user:
+            # HipChat doesn't seem to offer direct message functionality, so no HipChat PM functionality here...
+            return
+
         try:
             # We use same template for HipChat as for slack
             res = requests.request(
                 method='POST',
                 url='https://%s/v2/room/%s/notification?auth_token=%s' %
-                (get_system_setting('hipchat_site'), channel,
-                 get_system_setting('hipchat_token')),
+                (get_system_setting('hipchat_site'),
+                get_system_setting('hipchat_channel'),
+                get_system_setting('hipchat_token')),
                 data={
                     'message': create_notification_message(event, 'slack'),
                     'message_format': 'text'
@@ -1842,7 +1878,12 @@ def create_notification(event=None, **kwargs):
             log_alert(e)
             pass
 
-    def send_mail_notification(address):
+    def send_mail_notification(user=None):
+        if user:
+            address = user.email
+        else:
+            address = get_system_setting('mail_notifications_to')
+
         subject = '%s notification' % get_system_setting('team_name')
         if 'title' in kwargs:
             subject += ': %s' % kwargs['title']
@@ -1854,9 +1895,13 @@ def create_notification(event=None, **kwargs):
                 [address],
                 headers={"From": "{}".format(get_system_setting('mail_notifications_from'))}
             )
+            email.content_subtype = 'html'
+            # logger.info('sending email alert:')
+            # logger.info(create_notification_message(event, 'mail'))
             email.send(fail_silently=False)
 
         except Exception as e:
+            logger.exception(e)
             log_alert(e)
             pass
 
@@ -1883,60 +1928,64 @@ def create_notification(event=None, **kwargs):
                 source="Notifications")
             alert.save()
 
-    # Global notifications
+    def process_notifications(notifications=None):
+        if notifications:
+            slack_enabled = get_system_setting('enable_slack_notifications')
+            hipchat_enabled = get_system_setting('enable_hipchat_notifications')
+            mail_enabled = get_system_setting('enable_mail_notifications')
+
+            if slack_enabled and 'slack' in getattr(notifications, event):
+                send_slack_notification(notifications.user)
+
+            if hipchat_enabled and 'hipchat' in getattr(notifications, event):
+                send_hipchat_notification(notifications.user)
+
+            if mail_enabled and 'mail' in getattr(notifications, event):
+                send_mail_notification(notifications.user)
+
+            if 'alert' in getattr(notifications, event, None):
+                send_alert_notification(notifications.user)
+
+    # System notifications
     try:
-        notifications = Notifications.objects.get(user=None)
-    except Exception as e:
-        notifications = Notifications()
+        system_notifications = Notifications.objects.get(user=None)
+    except Exception:
+        system_notifications = Notifications()
 
-    slack_enabled = get_system_setting('enable_slack_notifications')
-    hipchat_enabled = get_system_setting('enable_hipchat_notifications')
-    mail_enabled = get_system_setting('enable_mail_notifications')
+    logger.debug('sending system notifications')
+    process_notifications(system_notifications)
 
-    if slack_enabled and 'slack' in getattr(notifications, event):
-        send_slack_notification(get_system_setting('slack_channel'))
-
-    if hipchat_enabled and 'hipchat' in getattr(notifications, event):
-        send_hipchat_notification(get_system_setting('hipchat_channel'))
-
-    if mail_enabled and 'mail' in getattr(notifications, event):
-        send_mail_notification(get_system_setting('mail_notifications_to'))
-
-    if 'alert' in getattr(notifications, event, None):
-        send_alert_notification()
-
-    # Personal notifications
     if 'recipients' in kwargs:
-        users = User.objects.filter(username__in=kwargs['recipients'])
+        # mimic existing code so that when recipients is specified, no other personal notifications are sent.
+        logger.info('sending notifications for recipients')
+        for recipient_notifications in Notifications.objects.filter(user__username__in=kwargs['recipients'], user__is_active=True):
+            kwargs.update({'user': recipient_notifications.user})
+            process_notifications(recipient_notifications)
     else:
-        users = User.objects.filter(is_superuser=True)
-    for user in users:
-        try:
-            notifications = Notifications.objects.get(user=user)
-        except Exception as e:
-            notifications = Notifications()
+        # Personal but global notifications
+        # only retrieve users which have at least one notification type enabled for this event type.
+        logger.info('sending personal notifications')
 
-        if slack_enabled and 'slack' in getattr(
-                notifications,
-                event) and user.usercontactinfo.slack_username is not None:
-            slack_user_id = user.usercontactinfo.slack_user_id
-            if user.usercontactinfo.slack_user_id is None:
-                # Lookup the slack userid
-                slack_user_id = get_slack_user_id(
-                    user.usercontactinfo.slack_username)
-                slack_user_save = UserContactInfo.objects.get(user_id=user.id)
-                slack_user_save.slack_user_id = slack_user_id
-                slack_user_save.save()
+        if 'product' in kwargs:
+            product = kwargs.get('product')
 
-            send_slack_notification('@%s' % slack_user_id)
+        if not product and 'engagement' in kwargs:
+            product = kwargs['engagement'].product
 
-        # HipChat doesn't seem to offer direct message functionality, so no HipChat PM functionality here...
+        if not product and 'test' in kwargs:
+            product = kwargs['test'].engagement.product
 
-        if mail_enabled and 'mail' in getattr(notifications, event):
-            send_mail_notification(user.email)
+        # get users with either global notifications, or a product specific noditiciation
+        users = Dojo_User.objects.filter(is_active=True).prefetch_related(Prefetch(
+            "notifications_set",
+            queryset=Notifications.objects.filter(Q(product_id=product) | Q(product__isnull=True)),
+            to_attr="applicable_notifications"
+        )).annotate(applicable_notifications_count=Count('notifications__id', filter=Q(notifications__product_id=product) | Q(notifications__product__isnull=True))).filter(applicable_notifications_count__gt=0)
 
-        if 'alert' in getattr(notifications, event):
-            send_alert_notification(user)
+        for user in users:
+            # send notifications to user after merging possible multiple notifications records (i.e. personal global + personal product)
+            kwargs.update({'user': user})
+            process_notifications(Notifications.merge_notification_list(user.applicable_notifications))
 
 
 def calculate_grade(product):
@@ -2103,3 +2152,37 @@ def truncate_with_dots(the_string, max_length_including_dots):
 
 def max_safe(list):
     return max(i for i in list if i is not None)
+
+
+def get_full_url(relative_url):
+    if settings.SITE_URL:
+        return settings.SITE_URL + relative_url
+    else:
+        logger.warn('SITE URL undefined in settings, full_url cannot be created')
+        return relative_url
+
+
+@receiver(post_save, sender=Dojo_User)
+def set_default_notifications(sender, instance, created, **kwargs):
+    # for new user we create a Notifications object so the default 'alert' notifications work
+    # this needs to be a signal to make it also work for users created via ldap, oauth and other authentication backends
+    if created:
+        logger.info('creating default set of notifications for: ' + str(instance))
+        notifications = Notifications()
+        notifications.user = instance
+        notifications.save()
+
+
+@receiver(post_save, sender=Engagement)
+def engagement_post_Save(sender, instance, created, **kwargs):
+    if created:
+        engagement = instance
+        title = 'Engagement created for ' + str(engagement.product) + ': ' + str(engagement.name)
+        create_notification(event='engagement_added', title=title, engagement=engagement, product=engagement.product,
+                            url=reverse('view_engagement', args=(engagement.id,)))
+
+
+def merge_sets_safe(set1, set2):
+    return set(itertools.chain(set1 or [], set2 or []))
+    # This concat looks  better, but requires Python 3.6+
+    # return {*set1, *set2}

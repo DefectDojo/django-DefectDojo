@@ -661,7 +661,7 @@ def import_scan_results(request, eid=None, pid=None):
                     extra_tags='alert-success')
 
                 create_notification(
-                    event='results_added',
+                    event='scan_added',
                     title=str(finding_count) + " findings for " + engagement.product.name,
                     finding_count=finding_count,
                     test=t,

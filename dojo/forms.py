@@ -1906,6 +1906,20 @@ class NotificationsForm(forms.ModelForm):
         exclude = ['']
 
 
+class ProductNotificationsForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(ProductNotificationsForm, self).__init__(*args, **kwargs)
+        if not self.instance.id:
+            self.initial['engagement_added'] = ''
+            self.initial['test_added'] = ''
+            self.initial['scan_added'] = ''
+
+    class Meta:
+        model = Notifications
+        fields = ['engagement_added', 'test_added', 'scan_added']
+
+
 class AjaxChoiceField(forms.ChoiceField):
     def valid_value(self, value):
         return True
