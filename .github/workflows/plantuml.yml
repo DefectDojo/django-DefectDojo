@@ -12,12 +12,12 @@ jobs:
     env:
       UML_FILES: ".puml"
     steps:
-      - name: Checkout Source 
+      - name: Checkout Source
         uses: actions/checkout@v1
       - name: Generate SVG Diagrams
         uses: cloudbees/plantuml-github-action@master
         with:
-            args: -v -tsvg $UML_FILES
+          args: -v -tsvg $UML_FILES
       - name: Get changed UML files
         id: getfile
         run: |
@@ -28,12 +28,12 @@ jobs:
       - name: Generate PNG Diagrams
         uses: cloudbees/plantuml-github-action@master
         with:
-            args: -v -tpng $UML_FILES
+          args: -v -tpng $UML_FILES
       - name: Push Local Changes
-        uses:  stefanzweifel/git-auto-commit-action@v4.1.2 
-        with: 
+        uses: stefanzweifel/git-auto-commit-action@v4.1.2
+        with:
           commit_user_name: "PlantUML_bot"
           commit_user_email: "noreply@defectdojo.org"
           commit_author: "PlantUML Bot <noreply@defectdojo.org>"
-          commit_message: "Generate SVG and PNG images for PlantUML diagrams" 
+          commit_message: "Generate SVG and PNG images for PlantUML diagrams"
           branch: ${{ github.head_ref }}
