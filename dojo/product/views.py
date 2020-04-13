@@ -26,7 +26,7 @@ from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, S
     Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product
 from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, create_notification, Product_Tab, get_punchcard_data
 from custom_field.models import CustomFieldValue, CustomField
-from dojo.tasks import add_epic_task, add_issue_task, add_external_issue_task
+from dojo.tasks import add_epic_task, add_external_issue_task
 from tagging.models import Tag
 from tagging.utils import get_tag_list
 from django.db.models import Prefetch
