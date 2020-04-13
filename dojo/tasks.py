@@ -18,8 +18,9 @@ from dojo.tools.tool_issue_updater import tool_issue_updater, update_findings_fr
 from dojo.utils import sync_false_history, calculate_grade
 from dojo.reports.widgets import report_widget_factory
 from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_issue, \
-                       close_epic, create_notification, sync_rules, fix_loop_duplicates, rename_whitesource_finding, update_external_issue, add_external_issue, close_external_issue, reopen_external_issue
-
+                       close_epic, create_notification, sync_rules, fix_loop_duplicates, \
+                       rename_whitesource_finding, update_external_issue, add_external_issue, \
+                       close_external_issue, reopen_external_issue, create_notification_sync
 
 import logging
 fmt = getattr(settings, 'LOG_FORMAT', None)
@@ -300,6 +301,12 @@ def add_comment_task(find, note):
 def async_dedupe(new_finding, *args, **kwargs):
     deduplicationLogger.debug("running async deduplication")
     dedupe_signal.send(sender=new_finding.__class__, new_finding=new_finding)
+
+
+@app.task(name='async_create_notification')
+def async_create_notification(initiator=None, event=None, *args, **kwargs):
+    logger.info("async_create_notification")
+    create_notification_sync(new_finding, *args, **kwargs)
 
 
 @app.task(name='applying rules')

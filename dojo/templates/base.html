@@ -597,7 +597,7 @@
 <script src="{% static "dojo/js/index.js" %}"></script>
 <script type="application/javascript">
     $(document).ready(function() {
-        $('.has-popover').popover({'trigger':'hover'});
+        $('.has-popover').popover({'trigger':'hover', 'html': 'true'});
         {% if request.user.is_authenticated %}
         $('.dropdown-toggle').click(function() { get_alerts(); });
         setInterval(function() {

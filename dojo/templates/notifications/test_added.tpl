@@ -1,18 +1,20 @@
 {% if type == 'mail' %}
+{% load navigation_tags %}
+{% load display_tags %}
 <html>
 <body>
 {% autoescape on %}
 <p>
 Hello {{ user.get_full_name }},
 <br/>
-</br>
-    A new test has been added to the engagement {{ engagement.product }}</br>
-    Title: {{test.title}}</br>
-    Type: {{ test.test_type }}</br>
-    You can find details here: <a href="{{ full_url }}">findings</a></br>
-    More details in the next email with updated finding results.
-</br>
-    Kind regards,</br>
+<br/>
+{% url 'view_product' test.engagement.product.id as product_url %}
+{% url 'view_engagement' test.engagement.id as engagement_url %}
+{% url 'view_test' test.id as test_url %}
+    A new test has been added: <a href="{{product_url|full_url}}">{{product}}</a> / <a href="{{engagement_url|full_url}}">{{ engagement.name }}</a> / <a href="{{ test_url|full_url }}">{{ test }}</a><br/>
+    Finding details in the 'scan_added' email, whichi is a separate notification (for now).
+<br/>
+Kind regards,</br>
 {% if system_settings.team_name is not None %}
 {{ system_settings.team_name }}</br>
 {% else %}

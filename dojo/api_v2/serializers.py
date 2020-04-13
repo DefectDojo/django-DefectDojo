@@ -723,7 +723,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         updated_count = len(new_findings) + len(old_findings)
         if updated_count > 0:
             title = 'Created ' + str(updated_count) + " findings for " + str(test.engagement.product) + ': ' + str(test.engagement.name) + ': ' + str(test)
-            create_notification(event='findings_updated', title=title, findings_new=new_findings, findings_mitigated=old_findings,
+            create_notification(initiator=self.context['request'].user, event='scan_added', title=title, findings_new=new_findings, findings_mitigated=old_findings,
                                 finding_count=updated_count, test=test, engagement=test.engagement, product=test.engagement.product,
                                 url=reverse('view_test', args=(test.id,)))
 
@@ -901,6 +901,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     mitigated_findings.append(finding)
                     mitigated_count += 1
 
+            untouched = set(unchanged_items) - set(to_mitigate)
+
             test.updated = max_safe([scan_date_time, test.updated])
             test.engagement.updated = max_safe([scan_date_time, test.engagement.updated])
 
@@ -914,14 +916,14 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             print(len(new_items))
             print(reactivated_count)
             print(mitigated_count)
-            print(unchanged_count)
+            print(unchanged_count - mitigated_count)
 
             updated_count = mitigated_count + reactivated_count + len(new_items)
-            if updated_count > 0:
+            if updated_count > 0 or True:
                 # new_items = original_items
                 title = 'Updated ' + str(updated_count) + " findings for " + str(test.engagement.product) + ': ' + str(test.engagement.name) + ': ' + str(test)
-                create_notification(event='findings_updated', title=title, findings_new=new_items, findings_mitigated=mitigated_findings, findings_reactivated=reactivated_items,
-                                    finding_count=updated_count, test=test, engagement=test.engagement, product=test.engagement.product,
+                create_notification(initiator=self.context['request'].user, event='scan_added', title=title, findings_new=new_items, findings_mitigated=mitigated_findings, findings_reactivated=reactivated_items,
+                                    finding_count=updated_count, test=test, engagement=test.engagement, product=test.engagement.product, findings_untouched=untouched,
                                     url=reverse('view_test', args=(test.id,)))
 
         except SyntaxError:
