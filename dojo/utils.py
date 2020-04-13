@@ -2099,3 +2099,7 @@ def truncate_with_dots(the_string, max_length_including_dots):
     if not the_string:
         return the_string
     return (the_string[:max_length_including_dots - 3] + '...' if len(the_string) > max_length_including_dots else the_string)
+
+
+def max_safe(list):
+    return max(i for i in list if i is not None)
