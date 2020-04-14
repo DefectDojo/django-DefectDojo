@@ -2,6 +2,7 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
+import multiselectfield.db.fields
 
 
 class Migration(migrations.Migration):
@@ -29,5 +30,10 @@ class Migration(migrations.Migration):
         migrations.AddConstraint(
             model_name='notifications',
             constraint=models.UniqueConstraint(fields=('user', 'product'), name='notifications_user_product'),
+        ),
+        migrations.AlterField(
+            model_name='notifications',
+            name='scan_added',
+            field=multiselectfield.db.fields.MultiSelectField(blank=True, choices=[('slack', 'slack'), ('hipchat', 'hipchat'), ('mail', 'mail'), ('alert', 'alert')], default='alert', help_text='Triggered whenever an (re-)import has been done that created/updated/closed findings.', max_length=24),
         ),
     ]
