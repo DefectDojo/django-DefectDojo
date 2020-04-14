@@ -1762,14 +1762,14 @@ class Finding(models.Model):
             self.jira_change = timezone.now()
             if not jira_issue_exists:
                 self.jira_creation = timezone.now()
-        # If the product has "Push_all_issues" enabled, then we're pushing this to JIRA no matter
-        # what.
+        # If the product has "Push_all_issues" enabled,
+        # then we're pushing this to JIRA no matter what
         if not push_to_jira:
-            # only if there is a JIRA configuration
             try:
                 push_to_jira = JIRA_PKey.objects.get(
                     product=self.test.engagement.product).push_all_issues
-            except JIRA_PKey.DoesNotExist:
+            except models.JIRA_PKey.DoesNotExist:
+                # only if there is a JIRA configuration
                 logger.info("There is no JIRA configuration, cannot push all issues!")
 
         if self.pk is None:
