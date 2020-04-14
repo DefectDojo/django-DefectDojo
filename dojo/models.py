@@ -1769,6 +1769,7 @@ class Finding(models.Model):
                 push_to_jira = JIRA_PKey.objects.get(
                     product=self.test.engagement.product).push_all_issues
             except models.JIRA_PKey.DoesNotExist:
+                # only if there is a JIRA configuration
                 logger.info("There is no JIRA configuration, cannot push all issues!")
 
         if self.pk is None:
