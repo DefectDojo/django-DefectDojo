@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0033_remove_finding_duplicate_list'),
+        ('dojo', '0034_add_github_support'),
     ]
 
     operations = [
