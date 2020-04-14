@@ -73,6 +73,9 @@ from dojo.tools.xanitizer.parser import XanitizerXMLParser
 from dojo.tools.trivy.parser import TrivyParser
 from dojo.tools.outpost24.parser import Outpost24Parser
 from dojo.tools.burp_enterprise.parser import BurpEnterpriseHtmlParser
+from dojo.tools.anchore_enterprise.parser import AnchoreEnterprisePolicyCheckParser
+from dojo.tools.gitleaks.parser import GitleaksJSONParser
+from dojo.tools.harbor_vulnerability.parser import HarborVulnerabilityParser
 
 
 
@@ -239,6 +242,12 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = Outpost24Parser(file, test)
     elif scan_type == 'DSOP Scan':
         parser = DsopParser(file, test)
+    elif scan_type == 'Anchore Enterprise Policy Check':
+        parser = AnchoreEnterprisePolicyCheckParser(file, test)
+    elif scan_type == 'Gitleaks Scan':
+        parser = GitleaksJSONParser(file, test)
+    elif scan_type == 'Harbor Vulnerability Scan':
+        parser = HarborVulnerabilityParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 

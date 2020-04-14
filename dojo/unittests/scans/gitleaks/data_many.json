@@ -1,0 +1,29 @@
+[
+  {
+   "line": "export JEKYLL_GITHUB_TOKEN=\"c77e01c1e89682e4d4b94a059a7fd2b37ab326ed\"",
+   "offender": "GITHUB_TOKEN=\"c77e01c1e89682e4d4b94a059a7fd2b37ab326ed\"",
+   "commit": "d54ce70d0cf883054ed256db46406a5df551f000",
+   "repo": ".",
+   "rule": "Github",
+   "commitMessage": "saving bashrc to git\n",
+   "author": "John Doe",
+   "email": "john.doe@mail.com",
+   "file": ".bashrc",
+   "date": "2020-04-04T15:52:59-07:00",
+   "tags": "key, Github"
+  },
+  {
+   "line": "export MAILCHIMP_API_KEY=\"38c47f19e349153fa963bb3b3212fe8e-us11\"",
+   "offender": "MAILCHIMP_API_KEY=\"38c47f19e349153fa963bb3b3212fe8e-us11\"",
+   "commit": "d54ce70d0cf883054ed256db46406a5df551f000",
+   "repo": ".",
+   "rule": "MailChimp API key",
+   "commitMessage": "saving bashrc to git\n",
+   "author": "John Doe",
+   "email": "john.doe@mail.com",
+   "file": ".bashrc",
+   "date": "2020-04-04T15:52:59-07:00",
+   "tags": "key, Mailchimp"
+  }
+ ]
+ 

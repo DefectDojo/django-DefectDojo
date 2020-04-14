@@ -25,6 +25,11 @@ from multiselectfield import MultiSelectField
 from django import forms
 from django.utils.translation import gettext as _
 from dojo.signals import dedupe_signal
+from django.core.cache import cache
+from dojo.tag.prefetching_tag_descriptor import PrefetchingTagDescriptor
+from django.contrib.contenttypes.fields import GenericRelation
+from tagging.models import TaggedItem
+from dateutil.relativedelta import relativedelta
 
 fmt = getattr(settings, 'LOG_FORMAT', None)
 lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
@@ -89,7 +94,31 @@ class Regulation(models.Model):
         return self.acronym + ' (' + self.jurisdiction + ')'
 
 
+class SystemSettingsManager(models.Manager):
+    CACHE_KEY = 'defect_dojo_cache.system_settings'
+
+    def get_from_super(self, *args, **kwargs):
+        logger.debug('getting system_settings from super because cache was empty')
+        return super(SystemSettingsManager, self).get(*args, **kwargs)
+
+    def get(self, no_cache=False, *args, **kwargs):
+        # cache only 30s because django default cache backend is local per process
+        if no_cache:
+            logger.debug('no cache specified, retrieving system settings from super()')
+            return super(SystemSettingsManager, self).get(*args, **kwargs)
+        return cache.get_or_set(self.CACHE_KEY, lambda: self.get_from_super(*args, **kwargs), timeout=30)
+
+
 class System_Settings(models.Model):
+    enable_auditlog = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name='Enable audit logging',
+        help_text="With this setting turned on, Dojo maintains an audit log "
+                  "of changes made to entities (Findings, Tests, Engagements, Procuts, ...)"
+                  "If you run big import you may want to disable this "
+                  "because the way django-auditlog currently works, there's a "
+                  "big performance hit. Especially during (re-)imports.")
     enable_deduplication = models.BooleanField(
         default=False,
         blank=False,
@@ -123,6 +152,11 @@ class System_Settings(models.Model):
                                              default='None')
     jira_labels = models.CharField(max_length=200, blank=True, null=True,
                                    help_text='JIRA issue labels space seperated')
+
+    enable_github = models.BooleanField(default=False,
+                                      verbose_name='Enable GITHUB integration',
+                                      blank=False)
+
     enable_slack_notifications = \
         models.BooleanField(default=False,
                             verbose_name='Enable Slack notifications',
@@ -245,6 +279,13 @@ class System_Settings(models.Model):
     column_widths = models.CharField(max_length=1500, blank=True)
     drive_folder_ID = models.CharField(max_length=100, blank=True)
     enable_google_sheets = models.BooleanField(default=False, null=True, blank=True)
+
+    objects = SystemSettingsManager()
+
+    def save(self, *args, **kwargs):
+        super(System_Settings, self).save(*args, **kwargs)
+        logger.debug('deleting system settings from cache after save')
+        cache.delete(SystemSettingsManager.CACHE_KEY)
 
 
 class SystemSettingsFormAdmin(forms.ModelForm):
@@ -388,6 +429,14 @@ class Product_Type(models.Model):
     #         Q(severity="High") |
     #         Q(severity="Medium") |
     #         Q(severity="Low")).count()
+
+    @property
+    def unaccepted_open_findings(self):
+        engagements = Engagement.objects.filter(product__prod_type=self)
+        accepted_findings = Finding.objects.filter(risk_acceptance__engagement__in=engagements)
+        accepted_ids = [f.id for f in accepted_findings.only('id')]
+        return Finding.objects.filter(active=True, verified=True, duplicate=False,
+                                      test__engagement__product__prod_type=self).exclude(id__in=accepted_ids)
 
     # def products_count(self):
     #     return Product.objects.filter(prod_type=self).count()
@@ -570,6 +619,9 @@ class Product(models.Model):
     external_audience = models.BooleanField(default=False, help_text=_('Specify if the application is used by people outside the organization.'))
     internet_accessible = models.BooleanField(default=False, help_text=_('Specify if the application is accessible from the public internet.'))
     regulations = models.ManyToManyField(Regulation, blank=True)
+
+    # used for prefetching tags because django-tagging doesn't support that out of the box
+    tagged_items = GenericRelation(TaggedItem)
 
     def __unicode__(self):
         return self.name
@@ -909,8 +961,24 @@ class Engagement(models.Model):
     orchestration_engine = models.ForeignKey(Tool_Configuration, verbose_name="Orchestration Engine", help_text="Orchestration service responsible for CI/CD test", null=True, blank=True, related_name='orchestration', on_delete=models.CASCADE)
     deduplication_on_engagement = models.BooleanField(default=False)
 
+    # used for prefetching tags because django-tagging doesn't support that out of the box
+    tagged_items = GenericRelation(TaggedItem)
+
     class Meta:
         ordering = ['-target_start']
+
+    def is_overdue(self):
+        if self.engagement_type == 'CI/CD':
+            overdue_grace_days = 10
+        else:
+            overdue_grace_days = 0
+
+        max_end_date = timezone.now() - relativedelta(days=overdue_grace_days)
+
+        if self.target_end < max_end_date.date():
+            return True
+
+        return False
 
     def __unicode__(self):
         return "Engagement: %s (%s)" % (self.name if self.name else '',
@@ -927,6 +995,16 @@ class Engagement(models.Model):
         bc += [{'title': self.__unicode__(),
                 'url': reverse('view_engagement', args=(self.id,))}]
         return bc
+
+    @property
+    def unaccepted_open_findings(self):
+        accepted_findings = Finding.objects.filter(risk_acceptance__engagement=self)
+        accepted_ids = [f.id for f in accepted_findings.only('id')]
+        return Finding.objects.filter(active=True, verified=True, duplicate=False,
+                                      test__engagement=self).exclude(id__in=accepted_ids)
+
+    def accept_risks(self, accepted_risks):
+        self.risk_acceptance.add(*accepted_risks)
 
 
 class CWE(models.Model):
@@ -965,6 +1043,9 @@ class Endpoint(models.Model):
     endpoint_params = models.ManyToManyField(Endpoint_Params, blank=True,
                                              editable=False)
     remediated = models.BooleanField(default=False, blank=True)
+
+    # used for prefetching tags because django-tagging doesn't support that out of the box
+    tagged_items = GenericRelation(TaggedItem)
 
     class Meta:
         ordering = ['product', 'protocol', 'host', 'path', 'query', 'fragment']
@@ -1173,6 +1254,9 @@ class Test(models.Model):
     updated = models.DateTimeField(auto_now=True, null=True)
     created = models.DateTimeField(auto_now_add=True, null=True)
 
+    # used for prefetching tags because django-tagging doesn't support that out of the box
+    tagged_items = GenericRelation(TaggedItem)
+
     def test_type_name(self):
         return self.test_type.name
 
@@ -1194,6 +1278,16 @@ class Test(models.Model):
 
     def verified_finding_count(self):
         return self.finding_set.filter(verified=True).count()
+
+    @property
+    def unaccepted_open_findings(self):
+        accepted_findings = Finding.objects.filter(risk_acceptance__engagement=self.engagement)
+        accepted_ids = [f.id for f in accepted_findings.only('id')]
+        return Finding.objects.filter(active=True, verified=True, duplicate=False, test=self).exclude(
+            id__in=accepted_ids)
+
+    def accept_risks(self, accepted_risks):
+        self.engagement.risk_acceptance.add(*accepted_risks)
 
 
 class VA(models.Model):
@@ -1274,7 +1368,6 @@ class Finding(models.Model):
     duplicate_finding = models.ForeignKey('self', editable=False, null=True,
                                           related_name='original_finding',
                                           blank=True, on_delete=models.CASCADE)
-    duplicate_list = models.ManyToManyField("self", editable=False, blank=True)
     out_of_scope = models.BooleanField(default=False)
     under_review = models.BooleanField(default=False)
     review_requested_by = models.ForeignKey(Dojo_User, null=True, blank=True,
@@ -1338,6 +1431,9 @@ class Finding(models.Model):
                                verbose_name="Number of occurences",
                                help_text="Number of occurences in the source tool when several vulnerabilites were found and aggregated by the scanner")
 
+    # used for prefetching tags because django-tagging doesn't support that out of the box
+    tagged_items = GenericRelation(TaggedItem)
+
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
 
@@ -1354,6 +1450,10 @@ class Finding(models.Model):
             models.Index(fields=['date']),
             models.Index(fields=['title']),
         ]
+
+    @classmethod
+    def unaccepted_open_findings(cls):
+        return cls.objects.filter(active=True, verified=True, duplicate=False, risk_acceptance__isnull=True)
 
     @property
     def similar_findings(self):
@@ -1470,7 +1570,10 @@ class Finding(models.Model):
                 r.delete()
 
     def duplicate_finding_set(self):
-        return self.duplicate_list.all().order_by('title')
+        if self.duplicate:
+            return Finding.objects.get(id=self.duplicate_finding.id).original_finding.all().order_by('title')
+        else:
+            return self.original_finding.all().order_by('title')
 
     def get_scanner_confidence_text(self):
         scanner_confidence_text = ""
@@ -1568,6 +1671,36 @@ class Finding(models.Model):
             else:
                 sla_calculation = sla_age - age
         return sla_calculation
+
+    def github(self):
+        try:
+            return self.github_issue
+        except GITHUB_Issue.DoesNotExist:
+            return None
+
+    def has_github_issue(self):
+        try:
+            issue = self.jira_issue
+            return True
+        except GITHUB_Issue.DoesNotExist:
+            return False
+
+    def github_conf(self):
+        try:
+            jpkey = GITHUB_PKey.objects.get(product=self.test.engagement.product)
+            jconf = jpkey.conf
+        except:
+            jconf = None
+            pass
+        return jconf
+
+    # newer version that can work with prefetching
+    def github_conf_new(self):
+        try:
+            return self.test.engagement.product.github_pkey_set.all()[0].conf
+        except:
+            return None
+            pass
 
     def jira(self):
         try:
@@ -1686,6 +1819,8 @@ class Finding(models.Model):
                 except:
                     async_dedupe.delay(self, *args, **kwargs)
                     pass
+            else:
+                deduplicationLogger.debug("skipping dedupe because it's disabled in system settings")
         if system_settings.false_positive_history and false_history:
             from dojo.tasks import async_false_history
             from dojo.utils import sync_false_history
@@ -1706,6 +1841,9 @@ class Finding(models.Model):
         calculate_grade(self.test.engagement.product)
 
     def delete(self, *args, **kwargs):
+        for find in self.original_finding.all():
+            # Explicitely delete the duplicates
+            super(Finding, find).delete()
         super(Finding, self).delete(*args, **kwargs)
         from dojo.utils import calculate_grade
         calculate_grade(self.test.engagement.product)
@@ -1805,6 +1943,9 @@ class Finding_Template(models.Model):
     numerical_severity = models.CharField(max_length=4, null=True, blank=True, editable=False)
     template_match = models.BooleanField(default=False, verbose_name='Template Match Enabled', help_text="Enables this template for matching remediation advice. Match will be applied to all active, verified findings by CWE.")
     template_match_title = models.BooleanField(default=False, verbose_name='Match Template by Title and CWE', help_text="Matches by title text (contains search) and CWE.")
+
+    # used for prefetching tags because django-tagging doesn't support that out of the box
+    tagged_items = GenericRelation(TaggedItem)
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
@@ -2003,6 +2144,56 @@ class FindingImageAccessToken(models.Model):
 class BannerConf(models.Model):
     banner_enable = models.BooleanField(default=False, null=True, blank=True)
     banner_message = models.CharField(max_length=500, help_text="This message will be displayed on the login page", default='')
+
+
+class GITHUB_Conf(models.Model):
+    configuration_name = models.CharField(max_length=2000, help_text="Enter a name to give to this configuration", default='')
+    api_key = models.CharField(max_length=2000, help_text="Enter your Github API Key", default='')
+
+    def __unicode__(self):
+        return self.configuration_name
+
+    def __str__(self):
+        return self.configuration_name
+
+
+class GITHUB_Issue(models.Model):
+    issue_id = models.CharField(max_length=200)
+    issue_url = models.URLField(max_length=2000, verbose_name="GitHub issue URL")
+    finding = models.OneToOneField(Finding, null=True, blank=True, on_delete=models.CASCADE)
+
+    def __unicode__(self):
+        return str(self.github_issue_id) + '| GitHub Issue URL: ' + str(self.github_issue_url)
+
+    def __str__(self):
+        return str(self.github_issue_id) + '| GitHub Issue URL: ' + str(self.github_issue_url)
+
+
+class GITHUB_Clone(models.Model):
+    github_id = models.CharField(max_length=200)
+    github_clone_id = models.CharField(max_length=200)
+
+
+class GITHUB_Details_Cache(models.Model):
+    github_id = models.CharField(max_length=200)
+    github_key = models.CharField(max_length=200)
+    github_status = models.CharField(max_length=200)
+    github_resolution = models.CharField(max_length=200)
+
+
+class GITHUB_PKey(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+    project_key = models.CharField(max_length=200, blank=True, verbose_name="Github project", help_text="Specify your project location. (:user/:repo)")
+    conf = models.ForeignKey(GITHUB_Conf, verbose_name="Github Configuration",
+                             null=True, blank=True, on_delete=models.CASCADE)
+    push_notes = models.BooleanField(default=False, blank=True, help_text="Notes added to findings will be automatically added to the corresponding github issue")
+
+    def __unicode__(self):
+        return self.product.name + " | " + self.project_key
+
+    def __str__(self):
+        return self.product.name + " | " + self.project_key
 
 
 class JIRA_Conf(models.Model):
@@ -2280,6 +2471,9 @@ class App_Analysis(models.Model):
     website_found = models.URLField(max_length=400, null=True, blank=True)
     created = models.DateTimeField(null=False, editable=False, default=now)
 
+    # used for prefetching tags because django-tagging doesn't support that out of the box
+    tagged_items = GenericRelation(TaggedItem)
+
     def __unicode__(self):
         return self.name + " | " + self.product.name
 
@@ -2309,6 +2503,9 @@ class Objects(models.Model):
                                 null=True, blank=True)
     review_status = models.ForeignKey(Objects_Review, on_delete=models.CASCADE)
     created = models.DateTimeField(null=False, editable=False, default=now)
+
+    # used for prefetching tags because django-tagging doesn't support that out of the box
+    tagged_items = GenericRelation(TaggedItem)
 
     def __unicode__(self):
         name = None
@@ -2582,16 +2779,35 @@ class FieldRule(models.Model):
     text = models.CharField(max_length=200)
 
 
-# Register for automatic logging to database
-auditlog.register(Dojo_User)
-auditlog.register(Endpoint)
-auditlog.register(Engagement)
-auditlog.register(Finding)
-auditlog.register(Product)
-auditlog.register(Test)
-auditlog.register(Risk_Acceptance)
-auditlog.register(Finding_Template)
-auditlog.register(Cred_User)
+def enable_disable_auditlog(enable=True):
+    if enable:
+        # Register for automatic logging to database
+        logger.info('enabling audit logging')
+        auditlog.register(Dojo_User)
+        auditlog.register(Endpoint)
+        auditlog.register(Engagement)
+        auditlog.register(Finding)
+        auditlog.register(Product)
+        auditlog.register(Test)
+        auditlog.register(Risk_Acceptance)
+        auditlog.register(Finding_Template)
+        auditlog.register(Cred_User)
+    else:
+        logger.info('disabling audit logging')
+        auditlog.unregister(Dojo_User)
+        auditlog.unregister(Endpoint)
+        auditlog.unregister(Engagement)
+        auditlog.unregister(Finding)
+        auditlog.unregister(Product)
+        auditlog.unregister(Test)
+        auditlog.unregister(Risk_Acceptance)
+        auditlog.unregister(Finding_Template)
+        auditlog.unregister(Cred_User)
+
+
+from dojo.utils import get_system_setting
+enable_disable_auditlog(enable=get_system_setting('enable_auditlog'))  # on startup choose safe to retrieve system settiung)
+
 
 # Register tagging for models
 tag_register(Product)
@@ -2602,6 +2818,9 @@ tag_register(Endpoint)
 tag_register(Finding_Template)
 tag_register(App_Analysis)
 tag_register(Objects)
+
+# Patch to support prefetching
+PrefetchingTagDescriptor.patch()
 
 # Benchmarks
 admin.site.register(Benchmark_Type)
@@ -2646,6 +2865,8 @@ admin.site.register(Alerts)
 admin.site.register(JIRA_Issue)
 admin.site.register(JIRA_Conf)
 admin.site.register(JIRA_PKey)
+admin.site.register(GITHUB_Conf)
+admin.site.register(GITHUB_PKey)
 admin.site.register(Tool_Configuration)
 admin.site.register(Tool_Product_Settings)
 admin.site.register(Tool_Type)

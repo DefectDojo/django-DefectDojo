@@ -55,13 +55,16 @@ def get_item(item_node, test):
 
     paths = ''
     for finding in item_node['findings']:
-        paths += "\n  - " + str(finding['version']) + ":" + str(','.join(finding['paths']))
+        paths += "\n  - " + str(finding['version']) + ":" + str(','.join(finding['paths'][:25]))
+        if len(finding['paths']) > 25:
+            paths += "\n  - ..... (list of paths truncated after 25 paths)"
 
     finding = Finding(title=item_node['title'] + " - " + "(" + item_node['module_name'] + ", " + item_node['vulnerable_versions'] + ")",
                       test=test,
                       severity=severity,
                       file_path=item_node['findings'][0]['paths'][0],
-                      description=item_node['overview'] + "\n Vulnerable Module: " +
+                      description=item_node['url'] + "\n" +
+                      item_node['overview'] + "\n Vulnerable Module: " +
                       item_node['module_name'] + "\n Vulnerable Versions: " +
                       str(item_node['vulnerable_versions']) + "\n Patched Version: " +
                       str(item_node['patched_versions']) + "\n Vulnerable Paths: " +
