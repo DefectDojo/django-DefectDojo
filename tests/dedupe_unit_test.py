@@ -353,7 +353,7 @@ class DedupeTest(BaseTestCase):
         driver.find_element_by_xpath('//*[@id="base-content"]/form/div[3]/div/div').click()
         driver.find_element_by_xpath('//*[@id="base-content"]/form/div[4]/div/div').click()
         # os.path.realpath makes the path canonical
-        driver.find_element_by_id('id_file').send_keys(os.path.realpath(self.relative_path + "/../dojo/unittests/scans/checkmarx/multiple_findings.xml"))
+        driver.find_element_by_id('id_file').send_keys(os.path.realpath(self.relative_path + "/dedupe_scans/multiple_findings.xml"))
         driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
         text = driver.find_element_by_tag_name("BODY").text
         self.assertTrue(re.search(r'a total of 2 findings were processed', text))
@@ -366,7 +366,7 @@ class DedupeTest(BaseTestCase):
         driver.find_element_by_link_text("Re-Upload Scan").click()
         driver.find_element_by_xpath('//*[@id="base-content"]/form/div[3]/div/div').click()
         driver.find_element_by_xpath('//*[@id="base-content"]/form/div[4]/div/div').click()
-        driver.find_element_by_id('id_file').send_keys(os.path.realpath(self.relative_path + "/../dojo/unittests/scans/checkmarx/multiple_findings_line_changed.xml"))
+        driver.find_element_by_id('id_file').send_keys(os.path.realpath(self.relative_path + "/dedupe_scans/multiple_findings_line_changed.xml"))
         driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
         text = driver.find_element_by_tag_name("BODY").text
         self.assertTrue(re.search(r'a total of 2 findings were processed', text))
