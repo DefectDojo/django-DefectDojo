@@ -573,7 +573,7 @@
 	},
 	{
 		"fields": {
-		    "name": "Gitleaks Scan"
+			"name": "Gitleaks Scan"
 		},
 		"model": "dojo.test_type",
 		"pk": 174
@@ -584,5 +584,12 @@
 		},
 		"model": "dojo.test_type",
 		"pk": 175
+	},
+	{
+		"fields": {
+			"name": "GitLab SAST Report"
+		},
+		"model": "dojo.test_type",
+		"pk": 176
 	}
 ]
