@@ -1766,11 +1766,7 @@ class Finding(models.Model):
         # what.
         if not push_to_jira:
             # only if there is a JIRA configuration
-            try:
-                push_to_jira = JIRA_PKey.objects.get(
-                    product=self.test.engagement.product).push_all_issues
-            except JIRA_PKey.DoesNotExist:
-                logger.info("There is no JIRA configuration, cannot push all issues!")
+            push_to_jira = self.jira_conf_new() and self.jira_conf_new().push_all_issues
 
         if self.pk is None:
             # We enter here during the first call from serializers.py
