@@ -1790,7 +1790,11 @@ def get_slack_user_id(user_email):
 
 
 def create_notification(initiator=None, event=None, **kwargs):
-    print('block_exec: ', vars(initiator.usercontactinfo))
+    try:
+        print('block_exec: ', vars(initiator.usercontactinfo))
+    except:
+        print('block_exec: not found')
+
     if initiator and initiator.usercontactinfo and not initiator.usercontactinfo.block_execution:
         from .tasks import async_create_notification
         print('async nottttttttttttts')
