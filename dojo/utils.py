@@ -1970,6 +1970,7 @@ def create_notification_sync(event=None, **kwargs):
         # only retrieve users which have at least one notification type enabled for this event type.
         logger.info('sending personal notifications')
 
+        product = None
         if 'product' in kwargs:
             product = kwargs.get('product')
 
