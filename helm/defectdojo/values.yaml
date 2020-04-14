@@ -2,7 +2,7 @@
 # Global settings
 createSecret: true
 ## Configuration value to select database type
-## Option to use "postgresql" or "mysql" database type, by default "postgresql" is chosen
+## Option to use "postgresql" or "mysql" database type, by default "mysql" is chosen
 ## Set the "enable" field to true of the database type you select (if you want to use internal database) and false of the one you don't select
 database: mysql
 host: defectdojo.default.minikube.local
