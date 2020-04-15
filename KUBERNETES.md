@@ -191,8 +191,11 @@ helm install \
 
 ## Kubernetes Production
 
-Optionally, for TLS locally, you need to install a TLS certificate into your
-Kubernetes cluster.
+When running defectdojo in production be aware that you understood the full setup and always have a backup.
+
+### Encryption to Kubernetes
+
+Optionally, for TLS locally, you need to install a TLS certificate into your Kubernetes cluster.
 For development purposes, you can create your own certificate authority as
 described [here](https://github.com/hendrikhalkow/k8s-docs/blob/master/tls.md).
 
@@ -209,6 +212,16 @@ kubectl --namespace "${K8S_NAMESPACE}" create secret tls defectdojo-tls \
     "${CA_DIR}/certs/${TLS_CERT_DOMAIN}.cert.pem" \
     "${CA_DIR}/chain.pem")
 ```
+
+### Encryption in Kubernetes and End-to-End Encryption
+
+With the TLS certificate from your Kubernetes cluster all traffic to you cluster is encrypted, but the traffic in your cluster is still unencrypted.
+
+If you want to encrypt the traffic to the nginx server you can use the option `--set nginx.tls.enabled=true` and `--set nginx.tls.generateCertificate=true` to generate a self signed certificate and use the https config. The option to add you own pregenerated certificate is generelly possible but not implemented in the helm chart yet.
+
+Be aware that the traffic to the database and celery broker are unencrypted at the moment.
+
+### Installation
 
 ```zsh
 # Install Helm chart. Choose a host name that matches the certificate above
@@ -294,7 +307,7 @@ However, that doesn't work and I haven't found out why. In a production
 environment, a redundant PostgreSQL cluster is the better option. As it uses
 statefulsets that are kept by default, the problem doesn't exist there.
 
-### Useful stuff
+## Useful stuff
 
 ```zsh
 # View logs of a specific pod
