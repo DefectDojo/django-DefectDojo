@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0034_add_github_support'),
+        ('dojo', '0035_push_all_issues_help_text_rename_gh_fields'),
     ]
 
     operations = [
