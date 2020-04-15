@@ -326,9 +326,7 @@ $(document).mouseup(function (e){
 		container.hide();
 	}
 });
-environmentalMetricScore
-//document.getElementById('id_severity').value='High';
-console.log(document.getElementById('environmentalSeverity').value);
+
 "use strict";
 
 function updateScores() {
@@ -542,7 +540,7 @@ function inputSelect() {
 }
 
 function cvssCalculator() {
-    if (!("CVSS" in window) || !("CVSS_Help" in window)) {
+    if (!("CVSS" in window) || !("CVSS_Help" in window )) {
         setTimeout(cvssCalculator, 100);
         return
     }
@@ -561,4 +559,6 @@ function cvssCalculator() {
     }
     bind(bind("#vectorString", "click", inputSelect), "contextmenu", inputSelect)
 }
-cvssCalculator();
+if (typeof id_cvssv3 != "undefined") {
+    cvssCalculator();
+}
