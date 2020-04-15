@@ -9,7 +9,6 @@ env:
     - HELM_VERSION=v2.13.0
     - CHANGE_MINIKUBE_NONE_USER=true
   matrix:
-    fast_finish: true    
     - TEST=flake8
     - TEST=integration_tests
     - TEST=docker
