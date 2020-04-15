@@ -31,4 +31,3 @@ class Migration(migrations.Migration):
             new_name='git_push_notes',
         ),
     ]
-    
