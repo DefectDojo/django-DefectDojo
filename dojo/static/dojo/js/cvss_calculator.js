@@ -313,7 +313,7 @@ var response = '<!--'+
 '</form>'+
 '<!-- CVSS Calculator end -->';
 
-$("#id_cvssv3").parent().append(response);
+$(".cvsscalculator").parent().append(response);
   $(document).ready(function() {
     $("#id_cvssv3").click(function(){
       $("#cvsscalculator").toggle();
@@ -559,6 +559,6 @@ function cvssCalculator() {
     }
     bind(bind("#vectorString", "click", inputSelect), "contextmenu", inputSelect)
 }
-if ((typeof id_cvssv3 != "undefined") && (typeof cvssCalculator != "undefined")) {
+if ((document.getElementById("id_cvssv3")) && (document.getElementById("cvsscalculator"))) {
     cvssCalculator();
 }
