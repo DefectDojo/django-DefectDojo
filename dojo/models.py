@@ -2201,10 +2201,10 @@ class GITHUB_Details_Cache(models.Model):
 class GITHUB_PKey(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
 
-    project_key = models.CharField(max_length=200, blank=True, verbose_name="Github project", help_text="Specify your project location. (:user/:repo)")
-    conf = models.ForeignKey(GITHUB_Conf, verbose_name="Github Configuration",
-                             null=True, blank=True, on_delete=models.CASCADE)
-    push_notes = models.BooleanField(default=False, blank=True, help_text="Notes added to findings will be automatically added to the corresponding github issue")
+    git_project = models.CharField(max_length=200, blank=True, verbose_name="Github project", help_text="Specify your project location. (:user/:repo)")
+    git_conf = models.ForeignKey(GITHUB_Conf, verbose_name="Github Configuration",
+                                 null=True, blank=True, on_delete=models.CASCADE)
+    git_push_notes = models.BooleanField(default=False, blank=True, help_text="Notes added to findings will be automatically added to the corresponding github issue")
 
     def __unicode__(self):
         return self.product.name + " | " + self.project_key

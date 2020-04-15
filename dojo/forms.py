@@ -1949,7 +1949,7 @@ class CredUserForm(forms.ModelForm):
 
 
 class GITHUB_Product_Form(forms.ModelForm):
-    conf = forms.ModelChoiceField(queryset=GITHUB_Conf.objects.all(), label='GITHUB Configuration', required=False)
+    git_conf = forms.ModelChoiceField(queryset=GITHUB_Conf.objects.all(), label='GITHUB Configuration', required=False)
 
     class Meta:
         model = GITHUB_PKey
