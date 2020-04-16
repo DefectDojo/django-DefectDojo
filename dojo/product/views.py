@@ -662,7 +662,7 @@ def edit_product(request, pid):
                 gform = GITHUB_Product_Form(instance=github_inst)
             else:
                 gform = GITHUB_Product_Form()
-        elif jira_enabled:
+        elif github_enabled:
             gform = GITHUB_Product_Form()
         else:
             gform = None
