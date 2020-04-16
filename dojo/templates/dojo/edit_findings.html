@@ -21,7 +21,7 @@
             {% csrf_token %}
             {% include "dojo/form_fields.html" with form=form %}
             {% if jform %}
-                <h3> JIRA </h3>
+                <h4> JIRA </h4>
                 <hr>
                 {% include "dojo/form_fields.html" with form=jform %}
             {% endif %}
@@ -73,6 +73,8 @@
             </div>
 
             {% if jform %}
+                <h4> JIRA </h4>
+                <hr>
                 {% include "dojo/form_fields.html" with form=jform %}
             {% endif %}
             {% if gform %}
