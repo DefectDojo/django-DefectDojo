@@ -404,6 +404,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     images = FindingImageSerializer(many=True, read_only=True)
     tags = TagListSerializerField(required=False)
     accepted_risks = RiskAcceptanceSerializer(many=True, read_only=True, source='risk_acceptance_set')
+    push_to_jira = serializers.BooleanField(default=False)
 
     class Meta:
         model = Finding
@@ -450,6 +451,7 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         allow_null=True,
         default=None)
     tags = TagListSerializerField(required=False)
+    push_to_jira = serializers.BooleanField(default=False)
 
     class Meta:
         model = Finding
@@ -457,6 +459,25 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         extra_kwargs = {
             'reporter': {'default': serializers.CurrentUserDefault()},
         }
+
+    # Overriding this to push add Push to JIRA functionality
+    def create(self, validated_data):
+        to_be_tagged, validated_data = self._pop_tags(validated_data)
+        push_to_jira = validated_data.pop('push_to_jira')
+        # Somewhere in the below line finding.save() is called, but I'm not sure how to get
+        # push_to_jira to it.
+        tag_object = super(TaggitSerializer, self).create(validated_data)
+
+        has_jira_config = tag_object.test.engagement.product.jira_pkey_set.first() is not None
+        if not push_to_jira and has_jira_config:
+            push_to_jira = tag_object.test.engagement.product.jira_pkey_set.first().push_all_issues
+
+        # No need to save the finding twice if we're not pushing to JIRA
+        if push_to_jira:
+            # Saving again with push_to_jira context
+            tag_object.save(push_to_jira=push_to_jira)
+        return self._save_tags(tag_object, to_be_tagged)
+        pass
 
     def validate(self, data):
         if ((data['active'] or data['verified']) and data['duplicate']):
@@ -557,8 +578,9 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         queryset=User.objects.all())
     tags = TagListSerializerField(required=False)
     close_old_findings = serializers.BooleanField(required=False, default=False)
+    push_to_jira = serializers.BooleanField(default=False)
 
-    def save(self):
+    def save(self, push_to_jira=False):
         data = self.validated_data
         close_old_findings = data['close_old_findings']
         active = data['active']
@@ -666,7 +688,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 if item.unsaved_tags is not None:
                     item.tags = item.unsaved_tags
 
-                item.save()
+                item.save(push_to_jira=push_to_jira)
 
         except SyntaxError:
             raise Exception('Parser SyntaxError')
@@ -748,8 +770,9 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     file = serializers.FileField(required=False)
     test = serializers.PrimaryKeyRelatedField(
         queryset=Test.objects.all())
+    push_to_jira = serializers.BooleanField(default=False)
 
-    def save(self):
+    def save(self, push_to_jira=False):
         data = self.validated_data
         test = data['test']
         scan_type = data['scan_type']
@@ -865,7 +888,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     if item.unsaved_tags:
                         finding.tags = item.unsaved_tags
 
-                    finding.save()
+                    finding.save(push_to_jira=push_to_jira)
 
             to_mitigate = set(original_items) - set(new_items)
             for finding in to_mitigate:
@@ -874,7 +897,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     finding.is_Mitigated = True
                     finding.mitigated_by = self.context['request'].user
                     finding.active = False
-                    finding.save()
+                    finding.save(push_to_jira=push_to_jira)
                     note = Notes(entry="Mitigated by %s re-upload." % scan_type,
                                 author=self.context['request'].user)
                     note.save()
