@@ -2,7 +2,7 @@
 asteval==0.9.18
 bleach>=3.1.0
 celery==4.4.2
-coverage==5.0.4
+coverage==5.1
 defusedxml==0.6.0
 django_celery_results==1.2.1
 django-auditlog==0.4.7
@@ -25,17 +25,18 @@ Django==2.2.12
 djangorestframework==3.11.0
 gunicorn==20.0.4
 html2text==2020.1.16
-humanize==2.2.0
+humanize==2.3.0
 jira==2.0.0
+PyGithub==1.47
 lxml==4.5.0
 Markdown==3.2.1
 mysqlclient==1.4.6
 pandas>=0.25
 xlrd>=1.0.0
 pdfkit==0.6.1
-Pillow==7.1.0  # required by django-imagekit
-psycopg2-binary==2.8.4
-cryptography==2.8
+Pillow==7.1.1  # required by django-imagekit
+psycopg2-binary==2.8.5
+cryptography==2.9
 python-dateutil==2.8.1
 python-nmap==0.6.1
 pytz==2019.3
@@ -54,6 +55,6 @@ git+https://github.com/DefectDojo/defectDojo-engagement-survey.git@8437e158fbc75
 gitpython>=2.1.13
 ptvsd>=4.2.7
 google-api-python-client==1.8.0
-google-auth==1.13.1
+google-auth==1.14.0
 google-auth-oauthlib==0.4.1
 drf_yasg==1.17.1

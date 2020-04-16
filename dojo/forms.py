@@ -17,7 +17,7 @@ from tagging.models import Tag
 from dojo.models import Finding, Product_Type, Product, Note_Type, ScanSettings, VA, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
     Development_Environment, Dojo_User, Scan, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage, \
-    JIRA_Issue, JIRA_PKey, JIRA_Conf, UserContactInfo, Tool_Type, Tool_Configuration, Tool_Product_Settings, \
+    JIRA_Issue, JIRA_PKey, JIRA_Conf, GITHUB_Issue, GITHUB_PKey, GITHUB_Conf, UserContactInfo, Tool_Type, Tool_Configuration, Tool_Product_Settings, \
     Cred_User, Cred_Mapping, System_Settings, Notifications, Languages, Language_Type, App_Analysis, Objects, \
     Benchmark_Product, Benchmark_Requirement, Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, \
     DojoMeta, Sonarqube_Product, CommonNote
@@ -367,7 +367,9 @@ class ImportScanForm(forms.Form):
                          ("Burp Enterprise Scan", "Burp Enterprise Scan"),
                          ("DSOP Scan", "DSOP Scan"),
                          ("Trivy Scan", "Trivy Scan"),
-                         ("Anchore Enterprise Policy Check", "Anchore Enterprise Policy Check"))
+                         ("Anchore Enterprise Policy Check", "Anchore Enterprise Policy Check"),
+                         ("Gitleaks Scan", "Gitleaks Scan"),
+                         ("Harbor Vulnerability Scan", "Harbor Vulnerability Scan"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
     scan_date = forms.DateTimeField(
@@ -1087,6 +1089,7 @@ class DeleteFindingTemplateForm(forms.ModelForm):
 class FindingBulkUpdateForm(forms.ModelForm):
     status = forms.BooleanField(required=False)
     push_to_jira = forms.BooleanField(required=False)
+    push_to_github = forms.BooleanField(required=False)
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
                            required=False)
 
@@ -1611,6 +1614,42 @@ class AddFindingImageForm(forms.ModelForm):
 FindingImageFormSet = modelformset_factory(FindingImage, extra=3, max_num=10, exclude=[''], can_delete=True)
 
 
+class GITHUB_IssueForm(forms.ModelForm):
+
+    class Meta:
+        model = GITHUB_Issue
+        exclude = ['product']
+
+
+class GITHUBForm(forms.ModelForm):
+    api_key = forms.CharField(widget=forms.PasswordInput, required=True)
+
+    class Meta:
+        model = GITHUB_Conf
+        exclude = ['product']
+
+
+class DeleteGITHUBConfForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    class Meta:
+        model = GITHUB_Conf
+        fields = ('id',)
+
+
+class ExpressGITHUBForm(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput, required=True)
+    issue_key = forms.CharField(required=True, help_text='A valid issue ID is required to gather the necessary information.')
+
+    class Meta:
+        model = GITHUB_Conf
+        exclude = ['product', 'epic_name_id', 'open_status_key',
+                    'close_status_key', 'info_mapping_severity',
+                    'low_mapping_severity', 'medium_mapping_severity',
+                    'high_mapping_severity', 'critical_mapping_severity', 'finding_text']
+
+
 class JIRA_IssueForm(forms.ModelForm):
 
     class Meta:
@@ -1909,12 +1948,31 @@ class CredUserForm(forms.ModelForm):
         # fields = ['selenium_script']
 
 
+class GITHUB_Product_Form(forms.ModelForm):
+    conf = forms.ModelChoiceField(queryset=GITHUB_Conf.objects.all(), label='GITHUB Configuration', required=False)
+
+    class Meta:
+        model = GITHUB_PKey
+        exclude = ['product']
+
+
 class JIRAPKeyForm(forms.ModelForm):
     conf = forms.ModelChoiceField(queryset=JIRA_Conf.objects.all(), label='JIRA Configuration', required=False)
 
     class Meta:
         model = JIRA_PKey
         exclude = ['product']
+
+
+class GITHUBFindingForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        self.enabled = kwargs.pop('enabled')
+        super(GITHUBFindingForm, self).__init__(*args, **kwargs)
+        self.fields['push_to_github'] = forms.BooleanField()
+        self.fields['push_to_github'].required = False
+        self.fields['push_to_github'].help_text = "Checking this will overwrite content of your Github issue, or create one."
+
+    push_to_github = forms.BooleanField(required=False)
 
 
 class JIRAFindingForm(forms.Form):

@@ -21,6 +21,11 @@
                 <hr>
                 {% include "dojo/form_fields.html" with form=jform %}
             {% endif %}
+        {%  if gform %}
+            <h4> Github </h4>
+            <hr>
+            {% include "dojo/form_fields.html" with form=gform %}
+        {% endif %}
         {% if sonarqube_form %}
             <h4> SonarQube API </h4>
             <hr>

@@ -1,8 +1,7 @@
 #!/bin/bash
 
 umask 0002
-if [ "${GENERATE_TLS_CERTIFICATE}" == "True" ]
-then
+if [ "${GENERATE_TLS_CERTIFICATE}" = true ]; then
   openssl req  \
       -x509 \
       -nodes \
@@ -13,13 +12,19 @@ then
       -subj "/C=DE/ST=City/L=City/O=Global Security/OU=IT Department/CN=nginx"
 fi
 
-if [ "${NGINX_METRICS_ENABLED}" = True ]; then
-  sed -i "s/#stub_status/stub_status/g;" /etc/nginx/nginx.conf
+if [ "${USE_TLS}" = true ]; then
+  NGINX_CONFIG="/etc/nginx/nginx_TLS.conf"
+else
+  NGINX_CONFIG="/etc/nginx/nginx.conf"
+fi
+
+if [ "${NGINX_METRICS_ENABLED}" = true ]; then
+  sed -i "s/#stub_status/stub_status/g;" $NGINX_CONFIG
   echo "Nginx metrics are enabled"
 fi
 
 if [ "${METRICS_HTTP_AUTH_PASSWORD}" != "" ]; then
-  sed -i "s/#auth_basic/auth_basic/g;" /etc/nginx/nginx.conf
+  sed -i "s/#auth_basic/auth_basic/g;" $NGINX_CONFIG
   rm -rf /etc/nginx/.htpasswd
   echo -n $METRICS_HTTP_AUTH_USER:$(openssl passwd -apr1 $METRICS_HTTP_AUTH_PASSWORD) >> /etc/nginx/.htpasswd
   echo "Basic auth is on for user ${HTTP_AUTH_LOGIN}..."
@@ -29,9 +34,5 @@ fi
 
 echo "uwsgi_pass ${DD_UWSGI_PASS};" > /run/uwsgi_pass
 echo "server ${DD_UWSGI_HOST}:${DD_UWSGI_PORT};" > /run/uwsgi_server
-if [ "${USE_TLS}" == "True" ]
-then
-  exec nginx -c /etc/nginx/nginx_TLS.conf -g "daemon off;"
-else
-  exec nginx -g "daemon off;"
-fi
+
+exec nginx -c $NGINX_CONFIG -g "daemon off;"

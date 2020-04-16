@@ -8,7 +8,7 @@ class TestSystemSettings(TestCase):
         try:
             # although the unittests are run after initial data has been loaded, for some reason in travis sometimes the settings aren't present
             system_settings = System_Settings.objects.get()
-        except System_Settings.DoesNotExistDoesNotExist:
+        except System_Settings.DoesNotExist:
             system_settings = System_Settings()
 
         system_settings.enable_jira = True

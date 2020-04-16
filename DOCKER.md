@@ -114,7 +114,7 @@ docker-compose up
 
 This will run the application based on merged configurations from docker-compose.yml and docker-compose.override.ptvsd.yml.
 
-The default configuration assumes port 3000 by default for ptvsd, and you should access the DefectDojo UI on port 8000 instead of port 8080, as the uwsgi container will serve directly.
+The default configuration assumes port 3000 by default for ptvsd.
 
 ### VS code
 Add the following python debug configuration (You would have to install the `ms-python.python`. Other setup may work.)
@@ -243,14 +243,14 @@ To change the port:
 NB: some third party software may require to change the exposed port in Dockerfile.nginx as they use docker-compose declarations to discover which ports to map when publishing the application.
 
 
-# Run the unit-tests with docker
-## Introduction
+# Run the tests with docker
 The unit-tests are under `dojo/unittests`
 
+The integration-tests are under `tests`
 
 
-## Running the unit-tests 
-This will run all the tests and leave the uwsgi container up: 
+## Running the unit-tests
+This will run all unit-tests and leave the uwsgi container up: 
 
 ```
 cp dojo/settings/settings.dist.py dojo/settings/settings.py
@@ -278,6 +278,15 @@ Run a single test. Example:
 
 ```
 python manage.py test dojo.unittests.test_dependency_check_parser.TestDependencyCheckParser.test_parse_without_file_has_no_findings --keepdb
+```
+
+## Running the integration-tests
+This will run all integration-tests and leave the containers up: 
+
+```
+cp dojo/settings/settings.dist.py dojo/settings/settings.py
+docker/setEnv.sh integration_tests
+docker-compose up
 ```
 
 # Checking Docker versions
