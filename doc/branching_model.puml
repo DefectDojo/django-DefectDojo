@@ -20,7 +20,8 @@ rcbranch --> devbranch: Merge back more bug fixes
 
 
 note right of rcbranch
-  Bug fixes
+  - Bug fixes
+  - Push to DockerHub with -rc suffix
 end note
 
 
@@ -28,7 +29,7 @@ rcbranch -> master: Merge
 note right of master
     Official release
     - Tag "rx.y.0"
-    - Deploy to DockerHub
+    - Push to DockerHub
 end note
 
 {endrc} rcbranch --> devbranch --: Release done
