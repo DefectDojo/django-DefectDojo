@@ -523,6 +523,7 @@ form ul#id_accepted_findings input {
 
 .severity {
     font-size: 80%;
+    display:inline-block; /* needed to overwrite text-decoration from ancestor, you can't overrwite it directly */
 }
 
 .severity-Info {
@@ -1582,4 +1583,8 @@ mark{
 small {
   font-size:12px;
   font-weight:400;
+}
+
+.inactive_finding td {
+    text-decoration: line-through;
 }
