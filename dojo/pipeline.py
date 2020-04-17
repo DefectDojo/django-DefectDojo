@@ -1,4 +1,3 @@
-import os
 import gitlab
 
 from django.conf import settings
@@ -78,7 +77,7 @@ def update_product_access(backend, uid, user=None, social=None, *args, **kwargs)
         project_names = [project.path_with_namespace for project in projects]
         # For each project: create a new product or update product's authorized_users
         for project_name in project_names:
-            if not project_name in prod_names:
+            if project_name not in prod_names:
                 product = Product.objects.create(name=project_name)
                 product.authorized_users.add(user)
                 product.save()
@@ -88,7 +87,7 @@ def update_product_access(backend, uid, user=None, social=None, *args, **kwargs)
                 product.save()
         # For each product: if user is not project member any more, remove him from product's authorized users
         for product_name in prod_names:
-            if not product_name in project_names:
+            if product_name not in project_names:
                 product = Product.objects.get(name=product_name)
                 product.authorized_users.remove(user)
                 product.save()
