@@ -18,12 +18,12 @@ from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
 from dojo.templatetags.display_tags import get_level
 from dojo.filters import ProductFilter, ProductFindingFilter, EngagementFilter
-from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAPKeyForm, JIRAFindingForm, AdHocFindingForm, GITHUB_Product_Form, GITHUBFindingForm, \
-                       EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm
-
+from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAPKeyForm, JIRAFindingForm, AdHocFindingForm, \
+                       EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm, ProductNotificationsForm, \
+                       GITHUB_Product_Form, GITHUBFindingForm
 from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, GITHUB_PKey, Finding_Template, \
-    Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, \
-    Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product
+                        Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, \
+                        Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications
 from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, create_notification, Product_Tab, get_punchcard_data
 from custom_field.models import CustomFieldValue, CustomField
 from dojo.tasks import add_epic_task, add_external_issue_task
@@ -105,6 +105,14 @@ def view_product(request, pid):
     prod_query = Product.objects.all().select_related('product_manager', 'technical_contact', 'team_manager').prefetch_related('authorized_users')
     prod = get_object_or_404(prod_query, id=pid)
     auth = request.user.is_staff or request.user in prod.authorized_users.all()
+
+    # instance = Notificationws.objects.filter(user=request.user).filter(product=prod).first()
+    # print(vars(instance))
+
+    personal_notifications_form = ProductNotificationsForm(instance=Notifications.objects.filter(user=request.user).filter(product=prod).first())
+
+    print(vars(personal_notifications_form))
+
     if not auth:
         # will render 403
         raise PermissionDenied
@@ -165,7 +173,8 @@ def view_product(request, pid):
                   'system_settings': system_settings,
                   'benchmarks_percents': benchAndPercent,
                   'benchmarks': benchmarks,
-                  'authorized': auth})
+                  'authorized': auth,
+                  'personal_notifications_form': personal_notifications_form})
 
 
 def view_product_metrics(request, pid):
@@ -947,7 +956,6 @@ def ad_hoc_finding(request, pid):
                 if jform.is_valid():
                     push_to_jira = jform.cleaned_data.get('push_to_jira')
 
-
                 messages.add_message(request,
                                      messages.SUCCESS,
                                      'Finding added successfully.',
@@ -1102,3 +1110,27 @@ def delete_engagement_presets(request, pid, eid):
                    'product_tab': product_tab,
                    'rels': rels,
                    })
+
+
+def edit_notifications(request, pid):
+    print('editing them notifications')
+    prod = get_object_or_404(Product, id=pid)
+    if request.method == 'POST':
+        product_notifications = Notifications.objects.filter(user=request.user).filter(product=prod).first()
+        if not product_notifications:
+            product_notifications = Notifications(user=request.user, product=prod)
+            print('no existing product notifications found')
+        else:
+            print('existing product notifications found')
+
+        form = ProductNotificationsForm(request.POST, instance=product_notifications)
+        # print(vars(form))
+
+        if form.is_valid():
+            form.save()
+            messages.add_message(request,
+                                    messages.SUCCESS,
+                                    'Notification settings updated.',
+                                    extra_tags='alert-success')
+
+    return HttpResponseRedirect(reverse('view_product', args=(pid,)))
