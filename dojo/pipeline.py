@@ -1,4 +1,10 @@
+import os
+import gitlab
+
 from django.conf import settings
+from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
+from dojo.models import Engagement, Product
 from social_core.backends.azuread_tenant import AzureADTenantOAuth2
 from social_core.backends.google import GoogleOAuth2
 
@@ -53,3 +59,36 @@ def social_uid(backend, details, response, *args, **kwargs):
 def modify_permissions(backend, uid, user=None, social=None, *args, **kwargs):
     if kwargs.get('is_new'):
         user.is_staff = False
+        if settings.GITLAB_PROJECT_AUTO_IMPORT is True:
+            # Add engagement creation permission
+            user.user_permissions.set([Permission.objects.get(codename='add_engagement', content_type=ContentType.objects.get_for_model(Engagement))])
+
+
+def update_product_access(backend, uid, user=None, social=None, *args, **kwargs):
+    if settings.GITLAB_PROJECT_AUTO_IMPORT is True:
+        # Get all product names
+        prod_names = [prod.name for prod in Product.objects.all()]
+        # Get Gitlab access token
+        soc = user.social_auth.get()
+        token = soc.extra_data['access_token']
+        # Get user's projects list on Gitlab
+        gl = gitlab.Gitlab(settings.SOCIAL_AUTH_GITLAB_API_URL, oauth_token=token)
+        # Get each project path_with_namespace as future product name
+        projects = gl.projects.list(membership=True, all=True)
+        project_names = [project.path_with_namespace for project in projects]
+        # For each project: create a new product or update product's authorized_users
+        for project_name in project_names:
+            if not project_name in prod_names:
+                product = Product.objects.create(name=project_name)
+                product.authorized_users.add(user)
+                product.save()
+            else:
+                product = Product.objects.get(name=project_name)
+                product.authorized_users.add(user)
+                product.save()
+        # For each product: if user is not project member any more, remove him from product's authorized users
+        for product_name in prod_names:
+            if not product_name in project_names:
+                product = Product.objects.get(name=product_name)
+                product.authorized_users.remove(user)
+                product.save()
