@@ -7,7 +7,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 import unittest
 import os
 import re
-
+import time
 
 dd_driver = None
 dd_driver_options = None
@@ -33,7 +33,7 @@ class BaseTestCase(unittest.TestCase):
             # dd_driver_options.add_argument("--disable-dev-shm-usage")
 
             # start maximized or at least with sufficient with because datatables will hide certain controls when the screen is too narrow
-            dd_driver_options.add_argument("--window-size=1280,768")
+            dd_driver_options.add_argument("--window-size=1280,1024")
             # dd_driver_options.add_argument("--start-maximized")
 
             dd_driver_options.set_capability("acceptInsecureCerts", True)
@@ -213,6 +213,8 @@ def on_exception_html_source_logger(func):
 
         except Exception as e:
             print(self.driver.page_source)
+            print("exception url:", self.driver.current_url)
+            time.sleep(30)
             raise(e)
 
     return wrapper

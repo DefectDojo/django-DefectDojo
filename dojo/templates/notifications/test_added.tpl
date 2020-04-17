@@ -12,7 +12,7 @@ Hello {{ user.get_full_name }},
 {% url 'view_engagement' test.engagement.id as engagement_url %}
 {% url 'view_test' test.id as test_url %}
     A new test has been added: <a href="{{product_url|full_url}}">{{product}}</a> / <a href="{{engagement_url|full_url}}">{{ engagement.name }}</a> / <a href="{{ test_url|full_url }}">{{ test }}</a><br/>
-    Finding details in the 'scan_added' email, whichi is a separate notification (for now).
+    Finding details in the 'scan_added' email, which is a separate notification (for now).
 <br/>
 Kind regards,</br>
 {% if system_settings.team_name is not None %}

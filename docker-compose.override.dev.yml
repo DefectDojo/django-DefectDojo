@@ -9,6 +9,8 @@ services:
       - './media/CACHE:/app/media/CACHE'
     environment:
       DD_DEBUG: 'True'
+      DD_ADMIN_USER: ${DD_ADMIN_USER:-admin}
+      DD_ADMIN_PASSWORD: ${DD_ADMIN_PASSWORD:-admin}      
   celeryworker:
     volumes:
       - '.:/app:z'
@@ -18,6 +20,8 @@ services:
   initializer:
     volumes:
       - '.:/app:z'
+    environment:
+      DD_ADMIN_PASSWORD: ${DD_ADMIN_PASSWORD:-admin}
   nginx:
     volumes:
       - './dojo/static/dojo:/usr/share/nginx/html/static/dojo'

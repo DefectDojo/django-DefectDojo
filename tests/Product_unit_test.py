@@ -82,6 +82,7 @@ class ProductTest(BaseTestCase):
         # Select and click on the particular product to edit
         driver.find_element_by_link_text("QA Test").click()
         # "Click" the dropdown option
+        # driver.execute_script("window.scrollTo(0, 0)")
         driver.find_element_by_id("dropdownMenu1").click()
         # Click on the 'Edit' option
         driver.find_element_by_link_text("Edit").click()
@@ -325,6 +326,7 @@ class ProductTest(BaseTestCase):
         # Select the specific product to delete
         driver.find_element_by_link_text("QA Test").click()
         # Click the drop down menu
+        # driver.execute_script("window.scrollTo(0, 0)")
         driver.find_element_by_id('dropdownMenu1').click()
         # "Click" the Delete option
         driver.find_element_by_link_text("Delete").click()

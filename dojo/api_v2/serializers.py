@@ -702,11 +702,11 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         except SyntaxError:
             raise Exception('Parser SyntaxError')
 
+        old_findings = []
         if close_old_findings:
             # Close old active findings that are not reported by this scan.
             new_hash_codes = test.finding_set.values('hash_code')
 
-            old_findings = None
             if test.engagement.deduplication_on_engagement:
                 old_findings = Finding.objects.exclude(test=test) \
                                               .exclude(hash_code__in=new_hash_codes) \
