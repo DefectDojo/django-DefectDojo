@@ -2188,7 +2188,7 @@ def finding_bulk_update_all(request, pid=None):
                     if JIRA_PKey.objects.filter(product=finding.test.engagement.product).count() == 0:
                         log_jira_alert('Finding cannot be pushed to jira as there is no jira configuration for this product.', finding)
                     else:
-                        push_anyway = finding.jira_conf_new().jira_pkey_set.first().push_all_issues
+                        push_anyway = finding.jira_conf_new() and finding.jira_conf_new().jira_pkey_set.first().push_all_issues
                         # push_anyway = JIRA_PKey.objects.get(
                         #     product=finding.test.engagement.product).push_all_issues
                         if form.cleaned_data['push_to_jira'] or push_anyway:
