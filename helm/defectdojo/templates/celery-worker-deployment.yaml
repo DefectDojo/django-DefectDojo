@@ -59,7 +59,12 @@ spec:
               # Use secret handled outside of the chart
               name: {{- if .Values.mysql.enabled }} defectdojo-mysql-specific {{- else }} {{ .Values.mysql.mysqlPasswordSecret }} {{- end }}
               key: mysql-password
-              {{- end }}   
+              {{- end }}
+        - name: DD_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ $fullName }}
+              key: DD_SECRET_KEY
         resources:
           {{- toYaml .Values.celery.worker.resources | nindent 10 }}
       {{- with .Values.celery.worker.nodeSelector }}
