@@ -262,15 +262,15 @@ def reopen_external_issue_task(find, note, external_issue_provider):
 
 
 @task(name='add_issue_task')
-def add_issue_task(find, push_to_jira, push_to_github):
+def add_issue_task(find, push_to_jira):
     logger.info("add issue task")
     add_issue(find, push_to_jira)
 
 
 @task(name='update_issue_task')
-def update_issue_task(find, old_status, push_to_jira):
+def update_issue_task(find, push_to_jira):
     logger.info("update issue task")
-    update_issue(find, old_status, push_to_jira)
+    update_issue(find, push_to_jira)
 
 
 @task(name='add_epic_task')

@@ -26,7 +26,7 @@ from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, S
                         Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications
 from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, create_notification, Product_Tab, get_punchcard_data
 from custom_field.models import CustomFieldValue, CustomField
-from dojo.tasks import add_epic_task, add_issue_task, add_external_issue_task
+from dojo.tasks import add_epic_task, add_external_issue_task
 from tagging.models import Tag
 from tagging.utils import get_tag_list
 from django.db.models import Prefetch
@@ -85,7 +85,7 @@ def prefetch_for_product(prods):
         prefetched_prods = prefetched_prods.annotate(last_engagement_date=Max('engagement__target_start'))
         prefetched_prods = prefetched_prods.annotate(active_finding_count=Count('engagement__test__finding__id', filter=Q(engagement__test__finding__active=True)))
         prefetched_prods = prefetched_prods.prefetch_related(Prefetch('jira_pkey_set', queryset=JIRA_PKey.objects.all().select_related('conf'), to_attr='jira_confs'))
-        prefetched_prods = prefetched_prods.prefetch_related(Prefetch('github_pkey_set', queryset=GITHUB_PKey.objects.all().select_related('conf'), to_attr='github_confs'))
+        prefetched_prods = prefetched_prods.prefetch_related(Prefetch('github_pkey_set', queryset=GITHUB_PKey.objects.all().select_related('git_conf'), to_attr='github_confs'))
         active_endpoint_query = Endpoint.objects.filter(
                 finding__active=True,
                 finding__mitigated__isnull=True)
@@ -671,7 +671,7 @@ def edit_product(request, pid):
                 gform = GITHUB_Product_Form(instance=github_inst)
             else:
                 gform = GITHUB_Product_Form()
-        elif jira_enabled:
+        elif github_enabled:
             gform = GITHUB_Product_Form()
         else:
             gform = None
@@ -780,7 +780,7 @@ def new_eng_for_app(request, pid, cicd=False):
             if get_system_setting('enable_jira'):
                 # Test to make sure there is a Jira project associated the product
                 try:
-                    jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=JIRA_PKey.objects.get(product=prod).push_all_issues)
+                    jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=False)
                     if jform.is_valid():
                         add_epic_task.delay(new_eng, jform.cleaned_data.get('push_to_jira'))
                 except JIRA_PKey.DoesNotExist:
@@ -801,9 +801,15 @@ def new_eng_for_app(request, pid, cicd=False):
                 return HttpResponseRedirect(reverse('view_engagement', args=(new_eng.id,)))
     else:
         form = EngForm(initial={'lead': request.user, 'target_start': timezone.now().date(), 'target_end': timezone.now().date() + timedelta(days=7), 'product': prod.id}, cicd=cicd, product=prod.id)
-        if(get_system_setting('enable_jira')):
+        if get_system_setting('enable_jira'):
             if JIRA_PKey.objects.filter(product=prod).count() != 0:
-                jform = JIRAFindingForm(prefix='jiraform', enabled=JIRA_PKey.objects.get(product=prod).push_all_issues)
+                # Enabled must be false in this case, because this Push-to-jira is more about
+                # epics then findings.
+                jform = JIRAFindingForm(prefix='jiraform', enabled=False)
+                # Feels like we should probably inform the user that this particular checkbox
+                # is more about epics and engagements than findings and issues.
+                jform.fields['push_to_jira'].help_text = "Checking this will add an EPIC for this engagement."
+                jform.fields['push_to_jira'].label = "Create EPIC"
 
     product_tab = Product_Tab(pid, title="New Engagement", tab="engagements")
     return render(request, 'dojo/new_eng.html',
@@ -899,12 +905,10 @@ def ad_hoc_finding(request, pid):
     enabled = False
     jform = None
     form = AdHocFindingForm(initial={'date': timezone.now().date()})
-    if get_system_setting('enable_jira'):
-        if JIRA_PKey.objects.filter(product=test.engagement.product).count() != 0:
-            enabled = JIRA_PKey.objects.get(product=test.engagement.product).push_all_issues
-            jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
-    else:
-        jform = None
+    if get_system_setting('enable_jira') and \
+            test.engagement.product.jira_pkey_set.first() is not None:
+        enabled = test.engagement.product.jira_pkey_set.first().push_all_issues
+        jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
     if get_system_setting('enable_github'):
         if GITHUB_PKey.objects.filter(product=test.engagement.product).count() != 0:
             gform = GITHUBFindingForm(enabled=enabled, prefix='githubform')
@@ -941,11 +945,17 @@ def ad_hoc_finding(request, pid):
             new_finding.is_template = False
             new_finding.save()
             new_finding.endpoints.set(form.cleaned_data['endpoints'])
-            new_finding.save()
-            if 'jiraform-push_to_jira' in request.POST:
-                jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=enabled)
+
+            # Push to Jira?
+            push_to_jira = False
+            if enabled:
+                push_to_jira = True
+            elif 'jiraform-push_to_jira' in request.POST:
+                jform = JIRAFindingForm(request.POST, prefix='jiraform',
+                                        enabled=enabled)
                 if jform.is_valid():
-                    add_issue_task.delay(new_finding, 'github')
+                    push_to_jira = jform.cleaned_data.get('push_to_jira')
+
                 messages.add_message(request,
                                      messages.SUCCESS,
                                      'Finding added successfully.',
@@ -958,6 +968,8 @@ def ad_hoc_finding(request, pid):
                                      messages.SUCCESS,
                                      'Finding added successfully to github.',
                                      extra_tags='alert-success')
+            new_finding.save(push_to_jira=push_to_jira)
+
             if create_template:
                 templates = Finding_Template.objects.filter(title=new_finding.title)
                 if len(templates) > 0:
