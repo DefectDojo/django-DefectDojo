@@ -15,12 +15,13 @@ note left of devbranch
 end note
 
 
-rcbranch --> devbranch: Merge back bug fixes
-rcbranch --> devbranch: Merge back more bug fixes
+rcbranch <- devbranch: Merge bug fixes
+rcbranch <- devbranch: Merge more bug fixes
 
 
 note right of rcbranch
   - Bug fixes
+  - Tag "x.y.0-rc" on RC branch
   - Push to DockerHub with -rc suffix
 end note
 
@@ -28,7 +29,7 @@ end note
 rcbranch -> master: Merge
 note right of master
     Official release
-    - Tag "rx.y.0"
+    - Tag "x.y.0"
     - Push to DockerHub
 end note
 
@@ -36,8 +37,8 @@ end note
 
 devbranch -> rcbranch: Start release x.(y+1).0
 note left of devbranch
- (increase x if case of
-  major breaking change)
+  Increase x if case of
+  major breaking change
 end note
 
 
@@ -52,13 +53,13 @@ note right of hotbranch
     Severe bug
     to be corrected
 end note
-hotbranch -> master: Merge
+hotbranch <- devbranch --: Merge hotfix per PR
+hotbranch --> master: Merge
 note right of master
     Official release
-    - Tag "rx.y.1"
+    - Tag "x.y.1" on master
     - Deploy to DockerHub
 end note
-hotbranch -> rcbranch: Merge
-hotbranch -> devbranch --: Merge
+hotbranch --> rcbranch: Merge
 
 @enduml
