@@ -97,7 +97,7 @@
                             <h5>Accepted Findings</h5>
                         </div>
                         <div class="panel-body">
-                            <div id="reported_findings" class="graph"></div>
+                            <div id="accepted_findings" class="graph"></div>
                         </div>
                     </div>
                 </div>
@@ -517,7 +517,7 @@
                 }
             ];
 
-            $.plot("#reported_findings", data, {
+            $.plot("#accepted_findings", data, {
                 series: {
                     stack: true,
                     bars: {
