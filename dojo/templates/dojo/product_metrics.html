@@ -114,7 +114,8 @@
                                 <div class="pull-right inline-block text-right">
                                     <span class=" fa-2x">{{ verified_findings|length }}</span>
                                     <span><a
-                                            href="{% url 'product_verified_findings' prod.id %}?test__engagement__product={{ prod.id }}">Verified
+                                            href="{% url 'product_verified_findings' prod.id %}?test__engagement__product={{ prod.id }}"
+                                            title="Findings that are open/active and verified">Verified
                                         Finding{{ verified_findings|length|pluralize }} <i
                                                 class="fa fa-arrow-circle-right"></i></a>
                                     </span>
@@ -141,7 +142,8 @@
 
                                 <div class="pull-right inline-block text-right">
                                     <span class=" fa-2x">{{ open_findings|length }}</span>
-                                    <span><a href="{% url 'product_open_findings' prod.id %}?test__engagement__product={{ prod.id }}">Open
+                                    <span><a href="{% url 'product_open_findings' prod.id %}?test__engagement__product={{ prod.id }}"
+                                        title="Findings that are open/active, but not (yet) verified">Open
                                         Finding{{ open_findings|length|pluralize }} <i
                                                 class="fa fa-arrow-circle-right"></i></a>
                                     </span>
@@ -169,7 +171,8 @@
                                 <div class="pull-right text-right">
                                     <span class="fa-2x">{{ accepted_findings|length }}</span>
                                     <span><a
-                                            href="{% url 'accepted_findings' %}?test__engagement__product={{ prod.id }}">Accepted
+                                            href="{% url 'accepted_findings' %}?test__engagement__product={{ prod.id }}"
+                                            title="Findings that have been accepted in a risk acceptance.">Accepted
                                     Findings <i class="fa fa-arrow-circle-right"></i></a>
                                 </span>
                                 </div>
@@ -195,7 +198,8 @@
 
                                 <div class="text-right pull-right">
                                     <span class="fa-2x">{{ closed_findings|length }}</span>
-                                    <span><a href="{% url 'closed_findings' %}?test__engagement__product={{ prod.id }}">Closed
+                                    <span><a href="{% url 'closed_findings' %}?test__engagement__product={{ prod.id }}"
+                                             title="Findings that are closed and mitigated.">Closed
                                         Finding{{ closed_findings|length|pluralize }} <i
                                                 class="fa fa-arrow-circle-right"></i></a>
                                     </span>
@@ -222,7 +226,8 @@
 
                                 <div class="text-right pull-right">
                                     <span class="fa-2x">{{ false_positive_findings|length }}</span>
-                                    <span><a href="{% url 'product_false_positive_findings' prod.id %}?test__engagement__product={{ prod.id }}">False-postive
+                                    <span><a href="{% url 'product_false_positive_findings' prod.id %}?test__engagement__product={{ prod.id }}"
+                                             title="Findings that are marked as false postive.">False-postive
                                         Finding{{ false_positive_findings|length|pluralize }} <i
                                                 class="fa fa-arrow-circle-right"></i></a>
                                     </span>
@@ -250,7 +255,8 @@
                                 <div class="pull-right inline-block text-right">
                                     <span class=" fa-2x">{{ out_of_scope_findings|length }}</span>
                                     <span><a
-                                            href="{% url 'product_out_of_scope_findings' prod.id %}?test__engagement__product={{ prod.id }}">Out Of Scope
+                                            href="{% url 'product_out_of_scope_findings' prod.id %}?test__engagement__product={{ prod.id }}"
+                                            title="Findings that are marked as out of scope.">Out Of Scope
                                         Finding{{ out_of_scope_findings|length|pluralize }} <i
                                                 class="fa fa-arrow-circle-right"></i></a>
                                     </span>
@@ -277,7 +283,8 @@
 
                                 <div class="text-right pull-right">
                                     <span class="fa-2x">{{ all_findings|length }}</span>
-                                    <span><a href="{% url 'product_false_positive_findings' prod.id %}?test__engagement__product={{ prod.id }}">Total 
+                                    <span><a href="{% url 'product_false_positive_findings' prod.id %}?test__engagement__product={{ prod.id }}"
+                                            title="All findings.">Total 
                                         Finding{{ all_findings|length|pluralize }} <i
                                                 class="fa fa-arrow-circle-right"></i></a>
                                     </span>
@@ -304,7 +311,8 @@
 
                                 <div class="pull-right inline-block text-right">
                                     <span class=" fa-2x">{{ inactive_findings|length }}</span>
-                                    <span><a href="{% url 'product_inactive_findings' prod.id %}?test__engagement__product={{ prod.id }}">Inactive
+                                    <span><a href="{% url 'product_inactive_findings' prod.id %}?test__engagement__product={{ prod.id }}"
+                                             title="Findings that are not active but not mitigated for some reason">Inactive
                                         Finding{{ inactive_findings|length|pluralize }} <i
                                                 class="fa fa-arrow-circle-right"></i></a>
                                     </span>
