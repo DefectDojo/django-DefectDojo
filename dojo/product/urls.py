@@ -1,4 +1,5 @@
 from django.conf.urls import url
+from django.urls import path
 
 from dojo.product import views
 
@@ -7,6 +8,10 @@ urlpatterns = [
     url(r'^product$', views.product, name='product'),
     url(r'^product/(?P<pid>\d+)$', views.view_product,
         name='view_product'),
+    path('product/name/<str:pname>', views.view_product_by_name,
+        name='view_product_by_name'),
+    path('product/meta/<str:pmeta_name>/<str:pmeta_value>', views.view_product_by_meta,
+        name='view_product_by_meta'),
     url(r'^product/(?P<pid>\d+)/engagements$', views.view_engagements,
         name='view_engagements'),
     url(r'^product/(?P<pid>\d+)/engagements/cicd$', views.view_engagements_cicd,
