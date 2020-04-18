@@ -101,6 +101,17 @@ def iso_to_gregorian(iso_year, iso_week, iso_day):
     return start + timedelta(weeks=iso_week - 1, days=iso_day - 1)
 
 
+def view_product_by_name(request, pname):
+    prod = get_object_or_404(Product, name=pname)
+    return HttpResponseRedirect(reverse('view_product', args=(prod.id,)))
+
+
+def view_product_by_meta(request, pmeta_name, pmeta_value):
+    prod_query = Product.objects.filter(product_meta__name=pmeta_name, product_meta__value=pmeta_value)
+    prod = get_object_or_404(prod_query)
+    return HttpResponseRedirect(reverse('view_product', args=(prod.id,)))
+
+
 def view_product(request, pid):
     prod_query = Product.objects.all().select_related('product_manager', 'technical_contact', 'team_manager').prefetch_related('authorized_users')
     prod = get_object_or_404(prod_query, id=pid)
@@ -946,7 +957,6 @@ def ad_hoc_finding(request, pid):
                                         enabled=enabled)
                 if jform.is_valid():
                     push_to_jira = jform.cleaned_data.get('push_to_jira')
-
 
                 messages.add_message(request,
                                      messages.SUCCESS,
