@@ -291,9 +291,6 @@
                                     <ul class="nav nav-second-level">
                                         {% if request.user.is_superuser %}                            
                                         <li><a href="{% url 'cred' %}">Credential Manager </a></li>
-                                            {% if system_settings.enable_jira %}
-                                            <li><a href="{% url 'jira' %}">JIRA </a></li>
-                                            {% endif %}
                                         {% if system_settings.enable_jira %}
                                         <li><a href="{% url 'jira' %}">JIRA </a></li>
                                         {% endif %}
