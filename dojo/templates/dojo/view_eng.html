@@ -114,7 +114,7 @@
                     <div class="panel-heading">
                         <div class="clearfix">
                             <h4 class="pull-left">
-                            Engagement Presets <small>{{ eng.preset.title|truncatechars:60 }}</small>
+                            Engagement Presets <small>{{ eng.preset.title|truncatechars_html:60 }}</small>
                             </h4>
                             <div class="dropdown pull-right">
                                 <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
@@ -592,7 +592,7 @@
             </tr>
             <tr>
               <td><strong>Commit Hash</strong></td>
-              <td>{{ eng.commit_hash|notspecified|truncatechars:13 }}</td>
+              <td>{{ eng.commit_hash|notspecified|truncatechars_html:13 }}</td>
             </tr>
             <tr>
               <td><strong>Branch/Tag</strong></td>
