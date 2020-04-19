@@ -315,12 +315,12 @@
                                                     <td>{{ finding.test.engagement.product.prod_type.name }}</td>
                                                     <td>
                                         <span title="{{ finding.test.engagement.product.name }}">
-                                            {{ finding.test.engagement.product.name|truncatechars:20 }}
+                                            {{ finding.test.engagement.product.name|truncatechars_html:20 }}
                                         </span>
                                                     </td>
                                                     <td>{{ finding.severity_display }}</td>
                                                     <td><a href="{% url 'view_finding' finding.id %}"
-                                                           title="{{ finding.title }}">{{ finding.title|truncatechars:20 }}</a>
+                                                           title="{{ finding.title }}">{{ finding.title|truncatechars_html:20 }}</a>
                                                     </td>
                                                     <td>{{ finding.age }}</td>
                                                     <td>{{ finding.status }}</td>
