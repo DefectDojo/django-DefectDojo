@@ -333,13 +333,6 @@ class Dojo_User(User):
     def __str__(self):
         return self.get_full_name()
 
-    @property
-    def is_block_execution(self):
-        if self.usercontactinfo and not self.usercontactinfo.block_execution:
-            return True
-
-        return False
-
 
 class UserContactInfo(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -2376,7 +2369,7 @@ class Notifications(models.Model):
         result = None
         for notifications in notifications_list:
             print('id: ', notifications.id)
-            print('scan_added: ', notifications.scan_added)
+            print('not.user.get_full_name: ', notifications.user.get_full_name())
             if result is None:
                 # we start by copying the first instance, because creating a new instance would set all notification columns to 'alert' :-()
                 result = notifications

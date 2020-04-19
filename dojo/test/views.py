@@ -27,7 +27,8 @@ from dojo.forms import NoteForm, TestForm, FindingForm, \
     ImportScanForm, ReImportScanForm, FindingBulkUpdateForm, JIRAFindingForm
 from dojo.models import Product, Finding, Test, Notes, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, Finding_Template, JIRA_PKey, Cred_Mapping, Dojo_User, JIRA_Issue, System_Settings
 from dojo.tools.factory import import_parser_factory
-from dojo.utils import get_page_items, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting, create_notification, Product_Tab, calculate_grade, log_jira_alert, max_safe
+from dojo.utils import get_page_items, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting, Product_Tab, calculate_grade, log_jira_alert, max_safe
+from dojo.notifications.helper import create_notification
 from dojo.tasks import add_issue_task, update_issue_task
 from functools import reduce
 

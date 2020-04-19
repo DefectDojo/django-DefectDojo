@@ -32,7 +32,8 @@ from dojo.models import Finding, Product, Engagement, Test, \
 from dojo.tools import handles_active_verified_statuses
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
-    FileIterWrapper, get_cal_event, message, get_system_setting, create_notification, Product_Tab
+    FileIterWrapper, get_cal_event, message, get_system_setting, Product_Tab
+from dojo.notifications.helper import create_notification
 from dojo.tasks import update_epic_task, add_epic_task
 from functools import reduce
 from django.db.models.query import QuerySet

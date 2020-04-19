@@ -7,7 +7,7 @@ import html2text
 from dojo.models import Finding
 from dojo.tools.sonarqube_api.api_client import SonarQubeAPI
 from dojo.models import Sonarqube_Issue
-from dojo.utils import create_notification
+from dojo.notifications.helper import create_notification
 
 logger = logging.getLogger(__name__)
 
