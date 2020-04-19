@@ -3,6 +3,10 @@ import unittest
 import re
 import sys
 from base_test_class import BaseTestCase
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver import ActionChains
 
 
 class UserTest(BaseTestCase):
@@ -95,6 +99,27 @@ class UserTest(BaseTestCase):
         # Assert ot the query to dtermine status of failure
         self.assertTrue(re.search(r'User and relationships removed.', productTxt))
 
+    def test_user_notifications_change(self):
+        # Login to the site. Password will have to be modified
+        # to match an admin password in your own container
+        driver = self.login_page()
+
+        wait = WebDriverWait(driver, 5)
+        actions = ActionChains(driver)
+        configuration_menu = driver.find_element_by_id('menu_configuration')
+        actions.move_to_element(configuration_menu).perform()
+        wait.until(EC.visibility_of_element_located((By.LINK_TEXT, "Notifications"))).click()
+
+        driver.find_element_by_xpath("//input[@name='product_added' and @value='mail']").click()
+        driver.find_element_by_xpath("//input[@name='scan_added' and @value='mail']").click()
+
+        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+
+        body = driver.find_element_by_tag_name("BODY").text
+        self.assertTrue(re.search(r'Settings saved', body))
+        self.assertTrue(driver.find_element_by_xpath("//input[@name='product_added' and @value='mail']").is_selected())
+        self.assertTrue(driver.find_element_by_xpath("//input[@name='scan_added' and @value='mail']").is_selected())
+
 
 def suite():
     suite = unittest.TestSuite()
@@ -103,6 +128,10 @@ def suite():
     suite.addTest(UserTest('test_create_user'))
     suite.addTest(UserTest('test_user_edit_permissions'))
     suite.addTest(UserTest('test_user_delete'))
+
+    # not really for the user we created, but still related to user settings
+    suite.addTest(UserTest('test_user_notifications_change'))
+
     return suite
 
 

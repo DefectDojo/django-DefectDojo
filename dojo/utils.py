@@ -1795,21 +1795,7 @@ def get_slack_user_id(user_email):
     return user_id
 
 
-def create_notification(initiator=None, event=None, **kwargs):
-    try:
-        print('block_exec: ', vars(initiator.usercontactinfo))
-    except:
-        print('block_exec: not found')
-
-    if initiator and initiator.usercontactinfo and not initiator.usercontactinfo.block_execution:
-        from .tasks import async_create_notification
-        print('async nottttttttttttts')
-        async_create_notification.delay(initator=initiator, event=event, **kwargs)
-    else:
-        create_notification_sync(initator=initiator, event=event, **kwargs)
-
-
-def create_notification_sync(event=None, **kwargs):
+def create_notification(event=None, **kwargs):
     def create_description(event):
         if "description" not in kwargs.keys():
             if event == 'product_added':
@@ -1992,7 +1978,7 @@ def create_notification_sync(event=None, **kwargs):
         for user in users:
             # send notifications to user after merging possible multiple notifications records (i.e. personal global + personal product)
             kwargs.update({'user': user})
-            process_notifications(Notifications.merge_notification_list(user.applicable_notifications))
+            process_notifications(Notifications.merge_notifications_list(user.applicable_notifications))
 
 
 def calculate_grade(product):

@@ -333,6 +333,13 @@ class Dojo_User(User):
     def __str__(self):
         return self.get_full_name()
 
+    @property
+    def is_block_execution(self):
+        if self.usercontactinfo and not self.usercontactinfo.block_execution:
+            return True
+
+        return False
+
 
 class UserContactInfo(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -2360,7 +2367,7 @@ class Notifications(models.Model):
         ]
 
     @classmethod
-    def merge_notification_list(cls, notifications_list):
+    def merge_notifications_list(cls, notifications_list):
         print('merging')
         if not notifications_list:
             print('return empty list')
