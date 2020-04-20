@@ -1,5 +1,6 @@
 from dojo.models import Product, Engagement
 from dojo.utils import redirect
+from django.shortcuts import get_object_or_404
 import logging
 
 logger = logging.getLogger(__name__)
