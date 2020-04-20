@@ -23,9 +23,16 @@ class NpmAuditParser(object):
                 tree = json.loads(str(data, 'utf-8'))
             except:
                 tree = json.loads(data)
-            subtree = tree.get('advisories')
         except:
-            raise Exception("Invalid format")
+            raise Exception("Invalid format, unable to parse json.")
+
+        if tree.get('error'):
+            error = tree.get('error')
+            code = error['code']
+            summary = error['summary']
+            raise ValueError('npm audit report contains errors: %s, %s', code, summary)
+
+        subtree = tree.get('advisories')
 
         return subtree
 

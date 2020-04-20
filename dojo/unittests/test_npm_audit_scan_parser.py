@@ -26,3 +26,11 @@ class TestNpmAuditParser(TestCase):
         parser = NpmAuditParser(testfile, Test())
         testfile.close()
         self.assertEqual(5, len(parser.items))
+
+    def test_npm_audit_parser_empty_with_error(self):
+        with self.assertRaises(ValueError) as context:
+            testfile = open("dojo/unittests/scans/npm_audit_sample/empty_with_error.json")
+            parser = NpmAuditParser(testfile, Test())
+            testfile.close()
+            self.assertTrue('npm audit report contains errors:' in str(context.exception))
+            self.assertTrue('ENOAUDIT' in str(context.exception))
