@@ -1031,6 +1031,12 @@ def edit_finding(request, fid):
     form.initial['tags'] = [tag.name for tag in finding.tags]
     form_error = False
     jform = None
+    enabled = False
+
+    if get_system_setting('enable_jira') and finding.jira_conf_new() is not None:
+        enabled = finding.test.engagement.product.jira_pkey_set.first().push_all_issues
+        jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
+
     gform = None
     try:
         jissue = JIRA_Issue.objects.get(finding=finding)
@@ -1045,10 +1051,6 @@ def edit_finding(request, fid):
     except:
         enabled = False
         pass
-
-    if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(
-            product=finding.test.engagement.product) != 0:
-        jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
 
     if get_system_setting('enable_github') and GITHUB_PKey.objects.filter(
             product=finding.test.engagement.product) != 0:
@@ -1114,11 +1116,16 @@ def edit_finding(request, fid):
             tags = request.POST.getlist('tags')
             t = ", ".join('"{0}"'.format(w) for w in tags)
             new_finding.tags = t
-            new_finding.save()
-            if 'jiraform-push_to_jira' in request.POST:
-                jform = JIRAFindingForm(
-                    request.POST, prefix='jiraform', enabled=enabled)
+
+            # Push to Jira?
+            push_to_jira = False
+            if enabled:
+                push_to_jira = True
+            elif 'jiraform-push_to_jira' in request.POST:
+                jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=enabled)
                 if jform.is_valid():
+                    push_to_jira = jform.cleaned_data.get('push_to_jira')
+
                     if JIRA_Issue.objects.filter(finding=new_finding).exists():
                         update_issue_task.delay(
                             new_finding, old_status,
@@ -1140,6 +1147,8 @@ def edit_finding(request, fid):
                         add_external_issue_task.delay(
                             new_finding,
                             'github')
+
+            new_finding.save(push_to_jira=push_to_jira)
 
             tags = request.POST.getlist('tags')
             t = ", ".join('"{0}"'.format(w) for w in tags)
@@ -1568,17 +1577,12 @@ def promote_to_finding(request, fid):
     test = finding.test
     form_error = False
     jira_available = False
+    enabled = False
+    jform = None
 
-    if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(
-            product=test.engagement.product) != 0:
-        jform = JIRAFindingForm(
-            request.POST,
-            prefix='jiraform',
-            enabled=JIRA_PKey.objects.get(
-                product=test.engagement.product).push_all_issues)
-        # jira_available = True
-    else:
-        jform = None
+    if get_system_setting('enable_jira') and test.engagement.product.jira_pkey_set.first() is not None:
+        enabled = test.engagement.product.jira_pkey_set.first().push_all_issues
+        jform = JIRAFindingForm(prefix='jiraform', enabled=enabled)
 
     product_tab = Product_Tab(finding.test.engagement.product.id, title="Promote Finding", tab="findings")
 
@@ -1610,19 +1614,22 @@ def promote_to_finding(request, fid):
 
             new_finding.save()
             new_finding.endpoints.set(form.cleaned_data['endpoints'])
-            new_finding.save()
 
-            finding.delete()
-            if 'jiraform' in request.POST:
-                jform = JIRAFindingForm(
-                    request.POST,
-                    prefix='jiraform',
-                    enabled=JIRA_PKey.objects.get(
-                        product=test.engagement.product).push_all_issues)
+            # Push to Jira?
+            push_to_jira = False
+            if enabled:
+                push_to_jira = True
+            elif 'jiraform-push_to_jira' in request.POST:
+                jform = JIRAFindingForm(request.POST, prefix='jiraform',
+                                        enabled=enabled)
                 if jform.is_valid():
-                    add_issue_task.delay(
-                        new_finding, jform.cleaned_data.get('push_to_jira'))
+                    push_to_jira = jform.cleaned_data.get('push_to_jira')
 
+            # Save it and push it to JIRA
+            new_finding.save(push_to_jira=push_to_jira)
+
+            # Delete potential finding
+            finding.delete()
             if 'githubform' in request.POST:
                 gform = GITHUBFindingForm(
                     request.POST,
@@ -1660,6 +1667,7 @@ def promote_to_finding(request, fid):
             'test': test,
             'stub_finding': finding,
             'form_error': form_error,
+            'jform': jform,
         })
 
 
@@ -2175,13 +2183,17 @@ def finding_bulk_update_all(request, pid=None):
                     from dojo.tools import tool_issue_updater
                     tool_issue_updater.async_tool_issue_update(finding)
 
+                    # Because we never call finding.save() in a bulk update, we need to actually
+                    # push the JIRA stuff here, rather than in finding.save()
                     if JIRA_PKey.objects.filter(product=finding.test.engagement.product).count() == 0:
                         log_jira_alert('Finding cannot be pushed to jira as there is no jira configuration for this product.', finding)
                     else:
-                        old_status = finding.status()
-                        if form.cleaned_data['push_to_jira']:
+                        push_anyway = finding.jira_conf_new().jira_pkey_set.first().push_all_issues
+                        # push_anyway = JIRA_PKey.objects.get(
+                        #     product=finding.test.engagement.product).push_all_issues
+                        if form.cleaned_data['push_to_jira'] or push_anyway:
                             if JIRA_Issue.objects.filter(finding=finding).exists():
-                                update_issue_task.delay(finding, old_status, True)
+                                update_issue_task.delay(finding, True)
                             else:
                                 add_issue_task.delay(finding, True)
 

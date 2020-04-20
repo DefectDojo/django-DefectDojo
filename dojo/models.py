@@ -279,6 +279,7 @@ class System_Settings(models.Model):
     column_widths = models.CharField(max_length=1500, blank=True)
     drive_folder_ID = models.CharField(max_length=100, blank=True)
     enable_google_sheets = models.BooleanField(default=False, null=True, blank=True)
+    email_address = models.EmailField(max_length=100, blank=True)
 
     objects = SystemSettingsManager()
 
@@ -1752,9 +1753,23 @@ class Finding(models.Model):
         long_desc += '*References*:' + self.references
         return long_desc
 
-    def save(self, dedupe_option=True, false_history=False, rules_option=True, issue_updater_option=True, *args, **kwargs):
+    def save(self, dedupe_option=True, false_history=False, rules_option=True,
+             issue_updater_option=True, push_to_jira=False, *args, **kwargs):
         # Make changes to the finding before it's saved to add a CWE template
         new_finding = False
+
+        jira_issue_exists = JIRA_Issue.objects.filter(finding=self).exists()
+        if push_to_jira:
+            self.jira_change = timezone.now()
+            if not jira_issue_exists:
+                self.jira_creation = timezone.now()
+        # If the product has "Push_all_issues" enabled,
+        # then we're pushing this to JIRA no matter what
+        if not push_to_jira:
+            # only if there is a JIRA configuration
+            push_to_jira = self.jira_conf_new() and \
+                           self.jira_conf_new().jira_pkey_set.first().push_all_issues
+
         if self.pk is None:
             # We enter here during the first call from serializers.py
             logger.debug("Saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is None)")
@@ -1836,6 +1851,14 @@ class Finding(models.Model):
 
         from dojo.utils import calculate_grade
         calculate_grade(self.test.engagement.product)
+
+        # Adding a snippet here for push to JIRA so that it's in one place
+        if push_to_jira:
+            from dojo.tasks import update_issue_task, add_issue_task
+            if jira_issue_exists:
+                update_issue_task.delay(self, True)
+            else:
+                add_issue_task.delay(self, True)
 
     def delete(self, *args, **kwargs):
         for find in self.original_finding.all():
@@ -2179,10 +2202,10 @@ class GITHUB_Details_Cache(models.Model):
 class GITHUB_PKey(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
 
-    project_key = models.CharField(max_length=200, blank=True, verbose_name="Github project", help_text="Specify your project location. (:user/:repo)")
-    conf = models.ForeignKey(GITHUB_Conf, verbose_name="Github Configuration",
-                             null=True, blank=True, on_delete=models.CASCADE)
-    push_notes = models.BooleanField(default=False, blank=True, help_text="Notes added to findings will be automatically added to the corresponding github issue")
+    git_project = models.CharField(max_length=200, blank=True, verbose_name="Github project", help_text="Specify your project location. (:user/:repo)")
+    git_conf = models.ForeignKey(GITHUB_Conf, verbose_name="Github Configuration",
+                                 null=True, blank=True, on_delete=models.CASCADE)
+    git_push_notes = models.BooleanField(default=False, blank=True, help_text="Notes added to findings will be automatically added to the corresponding github issue")
 
     def __unicode__(self):
         return self.product.name + " | " + self.project_key
@@ -2296,7 +2319,8 @@ class JIRA_PKey(models.Model):
     conf = models.ForeignKey(JIRA_Conf, verbose_name="JIRA Configuration",
                              null=True, blank=True, on_delete=models.CASCADE)
     component = models.CharField(max_length=200, blank=True)
-    push_all_issues = models.BooleanField(default=False, blank=True)
+    push_all_issues = models.BooleanField(default=False, blank=True,
+         help_text="Automatically maintain parity with JIRA. Always create and update JIRA tickets for findings in this Product.")
     enable_engagement_epic_mapping = models.BooleanField(default=False,
                                                          blank=True)
     push_notes = models.BooleanField(default=False, blank=True)

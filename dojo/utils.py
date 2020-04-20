@@ -1378,9 +1378,10 @@ def add_issue(find, push_to_jira):
                     j_issue = JIRA_Issue(
                         jira_id=new_issue.id, jira_key=new_issue, finding=find)
                     j_issue.save()
-                    find.jira_creation = timezone.now()
-                    find.jira_change = find.jira_creation
-                    find.save()
+                    # Moving this to the save function
+                    # find.jira_creation = timezone.now()
+                    # find.jira_change = find.jira_creation
+                    # find.save()
                     issue = jira.issue(new_issue.id)
 
                     # Add labels (security & product)
@@ -1436,7 +1437,7 @@ def jira_check_attachment(issue, source_file_name):
     return file_exists
 
 
-def update_issue(find, old_status, push_to_jira):
+def update_issue(find, push_to_jira):
     prod = Product.objects.get(
         engagement=Engagement.objects.get(test=find.test))
     jpkey = JIRA_PKey.objects.get(product=prod)
@@ -1478,8 +1479,9 @@ def update_issue(find, old_status, push_to_jira):
                 priority={'name': jira_conf.get_priority(find.severity)},
                 fields=fields)
             print('\n\nSaving jira_change\n\n')
-            find.jira_change = timezone.now()
-            find.save()
+            # Moving this to finding.save()
+            # find.jira_change = timezone.now()
+            # find.save()
             # Add labels(security & product)
             add_labels(find, issue)
         except JIRAError as e:
@@ -1490,23 +1492,23 @@ def update_issue(find, old_status, push_to_jira):
         if 'Inactive' in find.status() or 'Mitigated' in find.status(
         ) or 'False Positive' in find.status(
         ) or 'Out of Scope' in find.status() or 'Duplicate' in find.status():
-            if 'Active' in old_status:
-                json_data = {'transition': {'id': jira_conf.close_status_key}}
-                r = requests.post(
-                    url=req_url,
-                    auth=HTTPBasicAuth(jira_conf.username, jira_conf.password),
-                    json=json_data)
-                find.jira_change = timezone.now()
-                find.save()
+            # if 'Active' in old_status:
+            json_data = {'transition': {'id': jira_conf.close_status_key}}
+            r = requests.post(
+                url=req_url,
+                auth=HTTPBasicAuth(jira_conf.username, jira_conf.password),
+                json=json_data)
+            find.jira_change = timezone.now()
+            find.save()
         elif 'Active' in find.status() and 'Verified' in find.status():
-            if 'Inactive' in old_status:
-                json_data = {'transition': {'id': jira_conf.open_status_key}}
-                r = requests.post(
-                    url=req_url,
-                    auth=HTTPBasicAuth(jira_conf.username, jira_conf.password),
-                    json=json_data)
-                find.jira_change = timezone.now()
-                find.save()
+            # if 'Inactive' in old_status:
+            json_data = {'transition': {'id': jira_conf.open_status_key}}
+            r = requests.post(
+                url=req_url,
+                auth=HTTPBasicAuth(jira_conf.username, jira_conf.password),
+                json=json_data)
+            find.jira_change = timezone.now()
+            find.save()
 
 
 def close_epic(eng, push_to_jira):
