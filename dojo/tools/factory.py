@@ -78,7 +78,6 @@ from dojo.tools.gitleaks.parser import GitleaksJSONParser
 from dojo.tools.harbor_vulnerability.parser import HarborVulnerabilityParser
 
 
-
 __author__ = 'Jay Paz'
 
 
