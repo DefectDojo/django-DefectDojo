@@ -338,6 +338,31 @@ class ProductTest(BaseTestCase):
         productTxt = driver.find_element_by_tag_name("BODY").text
         self.assertTrue(re.search(r'Product and relationships removed.', productTxt))
 
+    @on_exception_html_source_logger
+    def test_product_notifications_change(self):
+        # Login to the site. Password will have to be modified
+        # to match an admin password in your own container
+        driver = self.login_page()
+        self.goto_product_overview(driver)
+        # Select the specific product to delete
+        driver.find_element_by_link_text("QA Test").click()
+
+        driver.find_element_by_xpath("//input[@name='engagement_added' and @value='mail']").click()
+        # clicking == ajax call to submit, but I think selenium gets this
+        body = driver.find_element_by_tag_name("BODY").text
+        self.assertTrue(re.search(r'Notification settings updated', body))
+        self.assertTrue(driver.find_element_by_xpath("//input[@name='engagement_added' and @value='mail']").is_selected())
+        self.assertFalse(driver.find_element_by_xpath("//input[@name='scan_added' and @value='mail']").is_selected())
+        self.assertFalse(driver.find_element_by_xpath("//input[@name='test_added' and @value='mail']").is_selected())
+
+        driver.find_element_by_xpath("//input[@name='scan_added' and @value='mail']").click()
+
+        body = driver.find_element_by_tag_name("BODY").text
+        self.assertTrue(re.search(r'Notification settings updated', body))
+        self.assertTrue(driver.find_element_by_xpath("//input[@name='engagement_added' and @value='mail']").is_selected())
+        self.assertTrue(driver.find_element_by_xpath("//input[@name='scan_added' and @value='mail']").is_selected())
+        self.assertFalse(driver.find_element_by_xpath("//input[@name='test_added' and @value='mail']").is_selected())
+
 
 def suite():
     suite = unittest.TestSuite()
@@ -353,6 +378,7 @@ def suite():
     suite.addTest(ProductTest('test_add_product_tracking_files'))
     suite.addTest(ProductTest('test_edit_product_tracking_files'))
     suite.addTest(ProductTest('test_list_products'))
+    suite.addTest(ProductTest('test_product_notifications_change'))
     suite.addTest(ProductTest('test_delete_product'))
     return suite
 

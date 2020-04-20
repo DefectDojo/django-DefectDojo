@@ -7,7 +7,8 @@ from dojo.models import Product, Engagement, Test, Finding, \
 from dojo.forms import ImportScanForm, SEVERITY_CHOICES
 from dojo.tools import requires_file
 from dojo.tools.factory import import_parser_factory
-from dojo.utils import create_notification, max_safe
+from dojo.utils import max_safe
+from dojo.notifications.helper import create_notification
 from django.urls import reverse
 from tagging.models import Tag
 from django.core.validators import URLValidator, validate_ipv46_address

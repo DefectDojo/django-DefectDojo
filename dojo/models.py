@@ -2341,7 +2341,7 @@ class Notifications(models.Model):
         ]
 
     @classmethod
-    def merge_notification_list(cls, notifications_list):
+    def merge_notifications_list(cls, notifications_list):
         print('merging')
         if not notifications_list:
             print('return empty list')
@@ -2350,7 +2350,7 @@ class Notifications(models.Model):
         result = None
         for notifications in notifications_list:
             print('id: ', notifications.id)
-            print('scan_added: ', notifications.scan_added)
+            print('not.user.get_full_name: ', notifications.user.get_full_name())
             if result is None:
                 # we start by copying the first instance, because creating a new instance would set all notification columns to 'alert' :-()
                 result = notifications

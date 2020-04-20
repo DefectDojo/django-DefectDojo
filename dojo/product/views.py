@@ -24,7 +24,8 @@ from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm
 from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, GITHUB_PKey, Finding_Template, \
                         Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, \
                         Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications
-from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, create_notification, Product_Tab, get_punchcard_data
+from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, Product_Tab, get_punchcard_data
+from dojo.notifications.helper import create_notification
 from custom_field.models import CustomFieldValue, CustomField
 from dojo.tasks import add_epic_task, add_external_issue_task
 from tagging.models import Tag

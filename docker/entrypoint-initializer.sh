@@ -2,8 +2,6 @@
 
 umask 0002
 
-echo valentijn admin password $DD_ADMIN_PASSWORD
-
 if [ "${DD_INITIALIZE}" = false ]
 then
   echo "Echo initialization skipped. Exiting."
