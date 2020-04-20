@@ -1977,6 +1977,7 @@ def set_default_notifications(sender, instance, created, **kwargs):
 @receiver(post_save, sender=Engagement)
 def engagement_post_Save(sender, instance, created, **kwargs):
     if created:
+        from dojo.notifications.helper import create_notification
         engagement = instance
         title = 'Engagement created for ' + str(engagement.product) + ': ' + str(engagement.name)
         create_notification(event='engagement_added', title=title, engagement=engagement, product=engagement.product,
