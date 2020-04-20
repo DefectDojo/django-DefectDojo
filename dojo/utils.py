@@ -20,6 +20,7 @@ from django.urls import get_resolver, reverse
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
 from django.template.defaultfilters import pluralize
 from django.template.loader import render_to_string
+from django.http import HttpResponseRedirect
 from django.utils import timezone
 from jira import JIRA
 from jira.exceptions import JIRAError
@@ -2105,3 +2106,12 @@ def truncate_with_dots(the_string, max_length_including_dots):
 
 def max_safe(list):
     return max(i for i in list if i is not None)
+
+
+def redirect(obj):
+    if isinstance(obj, Engagement):
+        return HttpResponseRedirect(reverse('view_engagement', args=(obj.id,)))
+    elif isinstance(obj, Product):
+        return HttpResponseRedirect(reverse('view_product', args=(obj.id,)))
+    else:
+        raise NotImplementedError
