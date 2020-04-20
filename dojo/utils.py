@@ -319,7 +319,7 @@ def deduplication_attr_config(new_finding, attributes):
             deduplicationLogger.debug(
                 'deduplication_on_engagement_mismatch, skipping dedupe.')
             continue
-        if new_finding.dynamic_finding == True:
+        if new_finding.dynamic_finding is True:
             if 'endpoints' in attributes:
                 if finding.endpoints.count() != 0 and new_finding.endpoints.count() != 0:
                     list1 = [e.host_with_port for e in new_finding.endpoints.all()]
@@ -329,7 +329,7 @@ def deduplication_attr_config(new_finding, attributes):
             else:
                 original_findings.append(finding)
 
-        elif new_finding.static_finding == True:
+        elif new_finding.static_finding is True:
             if 'offset' in attributes:
                 findings_set_for_offset.append(finding)
                 if finding.line == new_finding.line:
@@ -337,12 +337,12 @@ def deduplication_attr_config(new_finding, attributes):
             else:
                 original_findings.append(finding)
 
-    if not original_findings and new_finding.static_finding == True and 'offset' in attributes:
+    if not original_findings and new_finding.static_finding is True and 'offset' in attributes:
         similar_findings_with_offset = list(filter(lambda i: abs(i.line - int(new_finding.line)) <= 100, findings_set_for_offset))
         if similar_findings_with_offset:
             for finding in similar_findings_with_offset:
                 finding.line_diff = abs(finding.line - int(new_finding.line))
-            original_findings = sorted(similar_findings_with_offset , key = lambda x : x.line_diff)
+            original_findings = sorted(similar_findings_with_offset, key=lambda x: x.line_diff)
 
     for find in original_findings:
         try:
