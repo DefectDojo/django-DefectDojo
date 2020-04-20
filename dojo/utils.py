@@ -18,6 +18,7 @@ from django.core.paginator import Paginator
 from django.urls import get_resolver, reverse
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
 from django.template.defaultfilters import pluralize
+from django.http import HttpResponseRedirect
 from django.utils import timezone
 from jira import JIRA
 from jira.exceptions import JIRAError
@@ -1988,3 +1989,12 @@ def merge_sets_safe(set1, set2):
     return set(itertools.chain(set1 or [], set2 or []))
     # This concat looks  better, but requires Python 3.6+
     # return {*set1, *set2}
+
+
+def redirect(obj):
+    if isinstance(obj, Engagement):
+        return HttpResponseRedirect(reverse('view_engagement', args=(obj.id,)))
+    elif isinstance(obj, Product):
+        return HttpResponseRedirect(reverse('view_product', args=(obj.id,)))
+    else:
+        raise NotImplementedError
