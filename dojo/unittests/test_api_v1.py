@@ -25,9 +25,9 @@ class ApiBasicOperationsTest(ResourceTestCaseMixin, TestCase):
         return self.create_apikey(self.username, self.user.api_key.key)
 
     def prepare_a_product(self):
-        name = "Product %s" % str(random.randint(0, 999))
+        self.product_name = "Product %s" % str(random.randint(0, 999))
         description = "A precise product description"
-        return Product.objects.create(name=name, description=description,
+        return Product.objects.create(name=self.product_name, description=description,
                                       prod_type=self.prod_type)
 
     def test_unauthenticated_request(self):
@@ -40,7 +40,7 @@ class ApiBasicOperationsTest(ResourceTestCaseMixin, TestCase):
 
     def test_list_products(self):
         p = self.prepare_a_product()
-        r = self.api_client.get('/api/v1/products/',
+        r = self.api_client.get('/api/v1/products/?name=%s' % self.product_name,
                                 authentication=self.get_credentials())
         self.assertValidJSONResponse(r)
         data = self.deserialize(r)
@@ -99,9 +99,11 @@ class ApiBasicOperationsTest(ResourceTestCaseMixin, TestCase):
         to another model.
         """
         p = self.prepare_a_product()
+        engagement_name = "Test Create Engagement"
         product_uri = '/api/v1/products/%s/' % str(p.id)
         user_uri = '/api/v1/users/%s/' % str(self.user.id)
         e_data = {
+            'name': engagement_name,
             'product': product_uri,
             'lead': user_uri,
             'status': "In Progress",
@@ -114,7 +116,7 @@ class ApiBasicOperationsTest(ResourceTestCaseMixin, TestCase):
         self.assertHttpCreated(r)
 
         # Verify the object's creation
-        e = Engagement.objects.first()
+        e = Engagement.objects.get(name=engagement_name)
         self.assertEqual('2018-01-01', e.target_start.strftime('%Y-%m-%d'))
         self.assertEqual('2025-12-31', e.target_end.strftime('%Y-%m-%d'))
 

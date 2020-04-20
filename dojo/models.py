@@ -13,7 +13,6 @@ from django.urls import reverse
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import Q
 from django.utils.deconstruct import deconstructible
 from django.utils.timezone import now
 from django.utils.functional import cached_property
@@ -30,6 +29,7 @@ from django.core.cache import cache
 from dojo.tag.prefetching_tag_descriptor import PrefetchingTagDescriptor
 from django.contrib.contenttypes.fields import GenericRelation
 from tagging.models import TaggedItem
+from dateutil.relativedelta import relativedelta
 
 fmt = getattr(settings, 'LOG_FORMAT', None)
 lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
@@ -97,11 +97,16 @@ class Regulation(models.Model):
 class SystemSettingsManager(models.Manager):
     CACHE_KEY = 'defect_dojo_cache.system_settings'
 
+    def get_from_super(self, *args, **kwargs):
+        logger.debug('getting system_settings from super because cache was empty')
+        return super(SystemSettingsManager, self).get(*args, **kwargs)
+
     def get(self, no_cache=False, *args, **kwargs):
         # cache only 30s because django default cache backend is local per process
         if no_cache:
+            logger.debug('no cache specified, retrieving system settings from super()')
             return super(SystemSettingsManager, self).get(*args, **kwargs)
-        return cache.get_or_set(self.CACHE_KEY, lambda: super(SystemSettingsManager, self).get(*args, **kwargs), timeout=30)
+        return cache.get_or_set(self.CACHE_KEY, lambda: self.get_from_super(*args, **kwargs), timeout=30)
 
 
 class System_Settings(models.Model):
@@ -147,6 +152,11 @@ class System_Settings(models.Model):
                                              default='None')
     jira_labels = models.CharField(max_length=200, blank=True, null=True,
                                    help_text='JIRA issue labels space seperated')
+
+    enable_github = models.BooleanField(default=False,
+                                      verbose_name='Enable GITHUB integration',
+                                      blank=False)
+
     enable_slack_notifications = \
         models.BooleanField(default=False,
                             verbose_name='Enable Slack notifications',
@@ -269,11 +279,13 @@ class System_Settings(models.Model):
     column_widths = models.CharField(max_length=1500, blank=True)
     drive_folder_ID = models.CharField(max_length=100, blank=True)
     enable_google_sheets = models.BooleanField(default=False, null=True, blank=True)
+    email_address = models.EmailField(max_length=100, blank=True)
 
     objects = SystemSettingsManager()
 
     def save(self, *args, **kwargs):
         super(System_Settings, self).save(*args, **kwargs)
+        logger.debug('deleting system settings from cache after save')
         cache.delete(SystemSettingsManager.CACHE_KEY)
 
 
@@ -955,6 +967,19 @@ class Engagement(models.Model):
 
     class Meta:
         ordering = ['-target_start']
+
+    def is_overdue(self):
+        if self.engagement_type == 'CI/CD':
+            overdue_grace_days = 10
+        else:
+            overdue_grace_days = 0
+
+        max_end_date = timezone.now() - relativedelta(days=overdue_grace_days)
+
+        if self.target_end < max_end_date.date():
+            return True
+
+        return False
 
     def __unicode__(self):
         return "Engagement: %s (%s)" % (self.name if self.name else '',
@@ -1646,6 +1671,36 @@ class Finding(models.Model):
                 sla_calculation = sla_age - age
         return sla_calculation
 
+    def github(self):
+        try:
+            return self.github_issue
+        except GITHUB_Issue.DoesNotExist:
+            return None
+
+    def has_github_issue(self):
+        try:
+            issue = self.jira_issue
+            return True
+        except GITHUB_Issue.DoesNotExist:
+            return False
+
+    def github_conf(self):
+        try:
+            jpkey = GITHUB_PKey.objects.get(product=self.test.engagement.product)
+            jconf = jpkey.conf
+        except:
+            jconf = None
+            pass
+        return jconf
+
+    # newer version that can work with prefetching
+    def github_conf_new(self):
+        try:
+            return self.test.engagement.product.github_pkey_set.all()[0].conf
+        except:
+            return None
+            pass
+
     def jira(self):
         try:
             return self.jira_issue
@@ -1698,9 +1753,23 @@ class Finding(models.Model):
         long_desc += '*References*:' + self.references
         return long_desc
 
-    def save(self, dedupe_option=True, false_history=False, rules_option=True, issue_updater_option=True, *args, **kwargs):
+    def save(self, dedupe_option=True, false_history=False, rules_option=True,
+             issue_updater_option=True, push_to_jira=False, *args, **kwargs):
         # Make changes to the finding before it's saved to add a CWE template
         new_finding = False
+
+        jira_issue_exists = JIRA_Issue.objects.filter(finding=self).exists()
+        if push_to_jira:
+            self.jira_change = timezone.now()
+            if not jira_issue_exists:
+                self.jira_creation = timezone.now()
+        # If the product has "Push_all_issues" enabled,
+        # then we're pushing this to JIRA no matter what
+        if not push_to_jira:
+            # only if there is a JIRA configuration
+            push_to_jira = self.jira_conf_new() and \
+                           self.jira_conf_new().jira_pkey_set.first().push_all_issues
+
         if self.pk is None:
             # We enter here during the first call from serializers.py
             logger.debug("Saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is None)")
@@ -1762,6 +1831,8 @@ class Finding(models.Model):
                 except:
                     async_dedupe.delay(self, *args, **kwargs)
                     pass
+            else:
+                deduplicationLogger.debug("skipping dedupe because it's disabled in system settings")
         if system_settings.false_positive_history and false_history:
             from dojo.tasks import async_false_history
             from dojo.utils import sync_false_history
@@ -1780,6 +1851,14 @@ class Finding(models.Model):
 
         from dojo.utils import calculate_grade
         calculate_grade(self.test.engagement.product)
+
+        # Adding a snippet here for push to JIRA so that it's in one place
+        if push_to_jira:
+            from dojo.tasks import update_issue_task, add_issue_task
+            if jira_issue_exists:
+                update_issue_task.delay(self, True)
+            else:
+                add_issue_task.delay(self, True)
 
     def delete(self, *args, **kwargs):
         for find in self.original_finding.all():
@@ -2085,6 +2164,56 @@ class BannerConf(models.Model):
     banner_message = models.CharField(max_length=500, help_text="This message will be displayed on the login page", default='')
 
 
+class GITHUB_Conf(models.Model):
+    configuration_name = models.CharField(max_length=2000, help_text="Enter a name to give to this configuration", default='')
+    api_key = models.CharField(max_length=2000, help_text="Enter your Github API Key", default='')
+
+    def __unicode__(self):
+        return self.configuration_name
+
+    def __str__(self):
+        return self.configuration_name
+
+
+class GITHUB_Issue(models.Model):
+    issue_id = models.CharField(max_length=200)
+    issue_url = models.URLField(max_length=2000, verbose_name="GitHub issue URL")
+    finding = models.OneToOneField(Finding, null=True, blank=True, on_delete=models.CASCADE)
+
+    def __unicode__(self):
+        return str(self.github_issue_id) + '| GitHub Issue URL: ' + str(self.github_issue_url)
+
+    def __str__(self):
+        return str(self.github_issue_id) + '| GitHub Issue URL: ' + str(self.github_issue_url)
+
+
+class GITHUB_Clone(models.Model):
+    github_id = models.CharField(max_length=200)
+    github_clone_id = models.CharField(max_length=200)
+
+
+class GITHUB_Details_Cache(models.Model):
+    github_id = models.CharField(max_length=200)
+    github_key = models.CharField(max_length=200)
+    github_status = models.CharField(max_length=200)
+    github_resolution = models.CharField(max_length=200)
+
+
+class GITHUB_PKey(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+    git_project = models.CharField(max_length=200, blank=True, verbose_name="Github project", help_text="Specify your project location. (:user/:repo)")
+    git_conf = models.ForeignKey(GITHUB_Conf, verbose_name="Github Configuration",
+                                 null=True, blank=True, on_delete=models.CASCADE)
+    git_push_notes = models.BooleanField(default=False, blank=True, help_text="Notes added to findings will be automatically added to the corresponding github issue")
+
+    def __unicode__(self):
+        return self.product.name + " | " + self.project_key
+
+    def __str__(self):
+        return self.product.name + " | " + self.project_key
+
+
 class JIRA_Conf(models.Model):
     configuration_name = models.CharField(max_length=2000, help_text="Enter a name to give to this configuration", default='')
     url = models.URLField(max_length=2000, verbose_name="JIRA URL", help_text="For configuring Jira, view: https://defectdojo.readthedocs.io/en/latest/features.html#jira-integration")
@@ -2190,7 +2319,8 @@ class JIRA_PKey(models.Model):
     conf = models.ForeignKey(JIRA_Conf, verbose_name="JIRA Configuration",
                              null=True, blank=True, on_delete=models.CASCADE)
     component = models.CharField(max_length=200, blank=True)
-    push_all_issues = models.BooleanField(default=False, blank=True)
+    push_all_issues = models.BooleanField(default=False, blank=True,
+         help_text="Automatically maintain parity with JIRA. Always create and update JIRA tickets for findings in this Product.")
     enable_engagement_epic_mapping = models.BooleanField(default=False,
                                                          blank=True)
     push_notes = models.BooleanField(default=False, blank=True)
@@ -2754,6 +2884,8 @@ admin.site.register(Alerts)
 admin.site.register(JIRA_Issue)
 admin.site.register(JIRA_Conf)
 admin.site.register(JIRA_PKey)
+admin.site.register(GITHUB_Conf)
+admin.site.register(GITHUB_PKey)
 admin.site.register(Tool_Configuration)
 admin.site.register(Tool_Product_Settings)
 admin.site.register(Tool_Type)

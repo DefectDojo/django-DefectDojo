@@ -1,4 +1,3 @@
-import calendar as tcalendar
 import re
 import binascii
 import os
@@ -26,10 +25,12 @@ from jira import JIRA
 from jira.exceptions import JIRAError
 from django.dispatch import receiver
 from dojo.signals import dedupe_signal
+import calendar as tcalendar
+from dojo.github import add_external_issue_github, update_external_issue_github, close_external_issue_github, reopen_external_issue_github
 
-from dojo.models import Finding, Engagement, Finding_Template, Product, JIRA_PKey, JIRA_Issue, \
+from dojo.models import Finding, Engagement, Finding_Template, Product, JIRA_PKey, JIRA_Issue,\
     Dojo_User, User, Alerts, System_Settings, Notifications, UserContactInfo, Endpoint, Benchmark_Type, \
-    Language_Type, Languages, Rule, Finding, Test_Type
+    Language_Type, Languages, Rule, Test_Type
 from asteval import Interpreter
 from requests.auth import HTTPBasicAuth
 import logging
@@ -119,6 +120,8 @@ def sync_dedupe(sender, *args, **kwargs):
         else:
             deduplicationLogger.debug("no configuration per parser found; using legacy algorithm")
             deduplicate_legacy(new_finding)
+    else:
+        deduplicationLogger.debug("skipping dedupe because it's disabled in system settings get()")
 
 
 def deduplicate_legacy(new_finding):
@@ -1354,20 +1357,51 @@ def jira_long_description(find_description, find_id, jira_conf_finding_text):
         find_id) + "\n\n" + jira_conf_finding_text
 
 
+def add_external_issue(find, external_issue_provider):
+    eng = Engagement.objects.get(test=find.test)
+    prod = Product.objects.get(engagement=eng)
+    logger.debug('adding external issue with provider: ' + external_issue_provider)
+
+    if external_issue_provider == 'github':
+        add_external_issue_github(find, prod, eng)
+
+
+def update_external_issue(find, old_status, external_issue_provider):
+    prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
+    eng = Engagement.objects.get(test=find.test)
+
+    if external_issue_provider == 'github':
+        update_external_issue_github(find, prod, eng)
+
+
+def close_external_issue(find, note, external_issue_provider):
+    prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
+    eng = Engagement.objects.get(test=find.test)
+
+    if external_issue_provider == 'github':
+        close_external_issue_github(find, note, prod, eng)
+
+
+def reopen_external_issue(find, note, external_issue_provider):
+    prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
+    eng = Engagement.objects.get(test=find.test)
+
+    if external_issue_provider == 'github':
+        reopen_external_issue_github(find, note, prod, eng)
+
+
 def add_issue(find, push_to_jira):
-    logger.debug('adding issue: ' + str(find))
     eng = Engagement.objects.get(test=find.test)
     prod = Product.objects.get(engagement=eng)
 
-    if JIRA_PKey.objects.filter(product=prod).count() == 0:
-        log_jira_alert(
-            'Finding cannot be pushed to jira as there is no jira configuration for this product.', find)
-        return
-
-    jpkey = JIRA_PKey.objects.get(product=prod)
-    jira_conf = jpkey.conf
-
     if push_to_jira:
+        if JIRA_PKey.objects.filter(product=prod).count() == 0:
+            log_jira_alert('Finding cannot be pushed to jira as there is no jira configuration for this product.', find)
+            return
+
+        jpkey = JIRA_PKey.objects.get(product=prod)
+        jira_conf = jpkey.conf
+
         if 'Active' in find.status() and 'Verified' in find.status():
             if ((jpkey.push_all_issues and Finding.get_number_severity(
                     System_Settings.objects.get().jira_minimum_severity) >=
@@ -1412,9 +1446,10 @@ def add_issue(find, push_to_jira):
                     j_issue = JIRA_Issue(
                         jira_id=new_issue.id, jira_key=new_issue, finding=find)
                     j_issue.save()
-                    find.jira_creation = timezone.now()
-                    find.jira_change = find.jira_creation
-                    find.save()
+                    # Moving this to the save function
+                    # find.jira_creation = timezone.now()
+                    # find.jira_change = find.jira_creation
+                    # find.save()
                     issue = jira.issue(new_issue.id)
 
                     # Add labels (security & product)
@@ -1470,7 +1505,7 @@ def jira_check_attachment(issue, source_file_name):
     return file_exists
 
 
-def update_issue(find, old_status, push_to_jira):
+def update_issue(find, push_to_jira):
     prod = Product.objects.get(
         engagement=Engagement.objects.get(test=find.test))
     jpkey = JIRA_PKey.objects.get(product=prod)
@@ -1512,8 +1547,9 @@ def update_issue(find, old_status, push_to_jira):
                 priority={'name': jira_conf.get_priority(find.severity)},
                 fields=fields)
             print('\n\nSaving jira_change\n\n')
-            find.jira_change = timezone.now()
-            find.save()
+            # Moving this to finding.save()
+            # find.jira_change = timezone.now()
+            # find.save()
             # Add labels(security & product)
             add_labels(find, issue)
         except JIRAError as e:
@@ -1524,23 +1560,23 @@ def update_issue(find, old_status, push_to_jira):
         if 'Inactive' in find.status() or 'Mitigated' in find.status(
         ) or 'False Positive' in find.status(
         ) or 'Out of Scope' in find.status() or 'Duplicate' in find.status():
-            if 'Active' in old_status:
-                json_data = {'transition': {'id': jira_conf.close_status_key}}
-                r = requests.post(
-                    url=req_url,
-                    auth=HTTPBasicAuth(jira_conf.username, jira_conf.password),
-                    json=json_data)
-                find.jira_change = timezone.now()
-                find.save()
+            # if 'Active' in old_status:
+            json_data = {'transition': {'id': jira_conf.close_status_key}}
+            r = requests.post(
+                url=req_url,
+                auth=HTTPBasicAuth(jira_conf.username, jira_conf.password),
+                json=json_data)
+            find.jira_change = timezone.now()
+            find.save()
         elif 'Active' in find.status() and 'Verified' in find.status():
-            if 'Inactive' in old_status:
-                json_data = {'transition': {'id': jira_conf.open_status_key}}
-                r = requests.post(
-                    url=req_url,
-                    auth=HTTPBasicAuth(jira_conf.username, jira_conf.password),
-                    json=json_data)
-                find.jira_change = timezone.now()
-                find.save()
+            # if 'Inactive' in old_status:
+            json_data = {'transition': {'id': jira_conf.open_status_key}}
+            r = requests.post(
+                url=req_url,
+                auth=HTTPBasicAuth(jira_conf.username, jira_conf.password),
+                json=json_data)
+            find.jira_change = timezone.now()
+            find.save()
 
 
 def close_epic(eng, push_to_jira):
@@ -2133,3 +2169,7 @@ def truncate_with_dots(the_string, max_length_including_dots):
     if not the_string:
         return the_string
     return (the_string[:max_length_including_dots - 3] + '...' if len(the_string) > max_length_including_dots else the_string)
+
+
+def max_safe(list):
+    return max(i for i in list if i is not None)

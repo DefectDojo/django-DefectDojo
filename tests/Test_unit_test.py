@@ -13,7 +13,9 @@ class TestUnitTest(BaseTestCase):
         # Login to the site.
         driver = self.login_page()
 
-        driver.get(self.base_url + "engagements_all")
+        # goto engagemnent list (and wait for javascript to load)
+        self.goto_all_engagements_overview(driver)
+
         # Select a previously created engagement title
         driver.find_element_by_partial_link_text("Ad Hoc Engagement").click()
 
@@ -47,7 +49,9 @@ class TestUnitTest(BaseTestCase):
         # Username and password will be gotten from environ
         driver = self.login_page()
         # Navigate to the Product page to select the product we created earlier
-        driver.get(self.base_url + "product")
+        self.goto_product_overview(driver)
+        # wait for product_wrapper div as datatables javascript modifies the DOM on page load.
+        driver.find_element_by_id('products_wrapper')
         # Select and click on the particular product to create test for
         driver.find_element_by_link_text("QA Test").click()
         # "Click" the dropdown option

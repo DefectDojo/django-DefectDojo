@@ -7,7 +7,7 @@ from dojo.models import Product, Engagement, Test, Finding, \
 from dojo.forms import ImportScanForm, SEVERITY_CHOICES
 from dojo.tools import requires_file
 from dojo.tools.factory import import_parser_factory
-from dojo.utils import create_notification
+from dojo.utils import create_notification, max_safe
 from django.urls import reverse
 from tagging.models import Tag
 from django.core.validators import URLValidator, validate_ipv46_address
@@ -404,6 +404,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     images = FindingImageSerializer(many=True, read_only=True)
     tags = TagListSerializerField(required=False)
     accepted_risks = RiskAcceptanceSerializer(many=True, read_only=True, source='risk_acceptance_set')
+    push_to_jira = serializers.BooleanField(default=False)
 
     class Meta:
         model = Finding
@@ -450,6 +451,7 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         allow_null=True,
         default=None)
     tags = TagListSerializerField(required=False)
+    push_to_jira = serializers.BooleanField(default=False)
 
     class Meta:
         model = Finding
@@ -457,6 +459,25 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         extra_kwargs = {
             'reporter': {'default': serializers.CurrentUserDefault()},
         }
+
+    # Overriding this to push add Push to JIRA functionality
+    def create(self, validated_data):
+        to_be_tagged, validated_data = self._pop_tags(validated_data)
+        push_to_jira = validated_data.pop('push_to_jira')
+        # Somewhere in the below line finding.save() is called, but I'm not sure how to get
+        # push_to_jira to it.
+        tag_object = super(TaggitSerializer, self).create(validated_data)
+
+        has_jira_config = tag_object.test.engagement.product.jira_pkey_set.first() is not None
+        if not push_to_jira and has_jira_config:
+            push_to_jira = tag_object.test.engagement.product.jira_pkey_set.first().push_all_issues
+
+        # No need to save the finding twice if we're not pushing to JIRA
+        if push_to_jira:
+            # Saving again with push_to_jira context
+            tag_object.save(push_to_jira=push_to_jira)
+        return self._save_tags(tag_object, to_be_tagged)
+        pass
 
     def validate(self, data):
         if ((data['active'] or data['verified']) and data['duplicate']):
@@ -536,6 +557,7 @@ class ScanSerializer(serializers.ModelSerializer):
 
 class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
     scan_date = serializers.DateField(default=datetime.date.today)
+
     minimum_severity = serializers.ChoiceField(
         choices=SEVERITY_CHOICES,
         default='Info')
@@ -556,8 +578,9 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         queryset=User.objects.all())
     tags = TagListSerializerField(required=False)
     close_old_findings = serializers.BooleanField(required=False, default=False)
+    push_to_jira = serializers.BooleanField(default=False)
 
-    def save(self):
+    def save(self, push_to_jira=False):
         data = self.validated_data
         close_old_findings = data['close_old_findings']
         active = data['active']
@@ -567,6 +590,11 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         endpoint_to_add = data['endpoint_to_add']
         environment, created = Development_Environment.objects.get_or_create(
             name='Development')
+        scan_date = data['scan_date']
+        scan_date_time = datetime.datetime.combine(scan_date, timezone.now().time())
+        if settings.USE_TZ:
+            scan_date_time = timezone.make_aware(scan_date_time, timezone.get_default_timezone())
+
         test = Test(
             engagement=data['engagement'],
             lead=data['lead'],
@@ -583,6 +611,13 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         test.save()
         # return the id of the created test, can't find a better way because this is not a ModelSerializer....
         self.fields['test'] = serializers.IntegerField(read_only=True, default=test.id)
+
+        test.engagement.updated = max_safe([scan_date_time, test.engagement.updated])
+
+        if test.engagement.engagement_type == 'CI/CD':
+            test.engagement.target_end = max_safe([scan_date, test.engagement.target_end])
+
+        test.engagement.save()
 
         if 'tags' in data:
             test.tags = ' '.join(data['tags'])
@@ -653,7 +688,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 if item.unsaved_tags is not None:
                     item.tags = item.unsaved_tags
 
-                item.save()
+                item.save(push_to_jira=push_to_jira)
 
         except SyntaxError:
             raise Exception('Parser SyntaxError')
@@ -735,14 +770,18 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     file = serializers.FileField(required=False)
     test = serializers.PrimaryKeyRelatedField(
         queryset=Test.objects.all())
+    push_to_jira = serializers.BooleanField(default=False)
 
-    def save(self):
+    def save(self, push_to_jira=False):
         data = self.validated_data
         test = data['test']
         scan_type = data['scan_type']
         endpoint_to_add = data['endpoint_to_add']
         min_sev = data['minimum_severity']
         scan_date = data['scan_date']
+        scan_date_time = datetime.datetime.combine(scan_date, timezone.now().time())
+        if settings.USE_TZ:
+            scan_date_time = timezone.make_aware(scan_date_time, timezone.get_default_timezone())
         verified = data['verified']
         active = data['active']
 
@@ -789,8 +828,9 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
 
                 if findings:
                     finding = findings[0]
-                    if finding.mitigated:
+                    if finding.mitigated or finding.is_Mitigated:
                         finding.mitigated = None
+                        finding.is_Mitigated = False
                         finding.mitigated_by = None
                         finding.active = True
                         finding.verified = verified
@@ -848,25 +888,31 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     if item.unsaved_tags:
                         finding.tags = item.unsaved_tags
 
-                    finding.save()
+                    finding.save(push_to_jira=push_to_jira)
 
             to_mitigate = set(original_items) - set(new_items)
             for finding in to_mitigate:
-                finding.mitigated = datetime.datetime.combine(
-                    scan_date,
-                    timezone.now().time())
-                if settings.USE_TZ:
-                    finding.mitigated = timezone.make_aware(
-                        finding.mitigated,
-                        timezone.get_default_timezone())
-                finding.mitigated_by = self.context['request'].user
-                finding.active = False
-                finding.save()
-                note = Notes(entry="Mitigated by %s re-upload." % scan_type,
-                             author=self.context['request'].user)
-                note.save()
-                finding.notes.add(note)
-                mitigated_count += 1
+                if not finding.mitigated or not finding.is_Mitigated:
+                    finding.mitigated = scan_date_time
+                    finding.is_Mitigated = True
+                    finding.mitigated_by = self.context['request'].user
+                    finding.active = False
+                    finding.save(push_to_jira=push_to_jira)
+                    note = Notes(entry="Mitigated by %s re-upload." % scan_type,
+                                author=self.context['request'].user)
+                    note.save()
+                    finding.notes.add(note)
+                    mitigated_count += 1
+
+            test.updated = max_safe([scan_date_time, test.updated])
+            test.engagement.updated = max_safe([scan_date_time, test.engagement.updated])
+
+            if test.engagement.engagement_type == 'CI/CD':
+                test.target_end = max_safe([scan_date_time, test.target_end])
+                test.engagement.target_end = max_safe([scan_date, test.engagement.target_end])
+
+            test.save()
+            test.engagement.save()
 
         except SyntaxError:
             raise Exception("Parser SyntaxError")
@@ -912,7 +958,7 @@ class AddNewNoteOptionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Notes
-        fields = ['entry', 'private']
+        fields = ['entry', 'private', 'note_type']
 
 
 class FindingToFindingImagesSerializer(serializers.Serializer):

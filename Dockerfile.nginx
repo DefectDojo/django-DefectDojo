@@ -62,7 +62,7 @@ RUN \
   python3 manage.py collectstatic --noinput && \
   true
 
-FROM nginx:1.17.9@sha256:3936fb3946790d711a68c58be93628e43cbca72439079e16d154b5db216b58da
+FROM nginx:1.17.9@sha256:7ac7819e1523911399b798309025935a9968b277d86d50e5255465d6592c0266
 COPY --from=collectstatic /app/static/ /usr/share/nginx/html/static/
 COPY wsgi_params nginx/nginx.conf nginx/nginx_TLS.conf /etc/nginx/
 COPY docker/entrypoint-nginx.sh /
@@ -79,9 +79,9 @@ ENV \
   DD_UWSGI_PASS="uwsgi_server" \
   DD_UWSGI_HOST="uwsgi" \
   DD_UWSGI_PORT="3031" \
-  GENERATE_TLS_CERTIFICATE="False" \
-  USE_TLS="False" \
-  NGINX_METRICS_ENABLED="False" \
+  GENERATE_TLS_CERTIFICATE="false" \
+  USE_TLS="false" \
+  NGINX_METRICS_ENABLED="false" \
   METRICS_HTTP_AUTH_USER="" \
   METRICS_HTTP_AUTH_PASSWORD=""
 USER 1001
