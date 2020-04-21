@@ -2108,10 +2108,15 @@ def max_safe(list):
     return max(i for i in list if i is not None)
 
 
-def redirect(obj):
+def redirect(obj, suffix=None):
+
+    real_suffix = ''
+    if suffix:
+        real_suffix = suffix
+
     if isinstance(obj, Engagement):
-        return HttpResponseRedirect(reverse('view_engagement', args=(obj.id,)))
+        return HttpResponseRedirect(reverse('view_engagement', args=(obj.id,)) + real_suffix)
     elif isinstance(obj, Product):
-        return HttpResponseRedirect(reverse('view_product', args=(obj.id,)))
+        return HttpResponseRedirect(reverse('view_product', args=(obj.id,)) + real_suffix)
     else:
         raise NotImplementedError
