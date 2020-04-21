@@ -819,6 +819,10 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
 
             for item in items:
                 sev = item.severity
+                # temp code to set component fields on existing findings
+                component_name = item.component_name if hasattr(item, 'component_name') else None
+                component_version = item.component_version if hasattr(item, 'component_version') else None
+
                 if sev == 'Information' or sev == 'Informational':
                     sev = 'Info'
 
@@ -849,6 +853,10 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                         finding.mitigated_by = None
                         finding.active = True
                         finding.verified = verified
+                        # temp code to set component fields on existing findings
+                        finding.component_name = component_name
+                        finding.component_version = component_version
+
                         finding.save()
                         note = Notes(
                             entry="Re-activated by %s re-upload." % scan_type,
@@ -858,6 +866,11 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                         reactivated_items.append(finding)
                         reactivated_count += 1
                     else:
+                        # temp code to set component fields on existing findings
+                        finding.component_name = component_name
+                        finding.component_version = component_version
+                        finding.save()
+
                         unchanged_items.append(finding)
                         unchanged_count += 1
                 else:
