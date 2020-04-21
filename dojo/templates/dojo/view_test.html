@@ -407,7 +407,7 @@
                                 {{ finding.severity_display }}
                             </span>
                         </td>
-                        <td class="nowrap"><a href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a>
+                        <td><a href="{% url 'view_finding' finding.id %}">{{ finding.title|truncatechars_html:60 }}</a>
                           {% if finding.file_path %}
                           <i class="fa dojo-sup fa-code has-popover" data-trigger="hover" data-content="{{ finding.file_path }}" data-placement="right" data-container="body" data-original-title="Files" title=""></i>
                             {% if finding.component_name %}
