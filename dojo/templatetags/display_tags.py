@@ -731,6 +731,7 @@ def get_severity_count(id, table):
     return display_counts
 
 
+@register.filter
 def full_url(url):
     return get_full_url(url)
 

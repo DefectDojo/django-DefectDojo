@@ -268,7 +268,7 @@
                                 <td>
                                   {% if finding.title %}
                                   <a title="{{ finding.title }}"
-                                                      href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a>
+                                                      href="{% url 'view_finding' finding.id %}">{{ finding.title|truncatechars_html:60 }}</a>
                                   {% else %}
                                   <a title="{{ finding.id }}"
                                                       href="{% url 'view_finding' finding.id %}">{{ finding.id }}</a>
