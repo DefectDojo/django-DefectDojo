@@ -1991,10 +1991,15 @@ def merge_sets_safe(set1, set2):
     # return {*set1, *set2}
 
 
-def redirect(obj):
+def redirect(obj, suffix=None):
+
+    real_suffix = ''
+    if suffix:
+        real_suffix = suffix
+
     if isinstance(obj, Engagement):
-        return HttpResponseRedirect(reverse('view_engagement', args=(obj.id,)))
+        return HttpResponseRedirect(reverse('view_engagement', args=(obj.id,)) + real_suffix)
     elif isinstance(obj, Product):
-        return HttpResponseRedirect(reverse('view_product', args=(obj.id,)))
+        return HttpResponseRedirect(reverse('view_product', args=(obj.id,)) + real_suffix)
     else:
         raise NotImplementedError

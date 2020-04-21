@@ -14,6 +14,14 @@ def view_product_by_meta(request, pmeta_name, pmeta_value):
     return redirect(get_prod_by_meta(pmeta_name, pmeta_value))
 
 
+def view_cicd_engagements_by_product_by_name(request, pname):
+    return redirect(get_prod_by_name(pname), '/engagements/cicd')
+
+
+def view_cicd_engagements_by_product_by_meta(request, pmeta_name, pmeta_value):
+    return redirect(get_prod_by_meta(pmeta_name, pmeta_value), '/engagement/cicd')
+
+
 def view_engagement_by_name_by_product_name(request, pmeta_name, pmeta_value, ename):
     prod = get_prod_by_meta(pmeta_name, pmeta_value)
     eng = get_eng_by_product_and_name(prod.id, ename)
