@@ -741,9 +741,8 @@ def full_url(url):
     return get_full_url(url)
 
 
-# settings value
-# usage {% settings_value "LANGUAGE_CODE" %}
+# check if setting is enabled in django settings.py
+# use 'DISABLE_FINDING_MERGE'|setting_enabled
 @register.filter
 def setting_enabled(name):
-    print(getattr(settings, name))
     return getattr(settings, name, False)
