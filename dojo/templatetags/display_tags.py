@@ -13,13 +13,14 @@ from dojo.models import Check_List, FindingImageAccessToken, Finding, System_Set
 import markdown
 from django.db.models import Sum, Case, When, IntegerField, Value
 from django.utils import timezone
-from markdown.extensions import Extension
 import dateutil.relativedelta
 import datetime
 from ast import literal_eval
 from urllib.parse import urlparse
 import bleach
 import git
+from django.conf import settings
+
 
 register = template.Library()
 
@@ -728,3 +729,11 @@ def get_severity_count(id, table):
     display_counts = ", ".join([str(item) for item in display_counts])
 
     return display_counts
+
+
+# settings value
+# usage {% settings_value "LANGUAGE_CODE" %}
+@register.filter
+def setting_enabled(name):
+    print(getattr(settings, name))
+    return getattr(settings, name, False)

@@ -204,7 +204,7 @@
                 <span class="caret"></span>
             </button>
             <div class="btn-group mr-2" role="group" aria-label="Bulk Actions">
-                {% if product_tab %}
+                {% if product_tab and not 'DISABLE_FINDING_MERGE'|setting_enabled %}
                     <button type="button" class="btn btn-info btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom" title="Merge Findings">
                         <a class="white-color merge" href="#" alt="Merge Findings">
                             <i class="fa fa-compress"></i>
