@@ -19,6 +19,8 @@ from ast import literal_eval
 from urllib.parse import urlparse
 import bleach
 import git
+from django.conf import settings
+
 
 register = template.Library()
 
@@ -737,3 +739,11 @@ def get_severity_count(id, table):
 @register.filter
 def full_url(url):
     return get_full_url(url)
+
+
+# settings value
+# usage {% settings_value "LANGUAGE_CODE" %}
+@register.filter
+def setting_enabled(name):
+    print(getattr(settings, name))
+    return getattr(settings, name, False)
