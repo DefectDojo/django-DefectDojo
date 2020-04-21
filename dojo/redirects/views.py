@@ -19,7 +19,7 @@ def view_cicd_engagements_by_product_by_name(request, pname):
 
 
 def view_cicd_engagements_by_product_by_meta(request, pmeta_name, pmeta_value):
-    return redirect(get_prod_by_meta(pmeta_name, pmeta_value), '/engagement/cicd')
+    return redirect(get_prod_by_meta(pmeta_name, pmeta_value), '/engagements/cicd')
 
 
 def view_engagement_by_name_by_product_name(request, pmeta_name, pmeta_value, ename):
