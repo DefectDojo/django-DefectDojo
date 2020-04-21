@@ -684,6 +684,10 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'DSOP Scan': DEDUPE_ALGO_HASH_CODE,
 }
 
+# merging findings doesn't always work well with dedupe and reimport etc.
+# disable it if you see any issues (and report them on github)
+DISABLE_FINDING_MERGE = False
+
 # ------------------------------------------------------------------------------
 # JIRA
 # ------------------------------------------------------------------------------
