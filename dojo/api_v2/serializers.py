@@ -602,7 +602,8 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
             target_start=data['scan_date'],
             target_end=data['scan_date'],
             environment=environment,
-            percent_complete=100)
+            percent_complete=100,
+            version=data['version'])
         try:
             test.full_clean()
         except ValidationError:
