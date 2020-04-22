@@ -41,8 +41,8 @@ if cat dojo/settings/.env.prod | grep -q "mysql://root:dojodb_install@localhost:
 	#DB_ROOT_PASS_USER=`pwgen -scn $DB_ROOT_PASS_LEN 1`
 	#entrypoint_scripts/common/setup-superuser.expect product_manager "$DD_ADMIN_PASSWORD"
 
-	#DD_DATABASE_PASsWORD=`pwgen -scn $DB_ROOT_PASS_LEN 1`
-	#entrypoint_scripts/common/setup-superuser.expect user2 "$DD_DATABASE_PASsWORD"
+	#DD_DATABASE_PASSWORD=`pwgen -scn $DB_ROOT_PASS_LEN 1`
+	#entrypoint_scripts/common/setup-superuser.expect user2 "$DD_DATABASE_PASSWORD"
 
 	echo
 	echo "=============================================================================="
