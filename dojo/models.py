@@ -2341,7 +2341,7 @@ class Notifications(models.Model):
     product_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     engagement_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     test_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
-    results_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
+    scan_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True, help_text='Triggered whenever an (re-)import has been done that created/updated/closed findings.')
     report_created = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     jira_update = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     upcoming_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
@@ -2351,7 +2351,56 @@ class Notifications(models.Model):
     code_review = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     review_requested = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     other = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
-    user = models.ForeignKey(User, default=None, null=True, editable=False, on_delete=models.CASCADE)
+    user = models.ForeignKey(Dojo_User, default=None, null=True, editable=False, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, default=None, null=True, editable=False, on_delete=models.CASCADE)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'product'], name="notifications_user_product")
+        ]
+
+    @classmethod
+    def merge_notifications_list(cls, notifications_list):
+        print('merging')
+        if not notifications_list:
+            print('return empty list')
+            return []
+
+        result = None
+        for notifications in notifications_list:
+            print('id: ', notifications.id)
+            print('not.user.get_full_name: ', notifications.user.get_full_name())
+            if result is None:
+                # we start by copying the first instance, because creating a new instance would set all notification columns to 'alert' :-()
+                result = notifications
+                # result.pk = None # detach from db
+            else:
+                # from dojo.utils import concat_comma_separated_strings
+                print('combining: ' + str(result.scan_added) + ' with ' + str(notifications.scan_added))
+                # result.scan_added = (result.scan_added or []).extend(notifications.scan_added)
+                # if result.scan_added:
+                #     result.scan_added.extend(notifications.scan_added)
+                # else:
+                #     result.scan_added = notifications.scan_added
+
+                # This concat looks  better, but requires Python 3.6+
+                # result.scan_added = [*result.scan_added, *notifications.scan_added]
+                from dojo.utils import merge_sets_safe
+                result.product_added = merge_sets_safe(result.product_added, notifications.product_added)
+                result.engagement_added = merge_sets_safe(result.engagement_added, notifications.engagement_added)
+                result.test_added = merge_sets_safe(result.test_added, notifications.test_added)
+                result.scan_added = merge_sets_safe(result.scan_added, notifications.scan_added)
+                result.report_created = merge_sets_safe(result.report_created, notifications.report_created)
+                result.jira_update = merge_sets_safe(result.jira_update, notifications.jira_update)
+                result.upcoming_engagement = merge_sets_safe(result.upcoming_engagement, notifications.upcoming_engagement)
+                result.stale_engagement = merge_sets_safe(result.stale_engagement, notifications.stale_engagement)
+                result.auto_close_engagement = merge_sets_safe(result.auto_close_engagement, notifications.auto_close_engagement)
+                result.user_mentioned = merge_sets_safe(result.user_mentioned, notifications.user_mentioned)
+                result.code_review = merge_sets_safe(result.code_review, notifications.code_review)
+                result.review_requested = merge_sets_safe(result.review_requested, notifications.review_requested)
+                result.other = merge_sets_safe(result.other, notifications.other)
+
+        return result
 
 
 class Tool_Product_Settings(models.Model):

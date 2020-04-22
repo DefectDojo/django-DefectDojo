@@ -5,7 +5,7 @@ import json
 from django.urls import reverse
 from django.utils import timezone
 
-from dojo.utils import create_notification
+from dojo.notifications.helper import create_notification
 from dojo.forms import Tag
 from dojo.models import Test, Test_Type, Development_Environment, Objects_Engagement, \
                         Objects, Objects_Review
