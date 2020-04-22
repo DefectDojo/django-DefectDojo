@@ -500,16 +500,16 @@
                                 </td>
                                 <td>{{ similar.status }}{% if similar.duplicate_finding_id %}, <a href="{% url 'view_finding' similar.duplicate_finding_id %}">Original</a> {% endif %}</td>
                                 <td>
-                                    <a target="#" data-toggle="tooltip" data-placement="bottom" title="{{ similar.title }}" href="{% url 'view_finding' similar.id %}">{{ similar.date }}</a>
+                                    {{ similar.date|date }}</br>
                                     {% with similar.notes.count as note_count %}
                                         ({{ note_count }} note{{ note_count|pluralize }})
                                     {% endwith %}
                                 </td>
                                 <td><a href="{% url 'view_test' similar.test_id %}">{{ similar.test.test_type.name }}</a></td>
                                 <td><a href="{% url 'view_engagement' similar.test.engagement_id %}">{{ similar.test.engagement.name }}</a>
-                                {% if similar.test.engagement.version%}
+                                {% if similar.test.engagement.version %}
                                     <sup>
-                                          <a target="_blank" class="tag-label tag-version" data-toggle="tooltip" data-placement="bottom" title="Product Version: {{ eng.version }}">
+                                          <a target="_blank" class="tag-label tag-version" data-toggle="tooltip" data-placement="bottom" title="Product Version: {{ similar.test.engagement.version }}">
                                           {{ similar.test.engagement.version }}</a>
                                     </sup>
                                 {% endif %}
