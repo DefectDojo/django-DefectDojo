@@ -8,12 +8,11 @@ from django.utils.safestring import mark_safe, SafeData
 from django.utils.text import normalize_newlines
 from django.urls import reverse
 from django.contrib.auth.models import User
-from dojo.utils import prepare_for_view, get_system_setting
+from dojo.utils import prepare_for_view, get_system_setting, get_full_url
 from dojo.models import Check_List, FindingImageAccessToken, Finding, System_Settings, JIRA_PKey, Product
 import markdown
 from django.db.models import Sum, Case, When, IntegerField, Value
 from django.utils import timezone
-from markdown.extensions import Extension
 import dateutil.relativedelta
 import datetime
 from ast import literal_eval
@@ -728,3 +727,8 @@ def get_severity_count(id, table):
     display_counts = ", ".join([str(item) for item in display_counts])
 
     return display_counts
+
+
+@register.filter
+def full_url(url):
+    return get_full_url(url)

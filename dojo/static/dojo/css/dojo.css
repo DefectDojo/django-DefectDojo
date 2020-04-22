@@ -754,6 +754,10 @@ table.centered th {
     text-align: center;
 }
 
+table.centered td {
+    text-align: center;
+}
+
 .text-critical {
     color: #d9534f
 }

@@ -8,7 +8,8 @@ from django.shortcuts import render, get_object_or_404
 from dojo.filters import ProductTypeFilter
 from dojo.forms import Product_TypeForm, Product_TypeProductForm, Delete_Product_TypeForm
 from dojo.models import Product_Type
-from dojo.utils import get_page_items, add_breadcrumb, create_notification
+from dojo.utils import get_page_items, add_breadcrumb
+from dojo.notifications.helper import create_notification
 from django.db.models import Count, Q
 from django.db.models.query import QuerySet
 
