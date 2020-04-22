@@ -366,8 +366,9 @@
                 </tr>
                 <tr>
                     <td>
-                        <span>
-                           {{ finding.file_path }}
+                        <span>{{ finding.file_path }} 
+                            <i class="fa fa-copy fa-align-right copytoclipboard" title="copy to clipboard"
+                            data-clipboard-text="{{finding.file_path}}"></i>
                         </span>
                     </td>
                     <td>
@@ -500,16 +501,16 @@
                                 </td>
                                 <td>{{ similar.status }}{% if similar.duplicate_finding_id %}, <a href="{% url 'view_finding' similar.duplicate_finding_id %}">Original</a> {% endif %}</td>
                                 <td>
-                                    <a target="#" data-toggle="tooltip" data-placement="bottom" title="{{ similar.title }}" href="{% url 'view_finding' similar.id %}">{{ similar.date }}</a>
+                                    {{ similar.date|date }}</br>
                                     {% with similar.notes.count as note_count %}
                                         ({{ note_count }} note{{ note_count|pluralize }})
                                     {% endwith %}
                                 </td>
                                 <td><a href="{% url 'view_test' similar.test_id %}">{{ similar.test.test_type.name }}</a></td>
                                 <td><a href="{% url 'view_engagement' similar.test.engagement_id %}">{{ similar.test.engagement.name }}</a>
-                                {% if similar.test.engagement.version%}
+                                {% if similar.test.engagement.version %}
                                     <sup>
-                                          <a target="_blank" class="tag-label tag-version" data-toggle="tooltip" data-placement="bottom" title="Product Version: {{ eng.version }}">
+                                          <a target="_blank" class="tag-label tag-version" data-toggle="tooltip" data-placement="bottom" title="Product Version: {{ similar.test.engagement.version }}">
                                           {{ similar.test.engagement.version }}</a>
                                     </sup>
                                 {% endif %}
@@ -522,7 +523,10 @@
                                 </td>
                                 {% endif %}
                                 <td>{{ similar.cve }}</td>
-                                <td title="{{similar.file_path}}">{{ similar.file_path|truncatechars_html:20 }}{% if similar.line > 0 %} (Line {{ similar.line }}){% endif %}</td>
+                                <td title="{{similar.file_path}}{% if similar.line > 0 %} (Line {{ similar.line }}){% endif %}">
+                                    {{ similar.file_path|truncatechars_html:20 }}{% if similar.line > 0 %} (Line {{ similar.line }}){% endif %}
+                                    <i class="fa fa-copy fa-align-right copytoclipboard" title="copy full path to clipboard"
+                                    data-clipboard-text="{{similar.file_path}}{% if similar.line > 0 %} (Line {{ similar.line }}){% endif %}"></i></td>
                                 <td>
                                     {% if similar.duplicate %}
                                         <form method="post"
@@ -919,6 +923,7 @@
     </div>
 {% endblock %}
 {% block postscript %}
+    <script src="{% static "clipboard/dist/clipboard.min.js" %}"></script>
     <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
     <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
     <script type="text/javascript">
@@ -1025,5 +1030,7 @@
                 }
             });
         });
+
+        var clipboard = new ClipboardJS('.copytoclipboard');
     </script>
 {% endblock %}
