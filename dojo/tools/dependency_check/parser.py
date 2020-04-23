@@ -20,6 +20,39 @@ class DependencyCheckParser(object):
     def get_filename_from_dependency(self, dependency):
         return self.get_field_value(dependency, 'fileName')
 
+    def get_filename_from_related_dependency(self, dependency, related_dependancy):
+        file_name = self.get_field_value(dependency, 'fileName')
+        file_path = self.get_field_value(dependency, 'filePath')
+
+        # <dependency>
+        #     <fileName>app1.war: library2.jar</fileName>
+        #     <filePath>/var/lib/jenkins/workspace/dev/app1.war/WEB-INF/lib/library2.jar</filePath>
+
+        file_name_parts = file_name.split(': ')
+        artifact_name = file_name_parts[0]
+        path_parts = file_path.split(artifact_name)
+        path_prefix = path_parts[0]
+        path_suffix = ''.join(path_parts[1:])
+
+        print('artifact_name', artifact_name)
+        print('path_prefix', path_prefix)
+        print('path_suffix', path_suffix)
+
+        # <relatedDependency>
+        #     <filePath>/var/lib/jenkins/workspace/dev/app2.war/WEB-INF/lib/library2.jar</filePath>
+
+        file_path_related = self.get_field_value(related_dependancy, 'filePath')
+        artifact_name_related = file_path_related[len(path_prefix):]
+        print(artifact_name_related)
+        artifact_name_related = artifact_name_related[:(len(file_path_related) - len(path_prefix) - len(path_suffix))]
+        print(artifact_name_related)
+
+        print('artifact_name_related:', artifact_name_related)
+        # file_name_related = artifact_name_related + ': ' + ''.join(file_name_parts[1:])
+        file_name_related = file_name.replace(artifact_name, artifact_name_related)
+        print(file_name_related)
+        return file_name_related
+
     def get_finding_from_vulnerability(self, vulnerability, filename, test):
         name = self.get_field_value(vulnerability, 'name')
         cwes_node = vulnerability.find(self.namespace + 'cwes')
@@ -45,7 +78,6 @@ class DependencyCheckParser(object):
             severity = self.get_field_value(cvssv2_node, 'severity').lower().capitalize()
         else:
             severity = self.get_field_value(vulnerability, 'severity').lower().capitalize()
-        print("severity: " + severity)
         if severity in SEVERITY:
             severity = severity
         else:
@@ -110,21 +142,33 @@ class DependencyCheckParser(object):
                                                    'dependency'):
                 dependency_filename = self.get_filename_from_dependency(
                     dependency)
-                vulnerabilities = dependency.find(self.namespace +
-                                                  'vulnerabilities')
-                if vulnerabilities is not None:
-                    for vulnerability in vulnerabilities.findall(
-                            self.namespace + 'vulnerability'):
-                        finding = self.get_finding_from_vulnerability(
-                            vulnerability, dependency_filename, test)
 
-                        if finding is not None:
-                            key_str = '{}|{}|{}'.format(finding.severity,
-                                                         finding.title,
-                                                         finding.description)
-                            key = hashlib.md5(key_str.encode('utf-8')).hexdigest()
+                filenames = [dependency_filename]
 
-                            if key not in self.dupes:
-                                self.dupes[key] = finding
+                related_dependencies = dependency.find(self.namespace + 'relatedDependencies')
+
+                if related_dependencies:
+                    for related_dependency in related_dependencies:
+                        filenames.append(self.get_filename_from_related_dependency(dependency, related_dependency))
+
+                print(filenames)
+
+                for filename in filenames:
+                    vulnerabilities = dependency.find(self.namespace +
+                                                    'vulnerabilities')
+                    if vulnerabilities is not None:
+                        for vulnerability in vulnerabilities.findall(
+                                self.namespace + 'vulnerability'):
+                            finding = self.get_finding_from_vulnerability(
+                                vulnerability, filename, test)
+
+                            if finding is not None:
+                                key_str = '{}|{}|{}'.format(finding.severity,
+                                                            finding.title,
+                                                            finding.description)
+                                key = hashlib.md5(key_str.encode('utf-8')).hexdigest()
+
+                                if key not in self.dupes:
+                                    self.dupes[key] = finding
 
         self.items = list(self.dupes.values())

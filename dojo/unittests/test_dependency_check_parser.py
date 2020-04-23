@@ -34,7 +34,7 @@ class TestDependencyCheckParser(TestCase):
     <dependencies>
         <dependency>
             <fileName>component1.dll</fileName>
-            <filePath>C:\Projects\testproject\libraries\component1.dll</filePath>
+            <filePath>/var/lib/folder</filePath>
             <md5>ba5a6a10bae6ce2abbabec9facae23a4</md5>
             <sha1>ae917bbce68733468b1972113e0e1fc5dc7444a0</sha1>
             <evidenceCollected>
@@ -62,7 +62,7 @@ class TestDependencyCheckParser(TestCase):
         </dependency>
         <dependency>
             <fileName>component2.dll</fileName>
-            <filePath>C:\Projects\testproject\libraries\component2.dll</filePath>
+            <filePath>/var/lib/folder/component2.dll</filePath>
             <md5>21b24bc199530e07cb15d93c7f929f04</md5>
             <sha1>a29f196740ab608199488c574f536529b5c21242</sha1>
             <evidenceCollected>
@@ -98,7 +98,7 @@ class TestDependencyCheckParser(TestCase):
     <dependencies>
         <dependency>
             <fileName>component1.dll</fileName>
-            <filePath>C:\Projects\testproject\libraries\component1.dll</filePath>
+            <filePath>C:\\Projects\\testproject\\libraries\\component1.dll</filePath>
             <md5>ba5a6a10bae6ce2abbabec9facae23a4</md5>
             <sha1>ae917bbce68733468b1972113e0e1fc5dc7444a0</sha1>
             <evidenceCollected>
@@ -126,7 +126,7 @@ class TestDependencyCheckParser(TestCase):
         </dependency>
         <dependency>
             <fileName>component2.dll</fileName>
-            <filePath>C:\Projects\testproject\libraries\component2.dll</filePath>
+            <filePath>C:\\Projects\\testproject\\libraries\\component2.dll</filePath>
             <md5>21b24bc199530e07cb15d93c7f929f04</md5>
             <sha1>a29f196740ab608199488c574f536529b5c21242</sha1>
             <evidenceCollected>
@@ -184,6 +184,194 @@ class TestDependencyCheckParser(TestCase):
         parser = DependencyCheckParser(testfile, Test())
         self.assertEqual(1, len(parser.items))
 
+    def test_parse_file_with_single_vulnerability_has_single_finding_related_dependencies(self):
+        content = """<?xml version="1.0"?>
+<analysis xmlns="https://jeremylong.github.io/DependencyCheck/dependency-check.1.3.xsd">
+    <scanInfo>
+    </scanInfo>
+    <projectInfo>
+        <name>Test Project</name>
+        <reportDate>2016-11-05T14:52:15.748-0400</reportDate>
+        <credits>This report contains data retrieved from the National Vulnerability Database: http://nvd.nist.gov</credits>
+    </projectInfo>
+    <dependencies>
+        <dependency>
+            <fileName>app1.war: library2.jar</fileName>
+            <filePath>/var/lib/jenkins/workspace/dev/app1.war/WEB-INF/lib/library2.jar</filePath>
+            <md5>ba5a6a10bae6ce2abbabec9facae23a4</md5>
+            <sha1>ae917bbce68733468b1972113e0e1fc5dc7444a0</sha1>
+            <relatedDependencies>
+                <relatedDependency>
+                    <filePath>/var/lib/jenkins/workspace/dev/app2.war/WEB-INF/lib/library2.jar</filePath>
+                    <sha256>ede77ae49f626bbe0d2f0d0f62c29f7697c5aee0599b547812f4a69129dd625c</sha256>
+                    <sha1>b0b20a73eaa86e1a53be127a7a0c952e241fdaa0</sha1>
+                    <md5>45a1594820426c78456320fae7acda48</md5>
+                </relatedDependency>
+                <relatedDependency>
+                    <filePath>/var/lib/jenkins/workspace/dev/app3.war/WEB-INF/lib/library2.jar</filePath>
+                    <sha256>ede77ae49f626bbe0d2f0d0f62c29f7697c5aee0599b547812f4a69129dd625c</sha256>
+                    <sha1>b0b20a73eaa86e1a53be127a7a0c952e241fdaa0</sha1>
+                    <md5>45a1594820426c78456320fae7acda48</md5>
+                </relatedDependency>
+            </relatedDependencies>
+            <evidenceCollected>
+                <evidence type="vendor" confidence="HIGH">
+                    <source>file</source>
+                    <name>name</name>
+                    <value>component1.dll</value>
+                </evidence>
+                <evidence type="product" confidence="HIGH">
+                    <source>file</source>
+                    <name>name</name>
+                    <value>component1</value>
+                </evidence>
+                <evidence type="version" confidence="MEDIUM">
+                    <source>file</source>
+                    <name>name</name>
+                    <value>component1</value>
+                </evidence>
+                <evidence type="version" confidence="MEDIUM">
+                    <source>file</source>
+                    <name>version</name>
+                    <value>1</value>
+                </evidence>
+            </evidenceCollected>
+            <vulnerabilities>
+                <vulnerability>
+                    <name>CVE-0000-0001</name>
+                    <cvssScore>7.5</cvssScore>
+                    <cvssAccessVector>NETWORK</cvssAccessVector>
+                    <cvssAccessComplexity>LOW</cvssAccessComplexity>
+                    <cvssAuthenticationr>NONE</cvssAuthenticationr>
+                    <cvssConfidentialImpact>PARTIAL</cvssConfidentialImpact>
+                    <cvssIntegrityImpact>PARTIAL</cvssIntegrityImpact>
+                    <cvssAvailabilityImpact>PARTIAL</cvssAvailabilityImpact>
+                    <severity>High</severity>
+                    <cwe>CWE-00 Bad Vulnerability</cwe>
+                    <description>Description of a bad vulnerability.</description>
+                    <references>
+                        <reference>
+                            <source>Reference1</source>
+                            <url>http://localhost/badvulnerability.htm</url>
+                            <name>Reference Name</name>
+                        </reference>
+                        <reference>
+                            <source>MISC</source>
+                            <url>http://localhost2/reference_for_badvulnerability.pdf</url>
+                            <name>Reference for a bad vulnerability</name>
+                        </reference>
+                    </references>
+                    <vulnerableSoftware>
+                        <software>cpe:/a:component2:component2:1.0</software>
+                    </vulnerableSoftware>
+                </vulnerability>
+            </vulnerabilities>
+        </dependency>
+        </dependencies>
+</analysis>
+ """
+        testfile = TestFile("dependency-check-report.xml", content)
+        parser = DependencyCheckParser(testfile, Test())
+        # defect dojo is finding based and can have only 1 filepath per finding, so we need 3 findings to cover all related dependencies containing the same vulnerability
+        self.assertEqual(3, len(parser.items))
+
+        for expected_title in ['app1.war: library2.jar | CVE-0000-0001', 'app2.war: library2.jar | CVE-0000-0001', 'app3.war: library2.jar | CVE-0000-0001']:
+            self.assertTrue(expected_title in [i.title for i in parser.items])
+
+    def test_parse_file_with_single_vulnerability_has_single_finding_related_dependencies_shaded(self):
+        content = """<?xml version="1.0"?>
+<analysis xmlns="https://jeremylong.github.io/DependencyCheck/dependency-check.1.3.xsd">
+    <scanInfo>
+    </scanInfo>
+    <projectInfo>
+        <name>Test Project</name>
+        <reportDate>2016-11-05T14:52:15.748-0400</reportDate>
+        <credits>This report contains data retrieved from the National Vulnerability Database: http://nvd.nist.gov</credits>
+    </projectInfo>
+    <dependencies>
+        <dependency>
+            <fileName>app1.war: library2.jar (shaded: com.fasterxml.jackson.core:jackson-annotations:2.9.0)</fileName>
+            <filePath>/var/lib/jenkins/workspace/dev/app1.war/WEB-INF/lib/library2.jar/META-INF/maven/com.fasterxml.jackson.core/jackson-annotations/pom.xml</filePath>
+            <md5>ba5a6a10bae6ce2abbabec9facae23a4</md5>
+            <sha1>ae917bbce68733468b1972113e0e1fc5dc7444a0</sha1>
+            <relatedDependencies>
+                <relatedDependency>
+                    <filePath>/var/lib/jenkins/workspace/dev/app2.war/WEB-INF/lib/library2.jar/META-INF/maven/com.fasterxml.jackson.core/jackson-annotations/pom.xml</filePath>
+                    <sha256>ede77ae49f626bbe0d2f0d0f62c29f7697c5aee0599b547812f4a69129dd625c</sha256>
+                    <sha1>b0b20a73eaa86e1a53be127a7a0c952e241fdaa0</sha1>
+                    <md5>45a1594820426c78456320fae7acda48</md5>
+                </relatedDependency>
+                <relatedDependency>
+                    <filePath>/var/lib/jenkins/workspace/dev/app3.war/WEB-INF/lib/library2.jar/META-INF/maven/com.fasterxml.jackson.core/jackson-annotations/pom.xml</filePath>
+                    <sha256>ede77ae49f626bbe0d2f0d0f62c29f7697c5aee0599b547812f4a69129dd625c</sha256>
+                    <sha1>b0b20a73eaa86e1a53be127a7a0c952e241fdaa0</sha1>
+                    <md5>45a1594820426c78456320fae7acda48</md5>
+                </relatedDependency>
+            </relatedDependencies>
+            <evidenceCollected>
+                <evidence type="vendor" confidence="HIGH">
+                    <source>file</source>
+                    <name>name</name>
+                    <value>component1.dll</value>
+                </evidence>
+                <evidence type="product" confidence="HIGH">
+                    <source>file</source>
+                    <name>name</name>
+                    <value>component1</value>
+                </evidence>
+                <evidence type="version" confidence="MEDIUM">
+                    <source>file</source>
+                    <name>name</name>
+                    <value>component1</value>
+                </evidence>
+                <evidence type="version" confidence="MEDIUM">
+                    <source>file</source>
+                    <name>version</name>
+                    <value>1</value>
+                </evidence>
+            </evidenceCollected>
+            <vulnerabilities>
+                <vulnerability>
+                    <name>CVE-0000-0001</name>
+                    <cvssScore>7.5</cvssScore>
+                    <cvssAccessVector>NETWORK</cvssAccessVector>
+                    <cvssAccessComplexity>LOW</cvssAccessComplexity>
+                    <cvssAuthenticationr>NONE</cvssAuthenticationr>
+                    <cvssConfidentialImpact>PARTIAL</cvssConfidentialImpact>
+                    <cvssIntegrityImpact>PARTIAL</cvssIntegrityImpact>
+                    <cvssAvailabilityImpact>PARTIAL</cvssAvailabilityImpact>
+                    <severity>High</severity>
+                    <cwe>CWE-00 Bad Vulnerability</cwe>
+                    <description>Description of a bad vulnerability.</description>
+                    <references>
+                        <reference>
+                            <source>Reference1</source>
+                            <url>http://localhost/badvulnerability.htm</url>
+                            <name>Reference Name</name>
+                        </reference>
+                        <reference>
+                            <source>MISC</source>
+                            <url>http://localhost2/reference_for_badvulnerability.pdf</url>
+                            <name>Reference for a bad vulnerability</name>
+                        </reference>
+                    </references>
+                    <vulnerableSoftware>
+                        <software>cpe:/a:component2:component2:1.0</software>
+                    </vulnerableSoftware>
+                </vulnerability>
+            </vulnerabilities>
+        </dependency>
+        </dependencies>
+</analysis>
+ """
+        testfile = TestFile("dependency-check-report.xml", content)
+        parser = DependencyCheckParser(testfile, Test())
+        # defect dojo is finding based and can have only 1 filepath per finding, so we need 3 findings to cover all related dependencies containing the same vulnerability
+        self.assertEqual(3, len(parser.items))
+
+        for expected_title in ['app1.war: library2.jar (shaded: com.fasterxml.jackson.core:jackson-annotations:2.9.0) | CVE-0000-0001', 'app2.war: library2.jar (shaded: com.fasterxml.jackson.core:jackson-annotations:2.9.0) | CVE-0000-0001', 'app3.war: library2.jar (shaded: com.fasterxml.jackson.core:jackson-annotations:2.9.0) | CVE-0000-0001']:
+            self.assertTrue(expected_title in [i.title for i in parser.items])
+
     def test_parse_file_with_multiple_vulnerabilities_has_multiple_findings(
             self):
         content = """<?xml version="1.0"?>
@@ -198,7 +386,7 @@ class TestDependencyCheckParser(TestCase):
     <dependencies>
         <dependency>
             <fileName>component1.dll</fileName>
-            <filePath>C:\Projects\testproject\libraries\component1.dll</filePath>
+            <filePath>C:\\Projects\\testproject\\libraries\\component1.dll</filePath>
             <md5>ba5a6a10bae6ce2abbabec9facae23a4</md5>
             <sha1>ae917bbce68733468b1972113e0e1fc5dc7444a0</sha1>
             <evidenceCollected>
@@ -226,7 +414,7 @@ class TestDependencyCheckParser(TestCase):
         </dependency>
         <dependency>
             <fileName>component2.dll</fileName>
-            <filePath>C:\Projects\testproject\libraries\component2.dll</filePath>
+            <filePath>C:\\Projects\\testproject\\libraries\\component2.dll</filePath>
             <md5>21b24bc199530e07cb15d93c7f929f04</md5>
             <sha1>a29f196740ab608199488c574f536529b5c21242</sha1>
             <evidenceCollected>
@@ -279,7 +467,7 @@ class TestDependencyCheckParser(TestCase):
         </dependency>
         <dependency>
             <fileName>component3.dll</fileName>
-            <filePath>C:\Projects\testproject\libraries\component3.dll</filePath>
+            <filePath>C:\\Projects\\testproject\\libraries\\component3.dll</filePath>
             <md5>21b24bc199530e07cb15d93c7f929f03</md5>
             <sha1>a29f196740ab608199488c574f536529b5c21243</sha1>
             <evidenceCollected>
