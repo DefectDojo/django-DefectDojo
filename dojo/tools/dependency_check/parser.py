@@ -42,10 +42,10 @@ class DependencyCheckParser(object):
         #     <filePath>/var/lib/jenkins/workspace/dev/app2.war/WEB-INF/lib/library2.jar</filePath>
 
         file_path_related = self.get_field_value(related_dependancy, 'filePath')
+        print('file_path_related: ', file_path_related)
         artifact_name_related = file_path_related[len(path_prefix):]
-        print(artifact_name_related)
+        print('artifact_name_related1: ', artifact_name_related)
         artifact_name_related = artifact_name_related[:(len(file_path_related) - len(path_prefix) - len(path_suffix))]
-        print(artifact_name_related)
 
         print('artifact_name_related:', artifact_name_related)
         # file_name_related = artifact_name_related + ': ' + ''.join(file_name_parts[1:])
