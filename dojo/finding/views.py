@@ -1126,15 +1126,6 @@ def edit_finding(request, fid):
                 if jform.is_valid():
                     push_to_jira = jform.cleaned_data.get('push_to_jira')
 
-                    if JIRA_Issue.objects.filter(finding=new_finding).exists():
-                        update_issue_task.delay(
-                            new_finding, old_status,
-                            jform.cleaned_data.get('push_to_jira'))
-                    else:
-                        add_issue_task.delay(
-                            new_finding,
-                            jform.cleaned_data.get('push_to_jira'))
-
             if 'githubform-push_to_github' in request.POST:
                 gform = JIRAFindingForm(
                     request.POST, prefix='githubform', enabled=enabled)
@@ -2185,7 +2176,7 @@ def finding_bulk_update_all(request, pid=None):
 
                     # Because we never call finding.save() in a bulk update, we need to actually
                     # push the JIRA stuff here, rather than in finding.save()
-                    if JIRA_PKey.objects.filter(product=finding.test.engagement.product).count() == 0:
+                    if finding.jira_conf_new() is None:
                         log_jira_alert('Finding cannot be pushed to jira as there is no jira configuration for this product.', finding)
                     else:
                         push_anyway = finding.jira_conf_new().jira_pkey_set.first().push_all_issues
