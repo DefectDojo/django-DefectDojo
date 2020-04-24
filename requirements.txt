@@ -36,7 +36,7 @@ xlrd>=1.0.0
 pdfkit==0.6.1
 Pillow==7.1.1  # required by django-imagekit
 psycopg2-binary==2.8.5
-cryptography==2.9
+cryptography==2.9.1
 python-dateutil==2.8.1
 python-nmap==0.6.1
 pytz==2019.3
@@ -55,7 +55,7 @@ git+https://github.com/DefectDojo/defectDojo-engagement-survey.git@8437e158fbc75
 gitpython>=2.1.13
 ptvsd>=4.2.7
 google-api-python-client==1.8.0
-google-auth==1.14.0
+google-auth==1.14.1
 google-auth-oauthlib==0.4.1
 drf_yasg==1.17.1
 git+https://github.com/LeetCode-OpenSource/django-cachalot@4d6831c85a9701cf9a17c145f7f74b2dffe94e1d#egg=django-cachalot

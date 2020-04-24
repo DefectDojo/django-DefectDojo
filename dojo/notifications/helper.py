@@ -1,7 +1,6 @@
 import requests
 import logging
 from django.core.mail import EmailMessage
-from dojo.utils import get_system_setting, get_slack_user_id
 from dojo.models import Notifications, Dojo_User, Alerts, UserContactInfo
 from django.template.loader import render_to_string
 from django.db.models import Q, Count, Prefetch
@@ -17,19 +16,19 @@ def create_notification(event=None, *args, **kwargs):
     except Exception:
         system_notifications = Notifications()
 
-    logger.debug('sending system notifications')
+    logger.debug('creating system notifications')
     process_notifications(event, system_notifications, *args, **kwargs)
 
     if 'recipients' in kwargs:
         # mimic existing code so that when recipients is specified, no other personal notifications are sent.
-        logger.info('sending notifications for recipients')
+        logger.debug('creating notifications for recipients')
         for recipient_notifications in Notifications.objects.filter(user__username__in=kwargs['recipients'], user__is_active=True):
             # kwargs.update({'user': recipient_notifications.user})
             process_notifications(event, recipient_notifications, *args, **kwargs)
     else:
         # Personal but global notifications
         # only retrieve users which have at least one notification type enabled for this event type.
-        logger.info('sending personal notifications')
+        logger.debug('creating personal notifications')
 
         product = None
         if 'product' in kwargs:
@@ -69,9 +68,6 @@ def create_notification_message(event, user, notification_type, *args, **kwargs)
     kwargs.update({'type': notification_type})
     kwargs.update({'user': user})
 
-    print('rendering_to_string with: ' + template)
-    print(kwargs)
-
     try:
         notification = render_to_string(template, kwargs)
     except Exception as e:
@@ -83,6 +79,8 @@ def create_notification_message(event, user, notification_type, *args, **kwargs)
 
 
 def process_notifications(event, notifications=None, *args, **kwargs):
+    from dojo.utils import get_system_setting
+
     if not notifications:
         logger.warn('no notifications!')
         return
@@ -125,6 +123,7 @@ def process_notifications(event, notifications=None, *args, **kwargs):
 
 
 def send_slack_notification(event, user=None, *args, **kwargs):
+    from dojo.utils import get_system_setting, get_slack_user_id
     if user is not None:
         if user.usercontactinfo.slack_username is not None:
             slack_user_id = user.usercontactinfo.slack_user_id
@@ -160,6 +159,7 @@ def send_slack_notification(event, user=None, *args, **kwargs):
 
 
 def send_hipchat_notification(event, user=None, *args, **kwargs):
+    from dojo.utils import get_system_setting
     if user:
         # HipChat doesn't seem to offer direct message functionality, so no HipChat PM functionality here...
         return
@@ -183,9 +183,7 @@ def send_hipchat_notification(event, user=None, *args, **kwargs):
 
 
 def send_mail_notification(event, user=None, *args, **kwargs):
-    print(args)
-    print('---')
-    print(kwargs)
+    from dojo.utils import get_system_setting
 
     if user:
         address = user.email
@@ -204,7 +202,7 @@ def send_mail_notification(event, user=None, *args, **kwargs):
             headers={"From": "{}".format(get_system_setting('mail_notifications_from'))}
         )
         email.content_subtype = 'html'
-        logger.info('sending email alert:')
+        logger.debug('sending email alert')
         # logger.info(create_notification_message(event, 'mail'))
         email.send(fail_silently=False)
 
