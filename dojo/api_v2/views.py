@@ -554,11 +554,14 @@ class TestsViewSet(mixins.ListModelMixin,
         return Test
 
     def get_queryset(self):
+        qs = Test.objects.all()
+
         if not self.request.user.is_staff:
             return Test.objects.filter(
                 engagement__product__authorized_users__in=[self.request.user])
-        else:
-            return Test.objects.all()
+
+        #  serializer outputs also self.test_type.name, so prefetch that
+        return qs.select_related('test_type')
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
