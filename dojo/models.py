@@ -1852,14 +1852,6 @@ class Finding(models.Model):
         from dojo.utils import calculate_grade
         calculate_grade(self.test.engagement.product)
 
-        # Adding a snippet here for push to JIRA so that it's in one place
-        if push_to_jira:
-            from dojo.tasks import update_issue_task, add_issue_task
-            if jira_issue_exists:
-                update_issue_task.delay(self, True)
-            else:
-                add_issue_task.delay(self, True)
-
     def delete(self, *args, **kwargs):
         for find in self.original_finding.all():
             # Explicitely delete the duplicates
