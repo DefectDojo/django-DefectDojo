@@ -3,7 +3,8 @@ import gitlab
 from django.conf import settings
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
-from dojo.models import Engagement, Product
+from django.core.exceptions import ObjectDoesNotExist
+from dojo.models import Engagement, Product, Product_Type
 from social_core.backends.azuread_tenant import AzureADTenantOAuth2
 from social_core.backends.google import GoogleOAuth2
 
@@ -75,10 +76,15 @@ def update_product_access(backend, uid, user=None, social=None, *args, **kwargs)
         # Get each project path_with_namespace as future product name
         projects = gl.projects.list(membership=True, all=True)
         project_names = [project.path_with_namespace for project in projects]
+        # Create product_type if necessary
+        try:
+            product_type = Product_Type.objects.get(name='Gitlab Import')
+        except ObjectDoesNotExist:
+            product_type = Product_Type.objects.create(name='Gitlab Import')
         # For each project: create a new product or update product's authorized_users
         for project_name in project_names:
             if project_name not in prod_names:
-                product = Product.objects.create(name=project_name)
+                product = Product.objects.create(name=project_name, prod_type=product_type)
                 product.authorized_users.add(user)
                 product.save()
             else:
