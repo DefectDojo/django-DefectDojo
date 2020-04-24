@@ -83,3 +83,4 @@ class NmapXMLParser(object):
 
                 find.unsaved_endpoints.append(Endpoint(host=ip, fqdn=fqdn, port=port, protocol=protocol))
         self.items = list(self.dupes.values())
+
