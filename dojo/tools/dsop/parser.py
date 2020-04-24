@@ -132,14 +132,13 @@ class DsopParser:
             description = "Gate: {} (Trigger: {}): {}".format(row.gate, row.trigger, row.check_output)
             title = '{}: {}'.format(row.policy_id, row.trigger_id)
             tags = "anchore_compliance"
-            
+
             finding = Finding(title=title, severity=severity,
                                     mitigation=mitigation,
                                     description=description, test=self._test,
                                     static_finding=True, dynamic_finding=False)
             finding.unsaved_tags = tags
             self._items.append(finding)
-
 
     @property
     def items(self):
