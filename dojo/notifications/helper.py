@@ -1,7 +1,6 @@
 import requests
 import logging
 from django.core.mail import EmailMessage
-from dojo.utils import get_system_setting, get_slack_user_id
 from dojo.models import Notifications, Dojo_User, Alerts, UserContactInfo
 from django.template.loader import render_to_string
 from django.db.models import Q, Count, Prefetch
@@ -80,6 +79,8 @@ def create_notification_message(event, user, notification_type, *args, **kwargs)
 
 
 def process_notifications(event, notifications=None, *args, **kwargs):
+    from dojo.utils import get_system_setting
+
     if not notifications:
         logger.warn('no notifications!')
         return
@@ -122,6 +123,7 @@ def process_notifications(event, notifications=None, *args, **kwargs):
 
 
 def send_slack_notification(event, user=None, *args, **kwargs):
+    from dojo.utils import get_system_setting, get_slack_user_id
     if user is not None:
         if user.usercontactinfo.slack_username is not None:
             slack_user_id = user.usercontactinfo.slack_user_id
@@ -157,6 +159,7 @@ def send_slack_notification(event, user=None, *args, **kwargs):
 
 
 def send_hipchat_notification(event, user=None, *args, **kwargs):
+    from dojo.utils import get_system_setting
     if user:
         # HipChat doesn't seem to offer direct message functionality, so no HipChat PM functionality here...
         return
@@ -180,6 +183,7 @@ def send_hipchat_notification(event, user=None, *args, **kwargs):
 
 
 def send_mail_notification(event, user=None, *args, **kwargs):
+    from dojo.utils import get_system_setting
 
     if user:
         address = user.email

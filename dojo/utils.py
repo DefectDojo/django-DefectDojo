@@ -31,6 +31,7 @@ from dojo.models import Finding, Engagement, Finding_Template, Product, JIRA_PKe
     Language_Type, Languages, Rule, Test_Type
 from asteval import Interpreter
 from requests.auth import HTTPBasicAuth
+from dojo.notifications.helper import create_notification
 import logging
 import itertools
 
@@ -241,7 +242,7 @@ def deduplicate_hash_code(new_finding):
         str(len(existing_findings)) + " findings with same hash_code")
     for find in existing_findings:
         if is_deduplication_on_engagement_mismatch(new_finding, find):
-            deduplicationLoggerdebug(
+            deduplicationLogger.debug(
                 'deduplication_on_engagement_mismatch, skipping dedupe.')
             continue
         try:
@@ -1981,7 +1982,6 @@ def set_default_notifications(sender, instance, created, **kwargs):
 @receiver(post_save, sender=Engagement)
 def engagement_post_Save(sender, instance, created, **kwargs):
     if created:
-        from dojo.notifications.helper import create_notification
         engagement = instance
         title = 'Engagement created for ' + str(engagement.product) + ': ' + str(engagement.name)
         create_notification(event='engagement_added', title=title, engagement=engagement, product=engagement.product,
