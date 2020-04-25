@@ -7,7 +7,8 @@ from dojo.models import Product, Engagement, Test, Finding, \
 from dojo.forms import ImportScanForm, SEVERITY_CHOICES
 from dojo.tools import requires_file
 from dojo.tools.factory import import_parser_factory
-from dojo.utils import create_notification, max_safe
+from dojo.utils import max_safe
+from dojo.notifications.helper import create_notification
 from django.urls import reverse
 from tagging.models import Tag
 from django.core.validators import URLValidator, validate_ipv46_address
@@ -404,6 +405,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     images = FindingImageSerializer(many=True, read_only=True)
     tags = TagListSerializerField(required=False)
     accepted_risks = RiskAcceptanceSerializer(many=True, read_only=True, source='risk_acceptance_set')
+    push_to_jira = serializers.BooleanField(default=False)
 
     class Meta:
         model = Finding
@@ -450,6 +452,7 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         allow_null=True,
         default=None)
     tags = TagListSerializerField(required=False)
+    push_to_jira = serializers.BooleanField(default=False)
 
     class Meta:
         model = Finding
@@ -457,6 +460,25 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         extra_kwargs = {
             'reporter': {'default': serializers.CurrentUserDefault()},
         }
+
+    # Overriding this to push add Push to JIRA functionality
+    def create(self, validated_data):
+        to_be_tagged, validated_data = self._pop_tags(validated_data)
+        push_to_jira = validated_data.pop('push_to_jira')
+        # Somewhere in the below line finding.save() is called, but I'm not sure how to get
+        # push_to_jira to it.
+        tag_object = super(TaggitSerializer, self).create(validated_data)
+
+        has_jira_config = tag_object.test.engagement.product.jira_pkey_set.first() is not None
+        if not push_to_jira and has_jira_config:
+            push_to_jira = tag_object.test.engagement.product.jira_pkey_set.first().push_all_issues
+
+        # No need to save the finding twice if we're not pushing to JIRA
+        if push_to_jira:
+            # Saving again with push_to_jira context
+            tag_object.save(push_to_jira=push_to_jira)
+        return self._save_tags(tag_object, to_be_tagged)
+        pass
 
     def validate(self, data):
         if ((data['active'] or data['verified']) and data['duplicate']):
@@ -557,8 +579,9 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         queryset=User.objects.all())
     tags = TagListSerializerField(required=False)
     close_old_findings = serializers.BooleanField(required=False, default=False)
+    push_to_jira = serializers.BooleanField(default=False)
 
-    def save(self):
+    def save(self, push_to_jira=False):
         data = self.validated_data
         close_old_findings = data['close_old_findings']
         active = data['active']
@@ -608,6 +631,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         except ValueError:
             raise Exception('FileParser ValueError')
 
+        new_findings = []
         skipped_hashcodes = []
         try:
             for item in parser.items:
@@ -666,16 +690,17 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 if item.unsaved_tags is not None:
                     item.tags = item.unsaved_tags
 
-                item.save()
+                item.save(push_to_jira=push_to_jira)
+                new_findings.append(item)
 
         except SyntaxError:
             raise Exception('Parser SyntaxError')
 
+        old_findings = []
         if close_old_findings:
             # Close old active findings that are not reported by this scan.
             new_hash_codes = test.finding_set.values('hash_code')
 
-            old_findings = None
             if test.engagement.deduplication_on_engagement:
                 old_findings = Finding.objects.exclude(test=test) \
                                               .exclude(hash_code__in=new_hash_codes) \
@@ -706,16 +731,17 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                                          " as it is not present anymore in recent scans.")
                 Tag.objects.add_tag(old_finding, 'stale')
                 old_finding.save()
-                title = 'An old finding has been closed for "{}".' \
-                        .format(test.engagement.product.name)
-                description = 'See <a href="{}">{}</a>' \
-                        .format(reverse('view_finding', args=(old_finding.id, )),
-                                old_finding.title)
-                create_notification(event='other',
-                                    title=title,
-                                    description=description,
-                                    icon='bullseye',
-                                    objowner=self.context['request'].user)
+
+        title = 'Test created for ' + str(test.engagement.product) + ': ' + str(test.engagement.name) + ': ' + str(test)
+        create_notification(event='test_added', title=title, test=test, engagement=test.engagement, product=test.engagement.product,
+                            url=reverse('view_test', args=(test.id,)))
+
+        updated_count = len(new_findings) + len(old_findings)
+        if updated_count > 0:
+            title = 'Created ' + str(updated_count) + " findings for " + str(test.engagement.product) + ': ' + str(test.engagement.name) + ': ' + str(test)
+            create_notification(initiator=self.context['request'].user, event='scan_added', title=title, findings_new=new_findings, findings_mitigated=old_findings,
+                                finding_count=updated_count, test=test, engagement=test.engagement, product=test.engagement.product,
+                                url=reverse('view_test', args=(test.id,)))
 
         return test
 
@@ -748,8 +774,9 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     file = serializers.FileField(required=False)
     test = serializers.PrimaryKeyRelatedField(
         queryset=Test.objects.all())
+    push_to_jira = serializers.BooleanField(default=False)
 
-    def save(self):
+    def save(self, push_to_jira=False):
         data = self.validated_data
         test = data['test']
         scan_type = data['scan_type']
@@ -779,6 +806,9 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             finding_count = 0
             finding_added_count = 0
             reactivated_count = 0
+            reactivated_items = []
+            unchanged_count = 0
+            unchanged_items = []
 
             for item in items:
                 sev = item.severity
@@ -804,6 +834,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                         numerical_severity=Finding.get_numerical_severity(sev)).all()
 
                 if findings:
+                    # existing finding found
                     finding = findings[0]
                     if finding.mitigated or finding.is_Mitigated:
                         finding.mitigated = None
@@ -817,9 +848,13 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                             author=self.context['request'].user)
                         note.save()
                         finding.notes.add(note)
+                        reactivated_items.append(finding)
                         reactivated_count += 1
-                    new_items.append(finding)
+                    else:
+                        unchanged_items.append(finding)
+                        unchanged_count += 1
                 else:
+                    # no existing finding found
                     item.test = test
                     item.date = scan_date
                     item.reporter = self.context['request'].user
@@ -829,7 +864,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     item.active = active
                     item.save(dedupe_option=False)
                     finding_added_count += 1
-                    new_items.append(item.id)
+                    new_items.append(item)
                     finding = item
 
                     if hasattr(item, 'unsaved_req_resp'):
@@ -865,21 +900,25 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     if item.unsaved_tags:
                         finding.tags = item.unsaved_tags
 
-                    finding.save()
+                    finding.save(push_to_jira=push_to_jira)
 
-            to_mitigate = set(original_items) - set(new_items)
+            to_mitigate = set(original_items) - set(reactivated_items) - set(unchanged_items)
+            mitigated_findings = []
             for finding in to_mitigate:
                 if not finding.mitigated or not finding.is_Mitigated:
                     finding.mitigated = scan_date_time
                     finding.is_Mitigated = True
                     finding.mitigated_by = self.context['request'].user
                     finding.active = False
-                    finding.save()
+                    finding.save(push_to_jira=push_to_jira)
                     note = Notes(entry="Mitigated by %s re-upload." % scan_type,
                                 author=self.context['request'].user)
                     note.save()
                     finding.notes.add(note)
+                    mitigated_findings.append(finding)
                     mitigated_count += 1
+
+            untouched = set(unchanged_items) - set(to_mitigate)
 
             test.updated = max_safe([scan_date_time, test.updated])
             test.engagement.updated = max_safe([scan_date_time, test.engagement.updated])
@@ -890,6 +929,19 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
 
             test.save()
             test.engagement.save()
+
+            print(len(new_items))
+            print(reactivated_count)
+            print(mitigated_count)
+            print(unchanged_count - mitigated_count)
+
+            updated_count = mitigated_count + reactivated_count + len(new_items)
+            if updated_count > 0:
+                # new_items = original_items
+                title = 'Updated ' + str(updated_count) + " findings for " + str(test.engagement.product) + ': ' + str(test.engagement.name) + ': ' + str(test)
+                create_notification(initiator=self.context['request'].user, event='scan_added', title=title, findings_new=new_items, findings_mitigated=mitigated_findings, findings_reactivated=reactivated_items,
+                                    finding_count=updated_count, test=test, engagement=test.engagement, product=test.engagement.product, findings_untouched=untouched,
+                                    url=reverse('view_test', args=(test.id,)))
 
         except SyntaxError:
             raise Exception("Parser SyntaxError")

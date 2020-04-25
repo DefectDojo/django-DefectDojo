@@ -279,6 +279,7 @@ class System_Settings(models.Model):
     column_widths = models.CharField(max_length=1500, blank=True)
     drive_folder_ID = models.CharField(max_length=100, blank=True)
     enable_google_sheets = models.BooleanField(default=False, null=True, blank=True)
+    email_address = models.EmailField(max_length=100, blank=True)
 
     objects = SystemSettingsManager()
 
@@ -1755,9 +1756,23 @@ class Finding(models.Model):
         long_desc += '*References*:' + self.references
         return long_desc
 
-    def save(self, dedupe_option=True, false_history=False, rules_option=True, issue_updater_option=True, *args, **kwargs):
+    def save(self, dedupe_option=True, false_history=False, rules_option=True,
+             issue_updater_option=True, push_to_jira=False, *args, **kwargs):
         # Make changes to the finding before it's saved to add a CWE template
         new_finding = False
+
+        jira_issue_exists = JIRA_Issue.objects.filter(finding=self).exists()
+        if push_to_jira:
+            self.jira_change = timezone.now()
+            if not jira_issue_exists:
+                self.jira_creation = timezone.now()
+        # If the product has "Push_all_issues" enabled,
+        # then we're pushing this to JIRA no matter what
+        if not push_to_jira:
+            # only if there is a JIRA configuration
+            push_to_jira = self.jira_conf_new() and \
+                           self.jira_conf_new().jira_pkey_set.first().push_all_issues
+
         if self.pk is None:
             # We enter here during the first call from serializers.py
             logger.debug("Saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is None)")
@@ -1839,6 +1854,14 @@ class Finding(models.Model):
 
         from dojo.utils import calculate_grade
         calculate_grade(self.test.engagement.product)
+
+        # Adding a snippet here for push to JIRA so that it's in one place
+        if push_to_jira:
+            from dojo.tasks import update_issue_task, add_issue_task
+            if jira_issue_exists:
+                update_issue_task.delay(self, True)
+            else:
+                add_issue_task.delay(self, True)
 
     def delete(self, *args, **kwargs):
         for find in self.original_finding.all():
@@ -2184,10 +2207,10 @@ class GITHUB_Details_Cache(models.Model):
 class GITHUB_PKey(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
 
-    project_key = models.CharField(max_length=200, blank=True, verbose_name="Github project", help_text="Specify your project location. (:user/:repo)")
-    conf = models.ForeignKey(GITHUB_Conf, verbose_name="Github Configuration",
-                             null=True, blank=True, on_delete=models.CASCADE)
-    push_notes = models.BooleanField(default=False, blank=True, help_text="Notes added to findings will be automatically added to the corresponding github issue")
+    git_project = models.CharField(max_length=200, blank=True, verbose_name="Github project", help_text="Specify your project location. (:user/:repo)")
+    git_conf = models.ForeignKey(GITHUB_Conf, verbose_name="Github Configuration",
+                                 null=True, blank=True, on_delete=models.CASCADE)
+    git_push_notes = models.BooleanField(default=False, blank=True, help_text="Notes added to findings will be automatically added to the corresponding github issue")
 
     def __unicode__(self):
         return self.product.name + " | " + self.project_key
@@ -2301,7 +2324,8 @@ class JIRA_PKey(models.Model):
     conf = models.ForeignKey(JIRA_Conf, verbose_name="JIRA Configuration",
                              null=True, blank=True, on_delete=models.CASCADE)
     component = models.CharField(max_length=200, blank=True)
-    push_all_issues = models.BooleanField(default=False, blank=True)
+    push_all_issues = models.BooleanField(default=False, blank=True,
+         help_text="Automatically maintain parity with JIRA. Always create and update JIRA tickets for findings in this Product.")
     enable_engagement_epic_mapping = models.BooleanField(default=False,
                                                          blank=True)
     push_notes = models.BooleanField(default=False, blank=True)
@@ -2322,7 +2346,7 @@ class Notifications(models.Model):
     product_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     engagement_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     test_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
-    results_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
+    scan_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True, help_text='Triggered whenever an (re-)import has been done that created/updated/closed findings.')
     report_created = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     jira_update = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     upcoming_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
@@ -2332,7 +2356,56 @@ class Notifications(models.Model):
     code_review = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     review_requested = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     other = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
-    user = models.ForeignKey(User, default=None, null=True, editable=False, on_delete=models.CASCADE)
+    user = models.ForeignKey(Dojo_User, default=None, null=True, editable=False, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, default=None, null=True, editable=False, on_delete=models.CASCADE)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'product'], name="notifications_user_product")
+        ]
+
+    @classmethod
+    def merge_notifications_list(cls, notifications_list):
+        print('merging')
+        if not notifications_list:
+            print('return empty list')
+            return []
+
+        result = None
+        for notifications in notifications_list:
+            print('id: ', notifications.id)
+            print('not.user.get_full_name: ', notifications.user.get_full_name())
+            if result is None:
+                # we start by copying the first instance, because creating a new instance would set all notification columns to 'alert' :-()
+                result = notifications
+                # result.pk = None # detach from db
+            else:
+                # from dojo.utils import concat_comma_separated_strings
+                print('combining: ' + str(result.scan_added) + ' with ' + str(notifications.scan_added))
+                # result.scan_added = (result.scan_added or []).extend(notifications.scan_added)
+                # if result.scan_added:
+                #     result.scan_added.extend(notifications.scan_added)
+                # else:
+                #     result.scan_added = notifications.scan_added
+
+                # This concat looks  better, but requires Python 3.6+
+                # result.scan_added = [*result.scan_added, *notifications.scan_added]
+                from dojo.utils import merge_sets_safe
+                result.product_added = merge_sets_safe(result.product_added, notifications.product_added)
+                result.engagement_added = merge_sets_safe(result.engagement_added, notifications.engagement_added)
+                result.test_added = merge_sets_safe(result.test_added, notifications.test_added)
+                result.scan_added = merge_sets_safe(result.scan_added, notifications.scan_added)
+                result.report_created = merge_sets_safe(result.report_created, notifications.report_created)
+                result.jira_update = merge_sets_safe(result.jira_update, notifications.jira_update)
+                result.upcoming_engagement = merge_sets_safe(result.upcoming_engagement, notifications.upcoming_engagement)
+                result.stale_engagement = merge_sets_safe(result.stale_engagement, notifications.stale_engagement)
+                result.auto_close_engagement = merge_sets_safe(result.auto_close_engagement, notifications.auto_close_engagement)
+                result.user_mentioned = merge_sets_safe(result.user_mentioned, notifications.user_mentioned)
+                result.code_review = merge_sets_safe(result.code_review, notifications.code_review)
+                result.review_requested = merge_sets_safe(result.review_requested, notifications.review_requested)
+                result.other = merge_sets_safe(result.other, notifications.other)
+
+        return result
 
 
 class Tool_Product_Settings(models.Model):

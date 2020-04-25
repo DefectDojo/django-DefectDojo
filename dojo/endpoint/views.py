@@ -17,7 +17,8 @@ from dojo.filters import EndpointFilter
 from dojo.forms import EditEndpointForm, \
     DeleteEndpointForm, AddEndpointForm, DojoMetaDataForm
 from dojo.models import Product, Endpoint, Finding, System_Settings, DojoMeta
-from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, get_system_setting, Product_Tab, calculate_grade, create_notification
+from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, get_system_setting, Product_Tab, calculate_grade
+from dojo.notifications.helper import create_notification
 
 logger = logging.getLogger(__name__)
 

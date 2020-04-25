@@ -18,10 +18,13 @@ from dojo.tools.tool_issue_updater import tool_issue_updater, update_findings_fr
 from dojo.utils import sync_false_history, calculate_grade
 from dojo.reports.widgets import report_widget_factory
 from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_issue, \
-                       close_epic, create_notification, sync_rules, fix_loop_duplicates, rename_whitesource_finding, update_external_issue, add_external_issue, close_external_issue, reopen_external_issue
-
-
+                       close_epic, sync_rules, fix_loop_duplicates, \
+                       rename_whitesource_finding, update_external_issue, add_external_issue, \
+                       close_external_issue, reopen_external_issue
+from dojo.notifications.helper import send_alert_notification, send_hipchat_notification, send_mail_notification, send_slack_notification
 import logging
+
+
 fmt = getattr(settings, 'LOG_FORMAT', None)
 lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
 logging.basicConfig(format=fmt, level=lvl)
@@ -261,15 +264,15 @@ def reopen_external_issue_task(find, note, external_issue_provider):
 
 
 @task(name='add_issue_task')
-def add_issue_task(find, push_to_jira, push_to_github):
+def add_issue_task(find, push_to_jira):
     logger.info("add issue task")
     add_issue(find, push_to_jira)
 
 
 @task(name='update_issue_task')
-def update_issue_task(find, old_status, push_to_jira):
+def update_issue_task(find, push_to_jira):
     logger.info("update issue task")
-    update_issue(find, old_status, push_to_jira)
+    update_issue(find, push_to_jira)
 
 
 @task(name='add_epic_task')
@@ -356,3 +359,27 @@ def async_dupe_delete(*args, **kwargs):
 @task(name='celery_status', ignore_result=False)
 def celery_status():
     return True
+
+
+@app.task(name='send_slack_notification')
+def send_slack_notification_task(*args, **kwargs):
+    logger.debug("send_slack_notification async")
+    send_slack_notification(*args, **kwargs)
+
+
+@app.task(name='send_mail_notification')
+def send_mail_notification_task(*args, **kwargs):
+    logger.debug("send_mail_notification async")
+    send_mail_notification(*args, **kwargs)
+
+
+@app.task(name='send_hipchat_notification')
+def send_hipchat_notification_task(*args, **kwargs):
+    logger.debug("send_hipchat_notification async")
+    send_hipchat_notification(*args, **kwargs)
+
+
+@app.task(name='send_alert_notification')
+def send_alert_notification_task(*args, **kwargs):
+    logger.debug("send_alert_notification")
+    send_alert_notification(*args, **kwargs)

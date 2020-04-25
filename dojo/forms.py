@@ -1912,6 +1912,20 @@ class NotificationsForm(forms.ModelForm):
         exclude = ['']
 
 
+class ProductNotificationsForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(ProductNotificationsForm, self).__init__(*args, **kwargs)
+        if not self.instance.id:
+            self.initial['engagement_added'] = ''
+            self.initial['test_added'] = ''
+            self.initial['scan_added'] = ''
+
+    class Meta:
+        model = Notifications
+        fields = ['engagement_added', 'test_added', 'scan_added']
+
+
 class AjaxChoiceField(forms.ChoiceField):
     def valid_value(self, value):
         return True
@@ -1955,7 +1969,7 @@ class CredUserForm(forms.ModelForm):
 
 
 class GITHUB_Product_Form(forms.ModelForm):
-    conf = forms.ModelChoiceField(queryset=GITHUB_Conf.objects.all(), label='GITHUB Configuration', required=False)
+    git_conf = forms.ModelChoiceField(queryset=GITHUB_Conf.objects.all(), label='GITHUB Configuration', required=False)
 
     class Meta:
         model = GITHUB_PKey
@@ -1983,13 +1997,22 @@ class GITHUBFindingForm(forms.Form):
 
 class JIRAFindingForm(forms.Form):
     def __init__(self, *args, **kwargs):
-        self.enabled = kwargs.pop('enabled')
+        self.enabled = kwargs.pop('enabled') or False
         super(JIRAFindingForm, self).__init__(*args, **kwargs)
         self.fields['push_to_jira'] = forms.BooleanField()
         self.fields['push_to_jira'].required = False
         self.fields['push_to_jira'].help_text = "Checking this will overwrite content of your JIRA issue, or create one."
+        self.fields['push_to_jira'].label = "Push to JIRA"
+        if self.enabled:
+            # This will show the checkbox as checked and greyed out, this way the user is aware
+            # that issues will be pushed to JIRA, given their product-level settings.
+            self.fields['push_to_jira'].help_text = \
+                "Push all issues is enabled on this product. If you do not wish to push all issues" \
+                " to JIRA, please disable Push all issues on this product."
+            self.fields['push_to_jira'].widget.attrs['checked'] = 'checked'
+            self.fields['push_to_jira'].disabled = True
 
-    push_to_jira = forms.BooleanField(required=False)
+    push_to_jira = forms.BooleanField(required=False, label="Push to JIRA")
 
 
 class GoogleSheetFieldsForm(forms.Form):
@@ -2003,6 +2026,10 @@ class GoogleSheetFieldsForm(forms.Form):
         required=True,
         label="Google Drive folder ID",
         help_text="Extract the Drive folder ID from the URL and provide it here")
+    email_address = forms.EmailField(
+        required=True,
+        label="Email Address",
+        help_text="Enter the same email Address used to create the Service Account")
     enable_service = forms.BooleanField(
         initial=False,
         required=False,
