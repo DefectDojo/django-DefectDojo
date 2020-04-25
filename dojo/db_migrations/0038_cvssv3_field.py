@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0034_add_github_support'),
+        ('dojo', '0037_email_notification_overhaul'),
     ]
 
     operations = [
