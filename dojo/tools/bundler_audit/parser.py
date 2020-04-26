@@ -8,7 +8,6 @@ from dojo.models import Finding
 class BundlerAuditParser(object):
     def __init__(self, filename, test):
         lines = filename.read().decode('utf8')
-        print(repr(lines))
         dupes = dict()
         find_date = datetime.now()
         warnings = lines.split('\n\n')
