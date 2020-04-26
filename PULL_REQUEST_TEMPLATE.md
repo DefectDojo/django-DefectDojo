@@ -1,6 +1,6 @@
 This template is for your information. Please clear everything when submitting your pull request.
 
-**Note: DefectDojo is now on Python3.5 and Django 2.2.x Please submit your pull requests to the 'dev' branch as the 'legacy-python2.7' branch is only for bug fixes. Any new features submitted to the legacy branch will be ignored and closed.**
+**Note: DefectDojo is now on Python3.6 and Django 2.2.x. Please submit your pull requests to the 'dev' branch as the 'legacy-python2.7' branch is only for bug fixes. Any new features submitted to the legacy branch will be ignored and closed.**
 
 When submitting a pull request, please make sure you have completed the following checklist:
 
@@ -12,7 +12,7 @@ When submitting a pull request, please make sure you have completed the followin
 - [ ] Add the proper label to categorize your PR.
 
 
-Current accepted labels for PRs:
+Moderators: Labels currently accepted for PRs:
 - Import Scans (for new scanners/importers)
 - enhancement
 - performance
@@ -20,9 +20,10 @@ Current accepted labels for PRs:
 - bugfix
 - maintenance (a.k.a chores)
 - dependencies
-- New Migration
+- New Migration (when the PR introduces a DB migration)
+- settings_changes (when the PR introduces changes or new settings in settings.dist.py)
 
-# Git Tips
+# Contributors: Git Tips
 ## Rebase on dev branch
 If the dev branch has changed since you started working on it, please rebase your work after the current dev.
 
