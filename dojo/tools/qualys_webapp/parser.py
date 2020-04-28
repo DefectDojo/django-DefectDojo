@@ -2,75 +2,18 @@
 #
 # -*- coding:utf-8 -*-
 
-import argparse
-import csv
 import xml
 import re
 import base64
 from dojo.models import Finding, Endpoint
 from urllib.parse import urlparse
-################################################################
 
-try:
-    import html2text
-except ImportError:
-    print("Missing html2text library. Please install using PIP. https://pypi.python.org/pypi/html2text/2015.2.18")
-    exit()
-
-# Custom libraries
-try:
-    from . import utfdictcsv
-except ImportError:
-    print("Missing dict to csv converter custom library. utfdictcsv.py should be in the same path as this file.")
-    exit()
-
-################################################################
-
-CUSTOM_HEADERS = {'CVSS_score': 'CVSS Score',
-                  'ip_address': 'IP Address',
-                  'fqdn': 'FQDN',
-                  'os': 'OS',
-                  'port_status': 'Port',
-                  'vuln_name': 'Vulnerability',
-                  'vuln_description': 'Description',
-                  'solution': 'Solution',
-                  'links': 'Links',
-                  'cve': 'CVE'}
-
-REPORT_HEADERS = ['CVSS_score',
-                  'ip_address',
-                  'fqdn',
-                  'os',
-                  'port_status',
-                  'vuln_name',
-                  'vuln_description',
-                  'solution',
-                  'links',
-                  'cve']
 
 SEVERITY_MATCH = ['Informational',
                    'Low',
                    'Medium',
                    'High',
                    'Critical']
-
-################################################################
-
-
-def htmltext(blob):
-    h = html2text.HTML2Text()
-    h.ignore_links = False
-    return h.handle(blob)
-
-
-def report_writer(report_dic, output_filename):
-    with open(output_filename, "wb") as outFile:
-        csvWriter = utfdictcsv.DictUnicodeWriter(outFile, REPORT_HEADERS, quoting=csv.QUOTE_ALL)
-        csvWriter.writerow(CUSTOM_HEADERS)
-        csvWriter.writerows(report_dic)
-    print("Successfully parsed.")
-
-################################################################
 
 
 # Parse 'CWE-XXXX' format to strip just the numbers
@@ -238,28 +181,6 @@ def qualys_webapp_parser(qualys_xml_file, test):
     items = list(get_items(vulnerabilities, info_gathered, glossary).values())
 
     return items
-
-################################################################
-
-
-if __name__ == "__main__":
-
-    # Parse args
-    aparser = argparse.ArgumentParser(description='Converts Qualys XML results to .csv file.')
-    aparser.add_argument('--out',
-                        dest='outfile',
-                        default='qualys.csv',
-                        help="WARNING: By default, output will overwrite current path to the file named 'qualys.csv'")
-    aparser.add_argument('qualys_xml_file',
-                        type=str,
-                        help='Qualys xml file.')
-    args = aparser.parse_args()
-
-    try:
-        qualys_parser(args.qualys_xml_file)
-    except IOError:
-        print("[!] Error processing file: {}".format(args.qualys_xml_file))
-        exit()
 
 
 class QualysWebAppParser(object):
