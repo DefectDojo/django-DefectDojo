@@ -573,14 +573,14 @@
 	},
 	{
 		"fields": {
-		"name": "Gitleaks Scan"
+		    "name": "Gitleaks Scan"
 		},
 		"model": "dojo.test_type",
 		"pk": 174
 	},
 	{
 		"fields": {
-		"name": "Choctaw Hog Scan"
+		    "name": "Choctaw Hog Scan"
 		},
 		"model": "dojo.test_type",
 		"pk": 175
