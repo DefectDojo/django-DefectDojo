@@ -57,8 +57,6 @@ class DedupeTest(BaseTestCase):
             driver.find_element_by_xpath('//*[@id="id_enable_deduplication"]').click()
             # save settings
             driver.find_element_by_css_selector("input.btn.btn-primary").click()
-            # Temporary fix for the caching issue, see https://github.com/DefectDojo/django-DefectDojo/issues/2164
-            time.sleep(30)
             # check if it's enabled after reload
             driver.get(self.base_url + 'system_settings')
             self.assertTrue(driver.find_element_by_id('id_enable_deduplication').is_selected())

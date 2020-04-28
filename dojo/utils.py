@@ -1765,11 +1765,7 @@ def prepare_for_view(encrypted_value):
 
 
 def get_system_setting(setting):
-    try:
-        system_settings = System_Settings.objects.get()
-    except:
-        system_settings = System_Settings()
-
+    system_settings = System_Settings.objects.get()
     return getattr(system_settings, setting, None)
 
 

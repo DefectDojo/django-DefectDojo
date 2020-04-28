@@ -510,6 +510,7 @@ INSTALLED_APPS = (
 DJANGO_MIDDLEWARE_CLASSES = [
     # 'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'dojo.middleware.DojoSytemSettingsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -706,8 +707,7 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '[%(asctime)s] %(levelname)s '
-                      '[%(name)s:%(lineno)d] %(message)s',
+            'format': '[%(asctime)s] %(levelname)s [%(name)s:%(lineno)d] %(message)s',
             'datefmt': '%d/%b/%Y %H:%M:%S',
         },
         'simple': {
