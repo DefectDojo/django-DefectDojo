@@ -83,7 +83,7 @@ def get_cwe(cwe):
 
 
 # Inputs are a list of endpoints and request/response pairs and doctors
-# them to fit their respective model structures and the adds them to a 
+# them to fit their respective model structures and the adds them to a
 # newly generated Finding
 def attach_extras(endpoints, requests, responses, finding):
     if finding is None:
@@ -175,7 +175,7 @@ def get_vulnerabilities(vulnerabilities):
     return findings
 
 
-# Retrieve information from a single glossary entry such as description, 
+# Retrieve information from a single glossary entry such as description,
 # severity, title, impact, mitigation, and CWE
 def get_glossary_item(glossary, finding):
     title = str(glossary.findtext('TITLE'))
