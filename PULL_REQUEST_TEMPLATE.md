@@ -6,7 +6,7 @@ When submitting a pull request, please make sure you have completed the followin
 
 - [ ] Give a meaninful name to your PR, as it may end up being used in the release notes.
 - [ ] Your code is flake8 compliant.
-- [ ] Your code is python 3.5 compliant (specific python >=3.6 syntax is currently not accepted).
+- [ ] Your code is python 3.6 compliant (specific python >=3.6 syntax is currently not accepted).
 - [ ] If this is a new feature and not a bug fix, you've included the proper documentation in the ReadTheDocs documentation folder. https://github.com/DefectDojo/Documentation/tree/master/docs or provide feature documentation in the PR.
 - [ ] Model changes must include the necessary migrations in the dojo/db_migrations folder.
 - [ ] Add applicable tests to the unit tests.
