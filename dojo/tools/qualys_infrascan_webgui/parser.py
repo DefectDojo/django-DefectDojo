@@ -166,22 +166,22 @@ def issue_r(raw_row, vuln, scan_date):
 
 
 def qualys_infrascan_parser(qualys_xml_file):
-    parser = etree.XMLParser(remove_blank_text=True, no_network=True, recover=True)
-    d = etree.parse(qualys_xml_file, parser)
-
-    # fetch scan date e.g.: <KEY value="DATE">2020-01-30T09:45:41Z</KEY>
-    scan_date = ''
-    header = d.xpath('/SCAN/HEADER/KEY')
-    for i in header:
-        if i.get('value') == 'DATE':
-            scan_date = i.text
-
-    r = d.xpath('/SCAN/IP')
-
     master_list = []
+    if qualys_xml_file != None:
+        parser = etree.XMLParser(remove_blank_text=True, no_network=True, recover=True)
+        d = etree.parse(qualys_xml_file, parser)
 
-    for issue in r:
-        master_list += issue_r(issue, d, scan_date)
+        # fetch scan date e.g.: <KEY value="DATE">2020-01-30T09:45:41Z</KEY>
+        scan_date = ''
+        header = d.xpath('/SCAN/HEADER/KEY')
+        for i in header:
+            if i.get('value') == 'DATE':
+                scan_date = i.text
+
+        r = d.xpath('/SCAN/IP')
+
+        for issue in r:
+            master_list += issue_r(issue, d, scan_date)
     return master_list
     # report_writer(master_list, args.outfile)
 

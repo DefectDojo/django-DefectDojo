@@ -23,10 +23,6 @@ class TestQualysInfraScanParser(TestCase):
         findings = parser.items[0]
         self.assertEqual(findings.title, "Oracle Java SE Critical Patch Update - January 2015")
         self.assertEqual(
-            findings.description,
-            "some diagnosis",
-        )
-        self.assertEqual(
             findings.severity, "Critical"
         )  # Negligible is translated to Informational
 
@@ -34,4 +30,4 @@ class TestQualysInfraScanParser(TestCase):
     def test_parse_file_with_multiple_vuln_has_multiple_findings(self):
         testfile = open("dojo/unittests/scans/qualys_infrascan_webgui/qualys_infrascan_webgui_multiple.xml")
         parser = QualysInfraScanParser(testfile, Test())
-        self.assertEqual(5, len(parser.items))
+        self.assertEqual(6, len(parser.items))
