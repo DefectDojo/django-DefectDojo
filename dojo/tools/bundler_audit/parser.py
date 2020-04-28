@@ -7,7 +7,7 @@ from dojo.models import Finding
 
 class BundlerAuditParser(object):
     def __init__(self, filename, test):
-        lines = filename.read()
+        lines = filename.read().decode('utf8')
         dupes = dict()
         find_date = datetime.now()
         warnings = lines.split('\n\n')
@@ -45,7 +45,7 @@ class BundlerAuditParser(object):
             mitigation = advisory_solution
             references = advisory_url
             fingerprint = "bundler-audit" + gem_name + gem_version + advisory_cve + sev
-            dupe_key = hashlib.md5(fingerprint).hexdigest()
+            dupe_key = hashlib.md5(fingerprint.encode("utf-8")).hexdigest()
             if dupe_key in dupes:
                 find = dupes[dupe_key]
             else:
