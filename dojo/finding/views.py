@@ -1783,7 +1783,6 @@ def edit_template(request, tid):
     template = get_object_or_404(Finding_Template, id=tid)
     form = FindingTemplateForm(instance=template)
 
-    apply_message = ""
     if request.method == 'POST':
         form = FindingTemplateForm(request.POST, instance=template)
         if form.is_valid():
@@ -1794,6 +1793,8 @@ def edit_template(request, tid):
             count = apply_cwe_mitigation(form.cleaned_data["apply_to_findings"], template)
             if count > 0:
                 apply_message = " and " + str(count) + " " + pluralize(count, 'finding,findings') + " "
+            else:
+                apply_message = ""
 
             tags = request.POST.getlist('tags')
             t = ", ".join('"{0}"'.format(w) for w in tags)
@@ -1810,9 +1811,8 @@ def edit_template(request, tid):
                 messages.ERROR,
                 'Template form has error, please revise and try again.',
                 extra_tags='alert-danger')
-    else:
-        count = apply_cwe_mitigation(True, template, False)
 
+    count = apply_cwe_mitigation(True, template, False)
     form.initial['tags'] = [tag.name for tag in template.tags]
     add_breadcrumb(title="Edit Template", top_level=False, request=request)
     return render(request, 'dojo/add_template.html', {
