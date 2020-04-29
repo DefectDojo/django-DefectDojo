@@ -39,7 +39,7 @@ psycopg2-binary==2.8.5
 cryptography==2.9.2
 python-dateutil==2.8.1
 python-nmap==0.6.1
-pytz==2019.3
+pytz==2020.1
 redis==3.4.1
 requests>=2.22.0
 sqlalchemy  # Required by Celery broker transport
