@@ -370,25 +370,15 @@ def inactive_findings(request, pid=None, eid=None, view=None):
     pid_local = None
     tags = Tag.objects.usage_for_model(Finding)
     if pid:
-        if view == "All":
-            filter_name = "All"
-            findings = Finding.objects.filter(test__engagement__product__id=pid).order_by('numerical_severity')
-        else:
-            findings = Finding.objects.filter(test__engagement__product__id=pid, active=False, duplicate=False).order_by('numerical_severity')
+        findings = Finding.objects.filter(test__engagement__product__id=pid)
     elif eid:
         eng = get_object_or_404(Engagement, id=eid)
         pid_local = eng.product.id
-        if view == "All":
-            filter_name = "All"
-            findings = Finding.objects.filter(test__engagement=eid).order_by('numerical_severity')
-        else:
-            findings = Finding.objects.filter(test__engagement=eid, active=False, duplicate=False).order_by('numerical_severity')
+        findings = Finding.objects.filter(test__engagement=eid)
     else:
-        if view == "All":
-            filter_name = "All"
-            findings = Finding.objects.all().order_by('numerical_severity')
-        else:
-            findings = Finding.objects.filter(active=False, duplicate=False).order_by('numerical_severity')
+        findings = Finding.objects.all()
+
+    findings = findings.filter(active=False, duplicate=False, is_Mitigated=False, false_p=False, out_of_scope=False).order_by('numerical_severity')
 
     if request.user.is_staff:
         findings = OpenFingingSuperFilter(
