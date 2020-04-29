@@ -167,7 +167,7 @@ def issue_r(raw_row, vuln, scan_date):
 
 def qualys_infrascan_parser(qualys_xml_file):
     master_list = []
-    if qualys_xml_file != None:
+    if qualys_xml_file is not None:
         parser = etree.XMLParser(remove_blank_text=True, no_network=True, recover=True)
         d = etree.parse(qualys_xml_file, parser)
 
