@@ -2158,4 +2158,3 @@ class EditCommonNoteForm(CommonNoteForm):
 
     def __init__(self, *args, **kwargs):
         super(EditCommonNoteForm, self).__init__(*args, **kwargs)
-

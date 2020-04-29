@@ -685,7 +685,7 @@ def import_scan_results(request, eid=None, pid=None):
                         if notes is not None:
                             for note in notes:
                                 item.notes.add(note)
-                  
+
                     item.save(false_history=True, push_to_jira=push_to_jira)
 
                     if item.unsaved_tags is not None:
