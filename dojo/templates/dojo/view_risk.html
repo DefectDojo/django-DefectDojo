@@ -68,7 +68,7 @@
                           </span>
                         </td>
                         <td><a href="{% url 'view_finding' finding.id %}"
-                               title="{{ finding.title }}">{{ finding.title|truncatechars:140 }}</a></td>
+                               title="{{ finding.title }}">{{ finding.title|truncatechars_html:140 }}</a></td>
                         <td>{{ finding.date }}</td>
                         <td>{{ finding.active }}</td>
 

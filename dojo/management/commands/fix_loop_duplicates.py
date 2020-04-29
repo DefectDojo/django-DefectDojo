@@ -1,8 +1,5 @@
 from django.core.management.base import BaseCommand
-from pytz import timezone
 from dojo.utils import fix_loop_duplicates
-
-locale = timezone(get_system_setting('time_zone'))
 
 """
 Author: Marian Gawron

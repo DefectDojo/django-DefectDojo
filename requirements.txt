@@ -25,7 +25,7 @@ Django==2.2.12
 djangorestframework==3.11.0
 gunicorn==20.0.4
 html2text==2020.1.16
-humanize==2.3.0
+humanize==2.4.0
 jira==2.0.0
 PyGithub==1.47
 lxml==4.5.0
@@ -36,7 +36,7 @@ xlrd>=1.0.0
 pdfkit==0.6.1
 Pillow==7.1.1  # required by django-imagekit
 psycopg2-binary==2.8.5
-cryptography==2.9
+cryptography==2.9.1
 python-dateutil==2.8.1
 python-nmap==0.6.1
 pytz==2019.3
@@ -44,7 +44,7 @@ redis==3.4.1
 requests>=2.22.0
 sqlalchemy  # Required by Celery broker transport
 supervisor==4.1.0
-urllib3==1.25.8
+urllib3==1.25.9
 uWSGI==2.0.18
 vobject==0.9.6.1
 whitenoise>=4.1.2
@@ -54,7 +54,7 @@ Python-jose==3.1.0
 git+https://github.com/DefectDojo/defectDojo-engagement-survey.git@8437e158fbc751e9e548952c6202191e22515320#egg=defectDojo-engagement-survey
 gitpython>=2.1.13
 ptvsd>=4.2.7
-google-api-python-client==1.8.0
-google-auth==1.14.0
+google-api-python-client==1.8.2
+google-auth==1.14.1
 google-auth-oauthlib==0.4.1
 drf_yasg==1.17.1

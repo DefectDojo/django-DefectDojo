@@ -182,9 +182,13 @@ class ProductForm(forms.ModelForm):
         queryset=None,
         required=False, label="Authorized Users")
 
+    product_manager = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'), required=False)
+    technical_contact = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'), required=False)
+    product_manager = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'), required=False)
+
     def __init__(self, *args, **kwargs):
-        non_staff = User.objects.exclude(is_staff=True) \
-            .exclude(is_active=False)
+        non_staff = Dojo_User.objects.exclude(is_staff=True) \
+            .exclude(is_active=False).order_by('first_name', 'last_name')
         tags = Tag.objects.usage_for_model(Product)
         t = [(tag.name, tag.name) for tag in tags]
         super(ProductForm, self).__init__(*args, **kwargs)
@@ -1904,6 +1908,20 @@ class NotificationsForm(forms.ModelForm):
     class Meta:
         model = Notifications
         exclude = ['']
+
+
+class ProductNotificationsForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(ProductNotificationsForm, self).__init__(*args, **kwargs)
+        if not self.instance.id:
+            self.initial['engagement_added'] = ''
+            self.initial['test_added'] = ''
+            self.initial['scan_added'] = ''
+
+    class Meta:
+        model = Notifications
+        fields = ['engagement_added', 'test_added', 'scan_added']
 
 
 class AjaxChoiceField(forms.ChoiceField):

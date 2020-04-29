@@ -38,7 +38,8 @@ from dojo.models import Product_Type, Finding, Notes, NoteHistory, Note_Type, \
     FindingImageAccessToken, JIRA_Issue, JIRA_PKey, GITHUB_PKey, GITHUB_Issue, Dojo_User, Cred_Mapping, Test, Product, User, Engagement
 from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_notifications, \
     add_comment, jira_get_resolution_id, jira_change_resolution_id, get_jira_connection, \
-    get_system_setting, create_notification, apply_cwe_to_template, Product_Tab, calculate_grade, log_jira_alert
+    get_system_setting, apply_cwe_to_template, Product_Tab, calculate_grade, log_jira_alert
+from dojo.notifications.helper import create_notification
 
 from dojo.tasks import add_issue_task, update_issue_task, update_external_issue_task, add_comment_task, \
     add_external_issue_task, close_external_issue_task, reopen_external_issue_task
@@ -369,25 +370,15 @@ def inactive_findings(request, pid=None, eid=None, view=None):
     pid_local = None
     tags = Tag.objects.usage_for_model(Finding)
     if pid:
-        if view == "All":
-            filter_name = "All"
-            findings = Finding.objects.filter(test__engagement__product__id=pid).order_by('numerical_severity')
-        else:
-            findings = Finding.objects.filter(test__engagement__product__id=pid, active=False, duplicate=False).order_by('numerical_severity')
+        findings = Finding.objects.filter(test__engagement__product__id=pid)
     elif eid:
         eng = get_object_or_404(Engagement, id=eid)
         pid_local = eng.product.id
-        if view == "All":
-            filter_name = "All"
-            findings = Finding.objects.filter(test__engagement=eid).order_by('numerical_severity')
-        else:
-            findings = Finding.objects.filter(test__engagement=eid, active=False, duplicate=False).order_by('numerical_severity')
+        findings = Finding.objects.filter(test__engagement=eid)
     else:
-        if view == "All":
-            filter_name = "All"
-            findings = Finding.objects.all().order_by('numerical_severity')
-        else:
-            findings = Finding.objects.filter(active=False, duplicate=False).order_by('numerical_severity')
+        findings = Finding.objects.all()
+
+    findings = findings.filter(active=False, duplicate=False, is_Mitigated=False, false_p=False, out_of_scope=False).order_by('numerical_severity')
 
     if request.user.is_staff:
         findings = OpenFingingSuperFilter(
@@ -1782,7 +1773,6 @@ def edit_template(request, tid):
     template = get_object_or_404(Finding_Template, id=tid)
     form = FindingTemplateForm(instance=template)
 
-    apply_message = ""
     if request.method == 'POST':
         form = FindingTemplateForm(request.POST, instance=template)
         if form.is_valid():
@@ -1793,6 +1783,8 @@ def edit_template(request, tid):
             count = apply_cwe_mitigation(form.cleaned_data["apply_to_findings"], template)
             if count > 0:
                 apply_message = " and " + str(count) + " " + pluralize(count, 'finding,findings') + " "
+            else:
+                apply_message = ""
 
             tags = request.POST.getlist('tags')
             t = ", ".join('"{0}"'.format(w) for w in tags)
@@ -1809,9 +1801,8 @@ def edit_template(request, tid):
                 messages.ERROR,
                 'Template form has error, please revise and try again.',
                 extra_tags='alert-danger')
-    else:
-        count = apply_cwe_mitigation(True, template, False)
 
+    count = apply_cwe_mitigation(True, template, False)
     form.initial['tags'] = [tag.name for tag in template.tags]
     add_breadcrumb(title="Edit Template", top_level=False, request=request)
     return render(request, 'dojo/add_template.html', {
