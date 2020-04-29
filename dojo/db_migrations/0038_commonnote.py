@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0033_remove_finding_duplicate_list'),
+        ('dojo', '0037_email_notification_overhaul'),
     ]
 
     operations = [
@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
                 ('scanner', models.TextField(max_length=100)),
                 ('product', models.TextField(max_length=100)),
                 ('cwe', models.IntegerField(blank=True, default=0, null=True)),
-                ('note', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='notes', to='dojo.Notes')),
+                ('notes ', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='notes', to='dojo.Notes')),
             ],
         ),
     ]
