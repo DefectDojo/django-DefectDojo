@@ -69,7 +69,6 @@ def get_defectdojo_date(date):
     mon = date[1]
     year = date[2]
     defectdojo_date = "{year}-{mon}-{day}".format(year=year, mon=mon, day=day)
-    print(defectdojo_date)
     return defectdojo_date
 
 
