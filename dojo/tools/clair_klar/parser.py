@@ -93,6 +93,8 @@ def get_item(item_node, test):
                       out_of_scope=False,
                       mitigated=None,
                       cwe=1035,  # Vulnerable Third Party Component
+                      static_finding=True,
+                      dynamic_finding=False,
                       impact="No impact provided")
 
     return finding
