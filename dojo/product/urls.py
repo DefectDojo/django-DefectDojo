@@ -28,6 +28,8 @@ urlpatterns = [
         name='new_eng_for_prod_cicd'),
     url(r'^product/(?P<pid>\d+)/add_meta_data', views.add_meta_data,
         name='add_meta_data'),
+    url(r'^product/(?P<pid>\d+)/edit_notifications', views.edit_notifications,
+        name='edit_notifications'),
     url(r'^product/(?P<pid>\d+)/edit_meta_data', views.edit_meta_data,
         name='edit_meta_data'),
     url(r'^product/(?P<pid>\d+)/ad_hoc_finding', views.ad_hoc_finding,

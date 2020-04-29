@@ -1,8 +1,13 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+
 import unittest
 import os
 import re
+import time
 
 dd_driver = None
 dd_driver_options = None
@@ -24,32 +29,25 @@ class BaseTestCase(unittest.TestCase):
             # dd_driver_options.add_experimental_option("detach", True)
 
             # the next 2 maybe needed in some scenario's for example on WSL or other headless situations
-            # dd_driver_options.add_argument("--no-sandbox")
+            dd_driver_options.add_argument("--no-sandbox")
             # dd_driver_options.add_argument("--disable-dev-shm-usage")
 
             # start maximized or at least with sufficient with because datatables will hide certain controls when the screen is too narrow
-            dd_driver_options.add_argument("--window-size=1280,768")
+            dd_driver_options.add_argument("--window-size=1280,1024")
             # dd_driver_options.add_argument("--start-maximized")
+
+            dd_driver_options.set_capability("acceptInsecureCerts", True)
 
             # some extra logging can be turned on if you want to query the browser javascripe console in your tests
             desired = webdriver.DesiredCapabilities.CHROME
             desired['goog:loggingPrefs'] = {'browser': 'ALL'}
 
             # change path of chromedriver according to which directory you have chromedriver.
+            print('starting chromedriver with options: ', vars(dd_driver_options), desired)
             dd_driver = webdriver.Chrome('chromedriver', chrome_options=dd_driver_options, desired_capabilities=desired)
             dd_driver.implicitly_wait(30)
 
         cls.driver = dd_driver
-
-        # print('launching browser for: ', cls.__name__)
-        # # change path of chromedriver according to which directory you have chromedriver.
-        # cls.options = Options()
-        # cls.options.add_argument("--headless")
-        # cls.options.add_experimental_option("detach", True)
-        # cls.options.add_argument("--no-sandbox")
-        # cls.options.add_argument("--disable-dev-shm-usage")
-        # cls.driver = webdriver.Chrome('chromedriver', chrome_options=cls.options)
-        # cls.driver.implicitly_wait(30)
         cls.base_url = os.environ['DD_BASE_URL']
 
     def setUp(self):
@@ -67,6 +65,45 @@ class BaseTestCase(unittest.TestCase):
         driver.find_element_by_id("id_password").clear()
         driver.find_element_by_id("id_password").send_keys(os.environ['DD_ADMIN_PASSWORD'])
         driver.find_element_by_css_selector("button.btn.btn-success").click()
+        text = driver.find_element_by_tag_name("BODY").text
+        self.assertFalse(re.search(r'Please enter a correct username and password', text))
+        return driver
+
+    def goto_product_overview(self, driver):
+        driver.get(self.base_url + "product")
+        body = driver.find_element_by_tag_name("BODY").text
+        # print('BODY:')
+        # print(body)
+        # print('re.search:', re.search(r'No products found', body))
+
+        if re.search(r'No products found', body):
+            return driver
+
+        # wait for product_wrapper div as datatables javascript modifies the DOM on page load.
+        WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.ID, "products_wrapper")))
+
+    def goto_active_engagements_overview(self, driver):
+        # return self.goto_engagements_internal(driver, 'engagement')
+        # engagement overview doesn't seem to have the datatables yet modifying the DOM
+        # https://github.com/DefectDojo/django-DefectDojo/issues/2173
+        driver.get(self.base_url + 'engagement')
+        return driver
+
+    def goto_all_engagements_overview(self, driver):
+        return self.goto_engagements_internal(driver, 'engagements_all')
+
+    def goto_engagements_internal(self, driver, rel_url):
+        driver.get(self.base_url + rel_url)
+        body = driver.find_element_by_tag_name("BODY").text
+        # print('BODY:')
+        # print(body)
+        # print('re.search:', re.search(r'No products found', body))
+
+        if re.search(r'No engagements found', body):
+            return driver
+
+        # wait for engagements_wrapper div as datatables javascript modifies the DOM on page load.
+        WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.ID, "engagements_wrapper")))
         return driver
 
     def is_alert_present(self):
@@ -108,12 +145,14 @@ class BaseTestCase(unittest.TestCase):
             accepted_javascript_messages = r'((zoom\-in\.cur.*)|(images\/finding_images\/.*))404\ \(Not\ Found\)'
 
             if (entry['level'] == 'SEVERE'):
-                print(self.driver.current_url)  # TODO actually this seems to be the previous url
+                # print(self.driver.current_url)  # TODO actually this seems to be the previous url
                 # self.driver.save_screenshot("C:\\Data\\django-DefectDojo\\tests\\javascript-errors.png")
                 # with open("C:\\Data\\django-DefectDojo\\tests\\javascript-errors.html", "w") as f:
                 #    f.write(self.driver.page_source)
 
                 print(entry)
+                print('There was a SEVERE javascript error in the console, please check all steps fromt the current test to see where it happens')
+                print('Currently there is no way to find out at which url the error happened.')
                 if self.accept_javascript_errors:
                     print('WARNING: skipping SEVERE javascript error because accept_javascript_errors is True!')
                 elif re.search(accepted_javascript_messages, entry['message']):
@@ -165,3 +204,17 @@ class WebdriverOnlyNewLogFacade(object):
         self.last_timestamp = last_timestamp
 
         return filtered
+
+
+def on_exception_html_source_logger(func):
+    def wrapper(self, *args, **kwargs):
+        try:
+            return func(self, *args, **kwargs)
+
+        except Exception as e:
+            print(self.driver.page_source)
+            print("exception url:", self.driver.current_url)
+            time.sleep(30)
+            raise(e)
+
+    return wrapper

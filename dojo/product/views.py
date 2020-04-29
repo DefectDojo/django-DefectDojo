@@ -19,17 +19,20 @@ from django.db import DEFAULT_DB_ALIAS
 from dojo.templatetags.display_tags import get_level
 from dojo.filters import ProductFilter, ProductFindingFilter, EngagementFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAPKeyForm, JIRAFindingForm, AdHocFindingForm, \
-                       EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm
-from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, Finding_Template, \
-    Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, \
-    Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product
-from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, create_notification, Product_Tab, get_punchcard_data
+                       EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm, ProductNotificationsForm, \
+                       GITHUB_Product_Form, GITHUBFindingForm
+from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, GITHUB_PKey, Finding_Template, \
+                        Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, \
+                        Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications
+from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, Product_Tab, get_punchcard_data
+from dojo.notifications.helper import create_notification
 from custom_field.models import CustomFieldValue, CustomField
-from dojo.tasks import add_epic_task, add_issue_task
+from dojo.tasks import add_epic_task, add_external_issue_task
 from tagging.models import Tag
 from tagging.utils import get_tag_list
 from django.db.models import Prefetch
 from django.db.models.query import QuerySet
+from github import Github
 
 logger = logging.getLogger(__name__)
 
@@ -83,6 +86,7 @@ def prefetch_for_product(prods):
         prefetched_prods = prefetched_prods.annotate(last_engagement_date=Max('engagement__target_start'))
         prefetched_prods = prefetched_prods.annotate(active_finding_count=Count('engagement__test__finding__id', filter=Q(engagement__test__finding__active=True)))
         prefetched_prods = prefetched_prods.prefetch_related(Prefetch('jira_pkey_set', queryset=JIRA_PKey.objects.all().select_related('conf'), to_attr='jira_confs'))
+        prefetched_prods = prefetched_prods.prefetch_related(Prefetch('github_pkey_set', queryset=GITHUB_PKey.objects.all().select_related('git_conf'), to_attr='github_confs'))
         active_endpoint_query = Endpoint.objects.filter(
                 finding__active=True,
                 finding__mitigated__isnull=True)
@@ -102,6 +106,14 @@ def view_product(request, pid):
     prod_query = Product.objects.all().select_related('product_manager', 'technical_contact', 'team_manager').prefetch_related('authorized_users')
     prod = get_object_or_404(prod_query, id=pid)
     auth = request.user.is_staff or request.user in prod.authorized_users.all()
+
+    # instance = Notificationws.objects.filter(user=request.user).filter(product=prod).first()
+    # print(vars(instance))
+
+    personal_notifications_form = ProductNotificationsForm(instance=Notifications.objects.filter(user=request.user).filter(product=prod).first())
+
+    print(vars(personal_notifications_form))
+
     if not auth:
         # will render 403
         raise PermissionDenied
@@ -162,7 +174,8 @@ def view_product(request, pid):
                   'system_settings': system_settings,
                   'benchmarks_percents': benchAndPercent,
                   'benchmarks': benchmarks,
-                  'authorized': auth})
+                  'authorized': auth,
+                  'personal_notifications_form': personal_notifications_form})
 
 
 def view_product_metrics(request, pid):
@@ -228,7 +241,7 @@ def view_product_metrics(request, pid):
                                            duplicate=False,
                                            out_of_scope=False,
                                            active=True,
-                                           mitigated__isnull=True)
+                                           is_Mitigated=False)
 
     inactive_findings = Finding.objects.filter(test__engagement__product=prod,
                                            date__range=[start_date, end_date],
@@ -236,28 +249,30 @@ def view_product_metrics(request, pid):
                                            duplicate=False,
                                            out_of_scope=False,
                                            active=False,
-                                           mitigated__isnull=True)
+                                           is_Mitigated=False)
 
     closed_findings = Finding.objects.filter(test__engagement__product=prod,
                                              date__range=[start_date, end_date],
                                              false_p=False,
-                                             verified=False,
                                              duplicate=False,
                                              out_of_scope=False,
                                              active=False,
-                                             mitigated__isnull=False)
+                                             is_Mitigated=True)
 
     false_positive_findings = Finding.objects.filter(test__engagement__product=prod,
                                              date__range=[start_date, end_date],
                                              false_p=True,
-                                             verified=False,
                                              duplicate=False,
                                              out_of_scope=False)
 
     out_of_scope_findings = Finding.objects.filter(test__engagement__product=prod,
                                              date__range=[start_date, end_date],
+                                             false_p=False,
                                              duplicate=False,
                                              out_of_scope=True)
+
+    all_findings = Finding.objects.filter(test__engagement__product=prod,
+                                             date__range=[start_date, end_date])
 
     open_vulnerabilities = Finding.objects.filter(
         test__engagement__product=prod,
@@ -387,6 +402,7 @@ def view_product_metrics(request, pid):
                    'out_of_scope_findings': out_of_scope_findings,
                    'accepted_findings': accepted_findings,
                    'new_findings': new_verified_findings,
+                   'all_findings': all_findings,
                    'open_vulnerabilities': open_vulnerabilities,
                    'all_vulnerabilities': all_vulnerabilities,
                    'start_date': start_date,
@@ -482,6 +498,11 @@ def new_product(request):
         else:
             jform = None
 
+        if get_system_setting('enable_github'):
+            gform = GITHUB_Product_Form(request.POST, instance=GITHUB_PKey())
+        else:
+            gform = None
+
         if form.is_valid():
             product = form.save()
             tags = request.POST.getlist('tags')
@@ -502,6 +523,30 @@ def new_product(request):
                                                 'JIRA information added successfully.',
                                                 extra_tags='alert-success')
 
+            if get_system_setting('enable_github'):
+                if gform.is_valid():
+                    github_pkey = gform.save(commit=False)
+                    if github_pkey.conf is not None:
+                        github_pkey.product = product
+                        github_pkey.save()
+                        messages.add_message(request,
+                                                messages.SUCCESS,
+                                                'Github information added successfully.',
+                                                extra_tags='alert-success')
+                    # Create appropriate labels in the repo
+                    logger.info('Create label in repo: ' + github_pkey.project_key)
+                    try:
+                        g = Github(github_pkey.conf.api_key)
+                        repo = g.get_repo(github_pkey.project_key)
+                        repo.create_label(name="security", color="FF0000", description="This label is automatically applied to all issues created by defectDojo")
+                        repo.create_label(name="security / info", color="00FEFC", description="This label is automatically applied to all issues created by defectDojo")
+                        repo.create_label(name="security / low", color="B7FE00", description="This label is automatically applied to all issues created by defectDojo")
+                        repo.create_label(name="security / medium", color="FEFE00", description="This label is automatically applied to all issues created by defectDojo")
+                        repo.create_label(name="security / high", color="FE9A00", description="This label is automatically applied to all issues created by defectDojo")
+                        repo.create_label(name="security / critical", color="FE2200", description="This label is automatically applied to all issues created by defectDojo")
+                    except:
+                        logger.info('Labels cannot be created - they may already exists')
+
             # SonarQube API Configuration
             sonarqube_form = Sonarqube_ProductForm(request.POST)
             if sonarqube_form.is_valid():
@@ -517,11 +562,16 @@ def new_product(request):
             jform = JIRAPKeyForm()
         else:
             jform = None
+        if get_system_setting('enable_github'):
+            gform = GITHUB_Product_Form()
+        else:
+            gform = None
 
     add_breadcrumb(title="New Product", top_level=False, request=request)
     return render(request, 'dojo/new_product.html',
                   {'form': form,
                    'jform': jform,
+                   'gform': gform,
                    'sonarqube_form': Sonarqube_ProductForm()})
 
 
@@ -532,11 +582,19 @@ def edit_product(request, pid):
     jira_enabled = system_settings.enable_jira
     jira_inst = None
     jform = None
+    github_enabled = system_settings.enable_github
+    github_inst = None
+    gform = None
     sonarqube_form = None
     try:
         jira_inst = JIRA_PKey.objects.get(product=prod)
     except:
         jira_inst = None
+        pass
+    try:
+        github_inst = GITHUB_PKey.objects.get(product=prod)
+    except:
+        github_inst = None
         pass
 
     sonarqube_conf = Sonarqube_Product.objects.filter(product=prod).first()
@@ -571,6 +629,24 @@ def edit_product(request, pid):
                                             'JIRA information updated successfully.',
                                             extra_tags='alert-success')
 
+            if get_system_setting('enable_github') and github_inst:
+                gform = GITHUB_Product_Form(request.POST, instance=github_inst)
+                # need to handle delete
+                try:
+                    gform.save()
+                except:
+                    pass
+            elif get_system_setting('enable_github'):
+                gform = GITHUB_Product_Form(request.POST)
+                if gform.is_valid():
+                    new_conf = gform.save(commit=False)
+                    new_conf.product_id = pid
+                    new_conf.save()
+                    messages.add_message(request,
+                                            messages.SUCCESS,
+                                            'GITHUB information updated successfully.',
+                                            extra_tags='alert-success')
+
             # SonarQube API Configuration
             sonarqube_form = Sonarqube_ProductForm(request.POST, instance=sonarqube_conf)
             if sonarqube_form.is_valid():
@@ -594,6 +670,16 @@ def edit_product(request, pid):
         else:
             jform = None
 
+        if github_enabled and (github_inst is not None):
+            if github_inst is not None:
+                gform = GITHUB_Product_Form(instance=github_inst)
+            else:
+                gform = GITHUB_Product_Form()
+        elif github_enabled:
+            gform = GITHUB_Product_Form()
+        else:
+            gform = None
+
         sonarqube_form = Sonarqube_ProductForm(instance=sonarqube_conf)
 
     form.initial['tags'] = [tag.name for tag in prod.tags]
@@ -603,6 +689,7 @@ def edit_product(request, pid):
                   {'form': form,
                    'product_tab': product_tab,
                    'jform': jform,
+                   'gform': gform,
                    'sonarqube_form': sonarqube_form,
                    'product': prod
                    })
@@ -697,7 +784,7 @@ def new_eng_for_app(request, pid, cicd=False):
             if get_system_setting('enable_jira'):
                 # Test to make sure there is a Jira project associated the product
                 try:
-                    jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=JIRA_PKey.objects.get(product=prod).push_all_issues)
+                    jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=False)
                     if jform.is_valid():
                         add_epic_task.delay(new_eng, jform.cleaned_data.get('push_to_jira'))
                 except JIRA_PKey.DoesNotExist:
@@ -718,9 +805,15 @@ def new_eng_for_app(request, pid, cicd=False):
                 return HttpResponseRedirect(reverse('view_engagement', args=(new_eng.id,)))
     else:
         form = EngForm(initial={'lead': request.user, 'target_start': timezone.now().date(), 'target_end': timezone.now().date() + timedelta(days=7), 'product': prod.id}, cicd=cicd, product=prod.id)
-        if(get_system_setting('enable_jira')):
+        if get_system_setting('enable_jira'):
             if JIRA_PKey.objects.filter(product=prod).count() != 0:
-                jform = JIRAFindingForm(prefix='jiraform', enabled=JIRA_PKey.objects.get(product=prod).push_all_issues)
+                # Enabled must be false in this case, because this Push-to-jira is more about
+                # epics then findings.
+                jform = JIRAFindingForm(prefix='jiraform', enabled=False)
+                # Feels like we should probably inform the user that this particular checkbox
+                # is more about epics and engagements than findings and issues.
+                jform.fields['push_to_jira'].help_text = "Checking this will add an EPIC for this engagement."
+                jform.fields['push_to_jira'].label = "Create EPIC"
 
     product_tab = Product_Tab(pid, title="New Engagement", tab="engagements")
     return render(request, 'dojo/new_eng.html',
@@ -816,12 +909,15 @@ def ad_hoc_finding(request, pid):
     enabled = False
     jform = None
     form = AdHocFindingForm(initial={'date': timezone.now().date()})
-    if get_system_setting('enable_jira'):
-        if JIRA_PKey.objects.filter(product=test.engagement.product).count() != 0:
-            enabled = JIRA_PKey.objects.get(product=test.engagement.product).push_all_issues
-            jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
+    if get_system_setting('enable_jira') and \
+            test.engagement.product.jira_pkey_set.first() is not None:
+        enabled = test.engagement.product.jira_pkey_set.first().push_all_issues
+        jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
+    if get_system_setting('enable_github'):
+        if GITHUB_PKey.objects.filter(product=test.engagement.product).count() != 0:
+            gform = GITHUBFindingForm(enabled=enabled, prefix='githubform')
     else:
-        jform = None
+        gform = None
     if request.method == 'POST':
         form = AdHocFindingForm(request.POST)
         if (form['active'].value() is False or form['false_p'].value()) and form['duplicate'].value() is False:
@@ -853,15 +949,31 @@ def ad_hoc_finding(request, pid):
             new_finding.is_template = False
             new_finding.save()
             new_finding.endpoints.set(form.cleaned_data['endpoints'])
-            new_finding.save()
-            if 'jiraform-push_to_jira' in request.POST:
-                jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=enabled)
+
+            # Push to Jira?
+            push_to_jira = False
+            if enabled:
+                push_to_jira = True
+            elif 'jiraform-push_to_jira' in request.POST:
+                jform = JIRAFindingForm(request.POST, prefix='jiraform',
+                                        enabled=enabled)
                 if jform.is_valid():
-                    add_issue_task.delay(new_finding, jform.cleaned_data.get('push_to_jira'))
+                    push_to_jira = jform.cleaned_data.get('push_to_jira')
+
                 messages.add_message(request,
                                      messages.SUCCESS,
                                      'Finding added successfully.',
                                      extra_tags='alert-success')
+            if 'githubform-push_to_github' in request.POST:
+                gform = GITHUBFindingForm(request.POST, prefix='jiragithub', enabled=enabled)
+                if gform.is_valid():
+                    add_external_issue_task.delay(new_finding, 'github')
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     'Finding added successfully to github.',
+                                     extra_tags='alert-success')
+            new_finding.save(push_to_jira=push_to_jira)
+
             if create_template:
                 templates = Finding_Template.objects.filter(title=new_finding.title)
                 if len(templates) > 0:
@@ -908,6 +1020,7 @@ def ad_hoc_finding(request, pid):
                    'pid': pid,
                    'form_error': form_error,
                    'jform': jform,
+                   'gform': gform,
                    })
 
 
@@ -1001,3 +1114,27 @@ def delete_engagement_presets(request, pid, eid):
                    'product_tab': product_tab,
                    'rels': rels,
                    })
+
+
+def edit_notifications(request, pid):
+    print('editing them notifications')
+    prod = get_object_or_404(Product, id=pid)
+    if request.method == 'POST':
+        product_notifications = Notifications.objects.filter(user=request.user).filter(product=prod).first()
+        if not product_notifications:
+            product_notifications = Notifications(user=request.user, product=prod)
+            print('no existing product notifications found')
+        else:
+            print('existing product notifications found')
+
+        form = ProductNotificationsForm(request.POST, instance=product_notifications)
+        # print(vars(form))
+
+        if form.is_valid():
+            form.save()
+            messages.add_message(request,
+                                    messages.SUCCESS,
+                                    'Notification settings updated.',
+                                    extra_tags='alert-success')
+
+    return HttpResponseRedirect(reverse('view_product', args=(pid,)))

@@ -7,7 +7,7 @@ import httplib2
 from datetime import datetime
 import googleapiclient.discovery
 from google.oauth2 import service_account
-
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied, ValidationError
@@ -27,7 +27,8 @@ from dojo.forms import NoteForm, TestForm, FindingForm, \
     ImportScanForm, ReImportScanForm, FindingBulkUpdateForm, JIRAFindingForm
 from dojo.models import Product, Finding, Test, Notes, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, Finding_Template, JIRA_PKey, Cred_Mapping, Dojo_User, JIRA_Issue, System_Settings
 from dojo.tools.factory import import_parser_factory
-from dojo.utils import get_page_items, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting, create_notification, Product_Tab, calculate_grade, log_jira_alert
+from dojo.utils import get_page_items, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting, Product_Tab, calculate_grade, log_jira_alert, max_safe
+from dojo.notifications.helper import create_notification
 from dojo.tasks import add_issue_task, update_issue_task
 from functools import reduce
 
@@ -262,12 +263,12 @@ def test_ics(request, tid):
 def add_findings(request, tid):
     test = Test.objects.get(id=tid)
     form_error = False
-    enabled = False
     jform = None
     form = AddFindingForm(initial={'date': timezone.now().date()})
+    enabled = False
 
     if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(product=test.engagement.product).count() != 0:
-        enabled = JIRA_PKey.objects.get(product=test.engagement.product).push_all_issues
+        enabled = test.engagement.product.jira_pkey_set.first().push_all_issues
         jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
     else:
         jform = None
@@ -318,20 +319,23 @@ def add_findings(request, tid):
             new_finding.is_template = False
             new_finding.save(dedupe_option=False)
             new_finding.endpoints.set(form.cleaned_data['endpoints'])
-            new_finding.save(false_history=True)
+
+            # Push to jira?
+            push_to_jira = False
+            if enabled:
+                push_to_jira = True
+            elif 'jiraform-push_to_jira' in request.POST:
+                jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=enabled)
+                if jform.is_valid():
+                    push_to_jira = jform.cleaned_data.get('push_to_jira')
+
+            new_finding.save(false_history=True, push_to_jira=push_to_jira)
             create_notification(event='other',
                                 title='Addition of %s' % new_finding.title,
                                 description='Finding "%s" was added by %s' % (new_finding.title, request.user),
                                 url=request.build_absolute_uri(reverse('view_finding', args=(new_finding.id,))),
                                 icon="exclamation-triangle")
-            if 'jiraform-push_to_jira' in request.POST:
-                jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=enabled)
-                if jform.is_valid():
-                    add_issue_task.delay(new_finding, jform.cleaned_data.get('push_to_jira'))
-                messages.add_message(request,
-                                     messages.SUCCESS,
-                                     'Finding added successfully.',
-                                     extra_tags='alert-success')
+
             if create_template:
                 templates = Finding_Template.objects.filter(title=new_finding.title)
                 if len(templates) > 0:
@@ -483,7 +487,7 @@ def add_temp_finding(request, tid, fid):
                                     'numerical_severity': finding.numerical_severity,
                                     'tags': [tag.name for tag in finding.tags]})
         if get_system_setting('enable_jira'):
-            enabled = JIRA_PKey.objects.get(product=test.engagement.product).push_all_issues
+            enabled = test.engagement.product.jira_pkey_set.first().push_all_issues
             jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
         else:
             jform = None
@@ -568,10 +572,12 @@ def finding_bulk_update(request, tid):
                     if JIRA_PKey.objects.filter(product=finding.test.engagement.product).count() == 0:
                         log_jira_alert('Finding cannot be pushed to jira as there is no jira configuration for this product.', finding)
                     else:
-                        old_status = finding.status()
-                        if form.cleaned_data['push_to_jira']:
+                        push_anyway = finding.jira_conf_new().jira_pkey_set.first().push_all_issues
+                        # push_anyway = JIRA_PKey.objects.get(
+                        #     product=finding.test.engagement.product).push_all_issues
+                        if form.cleaned_data['push_to_jira'] or push_anyway:
                             if JIRA_Issue.objects.filter(finding=finding).exists():
-                                update_issue_task.delay(finding, old_status, True)
+                                update_issue_task.delay(finding, True)
                             else:
                                 add_issue_task.delay(finding, True)
 
@@ -593,26 +599,38 @@ def re_import_scan_results(request, tid):
     additional_message = "When re-uploading a scan, any findings not found in original scan will be updated as " \
                          "mitigated.  The process attempts to identify the differences, however manual verification " \
                          "is highly recommended."
-    t = get_object_or_404(Test, id=tid)
-    scan_type = t.test_type.name
-    engagement = t.engagement
+    test = get_object_or_404(Test, id=tid)
+    scan_type = test.test_type.name
+    engagement = test.engagement
     form = ReImportScanForm()
+    jform = None
+    enabled = False
 
-    form.initial['tags'] = [tag.name for tag in t.tags]
+    # Decide if we need to present the Push to JIRA form
+    if get_system_setting('enable_jira') and engagement.product.jira_pkey_set.first() is not None:
+        enabled = engagement.product.jira_pkey_set.first().push_all_issues
+        jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
+
+    form.initial['tags'] = [tag.name for tag in test.tags]
     if request.method == "POST":
         form = ReImportScanForm(request.POST, request.FILES)
         if form.is_valid():
             scan_date = form.cleaned_data['scan_date']
+
+            scan_date_time = datetime.combine(scan_date, timezone.now().time())
+            if settings.USE_TZ:
+                scan_date_time = timezone.make_aware(scan_date_time, timezone.get_default_timezone())
+
             min_sev = form.cleaned_data['minimum_severity']
             file = request.FILES['file']
-            scan_type = t.test_type.name
+            scan_type = test.test_type.name
             active = form.cleaned_data['active']
             verified = form.cleaned_data['verified']
             tags = request.POST.getlist('tags')
             ts = ", ".join(tags)
-            t.tags = ts
+            test.tags = ts
             try:
-                parser = import_parser_factory(file, t, active, verified)
+                parser = import_parser_factory(file, test, active, verified)
             except ValueError:
                 raise Http404()
             except Exception as e:
@@ -623,67 +641,85 @@ def re_import_scan_results(request, tid):
                                      extra_tags='alert-danger')
                 parse_logger.exception(e)
                 parse_logger.error("Error in parser: {}".format(str(e)))
-                return HttpResponseRedirect(reverse('re_import_scan_results', args=(t.id,)))
+                return HttpResponseRedirect(reverse('re_import_scan_results', args=(test.id,)))
 
             try:
                 items = parser.items
-                original_items = t.finding_set.all().values_list("id", flat=True)
+                original_items = test.finding_set.all().values_list("id", flat=True)
                 new_items = []
                 mitigated_count = 0
                 finding_count = 0
                 finding_added_count = 0
                 reactivated_count = 0
+                # Push to Jira?
+
+                push_to_jira = False
+                if enabled:
+                    push_to_jira = True
+                elif 'jiraform-push_to_jira' in request.POST:
+                    jform = JIRAFindingForm(request.POST, prefix='jiraform',
+                                            enabled=enabled)
+                    if jform.is_valid():
+                        push_to_jira = jform.cleaned_data.get('push_to_jira')
                 for item in items:
+
                     sev = item.severity
                     if sev == 'Information' or sev == 'Informational':
                         sev = 'Info'
                         item.severity = sev
 
+                    # If it doesn't clear minimum severity, move on
                     if Finding.SEVERITIES[sev] > Finding.SEVERITIES[min_sev]:
                         continue
 
+                    # Try to find the existing finding
+                    # If it's Veracode or Arachni, then we consider the description for some
+                    # reason...
                     if scan_type == 'Veracode Scan' or scan_type == 'Arachni Scan':
-                        find = Finding.objects.filter(title=item.title,
-                                                      test__id=t.id,
-                                                      severity=sev,
-                                                      numerical_severity=Finding.get_numerical_severity(sev),
-                                                      description=item.description
-                                                      )
-                    else:
-                        find = Finding.objects.filter(title=item.title,
-                                                      test__id=t.id,
-                                                      severity=sev,
-                                                      numerical_severity=Finding.get_numerical_severity(sev),
-                                                      )
+                        finding = Finding.objects.filter(title=item.title,
+                                                        test__id=test.id,
+                                                        severity=sev,
+                                                        numerical_severity=Finding.get_numerical_severity(sev),
+                                                        description=item.description)
 
-                    if len(find) == 1:
-                        find = find[0]
-                        if find.mitigated:
-                            # it was once fixed, but now back
-                            find.mitigated = None
-                            find.mitigated_by = None
-                            find.active = True
-                            find.verified = verified
-                            find.save()
-                            note = Notes(entry="Re-activated by %s re-upload." % scan_type,
-                                         author=request.user)
-                            note.save()
-                            find.notes.add(note)
-                            reactivated_count += 1
-                        new_items.append(find.id)
                     else:
-                        item.test = t
+                        finding = Finding.objects.filter(title=item.title,
+                                                      test__id=test.id,
+                                                      severity=sev,
+                                                      numerical_severity=Finding.get_numerical_severity(sev))
+
+                    if len(finding) == 1:
+                        finding = finding[0]
+                        if finding.mitigated or finding.is_Mitigated:
+                            # it was once fixed, but now back
+                            finding.mitigated = None
+                            finding.is_Mitigated = False
+                            finding.mitigated_by = None
+                            finding.active = True
+                            finding.verified = verified
+                            finding.save()
+                            note = Notes(
+                                entry="Re-activated by %s re-upload." % scan_type,
+                                author=request.user)
+                            note.save()
+                            finding.notes.add(note)
+                            reactivated_count += 1
+                        new_items.append(finding.id)
+                    else:
+                        item.test = test
                         if item.date == timezone.now().date():
-                            item.date = t.target_start
+                            item.date = test.target_start
                         item.reporter = request.user
                         item.last_reviewed = timezone.now()
                         item.last_reviewed_by = request.user
                         item.verified = verified
                         item.active = active
+                        # Save it
                         item.save(dedupe_option=False)
                         finding_added_count += 1
+                        # Add it to the new items
                         new_items.append(item.id)
-                        find = item
+                        finding = item
 
                         if hasattr(item, 'unsaved_req_resp') and len(item.unsaved_req_resp) > 0:
                             for req_resp in item.unsaved_req_resp:
@@ -703,13 +739,13 @@ def re_import_scan_results(request, tid):
                                 burp_rr.save()
 
                         if item.unsaved_request is not None and item.unsaved_response is not None:
-                            burp_rr = BurpRawRequestResponse(finding=find,
+                            burp_rr = BurpRawRequestResponse(finding=finding,
                                                              burpRequestBase64=base64.b64encode(item.unsaved_request.encode()),
                                                              burpResponseBase64=base64.b64encode(item.unsaved_response.encode()),
                                                              )
                             burp_rr.clean()
                             burp_rr.save()
-                    if find:
+                    if finding:
                         finding_count += 1
                         for endpoint in item.unsaved_endpoints:
                             ep, created = Endpoint.objects.get_or_create(protocol=endpoint.protocol,
@@ -717,34 +753,44 @@ def re_import_scan_results(request, tid):
                                                                          path=endpoint.path,
                                                                          query=endpoint.query,
                                                                          fragment=endpoint.fragment,
-                                                                         product=t.engagement.product)
-                            find.endpoints.add(ep)
+                                                                         product=test.engagement.product)
+                            finding.endpoints.add(ep)
                         for endpoint in form.cleaned_data['endpoints']:
                             ep, created = Endpoint.objects.get_or_create(protocol=endpoint.protocol,
                                                                          host=endpoint.host,
                                                                          path=endpoint.path,
                                                                          query=endpoint.query,
                                                                          fragment=endpoint.fragment,
-                                                                         product=t.engagement.product)
-                            find.endpoints.add(ep)
+                                                                         product=test.engagement.product)
+                            finding.endpoints.add(ep)
 
                         if item.unsaved_tags is not None:
-                            find.tags = item.unsaved_tags
+                            finding.tags = item.unsaved_tags
 
-                    find.save()
+                    # Save it. This may be the second time we save it in this function.
+                    finding.save(push_to_jira=push_to_jira)
                 # calculate the difference
                 to_mitigate = set(original_items) - set(new_items)
                 for finding_id in to_mitigate:
                     finding = Finding.objects.get(id=finding_id)
-                    finding.mitigated = datetime.combine(scan_date, timezone.now().time())
-                    finding.mitigated_by = request.user
-                    finding.active = False
-                    finding.save()
-                    note = Notes(entry="Mitigated by %s re-upload." % scan_type,
-                                 author=request.user)
-                    note.save()
-                    finding.notes.add(note)
-                    mitigated_count += 1
+                    if not finding.mitigated or not finding.is_Mitigated:
+                        finding.mitigated = scan_date_time
+                        finding.is_Mitigated = True
+                        finding.mitigated_by = request.user
+                        finding.active = False
+                        finding.save()
+                        note = Notes(entry="Mitigated by %s re-upload." % scan_type,
+                                    author=request.user)
+                        note.save()
+                        finding.notes.add(note)
+                        mitigated_count += 1
+
+                test.updated = max_safe([scan_date_time, test.updated])
+                test.engagement.updated = max_safe([scan_date_time, test.engagement.updated])
+
+                test.save()
+                test.engagement.save()
+
                 messages.add_message(request,
                                      messages.SUCCESS,
                                      '%s processed, a total of ' % scan_type + message(finding_count, 'finding',
@@ -769,9 +815,9 @@ def re_import_scan_results(request, tid):
                                                                  'mitigated') + '. Please manually verify each one.',
                                          extra_tags='alert-success')
 
-                create_notification(event='results_added', title=str(finding_count) + " findings for " + engagement.product.name, finding_count=finding_count, test=t, engagement=engagement, url=reverse('view_test', args=(t.id,)))
+                create_notification(event='scan_added', title=str(finding_count) + " findings for " + test.engagement.product.name, finding_count=finding_count, test=test, engagement=test.engagement, url=reverse('view_test', args=(test.id,)))
 
-                return HttpResponseRedirect(reverse('view_test', args=(t.id,)))
+                return HttpResponseRedirect(reverse('view_test', args=(test.id,)))
             except SyntaxError:
                 messages.add_message(request,
                                      messages.ERROR,
@@ -787,4 +833,5 @@ def re_import_scan_results(request, tid):
                    'product_tab': product_tab,
                    'eid': engagement.id,
                    'additional_message': additional_message,
+                   'jform': jform,
                    })

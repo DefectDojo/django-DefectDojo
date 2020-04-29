@@ -16,10 +16,7 @@ logger = logging.getLogger(__name__)
 
 @user_passes_test(lambda u: u.is_superuser)
 def system_settings(request):
-    try:
-        system_settings_obj = System_Settings.objects.get(no_cache=True)
-    except:
-        system_settings_obj = System_Settings()
+    system_settings_obj = System_Settings.objects.get(no_cache=True)
 
     # Celery needs to be set with the setting: CELERY_RESULT_BACKEND = 'db+sqlite:///dojo.celeryresults.sqlite'
     if hasattr(settings, 'CELERY_RESULT_BACKEND'):

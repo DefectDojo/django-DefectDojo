@@ -66,8 +66,17 @@
                                     <input id="id_bulk_is_Mitigated" name="is_Mitigated" type="checkbox" disabled/>
                                     <span>Mitigated</span>
                                 </label>
+                                <br/>
                                 {% if system_settings.enable_jira %}
-                                <b>Push to JIRA</b> <input id="id_push_tojira" name="push_to_jira" type="checkbox" alt="Select to push to JIRA"/><br/>
+                                <label style="font-size: 80%; font-weight: bold; display: block">Push to Jira
+                                  <input id="id_push_tojira" name="push_to_jira" type="checkbox" alt="Select to push to JIRA"/>
+                                </label>
+                                {% endif %}
+                                {% if system_settings.enable_github %}
+                                <label style="font-size: 80%; font-weight: bold; display: block">Push to Github
+                                  <input id="id_push_togithub" name="push_to_github" type="checkbox" alt="Select to push to Github"/>
+                                </label>
+                                <br/>
                                 {% endif %}
                                 <label style="display: block">Tags</label>
                                 <label style="font-size: 80%; font-weight: normal; display: block; padding-right: 8px;">
@@ -259,7 +268,7 @@
                                 <td>
                                   {% if finding.title %}
                                   <a title="{{ finding.title }}"
-                                                      href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a>
+                                                      href="{% url 'view_finding' finding.id %}">{{ finding.title|truncatechars_html:60 }}</a>
                                   {% else %}
                                   <a title="{{ finding.id }}"
                                                       href="{% url 'view_finding' finding.id %}">{{ finding.id }}</a>

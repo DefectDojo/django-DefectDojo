@@ -217,6 +217,12 @@ echo "Running test ${TEST}"
       # make sure you remember to change back to 'release' before making a PR
       source ./docker/setEnv.sh release
       docker-compose build
+
+      echo "Waiting for services to start"
+      docker-compose up -d
+      # wait for containers to start from images and services to become available
+      sleep 100 # giving long enough time
+
       source ./travis/integration_test-script.sh
       ;;
     snyk)

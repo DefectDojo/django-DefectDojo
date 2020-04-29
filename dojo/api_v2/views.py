@@ -7,6 +7,7 @@ from rest_framework.permissions import DjangoModelPermissions
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_yasg.utils import swagger_auto_schema
 
 from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Finding, \
@@ -21,7 +22,7 @@ from dojo.risk_acceptance import api as ra_api
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from datetime import datetime
-from dojo.utils import get_period_counts_legacy
+from dojo.utils import get_period_counts_legacy, get_system_setting
 from dojo.api_v2 import serializers, permissions
 from django.db.models import Count, Q
 
@@ -159,6 +160,24 @@ class FindingViewSet(mixins.ListModelMixin,
                      'duplicate', 'test__engagement__product',
                      'test__engagement')
 
+    # Overriding mixins.UpdateModeMixin perform_update() method to grab push_to_jira
+    # data and add that as a parameter to .save()
+    def perform_update(self, serializer):
+        enabled = False
+        push_to_jira = serializer.validated_data.get('push_to_jira')
+        # IF JIRA is enabled and this product has a JIRA configuration
+        if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(
+                product=serializer.instance.test.engagement.product) != 0:
+            # Check if push_all_issues is set on this product
+            enabled = serializer.instance.test.engagement.product.jira_pkey_set.first().push_all_issues
+
+        # If push_all_issues is set:
+        if enabled:
+            push_to_jira = True
+
+        # add a check for the product having push all issues enabled right here.
+        serializer.save(push_to_jira=push_to_jira)
+
     def get_queryset(self):
         if not self.request.user.is_staff:
             return Finding.objects.filter(
@@ -195,7 +214,7 @@ class FindingViewSet(mixins.ListModelMixin,
         serialized_tags = serializers.TagSerializer({"tags": tags})
         return Response(serialized_tags.data)
 
-    @action(detail=True, methods=["get", "post"])
+    @action(detail=True, methods=["get", "post", "patch"])
     def notes(self, request, pk=None):
         finding = get_object_or_404(Finding.objects, id=pk)
         if request.method == 'POST':
@@ -203,12 +222,13 @@ class FindingViewSet(mixins.ListModelMixin,
             if new_note.is_valid():
                 entry = new_note.validated_data['entry']
                 private = new_note.validated_data['private']
+                note_type = new_note.validated_data['note_type']
             else:
                 return Response(new_note.errors,
                     status=status.HTTP_400_BAD_REQUEST)
 
             author = request.user
-            note = Notes(entry=entry, author=author, private=private)
+            note = Notes(entry=entry, author=author, private=private, note_type=note_type)
             note.save()
             finding.notes.add(note)
 
@@ -234,7 +254,8 @@ class FindingViewSet(mixins.ListModelMixin,
         return Response(serialized_notes,
                 status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=["put", "patch"])
+    @swagger_auto_schema(request_body=serializers.NoteSerializer)
+    @action(detail=True, methods=["patch"])
     def remove_note(self, request, pk=None):
         """Remove Note From Finding Note"""
         finding = get_object_or_404(Finding.objects, id=pk)
@@ -247,7 +268,7 @@ class FindingViewSet(mixins.ListModelMixin,
         else:
             return Response({"error": "('note_id') parameter missing"},
                 status=status.HTTP_400_BAD_REQUEST)
-        if note.author.username == request.user.username:
+        if note.author.username == request.user.username or request.user.is_staff:
             finding.notes.remove(note)
             note.delete()
         else:
@@ -324,7 +345,7 @@ class JiraIssuesViewSet(mixins.ListModelMixin,
     serializer_class = serializers.JIRAIssueSerializer
     queryset = JIRA_Issue.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'jira_id', 'jira_key')
+    filter_fields = ('id', 'jira_id', 'jira_key', 'finding_id')
 
 
 class JiraViewSet(mixins.ListModelMixin,
@@ -630,12 +651,44 @@ class ImportScanView(mixins.CreateModelMixin,
     parser_classes = [MultiPartParser]
     queryset = Test.objects.all()
 
+    def perform_create(self, serializer):
+        # Override CreateModeMixin to pass in push_to_jira if needed.
+        enabled = False
+        push_to_jira = serializer.validated_data.get('push_to_jira')
+        # IF JIRA is enabled and this product has a JIRA configuration
+        engagement = serializer.validated_data['engagement']
+        jira_config = engagement.product.jira_pkey_set.first() is not None
+        if get_system_setting('enable_jira') and jira_config:
+            # Check if push_all_issues is set on this product
+            enabled = engagement.product.jira_pkey_set.first().push_all_issues
+
+        # If push_all_issues is set:
+        if enabled:
+            push_to_jira = True
+        serializer.save(push_to_jira=push_to_jira)
+
 
 class ReImportScanView(mixins.CreateModelMixin,
                        viewsets.GenericViewSet):
     serializer_class = serializers.ReImportScanSerializer
     parser_classes = [MultiPartParser]
     queryset = Test.objects.all()
+
+    def perform_create(self, serializer):
+        # Override CreateModeMixin to pass in push_to_jira if needed.
+        enabled = False
+        push_to_jira = serializer.validated_data.get('push_to_jira')
+        test = serializer.validated_data['test']
+        jira_config = test.engagement.product.jira_pkey_set.first() is not None
+        # IF JIRA is enabled and this product has a JIRA configuration
+        if get_system_setting('enable_jira') and jira_config:
+            # Check if push_all_issues is set on this product
+            enabled = test.engagement.product.jira_pkey_set.first().push_all_issues
+
+        # If push_all_issues is set:
+        if enabled:
+            push_to_jira = True
+        serializer.save(push_to_jira=push_to_jira)
 
 
 class NotesViewSet(mixins.ListModelMixin,

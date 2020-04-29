@@ -27,7 +27,7 @@ if [ ! -z "$ADMIN_EXISTS" ]
 then
     echo "Admin password: Initialization detected that the admin user ${DD_ADMIN_USER} already exists in your database."
     echo "If you don't remember the ${DD_ADMIN_USER} password, you can create a new superuser with:"
-    echo "$ docker-compose exec uswgi /bin/bash -c 'python manage.py createsuperuser'"
+    echo "$ docker-compose exec uwsgi /bin/bash -c 'python manage.py createsuperuser'"
     exit
 fi
 
@@ -52,11 +52,11 @@ User.objects.create_superuser(
 )
 EOD
 
+  python3 manage.py loaddata system_settings
   python3 manage.py loaddata initial_banner_conf
   python3 manage.py loaddata product_type
   python3 manage.py loaddata test_type
   python3 manage.py loaddata development_environment
-  python3 manage.py loaddata system_settings
   python3 manage.py loaddata benchmark_type
   python3 manage.py loaddata benchmark_category
   python3 manage.py loaddata benchmark_requirement

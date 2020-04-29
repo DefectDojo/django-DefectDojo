@@ -3,7 +3,7 @@
 
 cd /app
 
-./manage.py makemigrations --no-input --check --dry-run || {
+./manage.py makemigrations --no-input --check --dry-run --verbosity 3 || {
     cat <<-EOF
 
 ********************************************************************************
