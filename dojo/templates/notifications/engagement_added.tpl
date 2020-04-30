@@ -21,7 +21,6 @@ Kind regards,<br/>
 {% else %}
 Defect Dojo
 {% endif %}
-<p>
 <br/>
 <br/>
 <p>
