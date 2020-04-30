@@ -110,6 +110,9 @@
                     {% if test.percent_complete > 0 %}
                         <th>Progress</th>
                     {% endif %}
+                    {% if test.version != '' %}
+                        <th>Version</th>
+                    {% endif %}
                 </tr>
                 <tr>
                     <td><a href="{% url 'view_engagement' test.engagement.id %}">{{ test.engagement.name }}</a></td>
@@ -135,6 +138,9 @@
                                 </div>
                             </div>
                         </td>
+                    {% endif %}
+                    {% if test.version != '' %}
+                    <td>{{ test.version }}</td>
                     {% endif %}
                 </tr>
             </table>

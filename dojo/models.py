@@ -1239,6 +1239,8 @@ class Test(models.Model):
     # used for prefetching tags because django-tagging doesn't support that out of the box
     tagged_items = GenericRelation(TaggedItem)
 
+    version = models.CharField(max_length=100, null=True, blank=True)
+
     def test_type_name(self):
         return self.test_type.name
 

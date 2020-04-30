@@ -243,7 +243,7 @@ def deduplicate_hash_code(new_finding):
         str(len(existing_findings)) + " findings with same hash_code")
     for find in existing_findings:
         if is_deduplication_on_engagement_mismatch(new_finding, find):
-            deduplicationLoggerdebug(
+            deduplicationLogger.debug(
                 'deduplication_on_engagement_mismatch, skipping dedupe.')
             continue
         try:

@@ -626,6 +626,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'ZAP Scan': ['cwe', 'endpoints', 'severity'],
     'Qualys Scan': ['title', 'endpoints', 'severity'],
     'PHP Symfony Security Check': ['title', 'cve'],
+    'Clair Scan': ['title', 'cve', 'description', 'severity'],
+    'Clair Klar Scan': ['title', 'description', 'severity'],
     # for backwards compatibility because someone decided to rename this scanner:
     'Symfony Security Check': ['title', 'cve'],
     'DSOP Scan': ['cve'],
@@ -678,6 +680,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'ZAP Scan': DEDUPE_ALGO_HASH_CODE,
     'Qualys Scan': DEDUPE_ALGO_HASH_CODE,
     'PHP Symfony Security Check': DEDUPE_ALGO_HASH_CODE,
+    'Clair Scan': DEDUPE_ALGO_HASH_CODE,
+    'Clair Klar Scan': DEDUPE_ALGO_HASH_CODE,
     # for backwards compatibility because someone decided to rename this scanner:
     'Symfony Security Check': DEDUPE_ALGO_HASH_CODE,
     'DSOP Scan': DEDUPE_ALGO_HASH_CODE,

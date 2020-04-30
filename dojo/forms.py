@@ -373,6 +373,7 @@ class ImportScanForm(forms.Form):
                          ("Trivy Scan", "Trivy Scan"),
                          ("Anchore Enterprise Policy Check", "Anchore Enterprise Policy Check"),
                          ("Gitleaks Scan", "Gitleaks Scan"),
+                         ("Choctaw Hog Scan", "Choctaw Hog Scan"),
                          ("Harbor Vulnerability Scan", "Harbor Vulnerability Scan"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
@@ -815,7 +816,7 @@ class TestForm(forms.ModelForm):
     class Meta:
         model = Test
         fields = ['title', 'test_type', 'target_start', 'target_end',
-                  'environment', 'percent_complete', 'tags', 'lead']
+                  'environment', 'percent_complete', 'tags', 'lead', 'version']
 
 
 class DeleteTestForm(forms.ModelForm):
