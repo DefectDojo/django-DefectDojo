@@ -601,12 +601,12 @@ def accepted_findings(request, pid=None):
     findings = Finding.objects.filter(risk_acceptance__isnull=False)
     findings_filter = AcceptedFindingSuperFilter(request.GET, queryset=findings)
     title_words = [
-        word for finding in findings for word in finding.title.split()
+        word for finding in findings_filter.qs for word in finding.title.split()
         if len(word) > 2
     ]
 
     title_words = sorted(set(title_words))
-    paged_findings = get_page_items(request, findings_filter.qs, 25)
+    paged_findings = get_page_items(request, findings_filter.qs.order_by('numerical_severity'), 25)
 
     product_tab = None
     if pid:
