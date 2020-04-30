@@ -60,12 +60,12 @@ Kind regards,<br/>
 {% else %}
 Defect Dojo
 {% endif %}
-<p>
 <br/>
 <br/>
 <p>
 {% url 'notifications' as notification_url %}
-You can manage your notification settings here: <a href="{{ notification_url|full_url }}">{{ notification_url|full_url }}</a>
+You can manage your global notification settings here: <a href="{{ notification_url|full_url }}">{{ notification_url|full_url }}</a>
+You can manage your product notifications here: <a href="{{product_url|full_url}}#notifications">{{product}} notifications</a>
 </p>
 {% endautoescape %}
 </body>
