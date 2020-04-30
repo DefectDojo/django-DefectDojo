@@ -92,6 +92,8 @@ def prefetch_for_product(prods):
                 finding__mitigated__isnull=True)
         prefetched_prods = prefetched_prods.prefetch_related(Prefetch('endpoint_set', queryset=active_endpoint_query, to_attr='active_endpoints'))
         prefetched_prods = prefetched_prods.prefetch_related('tagged_items__tag')
+    else:
+        logger.debug('unable to prefetch because query was already executed')
 
     return prefetched_prods
 
@@ -475,6 +477,9 @@ def prefetch_for_view_engagements(engs):
         prefetched_engs = prefetched_engs.annotate(count_findings_open=Count('test__finding__id', filter=Q(test__finding__active=True)))
         prefetched_engs = prefetched_engs.annotate(count_findings_duplicate=Count('test__finding__id', filter=Q(test__finding__duplicate=True)))
         prefetched_engs = prefetched_engs.prefetch_related('tagged_items__tag')
+    else:
+        logger.debug('unable to prefetch because query was already executed')
+
     return prefetched_engs
 
 
