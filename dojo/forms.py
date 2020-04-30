@@ -816,7 +816,7 @@ class TestForm(forms.ModelForm):
     class Meta:
         model = Test
         fields = ['title', 'test_type', 'target_start', 'target_end',
-                  'environment', 'percent_complete', 'tags', 'lead']
+                  'environment', 'percent_complete', 'tags', 'lead', 'version']
 
 
 class DeleteTestForm(forms.ModelForm):
