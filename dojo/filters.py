@@ -406,7 +406,7 @@ class OpenFindingFilter(DojoFilter):
             del self.form.fields['test__engagement__product']
 
 
-class OpenFingingSuperFilter(OpenFindingFilter):
+class OpenFindingSuperFilter(OpenFindingFilter):
     reporter = ModelMultipleChoiceFilter(
         queryset=Dojo_User.objects.all())
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
@@ -472,7 +472,7 @@ class ClosedFindingFilter(DojoFilter):
         self.form.fields['cwe'].choices = list(cwe.items())
 
 
-class ClosedFingingSuperFilter(ClosedFindingFilter):
+class ClosedFindingSuperFilter(ClosedFindingFilter):
     reporter = ModelMultipleChoiceFilter(
         queryset=Dojo_User.objects.all())
 
@@ -538,7 +538,7 @@ class AcceptedFindingFilter(DojoFilter):
         self.form.fields['cwe'].choices = list(cwe.items())
 
 
-class AcceptedFingingSuperFilter(AcceptedFindingFilter):
+class AcceptedFindingSuperFilter(AcceptedFindingFilter):
     test__engagement__risk_acceptance__reporter = \
         ModelMultipleChoiceFilter(
             queryset=Dojo_User.objects.all(),
