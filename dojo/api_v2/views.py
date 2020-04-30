@@ -244,7 +244,6 @@ class FindingViewSet(mixins.ListModelMixin,
         serialized_burps = serializers.BurpRawRequestResponseSerializer({'req_resp': burp_list})
         return Response(serialized_burps.data)
 
-
     @action(detail=True, methods=['get', 'post'])
     def tags(self, request, pk=None):
         finding = get_object_or_404(Finding.objects, id=pk)
