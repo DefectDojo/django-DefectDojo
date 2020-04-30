@@ -596,6 +596,10 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         if settings.USE_TZ:
             scan_date_time = timezone.make_aware(scan_date_time, timezone.get_default_timezone())
 
+        version = ''
+        if 'version' in data:
+            version = data['version']
+
         test = Test(
             engagement=data['engagement'],
             lead=data['lead'],
@@ -603,7 +607,8 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
             target_start=data['scan_date'],
             target_end=data['scan_date'],
             environment=environment,
-            percent_complete=100)
+            percent_complete=100,
+            version=version)
         try:
             test.full_clean()
         except ValidationError:
