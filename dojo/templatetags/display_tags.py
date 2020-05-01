@@ -467,6 +467,11 @@ def severity_value(value):
     return value
 
 
+@register.simple_tag
+def severity_number_value(value):
+    return Finding.get_number_severity(value)
+
+
 @register.filter
 def tracked_object_value(current_object):
     value = ""
