@@ -16,4 +16,6 @@ exec uwsgi \
   --enable-threads \
   --processes 2 \
   --threads 2 \
+  --reload-mercy 3 \
+  --worker-reload-mercy 3 \
   --py-autoreload 1
