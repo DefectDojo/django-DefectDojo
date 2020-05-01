@@ -9,7 +9,7 @@
     "chosen-bootstrap": "dbtek/chosen-bootstrap#~1.1.0",
     "clipboard": "^2.0.6",
     "components-jqueryui": "^1.0.0",
-    "datatables": "1.10.18",
+    "datatables": "1.10.20",
     "drmonty-datatables-plugins": "^1.0.0",
     "drmonty-datatables-responsive": "^1.0.0",
     "flot": "flot/flot#~0.8.3",
