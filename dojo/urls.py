@@ -99,7 +99,7 @@ v1_api.register(BuildDetails())
 
 # v2 api written in django-rest-framework
 v2_api = DefaultRouter()
-v2_api.register(r'app_analysis', AppAnalysisViewSet)
+v2_api.register(r'technologies', AppAnalysisViewSet)
 v2_api.register(r'endpoints', EndPointViewSet)
 v2_api.register(r'engagements', EngagementViewSet)
 v2_api.register(r'development_environments', DevelopmentEnvironmentViewSet)
