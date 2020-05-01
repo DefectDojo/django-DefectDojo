@@ -13,7 +13,8 @@ from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Finding, \
     User, ScanSettings, Scan, Stub_Finding, Finding_Template, Notes, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
-    Endpoint, JIRA_PKey, JIRA_Conf, DojoMeta, Development_Environment, Dojo_User
+    Endpoint, JIRA_PKey, JIRA_Conf, DojoMeta, Development_Environment, \
+    Dojo_User, App_Analysis
 
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import report_url_resolver
@@ -123,6 +124,16 @@ class EngagementViewSet(mixins.ListModelMixin,
         data = report_generate(request, engagement, options)
         report = serializers.ReportGenerateSerializer(data)
         return Response(report.data)
+
+
+class AppAnalysisViewSet(mixins.ListModelMixin,
+                        mixins.RetrieveModelMixin,
+                        mixins.UpdateModelMixin,
+                        mixins.DestroyModelMixin,
+                        mixins.CreateModelMixin,
+                        viewsets.GenericViewSet):
+    serializer_class = serializers.AppAnalysisSerializer
+    queryset = App_Analysis.objects.all()
 
 
 class FindingTemplatesViewSet(mixins.ListModelMixin,
