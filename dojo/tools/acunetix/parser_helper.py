@@ -178,7 +178,7 @@ def get_defectdojo_findings(filename):
         defectdojo_finding = dict()
 
         if "Affects" in report_item:
-            affects = (" at {}".format(report_item['Affects']))
+            affects = (" ({})".format(report_item['Affects']))
         else:
             affects = ""
         defectdojo_finding['title'] = "{}{}".format(report_item['Name'], affects)
