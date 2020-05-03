@@ -27,7 +27,7 @@ from dojo.forms import NoteForm, TestForm, FindingForm, \
     ImportScanForm, ReImportScanForm, FindingBulkUpdateForm, JIRAFindingForm
 from dojo.models import Product, Finding, Test, Notes, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, Finding_Template, JIRA_PKey, Cred_Mapping, Dojo_User, JIRA_Issue, System_Settings
 from dojo.tools.factory import import_parser_factory
-from dojo.utils import get_page_items, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting, Product_Tab, calculate_grade, log_jira_alert, max_safe
+from dojo.utils import get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting, Product_Tab, calculate_grade, log_jira_alert, max_safe
 from dojo.notifications.helper import create_notification
 from dojo.tasks import add_issue_task, update_issue_task
 from functools import reduce
@@ -71,8 +71,8 @@ def view_test(request, tid):
     else:
         form = NoteForm()
 
-    fpage = get_page_items(request, prefetch_for_findings(findings.qs), 25)
-    sfpage = get_page_items(request, stub_findings, 25)
+    paged_findings, total_findings_count = get_page_items_and_count(request, prefetch_for_findings(findings.qs), 25)
+    paged_stub_findings = get_page_items(request, stub_findings, 25)
     show_re_upload = any(test.test_type.name in code for code in ImportScanForm.SCAN_TYPE_CHOICES)
 
     product_tab = Product_Tab(prod.id, title="Test", tab="engagements")
@@ -119,10 +119,10 @@ def view_test(request, tid):
     return render(request, 'dojo/view_test.html',
                   {'test': test,
                    'product_tab': product_tab,
-                   'findings': fpage,
+                   'findings': paged_findings,
                    'filtered': findings,
-                   'findings_count': findings.qs.count(),
-                   'stub_findings': sfpage,
+                   'findings_count': total_findings_count,
+                   'stub_findings': paged_stub_findings,
                    'form': form,
                    'notes': notes,
                    'person': person,
@@ -144,8 +144,12 @@ def prefetch_for_findings(findings):
         prefetched_findings = prefetched_findings.prefetch_related('risk_acceptance_set')
         # we could try to prefetch only the latest note with SubQuery and OuterRef, but I'm getting that MySql doesn't support limits in subqueries.
         prefetched_findings = prefetched_findings.prefetch_related('notes')
+        prefetched_findings = prefetched_findings.prefetch_related('endpoints')
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__jira_pkey_set__conf')
         prefetched_findings = prefetched_findings.prefetch_related('tagged_items__tag')
+    else:
+        logger.debug('unable to prefetch because query was already executed')
+
     return prefetched_findings
 
 

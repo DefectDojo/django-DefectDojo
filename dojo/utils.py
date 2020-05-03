@@ -1175,6 +1175,15 @@ def get_page_items(request, items, page_size, param_name='page'):
     return paginator.get_page(page)
 
 
+def get_page_items_and_count(request, items, page_size, param_name='page'):
+    size = request.GET.get('page_size', page_size)
+    paginator = Paginator(items, size)
+    page = request.GET.get(param_name)
+
+    # new get_page method will handle invalid page value, out of bounds pages, etc
+    return paginator.get_page(page), paginator.count
+
+
 def handle_uploaded_threat(f, eng):
     name, extension = os.path.splitext(f.name)
     with open(settings.MEDIA_ROOT + '/threat/%s%s' % (eng.id, extension),
