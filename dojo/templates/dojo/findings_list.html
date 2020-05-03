@@ -260,7 +260,7 @@
                                    </div>
                                 </td>
                                 {% endif %}
-                                <td>
+                                <td class="centered" data-order="{% severity_number_value finding.severity %}">
                                   <span class="label severity severity-{{ finding.severity }}">
                                       {{ finding.severity_display }}
                                   </span>
@@ -460,9 +460,11 @@
                         }},
                     {% endif %}
                 ],
-                order: [2],
+                order: [],
                 "columnDefs": [
-                    { "orderable": false, "targets": [0, 1] }
+                    { 
+                        "orderable": false, "targets": [0, 1]
+                    }
                 ],
                 dom: 'Bfrtip',
                 paging: false,
@@ -695,6 +697,7 @@
             };
 
         });
+
     </script>
     {% include "dojo/filter_js_snippet.html" %}
 {% endblock %}
