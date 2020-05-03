@@ -3,7 +3,7 @@ from dojo.models import Product, Engagement, Test, Finding, \
     Finding_Template, Test_Type, Development_Environment, NoteHistory, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Product_Type, JIRA_Conf, Endpoint, BurpRawRequestResponse, JIRA_PKey, \
-    Notes, DojoMeta, FindingImage
+    Notes, DojoMeta, FindingImage, Note_Type
 from dojo.forms import ImportScanForm, SEVERITY_CHOICES
 from dojo.tools import requires_file
 from dojo.tools.factory import import_parser_factory
@@ -985,6 +985,12 @@ class NoteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Notes
+        fields = '__all__'
+
+    
+class NoteTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Note_Type
         fields = '__all__'
 
 
