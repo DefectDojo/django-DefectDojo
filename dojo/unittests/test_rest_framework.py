@@ -489,7 +489,8 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
             "file": open('tests/zap_sample.xml'),
             "engagement": 1,
             "lead": 2,
-            "tags": ["'ci/cd, api"]
+            "tags": ["'ci/cd, api"],
+            "version": "1.0.0",
         }
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
@@ -514,6 +515,7 @@ class ReimportScanTest(APITestCase):
                 "scan_type": 'ZAP Scan',
                 "file": open('tests/zap_sample.xml'),
                 "test": 3,
+                "version": "1.0.1",
             })
         self.assertEqual(length, Test.objects.all().count())
         self.assertEqual(201, response.status_code)
