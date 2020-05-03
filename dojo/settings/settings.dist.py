@@ -96,6 +96,7 @@ env = environ.Env(
     # merging findings doesn't always work well with dedupe and reimport etc.
     # disable it if you see any issues (and report them on github)
     DD_DISABLE_FINDING_MERGE=(bool, False),
+    DD_ACTIVATE_REMOTE_USER_AUTHENTICATION=(bool, False),
 )
 
 
@@ -523,6 +524,13 @@ DJANGO_MIDDLEWARE_CLASSES = [
     'watson.middleware.SearchContextMiddleware',
     'auditlog.middleware.AuditlogMiddleware',
 ]
+
+# If remote user authentication is allowed, insert this middleware after AuthenticationMiddleware
+# Ref: https://docs.djangoproject.com/en/2.2/howto/auth-remote-user/
+if env('DD_ACTIVATE_REMOTE_USER_AUTHENTICATION'):
+    DJANGO_MIDDLEWARE_CLASSES.insert(
+        DJANGO_MIDDLEWARE_CLASSES.index('django.contrib.auth.middleware.AuthenticationMiddleware') + 1,
+        'django.contrib.auth.middleware.RemoteUserMiddleware')
 
 MIDDLEWARE = DJANGO_MIDDLEWARE_CLASSES
 

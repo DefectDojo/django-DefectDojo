@@ -32,6 +32,14 @@ else
   echo "Basic auth is off (HTTP_AUTH_PASSWORD not provided)"
 fi
 
+
+# Activate remote user authentication at nginx level
+if [ "${NGINX_ACTIVATE_REMOTE_USER_AUTHENTICATION}" = "True" -a "${NGINX_REMOTE_USER_HEADER}" != "" ]; then
+  echo "Activating REMOTE_USER : the user name contained in ${NGINX_REMOTE_USER_HEADER} header will be automatically authenticated"
+  sed -i "s/#uwsgi_param  REMOTE_USER/uwsgi_param  REMOTE_USER/g;" /etc/nginx/wsgi_params
+  sed -i "s/<NGINX_REMOTE_USER_HEADER>/${NGINX_REMOTE_USER_HEADER}/g;" /etc/nginx/wsgi_params
+fi
+
 echo "uwsgi_pass ${DD_UWSGI_PASS};" > /run/uwsgi_pass
 echo "server ${DD_UWSGI_HOST}:${DD_UWSGI_PORT};" > /run/uwsgi_server
 
