@@ -600,7 +600,7 @@ class EngagementResource(BaseModelResource):
 
 
 """
-    /api/v1/technologies/
+    /api/v1/app_analysis/
     GET [/id/], DELETE [/id/]
     Expects: no params or id
     Returns Tool_ConfigurationResource
@@ -618,7 +618,7 @@ class App_AnalysisResource(BaseModelResource):
     user = fields.ForeignKey(UserResource, 'user', null=False)
 
     class Meta:
-        resource_name = 'technologies'
+        resource_name = 'app_analysis'
         list_allowed_methods = ['get', 'post', 'put', 'delete']
         detail_allowed_methods = ['get', 'post', 'put', 'delete']
         queryset = App_Analysis.objects.all()
