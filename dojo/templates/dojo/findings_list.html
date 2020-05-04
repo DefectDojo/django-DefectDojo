@@ -461,36 +461,42 @@
                     {% endif %}
                 ],
                 order: [],
-                "columnDefs": [
+                columnDefs: [
                     { 
-                        "orderable": false, "targets": [0, 1]
+                        "orderable": false,
+                        "targets": [0, 1]
+                    },
+                    {
+                        targets: [0, 1],
+                        className: 'noVis'
                     }
                 ],
                 dom: 'Bfrtip',
                 paging: false,
                 buttons: [
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'colvis'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
+                    {
+                        extend: 'colvis',
+                        columns: ':not(.noVis)'
+                    },
+                    {
                         extend: 'copyHtml5'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
+                    },
+                    {
                         extend: 'excelHtml5',
                         autoFilter: true,
                         sheetName: 'Exported data',
-                    }),
-                    $.extend( true, {}, buttonCommon, {
+                    },
+                    {
                         extend: 'csvHtml5'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
+                    },
+                    {
                         extend: 'pdfHtml5',
                         orientation: 'landscape',
                         pageSize: 'LETTER'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
+                    },
+                    {
                         extend: 'print'
-                    }),
+                    },
                 ],
             });
         });
