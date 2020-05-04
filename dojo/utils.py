@@ -35,6 +35,7 @@ from requests.auth import HTTPBasicAuth
 from dojo.notifications.helper import create_notification
 import logging
 import itertools
+from django.contrib import messages
 
 
 logger = logging.getLogger(__name__)
@@ -2009,3 +2010,18 @@ def redirect(obj, suffix=None):
         return HttpResponseRedirect(reverse('view_product', args=(obj.id,)) + real_suffix)
     else:
         raise NotImplementedError
+
+
+def get_return_url(request_params):
+    return request_params.get('return_url', None)
+
+
+def redirect_to_return_url_or_else(request, or_else):
+    return_url = get_return_url(request.POST)
+    if return_url is not None and return_url.strip():
+        return HttpResponseRedirect(return_url)
+    elif or_else:
+        return HttpResponseRedirect(or_else)
+    else:
+        messages.add_message(request, messages.ERROR, 'Unable to redirect anywhere.', extra_tags='alert-danger')
+        return HttpResponseRedirect(request.get_full_path())

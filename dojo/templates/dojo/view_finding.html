@@ -532,17 +532,20 @@
                                         <form method="post"
                                               action="{% url 'reset_finding_duplicate_status' similar.id %}">
                                             {% csrf_token %}
+                                            <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
                                             <input type="submit" value="Reset duplicate status"/>
                                         </form>
                                     {% elif finding.original_finding.id != similar.id %}
                                         <form method="post"
                                               action="{% url 'mark_finding_duplicate' original_id=similar.id duplicate_id=finding.id %}">
                                             {% csrf_token %}
+                                            <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
                                             <input type="submit" value="Use as original"/>
                                         </form>
                                         <form method="post"
                                               action="{% url 'mark_finding_duplicate' duplicate_id=similar.id original_id=finding.id %}">
                                             {% csrf_token %}
+                                            <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
                                             <input type="submit" value="Mark as duplicate"/>
                                         </form>
                                     {% else %}
