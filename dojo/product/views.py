@@ -57,11 +57,10 @@ def product(request):
                     for word in product.name.split() if len(word) > 2]
 
     prod_filter = ProductFilter(request.GET, queryset=prods, user=request.user)
-    # prod_list = get_page_items(request, prod_filter.qs, 25)
-    prod_list = get_page_items(request, prefetch_for_product(prod_filter.qs), 25)
+    prod_list = get_page_items(request, prod_filter.qs, 25)
 
     # perform annotation/prefetching by replacing the queryset in the page with an annotated/prefetched queryset.
-    # prod_list.object_list = prefetch_for_product(prod_list.object_list)
+    prod_list.object_list = prefetch_for_product(prod_list.object_list)
 
     """
     if 'tags' in request.GET:
