@@ -38,7 +38,8 @@ from dojo.models import Finding, Notes, NoteHistory, Note_Type, \
     FindingImageAccessToken, JIRA_Issue, JIRA_PKey, GITHUB_PKey, GITHUB_Issue, Dojo_User, Cred_Mapping, Test, Product, User, Engagement
 from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_notifications, \
     add_comment, jira_get_resolution_id, jira_change_resolution_id, get_jira_connection, \
-    get_system_setting, apply_cwe_to_template, Product_Tab, calculate_grade, log_jira_alert
+    get_system_setting, apply_cwe_to_template, Product_Tab, calculate_grade, log_jira_alert, \
+    redirect_to_return_url_or_else
 from dojo.notifications.helper import create_notification
 
 from dojo.tasks import add_issue_task, update_issue_task, update_external_issue_task, add_comment_task, \
@@ -561,7 +562,7 @@ def delete_finding(request, fid):
                                 url=request.build_absolute_uri(reverse('all_findings')),
                                 recipients=[finding.test.engagement.lead],
                                 icon="exclamation-triangle")
-            return HttpResponseRedirect(reverse('view_test', args=(tid, )))
+            return redirect_to_return_url_or_else(request, reverse('view_test', args=(tid,)))
         else:
             messages.add_message(
                 request,
@@ -607,8 +608,6 @@ def edit_finding(request, fid):
 
     if request.method == 'POST':
         form = FindingForm(request.POST, instance=finding, template=False)
-        source = request.POST.get("source", "")
-        page = request.POST.get("page", "")
         if finding.active:
             if (form['active'].value() is False or form['false_p'].value()) and form['duplicate'].value() is False:
                 note_type_activation = Note_Type.objects.filter(is_active=True).count()
@@ -725,22 +724,8 @@ def edit_finding(request, fid):
                         messages.SUCCESS,
                         'A finding template was also created.',
                         extra_tags='alert-success')
-            page_value = ""
-            if page:
-                try:
-                    if int(page):
-                        page_value = "&page=" + str(page)
-                except:
-                    pass
 
-            if source == "test":
-                return HttpResponseRedirect(reverse('view_test', args=(new_finding.test.id, )))
-            elif source == "product_findings":
-                return HttpResponseRedirect(reverse('product_open_findings', args=(new_finding.test.engagement.product.id, )) + '?test__engagement__product=' + str(new_finding.test.engagement.product.id) + page_value)
-            elif source == "all_product_findings":
-                return HttpResponseRedirect(reverse('open_findings') + '?' + page_value)
-            else:
-                return HttpResponseRedirect(reverse('view_finding', args=(new_finding.id, )))
+            return redirect_to_return_url_or_else(request, reverse('view_finding', args=(new_finding.id,)))
         else:
             messages.add_message(
                 request,
@@ -765,13 +750,14 @@ def edit_finding(request, fid):
             title=finding.title).exclude(
             id=finding.id)
     product_tab = Product_Tab(finding.test.engagement.product.id, title="Edit Finding", tab="findings")
-    return render(request, 'dojo/edit_findings.html', {
+    return render(request, 'dojo/edit_finding.html', {
         'product_tab': product_tab,
         'form': form,
         'finding': finding,
         'jform': jform,
         'gform': gform,
         'dupes': finding_dupes,
+        'return_url': return_url
     })
 
 
@@ -1747,7 +1733,7 @@ def finding_bulk_update_all(request, pid=None):
                                      'Unable to process bulk update. Required fields were not selected.',
                                      extra_tags='alert-danger')
 
-        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+    return redirect_to_return_url_or_else(request, None)
 
 
 def find_available_notetypes(notes):
@@ -1799,7 +1785,8 @@ def mark_finding_duplicate(request, original_id, duplicate_id):
     duplicate.save()
     original.found_by.add(duplicate.test.test_type)
     original.save()
-    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+    return redirect_to_return_url_or_else(request, reverse('view_finding', args=(duplicate.id,)))
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -1814,4 +1801,5 @@ def reset_finding_duplicate_status(request, duplicate_id):
     duplicate.last_reviewed = timezone.now()
     duplicate.last_reviewed_by = request.user
     duplicate.save()
-    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+    return redirect_to_return_url_or_else(request, reverse('view_finding', args=(duplicate.id,)))

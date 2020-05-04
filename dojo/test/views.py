@@ -25,9 +25,11 @@ from dojo.filters import TemplateFindingFilter, OpenFindingFilter
 from dojo.forms import NoteForm, TestForm, FindingForm, \
     DeleteTestForm, AddFindingForm, \
     ImportScanForm, ReImportScanForm, FindingBulkUpdateForm, JIRAFindingForm
-from dojo.models import Product, Finding, Test, Notes, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, Finding_Template, JIRA_PKey, Cred_Mapping, Dojo_User, JIRA_Issue, System_Settings
+from dojo.models import Product, Finding, Test, Notes, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, \
+    Finding_Template, JIRA_PKey, Cred_Mapping, Dojo_User, JIRA_Issue, System_Settings
 from dojo.tools.factory import import_parser_factory
-from dojo.utils import get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting, Product_Tab, calculate_grade, log_jira_alert, max_safe
+from dojo.utils import get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting, \
+    Product_Tab, calculate_grade, log_jira_alert, max_safe, redirect_to_return_url_or_else
 from dojo.notifications.helper import create_notification
 from dojo.tasks import add_issue_task, update_issue_task
 from functools import reduce
@@ -595,7 +597,7 @@ def finding_bulk_update(request, tid):
                                      'Unable to process bulk update. Required fields were not selected.',
                                      extra_tags='alert-danger')
 
-    return HttpResponseRedirect(reverse('view_test', args=(test.id,)))
+    return redirect_to_return_url_or_else(request, reverse('view_test', args=(test.id,)))
 
 
 @user_passes_test(lambda u: u.is_staff)

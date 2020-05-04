@@ -40,16 +40,7 @@
     {% else %}
         <form id="add_finding" class="form-horizontal" action="{% url 'edit_finding' finding.id %}" method="post">
             {% csrf_token %}
-            {% if request.GET.source == "test" %}
-                <input type="hidden" name="source" value="test">
-            {% elif request.GET.source == "product_findings" %}
-                <input type="hidden" name="source" value="product_findings">
-            {% elif request.GET.source == "all_product_findings" %}
-                <input type="hidden" name="source" value="all_product_findings">
-            {% endif %}
-            {% if request.GET.page %}
-              <input type="hidden" name="page" value="{{ request.GET.page|paginator_form }}">
-            {% endif %}
+            <input type="hidden" name="return_url" value="{{ return_url }}" />            
             {% include "dojo/form_fields.html" with form=form %}
             <div class="form-group hidden">
                 {% if dupes %}
