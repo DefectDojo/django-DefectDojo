@@ -172,7 +172,7 @@ class ProductMetaSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'first_name', 'last_name', 'last_login')
+        fields = ('id', 'username', 'first_name', 'last_name', 'email', 'last_login')
 
 
 class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
