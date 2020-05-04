@@ -40,7 +40,7 @@ cryptography==2.9.2
 python-dateutil==2.8.1
 python-nmap==0.6.1
 pytz==2020.1
-redis==3.4.1
+redis==3.5.0
 requests>=2.22.0
 sqlalchemy  # Required by Celery broker transport
 supervisor==4.1.0
