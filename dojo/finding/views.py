@@ -39,7 +39,7 @@ from dojo.models import Finding, Notes, NoteHistory, Note_Type, \
 from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_notifications, \
     add_comment, jira_get_resolution_id, jira_change_resolution_id, get_jira_connection, \
     get_system_setting, apply_cwe_to_template, Product_Tab, calculate_grade, log_jira_alert, \
-    redirect_to_return_url_or_else
+    redirect_to_return_url_or_else, get_return_url
 from dojo.notifications.helper import create_notification
 
 from dojo.tasks import add_issue_task, update_issue_task, update_external_issue_task, add_comment_task, \
@@ -757,7 +757,7 @@ def edit_finding(request, fid):
         'jform': jform,
         'gform': gform,
         'dupes': finding_dupes,
-        'return_url': return_url
+        'return_url': get_return_url(request.GET)
     })
 
 

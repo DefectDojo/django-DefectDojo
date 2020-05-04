@@ -2001,9 +2001,13 @@ def merge_sets_safe(set1, set2):
     # return {*set1, *set2}
 
 
+def get_return_url(request_params):
+    return request_params.get('return_url', None)
+
+
 def redirect_to_return_url_or_else(request, or_else):
-    return_url = request.POST.get('return_url', '')
-    if return_url and return_url.strip():
+    return_url = get_return_url(request.POST)
+    if return_url is not None and return_url.strip():
         return HttpResponseRedirect(return_url)
     elif or_else:
         return HttpResponseRedirect(or_else)
