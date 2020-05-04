@@ -150,28 +150,12 @@ django_filter=open_findings_filter):
 
     findings_filter = django_filter(request, findings, request.user, pid)
 
-    # if request.user.is_staff:
-    #     findings_filter = OpenFindingSuperFilter(
-    #         request.GET, queryset=findings, user=request.user, pid=pid)
-    # else:
-    #     findings = findings.filter(
-    #         test__engagement__product__authorized_users__in=[request.user])
-    #     findings_filter = OpenFindingFilter(
-    #         request.GET, queryset=findings, user=request.user, pid=pid)
-
     title_words = [
         word for word in list(findings_filter.qs.values_list('title', flat=True).distinct()) if len(word) > 2
     ]
     title_words = sorted(set(title_words))
 
     paged_findings = get_page_items(request, prefetch_for_findings(findings_filter.qs), 25)
-
-    # what does this do besides checking for existence?
-    # product_type = None
-    # if 'test__engagement__product__prod_type' in request.GET:
-    #     p = request.GET.getlist('test__engagement__product__prod_type', [])
-    #     if len(p) == 1:
-    #         product_type = get_object_or_404(Product_Type, id=p[0])
 
     # show custom breadcrumb if user has filtered by exactly 1 endpoint
     endpoint = None
@@ -184,20 +168,11 @@ django_filter=open_findings_filter):
             filter_name = "Vulnerable Endpoints"
             custom_breadcrumb = OrderedDict([("Endpoints", reverse('vulnerable_endpoints')), (endpoint, reverse('view_endpoint', args=(endpoint.id, )))])
 
-    # found by not used anymore in any template. openfindingsfilter has its own query
-    # found_by = None
-    # try:
-    #     found_by = findings_filter.found_by.all().distinct()
-    # except:
-    #     found_by = None
-    #     pass
-
     if jira_config:
         jira_config = jira_config.conf_id
     if github_config:
         github_config = github_config.conf_id
 
-    # paged_findings.object_list = prefetch_for_findings(paged_findings.object_list)
     return render(
         request, 'dojo/findings_list.html', {
             'show_product_column': show_product_column,
