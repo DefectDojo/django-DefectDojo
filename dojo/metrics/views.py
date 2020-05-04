@@ -251,7 +251,7 @@ def metrics(request, mtype):
 
         if finding.test.engagement.product.name not in in_period_details:
             in_period_details[finding.test.engagement.product.name] = {
-                'path': reverse('view_product_findings', args=(finding.test.engagement.product.id,)),
+                'path': reverse('product_open_findings', args=(finding.test.engagement.product.id,)),
                 'Critical': 0, 'High': 0, 'Medium': 0, 'Low': 0, 'Info': 0, 'Total': 0}
         in_period_details[
             finding.test.engagement.product.name
@@ -772,7 +772,7 @@ def view_engineer(request, eid):
                 ).count()
         prod = Product.objects.get(id=product)
         all_findings_link = "<a href='%s'>%s</a>" % (
-            reverse('view_product_findings', args=(prod.id,)), escape(prod.name))
+            reverse('product_open_findings', args=(prod.id,)), escape(prod.name))
         update.append([all_findings_link, z_count, o_count, t_count, h_count,
                        z_count + o_count + t_count + h_count])
     total_update = []
@@ -805,7 +805,7 @@ def view_engineer(request, eid):
                     severity='Low').count()
         prod = Product.objects.get(id=product)
         all_findings_link = "<a href='%s'>%s</a>" % (
-            reverse('view_product_findings', args=(prod.id,)), escape(prod.name))
+            reverse('product_open_findings', args=(prod.id,)), escape(prod.name))
         total_update.append([all_findings_link, z_count, o_count, t_count,
                              h_count, z_count + o_count + t_count + h_count])
 

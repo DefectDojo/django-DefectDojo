@@ -447,12 +447,14 @@
                             return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
                     }},
                     {% if system_settings.enable_jira %}
+                      {% if jira_config and product_tab or not product_tab %}                    
                         { "data": "jira_age", render: function (data, type, row) {
                                 return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
                         }},
                         { "data": "jira_change", render: function (data, type, row) {
                                 return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
                         }},
+                      {% endif %}                          
                     {% endif %}
                     {% if show_product_column and product_tab is None %}
                         { "data": "product" , render: function (data, type, row) {
