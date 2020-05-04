@@ -40,7 +40,9 @@
     {% else %}
         <form id="add_finding" class="form-horizontal" action="{% url 'edit_finding' finding.id %}" method="post">
             {% csrf_token %}
-            <input type="hidden" name="return_url" value="{{ return_url }}" />            
+            {% if return_url %}
+                <input type="hidden" name="return_url" value="{{ return_url }}" />            
+            {% endif %}
             {% include "dojo/form_fields.html" with form=form %}
             <div class="form-group hidden">
                 {% if dupes %}
