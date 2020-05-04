@@ -987,7 +987,7 @@ class NoteSerializer(serializers.ModelSerializer):
         model = Notes
         fields = '__all__'
 
-    
+
 class NoteTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Note_Type
