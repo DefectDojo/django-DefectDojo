@@ -27,7 +27,7 @@ gunicorn==20.0.4
 html2text==2020.1.16
 humanize==2.4.0
 jira==2.0.0
-PyGithub==1.50
+PyGithub==1.51
 lxml==4.5.0
 Markdown==3.2.1
 mysqlclient==1.4.6
@@ -40,7 +40,7 @@ cryptography==2.9.2
 python-dateutil==2.8.1
 python-nmap==0.6.1
 pytz==2020.1
-redis==3.4.1
+redis==3.5.0
 requests>=2.22.0
 sqlalchemy  # Required by Celery broker transport
 supervisor==4.1.0
