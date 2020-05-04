@@ -44,7 +44,7 @@ from dojo.notifications.helper import create_notification
 from dojo.tasks import add_issue_task, update_issue_task, update_external_issue_task, add_comment_task, \
     add_external_issue_task, close_external_issue_task, reopen_external_issue_task
 from django.template.defaultfilters import pluralize
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 
 logger = logging.getLogger(__name__)
 
