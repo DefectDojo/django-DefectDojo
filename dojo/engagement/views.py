@@ -76,7 +76,7 @@ def engagement(request):
                                                             'engagement_set__test_set__lead', 'engagement_set__test_set__test_type'))
     prods = get_page_items(request, filtered.qs, 25)
     name_words = products_with_engagements.values_list('name', flat=True)
-    eng_words = Engagement.objects.filter(active=True).values_list('name', flat=True)
+    eng_words = Engagement.objects.filter(active=True).values_list('name', flat=True).distinct()
 
     add_breadcrumb(
         title="Active Engagements",
@@ -106,7 +106,7 @@ def engagements_all(request):
     prods = get_page_items(request, filtered.qs, 25)
 
     name_words = products_with_engagements.values_list('name', flat=True)
-    eng_words = Engagement.objects.all().values_list('name', flat=True)
+    eng_words = Engagement.objects.all().values_list('name', flat=True).distinct()
 
     add_breadcrumb(
         title="All Engagements",
