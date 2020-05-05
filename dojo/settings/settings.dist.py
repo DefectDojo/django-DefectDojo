@@ -758,7 +758,12 @@ LOGGING = {
             'handlers': ['console'],
             'level': 'INFO',
             'propagate': False,
-        }
+        },
+        'MARKDOWN': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
     }
 }
 
