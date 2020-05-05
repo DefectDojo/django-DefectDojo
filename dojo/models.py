@@ -1423,6 +1423,7 @@ class Finding(models.Model):
         ordering = ('numerical_severity', '-date', 'title')
         indexes = [
             models.Index(fields=['cve']),
+            models.Index(fields=['cwe']),
             models.Index(fields=['out_of_scope']),
             models.Index(fields=['false_p']),
             models.Index(fields=['verified']),
