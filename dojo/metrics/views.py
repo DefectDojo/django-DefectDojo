@@ -48,7 +48,7 @@ def critical_product_metrics(request, mtype):
     })
 
 
-@cache_page(60 * 5)  # cache for 5 minutes
+# @cache_page(60 * 5)  # cache for 5 minutes
 def metrics(request, mtype):
     template = 'dojo/metrics.html'
     page_name = 'Product Type Metrics'
@@ -112,14 +112,14 @@ def metrics(request, mtype):
                         tzinfo=timezone.get_current_timezone())
 
     if len(prod_type) > 0:
-        findings_closed = Finding.objects.filter(mitigated__range=[start_date, end_date],
+        findings_closed = Finding.objects.filter(mitigated__date__range=[start_date, end_date],
                                                  test__engagement__product__prod_type__in=prod_type).prefetch_related(
             'test__engagement__product')
         # capture the accepted findings in period
-        accepted_findings = Finding.objects.filter(risk_acceptance__created__range=[start_date, end_date],
+        accepted_findings = Finding.objects.filter(risk_acceptance__created__date__range=[start_date, end_date],
                                                    test__engagement__product__prod_type__in=prod_type). \
             prefetch_related('test__engagement__product')
-        accepted_findings_counts = Finding.objects.filter(risk_acceptance__created__range=[start_date, end_date],
+        accepted_findings_counts = Finding.objects.filter(risk_acceptance__created__date__range=[start_date, end_date],
                                                           test__engagement__product__prod_type__in=prod_type). \
             prefetch_related('test__engagement__product').aggregate(
             total=Sum(
@@ -148,11 +148,11 @@ def metrics(request, mtype):
                      output_field=IntegerField())),
         )
     else:
-        findings_closed = Finding.objects.filter(mitigated__range=[start_date, end_date]).prefetch_related(
+        findings_closed = Finding.objects.filter(mitigated__date__range=[start_date, end_date]).prefetch_related(
             'test__engagement__product')
-        accepted_findings = Finding.objects.filter(risk_acceptance__created__range=[start_date, end_date]). \
+        accepted_findings = Finding.objects.filter(risk_acceptance__created__date__range=[start_date, end_date]). \
             prefetch_related('test__engagement__product')
-        accepted_findings_counts = Finding.objects.filter(risk_acceptance__created__range=[start_date, end_date]). \
+        accepted_findings_counts = Finding.objects.filter(risk_acceptance__created__date__range=[start_date, end_date]). \
             prefetch_related('test__engagement__product').aggregate(
             total=Sum(
                 Case(When(severity__in=('Critical', 'High', 'Medium', 'Low'),
@@ -449,12 +449,12 @@ def product_type_counts(request):
 
             opened_in_period_list.append(oip)
 
-            closed_in_period = Finding.objects.filter(mitigated__range=[start_date, end_date],
+            closed_in_period = Finding.objects.filter(mitigated__date__range=[start_date, end_date],
                                                       test__engagement__product__prod_type=pt,
                                                       severity__in=('Critical', 'High', 'Medium', 'Low')).values(
                 'numerical_severity').annotate(Count('numerical_severity')).order_by('numerical_severity')
 
-            total_closed_in_period = Finding.objects.filter(mitigated__range=[start_date, end_date],
+            total_closed_in_period = Finding.objects.filter(mitigated__date__range=[start_date, end_date],
                                                             test__engagement__product__prod_type=pt,
                                                             severity__in=(
                                                                 'Critical', 'High', 'Medium', 'Low')).aggregate(
