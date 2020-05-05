@@ -14,6 +14,8 @@ django-imagekit==4.0.2
 django-multiselectfield==0.1.12
 django-overextends==0.4.3
 django-polymorphic==2.1.2
+django-crispy-forms==1.9.0
+django_extensions==2.2.9
 django-rest-swagger==2.2.0
 django-slack==5.14.3
 django-tagging==0.5.0
@@ -51,7 +53,6 @@ whitenoise>=4.1.2
 titlecase==0.12.0
 social-auth-app-django==3.1.0
 Python-jose==3.1.0
-git+https://github.com/DefectDojo/defectDojo-engagement-survey.git@8437e158fbc751e9e548952c6202191e22515320#egg=defectDojo-engagement-survey
 gitpython>=2.1.13
 ptvsd>=4.2.7
 google-api-python-client==1.8.2

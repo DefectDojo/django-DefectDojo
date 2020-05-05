@@ -116,6 +116,10 @@
                                 v1 Docs</a></li>
                             <li><a href="{% url 'api_v2_schema' %}"><i class="fa fa-book fa-fw"></i> API
                                 v2 Docs</a></li>
+                            {{ block.super }}
+                            {% if user.is_staff %}
+                                <li><a href="{% url 'survey' %}"> <i class="fa fa-hospital-o fa-fw"> </i> Surveys </a></li>
+                            {% endif %}
                         {% endblock %}
                         {% if request.user.is_authenticated %}
                             <li><a href="{% url 'logout' %}"><i class="fa fa-sign-out fa-fw"></i> Logout</a></li>
@@ -282,6 +286,16 @@
                                         <span>Calendar</span>
                                     </a>
                                 </li>
+                                <li>
+                                    <a href="#"><i class="fa fa-hospital-o fa-fw"> </i> <span>Surveys</span><span
+                                            class="glyphicon arrow"></span></a>
+                                    <ul class="nav nav-second-level">
+                                        <li><a href="{% url 'survey' %}">All Surveys </a></li>
+                                        <li><a href="{% url 'questions' %}">All Questions </a></li>
+
+                                    </ul>
+                                    <!-- /.nav-second-level -->
+                                </li>
                             {% endif %}                                
                                 <li id="menu_configuration">
 				                    <a href="#" aria-expanded="false" aria-label="Configuration">
@@ -307,8 +321,6 @@
                                         {% endif %}
                                         <li><a href="{% url 'notifications' %}">Notifications</a></li>
                                     </ul>
-                                </li>
-
                         {% endblock %}
 
                         <li id="min-menu">

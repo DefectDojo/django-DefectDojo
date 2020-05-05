@@ -17,6 +17,8 @@ setup(
         'django-multiselectfield',
         'django-overextends==0.4.3',  # Required for extensions
         'django-polymorphic==1.2',
+        'django-crispy-forms',
+        'django_extensions',
         'django-rest-swagger==2.1.2',
         'django-slack',
         'django-tagging',
@@ -45,7 +47,6 @@ setup(
         'celery>=4.1.1',
         'kombu>=4.1',
         'sqlalchemy',
-        'django-polymorphic==1.2',
         'pdfkit==0.6.1',
         'django-overextends',
         'defusedxml',
