@@ -13,7 +13,7 @@ from dojo.models import Finding, Engagement, Risk_Acceptance
 from django.db.models import Count
 from dojo.utils import add_breadcrumb, get_punchcard_data
 
-from defectDojo_engagement_survey.models import Answered_Survey
+from dojo.models import Answered_Survey
 
 logger = logging.getLogger(__name__)
 
