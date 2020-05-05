@@ -10,9 +10,9 @@
 		{% include "dojo/form_fields.html" with form=form %}
 			<div class="form-group">
 				<div class="col-sm-offset-2 col-sm-10">
-					<input class="btn btn-primary" type="submit" name="add_survey" value="Add Survey" />
+					<input class="btn btn-primary" type="submit" label="add_survey" name="add_survey" value="Add Survey" />
 					{% if engagement %}
-						<input class="btn btn-primary" type="submit" name="respond_survey" value="Add Survey and Respond" />
+						<input class="btn btn-primary" type="submit" label="respond_survey" name="respond_survey" value="Add Survey and Respond" />
 					{% endif %} 
 				</div>
 			</div>
