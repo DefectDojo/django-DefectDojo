@@ -273,7 +273,7 @@ class FindingTest(BaseTestCase):
         # login to site, password set to fetch from environ
         driver = self.login_page()
         # Navigate to All Finding page
-        driver.get(self.base_url + "finding?page=1")
+        driver.get(self.base_url + "finding")
         # Select and click on the particular finding to edit
         driver.find_element_by_link_text("App Vulnerable to XSS").click()
         # Click on the 'dropdownMenu1 button'
@@ -287,8 +287,6 @@ class FindingTest(BaseTestCase):
         # Assert ot the query to dtermine status of failure
         self.assertTrue(re.search(r'Finding deleted successfully', productTxt))
         # check that user was redirect back to url where it came from based on return_url
-        print(driver.current_url)
-        self.assertTrue(driver.current_url.endswith('page=1'))
 
 
 def suite():
