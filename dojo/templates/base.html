@@ -142,7 +142,7 @@
                             {% endif %}
                             <li>
                                 {% if request.user.is_staff %}
-                                    <a href="#" aria-expanded="false" aria-label="Products">
+                                    <a href="{% url 'product' %}" aria-expanded="false" aria-label="Products">
                                         <i class="fa fa-list fa-fw"></i>
                                         <span>Products</span>
                                         <span class="glyphicon arrow"></span>
@@ -170,7 +170,7 @@
                             </li>
                             {% if request.user.is_staff %}
                                 <li>
-                                    <a href="#" aria-expanded="false" aria-label="Engagements">
+                                    <a href="{% url 'engagements_all' %}" aria-expanded="false" aria-label="Engagements">
                                         <i class="fa fa-inbox fa-fw"></i>
                                         <span>Engagements</span>
                                         <span class="glyphicon arrow"></span>
@@ -192,7 +192,7 @@
                                     <!-- /.nav-second-level -->
                                 </li>
                                 <li>
-                                    <a href="#" aria-expanded="false" aria-label="Findings">
+                                    <a href="{% url 'open_findings' %}" aria-expanded="false" aria-label="Findings">
                                         <i class="fa fa-bug fa-fw"></i>
                                         <span>Findings</span>
                                         <span class="glyphicon arrow"></span>
@@ -217,7 +217,7 @@
                                     <!-- /.nav-second-level -->
                                 </li>
                                 <li>
-                                    <a href="#" aria-expanded="false" aria-label="Endpoints">
+                                    <a href="{% url 'endpoints' %}" aria-expanded="false" aria-label="Endpoints">
 					                    <i class="fa fa-sitemap fa-fw"></i>
                                         <span>Endpoints</span>
                                         <span class="glyphicon arrow"></span>
@@ -236,7 +236,7 @@
                             {% endif %}
                             {% if request.user.is_authenticated %}
                             <li>
-                                <a href="#" aria-expanded="false" aria-label="Reports">
+                                <a href="{% url 'reports' %}" aria-expanded="false" aria-label="Reports">
 				                    <i class="fa fa-file-text-o fa-fw"></i>
                                     <span>Reports</span>
                                     <span class="glyphicon arrow"></span>
@@ -248,7 +248,7 @@
                                 <!-- /.nav-second-level -->
                             </li>
                             <li>
-                                <a href="#" aria-expanded="false" aria-label="Metrics">
+                                <a href="{% url 'metrics' %}?date=5&view=dashboard" aria-expanded="false" aria-label="Metrics">
 				                    <i class="fa fa-bar-chart fa-fw"></i>
                                     <span>Metrics</span>
                                     <span class="glyphicon arrow"></span>
