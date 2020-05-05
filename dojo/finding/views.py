@@ -151,7 +151,7 @@ django_filter=open_findings_filter):
     findings_filter = django_filter(request, findings, request.user, pid)
 
     title_words = [
-        word for word in list(findings_filter.qs.values_list('title', flat=True).distinct()) if len(word) > 2
+        word for title in findings_filter.qs.values_list('title', flat=True) for word in title.split() if len(word) > 2
     ]
     title_words = sorted(set(title_words))
 
