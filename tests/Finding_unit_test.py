@@ -287,6 +287,7 @@ class FindingTest(BaseTestCase):
         # Assert ot the query to dtermine status of failure
         self.assertTrue(re.search(r'Finding deleted successfully', productTxt))
         # check that user was redirect back to url where it came from based on return_url
+        print(driver.current_url)
         self.assertTrue(driver.current_url.endswith('page=1'))
 
 
