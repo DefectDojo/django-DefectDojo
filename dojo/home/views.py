@@ -27,9 +27,7 @@ def home(request):
 @user_passes_test(lambda u: u.is_staff)
 def dashboard(request):
     now = timezone.now()
-    # today = timezone.make_aware(datetime.combine(now, datetime.max.time()))
     seven_days_ago = now - timedelta(days=6)  # 6 days plus today
-    # seven_days_ago_start = timezone.make_aware(datetime.combine(seven_days_ago, datetime.min.time()))
 
     if request.user.is_superuser:
         engagement_count = Engagement.objects.filter(active=True).count()
