@@ -465,9 +465,9 @@ class ClosedFindingFilter(DojoFilter):
     def __init__(self, *args, **kwargs):
         super(ClosedFindingFilter, self).__init__(*args, **kwargs)
         cwe = dict()
-        cwe = dict([finding.cwe, finding.cwe]
-                   for finding in self.queryset.distinct()
-                   if type(finding.cwe) is int and finding.cwe is not None and finding.cwe > 0 and finding.cwe not in cwe)
+        cwe = dict([cwe, cwe]
+                   for cwe in self.queryset.values_list('cwe', flat=True).distinct()
+                   if type(cwe) is int and cwe is not None and cwe > 0)
         cwe = collections.OrderedDict(sorted(cwe.items()))
         self.form.fields['cwe'].choices = list(cwe.items())
 
