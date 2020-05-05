@@ -654,9 +654,6 @@ def get_punchcard_data(findings, start_date, weeks):
         first_sunday = start_date - relativedelta(weekday=SU(-1))
         last_sunday = start_date + relativedelta(weeks=weeks)
 
-        print(first_sunday)
-        print(last_sunday)
-
         # reminder: The first week of a year is the one that contains the year’s first Thursday
         # so we could have for 29/12/2019: week=1 and year=2019 :-D. So using week number from db is not practical
 
@@ -726,9 +723,9 @@ def get_punchcard_data(findings, start_date, weeks):
 
         # add week in progress + empty weeks on the end if needed
         while tick < weeks + 1:
-            print(tick)
+            # print(tick)
             week_data, label = get_week_data(start_of_week, tick, day_counts)
-            print(week_data, label)
+            # print(week_data, label)
             punchcard.extend(week_data)
             ticks.append(label)
             tick += 1
@@ -1175,6 +1172,15 @@ def get_page_items(request, items, page_size, param_name='page'):
     return paginator.get_page(page)
 
 
+def get_page_items_and_count(request, items, page_size, param_name='page'):
+    size = request.GET.get('page_size', page_size)
+    paginator = Paginator(items, size)
+    page = request.GET.get(param_name)
+
+    # new get_page method will handle invalid page value, out of bounds pages, etc
+    return paginator.get_page(page), paginator.count
+
+
 def handle_uploaded_threat(f, eng):
     name, extension = os.path.splitext(f.name)
     with open(settings.MEDIA_ROOT + '/threat/%s%s' % (eng.id, extension),
@@ -1478,7 +1484,7 @@ def update_issue(find, push_to_jira):
                                                   jira_conf.finding_text),
                 priority={'name': jira_conf.get_priority(find.severity)},
                 fields=fields)
-            print('\n\nSaving jira_change\n\n')
+            # print('\n\nSaving jira_change\n\n')
             # Moving this to finding.save()
             # find.jira_change = timezone.now()
             # find.save()

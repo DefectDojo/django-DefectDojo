@@ -27,14 +27,14 @@ from tagging.models import Tag
 from itertools import chain
 
 from dojo.filters import OpenFindingFilter, \
-    OpenFingingSuperFilter, AcceptedFingingSuperFilter, \
-    ClosedFingingSuperFilter, TemplateFindingFilter
+    OpenFindingSuperFilter, AcceptedFindingSuperFilter, \
+    ClosedFindingSuperFilter, TemplateFindingFilter
 from dojo.forms import NoteForm, FindingNoteForm, CloseFindingForm, FindingForm, PromoteFindingForm, FindingTemplateForm, \
     DeleteFindingTemplateForm, FindingImageFormSet, JIRAFindingForm, GITHUBFindingForm, ReviewFindingForm, ClearFindingReviewForm, \
     DefectFindingForm, StubFindingForm, DeleteFindingForm, DeleteStubFindingForm, ApplyFindingTemplateForm, \
     FindingFormID, FindingBulkUpdateForm, MergeFindings
 from dojo.models import Product_Type, Finding, Notes, NoteHistory, Note_Type, \
-    Risk_Acceptance, BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, \
+    BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, \
     FindingImageAccessToken, JIRA_Issue, JIRA_PKey, GITHUB_PKey, GITHUB_Issue, Dojo_User, Cred_Mapping, Test, Product, User, Engagement
 from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_notifications, \
     add_comment, jira_get_resolution_id, jira_change_resolution_id, get_jira_connection, \
@@ -45,7 +45,6 @@ from dojo.tasks import add_issue_task, update_issue_task, update_external_issue_
     add_external_issue_task, close_external_issue_task, reopen_external_issue_task
 from django.template.defaultfilters import pluralize
 from django.db.models.query import QuerySet
-
 
 logger = logging.getLogger(__name__)
 
@@ -78,22 +77,24 @@ def verified_findings(request, pid=None, eid=None, view=None):
         else:
             findings = Finding.objects.filter(verified=True).order_by('numerical_severity')
 
-    if request.user.is_staff:
-        findings = OpenFingingSuperFilter(
-            request.GET, queryset=findings, user=request.user, pid=pid)
-    else:
+    if not request.user.is_staff:
         findings = findings.filter(
             test__engagement__product__authorized_users__in=[request.user])
-        findings = OpenFindingFilter(
-            request.GET, queryset=findings, user=request.user, pid=pid)
 
     title_words = [
-        word for finding in findings.qs for word in finding.title.split()
+        word for finding in findings for word in finding.title.split()
         if len(word) > 2
     ]
-
     title_words = sorted(set(title_words))
-    paged_findings = get_page_items(request, findings.qs, 25)
+
+    if request.user.is_staff:
+        findings_filter = OpenFindingSuperFilter(
+            request.GET, queryset=findings, user=request.user, pid=pid)
+    else:
+        findings_filter = OpenFindingFilter(
+            request.GET, queryset=findings, user=request.user, pid=pid)
+
+    paged_findings = get_page_items(request, findings_filter.qs, 25)
 
     product_type = None
     if 'test__engagement__product__prod_type' in request.GET:
@@ -113,7 +114,7 @@ def verified_findings(request, pid=None, eid=None, view=None):
 
     found_by = None
     try:
-        found_by = findings.found_by.all().distinct()
+        found_by = findings_filter.found_by.all().distinct()
     except:
         found_by = None
         pass
@@ -143,7 +144,7 @@ def verified_findings(request, pid=None, eid=None, view=None):
             'show_product_column': show_product_column,
             "product_tab": product_tab,
             "findings": paged_findings,
-            "filtered": findings,
+            "filtered": findings_filter,
             "title_words": title_words,
             'found_by': found_by,
             'custom_breadcrumb': custom_breadcrumb,
@@ -182,22 +183,24 @@ def out_of_scope_findings(request, pid=None, eid=None, view=None):
         else:
             findings = Finding.objects.filter(active=False, out_of_scope=True).order_by('numerical_severity')
 
-    if request.user.is_staff:
-        findings = OpenFingingSuperFilter(
-            request.GET, queryset=findings, user=request.user, pid=pid)
-    else:
+    if not request.user.is_staff:
         findings = findings.filter(
             test__engagement__product__authorized_users__in=[request.user])
-        findings = OpenFindingFilter(
-            request.GET, queryset=findings, user=request.user, pid=pid)
 
     title_words = [
-        word for finding in findings.qs for word in finding.title.split()
+        word for finding in findings for word in finding.title.split()
         if len(word) > 2
     ]
-
     title_words = sorted(set(title_words))
-    paged_findings = get_page_items(request, findings.qs, 25)
+
+    if request.user.is_staff:
+        findings_filter = OpenFindingSuperFilter(
+            request.GET, queryset=findings, user=request.user, pid=pid)
+    else:
+        findings_filter = OpenFindingFilter(
+            request.GET, queryset=findings, user=request.user, pid=pid)
+
+    paged_findings = get_page_items(request, findings_filter.qs, 25)
 
     product_type = None
     if 'test__engagement__product__prod_type' in request.GET:
@@ -247,7 +250,7 @@ def out_of_scope_findings(request, pid=None, eid=None, view=None):
             'show_product_column': show_product_column,
             "product_tab": product_tab,
             "findings": paged_findings,
-            "filtered": findings,
+            "filtered": findings_filter,
             "title_words": title_words,
             'found_by': found_by,
             'custom_breadcrumb': custom_breadcrumb,
@@ -286,22 +289,24 @@ def false_positive_findings(request, pid=None, eid=None, view=None):
         else:
             findings = Finding.objects.filter(active=False, duplicate=False, false_p=True).order_by('numerical_severity')
 
-    if request.user.is_staff:
-        findings = OpenFingingSuperFilter(
-            request.GET, queryset=findings, user=request.user, pid=pid)
-    else:
+    if not request.user.is_staff:
         findings = findings.filter(
             test__engagement__product__authorized_users__in=[request.user])
-        findings = OpenFindingFilter(
-            request.GET, queryset=findings, user=request.user, pid=pid)
 
     title_words = [
-        word for finding in findings.qs for word in finding.title.split()
+        word for finding in findings for word in finding.title.split()
         if len(word) > 2
     ]
-
     title_words = sorted(set(title_words))
-    paged_findings = get_page_items(request, findings.qs, 25)
+
+    if request.user.is_staff:
+        findings_filter = OpenFindingSuperFilter(
+            request.GET, queryset=findings, user=request.user, pid=pid)
+    else:
+        findings_filter = OpenFindingFilter(
+            request.GET, queryset=findings, user=request.user, pid=pid)
+
+    paged_findings = get_page_items(request, findings_filter.qs, 25)
 
     product_type = None
     if 'test__engagement__product__prod_type' in request.GET:
@@ -351,7 +356,7 @@ def false_positive_findings(request, pid=None, eid=None, view=None):
             'show_product_column': show_product_column,
             "product_tab": product_tab,
             "findings": paged_findings,
-            "filtered": findings,
+            "filtered": findings_filter,
             "title_words": title_words,
             'found_by': found_by,
             'custom_breadcrumb': custom_breadcrumb,
@@ -380,22 +385,20 @@ def inactive_findings(request, pid=None, eid=None, view=None):
 
     findings = findings.filter(active=False, duplicate=False, is_Mitigated=False, false_p=False, out_of_scope=False).order_by('numerical_severity')
 
-    if request.user.is_staff:
-        findings = OpenFingingSuperFilter(
-            request.GET, queryset=findings, user=request.user, pid=pid)
-    else:
-        findings = findings.filter(
-            test__engagement__product__authorized_users__in=[request.user])
-        findings = OpenFindingFilter(
-            request.GET, queryset=findings, user=request.user, pid=pid)
-
     title_words = [
-        word for finding in findings.qs for word in finding.title.split()
+        word for finding in findings for word in finding.title.split()
         if len(word) > 2
     ]
-
     title_words = sorted(set(title_words))
-    paged_findings = get_page_items(request, findings.qs, 25)
+
+    if request.user.is_staff:
+        findings_filter = OpenFindingSuperFilter(
+            request.GET, queryset=findings, user=request.user, pid=pid)
+    else:
+        findings_filter = OpenFindingFilter(
+            request.GET, queryset=findings, user=request.user, pid=pid)
+
+    paged_findings = get_page_items(request, findings_filter.qs, 25)
 
     product_type = None
     if 'test__engagement__product__prod_type' in request.GET:
@@ -445,7 +448,7 @@ def inactive_findings(request, pid=None, eid=None, view=None):
             'show_product_column': show_product_column,
             "product_tab": product_tab,
             "findings": paged_findings,
-            "filtered": findings,
+            "filtered": findings_filter,
             "title_words": title_words,
             'found_by': found_by,
             'custom_breadcrumb': custom_breadcrumb,
@@ -495,7 +498,7 @@ def open_findings(request, pid=None, eid=None, view=None):
     title_words = sorted(set(title_words))
 
     if request.user.is_staff:
-        findings_filter = OpenFingingSuperFilter(
+        findings_filter = OpenFindingSuperFilter(
             request.GET, queryset=findings, user=request.user, pid=pid)
     else:
         findings_filter = OpenFindingFilter(
@@ -580,6 +583,9 @@ def prefetch_for_findings(findings):
         # we could try to prefetch only the latest note with SubQuery and OuterRef, but I'm getting that MySql doesn't support limits in subqueries.
         prefetched_findings = prefetched_findings.prefetch_related('notes')
         prefetched_findings = prefetched_findings.prefetch_related('tagged_items__tag')
+    else:
+        logger.debug('unable to prefetch because query was already executed')
+
     return prefetched_findings
 
 
@@ -593,15 +599,14 @@ def accepted_findings(request, pid=None):
     # user = request.user
 
     findings = Finding.objects.filter(risk_acceptance__isnull=False)
-    findings = AcceptedFingingSuperFilter(request.GET, queryset=findings)
+    findings_filter = AcceptedFindingSuperFilter(request.GET, queryset=findings)
     title_words = [
-        word for ra in Risk_Acceptance.objects.all() for finding in
-        ra.accepted_findings.order_by('title').values('title').distinct()
-        for word in finding['title'].split() if len(word) > 2
+        word for finding in findings_filter.qs for word in finding.title.split()
+        if len(word) > 2
     ]
 
     title_words = sorted(set(title_words))
-    paged_findings = get_page_items(request, findings.qs, 25)
+    paged_findings = get_page_items(request, findings_filter.qs.order_by('numerical_severity'), 25)
 
     product_tab = None
     if pid:
@@ -614,7 +619,7 @@ def accepted_findings(request, pid=None):
             "findings": paged_findings,
             "product_tab": product_tab,
             "filter_name": "Accepted",
-            "filtered": findings,
+            "filtered": findings_filter,
             "title_words": title_words,
         })
 
@@ -622,14 +627,14 @@ def accepted_findings(request, pid=None):
 @user_passes_test(lambda u: u.is_staff)
 def closed_findings(request, pid=None):
     findings = Finding.objects.filter(mitigated__isnull=False)
-    findings = ClosedFingingSuperFilter(request.GET, queryset=findings)
+    findings_filter = ClosedFindingSuperFilter(request.GET, queryset=findings)
     title_words = [
-        word for finding in findings.qs for word in finding.title.split()
+        word for finding in findings for word in finding.title.split()
         if len(word) > 2
     ]
 
     title_words = sorted(set(title_words))
-    paged_findings = get_page_items(request, findings.qs.order_by('-mitigated'), 25)
+    paged_findings = get_page_items(request, findings_filter.qs.order_by('-mitigated'), 25)
 
     product_tab = None
     if pid:
@@ -641,7 +646,7 @@ def closed_findings(request, pid=None):
         request, 'dojo/findings_list.html', {
             "findings": paged_findings,
             "product_tab": product_tab,
-            "filtered": findings,
+            "filtered": findings_filter,
             "filter_name": "Closed",
             "title_words": title_words,
         })
@@ -1116,15 +1121,6 @@ def edit_finding(request, fid):
                 jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=enabled)
                 if jform.is_valid():
                     push_to_jira = jform.cleaned_data.get('push_to_jira')
-
-                    if JIRA_Issue.objects.filter(finding=new_finding).exists():
-                        update_issue_task.delay(
-                            new_finding, old_status,
-                            jform.cleaned_data.get('push_to_jira'))
-                    else:
-                        add_issue_task.delay(
-                            new_finding,
-                            jform.cleaned_data.get('push_to_jira'))
 
             if 'githubform-push_to_github' in request.POST:
                 gform = JIRAFindingForm(
@@ -2176,7 +2172,7 @@ def finding_bulk_update_all(request, pid=None):
 
                     # Because we never call finding.save() in a bulk update, we need to actually
                     # push the JIRA stuff here, rather than in finding.save()
-                    if JIRA_PKey.objects.filter(product=finding.test.engagement.product).count() == 0:
+                    if finding.jira_conf_new() is None:
                         log_jira_alert('Finding cannot be pushed to jira as there is no jira configuration for this product.', finding)
                     else:
                         push_anyway = finding.jira_conf_new().jira_pkey_set.first().push_all_issues
