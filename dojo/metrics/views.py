@@ -48,7 +48,7 @@ def critical_product_metrics(request, mtype):
     })
 
 
-# @cache_page(60 * 5)  # cache for 5 minutes
+@cache_page(60 * 5)  # cache for 5 minutes
 def metrics(request, mtype):
     template = 'dojo/metrics.html'
     page_name = 'Product Type Metrics'
