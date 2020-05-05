@@ -53,8 +53,7 @@ def product(request):
     # perform all stuff for filtering and pagination first, before annotation/prefetching
     # otherwise the paginator will perform all the annotations/prefetching already only to count the total number of records
     # see https://code.djangoproject.com/ticket/23771 and https://code.djangoproject.com/ticket/25375
-    name_words = [product.name for product in prods
-                    for word in product.name.split() if len(word) > 2]
+    name_words = prods.values_list('name', flat=True)
 
     prod_filter = ProductFilter(request.GET, queryset=prods, user=request.user)
     prod_list = get_page_items(request, prod_filter.qs, 25)
