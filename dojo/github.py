@@ -19,6 +19,10 @@ def reopen_external_issue_github(find, note, prod, eng):
         return
 
     github_product = GITHUB_PKey.objects.get(product=prod)
+    if github_product is None:
+        logger.error("Unable to get project key")
+        return
+
     github_conf = github_product.conf
     g_issue = GITHUB_Issue.objects.get(finding=find)
 
@@ -42,6 +46,10 @@ def close_external_issue_github(find, note, prod, eng):
         return
 
     github_product = GITHUB_PKey.objects.get(product=prod)
+    if github_product is None:
+        logger.error("Unable to get project key")
+        return
+
     github_conf = github_product.conf
     g_issue = GITHUB_Issue.objects.get(finding=find)
 
@@ -65,6 +73,10 @@ def update_external_issue_github(find, prod, eng):
         return
 
     github_product = GITHUB_PKey.objects.get(product=prod)
+    if github_product is None:
+        logger.error("Unable to get project key")
+        return
+
     github_conf = github_product.conf
     g_issue = GITHUB_Issue.objects.get(finding=find)
 
@@ -85,6 +97,10 @@ def add_external_issue_github(find, prod, eng):
         return
 
     github_pkey = GITHUB_PKey.objects.get(product=prod)
+    if github_pkey is None:
+        logger.error("Unable to get project key")
+        return
+
     github_conf = github_pkey.conf
 
     # We push only active and verified issues
