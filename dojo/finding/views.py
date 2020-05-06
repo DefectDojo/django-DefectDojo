@@ -545,12 +545,14 @@ def open_findings(request, pid=None, eid=None, view=None):
         product_tab = Product_Tab(pid_local, title=eng.name, tab="engagements")
         jira_config = JIRA_PKey.objects.filter(product__engagement=eid).first()
         github_config = GITHUB_PKey.objects.filter(product__engagement=eid).first()
+        print(github_config)
+
     else:
         add_breadcrumb(title="Findings", top_level=not len(request.GET), request=request)
     if jira_config:
         jira_config = jira_config.conf_id
     if github_config:
-        github_config = github_config.conf_id
+        github_config = github_config.git_conf_id
 
     paged_findings.object_list = prefetch_for_findings(paged_findings.object_list)
 
