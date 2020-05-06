@@ -545,7 +545,6 @@ def open_findings(request, pid=None, eid=None, view=None):
         product_tab = Product_Tab(pid_local, title=eng.name, tab="engagements")
         jira_config = JIRA_PKey.objects.filter(product__engagement=eid).first()
         github_config = GITHUB_PKey.objects.filter(product__engagement=eid).first()
-        print(github_config)
 
     else:
         add_breadcrumb(title="Findings", top_level=not len(request.GET), request=request)
