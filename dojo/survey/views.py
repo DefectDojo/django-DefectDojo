@@ -391,6 +391,10 @@ def survey(request):
         survey_exp = survey.expiration
         if survey.expiration < tz.now():
             survey.delete()
+    messages.add_message(request,
+                                 messages.INFO,
+                                 'Surveys have migrated to core DefectDojo! Please run python manage.py migrate_surveys to retrieve data.',
+                                 extra_tags='alert-info')
 
     add_breadcrumb(title="All Surveys", top_level=True, request=request)
     return render(request, 'defectDojo-engagement-survey/list_surveys.html',
@@ -695,7 +699,7 @@ def answer_empty_survey(request, esid):
     general_survey = get_object_or_404(General_Survey, id=esid)
     engagement_survey = get_object_or_404(Engagement_Survey, id=general_survey.survey_id)
     engagement, survey = None, None
-    
+
     settings = System_Settings.objects.all()[0]
 
     if not settings.allow_anonymous_survey_repsonse:
