@@ -393,7 +393,8 @@ def survey(request):
             survey.delete()
     messages.add_message(request,
                                  messages.INFO,
-                                 'Surveys have migrated to core DefectDojo! Please run python manage.py migrate_surveys to retrieve data.',
+                                 'Surveys have migrated to core DefectDojo! Please run python3 manage.py migrate_surveys to retrieve data. ' +
+                                 'For docker-compose, run `docker ps -a` to find the uwsgi container name then `docker exec -it <conainter_name> ./manage.py migrate_sruveys`',
                                  extra_tags='alert-info')
 
     add_breadcrumb(title="All Surveys", top_level=True, request=request)
