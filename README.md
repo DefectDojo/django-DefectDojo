@@ -43,7 +43,7 @@ For detailed documentation you can visit
 ## Supported Installation Options
 
 * [Setup.bash](https://github.com/DefectDojo/django-DefectDojo/blob/master/setup/README.MD)
-* [Docker](DOCKER.md)
+* [Docker / Docker Compose](DOCKER.md)
 
 ## Getting Started
 
