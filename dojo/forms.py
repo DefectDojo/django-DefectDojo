@@ -1339,11 +1339,11 @@ class NoteForm(forms.ModelForm):
         fields = ['entry', 'private']
 
 
-class FindingNoteForm(NoteForm):
+class TypedNoteForm(NoteForm):
 
     def __init__(self, *args, **kwargs):
         queryset = kwargs.pop('available_note_types')
-        super(FindingNoteForm, self).__init__(*args, **kwargs)
+        super(TypedNoteForm, self).__init__(*args, **kwargs)
         self.fields['note_type'] = forms.ModelChoiceField(queryset=queryset, label='Note Type', required=True)
 
     class Meta():

@@ -407,9 +407,9 @@
                       <span class="fa fa-edit"></span></a></a>
               {% endif %}
             {% endif %}
-            
           </h4>
         </div>
+
         <div id="add_feat_check_list" class="panel-body collapse">
           {% if check %}
             <div class="panel panel-default">
@@ -470,6 +470,7 @@
     {% endif %}
 
     <div class="panel panel-default">
+
       <div class="panel-heading">
         <h4>Surveys<span class="pull-right">
           <a data-toggle="collapse" href="#add_feat_survey">
@@ -477,45 +478,147 @@
             {% add_surveys eng %}
         </h4>
       </div>
-
-        <div id="add_feat_survey" class="panel-body collapse">
-          
-
-          <div class="row">
-            <div class="col-md-12">
-              <div class="panel panel-default">
-                {% show_surveys eng users %}
-              </div>
+      
+      <div id="add_feat_survey" class="panel-body collapse">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="panel panel-default">
+              {% show_surveys eng users %}
             </div>
-            <div class="modal fade" id="shareSurveyModal" tabindex="-1" role="dialog" aria-labelledby="shareSurveyModalLabel">
-              <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                            aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="shareSurveyModalLabel">Share Survey Link</h4>
+          </div>
+          <div class="modal fade" id="shareSurveyModal" tabindex="-1" role="dialog" aria-labelledby="shareSurveyModalLabel">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                          aria-hidden="true">&times;</span></button>
+                  <h4 class="modal-title" id="shareSurveyModalLabel">Share Survey Link</h4>
+                </div>
+                <div class="modal-body">
+                  <p id="surveyURL"></p>
+                  <div class="alert alert-info" role="alert">
+                      <b>Note:</b> Only users that are authorized for {{ eng.product}} will be allowed to answer
+                      this survey.
                   </div>
-                  <div class="modal-body">
-                    <p id="surveyURL"></p>
-                    <div class="alert alert-info" role="alert">
-                        <b>Note:</b> Only users that are authorized for {{ eng.product}} will be allowed to answer
-                        this survey.
-                    </div>
-                  </div>
-                  <div class="modal-footer">
-                      <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
-                  </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
                 </div>
               </div>
             </div>
           </div>
-
-
-
         </div>
+      </div>
+
     </div>
 
+    <div class="panel panel-default">
+
+      <div class="panel-heading">
+        <h4>Notes<span class="pull-right">
+          <a data-toggle="collapse" href="#add_feat_notes">
+            <i class="glyphicon glyphicon-chevron-down"></i></a></span>
+        </h4>
+      </div>
+      
+      <div id="add_feat_notes" class="panel-body collapse">
+        <form class="form-horizontal" action="" method="post">{% csrf_token %}
+          {% include "dojo/form_fields.html" with form=form %}
+          <div class="form-group">
+              <div class="col-sm-offset-2 col-sm-10">
+                  <input class="btn btn-primary" type="submit" value="Add Note"/>
+              </div>
+          </div>
+        </form>
+
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h4>Note Log<span class="pull-right">
+              <a data-toggle="collapse" href="#add_feat_note_log">
+                <i class="glyphicon glyphicon-chevron-{% if notes %}up{%else%}down{%endif%}"></i></a></span>
+            </h4>
+          </div>
+          <div id="add_feat_note_log" class="panel-body collapse {% if notes %}in{%endif%}">
+            {% for note in notes %}
+              <div>
+                <div class="panel panel-default">
+                  <div class="panel-comments">
+                      {% if user.username == note.author.username and user.is_staff or user.is_superuser %}
+                      <div class="pull-right">
+                        <form method="post" action="{% url 'delete_note' note.id 'engagement' eng.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" aria-label="id" name="id" value="{{note.id}}" id="id_id" />
+                            <button type="submit" aria-label="Delete Note" class="btn-delete">
+                              <i class="fa fa-trash"></i>
+                            </button>
+                        </form>
+                      </div>
+                      {% endif %}
+                      {% if user.username == note.author.username or user.is_staff %}
+                        <div class="pull-right">
+                          <form method="get" action="{% url 'edit_note' note.id 'engagement' eng.id %}">
+                              {% csrf_token %}
+                              <input type="hidden" aria-label="id" name="id" value="{{note.id}}" id="id_id" />
+                              <button type="submit" aria-label="Edit Note" class="btn-edit">
+                                <i class="fa fa-edit"></i>
+                              </button>
+                          </form>
+                        </div>
+                      {% endif %}
+                      {% if user.is_staff %}
+                        <div class="pull-right">
+                          <form method="get" action="{% url 'note_history' note.id 'engagement' eng.id %}">
+                              {% csrf_token %}
+                              <input type="hidden" aria-label="id" name="id" value="{{note.id}}" id="id_id" />
+                              <button type="submit" aria-label="history" class="btn-history">
+                                <i class="fa fa-history"></i>
+                              </button>
+                          </form>
+                        </div>
+                      {% endif %}
+                      
+                      <div class="row-sm-2">
+                        <strong>{{ note.author.username }}</strong>
+                        <span class="text-muted">commented {{ note.date }}</span>
+                      </div>
+                      {% if note.edited %}
+                        <div class="row-sm-2">
+                          <strong>{{ note.editor.username }}</strong>
+                          <span class="text-muted">edited {{ note.edit_time }}</span>
+                        </div>
+                      {% endif %}
+                      {% if note.private %}
+                        <div class="row-sm-2">
+                          <span class="text-muted">(will not appear in report)</span>
+                        </div>
+                      {% endif %} 
+                  </div>
+                  <div class="panel-body">
+                    {% if note.note_type != None %}
+                      <strong>Note type : {{ note.note_type }}</strong>
+                      <br><br>
+                    {% endif %}
+                    {{ note|linebreaks }}
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+        
+      </div>
+      
+
+    </div>
+
+
   </div>
+
+
+
+  
+
+
 </div> 
 
 <!-- Sidebar -->
