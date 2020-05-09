@@ -29,7 +29,7 @@ humanize==2.4.0
 jira==2.0.0
 PyGithub==1.51
 lxml==4.5.0
-Markdown==3.2.1
+Markdown==3.2.2
 mysqlclient==1.4.6
 pandas>=0.25
 xlrd>=1.0.0
