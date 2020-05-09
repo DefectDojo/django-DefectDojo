@@ -14,10 +14,6 @@ jobs:
     steps:
       - name: Checkout Source
         uses: actions/checkout@v1
-      - name: Generate SVG Diagrams
-        uses: cloudbees/plantuml-github-action@master
-        with:
-          args: -v -tsvg $UML_FILES
       - name: Get changed UML files
         id: getfile
         run: |
@@ -25,10 +21,14 @@ jobs:
       - name: UML files considered echo output
         run: |
           echo ${{ steps.getfile.outputs.files }}
+      - name: Generate SVG Diagrams
+        uses: cloudbees/plantuml-github-action@master
+        with:
+          args: -v -tsvg ${{ steps.getfile.outputs.files }}
       - name: Generate PNG Diagrams
         uses: cloudbees/plantuml-github-action@master
         with:
-          args: -v -tpng $UML_FILES
+          args: -v -tpng ${{ steps.getfile.outputs.files }}
       - name: Push Local Changes
         uses: stefanzweifel/git-auto-commit-action@v4.1.2
         with:
