@@ -1431,6 +1431,7 @@ class Finding(models.Model):
             models.Index(fields=['numerical_severity']),
             models.Index(fields=['date']),
             models.Index(fields=['title']),
+            models.Index(fields=['hash_code']),
         ]
 
     @classmethod
