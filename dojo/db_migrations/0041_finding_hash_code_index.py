@@ -19,4 +19,12 @@ class Migration(migrations.Migration):
             model_name='finding',
             index=models.Index(fields=['hash_code'], name='dojo_findin_hash_co_09df6a_idx'),
         ),
+        migrations.AddIndex(
+            model_name='finding',
+            index=models.Index(fields=['unique_id_from_tool'], name='dojo_findin_unique__f76d47_idx'),
+        ),
+        migrations.AddIndex(
+            model_name='finding',
+            index=models.Index(fields=['line'], name='dojo_findin_line_fea329_idx'),
+        ),
     ]
