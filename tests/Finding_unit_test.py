@@ -12,7 +12,19 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 class FindingTest(BaseTestCase):
 
-    def test_list_finding(self):
+    def test_list_findings_all(self):
+        return self.test_list_findings('finding/all')
+
+    def test_list_findings_closed(self):
+        return self.test_list_findings('finding/closed')
+
+    def test_list_findings_accepted(self):
+        return self.test_list_findings('finding/accepted')
+
+    def test_list_findings_open(self):
+        return self.test_list_findings('finding/open')
+
+    def test_list_findings(self, suffix):
         # bulk edit dropdown menu
         driver = self.login_page()
         driver.get(self.base_url + "finding")
@@ -274,6 +286,7 @@ class FindingTest(BaseTestCase):
         productTxt = driver.find_element_by_tag_name("BODY").text
         # Assert ot the query to dtermine status of failure
         self.assertTrue(re.search(r'Finding deleted successfully', productTxt))
+        # check that user was redirect back to url where it came from based on return_url
 
 
 def suite():
@@ -282,7 +295,11 @@ def suite():
     # success and failure is output by the test
     suite.addTest(ProductTest('test_create_product'))
     suite.addTest(ProductTest('test_add_product_finding'))
-    suite.addTest(FindingTest('test_list_finding'))
+    # TODO add some more findings with different statuses
+    suite.addTest(FindingTest('test_list_findings_all'))
+    suite.addTest(FindingTest('test_list_findings_closed'))
+    suite.addTest(FindingTest('test_list_findings_accepted'))
+    suite.addTest(FindingTest('test_list_findings_open'))
     suite.addTest(FindingTest('test_edit_finding'))
     suite.addTest(FindingTest('test_add_image'))
     suite.addTest(FindingTest('test_delete_image'))

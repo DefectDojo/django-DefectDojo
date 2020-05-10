@@ -34,6 +34,8 @@ from requests.auth import HTTPBasicAuth
 from dojo.notifications.helper import create_notification
 import logging
 import itertools
+from django.contrib import messages
+from django.http import HttpResponseRedirect
 
 
 logger = logging.getLogger(__name__)
@@ -657,7 +659,7 @@ def get_punchcard_data(findings, start_date, weeks):
         # reminder: The first week of a year is the one that contains the year’s first Thursday
         # so we could have for 29/12/2019: week=1 and year=2019 :-D. So using week number from db is not practical
 
-        severities_by_day = findings.filter(created__gte=first_sunday).filter(created__lt=last_sunday) \
+        severities_by_day = findings.filter(created__date__gte=first_sunday).filter(created__date__lt=last_sunday) \
                                     .values('created__date') \
                                     .annotate(count=Count('id')) \
                                     .order_by('created__date')
@@ -783,11 +785,11 @@ def get_period_counts_legacy(findings,
             end_date = new_date + relativedelta(weeks=1, weekday=MO(1))
 
         closed_in_range_count = findings_closed.filter(
-            mitigated__range=[new_date, end_date]).count()
+            mitigated__date__range=[new_date, end_date]).count()
 
         if accepted_findings:
             risks_a = accepted_findings.filter(
-                risk_acceptance__created__range=[
+                risk_acceptance__created__date__range=[
                     datetime(
                         new_date.year,
                         new_date.month,
@@ -882,11 +884,11 @@ def get_period_counts(active_findings,
             end_date = new_date + relativedelta(weeks=1, weekday=MO(1))
 
         closed_in_range_count = findings_closed.filter(
-            mitigated__range=[new_date, end_date]).count()
+            mitigated__date__range=[new_date, end_date]).count()
 
         if accepted_findings:
             risks_a = accepted_findings.filter(
-                risk_acceptance__created__range=[
+                risk_acceptance__created__date__range=[
                     datetime(
                         new_date.year,
                         new_date.month,
@@ -1046,7 +1048,7 @@ def opened_in_period(start_date, end_date, pt):
         end_date,
         'closed':
         Finding.objects.filter(
-            mitigated__range=[start_date, end_date],
+            mitigated__date__range=[start_date, end_date],
             test__engagement__product__prod_type=pt,
             severity__in=('Critical', 'High', 'Medium', 'Low')).aggregate(
                 total=Sum(
@@ -1994,3 +1996,18 @@ def merge_sets_safe(set1, set2):
     return set(itertools.chain(set1 or [], set2 or []))
     # This concat looks  better, but requires Python 3.6+
     # return {*set1, *set2}
+
+
+def get_return_url(request_params):
+    return request_params.get('return_url', None)
+
+
+def redirect_to_return_url_or_else(request, or_else):
+    return_url = get_return_url(request.POST)
+    if return_url is not None and return_url.strip():
+        return HttpResponseRedirect(return_url)
+    elif or_else:
+        return HttpResponseRedirect(or_else)
+    else:
+        messages.add_message(request, messages.ERROR, 'Unable to redirect anywhere.', extra_tags='alert-danger')
+        return HttpResponseRedirect(request.get_full_path())
