@@ -315,6 +315,7 @@ class ImportScanForm(forms.Form):
                          ("Node Security Platform Scan", "Node Security Platform Scan"),
                          ("NPM Audit Scan", "NPM Audit Scan"),
                          ("Qualys Scan", "Qualys Scan"),
+                         ("Qualys Infrastructure Scan (WebGUI XML)", "Qualys Infrastructure Scan (WebGUI XML)"),
                          ("Qualys Webapp Scan", "Qualys Webapp Scan"),
                          ("OpenVAS CSV", "OpenVAS CSV"),
                          ("Snyk Scan", "Snyk Scan"),
