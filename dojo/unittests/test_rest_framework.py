@@ -1,14 +1,14 @@
 from dojo.models import Product, Engagement, Test, Finding, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     User, ScanSettings, Scan, Stub_Finding, Endpoint, JIRA_PKey, JIRA_Conf, \
-    Finding_Template
+    Finding_Template, Note_Type
 
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraConfigurationsViewSet, \
     JiraIssuesViewSet, JiraViewSet, ProductViewSet, ScanSettingsViewSet, \
     ScansViewSet, StubFindingsViewSet, TestsViewSet, \
     ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
-    UsersViewSet, ImportScanView
+    UsersViewSet, ImportScanView, NoteTypeViewSet
 
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
@@ -397,6 +397,24 @@ class ToolTypesTest(BaseClass.RESTEndpointTest):
         self.payload = {
             "name": "Tool Type",
             "description": "test tool type"
+        }
+        self.update_fields = {'description': 'changed description'}
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class NoteTypesTest(BaseClass.RESTEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Note_Type
+        self.viewname = 'note_type'
+        self.viewset = NoteTypeViewSet
+        self.payload = {
+            "name": "Test Note",
+            "description": "not that much",
+            "is_single": False,
+            "is_active": True,
+            "is_mandatory": False
         }
         self.update_fields = {'description': 'changed description'}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)

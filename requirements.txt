@@ -29,7 +29,7 @@ humanize==2.4.0
 jira==2.0.0
 PyGithub==1.51
 lxml==4.5.0
-Markdown==3.2.1
+Markdown==3.2.2
 mysqlclient==1.4.6
 pandas>=0.25
 xlrd>=1.0.0
@@ -55,7 +55,7 @@ git+https://github.com/DefectDojo/defectDojo-engagement-survey.git@8437e158fbc75
 gitpython>=2.1.13
 ptvsd>=4.2.7
 google-api-python-client==1.8.2
-google-auth==1.14.1
+google-auth==1.14.2
 google-auth-oauthlib==0.4.1
 drf_yasg==1.17.1
 git+https://github.com/LeetCode-OpenSource/django-cachalot@4d6831c85a9701cf9a17c145f7f74b2dffe94e1d#egg=django-cachalot

@@ -13,7 +13,8 @@ from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Finding, \
     User, ScanSettings, Scan, Stub_Finding, Finding_Template, Notes, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
-    Endpoint, JIRA_PKey, JIRA_Conf, DojoMeta, Development_Environment, Dojo_User
+    Endpoint, JIRA_PKey, JIRA_Conf, DojoMeta, Development_Environment, \
+    Dojo_User, Note_Type
 
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import report_url_resolver
@@ -166,8 +167,8 @@ class FindingViewSet(mixins.ListModelMixin,
         enabled = False
         push_to_jira = serializer.validated_data.get('push_to_jira')
         # IF JIRA is enabled and this product has a JIRA configuration
-        if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(
-                product=serializer.instance.test.engagement.product) != 0:
+        if get_system_setting('enable_jira') and \
+                serializer.instance.test.engagement.product.jira_pkey_set.first() is not None:
             # Check if push_all_issues is set on this product
             enabled = serializer.instance.test.engagement.product.jira_pkey_set.first().push_all_issues
 
@@ -694,6 +695,18 @@ class ReImportScanView(mixins.CreateModelMixin,
         if enabled:
             push_to_jira = True
         serializer.save(push_to_jira=push_to_jira)
+
+
+class NoteTypeViewSet(mixins.ListModelMixin,
+                       mixins.RetrieveModelMixin,
+                       mixins.DestroyModelMixin,
+                       mixins.CreateModelMixin,
+                       mixins.UpdateModelMixin,
+                       viewsets.GenericViewSet):
+    serializer_class = serializers.NoteTypeSerializer
+    queryset = Note_Type.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'name', 'description', 'is_single', 'is_active', 'is_mandatory')
 
 
 class NotesViewSet(mixins.ListModelMixin,

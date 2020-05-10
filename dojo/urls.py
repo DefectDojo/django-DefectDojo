@@ -19,14 +19,15 @@ from dojo.api import UserResource, ProductResource, EngagementResource, \
     ReImportScanResource, JiraResource, JIRA_ConfResource, EndpointResource, \
     JIRA_IssueResource, ToolProductSettingsResource, Tool_ConfigurationResource, \
     Tool_TypeResource, LanguagesResource, LanguageTypeResource, App_AnalysisResource, \
-    BuildDetails, DevelopmentEnvironmentResource, ProductTypeResource, TestTypeResource
+    BuildDetails, DevelopmentEnvironmentResource, ProductTypeResource, TestTypeResource, \
+    Note_TypeResource
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraConfigurationsViewSet, \
     JiraIssuesViewSet, JiraViewSet, ProductViewSet, ScanSettingsViewSet, \
     ScansViewSet, StubFindingsViewSet, TestsViewSet, TestTypesViewSet, \
     ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
     UsersViewSet, ImportScanView, ReImportScanView, ProductTypeViewSet, DojoMetaViewSet, \
-    DevelopmentEnvironmentViewSet, NotesViewSet
+    DevelopmentEnvironmentViewSet, NotesViewSet, NoteTypeViewSet
 
 from dojo.utils import get_system_setting
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
@@ -87,6 +88,7 @@ v1_api.register(JIRA_IssueResource())
 v1_api.register(ToolProductSettingsResource())
 v1_api.register(Tool_ConfigurationResource())
 v1_api.register(Tool_TypeResource())
+v1_api.register(Note_TypeResource())
 v1_api.register(LanguagesResource())
 v1_api.register(LanguageTypeResource())
 v1_api.register(App_AnalysisResource())
@@ -118,6 +120,7 @@ v2_api.register(r'import-scan', ImportScanView, basename='importscan')
 v2_api.register(r'reimport-scan', ReImportScanView, basename='reimportscan')
 v2_api.register(r'metadata', DojoMetaViewSet, basename='metadata')
 v2_api.register(r'notes', NotesViewSet)
+v2_api.register(r'note_type', NoteTypeViewSet)
 
 ur = []
 ur += dev_env_urls
