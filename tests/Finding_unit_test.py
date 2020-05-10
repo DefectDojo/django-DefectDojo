@@ -286,6 +286,7 @@ class FindingTest(BaseTestCase):
         productTxt = driver.find_element_by_tag_name("BODY").text
         # Assert ot the query to dtermine status of failure
         self.assertTrue(re.search(r'Finding deleted successfully', productTxt))
+        # check that user was redirect back to url where it came from based on return_url
 
 
 def suite():
