@@ -20,8 +20,6 @@ urlpatterns = [
     url(r'^product/(?P<pid>\d+)/delete$', views.delete_product,
         name='delete_product'),
     url(r'^product/add', views.new_product, name='new_product'),
-    url(r'^product/(?P<pid>\d+)/findings$',
-        views.all_product_findings, name='view_product_findings'),
     url(r'^product/(?P<pid>\d+)/new_engagement$', views.new_eng_for_app,
         name='new_eng_for_prod'),
     url(r'^product/(?P<pid>\d+)/new_engagement/cicd$', views.new_eng_for_app_cicd,

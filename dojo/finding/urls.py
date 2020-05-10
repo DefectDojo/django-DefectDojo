@@ -16,6 +16,9 @@ urlpatterns = [
         name='open_findings'),
     url(r'^product/(?P<pid>\d+)/finding/open$', views.open_findings,
         name='product_open_findings'),
+    # legacy url kept for old bookmarks etc
+    url(r'^product/(?P<pid>\d+)/findings$', views.open_findings,
+       name='view_product_findings_old'),
     url(r'^product/(?P<pid>\d+)/finding/verified$', views.verified_findings,
         name='product_verified_findings'),
     url(r'^product/(?P<pid>\d+)/finding/out_of_scope$', views.out_of_scope_findings,

@@ -17,7 +17,7 @@ from django.db.models import Sum, Count, Q, Max
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
 from dojo.templatetags.display_tags import get_level
-from dojo.filters import ProductFilter, ProductFindingFilter, EngagementFilter
+from dojo.filters import ProductFilter, EngagementFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAPKeyForm, JIRAFindingForm, AdHocFindingForm, \
                        EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm, ProductNotificationsForm, \
                        GITHUB_Product_Form, GITHUBFindingForm
@@ -53,8 +53,7 @@ def product(request):
     # perform all stuff for filtering and pagination first, before annotation/prefetching
     # otherwise the paginator will perform all the annotations/prefetching already only to count the total number of records
     # see https://code.djangoproject.com/ticket/23771 and https://code.djangoproject.com/ticket/25375
-    name_words = [product.name for product in prods
-                    for word in product.name.split() if len(word) > 2]
+    name_words = prods.values_list('name', flat=True)
 
     prod_filter = ProductFilter(request.GET, queryset=prods, user=request.user)
     prod_list = get_page_items(request, prod_filter.qs, 25)
@@ -733,29 +732,6 @@ def delete_product(request, pid):
                    'form': form,
                    'product_tab': product_tab,
                    'rels': rels,
-                   })
-
-
-def all_product_findings(request, pid):
-    p = get_object_or_404(Product, id=pid)
-    auth = request.user.is_staff or request.user in p.authorized_users.all()
-    if not auth:
-        # will render 403
-        raise PermissionDenied
-    result = ProductFindingFilter(
-        request.GET,
-        queryset=Finding.objects.filter(test__engagement__product=p,
-                                        active=True))
-    page = get_page_items(request, result.qs, 25)
-
-    add_breadcrumb(title="Open findings", top_level=False, request=request)
-
-    return render(request,
-                  "dojo/all_product_findings.html",
-                  {"findings": page,
-                   "product": p,
-                   "filtered": result,
-                   "user": request.user,
                    })
 
 
