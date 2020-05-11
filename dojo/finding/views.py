@@ -172,7 +172,7 @@ django_filter=open_findings_filter):
     if jira_config:
         jira_config = jira_config.conf_id
     if github_config:
-        github_config = github_config.conf_id
+        github_config = github_config.git_conf_id
 
     return render(
         request, 'dojo/findings_list.html', {
@@ -250,7 +250,7 @@ def view_finding(request, fid):
         pass
     try:
         github_pkey = GITHUB_PKey.objects.get(product=finding.test.engagement.product)
-        gconf = github_pkey.conf
+        gconf = github_pkey.git_conf
     except:
         gconf = None
         pass
@@ -675,7 +675,7 @@ def edit_finding(request, fid):
                     push_to_jira = jform.cleaned_data.get('push_to_jira')
 
             if 'githubform-push_to_github' in request.POST:
-                gform = JIRAFindingForm(
+                gform = GITHUBFindingForm(
                     request.POST, prefix='githubform', enabled=enabled)
                 if gform.is_valid():
                     if GITHUB_Issue.objects.filter(finding=new_finding).exists():
