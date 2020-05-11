@@ -250,7 +250,7 @@ def view_finding(request, fid):
         pass
     try:
         github_pkey = GITHUB_PKey.objects.get(product=finding.test.engagement.product)
-        gconf = github_pkey.conf
+        gconf = github_pkey.git_conf
     except:
         gconf = None
         pass
