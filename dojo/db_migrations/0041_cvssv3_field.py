@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0037_email_notification_overhaul'),
+        ('dojo', '0040_finding_cwe_index'),
     ]
 
     operations = [
