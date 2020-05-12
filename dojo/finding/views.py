@@ -1682,7 +1682,7 @@ def finding_bulk_update_all(request, pid=None):
                     logger.info('push selected findings to github')
                     finds = Finding.objects.filter(id__in=finding_to_update)
                     for finding in finds:
-                        print('will push to github finding: ' + str(finding))
+                        print('will push to GitHub finding: ' + str(finding))
                         old_status = finding.status()
                         if form.cleaned_data['push_to_github']:
                             if GITHUB_Issue.objects.filter(finding=finding).exists():
