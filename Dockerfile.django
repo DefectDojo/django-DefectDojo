@@ -7,7 +7,7 @@
 # Using 3.5.7 to avoid compatibility issues that may be introduced by python 3.6 and 3.7.
 # Please upgrade before end-of-life in september 2020!
 # Ref: https://devguide.python.org/#branchstatus
-FROM python:3.6.10-buster as build
+FROM python:3.6.10-buster@sha256:07c839d23caa4edadf682020e13b88331eb499f630765f47eef780f4b07c1268 as build
 WORKDIR /app
 RUN \
   apt-get -y update && \
@@ -24,7 +24,7 @@ RUN \
 COPY requirements.txt ./
 RUN pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
 
-FROM python:3.6.10-slim-buster
+FROM python:3.6.10-slim-buster@sha256:07c839d23caa4edadf682020e13b88331eb499f630765f47eef780f4b07c1268
 WORKDIR /app
 RUN \
   apt-get -y update && \
