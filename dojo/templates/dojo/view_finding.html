@@ -445,6 +445,25 @@
             </div>
         </div>
     {% endif %}
+    {% if gissue and gconf %}
+    <div class="row to_highlight">
+        <div class="col-md-12">
+            <div class="panel panel-default endpoints table-responsive">
+                <div class="panel-heading">
+                    <h4>Github Link
+                        <span class="pull-right"><a data-toggle="collapse" href="#jira_link"><i
+                                class="glyphicon glyphicon-chevron-up"></i></a></span>
+                    </h4>
+                </div>
+                <div id="github_link" class="panel-body endpoint-panel table-responsive collapse in">
+                    <a href="{{gissue.issue_url }}"
+                       target="_blank"> {{gissue.issue_url}} </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     {% with findings=finding.similar_findings %}
         {% if findings %}
             <div class="panel panel-default">
@@ -493,17 +512,20 @@
                                         <form method="post"
                                               action="{% url 'reset_finding_duplicate_status' similar.id %}">
                                             {% csrf_token %}
+                                            <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
                                             <input type="submit" value="Reset duplicate status"/>
                                         </form>
                                     {% elif finding.duplicate_finding_id != similar.id %}
                                         <form method="post"
                                               action="{% url 'mark_finding_duplicate' original_id=similar.id duplicate_id=finding.id %}">
                                             {% csrf_token %}
+                                            <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
                                             <input type="submit" value="Use as original"/>
                                         </form>
                                         <form method="post"
                                               action="{% url 'mark_finding_duplicate' duplicate_id=similar.id original_id=finding.id %}">
                                             {% csrf_token %}
+                                            <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
                                             <input type="submit" value="Mark as duplicate"/>
                                         </form>
                                     {% else %}

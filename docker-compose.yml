@@ -9,7 +9,7 @@ services:
     depends_on:
       - uwsgi
     environment: 
-      NGINX_METRICS_ENABLED: ${NGINX_METRICS_ENABLED:-False}
+      NGINX_METRICS_ENABLED: ${NGINX_METRICS_ENABLED:-false}
     ports:
       - target: ${DD_PORT:-8080}
         published: ${DD_PORT:-8080}

@@ -376,7 +376,7 @@ class OpenFindingFilter(DojoFilter):
                    'thread_id', 'notes', 'scanner_confidence', 'mitigated',
                    'numerical_severity', 'reporter', 'last_reviewed', 'line',
                    'duplicate_finding', 'hash_code', 'images',
-                   'line_number', 'reviewers', 'mitigated_by', 'sourcefile', 'jira_creation', 'jira_change']
+                   'line_number', 'reviewers', 'mitigated_by', 'sourcefile', 'jira_creation', 'jira_change', 'created']
 
     def __init__(self, *args, **kwargs):
         self.user = None
@@ -389,9 +389,9 @@ class OpenFindingFilter(DojoFilter):
         super(OpenFindingFilter, self).__init__(*args, **kwargs)
 
         cwe = dict()
-        cwe = dict([finding.cwe, finding.cwe]
-                   for finding in self.queryset.distinct()
-                   if type(finding.cwe) is int and finding.cwe is not None and finding.cwe > 0 and finding.cwe not in cwe)
+        cwe = dict([cwe, cwe]
+                   for cwe in self.queryset.values_list('cwe', flat=True).distinct()
+                   if type(cwe) is int and cwe is not None and cwe > 0)
         cwe = collections.OrderedDict(sorted(cwe.items()))
         self.form.fields['cwe'].choices = list(cwe.items())
         if self.user is not None and not self.user.is_staff:
@@ -406,7 +406,7 @@ class OpenFindingFilter(DojoFilter):
             del self.form.fields['test__engagement__product']
 
 
-class OpenFingingSuperFilter(OpenFindingFilter):
+class OpenFindingSuperFilter(OpenFindingFilter):
     reporter = ModelMultipleChoiceFilter(
         queryset=Dojo_User.objects.all())
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
@@ -465,14 +465,14 @@ class ClosedFindingFilter(DojoFilter):
     def __init__(self, *args, **kwargs):
         super(ClosedFindingFilter, self).__init__(*args, **kwargs)
         cwe = dict()
-        cwe = dict([finding.cwe, finding.cwe]
-                   for finding in self.queryset.distinct()
-                   if type(finding.cwe) is int and finding.cwe is not None and finding.cwe > 0 and finding.cwe not in cwe)
+        cwe = dict([cwe, cwe]
+                   for cwe in self.queryset.values_list('cwe', flat=True).distinct()
+                   if type(cwe) is int and cwe is not None and cwe > 0)
         cwe = collections.OrderedDict(sorted(cwe.items()))
         self.form.fields['cwe'].choices = list(cwe.items())
 
 
-class ClosedFingingSuperFilter(ClosedFindingFilter):
+class ClosedFindingSuperFilter(ClosedFindingFilter):
     reporter = ModelMultipleChoiceFilter(
         queryset=Dojo_User.objects.all())
 
@@ -538,7 +538,7 @@ class AcceptedFindingFilter(DojoFilter):
         self.form.fields['cwe'].choices = list(cwe.items())
 
 
-class AcceptedFingingSuperFilter(AcceptedFindingFilter):
+class AcceptedFindingSuperFilter(AcceptedFindingFilter):
     test__engagement__risk_acceptance__reporter = \
         ModelMultipleChoiceFilter(
             queryset=Dojo_User.objects.all(),
