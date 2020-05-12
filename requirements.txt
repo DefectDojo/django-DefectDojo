@@ -40,10 +40,10 @@ cryptography==2.9.2
 python-dateutil==2.8.1
 python-nmap==0.6.1
 pytz==2020.1
-redis==3.5.0
+redis==3.5.1
 requests>=2.22.0
 sqlalchemy  # Required by Celery broker transport
-supervisor==4.1.0
+supervisor==4.2.0
 urllib3==1.25.9
 uWSGI==2.0.18
 vobject==0.9.6.1
@@ -55,7 +55,7 @@ git+https://github.com/DefectDojo/defectDojo-engagement-survey.git@8437e158fbc75
 gitpython>=2.1.13
 ptvsd>=4.2.7
 google-api-python-client==1.8.2
-google-auth==1.14.2
+google-auth==1.14.3
 google-auth-oauthlib==0.4.1
 drf_yasg==1.17.1
 git+https://github.com/LeetCode-OpenSource/django-cachalot@4d6831c85a9701cf9a17c145f7f74b2dffe94e1d#egg=django-cachalot

@@ -1670,19 +1670,19 @@ class Finding(models.Model):
 
     def has_github_issue(self):
         try:
-            issue = self.jira_issue
+            issue = self.github_issue
             return True
         except GITHUB_Issue.DoesNotExist:
             return False
 
     def github_conf(self):
         try:
-            jpkey = GITHUB_PKey.objects.get(product=self.test.engagement.product)
-            jconf = jpkey.conf
+            github_product_key = GITHUB_PKey.objects.get(product=self.test.engagement.product)
+            github_conf = github_product_key.conf
         except:
-            jconf = None
+            github_conf = None
             pass
-        return jconf
+        return github_conf
 
     # newer version that can work with prefetching
     def github_conf_new(self):
@@ -2199,10 +2199,10 @@ class GITHUB_PKey(models.Model):
     git_push_notes = models.BooleanField(default=False, blank=True, help_text="Notes added to findings will be automatically added to the corresponding github issue")
 
     def __unicode__(self):
-        return self.product.name + " | " + self.project_key
+        return self.product.name + " | " + self.git_project
 
     def __str__(self):
-        return self.product.name + " | " + self.project_key
+        return self.product.name + " | " + self.git_project
 
 
 class JIRA_Conf(models.Model):
