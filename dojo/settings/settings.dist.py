@@ -93,6 +93,9 @@ env = environ.Env(
     DD_SOCIAL_AUTH_GITLAB_SECRET=(str, ''),
     DD_SOCIAL_AUTH_GITLAB_API_URL=(str, 'https://gitlab.com'),
     DD_SOCIAL_AUTH_GITLAB_SCOPE=(list, ['api', 'read_user', 'openid', 'profile', 'email']),
+    # merging findings doesn't always work well with dedupe and reimport etc.
+    # disable it if you see any issues (and report them on github)
+    DD_DISABLE_FINDING_MERGE=(bool, False),
 )
 
 
@@ -683,6 +686,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Symfony Security Check': DEDUPE_ALGO_HASH_CODE,
     'DSOP Scan': DEDUPE_ALGO_HASH_CODE,
 }
+
+DISABLE_FINDING_MERGE = env('DD_DISABLE_FINDING_MERGE')
 
 # ------------------------------------------------------------------------------
 # JIRA
