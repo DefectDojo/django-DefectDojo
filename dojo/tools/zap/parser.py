@@ -11,7 +11,7 @@ import re
 import socket
 from urllib.parse import urlparse
 from defusedxml import ElementTree as ET
-from django.utils.html import strip_tags
+from django.utils.html import strip_tags, escape
 from dojo.models import Finding, Endpoint
 
 
@@ -191,6 +191,8 @@ class Item(object):
         description_detail = "\n"
         for instance in item_node.findall('instances/instance'):
             for node in instance.getiterator():
+                print('tag: ' + node.tag)
+                print('text:' + escape(node.text))
                 if node.tag == "uri":
                     if node.text != "":
                         description_detail += "URL: " + node.text
@@ -202,7 +204,7 @@ class Item(object):
                         description_detail += "Parameter: " + node.text
                 if node.tag == "evidence":
                     if node.text != "":
-                        description_detail += "Evidence: " + node.text
+                        description_detail += "Evidence: " + escape(node.text)
                 description_detail += "\n"
 
         self.desc += description_detail
