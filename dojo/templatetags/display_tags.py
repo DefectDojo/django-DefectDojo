@@ -19,6 +19,8 @@ from ast import literal_eval
 from urllib.parse import urlparse
 import bleach
 import git
+from django.conf import settings
+
 
 register = template.Library()
 
@@ -737,3 +739,10 @@ def get_severity_count(id, table):
 @register.filter
 def full_url(url):
     return get_full_url(url)
+
+
+# check if setting is enabled in django settings.py
+# use 'DISABLE_FINDING_MERGE'|setting_enabled
+@register.filter
+def setting_enabled(name):
+    return getattr(settings, name, False)
