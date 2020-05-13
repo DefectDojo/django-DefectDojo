@@ -19,7 +19,7 @@ class SafetyParser(object):
             self.items = []
 
     def parse_json(self, json_output):
-        data = json_output.read()
+        data = json_output.read() or '[]'
         try:
             json_obj = json.loads(str(data, 'utf-8'))
         except:
@@ -44,7 +44,9 @@ class SafetyParser(object):
 
 def get_item(item_node, test, safety_db):
     severity = 'Info'  # Because Safety doesn't include severity rating
-    cve = ''.join(a['cve'] for a in safety_db[item_node['package']] if a['id'] == 'pyup.io-' + item_node['id'])
+    cve = ''.join(a['cve'] or ''
+                  for a in safety_db[item_node['package']]
+                  if a['id'] == 'pyup.io-' + item_node['id'])
     title = item_node['package'] + " (" + item_node['affected'] + ")"
     if cve:
         title = title + " | " + cve
