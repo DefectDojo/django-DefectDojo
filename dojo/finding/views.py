@@ -601,8 +601,7 @@ def edit_finding(request, fid):
 
     gform = None
     if get_system_setting('enable_github'):
-        if GITHUB_PKey.objects.filter(
-            product=finding.test.engagement.product).exclude(git_conf_id=None):
+        if GITHUB_PKey.objects.filter(product=finding.test.engagement.product).exclude(git_conf_id=None):
             gform = GITHUBFindingForm(enabled=github_enabled, prefix='githubform')
 
     if request.method == 'POST':
