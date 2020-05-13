@@ -336,6 +336,10 @@
                     { "data": "jira", render: function (data, type, row) {
                             return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
                     }},
+                    {% if system_settings.enable_github %}
+                    { "data": "github", render: function (data, type, row) {
+                            return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
+                    }},
                     {% endif %}
                     { "data": "findings" , render: function (data, type, row) {
                             return type === 'export' ? getDojoExportValueFromTag(data, 'b') :  data;
