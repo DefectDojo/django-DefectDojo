@@ -72,7 +72,7 @@ def create_notification_message(event, user, notification_type, *args, **kwargs)
         notification = render_to_string(template, kwargs)
     except Exception as e:
         logger.exception(e)
-        create_description(event)
+        create_description(event, *args, **kwargs)
         notification = render_to_string('notifications/other.tpl', kwargs)
 
     return notification
