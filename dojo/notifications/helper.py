@@ -17,7 +17,12 @@ def create_notification(event=None, *args, **kwargs):
         system_notifications = Notifications()
 
     logger.debug('creating system notifications')
-    process_notifications(event, system_notifications, *args, **kwargs)
+
+    # send system notifications to all admin users
+    admin_users = Dojo_User.objects.filter(is_staff=True)
+    for admin_user in admin_users:
+        system_notifications.user = admin_user
+        process_notifications(event, system_notifications, *args, **kwargs)
 
     if 'recipients' in kwargs:
         # mimic existing code so that when recipients is specified, no other personal notifications are sent.
@@ -86,9 +91,9 @@ def process_notifications(event, notifications=None, *args, **kwargs):
         return
 
     sync = 'initiator' in kwargs and kwargs['initiator'].usercontactinfo and kwargs['initiator'].usercontactinfo.block_execution
-    logger.debug('sync: %s', sync)
-    logger.debug('sending notifications ' + ('synchronously' if sync else 'asynchronously'))
-    logger.debug(vars(notifications))
+    # logger.debug('sync: %s', sync)
+    # logger.debug('sending notifications ' + ('synchronously' if sync else 'asynchronously'))
+    # logger.debug(vars(notifications))
 
     slack_enabled = get_system_setting('enable_slack_notifications')
     hipchat_enabled = get_system_setting('enable_hipchat_notifications')
@@ -114,7 +119,6 @@ def process_notifications(event, notifications=None, *args, **kwargs):
         else:
             send_mail_notification(event, notifications.user, *args, **kwargs)
 
-    print(getattr(notifications, event, None))
     if 'alert' in getattr(notifications, event, None):
         if not sync:
             send_alert_notification_task.delay(event, notifications.user, *args, **kwargs)
