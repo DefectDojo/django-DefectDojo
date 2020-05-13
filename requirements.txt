@@ -58,6 +58,7 @@ google-api-python-client==1.8.2
 google-auth==1.14.3
 google-auth-oauthlib==0.4.1
 drf_yasg==1.17.1
-git+https://github.com/LeetCode-OpenSource/django-cachalot@4d6831c85a9701cf9a17c145f7f74b2dffe94e1d#egg=django-cachalot
+django-cachalot==2.2.0
 django-debug-toolbar==2.2
+
 
