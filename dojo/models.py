@@ -2926,6 +2926,7 @@ admin.site.register(Cred_Mapping)
 admin.site.register(System_Settings, System_SettingsAdmin)
 admin.site.register(CWE)
 admin.site.register(Regulation)
+admin.site.register(Notifications)
 
 # Watson
 watson.register(Product)
