@@ -530,7 +530,7 @@ def new_product(request):
             if get_system_setting('enable_github'):
                 if gform.is_valid():
                     github_pkey = gform.save(commit=False)
-                    if github_pkey.git_conf is not None and github_pkey.git_project is not None:
+                    if github_pkey.git_conf is not None and github_pkey.git_project:
                         github_pkey.product = product
                         github_pkey.save()
                         messages.add_message(request,
@@ -550,11 +550,6 @@ def new_product(request):
                             repo.create_label(name="security / critical", color="FE2200", description="This label is automatically applied to all issues created by DefectDojo")
                         except:
                             logger.info('Labels cannot be created - they may already exists')
-                    else:
-                        messages.add_message(request,
-                                                messages.ERROR,
-                                                'GitHub information could not be added.',
-                                                extra_tags='alert-danger')
 
             # SonarQube API Configuration
             sonarqube_form = Sonarqube_ProductForm(request.POST)
