@@ -8,4 +8,6 @@ exec uwsgi \
   --enable-threads \
   --processes 2 \
   --threads 2 \
+  --reload-mercy 1 \
+  --worker-reload-mercy 1 \
   --wsgi dojo.wsgi:application

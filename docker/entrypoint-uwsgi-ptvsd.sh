@@ -17,4 +17,7 @@ exec uwsgi \
   --protocol uwsgi \
   --wsgi dojo.wsgi:application \
   --py-autoreload 1 \
-  --enable-threads --lazy-apps --honour-stdin
+  --enable-threads --lazy-apps --honour-stdin \
+  --reload-mercy 1 \
+  --worker-reload-mercy 1 \
+
