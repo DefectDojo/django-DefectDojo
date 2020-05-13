@@ -289,8 +289,7 @@ class FindingTest(BaseTestCase):
         # check that user was redirect back to url where it came from based on return_url
 
 
-def suite():
-    suite = unittest.TestSuite()
+def add_finding_tests_to_suite(suite):
     # Add each test the the suite to be run
     # success and failure is output by the test
     suite.addTest(ProductTest('test_create_product'))
@@ -312,6 +311,15 @@ def suite():
     suite.addTest(FindingTest('test_delete_finding'))
     suite.addTest(FindingTest('test_delete_finding_template'))
     suite.addTest(ProductTest('test_delete_product'))
+    return suite
+
+
+def suite():
+    suite = unittest.TestSuite()
+    add_finding_tests_to_suite(suite)
+    suite.addTest(FindingTest('enable_jira'))
+    suite.addTest(FindingTest('enable_github'))
+    add_finding_tests_to_suite(suite)
     return suite
 
 

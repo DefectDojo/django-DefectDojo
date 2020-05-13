@@ -363,8 +363,7 @@ class ProductTest(BaseTestCase):
         self.assertFalse(driver.find_element_by_xpath("//input[@name='test_added' and @value='mail']").is_selected())
 
 
-def suite():
-    suite = unittest.TestSuite()
+def add_product_tests_to_suite(suite):
     # Add each test and the suite to be run
     # success and failure is output by the test
     suite.addTest(ProductTest('test_create_product'))
@@ -379,6 +378,15 @@ def suite():
     suite.addTest(ProductTest('test_list_products'))
     suite.addTest(ProductTest('test_product_notifications_change'))
     suite.addTest(ProductTest('test_delete_product'))
+    return suite
+
+
+def suite():
+    suite = unittest.TestSuite()
+    add_product_tests_to_suite(suite)
+    suite.addTest(ProductTest('enable_jira'))
+    suite.addTest(ProductTest('enable_github'))
+    add_product_tests_to_suite(suite)
     return suite
 
 
