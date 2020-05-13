@@ -12,7 +12,7 @@ class ProductTypeTest(BaseTestCase):
         driver.get(self.base_url + "product/type")
         driver.find_element_by_id("dropdownMenu1").click()
         driver.find_element_by_link_text("Add Product Type").click()
-        driver.find_element_by_id("id_name").clear()
+        # driver.find_element_by_id("id_name").clear()
         driver.find_element_by_id("id_name").send_keys("product test type")
         driver.find_element_by_id("id_critical_product").click()
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
@@ -24,7 +24,7 @@ class ProductTypeTest(BaseTestCase):
         driver = self.login_page()
         driver.get(self.base_url + "product/type")
         driver.find_element_by_link_text("Edit Product Type").click()
-        driver.find_element_by_id("id_name").clear()
+        # driver.find_element_by_id("id_name").clear()
         driver.find_element_by_id("id_name").send_keys("Edited product test type")
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
         productTxt = driver.find_element_by_tag_name("BODY").text

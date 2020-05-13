@@ -64,12 +64,14 @@ class TestUnitTest(BaseTestCase):
         # fill up at least all required input field options.
         # fields: 'Name', 'Description', 'Target Start', 'Target End', 'Testing Lead' and 'Status'
         # engagement name
-        driver.find_element_by_id("id_name").clear()
+        # driver.find_element_by_id("id_name").clear()
         driver.find_element_by_id("id_name").send_keys("Beta Test")
         # engagement description
-        # Tab into the description area to fill some text
-        # Couldnt find a way to get into the box with selenium
-        driver.find_element_by_id("id_name").send_keys("\tRunning Test on product before approving and push to production.")
+
+        # the markdown editor we use, uses codemirror underneath which needs some special javascript treatment
+        # "One does not simply send keys to a codemirror editor!"
+        self.set_code_mirror_text(0, 'Running Test on product before approving and push to production.')
+
         # engagement target start and target end already have defaults
         # we can safely skip
         # Testing Lead: This can be the logged in user
@@ -80,7 +82,7 @@ class TestUnitTest(BaseTestCase):
         driver.find_element_by_name("_Add Tests").click()
         # Fill at least required fields needed to create Test
         # Test title
-        driver.find_element_by_id("id_title").clear()  # clear field before inserting anything
+        # driver.find_element_by_id("id_title").clear()  # clear field before inserting anything
         driver.find_element_by_id("id_title").send_keys("Quick Security Testing")
         # Select Test type
         Select(driver.find_element_by_id("id_test_type")).select_by_visible_text("Manual Code Review")
@@ -126,7 +128,7 @@ class TestUnitTest(BaseTestCase):
         # "Click" the Edit Test option
         driver.find_element_by_link_text("Add Notes").click()
         # Select entry, clear field and input note
-        driver.find_element_by_id("id_entry").clear()
+        # driver.find_element_by_id("id_entry").clear()
         driver.find_element_by_id("id_entry").send_keys("This is a sample note for all to see.")
         # "Click" the submit button to complete the transaction
         driver.find_element_by_xpath("//input[@value='Add Note']").click()
@@ -148,7 +150,7 @@ class TestUnitTest(BaseTestCase):
         # "Click" the Edit Test option
         driver.find_element_by_link_text("Delete Test").click()
         # Type test name into Title field before clicking Delet button
-        driver.find_element_by_id("id_title").clear()  # always clear for inputting
+        # driver.find_element_by_id("id_title").clear()  # always clear for inputting
         driver.find_element_by_id("id_title").send_keys("Quick Security Testing")
         # "Click" the delete button to complete the transaction
         driver.find_element_by_css_selector("button.btn.btn-danger").click()

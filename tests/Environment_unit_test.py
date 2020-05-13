@@ -22,7 +22,7 @@ class EnvironmentTest(BaseTestCase):
         driver.get(self.base_url + "dev_env")
         driver.find_element_by_id("dropdownMenu1").click()
         driver.find_element_by_link_text("New Environment").click()
-        driver.find_element_by_id("id_name").clear()
+        # driver.find_element_by_id("id_name").clear()
         driver.find_element_by_id("id_name").send_keys("environment test")
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
         productTxt = driver.find_element_by_tag_name("BODY").text

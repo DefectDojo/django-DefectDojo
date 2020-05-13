@@ -22,8 +22,12 @@ class EngagementTest(BaseTestCase):
         driver.find_element_by_class_name("pull-left").click()
         driver.find_element_by_link_text("Add New Engagement").click()
         driver.find_element_by_id("id_name").send_keys("test engagement")
-        driver.find_element_by_id("id_name").send_keys("\tthis is engagement test.")
-        driver.find_element_by_id("id_test_strategy").clear()
+
+        # the markdown editor we use, uses codemirror underneath which needs some special javascript treatment
+        # "One does not simply send keys to a codemirror editor!"
+        self.set_code_mirror_text(0, 'this is engagement test.')
+
+        # driver.find_element_by_id("id_test_strategy").clear()
         driver.find_element_by_id('id_test_strategy').send_keys("http://localhost:5000")
         Select(driver.find_element_by_id("id_status")).select_by_visible_text("In Progress")
         driver.find_element_by_css_selector("input[value='Done']").click()
@@ -77,7 +81,11 @@ class EngagementTest(BaseTestCase):
         driver.find_element_by_xpath("//a[@class='dropdown-toggle active']//span[@class='hidden-xs']").click()
         driver.find_element_by_link_text('Add New CI/CD Engagement').click()
         driver.find_element_by_id("id_name").send_keys("test new ci/cd engagement")
-        driver.find_element_by_id("id_name").send_keys("\ttest new ci/cd engagement")
+
+        # the markdown editor we use, uses codemirror underneath which needs some special javascript treatment
+        # "One does not simply send keys to a codemirror editor!"
+        self.set_code_mirror_text(0, 'test new ci/cd engagement')
+
         driver.find_element_by_id('id_deduplication_on_engagement').get_attribute('checked')
         driver.find_element_by_css_selector("input[value='Done']").click()
         EngagementTXT = driver.find_element_by_tag_name("BODY").text

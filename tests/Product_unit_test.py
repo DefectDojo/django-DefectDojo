@@ -1,5 +1,4 @@
 from selenium.webdriver.support.ui import Select
-from selenium.webdriver.common.keys import Keys
 import unittest
 import re
 import sys
@@ -46,11 +45,13 @@ class ProductTest(BaseTestCase):
         # "Click" the add prodcut button
         driver.find_element_by_link_text("Add Product").click()
         # Fill in th product name
-        driver.find_element_by_id("id_name").clear()
+        # driver.find_element_by_id("id_name").clear()
         driver.find_element_by_id("id_name").send_keys("QA Test")
-        # Tab into the description area to fill some text
-        # Couldnt find a way to get into the box with selenium
-        driver.find_element_by_id("id_name").send_keys("\tThis is just a test. Be very afraid.")
+
+        # the markdown editor we use, uses codemirror underneath which needs some special javascript treatment
+        # "One does not simply send keys to a codemirror editor!"
+        self.set_code_mirror_text(0, 'This is just a test. Be very afraid')
+
         # Select an option in the poroduct type
         # some wild guess to print some debug info
         Select(driver.find_element_by_id("id_prod_type")).select_by_visible_text("Research and Development")
@@ -87,7 +88,11 @@ class ProductTest(BaseTestCase):
         # Click on the 'Edit' option
         driver.find_element_by_link_text("Edit").click()
         # Edit product description
-        driver.find_element_by_id("id_name").send_keys(Keys.TAB, "Updated Desription: ")
+
+        # the markdown editor we use, uses codemirror underneath which needs some special javascript treatment
+        # "One does not simply send keys to a codemirror editor!"
+        self.set_code_mirror_text(0, 'Updated Desription: ')
+
         # "Click" the submit button to complete the transaction
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
         # Query the site to determine if the product has been added
@@ -115,12 +120,15 @@ class ProductTest(BaseTestCase):
         # fill up at least all required input field options.
         # fields: 'Name', 'Description', 'Target Start', 'Target End', 'Testing Lead' and 'Status'
         # engagement name
-        driver.find_element_by_id("id_name").clear()
+        # driver.find_element_by_id("id_name").clear()
         driver.find_element_by_id("id_name").send_keys("Beta Test")
         # engagement description
         # Tab into the description area to fill some text
-        # Couldnt find a way to get into the box with selenium
-        driver.find_element_by_id("id_name").send_keys(Keys.TAB, "Running Test on product before approving and push to production.")
+
+        # the markdown editor we use, uses codemirror underneath which needs some special javascript treatment
+        # "One does not simply send keys to a codemirror editor!"
+        self.set_code_mirror_text(0, 'Running Test on product before approving and push to production. ')
+
         # engagement target start and target end already have defaults
         # we can safely skip
         # Testing Lead: This can be the logged in user
@@ -151,23 +159,19 @@ class ProductTest(BaseTestCase):
         # fill up at least all required input field options.
         # fields: 'Title', 'Date', 'Severity', 'Description', 'Mitigation' and 'Impact'
         # finding Title
-        driver.find_element_by_id("id_title").clear()
+        # driver.find_element_by_id("id_title").clear()
         driver.find_element_by_id("id_title").send_keys("App Vulnerable to XSS")
         # finding Date as a default value and can be safely skipped
         # finding Severity
         Select(driver.find_element_by_id("id_severity")).select_by_visible_text("High")
         # finding Description
-        driver.find_element_by_id("id_severity").send_keys(Keys.TAB, "This is just a Test Case Finding")
-        # Finding Mitigation
-        # Use Javascript to bypass the editor by making Setting textArea style from none to inline
-        # Any Text written to textarea automatically reflects in Editor field.
-        driver.execute_script("document.getElementsByName('mitigation')[0].style.display = 'inline'")
-        driver.find_element_by_name("mitigation").send_keys(Keys.TAB, "How to mitigate this finding")
-        # Finding Impact
-        # Use Javascript to bypass the editor by making Setting textArea style from none to inline
-        # Any Text written to textarea automatically reflects in Editor field.
-        driver.execute_script("document.getElementsByName('impact')[0].style.display = 'inline'")
-        driver.find_element_by_name("impact").send_keys(Keys.TAB, "This has a very critical effect on production")
+
+        # the markdown editor we use, uses codemirror underneath which needs some special javascript treatment
+        # "One does not simply send keys to a codemirror editor!"
+        self.set_code_mirror_text(0, 'This is just a Test Case Finding')  # description
+        self.set_code_mirror_text(1, 'How to mitigate this finding')  # mitigiation
+        self.set_code_mirror_text(2, 'This has a very critical effect on production')  # impact
+
         # "Click" the Done button to Add the finding with other defaults
         with WaitForPageLoad(driver, timeout=30):
             driver.find_element_by_xpath("//input[@name='_Finished']").click()
@@ -191,7 +195,7 @@ class ProductTest(BaseTestCase):
         driver.find_element_by_link_text("Add New Endpoint").click()
         # Keep a good practice of clearing field before entering value
         # Endpoints
-        driver.find_element_by_id("id_endpoint").clear()
+        # driver.find_element_by_id("id_endpoint").clear()
         driver.find_element_by_id("id_endpoint").send_keys("strange.prod.dev\n123.45.6.30")
         # submit
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
@@ -215,10 +219,10 @@ class ProductTest(BaseTestCase):
         driver.find_element_by_link_text("Add Custom Fields").click()
         # Keep a good practice of clearing field before entering value
         # Custom Name
-        driver.find_element_by_id("id_name").clear()
+        # driver.find_element_by_id("id_name").clear()
         driver.find_element_by_id("id_name").send_keys("Security Level")
         # Custom Value
-        driver.find_element_by_id("id_value").clear()
+        # driver.find_element_by_id("id_value").clear()
         driver.find_element_by_id("id_value").send_keys("Loose")
         # submit
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
@@ -270,7 +274,7 @@ class ProductTest(BaseTestCase):
         # Keep a good practice of clearing field before entering value
         # Just fill up to main required fields: 'File path' nd 'review status'
         # Full File path
-        driver.find_element_by_id("id_path").clear()
+        # driver.find_element_by_id("id_path").clear()
         driver.find_element_by_id("id_path").send_keys("/strange/folder/")
         # REview Status
         Select(driver.find_element_by_id("id_review_status")).select_by_visible_text("Untracked")

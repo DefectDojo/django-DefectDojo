@@ -20,7 +20,7 @@ class EndpointTest(BaseTestCase):
         driver.find_element_by_link_text("New Endpoint").click()
         # Keep a good practice of clearing field before entering value
         # Endpoints
-        driver.find_element_by_id("id_endpoint").clear()
+        # driver.find_element_by_id("id_endpoint").clear()
         driver.find_element_by_id("id_endpoint").send_keys("moving.com.rnd")
         # Select product to assign endpoint to
         Select(driver.find_element_by_id("id_product")).select_by_visible_text("QA Test")

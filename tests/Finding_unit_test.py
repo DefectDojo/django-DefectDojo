@@ -1,5 +1,4 @@
 from selenium.webdriver.support.ui import Select
-from selenium.webdriver.common.keys import Keys
 import unittest
 import re
 import sys
@@ -66,7 +65,11 @@ class FindingTest(BaseTestCase):
         # finding Severity
         Select(driver.find_element_by_id("id_severity")).select_by_visible_text("Critical")
         # finding Description
-        driver.find_element_by_id("id_severity").send_keys(Keys.TAB, "This is a crucial update to finding description.")
+
+        # the markdown editor we use, uses codemirror underneath which needs some special javascript treatment
+        # "One does not simply send keys to a codemirror editor!"
+        self.set_code_mirror_text(0, 'This is a crucial update to finding description.')
+
         # "Click" the Done button to Edit the finding
         driver.find_element_by_xpath("//input[@name='_Finished']").click()
         # Query the site to determine if the finding has been added
@@ -120,7 +123,7 @@ class FindingTest(BaseTestCase):
         reviewer_option = element.find_elements_by_tag_name('option')[0]
         Select(element).select_by_value(reviewer_option.get_attribute("value"))
         # Add Review notes
-        driver.find_element_by_id("id_entry").clear()
+        # driver.find_element_by_id("id_entry").clear()
         driver.find_element_by_id("id_entry").send_keys("This is to be reveiwed critically. Make sure it is well handled.")
         # Click 'Mark for reveiw'
         driver.find_element_by_name("submit").click()
@@ -142,7 +145,7 @@ class FindingTest(BaseTestCase):
         driver.find_element_by_id('id_active').click()
         driver.find_element_by_id('id_verified').click()
         # Add Review notes
-        driver.find_element_by_id("id_entry").clear()
+        # driver.find_element_by_id("id_entry").clear()
         driver.find_element_by_id("id_entry").send_keys("This has been reviewed and confirmed. A fix needed here.")
         # Click 'Clear reveiw' button
         driver.find_element_by_name("submit").click()
