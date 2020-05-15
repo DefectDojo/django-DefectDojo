@@ -232,45 +232,21 @@
             // Mapping of table columns to objects for proper cleanup and data formatting
             var dojoTable = $('#{{status}}').DataTable({
                 "columns": [
-                    { "data": "action" , render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
-                    }},
-                    { "data": "eng_name" , render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
-                    }},
-                    { "data": "lead" , render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
-                    }},
-                    { "data": "date" , render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
-                    }},
-                    { "data": "length" , render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
-                    }},
-                    { "data": "tests" , render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
-                    }},
-                    { "data": "open", render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
-                    } },
-                    { "data": "all", render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
-                    }},
-                    { "data": "dups", render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
-                    }},
-                    { "data": "updated" , render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
-                    }},
+                    { "data": "action" },
+                    { "data": "eng_name" },
+                    { "data": "lead" },
+                    { "data": "date" },
+                    { "data": "length" },
+                    { "data": "tests" },
+                    { "data": "open" },
+                    { "data": "all" },
+                    { "data": "dups" },
+                    { "data": "updated" },
                     {% if status == "paused" or status == "closed" %}
-                      { "data": "updated" , render: function (data, type, row) {
-                              return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
-                     }},
+                      { "data": "updated" },
                     {% endif %}
                     /* {% if user.is_staff %}
-                        { "data": "action", render: function (data, type, row) {
-                                return type === 'export' ?  "" :  data;
-                        }},
+                        { "data": "action" },
                     {% endif %} */
                 ],
                 columnDefs: [
@@ -286,25 +262,25 @@
                         extend: 'colvis',
                         columns: ':not(.noVis)'
                     },
-                    {
-                        extend: 'copyHtml5'
-                    },
-                    {
-                        extend: 'excelHtml5',
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'copy'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'excel',
                         autoFilter: true,
                         sheetName: 'Exported data',
-                    },
-                    {
-                        extend: 'csvHtml5'
-                    },
-                    {
-                        extend: 'pdfHtml5',
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'csv'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'pdf',
                         orientation: 'landscape',
                         pageSize: 'LETTER'
-                    },
-                    {
+                    }),
+                    $.extend( true, {}, buttonCommon, {
                         extend: 'print'
-                    },
+                    }),
                 ],
             });
         });
