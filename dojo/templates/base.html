@@ -598,8 +598,8 @@
         {% if request.user.is_authenticated %}
         $('.dropdown-toggle').click(function() { get_alerts(); });
         setInterval(function() {
-//            update_alertcount();
-        }, 10000);
+           update_alertcount();
+        }, 30000);
         {% endif %}
         function update_alertcount() {
             $.get("{% url 'alertcount' %}", function (data) {
