@@ -1,0 +1,23 @@
+[
+  [
+    "django",
+    "<1.2.7",
+    "1.2.2",
+    "django.contrib.sessions in Django before 1.2.7 and 1.3.x before 1.3.1, when session data is stored in the cache, uses the root namespace for both session identifiers and application-data keys, which allows remote attackers to modify a session by triggering use of a key that is equal to that session's identifier.",
+    "33063"
+  ],
+  [
+    "django",
+    "<1.2.7",
+    "1.2.2",
+    "The verify_exists functionality in the URLField implementation in Django before 1.2.7 and 1.3.x before 1.3.1 relies on Python libraries that attempt access to an arbitrary URL with no timeout, which allows remote attackers to cause a denial of service (resource consumption) via a URL associated with (1) a slow response, (2) a completed TCP connection with no application data sent, or (3) a large amount of application data, a related issue to CVE-2011-1521.",
+    "33064"
+  ],
+  [
+    "django",
+    "<1.2.7",
+    "1.2.2",
+    "The verify_exists functionality in the URLField implementation in Django before 1.2.7 and 1.3.x before 1.3.1 originally tests a URL's validity through a HEAD request, but then uses a GET request for the new target URL in the case of a redirect, which might allow remote attackers to trigger arbitrary GET requests with an unintended source IP address via a crafted Location header.",
+    "33065"
+  ]
+]
