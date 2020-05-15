@@ -313,16 +313,10 @@
                 drawCallback: function(){
                      $('.has-popover').popover({'trigger':'hover'});
                  },
-                "columns": [
-                    { "data": "action", render: function (data, type, row) {
-                            return type === 'export' ?  "" :  data;
-                    }},
-                    { "data": "product" , render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'b') :  data;
-                    }},
-                    { "data": "tags" , render: function (data, type, row) {
-                            return type === 'export' ?  getDojoExportValueFromTag(data, 'a') :  data;
-                    }},
+                 "columns": [
+                    { "data": "action" },
+                    { "data": "product" },
+                    { "data": "tags" },
                     { "data": "criticality" , render: function (data, type, row) {
                             return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
                     }},
@@ -337,12 +331,8 @@
                             return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
                     }},
                     {% endif %}
-                    { "data": "findings" , render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'b') :  data;
-                    }},
-                    { "data": "endpoints" , render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'b') :  data;
-                    }},
+                    { "data": "findings" },
+                    { "data": "endpoints" },
                     { "data": "contacts" },
                     { "data": "product_type" },
                 ],
@@ -364,25 +354,25 @@
                         extend: 'colvis',
                         columns: ':not(.noVis)'
                     },
-                    {
+                    $.extend( true, {}, buttonCommon, {
                         extend: 'copy'
-                    },
-                    {
+                    }),
+                    $.extend( true, {}, buttonCommon, {
                         extend: 'excel',
                         autoFilter: true,
                         sheetName: 'Exported data',
-                    },
-                    {
+                    }),
+                    $.extend( true, {}, buttonCommon, {
                         extend: 'csv'
-                    },
-                    {
+                    }),
+                    $.extend( true, {}, buttonCommon, {
                         extend: 'pdf',
                         orientation: 'landscape',
                         pageSize: 'LETTER'
-                    },
-                    {
+                    }),
+                    $.extend( true, {}, buttonCommon, {
                         extend: 'print'
-                    },
+                    }),
                 ],
             });
         });
