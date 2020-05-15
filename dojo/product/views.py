@@ -530,26 +530,26 @@ def new_product(request):
             if get_system_setting('enable_github'):
                 if gform.is_valid():
                     github_pkey = gform.save(commit=False)
-                    if github_pkey.conf is not None:
+                    if github_pkey.git_conf is not None and github_pkey.git_project:
                         github_pkey.product = product
                         github_pkey.save()
                         messages.add_message(request,
                                                 messages.SUCCESS,
-                                                'Github information added successfully.',
+                                                'GitHub information added successfully.',
                                                 extra_tags='alert-success')
-                    # Create appropriate labels in the repo
-                    logger.info('Create label in repo: ' + github_pkey.project_key)
-                    try:
-                        g = Github(github_pkey.conf.api_key)
-                        repo = g.get_repo(github_pkey.project_key)
-                        repo.create_label(name="security", color="FF0000", description="This label is automatically applied to all issues created by defectDojo")
-                        repo.create_label(name="security / info", color="00FEFC", description="This label is automatically applied to all issues created by defectDojo")
-                        repo.create_label(name="security / low", color="B7FE00", description="This label is automatically applied to all issues created by defectDojo")
-                        repo.create_label(name="security / medium", color="FEFE00", description="This label is automatically applied to all issues created by defectDojo")
-                        repo.create_label(name="security / high", color="FE9A00", description="This label is automatically applied to all issues created by defectDojo")
-                        repo.create_label(name="security / critical", color="FE2200", description="This label is automatically applied to all issues created by defectDojo")
-                    except:
-                        logger.info('Labels cannot be created - they may already exists')
+                        # Create appropriate labels in the repo
+                        logger.info('Create label in repo: ' + github_pkey.git_project)
+                        try:
+                            g = Github(github_pkey.git_conf.api_key)
+                            repo = g.get_repo(github_pkey.git_project)
+                            repo.create_label(name="security", color="FF0000", description="This label is automatically applied to all issues created by DefectDojo")
+                            repo.create_label(name="security / info", color="00FEFC", description="This label is automatically applied to all issues created by DefectDojo")
+                            repo.create_label(name="security / low", color="B7FE00", description="This label is automatically applied to all issues created by DefectDojo")
+                            repo.create_label(name="security / medium", color="FEFE00", description="This label is automatically applied to all issues created by DefectDojo")
+                            repo.create_label(name="security / high", color="FE9A00", description="This label is automatically applied to all issues created by DefectDojo")
+                            repo.create_label(name="security / critical", color="FE2200", description="This label is automatically applied to all issues created by DefectDojo")
+                        except:
+                            logger.info('Labels cannot be created - they may already exists')
 
             # SonarQube API Configuration
             sonarqube_form = Sonarqube_ProductForm(request.POST)
