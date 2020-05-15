@@ -599,7 +599,7 @@
         $('.dropdown-toggle').click(function() { get_alerts(); });
         setInterval(function() {
            update_alertcount();
-        }, 30000);
+        }, 300000);
         {% endif %}
         function update_alertcount() {
             $.get("{% url 'alertcount' %}", function (data) {
