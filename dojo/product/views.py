@@ -889,6 +889,7 @@ def ad_hoc_finding(request, pid):
     form_error = False
     enabled = False
     jform = None
+    gform = None
     form = AdHocFindingForm(initial={'date': timezone.now().date()})
     if get_system_setting('enable_jira') and \
             test.engagement.product.jira_pkey_set.first() is not None:
