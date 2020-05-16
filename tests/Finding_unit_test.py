@@ -215,12 +215,12 @@ class FindingTest(BaseTestCase):
         # Select and click on the particular finding to edit
         driver.find_element_by_link_text("App Vulnerable to XSS").click()
         # Click on the 'dropdownMenu1 button'
-        print("\nClicking on dropdown menu \n")
+        # print("\nClicking on dropdown menu \n")
         driver.find_element_by_id("dropdownMenu1").click()
         self.assertNoConsoleErrors()
 
         # Click on `Apply Template to Finding`
-        print("\nClicking on apply template \n")
+        # print("\nClicking on apply template \n")
         driver.find_element_by_link_text("Apply Template to Finding").click()
         self.assertNoConsoleErrors()
         # click on the template of 'App Vulnerable to XSS'
@@ -232,7 +232,7 @@ class FindingTest(BaseTestCase):
         driver.find_element_by_xpath("//button[@data-option='Replace']").click()
         self.assertNoConsoleErrors()
         # Click the 'finished' button to submit
-        print("\nClicking on finished \n")
+        # print("\nClicking on finished \n")
         driver.find_element_by_name('_Finished').click()
         self.assertNoConsoleErrors()
         # Query the site to determine if the finding has been added
@@ -275,8 +275,8 @@ class FindingTest(BaseTestCase):
             driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
         # Query the site to determine if the finding has been added
         productTxt = driver.find_element_by_tag_name("BODY").text
-        print("\n\nDebug Print Log: findingTxt fetched: {}\n".format(productTxt))
-        print("Checking for '.*ZAP Scan processed, a total of 4 findings were processed.*'")
+        # print("\n\nDebug Print Log: findingTxt fetched: {}\n".format(productTxt))
+        # print("Checking for '.*ZAP Scan processed, a total of 4 findings were processed.*'")
         # Assert ot the query to dtermine status of failure
         self.assertTrue(re.search(r'ZAP Scan processed, a total of 4 findings were processed', productTxt))
 
@@ -326,7 +326,8 @@ def add_finding_tests_to_suite(suite, jira=False, github=False):
     suite.addTest(FindingTest('test_make_finding_a_template'))
 
     if not jira:
-        # existing problem with jira enabled, this results in a 404 from bootstrap.min.js, disabling for now
+        # existing problem with jira enabled, this results in a 404 from something bootstrap.min.js is trying to load, disabling for now
+        # see https://github.com/DefectDojo/django-DefectDojo/issues/2371
         suite.addTest(FindingTest('test_apply_template_to_a_finding'))
 
     suite.addTest(FindingTest('test_import_scan_result'))
