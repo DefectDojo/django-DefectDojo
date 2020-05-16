@@ -333,6 +333,14 @@
                                       <a href="{{finding.jira_conf_new.url}}/browse/{{finding.jira_issue.jira_key}}" target="_blank" 
                                            alt="Jira Bug - {{finding.jira_issue.jira_key}}" data-toggle="tooltip" data-placement="bottom" title="{{finding.jira_issue.jira_key}}"><i class="fa fa-bug fa-fw"></i></a>
                                     {% endif %}
+<<<<<<< HEAD
+=======
+                                    {% if finding.notes.count %}
+                                      <a href="{% url 'view_finding' finding.id %}#vuln_notes" alt="{{ finding.notes.count }} comment{{ finding.notes.count|pluralize }}">
+                                        <span class="glyphicon glyphicon-comment"></span> {{ finding.notes.count }}
+                                      </a>
+                                    {% endif %}                                    
+>>>>>>> datatables-pdf-fix-update-1.0.21
                                   {% endif %}
                                 </td>
                                 {% if system_settings.enable_jira %}
@@ -398,6 +406,33 @@
                 drawCallback: function(){
                       $('.has-popover').popover({'trigger':'hover'});
                 },
+                "columns": [	
+                    { "data": "checkbox" },
+                    { "data": "action" },
+                    { "data": "severity" },
+                    { "data": "finding" , render: function (data, type, row) {	
+                            return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;	
+                    }},	
+                    { "data": "cwe" },
+                    { "data": "found_date" },
+                    { "data": "finding_age" },
+                    {% if system_settings.enable_finding_sla %}	
+                    { "data": "finding_sla" },
+                    {% endif %}                    	
+                    { "data": "reported_by" },
+                    { "data": "found_by_test" }, 
+                    { "data": "status" },
+                    { "data": "jira_id" },
+                    {% if system_settings.enable_jira %}	
+                      {% if jira_config and product_tab or not product_tab %}                    	
+                        { "data": "jira_age" },
+                        { "data": "jira_change" },
+                      {% endif %}                          	
+                    {% endif %}	
+                    {% if show_product_column and product_tab is None %}	
+                        { "data": "product" },
+                    {% endif %}	
+                ],
                 order: [],
                 columnDefs: [
                     { 

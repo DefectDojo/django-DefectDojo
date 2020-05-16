@@ -19,7 +19,7 @@ class SafetyParser(object):
             self.items = []
 
     def parse_json(self, json_output):
-        data = json_output.read()
+        data = json_output.read() or '[]'
         try:
             json_obj = json.loads(str(data, 'utf-8'))
         except:
@@ -29,7 +29,7 @@ class SafetyParser(object):
                        'installed': str(l[2]),
                        'description': str(l[3]),
                        'id': str(l[4])}
-                for l in json_obj}
+                for l in json_obj}  # noqa: E741
         return tree
 
     def get_items(self, tree, test, safety_db):
@@ -44,22 +44,21 @@ class SafetyParser(object):
 
 def get_item(item_node, test, safety_db):
     severity = 'Info'  # Because Safety doesn't include severity rating
-    cve = ''.join(a['cve'] for a in safety_db[item_node['package']] if a['id'] == 'pyup.io-' + item_node['id'])
+    cve = ''.join(a['cve'] or ''
+                  for a in safety_db[item_node['package']]
+                  if a['id'] == 'pyup.io-' + item_node['id']) or None
     title = item_node['package'] + " (" + item_node['affected'] + ")"
-    if cve:
-        title = title + " | " + cve
-    else:
-        cve = "N/A"
 
-    finding = Finding(title=title,
+    finding = Finding(title=title + " | " + cve if cve else title,
                       test=test,
                       severity=severity,
                       description=item_node['description'] +
                                   "\n Vulnerable Package: " + item_node['package'] +
                                   "\n Installed Version: " + item_node['installed'] +
                                   "\n Vulnerable Versions: " + item_node['affected'] +
-                                  "\n CVE: " + cve +
+                                  "\n CVE: " + (cve or "N/A") +
                                   "\n ID: " + item_node['id'],
+                      cve=cve,
                       cwe=1035,  # Vulnerable Third Party Component
                       mitigation="No mitigation provided",
                       references="No reference provided",
