@@ -199,7 +199,7 @@ class BaseTestCase(unittest.TestCase):
 
                 print(entry)
                 print('There was a SEVERE javascript error in the console, please check all steps fromt the current test to see where it happens')
-                print('Currently there is no way to find out at which url the error happened.')
+                print('Currently there is no way to find out at which url the error happened, but it could be: .' + self.driver.current_url)
                 if self.accept_javascript_errors:
                     print('WARNING: skipping SEVERE javascript error because accept_javascript_errors is True!')
                 elif re.search(accepted_javascript_messages, entry['message']):
