@@ -333,14 +333,11 @@
                                       <a href="{{finding.jira_conf_new.url}}/browse/{{finding.jira_issue.jira_key}}" target="_blank" 
                                            alt="Jira Bug - {{finding.jira_issue.jira_key}}" data-toggle="tooltip" data-placement="bottom" title="{{finding.jira_issue.jira_key}}"><i class="fa fa-bug fa-fw"></i></a>
                                     {% endif %}
-<<<<<<< HEAD
-=======
                                     {% if finding.notes.count %}
                                       <a href="{% url 'view_finding' finding.id %}#vuln_notes" alt="{{ finding.notes.count }} comment{{ finding.notes.count|pluralize }}">
                                         <span class="glyphicon glyphicon-comment"></span> {{ finding.notes.count }}
                                       </a>
                                     {% endif %}                                    
->>>>>>> datatables-pdf-fix-update-1.0.21
                                   {% endif %}
                                 </td>
                                 {% if system_settings.enable_jira %}
