@@ -85,7 +85,12 @@ def process_notifications(event, notifications=None, *args, **kwargs):
         logger.warn('no notifications!')
         return
 
-    sync = 'initiator' in kwargs and kwargs['initiator'].usercontactinfo and kwargs['initiator'].usercontactinfo.block_execution
+    sync = False
+    try:
+        sync = 'initiator' in kwargs and kwargs['initiator'].usercontactinfo and kwargs['initiator'].usercontactinfo.block_execution
+    except UserContactInfo.DoesNotExist:
+        pass
+
     logger.debug('sync: %s', sync)
     logger.debug('sending notifications ' + ('synchronously' if sync else 'asynchronously'))
     logger.debug(vars(notifications))
@@ -125,20 +130,24 @@ def process_notifications(event, notifications=None, *args, **kwargs):
 def send_slack_notification(event, user=None, *args, **kwargs):
     from dojo.utils import get_system_setting, get_slack_user_id
     if user is not None:
-        if user.usercontactinfo.slack_username is not None:
-            slack_user_id = user.usercontactinfo.slack_user_id
-            if user.usercontactinfo.slack_user_id is None:
-                # Lookup the slack userid
-                slack_user_id = get_slack_user_id(
-                    user.usercontactinfo.slack_username)
-                slack_user_save = UserContactInfo.objects.get(user_id=user.id)
-                slack_user_save.slack_user_id = slack_user_id
-                slack_user_save.save()
+        try:
+            if user.usercontactinfo.slack_username is not None:
+                slack_user_id = user.usercontactinfo.slack_user_id
+                if user.usercontactinfo.slack_user_id is None:
+                    # Lookup the slack userid
+                    slack_user_id = get_slack_user_id(
+                        user.usercontactinfo.slack_username)
+                    slack_user_save = UserContactInfo.objects.get(user_id=user.id)
+                    slack_user_save.slack_user_id = slack_user_id
+                    slack_user_save.save()
 
-            channel = '@%s' % slack_user_id
-        else:
-            # user has no slack username, skip
-            return
+                channel = '@%s' % slack_user_id
+            else:
+                # user has no slack username, skip
+                return
+        except UserContactInfo.DoesNotExist:
+            # no contact info means no slack username
+            pass
     else:
         channel = get_system_setting('slack_channel')
 
