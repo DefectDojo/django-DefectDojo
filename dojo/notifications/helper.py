@@ -90,10 +90,11 @@ def process_notifications(event, notifications=None, *args, **kwargs):
         logger.warn('no notifications!')
         return
 
-    sync = 'initiator' in kwargs and kwargs['initiator'].usercontactinfo and kwargs['initiator'].usercontactinfo.block_execution
-    # logger.debug('sync: %s', sync)
-    # logger.debug('sending notifications ' + ('synchronously' if sync else 'asynchronously'))
-    # logger.debug(vars(notifications))
+    sync = 'initiator' in kwargs and hasattr(kwargs['initiator'], 'usercontactinfo') and kwargs['initiator'].usercontactinfo.block_execution
+
+    logger.debug('sync: %s', sync)
+    logger.debug('sending notifications ' + ('synchronously' if sync else 'asynchronously'))
+    logger.debug(vars(notifications))
 
     slack_enabled = get_system_setting('enable_slack_notifications')
     hipchat_enabled = get_system_setting('enable_hipchat_notifications')
@@ -129,7 +130,7 @@ def process_notifications(event, notifications=None, *args, **kwargs):
 def send_slack_notification(event, user=None, *args, **kwargs):
     from dojo.utils import get_system_setting, get_slack_user_id
     if user is not None:
-        if user.usercontactinfo.slack_username is not None:
+        if hasattr(user, 'usercontactinfo') and user.usercontactinfo.slack_username is not None:
             slack_user_id = user.usercontactinfo.slack_user_id
             if user.usercontactinfo.slack_user_id is None:
                 # Lookup the slack userid
