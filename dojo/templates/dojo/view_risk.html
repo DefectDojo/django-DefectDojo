@@ -33,11 +33,13 @@
     <div class="table-responsive">
         <table class="table-striped table table-condensed table-hover centered">
                 <tr>
+                    <th>Name</th>
                     <th>Expiration Date</th>
                     <th>Accepted By</th>
                     <th>Compensating Control</th>
                 </tr>
                 <tr>
+                    <td>{{ risk_approval.name }}</td>
                     <td>{{ risk_approval.expiration_date|default_if_none:"" }}</td>
                     <td>{{ risk_approval.accepted_by|default_if_none:"" }}</td>
                     <td>{{ risk_approval.compensating_control|default_if_none:"" }}</td>

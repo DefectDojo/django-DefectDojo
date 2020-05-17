@@ -834,7 +834,7 @@ def upload_risk(request, eid):
                 finding.active = False
                 finding.save()
             risk = form.save(commit=False)
-            risk.reporter = form.cleaned_data['reporter']
+            risk.owner = form.cleaned_data['owner']
             risk.expiration_date = form.cleaned_data['expiration_date']
             risk.accepted_by = form.cleaned_data['accepted_by']
             risk.compensating_control = form.cleaned_data['compensating_control']
@@ -860,7 +860,7 @@ def upload_risk(request, eid):
             return HttpResponseRedirect(
                 reverse('view_engagement', args=(eid, )))
     else:
-        form = UploadRiskForm(initial={'reporter': request.user})
+        form = UploadRiskForm(initial={'owner': request.user, 'name': 'Ad Hoc ' + timezone.now().strftime('%b %d, %Y, %H:%M:%S')})
 
     form.fields["accepted_findings"].queryset = eng_findings
     product_tab = Product_Tab(eng.product.id, title="Upload Risk Exception", tab="engagements")
@@ -972,7 +972,7 @@ def view_risk(request, eid, raid):
         request,
         risk_approval.accepted_findings.order_by('numerical_severity'), 15)
 
-    authorized = (request.user == risk_approval.reporter.username or request.user.is_staff)
+    authorized = (request.user == risk_approval.owner.username or request.user.is_staff)
 
     product_tab = Product_Tab(eng.product.id, title="Risk Exception", tab="engagements")
     product_tab.setEngagement(eng)
