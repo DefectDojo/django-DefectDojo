@@ -1,6 +1,7 @@
 from .parser_helper import get_defectdojo_findings
 from dojo.models import Finding
 import hashlib
+import logging
 import re
 
 __author__ = "Vijay Bheemineni"
@@ -43,7 +44,7 @@ class AcunetixScannerParser(object):
                             dynamic_finding=acunetix_defectdojo_finding.dynamic_finding
                 )
             else:
-                print(("Duplicate finding : {defectdojo_title}".format(defectdojo_title=acunetix_defectdojo_finding.title)))
+                logging.info("Duplicate finding : {defectdojo_title}".format(defectdojo_title=acunetix_defectdojo_finding.title))
 
         self.items = list(defectdojo_findings.values())
 
