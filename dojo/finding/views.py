@@ -587,24 +587,22 @@ def edit_finding(request, fid):
         enabled = finding.test.engagement.product.jira_pkey_set.first().push_all_issues
         jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
 
-    gform = None
     try:
         jissue = JIRA_Issue.objects.get(finding=finding)
         enabled = True
     except:
         enabled = False
-        pass
 
     try:
         gissue = GITHUB_Issue.objects.get(finding=finding)
-        enabled = True
+        github_enabled = True
     except:
-        enabled = False
-        pass
+        github_enabled = False
 
-    if get_system_setting('enable_github') and GITHUB_PKey.objects.filter(
-            product=finding.test.engagement.product) != 0:
-        gform = GITHUBFindingForm(enabled=enabled, prefix='githubform')
+    gform = None
+    if get_system_setting('enable_github'):
+        if GITHUB_PKey.objects.filter(product=finding.test.engagement.product).exclude(git_conf_id=None):
+            gform = GITHUBFindingForm(enabled=github_enabled, prefix='githubform')
 
     if request.method == 'POST':
         form = FindingForm(request.POST, instance=finding, template=False)
@@ -676,7 +674,7 @@ def edit_finding(request, fid):
 
             if 'githubform-push_to_github' in request.POST:
                 gform = GITHUBFindingForm(
-                    request.POST, prefix='githubform', enabled=enabled)
+                    request.POST, prefix='githubform', enabled=github_enabled)
                 if gform.is_valid():
                     if GITHUB_Issue.objects.filter(finding=new_finding).exists():
                         update_external_issue_task.delay(
@@ -1683,7 +1681,7 @@ def finding_bulk_update_all(request, pid=None):
                     logger.info('push selected findings to github')
                     finds = Finding.objects.filter(id__in=finding_to_update)
                     for finding in finds:
-                        print('will push to github finding: ' + str(finding))
+                        print('will push to GitHub finding: ' + str(finding))
                         old_status = finding.status()
                         if form.cleaned_data['push_to_github']:
                             if GITHUB_Issue.objects.filter(finding=finding).exists():
