@@ -40,7 +40,7 @@ def dashboard(request):
                                                                    now]).count()
 
         accepted_count = len([finding for ra in Risk_Acceptance.objects.filter(
-            reporter=request.user, created__date__range=[seven_days_ago, now]) for finding in ra.accepted_findings.all()])
+            created__date__range=[seven_days_ago, now]) for finding in ra.accepted_findings.all()])
 
         # forever counts
         findings = Finding.objects.filter(verified=True, duplicate=False)
@@ -58,7 +58,7 @@ def dashboard(request):
                                                                    now]).count()
 
         accepted_count = len([finding for ra in Risk_Acceptance.objects.filter(
-            reporter=request.user, created__date__range=[seven_days_ago, now]) for finding in ra.accepted_findings.all()])
+            owner=request.user, created__date__range=[seven_days_ago, now]) for finding in ra.accepted_findings.all()])
 
         # forever counts
         findings = Finding.objects.filter(reporter=request.user,
