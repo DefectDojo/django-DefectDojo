@@ -1608,6 +1608,8 @@ class Finding(models.Model):
 
     def status(self):
         status = []
+        if self.under_review:
+            status += ['Under Review']
         if self.active:
             status += ['Active']
         else:
@@ -1623,8 +1625,7 @@ class Finding(models.Model):
         if self.duplicate:
             status += ['Duplicate']
         if self.risk_acceptance_set.exists():
-            status += ['Accepted']
-
+            status += ['Risk Accepted']
         if not len(status):
             status += ['Initial']
 
