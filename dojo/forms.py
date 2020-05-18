@@ -567,7 +567,7 @@ class AddFindingsRiskAcceptanceForm(forms.ModelForm):
     accepted_findings = forms.ModelMultipleChoiceField(
         queryset=Finding.objects.all(), required=True,
         widget=forms.widgets.SelectMultiple(attrs={'size': 10}),
-        help_text=('Select to add findings.'))
+        help_text=('Select to add findings.'), label="Add findings as accepted:")
 
     class Meta:
         model = Risk_Acceptance
