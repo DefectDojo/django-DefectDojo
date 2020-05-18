@@ -15,7 +15,6 @@ setup(
         'django-filter==1.0.4',
         'django-imagekit',
         'django-multiselectfield',
-        'django-overextends==0.4.3',  # Required for extensions
         'django-polymorphic==1.2',
         'django-crispy-forms',
         'django_extensions',
@@ -48,7 +47,6 @@ setup(
         'kombu>=4.1',
         'sqlalchemy',
         'pdfkit==0.6.1',
-        'django-overextends',
         'defusedxml',
         'django-tagging',
         'django-custom-field',
