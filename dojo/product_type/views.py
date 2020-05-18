@@ -24,7 +24,7 @@ Product Type views
 
 def product_type(request):
     # query for names outside of query with prefetch to avoid the complex prefetch query from executing twice
-    name_words = [prod_type.name for prod_type in Product_Type.objects.all().only('name')]
+    name_words = Product_Type.objects.all().values_list('name', flat=True)
 
     prod_types = Product_Type.objects.all()
 
@@ -56,6 +56,8 @@ def prefetch_for_product_type(prod_types):
 
         prefetch_prod_types = prefetch_prod_types.annotate(findings_count=Count('prod_type__engagement__test__finding__id', filter=active_findings_query))
         prefetch_prod_types = prefetch_prod_types.annotate(prod_count=Count('prod_type', distinct=True))
+    else:
+        logger.debug('unable to prefetch because query was already executed')
 
     return prefetch_prod_types
 

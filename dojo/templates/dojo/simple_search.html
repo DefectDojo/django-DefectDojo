@@ -93,7 +93,7 @@
                                         {% endfor %}
                                     </sup>
                                 </td>
-                                <td>{{ product.object.description|truncatechars:150|markdown_render }}</td>
+                                <td>{{ product.object.description|truncatechars_html:150|markdown_render }}</td>
                             </tr>
                         {% endfor %}
                         </tbody>

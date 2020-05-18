@@ -301,7 +301,7 @@ def add_comment_task(find, note):
 
 @app.task(name='async_dedupe')
 def async_dedupe(new_finding, *args, **kwargs):
-    deduplicationLogger.debug("running deduplication")
+    deduplicationLogger.debug("running async deduplication")
     dedupe_signal.send(sender=new_finding.__class__, new_finding=new_finding)
 
 

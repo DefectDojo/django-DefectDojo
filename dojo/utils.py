@@ -31,8 +31,11 @@ from dojo.models import Finding, Engagement, Finding_Template, Product, JIRA_PKe
     Language_Type, Languages, Rule, Test_Type
 from asteval import Interpreter
 from requests.auth import HTTPBasicAuth
+from dojo.notifications.helper import create_notification
 import logging
 import itertools
+from django.contrib import messages
+from django.http import HttpResponseRedirect
 
 
 logger = logging.getLogger(__name__)
@@ -241,7 +244,7 @@ def deduplicate_hash_code(new_finding):
         str(len(existing_findings)) + " findings with same hash_code")
     for find in existing_findings:
         if is_deduplication_on_engagement_mismatch(new_finding, find):
-            deduplicationLoggerdebug(
+            deduplicationLogger.debug(
                 'deduplication_on_engagement_mismatch, skipping dedupe.')
             continue
         try:
@@ -653,13 +656,10 @@ def get_punchcard_data(findings, start_date, weeks):
         first_sunday = start_date - relativedelta(weekday=SU(-1))
         last_sunday = start_date + relativedelta(weeks=weeks)
 
-        print(first_sunday)
-        print(last_sunday)
-
         # reminder: The first week of a year is the one that contains the year’s first Thursday
         # so we could have for 29/12/2019: week=1 and year=2019 :-D. So using week number from db is not practical
 
-        severities_by_day = findings.filter(created__gte=first_sunday).filter(created__lt=last_sunday) \
+        severities_by_day = findings.filter(created__date__gte=first_sunday).filter(created__date__lt=last_sunday) \
                                     .values('created__date') \
                                     .annotate(count=Count('id')) \
                                     .order_by('created__date')
@@ -725,9 +725,9 @@ def get_punchcard_data(findings, start_date, weeks):
 
         # add week in progress + empty weeks on the end if needed
         while tick < weeks + 1:
-            print(tick)
+            # print(tick)
             week_data, label = get_week_data(start_of_week, tick, day_counts)
-            print(week_data, label)
+            # print(week_data, label)
             punchcard.extend(week_data)
             ticks.append(label)
             tick += 1
@@ -785,11 +785,11 @@ def get_period_counts_legacy(findings,
             end_date = new_date + relativedelta(weeks=1, weekday=MO(1))
 
         closed_in_range_count = findings_closed.filter(
-            mitigated__range=[new_date, end_date]).count()
+            mitigated__date__range=[new_date, end_date]).count()
 
         if accepted_findings:
             risks_a = accepted_findings.filter(
-                risk_acceptance__created__range=[
+                risk_acceptance__created__date__range=[
                     datetime(
                         new_date.year,
                         new_date.month,
@@ -884,11 +884,11 @@ def get_period_counts(active_findings,
             end_date = new_date + relativedelta(weeks=1, weekday=MO(1))
 
         closed_in_range_count = findings_closed.filter(
-            mitigated__range=[new_date, end_date]).count()
+            mitigated__date__range=[new_date, end_date]).count()
 
         if accepted_findings:
             risks_a = accepted_findings.filter(
-                risk_acceptance__created__range=[
+                risk_acceptance__created__date__range=[
                     datetime(
                         new_date.year,
                         new_date.month,
@@ -1048,7 +1048,7 @@ def opened_in_period(start_date, end_date, pt):
         end_date,
         'closed':
         Finding.objects.filter(
-            mitigated__range=[start_date, end_date],
+            mitigated__date__range=[start_date, end_date],
             test__engagement__product__prod_type=pt,
             severity__in=('Critical', 'High', 'Medium', 'Low')).aggregate(
                 total=Sum(
@@ -1172,6 +1172,15 @@ def get_page_items(request, items, page_size, param_name='page'):
 
     # new get_page method will handle invalid page value, out of bounds pages, etc
     return paginator.get_page(page)
+
+
+def get_page_items_and_count(request, items, page_size, param_name='page'):
+    size = request.GET.get('page_size', page_size)
+    paginator = Paginator(items, size)
+    page = request.GET.get(param_name)
+
+    # new get_page method will handle invalid page value, out of bounds pages, etc
+    return paginator.get_page(page), paginator.count
 
 
 def handle_uploaded_threat(f, eng):
@@ -1477,7 +1486,7 @@ def update_issue(find, push_to_jira):
                                                   jira_conf.finding_text),
                 priority={'name': jira_conf.get_priority(find.severity)},
                 fields=fields)
-            print('\n\nSaving jira_change\n\n')
+            # print('\n\nSaving jira_change\n\n')
             # Moving this to finding.save()
             # find.jira_change = timezone.now()
             # find.save()
@@ -1764,11 +1773,7 @@ def prepare_for_view(encrypted_value):
 
 
 def get_system_setting(setting):
-    try:
-        system_settings = System_Settings.objects.get()
-    except:
-        system_settings = System_Settings()
-
+    system_settings = System_Settings.objects.get()
     return getattr(system_settings, setting, None)
 
 
@@ -1981,7 +1986,6 @@ def set_default_notifications(sender, instance, created, **kwargs):
 @receiver(post_save, sender=Engagement)
 def engagement_post_Save(sender, instance, created, **kwargs):
     if created:
-        from dojo.notifications.helper import create_notification
         engagement = instance
         title = 'Engagement created for ' + str(engagement.product) + ': ' + str(engagement.name)
         create_notification(event='engagement_added', title=title, engagement=engagement, product=engagement.product,
@@ -1992,3 +1996,18 @@ def merge_sets_safe(set1, set2):
     return set(itertools.chain(set1 or [], set2 or []))
     # This concat looks  better, but requires Python 3.6+
     # return {*set1, *set2}
+
+
+def get_return_url(request_params):
+    return request_params.get('return_url', None)
+
+
+def redirect_to_return_url_or_else(request, or_else):
+    return_url = get_return_url(request.POST)
+    if return_url is not None and return_url.strip():
+        return HttpResponseRedirect(return_url)
+    elif or_else:
+        return HttpResponseRedirect(or_else)
+    else:
+        messages.add_message(request, messages.ERROR, 'Unable to redirect anywhere.', extra_tags='alert-danger')
+        return HttpResponseRedirect(request.get_full_path())

@@ -182,9 +182,13 @@ class ProductForm(forms.ModelForm):
         queryset=None,
         required=False, label="Authorized Users")
 
+    product_manager = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'), required=False)
+    technical_contact = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'), required=False)
+    product_manager = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'), required=False)
+
     def __init__(self, *args, **kwargs):
-        non_staff = User.objects.exclude(is_staff=True) \
-            .exclude(is_active=False)
+        non_staff = Dojo_User.objects.exclude(is_staff=True) \
+            .exclude(is_active=False).order_by('first_name', 'last_name')
         tags = Tag.objects.usage_for_model(Product)
         t = [(tag.name, tag.name) for tag in tags]
         super(ProductForm, self).__init__(*args, **kwargs)
@@ -311,6 +315,7 @@ class ImportScanForm(forms.Form):
                          ("Node Security Platform Scan", "Node Security Platform Scan"),
                          ("NPM Audit Scan", "NPM Audit Scan"),
                          ("Qualys Scan", "Qualys Scan"),
+                         ("Qualys Infrastructure Scan (WebGUI XML)", "Qualys Infrastructure Scan (WebGUI XML)"),
                          ("Qualys Webapp Scan", "Qualys Webapp Scan"),
                          ("OpenVAS CSV", "OpenVAS CSV"),
                          ("Snyk Scan", "Snyk Scan"),
@@ -369,7 +374,9 @@ class ImportScanForm(forms.Form):
                          ("Trivy Scan", "Trivy Scan"),
                          ("Anchore Enterprise Policy Check", "Anchore Enterprise Policy Check"),
                          ("Gitleaks Scan", "Gitleaks Scan"),
-                         ("Harbor Vulnerability Scan", "Harbor Vulnerability Scan"))
+                         ("Choctaw Hog Scan", "Choctaw Hog Scan"),
+                         ("Harbor Vulnerability Scan", "Harbor Vulnerability Scan"),
+                         ("GitLab SAST Report", "GitLab SAST Report"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
     scan_date = forms.DateTimeField(
@@ -811,7 +818,7 @@ class TestForm(forms.ModelForm):
     class Meta:
         model = Test
         fields = ['title', 'test_type', 'target_start', 'target_end',
-                  'environment', 'percent_complete', 'tags', 'lead']
+                  'environment', 'percent_complete', 'tags', 'lead', 'version']
 
 
 class DeleteTestForm(forms.ModelForm):

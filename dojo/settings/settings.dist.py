@@ -93,6 +93,9 @@ env = environ.Env(
     DD_SOCIAL_AUTH_GITLAB_SECRET=(str, ''),
     DD_SOCIAL_AUTH_GITLAB_API_URL=(str, 'https://gitlab.com'),
     DD_SOCIAL_AUTH_GITLAB_SCOPE=(list, ['api', 'read_user', 'openid', 'profile', 'email']),
+    # merging findings doesn't always work well with dedupe and reimport etc.
+    # disable it if you see any issues (and report them on github)
+    DD_DISABLE_FINDING_MERGE=(bool, False),
 )
 
 
@@ -510,6 +513,7 @@ INSTALLED_APPS = (
 DJANGO_MIDDLEWARE_CLASSES = [
     # 'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'dojo.middleware.DojoSytemSettingsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -619,9 +623,11 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'NPM Audit Scan': ['title', 'severity', 'file_path', 'cve', 'cwe'],
     # possible improvment: in the scanner put the library name into file_path, then dedup on cve + file_path + severity
     'Whitesource Scan': ['title', 'severity', 'description'],
-    'ZAP Scan': ['cwe', 'endpoints', 'severity'],
+    'ZAP Scan': ['title', 'cwe', 'endpoints', 'severity'],
     'Qualys Scan': ['title', 'endpoints', 'severity'],
     'PHP Symfony Security Check': ['title', 'cve'],
+    'Clair Scan': ['title', 'cve', 'description', 'severity'],
+    'Clair Klar Scan': ['title', 'description', 'severity'],
     # for backwards compatibility because someone decided to rename this scanner:
     'Symfony Security Check': ['title', 'cve'],
     'DSOP Scan': ['cve'],
@@ -674,10 +680,14 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'ZAP Scan': DEDUPE_ALGO_HASH_CODE,
     'Qualys Scan': DEDUPE_ALGO_HASH_CODE,
     'PHP Symfony Security Check': DEDUPE_ALGO_HASH_CODE,
+    'Clair Scan': DEDUPE_ALGO_HASH_CODE,
+    'Clair Klar Scan': DEDUPE_ALGO_HASH_CODE,
     # for backwards compatibility because someone decided to rename this scanner:
     'Symfony Security Check': DEDUPE_ALGO_HASH_CODE,
     'DSOP Scan': DEDUPE_ALGO_HASH_CODE,
 }
+
+DISABLE_FINDING_MERGE = env('DD_DISABLE_FINDING_MERGE')
 
 # ------------------------------------------------------------------------------
 # JIRA
@@ -706,8 +716,7 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '[%(asctime)s] %(levelname)s '
-                      '[%(name)s:%(lineno)d] %(message)s',
+            'format': '[%(asctime)s] %(levelname)s [%(name)s:%(lineno)d] %(message)s',
             'datefmt': '%d/%b/%Y %H:%M:%S',
         },
         'simple': {
@@ -747,7 +756,12 @@ LOGGING = {
             'handlers': ['console'],
             'level': 'INFO',
             'propagate': False,
-        }
+        },
+        'MARKDOWN': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
     }
 }
 

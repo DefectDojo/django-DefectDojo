@@ -25,7 +25,6 @@ from multiselectfield import MultiSelectField
 from django import forms
 from django.utils.translation import gettext as _
 from dojo.signals import dedupe_signal
-from django.core.cache import cache
 from dojo.tag.prefetching_tag_descriptor import PrefetchingTagDescriptor
 from django.contrib.contenttypes.fields import GenericRelation
 from tagging.models import TaggedItem
@@ -92,21 +91,6 @@ class Regulation(models.Model):
 
     def __str__(self):
         return self.acronym + ' (' + self.jurisdiction + ')'
-
-
-class SystemSettingsManager(models.Manager):
-    CACHE_KEY = 'defect_dojo_cache.system_settings'
-
-    def get_from_super(self, *args, **kwargs):
-        logger.debug('getting system_settings from super because cache was empty')
-        return super(SystemSettingsManager, self).get(*args, **kwargs)
-
-    def get(self, no_cache=False, *args, **kwargs):
-        # cache only 30s because django default cache backend is local per process
-        if no_cache:
-            logger.debug('no cache specified, retrieving system settings from super()')
-            return super(SystemSettingsManager, self).get(*args, **kwargs)
-        return cache.get_or_set(self.CACHE_KEY, lambda: self.get_from_super(*args, **kwargs), timeout=30)
 
 
 class System_Settings(models.Model):
@@ -281,12 +265,8 @@ class System_Settings(models.Model):
     enable_google_sheets = models.BooleanField(default=False, null=True, blank=True)
     email_address = models.EmailField(max_length=100, blank=True)
 
-    objects = SystemSettingsManager()
-
-    def save(self, *args, **kwargs):
-        super(System_Settings, self).save(*args, **kwargs)
-        logger.debug('deleting system settings from cache after save')
-        cache.delete(SystemSettingsManager.CACHE_KEY)
+    from dojo.middleware import System_Settings_Manager
+    objects = System_Settings_Manager()
 
 
 class SystemSettingsFormAdmin(forms.ModelForm):
@@ -1258,6 +1238,8 @@ class Test(models.Model):
     # used for prefetching tags because django-tagging doesn't support that out of the box
     tagged_items = GenericRelation(TaggedItem)
 
+    version = models.CharField(max_length=100, null=True, blank=True)
+
     def test_type_name(self):
         return self.test_type.name
 
@@ -1440,6 +1422,7 @@ class Finding(models.Model):
         ordering = ('numerical_severity', '-date', 'title')
         indexes = [
             models.Index(fields=['cve']),
+            models.Index(fields=['cwe']),
             models.Index(fields=['out_of_scope']),
             models.Index(fields=['false_p']),
             models.Index(fields=['verified']),
@@ -1679,19 +1662,19 @@ class Finding(models.Model):
 
     def has_github_issue(self):
         try:
-            issue = self.jira_issue
+            issue = self.github_issue
             return True
         except GITHUB_Issue.DoesNotExist:
             return False
 
     def github_conf(self):
         try:
-            jpkey = GITHUB_PKey.objects.get(product=self.test.engagement.product)
-            jconf = jpkey.conf
+            github_product_key = GITHUB_PKey.objects.get(product=self.test.engagement.product)
+            github_conf = github_product_key.conf
         except:
-            jconf = None
+            github_conf = None
             pass
-        return jconf
+        return github_conf
 
     # newer version that can work with prefetching
     def github_conf_new(self):
@@ -2208,10 +2191,10 @@ class GITHUB_PKey(models.Model):
     git_push_notes = models.BooleanField(default=False, blank=True, help_text="Notes added to findings will be automatically added to the corresponding github issue")
 
     def __unicode__(self):
-        return self.product.name + " | " + self.project_key
+        return self.product.name + " | " + self.git_project
 
     def __str__(self):
-        return self.product.name + " | " + self.project_key
+        return self.product.name + " | " + self.git_project
 
 
 class JIRA_Conf(models.Model):

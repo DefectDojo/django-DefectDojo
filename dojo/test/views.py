@@ -25,9 +25,11 @@ from dojo.filters import TemplateFindingFilter, OpenFindingFilter
 from dojo.forms import NoteForm, TestForm, FindingForm, \
     DeleteTestForm, AddFindingForm, \
     ImportScanForm, ReImportScanForm, FindingBulkUpdateForm, JIRAFindingForm
-from dojo.models import Product, Finding, Test, Notes, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, Finding_Template, JIRA_PKey, Cred_Mapping, Dojo_User, JIRA_Issue, System_Settings
+from dojo.models import Product, Finding, Test, Notes, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, \
+    Finding_Template, JIRA_PKey, Cred_Mapping, Dojo_User, JIRA_Issue, System_Settings
 from dojo.tools.factory import import_parser_factory
-from dojo.utils import get_page_items, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting, Product_Tab, calculate_grade, log_jira_alert, max_safe
+from dojo.utils import get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting, \
+    Product_Tab, calculate_grade, log_jira_alert, max_safe, redirect_to_return_url_or_else
 from dojo.notifications.helper import create_notification
 from dojo.tasks import add_issue_task, update_issue_task
 from functools import reduce
@@ -71,8 +73,8 @@ def view_test(request, tid):
     else:
         form = NoteForm()
 
-    fpage = get_page_items(request, prefetch_for_findings(findings.qs), 25)
-    sfpage = get_page_items(request, stub_findings, 25)
+    paged_findings, total_findings_count = get_page_items_and_count(request, prefetch_for_findings(findings.qs), 25)
+    paged_stub_findings = get_page_items(request, stub_findings, 25)
     show_re_upload = any(test.test_type.name in code for code in ImportScanForm.SCAN_TYPE_CHOICES)
 
     product_tab = Product_Tab(prod.id, title="Test", tab="engagements")
@@ -119,10 +121,10 @@ def view_test(request, tid):
     return render(request, 'dojo/view_test.html',
                   {'test': test,
                    'product_tab': product_tab,
-                   'findings': fpage,
+                   'findings': paged_findings,
                    'filtered': findings,
-                   'findings_count': findings.qs.count(),
-                   'stub_findings': sfpage,
+                   'findings_count': total_findings_count,
+                   'stub_findings': paged_stub_findings,
                    'form': form,
                    'notes': notes,
                    'person': person,
@@ -144,8 +146,12 @@ def prefetch_for_findings(findings):
         prefetched_findings = prefetched_findings.prefetch_related('risk_acceptance_set')
         # we could try to prefetch only the latest note with SubQuery and OuterRef, but I'm getting that MySql doesn't support limits in subqueries.
         prefetched_findings = prefetched_findings.prefetch_related('notes')
+        prefetched_findings = prefetched_findings.prefetch_related('endpoints')
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__jira_pkey_set__conf')
         prefetched_findings = prefetched_findings.prefetch_related('tagged_items__tag')
+    else:
+        logger.debug('unable to prefetch because query was already executed')
+
     return prefetched_findings
 
 
@@ -569,7 +575,7 @@ def finding_bulk_update(request, tid):
                     from dojo.tools import tool_issue_updater
                     tool_issue_updater.async_tool_issue_update(finding)
 
-                    if JIRA_PKey.objects.filter(product=finding.test.engagement.product).count() == 0:
+                    if finding.jira_conf_new() is None:
                         log_jira_alert('Finding cannot be pushed to jira as there is no jira configuration for this product.', finding)
                     else:
                         push_anyway = finding.jira_conf_new().jira_pkey_set.first().push_all_issues
@@ -591,7 +597,7 @@ def finding_bulk_update(request, tid):
                                      'Unable to process bulk update. Required fields were not selected.',
                                      extra_tags='alert-danger')
 
-    return HttpResponseRedirect(reverse('view_test', args=(test.id,)))
+    return redirect_to_return_url_or_else(request, reverse('view_test', args=(test.id,)))
 
 
 @user_passes_test(lambda u: u.is_staff)

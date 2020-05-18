@@ -571,11 +571,32 @@
 		"model": "dojo.test_type",
 		"pk": 173
 	},
+	{
+		"fields": {
+			"name": "Gitleaks Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 174
+	},
+	{
+		"fields": {
+		    "name": "Choctaw Hog Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 175
+	},
+	{
+		"fields": {
+			"name": "GitLab SAST Report"
+		},
+		"model": "dojo.test_type",
+		"pk": 176
+	},
   {
     "fields": {
-      "name": "Gitleaks Scan"
+        "name": "Qualys Infrastructure Scan (WebGUI XML)"
     },
     "model": "dojo.test_type",
-      "pk": 174
+    "pk": 177
   }
 ]

@@ -3,7 +3,7 @@ from dojo.models import Product, Engagement, Test, Finding, \
     Finding_Template, Test_Type, Development_Environment, NoteHistory, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Product_Type, JIRA_Conf, Endpoint, BurpRawRequestResponse, JIRA_PKey, \
-    Notes, DojoMeta, FindingImage
+    Notes, DojoMeta, FindingImage, Note_Type
 from dojo.forms import ImportScanForm, SEVERITY_CHOICES
 from dojo.tools import requires_file
 from dojo.tools.factory import import_parser_factory
@@ -172,7 +172,7 @@ class ProductMetaSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'first_name', 'last_name', 'last_login')
+        fields = ('id', 'username', 'first_name', 'last_name', 'email', 'last_login')
 
 
 class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
@@ -596,6 +596,10 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         if settings.USE_TZ:
             scan_date_time = timezone.make_aware(scan_date_time, timezone.get_default_timezone())
 
+        version = ''
+        if 'version' in data:
+            version = data['version']
+
         test = Test(
             engagement=data['engagement'],
             lead=data['lead'],
@@ -603,7 +607,8 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
             target_start=data['scan_date'],
             target_end=data['scan_date'],
             environment=environment,
-            percent_complete=100)
+            percent_complete=100,
+            version=version)
         try:
             test.full_clean()
         except ValidationError:
@@ -980,6 +985,12 @@ class NoteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Notes
+        fields = '__all__'
+
+
+class NoteTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Note_Type
         fields = '__all__'
 
 
