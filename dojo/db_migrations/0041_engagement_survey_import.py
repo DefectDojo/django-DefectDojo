@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
     initial = True
     dependencies = [
         ('contenttypes', '0002_remove_content_type_name'),
-        ('dojo', '0039_test_version'),
+        ('dojo', '0040_finding_cwe_index'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
