@@ -215,7 +215,7 @@
 <script>
         // DataTables setup
         $(document).ready(function() {
-            date =  new Date().toISOString().slice(0, 10);
+            var date =  new Date().toISOString().slice(0, 10);
             var fileDated = 'Engagements_List_' + date;
             var buttonCommon = {
                 exportOptions: {
@@ -245,9 +245,6 @@
                     {% if status == "paused" or status == "closed" %}
                       { "data": "updated" },
                     {% endif %}
-                    /* {% if user.is_staff %}
-                        { "data": "action" },
-                    {% endif %} */
                 ],
                 columnDefs: [
                     { 
