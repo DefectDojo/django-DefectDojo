@@ -1806,14 +1806,10 @@ class Finding(models.Model):
         if rules_option:
             from dojo.tasks import async_rules
             from dojo.utils import sync_rules
-            try:
-                if self.reporter.usercontactinfo.block_execution:
-                    sync_rules(self, *args, **kwargs)
-                else:
-                    async_rules(self, *args, **kwargs)
-            except UserContactInfo.DoesNotExist:
+            if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
+                sync_rules(self, *args, **kwargs)
+            else:
                 async_rules(self, *args, **kwargs)
-                pass
         from dojo.utils import calculate_grade
         calculate_grade(self.test.engagement.product)
         # Assign the numerical severity for correct sorting order
