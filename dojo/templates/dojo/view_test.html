@@ -275,9 +275,8 @@
     {% endif %}
      <div class="panel panel-default table-responsive">
         {% if findings %}
-            <table id="test_findings" class="table table-condensed table-hover">
-                <tbody>
-                    <thead>
+            <table id="test_findings" class="tablesorter-bootstrap table table-condensed table-hover">
+                <thead>
                         <tr>
                             <th class="hidden-sm centered" title="Select all visible findings.">
                                 <div class="dropdown">
@@ -319,6 +318,7 @@
                             {% endif %}
                         </tr>
                     </thead>
+                <tbody>
                 {% for finding in findings %}
                     <tr class="{% if finding.active %}active_finding{% else %}inactive_finding{% endif %}">
                         <td class="hidden-sm centered">
@@ -496,6 +496,9 @@
                 <p class="text-center">No findings found.</p>
             </div>
         {% endif %}
+        <div class="clearfix">
+            {% include "dojo/paging_snippet.html" with page=findings page_size=True %}
+        </div>
 
         <div class="panel panel-default to_highlight table-responsive potential-finding">
             <div class="panel-heading">
@@ -938,5 +941,79 @@
 
         });
 
+        // DataTables setup
+        $(document).ready(function() {
+            date =  new Date().toISOString().slice(0, 10);
+            var fileDated = 'Findings_List_' + date;
+            var buttonCommon = {
+                exportOptions: {
+                    columns: ':not(:eq(8))',
+                    stripHtml: true,
+                    stripNewlines: true,
+                    trim: true,
+                    orthogonal: 'export'
+                },
+                filename: fileDated,
+                title: 'Findings List'
+            };
+
+            // Mapping of table columns to objects for proper cleanup and data formatting
+            var dojoTable = $('#test_findings').DataTable({
+                "columns": [
+                    { "data": "dropdown" },
+                    { "data": "action" },
+                    { "data": "severity" },
+                    { "data": "name" },
+                    { "data": "cwe" },
+                    { "data": "date" },
+                    { "data": "age" },
+                    {% if system_settings.enable_finding_sla %}
+                        { "data": "sla" },
+                    {% endif %}
+                    { "data": "reporter" },
+                    { "data": "status" },
+                    {% if system_settings.enable_jira %}
+                        {% if jira_config and product_tab or not product_tab %}
+                            { "data": "jira" },
+                            { "data": "jira_age" },
+                            { "data": "jira_change" },
+                        {% endif %}
+                    {% endif %}
+                ],
+                columnDefs: [
+                    { 
+                        "orderable": false,
+                        "targets": [0]
+                    },
+                ],
+                dom: 'Bfrtip',
+                paging: false,
+                buttons: [
+                    {
+                        extend: 'colvis',
+                        columns: ':not(.noVis)'
+                    },
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'copy'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'excel',
+                        autoFilter: true,
+                        sheetName: 'Exported data',
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'csv'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'pdf',
+                        orientation: 'landscape',
+                        pageSize: 'LETTER'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'print'
+                    }),
+                ],
+            });
+        });
     </script>
 {% endblock %}
