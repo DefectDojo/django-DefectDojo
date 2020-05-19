@@ -1094,6 +1094,10 @@ class DeleteFindingTemplateForm(forms.ModelForm):
 
 class FindingBulkUpdateForm(forms.ModelForm):
     status = forms.BooleanField(required=False)
+    risk_acceptance = forms.BooleanField(required=False)
+    risk_accept = forms.BooleanField(required=False)
+    risk_unaccept = forms.BooleanField(required=False)
+
     push_to_jira = forms.BooleanField(required=False)
     push_to_github = forms.BooleanField(required=False)
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
