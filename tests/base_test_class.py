@@ -71,16 +71,7 @@ class BaseTestCase(unittest.TestCase):
 
     def goto_product_overview(self, driver):
         driver.get(self.base_url + "product")
-        body = driver.find_element_by_tag_name("BODY").text
-        # print('BODY:')
-        # print(body)
-        # print('re.search:', re.search(r'No products found', body))
-
-        if re.search(r'No products found', body):
-            return driver
-
-        # wait for product_wrapper div as datatables javascript modifies the DOM on page load.
-        WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.ID, "products_wrapper")))
+        wait_for_datatable_if_content("no_products", "products_wrapper")
 
     def goto_active_engagements_overview(self, driver):
         # return self.goto_engagements_internal(driver, 'engagement')
@@ -94,30 +85,23 @@ class BaseTestCase(unittest.TestCase):
 
     def goto_engagements_internal(self, driver, rel_url):
         driver.get(self.base_url + rel_url)
-        body = driver.find_element_by_tag_name("BODY").text
-        # print('BODY:')
-        # print(body)
-        # print('re.search:', re.search(r'No products found', body))
-
-        if re.search(r'No engagements found', body):
-            return driver
-
-        # wait for engagements_wrapper div as datatables javascript modifies the DOM on page load.
-        WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.ID, "engagements_wrapper")))
+        wait_for_datatable_if_content("no_engagements", "engagements_wrapper")
         return driver
 
     def goto_all_findings_list(self, driver):
         driver.get(self.base_url + "finding")
-        body = driver.find_element_by_tag_name("BODY").text
-        # print('BODY:')
-        # print(body)
-        # print('re.search:', re.search(r'No products found', body))
+        wait_for_datatable_if_content("no_findings", "open_findings_wrapper")
 
-        if re.search(r'No findings found', body):
-            return driver
+    def wait_for_datatable_if_content(self, no_content_id, wrapper_id):
+        no_content = None
+        try:
+            no_content = driver.find_element_by_id(no_content_id)
+        except:
+            pass
 
-        # wait for product_wrapper div as datatables javascript modifies the DOM on page load.
-        WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.ID, "open_findings_wrapper")))
+        if no_content is None:
+            # wait for product_wrapper div as datatables javascript modifies the DOM on page load.
+            WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.ID, wrapper_id)))
 
     def change_system_setting(self, id, enable=True):
         # we set the admin user (ourselves) to have block_execution checked
