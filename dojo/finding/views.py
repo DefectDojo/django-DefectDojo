@@ -1737,11 +1737,11 @@ def finding_bulk_update_all(request, pid=None):
 
                     # Because we never call finding.save() in a bulk update, we need to actually
                     # push the JIRA stuff here, rather than in finding.save()
-                    if finding.jira_pkey() and finding.jira_pkey().push_all_issues and finding.jira_conf_new() is None:
-                        log_jira_alert('Finding cannot be pushed to jira as there is no jira configuration for this product.', finding)
-                    else:
-                        push_anyway = finding.jira_conf_new() and finding.jira_pkey().push_all_issues
-                        if form.cleaned_data['push_to_jira'] or push_anyway:
+                    push_anyway = finding.jira_conf_new() and finding.jira_pkey().push_all_issues
+                    if form.cleaned_data['push_to_jira'] or push_anyway:
+                        if not finding.jira_conf_new:
+                            log_jira_alert('Finding cannot be pushed to jira as there is no jira configuration for this product.', finding)
+                        else:
                             if JIRA_Issue.objects.filter(finding=finding).exists():
                                 update_issue_task.delay(finding, True)
                             else:
