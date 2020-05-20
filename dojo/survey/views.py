@@ -53,7 +53,7 @@ def delete_engagement_survey(request, eid, sid):
                                  messages.SUCCESS,
                                  'Survey deleted successfully.',
                                  extra_tags='alert-success')
-            return HttpResponseRedirect('/engagement/%s' % eid)
+            return HttpResponseRedirect(reverse('view_engagement', args=(engagement.id, )))
         else:
             messages.add_message(request,
                                  messages.ERROR,
@@ -209,8 +209,8 @@ def add_survey(request, eid):
                                  'Survey successfully added, answers pending.',
                                  extra_tags='alert-success')
             if 'respond_survey' in request.POST:
-                return HttpResponseRedirect(
-                    '/engagement/%s/survey/%s/answer' % (eid, survey.id))
+                return HttpResponseRedirect(reverse(
+                    'answer_survey', args=(eid, survey.id)))
 
             return HttpResponseRedirect('/engagement/%s' % eid)
         else:
@@ -594,9 +594,9 @@ def add_empty_survey(request):
                                  'Engagement Created, Survey successfully added, answers pending.',
                                  extra_tags='alert-success')
             if 'respond_survey' in request.POST:
-                return HttpResponseRedirect('/dashboard')
+                return HttpResponseRedirect(reverse('dashboard'))
 
-            return HttpResponseRedirect('/survey')
+            return HttpResponseRedirect(reverse('survey'))
         else:
             messages.add_message(request,
                                  messages.ERROR,
@@ -650,7 +650,7 @@ def delete_empty_survey(request, esid):
                                  messages.SUCCESS,
                                  'Survey deleted successfully.',
                                  extra_tags='alert-success')
-            return HttpResponseRedirect('/survey')
+            return HttpResponseRedirect(reverse('survey'))
         else:
             messages.add_message(request,
                                  messages.ERROR,
@@ -681,7 +681,7 @@ def delete_general_survey(request, esid):
                                  messages.SUCCESS,
                                  'Survey deleted successfully.',
                                  extra_tags='alert-success')
-            return HttpResponseRedirect('/survey')
+            return HttpResponseRedirect(reverse('survey'))
         else:
             messages.add_message(request,
                                  messages.ERROR,
@@ -803,7 +803,7 @@ def engagement_empty_survey(request, esid):
                                  messages.SUCCESS,
                                  'Engagement created and survey successfully linked.',
                                  extra_tags='alert-success')
-            return HttpResponseRedirect('/engagement/%s/edit' % engagement.id)
+            return HttpResponseRedirect(reverse('edit_engagement', args=(engagement.id, )))
         else:
             messages.add_message(request,
                                  messages.ERROR,

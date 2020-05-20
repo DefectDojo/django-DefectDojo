@@ -2136,7 +2136,7 @@ class TextQuestionForm(QuestionForm):
 
         self.fields['answer'] = forms.CharField(
             label=self.question.text,
-            widget=forms.Textarea(),
+            widget=forms.Textarea(attrs={"rows": 3, "cols": 10}),
             required=not self.question.optional,
             initial=initial_answer,
         )
