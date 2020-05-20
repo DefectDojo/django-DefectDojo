@@ -13,6 +13,22 @@ fi
 
 # Run available unittests with a simple setup
 echo "Running Product type integration tests"
+# All available Integrationtest Scripts are activated below
+# If successsful, A successs message is printed and the script continues
+# If any script is unsuccesssful a failure message is printed and the test script
+# Exits with status code of 1
+
+function fail() {
+    echo "Error: $1 test failed\n"
+    exit 1
+}
+
+function success() {
+    echo "Success: $1 test passed\n"
+}
+
+test="Product type integration tests"
+echo "Running: $test"
 if python3 tests/Product_type_unit_test.py ; then
     echo "Success: Product type integration tests passed"
 else

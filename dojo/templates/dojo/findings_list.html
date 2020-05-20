@@ -73,8 +73,8 @@
                                 </label>
                                 {% endif %}
                                 {% if system_settings.enable_github %}
-                                <label style="font-size: 80%; font-weight: bold; display: block">Push to Github
-                                  <input id="id_push_togithub" name="push_to_github" type="checkbox" alt="Select to push to Github"/>
+                                <label style="font-size: 80%; font-weight: bold; display: block">Push to GitHub
+                                  <input id="id_push_togithub" name="push_to_github" type="checkbox" alt="Select to push to GitHub"/>
                                 </label>
                                 <br/>
                                 {% endif %}
@@ -339,7 +339,7 @@
                                       <a href="{% url 'view_finding' finding.id %}#vuln_notes" alt="{{ finding.notes.count }} comment{{ finding.notes.count|pluralize }}">
                                         <span class="glyphicon glyphicon-comment"></span> {{ finding.notes.count }}
                                       </a>
-                                    {% endif %}
+                                    {% endif %}                                    
                                   {% endif %}
                                 </td>
                                 {% if system_settings.enable_jira %}
@@ -405,60 +405,32 @@
                 drawCallback: function(){
                       $('.has-popover').popover({'trigger':'hover'});
                 },
-                "columns": [
-                    { "data": "checkbox", render: function (data, type, row) {
-                            return type === 'export' ?  "" :  data;
-                    }},
-                    { "data": "action", render: function (data, type, row) {
-                            return type === 'export' ?  "" :  data;
-                    }},
-                    { "data": "severity" , render: function (data, type, row) {
-                            return type === 'export' ?  getDojoExportValueFromTag(data, 'span') :  data;
-                    }},
-                    { "data": "finding" , render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
-                    }},
-                    { "data": "cwe" , render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
-                    }},
-                    { "data": "found_date", render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
-                    }},
-                    { "data": "finding_age", render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
-                    } },
-                    
-                    {% if system_settings.enable_finding_sla %}
-                    { "data": "finding_sla", render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
-                    }},
-                    {% endif %}                    
-
-                    { "data": "reported_by", render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
-                    }},
-                    { "data": "found_by_test", render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
-                    }},
-                    { "data": "status", render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
-                    }},
-                    { "data": "jira_id", render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
-                    }},
-                    {% if system_settings.enable_jira %}
-                        { "data": "jira_age", render: function (data, type, row) {
-                                return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
-                        }},
-                        { "data": "jira_change", render: function (data, type, row) {
-                                return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
-                        }},
-                    {% endif %}
-                    {% if show_product_column and product_tab is None %}
-                        { "data": "product" , render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
-                        }},
-                    {% endif %}
+                "columns": [	
+                    { "data": "checkbox" },
+                    { "data": "action" },
+                    { "data": "severity" },
+                    { "data": "finding" , render: function (data, type, row) {	
+                            return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;	
+                    }},	
+                    { "data": "cwe" },
+                    { "data": "found_date" },
+                    { "data": "finding_age" },
+                    {% if system_settings.enable_finding_sla %}	
+                    { "data": "finding_sla" },
+                    {% endif %}                    	
+                    { "data": "reported_by" },
+                    { "data": "found_by_test" }, 
+                    { "data": "status" },
+                    { "data": "jira_id" },
+                    {% if system_settings.enable_jira %}	
+                      {% if jira_config and product_tab or not product_tab %}                    	
+                        { "data": "jira_age" },
+                        { "data": "jira_change" },
+                      {% endif %}                          	
+                    {% endif %}	
+                    {% if show_product_column and product_tab is None %}	
+                        { "data": "product" },
+                    {% endif %}	
                 ],
                 order: [],
                 "columnDefs": [
@@ -469,22 +441,23 @@
                 dom: 'Bfrtip',
                 paging: false,
                 buttons: [
+                    {
+                        extend: 'colvis',
+                        columns: ':not(.noVis)'
+                    },
                     $.extend( true, {}, buttonCommon, {
-                        extend: 'colvis'
+                        extend: 'copy'
                     }),
                     $.extend( true, {}, buttonCommon, {
-                        extend: 'copyHtml5'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'excelHtml5',
+                        extend: 'excel',
                         autoFilter: true,
                         sheetName: 'Exported data',
                     }),
                     $.extend( true, {}, buttonCommon, {
-                        extend: 'csvHtml5'
+                        extend: 'csv'
                     }),
                     $.extend( true, {}, buttonCommon, {
-                        extend: 'pdfHtml5',
+                        extend: 'pdf',
                         orientation: 'landscape',
                         pageSize: 'LETTER'
                     }),
