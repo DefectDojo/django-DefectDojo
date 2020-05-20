@@ -2018,3 +2018,17 @@ def redirect_to_return_url_or_else(request, or_else):
     else:
         messages.add_message(request, messages.ERROR, 'Unable to redirect anywhere.', extra_tags='alert-danger')
         return HttpResponseRedirect(request.get_full_path())
+
+
+def redirect(obj, suffix=None):
+
+    real_suffix = ''
+    if suffix:
+        real_suffix = suffix
+
+    if isinstance(obj, Engagement):
+        return HttpResponseRedirect(reverse('view_engagement', args=(obj.id,)) + real_suffix)
+    elif isinstance(obj, Product):
+        return HttpResponseRedirect(reverse('view_product', args=(obj.id,)) + real_suffix)
+    else:
+        raise NotImplementedError
