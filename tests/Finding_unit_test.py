@@ -55,7 +55,7 @@ class FindingTest(BaseTestCase):
         # login to site, password set to fetch from environ
         driver = self.login_page()
         # Navigate to All Finding page
-        driver.get(self.base_url + "finding")
+        self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
         driver.find_element_by_link_text("App Vulnerable to XSS").click()
         # Click on the 'dropdownMenu1 button'
@@ -81,7 +81,7 @@ class FindingTest(BaseTestCase):
         # login to site, password set to fetch from environ
         driver = self.login_page()
         # Navigate to All Finding page
-        driver.get(self.base_url + "finding")
+        self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
         driver.find_element_by_link_text("App Vulnerable to XSS").click()
         # Click on the 'dropdownMenu1 button'
@@ -104,7 +104,7 @@ class FindingTest(BaseTestCase):
         # login to site, password set to fetch from environ
         driver = self.login_page()
         # Navigate to All Finding page
-        driver.get(self.base_url + "finding")
+        self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
         driver.find_element_by_link_text("App Vulnerable to XSS").click()
         # Click on the 'dropdownMenu1 button'
@@ -133,7 +133,7 @@ class FindingTest(BaseTestCase):
         # login to site, password set to fetch from environ
         driver = self.login_page()
         # Navigate to All Finding page
-        driver.get(self.base_url + "finding")
+        self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
         driver.find_element_by_link_text("App Vulnerable to XSS").click()
         # Click on `Clear Review` link text
@@ -155,7 +155,7 @@ class FindingTest(BaseTestCase):
         # login to site, password set to fetch from environ
         driver = self.login_page()
         # Navigate to All Finding page
-        driver.get(self.base_url + "finding")
+        self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
         driver.find_element_by_link_text("App Vulnerable to XSS").click()
         # Click on the 'dropdownMenu1 button'
@@ -174,7 +174,7 @@ class FindingTest(BaseTestCase):
     def test_close_finding(self):
         driver = self.login_page()
         # Navigate to All Finding page
-        driver.get(self.base_url + "finding")
+        self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
         driver.find_element_by_link_text("App Vulnerable to XSS").click()
         # Click on the 'dropdownMenu1 button'
@@ -193,7 +193,7 @@ class FindingTest(BaseTestCase):
     def test_make_finding_a_template(self):
         driver = self.login_page()
         # Navigate to All Finding page
-        driver.get(self.base_url + "finding")
+        self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
         driver.find_element_by_link_text("App Vulnerable to XSS").click()
         # Click on the 'dropdownMenu1 button'
@@ -212,6 +212,7 @@ class FindingTest(BaseTestCase):
         print("\nListing findings \n")
         driver.get(self.base_url + "finding")
         self.assertNoConsoleErrors()
+        self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
         driver.find_element_by_link_text("App Vulnerable to XSS").click()
         # Click on the 'dropdownMenu1 button'
@@ -258,7 +259,7 @@ class FindingTest(BaseTestCase):
     def test_import_scan_result(self):
         driver = self.login_page()
         # Navigate to All Finding page
-        driver.get(self.base_url + "finding")
+        self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
         driver.find_element_by_link_text("App Vulnerable to XSS").click()
         # Click on the 'Finding' dropdown menubar
@@ -286,7 +287,9 @@ class FindingTest(BaseTestCase):
         # login to site, password set to fetch from environ
         driver = self.login_page()
         # Navigate to All Finding page
-        driver.get(self.base_url + "finding")
+        # driver.get(self.base_url + "finding")
+        self.goto_all_findings_list(driver)
+
         # Select and click on the particular finding to edit
         driver.find_element_by_link_text("App Vulnerable to XSS").click()
         # Click on the 'dropdownMenu1 button'

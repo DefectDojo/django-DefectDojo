@@ -106,6 +106,19 @@ class BaseTestCase(unittest.TestCase):
         WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.ID, "engagements_wrapper")))
         return driver
 
+    def goto_all_findings_list(self, driver):
+        driver.get(self.base_url + "finding")
+        body = driver.find_element_by_tag_name("BODY").text
+        # print('BODY:')
+        # print(body)
+        # print('re.search:', re.search(r'No products found', body))
+
+        if re.search(r'No findings found', body):
+            return driver
+
+        # wait for product_wrapper div as datatables javascript modifies the DOM on page load.
+        WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.ID, "open_findings_wrapper")))
+
     def change_system_setting(self, id, enable=True):
         # we set the admin user (ourselves) to have block_execution checked
         # this will force dedupe to happen synchronously as the celeryworker is not reliable in travis
