@@ -159,7 +159,7 @@ class FindingViewSet(mixins.ListModelMixin,
                      'mitigated', 'endpoints', 'test', 'active', 'verified',
                      'false_p', 'reporter', 'url', 'out_of_scope',
                      'duplicate', 'test__engagement__product',
-                     'test__engagement')
+                     'test__engagement', 'unique_id_from_tool')
 
     # Overriding mixins.UpdateModeMixin perform_update() method to grab push_to_jira
     # data and add that as a parameter to .save()
