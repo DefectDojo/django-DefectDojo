@@ -1772,7 +1772,12 @@ def mark_finding_duplicate(request, original_id, duplicate_id):
 
     if original.test.engagement != duplicate.test.engagement:
         if original.test.engagement.deduplication_on_engagement or duplicate.test.engagement.deduplication_on_engagement:
-            raise ValueError('Marking finding {} as duplicate of {} failed as they are not in the same engagement and deduplication_on_engagement is enabled for at least one of them')
+            messages.add_message(
+                request,
+                messages.ERROR,
+                'Marking finding as duplicate/original failed as they are not in the same engagement and deduplication_on_engagement is enabled for at least one of them',
+                extra_tags='alert-danger')
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
     duplicate.duplicate = True
     duplicate.active = False

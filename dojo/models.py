@@ -1439,24 +1439,27 @@ class Finding(models.Model):
 
     @property
     def similar_findings(self):
-        filtered = Finding.objects.all()
+        similar = Finding.objects.all()
 
         if self.test.engagement.deduplication_on_engagement:
-            filtered = filtered.filter(test__engagement=self.test.engagement)
+            similar = similar.filter(test__engagement=self.test.engagement)
         else:
-            filtered = filtered.filter(test__engagement__product=self.test.engagement.product)
+            similar = similar.filter(test__engagement__product=self.test.engagement.product)
 
         if self.cve:
-            filtered = filtered.filter(cve=self.cve)
+            similar = similar.filter(cve=self.cve)
         if self.cwe:
-            filtered = filtered.filter(cwe=self.cwe)
+            similar = similar.filter(cwe=self.cwe)
         if self.file_path:
-            filtered = filtered.filter(file_path=self.file_path)
+            similar = similar.filter(file_path=self.file_path)
         if self.line:
-            filtered = filtered.filter(line=self.line)
+            similar = similar.filter(line=self.line)
         if self.unique_id_from_tool:
-            filtered = filtered.filter(unique_id_from_tool=self.unique_id_from_tool)
-        return filtered.exclude(pk=self.pk)[:10]
+            similar = similar.filter(unique_id_from_tool=self.unique_id_from_tool)
+
+        identical = Finding.objects.all().filter(test__engagement__product=self.test.engagement.product).filter(hash_code=self.hash_code).exclude(pk=self.pk)
+
+        return (similar.exclude(pk=self.pk) | identical)[:10]
 
     def compute_hash_code(self):
         if hasattr(settings, 'HASHCODE_FIELDS_PER_SCANNER') and hasattr(settings, 'HASHCODE_ALLOWS_NULL_CWE') and hasattr(settings, 'HASHCODE_ALLOWED_FIELDS'):
