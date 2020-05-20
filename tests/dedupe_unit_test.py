@@ -27,7 +27,7 @@ class DedupeTest(BaseTestCase):
         for i in range(0, 18):
             time.sleep(5)  # wait bit for celery dedupe task which can be slow on travis
             driver = self.login_page()
-            driver.get(self.base_url + "finding")
+            self.goto_all_findings_list(driver)
             dupe_count = 0
             # iterate over the rows of the findings table and concatenates all columns into td.text
             trs = driver.find_elements_by_xpath('//*[@id="open_findings"]/tbody/tr')
