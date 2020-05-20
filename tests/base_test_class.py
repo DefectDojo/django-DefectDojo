@@ -71,16 +71,7 @@ class BaseTestCase(unittest.TestCase):
 
     def goto_product_overview(self, driver):
         driver.get(self.base_url + "product")
-        body = driver.find_element_by_tag_name("BODY").text
-        # print('BODY:')
-        # print(body)
-        # print('re.search:', re.search(r'No products found', body))
-
-        if re.search(r'No products found', body):
-            return driver
-
-        # wait for product_wrapper div as datatables javascript modifies the DOM on page load.
-        WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.ID, "products_wrapper")))
+        wait_for_datatable_if_content("no_products", "products_wrapper")
 
     def goto_active_engagements_overview(self, driver):
         # return self.goto_engagements_internal(driver, 'engagement')
@@ -94,17 +85,70 @@ class BaseTestCase(unittest.TestCase):
 
     def goto_engagements_internal(self, driver, rel_url):
         driver.get(self.base_url + rel_url)
-        body = driver.find_element_by_tag_name("BODY").text
-        # print('BODY:')
-        # print(body)
-        # print('re.search:', re.search(r'No products found', body))
-
-        if re.search(r'No engagements found', body):
-            return driver
-
-        # wait for engagements_wrapper div as datatables javascript modifies the DOM on page load.
-        WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.ID, "engagements_wrapper")))
+        wait_for_datatable_if_content("no_engagements", "engagements_wrapper")
         return driver
+
+    def goto_all_findings_list(self, driver):
+        driver.get(self.base_url + "finding")
+        wait_for_datatable_if_content("no_findings", "open_findings_wrapper")
+
+    def wait_for_datatable_if_content(self, no_content_id, wrapper_id):
+        no_content = None
+        try:
+            no_content = driver.find_element_by_id(no_content_id)
+        except:
+            pass
+
+        if no_content is None:
+            # wait for product_wrapper div as datatables javascript modifies the DOM on page load.
+            WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.ID, wrapper_id)))
+
+    def change_system_setting(self, id, enable=True):
+        # we set the admin user (ourselves) to have block_execution checked
+        # this will force dedupe to happen synchronously as the celeryworker is not reliable in travis
+        print("changing system setting " + id + " enable: " + str(enable))
+        driver = self.login_page()
+        driver.get(self.base_url + 'system_settings')
+
+        is_enabled = driver.find_element_by_id(id).is_selected()
+        if (enable and not is_enabled) or (not enable and is_enabled):
+            # driver.find_element_by_xpath('//*[@id=' + id + ']').click()
+            driver.find_element_by_id(id).click()
+            # save settings
+            driver.find_element_by_css_selector("input.btn.btn-primary").click()
+            # check if it's enabled after reload
+
+        is_enabled = driver.find_element_by_id(id).is_selected()
+
+        if enable:
+            self.assertTrue(is_enabled)
+
+        if not enable:
+            self.assertFalse(is_enabled)
+
+        return is_enabled
+
+    def enable_system_setting(self, id):
+        return self.change_system_setting(id, enable=True)
+
+    def disable_system_setting(self, id):
+        return self.change_system_setting(id, enable=False)
+
+    # def enable_block_execution(self):
+    # won't work, is on user profile instead of system settings
+    #     return self.enable_system_setting('id_block_execution')
+
+    def enable_jira(self):
+        return self.enable_system_setting('id_enable_jira')
+
+    def disable_jira(self):
+        return self.disable_system_setting('id_enable_jira')
+
+    def disable_github(self):
+        return self.disable_system_setting('id_enable_github')
+
+    def enable_github(self):
+        return self.enable_system_setting('id_enable_github')
 
     def is_alert_present(self):
         try:
@@ -152,7 +196,7 @@ class BaseTestCase(unittest.TestCase):
 
                 print(entry)
                 print('There was a SEVERE javascript error in the console, please check all steps fromt the current test to see where it happens')
-                print('Currently there is no way to find out at which url the error happened.')
+                print('Currently there is no reliable way to find out at which url the error happened, but it could be: .' + self.driver.current_url)
                 if self.accept_javascript_errors:
                     print('WARNING: skipping SEVERE javascript error because accept_javascript_errors is True!')
                 elif re.search(accepted_javascript_messages, entry['message']):

@@ -84,8 +84,8 @@
                                 </label>
                                 {% endif %}
                                 {% if system_settings.enable_github %}
-                                <label style="font-size: 80%; font-weight: bold; display: block">Push to Github
-                                  <input id="id_push_togithub" name="push_to_github" type="checkbox" alt="Select to push to Github"/>
+                                <label style="font-size: 80%; font-weight: bold; display: block">Push to GitHub
+                                  <input id="id_push_togithub" name="push_to_github" type="checkbox" alt="Select to push to GitHub"/>
                                 </label>
                                 <br/>
                                 {% endif %}
@@ -396,7 +396,7 @@
                     {% include "dojo/paging_snippet.html" with page=findings page_size=True%}
                 </div>
             {% else %}
-                <p class="text-center">No findings found.</p>
+                <div id="no_findings"><p class="text-center">No findings found.</p></div>                
             {% endif %}
         </div>
     </div>

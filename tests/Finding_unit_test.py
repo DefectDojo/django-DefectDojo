@@ -55,7 +55,7 @@ class FindingTest(BaseTestCase):
         # login to site, password set to fetch from environ
         driver = self.login_page()
         # Navigate to All Finding page
-        driver.get(self.base_url + "finding")
+        self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
         driver.find_element_by_link_text("App Vulnerable to XSS").click()
         # Click on the 'dropdownMenu1 button'
@@ -75,13 +75,13 @@ class FindingTest(BaseTestCase):
         self.assertTrue(re.search(r'Finding saved successfully', productTxt))
 
     def test_add_image(self):
-        print("\n\nDebug Print Log: testing 'add image' \n")
+        # print("\n\nDebug Print Log: testing 'add image' \n")
         # The Name of the Finding created by test_add_product_finding => 'App Vulnerable to XSS'
         # Test To Add Finding To product
         # login to site, password set to fetch from environ
         driver = self.login_page()
         # Navigate to All Finding page
-        driver.get(self.base_url + "finding")
+        self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
         driver.find_element_by_link_text("App Vulnerable to XSS").click()
         # Click on the 'dropdownMenu1 button'
@@ -104,7 +104,7 @@ class FindingTest(BaseTestCase):
         # login to site, password set to fetch from environ
         driver = self.login_page()
         # Navigate to All Finding page
-        driver.get(self.base_url + "finding")
+        self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
         driver.find_element_by_link_text("App Vulnerable to XSS").click()
         # Click on the 'dropdownMenu1 button'
@@ -133,7 +133,7 @@ class FindingTest(BaseTestCase):
         # login to site, password set to fetch from environ
         driver = self.login_page()
         # Navigate to All Finding page
-        driver.get(self.base_url + "finding")
+        self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
         driver.find_element_by_link_text("App Vulnerable to XSS").click()
         # Click on `Clear Review` link text
@@ -155,7 +155,7 @@ class FindingTest(BaseTestCase):
         # login to site, password set to fetch from environ
         driver = self.login_page()
         # Navigate to All Finding page
-        driver.get(self.base_url + "finding")
+        self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
         driver.find_element_by_link_text("App Vulnerable to XSS").click()
         # Click on the 'dropdownMenu1 button'
@@ -174,7 +174,7 @@ class FindingTest(BaseTestCase):
     def test_close_finding(self):
         driver = self.login_page()
         # Navigate to All Finding page
-        driver.get(self.base_url + "finding")
+        self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
         driver.find_element_by_link_text("App Vulnerable to XSS").click()
         # Click on the 'dropdownMenu1 button'
@@ -193,7 +193,7 @@ class FindingTest(BaseTestCase):
     def test_make_finding_a_template(self):
         driver = self.login_page()
         # Navigate to All Finding page
-        driver.get(self.base_url + "finding")
+        self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
         driver.find_element_by_link_text("App Vulnerable to XSS").click()
         # Click on the 'dropdownMenu1 button'
@@ -209,19 +209,33 @@ class FindingTest(BaseTestCase):
     def test_apply_template_to_a_finding(self):
         driver = self.login_page()
         # Navigate to All Finding page
+        print("\nListing findings \n")
         driver.get(self.base_url + "finding")
+        self.assertNoConsoleErrors()
+        self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
         driver.find_element_by_link_text("App Vulnerable to XSS").click()
         # Click on the 'dropdownMenu1 button'
+        # print("\nClicking on dropdown menu \n")
         driver.find_element_by_id("dropdownMenu1").click()
+        self.assertNoConsoleErrors()
+
         # Click on `Apply Template to Finding`
+        # print("\nClicking on apply template \n")
         driver.find_element_by_link_text("Apply Template to Finding").click()
+        self.assertNoConsoleErrors()
         # click on the template of 'App Vulnerable to XSS'
+        print("\nClicking on the template \n")
         driver.find_element_by_link_text("App Vulnerable to XSS").click()
+        self.assertNoConsoleErrors()
         # Click on 'Replace all' button
+        print("\nClicking on replace all \n")
         driver.find_element_by_xpath("//button[@data-option='Replace']").click()
+        self.assertNoConsoleErrors()
         # Click the 'finished' button to submit
+        # print("\nClicking on finished \n")
         driver.find_element_by_name('_Finished').click()
+        self.assertNoConsoleErrors()
         # Query the site to determine if the finding has been added
         productTxt = driver.find_element_by_tag_name("BODY").text
         # Assert ot the query to dtermine status of failure
@@ -245,7 +259,7 @@ class FindingTest(BaseTestCase):
     def test_import_scan_result(self):
         driver = self.login_page()
         # Navigate to All Finding page
-        driver.get(self.base_url + "finding")
+        self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
         driver.find_element_by_link_text("App Vulnerable to XSS").click()
         # Click on the 'Finding' dropdown menubar
@@ -262,8 +276,8 @@ class FindingTest(BaseTestCase):
             driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
         # Query the site to determine if the finding has been added
         productTxt = driver.find_element_by_tag_name("BODY").text
-        print("\n\nDebug Print Log: findingTxt fetched: {}\n".format(productTxt))
-        print("Checking for '.*ZAP Scan processed, a total of 4 findings were processed.*'")
+        # print("\n\nDebug Print Log: findingTxt fetched: {}\n".format(productTxt))
+        # print("Checking for '.*ZAP Scan processed, a total of 4 findings were processed.*'")
         # Assert ot the query to dtermine status of failure
         self.assertTrue(re.search(r'ZAP Scan processed, a total of 4 findings were processed', productTxt))
 
@@ -273,7 +287,9 @@ class FindingTest(BaseTestCase):
         # login to site, password set to fetch from environ
         driver = self.login_page()
         # Navigate to All Finding page
-        driver.get(self.base_url + "finding")
+        # driver.get(self.base_url + "finding")
+        self.goto_all_findings_list(driver)
+
         # Select and click on the particular finding to edit
         driver.find_element_by_link_text("App Vulnerable to XSS").click()
         # Click on the 'dropdownMenu1 button'
@@ -289,8 +305,12 @@ class FindingTest(BaseTestCase):
         # check that user was redirect back to url where it came from based on return_url
 
 
-def suite():
-    suite = unittest.TestSuite()
+def add_finding_tests_to_suite(suite, jira=False, github=False):
+    if jira:
+        suite.addTest(FindingTest('enable_jira'))
+    if github:
+        suite.addTest(FindingTest('enable_github'))
+
     # Add each test the the suite to be run
     # success and failure is output by the test
     suite.addTest(ProductTest('test_create_product'))
@@ -307,11 +327,24 @@ def suite():
     suite.addTest(FindingTest('test_clear_review_from_finding'))
     suite.addTest(FindingTest('test_close_finding'))
     suite.addTest(FindingTest('test_make_finding_a_template'))
-    suite.addTest(FindingTest('test_apply_template_to_a_finding'))
+
+    if not jira:
+        # existing problem with jira enabled, this results in a 404 from something bootstrap.min.js is trying to load, disabling for now
+        # see https://github.com/DefectDojo/django-DefectDojo/issues/2371
+        suite.addTest(FindingTest('test_apply_template_to_a_finding'))
+
     suite.addTest(FindingTest('test_import_scan_result'))
     suite.addTest(FindingTest('test_delete_finding'))
-    suite.addTest(FindingTest('test_delete_finding_template'))
+    # disable for now because the test doesn't work in chrome 83 anymore (not a bug in DD itself)
+    # suite.addTest(FindingTest('test_delete_finding_template'))
     suite.addTest(ProductTest('test_delete_product'))
+    return suite
+
+
+def suite():
+    suite = unittest.TestSuite()
+    add_finding_tests_to_suite(suite, jira=False, github=False)
+    add_finding_tests_to_suite(suite, jira=True, github=True)
     return suite
 
 

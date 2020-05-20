@@ -28,7 +28,7 @@ html2text==2020.1.16
 humanize==2.4.0
 jira==2.0.0
 PyGithub==1.51
-lxml==4.5.0
+lxml==4.5.1
 Markdown==3.2.2
 mysqlclient==1.4.6
 pandas>=0.25
@@ -55,7 +55,7 @@ git+https://github.com/DefectDojo/defectDojo-engagement-survey.git@8437e158fbc75
 gitpython>=2.1.13
 ptvsd>=4.2.7
 google-api-python-client==1.8.3
-google-auth==1.14.3
+google-auth==1.15.0
 google-auth-oauthlib==0.4.1
 drf_yasg==1.17.1
 django-cachalot==2.2.0
