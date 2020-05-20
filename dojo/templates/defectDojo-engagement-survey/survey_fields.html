@@ -24,14 +24,38 @@
                         </p>
                     {% endif %}
                 </div>
-
         {% elif field|is_radio %}
+        <!-- Only used for the multiple choice questions !-->
             {% if field.auto_id %}
                 <label class="control-label {% if field.field.required %}{{ form.required_css_class }}{% endif %}">{{ field.label }}</label>
             {% endif %}
 
                 {% for choice in field %}
                     <div class="radio">
+                        <label>
+                            {{ choice.tag }}
+                            {{ choice.choice_label }}
+                        </label>
+                    </div>
+                {% endfor %}
+    
+                {% for error in field.errors %}
+                    <span class="help-block {{ form.error_css_class }}">{{ error }}</span>
+                {% endfor %}
+    
+                {% if field.help_text %}
+                <p class="help-block">
+                    {{ field.help_text|safe }}
+                </p>
+                {% endif %}
+        {% elif field|is_multiple_checkbox %}
+        <!-- Only used for the multiple choice questions (multi select) !-->
+            {% if field.auto_id %}
+                <label class="control-label {% if field.field.required %}{{ form.required_css_class }}{% endif %}">{{ field.label }}</label>
+            {% endif %}
+
+                {% for choice in field %}
+                    <div class="checkbox {{ classes.value }} multiple-checkbox">
                         <label>
                             {{ choice.tag }}
                             {{ choice.choice_label }}
