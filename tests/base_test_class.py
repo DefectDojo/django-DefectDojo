@@ -71,7 +71,7 @@ class BaseTestCase(unittest.TestCase):
 
     def goto_product_overview(self, driver):
         driver.get(self.base_url + "product")
-        wait_for_datatable_if_content("no_products", "products_wrapper")
+        self.wait_for_datatable_if_content("no_products", "products_wrapper")
 
     def goto_active_engagements_overview(self, driver):
         # return self.goto_engagements_internal(driver, 'engagement')
@@ -85,12 +85,12 @@ class BaseTestCase(unittest.TestCase):
 
     def goto_engagements_internal(self, driver, rel_url):
         driver.get(self.base_url + rel_url)
-        wait_for_datatable_if_content("no_engagements", "engagements_wrapper")
+        self.wait_for_datatable_if_content("no_engagements", "engagements_wrapper")
         return driver
 
     def goto_all_findings_list(self, driver):
         driver.get(self.base_url + "finding")
-        wait_for_datatable_if_content("no_findings", "open_findings_wrapper")
+        self.wait_for_datatable_if_content("no_findings", "open_findings_wrapper")
 
     def wait_for_datatable_if_content(self, no_content_id, wrapper_id):
         no_content = None
