@@ -95,7 +95,7 @@ class BaseTestCase(unittest.TestCase):
     def wait_for_datatable_if_content(self, no_content_id, wrapper_id):
         no_content = None
         try:
-            no_content = driver.find_element_by_id(no_content_id)
+            no_content = self.driver.find_element_by_id(no_content_id)
         except:
             pass
 
