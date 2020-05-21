@@ -101,7 +101,7 @@ class BaseTestCase(unittest.TestCase):
 
         if no_content is None:
             # wait for product_wrapper div as datatables javascript modifies the DOM on page load.
-            WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.ID, wrapper_id)))
+            WebDriverWait(self.driver, 30).until(EC.presence_of_element_located((By.ID, wrapper_id)))
 
     def change_system_setting(self, id, enable=True):
         # we set the admin user (ourselves) to have block_execution checked
