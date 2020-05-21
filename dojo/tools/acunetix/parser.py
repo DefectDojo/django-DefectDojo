@@ -9,6 +9,7 @@ __license__ = "MIT"
 __version__ = "1.0.0"
 __status__ = "Development"
 
+logger = logging.getLogger(__name__)
 
 class AcunetixScannerParser(object):
     """
@@ -44,7 +45,7 @@ class AcunetixScannerParser(object):
                             dynamic_finding=acunetix_defectdojo_finding.dynamic_finding
                 )
             else:
-                logging.info("Duplicate finding : {defectdojo_title}".format(defectdojo_title=acunetix_defectdojo_finding.title))
+                logger.debug("Duplicate finding : {defectdojo_title}".format(defectdojo_title=acunetix_defectdojo_finding.title))
 
         self.items = list(defectdojo_findings.values())
 
