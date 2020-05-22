@@ -202,8 +202,7 @@ class FindingTest(BaseTestCase):
         # Query the site to determine if the finding has been added
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_success_message_present(text='Finding template added successfully. You may edit it here.') or
-            self.is_success_message_present(text='A finding template with that title already exists.'))
+        self.assertTrue(self.is_success_message_present(text='Finding template added successfully. You may edit it here.'))
 
     def test_apply_template_to_a_finding(self):
         driver = self.login_page()
