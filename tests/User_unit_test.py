@@ -41,8 +41,8 @@ class UserTest(BaseTestCase):
         # Query the site to determine if the user has been created
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_text_present_on_page('User added successfully, you may edit if necessary.') or
-            self.is_text_present_on_page('A user with that username already exists.'))
+        self.assertTrue(self.is_success_message_present(text='User added successfully, you may edit if necessary.') or
+            self.is_success_message_present(text='A user with that username already exists.'))
 
     def test_user_edit_permissions(self):
         # Login to the site. Password will have to be modified
@@ -70,7 +70,7 @@ class UserTest(BaseTestCase):
         # Query the site to determine if the User permission has been changed
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_text_present_on_page('User saved successfully.'))
+        self.assertTrue(self.is_success_message_present(text='User saved successfully.'))
 
     def test_user_delete(self):
         # Login to the site. Password will have to be modified
@@ -96,7 +96,7 @@ class UserTest(BaseTestCase):
         # Query the site to determine if the User has been deleted
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_text_present_on_page('User and relationships removed.'))
+        self.assertTrue(self.is_success_message_present(text='User and relationships removed.'))
 
     def test_user_notifications_change(self):
         # Login to the site. Password will have to be modified
@@ -114,7 +114,7 @@ class UserTest(BaseTestCase):
 
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
 
-        self.assertTrue(self.is_text_present_on_page('Settings saved'))
+        self.assertTrue(self.is_success_message_present(text='Settings saved'))
         self.assertTrue(driver.find_element_by_xpath("//input[@name='product_added' and @value='mail']").is_selected())
         self.assertTrue(driver.find_element_by_xpath("//input[@name='scan_added' and @value='mail']").is_selected())
 

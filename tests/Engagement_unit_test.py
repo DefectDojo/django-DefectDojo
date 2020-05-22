@@ -27,7 +27,7 @@ class EngagementTest(BaseTestCase):
         Select(driver.find_element_by_id("id_status")).select_by_visible_text("In Progress")
         driver.find_element_by_css_selector("input[value='Done']").click()
 
-        self.assertTrue(self.is_text_present_on_page('Engagement added successfully.'))
+        self.assertTrue(self.is_success_message_present(text='Engagement added successfully.'))
 
     def test_edit_created_new_engagement(self):
         driver = self.login_page()
@@ -42,7 +42,7 @@ class EngagementTest(BaseTestCase):
         Select(driver.find_element_by_id("id_status")).select_by_visible_text("In Progress")
         driver.find_element_by_css_selector("input[value='Done']").click()
 
-        self.assertTrue(self.is_text_present_on_page('Engagement updated successfully.'))
+        self.assertTrue(self.is_success_message_present(text='Engagement updated successfully.'))
 
     def test_close_new_engagement(self):
         driver = self.login_page()
@@ -53,7 +53,7 @@ class EngagementTest(BaseTestCase):
         driver.find_element_by_id("dropdownMenu1").click()
         driver.find_element_by_link_text("Close Engagement").click()
 
-        self.assertTrue(self.is_text_present_on_page('Engagement closed successfully.'))
+        self.assertTrue(self.is_success_message_present(text='Engagement closed successfully.'))
 
     def test_delete_new_closed_engagement(self):
         driver = self.login_page()
@@ -65,7 +65,7 @@ class EngagementTest(BaseTestCase):
         driver.find_element_by_link_text('Delete Engagement').click()
         driver.find_element_by_name('delete_name').click()
 
-        self.assertTrue(self.is_text_present_on_page('Engagement and relationships removed.'))
+        self.assertTrue(self.is_success_message_present(text='Engagement and relationships removed.'))
 
     def test_new_ci_cd_engagement(self):
         driver = self.login_page()
@@ -80,7 +80,7 @@ class EngagementTest(BaseTestCase):
         driver.find_element_by_id('id_deduplication_on_engagement').get_attribute('checked')
         driver.find_element_by_css_selector("input[value='Done']").click()
 
-        self.assertTrue(self.is_text_present_on_page('Engagement added successfully.'))
+        self.assertTrue(self.is_success_message_present(text='Engagement added successfully.'))
 
 
 def suite():

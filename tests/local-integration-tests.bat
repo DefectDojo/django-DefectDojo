@@ -2,9 +2,9 @@ set DD_ADMIN_USER=admin
 set DD_ADMIN_PASSWORD=admin
 set DD_BASE_URL=http://localhost:8080/
 
-echo "Running Product type integration tests"
-python tests/Product_type_unit_test.py
-if %ERRORLEVEL% NEQ 0 GOTO END
+REM echo "Running Product type integration tests"
+REM python tests/Product_type_unit_test.py
+REM if %ERRORLEVEL% NEQ 0 GOTO END
 
 echo "Running Product integration tests"
 python tests/Product_unit_test.py

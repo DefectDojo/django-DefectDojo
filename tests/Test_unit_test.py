@@ -91,7 +91,7 @@ class TestUnitTest(BaseTestCase):
         # Query the site to determine if the Test has been added
 
         # Assert on the query to determine success or failure
-        self.assertTrue(self.is_text_present_on_page('Test added successfully'))
+        self.assertTrue(self.is_success_message_present(text='Test added successfully'))
 
     def test_edit_test(self):
         # Login to the site.
@@ -111,7 +111,7 @@ class TestUnitTest(BaseTestCase):
         # Query the site to determine if the Test has been updated
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_text_present_on_page('Test saved.'))
+        self.assertTrue(self.is_success_message_present(text='Test saved.'))
 
     def test_add_note(self):
         # Login to the site.
@@ -132,7 +132,7 @@ class TestUnitTest(BaseTestCase):
         # Query the site to determine if the Test has been updated
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_text_present_on_page('Note added successfully.'))
+        self.assertTrue(self.is_success_message_present(text='Note added successfully.'))
 
     def test_delete_test(self):
         # Login to the site. Password will have to be modified
@@ -154,7 +154,7 @@ class TestUnitTest(BaseTestCase):
         # Query the site to determine if the product has been added
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_text_present_on_page('Test and relationships removed.'))
+        self.assertTrue(self.is_success_message_present(text='Test and relationships removed.'))
 
 
 def suite():
