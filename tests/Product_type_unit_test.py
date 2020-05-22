@@ -17,7 +17,7 @@ class ProductTypeTest(BaseTestCase):
         driver.find_element_by_id("id_critical_product").click()
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
 
-        self.assertTrue(self.is_text_present_on_page('Product type added successfully.'))
+        self.assertTrue(self.is_success_message_present(text='Product type added successfully.'))
 
     def test_edit_product_type(self):
         print("\n\nDebug Print Log: testing 'edit product type' \n")
@@ -28,7 +28,7 @@ class ProductTypeTest(BaseTestCase):
         driver.find_element_by_id("id_name").send_keys("Edited product test type")
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
 
-        self.assertTrue(self.is_text_present_on_page('Product type updated successfully.'))
+        self.assertTrue(self.is_success_message_present(text='Product type updated successfully.'))
 
     def test_delete_product_type(self):
         print("\n\nDebug Print Log: testing 'delete product type' \n")
@@ -38,7 +38,7 @@ class ProductTypeTest(BaseTestCase):
         driver.find_element_by_link_text("Edit Product Type").click()
         driver.find_element_by_css_selector("input.btn.btn-danger").click()
 
-        self.assertTrue(self.is_text_present_on_page('Product type Deleted successfully.'))
+        self.assertTrue(self.is_success_message_present(text='Product type Deleted successfully.'))
 
 
 def suite():

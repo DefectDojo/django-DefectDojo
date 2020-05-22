@@ -25,7 +25,7 @@ class EnvironmentTest(BaseTestCase):
         driver.find_element_by_id("id_name").send_keys("environment test")
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
 
-        self.assertTrue(self.is_text_present_on_page('Environment added successfully.'))
+        self.assertTrue(self.is_success_message_present(text='Environment added successfully.'))
 
     def test_edit_environment(self):
         driver = self.login_page()
@@ -35,7 +35,7 @@ class EnvironmentTest(BaseTestCase):
         driver.find_element_by_id("id_name").send_keys("Edited environment test")
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
 
-        self.assertTrue(self.is_text_present_on_page('Environment updated successfully.'))
+        self.assertTrue(self.is_success_message_present(text='Environment updated successfully.'))
 
     def test_delete_environment(self):
         driver = self.login_page()
@@ -43,7 +43,7 @@ class EnvironmentTest(BaseTestCase):
         driver.find_element_by_link_text("Edited environment test").click()
         driver.find_element_by_css_selector("input.btn.btn-danger").click()
 
-        self.assertTrue(self.is_text_present_on_page('Environment deleted successfully.'))
+        self.assertTrue(self.is_success_message_present(text='Environment deleted successfully.'))
 
 
 def suite():

@@ -11,7 +11,7 @@ class DojoTests(BaseTestCase):
     def test_login(self):
         driver = self.login_page()
 
-        self.assertTrue(self.is_text_present_on_page('Active Engagements'))
+        self.assertTrue(self.is_success_message_present(text='Active Engagements'))
 
     def test_create_product(self):
         driver = self.login_page()
@@ -25,7 +25,7 @@ class DojoTests(BaseTestCase):
         Select(driver.find_element_by_id("id_prod_type")).select_by_visible_text("Research and Development")
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
 
-        self.assertTrue(self.is_text_present_on_page('Product added successfully'))
+        self.assertTrue(self.is_success_message_present(text='Product added successfully'))
 
     def test_engagement(self):
         driver = self.login_page()
@@ -68,7 +68,7 @@ class DojoTests(BaseTestCase):
         driver.find_element_by_id("id_impact").send_keys("Impact")
         driver.find_element_by_name("_Finished").click()
 
-        self.assertTrue(self.is_text_present_on_page('Finding added successfully'))
+        self.assertTrue(self.is_success_message_present(text='Finding added successfully'))
 
     def is_element_present(self, how, what):
         try:

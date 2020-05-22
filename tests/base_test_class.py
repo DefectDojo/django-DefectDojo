@@ -3,11 +3,12 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import NoAlertPresentException
 
 import unittest
 import os
 import re
-import time
+# import time
 
 dd_driver = None
 dd_driver_options = None
@@ -31,6 +32,7 @@ class BaseTestCase(unittest.TestCase):
             # the next 2 maybe needed in some scenario's for example on WSL or other headless situations
             dd_driver_options.add_argument("--no-sandbox")
             # dd_driver_options.add_argument("--disable-dev-shm-usage")
+            dd_driver_options.add_argument("--disable-gpu")  # on windows sometimes chrome can't start with certain gpu driver versions, even in headless mode
 
             # start maximized or at least with sufficient with because datatables will hide certain controls when the screen is too narrow
             dd_driver_options.add_argument("--window-size=1280,1024")
@@ -45,7 +47,8 @@ class BaseTestCase(unittest.TestCase):
             # change path of chromedriver according to which directory you have chromedriver.
             print('starting chromedriver with options: ', vars(dd_driver_options), desired)
             dd_driver = webdriver.Chrome('chromedriver', chrome_options=dd_driver_options, desired_capabilities=desired)
-            dd_driver.implicitly_wait(30)
+            # best practice is only use explicit waits
+            dd_driver.implicitly_wait(0)
 
         cls.driver = dd_driver
         cls.base_url = os.environ['DD_BASE_URL']
@@ -66,7 +69,7 @@ class BaseTestCase(unittest.TestCase):
         driver.find_element_by_id("id_password").send_keys(os.environ['DD_ADMIN_PASSWORD'])
         driver.find_element_by_css_selector("button.btn.btn-success").click()
 
-        self.assertFalse(self.is_text_present_on_page('Please enter a correct username and password'))
+        self.assertFalse(self.is_element_by_css_selector_present('.alert-danger', 'Please enter a correct username and password'))
         return driver
 
     def goto_product_overview(self, driver):
@@ -103,15 +106,38 @@ class BaseTestCase(unittest.TestCase):
             # wait for product_wrapper div as datatables javascript modifies the DOM on page load.
             WebDriverWait(self.driver, 30).until(EC.presence_of_element_located((By.ID, wrapper_id)))
 
+    def is_element_by_css_selector_present(self, selector, text=None):
+        elems = self.driver.find_elements_by_css_selector(selector)
+        if len(elems) == 0:
+            return False
+
+        if text is None:
+            return True
+
+        for elem in elems:
+            print(elem.text)
+            if text in elem.text:
+                print('contains!')
+                return True
+
+        return False
+
+    def is_success_message_present(self, text=None):
+        return self.is_element_by_css_selector_present('.alert-success', text=text)
+
+    def is_error_message_present(self, text=None):
+        return self.is_element_by_css_selector_present('.alert-danger', text=text)
+
     def is_text_present_on_page(self, text):
         # DEBUG: couldn't find:  Product type added successfully. path:  //*[contains(text(),'Product type added successfully.')]
-        path = "//*[contains(text(), '" + text + "')]"
-        elems = self.driver.find_elements_by_xpath(path)
+        # can't get this xpath to work
+        # path = "//*[contains(text(), '" + text + "')]"
+        # elems = self.driver.find_elements_by_xpath(path)
+        # if len(elems) == 0:
+        #     print("DEBUG: couldn't find: ", text, "path: ", path)
 
-        if len(elems) == 0:
-            print("DEBUG: couldn't find: ", text, "path: ", path)
-
-        return len(elems) > 0
+        body = self.driver.find_element_by_tag_name("body")
+        return re.search(text, body.text)
 
     def change_system_setting(self, id, enable=True):
         # we set the admin user (ourselves) to have block_execution checked
@@ -163,7 +189,7 @@ class BaseTestCase(unittest.TestCase):
     def is_alert_present(self):
         try:
             self.driver.switch_to_alert()
-        except NoAlertPresentException as e:
+        except NoAlertPresentException:
             return False
         return True
 
@@ -266,9 +292,11 @@ def on_exception_html_source_logger(func):
             return func(self, *args, **kwargs)
 
         except Exception as e:
-            print(self.driver.page_source)
+            # print(self.driver.page_source)
             print("exception url:", self.driver.current_url)
-            time.sleep(30)
+            f = open("selenium_page_source.html", "w", encoding='utf-8')
+            f.writelines(self.driver.page_source)
+            # time.sleep(30)
             raise(e)
 
     return wrapper

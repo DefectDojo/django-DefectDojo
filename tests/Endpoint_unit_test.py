@@ -28,7 +28,7 @@ class EndpointTest(BaseTestCase):
         # Query the site to determine if the finding has been added
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_text_present_on_page('Endpoint added successfully'))
+        self.assertTrue(self.is_success_message_present(text='Endpoint added successfully'))
 
     def test_edit_endpoint(self):
         # Login to the site. Password will have to be modified
@@ -54,7 +54,7 @@ class EndpointTest(BaseTestCase):
         # Query the site to determine if the product has been added
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_text_present_on_page('Endpoint updated successfully'))
+        self.assertTrue(self.is_success_message_present(text='Endpoint updated successfully'))
 
     def test_delete_endpoint(self):
         # Login to the site. Password will have to be modified
@@ -73,7 +73,7 @@ class EndpointTest(BaseTestCase):
         # Query the site to determine if the product has been added
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_text_present_on_page('Endpoint and relationships removed.'))
+        self.assertTrue(self.is_success_message_present(text='Endpoint and relationships removed.'))
 
 
 def suite():

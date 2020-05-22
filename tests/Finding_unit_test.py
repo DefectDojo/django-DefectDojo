@@ -71,7 +71,7 @@ class FindingTest(BaseTestCase):
         # Query the site to determine if the finding has been added
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_text_present_on_page('Finding saved successfully'))
+        self.assertTrue(self.is_success_message_present(text='Finding saved successfully'))
 
     def test_add_image(self):
         # print("\n\nDebug Print Log: testing 'add image' \n")
@@ -97,7 +97,7 @@ class FindingTest(BaseTestCase):
         # Query the site to determine if the finding has been added
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_text_present_on_page('Images updated successfully'))
+        self.assertTrue(self.is_success_message_present(text='Images updated successfully'))
 
     def test_mark_finding_for_review(self):
         # login to site, password set to fetch from environ
@@ -126,7 +126,7 @@ class FindingTest(BaseTestCase):
         # Query the site to determine if the finding has been added
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_text_present_on_page('Finding marked for review and reviewers notified.'))
+        self.assertTrue(self.is_success_message_present(text='Finding marked for review and reviewers notified.'))
 
     def test_clear_review_from_finding(self):
         # login to site, password set to fetch from environ
@@ -148,7 +148,7 @@ class FindingTest(BaseTestCase):
         # Query the site to determine if the finding has been added
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_text_present_on_page('Finding review has been updated successfully.'))
+        self.assertTrue(self.is_success_message_present(text='Finding review has been updated successfully.'))
 
     def test_delete_image(self):
         # login to site, password set to fetch from environ
@@ -168,7 +168,7 @@ class FindingTest(BaseTestCase):
         # Query the site to determine if the finding has been added
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_text_present_on_page('Images updated successfully'))
+        self.assertTrue(self.is_success_message_present(text='Images updated successfully'))
 
     def test_close_finding(self):
         driver = self.login_page()
@@ -187,7 +187,7 @@ class FindingTest(BaseTestCase):
         # Query the site to determine if the finding has been added
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_text_present_on_page('Finding closed.'))
+        self.assertTrue(self.is_success_message_present(text='Finding closed.'))
 
     def test_make_finding_a_template(self):
         driver = self.login_page()
@@ -202,8 +202,8 @@ class FindingTest(BaseTestCase):
         # Query the site to determine if the finding has been added
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_text_present_on_page('Finding template added successfully. You may edit it here.') or
-            self.is_text_present_on_page('A finding template with that title already exists.'))
+        self.assertTrue(self.is_success_message_present(text='Finding template added successfully. You may edit it here.') or
+            self.is_success_message_present(text='A finding template with that title already exists.'))
 
     def test_apply_template_to_a_finding(self):
         driver = self.login_page()
@@ -238,7 +238,7 @@ class FindingTest(BaseTestCase):
         # Query the site to determine if the finding has been added
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_text_present_on_page('App Vulnerable to XSS'))
+        self.assertTrue(self.is_text_present_on_page(text='App Vulnerable to XSS'))
 
     def test_delete_finding_template(self):
         driver = self.login_page()
@@ -253,7 +253,7 @@ class FindingTest(BaseTestCase):
         # Query the site to determine if the finding has been added
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_text_present_on_page('Finding Template deleted successfully.'))
+        self.assertTrue(self.is_success_message_present(text='Finding Template deleted successfully.'))
 
     def test_import_scan_result(self):
         driver = self.login_page()
@@ -278,7 +278,7 @@ class FindingTest(BaseTestCase):
         # print("\n\nDebug Print Log: findingTxt fetched: {}\n".format(productTxt))
         # print("Checking for '.*ZAP Scan processed, a total of 4 findings were processed.*'")
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_text_present_on_page('ZAP Scan processed, a total of 4 findings were processed'))
+        self.assertTrue(self.is_success_message_present(text='ZAP Scan processed, a total of 4 findings were processed'))
 
     def test_delete_finding(self):
         # The Name of the Finding created by test_add_product_finding => 'App Vulnerable to XSS'
@@ -300,7 +300,7 @@ class FindingTest(BaseTestCase):
         # Query the site to determine if the finding has been added
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_text_present_on_page('Finding deleted successfully'))
+        self.assertTrue(self.is_success_message_present(text='Finding deleted successfully'))
         # check that user was redirect back to url where it came from based on return_url
 
 
