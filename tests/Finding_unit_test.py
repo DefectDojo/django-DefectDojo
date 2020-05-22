@@ -331,10 +331,10 @@ def add_finding_tests_to_suite(suite, jira=False, github=False):
         # see https://github.com/DefectDojo/django-DefectDojo/issues/2371
         suite.addTest(FindingTest('test_apply_template_to_a_finding'))
 
+    suite.addTest(FindingTest('test_delete_finding_template'))
     suite.addTest(FindingTest('test_import_scan_result'))
     suite.addTest(FindingTest('test_delete_finding'))
-    # disable for now because the test doesn't work in chrome 83 anymore (not a bug in DD itself)
-    # suite.addTest(FindingTest('test_delete_finding_template'))
+    suite.addTest(FindingTest('test_delete_finding_template'))
     suite.addTest(ProductTest('test_delete_product'))
     return suite
 
