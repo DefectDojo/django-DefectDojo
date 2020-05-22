@@ -1,10 +1,11 @@
 import unittest
 import sys
-from base_test_class import BaseTestCase
+from base_test_class import BaseTestCase, on_exception_html_source_logger
 
 
 class ProductTypeTest(BaseTestCase):
 
+    @on_exception_html_source_logger
     def test_create_product_type(self):
         print("\n\nDebug Print Log: testing 'create product type' \n")
         driver = self.login_page()

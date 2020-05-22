@@ -104,7 +104,8 @@ class BaseTestCase(unittest.TestCase):
             WebDriverWait(self.driver, 30).until(EC.presence_of_element_located((By.ID, wrapper_id)))
 
     def is_text_present_on_page(self, text):
-        path = "//*[contains(text(),'" + text + "')]"
+        # DEBUG: couldn't find:  Product type added successfully. path:  //*[contains(text(),'Product type added successfully.')]
+        path = "//*[contains(text(), '" + text + "')]"
         elems = self.driver.find_elements_by_xpath(path)
 
         if len(elems) == 0:
