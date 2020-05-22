@@ -105,6 +105,10 @@ class BaseTestCase(unittest.TestCase):
 
     def is_text_present_on_page(self, text):
         elems = self.driver.findElements(By.xpath("//*[contains(text(),'" + text + "')]"))
+
+        if len(elems) == 0:
+            print("couldn't find: ", text, "using: ", "//*[contains(text(),'" + text + "')]")
+
         return len(elems) > 0
 
     def change_system_setting(self, id, enable=True):
