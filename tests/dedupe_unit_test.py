@@ -66,7 +66,7 @@ class DedupeTest(BaseTestCase):
         print("removing previous findings...")
         driver = self.login_page()
         driver.get(self.base_url + "finding?page=1")
-        text = driver.find_element_by_tag_name("BODY").text
+        text = driver.find_element_by_id("no_findings").text
         if 'No findings found.' in text:
             return
         else:
@@ -80,7 +80,7 @@ class DedupeTest(BaseTestCase):
             except TimeoutException:
                 self.fail('Confirmation dialogue not shown, cannot delete previous findings')
 
-        text = driver.find_element_by_tag_name("BODY").text
+        text = driver.find_element_by_id("no_findings").text
         self.assertTrue(re.search(r'No findings found.', text))
         # check that user was redirect back to url where it came from based on return_url
         self.assertTrue(driver.current_url.endswith('page=1'))
