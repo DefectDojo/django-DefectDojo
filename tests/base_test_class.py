@@ -104,10 +104,11 @@ class BaseTestCase(unittest.TestCase):
             WebDriverWait(self.driver, 30).until(EC.presence_of_element_located((By.ID, wrapper_id)))
 
     def is_text_present_on_page(self, text):
-        elems = self.driver.find_elements(By.xpath("//*[contains(text(),'" + text + "')]"))
+        path = "//*[contains(text(),'" + text + "')]"
+        elems = self.driver.find_elements_by_xpath(path)
 
         if len(elems) == 0:
-            print("couldn't find: ", text, "using: ", "//*[contains(text(),'" + text + "')]")
+            print("DEBUG: couldn't find: ", text, "path: ", path)
 
         return len(elems) > 0
 
