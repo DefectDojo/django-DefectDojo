@@ -3,7 +3,7 @@ from selenium.webdriver.common.keys import Keys
 import unittest
 import sys
 import os
-from base_test_class import BaseTestCase
+from base_test_class import BaseTestCase, on_exception_html_source_logger
 from Product_unit_test import ProductTest, WaitForPageLoad
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -239,6 +239,7 @@ class FindingTest(BaseTestCase):
         # Assert ot the query to dtermine status of failure
         self.assertTrue(self.is_text_present_on_page(text='App Vulnerable to XSS'))
 
+    @on_exception_html_source_logger
     def test_delete_finding_template(self):
         driver = self.login_page()
         # Navigate to All Finding page
@@ -309,6 +310,8 @@ def add_finding_tests_to_suite(suite, jira=False, github=False):
     if github:
         suite.addTest(FindingTest('enable_github'))
 
+    # suite.addTest(FindingTest('test_delete_finding_template'))
+
     # Add each test the the suite to be run
     # success and failure is output by the test
     suite.addTest(ProductTest('test_create_product'))
@@ -331,7 +334,6 @@ def add_finding_tests_to_suite(suite, jira=False, github=False):
         # see https://github.com/DefectDojo/django-DefectDojo/issues/2371
         suite.addTest(FindingTest('test_apply_template_to_a_finding'))
 
-    suite.addTest(FindingTest('test_delete_finding_template'))
     suite.addTest(FindingTest('test_import_scan_result'))
     suite.addTest(FindingTest('test_delete_finding'))
     suite.addTest(FindingTest('test_delete_finding_template'))

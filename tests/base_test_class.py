@@ -48,7 +48,7 @@ class BaseTestCase(unittest.TestCase):
             print('starting chromedriver with options: ', vars(dd_driver_options), desired)
             dd_driver = webdriver.Chrome('chromedriver', chrome_options=dd_driver_options, desired_capabilities=desired)
             # best practice is only use explicit waits
-            dd_driver.implicitly_wait(0)
+            dd_driver.implicitly_wait(1)
 
         cls.driver = dd_driver
         cls.base_url = os.environ['DD_BASE_URL']
@@ -109,6 +109,7 @@ class BaseTestCase(unittest.TestCase):
     def is_element_by_css_selector_present(self, selector, text=None):
         elems = self.driver.find_elements_by_css_selector(selector)
         if len(elems) == 0:
+            print('no elements!')
             return False
 
         if text is None:
@@ -120,6 +121,7 @@ class BaseTestCase(unittest.TestCase):
                 print('contains!')
                 return True
 
+        print('text mismatch!')
         return False
 
     def is_success_message_present(self, text=None):
