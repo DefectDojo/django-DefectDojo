@@ -1,6 +1,5 @@
 from selenium.webdriver.support.ui import Select
 import unittest
-import re
 import sys
 from base_test_class import BaseTestCase
 from Product_unit_test import ProductTest
@@ -90,9 +89,9 @@ class TestUnitTest(BaseTestCase):
         # submit
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
         # Query the site to determine if the Test has been added
-        productTxt = driver.find_element_by_tag_name("BODY").text
+
         # Assert on the query to determine success or failure
-        self.assertTrue(re.search(r'Test added successfully', productTxt))
+        self.assertTrue(self.is_text_present_on_page('Test added successfully'))
 
     def test_edit_test(self):
         # Login to the site.
@@ -110,9 +109,9 @@ class TestUnitTest(BaseTestCase):
         # "Click" the submit button to complete the transaction
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
         # Query the site to determine if the Test has been updated
-        productTxt = driver.find_element_by_tag_name("BODY").text
+
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(re.search(r'Test saved.', productTxt))
+        self.assertTrue(self.is_text_present_on_page('Test saved.'))
 
     def test_add_note(self):
         # Login to the site.
@@ -131,9 +130,9 @@ class TestUnitTest(BaseTestCase):
         # "Click" the submit button to complete the transaction
         driver.find_element_by_xpath("//input[@value='Add Note']").click()
         # Query the site to determine if the Test has been updated
-        productTxt = driver.find_element_by_tag_name("BODY").text
+
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(re.search(r'Note added successfully.', productTxt))
+        self.assertTrue(self.is_text_present_on_page('Note added successfully.'))
 
     def test_delete_test(self):
         # Login to the site. Password will have to be modified
@@ -153,9 +152,9 @@ class TestUnitTest(BaseTestCase):
         # "Click" the delete button to complete the transaction
         driver.find_element_by_css_selector("button.btn.btn-danger").click()
         # Query the site to determine if the product has been added
-        productTxt = driver.find_element_by_tag_name("BODY").text
+
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(re.search(r'Test and relationships removed.', productTxt))
+        self.assertTrue(self.is_text_present_on_page('Test and relationships removed.'))
 
 
 def suite():

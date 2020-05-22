@@ -65,8 +65,8 @@ class BaseTestCase(unittest.TestCase):
         driver.find_element_by_id("id_password").clear()
         driver.find_element_by_id("id_password").send_keys(os.environ['DD_ADMIN_PASSWORD'])
         driver.find_element_by_css_selector("button.btn.btn-success").click()
-        text = driver.find_element_by_tag_name("BODY").text
-        self.assertFalse(re.search(r'Please enter a correct username and password', text))
+
+        self.assertFalse(self.is_text_present_on_page('Please enter a correct username and password'))
         return driver
 
     def goto_product_overview(self, driver):
@@ -102,6 +102,10 @@ class BaseTestCase(unittest.TestCase):
         if no_content is None:
             # wait for product_wrapper div as datatables javascript modifies the DOM on page load.
             WebDriverWait(self.driver, 30).until(EC.presence_of_element_located((By.ID, wrapper_id)))
+
+    def is_text_present_on_page(self, text):
+        elems = self.driver.findElements(By.xpath("//*[contains(text(),'" + text + "')]"))
+        return len(elems) > 0
 
     def change_system_setting(self, id, enable=True):
         # we set the admin user (ourselves) to have block_execution checked
