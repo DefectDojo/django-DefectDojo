@@ -339,7 +339,7 @@ LOGIN_EXEMPT_URLS = (
     r'^%sfinding/image/(?P<token>[^/]+)$' % URL_PREFIX,
     r'^%sapi/v2/' % URL_PREFIX,
     r'complete/',
-    r'empty_survey/([\d]+)/answer'
+    r'empty_questionnaire/([\d]+)/answer'
 )
 
 # ------------------------------------------------------------------------------
@@ -482,13 +482,11 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'polymorphic',  # provides admin templates
-    'overextends',
     'django.contrib.admin',
     'django.contrib.humanize',
     'gunicorn',
     'tastypie',
     'auditlog',
-    'defectDojo_engagement_survey',
     'dojo',
     'tastypie_swagger',
     'watson',
@@ -623,7 +621,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'NPM Audit Scan': ['title', 'severity', 'file_path', 'cve', 'cwe'],
     # possible improvment: in the scanner put the library name into file_path, then dedup on cve + file_path + severity
     'Whitesource Scan': ['title', 'severity', 'description'],
-    'ZAP Scan': ['cwe', 'endpoints', 'severity'],
+    'ZAP Scan': ['title', 'cwe', 'endpoints', 'severity'],
     'Qualys Scan': ['title', 'endpoints', 'severity'],
     'PHP Symfony Security Check': ['title', 'cve'],
     'Clair Scan': ['title', 'cve', 'description', 'severity'],

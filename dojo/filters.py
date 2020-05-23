@@ -13,8 +13,10 @@ from django_filters.filters import ChoiceFilter, _truncate, DateTimeFilter
 from pytz import timezone
 
 from dojo.models import Dojo_User, Product_Type, Finding, Product, Test_Type, \
-    Endpoint, Development_Environment, Finding_Template, Report, Note_Type
+    Endpoint, Development_Environment, Finding_Template, Report, Note_Type, \
+    Engagement_Survey, Question, TextQuestion, ChoiceQuestion
 from dojo.utils import get_system_setting
+from django.contrib.contenttypes.models import ContentType
 
 local_tz = timezone(get_system_setting('time_zone'))
 
@@ -1019,3 +1021,59 @@ class NoteTypesFilter(DojoFilter):
         model = Note_Type
         exclude = []
         include = ('name', 'is_single', 'description')
+
+# ==============================
+# Defect Dojo Engaegment Surveys
+# ==============================
+
+
+class SurveyFilter(FilterSet):
+    name = CharFilter(lookup_expr='icontains')
+    description = CharFilter(lookup_expr='icontains')
+    active = BooleanFilter()
+
+    class Meta:
+        model = Engagement_Survey
+        exclude = ['questions']
+
+    survey_set = FilterSet
+
+
+class QuestionTypeFilter(ChoiceFilter):
+    def any(self, qs, name):
+        return qs.all()
+
+    def text_question(self, qs, name):
+        return qs.filter(polymorphic_ctype=ContentType.objects.get_for_model(TextQuestion))
+
+    def choice_question(self, qs, name):
+        return qs.filter(polymorphic_ctype=ContentType.objects.get_for_model(ChoiceQuestion))
+
+    options = {
+        '': (_('Any'), any),
+        1: (_('Text Question'), text_question),
+        2: (_('Choice Question'), choice_question),
+    }
+
+    def __init__(self, *args, **kwargs):
+        kwargs['choices'] = [
+            (key, value[0]) for key, value in six.iteritems(self.options)]
+        super(QuestionTypeFilter, self).__init__(*args, **kwargs)
+
+    def filter(self, qs, value):
+        try:
+            value = int(value)
+        except (ValueError, TypeError):
+            value = ''
+        return self.options[value][1](self, qs, self.options[value][0])
+
+
+class QuestionFilter(FilterSet):
+    text = CharFilter(lookup_expr='icontains')
+    type = QuestionTypeFilter()
+
+    class Meta:
+        model = Question
+        exclude = ['polymorphic_ctype', 'created', 'modified', 'order']
+
+    question_set = FilterSet

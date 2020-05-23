@@ -93,7 +93,7 @@ Quarterly.txt
 components/*
 !components/package.json
 !components/yarn.lock
-dojo/static/*
+# dojo/static/*
 !dojo/static/dojo/*
 dojo/media
 /static

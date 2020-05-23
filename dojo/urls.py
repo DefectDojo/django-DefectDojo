@@ -10,7 +10,7 @@ from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from django.http import HttpResponse
-from defectDojo_engagement_survey.urls import urlpatterns as survey_urls
+
 
 from dojo import views
 from dojo.api import UserResource, ProductResource, EngagementResource, \
@@ -59,6 +59,7 @@ from dojo.notes.urls import urlpatterns as notes_urls
 from dojo.note_type.urls import urlpatterns as note_type_urls
 from dojo.google_sheet.urls import urlpatterns as google_sheets_urls
 from dojo.banner.urls import urlpatterns as banner_urls
+from dojo.survey.urls import urlpatterns as survey_urls
 
 admin.autodiscover()
 
