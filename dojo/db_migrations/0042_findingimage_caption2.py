@@ -11,6 +11,10 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.AlterModelOptions(
+            name='test',
+            options={'ordering': ('title',)},
+        ),
         migrations.AlterField(
             model_name='findingimage',
             name='image',
