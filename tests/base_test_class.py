@@ -141,6 +141,10 @@ class BaseTestCase(unittest.TestCase):
         body = self.driver.find_element_by_tag_name("body")
         return re.search(text, body.text)
 
+    def element_exists_by_id(self, id):
+        elems = self.driver.find_elements_by_id(id)
+        return len(elems) > 0
+
     def change_system_setting(self, id, enable=True):
         # we set the admin user (ourselves) to have block_execution checked
         # this will force dedupe to happen synchronously as the celeryworker is not reliable in travis
