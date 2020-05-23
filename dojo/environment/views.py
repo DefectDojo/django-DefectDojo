@@ -20,15 +20,15 @@ def environment(request):
     initial_queryset = Development_Environment.objects.all().order_by('name')
     name_words = [de.name for de in
                   initial_queryset]
-    devs = EnvironmentFilter(request.GET, queryset=initial_queryset)
-    dev_page = get_page_items(request, devs.qs, 25)
+    environments = EnvironmentFilter(request.GET, queryset=initial_queryset)
+    dev_page = get_page_items(request, environments.qs, 25)
     add_breadcrumb(title="Environment List", top_level=True, request=request)
     return render(request, 'dojo/environment.html', {
         'name': 'Environment',
         'metric': False,
         'user': request.user,
-        'devs': dev_page,
-        'dts': devs,
+        'environments': dev_page,
+        'dts': environments,
         'name_words': name_words})
 
 

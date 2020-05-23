@@ -30,7 +30,7 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     DevelopmentEnvironmentViewSet, NotesViewSet, NoteTypeViewSet
 
 from dojo.utils import get_system_setting
-from dojo.development_environment.urls import urlpatterns as dev_env_urls
+from dojo.environment.urls import urlpatterns as environment_urls
 from dojo.endpoint.urls import urlpatterns as endpoint_urls
 from dojo.engagement.urls import urlpatterns as eng_urls
 from dojo.finding.urls import urlpatterns as finding_urls
@@ -123,7 +123,7 @@ v2_api.register(r'notes', NotesViewSet)
 v2_api.register(r'note_type', NoteTypeViewSet)
 
 ur = []
-ur += dev_env_urls
+ur += environment_urls
 ur += endpoint_urls
 ur += eng_urls
 ur += finding_urls

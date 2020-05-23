@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from dojo.development_environment import views
+from dojo.environment import views
 
 urlpatterns = [
     # dev envs

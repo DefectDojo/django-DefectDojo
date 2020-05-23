@@ -29,25 +29,24 @@
                     {% include "dojo/filter_snippet.html" with form=dts.form %}
                 </div>
             </div>
-            {% if devs %}
+            {% if environments %}
                 <div class="clearfix">
-                    {% include "dojo/paging_snippet.html" with page=devs page_size=True%}
+                    {% include "dojo/paging_snippet.html" with page=environments page_size=True%}
                 </div>
                 <div class="panel panel-default table-responsive">
-                    <table id="test_types"
-                           class="tablesorter-bootstrap table table-bordered table-condensed table-striped">
+                    <table class="tablesorter-bootstrap table table-bordered table-condensed table-striped">
                         <thead>
                         <tr>
                             <th>{% dojo_sort request 'Environment' 'name' 'asc' %}</th>
                         </tr>
                         </thead>
                         <tbody>
-                        {% for de in devs %}
+                        {% for environment in environments %}
                             <tr>
                                 {% if user.is_staff %}
-                                    <td><a href="{% url 'edit_environment' de.id %}"> {{ de.name }} </a></td>
+                                    <td><a href="{% url 'edit_environment' environment.id %}"> {{ environment.name }} </a></td>
                                 {% else %}
-                                    <td> {{ de.name }} </a> </td>
+                                    <td> {{ environment.name }} </a> </td>
                                 {% endif %}
                             </tr>
                         {% endfor %}
@@ -55,7 +54,7 @@
                     </table>
                 </div>
                 <div class="clearfix">
-                    {% include "dojo/paging_snippet.html" with page=devs page_size=True%}
+                    {% include "dojo/paging_snippet.html" with page=environments page_size=True%}
                 </div>
             {% else %}
                 <p class="text-center">No environments found.</p>
