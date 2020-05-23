@@ -128,7 +128,7 @@ class DedupeTest(BaseTestCase):
         print("importing reports...")
         # First test
         driver = self.login_page()
-        driver.get(self.base_url + "engagement")
+        self.goto_active_engagements_overview(driver)
         driver.find_element_by_partial_link_text("Dedupe Path Test").click()
         driver.find_element_by_partial_link_text("Path Test 1").click()
         driver.find_element_by_id("dropdownMenu1").click()
@@ -142,7 +142,7 @@ class DedupeTest(BaseTestCase):
         self.assertTrue(self.is_success_message_present(text='a total of 3 findings were processed'))
 
         # Second test
-        driver.get(self.base_url + "engagement")
+        self.goto_active_engagements_overview(driver)
         driver.find_element_by_partial_link_text("Dedupe Path Test").click()
         driver.find_element_by_partial_link_text("Path Test 2").click()
         driver.find_element_by_id("dropdownMenu1").click()
@@ -199,7 +199,7 @@ class DedupeTest(BaseTestCase):
         print("Importing reports...")
         # First test : Immuniweb Scan (dynamic)
         driver = self.login_page()
-        driver.get(self.base_url + "engagement")
+        self.goto_active_engagements_overview(driver)
         driver.find_element_by_partial_link_text("Dedupe Endpoint Test").click()
         driver.find_element_by_partial_link_text("Endpoint Test 1").click()
         driver.find_element_by_id("dropdownMenu1").click()
@@ -213,7 +213,7 @@ class DedupeTest(BaseTestCase):
         self.assertTrue(self.is_success_message_present(text='a total of 3 findings were processed'))
 
         # Second test : Immuniweb Scan (dynamic)
-        driver.get(self.base_url + "engagement")
+        self.goto_active_engagements_overview(driver)
         driver.find_element_by_partial_link_text("Dedupe Endpoint Test").click()
         driver.find_element_by_partial_link_text("Endpoint Test 2").click()
         driver.find_element_by_id("dropdownMenu1").click()
@@ -267,7 +267,7 @@ class DedupeTest(BaseTestCase):
         print("Importing reports")
         # First test : Immuniweb Scan (dynamic)
         driver = self.login_page()
-        driver.get(self.base_url + "engagement")
+        self.goto_active_engagements_overview(driver)
         driver.find_element_by_partial_link_text("Dedupe Same Eng Test").click()
         driver.find_element_by_partial_link_text("Same Eng Test 1").click()
         driver.find_element_by_id("dropdownMenu1").click()
@@ -280,7 +280,7 @@ class DedupeTest(BaseTestCase):
         self.assertTrue(self.is_success_message_present(text='a total of 3 findings were processed'))
 
         # Second test : Generic Findings Import with Url (dynamic)
-        driver.get(self.base_url + "engagement")
+        self.goto_active_engagements_overview(driver)
         driver.find_element_by_partial_link_text("Dedupe Same Eng Test").click()
         driver.find_element_by_partial_link_text("Same Eng Test 2").click()
         driver.find_element_by_id("dropdownMenu1").click()
@@ -337,7 +337,7 @@ class DedupeTest(BaseTestCase):
     def test_import_path_tests_checkmarx_scan(self):
         # First test
         driver = self.login_page()
-        driver.get(self.base_url + "engagement")
+        self.goto_active_engagements_overview(driver)
         driver.find_element_by_partial_link_text("Dedupe on hash_code only").click()
         driver.find_element_by_partial_link_text("Path Test 1").click()
         driver.find_element_by_id("dropdownMenu1").click()
@@ -351,7 +351,7 @@ class DedupeTest(BaseTestCase):
         self.assertTrue(self.is_success_message_present(text='a total of 2 findings were processed'))
 
         # Second test
-        driver.get(self.base_url + "engagement")
+        self.goto_active_engagements_overview(driver)
         driver.find_element_by_partial_link_text("Dedupe on hash_code only").click()
         driver.find_element_by_partial_link_text("Path Test 2").click()
         driver.find_element_by_id("dropdownMenu1").click()
@@ -414,7 +414,7 @@ class DedupeTest(BaseTestCase):
         print("Importing findings...")
         # First test : Immuniweb Scan (dynamic)
         driver = self.login_page()
-        driver.get(self.base_url + "engagement")
+        self.goto_active_engagements_overview(driver)
         driver.find_element_by_partial_link_text("Dedupe Immuniweb Test").click()
         driver.find_element_by_partial_link_text("Immuniweb Test").click()
         driver.find_element_by_css_selector("b.fa.fa-ellipsis-v").click()
@@ -427,7 +427,7 @@ class DedupeTest(BaseTestCase):
         self.assertTrue(self.is_success_message_present(text='a total of 3 findings were processed'))
 
         # Second test : generic scan with url (dynamic)
-        driver.get(self.base_url + "engagement")
+        self.goto_active_engagements_overview(driver)
         driver.find_element_by_partial_link_text("Dedupe Generic Test").click()
         driver.find_element_by_partial_link_text("Generic Test").click()
         driver.find_element_by_css_selector("b.fa.fa-ellipsis-v").click()
