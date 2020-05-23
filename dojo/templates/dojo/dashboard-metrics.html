@@ -165,7 +165,7 @@
     <script src="{% static "flot/jquery.flot.js" %}"></script>
     <script src="{% static "flot/jquery.flot.pie.js" %}"></script>
     <script src="{% static "flot/jquery.flot.time.js" %}"></script>
-    <script src="{% static "flot.tooltip/js/jquery.flot.tooltip.min.js" %}"></script>
+    <script src="{% static "jquery.flot.tooltip/js/jquery.flot.tooltip.min.js" %}"></script>
     <script src="{% static "flot/jquery.flot.stack.js" %}"></script>
     <script src="{% static "flot/jquery.flot.resize.js" %}"></script>
     <script src="{% static "flot-axis/jquery.flot.axislabels.js" %}"></script>
@@ -175,7 +175,6 @@
         <script src="{% static "JUMFlot/javascripts/jquery.flot.bubbles.js" %}"></script>
     {% endif %}
     <script>
-        var highest_count = {{ highest_count }};
         $(function () {
             setInterval(function () {
                 window.location.reload();

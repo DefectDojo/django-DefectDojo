@@ -14,6 +14,7 @@ from tastypie.serializers import Serializer
 from tastypie.validation import FormValidation, Validation
 from django.urls.exceptions import Resolver404
 from django.utils import timezone
+from django.db.models import Count, Q
 
 from dojo.models import Product, Engagement, Test, Finding, \
     User, ScanSettings, IPScan, Scan, Stub_Finding, Risk_Acceptance, \
@@ -372,6 +373,7 @@ class ProductResource(BaseModelResource):
         list_allowed_methods = ['get', 'post']  # only allow get for lists
         detail_allowed_methods = ['get', 'post', 'put']
         queryset = Product.objects.all().order_by('name')
+        queryset = queryset.annotate(active_finding_count=Count('engagement__test__finding__id', filter=Q(engagement__test__finding__active=True)))
         ordering = ['name', 'id', 'description', 'findings_count', 'created',
                     'product_type_id']
         excludes = ['tid', 'manager', 'prod_manager', 'tech_contact',

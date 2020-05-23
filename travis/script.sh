@@ -71,47 +71,51 @@ if [ -z "${TEST}" ]; then
   sudo helm dependency update ./helm/defectdojo
 
   # Set Helm settings for the broker
-  case "${BROKER}" in
-      rabbitmq)
-	  HELM_BROKER_SETTINGS=" \
-	      --set redis.enabled=false \
-	      --set rabbitmq.enabled=true \
-	      --set celery.broker=rabbitmq \
-	  "
-	  ;;
-      redis)
-	  HELM_BROKER_SETTINGS=" \
-	      --set redis.enabled=true \
-	      --set rabbitmq.enabled=false \
-              --set celery.broker=redis \
-	  "
-	  ;;
-      *)
-	  (>&2 echo "ERROR: 'BROKER' must be 'redis' or 'rabbitmq'")
-	  exit 1
-	  ;;
+  case "${BROKER}" in 
+    rabbitmq)
+      HELM_BROKER_SETTINGS=" \
+        --set redis.enabled=false \
+        --set rabbitmq.enabled=true \
+        --set celery.broker=rabbitmq \
+        --set createRabbitMqSecret=true \
+      "
+      ;;
+    redis)
+      HELM_BROKER_SETTINGS=" \
+        --set redis.enabled=true \
+        --set rabbitmq.enabled=false \
+        --set celery.broker=redis \
+        --set createRedisSecret=true \
+      "
+      ;;
+    *)
+      (>&2 echo "ERROR: 'BROKER' must be 'redis' or 'rabbitmq'")
+      exit 1
+      ;;
   esac
 
   # Set Helm settings for the database
   case "${DATABASE}" in
-      mysql)
-	  HELM_DATABASE_SETTINGS=" \
-	      --set database=mysql \
-	      --set postgresql.enabled=false \
-	      --set mysql.enabled=true \
-	  "
-	  ;;
-      postgresql)
-	  HELM_DATABASE_SETTINGS=" \
-	      --set database=postgresql \
-	      --set postgresql.enabled=true \
-	      --set mysql.enabled=false \
-	  "
-	  ;;
-      *)
-	  (>&2 echo "ERROR: 'DATABASE' must be 'mysql' or 'postgresql'")
-	  exit 1
-	  ;;
+    mysql)
+      HELM_DATABASE_SETTINGS=" \
+        --set database=mysql \
+        --set postgresql.enabled=false \
+        --set mysql.enabled=true \
+        --set createMysqlSecret=true \
+      "
+      ;;
+    postgresql)
+      HELM_DATABASE_SETTINGS=" \
+        --set database=postgresql \
+        --set postgresql.enabled=true \
+        --set mysql.enabled=false \
+        --set createPostgresqlSecret=true \
+      "
+      ;;
+    *)
+      (>&2 echo "ERROR: 'DATABASE' must be 'mysql' or 'postgresql'")
+      exit 1
+      ;;
   esac
 
   # Install DefectDojo into Kubernetes and wait for it
@@ -121,7 +125,9 @@ if [ -z "${TEST}" ]; then
     --set django.ingress.enabled=false \
     --set imagePullPolicy=Never \
     ${HELM_BROKER_SETTINGS} \
-    ${HELM_DATABASE_SETTINGS}
+    ${HELM_DATABASE_SETTINGS} \
+    --set createSecret=true
+
 
   echo -n "Waiting for DefectDojo to become ready "
   i=0
@@ -195,6 +201,7 @@ echo "Running test ${TEST}"
       CR=$(curl -s -m 10 -I http://localhost:8080/login?next= | egrep "^HTTP" | cut  -d' ' -f2)
       if [ "$CR" != 200 ]; then
         echo "ERROR: cannot display login screen; got HTTP code $CR"
+        docker-compose logs  --tail="all" uwsgi
         exit 1
       fi
       echo "Docker compose container status"
@@ -210,6 +217,12 @@ echo "Running test ${TEST}"
       # make sure you remember to change back to 'release' before making a PR
       source ./docker/setEnv.sh release
       docker-compose build
+
+      echo "Waiting for services to start"
+      docker-compose up -d
+      # wait for containers to start from images and services to become available
+      sleep 100 # giving long enough time
+
       source ./travis/integration_test-script.sh
       ;;
     snyk)

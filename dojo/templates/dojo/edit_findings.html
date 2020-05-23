@@ -17,14 +17,18 @@
 {% block content %}
     <h3> Edit a Finding </h3>
     {% if temp %}
-
         <form id="add_finding" class="form-horizontal" action="{% url 'edit_finding' finding.id %}" method="post">
             {% csrf_token %}
             {% include "dojo/form_fields.html" with form=form %}
             {% if jform %}
-                <h3> JIRA </h3>
+                <h4> JIRA </h4>
                 <hr>
                 {% include "dojo/form_fields.html" with form=jform %}
+            {% endif %}
+            {% if gform %}
+                <h3> GitHub </h3>
+                <hr>
+                {% include "dojo/form_fields.html" with form=gform %}
             {% endif %}
             <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">
@@ -69,7 +73,12 @@
             </div>
 
             {% if jform %}
+                <h4> JIRA </h4>
+                <hr>
                 {% include "dojo/form_fields.html" with form=jform %}
+            {% endif %}
+            {% if gform %}
+                {% include "dojo/form_fields.html" with form=gform %}
             {% endif %}
             <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">
@@ -145,6 +154,8 @@
             });
         });
 
+
+        {% if dupes %}
         window.onload = function() {
             var menu = document.getElementById("dupe_choice").parentElement.parentElement
             var dupe_box = document.getElementById("id_duplicate").parentElement.parentElement.parentElement.parentElement
@@ -156,7 +167,7 @@
                 menu.setAttribute("class", "form-group hidden");
             }
         };
-
+        
         $("#id_duplicate").change(function () {
             var menu = document.getElementById("dupe_choice").parentElement.parentElement
             var dupe_box = document.getElementById("id_duplicate").parentElement.parentElement.parentElement.parentElement
@@ -167,8 +178,9 @@
             else {
                 menu.setAttribute("class", "form-group hidden");
             }
-
+            
         });
+        {% endif %}
 
         $("#add_finding").submit(function () {
             var isFormValid = true;

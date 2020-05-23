@@ -1,12 +1,11 @@
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.keys import Keys
 import unittest
 import re
 import sys
-import os
 import time
+from base_test_class import BaseTestCase, on_exception_html_source_logger
+from selenium.webdriver.common.by import By
 
 
 class WaitForPageLoad(object):
@@ -32,41 +31,16 @@ class WaitForPageLoad(object):
         )
 
 
-class ProductTest(unittest.TestCase):
-    def setUp(self):
-        self.options = Options()
-        self.options.add_argument("--headless")  # Comment out this line to allow test run with browser visible
-        self.driver = webdriver.Chrome('chromedriver', chrome_options=self.options)
-        # Allow a little time for the driver to initialize
-        self.driver.implicitly_wait(30)
-        # Set the base address of the dojo
-        self.base_url = "http://localhost:8080/"
-        self.verificationErrors = []
-        self.accept_next_alert = True
+class ProductTest(BaseTestCase):
 
-    def login_page(self):
-        # Make a member reference to the driver
-        driver = self.driver
-        # Navigate to the login page
-        driver.get(self.base_url + "login")
-        # Good practice to clear the entry before typing
-        driver.find_element_by_id("id_username").clear()
-        # Set the user to an admin account
-        # os.environ['DD_ADMIN_USER']
-        driver.find_element_by_id("id_username").clear()
-        driver.find_element_by_id("id_username").send_keys(os.environ['DD_ADMIN_USER'])
-        driver.find_element_by_id("id_password").clear()
-        driver.find_element_by_id("id_password").send_keys(os.environ['DD_ADMIN_PASSWORD'])
-        # "Click" the but the login button
-        driver.find_element_by_css_selector("button.btn.btn-success").click()
-        return driver
-
+    @on_exception_html_source_logger
     def test_create_product(self):
-        # Login to the site. Password will have to be modified
-        # to match an admin password in your own container
+        # make sure no left overs from previous runs are left behind
+        self.delete_product_if_exists()
+
         driver = self.login_page()
         # Navigate to the product page
-        driver.get(self.base_url + "product")
+        self.goto_product_overview(driver)
         # "Click" the dropdown button to see options
         driver.find_element_by_id("dropdownMenu1").click()
         # "Click" the add prodcut button
@@ -78,6 +52,7 @@ class ProductTest(unittest.TestCase):
         # Couldnt find a way to get into the box with selenium
         driver.find_element_by_id("id_name").send_keys("\tThis is just a test. Be very afraid.")
         # Select an option in the poroduct type
+        # some wild guess to print some debug info
         Select(driver.find_element_by_id("id_prod_type")).select_by_visible_text("Research and Development")
         # "Click" the submit button to complete the transaction
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
@@ -88,14 +63,22 @@ class ProductTest(unittest.TestCase):
         self.assertTrue(re.search(r'Product added successfully', productTxt) or
             re.search(r'Product with this Name already exists.', productTxt))
 
+    @on_exception_html_source_logger
+    def test_list_products(self):
+        driver = self.login_page()
+        # Navigate to the product page
+        self.goto_product_overview(driver)
+        # list products which will make sure there are no javascript errors such as before in https://github.com/DefectDojo/django-DefectDojo/issues/2050
+
     # For product consistency sake, We won't be editting the product title
     # instead We can edit the product description
+    @on_exception_html_source_logger
     def test_edit_product_description(self):
         # Login to the site. Password will have to be modified
         # to match an admin password in your own container
         driver = self.login_page()
         # Navigate to the product page
-        driver.get(self.base_url + "product")
+        self.goto_product_overview(driver)
         # Select and click on the particular product to edit
         driver.find_element_by_link_text("QA Test").click()
         # "Click" the dropdown option
@@ -112,12 +95,13 @@ class ProductTest(unittest.TestCase):
         self.assertTrue(re.search(r'Product updated successfully', productTxt) or
             re.search(r'Product with this Name already exists.', productTxt))
 
+    @on_exception_html_source_logger
     def test_add_product_engagement(self):
         # Test To Add Engagement To product
         # login to site, password set to fetch from environ
         driver = self.login_page()
-        # Navigate to Product page
-        driver.get(self.base_url + "product")
+        # Navigate to the product page
+        self.goto_product_overview(driver)
         # Select and click on the particular product to edit
         driver.find_element_by_link_text("QA Test").click()
         # "Click" the dropdown option
@@ -149,12 +133,13 @@ class ProductTest(unittest.TestCase):
         # Assert of the query to dtermine status of failure
         self.assertTrue(re.search(r'Engagement added successfully', productTxt))
 
+    @on_exception_html_source_logger
     def test_add_product_finding(self):
         # Test To Add Finding To product
         # login to site, password set to fetch from environ
         driver = self.login_page()
-        # Navigate to Product page
-        driver.get(self.base_url + "product")
+        # Navigate to the product page
+        self.goto_product_overview(driver)
         # Select and click on the particular product to edit
         driver.find_element_by_link_text("QA Test").click()
         # Click on the 'Finding dropdown button'
@@ -190,12 +175,13 @@ class ProductTest(unittest.TestCase):
         # Assert to the query to dtermine status of failure
         self.assertTrue(re.search(r'App Vulnerable to XSS', productTxt))
 
+    @on_exception_html_source_logger
     def test_add_product_endpoints(self):
         # Test To Add Endpoints To product
         # login to site, password set to fetch from environ
         driver = self.login_page()
-        # Navigate to Product page
-        driver.get(self.base_url + "product")
+        # Navigate to the product page
+        self.goto_product_overview(driver)
         # Select and click on the particular product to edit
         driver.find_element_by_link_text("QA Test").click()
         # Click on the 'Endpoints' dropdown button
@@ -213,12 +199,13 @@ class ProductTest(unittest.TestCase):
         # Assert ot the query to dtermine status of failure
         self.assertTrue(re.search(r'Endpoint added successfully', productTxt))
 
+    @on_exception_html_source_logger
     def test_add_product_custom_field(self):
         # Test To Add Custom Fields To product
         # login to site, password set to fetch from environ
         driver = self.login_page()
-        # Navigate to Product page
-        driver.get(self.base_url + "product")
+        # Navigate to the product page
+        self.goto_product_overview(driver)
         # Select and click on the particular product to edit
         driver.find_element_by_link_text("QA Test").click()
         # "Click" the dropdown option
@@ -241,12 +228,13 @@ class ProductTest(unittest.TestCase):
         self.assertTrue(re.search(r'Metadata added successfully', productTxt) or
             re.search(r'A metadata entry with the same name exists already for this object.', productTxt))
 
+    @on_exception_html_source_logger
     def test_edit_product_custom_field(self):
         # Test To Edit Product Custom Fields
         # login to site, password set to fetch from environ
         driver = self.login_page()
-        # Navigate to Product page
-        driver.get(self.base_url + "product")
+        # Navigate to the product page
+        self.goto_product_overview(driver)
         # Select and click on the particular product to edit
         driver.find_element_by_link_text("QA Test").click()
         # "Click" the dropdown option
@@ -265,12 +253,13 @@ class ProductTest(unittest.TestCase):
         self.assertTrue(re.search(r'Metadata edited successfully', productTxt) or
             re.search(r'A metadata entry with the same name exists already for this object.', productTxt))
 
+    @on_exception_html_source_logger
     def test_add_product_tracking_files(self):
         # Test To Add tracking files To product
         # login to site, password set to fetch from environ
         driver = self.login_page()
-        # Navigate to Product page
-        driver.get(self.base_url + "product")
+        # Navigate to the product page
+        self.goto_product_overview(driver)
         # Select and click on the particular product to edit
         driver.find_element_by_link_text("QA Test").click()
         # "Click" the dropdown option
@@ -291,12 +280,13 @@ class ProductTest(unittest.TestCase):
         # Assert ot the query to dtermine status of failure
         self.assertTrue(re.search(r'Added Tracked File to a Product', productTxt))
 
+    @on_exception_html_source_logger
     def test_edit_product_tracking_files(self):
         # Test To Edit Product Tracking Files
         # login to site, password set to fetch from environ
         driver = self.login_page()
-        # Navigate to Product page
-        driver.get(self.base_url + "product")
+        # Navigate to the product page
+        self.goto_product_overview(driver)
         # Select and click on the particular product to edit
         driver.find_element_by_link_text("QA Test").click()
         # "Click" the dropdown option
@@ -316,12 +306,22 @@ class ProductTest(unittest.TestCase):
         # Assert ot the query to dtermine status of failure
         self.assertTrue(re.search(r'Tool Product Configuration Successfully Updated', productTxt))
 
-    def test_delete_product(self):
-        # Login to the site. Password will have to be modified
-        # to match an admin password in your own container
+    @on_exception_html_source_logger
+    def delete_product_if_exists(self):
         driver = self.login_page()
         # Navigate to the product page
-        driver.get(self.base_url + "product")
+        self.goto_product_overview(driver)
+        # Select the specific product to delete
+        qa_products = driver.find_elements(By.LINK_TEXT, "QA Test")
+
+        if len(qa_products) > 0:
+            self.test_delete_product()
+
+    @on_exception_html_source_logger
+    def test_delete_product(self):
+        driver = self.login_page()
+        # Navigate to the product page
+        self.goto_product_overview(driver)
         # Select the specific product to delete
         driver.find_element_by_link_text("QA Test").click()
         # Click the drop down menu
@@ -332,16 +332,11 @@ class ProductTest(unittest.TestCase):
         driver.find_element_by_css_selector("button.btn.btn-danger").click()
         # Query the site to determine if the product has been added
         productTxt = driver.find_element_by_tag_name("BODY").text
-        # Assert ot the query to dtermine status of failure
+        # Assert ot the query to determine status of failure
         self.assertTrue(re.search(r'Product and relationships removed.', productTxt))
 
-    def tearDown(self):
-        self.driver.quit()
-        self.assertEqual([], self.verificationErrors)
 
-
-def suite():
-    suite = unittest.TestSuite()
+def add_product_tests_to_suite(suite):
     # Add each test and the suite to be run
     # success and failure is output by the test
     suite.addTest(ProductTest('test_create_product'))
@@ -353,11 +348,22 @@ def suite():
     suite.addTest(ProductTest('test_edit_product_custom_field'))
     suite.addTest(ProductTest('test_add_product_tracking_files'))
     suite.addTest(ProductTest('test_edit_product_tracking_files'))
+    suite.addTest(ProductTest('test_list_products'))
     suite.addTest(ProductTest('test_delete_product'))
     return suite
 
 
+def suite():
+    suite = unittest.TestSuite()
+    add_product_tests_to_suite(suite)
+    suite.addTest(ProductTest('enable_jira'))
+    suite.addTest(ProductTest('enable_github'))
+    add_product_tests_to_suite(suite)
+    return suite
+
+
 if __name__ == "__main__":
-    runner = unittest.TextTestRunner(descriptions=True, failfast=True)
+    runner = unittest.TextTestRunner(descriptions=True, failfast=True, verbosity=2)
     ret = not runner.run(suite()).wasSuccessful()
+    BaseTestCase.tearDownDriver()
     sys.exit(ret)

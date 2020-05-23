@@ -3,6 +3,7 @@ import logging
 import os
 from datetime import datetime
 import operator
+import base64
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.contrib import messages
@@ -34,8 +35,10 @@ from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, message, get_system_setting, create_notification, Product_Tab
 from dojo.tasks import update_epic_task, add_epic_task
 from functools import reduce
+from django.db.models.query import QuerySet
 
 logger = logging.getLogger(__name__)
+parse_logger = logging.getLogger('dojo')
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -65,30 +68,25 @@ def engagement_calendar(request):
 
 @user_passes_test(lambda u: u.is_staff)
 def engagement(request):
+    products_with_engagements = Product.objects.filter(~Q(engagement=None), engagement__active=True).distinct()
     filtered = EngagementFilter(
         request.GET,
-        queryset=Product.objects.filter(
-            ~Q(engagement=None),
-            engagement__active=True,
-        ).distinct())
+        queryset=products_with_engagements.prefetch_related('engagement_set', 'prod_type', 'engagement_set__lead',
+                                                            'engagement_set__test_set__lead', 'engagement_set__test_set__test_type'))
     prods = get_page_items(request, filtered.qs, 25)
     name_words = [
-        product.name for product in Product.objects.filter(
-            ~Q(engagement=None),
-            engagement__active=True,
-        ).distinct()
+        product.name for product in products_with_engagements.only('name')
     ]
     eng_words = [
-        engagement.name for product in Product.objects.filter(
-            ~Q(engagement=None),
-            engagement__active=True,
-        ).distinct() for engagement in product.engagement_set.all()
+        engagement.name for engagement in Engagement.objects.filter(active=True)
     ]
 
     add_breadcrumb(
         title="Active Engagements",
         top_level=not len(request.GET),
         request=request)
+
+    prods.object_list = prefetch_for_products_with_engagments(prods.object_list)
 
     return render(
         request, 'dojo/engagement.html', {
@@ -101,27 +99,27 @@ def engagement(request):
 
 @user_passes_test(lambda u: u.is_staff)
 def engagements_all(request):
+
+    products_with_engagements = Product.objects.filter(~Q(engagement=None)).distinct()
     filtered = EngagementFilter(
         request.GET,
-        queryset=Product.objects.filter(
-            ~Q(engagement=None),
-        ).distinct())
+        queryset=products_with_engagements.prefetch_related('engagement_set', 'prod_type', 'engagement_set__lead',
+                                                            'engagement_set__test_set__lead', 'engagement_set__test_set__test_type'))
+
     prods = get_page_items(request, filtered.qs, 25)
     name_words = [
-        product.name for product in Product.objects.filter(
-            ~Q(engagement=None),
-        ).distinct()
+        product.name for product in products_with_engagements.only('name')
     ]
     eng_words = [
-        engagement.name for product in Product.objects.filter(
-            ~Q(engagement=None),
-        ).distinct() for engagement in product.engagement_set.all()
+        engagement.name for engagement in Engagement.objects.filter(active=True)
     ]
 
     add_breadcrumb(
         title="All Engagements",
         top_level=not len(request.GET),
         request=request)
+
+    prods.object_list = prefetch_for_products_with_engagments(prods.object_list)
 
     return render(
         request, 'dojo/engagements_all.html', {
@@ -130,6 +128,14 @@ def engagements_all(request):
             'name_words': sorted(set(name_words)),
             'eng_words': sorted(set(eng_words)),
         })
+
+
+def prefetch_for_products_with_engagments(products_with_engagements):
+    if isinstance(products_with_engagements, QuerySet):  # old code can arrive here with prods being a list because the query was already executed
+        return products_with_engagements.prefetch_related('tagged_items__tag',
+            'engagement_set__tagged_items__tag',
+            'engagement_set__test_set__tagged_items__tag')
+    return products_with_engagements
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -174,20 +180,19 @@ def edit_engagement(request, eid):
     if eng.engagement_type == "CI/CD":
         ci_cd_form = True
     jform = None
+
     if request.method == 'POST':
         form = EngForm(request.POST, instance=eng, cicd=ci_cd_form, product=eng.product.id)
         if 'jiraform-push_to_jira' in request.POST:
             jform = JIRAFindingForm(
-                request.POST, prefix='jiraform', enabled=True)
+                request.POST, prefix='jiraform', enabled=False)
 
         if (form.is_valid() and jform is None) or (form.is_valid() and jform and jform.is_valid()):
             if 'jiraform-push_to_jira' in request.POST:
                 if JIRA_Issue.objects.filter(engagement=eng).exists():
                     update_epic_task.delay(
                         eng, jform.cleaned_data.get('push_to_jira'))
-                    enabled = True
                 else:
-                    enabled = False
                     add_epic_task.delay(eng,
                                         jform.cleaned_data.get('push_to_jira'))
             temp_form = form.save(commit=False)
@@ -222,7 +227,14 @@ def edit_engagement(request, eid):
 
         if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(
                 product=eng.product).count() != 0:
-            jform = JIRAFindingForm(prefix='jiraform', enabled=enabled)
+            # Enabled must be false in this case, because this Push-to-jira is more about
+            # epics then findings.
+            jform = JIRAFindingForm(prefix='jiraform', enabled=False)
+            # Feels like we should probably inform the user that this particular checkbox
+            # is more about epics and engagements than findings and issues.
+            jform.fields['push_to_jira'].help_text = \
+                "Checking this will add an EPIC or update an existing EPIC for this engagement."
+            jform.fields['push_to_jira'].label = "Create or update EPIC"
         else:
             jform = None
 
@@ -387,7 +399,7 @@ def view_engagement(request, eid):
             'risk': eng.risk_path,
             'form': form,
             'risks_accepted': risks_accepted,
-            'can_add_risk': len(eng_findings),
+            'can_add_risk': eng_findings.count(),
             'jissue': jissue,
             'jconf': jconf,
             'accepted_findings': accepted_findings,
@@ -489,20 +501,32 @@ def import_scan_results(request, eid=None, pid=None):
     form = ImportScanForm()
     cred_form = CredMappingForm()
     finding_count = 0
+    enabled = False
+    jform = None
+
     if eid:
         engagement = get_object_or_404(Engagement, id=eid)
         cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(engagement=engagement).order_by('cred_id')
+        if get_system_setting('enable_jira') and engagement.product.jira_pkey_set.first() is not None:
+            enabled = engagement.product.jira_pkey_set.first().push_all_issues
+            jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
+    elif pid:
+        product = get_object_or_404(Product, id=pid)
+        if get_system_setting('enable_jira') and product.jira_pkey_set.first() is not None:
+            enabled = product.jira_pkey_set.first().push_all_issues
+            jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
 
     if request.method == "POST":
         form = ImportScanForm(request.POST, request.FILES)
         cred_form = CredMappingForm(request.POST)
         cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(
             engagement=engagement).order_by('cred_id')
+
         if form.is_valid():
             # Allows for a test to be imported with an engagement created on the fly
             if engagement is None:
                 engagement = Engagement()
-                product = get_object_or_404(Product, id=pid)
+                # product = get_object_or_404(Product, id=pid)
                 engagement.name = "AdHoc Import - " + strftime("%a, %d %b %Y %X", timezone.now().timetuple())
                 engagement.threat_model = False
                 engagement.api_test = False
@@ -555,9 +579,29 @@ def import_scan_results(request, eid=None, pid=None):
                     new_f.cred_id = cred_user.cred_id
                     new_f.save()
 
-            parser = import_parser_factory(file, t, active, verified)
+            try:
+                parser = import_parser_factory(file, t, active, verified)
+            except Exception as e:
+                messages.add_message(request,
+                                     messages.ERROR,
+                                     "An error has occurred in the parser, please see error "
+                                     "log for details.",
+                                     extra_tags='alert-danger')
+                parse_logger.exception(e)
+                parse_logger.error("Error in parser: {}".format(str(e)))
+                return HttpResponseRedirect(reverse('import_scan_results', args=(eid,)))
 
             try:
+                # Push to Jira?
+                push_to_jira = False
+                if enabled:
+                    push_to_jira = True
+                elif 'jiraform-push_to_jira' in request.POST:
+                    jform = JIRAFindingForm(request.POST, prefix='jiraform',
+                                            enabled=enabled)
+                    if jform.is_valid():
+                        push_to_jira = jform.cleaned_data.get('push_to_jira')
+
                 for item in parser.items:
                     print("item blowup")
                     print(item)
@@ -580,6 +624,7 @@ def import_scan_results(request, eid=None, pid=None):
                     if not handles_active_verified_statuses(form.get_scan_type()):
                         item.active = active
                         item.verified = verified
+
                     item.save(dedupe_option=False, false_history=True)
 
                     if hasattr(item, 'unsaved_req_resp') and len(
@@ -594,8 +639,8 @@ def import_scan_results(request, eid=None, pid=None):
                             else:
                                 burp_rr = BurpRawRequestResponse(
                                     finding=item,
-                                    burpRequestBase64=req_resp["req"].encode("utf-8"),
-                                    burpResponseBase64=req_resp["resp"].encode("utf-8"),
+                                    burpRequestBase64=base64.b64encode(req_resp["req"].encode("utf-8")),
+                                    burpResponseBase64=base64.b64encode(req_resp["resp"].encode("utf-8")),
                                 )
                             burp_rr.clean()
                             burp_rr.save()
@@ -603,8 +648,8 @@ def import_scan_results(request, eid=None, pid=None):
                     if item.unsaved_request is not None and item.unsaved_response is not None:
                         burp_rr = BurpRawRequestResponse(
                             finding=item,
-                            burpRequestBase64=item.unsaved_request.encode("utf-8"),
-                            burpResponseBase64=item.unsaved_response.encode("utf-8"),
+                            burpRequestBase64=base64.b64encode(item.unsaved_request.encode()),
+                            burpResponseBase64=base64.b64encode(item.unsaved_response.encode()),
                         )
                         burp_rr.clean()
                         burp_rr.save()
@@ -630,7 +675,7 @@ def import_scan_results(request, eid=None, pid=None):
 
                         item.endpoints.add(ep)
 
-                    item.save(false_history=True)
+                    item.save(false_history=True, push_to_jira=push_to_jira)
 
                     if item.unsaved_tags is not None:
                         item.tags = item.unsaved_tags
@@ -646,6 +691,7 @@ def import_scan_results(request, eid=None, pid=None):
 
                 create_notification(
                     event='results_added',
+                    initiator=request.user,
                     title=str(finding_count) + " findings for " + engagement.product.name,
                     finding_count=finding_count,
                     test=t,
@@ -678,6 +724,7 @@ def import_scan_results(request, eid=None, pid=None):
         'custom_breadcrumb': custom_breadcrumb,
         'title': title,
         'cred_form': cred_form,
+        'jform': jform
     })
 
 

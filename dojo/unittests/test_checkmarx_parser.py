@@ -151,7 +151,8 @@ class TestCheckmarxParser(TestCase):
         self.assertEqual("58", item.line)
         # Added field for detailed scanner
         self.assertEqual(str, type(item.unique_id_from_tool))
-        self.assertEqual("28", item.unique_id_from_tool)
+        # unique_id_from_tool update from PathId to SimilarityId+PathId
+        self.assertEqual("157422106028", item.unique_id_from_tool)
         self.assertEqual(str, type(item.sast_source_object))
         self.assertEqual("executeQuery", item.sast_source_object)
         self.assertEqual(str, type(item.sast_sink_object))

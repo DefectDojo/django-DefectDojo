@@ -91,15 +91,18 @@ def get_item(vulnerability, test):
         # Re-assign 'severity' directly
         severity = vulnerability['severity'].title()
 
+    if 'id' in vulnerability:
+        references = "Custom SNYK ID: {}\n\n".format(vulnerability['id'])
+
     if cve_references or cwe_references:
-        references = "Several CVEs or CWEs were reported: \n\n{}\n{}".format(
+        references += "Several CVEs or CWEs were reported: \n\n{}\n{}".format(
             cve_references, cwe_references)
     else:
-        references = "Refer to the description above for references."
+        references += "Refer to the description above for references."
 
     # create the finding object
     finding = Finding(
-        title=vulnerability['from'][0] + ": " + vulnerability['title'] + " - " + "(" + vulnerability['packageName'] + ", " + vulnerability['version'] + ")",
+        title=vulnerability['from'][0] + ": " + vulnerability['title'],
         test=test,
         severity=severity,
         cwe=cwe,
@@ -111,6 +114,8 @@ def get_item(vulnerability, test):
             vulnerability['from']) + "</li></p>" + vulnerability['description'],
         mitigation="A fix (if available) will be provided in the description.",
         references=references,
+        component_name=vulnerability['packageName'],
+        component_version=vulnerability['version'],
         active=False,
         verified=False,
         false_p=False,
