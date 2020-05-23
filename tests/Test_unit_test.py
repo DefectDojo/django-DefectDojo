@@ -97,7 +97,7 @@ class TestUnitTest(BaseTestCase):
         # Login to the site.
         driver = self.login_page()
         # Navigate to the engagement page
-        driver.get(self.base_url + "engagement")
+        self.goto_active_engagements_overview(driver)
         # Select a previously created engagement title
         driver.find_element_by_partial_link_text("Quick Security Testing").click()
         # "Click" the dropdown button to see options
@@ -117,7 +117,7 @@ class TestUnitTest(BaseTestCase):
         # Login to the site.
         driver = self.login_page()
         # Navigate to the engagement page
-        driver.get(self.base_url + "engagement")
+        self.goto_active_engagements_overview(driver)
         # Select a previously created engagement title
         driver.find_element_by_partial_link_text("Quick Security Testing").click()
         # "Click" the dropdown button to see options
@@ -139,7 +139,7 @@ class TestUnitTest(BaseTestCase):
         # to match an admin password in your own container
         driver = self.login_page()
         # Navigate to the engagement page
-        driver.get(self.base_url + "engagement")
+        self.goto_active_engagements_overview(driver)
         # Select a previously created engagement title
         driver.find_element_by_partial_link_text("Quick Security Testing").click()
         # "Click" the dropdown button to see options
