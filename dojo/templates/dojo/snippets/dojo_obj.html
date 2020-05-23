@@ -9,7 +9,6 @@ Supported object types are:
 * Test
 * Test_Type
 * Finding
-* ReportNG
 * User
 
 Parameters:
@@ -92,35 +91,6 @@ Parameters:
                 <li role="presentation">
                     <a class="text-info" href="{% url "touch_finding" object.pk %}">
                         <i class="fa fa-clock-o"></i> Touch Finding
-                    </a>
-                </li>
-                <li role="separator" class="divider"></li>
-            {% endif %}
-        {% endas %}
-
-    {% elif model_name == "reportng" %}
-        {% as object_name %}{{ object.title }}{% endas %}
-        {% as extra_repr %}
-            <small><strong>{{ object.builder.name }}</strong></small>
-            {% if object.status == object.STATUS_DRAFT %}
-                <small><strong>· Draft</strong></small>
-            {% endif %}
-        {% endas %}
-        {% as delete_url %}{% url "reportng_delete" pk=object.pk %}{% endas %}
-        {% has_perm "reportng"|get_perm:"add" user as can_add %}
-        {% as actions_menu %}
-            {% if can_add %}
-                <li>
-                    <a class="text-info" href="{% url "reportng_builder" builder_code=object.builder_code draft_pk=object.pk %}">
-                        <i class="fa fa-edit"></i> Open in Report Builder
-                    </a>
-                </li>
-            {% endif %}
-            {% if object.is_downloadable %}
-                <li role="separator" class="divider"></li>
-                <li>
-                    <a class="text-info" href="{% url "reportng_download" pk=object.pk %}">
-                        <i class="fa fa-download"></i> Download
                     </a>
                 </li>
                 <li role="separator" class="divider"></li>

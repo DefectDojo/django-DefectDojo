@@ -40,8 +40,6 @@ RUN \
     libmariadb3 \
     xmlsec1 \
     git \
-    # Required by dojo.reportng.builders.tex.templatetags.tex.to_tex
-    pandoc \
     # only required for the dbshell (used by the initializer job)
     postgresql-client \
     && \

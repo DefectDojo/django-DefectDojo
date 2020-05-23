@@ -31,7 +31,6 @@ from tagging.models import TaggedItem
 from dateutil.relativedelta import relativedelta
 
 from .models_base import DojoModel, DojoQuerySet, Q, UniqueUploadNameProvider, User
-from .reportng import models as reportng_models  # noqa: F401
 
 
 fmt = getattr(settings, 'LOG_FORMAT', None)

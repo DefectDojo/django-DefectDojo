@@ -64,7 +64,5 @@ django-flexquery ~= 4.1
 git+https://github.com/efficiosoft/django-msgpackfield@master
 # Used by the form field templates to flexibly render form fields
 django-widget-tweaks ~= 1.4
-# Human-writable config input in ReportNG
-pyyaml ~= 5.3
 # Compact and mature framework for unified permission checking
 rules ~= 2.2

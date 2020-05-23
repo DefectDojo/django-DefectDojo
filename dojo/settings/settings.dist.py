@@ -93,7 +93,6 @@ env = environ.Env(
     DD_SOCIAL_AUTH_GITLAB_SECRET=(str, ''),
     DD_SOCIAL_AUTH_GITLAB_API_URL=(str, 'https://gitlab.com'),
     DD_SOCIAL_AUTH_GITLAB_SCOPE=(list, ['api', 'read_user', 'openid', 'profile', 'email']),
-    DD_REPORTNG_BUILDERS=environ.json.loads,
     # merging findings doesn't always work well with dedupe and reimport etc.
     # disable it if you see any issues (and report them on github)
     DD_DISABLE_FINDING_MERGE=(bool, False),
@@ -773,13 +772,3 @@ SILENCED_SYSTEM_CHECKS = ['mysql.E001']
 
 # Issue on benchmark : "The number of GET/POST parameters exceeded settings.DATA_UPLOAD_MAX_NUMBER_FIELD S"
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
-
-
-# ------------------------------------------------------------------------------
-# ReportNG Configuration
-# ------------------------------------------------------------------------------
-REPORTNG_BUILDERS = env('DD_REPORTNG_BUILDERS', default=[
-    # List of builder classes to activate by default
-    "dojo.reportng.builders.html.HTMLReportBuilder",
-    "dojo.reportng.builders.tex.TeXReportBuilder",
-])
