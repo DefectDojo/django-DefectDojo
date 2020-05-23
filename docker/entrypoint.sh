@@ -31,7 +31,7 @@ if [ ! -f "/opt/django-DefectDojo/static/docker_complete" ]; then
   python3 manage.py loaddata initial_banner_conf
   python3 manage.py loaddata product_type
   python3 manage.py loaddata test_type
-  python3 manage.py loaddata development_environment
+  python3 manage.py loaddata environment
   python3 manage.py loaddata system_settings
   python3 manage.py loaddata benchmark_type
   python3 manage.py loaddata benchmark_category

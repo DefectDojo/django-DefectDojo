@@ -390,7 +390,7 @@ function ubuntu_dojo_install() {
     $PY manage.py loaddata initial_banner_conf
     $PY manage.py loaddata product_type
     $PY manage.py loaddata test_type
-    $PY manage.py loaddata development_environment
+    $PY manage.py loaddata environment
     $PY manage.py loaddata system_settings
     $PY manage.py loaddata benchmark_type
     $PY manage.py loaddata benchmark_category

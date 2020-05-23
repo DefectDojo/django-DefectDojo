@@ -910,7 +910,7 @@ class JiraResource(BaseModelResource):
 """
 
 
-class DevelopmentEnvironmentResource(BaseModelResource):
+class EnvironmentResource(BaseModelResource):
 
     class Meta:
         resource_name = 'development_environments'
@@ -929,7 +929,7 @@ class DevelopmentEnvironmentResource(BaseModelResource):
 
         @property
         def validation(self):
-            return ModelFormValidation(form_class=EnvironmentForm, resource=DevelopmentEnvironmentResource)
+            return ModelFormValidation(form_class=EnvironmentForm, resource=EnvironmentResource)
 
 
 """

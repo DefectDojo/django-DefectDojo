@@ -531,7 +531,7 @@ class EnvironmentViewSet(mixins.ListModelMixin,
                                     mixins.CreateModelMixin,
                                     mixins.UpdateModelMixin,
                                     viewsets.GenericViewSet):
-    serializer_class = serializers.DevelopmentEnvironmentSerializer
+    serializer_class = serializers.EnvironmentSerializer
     queryset = Environment.objects.all()
     filter_backends = (DjangoFilterBackend,)
 

@@ -113,7 +113,7 @@ function setupdb() {
     python manage.py syncdb --noinput
     python manage.py loaddata product_type
     python manage.py loaddata test_type
-    python manage.py loaddata development_environment
+    python manage.py loaddata environment
     python manage.py loaddata system_settings
     python manage.py installwatson
     python manage.py buildwatson
@@ -503,7 +503,7 @@ function install_app() {
       python manage.py loaddata initial_banner_conf
       python manage.py loaddata product_type
       python manage.py loaddata test_type
-      python manage.py loaddata development_environment
+      python manage.py loaddata environment
       python manage.py loaddata system_settings
       python manage.py loaddata benchmark_type
       python manage.py loaddata benchmark_category

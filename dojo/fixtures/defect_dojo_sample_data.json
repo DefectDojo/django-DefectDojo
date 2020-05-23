@@ -2182,49 +2182,49 @@
     }
 },
 {
-    "model": "dojo.development_environment",
+    "model": "dojo.environment",
     "pk": 1,
     "fields": {
         "name": "AWS"
     }
 },
 {
-    "model": "dojo.development_environment",
+    "model": "dojo.environment",
     "pk": 2,
     "fields": {
         "name": "Staging"
     }
 },
 {
-    "model": "dojo.development_environment",
+    "model": "dojo.environment",
     "pk": 3,
     "fields": {
         "name": "Production"
     }
 },
 {
-    "model": "dojo.development_environment",
+    "model": "dojo.environment",
     "pk": 4,
     "fields": {
         "name": "Test"
     }
 },
 {
-    "model": "dojo.development_environment",
+    "model": "dojo.environment",
     "pk": 5,
     "fields": {
         "name": "Pre-prod"
     }
 },
 {
-    "model": "dojo.development_environment",
+    "model": "dojo.environment",
     "pk": 6,
     "fields": {
         "name": "Lab"
     }
 },
 {
-    "model": "dojo.development_environment",
+    "model": "dojo.environment",
     "pk": 7,
     "fields": {
         "name": "Development"

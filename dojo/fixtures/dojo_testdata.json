@@ -562,7 +562,7 @@
   },
   {
     "pk": 1,
-    "model": "dojo.development_environment",
+    "model": "dojo.environment",
     "fields": {
       "name": "Ad officia praesentium sequi suscipit error iste qui nihil illum q"
     }

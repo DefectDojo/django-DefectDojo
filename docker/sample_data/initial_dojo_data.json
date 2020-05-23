@@ -193,7 +193,7 @@
   },
   {
     "fields": {
-      "model": "development_environment",
+      "model": "environment",
       "app_label": "dojo"
     },
     "model": "contenttypes.contenttype",
@@ -638,42 +638,42 @@
     "fields": {
       "name": "Development"
     },
-    "model": "dojo.development_environment",
+    "model": "dojo.environment",
     "pk": 1
   },
   {
     "fields": {
       "name": "Staging"
     },
-    "model": "dojo.development_environment",
+    "model": "dojo.environment",
     "pk": 2
   },
   {
     "fields": {
       "name": "Production"
     },
-    "model": "dojo.development_environment",
+    "model": "dojo.environment",
     "pk": 3
   },
   {
     "fields": {
       "name": "Test"
     },
-    "model": "dojo.development_environment",
+    "model": "dojo.environment",
     "pk": 4
   },
   {
     "fields": {
       "name": "Pre-prod"
     },
-    "model": "dojo.development_environment",
+    "model": "dojo.environment",
     "pk": 5
   },
   {
     "fields": {
       "name": "Lab"
     },
-    "model": "dojo.development_environment",
+    "model": "dojo.environment",
     "pk": 6
   },
   {
@@ -2094,8 +2094,8 @@
   },
   {
     "fields": {
-      "codename": "add_development_environment",
-      "name": "Can add development_ environment",
+      "codename": "add_environment",
+      "name": "Can add development environment",
       "content_type": 25
     },
     "model": "auth.permission",
@@ -2103,8 +2103,8 @@
   },
   {
     "fields": {
-      "codename": "change_development_environment",
-      "name": "Can change development_ environment",
+      "codename": "change_environment",
+      "name": "Can change development environment",
       "content_type": 25
     },
     "model": "auth.permission",
@@ -2112,8 +2112,8 @@
   },
   {
     "fields": {
-      "codename": "delete_development_environment",
-      "name": "Can delete development_ environment",
+      "codename": "delete_environment",
+      "name": "Can delete development environment",
       "content_type": 25
     },
     "model": "auth.permission",

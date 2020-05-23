@@ -19,7 +19,7 @@ from dojo.api import UserResource, ProductResource, EngagementResource, \
     ReImportScanResource, JiraResource, JIRA_ConfResource, EndpointResource, \
     JIRA_IssueResource, ToolProductSettingsResource, Tool_ConfigurationResource, \
     Tool_TypeResource, LanguagesResource, LanguageTypeResource, App_AnalysisResource, \
-    BuildDetails, DevelopmentEnvironmentResource, ProductTypeResource, TestTypeResource, \
+    BuildDetails, EnvironmentResource, ProductTypeResource, TestTypeResource, \
     Note_TypeResource
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraConfigurationsViewSet, \
@@ -71,7 +71,7 @@ v1_api.register(UserResource())
 v1_api.register(ProductResource())
 v1_api.register(ProductTypeResource())
 v1_api.register(EngagementResource())
-v1_api.register(DevelopmentEnvironmentResource())
+v1_api.register(EnvironmentResource())
 v1_api.register(TestTypeResource())
 v1_api.register(TestResource())
 v1_api.register(FindingResource())

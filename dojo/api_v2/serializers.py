@@ -345,7 +345,7 @@ class JIRASerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class DevelopmentEnvironmentSerializer(serializers.ModelSerializer):
+class EnvironmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Environment
