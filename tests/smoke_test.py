@@ -1,33 +1,13 @@
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import NoAlertPresentException
 import unittest
 import re
-import os
 import sys
+from base_test_class import BaseTestCase
 
 
-class DojoTests(unittest.TestCase):
-    def setUp(self):
-        self.options = Options()
-        self.options.add_argument("--headless")
-        self.driver = webdriver.Chrome('chromedriver', chrome_options=self.options)
-        self.driver.implicitly_wait(30)
-        self.base_url = "http://localhost:8080/"
-        self.verificationErrors = []
-        self.accept_next_alert = True
-
-    def login_page(self):
-        driver = self.driver
-        driver.get(self.base_url + "login")
-        driver.find_element_by_id("id_username").clear()
-        driver.find_element_by_id("id_username").send_keys(os.environ['DD_ADMIN_USER'])
-        driver.find_element_by_id("id_password").clear()
-        driver.find_element_by_id("id_password").send_keys(os.environ['DD_ADMIN_PASSWORD'])
-        driver.find_element_by_css_selector("button.btn.btn-success").click()
-        return driver
+class DojoTests(BaseTestCase):
 
     def test_login(self):
         driver = self.login_page()
@@ -36,7 +16,7 @@ class DojoTests(unittest.TestCase):
 
     def test_create_product(self):
         driver = self.login_page()
-        driver.get(self.base_url + "product")
+        self.goto_product_overview(driver)
         driver.find_element_by_id("dropdownMenu1").click()
         driver.find_element_by_link_text("Add Product").click()
         driver.find_element_by_id("id_name").clear()
@@ -51,7 +31,7 @@ class DojoTests(unittest.TestCase):
     def test_engagement(self):
         driver = self.login_page()
         driver = self.driver
-        driver.get(self.base_url + "product")
+        self.goto_product_overview(driver)
         driver.find_element_by_link_text("Product List").click()
         driver.find_element_by_xpath("//table[@id='products']/tbody/tr[1]/td[5]/a").click()
 
@@ -118,10 +98,6 @@ class DojoTests(unittest.TestCase):
         finally:
             self.accept_next_alert = True
 
-    def tearDown(self):
-        self.driver.quit()
-        self.assertEqual([], self.verificationErrors)
-
 
 def suite():
     suite = unittest.TestSuite()
@@ -130,6 +106,7 @@ def suite():
 
 
 if __name__ == "__main__":
-    runner = unittest.TextTestRunner(descriptions=True, failfast=True)
+    runner = unittest.TextTestRunner(descriptions=True, failfast=True, verbosity=2)
     ret = not runner.run(suite()).wasSuccessful()
+    BaseTestCase.tearDownDriver()
     sys.exit(ret)

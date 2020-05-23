@@ -1,31 +1,10 @@
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 import unittest
 import re
 import sys
-import os
+from base_test_class import BaseTestCase
 
 
-class ProductTypeTest(unittest.TestCase):
-    def setUp(self):
-        # change path of chromedriver according to which directory you have chromedriver.
-        self.options = Options()
-        self.options.add_argument("--headless")
-        self.driver = webdriver.Chrome('chromedriver', chrome_options=self.options)
-        self.driver.implicitly_wait(30)
-        self.base_url = "http://localhost:8080/"
-        self.verificationErrors = []
-        self.accept_next_alert = True
-
-    def login_page(self):
-        driver = self.driver
-        driver.get(self.base_url + "login")
-        driver.find_element_by_id("id_username").clear()
-        driver.find_element_by_id("id_username").send_keys(os.environ['DD_ADMIN_USER'])
-        driver.find_element_by_id("id_password").clear()
-        driver.find_element_by_id("id_password").send_keys(os.environ['DD_ADMIN_PASSWORD'])
-        driver.find_element_by_css_selector("button.btn.btn-success").click()
-        return driver
+class ProductTypeTest(BaseTestCase):
 
     def test_create_product_type(self):
         print("\n\nDebug Print Log: testing 'create product type' \n")
@@ -55,14 +34,11 @@ class ProductTypeTest(unittest.TestCase):
         print("\n\nDebug Print Log: testing 'delete product type' \n")
         driver = self.login_page()
         driver.get(self.base_url + "product/type")
+        # TODO this assumes the first product_type in the list is the one that we just created (and can safely be deleted)
         driver.find_element_by_link_text("Edit Product Type").click()
         driver.find_element_by_css_selector("input.btn.btn-danger").click()
         productTxt = driver.find_element_by_tag_name("BODY").text
         self.assertTrue(re.search(r'Product type Deleted successfully.', productTxt))
-
-    def tearDown(self):
-        self.driver.quit()
-        self.assertEqual([], self.verificationErrors)
 
 
 def suite():
@@ -74,6 +50,7 @@ def suite():
 
 
 if __name__ == "__main__":
-    runner = unittest.TextTestRunner(descriptions=True, failfast=True)
+    runner = unittest.TextTestRunner(descriptions=True, failfast=True, verbosity=2)
     ret = not runner.run(suite()).wasSuccessful()
+    BaseTestCase.tearDownDriver()
     sys.exit(ret)

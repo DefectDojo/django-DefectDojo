@@ -1,5 +1,3 @@
-{% load get_system_setting %}
-
 {% if type == 'mail' %}
     Hello,
 
@@ -9,7 +7,7 @@
     Project end: {{ engagement.target_end }}
 
     Kind regards,
-    {{ "team_name"|get_system_setting }}
+    {{ system_settings.team_name }}
 {% elif type == 'alert' %}
     The engagement "{{ engagement.product }}" is starting on {{ engagement.target_start }}.
 {% elif type == 'slack' %}

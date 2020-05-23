@@ -39,7 +39,7 @@
                     <tr>
                     <td style="width: 250px;">
                     <a href="{% url 'view_engagement' eng.id %}" data-toggle="tooltip" data-placement="bottom" title="{{ eng.name|default:"N/A" }}">
-                    {{ eng.name|truncatechars:35|default:"N/A" }}</a>
+                    {{ eng.name|truncatechars_html:35|default:"N/A" }}</a>
                     {% if eng.version %}
                         <sup>
                               <a target="_blank" class="tag-label tag-version" data-toggle="tooltip" data-placement="bottom" title="Product Version: {{ eng.version }}">
@@ -132,7 +132,7 @@
                     </td>
                     <td class="nowrap">{{ eng.target_start|datediff_time:eng.target_end }}
                       {% if status == "open" %}
-                        {% if eng.target_end|overdue %}
+                        {% if eng.is_overdue %}
                         <sup>
                           <div class="tag-label warning-color">
                             {{ eng.target_end|overdue }} overdue
@@ -146,7 +146,7 @@
                           </div>
                         </sup>
                         {% endif %}
-                        {% if eng|count_findings_eng_all == 0 %}
+                        {% if eng.count_findings_all == 0 %}
                         &nbsp;<sup>
                           <div class="tag-label amber-color">
                             no findings
@@ -165,7 +165,7 @@
                           {% for test in eng.test_set.all %}
                                <li>
                                  <a class="" href="{% url 'view_test' test.id %}">
-                                   <i class="fa fa-list-alt"></i> {{test}}, {{test.created}}
+                                   <i class="fa fa-list-alt"></i> {{test}}, {{test.updated}}
                                </li>
                             {% endfor %}
                         </ul>
@@ -175,9 +175,9 @@
                       {% endif %}
                       </div>
                     </td>
-                    <td>{{ eng|count_findings_eng_open }}</td>
-                    <td>{{ eng|count_findings_eng_all }}</td>
-                    <td>{{ eng|count_findings_eng_duplicate }}</td>
+                    <td>{{ eng.count_findings_open }}</td>
+                    <td>{{ eng.count_findings_all }}</td>
+                    <td>{{ eng.count_findings_duplicate }}</td>
                     <td><a target="_blank" data-toggle="tooltip" data-placement="bottom" title="{{ eng.updated|default_if_none:"" }}">
                     {{ eng.updated|naturaltime|default_if_none:"" }}</a>
                     </td>
