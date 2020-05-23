@@ -1,10 +1,9 @@
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.keys import Keys
 import unittest
-import re
 import sys
 import os
-from base_test_class import BaseTestCase
+from base_test_class import BaseTestCase, on_exception_html_source_logger
 from Product_unit_test import ProductTest, WaitForPageLoad
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -55,7 +54,7 @@ class FindingTest(BaseTestCase):
         # login to site, password set to fetch from environ
         driver = self.login_page()
         # Navigate to All Finding page
-        driver.get(self.base_url + "finding")
+        self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
         driver.find_element_by_link_text("App Vulnerable to XSS").click()
         # Click on the 'dropdownMenu1 button'
@@ -70,9 +69,9 @@ class FindingTest(BaseTestCase):
         # "Click" the Done button to Edit the finding
         driver.find_element_by_xpath("//input[@name='_Finished']").click()
         # Query the site to determine if the finding has been added
-        productTxt = driver.find_element_by_tag_name("BODY").text
+
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(re.search(r'Finding saved successfully', productTxt))
+        self.assertTrue(self.is_success_message_present(text='Finding saved successfully'))
 
     def test_add_image(self):
         # print("\n\nDebug Print Log: testing 'add image' \n")
@@ -81,7 +80,7 @@ class FindingTest(BaseTestCase):
         # login to site, password set to fetch from environ
         driver = self.login_page()
         # Navigate to All Finding page
-        driver.get(self.base_url + "finding")
+        self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
         driver.find_element_by_link_text("App Vulnerable to XSS").click()
         # Click on the 'dropdownMenu1 button'
@@ -96,15 +95,15 @@ class FindingTest(BaseTestCase):
         with WaitForPageLoad(driver, timeout=50):
             driver.find_element_by_css_selector("button.btn.btn-success").click()
         # Query the site to determine if the finding has been added
-        productTxt = driver.find_element_by_tag_name("BODY").text
+
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(re.search(r'Images updated successfully', productTxt))
+        self.assertTrue(self.is_success_message_present(text='Images updated successfully'))
 
     def test_mark_finding_for_review(self):
         # login to site, password set to fetch from environ
         driver = self.login_page()
         # Navigate to All Finding page
-        driver.get(self.base_url + "finding")
+        self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
         driver.find_element_by_link_text("App Vulnerable to XSS").click()
         # Click on the 'dropdownMenu1 button'
@@ -125,15 +124,15 @@ class FindingTest(BaseTestCase):
         # Click 'Mark for reveiw'
         driver.find_element_by_name("submit").click()
         # Query the site to determine if the finding has been added
-        productTxt = driver.find_element_by_tag_name("BODY").text
+
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(re.search(r'Finding marked for review and reviewers notified.', productTxt))
+        self.assertTrue(self.is_success_message_present(text='Finding marked for review and reviewers notified.'))
 
     def test_clear_review_from_finding(self):
         # login to site, password set to fetch from environ
         driver = self.login_page()
         # Navigate to All Finding page
-        driver.get(self.base_url + "finding")
+        self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
         driver.find_element_by_link_text("App Vulnerable to XSS").click()
         # Click on `Clear Review` link text
@@ -147,15 +146,15 @@ class FindingTest(BaseTestCase):
         # Click 'Clear reveiw' button
         driver.find_element_by_name("submit").click()
         # Query the site to determine if the finding has been added
-        productTxt = driver.find_element_by_tag_name("BODY").text
+
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(re.search(r'Finding review has been updated successfully.', productTxt))
+        self.assertTrue(self.is_success_message_present(text='Finding review has been updated successfully.'))
 
     def test_delete_image(self):
         # login to site, password set to fetch from environ
         driver = self.login_page()
         # Navigate to All Finding page
-        driver.get(self.base_url + "finding")
+        self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
         driver.find_element_by_link_text("App Vulnerable to XSS").click()
         # Click on the 'dropdownMenu1 button'
@@ -167,14 +166,14 @@ class FindingTest(BaseTestCase):
         # Save selection(s) for image deletion
         driver.find_element_by_css_selector("button.btn.btn-success").click()
         # Query the site to determine if the finding has been added
-        productTxt = driver.find_element_by_tag_name("BODY").text
+
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(re.search(r'Images updated successfully', productTxt))
+        self.assertTrue(self.is_success_message_present(text='Images updated successfully'))
 
     def test_close_finding(self):
         driver = self.login_page()
         # Navigate to All Finding page
-        driver.get(self.base_url + "finding")
+        self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
         driver.find_element_by_link_text("App Vulnerable to XSS").click()
         # Click on the 'dropdownMenu1 button'
@@ -186,14 +185,14 @@ class FindingTest(BaseTestCase):
         # click 'close Finding' submission button
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
         # Query the site to determine if the finding has been added
-        productTxt = driver.find_element_by_tag_name("BODY").text
+
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(re.search(r'Finding closed.', productTxt))
+        self.assertTrue(self.is_success_message_present(text='Finding closed.'))
 
     def test_make_finding_a_template(self):
         driver = self.login_page()
         # Navigate to All Finding page
-        driver.get(self.base_url + "finding")
+        self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
         driver.find_element_by_link_text("App Vulnerable to XSS").click()
         # Click on the 'dropdownMenu1 button'
@@ -201,10 +200,9 @@ class FindingTest(BaseTestCase):
         # Click on `Make Finding a Template`
         driver.find_element_by_link_text("Make Finding a Template").click()
         # Query the site to determine if the finding has been added
-        productTxt = driver.find_element_by_tag_name("BODY").text
+
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(re.search(r'Finding template added successfully. You may edit it here.', productTxt) or
-            re.search(r'A finding template with that title already exists.', productTxt))
+        self.assertTrue(self.is_success_message_present(text='Finding template added successfully. You may edit it here.'))
 
     def test_apply_template_to_a_finding(self):
         driver = self.login_page()
@@ -212,6 +210,7 @@ class FindingTest(BaseTestCase):
         print("\nListing findings \n")
         driver.get(self.base_url + "finding")
         self.assertNoConsoleErrors()
+        self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
         driver.find_element_by_link_text("App Vulnerable to XSS").click()
         # Click on the 'dropdownMenu1 button'
@@ -236,10 +235,11 @@ class FindingTest(BaseTestCase):
         driver.find_element_by_name('_Finished').click()
         self.assertNoConsoleErrors()
         # Query the site to determine if the finding has been added
-        productTxt = driver.find_element_by_tag_name("BODY").text
-        # Assert ot the query to dtermine status of failure
-        self.assertTrue(re.search(r'App Vulnerable to XSS', productTxt))
 
+        # Assert ot the query to dtermine status of failure
+        self.assertTrue(self.is_text_present_on_page(text='App Vulnerable to XSS'))
+
+    @on_exception_html_source_logger
     def test_delete_finding_template(self):
         driver = self.login_page()
         # Navigate to All Finding page
@@ -251,14 +251,14 @@ class FindingTest(BaseTestCase):
         # Click 'Yes' on Alert popup
         driver.switch_to.alert.accept()
         # Query the site to determine if the finding has been added
-        productTxt = driver.find_element_by_tag_name("BODY").text
+
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(re.search(r'Finding Template deleted successfully.', productTxt))
+        self.assertTrue(self.is_success_message_present(text='Finding Template deleted successfully.'))
 
     def test_import_scan_result(self):
         driver = self.login_page()
         # Navigate to All Finding page
-        driver.get(self.base_url + "finding")
+        self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
         driver.find_element_by_link_text("App Vulnerable to XSS").click()
         # Click on the 'Finding' dropdown menubar
@@ -274,11 +274,11 @@ class FindingTest(BaseTestCase):
         with WaitForPageLoad(driver, timeout=50):
             driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
         # Query the site to determine if the finding has been added
-        productTxt = driver.find_element_by_tag_name("BODY").text
+
         # print("\n\nDebug Print Log: findingTxt fetched: {}\n".format(productTxt))
         # print("Checking for '.*ZAP Scan processed, a total of 4 findings were processed.*'")
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(re.search(r'ZAP Scan processed, a total of 4 findings were processed', productTxt))
+        self.assertTrue(self.is_success_message_present(text='ZAP Scan processed, a total of 4 findings were processed'))
 
     def test_delete_finding(self):
         # The Name of the Finding created by test_add_product_finding => 'App Vulnerable to XSS'
@@ -286,7 +286,9 @@ class FindingTest(BaseTestCase):
         # login to site, password set to fetch from environ
         driver = self.login_page()
         # Navigate to All Finding page
-        driver.get(self.base_url + "finding")
+        # driver.get(self.base_url + "finding")
+        self.goto_all_findings_list(driver)
+
         # Select and click on the particular finding to edit
         driver.find_element_by_link_text("App Vulnerable to XSS").click()
         # Click on the 'dropdownMenu1 button'
@@ -296,9 +298,9 @@ class FindingTest(BaseTestCase):
         # Click 'Yes' on Alert popup
         driver.switch_to.alert.accept()
         # Query the site to determine if the finding has been added
-        productTxt = driver.find_element_by_tag_name("BODY").text
+
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(re.search(r'Finding deleted successfully', productTxt))
+        self.assertTrue(self.is_success_message_present(text='Finding deleted successfully'))
         # check that user was redirect back to url where it came from based on return_url
 
 
@@ -307,6 +309,8 @@ def add_finding_tests_to_suite(suite, jira=False, github=False):
         suite.addTest(FindingTest('enable_jira'))
     if github:
         suite.addTest(FindingTest('enable_github'))
+
+    # suite.addTest(FindingTest('test_delete_finding_template'))
 
     # Add each test the the suite to be run
     # success and failure is output by the test
@@ -332,8 +336,7 @@ def add_finding_tests_to_suite(suite, jira=False, github=False):
 
     suite.addTest(FindingTest('test_import_scan_result'))
     suite.addTest(FindingTest('test_delete_finding'))
-    # disable for now because the test doesn't work in chrome 83 anymore (not a bug in DD itself)
-    # suite.addTest(FindingTest('test_delete_finding_template'))
+    suite.addTest(FindingTest('test_delete_finding_template'))
     suite.addTest(ProductTest('test_delete_product'))
     return suite
 
