@@ -17,12 +17,12 @@ fi
 # Exits with status code of 1
 
 function fail() {
-    echo "Error: $1 test failed"
+    echo "Error: $1 test failed\n"
     exit 1
 }
 
 function success() {
-    echo "Succes: $1 test passed"
+    echo "Success: $1 test passed\n"
 }
 
 test="Product type integration tests"
