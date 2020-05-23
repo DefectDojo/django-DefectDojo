@@ -11,7 +11,7 @@ class DojoTests(BaseTestCase):
     def test_login(self):
         driver = self.login_page()
 
-        self.assertTrue(self.is_success_message_present(text='Active Engagements'))
+        self.assertTrue(self.is_text_present_on_page(text='Active Engagements'))
 
     def test_create_product(self):
         driver = self.login_page()
