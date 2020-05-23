@@ -1589,7 +1589,7 @@ small {
 }
 
 
-/********** VARIOUS **********/
+/********** VARIOUS **********/  /* TODO VS: Check if this section is still used after removing reportng */
 .monospace {
     font-family: monospace;
 }
@@ -1612,7 +1612,7 @@ div.filter-panel-footer {
 }
 
 
-/********** PAGINATION **********/
+/********** PAGINATION **********/ /* TODO VS: Check if this section is still used after removing reportng */
 div.pagination {
     text-align: center;
     width: 100%;

@@ -57,12 +57,10 @@ ptvsd>=4.2.7
 google-api-python-client==1.8.3
 google-auth==1.15.0
 google-auth-oauthlib==0.4.1
-drf_yasg==1.17.1
+drf_yasg==1.17.1  # TODO VS: Check if still used
 # Queryset filtering for permission enforcement
 django-flexquery ~= 4.1
-# Time and space-efficient binary serializing db field
-git+https://github.com/efficiosoft/django-msgpackfield@master
 # Used by the form field templates to flexibly render form fields
-django-widget-tweaks ~= 1.4
+django-widget-tweaks ~= 1.4  # TODO VS: Check if still used
 # Compact and mature framework for unified permission checking
 rules ~= 2.2

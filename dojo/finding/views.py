@@ -38,7 +38,7 @@ from dojo.mixins import DojoPermissionViewMixin
 from dojo.models import Finding, Notes, NoteHistory, Note_Type, \
     BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, \
     FindingImageAccessToken, JIRA_Issue, JIRA_PKey, Cred_Mapping, Test, Product, User, Engagement, \
-    GITHUB_PKey, GITHUB_Issue
+    GITHUB_PKey, GITHUB_Issue, Dojo_User
 from dojo.utils import add_comment, jira_get_resolution_id, jira_change_resolution_id, get_jira_connection, \
     get_system_setting, apply_cwe_to_template, Product_Tab, calculate_grade, log_jira_alert, \
     redirect_to_return_url_or_else, get_return_url, ensure_permission, get_page_items, add_breadcrumb, FileIterWrapper, process_notifications
@@ -541,7 +541,7 @@ def apply_template_cwe(request, fid):
         return HttpResponseForbidden()
 
 
-@ensure_permission(Finding, "delete", "fid")
+@ensure_permission(Finding, "delete", "fid")  # TODO VS: Check if fid needs to become finding
 def delete_finding(request, finding):
     if request.method == 'POST':
         form = DeleteFindingForm(request.POST, instance=finding)
@@ -573,7 +573,7 @@ def delete_finding(request, finding):
         return HttpResponseForbidden()
 
 
-@ensure_permission(Finding, "change", "fid")
+@ensure_permission(Finding, "change", "fid")  # TODO VS: Check if fid needs to become finding
 def edit_finding(request, finding):
     old_status = finding.status()
     form = FindingForm(instance=finding, template=False)

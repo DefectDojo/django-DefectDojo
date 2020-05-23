@@ -43,7 +43,7 @@ $(function () {
         return false;
     });
 
-    // Submit bulk actions
+    // Submit bulk actions TODO VS: Check if still used afer reportng removal
     $(".bulk-action-button").click(function (e) {
         var target = $(e.target);
         var hook = target.attr("data-hook");
@@ -57,7 +57,7 @@ $(function () {
             .submit();
     });
 
-    // React to changes of page/page size with submitting the form
+    // React to changes of page/page size with submitting the form TODO VS: Check if still used afer reportng removal
     $(".pagination .page-select").change(function (e) {
         var target = $(e.target);
         var pagination = target.closest(".pagination");
@@ -72,7 +72,7 @@ $(function () {
         pagination.closest("form").submit();
     });
 
-    // On filter panel show/hide, store state in the panel_open input
+    // On filter panel show/hide, store state in the panel_open input  TODO VS: Check if still used afer reportng removal
     $(".filter-panel-collapse.collapse").on("show.bs.collapse", function (e) {
         $(e.target).find(".panel-open-input").val("true");
     });

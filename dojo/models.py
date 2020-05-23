@@ -2040,7 +2040,7 @@ class Risk_Acceptance(models.Model):
     accepted_findings = models.ManyToManyField(Finding)
     expiration_date = models.DateTimeField(default=None, null=True, blank=True)
     accepted_by = models.CharField(max_length=200, default=None, null=True, blank=True, verbose_name='Accepted By', help_text="The entity or person that accepts the risk.")
-    reporter = models.ForeignKey(User, editable=False, on_delete=models.CASCADE)
+    reporter = models.ForeignKey(User, editable=False, on_delete=models.CASCADE, db_column="owner_id")
     notes = models.ManyToManyField(Notes, editable=False)
     compensating_control = models.TextField(default=None, blank=True, null=True, help_text="If a compensating control exists to mitigate the finding or reduce risk, then list the compensating control(s).")
     created = models.DateTimeField(null=False, editable=False, default=now)

@@ -124,7 +124,7 @@ class DojoViewMixin(DojoBreadcrumbViewMixin, DojoPermissionViewMixin):
     """
 
 
-class SuccessRedirectBackViewMixin:
+class SuccessRedirectBackViewMixin:  # TODO VS: See if we can use this to replace our existing return_url code
     """
     A mixin to be used with Django's Editing Mixins.
 
