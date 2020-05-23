@@ -65,22 +65,27 @@ class DedupeTest(BaseTestCase):
         print("removing previous findings...")
         driver = self.login_page()
         driver.get(self.base_url + "finding?page=1")
-        text = driver.find_element_by_id("no_findings").text
-        if 'No findings found.' in text:
-            return
-        else:
-            driver.find_element_by_id("select_all").click()
-            driver.find_element_by_css_selector("i.fa.fa-trash").click()
-            try:
-                WebDriverWait(driver, 1).until(EC.alert_is_present(),
-                                            'Timed out waiting for PA creation ' +
-                                            'confirmation popup to appear.')
-                driver.switch_to.alert.accept()
-            except TimeoutException:
-                self.fail('Confirmation dialogue not shown, cannot delete previous findings')
 
-        text = driver.find_element_by_id("no_findings").text
-        self.assertTrue(self.is_success_message_present(text='No findings found.'))
+        if self.element_exists_by_id("no_findings"):
+            text = driver.find_element_by_id("no_findings").text
+            if 'No findings found.' in text:
+                return
+
+        driver.find_element_by_id("select_all").click()
+        driver.find_element_by_css_selector("i.fa.fa-trash").click()
+        try:
+            WebDriverWait(driver, 1).until(EC.alert_is_present(),
+                                        'Timed out waiting for PA creation ' +
+                                        'confirmation popup to appear.')
+            driver.switch_to.alert.accept()
+        except TimeoutException:
+            self.fail('Confirmation dialogue not shown, cannot delete previous findings')
+
+        text = None
+        if self.element_exists_by_id("no_findings"):
+            text = driver.find_element_by_id("no_findings").text
+
+        self.assertTrue('No findings found.' in text)
         # check that user was redirect back to url where it came from based on return_url
         self.assertTrue(driver.current_url.endswith('page=1'))
 
