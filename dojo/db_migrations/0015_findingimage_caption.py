@@ -19,6 +19,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='findingimage',
             name='image',
-            field=models.ImageField(upload_to=dojo.models_base.UniqueUploadNameProvider('finding_images')),
+            field=models.ImageField(upload_to=dojo.models.UniqueUploadNameProvider('finding_images')),
         ),
     ]
