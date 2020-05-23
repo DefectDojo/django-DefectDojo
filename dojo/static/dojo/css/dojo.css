@@ -184,6 +184,7 @@ input[type="file"] {
 
 .dojo-input-group {
     width: 73%;
+    z-index: 1;
 }
 
 .home-icon a {
@@ -753,6 +754,10 @@ table.centered th {
     text-align: center;
 }
 
+table.centered td {
+    text-align: center;
+}
+
 .text-critical {
     color: #d9534f
 }
@@ -831,6 +836,10 @@ h4.finding-title {
 
 .panel-heading span.clickable {
     cursor: pointer;
+}
+
+#test-pulldown .popover-content {
+    color: #000000;
 }
 
 span.endpoint_product {

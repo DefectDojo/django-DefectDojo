@@ -23,8 +23,7 @@ Test Type views
 @user_passes_test(lambda u: u.is_staff)
 def test_type(request):
     initial_queryset = Test_Type.objects.all().order_by('name')
-    name_words = [tt.name for tt in
-                  initial_queryset]
+    name_words = initial_queryset.values_list('name', flat=True)
     test_types = TestTypeFilter(request.GET, queryset=initial_queryset)
     tts = get_page_items(request, test_types.qs, 25)
     add_breadcrumb(title="Test Type List", top_level=True, request=request)

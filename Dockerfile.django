@@ -74,7 +74,7 @@ RUN \
   cp dojo/settings/settings.dist.py dojo/settings/settings.py
 COPY tests/ ./tests/
 RUN \
-  mkdir dojo/migrations && \
+  mkdir -p dojo/migrations && \
   chmod g=u dojo/migrations && \
   chmod g=u /var/run && \
   true

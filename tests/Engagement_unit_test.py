@@ -8,9 +8,17 @@ from Product_unit_test import ProductTest
 
 class EngagementTest(BaseTestCase):
 
+    def test_list_active_engagements(self):
+        driver = self.login_page()
+        self.goto_active_engagements_overview(driver)
+
+    def test_list_all_engagements(self):
+        driver = self.login_page()
+        self.goto_all_engagements_overview(driver)
+
     def test_add_new_engagement(self):
         driver = self.login_page()
-        driver.get(self.base_url + "product")
+        self.goto_product_overview(driver)
         driver.find_element_by_class_name("pull-left").click()
         driver.find_element_by_link_text("Add New Engagement").click()
         driver.find_element_by_id("id_name").send_keys("test engagement")
@@ -24,7 +32,7 @@ class EngagementTest(BaseTestCase):
 
     def test_edit_created_new_engagement(self):
         driver = self.login_page()
-        driver.get(self.base_url + "product")
+        self.goto_product_overview(driver)
         driver.find_element_by_class_name("pull-left").click()
         driver.find_element_by_link_text("View Engagements").click()
         driver.find_element_by_link_text("test engagement").click()
@@ -39,7 +47,7 @@ class EngagementTest(BaseTestCase):
 
     def test_close_new_engagement(self):
         driver = self.login_page()
-        driver.get(self.base_url + "product")
+        self.goto_product_overview(driver)
         driver.find_element_by_class_name("pull-left").click()
         driver.find_element_by_link_text("View Engagements").click()
         driver.find_element_by_link_text("edited test engagement").click()
@@ -50,7 +58,7 @@ class EngagementTest(BaseTestCase):
 
     def test_delete_new_closed_engagement(self):
         driver = self.login_page()
-        driver.get(self.base_url + "product")
+        self.goto_product_overview(driver)
         driver.find_element_by_class_name("pull-left").click()
         driver.find_element_by_link_text('View Engagements').click()
         driver.find_element_by_link_text("edited test engagement").click()
@@ -62,7 +70,9 @@ class EngagementTest(BaseTestCase):
 
     def test_new_ci_cd_engagement(self):
         driver = self.login_page()
-        driver.get(self.base_url + "product")
+        self.goto_product_overview(driver)
+        # wait for product_wrapper div as datatables javascript modifies the DOM on page load.
+        driver.find_element_by_id('products_wrapper')
         driver.find_element_by_link_text('QA Test').click()
         driver.find_element_by_xpath("//a[@class='dropdown-toggle active']//span[@class='hidden-xs']").click()
         driver.find_element_by_link_text('Add New CI/CD Engagement').click()

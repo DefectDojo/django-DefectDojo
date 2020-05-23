@@ -18,6 +18,8 @@ class DsopParser:
         self.__parse_twistlock(
             pd.read_excel(f, sheet_name='Twistlock Vulnerability Results', dtype={'severity': 'category'}))
         self.__parse_anchore(pd.read_excel(f, sheet_name='Anchore CVE Results', dtype={'severity': 'category'}))
+        self.__parse_anchore_compliance(
+            pd.read_excel(f, sheet_name='Anchore Compliance Results', dtype={'severity': 'category'}))
 
     def __parse_disa(self, df: pd.DataFrame):
         for row in df.itertuples(index=False):
@@ -37,7 +39,8 @@ class DsopParser:
             tags = "disa"
 
             finding = Finding(title=title, date=date, cve=cve, severity=severity, description=description,
-                        impact=impact, references=references, test=self._test, unique_id_from_tool=unique_id)
+                        impact=impact, references=references, test=self._test, unique_id_from_tool=unique_id,
+                         static_finding=True, dynamic_finding=False)
             finding.unsaved_tags = tags
             self._items.append(finding)
 
@@ -65,7 +68,7 @@ class DsopParser:
             tags = "oval"
 
             finding = Finding(title=title, cve=cve, severity=severity, unique_id_from_tool=unique_id,
-                    test=self._test)
+                    test=self._test, static_finding=True, dynamic_finding=False)
             finding.unsaved_tags = tags
             self._items.append(finding)
 
@@ -88,7 +91,9 @@ class DsopParser:
             tags = "twistlock"
 
             finding = Finding(title=title, cve=cve, url=url, severity=severity, description=description,
-                                       severity_justification=severity_justification, test=self._test)
+                                    component_name=component_name, component_version=component_version,
+                                    severity_justification=severity_justification, test=self._test,
+                                    static_finding=True, dynamic_finding=False)
             finding.unsaved_tags = tags
             self._items.append(finding)
 
@@ -96,14 +101,42 @@ class DsopParser:
         for row in df.itertuples(index=False):
             cve = row.cve
             severity = row.severity
-            component = row.vuln
+            component = row.package
+            file_path = row.package_path
             mitigation = row.fix
             description = "Image affected: {}".format(row.tag)
             title = '{}: {}'.format(cve, component)
             tags = "anchore"
 
             finding = Finding(title=title, cve=cve, severity=severity,
-                                    description=description, test=self._test)
+                                    mitigation=mitigation, component_name=component,
+                                    description=description, test=self._test,
+                                    static_finding=True, dynamic_finding=False,
+                                    file_path=file_path)
+            finding.unsaved_tags = tags
+            self._items.append(finding)
+
+    def __parse_anchore_compliance(self, df: pd.DataFrame):
+        for row in df.itertuples(index=False):
+            if row.policy_id != "DoDFileChecks":
+                continue
+
+            if row.gate_action == "warn":
+                severity = "Medium"
+            elif row.gate_action == "stop":
+                severity = "Critical"
+            else:
+                severity = "Info"
+            severity = severity
+            mitigation = "To be investigated"
+            description = "Gate: {} (Trigger: {}): {}".format(row.gate, row.trigger, row.check_output)
+            title = '{}: {}'.format(row.policy_id, row.trigger_id)
+            tags = "anchore_compliance"
+
+            finding = Finding(title=title, severity=severity,
+                                    mitigation=mitigation,
+                                    description=description, test=self._test,
+                                    static_finding=True, dynamic_finding=False)
             finding.unsaved_tags = tags
             self._items.append(finding)
 

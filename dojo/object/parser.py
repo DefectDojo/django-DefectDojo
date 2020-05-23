@@ -5,7 +5,7 @@ import json
 from django.urls import reverse
 from django.utils import timezone
 
-from dojo.utils import create_notification
+from dojo.notifications.helper import create_notification
 from dojo.forms import Tag
 from dojo.models import Test, Test_Type, Development_Environment, Objects_Engagement, \
                         Objects, Objects_Review
@@ -77,7 +77,7 @@ def import_object_eng(request, engagement, json_data):
             object.save()
             found_object = object
             if file_type == "path":
-                for tag in found_object.tags.all():
+                for tag in found_object.tags:
                     Tag.objects.update_tags(object, tag.name)
 
         full_url = None

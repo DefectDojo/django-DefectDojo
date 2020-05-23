@@ -31,7 +31,7 @@ $(function () {
     $('#side-menu').metisMenu();
 
     // auto focus on first form field
-    $('#base-content form:first *:input[type!=hidden]:first').not('button, input[type=submit]').not('.filters :input, textarea#id_entry, input#quick_add_finding').focus();
+    $('#base-content form:first *:input[type!=hidden]:first').not('button, input[type=submit]').not('.filters :input, textarea#id_entry, input#quick_add_finding').not('input[type=checkbox]').not('.datepicker').focus();
 
     $('a#minimize-menu').on('click', sidebar);
 

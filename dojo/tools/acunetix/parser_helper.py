@@ -77,8 +77,11 @@ def get_cwe_id(cwelist_node):
     :return:
     """
     # Assuming CWEList contains only CWE node
-    cwe = cwelist_node[0]
-    return cwe.text
+    if len(cwelist_node):
+        cwe = cwelist_node[0]
+        return cwe.text
+    else:
+        return None
 
 
 # @profile
@@ -172,19 +175,17 @@ def get_defectdojo_findings(filename):
     for report_item in acunetix_scan_report.ReportItems:
         defectdojo_finding = dict()
 
-        cwe = report_item['CWEId']
-        url = acunetix_scan_report.StartURL
-        title = acunetix_scan_report.Name + "_" + url + "_" + cwe + "_" + report_item['Affects']
-
-        defectdojo_finding['title'] = title
+        defectdojo_finding['title'] = report_item['Name']
         defectdojo_finding['date'] = acunetix_scan_report.StartTime
-        defectdojo_finding['cwe'] = cwe
-        defectdojo_finding['url'] = url
+        defectdojo_finding['cwe'] = report_item['CWEId']
+        defectdojo_finding['url'] = acunetix_scan_report.StartURL
         defectdojo_finding['severity'] = report_item['Severity']
         defectdojo_finding['description'] = get_html2text(report_item['Description'])
         defectdojo_finding['mitigation'] = get_html2text(report_item['Recommendation'])
         defectdojo_finding['impact'] = get_html2text(report_item['Impact'])
-        defectdojo_finding['references'] = report_item['ReferencesURLs']
+        defectdojo_finding['references'] = ''
+        for ref in report_item['ReferencesURLs']:
+            defectdojo_finding['references'] += "{}\n".format(ref)
         defectdojo_finding['false_p'] = report_item['IsFalsePositive']
 
         finding = DefectDojoFinding(**defectdojo_finding)

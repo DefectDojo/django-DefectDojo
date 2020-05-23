@@ -7,6 +7,10 @@ from dojo.models import Finding
 
 class BrakemanScanParser(object):
     def __init__(self, filename, test):
+        if filename is None:
+            self.items = ()
+            return
+
         tree = filename.read()
         try:
             data = json.loads(str(tree, 'utf-8'))
@@ -16,27 +20,24 @@ class BrakemanScanParser(object):
         find_date = parser.parse(data['scan_info']['end_time'])
 
         for item in data['warnings']:
-            categories = ''
-            language = ''
-            mitigation = ''
             impact = ''
-            references = ''
             findingdetail = ''
-            title = ''
-            group = ''
-            status = ''
 
             title = item['warning_type'] + '. ' + item['message']
 
             # Finding details information
             findingdetail += 'Filename: ' + item['file'] + '\n'
-            findingdetail += 'Line number: ' + str(item['line'] or '') + '\n'
+            if item['line'] is not None:
+                findingdetail += 'Line number: ' + str(item['line']) + '\n'
             findingdetail += 'Issue Confidence: ' + item['confidence'] + '\n\n'
-            findingdetail += 'Code:\n'
-            findingdetail += item['code'] or '' + '\n'
-
+            if item['code'] is not None:
+                findingdetail += 'Code:\n' + item['code'] + '\n'
+            if item['user_input'] is not None:
+                findingdetail += 'User input:\n' + item['user_input'] + '\n'
+            if item['render_path'] is not None:
+                findingdetail += 'Render path details:\n'
+                findingdetail += json.dumps(item['render_path'], indent=4)
             sev = 'Medium'
-            mitigation = 'coming soon'
             references = item['link']
 
             dupe_key = item['fingerprint']
@@ -54,12 +55,10 @@ class BrakemanScanParser(object):
                     description=findingdetail,
                     severity=sev,
                     numerical_severity=Finding.get_numerical_severity(sev),
-                    mitigation=mitigation,
                     impact=impact,
                     references=references,
                     file_path=item['file'],
                     line=item['line'],
-                    url='N/A',
                     date=find_date,
                     static_finding=True)
 

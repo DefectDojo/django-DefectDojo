@@ -1,0 +1,34 @@
+{
+  "version": "2.3",
+  "vulnerabilities": [
+    {
+      "category": "sast",
+      "name": "Password in URL",
+      "message": "Password in URL",
+      "description": "Password in URL detected; please remove and revoke it if this is a leak.",
+      "cve": "docker-compose.override.unit_tests.yml:4dd25cfea7294af80c58a87f764286ce21ec612e78ae7a208c0a92887870963b:Password in URL",
+      "severity": "Critical",
+      "confidence": "Unknown",
+      "scanner": {
+        "id": "trufflehog",
+        "name": "TruffleHog"
+      },
+      "location": {
+        "file": "docker-compose.override.unit_tests.yml",
+        "start_line": 19,
+        "end_line": 19,
+        "dependency": {
+          "package": {}
+        }
+      },
+      "identifiers": [
+        {
+          "type": "trufflehog_rule_id",
+          "name": "TruffleHog rule ID Password in URL",
+          "value": "Password in URL"
+        }
+      ]
+    }
+  ],
+  "remediations": []
+}
