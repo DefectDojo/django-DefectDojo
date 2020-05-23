@@ -1,0 +1,16 @@
+{% extends "dojo/add_related.html" %}
+{% block content %}
+    <h3>Add Choice</h3>
+
+    <form class="form-horizontal" method="post">{% csrf_token %}
+        {% include "dojo/form_fields.html" with form=form %}
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <input class="btn btn-primary" type="submit" label="add choice" name="add_choice" value="Add Choice"/>
+            </div>
+        </div>
+    </form>
+{% endblock %}
+{% block postscript %}
+    <script type="application/javascript" src="{{ STATIC_URL }}admin/js/admin/RelatedObjectLookups.js"></script>
+{% endblock %}
