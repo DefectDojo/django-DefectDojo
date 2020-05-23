@@ -1214,7 +1214,7 @@ class Development_Environment(models.Model):
 
     def get_breadcrumbs(self):
         return [{"title": self.__unicode__(),
-                 "url": reverse("edit_dev_env", args=(self.id,))}]
+                 "url": reverse("edit_environment", args=(self.id,))}]
 
 
 class Test(models.Model):

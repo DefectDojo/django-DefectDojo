@@ -27,7 +27,7 @@ from dojo.forms import ProductForm, EngForm, TestForm, \
     ImportScanForm, SEVERITY_CHOICES, JIRAForm, JIRA_PKeyForm, EditEndpointForm, \
     JIRA_IssueForm, ToolConfigForm, ToolProductSettingsForm, \
     ToolTypeForm, LanguagesTypeForm, Languages_TypeTypeForm, App_AnalysisTypeForm, \
-    Development_EnvironmentForm, Product_TypeForm, Test_TypeForm, NoteTypeForm
+    EnvironmentForm, Product_TypeForm, Test_TypeForm, NoteTypeForm
 from dojo.tools import requires_file
 from dojo.tools.factory import import_parser_factory
 from datetime import datetime
@@ -929,7 +929,7 @@ class DevelopmentEnvironmentResource(BaseModelResource):
 
         @property
         def validation(self):
-            return ModelFormValidation(form_class=Development_EnvironmentForm, resource=DevelopmentEnvironmentResource)
+            return ModelFormValidation(form_class=EnvironmentForm, resource=DevelopmentEnvironmentResource)
 
 
 """

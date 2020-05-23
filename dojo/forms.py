@@ -162,13 +162,13 @@ class Test_TypeForm(forms.ModelForm):
         exclude = ['']
 
 
-class Development_EnvironmentForm(forms.ModelForm):
+class EnvironmentForm(forms.ModelForm):
     class Meta:
         model = Development_Environment
         fields = ['name']
 
 
-class Delete_Dev_EnvironmentForm(forms.ModelForm):
+class DeleteEnvironmentForm(forms.ModelForm):
     class Meta:
         model = Development_Environment
         exclude = ['name']

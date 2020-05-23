@@ -19,7 +19,7 @@ class EnvironmentTest(BaseTestCase):
 
     def test_create_environment(self):
         driver = self.login_page()
-        driver.get(self.base_url + "dev_env")
+        driver.get(self.base_url + "environment")
         driver.find_element_by_id("dropdownMenu1").click()
         driver.find_element_by_link_text("New Environment").click()
         driver.find_element_by_id("id_name").clear()
@@ -30,7 +30,7 @@ class EnvironmentTest(BaseTestCase):
 
     def test_edit_environment(self):
         driver = self.login_page()
-        driver.get(self.base_url + "dev_env")
+        driver.get(self.base_url + "environment")
         driver.find_element_by_link_text("environment test").click()
         driver.find_element_by_id("id_name").clear()
         driver.find_element_by_id("id_name").send_keys("Edited environment test")
@@ -40,7 +40,7 @@ class EnvironmentTest(BaseTestCase):
 
     def test_delete_environment(self):
         driver = self.login_page()
-        driver.get(self.base_url + "dev_env")
+        driver.get(self.base_url + "environment")
         driver.find_element_by_link_text("Edited environment test").click()
         driver.find_element_by_css_selector("input.btn.btn-danger").click()
         productTxt = driver.find_element_by_tag_name("BODY").text

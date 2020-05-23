@@ -988,7 +988,7 @@ class TestTypeFilter(DojoFilter):
         include = ('name',)
 
 
-class DevelopmentEnvironmentFilter(DojoFilter):
+class EnvironmentFilter(DojoFilter):
     name = CharFilter(lookup_expr='icontains')
 
     o = OrderingFilter(
