@@ -27,7 +27,7 @@ from dojo.forms import CheckForm, \
     JIRAFindingForm, CredMappingForm
 from dojo.models import Finding, Product, Engagement, Test, \
     Check_List, Test_Type, Notes, \
-    Risk_Acceptance, Development_Environment, BurpRawRequestResponse, Endpoint, \
+    Risk_Acceptance, Environment, BurpRawRequestResponse, Endpoint, \
     JIRA_PKey, JIRA_Issue, Cred_Mapping, Dojo_User, System_Settings
 from dojo.tools import handles_active_verified_statuses
 from dojo.tools.factory import import_parser_factory
@@ -546,7 +546,7 @@ def import_scan_results(request, eid=None, pid=None):
 
             tt, t_created = Test_Type.objects.get_or_create(name=scan_type)
             # will save in development environment
-            environment, env_created = Development_Environment.objects.get_or_create(
+            environment, env_created = Environment.objects.get_or_create(
                 name="Development")
             t = Test(
                 engagement=engagement,

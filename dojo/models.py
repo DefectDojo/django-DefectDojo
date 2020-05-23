@@ -1203,7 +1203,7 @@ class Notes(models.Model):
         return self.entry
 
 
-class Development_Environment(models.Model):
+class Environment(models.Model):
     name = models.CharField(max_length=200)
 
     def __unicode__(self):
@@ -1231,7 +1231,7 @@ class Test(models.Model):
                                            editable=True)
     notes = models.ManyToManyField(Notes, blank=True,
                                    editable=False)
-    environment = models.ForeignKey(Development_Environment, null=True,
+    environment = models.ForeignKey(Environment, null=True,
                                     blank=False, on_delete=models.CASCADE)
 
     updated = models.DateTimeField(auto_now=True, null=True)
@@ -2439,7 +2439,7 @@ class Cred_User(models.Model):
                                            null=True, blank=True)
     description = models.CharField(max_length=2000, null=True, blank=True)
     url = models.URLField(max_length=2000, null=False)
-    environment = models.ForeignKey(Development_Environment, null=False, on_delete=models.CASCADE)
+    environment = models.ForeignKey(Environment, null=False, on_delete=models.CASCADE)
     login_regex = models.CharField(max_length=200, null=True, blank=True)
     logout_regex = models.CharField(max_length=200, null=True, blank=True)
     notes = models.ManyToManyField(Notes, blank=True, editable=False)

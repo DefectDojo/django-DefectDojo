@@ -21,7 +21,7 @@ from django.utils import timezone
 from tagging.models import Tag
 from dojo.models import Finding, Product_Type, Product, Note_Type, ScanSettings, VA, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
-    Development_Environment, Dojo_User, Scan, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage, \
+    Environment, Dojo_User, Scan, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage, \
     JIRA_Issue, JIRA_PKey, JIRA_Conf, GITHUB_Issue, GITHUB_PKey, GITHUB_Conf, UserContactInfo, Tool_Type, \
     Tool_Configuration, Tool_Product_Settings, Cred_User, Cred_Mapping, System_Settings, Notifications, \
     Languages, Language_Type, App_Analysis, Objects, Benchmark_Product, Benchmark_Requirement, \
@@ -164,13 +164,13 @@ class Test_TypeForm(forms.ModelForm):
 
 class EnvironmentForm(forms.ModelForm):
     class Meta:
-        model = Development_Environment
+        model = Environment
         fields = ['name']
 
 
 class DeleteEnvironmentForm(forms.ModelForm):
     class Meta:
-        model = Development_Environment
+        model = Environment
         exclude = ['name']
 
 
@@ -803,7 +803,7 @@ class TestForm(forms.ModelForm):
     title = forms.CharField(max_length=255, required=False)
     test_type = forms.ModelChoiceField(queryset=Test_Type.objects.all().order_by('name'))
     environment = forms.ModelChoiceField(
-        queryset=Development_Environment.objects.all().order_by('name'))
+        queryset=Environment.objects.all().order_by('name'))
     # credential = forms.ModelChoiceField(Cred_User.objects.all(), required=False)
     target_start = forms.DateTimeField(widget=forms.TextInput(
         attrs={'class': 'datepicker', 'autocomplete': 'off'}))

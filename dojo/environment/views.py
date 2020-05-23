@@ -9,7 +9,7 @@ from django.shortcuts import render, get_object_or_404
 
 from dojo.filters import EnvironmentFilter
 from dojo.forms import EnvironmentForm, DeleteEnvironmentForm
-from dojo.models import Development_Environment
+from dojo.models import Environment
 from dojo.utils import get_page_items, add_breadcrumb
 
 logger = logging.getLogger(__name__)
@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 @user_passes_test(lambda u: u.is_staff)
 def environment(request):
-    initial_queryset = Development_Environment.objects.all().order_by('name')
+    initial_queryset = Environment.objects.all().order_by('name')
     name_words = [de.name for de in
                   initial_queryset]
     environments = EnvironmentFilter(request.GET, queryset=initial_queryset)
@@ -55,7 +55,7 @@ def add_environment(request):
 
 @user_passes_test(lambda u: u.is_staff)
 def edit_environment(request, deid):
-    de = get_object_or_404(Development_Environment, pk=deid)
+    de = get_object_or_404(Environment, pk=deid)
     form1 = EnvironmentForm(instance=de)
     form2 = DeleteEnvironmentForm(instance=de)
     if request.method == 'POST' and request.POST.get('edit_environment'):

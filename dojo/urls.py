@@ -27,7 +27,7 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     ScansViewSet, StubFindingsViewSet, TestsViewSet, TestTypesViewSet, \
     ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
     UsersViewSet, ImportScanView, ReImportScanView, ProductTypeViewSet, DojoMetaViewSet, \
-    DevelopmentEnvironmentViewSet, NotesViewSet, NoteTypeViewSet
+    EnvironmentViewSet, NotesViewSet, NoteTypeViewSet
 
 from dojo.utils import get_system_setting
 from dojo.environment.urls import urlpatterns as environment_urls
@@ -99,7 +99,7 @@ v1_api.register(BuildDetails())
 v2_api = DefaultRouter()
 v2_api.register(r'endpoints', EndPointViewSet)
 v2_api.register(r'engagements', EngagementViewSet)
-v2_api.register(r'development_environments', DevelopmentEnvironmentViewSet)
+v2_api.register(r'development_environments', EnvironmentViewSet)
 v2_api.register(r'finding_templates', FindingTemplatesViewSet)
 v2_api.register(r'findings', FindingViewSet)
 v2_api.register(r'jira_configurations', JiraConfigurationsViewSet)

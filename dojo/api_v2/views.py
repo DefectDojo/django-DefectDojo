@@ -13,7 +13,7 @@ from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Finding, \
     User, ScanSettings, Scan, Stub_Finding, Finding_Template, Notes, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
-    Endpoint, JIRA_PKey, JIRA_Conf, DojoMeta, Development_Environment, \
+    Endpoint, JIRA_PKey, JIRA_Conf, DojoMeta, Environment, \
     Dojo_User, Note_Type
 
 from dojo.endpoint.views import get_endpoint_ids
@@ -526,13 +526,13 @@ class StubFindingsViewSet(mixins.ListModelMixin,
             return serializers.StubFindingSerializer
 
 
-class DevelopmentEnvironmentViewSet(mixins.ListModelMixin,
+class EnvironmentViewSet(mixins.ListModelMixin,
                                     mixins.RetrieveModelMixin,
                                     mixins.CreateModelMixin,
                                     mixins.UpdateModelMixin,
                                     viewsets.GenericViewSet):
     serializer_class = serializers.DevelopmentEnvironmentSerializer
-    queryset = Development_Environment.objects.all()
+    queryset = Environment.objects.all()
     filter_backends = (DjangoFilterBackend,)
 
 

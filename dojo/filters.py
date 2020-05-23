@@ -13,7 +13,7 @@ from django_filters.filters import ChoiceFilter, _truncate, DateTimeFilter
 from pytz import timezone
 
 from dojo.models import Dojo_User, Product_Type, Finding, Product, Test_Type, \
-    Endpoint, Development_Environment, Finding_Template, Report, Note_Type, \
+    Endpoint, Environment, Finding_Template, Report, Note_Type, \
     Engagement_Survey, Question, TextQuestion, ChoiceQuestion
 from dojo.utils import get_system_setting
 from django.contrib.contenttypes.models import ContentType
@@ -999,7 +999,7 @@ class EnvironmentFilter(DojoFilter):
     )
 
     class Meta:
-        model = Development_Environment
+        model = Environment
         exclude = []
         include = ('name',)
 

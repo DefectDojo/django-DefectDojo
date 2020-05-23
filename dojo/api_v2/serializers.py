@@ -1,6 +1,6 @@
 from dojo.models import Product, Engagement, Test, Finding, \
     User, ScanSettings, IPScan, Scan, Stub_Finding, Risk_Acceptance, \
-    Finding_Template, Test_Type, Development_Environment, NoteHistory, \
+    Finding_Template, Test_Type, Environment, NoteHistory, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Product_Type, JIRA_Conf, Endpoint, BurpRawRequestResponse, JIRA_PKey, \
     Notes, DojoMeta, FindingImage, Note_Type
@@ -348,7 +348,7 @@ class JIRASerializer(serializers.ModelSerializer):
 class DevelopmentEnvironmentSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Development_Environment
+        model = Environment
         fields = '__all__'
 
 
@@ -589,7 +589,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         test_type, created = Test_Type.objects.get_or_create(
             name=data.get('test_type', data['scan_type']))
         endpoint_to_add = data['endpoint_to_add']
-        environment, created = Development_Environment.objects.get_or_create(
+        environment, created = Environment.objects.get_or_create(
             name='Development')
         scan_date = data['scan_date']
         scan_date_time = datetime.datetime.combine(scan_date, timezone.now().time())

@@ -7,7 +7,7 @@ from django.utils import timezone
 
 from dojo.notifications.helper import create_notification
 from dojo.forms import Tag
-from dojo.models import Test, Test_Type, Development_Environment, Objects_Engagement, \
+from dojo.models import Test, Test_Type, Environment, Objects_Engagement, \
                         Objects, Objects_Review
 
 
@@ -110,7 +110,7 @@ def import_object_eng(request, engagement, json_data):
 
     # Create the test within the engagement
     if create_test_code_review:
-        environment, env_created = Development_Environment.objects.get_or_create(name="Development")
+        environment, env_created = Environment.objects.get_or_create(name="Development")
         tt = Test_Type.objects.get(pk=27)  # Manual code review
         if tt:
             test = Test(engagement=engagement, test_type=tt, target_start=timezone.now(),

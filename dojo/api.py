@@ -18,7 +18,7 @@ from django.db.models import Count, Q
 
 from dojo.models import Product, Engagement, Test, Finding, \
     User, ScanSettings, IPScan, Scan, Stub_Finding, Risk_Acceptance, \
-    Finding_Template, Test_Type, Development_Environment, \
+    Finding_Template, Test_Type, Environment, \
     BurpRawRequestResponse, Endpoint, Notes, JIRA_PKey, JIRA_Conf, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Languages, Language_Type, App_Analysis, Product_Type, Note_Type
@@ -917,7 +917,7 @@ class DevelopmentEnvironmentResource(BaseModelResource):
         list_allowed_methods = ['get', 'post']
         # disabled delete. Should not be allowed without fine authorization.
         detail_allowed_methods = ['get', 'post', 'put']
-        queryset = Development_Environment.objects.all().order_by('id')
+        queryset = Environment.objects.all().order_by('id')
         include_resource_uri = True
         filtering = {
             'id': ALL,
@@ -1492,7 +1492,7 @@ class ImportScanResource(MultipartResource, Resource):
         # We now have all the options we need and will just replicate the process in views.py
         tt, t_created = Test_Type.objects.get_or_create(name=bundle.data.get('test_type', bundle.data['scan_type']))
         # will save in development environment
-        environment, env_created = Development_Environment.objects.get_or_create(name="Development")
+        environment, env_created = Environment.objects.get_or_create(name="Development")
 
         scan_date = datetime.strptime(bundle.data['scan_date'], '%Y-%m-%d')
 
