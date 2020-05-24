@@ -1,7 +1,7 @@
 from django.http import HttpResponseRedirect
 from django.conf import settings
 from django.utils.http import urlquote
-import functools
+# import functools
 from re import compile
 import logging
 from threading import local
@@ -29,7 +29,9 @@ def patch_user(get_response):
         else:
             if user is not None:
                 # Cache permission check results for the duration of the request
-                user.has_perm = functools.lru_cache(maxsize=None)(user.has_perm)
+                # TODO VS: Disable for now due to pickle issues. Django already caches has_perm so might even not be needed to cache them ourselves.
+                # user.has_perm = functools.lru_cache(maxsize=None)(user.has_perm)
+                pass
         return get_response(request)
 
     return _patch_user
