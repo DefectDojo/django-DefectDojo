@@ -11,6 +11,8 @@ if [ "$CR" != 200 ]; then
     exit 1
 fi
 
+# Run available unittests with a simple setup
+echo "Running Product type integration tests"
 # All available Integrationtest Scripts are activated below
 # If successsful, A successs message is printed and the script continues
 # If any script is unsuccesssful a failure message is printed and the test script

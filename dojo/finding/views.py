@@ -174,6 +174,8 @@ django_filter=open_findings_filter):
     if github_config:
         github_config = github_config.git_conf_id
 
+    paged_findings.object_list = prefetch_for_findings(paged_findings.object_list)
+
     return render(
         request, 'dojo/findings_list.html', {
             'show_product_column': show_product_column,
