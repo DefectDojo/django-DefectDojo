@@ -40,23 +40,6 @@
                 <tbody>
                 {% for eng in engs %}
                     <tr>
-                    <td style="width: 250px;">
-                    <a href="{% url 'view_engagement' eng.id %}" data-toggle="tooltip" data-placement="bottom" title="{{ eng.name|default:"N/A" }}">
-                    {{ eng.name|truncatechars_html:35|default:"N/A" }}</a>
-                    {% if eng.version %}
-                        <sup>
-                              <a target="_blank" class="tag-label tag-version" data-toggle="tooltip" data-placement="bottom" title="Product Version: {{ eng.version }}">
-                              {{ eng.version }}</a>
-                        </sup>
-                    {% endif %}
-                    {% if eng.tags %}
-                        <sup>
-                            {% for tag in eng.tags %}
-                            <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
-                            {% endfor %}
-                        </sup>
-                    {% endif %}
-                    </td>
                     <td class="nowrap">
                       <div class="align-top">
                         <div class="dropdown">
