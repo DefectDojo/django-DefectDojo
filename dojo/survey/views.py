@@ -18,13 +18,13 @@ from pytz import timezone
 from datetime import timedelta
 from django.utils import timezone as tz
 
-from dojo.filters import SurveyFilter, QuestionFilter
+from dojo.filters import QuestionnaireFilter, QuestionFilter
 from dojo.models import Engagement, System_Settings
 from dojo.utils import add_breadcrumb, get_page_items
-from dojo.forms import Add_Questionnaire_Form, Delete_Survey_Form, CreateSurveyForm, Delete_Eng_Survey_Form, \
-    EditSurveyQuestionsForm, CreateQuestionForm, CreateTextQuestionForm, AssignUserForm, \
+from dojo.forms import Add_Questionnaire_Form, Delete_Questionnaire_Form, CreateQuestionnaireForm, Delete_Eng_Survey_Form, \
+    EditQuestionnaireQuestionsForm, CreateQuestionForm, CreateTextQuestionForm, AssignUserForm, \
     CreateChoiceQuestionForm, EditTextQuestionForm, EditChoiceQuestionForm, AddChoicesForm, \
-    AddEngagementForm, AddGeneralSurveyForm, DeleteGeneralSurveyForm
+    AddEngagementForm, AddGeneralQuestionnaireForm, DeleteGeneralQuestionnaireForm
 from dojo.models import Answered_Survey, Engagement_Survey, Answer, TextQuestion, ChoiceQuestion, Choice, General_Survey, Question
 
 localtz = timezone('America/Chicago')
@@ -37,10 +37,10 @@ def delete_engagement_survey(request, eid, sid):
 
     questions = get_answered_questions(survey=survey, read_only=True)
 
-    form = Delete_Survey_Form(instance=survey)
+    form = Delete_Questionnaire_Form(instance=survey)
 
     if request.method == 'POST':
-        form = Delete_Survey_Form(request.POST, instance=survey)
+        form = Delete_Questionnaire_Form(request.POST, instance=survey)
         if form.is_valid():
             answers = Answer.objects.filter(
                 question__in=[
@@ -68,7 +68,7 @@ def delete_engagement_survey(request, eid, sid):
                    })
 
 
-def answer_survey(request, eid, sid):
+def answer_questionnaire(request, eid, sid):
     survey = get_object_or_404(Answered_Survey, id=sid)
     engagement = get_object_or_404(Engagement, id=eid)
     prod = engagement.product
@@ -130,7 +130,7 @@ def answer_survey(request, eid, sid):
 
 
 @user_passes_test(lambda u: u.is_staff)
-def assign_survey(request, eid, sid):
+def assign_questionnaire(request, eid, sid):
     survey = get_object_or_404(Answered_Survey, id=sid)
     engagement = get_object_or_404(Engagement, id=eid)
     prod = engagement.product
@@ -157,7 +157,7 @@ def assign_survey(request, eid, sid):
 
 
 @user_passes_test(lambda u: u.is_staff)
-def view_survey(request, eid, sid):
+def view_questionnaire(request, eid, sid):
     survey = get_object_or_404(Answered_Survey, id=sid)
     engagement = get_object_or_404(Engagement, id=eid)
 
@@ -210,7 +210,7 @@ def add_questionnaire(request, eid):
                                  extra_tags='alert-success')
             if 'respond_survey' in request.POST:
                 return HttpResponseRedirect(reverse(
-                    'answer_survey', args=(eid, survey.id)))
+                    'answer_questionnaire', args=(eid, survey.id)))
 
             return HttpResponseRedirect('/engagement/%s' % eid)
         else:
@@ -234,7 +234,7 @@ def edit_questionnaire(request, sid):
     old_desc = survey.description
     old_active = survey.active
 
-    form = CreateSurveyForm(instance=survey)
+    form = CreateQuestionnaireForm(instance=survey)
     answered = Answered_Survey.objects.filter(survey=survey)
     if len(answered) > 0:
         messages.add_message(request,
@@ -244,7 +244,7 @@ def edit_questionnaire(request, sid):
                              extra_tags='alert-info')
 
     if request.method == 'POST':
-        form = CreateSurveyForm(request.POST, instance=survey)
+        form = CreateQuestionnaireForm(request.POST, instance=survey)
         if form.is_valid():
             if survey.name != old_name or \
                             survey.description != old_desc or \
@@ -262,7 +262,7 @@ def edit_questionnaire(request, sid):
                                      'No changes detected, questionnaire not updated.',
                                      extra_tags='alert-warning')
             if 'add_questions' in request.POST:
-                return HttpResponseRedirect(reverse('edit_survey_questions', args=(survey.id,)))
+                return HttpResponseRedirect(reverse('edit_questionnaire_questions', args=(survey.id,)))
         else:
             messages.add_message(request,
                                  messages.ERROR,
@@ -307,12 +307,12 @@ def delete_questionnaire(request, sid):
 
 
 @user_passes_test(lambda u: u.is_staff)
-def create_survey(request):
-    form = CreateSurveyForm()
+def create_questionnaire(request):
+    form = CreateQuestionnaireForm()
     survey = None
 
     if request.method == 'POST':
-        form = CreateSurveyForm(request.POST)
+        form = CreateQuestionnaireForm(request.POST)
         if form.is_valid():
             survey = form.save()
 
@@ -321,7 +321,7 @@ def create_survey(request):
                                  'Questionnaire successfully created, you may now add questions.',
                                  extra_tags='alert-success')
             if 'add_questions' in request.POST:
-                return HttpResponseRedirect(reverse('edit_survey_questions', args=(survey.id,)))
+                return HttpResponseRedirect(reverse('edit_questionnaire_questions', args=(survey.id,)))
             else:
                 return HttpResponseRedirect(reverse('questionnaire'))
         else:
@@ -338,16 +338,16 @@ def create_survey(request):
 
 
 @user_passes_test(lambda u: u.is_staff)
-def edit_survey_questions(request, sid):
+def edit_questionnaire_questions(request, sid):
     survey = get_object_or_404(Engagement_Survey, id=sid)
 
     answered_surveys = Answered_Survey.objects.filter(survey=survey)
     reverted = False
 
-    form = EditSurveyQuestionsForm(instance=survey)
+    form = EditQuestionnaireQuestionsForm(instance=survey)
 
     if request.method == 'POST':
-        form = EditSurveyQuestionsForm(request.POST, instance=survey)
+        form = EditQuestionnaireQuestionsForm(request.POST, instance=survey)
 
         if form.is_valid():
             form.save()
@@ -384,7 +384,7 @@ def edit_survey_questions(request, sid):
 def questionnaire(request):
     user = request.user
     surveys = Engagement_Survey.objects.all()
-    surveys = SurveyFilter(request.GET, queryset=surveys)
+    surveys = QuestionnaireFilter(request.GET, queryset=surveys)
     paged_surveys = get_page_items(request, surveys.qs, 25)
     general_surveys = General_Survey.objects.all()
     for survey in general_surveys:
@@ -576,15 +576,15 @@ def add_choices(request):
         'form': form})
 
 
-# Empty survey functions
+# Empty questionnaire functions
 @user_passes_test(lambda u: u.is_staff)
-def add_empty_survey(request):
+def add_empty_questionnaire(request):
     user = request.user
     surveys = Engagement_Survey.objects.all()
-    form = AddGeneralSurveyForm()
+    form = AddGeneralQuestionnaireForm()
     engagement = None
     if request.method == 'POST':
-        form = AddGeneralSurveyForm(request.POST)
+        form = AddGeneralQuestionnaireForm(request.POST)
         if form.is_valid():
             survey = form.save(commit=False)
             survey.generated = tz.now()
@@ -634,10 +634,10 @@ def delete_empty_questionnaire(request, esid):
 
     questions = get_answered_questions(survey=survey, read_only=True)
 
-    form = Delete_Survey_Form(instance=survey)
+    form = Delete_Questionnaire_Form(instance=survey)
 
     if request.method == 'POST':
-        form = Delete_Survey_Form(request.POST, instance=survey)
+        form = Delete_Questionnaire_Form(request.POST, instance=survey)
         if form.is_valid():
             answers = Answer.objects.filter(
                 question__in=[
@@ -671,23 +671,23 @@ def delete_general_questionnaire(request, esid):
     questions = None
     survey = get_object_or_404(General_Survey, id=esid)
 
-    form = DeleteGeneralSurveyForm(instance=survey)
+    form = DeleteGeneralQuestionnaireForm(instance=survey)
 
     if request.method == 'POST':
-        form = DeleteGeneralSurveyForm(request.POST, instance=survey)
+        form = DeleteGeneralQuestionnaireForm(request.POST, instance=survey)
         if form.is_valid():
             survey.delete()
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Questionnaire deleted successfully.',
                                  extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('survey'))
+            return HttpResponseRedirect(reverse('questionnaire'))
         else:
             messages.add_message(request,
                                  messages.ERROR,
                                  'Unable to delete questionnaire.',
                                  extra_tags='alert-danger')
-    add_breadcrumb(title="Delete " + survey.survey.name + " Survey", top_level=False, request=request)
+    add_breadcrumb(title="Delete " + survey.survey.name + " Questionnaire", top_level=False, request=request)
     return render(request, 'defectDojo-engagement-survey/delete_survey.html',
                   {'survey': survey,
                    'form': form,

@@ -1027,7 +1027,7 @@ class NoteTypesFilter(DojoFilter):
 # ==============================
 
 
-class SurveyFilter(FilterSet):
+class QuestionnaireFilter(FilterSet):
     name = CharFilter(lookup_expr='icontains')
     description = CharFilter(lookup_expr='icontains')
     active = BooleanFilter()
