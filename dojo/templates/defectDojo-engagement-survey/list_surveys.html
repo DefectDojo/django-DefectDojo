@@ -16,7 +16,7 @@
                         {% for survey in surveys %}
                             <tr>
                                 <td><a title="{{ survey.name }}"
-                                                      href="{% url 'edit_survey' survey.id %}">{{ survey.name }}</a>
+                                                      href="{% url 'edit_questionnaire' survey.id %}">{{ survey.name }}</a>
                                 </td>
                                 <td class="nowrap">{{ survey.questions.all|length }}</td>
                                 <td>{{ survey.active }}</td>
@@ -93,7 +93,7 @@
                         {{ filtered.form.as_p }}
                         <div class="centered">
                             <input type="submit" class="btn btn-primary inline top" label="submit" value="Apply"/><br/><br/>
-                            <a href="{% url 'survey' %}"> [Clear Filters] </a>
+                            <a href="{% url 'questionnaire' %}"> [Clear Filters] </a>
                         </div>
                     </form>
                 {% endif %}

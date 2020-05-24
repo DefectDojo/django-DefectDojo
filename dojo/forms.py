@@ -2257,7 +2257,7 @@ class ChoiceQuestionForm(QuestionForm):
         choice_answer.save()
 
 
-class Add_Survey_Form(forms.ModelForm):
+class Add_Questionnaire_Form(forms.ModelForm):
     survey = forms.ModelChoiceField(
         queryset=Engagement_Survey.objects.all(),
         required=True,
