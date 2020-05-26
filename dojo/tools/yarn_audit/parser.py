@@ -34,6 +34,9 @@ class YarnAuditParser(object):
                 item = get_item(node, test)
                 unique_key = str(node.get('id')) + str(node.get('module_name'))
                 items[unique_key] = item
+            elif element.get('type') == 'error':
+                error = element.get('data')
+                raise ValueError('yarn audit report contains errors: %s', error)
 
         return list(items.values())
 
@@ -57,7 +60,7 @@ def get_item(item_node, test):
         if len(finding['paths']) > 25:
             paths += "\n  - ..... (list of paths truncated after 25 paths)"
 
-    finding = Finding(title=item_node['title'] + " - " + "(" + item_node['module_name'] + ", " + item_node['vulnerable_versions'] + ")",
+    dojo_finding = Finding(title=item_node['title'] + " - " + "(" + item_node['module_name'] + ", " + item_node['vulnerable_versions'] + ")",
                       test=test,
                       severity=severity,
                       file_path=item_node['findings'][0]['paths'][0],
@@ -73,6 +76,8 @@ def get_item(item_node, test):
                       cve=item_node['cves'][0] if (len(item_node['cves']) > 0) else None,
                       mitigation=item_node['recommendation'],
                       references=item_node['url'],
+                      component_name=item_node['module_name'],
+                      component_version=item_node['findings'][0]['version'],
                       active=False,
                       verified=False,
                       false_p=False,
@@ -83,4 +88,4 @@ def get_item(item_node, test):
                       static_finding=True,
                       dynamic_finding=False)
 
-    return finding
+    return dojo_finding
