@@ -192,6 +192,19 @@ class FindingViewSet(mixins.ListModelMixin,
         else:
             return serializers.FindingSerializer
 
+    @action(detail=True, methods=['get'])
+    def re_open(self, request, pk=None):
+        finding = get_object_or_404(Finding.objects, id=pk)
+        if finding.is_Mitigated:
+            finding.active = True
+            finding.mitigated = None
+            finding.is_Mitigated = False
+            finding.mitigated_by = request.user
+            finding.last_reviewed = finding.mitigated
+            finding.last_reviewed_by = request.user
+            finding.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
     @action(detail=True, methods=['get', 'post'])
     def tags(self, request, pk=None):
         finding = get_object_or_404(Finding.objects, id=pk)
