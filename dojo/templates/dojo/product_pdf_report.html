@@ -379,7 +379,7 @@
                            <pre class="raw_request">{{ req.get_request }}</pre>
                         {% if req.get_response != "" %}
                            <h6>Response {{forloop.counter}}</h6>
-                           <pre class="raw_request">{{ req.get_response|truncatechars:800 }}</pre>
+                           <pre class="raw_request">{{ req.get_response|truncatechars_html:800 }}</pre>
                         {% endif %}
                         {% endfor %}
                         {% endif %}

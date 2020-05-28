@@ -556,7 +556,7 @@ def open_findings(request, pid=None, eid=None, view=None):
     if jira_config:
         jira_config = jira_config.conf_id
     if github_config:
-        github_config = github_config.conf_id
+        github_config = github_config.git_conf_id
 
     paged_findings.object_list = prefetch_for_findings(paged_findings.object_list)
 
@@ -700,7 +700,7 @@ def view_finding(request, fid):
         pass
     try:
         github_pkey = GITHUB_PKey.objects.get(product=finding.test.engagement.product)
-        gconf = github_pkey.conf
+        gconf = github_pkey.git_conf
     except:
         gconf = None
         pass
@@ -1037,24 +1037,22 @@ def edit_finding(request, fid):
         enabled = finding.test.engagement.product.jira_pkey_set.first().push_all_issues
         jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
 
-    gform = None
     try:
         jissue = JIRA_Issue.objects.get(finding=finding)
         enabled = True
     except:
         enabled = False
-        pass
 
     try:
         gissue = GITHUB_Issue.objects.get(finding=finding)
-        enabled = True
+        github_enabled = True
     except:
-        enabled = False
-        pass
+        github_enabled = False
 
-    if get_system_setting('enable_github') and GITHUB_PKey.objects.filter(
-            product=finding.test.engagement.product) != 0:
-        gform = GITHUBFindingForm(enabled=enabled, prefix='githubform')
+    gform = None
+    if get_system_setting('enable_github'):
+        if GITHUB_PKey.objects.filter(product=finding.test.engagement.product).exclude(git_conf_id=None):
+            gform = GITHUBFindingForm(enabled=github_enabled, prefix='githubform')
 
     if request.method == 'POST':
         form = FindingForm(request.POST, instance=finding, template=False)
@@ -1126,18 +1124,9 @@ def edit_finding(request, fid):
                 if jform.is_valid():
                     push_to_jira = jform.cleaned_data.get('push_to_jira')
 
-                    if JIRA_Issue.objects.filter(finding=new_finding).exists():
-                        update_issue_task.delay(
-                            new_finding, old_status,
-                            jform.cleaned_data.get('push_to_jira'))
-                    else:
-                        add_issue_task.delay(
-                            new_finding,
-                            jform.cleaned_data.get('push_to_jira'))
-
             if 'githubform-push_to_github' in request.POST:
-                gform = JIRAFindingForm(
-                    request.POST, prefix='githubform', enabled=enabled)
+                gform = GITHUBFindingForm(
+                    request.POST, prefix='githubform', enabled=github_enabled)
                 if gform.is_valid():
                     if GITHUB_Issue.objects.filter(finding=new_finding).exists():
                         update_external_issue_task.delay(
@@ -2157,7 +2146,7 @@ def finding_bulk_update_all(request, pid=None):
                     logger.info('push selected findings to github')
                     finds = Finding.objects.filter(id__in=finding_to_update)
                     for finding in finds:
-                        print('will push to github finding: ' + str(finding))
+                        print('will push to GitHub finding: ' + str(finding))
                         old_status = finding.status()
                         if form.cleaned_data['push_to_github']:
                             if GITHUB_Issue.objects.filter(finding=finding).exists():
@@ -2185,7 +2174,7 @@ def finding_bulk_update_all(request, pid=None):
 
                     # Because we never call finding.save() in a bulk update, we need to actually
                     # push the JIRA stuff here, rather than in finding.save()
-                    if JIRA_PKey.objects.filter(product=finding.test.engagement.product).count() == 0:
+                    if finding.jira_conf_new() is None:
                         log_jira_alert('Finding cannot be pushed to jira as there is no jira configuration for this product.', finding)
                     else:
                         push_anyway = finding.jira_conf_new().jira_pkey_set.first().push_all_issues

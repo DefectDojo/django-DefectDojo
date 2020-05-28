@@ -199,7 +199,7 @@
             {% endif %}
             {% if finding.get_response %}
                 <h6>Response</h6>
-                <pre>{{ finding.get_response|truncatechars:800 }}</pre>
+                <pre>{{ finding.get_response|truncatechars_html:800 }}</pre>
             {% endif %}
             <h6>Impact</h6>
             <pre>{{ finding.impact }}</pre>

@@ -49,7 +49,7 @@
 
                         {% for e in endpoints %}
                             <tr>
-                                <td><a href="{% url 'view_endpoint' e.id %}">{{ e|truncatechars:70 }}</a>
+                                <td><a href="{% url 'view_endpoint' e.id %}">{{ e|truncatechars_html:70 }}</a>
                                   {% if e.tags %}
                                       <sup>
                                           {% for tag in e.tags %}

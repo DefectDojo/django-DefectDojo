@@ -64,11 +64,6 @@ def new_github(request):
 
 
 @user_passes_test(lambda u: u.is_staff)
-def edit_github(request, jid):
-    return HttpResponse('')
-
-
-@user_passes_test(lambda u: u.is_staff)
 def github(request):
     confs = GITHUB_Conf.objects.all()
     add_breadcrumb(title="Github List", top_level=not len(request.GET), request=request)
