@@ -3,13 +3,15 @@
 # The code for the build image should be idendical with the code in
 # Dockerfile.django to use the caching mechanism of Docker.
 
-FROM python:3.5.9-buster@sha256:1baef6be00b82fbd77f1b60ab227a1dbede6f23825ce1b7f1e9c6f7d1469a45c as build
+FROM python:3.6.10-slim-buster@sha256:4a4f95aaa98bcef7d4abbae3de08353632ba34c2a97e295b7f7fd52e1d08d94b as build
 WORKDIR /app
 RUN \
   apt-get -y update && \
   apt-get -y install \
+    build-essential \
     dnsutils \
     default-mysql-client \
+    libmariadb-dev-compat \
     postgresql-client \
     xmlsec1 \
     git \
@@ -29,7 +31,7 @@ ENV \
   node="nodejs"
 RUN \
   apt-get -y update && \
-  apt-get -y install apt-transport-https ca-certificates && \
+  apt-get -y install apt-transport-https ca-certificates curl wget && \
   curl -sSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add --no-tty - && \
   curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
   curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
