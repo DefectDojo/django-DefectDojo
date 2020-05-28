@@ -193,7 +193,7 @@ class FindingViewSet(mixins.ListModelMixin,
             return serializers.FindingSerializer
 
     @action(detail=True, methods=['get'])
-    def re_open(self, request, pk=None):
+    def open(self, request, pk=None):
         finding = get_object_or_404(Finding.objects, id=pk)
         if finding.is_Mitigated:
             finding.active = True
