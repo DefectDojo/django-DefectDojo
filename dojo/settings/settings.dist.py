@@ -8,7 +8,7 @@ root = environ.Path(__file__) - 3  # Three folders back
 env = environ.Env(
     # Set casting and default values
     DD_SITE_URL=(str, 'http://localhost:8080'),
-    DD_DEBUG=(bool, False),
+    DD_DEBUG=(bool, True),
     DD_DJANGO_METRICS_ENABLED=(bool, False),
     DD_LOGIN_REDIRECT_URL=(str, '/'),
     DD_DJANGO_ADMIN_ENABLED=(bool, False),
@@ -503,6 +503,7 @@ INSTALLED_APPS = (
     'django_celery_results',
     'social_django',
     'drf_yasg',
+    'debug_toolbar',
 )
 
 # ------------------------------------------------------------------------------
@@ -522,6 +523,7 @@ DJANGO_MIDDLEWARE_CLASSES = [
     'social_django.middleware.SocialAuthExceptionMiddleware',
     'watson.middleware.SearchContextMiddleware',
     'auditlog.middleware.AuditlogMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 MIDDLEWARE = DJANGO_MIDDLEWARE_CLASSES
@@ -769,3 +771,16 @@ SILENCED_SYSTEM_CHECKS = ['mysql.E001']
 
 # Issue on benchmark : "The number of GET/POST parameters exceeded settings.DATA_UPLOAD_MAX_NUMBER_FIELD S"
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
+
+INTERNAL_IPS = type(str('c'), (), {'__contains__': lambda *a: True})()
+#INTERNAL_IPS = [
+#    '127.0.0.1',
+#    '172.30.3.5',  # get your docker IP container
+#]
+
+## force toolbar to show no matter what
+# def show_toolbar(request):
+#     return True
+# DEBUG_TOOLBAR_CONFIG = {
+#     "SHOW_TOOLBAR_CALLBACK" : show_toolbar,
+# }
