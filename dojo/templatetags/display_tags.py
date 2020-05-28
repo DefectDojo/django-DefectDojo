@@ -13,6 +13,7 @@ from dojo.models import Check_List, FindingImageAccessToken, Finding, System_Set
 import markdown
 from django.db.models import Sum, Case, When, IntegerField, Value
 from django.utils import timezone
+from markdown.extensions import Extension
 import dateutil.relativedelta
 import datetime
 from ast import literal_eval
@@ -465,11 +466,6 @@ def severity_value(value):
         pass
 
     return value
-
-
-@register.simple_tag
-def severity_number_value(value):
-    return Finding.get_number_severity(value)
 
 
 @register.filter

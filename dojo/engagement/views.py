@@ -522,6 +522,7 @@ def import_scan_results(request, eid=None, pid=None):
         cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(
             engagement=engagement).order_by('cred_id')
 
+
         if form.is_valid():
             # Allows for a test to be imported with an engagement created on the fly
             if engagement is None:
@@ -691,7 +692,6 @@ def import_scan_results(request, eid=None, pid=None):
 
                 create_notification(
                     event='results_added',
-                    initiator=request.user,
                     title=str(finding_count) + " findings for " + engagement.product.name,
                     finding_count=finding_count,
                     test=t,

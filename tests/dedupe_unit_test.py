@@ -63,6 +63,19 @@ class DedupeTest(BaseTestCase):
             driver.get(self.base_url + 'system_settings')
             self.assertTrue(driver.find_element_by_id('id_enable_deduplication').is_selected())
 
+    # def test_enable_block_execution(self):
+    #     # we set the admin user (ourselves) to have block_execution checked
+    #     # this will force dedupe to happen synchronously as the celeryworker is not reliable in travis
+    #     print("setting admin user to have block_execution checked....")
+    #     driver = self.login_page()
+    #     driver.get(self.base_url + 'profile')
+    #     if not driver.find_element_by_id('id_block_execution').is_selected():
+    #         driver.find_element_by_xpath('//*[@id="id_block_execution"]').click()
+    #         # save settings
+    #         driver.find_element_by_css_selector("input.btn.btn-primary").click()
+    #         # check if it's enabled after reload
+    #         self.assertTrue(driver.find_element_by_id('id_block_execution').is_selected())
+
     @on_exception_html_source_logger
     def test_delete_findings(self):
         print("removing previous findings...")
@@ -89,7 +102,7 @@ class DedupeTest(BaseTestCase):
 # Same scanner deduplication - Deduplication on engagement
 #   Test deduplication for Bandit SAST scanner
 # --------------------------------------------------------------------------------------------------------
-    @on_exception_html_source_logger  # noqa: E301
+    @on_exception_html_source_logger
     def test_add_path_test_suite(self):
         print("Same scanner deduplication - Deduplication on engagement - static. Creating tests...")
         # Create engagement
@@ -438,7 +451,8 @@ class DedupeTest(BaseTestCase):
         self.check_nb_duplicates(1)
 
 
-def add_dedupe_tests_to_suite(suite):
+def suite():
+    suite = unittest.TestSuite()
     suite.addTest(ProductTest('test_create_product'))
     suite.addTest(DedupeTest('test_enable_deduplication'))
     # suite.addTest(DedupeTest('test_enable_block_execution'))
@@ -469,15 +483,6 @@ def add_dedupe_tests_to_suite(suite):
     suite.addTest(DedupeTest('test_check_cross_status'))
     # Clean up
     suite.addTest(ProductTest('test_delete_product'))
-    return suite
-
-
-def suite():
-    suite = unittest.TestSuite()
-    add_dedupe_tests_to_suite(suite)
-    suite.addTest(DedupeTest('enable_jira'))
-    suite.addTest(DedupeTest('enable_github'))
-    add_dedupe_tests_to_suite(suite)
     return suite
 
 

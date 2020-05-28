@@ -1,8 +1,8 @@
 # Running with Docker Compose
 
-The docker-compose.yml in this repo is not intended for production use without first customizing it to fit your specific situation.  Please consider the docker-compose.yml files are templates to create on that fits your needs.
-Docker Compose is acceptable if you want to deploy a containerized DefectDojo to a production environment.
-It is one of the supported [Default installation](setup/README.md) methods.
+Docker compose is not intended for production use.
+If you want to deploy a containerized DefectDojo to a production environment,
+use the [Default installation](setup/README.md) approach.
 
 # Prerequisites
 *  Docker version

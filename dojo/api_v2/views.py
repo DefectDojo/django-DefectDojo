@@ -165,8 +165,8 @@ class FindingViewSet(mixins.ListModelMixin,
         enabled = False
         push_to_jira = serializer.validated_data.get('push_to_jira')
         # IF JIRA is enabled and this product has a JIRA configuration
-        if get_system_setting('enable_jira') and \
-                serializer.instance.test.engagement.product.jira_pkey_set.first() is not None:
+        if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(
+                product=serializer.instance.test.engagement.product) != 0:
             # Check if push_all_issues is set on this product
             enabled = serializer.instance.test.engagement.product.jira_pkey_set.first().push_all_issues
 

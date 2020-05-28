@@ -336,7 +336,8 @@ class ProductTest(BaseTestCase):
         self.assertTrue(re.search(r'Product and relationships removed.', productTxt))
 
 
-def add_product_tests_to_suite(suite):
+def suite():
+    suite = unittest.TestSuite()
     # Add each test and the suite to be run
     # success and failure is output by the test
     suite.addTest(ProductTest('test_create_product'))
@@ -350,15 +351,6 @@ def add_product_tests_to_suite(suite):
     suite.addTest(ProductTest('test_edit_product_tracking_files'))
     suite.addTest(ProductTest('test_list_products'))
     suite.addTest(ProductTest('test_delete_product'))
-    return suite
-
-
-def suite():
-    suite = unittest.TestSuite()
-    add_product_tests_to_suite(suite)
-    suite.addTest(ProductTest('enable_jira'))
-    suite.addTest(ProductTest('enable_github'))
-    add_product_tests_to_suite(suite)
     return suite
 
 

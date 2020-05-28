@@ -15,7 +15,7 @@ from tastypie.models import ApiKey
 
 from dojo.filters import UserFilter
 from dojo.forms import DojoUserForm, AddDojoUserForm, DeleteUserForm, APIKeyForm, UserContactInfoForm
-from dojo.models import Product, Dojo_User, Alerts
+from dojo.models import Product, Dojo_User, UserContactInfo, Alerts
 from dojo.utils import get_page_items, add_breadcrumb
 
 logger = logging.getLogger(__name__)
@@ -182,7 +182,11 @@ def alertcount(request):
 
 def view_profile(request):
     user = get_object_or_404(Dojo_User, pk=request.user.id)
-    user_contact = user.usercontactinfo if hasattr(user, 'usercontactinfo') else None
+    try:
+        user_contact = UserContactInfo.objects.get(user=user)
+    except UserContactInfo.DoesNotExist:
+        user_contact = None
+
     form = DojoUserForm(instance=user)
     if user_contact is None:
         contact_form = UserContactInfoForm()
@@ -308,9 +312,10 @@ def edit_user(request, uid):
         form.fields['is_staff'].widget.attrs['disabled'] = True
         form.fields['is_superuser'].widget.attrs['disabled'] = True
         form.fields['is_active'].widget.attrs['disabled'] = True
-
-    user_contact = user.usercontactinfo if hasattr(user, 'usercontactinfo') else None
-
+    try:
+        user_contact = UserContactInfo.objects.get(user=user)
+    except UserContactInfo.DoesNotExist:
+        user_contact = None
     if user_contact is None:
         contact_form = UserContactInfoForm()
     else:

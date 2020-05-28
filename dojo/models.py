@@ -1679,19 +1679,19 @@ class Finding(models.Model):
 
     def has_github_issue(self):
         try:
-            issue = self.github_issue
+            issue = self.jira_issue
             return True
         except GITHUB_Issue.DoesNotExist:
             return False
 
     def github_conf(self):
         try:
-            github_product_key = GITHUB_PKey.objects.get(product=self.test.engagement.product)
-            github_conf = github_product_key.conf
+            jpkey = GITHUB_PKey.objects.get(product=self.test.engagement.product)
+            jconf = jpkey.conf
         except:
-            github_conf = None
+            jconf = None
             pass
-        return github_conf
+        return jconf
 
     # newer version that can work with prefetching
     def github_conf_new(self):
@@ -1806,10 +1806,14 @@ class Finding(models.Model):
         if rules_option:
             from dojo.tasks import async_rules
             from dojo.utils import sync_rules
-            if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
-                sync_rules(self, *args, **kwargs)
-            else:
+            try:
+                if self.reporter.usercontactinfo.block_execution:
+                    sync_rules(self, *args, **kwargs)
+                else:
+                    async_rules(self, *args, **kwargs)
+            except UserContactInfo.DoesNotExist:
                 async_rules(self, *args, **kwargs)
+                pass
         from dojo.utils import calculate_grade
         calculate_grade(self.test.engagement.product)
         # Assign the numerical severity for correct sorting order
@@ -2204,10 +2208,10 @@ class GITHUB_PKey(models.Model):
     git_push_notes = models.BooleanField(default=False, blank=True, help_text="Notes added to findings will be automatically added to the corresponding github issue")
 
     def __unicode__(self):
-        return self.product.name + " | " + self.git_project
+        return self.product.name + " | " + self.project_key
 
     def __str__(self):
-        return self.product.name + " | " + self.git_project
+        return self.product.name + " | " + self.project_key
 
 
 class JIRA_Conf(models.Model):
