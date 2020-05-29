@@ -1644,6 +1644,9 @@ class Finding(models.Model):
         days = diff.days
         return days if days > 0 else 0
 
+    def is_risk_accepted(self):
+        return self.risk_acceptance_set.exists()
+
     def sla(self):
         sla_calculation = None
         severity = self.severity

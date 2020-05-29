@@ -299,7 +299,7 @@
                                 </div>
                             </th>
                             <th></th>
-                            <th>Severity</th>
+                            <th class="centered">Severity</th>
                             <th>Name</th>
                             <th>CWE</th>
                             <th>Date</th>
@@ -320,7 +320,7 @@
                     </thead>
                 <tbody>
                 {% for finding in findings %}
-                    <tr class="{% if finding.active %}active_finding{% else %}inactive_finding{% endif %}">
+                    <tr class="{{ finding|status_classes }}">
                         <td class="hidden-sm centered">
                             <form action="#">
                                 <input type="checkbox" name="select_{{ finding.id }}" id="{{ finding.id }}"
@@ -410,7 +410,7 @@
                                  </li>
                              </ul>
                         </td>
-                        <td>
+                        <td class="centered">
                             <span class="label severity severity-{{ finding.severity }}">
                                 {{ finding.severity_display }}
                             </span>

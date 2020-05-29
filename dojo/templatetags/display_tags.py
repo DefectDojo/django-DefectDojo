@@ -746,3 +746,20 @@ def full_url(url):
 @register.filter
 def setting_enabled(name):
     return getattr(settings, name, False)
+
+
+@register.filter
+def status_classes(finding):
+    classes = []
+    if finding.active:
+        classes.append('active_finding')
+    else:
+        classes.append('inactive_finding')
+
+    if finding.is_Mitigated:
+        classes.append('mitigated_finding')
+
+    if finding.is_risk_accepted:
+        classes.append('risk_accepted_finding')
+
+    return ' '.join(classes)
