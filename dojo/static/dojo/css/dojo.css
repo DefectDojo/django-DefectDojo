@@ -1589,6 +1589,6 @@ small {
   font-weight:400;
 }
 
-.inactive_finding td {
+.mitigated_finding td, .risk_accepted_finding td {
     text-decoration: line-through;
 }
