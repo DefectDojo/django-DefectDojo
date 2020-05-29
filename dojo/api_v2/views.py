@@ -14,7 +14,7 @@ from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Find
     User, ScanSettings, Scan, Stub_Finding, Finding_Template, Notes, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Endpoint, JIRA_PKey, JIRA_Conf, DojoMeta, Development_Environment, \
-    Dojo_User, Note_Type
+    Dojo_User, Note_Type, System_Settings
 
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import report_url_resolver
@@ -1037,3 +1037,12 @@ def report_generate(request, obj, options):
         result['executive_summary'] = executive_summary
 
     return result
+
+
+class SystemSettingsViewSet(mixins.ListModelMixin,
+                    mixins.UpdateModelMixin,
+                    viewsets.GenericViewSet):
+    """ Basic control over System Settings. Use 'id' 1 for PUT, PATCH operations """
+    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
+    serializer_class = serializers.SystemSettingsSerializer
+    queryset = System_Settings.objects.all()
