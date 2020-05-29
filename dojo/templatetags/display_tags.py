@@ -790,7 +790,7 @@ def status_classes(finding):
     if finding.is_Mitigated:
         classes.append('mitigated_finding')
 
-    if finding.is_risk_accepted:
+    if finding.is_risk_accepted():
         classes.append('risk_accepted_finding')
 
     return ' '.join(classes)
