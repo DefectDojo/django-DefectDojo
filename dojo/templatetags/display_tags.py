@@ -779,6 +779,7 @@ def finding_display_status(finding):
     return display_status
 
 
+@register.filter
 def status_classes(finding):
     classes = []
     if finding.active:
