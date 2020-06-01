@@ -1557,8 +1557,12 @@ class Finding(models.Model):
                 r.delete()
 
     def duplicate_finding_set(self):
-        if self.duplicate and self.duplicate_finding is not None:
-            return Finding.objects.get(id=self.duplicate_finding.id).original_finding.all().order_by('title')
+        if self.duplicate:
+            if self.duplicate_finding is not None:
+                return Finding.objects.get(
+                    id=self.duplicate_finding.id).original_finding.all().order_by('title')
+            else:
+                return []
         else:
             return self.original_finding.all().order_by('title')
 
