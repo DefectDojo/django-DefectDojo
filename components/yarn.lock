@@ -98,9 +98,10 @@ flot-axis@markrcote/flot-axislabels#*:
   version "0.0.0"
   resolved "https://codeload.github.com/markrcote/flot-axislabels/tar.gz/a181e09d04d120d05e5bc2baaa8738b5b3670428"
 
-flot@flot/flot#~0.8.3:
-  version "0.8.3"
-  resolved "https://codeload.github.com/flot/flot/tar.gz/453b017cc5acfd75e252b93e8635f57f4196d45d"
+flot@flot/flot#~3.2.13:
+  version "3.2.13"
+  uid "1b6bc01ae4b90147abf94b561b2ae378f5f69bc5"
+  resolved "https://codeload.github.com/flot/flot/tar.gz/1b6bc01ae4b90147abf94b561b2ae378f5f69bc5"
 
 font-awesome@^4.0.0:
   version "4.7.0"
