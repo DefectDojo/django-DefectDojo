@@ -6,6 +6,11 @@ JUMFlot@jumjum123/JUMFlot#*:
   version "0.0.0"
   resolved "https://codeload.github.com/jumjum123/JUMFlot/tar.gz/203147fa2ace27db89e2defcde0800654015ae23"
 
+balanced-match@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-1.0.0.tgz#89b4d199ab2bee49de164ea02b89ce462d71b767"
+  integrity sha1-ibTRmasr7kneFk6gK4nORi1xt2c=
+
 bootstrap-social@^4.0.0:
   version "4.11.0"
   resolved "https://registry.yarnpkg.com/bootstrap-social/-/bootstrap-social-4.11.0.tgz#7896d176fe366b06992196945a13fc9bfa6061b2"
@@ -29,6 +34,14 @@ bootswatch@3.4.1:
   resolved "https://registry.yarnpkg.com/bootswatch/-/bootswatch-3.4.1.tgz#50aed16fb04ec791c3dd8831515c29d4a757fdb9"
   integrity sha512-0hL4A8OUiqABgPipGrojf/hyhr5RS257xCNARlbK34HaMfhV5fXvwEooN4/ri9+jgX47J4Wg24ZPmfZ2xD2cKw==
 
+brace-expansion@^1.1.7:
+  version "1.1.11"
+  resolved "https://registry.yarnpkg.com/brace-expansion/-/brace-expansion-1.1.11.tgz#3c7fcbf529d87226f3d2f52b966ff5271eb441dd"
+  integrity sha512-iCuPHDFgrHX7H2vEI/5xpz07zSHB00TpugqhmYtVmMO6518mCuRMoOYFldEBl0g187ufozdaHgWKcYFb61qGiA==
+  dependencies:
+    balanced-match "^1.0.0"
+    concat-map "0.0.1"
+
 chosen-bootstrap@dbtek/chosen-bootstrap#~1.1.0:
   version "0.0.0"
   resolved "https://codeload.github.com/dbtek/chosen-bootstrap/tar.gz/12dcd363d1482c54c740ed9fe0e92549d81e9176"
@@ -46,6 +59,11 @@ clipboard@^2.0.6:
     select "^1.1.2"
     tiny-emitter "^2.0.0"
 
+clone@^1.0.2:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/clone/-/clone-1.0.4.tgz#da309cc263df15994c688ca902179ca3c7cd7c7e"
+  integrity sha1-2jCcwmPfFZlMaIypAheco8fNfH4=
+
 codemirror-spell-checker@*:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/codemirror-spell-checker/-/codemirror-spell-checker-1.1.2.tgz#1c660f9089483ccb5113b9ba9ca19c3f4993371e"
@@ -58,10 +76,20 @@ codemirror@*:
   resolved "https://registry.yarnpkg.com/codemirror/-/codemirror-5.52.0.tgz#4dbd6aef7f0e63db826b9a23922f0c03ac75c0a7"
   integrity sha512-K2UB6zjscrfME03HeRe/IuOmCeqNpw7PLKGHThYpLbZEuKf+ZoujJPhxZN4hHJS1O7QyzEsV7JJZGxuQWVaFCg==
 
+commander@^2.8.1:
+  version "2.20.3"
+  resolved "https://registry.yarnpkg.com/commander/-/commander-2.20.3.tgz#fd485e84c03eb4881c20722ba48035e8531aeb33"
+  integrity sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==
+
 components-jqueryui@^1.0.0:
   version "1.12.1"
   resolved "https://registry.yarnpkg.com/components-jqueryui/-/components-jqueryui-1.12.1.tgz#617076f128f3be4c265f3e2db50471ef96cd9cee"
   integrity sha1-YXB28SjzvkwmXz4ttQRx75bNnO4=
+
+concat-map@0.0.1:
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/concat-map/-/concat-map-0.0.1.tgz#d8a96bd77fd68df7793a73036a3ba0d5405d477b"
+  integrity sha1-2Klr13/Wjfd5OnMDajug1UBdR3s=
 
 datatables@1.10.18:
   version "1.10.18"
@@ -69,6 +97,13 @@ datatables@1.10.18:
   integrity sha512-ntatMgS9NN6UMpwbmO+QkYJuKlVeMA2Mi0Gu/QxyIh+dW7ZjLSDhPT2tWlzjpIWEkDYgieDzS9Nu7bdQCW0sbQ==
   dependencies:
     jquery ">=1.7"
+
+defaults@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/defaults/-/defaults-1.0.3.tgz#c656051e9817d9ff08ed881477f3fe4019f3ef7d"
+  integrity sha1-xlYFHpgX2f8I7YgUd/P+QBnz730=
+  dependencies:
+    clone "^1.0.2"
 
 delegate@^3.1.2:
   version "3.2.0"
@@ -94,13 +129,32 @@ eve-raphael@0.5.0:
   resolved "https://registry.yarnpkg.com/eve-raphael/-/eve-raphael-0.5.0.tgz#17c754b792beef3fa6684d79cf5a47c63c4cda30"
   integrity sha1-F8dUt5K+7z+maE15z1pHxjxM2jA=
 
+file-exist@0.0.4:
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/file-exist/-/file-exist-0.0.4.tgz#6cf0e574bc3dbacdb4bc068bcc69dc6e5afc05c9"
+  integrity sha1-bPDldLw9us20vAaLzGncblr8Bck=
+  dependencies:
+    commander "^2.8.1"
+
+files-exist@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/files-exist/-/files-exist-1.1.0.tgz#a8bc9e006ad797c8ab85d10a3613ca45abff8e75"
+  integrity sha512-FG9ZrkR5Ek6s+2MHe5ljMwEz2/gWOTNIh+qboHFgc49DZJIOZMwJVwMvH/Sn0ifHELrAKPy7bvKfHOL8ZcmDmQ==
+  dependencies:
+    defaults "^1.0.3"
+    glob "^6.0.2"
+
 flot-axis@markrcote/flot-axislabels#*:
   version "0.0.0"
   resolved "https://codeload.github.com/markrcote/flot-axislabels/tar.gz/a181e09d04d120d05e5bc2baaa8738b5b3670428"
 
-flot@flot/flot#~0.8.3:
-  version "0.8.3"
-  resolved "https://codeload.github.com/flot/flot/tar.gz/453b017cc5acfd75e252b93e8635f57f4196d45d"
+flot@flot/flot#~2.3.2:
+  version "2.3.2"
+  uid fdfdfeda2ff66eff6f0b417233d668d691e98460
+  resolved "https://codeload.github.com/flot/flot/tar.gz/fdfdfeda2ff66eff6f0b417233d668d691e98460"
+  dependencies:
+    file-exist "0.0.4"
+    files-exist "^1.1.0"
 
 font-awesome@^4.0.0:
   version "4.7.0"
@@ -117,6 +171,17 @@ fullcalendar@^3.10.2:
   resolved "https://registry.yarnpkg.com/fullcalendar/-/fullcalendar-3.10.2.tgz#9b1ba84bb02803621b761d1bba91a4f18affafb7"
   integrity sha512-YWZaHdp8ZLBqhPz615PoXdA49ymsBTUF+MGDM6H3vyz71Pv/ZW9Pm9/Mj3x6n822k6bs2txFO7muRTSvBhsqKg==
 
+glob@^6.0.2:
+  version "6.0.4"
+  resolved "https://registry.yarnpkg.com/glob/-/glob-6.0.4.tgz#0f08860f6a155127b2fadd4f9ce24b1aab6e4d22"
+  integrity sha1-DwiGD2oVUSey+t1PnOJLGqtuTSI=
+  dependencies:
+    inflight "^1.0.4"
+    inherits "2"
+    minimatch "2 || 3"
+    once "^1.3.0"
+    path-is-absolute "^1.0.0"
+
 good-listener@^1.2.2:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/good-listener/-/good-listener-1.2.2.tgz#d53b30cdf9313dffb7dc9a0d477096aa6d145c50"
@@ -128,6 +193,19 @@ google-code-prettify@^1.0.0:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/google-code-prettify/-/google-code-prettify-1.0.5.tgz#9f477f224dbfa62372e5ef803a7e157410400084"
   integrity sha1-n0d/Ik2/piNy5e+AOn4VdBBAAIQ=
+
+inflight@^1.0.4:
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/inflight/-/inflight-1.0.6.tgz#49bd6331d7d02d0c09bc910a1075ba8165b56df9"
+  integrity sha1-Sb1jMdfQLQwJvJEKEHW6gWW1bfk=
+  dependencies:
+    once "^1.3.0"
+    wrappy "1"
+
+inherits@2:
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/inherits/-/inherits-2.0.4.tgz#0fa2c64f932917c3433a0ded55363aae37416b7c"
+  integrity sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==
 
 jquery-highlight@3.5.0:
   version "3.5.0"
@@ -172,6 +250,13 @@ metismenu@~3.0.6:
   resolved "https://registry.yarnpkg.com/metismenu/-/metismenu-3.0.6.tgz#595ead90ccb88037ef8af5e5316598a3c57b7e54"
   integrity sha512-aO2XoKWMLNGAw3skRPWcAhZUtootPhEk6Lz5Jamc9RlulhThp4h09AoeXevhg4vVQvwQjl8UenN09Wnr2QeM5w==
 
+"minimatch@2 || 3":
+  version "3.0.4"
+  resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-3.0.4.tgz#5166e286457f03306064be5497e8dbb0c3d32083"
+  integrity sha512-yJHVQEhyqPLUTgt9B83PXu6W3rx4MvvHvSUvToogpwoGDOUQ+yDrR0HRot+yOCdCO7u4hX3pWft6kWBBcqh0UA==
+  dependencies:
+    brace-expansion "^1.1.7"
+
 moment@^2.25.3:
   version "2.25.3"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.25.3.tgz#252ff41319cf41e47761a1a88cab30edfe9808c0"
@@ -180,6 +265,18 @@ moment@^2.25.3:
 morris.js@morrisjs/morris.js:
   version "0.5.1"
   resolved "https://codeload.github.com/morrisjs/morris.js/tar.gz/14530d0733801d5bef1264cf3d062ecace7e326b"
+
+once@^1.3.0:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/once/-/once-1.4.0.tgz#583b1aa775961d4b113ac17d9c50baef9dd76bd1"
+  integrity sha1-WDsap3WWHUsROsF9nFC6753Xa9E=
+  dependencies:
+    wrappy "1"
+
+path-is-absolute@^1.0.0:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/path-is-absolute/-/path-is-absolute-1.0.1.tgz#174b9268735534ffbc7ace6bf53a5a9e1b5c5f5f"
+  integrity sha1-F0uSaHNVNP+8es5r9TpanhtcX18=
 
 raphael@^2.2.8:
   version "2.3.0"
@@ -216,3 +313,8 @@ typo-js@*:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/typo-js/-/typo-js-1.1.0.tgz#a5a9f592bcb453666bf70c9694da58705d025ed8"
   integrity sha512-W3kLbx+ML9PBl5Bzso/lTvVxk4BCveSNAtQeht59FEtxCdGThmn6wSHA4Xq3eQYAK24NHdisMM4JmsK0GFy/pg==
+
+wrappy@1:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/wrappy/-/wrappy-1.0.2.tgz#b5243d8f3ec1aa35f1364605bc0d1036e30ab69f"
+  integrity sha1-tSQ9jz7BqjXxNkYFvA0QNuMKtp8=
