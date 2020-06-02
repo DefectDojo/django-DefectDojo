@@ -768,7 +768,7 @@ def report_generate(request, obj, options):
                                                 test__finding__in=findings.qs).distinct()
         tests = Test.objects.filter(engagement__product__prod_type=product_type,
                                     finding__in=findings.qs).distinct()
-        if findings:
+        if len(findings.qs) > 0:
             start_date = timezone.make_aware(datetime.combine(findings.qs.last().date, datetime.min.time()))
         else:
             start_date = timezone.now()
