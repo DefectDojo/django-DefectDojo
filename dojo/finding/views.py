@@ -1124,8 +1124,8 @@ def edit_finding(request, fid):
             elif 'jiraform-push_to_jira' in request.POST:
                 jform = JIRAFindingForm(request.POST['jiraform-push_to_jira'], prefix='jiraform', enabled=True)
                 if jform.is_valid():
-                    # If we get here, this means the box got checked. 
-                    # Currently, the jform is only 1 field, that checkbox. 
+                    # If we get here, this means the box got checked.
+                    # Currently, the jform is only 1 field, that checkbox.
                     # Even though its value is 'on' and therefore should be True, it always returns False.
                     # So putting a band-aid here to fix the issue.
                     # Someone more knowledgeable can fix it later.
