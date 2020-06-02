@@ -1729,7 +1729,6 @@ class Finding(models.Model):
             return self.test.engagement.product.jira_pkey_set.all()[0].conf
         except:
             return None
-            pass
 
     def long_desc(self):
         long_desc = ''
@@ -1747,10 +1746,10 @@ class Finding(models.Model):
 
         for e in self.endpoints.all():
             long_desc += str(e) + '\n\n'
-        long_desc += '*Description*: \n' + self.description + '\n\n'
-        long_desc += '*Mitigation*: \n' + self.mitigation + '\n\n'
-        long_desc += '*Impact*: \n' + self.impact + '\n\n'
-        long_desc += '*References*:' + self.references
+        long_desc += '*Description*: \n' + str(self.description) + '\n\n'
+        long_desc += '*Mitigation*: \n' + str(self.mitigation) + '\n\n'
+        long_desc += '*Impact*: \n' + str(self.impact) + '\n\n'
+        long_desc += '*References*:' + str(self.references)
         return long_desc
 
     def save(self, dedupe_option=True, false_history=False, rules_option=True,
