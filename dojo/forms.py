@@ -332,6 +332,7 @@ class ImportScanForm(forms.Form):
                          ("SKF Scan", "SKF Scan"),
                          ("Clair Klar Scan", "Clair Klar Scan"),
                          ("Bandit Scan", "Bandit Scan"),
+                         ("DevSkim Scan", "DevSkim Scan"),
                          ("SSL Labs Scan", "SSL Labs Scan"),
                          ("Acunetix Scan", "Acunetix Scan"),
                          ("Fortify Scan", "Fortify Scan"),
