@@ -1,0 +1,50 @@
+[
+    {
+      "filename": "lib/utils.js",
+      "start_line": 95,
+      "start_column": 29,
+      "end_line": 95,
+      "end_column": 34,
+      "rule_id": "DS126858",
+      "rule_name": "Weak/Broken Hash Algorithm",
+      "severity": 1,
+      "description": "A weak or broken hash algorithm was detected.",
+      "match": "SHA-1"
+    },
+    {
+      "filename": "lib/insecurity.js",
+      "start_line": 106,
+      "start_column": 4,
+      "end_line": 106,
+      "end_column": 10,
+      "rule_id": "DS137138",
+      "rule_name": "Insecure URL",
+      "severity": 4,
+      "description": "An HTTP-based URL without TLS was detected.",
+      "match": "http:/"
+    },
+    {
+      "filename": "lib/insecurity.js",
+      "start_line": 107,
+      "start_column": 4,
+      "end_line": 107,
+      "end_column": 10,
+      "rule_id": "DS137138",
+      "rule_name": "Insecure URL",
+      "severity": 4,
+      "description": "An HTTP-based URL without TLS was detected.",
+      "match": "http:/"
+    },
+    {
+      "filename": "lib/insecurity.js",
+      "start_line": 109,
+      "start_column": 4,
+      "end_line": 109,
+      "end_column": 10,
+      "rule_id": "DS137138",
+      "rule_name": "Insecure URL",
+      "severity": 4,
+      "description": "An HTTP-based URL without TLS was detected.",
+      "match": "http:/"
+    }
+  ]
