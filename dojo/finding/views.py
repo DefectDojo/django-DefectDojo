@@ -1121,11 +1121,16 @@ def edit_finding(request, fid):
             if push_all_issues_enabled:
                 push_to_jira = True
             # elif 'jiraform-push_to_jira' in request.POST:
-            elif request.POST['jiraform-push_to_jira']:
+            elif 'jiraform-push_to_jira' in request.POST:
                 jform = JIRAFindingForm(request.POST['jiraform-push_to_jira'], prefix='jiraform', enabled=True)
                 if jform.is_valid():
-                    # push_to_jira = True  ## easy way out but why?
-                    push_to_jira = jform.cleaned_data.get('push_to_jira')
+                    # If we get here, this means the box got checked. 
+                    # Currently, the jform is only 1 field, that checkbox. 
+                    # Even though its value is 'on' and therefore should be True, it always returns False.
+                    # So putting a band-aid here to fix the issue.
+                    # Someone more knowledgeable can fix it later.
+                    # push_to_jira = jform.cleaned_data.get('push_to_jira')
+                    push_to_jira = True
 
             if 'githubform-push_to_github' in request.POST:
                 gform = GITHUBFindingForm(
