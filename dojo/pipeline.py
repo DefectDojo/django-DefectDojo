@@ -84,10 +84,12 @@ def update_product_access(backend, uid, user=None, social=None, *args, **kwargs)
         # For each project: create a new product or update product's authorized_users
         for project_name in project_names:
             if project_name not in prod_names:
+                # Create new product
                 product = Product.objects.create(name=project_name, prod_type=product_type)
                 product.authorized_users.add(user)
                 product.save()
             else:
+                # Update product
                 product = Product.objects.get(name=project_name)
                 product.authorized_users.add(user)
                 product.save()
