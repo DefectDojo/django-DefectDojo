@@ -198,14 +198,16 @@
                                 {% if system_settings.enable_jira %}
                                 <td class="text-center">
                                 {% for jira_conf in prod.jira_confs %}
-                                <i class="fa fa-bug has-popover" title="<i class='fa fa-bug'></i> <b>Jira Configuration</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="bottom"
-                                  data-content="<b>Jira:</b> {{ jira_conf.conf }}<br/>
-                                  <b>Project Key:</b> {{ jira_conf.project_key }}<br/>
-                                  <b>Component:</b> {{ jira_conf.component }}<br/>
-                                  <b>Push All Issues:</b> {{ jira_conf.push_all_issues }}<br/>
-                                  <b>Engagement Epic Mapping:</b> {{ jira_conf.enable_engagement_epic_mapping }}<br/>
-                                  <b>Push Notes:</b> {{ jira_conf.push_notes }}">
-                                </i>
+                                  {% if jira_conf.conf is not None %}
+                                  <i class="fa fa-bug has-popover" title="<i class='fa fa-bug'></i> <b>Jira Configuration</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="bottom"
+                                    data-content="<b>Jira:</b> {{ jira_conf.conf }}<br/>
+                                    <b>Project Key:</b> {{ jira_conf.project_key }}<br/>
+                                    <b>Component:</b> {{ jira_conf.component }}<br/>
+                                    <b>Push All Issues:</b> {{ jira_conf.push_all_issues }}<br/>
+                                    <b>Engagement Epic Mapping:</b> {{ jira_conf.enable_engagement_epic_mapping }}<br/>
+                                    <b>Push Notes:</b> {{ jira_conf.push_notes }}">
+                                  </i>
+                                  {% endif %}
                                 {% endfor %}
                                 </td>
                                 {% endif %}
@@ -213,11 +215,13 @@
                                 {% if system_settings.enable_github %}
                                 <td class="text-center">
                                 {% for github_conf in prod.github_confs %}
-                                <i class="fa fa-bug has-popover" title="<i class='fa fa-bug'></i> <b>GitHub Configuration</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="bottom"
-                                  data-content="<b>GitHub:</b> {{ github_conf.git_conf }}<br/>
-                                  <b>Project Key:</b> {{ github_conf.git_project }}<br/>
-                                  <b>Push Notes:</b> {{ github_conf.push_notes }}">
-                                </i>
+                                  {% if github_conf.git_conf is not None %}
+                                    <i class="fa fa-bug has-popover" title="<i class='fa fa-bug'></i> <b>GitHub Configuration</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="bottom"
+                                      data-content="<b>GitHub:</b> {{ github_conf.git_conf }}<br/>
+                                      <b>Project Key:</b> {{ github_conf.git_project }}<br/>
+                                      <b>Push Notes:</b> {{ github_conf.push_notes }}">
+                                    </i>
+                                  {% endif %}
                                 {% endfor %}
                                 </td>
                                 {% endif %}
