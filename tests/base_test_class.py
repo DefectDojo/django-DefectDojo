@@ -259,8 +259,8 @@ def on_exception_html_source_logger(func):
             return func(self, *args, **kwargs)
 
         except Exception as e:
-            print(self.driver.page_source)
-            print("exception url:", self.driver.current_url)
+            print("exception occured at url:", self.driver.current_url)
+            print("page source:", self.driver.page_source)
             time.sleep(30)
             raise(e)
 
