@@ -29,6 +29,7 @@ Furthermore, maintainers that have not had any activities (commits, PR, PR revie
 * Fred Blaise (@madchap)
 * Jannik Jürgens (@alles-klar)
 * Pascal Trovatelli (@ptrovatelli)
+* Cody Maffucci (@Maffooch)
 
 ### Maintainers
 * Anthony Pipia (@apipia)
