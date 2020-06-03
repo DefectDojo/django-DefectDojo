@@ -71,8 +71,8 @@ def create_notification_message(event, user, notification_type, *args, **kwargs)
     try:
         notification = render_to_string(template, kwargs)
     except Exception as e:
-        logger.exception(e)
-        create_description(event)
+        logger.debug('template not found or not implemented yet: %s', template)
+        create_description(event, *args, **kwargs)
         notification = render_to_string('notifications/other.tpl', kwargs)
 
     return notification
@@ -89,7 +89,7 @@ def process_notifications(event, notifications=None, *args, **kwargs):
 
     logger.debug('sync: %s', sync)
     logger.debug('sending notifications ' + ('synchronously' if sync else 'asynchronously'))
-    logger.debug(vars(notifications))
+    # logger.debug(vars(notifications))
 
     slack_enabled = get_system_setting('enable_slack_notifications')
     hipchat_enabled = get_system_setting('enable_hipchat_notifications')
@@ -125,25 +125,25 @@ def process_notifications(event, notifications=None, *args, **kwargs):
 
 def send_slack_notification(event, user=None, *args, **kwargs):
     from dojo.utils import get_system_setting, get_slack_user_id
-    if user is not None:
-        if hasattr(user, 'usercontactinfo') and user.usercontactinfo.slack_username is not None:
-            slack_user_id = user.usercontactinfo.slack_user_id
-            if user.usercontactinfo.slack_user_id is None:
-                # Lookup the slack userid
-                slack_user_id = get_slack_user_id(
-                    user.usercontactinfo.slack_username)
-                slack_user_save = UserContactInfo.objects.get(user_id=user.id)
-                slack_user_save.slack_user_id = slack_user_id
-                slack_user_save.save()
-
-            channel = '@%s' % slack_user_id
-        else:
-            # user has no slack username, skip
-            return
-    else:
-        channel = get_system_setting('slack_channel')
-
     try:
+        if user is not None:
+            if hasattr(user, 'usercontactinfo') and user.usercontactinfo.slack_username is not None:
+                slack_user_id = user.usercontactinfo.slack_user_id
+                if user.usercontactinfo.slack_user_id is None:
+                    # Lookup the slack userid
+                    slack_user_id = get_slack_user_id(
+                        user.usercontactinfo.slack_username)
+                    slack_user_save = UserContactInfo.objects.get(user_id=user.id)
+                    slack_user_save.slack_user_id = slack_user_id
+                    slack_user_save.save()
+
+                channel = '@%s' % slack_user_id
+            else:
+                # user has no slack username, skip
+                return
+        else:
+            channel = get_system_setting('slack_channel')
+
         res = requests.request(
             method='POST',
             url='https://slack.com/api/chat.postMessage',
@@ -161,11 +161,11 @@ def send_slack_notification(event, user=None, *args, **kwargs):
 
 def send_hipchat_notification(event, user=None, *args, **kwargs):
     from dojo.utils import get_system_setting
-    if user:
-        # HipChat doesn't seem to offer direct message functionality, so no HipChat PM functionality here...
-        return
-
     try:
+        if user:
+            # HipChat doesn't seem to offer direct message functionality, so no HipChat PM functionality here...
+            return
+
         # We use same template for HipChat as for slack
         res = requests.request(
             method='POST',
@@ -185,16 +185,17 @@ def send_hipchat_notification(event, user=None, *args, **kwargs):
 
 def send_mail_notification(event, user=None, *args, **kwargs):
     from dojo.utils import get_system_setting
-
-    if user:
-        address = user.email
-    else:
-        address = get_system_setting('mail_notifications_to')
-
-    subject = '%s notification' % get_system_setting('team_name')
-    if 'title' in kwargs:
-        subject += ': %s' % kwargs['title']
     try:
+
+        if user:
+            address = user.email
+        else:
+            address = get_system_setting('mail_notifications_to')
+
+        subject = '%s notification' % get_system_setting('team_name')
+        if 'title' in kwargs:
+            subject += ': %s' % kwargs['title']
+
         email = EmailMessage(
             subject,
             create_notification_message(event, user, 'mail', *args, **kwargs),
@@ -214,18 +215,28 @@ def send_mail_notification(event, user=None, *args, **kwargs):
 
 
 def send_alert_notification(event, user=None, *args, **kwargs):
-    icon = kwargs.get('icon', 'info-circle')
-    alert = Alerts(
-        user_id=user,
-        title=kwargs.get('title'),
-        description=create_notification_message(event, user, 'alert', *args, **kwargs),
-        url=kwargs.get('url', reverse('alerts')),
-        icon=icon,
-        source=Notifications._meta.get_field(event).verbose_name.title())
-    alert.save()
+    print('sending alert notification')
+    try:
+        icon = kwargs.get('icon', 'info-circle')
+        alert = Alerts(
+            user_id=user,
+            title=kwargs.get('title')[:100],
+            description=create_notification_message(event, user, 'alert', *args, **kwargs),
+            url=kwargs.get('url', reverse('alerts')),
+            icon=icon[:25],
+            source=Notifications._meta.get_field(event).verbose_name.title()[:100]
+        )
+        # relative urls will fail validation
+        alert.clean_fields(exclude=['url'])
+        alert.save()
+    except Exception as e:
+        logger.exception(e)
+        log_alert(e, *args, **kwargs)
+        pass
 
 
 def log_alert(e, *args, **kwargs):
+    # no try catch here, if this fails we need to show an error
     users = Dojo_User.objects.filter(is_superuser=True)
     for user in users:
         alert = Alerts(
@@ -235,4 +246,6 @@ def log_alert(e, *args, **kwargs):
             description="%s" % e,
             icon="exclamation-triangle",
             source="Notifications")
+        # relative urls will fail validation
+        alert.clean_fields(exclude=['url'])
         alert.save()
