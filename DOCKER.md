@@ -9,7 +9,8 @@ It is one of the supported [Default installation](setup/README.md) methods.
     *  Installing with docker-compose requires at least docker 18.09.4 and docker-compose 1.24.0. See "Checking Docker versions" below for version errors during running docker-compose.
 *  Proxies
     *  If you're behind a corporate proxy check https://docs.docker.com/network/proxy/ . 
-
+*  Known issues
+    * finding images only work in `dev` and `ptvsd` mode. Making them work in `release` mode requires modifications to the docker-compose configuration.
 
 # Setup via Docker Compose - introduction
 
