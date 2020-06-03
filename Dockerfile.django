@@ -4,8 +4,6 @@
 # The code for the build image should be idendical with the code in
 # Dockerfile.nginx to use the caching mechanism of Docker.
 
-# Using 3.5.7 to avoid compatibility issues that may be introduced by python 3.6 and 3.7.
-# Please upgrade before end-of-life in september 2020!
 # Ref: https://devguide.python.org/#branchstatus
 FROM python:3.6.10-slim-buster@sha256:4a4f95aaa98bcef7d4abbae3de08353632ba34c2a97e295b7f7fd52e1d08d94b as build
 WORKDIR /app
