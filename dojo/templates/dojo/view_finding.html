@@ -123,7 +123,7 @@
                             {% if finding.risk_acceptance_set.exists %}
                                 <li role="presentation">
                                 <a href="{% url 'simple_risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
-                                    <i class="fa fa-exclamation-circle"></i> Unaccept Risk (simple)
+                                    <i class="fa fa-exclamation-circle"></i> Unaccept Risk
                                 </a>
                                 </li>
                             {% else %}

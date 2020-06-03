@@ -1470,6 +1470,11 @@ class Finding(models.Model):
         # removing from ManyToMany will not fail for non-existing entries
         self.get_simple_risk_acceptance().accepted_findings.remove(self)
         # risk acceptance no longer in place, so reactivate, but only when it makes sense
+
+        # for now also remove from any other risk acceptance as differianting between simple and full here would clutter the menu.
+        # also currently you can only add a finding to 1 risk acceptance, so this would only affect old findings added to multiple
+        # risk acceptances in some obcure way
+        self.remove_from_any_risk_acceptance()
         if not self.mitigated and not self.false_p and not self.out_of_scope and not self.risk_acceptance_set.exists():
             self.active = True
             self.save()
