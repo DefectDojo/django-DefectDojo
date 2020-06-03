@@ -13,7 +13,7 @@ django-filter==2.2.0
 django-imagekit==4.0.2
 django-multiselectfield==0.1.12
 django-polymorphic==2.1.2
-django-crispy-forms==1.9.0
+django-crispy-forms==1.9.1
 django_extensions==2.2.9
 django-rest-swagger==2.2.0
 django-slack==5.14.4
