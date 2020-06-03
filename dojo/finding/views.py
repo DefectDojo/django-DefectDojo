@@ -653,6 +653,11 @@ def edit_finding(request, fid):
                 parent_find.found_by.remove(new_finding.test.test_type)
                 new_finding.duplicate_finding = None
 
+            if form['simple_risk_accept'].value():
+                new_finding.simple_risk_accept()
+            else:
+                new_finding.simple_risk_unaccept()
+
             create_template = new_finding.is_template
             # always false now since this will be deprecated soon in favor of new Finding_Template model
             new_finding.is_template = False

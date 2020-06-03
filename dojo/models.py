@@ -1479,6 +1479,11 @@ class Finding(models.Model):
             self.save()
 
     @property
+    def is_simple_risk_accepted(self):
+        if self.get_simple_risk_acceptance() is not None:
+            return self.get_simple_risk_acceptance().accepted_findings.filter(id=self.id).exists()
+
+    @property
     def similar_findings(self):
         similar = Finding.objects.all()
 
