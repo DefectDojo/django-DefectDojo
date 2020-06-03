@@ -10,7 +10,7 @@ It is one of the supported [Default installation](setup/README.md) methods.
 *  Proxies
     *  If you're behind a corporate proxy check https://docs.docker.com/network/proxy/ . 
 *  Known issues
-    * finding images only work in `dev` and `ptvsd` mode. Making them work in release mode requires additional configuration.
+    * finding images do not work with docker-compose yet. Making them work in release mode requires additional configuration, some of which will arrive in 1.7.0
 
 
 # Setup via Docker Compose - introduction
