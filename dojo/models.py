@@ -1466,6 +1466,7 @@ class Finding(models.Model):
         self.save()
 
     def simple_risk_unaccept(self):
+        print('unaccepting risk')
         # removing from ManyToMany will not fail for non-existing entries
         self.get_simple_risk_acceptance().accepted_findings.remove(self)
         # risk acceptance no longer in place, so reactivate, but only when it makes sense
