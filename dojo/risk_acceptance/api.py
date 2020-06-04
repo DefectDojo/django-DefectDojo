@@ -7,6 +7,7 @@ from rest_framework import serializers, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
+from drf_yasg.utils import swagger_auto_schema
 
 from dojo.api_v2.serializers import RiskAcceptanceSerializer
 from dojo.models import Engagement, Risk_Acceptance, User
@@ -32,6 +33,10 @@ class AcceptedRisksMixin(ABC):
     def risk_application_model_class(self):
         pass
 
+    @swagger_auto_schema(
+        request_body=AcceptedRiskSerializer(many=True),
+        responses={status.HTTP_201_CREATED: RiskAcceptanceSerializer},
+    )
     @action(methods=['post'], detail=True, permission_classes=[IsAdminUser], serializer_class=AcceptedRiskSerializer)
     def accept_risks(self, request, pk=None):
         model = get_object_or_404(self.risk_application_model_class, pk=pk)
@@ -50,6 +55,10 @@ class AcceptedRisksMixin(ABC):
 
 class AcceptedFindingsMixin(ABC):
 
+    @swagger_auto_schema(
+        request_body=AcceptedRiskSerializer(many=True),
+        responses={status.HTTP_201_CREATED: RiskAcceptanceSerializer},
+    )
     @action(methods=['post'], detail=False, permission_classes=[IsAdminUser], serializer_class=AcceptedRiskSerializer)
     def accept_risks(self, request):
         serializer = AcceptedRiskSerializer(data=request.data, many=True)
