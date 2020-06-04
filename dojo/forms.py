@@ -987,9 +987,9 @@ class FindingForm(forms.ModelForm):
         t = [(tag.name, tag.name) for tag in tags]
         super(FindingForm, self).__init__(*args, **kwargs)
         self.fields['tags'].widget.choices = t
-        print(self.instance.get_simple_risk_acceptance())
-        self.fields['simple_risk_accept'].initial = True if self.instance.is_simple_risk_accepted is not None else False
-        print(self.fields['simple_risk_accept'].initial)
+        # print(self.instance.get_simple_risk_acceptance())
+        self.fields['simple_risk_accept'].initial = True if self.instance.is_simple_risk_accepted else False
+        # print(self.fields['simple_risk_accept'].initial)
 
     def clean(self):
         cleaned_data = super(FindingForm, self).clean()

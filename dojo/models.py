@@ -1442,7 +1442,8 @@ class Finding(models.Model):
     def unaccepted_open_findings(cls):
         return cls.objects.filter(active=True, verified=True, duplicate=False, risk_acceptance__isnull=True)
 
-    def get_simple_risk_acceptance(self):
+    # gets or creates the simple risk acceptance instance connected to the engagement. only contains this finding if it is simple accepted
+    def get_simple_risk_acceptance(self, create=True):
         if hasattr(self.test.engagement, 'simple_risk_acceptance') and len(self.test.engagement.simple_risk_acceptance) > 0:
             return self.test.engagement.simple_risk_acceptance[0]
 
@@ -1481,8 +1482,12 @@ class Finding(models.Model):
 
     @property
     def is_simple_risk_accepted(self):
-        if self.get_simple_risk_acceptance() is not None:
+        if self.get_simple_risk_acceptance(create=False) is not None:
             return self.get_simple_risk_acceptance().accepted_findings.filter(id=self.id).exists()
+            # print('exists: ', exists)
+            # return exists
+
+        return False
 
     @property
     def similar_findings(self):
