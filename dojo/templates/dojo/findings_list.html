@@ -37,6 +37,7 @@
                             <form action="{% url 'findings_bulk_all' %}" method="post" id="bulk_change_form">
                           {% endif %}
                                 {% csrf_token %}
+                                <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />                                            
                                 <label style="display: block" for="severity">Severity</label>
                                 <select name="severity" id="severity" style="font-size: 80%">
                                     <option value="">Choose...</option>
@@ -73,8 +74,8 @@
                                 </label>
                                 {% endif %}
                                 {% if system_settings.enable_github %}
-                                <label style="font-size: 80%; font-weight: bold; display: block">Push to Github
-                                  <input id="id_push_togithub" name="push_to_github" type="checkbox" alt="Select to push to Github"/>
+                                <label style="font-size: 80%; font-weight: bold; display: block">Push to GitHub
+                                  <input id="id_push_togithub" name="push_to_github" type="checkbox" alt="Select to push to GitHub"/>
                                 </label>
                                 <br/>
                                 {% endif %}
@@ -92,7 +93,7 @@
                     </ul>
                   </div>
                   <div class="btn-group mr-2" role="group" aria-label="Bulk Actions">
-                    {% if product_tab %}
+                    {% if product_tab and not 'DISABLE_FINDING_MERGE'|setting_enabled %}
                     <button type="button" class="btn btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom" title="Merge Findings">
                       <a class="white-color merge" href="#" alt="Merge Findings">
                         <i class="fa fa-compress"></i>
@@ -183,12 +184,8 @@
                                           </a>
                                        </li>
                                         <li>
-                                          {% if product_tab %}
-                                             <a class="" href="{% url 'edit_finding' finding.id %}?source=product_findings{{ request.GET.page|paginator }}">
-                                          {% else %}
-                                             <a class="" href="{% url 'edit_finding' finding.id %}?source=all_product_findings{{ request.GET.page|paginator }}">
-                                          {% endif %}
-                                            <i class="fa fa-pencil-square-o"></i> Edit
+                                          <a class="" href="{% url 'edit_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
+                                          <i class="fa fa-pencil-square-o"></i> Edit
                                           </a>
                                        </li>
                                        <li class="divider"></li>
@@ -249,6 +246,7 @@
                                          <form method="post" action="{% url 'delete_finding' finding.id %}"
                                               style="display: inline" class="form-inline form" id="delete-finding-menu-{{ finding.id }}-form">
                                             {% csrf_token %}
+                                            <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
                                             <input type="hidden" name="id" value="{{ finding.id }}"/>
                                          </form>
                                          <a class="text-danger delete-finding" id="delete-finding-menu-{{ finding.id }}" href="#">
@@ -326,8 +324,7 @@
                                 <td>
                                   <a target="#" data-toggle="tooltip" data-placement="bottom" title="Test: {{ finding.test }}">{{ finding.found_by.all|join:", " }}</a>
                                 </td>
-                                <td>{% if finding.under_review %}Under Review, {% endif %}{{ finding.status }}{% if finding.duplicate_finding.id %}, <a href="{% url 'view_finding' finding.duplicate_finding.id%}" data-toggle="tooltip" data-placement="top" title="{{ finding.duplicate_finding.title }}, {{ finding.duplicate_finding.created }}">Original</a>
-                                  {% endif %}
+                                <td>{{ finding|finding_display_status|safe }}
                                 </td>
                                 <td class="nowrap">
                                   {% if system_settings.enable_jira %}
@@ -339,7 +336,7 @@
                                       <a href="{% url 'view_finding' finding.id %}#vuln_notes" alt="{{ finding.notes.count }} comment{{ finding.notes.count|pluralize }}">
                                         <span class="glyphicon glyphicon-comment"></span> {{ finding.notes.count }}
                                       </a>
-                                    {% endif %}
+                                    {% endif %}                                    
                                   {% endif %}
                                 </td>
                                 {% if system_settings.enable_jira %}
@@ -374,7 +371,7 @@
                     {% include "dojo/paging_snippet.html" with page=findings page_size=True%}
                 </div>
             {% else %}
-                <p class="text-center">No findings found.</p>
+                <div id="no_findings"><p class="text-center">No findings found.</p></div>                
             {% endif %}
         </div>
     </div>
@@ -405,86 +402,64 @@
                 drawCallback: function(){
                       $('.has-popover').popover({'trigger':'hover'});
                 },
-                "columns": [
-                    { "data": "checkbox", render: function (data, type, row) {
-                            return type === 'export' ?  "" :  data;
-                    }},
-                    { "data": "action", render: function (data, type, row) {
-                            return type === 'export' ?  "" :  data;
-                    }},
-                    { "data": "severity" , render: function (data, type, row) {
-                            return type === 'export' ?  getDojoExportValueFromTag(data, 'span') :  data;
-                    }},
-                    { "data": "finding" , render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
-                    }},
-                    { "data": "cwe" , render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
-                    }},
-                    { "data": "found_date", render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
-                    }},
-                    { "data": "finding_age", render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
-                    } },
-                    
-                    {% if system_settings.enable_finding_sla %}
-                    { "data": "finding_sla", render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
-                    }},
-                    {% endif %}                    
-
-                    { "data": "reported_by", render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
-                    }},
-                    { "data": "found_by_test", render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
-                    }},
-                    { "data": "status", render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
-                    }},
-                    { "data": "jira_id", render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
-                    }},
-                    {% if system_settings.enable_jira %}
-                        { "data": "jira_age", render: function (data, type, row) {
-                                return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
-                        }},
-                        { "data": "jira_change", render: function (data, type, row) {
-                                return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
-                        }},
-                    {% endif %}
-                    {% if show_product_column and product_tab is None %}
-                        { "data": "product" , render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
-                        }},
-                    {% endif %}
+                "columns": [	
+                    { "data": "checkbox" },
+                    { "data": "action" },
+                    { "data": "severity" },
+                    { "data": "finding" , render: function (data, type, row) {	
+                            return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;	
+                    }},	
+                    { "data": "cwe" },
+                    { "data": "found_date" },
+                    { "data": "finding_age" },
+                    {% if system_settings.enable_finding_sla %}	
+                    { "data": "finding_sla" },
+                    {% endif %}                    	
+                    { "data": "reported_by" },
+                    { "data": "found_by_test" }, 
+                    { "data": "status" },
+                    { "data": "jira_id" },
+                    {% if system_settings.enable_jira %}	
+                      {% if jira_config and product_tab or not product_tab %}                    	
+                        { "data": "jira_age" },
+                        { "data": "jira_change" },
+                      {% endif %}                          	
+                    {% endif %}	
+                    {% if show_product_column and product_tab is None %}	
+                        { "data": "product" },
+                    {% endif %}	
                 ],
                 order: [],
-                "columnDefs": [
+                columnDefs: [
                     { 
-                        "orderable": false, "targets": [0, 1]
+                        "orderable": false,
+                        "targets": [0, 1]
+                    },
+                    {
+                        targets: [0, 1],
+                        className: 'noVis'
                     }
                 ],
                 dom: 'Bfrtip',
                 paging: false,
                 buttons: [
+                    {
+                        extend: 'colvis',
+                        columns: ':not(.noVis)'
+                    },
                     $.extend( true, {}, buttonCommon, {
-                        extend: 'colvis'
+                        extend: 'copy'
                     }),
                     $.extend( true, {}, buttonCommon, {
-                        extend: 'copyHtml5'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'excelHtml5',
+                        extend: 'excel',
                         autoFilter: true,
                         sheetName: 'Exported data',
                     }),
                     $.extend( true, {}, buttonCommon, {
-                        extend: 'csvHtml5'
+                        extend: 'csv'
                     }),
                     $.extend( true, {}, buttonCommon, {
-                        extend: 'pdfHtml5',
+                        extend: 'pdf',
                         orientation: 'landscape',
                         pageSize: 'LETTER'
                     }),
@@ -557,7 +532,7 @@
             })
 
             $('[id^=delete-finding-menu-]').on('click', function () {
-              if (confirm('Are you sure you want to delete these findings?'))
+              if (confirm('Are you sure you want to delete this finding?'))
               {
                   var form_element = "form#" + this.id + "-form";
                   $( form_element ).submit();
@@ -575,7 +550,7 @@
             });
 
             $( document ).on( "click", "button.delete-finding", function (e) {
-                return confirm('Are you sure you want to delete this finding?')
+                return confirm('Are you sure you want to delete these findings?')
             });
 
             $('input[type="checkbox"]').change(function () {
@@ -649,7 +624,7 @@
             });
 
             $('a.delete-bulk').on('click', function (e) {
-                if (confirm('Are you sure you want to delete this finding?'))
+                if (confirm('Are you sure you want to delete these findings?'))
                 {
                     var hidden_input = $('<input type="hidden" value="delete_bulk_findings" name="delete_bulk_findings">')
                     $('form#bulk_change_form').append(hidden_input);

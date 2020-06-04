@@ -13,6 +13,7 @@ from django.urls import reverse
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from django.db import models
+from django_extensions.db.models import TimeStampedModel
 from django.utils.deconstruct import deconstructible
 from django.utils.timezone import now
 from django.utils.functional import cached_property
@@ -20,6 +21,7 @@ from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToCover
 from django.utils import timezone
 from pytz import all_timezones
+from polymorphic.models import PolymorphicModel
 from tagging.registry import register as tag_register
 from multiselectfield import MultiSelectField
 from django import forms
@@ -1422,6 +1424,7 @@ class Finding(models.Model):
         ordering = ('numerical_severity', '-date', 'title')
         indexes = [
             models.Index(fields=['cve']),
+            models.Index(fields=['cwe']),
             models.Index(fields=['out_of_scope']),
             models.Index(fields=['false_p']),
             models.Index(fields=['verified']),
@@ -1438,24 +1441,27 @@ class Finding(models.Model):
 
     @property
     def similar_findings(self):
-        filtered = Finding.objects.all()
+        similar = Finding.objects.all()
 
         if self.test.engagement.deduplication_on_engagement:
-            filtered = filtered.filter(test__engagement=self.test.engagement)
+            similar = similar.filter(test__engagement=self.test.engagement)
         else:
-            filtered = filtered.filter(test__engagement__product=self.test.engagement.product)
+            similar = similar.filter(test__engagement__product=self.test.engagement.product)
 
         if self.cve:
-            filtered = filtered.filter(cve=self.cve)
+            similar = similar.filter(cve=self.cve)
         if self.cwe:
-            filtered = filtered.filter(cwe=self.cwe)
+            similar = similar.filter(cwe=self.cwe)
         if self.file_path:
-            filtered = filtered.filter(file_path=self.file_path)
+            similar = similar.filter(file_path=self.file_path)
         if self.line:
-            filtered = filtered.filter(line=self.line)
+            similar = similar.filter(line=self.line)
         if self.unique_id_from_tool:
-            filtered = filtered.filter(unique_id_from_tool=self.unique_id_from_tool)
-        return filtered.exclude(pk=self.pk)[:10]
+            similar = similar.filter(unique_id_from_tool=self.unique_id_from_tool)
+
+        identical = Finding.objects.all().filter(test__engagement__product=self.test.engagement.product).filter(hash_code=self.hash_code).exclude(pk=self.pk)
+
+        return (similar.exclude(pk=self.pk) | identical)[:10]
 
     def compute_hash_code(self):
         if hasattr(settings, 'HASHCODE_FIELDS_PER_SCANNER') and hasattr(settings, 'HASHCODE_ALLOWS_NULL_CWE') and hasattr(settings, 'HASHCODE_ALLOWED_FIELDS'):
@@ -1607,6 +1613,8 @@ class Finding(models.Model):
 
     def status(self):
         status = []
+        if self.under_review:
+            status += ['Under Review']
         if self.active:
             status += ['Active']
         else:
@@ -1622,8 +1630,7 @@ class Finding(models.Model):
         if self.duplicate:
             status += ['Duplicate']
         if self.risk_acceptance_set.exists():
-            status += ['Accepted']
-
+            status += ['Risk Accepted']
         if not len(status):
             status += ['Initial']
 
@@ -1661,19 +1668,19 @@ class Finding(models.Model):
 
     def has_github_issue(self):
         try:
-            issue = self.jira_issue
+            issue = self.github_issue
             return True
         except GITHUB_Issue.DoesNotExist:
             return False
 
     def github_conf(self):
         try:
-            jpkey = GITHUB_PKey.objects.get(product=self.test.engagement.product)
-            jconf = jpkey.conf
+            github_product_key = GITHUB_PKey.objects.get(product=self.test.engagement.product)
+            github_conf = github_product_key.conf
         except:
-            jconf = None
+            github_conf = None
             pass
-        return jconf
+        return github_conf
 
     # newer version that can work with prefetching
     def github_conf_new(self):
@@ -1788,14 +1795,10 @@ class Finding(models.Model):
         if rules_option:
             from dojo.tasks import async_rules
             from dojo.utils import sync_rules
-            try:
-                if self.reporter.usercontactinfo.block_execution:
-                    sync_rules(self, *args, **kwargs)
-                else:
-                    async_rules(self, *args, **kwargs)
-            except UserContactInfo.DoesNotExist:
+            if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
+                sync_rules(self, *args, **kwargs)
+            else:
                 async_rules(self, *args, **kwargs)
-                pass
         from dojo.utils import calculate_grade
         calculate_grade(self.test.engagement.product)
         # Assign the numerical severity for correct sorting order
@@ -2034,25 +2037,24 @@ class BurpRawRequestResponse(models.Model):
 
 
 class Risk_Acceptance(models.Model):
+    name = models.CharField(max_length=100, null=False, blank=False, help_text="Descriptive name which in the future may also be used to group risk acceptances together across engagements and products")
     path = models.FileField(upload_to='risk/%Y/%m/%d',
                             editable=False, null=False,
                             blank=False, verbose_name="Risk Acceptance File")
     accepted_findings = models.ManyToManyField(Finding)
-    expiration_date = models.DateTimeField(default=None, null=True, blank=True)
     accepted_by = models.CharField(max_length=200, default=None, null=True, blank=True, verbose_name='Accepted By', help_text="The entity or person that accepts the risk.")
-    reporter = models.ForeignKey(User, editable=False, on_delete=models.CASCADE)
+    expiration_date = models.DateTimeField(default=None, null=True, blank=True)
+    owner = models.ForeignKey(Dojo_User, editable=True, on_delete=models.CASCADE, help_text="Only the owner and staff users can edit the risk acceptance.")
     notes = models.ManyToManyField(Notes, editable=False)
     compensating_control = models.TextField(default=None, blank=True, null=True, help_text="If a compensating control exists to mitigate the finding or reduce risk, then list the compensating control(s).")
-    created = models.DateTimeField(null=False, editable=False, default=now)
-    updated = models.DateTimeField(editable=False, default=now)
+    created = models.DateTimeField(null=False, editable=False, auto_now_add=True)
+    updated = models.DateTimeField(editable=False, auto_now=True)
 
     def __unicode__(self):
-        return "Risk Acceptance added on %s" % self.created.strftime(
-            "%b %d, %Y")
+        return str(self.name)
 
     def __str__(self):
-        return "Risk Acceptance added on %s" % self.created.strftime(
-            "%b %d, %Y")
+        return str(self.name)
 
     def filename(self):
         return os.path.basename(self.path.name) \
@@ -2190,10 +2192,10 @@ class GITHUB_PKey(models.Model):
     git_push_notes = models.BooleanField(default=False, blank=True, help_text="Notes added to findings will be automatically added to the corresponding github issue")
 
     def __unicode__(self):
-        return self.product.name + " | " + self.project_key
+        return self.product.name + " | " + self.git_project
 
     def __str__(self):
-        return self.product.name + " | " + self.project_key
+        return self.product.name + " | " + self.git_project
 
 
 class JIRA_Conf(models.Model):
@@ -2829,6 +2831,196 @@ class FieldRule(models.Model):
     text = models.CharField(max_length=200)
 
 
+# ==============================
+# Defect Dojo Engaegment Surveys
+# ==============================
+
+class Question(PolymorphicModel, TimeStampedModel):
+    '''
+        Represents a question.
+    '''
+
+    class Meta:
+        ordering = ['order']
+
+    order = models.PositiveIntegerField(default=1,
+                                        help_text='The render order')
+
+    optional = models.BooleanField(
+        default=False,
+        help_text="If selected, user doesn't have to answer this question")
+
+    text = models.TextField(blank=False, help_text='The question text', default='')
+
+    def __unicode__(self):
+        return self.text
+
+    def __str__(self):
+        return self.text
+
+
+class TextQuestion(Question):
+    '''
+    Question with a text answer
+    '''
+
+    def get_form(self):
+        '''
+        Returns the form for this model
+        '''
+        from .forms import TextQuestionForm
+        return TextQuestionForm
+
+
+class Choice(TimeStampedModel):
+    '''
+    Model to store the choices for multi choice questions
+    '''
+
+    order = models.PositiveIntegerField(default=1)
+
+    label = models.TextField(default="")
+
+    class Meta:
+        ordering = ['order']
+
+    def __unicode__(self):
+        return self.label
+
+    def __str__(self):
+        return self.label
+
+
+class ChoiceQuestion(Question):
+    '''
+    Question with answers that are chosen from a list of choices defined
+    by the user.
+    '''
+
+    multichoice = models.BooleanField(default=False,
+                                      help_text="Select one or more")
+
+    choices = models.ManyToManyField(Choice)
+
+    def get_form(self):
+        '''
+        Returns the form for this model
+        '''
+
+        from .forms import ChoiceQuestionForm
+        return ChoiceQuestionForm
+
+
+# meant to be a abstract survey, identified by name for purpose
+class Engagement_Survey(models.Model):
+    name = models.CharField(max_length=200, null=False, blank=False,
+                            editable=True, default='')
+    description = models.TextField(editable=True, default='')
+    questions = models.ManyToManyField(Question)
+    active = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = "Engagement Survey"
+        verbose_name_plural = "Engagement Surveys"
+        ordering = ('-active', 'name',)
+
+    def __unicode__(self):
+        return self.name
+
+    def __str__(self):
+        return self.name
+
+
+# meant to be an answered survey tied to an engagement
+
+class Answered_Survey(models.Model):
+    # tie this to a specific engagement
+    engagement = models.ForeignKey(Engagement, related_name='engagement+',
+                                   null=True, blank=False, editable=True,
+                                   on_delete=models.CASCADE)
+    # what surveys have been answered
+    survey = models.ForeignKey(Engagement_Survey, on_delete=models.CASCADE)
+    assignee = models.ForeignKey(User, related_name='assignee',
+                                  null=True, blank=True, editable=True,
+                                  default=None, on_delete=models.CASCADE)
+    # who answered it
+    responder = models.ForeignKey(User, related_name='responder',
+                                  null=True, blank=True, editable=True,
+                                  default=None, on_delete=models.CASCADE)
+    completed = models.BooleanField(default=False)
+    answered_on = models.DateField(null=True)
+
+    class Meta:
+        verbose_name = "Answered Engagement Survey"
+        verbose_name_plural = "Answered Engagement Surveys"
+
+    def __unicode__(self):
+        return self.survey.name
+
+    def __str__(self):
+        return self.survey.name
+
+
+class General_Survey(models.Model):
+    survey = models.ForeignKey(Engagement_Survey, on_delete=models.CASCADE)
+    num_responses = models.IntegerField(default=0)
+    generated = models.DateTimeField(auto_now_add=True, null=True)
+    expiration = models.DateTimeField(null=False, blank=False)
+
+    class Meta:
+        verbose_name = "General Engagement Survey"
+        verbose_name_plural = "General Engagement Surveys"
+
+    def __unicode__(self):
+        return self.survey.name
+
+    def __str__(self):
+        return self.survey.name
+
+
+class Answer(PolymorphicModel, TimeStampedModel):
+    ''' Base Answer model
+    '''
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+
+#     content_type = models.ForeignKey(ContentType)
+#     object_id = models.PositiveIntegerField()
+#     content_object = generic.GenericForeignKey('content_type', 'object_id')
+    answered_survey = models.ForeignKey(Answered_Survey,
+                                        null=False,
+                                        blank=False,
+                                        on_delete=models.CASCADE)
+
+
+class TextAnswer(Answer):
+    answer = models.TextField(
+        blank=False,
+        help_text='The answer text',
+        default='')
+
+    def __unicode__(self):
+        return self.answer
+
+
+class ChoiceAnswer(Answer):
+    answer = models.ManyToManyField(
+        Choice,
+        help_text='The selected choices as the answer')
+
+    def __unicode__(self):
+        if len(self.answer.all()):
+            return str(self.answer.all()[0])
+        else:
+            return 'No Response'
+
+
+# Causing issues in various places.
+# auditlog.register(Answer)
+# auditlog.register(Answered_Survey)
+# auditlog.register(Question)
+# auditlog.register(Engagement_Survey)
+
+
 def enable_disable_auditlog(enable=True):
     if enable:
         # Register for automatic logging to database
@@ -2925,7 +3117,6 @@ admin.site.register(Cred_Mapping)
 admin.site.register(System_Settings, System_SettingsAdmin)
 admin.site.register(CWE)
 admin.site.register(Regulation)
-
 # Watson
 watson.register(Product)
 watson.register(Test)
