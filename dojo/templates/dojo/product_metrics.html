@@ -155,7 +155,7 @@
                         <div id="open_findings" class="graph"></div>
                     </div>
                     <div class="panel-footer">
-                        <i title="Accepted since {{ start_date }}"
+                        <i title="Opened since {{ start_date }}"
                            class="text-info fa fa-info-circle"></i>
                         <small>Opened since {{ start_date|date:"D., M. d, Y" }}</small>
                     </div>
@@ -172,7 +172,7 @@
                                     <span class="fa-2x">{{ accepted_findings|length }}</span>
                                     <span><a
                                             href="{% url 'accepted_findings' %}?test__engagement__product={{ prod.id }}"
-                                            title="Findings that have been accepted in a risk acceptance.">Accepted
+                                            title="Findings that have been accepted in a risk acceptance.">Risk Accepted
                                     Findings <i class="fa fa-arrow-circle-right"></i></a>
                                 </span>
                                 </div>
@@ -185,7 +185,7 @@
                     <div class="panel-footer">
                         <i title="Accepted since {{ start_date }}"
                            class="text-info fa fa-info-circle"></i>
-                        <small>Accepted since {{ start_date|date:"D., M. d, Y" }}</small>
+                        <small>Risk Accepted since {{ start_date|date:"D., M. d, Y" }}</small>
                     </div>
                 </div>
             </div>
@@ -211,7 +211,7 @@
                         <div id="closed_findings" class="graph"></div>
                     </div>
                     <div class="panel-footer">
-                        <i title="Accepted since {{ start_date }}"
+                        <i title="Closed since {{ start_date }}"
                            class="text-info fa fa-info-circle"></i>
                         <small>Closed since {{ start_date|date:"D., M. d, Y" }}</small>
                     </div>

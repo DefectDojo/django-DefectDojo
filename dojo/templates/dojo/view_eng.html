@@ -340,12 +340,13 @@
             </div>
             {% if risks_accepted %}
                 <div class="table-responsive">
-                    <table id="open_findings"
+                    <table id="risk_acceptances"
                            class="tablesorter-bootstrap table table-condensed table-striped">
                         <thead>
                         <tr>
-                            <th>Reporter</th>
+                            <th>Owner</th>
                             <th>Date</th>
+                            <th>Name</th>
                             <th>Date Expires</th>
                             <th>Accepted by</th>
                             <th>Findings Accepted</th>
@@ -355,8 +356,9 @@
                         <tbody>
                         {% for risk in risks_accepted %}
                             <tr>
-                                <td>{{ risk.reporter }}</td>
+                                <td>{{ risk.owner }}</td>
                                 <td>{{ risk.created }}</td>
+                                <td>{{ risk.name }}</td>
                                 <td>{{ risk.expiration_date|default_if_none:"" }}</td>
                                 <td>{{ risk.accepted_by|default_if_none:"" }}</td>
                                 <td>{{ risk.accepted_findings.count }}</td>
