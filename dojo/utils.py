@@ -73,7 +73,7 @@ def sync_false_history(new_finding, *args, **kwargs):
     if total_findings.count() > 0:
         new_finding.false_p = True
         new_finding.active = False
-        new_finding.verified = False
+        new_finding.verified = True
         super(Finding, new_finding).save(*args, **kwargs)
 
 
