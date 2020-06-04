@@ -979,7 +979,7 @@ class NoteSerializer(serializers.ModelSerializer):
     author = UserSerializer(
         many=False, read_only=False)
     editor = UserSerializer(
-        read_only=False, many=False, allow_null=True)
+        read_only=False, many=False, allow_null=True, required=False)
 
     history = NoteHistorySerializer(read_only=True, many=True)
 
@@ -1046,8 +1046,8 @@ class ReportGenerateSerializer(serializers.Serializer):
     title = serializers.CharField(max_length=200)
     user_id = serializers.IntegerField()
     host = serializers.CharField(max_length=200)
-    finding_images = FindingToFindingImagesSerializer(many=True, allow_null=True)
-    finding_notes = FindingToNotesSerializer(many=True, allow_null=True)
+    finding_images = FindingToFindingImagesSerializer(many=True, allow_null=True, required=False)
+    finding_notes = FindingToNotesSerializer(many=True, allow_null=True, required=False)
 
 
 class TagSerializer(serializers.Serializer):
