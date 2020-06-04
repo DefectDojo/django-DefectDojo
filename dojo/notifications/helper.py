@@ -17,7 +17,12 @@ def create_notification(event=None, *args, **kwargs):
         system_notifications = Notifications()
 
     logger.debug('creating system notifications')
-    process_notifications(event, system_notifications, *args, **kwargs)
+
+    # send system notifications to all admin users
+    admin_users = Dojo_User.objects.filter(is_staff=True)
+    for admin_user in admin_users:
+        system_notifications.user = admin_user
+        process_notifications(event, system_notifications, *args, **kwargs)
 
     if 'recipients' in kwargs:
         # mimic existing code so that when recipients is specified, no other personal notifications are sent.
@@ -115,7 +120,6 @@ def process_notifications(event, notifications=None, *args, **kwargs):
         else:
             send_mail_notification(event, notifications.user, *args, **kwargs)
 
-    print(getattr(notifications, event, None))
     if 'alert' in getattr(notifications, event, None):
         if not sync:
             send_alert_notification_task.delay(event, notifications.user, *args, **kwargs)
