@@ -293,10 +293,9 @@ class FindingViewSet(mixins.ListModelMixin,
                         status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
-        request_body=serializers.FindingNoteSerializer(),
+        request_body=serializers.FindingNoteSerializer,
         responses={status.HTTP_200_OK: ""}
     )
-    @swagger_auto_schema(request_body=serializers.NoteSerializer)
     @action(detail=True, methods=["patch"])
     def remove_note(self, request, pk=None):
         """Remove Note From Finding Note"""
