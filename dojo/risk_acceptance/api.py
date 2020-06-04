@@ -12,13 +12,17 @@ from drf_yasg.utils import swagger_auto_schema
 from dojo.api_v2.serializers import RiskAcceptanceSerializer
 from dojo.models import Engagement, Risk_Acceptance, User
 
-AcceptedRisk = NamedTuple('AcceptedRisk', (('cve', str), ('justification', str), ('accepted_by', str)))
+AcceptedRisk = NamedTuple(
+    'AcceptedRisk', (('cve', str), ('justification', str), ('accepted_by', str)))
 
 
 class AcceptedRiskSerializer(serializers.Serializer):
-    cve = serializers.CharField(max_length=28, label='CVE', help_text='CVE or vulnerability id to accept findings for')
-    justification = serializers.CharField(help_text='Justification for accepting findings with this CVE')
-    accepted_by = serializers.CharField(max_length=200, help_text='Name or email of person who accepts the risk')
+    cve = serializers.CharField(
+        max_length=28, label='CVE', help_text='CVE or vulnerability id to accept findings for')
+    justification = serializers.CharField(
+        help_text='Justification for accepting findings with this CVE')
+    accepted_by = serializers.CharField(
+        max_length=200, help_text='Name or email of person who accepts the risk')
 
     def create(self, validated_data):
         return AcceptedRisk(**validated_data)
