@@ -1,6 +1,6 @@
 # Submitting an Issue
 
-## For Bugs
+## For Bugs 
 
 Before submitting, please ensure that you are using the latests code by performing a `git pull`.
 
