@@ -324,8 +324,7 @@
                                 <td>
                                   <a target="#" data-toggle="tooltip" data-placement="bottom" title="Test: {{ finding.test }}">{{ finding.found_by.all|join:", " }}</a>
                                 </td>
-                                <td>{% if finding.under_review %}Under Review, {% endif %}{{ finding.status }}{% if finding.duplicate_finding.id %}, <a href="{% url 'view_finding' finding.duplicate_finding.id%}" data-toggle="tooltip" data-placement="top" title="{{ finding.duplicate_finding.title }}, {{ finding.duplicate_finding.created }}">Original</a>
-                                  {% endif %}
+                                <td>{{ finding|finding_display_status|safe }}
                                 </td>
                                 <td class="nowrap">
                                   {% if system_settings.enable_jira %}

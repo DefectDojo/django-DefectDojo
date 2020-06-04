@@ -464,8 +464,7 @@
                               {{ finding.reporter }}
                           {% endif %}
                         </td>
-                        <td>{% if finding.under_review %}Under Review, {% endif %}{{ finding.status }}{% if finding.duplicate_finding.id %}, <a href="{% url 'view_finding' finding.duplicate_finding.id%}" data-toggle="tooltip" data-placement="top" title="{{ finding.title }}, {{ finding.created }}">Original</a>
-                        {% endif %}
+                        <td>{{ finding|finding_display_status|safe }}
                         </td>
                         {% if system_settings.enable_jira %}
                             {% if jira_config and product_tab or not product_tab %}
