@@ -1076,3 +1076,7 @@ class SystemSettingsSerializer(serializers.Serializer):
 
         instance.save()
         return instance
+
+
+class FindingNoteSerializer(serializers.Serializer):
+    note_id = serializers.IntegerField()
