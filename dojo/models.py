@@ -1766,12 +1766,6 @@ class Finding(models.Model):
             self.jira_change = timezone.now()
             if not jira_issue_exists:
                 self.jira_creation = timezone.now()
-        # If the product has "Push_all_issues" enabled,
-        # then we're pushing this to JIRA no matter what
-        if not push_to_jira:
-            # only if there is a JIRA configuration
-            push_to_jira = self.jira_conf_new() and \
-                           self.jira_conf_new().jira_pkey_set.first().push_all_issues
 
         if self.pk is None:
             # We enter here during the first call from serializers.py
