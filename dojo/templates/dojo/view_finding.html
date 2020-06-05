@@ -471,9 +471,9 @@
         {% if findings %}
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h4>Similar Findings<span class="pull-right"><a data-toggle="collapse" href="#similar_findings"><i class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
+                    <h4>Similar Findings ({{ findings.count }}) <span class="pull-right"><a data-toggle="collapse" href="#similar_findings"><i class="glyphicon glyphicon-chevron-down"></i></a></span></h4>
                 </div>
-                <div id="similar_findings" class="panel-body collapse in">
+                <div id="similar_findings" class="panel-body collapse">
                     <table class="table table-striped table-hover centered">
                         <tr>
                             <th>Title</th>
