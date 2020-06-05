@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0036_system_settings_email_address'),
+        ('dojo', '0042_risk_acceptance_improvements'),
     ]
 
     operations = [
