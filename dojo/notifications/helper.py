@@ -89,7 +89,7 @@ def process_notifications(event, notifications=None, *args, **kwargs):
 
     logger.debug('sync: %s', sync)
     logger.debug('sending notifications ' + ('synchronously' if sync else 'asynchronously'))
-    # logger.debug(vars(notifications))
+    logger.debug(vars(notifications))
 
     slack_enabled = get_system_setting('enable_slack_notifications')
     hipchat_enabled = get_system_setting('enable_hipchat_notifications')
