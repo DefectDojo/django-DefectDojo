@@ -56,8 +56,7 @@ class EndPointViewSet(mixins.ListModelMixin,
 
         options = {}
         # prepare post data
-        report_options = serializers.ReportGenerateOptionSerializer(
-            data=request.data)
+        report_options = serializers.ReportGenerateOptionSerializer(data=request.data)
         if report_options.is_valid():
             options['include_finding_notes'] = report_options.validated_data['include_finding_notes']
             options['include_finding_images'] = report_options.validated_data['include_finding_images']
@@ -65,7 +64,7 @@ class EndPointViewSet(mixins.ListModelMixin,
             options['include_table_of_contents'] = report_options.validated_data['include_table_of_contents']
         else:
             return Response(report_options.errors,
-                            status=status.HTTP_400_BAD_REQUEST)
+                status=status.HTTP_400_BAD_REQUEST)
 
         data = report_generate(request, endpoint, options)
         report = serializers.ReportGenerateSerializer(data)
@@ -97,9 +96,9 @@ class EngagementViewSet(mixins.ListModelMixin,
                 product__authorized_users__in=[self.request.user])
         else:
             return Engagement.objects.all()
-
-    @swagger_auto_schema(
-        request_body=no_body, responses={status.HTTP_200_OK: ""}
+   
+    @swagger_auto_schema(    
+        request_body=no_body,responses={status.HTTP_200_OK: ""}
     )
     @action(detail=True, methods=["post"])
     def close(self, request, pk=None):
@@ -107,8 +106,8 @@ class EngagementViewSet(mixins.ListModelMixin,
         close_engagement(eng)
         return HttpResponse()
 
-    @swagger_auto_schema(
-        request_body=no_body, responses={status.HTTP_200_OK: ""}
+    @swagger_auto_schema(    
+        request_body=no_body,responses={status.HTTP_200_OK: ""}
     )
     @action(detail=True, methods=["post"])
     def reopen(self, request, pk=None):
@@ -126,8 +125,7 @@ class EngagementViewSet(mixins.ListModelMixin,
 
         options = {}
         # prepare post data
-        report_options = serializers.ReportGenerateOptionSerializer(
-            data=request.data)
+        report_options = serializers.ReportGenerateOptionSerializer(data=request.data)
         if report_options.is_valid():
             options['include_finding_notes'] = report_options.validated_data['include_finding_notes']
             options['include_finding_images'] = report_options.validated_data['include_finding_images']
@@ -135,7 +133,7 @@ class EngagementViewSet(mixins.ListModelMixin,
             options['include_table_of_contents'] = report_options.validated_data['include_table_of_contents']
         else:
             return Response(report_options.errors,
-                            status=status.HTTP_400_BAD_REQUEST)
+                status=status.HTTP_400_BAD_REQUEST)
 
         data = report_generate(request, engagement, options)
         report = serializers.ReportGenerateSerializer(data)
@@ -209,11 +207,11 @@ class FindingViewSet(mixins.ListModelMixin,
             return serializers.FindingSerializer
 
     @swagger_auto_schema(
-        method='get',
+        method='get', 
         responses={status.HTTP_200_OK: serializers.TagSerializer}
     )
     @swagger_auto_schema(
-        method='post',
+        method='post', 
         request_body=serializers.TagSerializer,
         responses={status.HTTP_200_OK: serializers.TagSerializer}
     )
@@ -225,8 +223,7 @@ class FindingViewSet(mixins.ListModelMixin,
             new_tags = serializers.TagSerializer(data=request.data)
             if new_tags.is_valid():
                 all_tags = finding.tags
-                all_tags = serializers.TagSerializer(
-                    {"tags": all_tags}).data['tags']
+                all_tags = serializers.TagSerializer({"tags": all_tags}).data['tags']
 
                 for tag in new_tags.validated_data['tags']:
                     if tag not in all_tags:
@@ -236,17 +233,17 @@ class FindingViewSet(mixins.ListModelMixin,
                 finding.save()
             else:
                 return Response(new_tags.errors,
-                                status=status.HTTP_400_BAD_REQUEST)
+                    status=status.HTTP_400_BAD_REQUEST)
         tags = finding.tags
         serialized_tags = serializers.TagSerializer({"tags": tags})
         return Response(serialized_tags.data)
 
     @swagger_auto_schema(
-        method='get',
+        method='get', 
         responses={status.HTTP_200_OK: serializers.FindingToNotesSerializer}
     )
     @swagger_auto_schema(
-        methods=['post', 'patch'],
+        methods=['post','patch'], 
         request_body=serializers.AddNewNoteOptionSerializer,
         responses={status.HTTP_200_OK: serializers.NoteSerializer}
     )
@@ -254,19 +251,17 @@ class FindingViewSet(mixins.ListModelMixin,
     def notes(self, request, pk=None):
         finding = get_object_or_404(Finding.objects, id=pk)
         if request.method == 'POST':
-            new_note = serializers.AddNewNoteOptionSerializer(
-                data=request.data)
+            new_note = serializers.AddNewNoteOptionSerializer(data=request.data)
             if new_note.is_valid():
                 entry = new_note.validated_data['entry']
                 private = new_note.validated_data['private']
                 note_type = new_note.validated_data['note_type']
             else:
                 return Response(new_note.errors,
-                                status=status.HTTP_400_BAD_REQUEST)
+                    status=status.HTTP_400_BAD_REQUEST)
 
             author = request.user
-            note = Notes(entry=entry, author=author,
-                         private=private, note_type=note_type)
+            note = Notes(entry=entry, author=author, private=private, note_type=note_type)
             note.save()
             finding.notes.add(note)
 
@@ -278,19 +273,19 @@ class FindingViewSet(mixins.ListModelMixin,
                 "finding_id": finding, "notes": [serialized_note.data]
             })
             return Response(serialized_note.data,
-                            status=status.HTTP_200_OK)
+                status=status.HTTP_200_OK)
         notes = finding.notes.all()
 
         serialized_notes = []
         if notes:
             serialized_notes = serializers.FindingToNotesSerializer({
-                "finding_id": finding, "notes": notes
+                    "finding_id": finding, "notes": notes
             })
             return Response(serialized_notes.data,
-                            status=status.HTTP_200_OK)
+                    status=status.HTTP_200_OK)
 
         return Response(serialized_notes,
-                        status=status.HTTP_200_OK)
+                status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
         request_body=serializers.FindingNoteSerializer,
@@ -305,25 +300,25 @@ class FindingViewSet(mixins.ListModelMixin,
             note = get_object_or_404(Notes.objects, id=request.data['note_id'])
             if note not in notes:
                 return Response({"error": "Selected Note is not assigned to this Finding"},
-                                status=status.HTTP_400_BAD_REQUEST)
+                status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({"error": "('note_id') parameter missing"},
-                            status=status.HTTP_400_BAD_REQUEST)
+                status=status.HTTP_400_BAD_REQUEST)
         if note.author.username == request.user.username or request.user.is_staff:
             finding.notes.remove(note)
             note.delete()
         else:
             return Response({"error": "Delete Failed, You are not the Note's author"},
-                            status=status.HTTP_400_BAD_REQUEST)
+                status=status.HTTP_400_BAD_REQUEST)
 
         return Response({"Success": "Selected Note has been Removed successfully"},
-                        status=status.HTTP_200_OK)
+            status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
         responses={
             status.HTTP_200_OK: None
         },
-        methods=['put', 'patch'],
+        methods=['put','patch'], 
         request_body=serializers.TagSerializer
     )
     @action(detail=True, methods=["put", "patch"])
@@ -333,25 +328,24 @@ class FindingViewSet(mixins.ListModelMixin,
         delete_tags = serializers.TagSerializer(data=request.data)
         if delete_tags.is_valid():
             all_tags = finding.tags
-            all_tags = serializers.TagSerializer(
-                {"tags": all_tags}).data['tags']
+            all_tags = serializers.TagSerializer({"tags": all_tags}).data['tags']
             del_tags = delete_tags.validated_data['tags']
             if len(del_tags) < 1:
                 return Response({"error": "Empty Tag List Not Allowed"},
-                                status=status.HTTP_400_BAD_REQUEST)
+                        status=status.HTTP_400_BAD_REQUEST)
             for tag in del_tags:
                 if tag not in all_tags:
                     return Response({"error": "'{}' is not a valid tag in list".format(tag)},
-                                    status=status.HTTP_400_BAD_REQUEST)
+                        status=status.HTTP_400_BAD_REQUEST)
                 all_tags.remove(tag)
             t = ", ".join(all_tags)
             finding.tags = t
             finding.save()
             return Response({"success": "Tag(s) Removed"},
-                            status=status.HTTP_200_OK)
+                status=status.HTTP_200_OK)
         else:
             return Response(delete_tags.errors,
-                            status=status.HTTP_400_BAD_REQUEST)
+                status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(
         request_body=serializers.ReportGenerateOptionSerializer,
@@ -362,8 +356,7 @@ class FindingViewSet(mixins.ListModelMixin,
         findings = Finding.objects.all()
         options = {}
         # prepare post data
-        report_options = serializers.ReportGenerateOptionSerializer(
-            data=request.data)
+        report_options = serializers.ReportGenerateOptionSerializer(data=request.data)
         if report_options.is_valid():
             options['include_finding_notes'] = report_options.validated_data['include_finding_notes']
             options['include_finding_images'] = report_options.validated_data['include_finding_images']
@@ -371,7 +364,7 @@ class FindingViewSet(mixins.ListModelMixin,
             options['include_table_of_contents'] = report_options.validated_data['include_table_of_contents']
         else:
             return Response(report_options.errors,
-                            status=status.HTTP_400_BAD_REQUEST)
+                status=status.HTTP_400_BAD_REQUEST)
 
         data = report_generate(request, findings, options)
         report = serializers.ReportGenerateSerializer(data)
@@ -417,11 +410,11 @@ class JiraViewSet(mixins.ListModelMixin,
 
 
 class DojoMetaViewSet(mixins.ListModelMixin,
-                      mixins.RetrieveModelMixin,
-                      mixins.DestroyModelMixin,
-                      mixins.CreateModelMixin,
-                      mixins.UpdateModelMixin,
-                      viewsets.GenericViewSet):
+                     mixins.RetrieveModelMixin,
+                     mixins.DestroyModelMixin,
+                     mixins.CreateModelMixin,
+                     mixins.UpdateModelMixin,
+                     viewsets.GenericViewSet):
     serializer_class = serializers.MetaSerializer
     queryset = DojoMeta.objects.all()
     filter_backends = (DjangoFilterBackend,)
@@ -436,8 +429,7 @@ class ProductViewSet(mixins.ListModelMixin,
     serializer_class = serializers.ProductSerializer
     # TODO: prefetch
     queryset = Product.objects.all()
-    queryset = queryset.annotate(active_finding_count=Count(
-        'engagement__test__finding__id', filter=Q(engagement__test__finding__active=True)))
+    queryset = queryset.annotate(active_finding_count=Count('engagement__test__finding__id', filter=Q(engagement__test__finding__active=True)))
     filter_backends = (DjangoFilterBackend,)
     permission_classes = (permissions.UserHasProductPermission,
                           DjangoModelPermissions)
@@ -461,8 +453,7 @@ class ProductViewSet(mixins.ListModelMixin,
 
         options = {}
         # prepare post data
-        report_options = serializers.ReportGenerateOptionSerializer(
-            data=request.data)
+        report_options = serializers.ReportGenerateOptionSerializer(data=request.data)
         if report_options.is_valid():
             options['include_finding_notes'] = report_options.validated_data['include_finding_notes']
             options['include_finding_images'] = report_options.validated_data['include_finding_images']
@@ -470,7 +461,7 @@ class ProductViewSet(mixins.ListModelMixin,
             options['include_table_of_contents'] = report_options.validated_data['include_table_of_contents']
         else:
             return Response(report_options.errors,
-                            status=status.HTTP_400_BAD_REQUEST)
+                status=status.HTTP_400_BAD_REQUEST)
 
         data = report_generate(request, product, options)
         report = serializers.ReportGenerateSerializer(data)
@@ -485,8 +476,7 @@ class ProductTypeViewSet(mixins.ListModelMixin,
     serializer_class = serializers.ProductTypeSerializer
     queryset = Product_Type.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'name', 'critical_product',
-                     'key_product', 'created', 'updated')
+    filter_fields = ('id', 'name', 'critical_product', 'key_product', 'created', 'updated')
 
     def get_queryset(self):
         if not self.request.user.is_staff:
@@ -505,8 +495,7 @@ class ProductTypeViewSet(mixins.ListModelMixin,
 
         options = {}
         # prepare post data
-        report_options = serializers.ReportGenerateOptionSerializer(
-            data=request.data)
+        report_options = serializers.ReportGenerateOptionSerializer(data=request.data)
         if report_options.is_valid():
             options['include_finding_notes'] = report_options.validated_data['include_finding_notes']
             options['include_finding_images'] = report_options.validated_data['include_finding_images']
@@ -514,7 +503,7 @@ class ProductTypeViewSet(mixins.ListModelMixin,
             options['include_table_of_contents'] = report_options.validated_data['include_table_of_contents']
         else:
             return Response(report_options.errors,
-                            status=status.HTTP_400_BAD_REQUEST)
+                status=status.HTTP_400_BAD_REQUEST)
 
         data = report_generate(request, product_type, options)
         report = serializers.ReportGenerateSerializer(data)
@@ -644,8 +633,7 @@ class TestsViewSet(mixins.ListModelMixin,
 
         options = {}
         # prepare post data
-        report_options = serializers.ReportGenerateOptionSerializer(
-            data=request.data)
+        report_options = serializers.ReportGenerateOptionSerializer(data=request.data)
         if report_options.is_valid():
             options['include_finding_notes'] = report_options.validated_data['include_finding_notes']
             options['include_finding_images'] = report_options.validated_data['include_finding_images']
@@ -653,7 +641,7 @@ class TestsViewSet(mixins.ListModelMixin,
             options['include_table_of_contents'] = report_options.validated_data['include_table_of_contents']
         else:
             return Response(report_options.errors,
-                            status=status.HTTP_400_BAD_REQUEST)
+                status=status.HTTP_400_BAD_REQUEST)
 
         data = report_generate(request, test, options)
         report = serializers.ReportGenerateSerializer(data)
@@ -763,16 +751,15 @@ class ReImportScanView(mixins.CreateModelMixin,
 
 
 class NoteTypeViewSet(mixins.ListModelMixin,
-                      mixins.RetrieveModelMixin,
-                      mixins.DestroyModelMixin,
-                      mixins.CreateModelMixin,
-                      mixins.UpdateModelMixin,
-                      viewsets.GenericViewSet):
+                       mixins.RetrieveModelMixin,
+                       mixins.DestroyModelMixin,
+                       mixins.CreateModelMixin,
+                       mixins.UpdateModelMixin,
+                       viewsets.GenericViewSet):
     serializer_class = serializers.NoteTypeSerializer
     queryset = Note_Type.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'name', 'description',
-                     'is_single', 'is_active', 'is_mandatory')
+    filter_fields = ('id', 'name', 'description', 'is_single', 'is_active', 'is_mandatory')
 
 
 class NotesViewSet(mixins.ListModelMixin,
@@ -783,8 +770,8 @@ class NotesViewSet(mixins.ListModelMixin,
     queryset = Notes.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'entry', 'author',
-                     'private', 'date', 'edited',
-                     'edit_time', 'editor')
+                    'private', 'date', 'edited',
+                    'edit_time', 'editor')
 
 
 def report_generate(request, obj, options):
@@ -840,8 +827,7 @@ def report_generate(request, obj, options):
         tests = Test.objects.filter(engagement__product__prod_type=product_type,
                                     finding__in=findings.qs).distinct()
         if len(findings.qs) > 0:
-            start_date = timezone.make_aware(datetime.combine(
-                findings.qs.last().date, datetime.min.time()))
+            start_date = timezone.make_aware(datetime.combine(findings.qs.last().date, datetime.min.time()))
         else:
             start_date = timezone.now()
 
@@ -853,8 +839,8 @@ def report_generate(request, obj, options):
         months_between += 1
 
         endpoint_monthly_counts = get_period_counts_legacy(findings.qs.order_by('numerical_severity'), findings.qs.order_by('numerical_severity'), None,
-                                                           months_between, start_date,
-                                                           relative_delta='months')
+                                                            months_between, start_date,
+                                                            relative_delta='months')
 
     elif type(obj).__name__ == "Product":
         product = obj
@@ -867,11 +853,9 @@ def report_generate(request, obj, options):
                                                                            'test__engagement__product',
                                                                            'test__engagement__product__prod_type'))
         ids = set(finding.id for finding in findings.qs)
-        engagements = Engagement.objects.filter(
-            test__finding__id__in=ids).distinct()
+        engagements = Engagement.objects.filter(test__finding__id__in=ids).distinct()
         tests = Test.objects.filter(finding__id__in=ids).distinct()
-        ids = get_endpoint_ids(
-            Endpoint.objects.filter(product=product).distinct())
+        ids = get_endpoint_ids(Endpoint.objects.filter(product=product).distinct())
         endpoints = Endpoint.objects.filter(id__in=ids)
 
     elif type(obj).__name__ == "Engagement":
@@ -890,17 +874,16 @@ def report_generate(request, obj, options):
 
         ids = set(finding.id for finding in findings.qs)
         tests = Test.objects.filter(finding__id__in=ids).distinct()
-        ids = get_endpoint_ids(Endpoint.objects.filter(
-            product=engagement.product).distinct())
+        ids = get_endpoint_ids(Endpoint.objects.filter(product=engagement.product).distinct())
         endpoints = Endpoint.objects.filter(id__in=ids)
 
     elif type(obj).__name__ == "Test":
         test = obj
         findings = ReportFindingFilter(request.GET,
                                        queryset=Finding.objects.filter(test=test).prefetch_related(
-                                           'test',
-                                           'test__engagement__product',
-                                           'test__engagement__product__prod_type').distinct())
+                                            'test',
+                                            'test__engagement__product',
+                                            'test__engagement__product__prod_type').distinct())
         report_name = "Test Report: " + str(test)
         report_title = "Test Report"
         report_subtitle = str(test)
@@ -915,23 +898,23 @@ def report_generate(request, obj, options):
         report_title = "Endpoint Report"
         report_subtitle = host
         findings = ReportFindingFilter(request.GET,
-                                       queryset=Finding.objects.filter(
-                                           endpoints__in=endpoints,
-                                       ).prefetch_related(
-                                           'test',
-                                           'test__engagement__product',
-                                           'test__engagement__product__prod_type'
-                                       ).distinct())
+            queryset=Finding.objects.filter(
+                endpoints__in=endpoints,
+            ).prefetch_related(
+                'test',
+                'test__engagement__product',
+                'test__engagement__product__prod_type'
+            ).distinct())
 
     elif type(obj).__name__ == "QuerySet":
         findings = ReportAuthedFindingFilter(request.GET,
-                                             queryset=obj.prefetch_related(
-                                                 'test',
-                                                 'test__engagement__product',
-                                                 'test__engagement__product__prod_type'
-                                             ).distinct(),
-                                             user=request.user
-                                             )
+            queryset=obj.prefetch_related(
+                'test',
+                'test__engagement__product',
+                'test__engagement__product__prod_type'
+            ).distinct(),
+            user=request.user
+        )
         report_name = 'Finding'
         report_type = 'Finding'
         report_title = "Finding Report"
@@ -980,8 +963,7 @@ def report_generate(request, obj, options):
                 finding_notes.append(
                     {
                         "finding_id": finding,
-                        # fetching only public notes for report
-                        "notes": notes.filter(private=False)
+                        "notes": notes.filter(private=False)  # fetching only public notes for report
                     }
                 )
         result['finding_notes'] = finding_notes
@@ -1111,8 +1093,8 @@ def report_generate(request, obj, options):
 
 
 class SystemSettingsViewSet(mixins.ListModelMixin,
-                            mixins.UpdateModelMixin,
-                            viewsets.GenericViewSet):
+                    mixins.UpdateModelMixin,
+                    viewsets.GenericViewSet):
     """ Basic control over System Settings. Use 'id' 1 for PUT, PATCH operations """
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
     serializer_class = serializers.SystemSettingsSerializer

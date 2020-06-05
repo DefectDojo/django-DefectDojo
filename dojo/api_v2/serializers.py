@@ -172,8 +172,7 @@ class ProductMetaSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'first_name',
-                  'last_name', 'email', 'last_login')
+        fields = ('id', 'username', 'first_name', 'last_name', 'email', 'last_login')
 
 
 class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
@@ -405,8 +404,7 @@ class FindingImageSerializer(serializers.ModelSerializer):
 class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     images = FindingImageSerializer(many=True, read_only=True)
     tags = TagListSerializerField(required=False)
-    accepted_risks = RiskAcceptanceSerializer(
-        many=True, read_only=True, source='risk_acceptance_set')
+    accepted_risks = RiskAcceptanceSerializer(many=True, read_only=True, source='risk_acceptance_set')
     push_to_jira = serializers.BooleanField(default=False)
 
     class Meta:
@@ -580,8 +578,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         default=None,
         queryset=User.objects.all())
     tags = TagListSerializerField(required=False)
-    close_old_findings = serializers.BooleanField(
-        required=False, default=False)
+    close_old_findings = serializers.BooleanField(required=False, default=False)
     push_to_jira = serializers.BooleanField(default=False)
 
     def save(self, push_to_jira=False):
@@ -595,11 +592,9 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         environment, created = Development_Environment.objects.get_or_create(
             name='Development')
         scan_date = data['scan_date']
-        scan_date_time = datetime.datetime.combine(
-            scan_date, timezone.now().time())
+        scan_date_time = datetime.datetime.combine(scan_date, timezone.now().time())
         if settings.USE_TZ:
-            scan_date_time = timezone.make_aware(
-                scan_date_time, timezone.get_default_timezone())
+            scan_date_time = timezone.make_aware(scan_date_time, timezone.get_default_timezone())
 
         version = ''
         if 'version' in data:
@@ -621,15 +616,12 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
 
         test.save()
         # return the id of the created test, can't find a better way because this is not a ModelSerializer....
-        self.fields['test'] = serializers.IntegerField(
-            read_only=True, default=test.id)
+        self.fields['test'] = serializers.IntegerField(read_only=True, default=test.id)
 
-        test.engagement.updated = max_safe(
-            [scan_date_time, test.engagement.updated])
+        test.engagement.updated = max_safe([scan_date_time, test.engagement.updated])
 
         if test.engagement.engagement_type == 'CI/CD':
-            test.engagement.target_end = max_safe(
-                [scan_date, test.engagement.target_end])
+            test.engagement.target_end = max_safe([scan_date, test.engagement.target_end])
 
         test.engagement.save()
 
@@ -719,15 +711,15 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                                               .exclude(hash_code__in=new_hash_codes) \
                                               .exclude(hash_code__in=skipped_hashcodes) \
                                               .filter(test__engagement=test.engagement,
-                                                      test__test_type=test_type,
-                                                      active=True)
+                                                  test__test_type=test_type,
+                                                  active=True)
             else:
                 old_findings = Finding.objects.exclude(test=test) \
                                               .exclude(hash_code__in=new_hash_codes) \
                                               .exclude(hash_code__in=skipped_hashcodes) \
                                               .filter(test__engagement__product=test.engagement.product,
-                                                      test__test_type=test_type,
-                                                      active=True)
+                                                  test__test_type=test_type,
+                                                  active=True)
 
             for old_finding in old_findings:
                 old_finding.active = False
@@ -745,16 +737,13 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 Tag.objects.add_tag(old_finding, 'stale')
                 old_finding.save()
 
-        title = 'Test created for ' + \
-            str(test.engagement.product) + ': ' + \
-            str(test.engagement.name) + ': ' + str(test)
+        title = 'Test created for ' + str(test.engagement.product) + ': ' + str(test.engagement.name) + ': ' + str(test)
         create_notification(event='test_added', title=title, test=test, engagement=test.engagement, product=test.engagement.product,
                             url=reverse('view_test', args=(test.id,)))
 
         updated_count = len(new_findings) + len(old_findings)
         if updated_count > 0:
-            title = 'Created ' + str(updated_count) + " findings for " + str(
-                test.engagement.product) + ': ' + str(test.engagement.name) + ': ' + str(test)
+            title = 'Created ' + str(updated_count) + " findings for " + str(test.engagement.product) + ': ' + str(test.engagement.name) + ': ' + str(test)
             create_notification(initiator=self.context['request'].user, event='scan_added', title=title, findings_new=new_findings, findings_mitigated=old_findings,
                                 finding_count=updated_count, test=test, engagement=test.engagement, product=test.engagement.product,
                                 url=reverse('view_test', args=(test.id,)))
@@ -765,8 +754,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         scan_type = data.get("scan_type")
         file = data.get("file")
         if not file and requires_file(scan_type):
-            raise serializers.ValidationError(
-                'Uploading a Report File is required for {}'.format(scan_type))
+            raise serializers.ValidationError('Uploading a Report File is required for {}'.format(scan_type))
         return data
 
     def validate_scan_data(self, value):
@@ -786,8 +774,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     scan_type = serializers.ChoiceField(
         choices=ImportScanForm.SCAN_TYPE_CHOICES)
     endpoint_to_add = serializers.PrimaryKeyRelatedField(queryset=Endpoint.objects.all(),
-                                                         default=None,
-                                                         required=False)
+                                                          default=None,
+                                                          required=False)
     file = serializers.FileField(required=False)
     test = serializers.PrimaryKeyRelatedField(
         queryset=Test.objects.all())
@@ -800,11 +788,9 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         endpoint_to_add = data['endpoint_to_add']
         min_sev = data['minimum_severity']
         scan_date = data['scan_date']
-        scan_date_time = datetime.datetime.combine(
-            scan_date, timezone.now().time())
+        scan_date_time = datetime.datetime.combine(scan_date, timezone.now().time())
         if settings.USE_TZ:
-            scan_date_time = timezone.make_aware(
-                scan_date_time, timezone.get_default_timezone())
+            scan_date_time = timezone.make_aware(scan_date_time, timezone.get_default_timezone())
         verified = data['verified']
         active = data['active']
 
@@ -921,8 +907,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
 
                     finding.save(push_to_jira=push_to_jira)
 
-            to_mitigate = set(original_items) - \
-                set(reactivated_items) - set(unchanged_items)
+            to_mitigate = set(original_items) - set(reactivated_items) - set(unchanged_items)
             mitigated_findings = []
             for finding in to_mitigate:
                 if not finding.mitigated or not finding.is_Mitigated:
@@ -932,7 +917,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     finding.active = False
                     finding.save(push_to_jira=push_to_jira)
                     note = Notes(entry="Mitigated by %s re-upload." % scan_type,
-                                 author=self.context['request'].user)
+                                author=self.context['request'].user)
                     note.save()
                     finding.notes.add(note)
                     mitigated_findings.append(finding)
@@ -941,13 +926,11 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             untouched = set(unchanged_items) - set(to_mitigate)
 
             test.updated = max_safe([scan_date_time, test.updated])
-            test.engagement.updated = max_safe(
-                [scan_date_time, test.engagement.updated])
+            test.engagement.updated = max_safe([scan_date_time, test.engagement.updated])
 
             if test.engagement.engagement_type == 'CI/CD':
                 test.target_end = max_safe([scan_date_time, test.target_end])
-                test.engagement.target_end = max_safe(
-                    [scan_date, test.engagement.target_end])
+                test.engagement.target_end = max_safe([scan_date, test.engagement.target_end])
 
             test.save()
             test.engagement.save()
@@ -957,12 +940,10 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             print(mitigated_count)
             print(unchanged_count - mitigated_count)
 
-            updated_count = mitigated_count + \
-                reactivated_count + len(new_items)
+            updated_count = mitigated_count + reactivated_count + len(new_items)
             if updated_count > 0:
                 # new_items = original_items
-                title = 'Updated ' + str(updated_count) + " findings for " + str(
-                    test.engagement.product) + ': ' + str(test.engagement.name) + ': ' + str(test)
+                title = 'Updated ' + str(updated_count) + " findings for " + str(test.engagement.product) + ': ' + str(test.engagement.name) + ': ' + str(test)
                 create_notification(initiator=self.context['request'].user, event='scan_added', title=title, findings_new=new_items, findings_mitigated=mitigated_findings, findings_reactivated=reactivated_items,
                                     finding_count=updated_count, test=test, engagement=test.engagement, product=test.engagement.product, findings_untouched=untouched,
                                     url=reverse('view_test', args=(test.id,)))
@@ -976,8 +957,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         scan_type = data.get("scan_type")
         file = data.get("file")
         if not file and requires_file(scan_type):
-            raise serializers.ValidationError(
-                'Uploading a Report File is required for {}'.format(scan_type))
+            raise serializers.ValidationError('Uploading a Report File is required for {}'.format(scan_type))
         return data
 
     def validate_scan_data(self, value):
@@ -1022,14 +1002,12 @@ class AddNewNoteOptionSerializer(serializers.ModelSerializer):
 
 
 class FindingToFindingImagesSerializer(serializers.Serializer):
-    finding_id = serializers.PrimaryKeyRelatedField(
-        queryset=Finding.objects.all(), many=False, allow_null=True)
+    finding_id = serializers.PrimaryKeyRelatedField(queryset=Finding.objects.all(), many=False, allow_null=True)
     images = FindingImageSerializer(many=True)
 
 
 class FindingToNotesSerializer(serializers.Serializer):
-    finding_id = serializers.PrimaryKeyRelatedField(
-        queryset=Finding.objects.all(), many=False, allow_null=True)
+    finding_id = serializers.PrimaryKeyRelatedField(queryset=Finding.objects.all(), many=False, allow_null=True)
     notes = NoteSerializer(many=True)
 
 
@@ -1048,8 +1026,7 @@ class ExecutiveSummarySerializer(serializers.Serializer):
     test_target_start = serializers.DateTimeField()
     test_target_end = serializers.DateTimeField()
     test_environment_name = serializers.CharField(max_length=200)
-    test_strategy_ref = serializers.URLField(
-        max_length=200, min_length=None, allow_blank=True)
+    test_strategy_ref = serializers.URLField(max_length=200, min_length=None, allow_blank=True)
     total_findings = serializers.IntegerField()
 
 
@@ -1069,10 +1046,8 @@ class ReportGenerateSerializer(serializers.Serializer):
     title = serializers.CharField(max_length=200)
     user_id = serializers.IntegerField()
     host = serializers.CharField(max_length=200)
-    finding_images = FindingToFindingImagesSerializer(
-        many=True, allow_null=True, required=False)
-    finding_notes = FindingToNotesSerializer(
-        many=True, allow_null=True, required=False)
+    finding_images = FindingToFindingImagesSerializer(many=True, allow_null=True, required=False)
+    finding_notes = FindingToNotesSerializer(many=True, allow_null=True, required=False)
 
 
 class TagSerializer(serializers.Serializer):
@@ -1090,22 +1065,14 @@ class SystemSettingsSerializer(serializers.Serializer):
     enable_finding_sla = serializers.BooleanField(default=True)
 
     def update(self, instance, validated_data):
-        instance.enable_auditlog = validated_data.get(
-            'enable_auditlog', instance.enable_auditlog)
-        instance.enable_deduplication = validated_data.get(
-            'enable_deduplication', instance.enable_deduplication)
-        instance.delete_dupulicates = validated_data.get(
-            'delete_dupulicates', instance.delete_dupulicates)
-        instance.max_dupes = validated_data.get(
-            'max_dupes', instance.max_dupes)
-        instance.enable_jira = validated_data.get(
-            'enable_jira', instance.enable_jira)
-        instance.enable_benchmark = validated_data.get(
-            'enable_benchmark', instance.enable_benchmark)
-        instance.enable_product_grade = validated_data.get(
-            'enable_product_grade', instance.enable_product_grade)
-        instance.enable_finding_sla = validated_data.get(
-            'enable_finding_sla', instance.enable_finding_sla)
+        instance.enable_auditlog = validated_data.get('enable_auditlog', instance.enable_auditlog)
+        instance.enable_deduplication = validated_data.get('enable_deduplication', instance.enable_deduplication)
+        instance.delete_dupulicates = validated_data.get('delete_dupulicates', instance.delete_dupulicates)
+        instance.max_dupes = validated_data.get('max_dupes', instance.max_dupes)
+        instance.enable_jira = validated_data.get('enable_jira', instance.enable_jira)
+        instance.enable_benchmark = validated_data.get('enable_benchmark', instance.enable_benchmark)
+        instance.enable_product_grade = validated_data.get('enable_product_grade', instance.enable_product_grade)
+        instance.enable_finding_sla = validated_data.get('enable_finding_sla', instance.enable_finding_sla)
 
         instance.save()
         return instance
