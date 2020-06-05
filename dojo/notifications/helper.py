@@ -71,8 +71,7 @@ def create_notification_message(event, user, notification_type, *args, **kwargs)
     try:
         notification = render_to_string(template, kwargs)
     except Exception as e:
-        logger.debug('template not found or not implemented yet: %s', template)
-        create_description(event, *args, **kwargs)
+        kwargs["description"] = create_description(event, *args, **kwargs)
         notification = render_to_string('notifications/other.tpl', kwargs)
 
     return notification
