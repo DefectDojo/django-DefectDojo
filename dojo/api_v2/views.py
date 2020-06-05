@@ -96,9 +96,9 @@ class EngagementViewSet(mixins.ListModelMixin,
                 product__authorized_users__in=[self.request.user])
         else:
             return Engagement.objects.all()
-   
-    @swagger_auto_schema(    
-        request_body=no_body,responses={status.HTTP_200_OK: ""}
+
+    @swagger_auto_schema(
+        request_body=no_body, responses={status.HTTP_200_OK: ""}
     )
     @action(detail=True, methods=["post"])
     def close(self, request, pk=None):
@@ -106,8 +106,8 @@ class EngagementViewSet(mixins.ListModelMixin,
         close_engagement(eng)
         return HttpResponse()
 
-    @swagger_auto_schema(    
-        request_body=no_body,responses={status.HTTP_200_OK: ""}
+    @swagger_auto_schema(
+        request_body=no_body, responses={status.HTTP_200_OK: ""}
     )
     @action(detail=True, methods=["post"])
     def reopen(self, request, pk=None):
@@ -207,11 +207,11 @@ class FindingViewSet(mixins.ListModelMixin,
             return serializers.FindingSerializer
 
     @swagger_auto_schema(
-        method='get', 
+        method='get',
         responses={status.HTTP_200_OK: serializers.TagSerializer}
     )
     @swagger_auto_schema(
-        method='post', 
+        method='post',
         request_body=serializers.TagSerializer,
         responses={status.HTTP_200_OK: serializers.TagSerializer}
     )
@@ -239,11 +239,11 @@ class FindingViewSet(mixins.ListModelMixin,
         return Response(serialized_tags.data)
 
     @swagger_auto_schema(
-        method='get', 
+        method='get',
         responses={status.HTTP_200_OK: serializers.FindingToNotesSerializer}
     )
     @swagger_auto_schema(
-        methods=['post','patch'], 
+        methods=['post', 'patch'],
         request_body=serializers.AddNewNoteOptionSerializer,
         responses={status.HTTP_200_OK: serializers.NoteSerializer}
     )
@@ -315,10 +315,8 @@ class FindingViewSet(mixins.ListModelMixin,
             status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
-        responses={
-            status.HTTP_200_OK: None
-        },
-        methods=['put','patch'], 
+        responses={status.HTTP_200_OK: None},
+        methods=['put', 'patch'],
         request_body=serializers.TagSerializer
     )
     @action(detail=True, methods=["put", "patch"])
