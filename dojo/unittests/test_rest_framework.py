@@ -83,7 +83,7 @@ class BaseClass():
 
 
 class AppAnalysisTest(BaseClass.RESTEndpointTest):
-    fixtures = ['defect_dojo_sample_data.json']
+    fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = App_Analysis
