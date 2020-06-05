@@ -157,6 +157,8 @@ def send_slack_notification(event, user=None, *args, **kwargs):
 
                 channel = '@{}'.format(slack_user_id)
                 _post_slack_message(channel)
+                # return here to avoid sending twice to the channel below
+                return
             else:
                 logger.info("The user does not have a email address informed for Slack in profile.")
 
