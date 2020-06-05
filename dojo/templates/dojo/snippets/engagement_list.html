@@ -15,12 +15,15 @@
               {% endif %}
               </h4>
         </div>
+        <div class="clearfix">
+            {% include "dojo/paging_snippet.html" with page=engs parm_name=parm_name page_size=True %}
+        </div>
         {% if engs %}
-            <table class="tablesorter-bootstrap table table-condensed table-striped table-hover">
+            <table id={{ status }} class="tablesorter-bootstrap table table-condensed table-striped table-hover">
                 <thead>
                 <tr>
-                    <th>Name</th>
                     <th></th>
+                    <th>Name</th>
                     <th>Lead</th>
                     <th>Date</th>
                     <th>Length</th>
@@ -37,23 +40,6 @@
                 <tbody>
                 {% for eng in engs %}
                     <tr>
-                    <td style="width: 250px;">
-                    <a href="{% url 'view_engagement' eng.id %}" data-toggle="tooltip" data-placement="bottom" title="{{ eng.name|default:"N/A" }}">
-                    {{ eng.name|truncatechars:35|default:"N/A" }}</a>
-                    {% if eng.version %}
-                        <sup>
-                              <a target="_blank" class="tag-label tag-version" data-toggle="tooltip" data-placement="bottom" title="Product Version: {{ eng.version }}">
-                              {{ eng.version }}</a>
-                        </sup>
-                    {% endif %}
-                    {% if eng.tags %}
-                        <sup>
-                            {% for tag in eng.tags %}
-                            <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
-                            {% endfor %}
-                        </sup>
-                    {% endif %}
-                    </td>
                     <td class="nowrap">
                       <div class="align-top">
                         <div class="dropdown">
@@ -117,6 +103,23 @@
                            </ul>
                          </li>
                      </ul>
+                    </td>
+                    <td style="width: 250px;">
+                    <a href="{% url 'view_engagement' eng.id %}" data-toggle="tooltip" data-placement="bottom" title="{{ eng.name|default:"N/A" }}">
+                    {{ eng.name|truncatechars_html:35|default:"N/A" }}</a>
+                    {% if eng.version %}
+                        <sup>
+                              <a target="_blank" class="tag-label tag-version" data-toggle="tooltip" data-placement="bottom" title="Product Version: {{ eng.version }}">
+                              {{ eng.version }}</a>
+                        </sup>
+                    {% endif %}
+                    {% if eng.tags %}
+                        <sup>
+                            {% for tag in eng.tags %}
+                            <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                            {% endfor %}
+                        </sup>
+                    {% endif %}
                     </td>
                     <td style="width: 150px;">
                       {% if eng.lead.get_full_name and eng.lead.get_full_name.strip %}
@@ -207,3 +210,77 @@
         {% include "dojo/paging_snippet.html" with page=engs parm_name=parm_name page_size=True %}
     </div>
 </div>
+{% block postscript %}
+<script src="/static/jquery/dist/jquery.js"></script>
+<script>
+        // DataTables setup
+        $(document).ready(function() {
+            var date =  new Date().toISOString().slice(0, 10);
+            var fileDated = 'Engagements_List_' + date;
+            var buttonCommon = {
+                exportOptions: {
+                    columns: ':not(:eq(8))',
+                    stripHtml: true,
+                    stripNewlines: true,
+                    trim: true,
+                    orthogonal: 'export'
+                },
+                filename: fileDated,
+                title: 'Engagements List'
+            };
+
+            // Mapping of table columns to objects for proper cleanup and data formatting
+            var dojoTable = $('#{{status}}').DataTable({
+                "columns": [
+                    { "data": "action" },
+                    { "data": "eng_name" },
+                    { "data": "lead" },
+                    { "data": "date" },
+                    { "data": "length" },
+                    { "data": "tests" },
+                    { "data": "open" },
+                    { "data": "all" },
+                    { "data": "dups" },
+                    { "data": "updated" },
+                    {% if status == "paused" or status == "closed" %}
+                      { "data": "updated" },
+                    {% endif %}
+                ],
+                columnDefs: [
+                    { 
+                        "orderable": false,
+                        "targets": [0]
+                    },
+                ],
+                dom: 'Bfrtip',
+                paging: false,
+                buttons: [
+                    {
+                        extend: 'colvis',
+                        columns: ':not(.noVis)'
+                    },
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'copy'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'excel',
+                        autoFilter: true,
+                        sheetName: 'Exported data',
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'csv'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'pdf',
+                        orientation: 'landscape',
+                        pageSize: 'LETTER'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'print'
+                    }),
+                ],
+            });
+        });
+    </script>
+    {% endblock %}
+    {% include "dojo/filter_js_snippet.html" %}

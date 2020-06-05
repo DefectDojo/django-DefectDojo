@@ -93,7 +93,7 @@
                                         {% endfor %}
                                     </sup>
                                 </td>
-                                <td>{{ product.object.description|truncatechars:150|markdown_render }}</td>
+                                <td>{{ product.object.description|truncatechars_html:150|markdown_render }}</td>
                             </tr>
                         {% endfor %}
                         </tbody>
@@ -133,7 +133,6 @@
                                     </sup>
                                 </td>
                                 <td>
-                                    {% if finding.object.under_review %}Under Review, {% endif %}
                                     {{ finding.object.status }}
                                     {% if finding.object.duplicate_finding.id %}, <a href="{% url 'view_finding' finding.object.duplicate_finding.id%}" data-toggle="tooltip" data-placement="top" title="{{ finding.object.title }}, {{ finding.object.created }}">Original</a>{% endif %}
                                 </td>

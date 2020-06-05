@@ -112,14 +112,14 @@ def metrics(request, mtype):
                         tzinfo=timezone.get_current_timezone())
 
     if len(prod_type) > 0:
-        findings_closed = Finding.objects.filter(mitigated__range=[start_date, end_date],
+        findings_closed = Finding.objects.filter(mitigated__date__range=[start_date, end_date],
                                                  test__engagement__product__prod_type__in=prod_type).prefetch_related(
             'test__engagement__product')
         # capture the accepted findings in period
-        accepted_findings = Finding.objects.filter(risk_acceptance__created__range=[start_date, end_date],
+        accepted_findings = Finding.objects.filter(risk_acceptance__created__date__range=[start_date, end_date],
                                                    test__engagement__product__prod_type__in=prod_type). \
             prefetch_related('test__engagement__product')
-        accepted_findings_counts = Finding.objects.filter(risk_acceptance__created__range=[start_date, end_date],
+        accepted_findings_counts = Finding.objects.filter(risk_acceptance__created__date__range=[start_date, end_date],
                                                           test__engagement__product__prod_type__in=prod_type). \
             prefetch_related('test__engagement__product').aggregate(
             total=Sum(
@@ -148,11 +148,11 @@ def metrics(request, mtype):
                      output_field=IntegerField())),
         )
     else:
-        findings_closed = Finding.objects.filter(mitigated__range=[start_date, end_date]).prefetch_related(
+        findings_closed = Finding.objects.filter(mitigated__date__range=[start_date, end_date]).prefetch_related(
             'test__engagement__product')
-        accepted_findings = Finding.objects.filter(risk_acceptance__created__range=[start_date, end_date]). \
+        accepted_findings = Finding.objects.filter(risk_acceptance__created__date__range=[start_date, end_date]). \
             prefetch_related('test__engagement__product')
-        accepted_findings_counts = Finding.objects.filter(risk_acceptance__created__range=[start_date, end_date]). \
+        accepted_findings_counts = Finding.objects.filter(risk_acceptance__created__date__range=[start_date, end_date]). \
             prefetch_related('test__engagement__product').aggregate(
             total=Sum(
                 Case(When(severity__in=('Critical', 'High', 'Medium', 'Low'),
@@ -251,7 +251,7 @@ def metrics(request, mtype):
 
         if finding.test.engagement.product.name not in in_period_details:
             in_period_details[finding.test.engagement.product.name] = {
-                'path': reverse('view_product_findings', args=(finding.test.engagement.product.id,)),
+                'path': reverse('product_open_findings', args=(finding.test.engagement.product.id,)),
                 'Critical': 0, 'High': 0, 'Medium': 0, 'Low': 0, 'Info': 0, 'Total': 0}
         in_period_details[
             finding.test.engagement.product.name
@@ -449,12 +449,12 @@ def product_type_counts(request):
 
             opened_in_period_list.append(oip)
 
-            closed_in_period = Finding.objects.filter(mitigated__range=[start_date, end_date],
+            closed_in_period = Finding.objects.filter(mitigated__date__range=[start_date, end_date],
                                                       test__engagement__product__prod_type=pt,
                                                       severity__in=('Critical', 'High', 'Medium', 'Low')).values(
                 'numerical_severity').annotate(Count('numerical_severity')).order_by('numerical_severity')
 
-            total_closed_in_period = Finding.objects.filter(mitigated__range=[start_date, end_date],
+            total_closed_in_period = Finding.objects.filter(mitigated__date__range=[start_date, end_date],
                                                             test__engagement__product__prod_type=pt,
                                                             severity__in=(
                                                                 'Critical', 'High', 'Medium', 'Low')).aggregate(
@@ -652,7 +652,7 @@ def view_engineer(request, eid):
     open_week = findings.filter(reduce(operator.or_, q_objects))
 
     accepted_week = [finding for ra in Risk_Acceptance.objects.filter(
-        reporter=user, created__range=[day_list[0], day_list[-1]])
+        owner=user, created__range=[day_list[0], day_list[-1]])
                      for finding in ra.accepted_findings.all()]
 
     q_objects = (Q(mitigated=d) for d in day_list)
@@ -681,7 +681,7 @@ def view_engineer(request, eid):
                                  month_start.month)[1],
                              tzinfo=timezone.get_current_timezone())
         for finding in [finding for ra in Risk_Acceptance.objects.filter(
-                created__range=[month_start, month_end], reporter=user)
+                created__range=[month_start, month_end], owner=user)
                         for finding in ra.accepted_findings.all()]:
             if finding.severity == 'Critical':
                 month[1] += 1
@@ -708,7 +708,7 @@ def view_engineer(request, eid):
             wk_range[1].strip() + " " + str(now.year), "%b %d %Y")
 
         for finding in [finding for ra in Risk_Acceptance.objects.filter(
-                created__range=[week_start, week_end], reporter=user)
+                created__range=[week_start, week_end], owner=user)
                         for finding in ra.accepted_findings.all()]:
             if finding.severity == 'Critical':
                 week[1] += 1
@@ -771,7 +771,7 @@ def view_engineer(request, eid):
                 ).count()
         prod = Product.objects.get(id=product)
         all_findings_link = "<a href='%s'>%s</a>" % (
-            reverse('view_product_findings', args=(prod.id,)), escape(prod.name))
+            reverse('product_open_findings', args=(prod.id,)), escape(prod.name))
         update.append([all_findings_link, z_count, o_count, t_count, h_count,
                        z_count + o_count + t_count + h_count])
     total_update = []
@@ -804,7 +804,7 @@ def view_engineer(request, eid):
                     severity='Low').count()
         prod = Product.objects.get(id=product)
         all_findings_link = "<a href='%s'>%s</a>" % (
-            reverse('view_product_findings', args=(prod.id,)), escape(prod.name))
+            reverse('product_open_findings', args=(prod.id,)), escape(prod.name))
         total_update.append([all_findings_link, z_count, o_count, t_count,
                              h_count, z_count + o_count + t_count + h_count])
 

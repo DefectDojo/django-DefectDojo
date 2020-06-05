@@ -4,16 +4,16 @@
 # The code for the build image should be idendical with the code in
 # Dockerfile.nginx to use the caching mechanism of Docker.
 
-# Using 3.5.7 to avoid compatibility issues that may be introduced by python 3.6 and 3.7.
-# Please upgrade before end-of-life in september 2020!
 # Ref: https://devguide.python.org/#branchstatus
-FROM python:3.6.10-buster@sha256:5ad282921c5b8d811a8c589f4ee0d52ebfc98b5c88b9e098b8f1543f2ec64cc1 as build
+FROM python:3.6.10-slim-buster@sha256:4a4f95aaa98bcef7d4abbae3de08353632ba34c2a97e295b7f7fd52e1d08d94b as build
 WORKDIR /app
 RUN \
   apt-get -y update && \
   apt-get -y install \
+    build-essential \
     dnsutils \
     default-mysql-client \
+    libmariadb-dev-compat \
     postgresql-client \
     xmlsec1 \
     git \
@@ -72,7 +72,7 @@ RUN \
   cp dojo/settings/settings.dist.py dojo/settings/settings.py
 COPY tests/ ./tests/
 RUN \
-  mkdir dojo/migrations && \
+  mkdir -p dojo/migrations && \
   chmod g=u dojo/migrations && \
   chmod g=u /var/run && \
   true

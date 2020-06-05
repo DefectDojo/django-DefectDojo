@@ -1,0 +1,9 @@
+[
+    [
+        "httplib2",
+        "<=0.9.2",
+        "0.9.2",
+        "httplib2 before and including 0.9.2 on \"SSL certificate hostname mismatch\" it is checked only once: https://github.com/httplib2/httplib2/issues/5",
+        "25848"
+    ]
+]
