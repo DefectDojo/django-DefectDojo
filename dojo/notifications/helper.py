@@ -133,6 +133,7 @@ def send_slack_notification(event, user=None, *args, **kwargs):
             data={
                 'token': get_system_setting('slack_token'),
                 'channel': channel,
+                'username': get_system_setting('slack_username'),
                 'text': create_notification_message(event, user, 'slack', *args, **kwargs)
             })
 
@@ -157,8 +158,7 @@ def send_slack_notification(event, user=None, *args, **kwargs):
                 channel = '@{}'.format(slack_user_id)
                 _post_slack_message(channel)
             else:
-                logger.error("The user does not have a Slack email address in profile.")
-                return
+                logger.info("The user does not have a email address informed for Slack in profile.")
 
         # This will trigger if slack notification somewhere is enabled
         # e.g. System scope slack notifications, and not personal would still see this go through

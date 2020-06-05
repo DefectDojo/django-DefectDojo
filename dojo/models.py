@@ -154,7 +154,7 @@ class System_Settings(models.Model):
                                              'with Slack. Get one at '
                                              'https://api.slack.com/tokens')
     slack_username = models.CharField(max_length=100, default='', blank=True,
-                        help_text='Optional. Will take your bot name.')
+                     help_text='Optional. Will take your bot name otherwise.')
     enable_hipchat_notifications = \
         models.BooleanField(default=False,
                             verbose_name='Enable HipChat notifications',
