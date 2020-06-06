@@ -1,6 +1,16 @@
 This template is for your information. Please clear everything when submitting your pull request.
 
-**Note: DefectDojo is now on Python3.6 and Django 2.2.x. Please submit your pull requests to the 'dev' branch as the 'legacy-python2.7' branch is only for bug fixes. Any new features submitted to the legacy branch will be ignored and closed.**
+**Note: DefectDojo is now on Python3.6 and Django 2.2.x.**
+
+**Please submit your pull requests to :**
+
+**- evolutions: dev branch**
+
+**- bugfix: latest "release/x.y.z" branch**
+
+**- hotfixes: master branch**
+
+If in doubt you can use dev branch, it will just roll-out later. 
 
 When submitting a pull request, please make sure you have completed the following checklist:
 
