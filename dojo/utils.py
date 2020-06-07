@@ -1329,7 +1329,8 @@ def add_issue(find, push_to_jira):
 
     if push_to_jira:
         if JIRA_PKey.objects.filter(product=prod).count() == 0:
-            logger.error('Finding cannot be pushed to JIRA as there is no JIRA configuration for this product.', find)
+            logger.error("Finding {} cannot be pushed to JIRA as there is no JIRA configuration for this product.".format(find.id))
+            log_jira_alert('Finding cannot be pushed to JIRA as there is no JIRA configuration for this product.', find)
             return
 
         jpkey = JIRA_PKey.objects.get(product=prod)
@@ -1337,6 +1338,7 @@ def add_issue(find, push_to_jira):
 
         if 'Active' in find.status() and 'Verified' in find.status():
             if jira_minimum_threshold > Finding.get_number_severity(find.severity):
+                log_jira_alert('Finding below the minimum jira severity threshold.', find)
                 logger.warn("Finding {} is below the minimum jira severity threshold.".format(find.id))
                 logger.warn("The JIRA issue will NOT be created.")
                 return
@@ -1397,6 +1399,7 @@ def add_issue(find, push_to_jira):
                     #      jira.add_issues_to_epic(epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
             except JIRAError as e:
                 logger.error(e.text, find)
+                log_jira_alert(e.text, find)
         else:
             logger.warning("A Finding needs to be both Active and Verified to be pushed to JIRA.", find)
 
