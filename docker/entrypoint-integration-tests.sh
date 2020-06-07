@@ -11,6 +11,7 @@ if [ "$CR" != 200 ]; then
     exit 1
 fi
 
+# Run available unittests with a simple setup
 # All available Integrationtest Scripts are activated below
 # If successsful, A successs message is printed and the script continues
 # If any script is unsuccesssful a failure message is printed and the test script
@@ -97,13 +98,14 @@ else
     fail $test
 fi
 
-test="Smoke integration test"
-echo "Running: $test"
-if python3 tests/smoke_test.py ; then
-    success $test
-else
-    fail $test
-fi
+# all smoke tests are already covered by other testcases above/below
+# test="Smoke integration test"
+# echo "Running: $test"
+# if python3 tests/smoke_test.py ; then
+#     success $test
+# else
+#     fail $test
+# fi
 
 test="Check Status test"
 echo "Running: $test"

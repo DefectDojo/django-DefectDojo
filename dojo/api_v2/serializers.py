@@ -3,7 +3,7 @@ from dojo.models import Product, Engagement, Test, Finding, \
     Finding_Template, Test_Type, Environment, NoteHistory, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Product_Type, JIRA_Conf, Endpoint, BurpRawRequestResponse, JIRA_PKey, \
-    Notes, DojoMeta, FindingImage, Note_Type
+    Notes, DojoMeta, FindingImage, Note_Type, System_Settings
 from dojo.forms import ImportScanForm, SEVERITY_CHOICES
 from dojo.tools import requires_file
 from dojo.tools.factory import import_parser_factory
@@ -1052,3 +1052,27 @@ class ReportGenerateSerializer(serializers.Serializer):
 
 class TagSerializer(serializers.Serializer):
     tags = TagListSerializerField(required=True)
+
+
+class SystemSettingsSerializer(serializers.Serializer):
+    enable_auditlog = serializers.BooleanField(default=True)
+    enable_deduplication = serializers.BooleanField(default=False)
+    delete_dupulicates = serializers.BooleanField(default=False)
+    max_dupes = serializers.IntegerField(allow_null=True, required=False)
+    enable_jira = serializers.BooleanField(default=False)
+    enable_benchmark = serializers.BooleanField(default=True)
+    enable_product_grade = serializers.BooleanField(default=False)
+    enable_finding_sla = serializers.BooleanField(default=True)
+
+    def update(self, instance, validated_data):
+        instance.enable_auditlog = validated_data.get('enable_auditlog', instance.enable_auditlog)
+        instance.enable_deduplication = validated_data.get('enable_deduplication', instance.enable_deduplication)
+        instance.delete_dupulicates = validated_data.get('delete_dupulicates', instance.delete_dupulicates)
+        instance.max_dupes = validated_data.get('max_dupes', instance.max_dupes)
+        instance.enable_jira = validated_data.get('enable_jira', instance.enable_jira)
+        instance.enable_benchmark = validated_data.get('enable_benchmark', instance.enable_benchmark)
+        instance.enable_product_grade = validated_data.get('enable_product_grade', instance.enable_product_grade)
+        instance.enable_finding_sla = validated_data.get('enable_finding_sla', instance.enable_finding_sla)
+
+        instance.save()
+        return instance
