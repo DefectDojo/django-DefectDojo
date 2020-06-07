@@ -47,7 +47,7 @@ end note
 
 == Hotfix ==
 
-master -> hotbranch ++ #DarkSalmon: Create short-lived fix branch "hf/x.y.z"
+master -> hotbranch ++ #DarkSalmon: Create short-lived fix branch "hotfix/x.y.z"
 note left
 z starts at 1. Increase for each hotfix.
 end note
