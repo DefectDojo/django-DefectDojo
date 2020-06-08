@@ -768,12 +768,16 @@ def finding_display_status(finding):
         display_status = display_status.replace('Under Review', link)
         print('status2: ', display_status)
 
-    if finding.duplicate and finding.duplicate_finding is not None:
-        url = reverse('view_finding', args=(finding.duplicate_finding.id, ))
-        name = finding.duplicate_finding.title + ', ' + finding.duplicate_finding.created.strftime('%b %d, %Y, %H:%M:%S')
-        link = '<a href="' + url + '" data-toggle="tooltip" data-placement="top" title="' + escape(name) + '">Duplicate</a>'
-        # print(link)
+    if finding.duplicate:
+        url = '#'
+        name = 'unknown'
+        if finding.duplicate_finding:
+            url = reverse('view_finding', args=(finding.duplicate_finding.id,))
+            name = finding.duplicate_finding.title + ', ' + \
+                   finding.duplicate_finding.created.strftime('%b %d, %Y, %H:%M:%S')
+
+        link = '<a href="' + url + '" data-toggle="tooltip" data-placement="top" title="' + escape(
+            name) + '">Duplicate</a>'
         display_status = display_status.replace('Duplicate', link)
-        print('status1: ', display_status)
 
     return display_status
