@@ -122,7 +122,7 @@
                             {% endif %}
                             <li role="presentation">
                                 <a href ="{% url 'upload_risk_acceptance$' finding.test.engagement.id%}">
-                                    <i class="fa fa-exclamation-circle"></i> Add Risk Exception
+                                    <i class="fa fa-exclamation-circle"></i> Add Risk Acceptance
                                 </a>
                             </li>
                             <li role="presentation">
@@ -185,7 +185,7 @@
                     {% endif %}
                     <th>Status</th>
                     {% if finding.risk_acceptance_set.all %}
-                        <th>Acceptance</th>
+                        <th>Risk Acceptance</th>
                     {% endif %}
                     {% if finding.duplicate_finding_set %}
                     <th>Parent</th>
@@ -224,8 +224,7 @@
                     {% if finding.scanner_confidence %}
                     <td> {{finding.get_scanner_confidence_text}}</td>
                     {% endif %}
-                    <td>{% if finding.under_review %}Under Review, {% endif %}{{ finding.status }}{% if finding.duplicate_finding.id %}, <a href="{% url 'view_finding' finding.duplicate_finding.id %}">Original
-                        {% endif %}</a></td>
+                    <td>{{ finding|finding_display_status|safe }}
                     {% if finding.duplicate_finding_set %}
                     <td>
                         <div class="align-top">
@@ -246,8 +245,11 @@
                     {% endif %}
                     {% if finding.risk_acceptance_set.all %}
                         <td>
-                            <a href="{% url 'view_risk' finding.test.engagement.id finding.risk_acceptance_set.all.0.id %}">
-                                View Risk Acceptance</a>
+                            {% for ra in finding.risk_acceptance_set.all|slice:":5" %}
+                                <a href="{% url 'view_risk' finding.test.engagement.id finding.risk_acceptance_set.all.0.id %}" class="fa fa-thumbs-up fa-lg has-popover" data-trigger="hover" data-placement="right"
+                                data-content="{{ finding.risk_acceptance_set.all.0.name }}"
+                                data-container="body" data-original-title="Risk Acceptance"></a>
+                            {% endfor %}
                         </td>
                     {% endif %}
                     <td>
@@ -469,9 +471,9 @@
         {% if findings %}
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h4>Similar Findings<span class="pull-right"><a data-toggle="collapse" href="#similar_findings"><i class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
+                    <h4>Similar Findings ({{ findings.count }}) <span class="pull-right"><a data-toggle="collapse" href="#similar_findings"><i class="glyphicon glyphicon-chevron-down"></i></a></span></h4>
                 </div>
-                <div id="similar_findings" class="panel-body collapse in">
+                <div id="similar_findings" class="panel-body collapse">
                     <table class="table table-striped table-hover centered">
                         <tr>
                             <th>Title</th>
