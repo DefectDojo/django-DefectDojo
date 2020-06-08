@@ -586,7 +586,7 @@ class Product(models.Model):
 
     created = models.DateTimeField(editable=False, null=True, blank=True)
     prod_type = models.ForeignKey(Product_Type, related_name='prod_type',
-                                  null=True, blank=True, on_delete=models.CASCADE)
+                                  null=False, blank=False, on_delete=models.CASCADE)
     updated = models.DateTimeField(editable=False, null=True, blank=True)
     tid = models.IntegerField(default=0, editable=False)
     authorized_users = models.ManyToManyField(User, blank=True)
