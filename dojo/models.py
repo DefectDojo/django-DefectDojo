@@ -1652,7 +1652,7 @@ class Finding(models.Model):
     def is_risk_accepted(self):
         return self.risk_acceptance_set.exists()
 
-    def sla(self):
+    def sla_days_remaining(self):
         sla_calculation = None
         severity = self.severity
         from dojo.utils import get_system_setting
