@@ -406,6 +406,8 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
     accepted_risks = RiskAcceptanceSerializer(many=True, read_only=True, source='risk_acceptance_set')
     push_to_jira = serializers.BooleanField(default=False)
+    age = serializers.IntegerField(read_only=True)
+    sla_days_remaining = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Finding
