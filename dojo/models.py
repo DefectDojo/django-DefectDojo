@@ -1570,7 +1570,11 @@ class Finding(models.Model):
 
     def duplicate_finding_set(self):
         if self.duplicate:
-            return Finding.objects.get(id=self.duplicate_finding.id).original_finding.all().order_by('title')
+            if self.duplicate_finding is not None:
+                return Finding.objects.get(
+                    id=self.duplicate_finding.id).original_finding.all().order_by('title')
+            else:
+                return []
         else:
             return self.original_finding.all().order_by('title')
 
