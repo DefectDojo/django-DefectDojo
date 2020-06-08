@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0040_finding_cwe_index'),
+        ('dojo', '0043_finding_hash_code_index'),
     ]
 
     operations = [
