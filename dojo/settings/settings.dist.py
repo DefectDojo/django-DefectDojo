@@ -339,7 +339,7 @@ LOGIN_EXEMPT_URLS = (
     r'^%sfinding/image/(?P<token>[^/]+)$' % URL_PREFIX,
     r'^%sapi/v2/' % URL_PREFIX,
     r'complete/',
-    r'empty_survey/([\d]+)/answer'
+    r'empty_questionnaire/([\d]+)/answer'
 )
 
 # ------------------------------------------------------------------------------
@@ -482,13 +482,11 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'polymorphic',  # provides admin templates
-    'overextends',
     'django.contrib.admin',
     'django.contrib.humanize',
     'gunicorn',
     'tastypie',
     'auditlog',
-    'defectDojo_engagement_survey',
     'dojo',
     'tastypie_swagger',
     'watson',

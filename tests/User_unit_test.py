@@ -1,6 +1,5 @@
 # from selenium.webdriver.support.ui import Select
 import unittest
-import re
 import sys
 from base_test_class import BaseTestCase
 from selenium.webdriver.common.by import By
@@ -40,10 +39,10 @@ class UserTest(BaseTestCase):
         # "Click" the submit button to complete the transaction
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
         # Query the site to determine if the user has been created
-        productTxt = driver.find_element_by_tag_name("BODY").text
+
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(re.search(r'User added successfully, you may edit if necessary.', productTxt) or
-            re.search(r'A user with that username already exists.', productTxt))
+        self.assertTrue(self.is_success_message_present(text='User added successfully, you may edit if necessary.') or
+            self.is_success_message_present(text='A user with that username already exists.'))
 
     def test_user_edit_permissions(self):
         # Login to the site. Password will have to be modified
@@ -69,9 +68,9 @@ class UserTest(BaseTestCase):
         # "Click" the submit button to complete the transaction
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
         # Query the site to determine if the User permission has been changed
-        productTxt = driver.find_element_by_tag_name("BODY").text
+
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(re.search(r'User saved successfully.', productTxt))
+        self.assertTrue(self.is_success_message_present(text='User saved successfully.'))
 
     def test_user_delete(self):
         # Login to the site. Password will have to be modified
@@ -95,9 +94,9 @@ class UserTest(BaseTestCase):
         # confirm deletion, by clicking delete a second time
         driver.find_element_by_css_selector("button.btn.btn-danger").click()
         # Query the site to determine if the User has been deleted
-        productTxt = driver.find_element_by_tag_name("BODY").text
+
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(re.search(r'User and relationships removed.', productTxt))
+        self.assertTrue(self.is_success_message_present(text='User and relationships removed.'))
 
     def test_user_notifications_change(self):
         # Login to the site. Password will have to be modified
@@ -115,8 +114,7 @@ class UserTest(BaseTestCase):
 
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
 
-        body = driver.find_element_by_tag_name("BODY").text
-        self.assertTrue(re.search(r'Settings saved', body))
+        self.assertTrue(self.is_success_message_present(text='Settings saved'))
         self.assertTrue(driver.find_element_by_xpath("//input[@name='product_added' and @value='mail']").is_selected())
         self.assertTrue(driver.find_element_by_xpath("//input[@name='scan_added' and @value='mail']").is_selected())
 

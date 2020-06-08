@@ -265,7 +265,7 @@
                     {% include "dojo/paging_snippet.html" with page=prod_list page_size=True %}
                 </div>
             {% else %}
-                <p class="text-center">No products found.</p>
+                <div id="no_products"><p class="text-center">No products found.</p></div>
             {% endif %}
         </div>
     </div>
@@ -313,16 +313,10 @@
                 drawCallback: function(){
                      $('.has-popover').popover({'trigger':'hover'});
                  },
-                "columns": [
-                    { "data": "action", render: function (data, type, row) {
-                            return type === 'export' ?  "" :  data;
-                    }},
-                    { "data": "product" , render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'b') :  data;
-                    }},
-                    { "data": "tags" , render: function (data, type, row) {
-                            return type === 'export' ?  getDojoExportValueFromTag(data, 'a') :  data;
-                    }},
+                 "columns": [
+                    { "data": "action" },
+                    { "data": "product" },
+                    { "data": "tags" },
                     { "data": "criticality" , render: function (data, type, row) {
                             return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
                     }},
@@ -342,12 +336,8 @@
                             return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
                     }},
                     {% endif %}
-                    { "data": "findings" , render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'b') :  data;
-                    }},
-                    { "data": "endpoints" , render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'b') :  data;
-                    }},
+                    { "data": "findings" },
+                    { "data": "endpoints" },
                     { "data": "contacts" },
                     { "data": "product_type" },
                 ],
@@ -369,25 +359,25 @@
                         extend: 'colvis',
                         columns: ':not(.noVis)'
                     },
-                    {
-                        extend: 'copyHtml5'
-                    },
-                    {
-                        extend: 'excelHtml5',
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'copy'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'excel',
                         autoFilter: true,
                         sheetName: 'Exported data',
-                    },
-                    {
-                        extend: 'csvHtml5'
-                    },
-                    {
-                        extend: 'pdfHtml5',
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'csv'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'pdf',
                         orientation: 'landscape',
                         pageSize: 'LETTER'
-                    },
-                    {
+                    }),
+                    $.extend( true, {}, buttonCommon, {
                         extend: 'print'
-                    },
+                    }),
                 ],
             });
         });

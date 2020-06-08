@@ -12,15 +12,10 @@ class GosecScannerParser(object):
         dupes = dict()
 
         for item in data["Issues"]:
-            categories = ''
-            language = ''
-            mitigation = ''
             impact = ''
             references = ''
             findingdetail = ''
             title = ''
-            group = ''
-            status = ''
             filename = item.get("file")
             line = item.get("line")
             scanner_confidence = item.get("confidence")
@@ -35,7 +30,6 @@ class GosecScannerParser(object):
             findingdetail += "```{}```".format(item["code"])
 
             sev = item["severity"]
-            mitigation = "coming soon"
             # Best attempt at ongoing documentation provided by gosec, based on rule id
             references = "https://securego.io/docs/rules/{}.html".format(item['rule_id']).lower()
 
@@ -66,16 +60,13 @@ class GosecScannerParser(object):
                                description=findingdetail,
                                severity=sev.title(),
                                numerical_severity=Finding.get_numerical_severity(sev),
-                               mitigation=mitigation,
                                impact=impact,
                                references=references,
                                file_path=filename,
                                line=line,
-                               url='N/A',
                                scanner_confidence=scanner_confidence,
                                static_finding=True)
 
                 dupes[dupe_key] = find
-                findingdetail = ''
 
         self.items = list(dupes.values())

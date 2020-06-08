@@ -13,7 +13,7 @@ from dojo.models import Finding, Engagement, Risk_Acceptance
 from django.db.models import Count
 from dojo.utils import add_breadcrumb, get_punchcard_data
 
-from defectDojo_engagement_survey.models import Answered_Survey
+from dojo.models import Answered_Survey
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +40,7 @@ def dashboard(request):
                                                                    now]).count()
 
         accepted_count = len([finding for ra in Risk_Acceptance.objects.filter(
-            reporter=request.user, created__date__range=[seven_days_ago, now]) for finding in ra.accepted_findings.all()])
+            created__date__range=[seven_days_ago, now]) for finding in ra.accepted_findings.all()])
 
         # forever counts
         findings = Finding.objects.filter(verified=True, duplicate=False)
@@ -58,7 +58,7 @@ def dashboard(request):
                                                                    now]).count()
 
         accepted_count = len([finding for ra in Risk_Acceptance.objects.filter(
-            reporter=request.user, created__date__range=[seven_days_ago, now]) for finding in ra.accepted_findings.all()])
+            owner=request.user, created__date__range=[seven_days_ago, now]) for finding in ra.accepted_findings.all()])
 
         # forever counts
         findings = Finding.objects.filter(reporter=request.user,
