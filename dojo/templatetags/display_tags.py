@@ -768,7 +768,7 @@ def finding_display_status(finding):
         display_status = display_status.replace('Under Review', link)
         print('status2: ', display_status)
 
-    if finding.duplicate:
+    if finding.duplicate and finding.duplicate_finding is not None:
         url = reverse('view_finding', args=(finding.duplicate_finding.id, ))
         name = finding.duplicate_finding.title + ', ' + finding.duplicate_finding.created.strftime('%b %d, %Y, %H:%M:%S')
         link = '<a href="' + url + '" data-toggle="tooltip" data-placement="top" title="' + escape(name) + '">Duplicate</a>'
