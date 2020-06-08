@@ -10,7 +10,7 @@ from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from django.http import HttpResponse
-from defectDojo_engagement_survey.urls import urlpatterns as survey_urls
+
 
 from dojo import views
 from dojo.api import UserResource, ProductResource, EngagementResource, \
@@ -27,7 +27,7 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     ScansViewSet, StubFindingsViewSet, TestsViewSet, TestTypesViewSet, \
     ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
     UsersViewSet, ImportScanView, ReImportScanView, ProductTypeViewSet, DojoMetaViewSet, \
-    DevelopmentEnvironmentViewSet, NotesViewSet, NoteTypeViewSet
+    DevelopmentEnvironmentViewSet, NotesViewSet, NoteTypeViewSet, SystemSettingsViewSet
 
 from dojo.utils import get_system_setting
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
@@ -59,6 +59,7 @@ from dojo.notes.urls import urlpatterns as notes_urls
 from dojo.note_type.urls import urlpatterns as note_type_urls
 from dojo.google_sheet.urls import urlpatterns as google_sheets_urls
 from dojo.banner.urls import urlpatterns as banner_urls
+from dojo.survey.urls import urlpatterns as survey_urls
 
 admin.autodiscover()
 
@@ -120,6 +121,7 @@ v2_api.register(r'reimport-scan', ReImportScanView, basename='reimportscan')
 v2_api.register(r'metadata', DojoMetaViewSet, basename='metadata')
 v2_api.register(r'notes', NotesViewSet)
 v2_api.register(r'note_type', NoteTypeViewSet)
+v2_api.register(r'system_settings', SystemSettingsViewSet)
 
 ur = []
 ur += dev_env_urls

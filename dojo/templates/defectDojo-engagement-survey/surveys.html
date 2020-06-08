@@ -1,0 +1,69 @@
+{% if surveys %}
+    <table id="surveys" class="tablesorter-bootstrap table table-condensed table-striped">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Assignee</th>
+            <th>Responder</th>
+            <th>Status</th>
+            <th>Completion Date</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        {% for survey in surveys %}
+            <tr>
+                <td><a href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}">{{ survey.survey.name }}</a></td>  
+                <td>
+                    {% if survey.assignee == None %}
+                        Not Assigned
+                    {% else %}
+                        {{ survey.assignee.username }} 
+                    {% endif %}
+                </td>
+                <td>
+                    {% if survey.responder %}
+                        {{ survey.responder }}
+                    {% else %}
+                        Anonymous
+                    {% endif %}
+                </td>
+                <td>
+                    {% if survey.completed %}
+                        <span class="pass_fail Pass">Completed</span>
+                    {% else %}
+                        <span class="pass_fail">Unanswered</span>
+                    {% endif %}
+                </td>
+                <td>{{ survey.answered_on }}</td>
+                <td>
+                    <div class="btn-group">
+                        {% if not survey.completed %}
+                            <a class="btn btn-sm btn-success"
+                               href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}/answer"> Answer</a>
+                        {% else %}
+                            <a class="btn btn-sm btn-primary"
+                               href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}"> View Responses </a>
+                            <a class="btn btn-sm btn-warning"
+                               href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}/answer"> Edit
+                                Responses </a>
+                        {% endif %}
+                        <a class="btn btn-sm btn-info"
+                           href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}/assign"> Assign User </a>
+                        <button type="button" class="btn btn-sm btn-primary" data-toggle="modal"
+                                data-target="#shareSurveyModal"
+                                data-whatever="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}/answer">
+                            <i class="fa fa-share-alt"></i> Share Questionnaire
+                        </button>
+                        <a class="btn btn-sm btn-danger"
+                           href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}/delete"> Delete
+                            Questionnaire </a>
+                    </div>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+{% else %}
+    <div class="panel-body">
+        <p>No Questionnaires found.</p>
+    </div>
+{% endif %}

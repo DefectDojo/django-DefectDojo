@@ -109,8 +109,8 @@ def add_external_issue_github(find, prod, eng):
         eng = Engagement.objects.get(test=find.test)
         prod = Product.objects.get(engagement=eng)
         github_product_key = GITHUB_PKey.objects.get(product=prod)
-        github_conf = github_product_key.git_conf
-        logger.debug('Create issue with github profile: ' + str(github_conf) + ' on product: ' + str(github_product_key))
+        github_conf = github_product_key.git_conf_id
+        logger.info('Create issue with github profile: ' + str(github_conf) + ' on product: ' + str(github_product_key))
 
         try:
             g = Github(github_conf.api_key)

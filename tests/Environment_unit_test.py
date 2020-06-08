@@ -1,5 +1,4 @@
 import unittest
-import re
 import sys
 import os
 from base_test_class import BaseTestCase
@@ -25,8 +24,8 @@ class EnvironmentTest(BaseTestCase):
         driver.find_element_by_id("id_name").clear()
         driver.find_element_by_id("id_name").send_keys("environment test")
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
-        productTxt = driver.find_element_by_tag_name("BODY").text
-        self.assertTrue(re.search(r'Environment added successfully.', productTxt))
+
+        self.assertTrue(self.is_success_message_present(text='Environment added successfully.'))
 
     def test_edit_environment(self):
         driver = self.login_page()
@@ -35,16 +34,16 @@ class EnvironmentTest(BaseTestCase):
         driver.find_element_by_id("id_name").clear()
         driver.find_element_by_id("id_name").send_keys("Edited environment test")
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
-        productTxt = driver.find_element_by_tag_name("BODY").text
-        self.assertTrue(re.search(r'Environment updated successfully.', productTxt))
+
+        self.assertTrue(self.is_success_message_present(text='Environment updated successfully.'))
 
     def test_delete_environment(self):
         driver = self.login_page()
         driver.get(self.base_url + "dev_env")
         driver.find_element_by_link_text("Edited environment test").click()
         driver.find_element_by_css_selector("input.btn.btn-danger").click()
-        productTxt = driver.find_element_by_tag_name("BODY").text
-        self.assertTrue(re.search(r'Environment deleted successfully.', productTxt))
+
+        self.assertTrue(self.is_success_message_present(text='Environment deleted successfully.'))
 
 
 def suite():
