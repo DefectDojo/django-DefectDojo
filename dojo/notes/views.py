@@ -23,7 +23,7 @@ def delete_issue(request, id, page, objid):
     note = get_object_or_404(Notes, id=id)
     reverse_url = None
     object_id = None
-    
+
     if page == "engagement":
         object = get_object_or_404(Engagement, id=objid)
         object_id = object.id

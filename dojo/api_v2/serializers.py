@@ -425,7 +425,7 @@ class TestTypeSerializer(TaggitSerializer, serializers.ModelSerializer):
         model = Test_Type
         fields = '__all__'
 
-    
+
 class TestToNotesSerializer(serializers.Serializer):
     test_id = serializers.PrimaryKeyRelatedField(queryset=Test.objects.all(), many=False, allow_null=True)
     notes = NoteSerializer(many=True)
@@ -1014,33 +1014,6 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             raise serializers.ValidationError(
                 'The date cannot be in the future!')
         return value
-
-
-class NoteHistorySerializer(serializers.ModelSerializer):
-    current_editor = UserSerializer(read_only=True)
-
-    class Meta:
-        model = NoteHistory
-        fields = '__all__'
-
-
-class NoteSerializer(serializers.ModelSerializer):
-    author = UserSerializer(
-        many=False, read_only=False)
-    editor = UserSerializer(
-        read_only=False, many=False, allow_null=True, required=False)
-
-    history = NoteHistorySerializer(read_only=True, many=True)
-
-    class Meta:
-        model = Notes
-        fields = '__all__'
-
-
-class NoteTypeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Note_Type
-        fields = '__all__'
 
 
 class AddNewNoteOptionSerializer(serializers.ModelSerializer):
