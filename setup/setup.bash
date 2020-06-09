@@ -43,6 +43,8 @@ else
     init_install_creds
 fi
 
+
+print_eol_message
 # Check for OS installer is running on and that python version is correct
 #   Funcions below in ./scripts/common/common-os.sh
 check_install_os
