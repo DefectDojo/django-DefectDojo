@@ -493,7 +493,7 @@ print_eol_message() {
     echo
     echo "=============================================================================="
     echo " The setup.bash installation method will be EOL on 2020-12-31 "
-    echo " A like successor will be godojo (https://github.com/mtesauro/godojo) "
+    echo " A likely successor will be godojo (https://github.com/mtesauro/godojo) "
     echo "=============================================================================="
     echo
 }
