@@ -491,9 +491,9 @@ prompt_for_config_vals() {
 
 print_eol_message() {
     echo
-    echo "=============================================================================="
+    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
     echo " The setup.bash installation method will be EOL on 2020-12-31 "
     echo " A likely successor will be godojo (https://github.com/mtesauro/godojo) "
-    echo "=============================================================================="
+    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
     echo
 }
