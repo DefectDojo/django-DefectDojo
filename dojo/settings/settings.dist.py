@@ -93,6 +93,9 @@ env = environ.Env(
     DD_SOCIAL_AUTH_GITLAB_SECRET=(str, ''),
     DD_SOCIAL_AUTH_GITLAB_API_URL=(str, 'https://gitlab.com'),
     DD_SOCIAL_AUTH_GITLAB_SCOPE=(list, ['api', 'read_user', 'openid', 'profile', 'email']),
+    # merging findings doesn't always work well with dedupe and reimport etc.
+    # disable it if you see any issues (and report them on github)
+    DD_DISABLE_FINDING_MERGE=(bool, False),
 )
 
 
@@ -336,7 +339,7 @@ LOGIN_EXEMPT_URLS = (
     r'^%sfinding/image/(?P<token>[^/]+)$' % URL_PREFIX,
     r'^%sapi/v2/' % URL_PREFIX,
     r'complete/',
-    r'empty_survey/([\d]+)/answer'
+    r'empty_questionnaire/([\d]+)/answer'
 )
 
 # ------------------------------------------------------------------------------
@@ -479,7 +482,6 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'polymorphic',  # provides admin templates
-    'overextends',
     'django.contrib.admin',
     'django.contrib.humanize',
     'gunicorn',
@@ -619,7 +621,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'NPM Audit Scan': ['title', 'severity', 'file_path', 'cve', 'cwe'],
     # possible improvment: in the scanner put the library name into file_path, then dedup on cve + file_path + severity
     'Whitesource Scan': ['title', 'severity', 'description'],
-    'ZAP Scan': ['cwe', 'endpoints', 'severity'],
+    'ZAP Scan': ['title', 'cwe', 'endpoints', 'severity'],
     'Qualys Scan': ['title', 'endpoints', 'severity'],
     'PHP Symfony Security Check': ['title', 'cve'],
     'Clair Scan': ['title', 'cve', 'description', 'severity'],
@@ -682,6 +684,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Symfony Security Check': DEDUPE_ALGO_HASH_CODE,
     'DSOP Scan': DEDUPE_ALGO_HASH_CODE,
 }
+
+DISABLE_FINDING_MERGE = env('DD_DISABLE_FINDING_MERGE')
 
 # ------------------------------------------------------------------------------
 # JIRA
@@ -750,7 +754,12 @@ LOGGING = {
             'handlers': ['console'],
             'level': 'INFO',
             'propagate': False,
-        }
+        },
+        'MARKDOWN': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
     }
 }
 

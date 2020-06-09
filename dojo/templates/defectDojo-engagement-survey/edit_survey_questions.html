@@ -3,14 +3,14 @@
     <link rel="stylesheet" href="{{ STATIC_URL }}chosen-bootstrap/chosen.bootstrap.min.css">
 {% endblock %}
 {% block content %}
-    <h3>Edit Survey Questions ({{ survey.name }})</h3>
+    <h3>Edit Questionnaire Questions ({{ survey.name }})</h3>
 
     <form class="form-horizontal" method="post">{% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
                 <input class="btn btn-primary" type="submit" label="edit_survey_questions" name="edit_survey_questions"
-                       value="Update Survey Questions"/>
+                       value="Update Questionnaire Questions"/>
             </div>
         </div>
     </form>

@@ -30,13 +30,13 @@ echo "export DD_ADMIN_USER=admin" >> ~/.profile && \
 export DD_BASE_URL='http://localhost:8080/'
 
 function fail() {
-    echo "Error: $1 test failed"
-    docker-compose logs --tail="all" uwsgi
+    echo "Error: $1 test failed\n"
+    docker-compose logs --tail="120" uwsgi
     exit 1    
 }
 
 function success() {
-    echo "Succes: $1 test passed"
+    echo "Success: $1 test passed\n"
 }
 
 test="Product type integration tests"

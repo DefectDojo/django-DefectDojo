@@ -536,6 +536,7 @@ class Note_TypeResource(BaseModelResource):
         def validation(self):
             return ModelFormValidation(form_class=NoteTypeForm, resource=Note_TypeResource)
 
+
 """
     POST, PUT [/id/]
     Expects *product *target_start, *target_end, *status[In Progress, On Hold,

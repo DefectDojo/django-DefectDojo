@@ -27,7 +27,8 @@ def home(request):
 @user_passes_test(lambda u: u.is_staff)
 def dashboard(request):
     now = timezone.now()
-    seven_days_ago = now - timedelta(days=7)
+    seven_days_ago = now - timedelta(days=6)  # 6 days plus today
+
     if request.user.is_superuser:
         engagement_count = Engagement.objects.filter(active=True).count()
         finding_count = Finding.objects.filter(verified=True,
@@ -35,11 +36,11 @@ def dashboard(request):
                                                duplicate=False,
                                                date__range=[seven_days_ago,
                                                             now]).count()
-        mitigated_count = Finding.objects.filter(mitigated__range=[seven_days_ago,
+        mitigated_count = Finding.objects.filter(mitigated__date__range=[seven_days_ago,
                                                                    now]).count()
 
         accepted_count = len([finding for ra in Risk_Acceptance.objects.filter(
-            reporter=request.user, created__range=[seven_days_ago, now]) for finding in ra.accepted_findings.all()])
+            created__date__range=[seven_days_ago, now]) for finding in ra.accepted_findings.all()])
 
         # forever counts
         findings = Finding.objects.filter(verified=True, duplicate=False)
@@ -53,11 +54,11 @@ def dashboard(request):
                                                date__range=[seven_days_ago,
                                                             now]).count()
         mitigated_count = Finding.objects.filter(mitigated_by=request.user,
-                                                 mitigated__range=[seven_days_ago,
+                                                 mitigated__date__range=[seven_days_ago,
                                                                    now]).count()
 
         accepted_count = len([finding for ra in Risk_Acceptance.objects.filter(
-            reporter=request.user, created__range=[seven_days_ago, now]) for finding in ra.accepted_findings.all()])
+            owner=request.user, created__date__range=[seven_days_ago, now]) for finding in ra.accepted_findings.all()])
 
         # forever counts
         findings = Finding.objects.filter(reporter=request.user,

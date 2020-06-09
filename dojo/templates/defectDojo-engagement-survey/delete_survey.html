@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
-    <h3> Delete {{ survey }} Survey</h3>
+    <h3> Delete {{ survey }} Questionnaire</h3>
     <p>
-        Deleting this Survey will remove any answers associated with it. These relationships are listed below:
+        Deleting this Questionnaire will remove any answers associated with it. These relationships are listed below:
     </p>
     <div class="danger-zone panel panel-danger">
         <div class="panel-heading">
@@ -27,7 +27,7 @@
             {{ form }}
 
             <div class="form-group">
-                <button class="btn btn-danger" type="submit" name="delete_name" value="delete_survey">Delete Survey
+                <button class="btn btn-danger" type="submit" name="delete_name" value="delete_survey">Delete Questionnaire
                 </button>
             </div>
         </form>

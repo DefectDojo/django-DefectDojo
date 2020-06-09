@@ -5,6 +5,8 @@ services:
     entrypoint: ['/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/entrypoint-uwsgi-ptvsd.sh']
     volumes:
       - '.:/app:z'
+      - './media:/app/media/finding_images'
+      - './media/CACHE:/app/media/CACHE'      
     environment:
       DD_DEBUG: 'True'
     ports:
@@ -18,6 +20,8 @@ services:
   nginx:
     volumes:
       - './dojo/static/dojo:/usr/share/nginx/html/static/dojo'
+      - './media:/usr/share/nginx/html/media'
+      - './media/CACHE:/usr/share/nginx/html/media/CACHE'      
   mysql:
     ports:
       - target: 3306

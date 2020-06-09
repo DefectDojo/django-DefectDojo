@@ -17,7 +17,7 @@ from django.db.models import Sum, Count, Q, Max
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
 from dojo.templatetags.display_tags import get_level
-from dojo.filters import ProductFilter, ProductFindingFilter, EngagementFilter
+from dojo.filters import ProductFilter, EngagementFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAPKeyForm, JIRAFindingForm, AdHocFindingForm, \
                        EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm, ProductNotificationsForm, \
                        GITHUB_Product_Form, GITHUBFindingForm
@@ -53,8 +53,7 @@ def product(request):
     # perform all stuff for filtering and pagination first, before annotation/prefetching
     # otherwise the paginator will perform all the annotations/prefetching already only to count the total number of records
     # see https://code.djangoproject.com/ticket/23771 and https://code.djangoproject.com/ticket/25375
-    name_words = [product.name for product in prods
-                    for word in product.name.split() if len(word) > 2]
+    name_words = prods.values_list('name', flat=True)
 
     prod_filter = ProductFilter(request.GET, queryset=prods, user=request.user)
     prod_list = get_page_items(request, prod_filter.qs, 25)
@@ -531,26 +530,26 @@ def new_product(request):
             if get_system_setting('enable_github'):
                 if gform.is_valid():
                     github_pkey = gform.save(commit=False)
-                    if github_pkey.conf is not None:
+                    if github_pkey.git_conf is not None and github_pkey.git_project:
                         github_pkey.product = product
                         github_pkey.save()
                         messages.add_message(request,
                                                 messages.SUCCESS,
-                                                'Github information added successfully.',
+                                                'GitHub information added successfully.',
                                                 extra_tags='alert-success')
-                    # Create appropriate labels in the repo
-                    logger.info('Create label in repo: ' + github_pkey.project_key)
-                    try:
-                        g = Github(github_pkey.conf.api_key)
-                        repo = g.get_repo(github_pkey.project_key)
-                        repo.create_label(name="security", color="FF0000", description="This label is automatically applied to all issues created by defectDojo")
-                        repo.create_label(name="security / info", color="00FEFC", description="This label is automatically applied to all issues created by defectDojo")
-                        repo.create_label(name="security / low", color="B7FE00", description="This label is automatically applied to all issues created by defectDojo")
-                        repo.create_label(name="security / medium", color="FEFE00", description="This label is automatically applied to all issues created by defectDojo")
-                        repo.create_label(name="security / high", color="FE9A00", description="This label is automatically applied to all issues created by defectDojo")
-                        repo.create_label(name="security / critical", color="FE2200", description="This label is automatically applied to all issues created by defectDojo")
-                    except:
-                        logger.info('Labels cannot be created - they may already exists')
+                        # Create appropriate labels in the repo
+                        logger.info('Create label in repo: ' + github_pkey.git_project)
+                        try:
+                            g = Github(github_pkey.git_conf.api_key)
+                            repo = g.get_repo(github_pkey.git_project)
+                            repo.create_label(name="security", color="FF0000", description="This label is automatically applied to all issues created by DefectDojo")
+                            repo.create_label(name="security / info", color="00FEFC", description="This label is automatically applied to all issues created by DefectDojo")
+                            repo.create_label(name="security / low", color="B7FE00", description="This label is automatically applied to all issues created by DefectDojo")
+                            repo.create_label(name="security / medium", color="FEFE00", description="This label is automatically applied to all issues created by DefectDojo")
+                            repo.create_label(name="security / high", color="FE9A00", description="This label is automatically applied to all issues created by DefectDojo")
+                            repo.create_label(name="security / critical", color="FE2200", description="This label is automatically applied to all issues created by DefectDojo")
+                        except:
+                            logger.info('Labels cannot be created - they may already exists')
 
             # SonarQube API Configuration
             sonarqube_form = Sonarqube_ProductForm(request.POST)
@@ -736,29 +735,6 @@ def delete_product(request, pid):
                    })
 
 
-def all_product_findings(request, pid):
-    p = get_object_or_404(Product, id=pid)
-    auth = request.user.is_staff or request.user in p.authorized_users.all()
-    if not auth:
-        # will render 403
-        raise PermissionDenied
-    result = ProductFindingFilter(
-        request.GET,
-        queryset=Finding.objects.filter(test__engagement__product=p,
-                                        active=True))
-    page = get_page_items(request, result.qs, 25)
-
-    add_breadcrumb(title="Open findings", top_level=False, request=request)
-
-    return render(request,
-                  "dojo/all_product_findings.html",
-                  {"findings": page,
-                   "product": p,
-                   "filtered": result,
-                   "user": request.user,
-                   })
-
-
 @user_passes_test(lambda u: u.is_staff)
 def new_eng_for_app(request, pid, cicd=False):
     jform = None
@@ -913,6 +889,7 @@ def ad_hoc_finding(request, pid):
     form_error = False
     enabled = False
     jform = None
+    gform = None
     form = AdHocFindingForm(initial={'date': timezone.now().date()})
     if get_system_setting('enable_jira') and \
             test.engagement.product.jira_pkey_set.first() is not None:

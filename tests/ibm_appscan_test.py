@@ -1,6 +1,5 @@
 from selenium.webdriver.support.ui import Select
 import unittest
-import re
 import sys
 import os
 from base_test_class import BaseTestCase
@@ -33,9 +32,9 @@ class IBMAppScanTest(BaseTestCase):
         # click on upload button
         driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
         # Query the site to determine if the finding has been added
-        productTxt = driver.find_element_by_tag_name("BODY").text
+
         # Assert the query to determine status or failure
-        self.assertTrue(re.search(r'IBM AppScan DAST processed, a total of 27 findings were processed', productTxt))
+        self.assertTrue(self.is_success_message_present(text='IBM AppScan DAST processed, a total of 27 findings were processed'))
 
 
 def suite():

@@ -12,7 +12,7 @@
         </thead>
         {% for survey in surveys %}
             <tr>
-                <td><a href="/engagement/{{ survey.engagement.id }}/survey/{{ survey.id }}">{{ survey.survey.name }}</a></td>  
+                <td><a href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}">{{ survey.survey.name }}</a></td>  
                 <td>
                     {% if survey.assignee == None %}
                         Not Assigned
@@ -39,24 +39,24 @@
                     <div class="btn-group">
                         {% if not survey.completed %}
                             <a class="btn btn-sm btn-success"
-                               href="/engagement/{{ survey.engagement.id }}/survey/{{ survey.id }}/answer"> Answer</a>
+                               href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}/answer"> Answer</a>
                         {% else %}
                             <a class="btn btn-sm btn-primary"
-                               href="/engagement/{{ survey.engagement.id }}/survey/{{ survey.id }}"> View Responses </a>
+                               href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}"> View Responses </a>
                             <a class="btn btn-sm btn-warning"
-                               href="/engagement/{{ survey.engagement.id }}/survey/{{ survey.id }}/answer"> Edit
+                               href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}/answer"> Edit
                                 Responses </a>
                         {% endif %}
                         <a class="btn btn-sm btn-info"
-                           href="/engagement/{{ survey.engagement.id }}/survey/{{ survey.id }}/assign"> Assign User </a>
+                           href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}/assign"> Assign User </a>
                         <button type="button" class="btn btn-sm btn-primary" data-toggle="modal"
                                 data-target="#shareSurveyModal"
-                                data-whatever="/engagement/{{ survey.engagement.id }}/survey/{{ survey.id }}/answer">
-                            <i class="fa fa-share-alt"></i> Share Survey
+                                data-whatever="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}/answer">
+                            <i class="fa fa-share-alt"></i> Share Questionnaire
                         </button>
                         <a class="btn btn-sm btn-danger"
-                           href="/engagement/{{ survey.engagement.id }}/survey/{{ survey.id }}/delete"> Delete
-                            Survey </a>
+                           href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}/delete"> Delete
+                            Questionnaire </a>
                     </div>
                 </td>
             </tr>
@@ -64,6 +64,6 @@
     </table>
 {% else %}
     <div class="panel-body">
-        <p>No surveys found.</p>
+        <p>No Questionnaires found.</p>
     </div>
 {% endif %}
