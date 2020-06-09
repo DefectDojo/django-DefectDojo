@@ -340,12 +340,13 @@
             </div>
             {% if risks_accepted %}
                 <div class="table-responsive">
-                    <table id="open_findings"
+                    <table id="risk_acceptances"
                            class="tablesorter-bootstrap table table-condensed table-striped">
                         <thead>
                         <tr>
-                            <th>Reporter</th>
+                            <th>Owner</th>
                             <th>Date</th>
+                            <th>Name</th>
                             <th>Date Expires</th>
                             <th>Accepted by</th>
                             <th>Findings Accepted</th>
@@ -355,8 +356,9 @@
                         <tbody>
                         {% for risk in risks_accepted %}
                             <tr>
-                                <td>{{ risk.reporter }}</td>
+                                <td>{{ risk.owner }}</td>
                                 <td>{{ risk.created }}</td>
+                                <td>{{ risk.name }}</td>
                                 <td>{{ risk.expiration_date|default_if_none:"" }}</td>
                                 <td>{{ risk.accepted_by|default_if_none:"" }}</td>
                                 <td>{{ risk.accepted_findings.count }}</td>
@@ -407,9 +409,9 @@
                       <span class="fa fa-edit"></span></a></a>
               {% endif %}
             {% endif %}
+            
           </h4>
         </div>
-
         <div id="add_feat_check_list" class="panel-body collapse">
           {% if check %}
             <div class="panel panel-default">
@@ -472,13 +474,13 @@
     <div class="panel panel-default">
 
       <div class="panel-heading">
-        <h4>Surveys<span class="pull-right">
+        <h4>Questionnaires<span class="pull-right">
           <a data-toggle="collapse" href="#add_feat_survey">
             <i class="glyphicon glyphicon-chevron-down"></i></a></span>
             {% add_surveys eng %}
         </h4>
       </div>
-      
+
       <div id="add_feat_survey" class="panel-body collapse">
         <div class="row">
           <div class="col-md-12">
@@ -492,13 +494,13 @@
                 <div class="modal-header">
                   <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                           aria-hidden="true">&times;</span></button>
-                  <h4 class="modal-title" id="shareSurveyModalLabel">Share Survey Link</h4>
+                  <h4 class="modal-title" id="shareSurveyModalLabel">Share Questionnaire Link</h4>
                 </div>
                 <div class="modal-body">
                   <p id="surveyURL"></p>
                   <div class="alert alert-info" role="alert">
                       <b>Note:</b> Only users that are authorized for {{ eng.product}} will be allowed to answer
-                      this survey.
+                      this questionnaire.
                   </div>
                 </div>
                 <div class="modal-footer">
@@ -608,17 +610,9 @@
         
       </div>
       
-
     </div>
 
-
   </div>
-
-
-
-  
-
-
 </div> 
 
 <!-- Sidebar -->
@@ -947,7 +941,7 @@
             var http = location.protocol;
             var slashes = http.concat("//");
             var host = slashes.concat(window.location.host);
-            modal.find('p#surveyURL').text('Survey URL: ' + host + path)
+            modal.find('p#surveyURL').text('Questionnaire URL: ' + host + path)
             })
         });
     </script>

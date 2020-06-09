@@ -24,7 +24,7 @@ Product Type views
 
 def product_type(request):
     # query for names outside of query with prefetch to avoid the complex prefetch query from executing twice
-    name_words = [prod_type.name for prod_type in Product_Type.objects.all().only('name')]
+    name_words = Product_Type.objects.all().values_list('name', flat=True)
 
     prod_types = Product_Type.objects.all()
 

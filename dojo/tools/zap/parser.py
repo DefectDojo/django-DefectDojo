@@ -11,7 +11,7 @@ import re
 import socket
 from urllib.parse import urlparse
 from defusedxml import ElementTree as ET
-from django.utils.html import strip_tags
+from django.utils.html import strip_tags, escape
 from dojo.models import Finding, Endpoint
 
 
@@ -27,6 +27,11 @@ class ZapXmlParser(object):
     """
 
     def __init__(self, xml_output, test):
+        self.items = []
+
+        if xml_output is None:
+            return
+
         tree = self.parse_xml(xml_output)
 
         if tree:
@@ -105,7 +110,7 @@ def get_attrib_from_subnode(xml_node, subnode_xpath_expr, attrib_name):
 
     if ETREE_VERSION[0] <= 1 and ETREE_VERSION[1] < 3:
 
-        match_obj = re.search("([^\@]+?)\[\@([^=]*?)=\'([^\']*?)\'", subnode_xpath_expr)
+        match_obj = re.search(r"([^\@]+?)\[\@([^=]*?)=\'([^\']*?)\'", subnode_xpath_expr)
         if match_obj is not None:
             node_to_find = match_obj.group(1)
             xpath_attrib = match_obj.group(2)
@@ -180,11 +185,14 @@ class Item(object):
         if self.get_text_from_subnode('cweid'):
             self.ref.append("CWE-" + self.get_text_from_subnode('cweid'))
             self.cwe = self.get_text_from_subnode('cweid')
-        else: self.cwe = 0
+        else:
+            self.cwe = 0
 
         description_detail = "\n"
         for instance in item_node.findall('instances/instance'):
             for node in instance.getiterator():
+                print('tag: ' + node.tag)
+                print('text:' + escape(node.text))
                 if node.tag == "uri":
                     if node.text != "":
                         description_detail += "URL: " + node.text
@@ -196,7 +204,7 @@ class Item(object):
                         description_detail += "Parameter: " + node.text
                 if node.tag == "evidence":
                     if node.text != "":
-                        description_detail += "Evidence: " + node.text
+                        description_detail += "Evidence: " + escape(node.text)
                 description_detail += "\n"
 
         self.desc += description_detail

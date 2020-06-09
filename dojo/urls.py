@@ -27,7 +27,7 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     ScansViewSet, StubFindingsViewSet, TestsViewSet, TestTypesViewSet, \
     ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
     UsersViewSet, ImportScanView, ReImportScanView, ProductTypeViewSet, DojoMetaViewSet, \
-    DevelopmentEnvironmentViewSet, NotesViewSet, NoteTypeViewSet
+    DevelopmentEnvironmentViewSet, NotesViewSet, NoteTypeViewSet, SystemSettingsViewSet
 
 from dojo.utils import get_system_setting
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
@@ -121,6 +121,7 @@ v2_api.register(r'reimport-scan', ReImportScanView, basename='reimportscan')
 v2_api.register(r'metadata', DojoMetaViewSet, basename='metadata')
 v2_api.register(r'notes', NotesViewSet)
 v2_api.register(r'note_type', NoteTypeViewSet)
+v2_api.register(r'system_settings', SystemSettingsViewSet)
 
 ur = []
 ur += dev_env_urls

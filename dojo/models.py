@@ -618,7 +618,7 @@ class Product(models.Model):
 
     created = models.DateTimeField(editable=False, null=True, blank=True)
     prod_type = models.ForeignKey(Product_Type, related_name='prod_type',
-                                  null=True, blank=True, on_delete=models.CASCADE)
+                                  null=False, blank=False, on_delete=models.CASCADE)
     updated = models.DateTimeField(editable=False, null=True, blank=True)
     tid = models.IntegerField(default=0, editable=False)
     authorized_users = models.ManyToManyField(User, blank=True)
@@ -1382,7 +1382,7 @@ class Finding(models.Model):
     sourcefile = models.TextField(null=True, blank=True, editable=False)
     param = models.TextField(null=True, blank=True, editable=False)
     payload = models.TextField(null=True, blank=True, editable=False)
-    hash_code = models.TextField(null=True, blank=True, editable=False)
+    hash_code = models.CharField(null=True, blank=True, editable=False, max_length=64)
 
     line = models.IntegerField(null=True, blank=True,
                                verbose_name="Line number",
@@ -1425,6 +1425,7 @@ class Finding(models.Model):
         ordering = ('numerical_severity', '-date', 'title')
         indexes = [
             models.Index(fields=['cve']),
+            models.Index(fields=['cwe']),
             models.Index(fields=['out_of_scope']),
             models.Index(fields=['false_p']),
             models.Index(fields=['verified']),
@@ -1433,6 +1434,10 @@ class Finding(models.Model):
             models.Index(fields=['numerical_severity']),
             models.Index(fields=['date']),
             models.Index(fields=['title']),
+            models.Index(fields=['hash_code']),
+            models.Index(fields=['unique_id_from_tool']),
+            # models.Index(fields=['file_path']), # can't add index because the field has max length 4000.
+            models.Index(fields=['line']),
         ]
 
     @classmethod
@@ -1441,24 +1446,27 @@ class Finding(models.Model):
 
     @property
     def similar_findings(self):
-        filtered = Finding.objects.all()
+        similar = Finding.objects.all()
 
         if self.test.engagement.deduplication_on_engagement:
-            filtered = filtered.filter(test__engagement=self.test.engagement)
+            similar = similar.filter(test__engagement=self.test.engagement)
         else:
-            filtered = filtered.filter(test__engagement__product=self.test.engagement.product)
+            similar = similar.filter(test__engagement__product=self.test.engagement.product)
 
         if self.cve:
-            filtered = filtered.filter(cve=self.cve)
+            similar = similar.filter(cve=self.cve)
         if self.cwe:
-            filtered = filtered.filter(cwe=self.cwe)
+            similar = similar.filter(cwe=self.cwe)
         if self.file_path:
-            filtered = filtered.filter(file_path=self.file_path)
+            similar = similar.filter(file_path=self.file_path)
         if self.line:
-            filtered = filtered.filter(line=self.line)
+            similar = similar.filter(line=self.line)
         if self.unique_id_from_tool:
-            filtered = filtered.filter(unique_id_from_tool=self.unique_id_from_tool)
-        return filtered.exclude(pk=self.pk)[:10]
+            similar = similar.filter(unique_id_from_tool=self.unique_id_from_tool)
+
+        identical = Finding.objects.all().filter(test__engagement__product=self.test.engagement.product).filter(hash_code=self.hash_code).exclude(pk=self.pk)
+
+        return (similar.exclude(pk=self.pk) | identical)[:10]
 
     def compute_hash_code(self):
         if hasattr(settings, 'HASHCODE_FIELDS_PER_SCANNER') and hasattr(settings, 'HASHCODE_ALLOWS_NULL_CWE') and hasattr(settings, 'HASHCODE_ALLOWED_FIELDS'):
@@ -1610,6 +1618,8 @@ class Finding(models.Model):
 
     def status(self):
         status = []
+        if self.under_review:
+            status += ['Under Review']
         if self.active:
             status += ['Active']
         else:
@@ -1625,8 +1635,7 @@ class Finding(models.Model):
         if self.duplicate:
             status += ['Duplicate']
         if self.risk_acceptance_set.exists():
-            status += ['Accepted']
-
+            status += ['Risk Accepted']
         if not len(status):
             status += ['Initial']
 
@@ -1641,7 +1650,7 @@ class Finding(models.Model):
         days = diff.days
         return days if days > 0 else 0
 
-    def sla(self):
+    def sla_days_remaining(self):
         sla_calculation = None
         severity = self.severity
         from dojo.utils import get_system_setting
@@ -1664,19 +1673,19 @@ class Finding(models.Model):
 
     def has_github_issue(self):
         try:
-            issue = self.jira_issue
+            issue = self.github_issue
             return True
         except GITHUB_Issue.DoesNotExist:
             return False
 
     def github_conf(self):
         try:
-            jpkey = GITHUB_PKey.objects.get(product=self.test.engagement.product)
-            jconf = jpkey.conf
+            github_product_key = GITHUB_PKey.objects.get(product=self.test.engagement.product)
+            github_conf = github_product_key.conf
         except:
-            jconf = None
+            github_conf = None
             pass
-        return jconf
+        return github_conf
 
     # newer version that can work with prefetching
     def github_conf_new(self):
@@ -1791,14 +1800,10 @@ class Finding(models.Model):
         if rules_option:
             from dojo.tasks import async_rules
             from dojo.utils import sync_rules
-            try:
-                if self.reporter.usercontactinfo.block_execution:
-                    sync_rules(self, *args, **kwargs)
-                else:
-                    async_rules(self, *args, **kwargs)
-            except UserContactInfo.DoesNotExist:
+            if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
+                sync_rules(self, *args, **kwargs)
+            else:
                 async_rules(self, *args, **kwargs)
-                pass
         from dojo.utils import calculate_grade
         calculate_grade(self.test.engagement.product)
         # Assign the numerical severity for correct sorting order
@@ -2037,25 +2042,24 @@ class BurpRawRequestResponse(models.Model):
 
 
 class Risk_Acceptance(models.Model):
+    name = models.CharField(max_length=100, null=False, blank=False, help_text="Descriptive name which in the future may also be used to group risk acceptances together across engagements and products")
     path = models.FileField(upload_to='risk/%Y/%m/%d',
                             editable=False, null=False,
                             blank=False, verbose_name="Risk Acceptance File")
     accepted_findings = models.ManyToManyField(Finding)
-    expiration_date = models.DateTimeField(default=None, null=True, blank=True)
     accepted_by = models.CharField(max_length=200, default=None, null=True, blank=True, verbose_name='Accepted By', help_text="The entity or person that accepts the risk.")
-    reporter = models.ForeignKey(User, editable=False, on_delete=models.CASCADE)
+    expiration_date = models.DateTimeField(default=None, null=True, blank=True)
+    owner = models.ForeignKey(Dojo_User, editable=True, on_delete=models.CASCADE, help_text="Only the owner and staff users can edit the risk acceptance.")
     notes = models.ManyToManyField(Notes, editable=False)
     compensating_control = models.TextField(default=None, blank=True, null=True, help_text="If a compensating control exists to mitigate the finding or reduce risk, then list the compensating control(s).")
-    created = models.DateTimeField(null=False, editable=False, default=now)
-    updated = models.DateTimeField(editable=False, default=now)
+    created = models.DateTimeField(null=False, editable=False, auto_now_add=True)
+    updated = models.DateTimeField(editable=False, auto_now=True)
 
     def __unicode__(self):
-        return "Risk Acceptance added on %s" % self.created.strftime(
-            "%b %d, %Y")
+        return str(self.name)
 
     def __str__(self):
-        return "Risk Acceptance added on %s" % self.created.strftime(
-            "%b %d, %Y")
+        return str(self.name)
 
     def filename(self):
         return os.path.basename(self.path.name) \
@@ -2193,10 +2197,10 @@ class GITHUB_PKey(models.Model):
     git_push_notes = models.BooleanField(default=False, blank=True, help_text="Notes added to findings will be automatically added to the corresponding github issue")
 
     def __unicode__(self):
-        return self.product.name + " | " + self.project_key
+        return self.product.name + " | " + self.git_project
 
     def __str__(self):
-        return self.product.name + " | " + self.project_key
+        return self.product.name + " | " + self.git_project
 
 
 class JIRA_Conf(models.Model):
@@ -3118,7 +3122,6 @@ admin.site.register(Cred_Mapping)
 admin.site.register(System_Settings, System_SettingsAdmin)
 admin.site.register(CWE)
 admin.site.register(Regulation)
-
 # Watson
 watson.register(Product)
 watson.register(Test)

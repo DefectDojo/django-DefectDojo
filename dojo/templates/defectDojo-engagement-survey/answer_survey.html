@@ -2,9 +2,9 @@
 {% block content %}
 <div class="well">
 {% if engagement %}
-    <h4>Answer {{survey}} survey for {{engagement}}</h4>
+    <h4>Answer {{survey}} Questionnaire for {{engagement}}</h4>
 {% else %}
-    <h4>Answer {{survey}} survey</h4>
+    <h4>Answer {{survey}} Questionnaire</h4>
 {% endif %}
 <p>{{ survey.survey.description }} </p>
 </div>
@@ -16,7 +16,7 @@
 
 <div class="form-group clearfix">
     <div class="col-sm-offset-2 col-sm-10">
-    <input class="btn btn-primary" type="submit" label="save_survey" name="save_survey" value="Save Survey" />
+    <input class="btn btn-primary" type="submit" label="save_survey" name="save_survey" value="Save Questionnaire" />
     <br/>
 </div>
 </div>
