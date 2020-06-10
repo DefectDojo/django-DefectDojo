@@ -586,7 +586,7 @@ class Product(models.Model):
 
     created = models.DateTimeField(editable=False, null=True, blank=True)
     prod_type = models.ForeignKey(Product_Type, related_name='prod_type',
-                                  null=True, blank=True, on_delete=models.CASCADE)
+                                  null=False, blank=False, on_delete=models.CASCADE)
     updated = models.DateTimeField(editable=False, null=True, blank=True)
     tid = models.IntegerField(default=0, editable=False)
     authorized_users = models.ManyToManyField(User, blank=True)
@@ -1381,7 +1381,7 @@ class Finding(models.Model):
     sourcefile = models.TextField(null=True, blank=True, editable=False)
     param = models.TextField(null=True, blank=True, editable=False)
     payload = models.TextField(null=True, blank=True, editable=False)
-    hash_code = models.TextField(null=True, blank=True, editable=False)
+    hash_code = models.CharField(null=True, blank=True, editable=False, max_length=64)
 
     line = models.IntegerField(null=True, blank=True,
                                verbose_name="Line number",
@@ -1433,6 +1433,10 @@ class Finding(models.Model):
             models.Index(fields=['numerical_severity']),
             models.Index(fields=['date']),
             models.Index(fields=['title']),
+            models.Index(fields=['hash_code']),
+            models.Index(fields=['unique_id_from_tool']),
+            # models.Index(fields=['file_path']), # can't add index because the field has max length 4000.
+            models.Index(fields=['line']),
         ]
 
     @classmethod
@@ -1645,7 +1649,7 @@ class Finding(models.Model):
         days = diff.days
         return days if days > 0 else 0
 
-    def sla(self):
+    def sla_days_remaining(self):
         sla_calculation = None
         severity = self.severity
         from dojo.utils import get_system_setting

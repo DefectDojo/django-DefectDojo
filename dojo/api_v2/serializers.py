@@ -406,6 +406,8 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
     accepted_risks = RiskAcceptanceSerializer(many=True, read_only=True, source='risk_acceptance_set')
     push_to_jira = serializers.BooleanField(default=False)
+    age = serializers.IntegerField(read_only=True)
+    sla_days_remaining = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Finding
@@ -979,7 +981,7 @@ class NoteSerializer(serializers.ModelSerializer):
     author = UserSerializer(
         many=False, read_only=False)
     editor = UserSerializer(
-        read_only=False, many=False, allow_null=True)
+        read_only=False, many=False, allow_null=True, required=False)
 
     history = NoteHistorySerializer(read_only=True, many=True)
 
@@ -1046,8 +1048,8 @@ class ReportGenerateSerializer(serializers.Serializer):
     title = serializers.CharField(max_length=200)
     user_id = serializers.IntegerField()
     host = serializers.CharField(max_length=200)
-    finding_images = FindingToFindingImagesSerializer(many=True, allow_null=True)
-    finding_notes = FindingToNotesSerializer(many=True, allow_null=True)
+    finding_images = FindingToFindingImagesSerializer(many=True, allow_null=True, required=False)
+    finding_notes = FindingToNotesSerializer(many=True, allow_null=True, required=False)
 
 
 class TagSerializer(serializers.Serializer):
@@ -1076,3 +1078,7 @@ class SystemSettingsSerializer(serializers.Serializer):
 
         instance.save()
         return instance
+
+
+class FindingNoteSerializer(serializers.Serializer):
+    note_id = serializers.IntegerField()

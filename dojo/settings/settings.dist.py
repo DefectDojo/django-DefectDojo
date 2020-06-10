@@ -622,6 +622,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Dependency Check Scan': ['cve', 'file_path'],
     # possible improvment: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
     'NPM Audit Scan': ['title', 'severity', 'file_path', 'cve', 'cwe'],
+    # possible improvment: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
+    'Yarn Audit Scan': ['title', 'severity', 'file_path', 'cve', 'cwe'],
     # possible improvment: in the scanner put the library name into file_path, then dedup on cve + file_path + severity
     'Whitesource Scan': ['title', 'severity', 'description'],
     'ZAP Scan': ['title', 'cwe', 'endpoints', 'severity'],
@@ -642,6 +644,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'SonarQube Scan': False,
     'Dependency Check Scan': True,
     'NPM Audit Scan': True,
+    'Yarn Audit Scan': True,
     'Whitesource Scan': True,
     'ZAP Scan': False,
     'Qualys Scan': True,
@@ -677,6 +680,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'SonarQube Scan': DEDUPE_ALGO_HASH_CODE,
     'Dependency Check Scan': DEDUPE_ALGO_HASH_CODE,
     'NPM Audit Scan': DEDUPE_ALGO_HASH_CODE,
+    'Yarn Audit Scan': DEDUPE_ALGO_HASH_CODE,
     'Whitesource Scan': DEDUPE_ALGO_HASH_CODE,
     'ZAP Scan': DEDUPE_ALGO_HASH_CODE,
     'Qualys Scan': DEDUPE_ALGO_HASH_CODE,

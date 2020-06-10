@@ -271,7 +271,7 @@ def finding_sla(finding):
 
     title = ""
     severity = finding.severity
-    find_sla = finding.sla()
+    find_sla = finding.sla_days_remaining()
     sla_age = get_system_setting('sla_' + severity.lower())
     if finding.mitigated:
         status = "blue"

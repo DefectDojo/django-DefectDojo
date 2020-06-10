@@ -1,7 +1,7 @@
 # requirements.txt for DefectDojo using Python 3.x
 asteval==0.9.18
 bleach>=3.1.0
-celery==4.4.3
+celery==4.4.5
 coverage==5.1
 defusedxml==0.6.0
 django_celery_results==1.2.1
@@ -54,8 +54,9 @@ social-auth-app-django==3.4.0
 Python-jose==3.1.0
 gitpython>=2.1.13
 ptvsd>=4.2.7
-google-api-python-client==1.9.1
+google-api-python-client==1.9.2
 google-auth==1.16.1
 google-auth-oauthlib==0.4.1
 drf_yasg==1.17.1
 python-gitlab==2.2.0
+jsonlines==1.2.0  # requred by yarn audit parser
