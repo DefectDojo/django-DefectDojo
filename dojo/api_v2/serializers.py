@@ -3,7 +3,7 @@ from dojo.models import Product, Engagement, Test, Finding, \
     Finding_Template, Test_Type, Development_Environment, NoteHistory, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Product_Type, JIRA_Conf, Endpoint, BurpRawRequestResponse, JIRA_PKey, \
-    Notes, DojoMeta, FindingImage, Note_Type
+    Notes, DojoMeta, FindingImage, Note_Type, System_Settings
 from dojo.forms import ImportScanForm, SEVERITY_CHOICES
 from dojo.tools import requires_file
 from dojo.tools.factory import import_parser_factory
@@ -406,6 +406,8 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
     accepted_risks = RiskAcceptanceSerializer(many=True, read_only=True, source='risk_acceptance_set')
     push_to_jira = serializers.BooleanField(default=False)
+    age = serializers.IntegerField(read_only=True)
+    sla_days_remaining = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Finding
@@ -979,7 +981,7 @@ class NoteSerializer(serializers.ModelSerializer):
     author = UserSerializer(
         many=False, read_only=False)
     editor = UserSerializer(
-        read_only=False, many=False, allow_null=True)
+        read_only=False, many=False, allow_null=True, required=False)
 
     history = NoteHistorySerializer(read_only=True, many=True)
 
@@ -1046,9 +1048,37 @@ class ReportGenerateSerializer(serializers.Serializer):
     title = serializers.CharField(max_length=200)
     user_id = serializers.IntegerField()
     host = serializers.CharField(max_length=200)
-    finding_images = FindingToFindingImagesSerializer(many=True, allow_null=True)
-    finding_notes = FindingToNotesSerializer(many=True, allow_null=True)
+    finding_images = FindingToFindingImagesSerializer(many=True, allow_null=True, required=False)
+    finding_notes = FindingToNotesSerializer(many=True, allow_null=True, required=False)
 
 
 class TagSerializer(serializers.Serializer):
     tags = TagListSerializerField(required=True)
+
+
+class SystemSettingsSerializer(serializers.Serializer):
+    enable_auditlog = serializers.BooleanField(default=True)
+    enable_deduplication = serializers.BooleanField(default=False)
+    delete_dupulicates = serializers.BooleanField(default=False)
+    max_dupes = serializers.IntegerField(allow_null=True, required=False)
+    enable_jira = serializers.BooleanField(default=False)
+    enable_benchmark = serializers.BooleanField(default=True)
+    enable_product_grade = serializers.BooleanField(default=False)
+    enable_finding_sla = serializers.BooleanField(default=True)
+
+    def update(self, instance, validated_data):
+        instance.enable_auditlog = validated_data.get('enable_auditlog', instance.enable_auditlog)
+        instance.enable_deduplication = validated_data.get('enable_deduplication', instance.enable_deduplication)
+        instance.delete_dupulicates = validated_data.get('delete_dupulicates', instance.delete_dupulicates)
+        instance.max_dupes = validated_data.get('max_dupes', instance.max_dupes)
+        instance.enable_jira = validated_data.get('enable_jira', instance.enable_jira)
+        instance.enable_benchmark = validated_data.get('enable_benchmark', instance.enable_benchmark)
+        instance.enable_product_grade = validated_data.get('enable_product_grade', instance.enable_product_grade)
+        instance.enable_finding_sla = validated_data.get('enable_finding_sla', instance.enable_finding_sla)
+
+        instance.save()
+        return instance
+
+
+class FindingNoteSerializer(serializers.Serializer):
+    note_id = serializers.IntegerField()

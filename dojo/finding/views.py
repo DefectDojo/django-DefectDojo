@@ -1700,6 +1700,7 @@ def finding_bulk_update_all(request, pid=None):
                     prev_prod = None
                     for finding in finds:
                         if prev_prod != finding.test.engagement.product.id:
+                            # TODO this can be inefficient as most findings usually have the same product
                             calculate_grade(finding.test.engagement.product)
                             prev_prod = finding.test.engagement.product.id
 
@@ -1709,13 +1710,12 @@ def finding_bulk_update_all(request, pid=None):
 
                     # Because we never call finding.save() in a bulk update, we need to actually
                     # push the JIRA stuff here, rather than in finding.save()
-                    if finding.jira_conf_new() is None:
-                        log_jira_alert('Finding cannot be pushed to jira as there is no jira configuration for this product.', finding)
-                    else:
-                        push_anyway = finding.jira_conf_new().jira_pkey_set.first().push_all_issues
-                        # push_anyway = JIRA_PKey.objects.get(
-                        #     product=finding.test.engagement.product).push_all_issues
-                        if form.cleaned_data['push_to_jira'] or push_anyway:
+                    push_anyway = finding.jira_conf_new().jira_pkey_set.first().push_all_issues
+                    if form.cleaned_data['push_to_jira'] or push_anyway:
+                        if finding.jira_conf_new() is None:
+                            log_jira_alert('Finding cannot be pushed to jira as there is no jira '
+                                           'configuration for this product.', finding)
+                        else:
                             if JIRA_Issue.objects.filter(finding=finding).exists():
                                 update_issue_task.delay(finding, True)
                             else:

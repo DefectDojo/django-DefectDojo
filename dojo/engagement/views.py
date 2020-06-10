@@ -1,4 +1,4 @@
-# #  engagements
+#  engagements
 import logging
 import os
 from datetime import datetime
@@ -37,6 +37,7 @@ from dojo.notifications.helper import create_notification
 from dojo.tasks import update_epic_task, add_epic_task
 from functools import reduce
 from django.db.models.query import QuerySet
+
 
 logger = logging.getLogger(__name__)
 parse_logger = logging.getLogger('dojo')
@@ -295,10 +296,10 @@ def delete_engagement(request, eid):
 
 def view_engagement(request, eid):
     eng = get_object_or_404(Engagement, id=eid)
-    tests = Test.objects.filter(engagement=eng).order_by('test_type__name', '-updated')
+    tests = Test.objects.filter(engagement=eng).prefetch_related('tagged_items__tag', 'test_type').order_by('test_type__name', '-updated')
     prod = eng.product
     auth = request.user.is_staff or request.user in prod.authorized_users.all()
-    risks_accepted = eng.risk_acceptance.all()
+    risks_accepted = eng.risk_acceptance.all().select_related('owner')
     preset_test_type = None
     network = None
     if eng.preset:
@@ -819,13 +820,9 @@ def complete_checklist(request, eid):
 @user_passes_test(lambda u: u.is_staff)
 def upload_risk(request, eid):
     eng = Engagement.objects.get(id=eid)
-    # exclude the findings already accepted
-    exclude_findings = [
-        finding.id for ra in eng.risk_acceptance.all()
-        for finding in ra.accepted_findings.all()
-    ]
-    eng_findings = Finding.objects.filter(active="True", verified="True", duplicate="False", test__in=eng.test_set.all()) \
-        .exclude(id__in=exclude_findings).order_by('title')
+
+    unaccepted_findings = Finding.objects.filter(active="True", verified="True", duplicate="False", test__in=eng.test_set.all()) \
+        .exclude(risk_acceptance__isnull=False).order_by('title')
 
     if request.method == 'POST':
         form = UploadRiskForm(request.POST, request.FILES)
@@ -835,7 +832,7 @@ def upload_risk(request, eid):
                 finding.active = False
                 finding.save()
             risk = form.save(commit=False)
-            risk.reporter = form.cleaned_data['reporter']
+            risk.owner = form.cleaned_data['owner']
             risk.expiration_date = form.cleaned_data['expiration_date']
             risk.accepted_by = form.cleaned_data['accepted_by']
             risk.compensating_control = form.cleaned_data['compensating_control']
@@ -861,9 +858,9 @@ def upload_risk(request, eid):
             return HttpResponseRedirect(
                 reverse('view_engagement', args=(eid, )))
     else:
-        form = UploadRiskForm(initial={'reporter': request.user})
+        form = UploadRiskForm(initial={'owner': request.user, 'name': 'Ad Hoc ' + timezone.now().strftime('%b %d, %Y, %H:%M:%S')})
 
-    form.fields["accepted_findings"].queryset = eng_findings
+    form.fields["accepted_findings"].queryset = unaccepted_findings
     product_tab = Product_Tab(eng.product.id, title="Upload Risk Exception", tab="engagements")
     product_tab.setEngagement(eng)
 
@@ -958,22 +955,18 @@ def view_risk(request, eid, raid):
     note_form = NoteForm()
     replace_form = ReplaceRiskAcceptanceForm()
     add_findings_form = AddFindingsRiskAcceptanceForm()
-    exclude_findings = [
-        finding.id for ra in eng.risk_acceptance.all()
-        for finding in ra.accepted_findings.all()
-    ]
-    findings = Finding.objects.filter(test__in=eng.test_set.all()) \
-        .exclude(id__in=exclude_findings).order_by("title")
 
-    add_fpage = get_page_items(request, findings, 10, 'apage')
+    accepted_findings = risk_approval.accepted_findings.order_by('numerical_severity')
+    fpage = get_page_items(request, accepted_findings, 15)
+
+    unaccepted_findings = Finding.objects.filter(test__in=eng.test_set.all()) \
+        .exclude(id__in=accepted_findings).order_by("title")
+    add_fpage = get_page_items(request, unaccepted_findings, 10, 'apage')
+    # on this page we need to add unaccepted findings as possible findings to add as accepted
     add_findings_form.fields[
         "accepted_findings"].queryset = add_fpage.object_list
 
-    fpage = get_page_items(
-        request,
-        risk_approval.accepted_findings.order_by('numerical_severity'), 15)
-
-    authorized = (request.user == risk_approval.reporter.username or request.user.is_staff)
+    authorized = (request.user == risk_approval.owner.username or request.user.is_staff)
 
     product_tab = Product_Tab(eng.product.id, title="Risk Exception", tab="engagements")
     product_tab.setEngagement(eng)
@@ -988,7 +981,7 @@ def view_risk(request, eid, raid):
             'note_form': note_form,
             'replace_form': replace_form,
             'add_findings_form': add_findings_form,
-            'show_add_findings_form': len(findings),
+            # 'show_add_findings_form': len(unaccepted_findings),
             'request': request,
             'add_findings': add_fpage,
             'authorized': authorized,
