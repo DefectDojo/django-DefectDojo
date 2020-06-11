@@ -291,7 +291,7 @@ def set_duplicate(new_finding, existing_finding):
     if existing_finding.id == new_finding.id:
         raise Exception("Can not add duplicate to itself")
     deduplicationLogger.debug('New finding ' + str(new_finding.id) + ' is a duplicate of existing finding ' + str(existing_finding.id))
-    if (existing_finding.is_Mitigated or existing_finding.mitigated) and new_finding.active and not new_finding.is_Mitigated:
+    if (existing_finding.is_Mitigated or existing_finding.mitigated) and not existing_finding.out_of_scope and not existing_finding.false_p and new_finding.active and not new_finding.is_Mitigated:
         existing_finding.mitigated = new_finding.mitigated
         existing_finding.is_Mitigated = new_finding.is_Mitigated
         existing_finding.active = new_finding.active
