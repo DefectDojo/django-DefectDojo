@@ -329,7 +329,7 @@ prompt_for_config_vals() {
 		esac
     done
 
-	# Sanity check answers, and exit if DB does not yet exist and DBTYPE is no mysql
+	# Sanity check answers, and exit if DB does not yet exist and DBTYPE is not mysql
 	if [ ! "$DB_TYPE" = "MySQL" ] && [ "$DB_EXISTS" = false ]; then
 	    echo ""
 		echo "##############################################################################"
@@ -337,7 +337,7 @@ prompt_for_config_vals() {
 		echo "##############################################################################"
 	    echo ""
 		echo "  You answered that the $DB_TYPE doesn't already exist"
-	    echo "  This installer currently can only create MySQL database."
+	    echo "  This installer currently can only create MySQL databases."
 	    echo "  Please create a database manually and re-run this installer"
 	    echo "  Exiting..."
 	    echo ""
