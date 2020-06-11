@@ -340,12 +340,16 @@ SAML2_AUTH = {
     # Metadata is required, choose either remote url or local file path
     'METADATA_AUTO_CONF_URL': '[The auto(dynamic) metadata configuration URL of SAML2]',
     'METADATA_LOCAL_FILE_PATH': '[The metadata configuration file path]',
+    # Custom URL to validate incoming SAML requests against
+    'ASSERTION_URL': 'https://mysite.com',
+    # Populates the Issuer element in authn request
+    'ENTITY_ID': 'https://mysite.com/saml2/acs/',
 
     # Optional settings below
     # Custom target redirect URL after the user get logged in. Default to /admin if not set. This setting will be overwritten if you have parameter ?next= specificed in the login URL.
     'DEFAULT_NEXT_URL': '/dashboard',
     # Create a new Django user when a new user logs in. Defaults to True.
-    'CREATE_USER': 'TRUE',
+    'CREATE_USER': True,
     'NEW_USER_PROFILE': {
         # The default group name when a new user logs in
         'USER_GROUPS': [],
@@ -367,10 +371,6 @@ SAML2_AUTH = {
         'CREATE_USER': 'path.to.your.new.user.hook.method',
         'BEFORE_LOGIN': 'path.to.your.login.hook.method',
     },
-    # Custom URL to validate incoming SAML requests against
-    'ASSERTION_URL': 'https://mysite.com',
-    # Populates the Issuer element in authn request
-    'ENTITY_ID': 'https://mysite.com/saml2/acs/',
     # Sets the Format property of authn NameIDPolicy element
     'NAME_ID_FORMAT': None,
     # Set this to True if you are running a Single Page Application (SPA) with Django Rest Framework (DRF), and are using JWT authentication to authorize client users
