@@ -628,20 +628,34 @@ def re_import_scan_results(request, tid):
             tags = request.POST.getlist('tags')
             ts = ", ".join(tags)
             test.tags = ts
-            try:
-                parser = import_parser_factory(file, test, active, verified)
-            except ValueError:
-                raise Http404()
-            except Exception as e:
-                messages.add_message(request,
-                                     messages.ERROR,
-                                     "An error has occurred in the parser, please see error "
-                                     "log for details.",
-                                     extra_tags='alert-danger')
-                parse_logger.exception(e)
-                parse_logger.error("Error in parser: {}".format(str(e)))
-                return HttpResponseRedirect(reverse('re_import_scan_results', args=(test.id,)))
-
+            if scan_type== SCAN_SONARQUBE_API:
+                try:
+                parser = import_parser_factory(file, test, active, verified,scan_type)
+                except ValueError:
+                    raise Http404()
+                except Exception as e:
+                    messages.add_message(request,
+                                         messages.ERROR,
+                                         "An error has occurred in the parser, please see error "
+                                         "log for details.",
+                                         extra_tags='alert-danger')
+                    parse_logger.exception(e)
+                    parse_logger.error("Error in parser: {}".format(str(e)))
+                    return HttpResponseRedirect(reverse('re_import_scan_results', args=(test.id,)))
+            else
+                try:
+                    parser = import_parser_factory(file, test, active, verified)
+                except ValueError:
+                    raise Http404()
+                except Exception as e:
+                    messages.add_message(request,
+                                         messages.ERROR,
+                                         "An error has occurred in the parser, please see error "
+                                         "log for details.",
+                                         extra_tags='alert-danger')
+                    parse_logger.exception(e)
+                    parse_logger.error("Error in parser: {}".format(str(e)))
+                    return HttpResponseRedirect(reverse('re_import_scan_results', args=(test.id,)))
             try:
                 items = parser.items
                 original_items = test.finding_set.all().values_list("id", flat=True)
