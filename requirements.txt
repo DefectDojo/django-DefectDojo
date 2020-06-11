@@ -55,7 +55,7 @@ Python-jose==3.1.0
 gitpython>=2.1.13
 ptvsd>=4.2.7
 google-api-python-client==1.9.2
-google-auth==1.16.1
+google-auth==1.17.0
 google-auth-oauthlib==0.4.1
 drf_yasg==1.17.1
 jsonlines==1.2.0  # requred by yarn audit parser
