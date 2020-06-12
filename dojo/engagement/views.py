@@ -14,7 +14,7 @@ from django.db.models import Q
 from django.http import HttpResponseRedirect, StreamingHttpResponse, Http404, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.cache import cache_page
-from django.utils import timezone
+from django.utils import timezone, is_scan_file_too_large
 from time import strftime
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
@@ -544,6 +544,12 @@ def import_scan_results(request, eid=None, pid=None):
             if not any(scan_type in code
                        for code in ImportScanForm.SCAN_TYPE_CHOICES):
                 raise Http404()
+            if file and is_scan_file_too_large(file):
+                messages.add_message(request,
+                                     messages.ERROR,
+                                     "Report file is too large. Maximum supported size is {} MB".format(settings.SCAN_FILE_MAX_SIZE),
+                                     extra_tags='alert-danger')
+                return HttpResponseRedirect(reverse('import_scan_results', args=(eid,)))
 
             tt, t_created = Test_Type.objects.get_or_create(name=scan_type)
             # will save in development environment
