@@ -14,7 +14,7 @@ from django.db.models import Q
 from django.http import HttpResponseRedirect, StreamingHttpResponse, Http404, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.cache import cache_page
-from django.utils import timezone, is_scan_file_too_large
+from django.utils import timezone
 from time import strftime
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
@@ -32,7 +32,7 @@ from dojo.models import Finding, Product, Engagement, Test, \
 from dojo.tools import handles_active_verified_statuses
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
-    FileIterWrapper, get_cal_event, message, get_system_setting, Product_Tab
+    FileIterWrapper, get_cal_event, message, get_system_setting, Product_Tab, is_scan_file_too_large
 from dojo.notifications.helper import create_notification
 from dojo.tasks import update_epic_task, add_epic_task
 from functools import reduce
