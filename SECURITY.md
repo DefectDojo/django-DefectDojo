@@ -4,7 +4,7 @@ No technology is perfect, and OWASP DefectDojo believes that working with skille
 
 ## Disclosure Policy and Process
 
-* Let us know by submitting the finding through HackerOne's [disclosure submission program](https://hackerone.com/defectdojo/reports/new) as soon as possible upon discovery of a potential security issue, and we'll make every effort to quickly resolve the issue.
+* Let us know by submitting the finding through HackerOne's [disclosure submission program](https://hackerone.com/defectdojo/reports/new) as soon as possible upon discovery of a potential security issue.
 * Once we've assessed your HackerOne report, a maintainer will create a GitHub "security advisory", which basically will allow the reporter and the DefectDojo team to work on the issue in a confidential manner, to avoid any premature disclosure. We will invite you as a collaborator to it and any needed trusted persons.
 * That "security advisory" will also allow us to have a temporary private fork, to work on the fix in confidentiality.
 * Once a fix is ready, we will coordonate a release.
