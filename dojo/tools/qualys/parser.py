@@ -229,7 +229,7 @@ def issue_r(raw_row, vuln):
 
 
 def qualys_parser(qualys_xml_file):
-    parser = etree.XMLParser(remove_blank_text=True, no_network=True, recover=True)
+    parser = etree.XMLParser(resolve_entities=False, remove_blank_text=True, no_network=True, recover=True)
     d = etree.parse(qualys_xml_file, parser)
     r = d.xpath('//ASSET_DATA_REPORT/HOST_LIST/HOST')
     master_list = []
