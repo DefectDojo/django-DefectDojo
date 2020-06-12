@@ -30,4 +30,4 @@ class TestHuskyCIReportParser(TestCase):
         testfile = open("dojo/unittests/scans/huskyci/huskyci_report_many_finding_two_tools.json")
         parser = HuskyCIReportParser(testfile, Test())
         testfile.close()
-        self.assertEqual(6, len(parser.items))
+        self.assertEqual(5, len(parser.items))

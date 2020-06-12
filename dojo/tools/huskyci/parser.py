@@ -41,7 +41,9 @@ class HuskyCIReportParser(object):
                 for severity in severity_results:                    
                     vulns = severity_results[severity]
                     for vuln in vulns:
-                        vuln['severity'] = severity[0:-5]
+                        vuln['severity'] = severity[0:-5].lower().capitalize()
+                        if vuln['severity'] not in ('High', 'Medium', 'Low'):
+                            continue
                         unique_key = hashlib.md5(str(vuln).encode('utf-8')).hexdigest()
                         item = get_item(vuln, test)
                         items[unique_key] = item
@@ -50,10 +52,6 @@ class HuskyCIReportParser(object):
 
 
 def get_item(item_node, test):    
-    severity = item_node['severity'].lower().capitalize()
-    if severity not in ('High', 'Medium', 'Low'):
-        severity = 'Info'
-    
     # description
     description = item_node.get('details')
     if 'code' in item_node:
@@ -66,7 +64,7 @@ def get_item(item_node, test):
     finding = Finding(
         title=item_node.get('title'),
         test=test,
-        severity=severity,
+        severity=item_node.get('severity'),
         description=description,
         mitigation='N/A',
         references='',
