@@ -136,19 +136,20 @@ def simple_search(request):
                             product__authorized_users__in=[request.user]), tags)
 
             if findings:
-                findings = findings.prefetch_related('object', 'object__test', 'object__test__engagement', 'object__test__engagement__product', 'object__risk_acceptance_set', 'object__test__test_type')
+                findings = findings.prefetch_related('object', 'object__test', 'object__test__engagement', 'object__test__engagement__product',
+                 'object__risk_acceptance_set', 'object__test__test_type', 'object__tagged_items__tag', 'object__test__engagement__product__tagged_items__tag')
 
             if engagements:
-                engagements = engagements.prefetch_related('object', 'object__product')
+                engagements = engagements.prefetch_related('object', 'object__product', 'object__product__tagged_items__tag', 'object__tagged_items__tag')
 
             if products:
-                products = products.prefetch_related('object')
+                products = products.prefetch_related('object', 'object__tagged_items__tag')
 
             if tests:
-                tests = tests.prefetch_related('object', 'object__engagement', 'object__engagement__product', 'object__test_type')
+                tests = tests.prefetch_related('object', 'object__engagement', 'object__engagement__product', 'object__test_type', 'object__engagement__tagged_items__tag')
 
             if languages:
-                languages = languages.prefetch_related('object', 'object__product')
+                languages = languages.prefetch_related('object', 'object__product', 'object__product__tagged_items__tag')
 
         else:
             form = SimpleSearchForm()

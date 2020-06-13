@@ -1,4 +1,3 @@
-import calendar as tcalendar
 import re
 import binascii
 import os
@@ -15,25 +14,30 @@ import requests
 from dateutil.relativedelta import relativedelta, MO, SU
 from django.conf import settings
 from django.core.mail import send_mail
-from django.core.mail import EmailMessage
 from django.core.paginator import Paginator
 from django.urls import get_resolver, reverse
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
 from django.template.defaultfilters import pluralize
-from django.template.loader import render_to_string
 from django.utils import timezone
 from jira import JIRA
 from jira.exceptions import JIRAError
 from django.dispatch import receiver
 from dojo.signals import dedupe_signal
-
-from dojo.models import Finding, Engagement, Finding_Template, Product, JIRA_PKey, JIRA_Issue, \
-    Dojo_User, User, Alerts, System_Settings, Notifications, UserContactInfo, Endpoint, Benchmark_Type, \
-    Language_Type, Languages, Rule
+from django.db.models.signals import post_save
+import calendar as tcalendar
+from dojo.github import add_external_issue_github, update_external_issue_github, close_external_issue_github, reopen_external_issue_github
+from dojo.models import Finding, Engagement, Finding_Template, Product, JIRA_PKey, JIRA_Issue,\
+    Dojo_User, User, System_Settings, Notifications, Endpoint, Benchmark_Type, \
+    Language_Type, Languages, Rule, Test_Type
 from asteval import Interpreter
 from requests.auth import HTTPBasicAuth
-
+from dojo.notifications.helper import create_notification
 import logging
+import itertools
+from django.contrib import messages
+from django.http import HttpResponseRedirect
+
+
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
@@ -110,6 +114,8 @@ def sync_dedupe(sender, *args, **kwargs):
         else:
             deduplicationLogger.debug("no configuration per parser found; using legacy algorithm")
             deduplicate_legacy(new_finding)
+    else:
+        deduplicationLogger.debug("skipping dedupe because it's disabled in system settings get()")
 
 
 def deduplicate_legacy(new_finding):
@@ -178,8 +184,12 @@ def deduplicate_legacy(new_finding):
         #    and (endpoints or (line and file_path)
         # ---------------------------------------------------------
         if ((flag_endpoints or flag_line_path) and flag_hash):
-            set_duplicate(new_finding, find)
-            super(Finding, new_finding).save()
+            try:
+                set_duplicate(new_finding, find)
+            except Exception as e:
+                deduplicationLogger.debug(str(e))
+                continue
+
             break
 
 
@@ -207,8 +217,11 @@ def deduplicate_unique_id_from_tool(new_finding):
             deduplicationLogger.debug(
                 'deduplication_on_engagement_mismatch, skipping dedupe.')
             continue
-        set_duplicate(new_finding, find)
-        super(Finding, new_finding).save()
+        try:
+            set_duplicate(new_finding, find)
+        except Exception as e:
+            deduplicationLogger.debug(str(e))
+            continue
         break
 
 
@@ -234,8 +247,11 @@ def deduplicate_hash_code(new_finding):
             deduplicationLogger.debug(
                 'deduplication_on_engagement_mismatch, skipping dedupe.')
             continue
-        set_duplicate(new_finding, find)
-        super(Finding, new_finding).save()
+        try:
+            set_duplicate(new_finding, find)
+        except Exception as e:
+            deduplicationLogger.debug(str(e))
+            continue
         break
 
 
@@ -263,12 +279,19 @@ def deduplicate_uid_or_hash_code(new_finding):
             deduplicationLogger.debug(
                 'deduplication_on_engagement_mismatch, skipping dedupe.')
             continue
-        set_duplicate(new_finding, find)
-        super(Finding, new_finding).save()
+        try:
+            set_duplicate(new_finding, find)
+        except Exception as e:
+            deduplicationLogger.debug(str(e))
+            continue
         break
 
 
 def set_duplicate(new_finding, existing_finding):
+    if existing_finding.duplicate:
+        raise Exception("Existing finding is a duplicate")
+    if existing_finding.id == new_finding.id:
+        raise Exception("Can not add duplicate to itself")
     deduplicationLogger.debug('New finding ' + str(new_finding.id) + ' is a duplicate of existing finding ' + str(existing_finding.id))
     if (existing_finding.is_Mitigated or existing_finding.mitigated) and new_finding.active and not new_finding.is_Mitigated:
         existing_finding.mitigated = new_finding.mitigated
@@ -282,8 +305,87 @@ def set_duplicate(new_finding, existing_finding):
     new_finding.active = False
     new_finding.verified = False
     new_finding.duplicate_finding = existing_finding
-    existing_finding.duplicate_list.add(new_finding)
+    for find in new_finding.original_finding.all():
+        new_finding.original_finding.remove(find)
+        set_duplicate(find, existing_finding)
     existing_finding.found_by.add(new_finding.test.test_type)
+    super(Finding, new_finding).save()
+    super(Finding, existing_finding).save()
+
+
+def removeLoop(finding_id, counter):
+    # get latest status
+    finding = Finding.objects.get(id=finding_id)
+    real_original = finding.duplicate_finding
+
+    if not real_original or real_original is None:
+        return
+
+    if finding_id == real_original.id:
+        finding.duplicate_finding = None
+        super(Finding, finding).save()
+        return
+
+    # Only modify the findings if the original ID is lower to get the oldest finding as original
+    if (real_original.id > finding_id) and (real_original.duplicate_finding is not None):
+        tmp = finding_id
+        finding_id = real_original.id
+        real_original = Finding.objects.get(id=tmp)
+        finding = Finding.objects.get(id=finding_id)
+
+    if real_original in finding.original_finding.all():
+        # remove the original from the duplicate list if it is there
+        finding.original_finding.remove(real_original)
+        super(Finding, finding).save()
+    if counter <= 0:
+        # Maximum recursion depth as safety method to circumvent recursion here
+        return
+    for f in finding.original_finding.all():
+        # for all duplicates set the original as their original, get rid of self in between
+        f.duplicate_finding = real_original
+        super(Finding, f).save()
+        super(Finding, real_original).save()
+        removeLoop(f.id, counter - 1)
+
+
+def fix_loop_duplicates():
+    candidates = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).all().order_by("-id")
+    deduplicationLogger.info("Identified %d Findings with Loops" % len(candidates))
+    for find_id in candidates.values_list('id', flat=True):
+        removeLoop(find_id, 5)
+
+    new_originals = Finding.objects.filter(duplicate_finding__isnull=True, duplicate=True)
+    for f in new_originals:
+        deduplicationLogger.info("New Original: %d " % f.id)
+        f.duplicate = False
+        super(Finding, f).save()
+
+    loop_count = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).count()
+    deduplicationLogger.info("%d Finding found with Loops" % loop_count)
+
+
+def rename_whitesource_finding():
+    whitesource_id = Test_Type.objects.get(name="Whitesource Scan").id
+    findings = Finding.objects.filter(found_by=whitesource_id)
+    findings = findings.order_by('-pk')
+    logger.info("######## Updating Hashcodes - deduplication is done in background using django signals upon finding save ########")
+    for finding in findings:
+        logger.info("Updating Whitesource Finding with id: %d" % finding.id)
+        lib_name_begin = re.search('\\*\\*Library Filename\\*\\* : ', finding.description).span(0)[1]
+        lib_name_end = re.search('\\*\\*Library Description\\*\\*', finding.description).span(0)[0]
+        lib_name = finding.description[lib_name_begin:lib_name_end - 1]
+        if finding.cve is None:
+            finding.title = "CVE-None | " + lib_name
+        else:
+            finding.title = finding.cve + " | " + lib_name
+        if not finding.cwe:
+            logger.debug('Set cwe for finding %d to 1035 if not an cwe Number is set' % finding.id)
+            finding.cwe = 1035
+        finding.title = finding.title.rstrip()  # delete \n at the end of the title
+        from titlecase import titlecase
+        finding.title = titlecase(finding.title)
+        finding.hash_code = finding.compute_hash_code()
+        finding.save()
 
 
 def sync_rules(new_finding, *args, **kwargs):
@@ -554,13 +656,10 @@ def get_punchcard_data(findings, start_date, weeks):
         first_sunday = start_date - relativedelta(weekday=SU(-1))
         last_sunday = start_date + relativedelta(weeks=weeks)
 
-        print(first_sunday)
-        print(last_sunday)
-
         # reminder: The first week of a year is the one that contains the year’s first Thursday
         # so we could have for 29/12/2019: week=1 and year=2019 :-D. So using week number from db is not practical
 
-        severities_by_day = findings.filter(created__gte=first_sunday).filter(created__lt=last_sunday) \
+        severities_by_day = findings.filter(created__date__gte=first_sunday).filter(created__date__lt=last_sunday) \
                                     .values('created__date') \
                                     .annotate(count=Count('id')) \
                                     .order_by('created__date')
@@ -626,9 +725,9 @@ def get_punchcard_data(findings, start_date, weeks):
 
         # add week in progress + empty weeks on the end if needed
         while tick < weeks + 1:
-            print(tick)
+            # print(tick)
             week_data, label = get_week_data(start_of_week, tick, day_counts)
-            print(week_data, label)
+            # print(week_data, label)
             punchcard.extend(week_data)
             ticks.append(label)
             tick += 1
@@ -686,11 +785,11 @@ def get_period_counts_legacy(findings,
             end_date = new_date + relativedelta(weeks=1, weekday=MO(1))
 
         closed_in_range_count = findings_closed.filter(
-            mitigated__range=[new_date, end_date]).count()
+            mitigated__date__range=[new_date, end_date]).count()
 
         if accepted_findings:
             risks_a = accepted_findings.filter(
-                risk_acceptance__created__range=[
+                risk_acceptance__created__date__range=[
                     datetime(
                         new_date.year,
                         new_date.month,
@@ -785,11 +884,11 @@ def get_period_counts(active_findings,
             end_date = new_date + relativedelta(weeks=1, weekday=MO(1))
 
         closed_in_range_count = findings_closed.filter(
-            mitigated__range=[new_date, end_date]).count()
+            mitigated__date__range=[new_date, end_date]).count()
 
         if accepted_findings:
             risks_a = accepted_findings.filter(
-                risk_acceptance__created__range=[
+                risk_acceptance__created__date__range=[
                     datetime(
                         new_date.year,
                         new_date.month,
@@ -949,7 +1048,7 @@ def opened_in_period(start_date, end_date, pt):
         end_date,
         'closed':
         Finding.objects.filter(
-            mitigated__range=[start_date, end_date],
+            mitigated__date__range=[start_date, end_date],
             test__engagement__product__prod_type=pt,
             severity__in=('Critical', 'High', 'Medium', 'Low')).aggregate(
                 total=Sum(
@@ -1075,6 +1174,15 @@ def get_page_items(request, items, page_size, param_name='page'):
     return paginator.get_page(page)
 
 
+def get_page_items_and_count(request, items, page_size, param_name='page'):
+    size = request.GET.get('page_size', page_size)
+    paginator = Paginator(items, size)
+    page = request.GET.get(param_name)
+
+    # new get_page method will handle invalid page value, out of bounds pages, etc
+    return paginator.get_page(page), paginator.count
+
+
 def handle_uploaded_threat(f, eng):
     name, extension = os.path.splitext(f.name)
     with open(settings.MEDIA_ROOT + '/threat/%s%s' % (eng.id, extension),
@@ -1145,10 +1253,12 @@ def log_jira_generic_alert(title, description):
 
 # Logs the error to the alerts table, which appears in the notification toolbar
 def log_jira_alert(error, finding):
+    prod_name = finding.test.engagement.product.name
     create_notification(
         event='jira_update',
-        title='Jira update issue',
+        title='Jira update issue (' + truncate_with_dots(prod_name, 25) + ')',
         description='Finding: ' + str(finding.id) + ', ' + error,
+        url=reverse('view_finding', args=(finding.id, )),
         icon='bullseye',
         source='Jira')
 
@@ -1187,20 +1297,51 @@ def jira_long_description(find_description, find_id, jira_conf_finding_text):
         find_id) + "\n\n" + jira_conf_finding_text
 
 
+def add_external_issue(find, external_issue_provider):
+    eng = Engagement.objects.get(test=find.test)
+    prod = Product.objects.get(engagement=eng)
+    logger.debug('adding external issue with provider: ' + external_issue_provider)
+
+    if external_issue_provider == 'github':
+        add_external_issue_github(find, prod, eng)
+
+
+def update_external_issue(find, old_status, external_issue_provider):
+    prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
+    eng = Engagement.objects.get(test=find.test)
+
+    if external_issue_provider == 'github':
+        update_external_issue_github(find, prod, eng)
+
+
+def close_external_issue(find, note, external_issue_provider):
+    prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
+    eng = Engagement.objects.get(test=find.test)
+
+    if external_issue_provider == 'github':
+        close_external_issue_github(find, note, prod, eng)
+
+
+def reopen_external_issue(find, note, external_issue_provider):
+    prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
+    eng = Engagement.objects.get(test=find.test)
+
+    if external_issue_provider == 'github':
+        reopen_external_issue_github(find, note, prod, eng)
+
+
 def add_issue(find, push_to_jira):
-    logger.debug('adding issue: ' + str(find))
     eng = Engagement.objects.get(test=find.test)
     prod = Product.objects.get(engagement=eng)
 
-    if JIRA_PKey.objects.filter(product=prod).count() == 0:
-        log_jira_alert(
-            'Finding cannot be pushed to jira as there is no jira configuration for this product.', find)
-        return
-
-    jpkey = JIRA_PKey.objects.get(product=prod)
-    jira_conf = jpkey.conf
-
     if push_to_jira:
+        if JIRA_PKey.objects.filter(product=prod).count() == 0:
+            log_jira_alert('Finding cannot be pushed to jira as there is no jira configuration for this product.', find)
+            return
+
+        jpkey = JIRA_PKey.objects.get(product=prod)
+        jira_conf = jpkey.conf
+
         if 'Active' in find.status() and 'Verified' in find.status():
             if ((jpkey.push_all_issues and Finding.get_number_severity(
                     System_Settings.objects.get().jira_minimum_severity) >=
@@ -1245,9 +1386,10 @@ def add_issue(find, push_to_jira):
                     j_issue = JIRA_Issue(
                         jira_id=new_issue.id, jira_key=new_issue, finding=find)
                     j_issue.save()
-                    find.jira_creation = timezone.now()
-                    find.jira_change = find.jira_creation
-                    find.save()
+                    # Moving this to the save function
+                    # find.jira_creation = timezone.now()
+                    # find.jira_change = find.jira_creation
+                    # find.save()
                     issue = jira.issue(new_issue.id)
 
                     # Add labels (security & product)
@@ -1303,7 +1445,7 @@ def jira_check_attachment(issue, source_file_name):
     return file_exists
 
 
-def update_issue(find, old_status, push_to_jira):
+def update_issue(find, push_to_jira):
     prod = Product.objects.get(
         engagement=Engagement.objects.get(test=find.test))
     jpkey = JIRA_PKey.objects.get(product=prod)
@@ -1344,9 +1486,10 @@ def update_issue(find, old_status, push_to_jira):
                                                   jira_conf.finding_text),
                 priority={'name': jira_conf.get_priority(find.severity)},
                 fields=fields)
-            print('\n\nSaving jira_change\n\n')
-            find.jira_change = timezone.now()
-            find.save()
+            # print('\n\nSaving jira_change\n\n')
+            # Moving this to finding.save()
+            # find.jira_change = timezone.now()
+            # find.save()
             # Add labels(security & product)
             add_labels(find, issue)
         except JIRAError as e:
@@ -1357,23 +1500,23 @@ def update_issue(find, old_status, push_to_jira):
         if 'Inactive' in find.status() or 'Mitigated' in find.status(
         ) or 'False Positive' in find.status(
         ) or 'Out of Scope' in find.status() or 'Duplicate' in find.status():
-            if 'Active' in old_status:
-                json_data = {'transition': {'id': jira_conf.close_status_key}}
-                r = requests.post(
-                    url=req_url,
-                    auth=HTTPBasicAuth(jira_conf.username, jira_conf.password),
-                    json=json_data)
-                find.jira_change = timezone.now()
-                find.save()
+            # if 'Active' in old_status:
+            json_data = {'transition': {'id': jira_conf.close_status_key}}
+            r = requests.post(
+                url=req_url,
+                auth=HTTPBasicAuth(jira_conf.username, jira_conf.password),
+                json=json_data)
+            find.jira_change = timezone.now()
+            find.save()
         elif 'Active' in find.status() and 'Verified' in find.status():
-            if 'Inactive' in old_status:
-                json_data = {'transition': {'id': jira_conf.open_status_key}}
-                r = requests.post(
-                    url=req_url,
-                    auth=HTTPBasicAuth(jira_conf.username, jira_conf.password),
-                    json=json_data)
-                find.jira_change = timezone.now()
-                find.save()
+            # if 'Inactive' in old_status:
+            json_data = {'transition': {'id': jira_conf.open_status_key}}
+            r = requests.post(
+                url=req_url,
+                auth=HTTPBasicAuth(jira_conf.username, jira_conf.password),
+                json=json_data)
+            find.jira_change = timezone.now()
+            find.save()
 
 
 def close_epic(eng, push_to_jira):
@@ -1630,11 +1773,7 @@ def prepare_for_view(encrypted_value):
 
 
 def get_system_setting(setting):
-    try:
-        system_settings = System_Settings.objects.get()
-    except:
-        system_settings = System_Settings()
-
+    system_settings = System_Settings.objects.get()
     return getattr(system_settings, setting, None)
 
 
@@ -1657,153 +1796,6 @@ def get_slack_user_id(user_email):
                         break
 
     return user_id
-
-
-def create_notification(event=None, **kwargs):
-    def create_description(event):
-        if "description" not in kwargs.keys():
-            if event == 'product_added':
-                kwargs["description"] = "Product " + kwargs['title'] + " has been created successfully."
-            else:
-                kwargs["description"] = "Event " + str(event) + " has occured."
-
-    def create_notification_message(event, notification_type):
-        template = 'notifications/%s.tpl' % event.replace('/', '')
-        kwargs.update({'type': notification_type})
-        try:
-            notification = render_to_string(template, kwargs)
-        except:
-            create_description(event)
-            notification = render_to_string('notifications/other.tpl', kwargs)
-
-        return notification
-
-    def send_slack_notification(channel):
-        try:
-            res = requests.request(
-                method='POST',
-                url='https://slack.com/api/chat.postMessage',
-                data={
-                    'token': get_system_setting('slack_token'),
-                    'channel': channel,
-                    'username': get_system_setting('slack_username'),
-                    'text': create_notification_message(event, 'slack')
-                })
-        except Exception as e:
-            log_alert(e)
-            pass
-
-    def send_hipchat_notification(channel):
-        try:
-            # We use same template for HipChat as for slack
-            res = requests.request(
-                method='POST',
-                url='https://%s/v2/room/%s/notification?auth_token=%s' %
-                (get_system_setting('hipchat_site'), channel,
-                 get_system_setting('hipchat_token')),
-                data={
-                    'message': create_notification_message(event, 'slack'),
-                    'message_format': 'text'
-                })
-        except Exception as e:
-            log_alert(e)
-            pass
-
-    def send_mail_notification(address):
-        subject = '%s notification' % get_system_setting('team_name')
-        if 'title' in kwargs:
-            subject += ': %s' % kwargs['title']
-        try:
-            email = EmailMessage(
-                subject,
-                create_notification_message(event, 'mail'),
-                get_system_setting('mail_notifications_from'),
-                [address],
-                headers={"From": "{}".format(get_system_setting('mail_notifications_from'))}
-            )
-            email.send(fail_silently=False)
-
-        except Exception as e:
-            log_alert(e)
-            pass
-
-    def send_alert_notification(user=None):
-        icon = kwargs.get('icon', 'info-circle')
-        alert = Alerts(
-            user_id=user,
-            title=kwargs.get('title'),
-            description=create_notification_message(event, 'alert'),
-            url=kwargs.get('url', reverse('alerts')),
-            icon=icon,
-            source=Notifications._meta.get_field(event).verbose_name.title())
-        alert.save()
-
-    def log_alert(e):
-        users = Dojo_User.objects.filter(is_superuser=True)
-        for user in users:
-            alert = Alerts(
-                user_id=user,
-                url=kwargs.get('url', reverse('alerts')),
-                title='Notification issue',
-                description="%s" % e,
-                icon="exclamation-triangle",
-                source="Notifications")
-            alert.save()
-
-    # Global notifications
-    try:
-        notifications = Notifications.objects.get(user=None)
-    except Exception as e:
-        notifications = Notifications()
-
-    slack_enabled = get_system_setting('enable_slack_notifications')
-    hipchat_enabled = get_system_setting('enable_hipchat_notifications')
-    mail_enabled = get_system_setting('enable_mail_notifications')
-
-    if slack_enabled and 'slack' in getattr(notifications, event):
-        send_slack_notification(get_system_setting('slack_channel'))
-
-    if hipchat_enabled and 'hipchat' in getattr(notifications, event):
-        send_hipchat_notification(get_system_setting('hipchat_channel'))
-
-    if mail_enabled and 'mail' in getattr(notifications, event):
-        send_mail_notification(get_system_setting('mail_notifications_to'))
-
-    if 'alert' in getattr(notifications, event, None):
-        send_alert_notification()
-
-    # Personal notifications
-    if 'recipients' in kwargs:
-        users = User.objects.filter(username__in=kwargs['recipients'])
-    else:
-        users = User.objects.filter(is_superuser=True)
-    for user in users:
-        try:
-            notifications = Notifications.objects.get(user=user)
-        except Exception as e:
-            notifications = Notifications()
-
-        if slack_enabled and 'slack' in getattr(
-                notifications,
-                event) and user.usercontactinfo.slack_username is not None:
-            slack_user_id = user.usercontactinfo.slack_user_id
-            if user.usercontactinfo.slack_user_id is None:
-                # Lookup the slack userid
-                slack_user_id = get_slack_user_id(
-                    user.usercontactinfo.slack_username)
-                slack_user_save = UserContactInfo.objects.get(user_id=user.id)
-                slack_user_save.slack_user_id = slack_user_id
-                slack_user_save.save()
-
-            send_slack_notification('@%s' % slack_user_id)
-
-        # HipChat doesn't seem to offer direct message functionality, so no HipChat PM functionality here...
-
-        if mail_enabled and 'mail' in getattr(notifications, event):
-            send_mail_notification(user.email)
-
-        if 'alert' in getattr(notifications, event):
-            send_alert_notification(user)
 
 
 def calculate_grade(product):
@@ -1960,3 +1952,62 @@ def apply_cwe_to_template(finding, override=False):
             template.save()
 
     return finding
+
+
+def truncate_with_dots(the_string, max_length_including_dots):
+    if not the_string:
+        return the_string
+    return (the_string[:max_length_including_dots - 3] + '...' if len(the_string) > max_length_including_dots else the_string)
+
+
+def max_safe(list):
+    return max(i for i in list if i is not None)
+
+
+def get_full_url(relative_url):
+    if settings.SITE_URL:
+        return settings.SITE_URL + relative_url
+    else:
+        logger.warn('SITE URL undefined in settings, full_url cannot be created')
+        return relative_url
+
+
+@receiver(post_save, sender=Dojo_User)
+def set_default_notifications(sender, instance, created, **kwargs):
+    # for new user we create a Notifications object so the default 'alert' notifications work
+    # this needs to be a signal to make it also work for users created via ldap, oauth and other authentication backends
+    if created:
+        logger.info('creating default set of notifications for: ' + str(instance))
+        notifications = Notifications()
+        notifications.user = instance
+        notifications.save()
+
+
+@receiver(post_save, sender=Engagement)
+def engagement_post_Save(sender, instance, created, **kwargs):
+    if created:
+        engagement = instance
+        title = 'Engagement created for ' + str(engagement.product) + ': ' + str(engagement.name)
+        create_notification(event='engagement_added', title=title, engagement=engagement, product=engagement.product,
+                            url=reverse('view_engagement', args=(engagement.id,)))
+
+
+def merge_sets_safe(set1, set2):
+    return set(itertools.chain(set1 or [], set2 or []))
+    # This concat looks  better, but requires Python 3.6+
+    # return {*set1, *set2}
+
+
+def get_return_url(request_params):
+    return request_params.get('return_url', None)
+
+
+def redirect_to_return_url_or_else(request, or_else):
+    return_url = get_return_url(request.POST)
+    if return_url is not None and return_url.strip():
+        return HttpResponseRedirect(return_url)
+    elif or_else:
+        return HttpResponseRedirect(or_else)
+    else:
+        messages.add_message(request, messages.ERROR, 'Unable to redirect anywhere.', extra_tags='alert-danger')
+        return HttpResponseRedirect(request.get_full_path())

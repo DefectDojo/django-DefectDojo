@@ -1,14 +1,14 @@
 from dojo.models import Product, Engagement, Test, Finding, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     User, ScanSettings, Scan, Stub_Finding, Endpoint, JIRA_PKey, JIRA_Conf, \
-    Finding_Template
+    Finding_Template, Note_Type
 
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraConfigurationsViewSet, \
     JiraIssuesViewSet, JiraViewSet, ProductViewSet, ScanSettingsViewSet, \
     ScansViewSet, StubFindingsViewSet, TestsViewSet, \
     ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
-    UsersViewSet, ImportScanView
+    UsersViewSet, ImportScanView, NoteTypeViewSet
 
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
@@ -42,7 +42,21 @@ class BaseClass():
 
         @skipIfNotSubclass('ListModelMixin')
         def test_list(self):
+
+            if hasattr(self.endpoint_model, 'tags') and self.payload:
+                # create a new instance first to make sure there's at least 1 instance with tags set by payload to trigger tag handling code
+                response = self.client.post(self.url, self.payload)
+
             response = self.client.get(self.url, format='json')
+            # print("RESPONSE[0]:", response.data['results'])
+            # print("RESPONSE[0]:", response.data['results'][0])
+            # print("RESPONSE[0]:", response.data['results'][0]['id'])
+            # finding = Finding.objects.get(id=response.data['results'][0]['id'])
+            # print("RESPONSE.age:", response.data['results'][0]['age'])
+            # print("finding.age:", finding.age)
+
+            # print("RESPONSE.sla_days_remaining:", response.data['results'][0]['sla_days_remaining'])
+            # print("finding.sla_days_remaining:", finding.sla_days_remaining())
             self.assertEqual(200, response.status_code)
 
         @skipIfNotSubclass('CreateModelMixin')
@@ -93,6 +107,7 @@ class EndpointTest(BaseClass.RESTEndpointTest):
             'query': 'test=true',
             'fragment': 'test-1',
             'product': 1,
+            "tags": ["mytag", "yourtag"]
         }
         self.update_fields = {'protocol': 'ftp'}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
@@ -138,7 +153,7 @@ class FindingsTest(BaseClass.RESTEndpointTest):
             "thread_id": 1,
             "found_by": [],
             "title": "DUMMY FINDING",
-            "date": "2017-12-31",
+            "date": "2020-05-20",
             "cwe": 1,
             "severity": "HIGH",
             "description": "TEST finding",
@@ -263,7 +278,7 @@ class ProductTest(BaseClass.RESTEndpointTest):
             "prod_type": 1,
             "name": "Test Product",
             "description": "test product",
-            "tags": ["mytag"]
+            "tags": ["mytag", "yourtag"]
         }
         self.update_fields = {'prod_type': 2}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
@@ -335,6 +350,7 @@ class TestsTest(BaseClass.RESTEndpointTest):
             "target_end": "2017-01-12T00:00",
             "percent_complete": 0,
             "lead": 2,
+            "tags": []
         }
         self.update_fields = {'percent_complete': 100}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
@@ -391,6 +407,24 @@ class ToolTypesTest(BaseClass.RESTEndpointTest):
         self.payload = {
             "name": "Tool Type",
             "description": "test tool type"
+        }
+        self.update_fields = {'description': 'changed description'}
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class NoteTypesTest(BaseClass.RESTEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Note_Type
+        self.viewname = 'note_type'
+        self.viewset = NoteTypeViewSet
+        self.payload = {
+            "name": "Test Note",
+            "description": "not that much",
+            "is_single": False,
+            "is_active": True,
+            "is_mandatory": False
         }
         self.update_fields = {'description': 'changed description'}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
@@ -482,6 +516,8 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
             "file": open('tests/zap_sample.xml'),
             "engagement": 1,
             "lead": 2,
+            "tags": ["'ci/cd, api"],
+            "version": "1.0.0",
         }
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
@@ -506,6 +542,7 @@ class ReimportScanTest(APITestCase):
                 "scan_type": 'ZAP Scan',
                 "file": open('tests/zap_sample.xml'),
                 "test": 3,
+                "version": "1.0.1",
             })
         self.assertEqual(length, Test.objects.all().count())
         self.assertEqual(201, response.status_code)

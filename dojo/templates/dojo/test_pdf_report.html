@@ -145,18 +145,51 @@
         <div class="row">
             <div class="col-lg-12">
                 {% if include_finding_notes %}
-                    {% with notes=find.notes.all|get_public_notes %}
+                    {% with notes=test.notes.all|get_public_notes %}
                         {% if notes.count > 0 %}
-                            <h3>Test Notes</h3>
-                            {% for note in notes reversed %}
-                                    <p>{{ note.author }} - {{ note.date }} - {{ note }}</p>
-                            {% endfor %}
+                            <h3> Test Notes </h3>
+                            <table id="notes" class="tablesorter-bootstrap table table-condensed table-striped">
+                                <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Date</th>
+                                    {% with notes_with_type=notes|get_notetype_notes_count %}
+                                        {% if notes_with_type > 0 %}
+                                            <th>Note Type</th>
+                                        {% endif %}
+                                        <th>Note</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for note in notes reversed %}
+                                            <tr>
+                                                <td>
+                                                    {{ note.author.username }}
+                                                </td>
+                                                <td>
+                                                    {{ note.date }}
+                                                </td>
+                                                {% if notes_with_type > 0 %}
+                                                    <td>
+                                                        {% if note.note_type != None %}
+                                                            {{ note.note_type }}
+                                                        {% endif %}
+                                                    </td>
+                                                {% endif %}
+                                                <td>
+                                                    {{ note|linebreaks }}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    {% endwith %}
+                            </table>
                         {% endif %}
                     {% endwith %}
                 {% endif %}
 
                 {% if test.engagement.risk_acceptance.count > 0 %}
-                    <h3 id="risk_acceptance">Accepted Findings</h3>
+                    <h3 id="risk_acceptance">Risk Accepted Findings</h3>
                     <table style="width: 100%;max-width: 100%;margin-bottom: 20px;margin-top:0;border: 1px solid #DDDDDD;">
                         <tr>
                             <th style="text-align: center;padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">
@@ -380,7 +413,7 @@
                            <pre>{{ req.get_request }}</pre>
                         {% if req.get_response %}
                            <h6>Response {{forloop.counter}}</h6>
-                           <pre>{{ req.get_response|truncatechars:800 }}</pre>
+                           <pre>{{ req.get_response|truncatechars_html:800 }}</pre>
                         {% endif %}
                         {% endfor %}
                         {% endif %}

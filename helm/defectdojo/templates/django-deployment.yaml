@@ -75,8 +75,8 @@ spec:
           mountPath: /run
         ports:
         - name: http
-          containerPort: 8080
           protocol: TCP
+          containerPort: {{- if .Values.django.nginx.tls.enabled }} 8443 {{- else }} 8080 {{- end }}
         envFrom:
         - configMapRef:
             name: {{ $fullName }}
@@ -86,10 +86,17 @@ spec:
             secretKeyRef:
               name: {{ $fullName }}
               key: METRICS_HTTP_AUTH_PASSWORD
+        - name: USE_TLS
+          value: '{{ .Values.django.nginx.tls.enabled }}'
+        - name: GENERATE_TLS_CERTIFICATE
+          value: '{{ .Values.django.nginx.tls.generateCertificate }}'
         livenessProbe:
           httpGet:
             path: /
             port: http
+            {{- if .Values.django.nginx.tls.enabled }}
+            scheme: HTTPS
+            {{- end }}
             httpHeaders:
             - name: Host
               value: {{ .Values.host }}
@@ -100,6 +107,9 @@ spec:
           httpGet:
             path: /
             port: http
+            {{- if .Values.django.nginx.tls.enabled }}
+            scheme: HTTPS
+            {{- end }}
             httpHeaders:
             - name: Host
               value: {{ .Values.host }}
@@ -108,7 +118,7 @@ spec:
           failureThreshold: 12
         resources:
           {{- toYaml .Values.django.nginx.resources | nindent 10 }}
-      {{- with .Values.nodeSelector }}
+      {{- with .Values.django.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}

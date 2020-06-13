@@ -19,4 +19,4 @@ class TestAnchoreEngineParser(TestCase):
         testfile = open("dojo/unittests/scans/anchore/many_vulns.json")
         parser = AnchoreEngineScanParser(testfile, Test())
         testfile.close()
-        self.assertEqual(20, len(parser.items))
+        self.assertEqual(23, len(parser.items))

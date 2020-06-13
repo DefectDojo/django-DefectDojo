@@ -94,10 +94,10 @@
                 <div class="col-md-6">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <h5>Accepted Findings</h5>
+                            <h5>Risk Accepted Findings</h5>
                         </div>
                         <div class="panel-body">
-                            <div id="reported_findings" class="graph"></div>
+                            <div id="accepted_findings" class="graph"></div>
                         </div>
                     </div>
                 </div>
@@ -322,7 +322,7 @@
                            <pre>{{ req.get_request }}</pre>
                         {% if req.get_response %}
                            <h6>Response {{forloop.counter}}</h6>
-                           <pre>{{ req.get_response|truncatechars:800 }}</pre>
+                           <pre>{{ req.get_response|truncatechars_html:800 }}</pre>
                         {% endif %}
                         {% endfor %}
                         {% endif %}
@@ -517,7 +517,7 @@
                 }
             ];
 
-            $.plot("#reported_findings", data, {
+            $.plot("#accepted_findings", data, {
                 series: {
                     stack: true,
                     bars: {

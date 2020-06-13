@@ -110,6 +110,9 @@
                     {% if test.percent_complete > 0 %}
                         <th>Progress</th>
                     {% endif %}
+                    {% if test.version != '' %}
+                        <th>Version</th>
+                    {% endif %}
                 </tr>
                 <tr>
                     <td><a href="{% url 'view_engagement' test.engagement.id %}">{{ test.engagement.name }}</a></td>
@@ -135,6 +138,9 @@
                                 </div>
                             </div>
                         </td>
+                    {% endif %}
+                    {% if test.version != '' %}
+                    <td>{{ test.version }}</td>
                     {% endif %}
                 </tr>
             </table>
@@ -204,7 +210,7 @@
                 <span class="caret"></span>
             </button>
             <div class="btn-group mr-2" role="group" aria-label="Bulk Actions">
-                {% if product_tab %}
+                {% if product_tab and not 'DISABLE_FINDING_MERGE'|setting_enabled %}
                     <button type="button" class="btn btn-info btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom" title="Merge Findings">
                         <a class="white-color merge" href="#" alt="Merge Findings">
                             <i class="fa fa-compress"></i>
@@ -222,6 +228,7 @@
                 <li style="padding-left: 8px;">
                     <form action="{% url 'finding_bulk_update' test.id %}" method="post" id="bulk_change_form">
                         {% csrf_token %}
+                        <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
                         <label style="display: block" for="severity">Severity</label>
                         <select name="severity" id="severity" style="font-size: 80%">
                             <option value="">Choose...</option>
@@ -231,22 +238,22 @@
                             <option value="High">High</option>
                             <option value="Critical">Critical</option>
                         </select><br/><br/>
-                        <b>Status</b> <input id="id_status" name="status" type="checkbox" alt="Select to enable" title="status_checkbox"/><br/>
+                        <label><b>Status</b> <input id="id_bulk_status" name="status" type="checkbox" alt="Select to enable" title="status_checkbox"/></label><br/>
                         <label style="font-size: 80%; font-weight: normal; display: block">
-                            <input id="id_active" name="active" type="checkbox" disabled/> <span>Active</span>
+                            <input id="id_bulk_active" name="active" type="checkbox" disabled/> <span>Active</span>
                         </label>
                         <label style="font-size: 80%; font-weight: normal; display: block">
-                            <input id="id_verified" name="verified" type="checkbox" disabled/> <span>Verified</span>
+                            <input id="id_bulk_verified" name="verified" type="checkbox" disabled/> <span>Verified</span>
                         </label>
                         <label style="font-size: 80%; font-weight: normal; display: block">
-                            <input id="id_false_p" name="false_p" type="checkbox" disabled/> <span>False Positive</span>
+                            <input id="id_bulk_false_p" name="false_p" type="checkbox" disabled/> <span>False Positive</span>
                         </label>
                         <label style="font-size: 80%; font-weight: normal; display: block">
-                            <input id="id_out_of_scope" name="out_of_scope" type="checkbox" disabled/>
+                            <input id="id_bulk_out_of_scope" name="out_of_scope" type="checkbox" disabled/>
                             <span>Out of scope</span>
                         </label>
                         <label style="font-size: 80%; font-weight: normal; display: block">
-                            <input id="id_is_Mitigated" name="is_Mitigated" type="checkbox" disabled/>
+                            <input id="id_bulk_is_Mitigated" name="is_Mitigated" type="checkbox" disabled/>
                             <span>Mitigated</span>
                         </label>
                         {% if system_settings.enable_jira %}
@@ -268,9 +275,8 @@
     {% endif %}
      <div class="panel panel-default table-responsive">
         {% if findings %}
-            <table id="test_findings" class="table table-condensed table-hover">
-                <tbody>
-                    <thead>
+            <table id="test_findings" class="tablesorter-bootstrap table table-condensed table-hover">
+                <thead>
                         <tr>
                             <th class="hidden-sm centered" title="Select all visible findings.">
                                 <div class="dropdown">
@@ -312,6 +318,7 @@
                             {% endif %}
                         </tr>
                     </thead>
+                <tbody>
                 {% for finding in findings %}
                     <tr class="{% if finding.active %}active_finding{% else %}inactive_finding{% endif %}">
                         <td class="hidden-sm centered">
@@ -330,7 +337,7 @@
                                        </a>
                                     </li>
                                      <li>
-                                       <a class="" href="{% url 'edit_finding' finding.id %}?source=test">
+                                       <a class="" href="{% url 'edit_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
                                          <i class="fa fa-pencil-square-o"></i> Edit
                                        </a>
                                     </li>
@@ -392,6 +399,7 @@
                                       <form method="post" action="{% url 'delete_finding' finding.id %}"
                                            style="display: inline" class="form-inline form" id="delete-finding-menu-{{ finding.id }}-form">
                                          {% csrf_token %}
+                                         <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />                                         
                                          <input type="hidden" name="id" value="{{ finding.id }}"/>
                                       </form>
                                       <a class="text-danger delete-finding" id="delete-finding-menu-{{ finding.id }}" href="#">
@@ -407,7 +415,7 @@
                                 {{ finding.severity_display }}
                             </span>
                         </td>
-                        <td class="nowrap"><a href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a>
+                        <td><a href="{% url 'view_finding' finding.id %}">{{ finding.title|truncatechars_html:60 }}</a>
                           {% if finding.file_path %}
                           <i class="fa dojo-sup fa-code has-popover" data-trigger="hover" data-content="{{ finding.file_path }}" data-placement="right" data-container="body" data-original-title="Files" title=""></i>
                             {% if finding.component_name %}
@@ -456,8 +464,7 @@
                               {{ finding.reporter }}
                           {% endif %}
                         </td>
-                        <td>{% if finding.under_review %}Under Review, {% endif %}{{ finding.status }}{% if finding.duplicate_finding.id %}, <a href="{% url 'view_finding' finding.duplicate_finding.id%}" data-toggle="tooltip" data-placement="top" title="{{ finding.title }}, {{ finding.created }}">Original</a>
-                        {% endif %}
+                        <td>{{ finding|finding_display_status|safe }}
                         </td>
                         {% if system_settings.enable_jira %}
                             {% if jira_config and product_tab or not product_tab %}
@@ -488,6 +495,9 @@
                 <p class="text-center">No findings found.</p>
             </div>
         {% endif %}
+        <div class="clearfix">
+            {% include "dojo/paging_snippet.html" with page=findings page_size=True %}
+        </div>
 
         <div class="panel panel-default to_highlight table-responsive potential-finding">
             <div class="panel-heading">
@@ -723,13 +733,13 @@
             });
 
             check_checked_finding();
-            $('#id_status').on('click', function (e) {
+            $('#id_bulk_status').on('click', function (e) {
                 var checked = this.checked;
-                $('#id_active').prop('disabled', !checked);
-                $('#id_verified').prop('disabled', !checked);
-                $('#id_false_p').prop('disabled', !checked);
-                $('#id_out_of_scope').prop('disabled', !checked);
-                $('#id_is_Mitigated').prop('disabled', !checked);
+                $('#bulk_edit_menu #id_bulk_active').prop('disabled', !checked);
+                $('#bulk_edit_menu #id_bulk_verified').prop('disabled', !checked);
+                $('#bulk_edit_menu #id_bulk_false_p').prop('disabled', !checked);
+                $('#bulk_edit_menu #id_bulk_out_of_scope').prop('disabled', !checked);
+                $('#bulk_edit_menu #id_bulk_is_Mitigated').prop('disabled', !checked);
             })
             //Ensures dropdown has proper zindex
             $('.table-responsive').on('show.bs.dropdown', function () {
@@ -930,5 +940,79 @@
 
         });
 
+        // DataTables setup
+        $(document).ready(function() {
+            date =  new Date().toISOString().slice(0, 10);
+            var fileDated = 'Findings_List_' + date;
+            var buttonCommon = {
+                exportOptions: {
+                    columns: ':not(:eq(8))',
+                    stripHtml: true,
+                    stripNewlines: true,
+                    trim: true,
+                    orthogonal: 'export'
+                },
+                filename: fileDated,
+                title: 'Findings List'
+            };
+
+            // Mapping of table columns to objects for proper cleanup and data formatting
+            var dojoTable = $('#test_findings').DataTable({
+                "columns": [
+                    { "data": "dropdown" },
+                    { "data": "action" },
+                    { "data": "severity" },
+                    { "data": "name" },
+                    { "data": "cwe" },
+                    { "data": "date" },
+                    { "data": "age" },
+                    {% if system_settings.enable_finding_sla %}
+                        { "data": "sla" },
+                    {% endif %}
+                    { "data": "reporter" },
+                    { "data": "status" },
+                    {% if system_settings.enable_jira %}
+                        {% if jira_config and product_tab or not product_tab %}
+                            { "data": "jira" },
+                            { "data": "jira_age" },
+                            { "data": "jira_change" },
+                        {% endif %}
+                    {% endif %}
+                ],
+                columnDefs: [
+                    { 
+                        "orderable": false,
+                        "targets": [0]
+                    },
+                ],
+                dom: 'Bfrtip',
+                paging: false,
+                buttons: [
+                    {
+                        extend: 'colvis',
+                        columns: ':not(.noVis)'
+                    },
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'copy'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'excel',
+                        autoFilter: true,
+                        sheetName: 'Exported data',
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'csv'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'pdf',
+                        orientation: 'landscape',
+                        pageSize: 'LETTER'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'print'
+                    }),
+                ],
+            });
+        });
     </script>
 {% endblock %}

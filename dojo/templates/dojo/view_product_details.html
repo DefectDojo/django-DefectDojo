@@ -3,7 +3,7 @@
 {% load humanize %}
 {% load display_tags %}
 {% block add_styles %}
-  .chart {height: 150px}
+  .chart {height: 160px}
 {% endblock %}
 {% block content %}
 <div class="row">
@@ -159,13 +159,13 @@
                 <span class="float-md-left"><strong>{{Abenchpercent.0}}</strong></span>
               </div>
               <div class="col-md-6 text-right">
-              <span class="float-md-right">{{Abenchpercent.1}} Complete</span>
+              <span class="float-md-right">{{Abenchpercent.1|default:"0&#37;"}} Complete</span>
               </div>
             </div>
             <div class="progress">
               <div class="progress-bar" role="progressbar" aria-valuenow="{{Abenchpercent.1}}"
               aria-valuemin="0%" aria-valuemax="100%" style="width:{{Abenchpercent.1}}">
-              <span class="sr-only">{{Abenchpercent.1}} Complete</span>
+              <span class="sr-only">{{Abenchpercent.1|default:"0&#37;"}} Complete</span>
               </div>
             </div>
           </li>
@@ -187,7 +187,7 @@
       <table class="table table-striped" id="set-width">
         <tbody>
           <tr>
-            <td style="width: 150px;"><strong>Business Criticality</strong></td>
+            <td style="width: 160px;"><strong>Business Criticality</strong></td>
             <td>{{ prod.get_business_criticality_display|notspecified }}</td>
           </tr>
           <tr>
@@ -263,7 +263,7 @@
         <tbody>
           {% for key, value in product_metadata.items %}
           <tr>
-            <td style="width: 150px;"><strong>{{ key }}</strong></td>
+            <td style="width: 160px;"><strong>{{ key }}</strong></td>
             <td>{{ value }}</td>
           </tr>
           {% endfor %}
@@ -282,7 +282,7 @@
       <table class="table table-striped">
         <tbody>
           <tr>
-            <td style="width: 150px;"><strong>Team Manager</strong></td>
+            <td style="width: 160px;"><strong>Team Manager</strong></td>
             <td>{% if prod.team_manager != "0" %}{{ prod.team_manager | default:"Unknown" }}{% endif %}</td>
           </tr>
           <tr>
@@ -314,6 +314,39 @@
     </div>
   </div>
 <!-- end contacts -->
+<!-- Notifications -->
+<div class="panel panel-default panel-default-secondary" id="edit_notifications">
+  <div class="panel-heading">
+    {% url 'notifications' as notifications_url %}
+    <h3 class="panel-title"><span class="fa fa-users fa-fw" aria-hidden="true"></span> Notifications
+      <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="These are your personal settings for this product, next to your <a href='{{notifications_url}}'>global notifications</a>." data-placement="right" data-container="body"></i>
+    </h3>
+  </div>
+  <form id="edit_notifications_form" class="form-horizontal" method="post" action="{% url 'edit_notifications' prod.id %}">{% csrf_token %}
+    <div class="table-responsive">
+      <table class="table table-striped">
+        <tbody>
+          <tr>
+              <td id="saving_notifications">&nbsp;</td><td class="centered">Slack</td><td class="centered">HipChat</td><td class="centered">Mail</td><td class="centered">Alert</td>
+          </tr>
+          {% for field in personal_notifications_form.visible_fields %}
+          <tr>
+            <td><strong>{{ field.label }}&nbsp;</strong>
+              {% if field.help_text %}
+              <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="{{ field.help_text }}" data-placement="right" data-container="body"></i>
+              {% endif %}
+            </td>
+            {% for pk,c in field.field.widget.choices %}
+            <td class="centered"><input id="{{ field.name }}_{{ c }}" type="checkbox" name="{{ field.name }}" {% if c in field.value %}checked{% endif %} value="{{ c }}"/></td>
+            {% endfor %}
+         </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+  </div>
+  </form>
+</div>
+<!-- end Notifications -->
 
 </div>
 </div>
@@ -343,6 +376,7 @@
         $('input#simple_search').val(terms);
       }
 
+      {% if languages and langSummary.files__count > 0 %}
       severity_pie();
       function severity_pie() {
           var data = [
@@ -373,7 +407,16 @@
               },
           });
         }
+        {% endif %}        
     });
+
+    $(function() {
+      $('div#edit_notifications input[type=checkbox]').on('click', function() {
+        $('#saving_notifications').append(' <small>(saving...)</small>')
+        $('#edit_notifications_form').submit()
+      });
+    });
+
 
   </script>
   {% endblock %}

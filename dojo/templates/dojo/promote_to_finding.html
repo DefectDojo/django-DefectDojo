@@ -2,7 +2,7 @@
 {% load event_tags %}
 {% load static from staticfiles %}
 {% block add_css %}
-    <link rel="stylesheet" href="{% static "simplemde/dist/simplemde.min.css" %}">
+    <link rel="stylesheet" href="{% static "easymde/dist/easymde.min.css" %}">
 {% endblock %}
 {% block add_styles %}
     .editor-toolbar, .editor-statusbar, .editor-preview-side, .CodeMirror {
@@ -22,6 +22,8 @@
         {% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
         {% if jform %}
+            <h4> JIRA </h4>
+            <hr>
             {% include "dojo/form_fields.html" with form=jform %}
         {% endif %}
         <div class="form-group">
@@ -33,7 +35,7 @@
 {% endblock %}
 {% block postscript %}
     <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
-    <script type="application/javascript" src="{% static "simplemde/dist/simplemde.min.js" %}"></script>
+    <script type="application/javascript" src="{% static "easymde/dist/easymde.min.js" %}"></script>
     <script type="text/javascript" src="{% static "admin/js/jquery.init.js" %}"></script>
     <script type="application/javascript" src="{% static "admin/js/admin/RelatedObjectLookups.js" %}"></script>
     <script type="application/javascript">
@@ -54,8 +56,8 @@
                     elem.id = "req"
                 }
 
-                var mde = new SimpleMDE({
-                    spellChecker: true,
+                var mde = new EasyMDE({
+                    spellChecker: false,
                     element: elem,
                     autofocus: false,
                     forceSync: true,

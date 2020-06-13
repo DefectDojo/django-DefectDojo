@@ -19,7 +19,8 @@ import requests
 # Local application/library imports
 from dojo.forms import JIRAForm, DeleteJIRAConfForm, ExpressJIRAForm
 from dojo.models import User, JIRA_Conf, JIRA_Issue, Notes, Risk_Acceptance
-from dojo.utils import add_breadcrumb, get_system_setting, create_notification
+from dojo.utils import add_breadcrumb, get_system_setting
+from dojo.notifications.helper import create_notification
 
 logger = logging.getLogger(__name__)
 

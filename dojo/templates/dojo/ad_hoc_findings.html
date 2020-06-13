@@ -2,7 +2,7 @@
 {% load event_tags %}
 {% load static from staticfiles %}
 {% block add_css %}
-    <link rel="stylesheet" href="{% static "simplemde/dist/simplemde.min.css" %}">
+    <link rel="stylesheet" href="{% static "easymde/dist/easymde.min.css" %}">
 {% endblock %}
 {% block add_styles %}
     .editor-toolbar, .editor-statusbar, .editor-preview-side, .CodeMirror {
@@ -22,6 +22,11 @@
                 <hr>
                 {% include "dojo/form_fields.html" with form=jform %}
             {% endif %}
+            {%  if gform %}
+                <h4> Github </h4>
+                <hr>
+                {% include "dojo/form_fields.html" with form=gform %}
+            {% endif %}
             <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">
                     <input class="btn btn-primary" type="submit" value="Add Another Finding"/>
@@ -33,7 +38,7 @@
 {% endblock %}
 {% block postscript %}
     <script type="text/javascript" src="{% static "admin/js/jquery.init.js"%}"></script>
-    <script type="application/javascript" src="{% static "simplemde/dist/simplemde.min.js" %}"></script>
+    <script type="application/javascript" src="{% static "easymde/dist/easymde.min.js" %}"></script>
     <script type="application/javascript" src="{% static "admin/js/admin/RelatedObjectLookups.js" %}"></script>
     <script type="application/javascript">
         $ = django.jQuery;
@@ -45,8 +50,8 @@
                     elem.id = "req"
                 }
 
-                var mde = new SimpleMDE({
-                    spellChecker: true,
+                var mde = new EasyMDE({
+                    spellChecker: false,
                     element: elem,
                     autofocus: false,
                     forceSync: true,

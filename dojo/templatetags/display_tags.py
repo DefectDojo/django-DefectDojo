@@ -8,18 +8,19 @@ from django.utils.safestring import mark_safe, SafeData
 from django.utils.text import normalize_newlines
 from django.urls import reverse
 from django.contrib.auth.models import User
-from dojo.utils import prepare_for_view, get_system_setting
+from dojo.utils import prepare_for_view, get_system_setting, get_full_url
 from dojo.models import Check_List, FindingImageAccessToken, Finding, System_Settings, JIRA_PKey, Product
 import markdown
 from django.db.models import Sum, Case, When, IntegerField, Value
 from django.utils import timezone
-from markdown.extensions import Extension
 import dateutil.relativedelta
 import datetime
 from ast import literal_eval
 from urllib.parse import urlparse
 import bleach
 import git
+from django.conf import settings
+
 
 register = template.Library()
 
@@ -270,7 +271,7 @@ def finding_sla(finding):
 
     title = ""
     severity = finding.severity
-    find_sla = finding.sla()
+    find_sla = finding.sla_days_remaining()
     sla_age = get_system_setting('sla_' + severity.lower())
     if finding.mitigated:
         status = "blue"
@@ -466,6 +467,11 @@ def severity_value(value):
         pass
 
     return value
+
+
+@register.simple_tag
+def severity_number_value(value):
+    return Finding.get_number_severity(value)
 
 
 @register.filter
@@ -728,3 +734,46 @@ def get_severity_count(id, table):
     display_counts = ", ".join([str(item) for item in display_counts])
 
     return display_counts
+
+
+@register.filter
+def full_url(url):
+    return get_full_url(url)
+
+
+# check if setting is enabled in django settings.py
+# use 'DISABLE_FINDING_MERGE'|setting_enabled
+@register.filter
+def setting_enabled(name):
+    return getattr(settings, name, False)
+
+
+@register.filter
+def finding_display_status(finding):
+    # add urls for some statuses
+    # outputs html, so make sure to escape user provided fields
+    display_status = finding.status()
+    print('status0: ', display_status)
+    if finding.risk_acceptance_set.all():
+        url = reverse('view_risk', args=(finding.test.engagement.id, finding.risk_acceptance_set.all()[0].id, ))
+        name = finding.risk_acceptance_set.all()[0].name
+        link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-content="' + escape(name) + '" data-container="body" data-original-title="Risk Acceptance">Risk Accepted</a>'
+        # print(link)
+        display_status = display_status.replace('Risk Accepted', link)
+        print('status1: ', display_status)
+
+    if finding.under_review:
+        url = reverse('defect_finding_review', args=(finding.id, ))
+        link = '<a href="' + url + '">Under Review</a>'
+        display_status = display_status.replace('Under Review', link)
+        print('status2: ', display_status)
+
+    if finding.duplicate:
+        url = reverse('view_finding', args=(finding.duplicate_finding.id, ))
+        name = finding.duplicate_finding.title + ', ' + finding.duplicate_finding.created.strftime('%b %d, %Y, %H:%M:%S')
+        link = '<a href="' + url + '" data-toggle="tooltip" data-placement="top" title="' + escape(name) + '">Duplicate</a>'
+        # print(link)
+        display_status = display_status.replace('Duplicate', link)
+        print('status1: ', display_status)
+
+    return display_status

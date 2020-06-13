@@ -103,7 +103,7 @@
                         </div>
                         <div class="col-xs-9 text-right">
                             <div class="huge">{{ accepted_count }}</div>
-                            <div>Accepted In Last Seven Days</div>
+                            <div>Risk Accepted In Last Seven Days</div>
                         </div>
                     </div>
                 </div>
@@ -155,7 +155,7 @@
         <div class="col-lg-12">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    Unassigned Answered Engagement Surveys
+                    Unassigned Answered Engagement Questionnaires
                 </div>
                 <div class="panel-body">
                     {% if surveys %}
@@ -175,9 +175,9 @@
                                 <tr>
                                     <td>
                                         {% if survey.engagement %}
-                                            <a href="/engagement/{{ survey.engagement.id }}/survey/{{ survey.id }}">{{ survey.survey.name }}</a>
+                                            <a href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}">{{ survey.survey.name }}</a>
                                         {% else %}
-                                            <a href="/empty_survey/{{ survey.id }}">{{ survey.survey.name }}</a>
+                                            <a href="/empty_questionnaire/{{ survey.id }}">{{ survey.survey.name }}</a>
                                         {% endif %}
                                     </td> 
                                     <td><a href="/product/{{ survey.engagement.product_id }}">{{ survey.engagement.product.name }}</a></td>
@@ -203,15 +203,15 @@
                                         <div class="btn-group">
                                             {% if survey.engagement %}
                                                 <a class="btn btn-sm btn-primary"
-                                                href="/engagement/{{ survey.engagement.id }}/survey/{{ survey.id }}"> View Responses </a>
+                                                href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}"> View Responses </a>
                                                 <a class="btn btn-sm btn-info"
-                                                href="/engagement/{{ survey.engagement.id }}/survey/{{ survey.id }}/assign"> Assign User </a>
+                                                href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}/assign"> Assign User </a>
                                             {% else %}
                                                 <a class="btn btn-sm btn-primary"
-                                                href="/empty_survey/{{ survey.id }}"> View Responses </a>
-                                                <a class="btn btn-sm btn-success" href="empty_survey/{{ survey.id }}/new_engagement">Create Engagement</a>
+                                                href="/empty_questionnaire/{{ survey.id }}"> View Responses </a>
+                                                <a class="btn btn-sm btn-success" href="empty_questionnaire/{{ survey.id }}/new_engagement">Create Engagement</a>
                                                 <button class="btn btn-sm btn-info" disabled
-                                                href="/engagement/{{ survey.engagement.id }}/survey/{{ survey.id }}/assign"> Assign User </button>
+                                                href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}/assign"> Assign User </button>
                                             {% endif %}
                                         </div>
                                     </td>
@@ -220,7 +220,7 @@
                         </table>
                     {% else %}
                         <div class="panel-body">
-                            <p>No surveys found.</p>
+                            <p>No questionnaires found.</p>
                         </div>
                     {% endif %}
                 </div>
@@ -368,6 +368,12 @@
                     grid: {
                         hoverable: true,
                     },
+                    tooltip:true,
+                    tooltipOpts: {
+                        content: function(label, xval, yval, flotItem) {
+                            return label+"<br>"+yval
+                        }
+                    }
                 });
             }
 

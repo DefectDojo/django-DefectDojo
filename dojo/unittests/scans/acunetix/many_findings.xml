@@ -1,0 +1,335 @@
+<?xml version="1.0"?>
+<ScanGroup ExportedOn="28/02/2020, 05:13:54">
+<Scan>
+        <Name><![CDATA[scan_name]]></Name>
+        <ShortName><![CDATA[scan_short_name]]></ShortName>
+        <StartURL><![CDATA[www.itsecgames.com]]></StartURL>
+        <StartTime><![CDATA[27/02/2020, 12:56:09]]></StartTime>
+        <FinishTime><![CDATA[27/02/2020, 14:52:19]]></FinishTime>
+        <ScanTime><![CDATA[116 minutes, 5 seconds]]></ScanTime>
+        <Aborted><![CDATA[False]]></Aborted>
+        <Responsive><![CDATA[True]]></Responsive>
+        <Banner><![CDATA[]]></Banner>
+        <Os><![CDATA[Unknown]]></Os>
+        <WebServer><![CDATA[nginx/1.12.2]]></WebServer>
+        <Technologies>
+            <![CDATA[
+                
+            ]]>
+        </Technologies>
+        <Crawler StartUrl="http://www.itsecgames.com/">
+            <Cookies>
+                
+            </Cookies>
+            <SiteFiles>
+<SiteFile id="1">
+                    <Name><![CDATA[http://www.itsecgames.com/]]></Name>
+                    <URL><![CDATA[/]]></URL>
+                    <FullURL><![CDATA[http://www.itsecgames.com/]]></FullURL>
+                    
+                </SiteFile>
+<SiteFile id="2">
+                    <Name><![CDATA[sitemap.xml]]></Name>
+                    <URL><![CDATA[/sitemap.xml]]></URL>
+                    <FullURL><![CDATA[http://www.itsecgames.com/sitemap.xml]]></FullURL>
+                    
+                </SiteFile>
+            </SiteFiles>
+        </Crawler>
+        <ReportItems>
+<ReportItem id="1" color="orange">
+                <Name><![CDATA[Slow HTTP Denial of Service Attack]]></Name>
+                <ModuleName><![CDATA[slow-loris]]></ModuleName>
+                <Details><![CDATA[Time difference between connections: <code>10000 </code>ms]]></Details>
+                <Affects><![CDATA[/]]></Affects>
+                <Parameter><![CDATA[]]></Parameter>
+                <AOP_SourceFile><![CDATA[]]></AOP_SourceFile>
+                <AOP_SourceLine></AOP_SourceLine>
+                <AOP_Additional><![CDATA[]]></AOP_Additional>
+                <IsFalsePositive><![CDATA[]]></IsFalsePositive>
+                <Severity><![CDATA[medium]]></Severity>
+                <Type><![CDATA[denialofservice]]></Type>
+                <Impact><![CDATA[A single machine can take down another machine's web server with minimal bandwidth and side effects on unrelated services and ports.]]></Impact>
+                <Description><![CDATA[Your web server is vulnerable to Slow HTTP DoS (Denial of Service) attacks. <br/><br/>
+Slowloris and Slow HTTP POST DoS attacks rely on the fact that the HTTP protocol, by design, requires requests to be completely received by the server before they are processed. If an HTTP request is not complete, or if the transfer rate is very low, the server keeps its resources busy waiting for the rest of the data. If the server keeps too many resources busy, this creates a denial of service.]]></Description>
+                <DetailedInformation><![CDATA[]]></DetailedInformation>
+                <Recommendation><![CDATA[Consult Web references for information about protecting your web server against this type of attack.]]></Recommendation>
+                <TechnicalDetails>
+                    <Request><![CDATA[]]></Request>
+                </TechnicalDetails>
+                <CWEList>
+                    
+                </CWEList>
+                <CVEList>
+                    
+                </CVEList>
+                <CVSS>
+                  <Descriptor><![CDATA[AV:N/AC:L/Au:N/C:N/I:N/A:P]]></Descriptor>
+                  <Score><![CDATA[5.0]]></Score>
+                  <AV><![CDATA[Network_Accessible]]></AV>
+                  <AC><![CDATA[Low]]></AC>
+                  <Au><![CDATA[None]]></Au>
+                  <C><![CDATA[None]]></C>
+                  <I><![CDATA[None]]></I>
+                  <A><![CDATA[Partial]]></A>
+                  <E><![CDATA[]]></E>
+                  <RL><![CDATA[]]></RL>
+                  <RC><![CDATA[]]></RC>
+                </CVSS>
+                
+                <CVSS3>
+                  <Descriptor><![CDATA[CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L]]></Descriptor>
+                  <Score><![CDATA[5.3]]></Score>
+                  <TempScore><![CDATA[]]></TempScore>
+                  <EnvScore><![CDATA[]]></EnvScore>
+                  <AV><![CDATA[Network]]></AV>
+                  <AC><![CDATA[Low]]></AC>
+                  <PR><![CDATA[None]]></PR>
+                  <UI><![CDATA[None]]></UI>
+                  <S><![CDATA[Unchanged]]></S>
+                  <C><![CDATA[None]]></C>
+                  <I><![CDATA[None]]></I>
+                  <A><![CDATA[Low]]></A>
+                  <E><![CDATA[]]></E>
+                  <RL><![CDATA[]]></RL>
+                  <RC><![CDATA[]]></RC>
+                </CVSS3>
+                
+                <References>
+                    
+                    <Reference>
+                      <Database><![CDATA[Slowloris DOS Mitigation Guide]]></Database>
+                      <URL><![CDATA[https://www.funtoo.org/Slowloris_DOS_Mitigation_Guide]]></URL>
+                    </Reference>
+                    
+                    <Reference>
+                      <Database><![CDATA[Protect Apache Against Slowloris Attack]]></Database>
+                      <URL><![CDATA[https://web.archive.org/web/20180329210925/http://blog.secaserver.com/2011/08/protect-apache-slowloris-attack/]]></URL>
+                    </Reference>
+                    
+                </References>
+            </ReportItem>
+<ReportItem id="2" color="blue">
+                <Name><![CDATA[Possible virtual host found]]></Name>
+                <ModuleName><![CDATA[/Scripts/PerServer/VirtualHost_Audit.script]]></ModuleName>
+                <Details><![CDATA[          Virtual host: <strong><span class="bb-dark">beta.itsecgames.com</span></strong><br/>      Response: <pre>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.01//EN&quot;
+   &quot;http://www.w3.org/TR/html4/strict.dtd&quot;&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;title&gt;itsecgames.com&lt;/title&gt;  
+  &lt;meta name=&quot;description&quot; content=&quot;bWAPP&quot;&gt;
+  &lt;meta name=&quot;keywords&quot; content=&quot;bWAPP&quot;&gt;
+&lt;/head&gt;
+&lt;frameset rows=&quot;100%,*&quot; border=&quot;0&quot;&gt;
+  &lt;frame src=&quot;http://www.mmebvba.com/sites/bwapp/&quot; frameborder=&quot;0&quot; /&gt;
+&lt;/frameset&gt;
+&lt;/html&gt;
+</pre>      <br/> ]]></Details>
+                <Affects><![CDATA[/]]></Affects>
+                <Parameter><![CDATA[]]></Parameter>
+                <AOP_SourceFile><![CDATA[]]></AOP_SourceFile>
+                <AOP_SourceLine></AOP_SourceLine>
+                <AOP_Additional><![CDATA[]]></AOP_Additional>
+                <IsFalsePositive><![CDATA[]]></IsFalsePositive>
+                <Severity><![CDATA[low]]></Severity>
+                <Type><![CDATA[informationdisclosure]]></Type>
+                <Impact><![CDATA[Possible sensitive information disclosure.]]></Impact>
+                <Description><![CDATA[Virtual hosting is a method for hosting multiple domain names (with separate handling of each name) on a single server (or pool of servers). This allows one server to share its resources, such as memory and processor cycles, without requiring all services provided to use the same host name. <br/><br/>
+This web server is responding differently when the Host header is manipulated and various common virtual hosts are tested. This could indicate there is a Virtual Host present.]]></Description>
+                <DetailedInformation><![CDATA[]]></DetailedInformation>
+                <Recommendation><![CDATA[Consult the virtual host configuration and check if this virtual host should be publicly accessible.]]></Recommendation>
+                <TechnicalDetails>
+                    <Request><![CDATA[]]></Request>
+                </TechnicalDetails>
+                <CWEList>
+                    
+                    <CWE id="200"><![CDATA[CWE-200]]></CWE>
+                    
+                </CWEList>
+                <CVEList>
+                    
+                </CVEList>
+                <CVSS>
+                  <Descriptor><![CDATA[AV:N/AC:L/Au:N/C:P/I:N/A:N]]></Descriptor>
+                  <Score><![CDATA[5.0]]></Score>
+                  <AV><![CDATA[Network_Accessible]]></AV>
+                  <AC><![CDATA[Low]]></AC>
+                  <Au><![CDATA[None]]></Au>
+                  <C><![CDATA[Partial]]></C>
+                  <I><![CDATA[None]]></I>
+                  <A><![CDATA[None]]></A>
+                  <E><![CDATA[]]></E>
+                  <RL><![CDATA[]]></RL>
+                  <RC><![CDATA[]]></RC>
+                </CVSS>
+                
+                <CVSS3>
+                  <Descriptor><![CDATA[CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N]]></Descriptor>
+                  <Score><![CDATA[7.5]]></Score>
+                  <TempScore><![CDATA[]]></TempScore>
+                  <EnvScore><![CDATA[]]></EnvScore>
+                  <AV><![CDATA[Network]]></AV>
+                  <AC><![CDATA[Low]]></AC>
+                  <PR><![CDATA[None]]></PR>
+                  <UI><![CDATA[None]]></UI>
+                  <S><![CDATA[Unchanged]]></S>
+                  <C><![CDATA[High]]></C>
+                  <I><![CDATA[None]]></I>
+                  <A><![CDATA[None]]></A>
+                  <E><![CDATA[]]></E>
+                  <RL><![CDATA[]]></RL>
+                  <RC><![CDATA[]]></RC>
+                </CVSS3>
+                
+                <References>
+                    
+                    <Reference>
+                      <Database><![CDATA[Virtual hosting]]></Database>
+                      <URL><![CDATA[https://en.wikipedia.org/wiki/Virtual_hosting]]></URL>
+                    </Reference>
+                    
+                </References>
+            </ReportItem>
+<ReportItem id="3" color="blue">
+                <Name><![CDATA[Unencrypted connection (verified)]]></Name>
+                <ModuleName><![CDATA[/RPA/no_https.js]]></ModuleName>
+                <Details><![CDATA[]]></Details>
+                <Affects><![CDATA[/]]></Affects>
+                <Parameter><![CDATA[]]></Parameter>
+                <AOP_SourceFile><![CDATA[]]></AOP_SourceFile>
+                <AOP_SourceLine></AOP_SourceLine>
+                <AOP_Additional><![CDATA[]]></AOP_Additional>
+                <IsFalsePositive><![CDATA[]]></IsFalsePositive>
+                <Severity><![CDATA[low]]></Severity>
+                <Type><![CDATA[weakcrypto]]></Type>
+                <Impact><![CDATA[Possible information disclosure.]]></Impact>
+                <Description><![CDATA[This scan target was connected to over an unencrypted connection. A potential attacker can intercept and modify data sent and received from this site. ]]></Description>
+                <DetailedInformation><![CDATA[]]></DetailedInformation>
+                <Recommendation><![CDATA[The site should send and receive data over a secure (HTTPS) connection.]]></Recommendation>
+                <TechnicalDetails>
+                    <Request><![CDATA[GET / HTTP/1.1
+Referer: http://www.itsecgames.com/
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Encoding: gzip,deflate
+Host: www.itsecgames.com
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36
+Connection: Keep-alive
+]]></Request>
+                </TechnicalDetails>
+                <CWEList>
+                    
+                    <CWE id="310"><![CDATA[CWE-310]]></CWE>
+                    
+                </CWEList>
+                <CVEList>
+                    
+                </CVEList>
+                <CVSS>
+                  <Descriptor><![CDATA[AV:N/AC:M/Au:N/C:P/I:P/A:N]]></Descriptor>
+                  <Score><![CDATA[5.8]]></Score>
+                  <AV><![CDATA[Network_Accessible]]></AV>
+                  <AC><![CDATA[Medium]]></AC>
+                  <Au><![CDATA[None]]></Au>
+                  <C><![CDATA[Partial]]></C>
+                  <I><![CDATA[Partial]]></I>
+                  <A><![CDATA[None]]></A>
+                  <E><![CDATA[]]></E>
+                  <RL><![CDATA[]]></RL>
+                  <RC><![CDATA[]]></RC>
+                </CVSS>
+                
+                <CVSS3>
+                  <Descriptor><![CDATA[CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N]]></Descriptor>
+                  <Score><![CDATA[9.1]]></Score>
+                  <TempScore><![CDATA[]]></TempScore>
+                  <EnvScore><![CDATA[]]></EnvScore>
+                  <AV><![CDATA[Network]]></AV>
+                  <AC><![CDATA[Low]]></AC>
+                  <PR><![CDATA[None]]></PR>
+                  <UI><![CDATA[None]]></UI>
+                  <S><![CDATA[Unchanged]]></S>
+                  <C><![CDATA[High]]></C>
+                  <I><![CDATA[High]]></I>
+                  <A><![CDATA[None]]></A>
+                  <E><![CDATA[]]></E>
+                  <RL><![CDATA[]]></RL>
+                  <RC><![CDATA[]]></RC>
+                </CVSS3>
+                
+                <References>
+                    
+                </References>
+            </ReportItem>
+<ReportItem id="4" color="green">
+                <Name><![CDATA[Content Security Policy (CSP) not implemented]]></Name>
+                <ModuleName><![CDATA[/httpdata/CSP_not_implemented.js]]></ModuleName>
+                <Details><![CDATA[]]></Details>
+                <Affects><![CDATA[/]]></Affects>
+                <Parameter><![CDATA[]]></Parameter>
+                <AOP_SourceFile><![CDATA[]]></AOP_SourceFile>
+                <AOP_SourceLine></AOP_SourceLine>
+                <AOP_Additional><![CDATA[]]></AOP_Additional>
+                <IsFalsePositive><![CDATA[]]></IsFalsePositive>
+                <Severity><![CDATA[informational]]></Severity>
+                <Type><![CDATA[configuration]]></Type>
+                <Impact><![CDATA[CSP can be used to prevent and/or mitigate attacks that involve content/code injection, such as cross-site scripting/XSS attacks, attacks that require embedding a malicious resource, attacks that involve malicious use of iframes, such as clickjacking attacks, and others. ]]></Impact>
+                <Description><![CDATA[Content Security Policy (CSP) is an added layer of security that helps to detect and mitigate certain types of attacks, including Cross Site Scripting (XSS) and data injection attacks. <br/><br/>
+Content Security Policy (CSP) can be implemented by adding a <strong>Content-Security-Policy</strong> header. The value of this header is a string containing the policy directives describing your Content Security Policy. To implement CSP, you should define lists of allowed origins for the all of the types of resources that your site utilizes. For example, if you have a simple site that needs to load scripts, stylesheets, and images hosted locally, as well as from the jQuery library from their CDN, the CSP header could look like the following:
+<pre><code>
+Content-Security-Policy:
+    default-src 'self';
+    script-src 'self' https://code.jquery.com;
+</code></pre>
+<br/><br/>
+It was detected that your web application doesn't implement Content Security Policy (CSP) as the CSP header is missing from the response. It's recommended to implement Content Security Policy (CSP) into your web application.]]></Description>
+                <DetailedInformation><![CDATA[]]></DetailedInformation>
+                <Recommendation><![CDATA[It's recommended to implement Content Security Policy (CSP) into your web application. Configuring Content Security Policy involves adding the <strong>Content-Security-Policy</strong> HTTP header to a web page and giving it values to control resources the user agent is allowed to load for that page. ]]></Recommendation>
+                <TechnicalDetails>
+                    <Request><![CDATA[GET / HTTP/1.1
+Referer: http://www.itsecgames.com/
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Encoding: gzip,deflate
+Host: www.itsecgames.com
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36
+Connection: Keep-alive
+]]></Request>
+                </TechnicalDetails>
+                <CWEList>
+                    
+                    <CWE id="16"><![CDATA[CWE-16]]></CWE>
+                    
+                </CWEList>
+                <CVEList>
+                    
+                </CVEList>
+                <CVSS>
+                  <Descriptor><![CDATA[AV:N/AC:L/Au:N/C:N/I:N/A:N]]></Descriptor>
+                  <Score><![CDATA[0.0]]></Score>
+                  <AV><![CDATA[Network_Accessible]]></AV>
+                  <AC><![CDATA[Low]]></AC>
+                  <Au><![CDATA[None]]></Au>
+                  <C><![CDATA[None]]></C>
+                  <I><![CDATA[None]]></I>
+                  <A><![CDATA[None]]></A>
+                  <E><![CDATA[]]></E>
+                  <RL><![CDATA[]]></RL>
+                  <RC><![CDATA[]]></RC>
+                </CVSS>
+                
+                <References>
+                    
+                    <Reference>
+                      <Database><![CDATA[Content Security Policy (CSP)]]></Database>
+                      <URL><![CDATA[https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP]]></URL>
+                    </Reference>
+                    
+                    <Reference>
+                      <Database><![CDATA[Implementing Content Security Policy]]></Database>
+                      <URL><![CDATA[https://hacks.mozilla.org/2016/02/implementing-content-security-policy/]]></URL>
+                    </Reference>
+                    
+                </References>
+            </ReportItem>
+        </ReportItems>
+    </Scan>
+</ScanGroup>

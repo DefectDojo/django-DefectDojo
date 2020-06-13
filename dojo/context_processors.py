@@ -4,7 +4,9 @@ from django.conf import settings
 
 def globalize_oauth_vars(request):
     # return the value you want as a dictionnary. you may add multiple values in there.
-    return {'GOOGLE_ENABLED': settings.GOOGLE_OAUTH_ENABLED,
+    return {'CLASSIC_AUTH_ENABLED': settings.CLASSIC_AUTH_ENABLED,
+            'AUTH0_ENABLED': settings.AUTH0_OAUTH2_ENABLED,
+            'GOOGLE_ENABLED': settings.GOOGLE_OAUTH_ENABLED,
             'OKTA_ENABLED': settings.OKTA_OAUTH_ENABLED,
             'GITLAB_ENABLED': settings.GITLAB_OAUTH2_ENABLED,
             'AZUREAD_TENANT_OAUTH2_ENABLED': settings.AZUREAD_TENANT_OAUTH2_ENABLED}

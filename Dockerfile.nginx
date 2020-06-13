@@ -3,13 +3,15 @@
 # The code for the build image should be idendical with the code in
 # Dockerfile.django to use the caching mechanism of Docker.
 
-FROM python:3.5.9-buster@sha256:1baef6be00b82fbd77f1b60ab227a1dbede6f23825ce1b7f1e9c6f7d1469a45c as build
+FROM python:3.6.10-slim-buster@sha256:cdb9505dab15e22df319d862de7b5315150f60f77cd855f4c57e9e422f49a384 as build
 WORKDIR /app
 RUN \
   apt-get -y update && \
   apt-get -y install \
+    build-essential \
     dnsutils \
     default-mysql-client \
+    libmariadb-dev-compat \
     postgresql-client \
     xmlsec1 \
     git \
@@ -29,17 +31,18 @@ ENV \
   node="nodejs"
 RUN \
   apt-get -y update && \
-  apt-get -y install apt-transport-https ca-certificates && \
-  curl -sSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add - && \
+  apt-get -y install apt-transport-https ca-certificates curl wget && \
+  curl -sSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add --no-tty - && \
   curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
   curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
-  echo "deb https://nightly.yarnpkg.com/debian/ nightly main" | tee /etc/apt/sources.list.d/yarn.list && \
+  wget https://github.com/yarnpkg/yarn/releases/download/v1.21.0/yarn_1.21.0_all.deb && \
+  dpkg -i yarn_1.21.0_all.deb && \
   apt-get -y update && \
+  echo "$(yarn --version)" && \
   apt-get -y install nodejs && \
   echo "$(node --version)" && \
-  apt-get -y install --no-install-recommends yarn && \
-  echo "$(yarn --version)" && \
   apt-get clean && \
+  rm yarn_1.21.0_all.deb && \
   rm -rf /var/lib/apt/lists && \
   true
 
@@ -61,7 +64,7 @@ RUN \
   python3 manage.py collectstatic --noinput && \
   true
 
-FROM nginx:1.17.9@sha256:3936fb3946790d711a68c58be93628e43cbca72439079e16d154b5db216b58da
+FROM nginx:1.19.0@sha256:d9002da0297bcd0909b394c26bd0fc9d8c466caf2b7396f58948cac5318d0d0b
 COPY --from=collectstatic /app/static/ /usr/share/nginx/html/static/
 COPY wsgi_params nginx/nginx.conf nginx/nginx_TLS.conf /etc/nginx/
 COPY docker/entrypoint-nginx.sh /
@@ -78,9 +81,9 @@ ENV \
   DD_UWSGI_PASS="uwsgi_server" \
   DD_UWSGI_HOST="uwsgi" \
   DD_UWSGI_PORT="3031" \
-  GENERATE_TLS_CERTIFICATE="False" \
-  USE_TLS="False" \
-  NGINX_METRICS_ENABLED="False" \
+  GENERATE_TLS_CERTIFICATE="false" \
+  USE_TLS="false" \
+  NGINX_METRICS_ENABLED="false" \
   METRICS_HTTP_AUTH_USER="" \
   METRICS_HTTP_AUTH_PASSWORD=""
 USER 1001

@@ -1,15 +1,16 @@
 # Running with Docker Compose
 
-Docker compose is not intended for production use.
-If you want to deploy a containerized DefectDojo to a production environment,
-use the [Default installation](setup/README.md) approach.
+The docker-compose.yml in this repo is not intended for production use without first customizing it to fit your specific situation.  Please consider the docker-compose.yml files are templates to create on that fits your needs.
+Docker Compose is acceptable if you want to deploy a containerized DefectDojo to a production environment.
+It is one of the supported [Default installation](setup/README.md) methods.
 
 # Prerequisites
 *  Docker version
     *  Installing with docker-compose requires at least docker 18.09.4 and docker-compose 1.24.0. See "Checking Docker versions" below for version errors during running docker-compose.
 *  Proxies
     *  If you're behind a corporate proxy check https://docs.docker.com/network/proxy/ . 
-
+*  Known issues
+    * finding images only work in `dev` and `ptvsd` mode. Making them work in `release` mode requires modifications to the docker-compose configuration.
 
 # Setup via Docker Compose - introduction
 
@@ -114,7 +115,7 @@ docker-compose up
 
 This will run the application based on merged configurations from docker-compose.yml and docker-compose.override.ptvsd.yml.
 
-The default configuration assumes port 3000 by default for ptvsd, and you should access the DefectDojo UI on port 8000 instead of port 8080, as the uwsgi container will serve directly.
+The default configuration assumes port 3000 by default for ptvsd.
 
 ### VS code
 Add the following python debug configuration (You would have to install the `ms-python.python`. Other setup may work.)
@@ -243,14 +244,14 @@ To change the port:
 NB: some third party software may require to change the exposed port in Dockerfile.nginx as they use docker-compose declarations to discover which ports to map when publishing the application.
 
 
-# Run the unit-tests with docker
-## Introduction
+# Run the tests with docker
 The unit-tests are under `dojo/unittests`
 
+The integration-tests are under `tests`
 
 
-## Running the unit-tests 
-This will run all the tests and leave the uwsgi container up: 
+## Running the unit-tests
+This will run all unit-tests and leave the uwsgi container up: 
 
 ```
 cp dojo/settings/settings.dist.py dojo/settings/settings.py
@@ -278,6 +279,15 @@ Run a single test. Example:
 
 ```
 python manage.py test dojo.unittests.test_dependency_check_parser.TestDependencyCheckParser.test_parse_without_file_has_no_findings --keepdb
+```
+
+## Running the integration-tests
+This will run all integration-tests and leave the containers up: 
+
+```
+cp dojo/settings/settings.dist.py dojo/settings/settings.py
+docker/setEnv.sh integration_tests
+docker-compose up
 ```
 
 # Checking Docker versions

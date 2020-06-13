@@ -623,10 +623,9 @@
       "last_reviewed_by": null,
       "reviewers": [],
       "static_finding": false,
-      "date": "2018-01-01",
+      "date": "2020-05-21",
       "references": "",
       "images": [],
-      "duplicate_list": [],
       "payload": null,
       "under_defect_review": false,
       "impact": "High",
@@ -678,7 +677,6 @@
       "date": "2018-01-01",
       "references": "",
       "images": [],
-      "duplicate_list": [],
       "payload": null,
       "under_defect_review": false,
       "impact": "High",
@@ -730,7 +728,6 @@
       "date": "2018-01-01",
       "references": "",
       "images": [],
-      "duplicate_list": [],
       "payload": null,
       "under_defect_review": false,
       "impact": "High",
@@ -782,7 +779,6 @@
       "date": "2018-01-01",
       "references": "",
       "images": [],
-      "duplicate_list": [],
       "payload": null,
       "under_defect_review": false,
       "impact": "High",
@@ -834,7 +830,6 @@
       "date": "2018-01-01",
       "references": "",
       "images": [],
-      "duplicate_list": [],
       "payload": null,
       "under_defect_review": false,
       "impact": "High",
@@ -886,7 +881,6 @@
       "date": "2017-12-31",
       "references": "",
       "images": [],
-      "duplicate_list": [],
       "payload": null,
       "under_defect_review": false,
       "impact": "High",
@@ -1118,6 +1112,17 @@
       "project_key": "key3"
     }
   },
+  {
+    "pk": 1,
+    "model": "dojo.note_type", 
+    "fields": {
+      "name": "Test Note Type", 
+      "description": "not that much", 
+      "is_single": false, 
+      "is_active": true, 
+      "is_mandatory": false
+    }
+  }, 
   {
     "pk": 1,
     "model": "dojo.tool_type",

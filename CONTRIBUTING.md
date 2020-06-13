@@ -18,13 +18,6 @@ Please use [these test scripts](./tests) to test your changes. These are the exa
 
 For changes that require additional settings, settings.dist.py is the file you want to change. Settings.py is created by setup.bash from settings.dist.py
 
-## Transition to python3
-
-With the nearing deprecation of python 2.7, the conversion to python3 will be
-executed as smoothly as possible. During this process, DefectDojo will also be
-upgraded to Django 2.2.1. Going forward, the 'dev' branch will only accept
-bug fixes, Please instead contribute features / bug fixes  to the ‘python3_dev’ branch.
-
 ## Python3 version
 For compatibility reasons, the code in dev branch should be python3.5 compliant.
 
@@ -56,7 +49,9 @@ DefectDojo.
 
 0. All submitted code should conform to [__PEP8 standards__][pep8].
 
-0. Pull requests should be submitted to the 'dev' or 'legacy-python2.7' branch.
+0. See [flake8 built-in commit hooks] on how to easily check for for pep8 with flake8 before comitting.
+
+0. Pull requests should be submitted to the 'dev' branch.
 
 0. In dev branch, the code should be python 3.5 compliant.
 
@@ -64,3 +59,6 @@ DefectDojo.
 [setup_py]: /setup.py "Python setup script"
 [setup_bash]: /setup.bash "Bash setup script"
 [pep8]: https://www.python.org/dev/peps/pep-0008/ "PEP8"
+[flake8 built-in commit hooks]: https://flake8.pycqa.org/en/latest/user/using-hooks.html#built-in-hook-integration
+
+   

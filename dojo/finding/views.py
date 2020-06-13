@@ -27,496 +27,138 @@ from tagging.models import Tag
 from itertools import chain
 
 from dojo.filters import OpenFindingFilter, \
-    OpenFingingSuperFilter, AcceptedFingingSuperFilter, \
-    ClosedFingingSuperFilter, TemplateFindingFilter
+    OpenFindingSuperFilter, AcceptedFindingSuperFilter, \
+    ClosedFindingSuperFilter, TemplateFindingFilter
 from dojo.forms import NoteForm, FindingNoteForm, CloseFindingForm, FindingForm, PromoteFindingForm, FindingTemplateForm, \
-    DeleteFindingTemplateForm, FindingImageFormSet, JIRAFindingForm, ReviewFindingForm, ClearFindingReviewForm, \
+    DeleteFindingTemplateForm, FindingImageFormSet, JIRAFindingForm, GITHUBFindingForm, ReviewFindingForm, ClearFindingReviewForm, \
     DefectFindingForm, StubFindingForm, DeleteFindingForm, DeleteStubFindingForm, ApplyFindingTemplateForm, \
     FindingFormID, FindingBulkUpdateForm, MergeFindings
-from dojo.models import Product_Type, Finding, Notes, NoteHistory, Note_Type, \
-    Risk_Acceptance, BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, \
-    FindingImageAccessToken, JIRA_Issue, JIRA_PKey, Dojo_User, Cred_Mapping, Test, Product, User, Engagement
+from dojo.models import Finding, Notes, NoteHistory, Note_Type, \
+    BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, \
+    FindingImageAccessToken, JIRA_Issue, JIRA_PKey, GITHUB_PKey, GITHUB_Issue, Dojo_User, Cred_Mapping, Test, Product, User, Engagement
 from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_notifications, \
     add_comment, jira_get_resolution_id, jira_change_resolution_id, get_jira_connection, \
-    get_system_setting, create_notification, apply_cwe_to_template, Product_Tab, calculate_grade, log_jira_alert
+    get_system_setting, apply_cwe_to_template, Product_Tab, calculate_grade, log_jira_alert, \
+    redirect_to_return_url_or_else, get_return_url
+from dojo.notifications.helper import create_notification
 
-from dojo.tasks import add_issue_task, update_issue_task, add_comment_task
+from dojo.tasks import add_issue_task, update_issue_task, update_external_issue_task, add_comment_task, \
+    add_external_issue_task, close_external_issue_task, reopen_external_issue_task
 from django.template.defaultfilters import pluralize
-from django.db.models.query import QuerySet
-
+from django.db.models import Q, QuerySet
 
 logger = logging.getLogger(__name__)
 
+OPEN_FINDINGS_QUERY = Q(active=True)
+VERIFIED_FINDINGS_QUERY = Q(verified=True)
+OUT_OF_SCOPE_FINDINGS_QUERY = Q(active=False, out_of_scope=True)
+FALSE_POSITIVE_FINDINGS_QUERY = Q(active=False, duplicate=False, false_p=True)
+INACTIVE_FINDINGS_QUERY = Q(active=False, duplicate=False, is_Mitigated=False, false_p=False, out_of_scope=False)
+ACCEPTED_FINDINGS_QUERY = Q(risk_acceptance__isnull=False)
+CLOSED_FINDINGS_QUERY = Q(mitigated__isnull=False)
 
-def verified_findings(request, pid=None, eid=None, view=None):
-    show_product_column = True
-    title = None
-    custom_breadcrumb = None
-    filter_name = "Verified"
-    pid_local = None
-    tags = Tag.objects.usage_for_model(Finding)
-    if pid:
-        if view == "All":
-            filter_name = "All"
-            findings = Finding.objects.filter(test__engagement__product__id=pid).order_by('numerical_severity')
-        else:
-            findings = Finding.objects.filter(test__engagement__product__id=pid, verified=True).order_by('numerical_severity')
-    elif eid:
-        eng = get_object_or_404(Engagement, id=eid)
-        pid_local = eng.product.id
-        if view == "All":
-            filter_name = "All"
-            findings = Finding.objects.filter(test__engagement=eid).order_by('numerical_severity')
-        else:
-            findings = Finding.objects.filter(test__engagement=eid, verified=True).order_by('numerical_severity')
+
+def open_findings_filter(request, queryset, user, pid):
+    if user.is_staff:
+        return OpenFindingSuperFilter(request.GET, queryset=queryset, user=user, pid=pid)
     else:
-        if view == "All":
-            filter_name = "All"
-            findings = Finding.objects.all().order_by('numerical_severity')
-        else:
-            findings = Finding.objects.filter(verified=True).order_by('numerical_severity')
-
-    if request.user.is_staff:
-        findings = OpenFingingSuperFilter(
-            request.GET, queryset=findings, user=request.user, pid=pid)
-    else:
-        findings = findings.filter(
-            test__engagement__product__authorized_users__in=[request.user])
-        findings = OpenFindingFilter(
-            request.GET, queryset=findings, user=request.user, pid=pid)
-
-    title_words = [
-        word for finding in findings.qs for word in finding.title.split()
-        if len(word) > 2
-    ]
-
-    title_words = sorted(set(title_words))
-    paged_findings = get_page_items(request, findings.qs, 25)
-
-    product_type = None
-    if 'test__engagement__product__prod_type' in request.GET:
-        p = request.GET.getlist('test__engagement__product__prod_type', [])
-        if len(p) == 1:
-            product_type = get_object_or_404(Product_Type, id=p[0])
-
-    endpoint = None
-    if 'endpoints' in request.GET:
-        endpoints = request.GET.getlist('endpoints', [])
-        if len(endpoints) == 1:
-            endpoint = endpoints[0]
-            endpoint = get_object_or_404(Endpoint, id=endpoint)
-            pid = endpoint.product.id
-            title = "Vulnerable Endpoints"
-            custom_breadcrumb = OrderedDict([("Endpoints", reverse('vulnerable_endpoints')), (endpoint, reverse('view_endpoint', args=(endpoint.id, )))])
-
-    found_by = None
-    try:
-        found_by = findings.found_by.all().distinct()
-    except:
-        found_by = None
-        pass
-
-    product_tab = None
-    active_tab = None
-    jira_config = None
-
-    # Only show product tab view in product or engagement
-    if pid:
-        show_product_column = False
-        product_tab = Product_Tab(pid, title="Findings", tab="findings")
-        jira_config = JIRA_PKey.objects.filter(product=pid).first()
-    elif eid and pid_local:
-        show_product_column = False
-        product_tab = Product_Tab(pid_local, title=eng.name, tab="engagements")
-        jira_config = JIRA_PKey.objects.filter(product__engagement=eid).first()
-    else:
-        add_breadcrumb(title="Findings", top_level=not len(request.GET), request=request)
-    if jira_config:
-        jira_config = jira_config.conf_id
-
-    paged_findings.object_list = prefetch_for_findings(paged_findings.object_list)
-
-    return render(
-        request, 'dojo/findings_list.html', {
-            'show_product_column': show_product_column,
-            "product_tab": product_tab,
-            "findings": paged_findings,
-            "filtered": findings,
-            "title_words": title_words,
-            'found_by': found_by,
-            'custom_breadcrumb': custom_breadcrumb,
-            'filter_name': filter_name,
-            'title': title,
-            'tag_input': tags,
-            'jira_config': jira_config,
-        })
+        return OpenFindingFilter(request.GET, queryset=queryset, user=user, pid=pid)
 
 
-def out_of_scope_findings(request, pid=None, eid=None, view=None):
-    show_product_column = True
-    title = None
-    custom_breadcrumb = None
-    filter_name = "Out of scope"
-    pid_local = None
-    tags = Tag.objects.usage_for_model(Finding)
-    if pid:
-        if view == "All":
-            filter_name = "All"
-            findings = Finding.objects.filter(test__engagement__product__id=pid).order_by('numerical_severity')
-        else:
-            findings = Finding.objects.filter(test__engagement__product__id=pid, out_of_scope=True).order_by('numerical_severity')
-    elif eid:
-        eng = get_object_or_404(Engagement, id=eid)
-        pid_local = eng.product.id
-        if view == "All":
-            filter_name = "All"
-            findings = Finding.objects.filter(test__engagement=eid).order_by('numerical_severity')
-        else:
-            findings = Finding.objects.filter(test__engagement=eid, out_of_scope=True).order_by('numerical_severity')
-    else:
-        if view == "All":
-            filter_name = "All"
-            findings = Finding.objects.all().order_by('numerical_severity')
-        else:
-            findings = Finding.objects.filter(active=False, out_of_scope=True).order_by('numerical_severity')
-
-    if request.user.is_staff:
-        findings = OpenFingingSuperFilter(
-            request.GET, queryset=findings, user=request.user, pid=pid)
-    else:
-        findings = findings.filter(
-            test__engagement__product__authorized_users__in=[request.user])
-        findings = OpenFindingFilter(
-            request.GET, queryset=findings, user=request.user, pid=pid)
-
-    title_words = [
-        word for finding in findings.qs for word in finding.title.split()
-        if len(word) > 2
-    ]
-
-    title_words = sorted(set(title_words))
-    paged_findings = get_page_items(request, findings.qs, 25)
-
-    product_type = None
-    if 'test__engagement__product__prod_type' in request.GET:
-        p = request.GET.getlist('test__engagement__product__prod_type', [])
-        if len(p) == 1:
-            product_type = get_object_or_404(Product_Type, id=p[0])
-
-    endpoint = None
-    if 'endpoints' in request.GET:
-        endpoints = request.GET.getlist('endpoints', [])
-        if len(endpoints) == 1:
-            endpoint = endpoints[0]
-            endpoint = get_object_or_404(Endpoint, id=endpoint)
-            pid = endpoint.product.id
-            title = "Vulnerable Endpoints"
-            custom_breadcrumb = OrderedDict([("Endpoints", reverse('vulnerable_endpoints')), (endpoint, reverse('view_endpoint', args=(endpoint.id, )))])
-
-    found_by = None
-    try:
-        found_by = findings.found_by.all().distinct()
-    except:
-        found_by = None
-        pass
-
-    product_tab = None
-    active_tab = None
-    jira_config = None
-
-    # Only show product tab view in product or engagement
-    if pid:
-        show_product_column = False
-        product_tab = Product_Tab(pid, title="Findings", tab="findings")
-        jira_config = JIRA_PKey.objects.filter(product=pid).first()
-    elif eid and pid_local:
-        show_product_column = False
-        product_tab = Product_Tab(pid_local, title=eng.name, tab="engagements")
-        jira_config = JIRA_PKey.objects.filter(product__engagement=eid).first()
-    else:
-        add_breadcrumb(title="Findings", top_level=not len(request.GET), request=request)
-    if jira_config:
-        jira_config = jira_config.conf_id
-
-    paged_findings.object_list = prefetch_for_findings(paged_findings.object_list)
-
-    return render(
-        request, 'dojo/findings_list.html', {
-            'show_product_column': show_product_column,
-            "product_tab": product_tab,
-            "findings": paged_findings,
-            "filtered": findings,
-            "title_words": title_words,
-            'found_by': found_by,
-            'custom_breadcrumb': custom_breadcrumb,
-            'filter_name': filter_name,
-            'title': title,
-            'tag_input': tags,
-            'jira_config': jira_config,
-        })
+def accepted_findings_filter(request, queryset, user, pid):
+    assert user.is_staff
+    return AcceptedFindingSuperFilter(request.GET, queryset=queryset)
 
 
-def false_positive_findings(request, pid=None, eid=None, view=None):
-    show_product_column = True
-    title = None
-    custom_breadcrumb = None
-    filter_name = "False Positive"
-    pid_local = None
-    tags = Tag.objects.usage_for_model(Finding)
-    if pid:
-        if view == "All":
-            filter_name = "All"
-            findings = Finding.objects.filter(test__engagement__product__id=pid).order_by('numerical_severity')
-        else:
-            findings = Finding.objects.filter(test__engagement__product__id=pid, duplicate=False, active=False, false_p=True).order_by('numerical_severity')
-    elif eid:
-        eng = get_object_or_404(Engagement, id=eid)
-        pid_local = eng.product.id
-        if view == "All":
-            filter_name = "All"
-            findings = Finding.objects.filter(test__engagement=eid).order_by('numerical_severity')
-        else:
-            findings = Finding.objects.filter(test__engagement=eid, duplicate=False, active=False, false_p=True).order_by('numerical_severity')
-    else:
-        if view == "All":
-            filter_name = "All"
-            findings = Finding.objects.all().order_by('numerical_severity')
-        else:
-            findings = Finding.objects.filter(active=False, duplicate=False, false_p=True).order_by('numerical_severity')
-
-    if request.user.is_staff:
-        findings = OpenFingingSuperFilter(
-            request.GET, queryset=findings, user=request.user, pid=pid)
-    else:
-        findings = findings.filter(
-            test__engagement__product__authorized_users__in=[request.user])
-        findings = OpenFindingFilter(
-            request.GET, queryset=findings, user=request.user, pid=pid)
-
-    title_words = [
-        word for finding in findings.qs for word in finding.title.split()
-        if len(word) > 2
-    ]
-
-    title_words = sorted(set(title_words))
-    paged_findings = get_page_items(request, findings.qs, 25)
-
-    product_type = None
-    if 'test__engagement__product__prod_type' in request.GET:
-        p = request.GET.getlist('test__engagement__product__prod_type', [])
-        if len(p) == 1:
-            product_type = get_object_or_404(Product_Type, id=p[0])
-
-    endpoint = None
-    if 'endpoints' in request.GET:
-        endpoints = request.GET.getlist('endpoints', [])
-        if len(endpoints) == 1:
-            endpoint = endpoints[0]
-            endpoint = get_object_or_404(Endpoint, id=endpoint)
-            pid = endpoint.product.id
-            title = "Vulnerable Endpoints"
-            custom_breadcrumb = OrderedDict([("Endpoints", reverse('vulnerable_endpoints')), (endpoint, reverse('view_endpoint', args=(endpoint.id, )))])
-
-    found_by = None
-    try:
-        found_by = findings.found_by.all().distinct()
-    except:
-        found_by = None
-        pass
-
-    product_tab = None
-    active_tab = None
-    jira_config = None
-
-    # Only show product tab view in product or engagement
-    if pid:
-        show_product_column = False
-        product_tab = Product_Tab(pid, title="Findings", tab="findings")
-        jira_config = JIRA_PKey.objects.filter(product=pid).first()
-    elif eid and pid_local:
-        show_product_column = False
-        product_tab = Product_Tab(pid_local, title=eng.name, tab="engagements")
-        jira_config = JIRA_PKey.objects.filter(product__engagement=eid).first()
-    else:
-        add_breadcrumb(title="Findings", top_level=not len(request.GET), request=request)
-    if jira_config:
-        jira_config = jira_config.conf_id
-
-    paged_findings.object_list = prefetch_for_findings(paged_findings.object_list)
-
-    return render(
-        request, 'dojo/findings_list.html', {
-            'show_product_column': show_product_column,
-            "product_tab": product_tab,
-            "findings": paged_findings,
-            "filtered": findings,
-            "title_words": title_words,
-            'found_by': found_by,
-            'custom_breadcrumb': custom_breadcrumb,
-            'filter_name': filter_name,
-            'title': title,
-            'tag_input': tags,
-            'jira_config': jira_config,
-        })
-
-
-def inactive_findings(request, pid=None, eid=None, view=None):
-    show_product_column = True
-    title = None
-    custom_breadcrumb = None
-    filter_name = "Inactive"
-    pid_local = None
-    tags = Tag.objects.usage_for_model(Finding)
-    if pid:
-        if view == "All":
-            filter_name = "All"
-            findings = Finding.objects.filter(test__engagement__product__id=pid).order_by('numerical_severity')
-        else:
-            findings = Finding.objects.filter(test__engagement__product__id=pid, active=False, duplicate=False).order_by('numerical_severity')
-    elif eid:
-        eng = get_object_or_404(Engagement, id=eid)
-        pid_local = eng.product.id
-        if view == "All":
-            filter_name = "All"
-            findings = Finding.objects.filter(test__engagement=eid).order_by('numerical_severity')
-        else:
-            findings = Finding.objects.filter(test__engagement=eid, active=False, duplicate=False).order_by('numerical_severity')
-    else:
-        if view == "All":
-            filter_name = "All"
-            findings = Finding.objects.all().order_by('numerical_severity')
-        else:
-            findings = Finding.objects.filter(active=False, duplicate=False).order_by('numerical_severity')
-
-    if request.user.is_staff:
-        findings = OpenFingingSuperFilter(
-            request.GET, queryset=findings, user=request.user, pid=pid)
-    else:
-        findings = findings.filter(
-            test__engagement__product__authorized_users__in=[request.user])
-        findings = OpenFindingFilter(
-            request.GET, queryset=findings, user=request.user, pid=pid)
-
-    title_words = [
-        word for finding in findings.qs for word in finding.title.split()
-        if len(word) > 2
-    ]
-
-    title_words = sorted(set(title_words))
-    paged_findings = get_page_items(request, findings.qs, 25)
-
-    product_type = None
-    if 'test__engagement__product__prod_type' in request.GET:
-        p = request.GET.getlist('test__engagement__product__prod_type', [])
-        if len(p) == 1:
-            product_type = get_object_or_404(Product_Type, id=p[0])
-
-    endpoint = None
-    if 'endpoints' in request.GET:
-        endpoints = request.GET.getlist('endpoints', [])
-        if len(endpoints) == 1:
-            endpoint = endpoints[0]
-            endpoint = get_object_or_404(Endpoint, id=endpoint)
-            pid = endpoint.product.id
-            title = "Vulnerable Endpoints"
-            custom_breadcrumb = OrderedDict([("Endpoints", reverse('vulnerable_endpoints')), (endpoint, reverse('view_endpoint', args=(endpoint.id, )))])
-
-    found_by = None
-    try:
-        found_by = findings.found_by.all().distinct()
-    except:
-        found_by = None
-        pass
-
-    product_tab = None
-    active_tab = None
-    jira_config = None
-
-    # Only show product tab view in product or engagement
-    if pid:
-        show_product_column = False
-        product_tab = Product_Tab(pid, title="Findings", tab="findings")
-        jira_config = JIRA_PKey.objects.filter(product=pid).first()
-    elif eid and pid_local:
-        show_product_column = False
-        product_tab = Product_Tab(pid_local, title=eng.name, tab="engagements")
-        jira_config = JIRA_PKey.objects.filter(product__engagement=eid).first()
-    else:
-        add_breadcrumb(title="Findings", top_level=not len(request.GET), request=request)
-    if jira_config:
-        jira_config = jira_config.conf_id
-
-    paged_findings.object_list = prefetch_for_findings(paged_findings.object_list)
-
-    return render(
-        request, 'dojo/findings_list.html', {
-            'show_product_column': show_product_column,
-            "product_tab": product_tab,
-            "findings": paged_findings,
-            "filtered": findings,
-            "title_words": title_words,
-            'found_by': found_by,
-            'custom_breadcrumb': custom_breadcrumb,
-            'filter_name': filter_name,
-            'title': title,
-            'tag_input': tags,
-            'jira_config': jira_config,
-        })
+def closed_findings_filter(request, queryset, user, pid):
+    assert user.is_staff
+    return ClosedFindingSuperFilter(request.GET, queryset=queryset)
 
 
 def open_findings(request, pid=None, eid=None, view=None):
+    return findings(request, pid=pid, eid=eid, view=view, filter_name="Open", query_filter=OPEN_FINDINGS_QUERY)
+
+
+def verified_findings(request, pid=None, eid=None, view=None):
+    return findings(request, pid=pid, eid=eid, view=view, filter_name="Verified", query_filter=VERIFIED_FINDINGS_QUERY)
+
+
+def out_of_scope_findings(request, pid=None, eid=None, view=None):
+    return findings(request, pid=pid, eid=eid, view=view, filter_name="Out of Scope", query_filter=OUT_OF_SCOPE_FINDINGS_QUERY)
+
+
+def false_positive_findings(request, pid=None, eid=None, view=None):
+    return findings(request, pid=pid, eid=eid, view=view, filter_name="False Positive", query_filter=FALSE_POSITIVE_FINDINGS_QUERY)
+
+
+def inactive_findings(request, pid=None, eid=None, view=None):
+    return findings(request, pid=pid, eid=eid, view=view, filter_name="Inactive", query_filter=INACTIVE_FINDINGS_QUERY)
+
+
+@user_passes_test(lambda u: u.is_staff)
+def accepted_findings(request, pid=None, eid=None, view=None):
+    return findings(request, pid=pid, eid=eid, view=view, filter_name="Accepted", query_filter=ACCEPTED_FINDINGS_QUERY,
+                    django_filter=accepted_findings_filter)
+
+
+@user_passes_test(lambda u: u.is_staff)
+def closed_findings(request, pid=None, eid=None, view=None):
+    return findings(request, pid=pid, eid=eid, view=view, filter_name="Closed", query_filter=CLOSED_FINDINGS_QUERY, order_by=('-mitigated'),
+                    django_filter=closed_findings_filter)
+
+
+def findings(request, pid=None, eid=None, view=None, filter_name=None, query_filter=None, order_by='numerical_severity',
+django_filter=open_findings_filter):
     show_product_column = True
-    title = None
     custom_breadcrumb = None
-    filter_name = "Open"
-    pid_local = None
+    product_tab = None
+    jira_config = None
+    github_config = None
+
     tags = Tag.objects.usage_for_model(Finding)
+
+    findings = Finding.objects.all()
+    if view == "All":
+        filter_name = "All"
+    else:
+        findings = findings.filter(query_filter)
+
+    findings = findings.order_by(order_by)
+
     if pid:
-        if view == "All":
-            filter_name = "All"
-            findings = Finding.objects.filter(test__engagement__product__id=pid).order_by('numerical_severity')
-        else:
-            findings = Finding.objects.filter(test__engagement__product__id=pid, active=True, duplicate=False).order_by('numerical_severity')
+        get_object_or_404(Product, id=pid)
+        findings = findings.filter(test__engagement__product__id=pid)
+
+        show_product_column = False
+        product_tab = Product_Tab(pid, title="Findings", tab="findings")
+        jira_config = JIRA_PKey.objects.filter(product=pid).first()
+        github_config = GITHUB_PKey.objects.filter(product=pid).first()
+
     elif eid:
         eng = get_object_or_404(Engagement, id=eid)
-        pid_local = eng.product.id
-        if view == "All":
-            filter_name = "All"
-            findings = Finding.objects.filter(test__engagement=eid).order_by('numerical_severity')
-        else:
-            findings = Finding.objects.filter(test__engagement=eid, active=True, duplicate=False).order_by('numerical_severity')
+        findings = Finding.objects.filter(test__engagement=eid).order_by('numerical_severity')
+
+        show_product_column = False
+        product_tab = Product_Tab(eng.product_id, title=eng.name, tab="engagements")
+        jira_config = JIRA_PKey.objects.filter(product__engagement=eid).first()
+        github_config = GITHUB_PKey.objects.filter(product__engagement=eid).first()
     else:
-        if view == "All":
-            filter_name = "All"
-            findings = Finding.objects.all().order_by('numerical_severity')
-        else:
-            findings = Finding.objects.filter(active=True, duplicate=False).order_by('numerical_severity')
+        add_breadcrumb(title="Findings", top_level=not len(request.GET), request=request)
 
     if not request.user.is_staff:
         findings = findings.filter(
             test__engagement__product__authorized_users__in=[request.user])
 
+    findings_filter = django_filter(request, findings, request.user, pid)
+
     title_words = [
-        word for finding in findings for word in finding.title.split()
-        if len(word) > 2
+        word for title in findings_filter.qs.values_list('title', flat=True) for word in title.split() if len(word) > 2
     ]
     title_words = sorted(set(title_words))
 
-    if request.user.is_staff:
-        findings_filter = OpenFingingSuperFilter(
-            request.GET, queryset=findings, user=request.user, pid=pid)
-    else:
-        findings_filter = OpenFindingFilter(
-            request.GET, queryset=findings, user=request.user, pid=pid)
+    paged_findings = get_page_items(request, prefetch_for_findings(findings_filter.qs), 25)
 
-    paged_findings = get_page_items(request, findings_filter.qs, 25)
-
-    product_type = None
-    if 'test__engagement__product__prod_type' in request.GET:
-        p = request.GET.getlist('test__engagement__product__prod_type', [])
-        if len(p) == 1:
-            product_type = get_object_or_404(Product_Type, id=p[0])
-
+    # show custom breadcrumb if user has filtered by exactly 1 endpoint
     endpoint = None
     if 'endpoints' in request.GET:
         endpoints = request.GET.getlist('endpoints', [])
@@ -524,35 +166,13 @@ def open_findings(request, pid=None, eid=None, view=None):
             endpoint = endpoints[0]
             endpoint = get_object_or_404(Endpoint, id=endpoint)
             pid = endpoint.product.id
-            title = "Vulnerable Endpoints"
+            filter_name = "Vulnerable Endpoints"
             custom_breadcrumb = OrderedDict([("Endpoints", reverse('vulnerable_endpoints')), (endpoint, reverse('view_endpoint', args=(endpoint.id, )))])
 
-    found_by = None
-    try:
-        found_by = findings_filter.found_by.all().distinct()
-    except:
-        found_by = None
-        pass
-
-    product_tab = None
-    active_tab = None
-    jira_config = None
-
-    # Only show product tab view in product or engagement
-    if pid:
-        show_product_column = False
-        product_tab = Product_Tab(pid, title="Findings", tab="findings")
-        jira_config = JIRA_PKey.objects.filter(product=pid).first()
-    elif eid and pid_local:
-        show_product_column = False
-        product_tab = Product_Tab(pid_local, title=eng.name, tab="engagements")
-        jira_config = JIRA_PKey.objects.filter(product__engagement=eid).first()
-    else:
-        add_breadcrumb(title="Findings", top_level=not len(request.GET), request=request)
     if jira_config:
         jira_config = jira_config.conf_id
-
-    paged_findings.object_list = prefetch_for_findings(paged_findings.object_list)
+    if github_config:
+        github_config = github_config.git_conf_id
 
     return render(
         request, 'dojo/findings_list.html', {
@@ -561,10 +181,8 @@ def open_findings(request, pid=None, eid=None, view=None):
             "findings": paged_findings,
             "filtered": findings_filter,
             "title_words": title_words,
-            'found_by': found_by,
             'custom_breadcrumb': custom_breadcrumb,
             'filter_name': filter_name,
-            'title': title,
             'tag_input': tags,
             'jira_config': jira_config,
         })
@@ -581,71 +199,11 @@ def prefetch_for_findings(findings):
         prefetched_findings = prefetched_findings.prefetch_related('risk_acceptance_set')
         # we could try to prefetch only the latest note with SubQuery and OuterRef, but I'm getting that MySql doesn't support limits in subqueries.
         prefetched_findings = prefetched_findings.prefetch_related('notes')
+        prefetched_findings = prefetched_findings.prefetch_related('tagged_items__tag')
+    else:
+        logger.debug('unable to prefetch because query was already executed')
+
     return prefetched_findings
-
-
-"""
-Accepted findings returns all the accepted findings for all products or a specific product
-"""
-
-
-@user_passes_test(lambda u: u.is_staff)
-def accepted_findings(request, pid=None):
-    # user = request.user
-
-    findings = Finding.objects.filter(risk_acceptance__isnull=False)
-    findings = AcceptedFingingSuperFilter(request.GET, queryset=findings)
-    title_words = [
-        word for ra in Risk_Acceptance.objects.all() for finding in
-        ra.accepted_findings.order_by('title').values('title').distinct()
-        for word in finding['title'].split() if len(word) > 2
-    ]
-
-    title_words = sorted(set(title_words))
-    paged_findings = get_page_items(request, findings.qs, 25)
-
-    product_tab = None
-    if pid:
-        product_tab = Product_Tab(pid, title="Accepted Findings", tab="findings")
-
-    paged_findings.object_list = prefetch_for_findings(paged_findings.object_list)
-
-    return render(
-        request, 'dojo/findings_list.html', {
-            "findings": paged_findings,
-            "product_tab": product_tab,
-            "filter_name": "Accepted",
-            "filtered": findings,
-            "title_words": title_words,
-        })
-
-
-@user_passes_test(lambda u: u.is_staff)
-def closed_findings(request, pid=None):
-    findings = Finding.objects.filter(mitigated__isnull=False)
-    findings = ClosedFingingSuperFilter(request.GET, queryset=findings)
-    title_words = [
-        word for finding in findings.qs for word in finding.title.split()
-        if len(word) > 2
-    ]
-
-    title_words = sorted(set(title_words))
-    paged_findings = get_page_items(request, findings.qs.order_by('-mitigated'), 25)
-
-    product_tab = None
-    if pid:
-        product_tab = Product_Tab(pid, title="Closed Findings", tab="findings")
-
-    paged_findings.object_list = prefetch_for_findings(paged_findings.object_list)
-
-    return render(
-        request, 'dojo/findings_list.html', {
-            "findings": paged_findings,
-            "product_tab": product_tab,
-            "filtered": findings,
-            "filter_name": "Closed",
-            "title_words": title_words,
-        })
 
 
 def view_finding(request, fid):
@@ -684,6 +242,17 @@ def view_finding(request, fid):
         jconf = jpkey.conf
     except:
         jconf = None
+        pass
+    try:
+        gissue = GITHUB_Issue.objects.get(finding=finding)
+    except:
+        gissue = None
+        pass
+    try:
+        github_pkey = GITHUB_PKey.objects.get(product=finding.test.engagement.product)
+        gconf = github_pkey.git_conf
+    except:
+        gconf = None
         pass
     dojo_user = get_object_or_404(Dojo_User, id=user.id)
     if user.is_staff or user in finding.test.engagement.product.authorized_users.all(
@@ -756,6 +325,8 @@ def view_finding(request, fid):
             'burp_request': burp_request,
             'jissue': jissue,
             'jconf': jconf,
+            'gissue': gissue,
+            'gconf': gconf,
             'cred_finding': cred_finding,
             'creds': creds,
             'cred_engagement': cred_engagement,
@@ -786,6 +357,8 @@ def close_finding(request, fid):
     form = CloseFindingForm(missing_note_types=missing_note_types)
     if request.method == 'POST':
         form = CloseFindingForm(request.POST, missing_note_types=missing_note_types)
+
+        close_external_issue_task.delay(finding, 'Closed by defectdojo', 'github')
 
         if form.is_valid():
             now = timezone.now()
@@ -925,6 +498,8 @@ def reopen_finding(request, fid):
     finding.last_reviewed_by = request.user
     finding.save()
 
+    reopen_external_issue_task.delay(finding, 're-opened by defectdojo', 'github')
+
     messages.add_message(
         request,
         messages.SUCCESS,
@@ -987,7 +562,7 @@ def delete_finding(request, fid):
                                 url=request.build_absolute_uri(reverse('all_findings')),
                                 recipients=[finding.test.engagement.lead],
                                 icon="exclamation-triangle")
-            return HttpResponseRedirect(reverse('view_test', args=(tid, )))
+            return redirect_to_return_url_or_else(request, reverse('view_test', args=(tid,)))
         else:
             messages.add_message(
                 request,
@@ -1006,21 +581,31 @@ def edit_finding(request, fid):
     form.initial['tags'] = [tag.name for tag in finding.tags]
     form_error = False
     jform = None
+    enabled = False
+
+    if get_system_setting('enable_jira') and finding.jira_conf_new() is not None:
+        enabled = finding.test.engagement.product.jira_pkey_set.first().push_all_issues
+        jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
+
     try:
         jissue = JIRA_Issue.objects.get(finding=finding)
         enabled = True
     except:
         enabled = False
-        pass
 
-    if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(
-            product=finding.test.engagement.product) != 0:
-        jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
+    try:
+        gissue = GITHUB_Issue.objects.get(finding=finding)
+        github_enabled = True
+    except:
+        github_enabled = False
+
+    gform = None
+    if get_system_setting('enable_github'):
+        if GITHUB_PKey.objects.filter(product=finding.test.engagement.product).exclude(git_conf_id=None):
+            gform = GITHUBFindingForm(enabled=github_enabled, prefix='githubform')
 
     if request.method == 'POST':
         form = FindingForm(request.POST, instance=finding, template=False)
-        source = request.POST.get("source", "")
-        page = request.POST.get("page", "")
         if finding.active:
             if (form['active'].value() is False or form['false_p'].value()) and form['duplicate'].value() is False:
                 note_type_activation = Note_Type.objects.filter(is_active=True).count()
@@ -1060,12 +645,11 @@ def edit_finding(request, fid):
                 if parent_find_string:
                     parent_find = Finding.objects.get(id=int(parent_find_string.split(':')[0]))
                     new_finding.duplicate_finding = parent_find
-                    parent_find.duplicate_list.add(new_finding)
                     parent_find.found_by.add(new_finding.test.test_type)
             if not new_finding.duplicate and new_finding.duplicate_finding:
                 parent_find = new_finding.duplicate_finding
                 if parent_find.found_by is not new_finding.found_by:
-                    parent_find.duplicate_list.remove(new_finding)
+                    parent_find.original_finding.remove(new_finding)
                 parent_find.found_by.remove(new_finding.test.test_type)
                 new_finding.duplicate_finding = None
 
@@ -1078,19 +662,31 @@ def edit_finding(request, fid):
             tags = request.POST.getlist('tags')
             t = ", ".join('"{0}"'.format(w) for w in tags)
             new_finding.tags = t
-            new_finding.save()
-            if 'jiraform-push_to_jira' in request.POST:
-                jform = JIRAFindingForm(
-                    request.POST, prefix='jiraform', enabled=enabled)
+
+            # Push to Jira?
+            push_to_jira = False
+            if enabled:
+                push_to_jira = True
+            elif 'jiraform-push_to_jira' in request.POST:
+                jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=enabled)
                 if jform.is_valid():
-                    if JIRA_Issue.objects.filter(finding=new_finding).exists():
-                        update_issue_task.delay(
+                    push_to_jira = jform.cleaned_data.get('push_to_jira')
+
+            if 'githubform-push_to_github' in request.POST:
+                gform = GITHUBFindingForm(
+                    request.POST, prefix='githubform', enabled=github_enabled)
+                if gform.is_valid():
+                    if GITHUB_Issue.objects.filter(finding=new_finding).exists():
+                        update_external_issue_task.delay(
                             new_finding, old_status,
-                            jform.cleaned_data.get('push_to_jira'))
+                            'github')
                     else:
-                        add_issue_task.delay(
+                        add_external_issue_task.delay(
                             new_finding,
-                            jform.cleaned_data.get('push_to_jira'))
+                            'github')
+
+            new_finding.save(push_to_jira=push_to_jira)
+
             tags = request.POST.getlist('tags')
             t = ", ".join('"{0}"'.format(w) for w in tags)
             new_finding.tags = t
@@ -1126,22 +722,8 @@ def edit_finding(request, fid):
                         messages.SUCCESS,
                         'A finding template was also created.',
                         extra_tags='alert-success')
-            page_value = ""
-            if page:
-                try:
-                    if int(page):
-                        page_value = "&page=" + str(page)
-                except:
-                    pass
 
-            if source == "test":
-                return HttpResponseRedirect(reverse('view_test', args=(new_finding.test.id, )))
-            elif source == "product_findings":
-                return HttpResponseRedirect(reverse('product_open_findings', args=(new_finding.test.engagement.product.id, )) + '?test__engagement__product=' + str(new_finding.test.engagement.product.id) + page_value)
-            elif source == "all_product_findings":
-                return HttpResponseRedirect(reverse('open_findings') + '?' + page_value)
-            else:
-                return HttpResponseRedirect(reverse('view_finding', args=(new_finding.id, )))
+            return redirect_to_return_url_or_else(request, reverse('view_finding', args=(new_finding.id,)))
         else:
             messages.add_message(
                 request,
@@ -1166,12 +748,14 @@ def edit_finding(request, fid):
             title=finding.title).exclude(
             id=finding.id)
     product_tab = Product_Tab(finding.test.engagement.product.id, title="Edit Finding", tab="findings")
-    return render(request, 'dojo/edit_findings.html', {
+    return render(request, 'dojo/edit_finding.html', {
         'product_tab': product_tab,
         'form': form,
         'finding': finding,
         'jform': jform,
+        'gform': gform,
         'dupes': finding_dupes,
+        'return_url': get_return_url(request.GET)
     })
 
 
@@ -1390,7 +974,7 @@ def choose_finding_template_options(request, tid, fid):
         'product_tab': product_tab,
         'template': template,
         'form': form,
-        'finding_tags': [tag.name for tag in finding.tags.all()],
+        'finding_tags': [tag.name for tag in finding.tags],
     })
 
 
@@ -1517,17 +1101,12 @@ def promote_to_finding(request, fid):
     test = finding.test
     form_error = False
     jira_available = False
+    enabled = False
+    jform = None
 
-    if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(
-            product=test.engagement.product) != 0:
-        jform = JIRAFindingForm(
-            request.POST,
-            prefix='jiraform',
-            enabled=JIRA_PKey.objects.get(
-                product=test.engagement.product).push_all_issues)
-        # jira_available = True
-    else:
-        jform = None
+    if get_system_setting('enable_jira') and test.engagement.product.jira_pkey_set.first() is not None:
+        enabled = test.engagement.product.jira_pkey_set.first().push_all_issues
+        jform = JIRAFindingForm(prefix='jiraform', enabled=enabled)
 
     product_tab = Product_Tab(finding.test.engagement.product.id, title="Promote Finding", tab="findings")
 
@@ -1559,18 +1138,31 @@ def promote_to_finding(request, fid):
 
             new_finding.save()
             new_finding.endpoints.set(form.cleaned_data['endpoints'])
-            new_finding.save()
 
-            finding.delete()
-            if 'jiraform' in request.POST:
-                jform = JIRAFindingForm(
-                    request.POST,
-                    prefix='jiraform',
-                    enabled=JIRA_PKey.objects.get(
-                        product=test.engagement.product).push_all_issues)
+            # Push to Jira?
+            push_to_jira = False
+            if enabled:
+                push_to_jira = True
+            elif 'jiraform-push_to_jira' in request.POST:
+                jform = JIRAFindingForm(request.POST, prefix='jiraform',
+                                        enabled=enabled)
                 if jform.is_valid():
-                    add_issue_task.delay(
-                        new_finding, jform.cleaned_data.get('push_to_jira'))
+                    push_to_jira = jform.cleaned_data.get('push_to_jira')
+
+            # Save it and push it to JIRA
+            new_finding.save(push_to_jira=push_to_jira)
+
+            # Delete potential finding
+            finding.delete()
+            if 'githubform' in request.POST:
+                gform = GITHUBFindingForm(
+                    request.POST,
+                    prefix='githubform',
+                    enabled=GITHUB_PKey.objects.get(
+                        product=test.engagement.product).push_all_issues)
+                if gform.is_valid():
+                    add_external_issue_task.delay(
+                        new_finding, 'github')
 
             messages.add_message(
                 request,
@@ -1599,6 +1191,7 @@ def promote_to_finding(request, fid):
             'test': test,
             'stub_finding': finding,
             'form_error': form_error,
+            'jform': jform,
         })
 
 
@@ -1713,7 +1306,6 @@ def edit_template(request, tid):
     template = get_object_or_404(Finding_Template, id=tid)
     form = FindingTemplateForm(instance=template)
 
-    apply_message = ""
     if request.method == 'POST':
         form = FindingTemplateForm(request.POST, instance=template)
         if form.is_valid():
@@ -1724,6 +1316,8 @@ def edit_template(request, tid):
             count = apply_cwe_mitigation(form.cleaned_data["apply_to_findings"], template)
             if count > 0:
                 apply_message = " and " + str(count) + " " + pluralize(count, 'finding,findings') + " "
+            else:
+                apply_message = ""
 
             tags = request.POST.getlist('tags')
             t = ", ".join('"{0}"'.format(w) for w in tags)
@@ -1740,9 +1334,8 @@ def edit_template(request, tid):
                 messages.ERROR,
                 'Template form has error, please revise and try again.',
                 extra_tags='alert-danger')
-    else:
-        count = apply_cwe_mitigation(True, template, False)
 
+    count = apply_cwe_mitigation(True, template, False)
     form.initial['tags'] = [tag.name for tag in template.tags]
     add_breadcrumb(title="Edit Template", top_level=False, request=request)
     return render(request, 'dojo/add_template.html', {
@@ -2083,6 +1676,19 @@ def finding_bulk_update_all(request, pid=None):
                                  is_Mitigated=form.cleaned_data['is_Mitigated'],
                                  last_reviewed=timezone.now(),
                                  last_reviewed_by=request.user)
+
+                if form.cleaned_data['push_to_github']:
+                    logger.info('push selected findings to github')
+                    finds = Finding.objects.filter(id__in=finding_to_update)
+                    for finding in finds:
+                        print('will push to GitHub finding: ' + str(finding))
+                        old_status = finding.status()
+                        if form.cleaned_data['push_to_github']:
+                            if GITHUB_Issue.objects.filter(finding=finding).exists():
+                                update_issue_task.delay(finding, old_status, True)
+                            else:
+                                add_external_issue_task.delay(finding, 'github')
+
                 if form.cleaned_data['tags']:
                     for finding in finds:
                         tags = request.POST.getlist('tags')
@@ -2094,6 +1700,7 @@ def finding_bulk_update_all(request, pid=None):
                     prev_prod = None
                     for finding in finds:
                         if prev_prod != finding.test.engagement.product.id:
+                            # TODO this can be inefficient as most findings usually have the same product
                             calculate_grade(finding.test.engagement.product)
                             prev_prod = finding.test.engagement.product.id
 
@@ -2101,13 +1708,16 @@ def finding_bulk_update_all(request, pid=None):
                     from dojo.tools import tool_issue_updater
                     tool_issue_updater.async_tool_issue_update(finding)
 
-                    if JIRA_PKey.objects.filter(product=finding.test.engagement.product).count() == 0:
-                        log_jira_alert('Finding cannot be pushed to jira as there is no jira configuration for this product.', finding)
-                    else:
-                        old_status = finding.status()
-                        if form.cleaned_data['push_to_jira']:
+                    # Because we never call finding.save() in a bulk update, we need to actually
+                    # push the JIRA stuff here, rather than in finding.save()
+                    push_anyway = finding.jira_conf_new().jira_pkey_set.first().push_all_issues
+                    if form.cleaned_data['push_to_jira'] or push_anyway:
+                        if finding.jira_conf_new() is None:
+                            log_jira_alert('Finding cannot be pushed to jira as there is no jira '
+                                           'configuration for this product.', finding)
+                        else:
                             if JIRA_Issue.objects.filter(finding=finding).exists():
-                                update_issue_task.delay(finding, old_status, True)
+                                update_issue_task.delay(finding, True)
                             else:
                                 add_issue_task.delay(finding, True)
 
@@ -2121,7 +1731,7 @@ def finding_bulk_update_all(request, pid=None):
                                      'Unable to process bulk update. Required fields were not selected.',
                                      extra_tags='alert-danger')
 
-        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+    return redirect_to_return_url_or_else(request, None)
 
 
 def find_available_notetypes(notes):
@@ -2162,7 +1772,12 @@ def mark_finding_duplicate(request, original_id, duplicate_id):
 
     if original.test.engagement != duplicate.test.engagement:
         if original.test.engagement.deduplication_on_engagement or duplicate.test.engagement.deduplication_on_engagement:
-            raise ValueError('Marking finding {} as duplicate of {} failed as they are not in the same engagement and deduplication_on_engagement is enabled for at least one of them')
+            messages.add_message(
+                request,
+                messages.ERROR,
+                'Marking finding as duplicate/original failed as they are not in the same engagement and deduplication_on_engagement is enabled for at least one of them',
+                extra_tags='alert-danger')
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
     duplicate.duplicate = True
     duplicate.active = False
@@ -2171,10 +1786,10 @@ def mark_finding_duplicate(request, original_id, duplicate_id):
     duplicate.last_reviewed = timezone.now()
     duplicate.last_reviewed_by = request.user
     duplicate.save()
-    original.duplicate_list.add(duplicate)
     original.found_by.add(duplicate.test.test_type)
     original.save()
-    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+    return redirect_to_return_url_or_else(request, reverse('view_finding', args=(duplicate.id,)))
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -2184,9 +1799,10 @@ def reset_finding_duplicate_status(request, duplicate_id):
     duplicate.duplicate = False
     duplicate.active = True
     if duplicate.duplicate_finding:
-        duplicate.duplicate_finding.duplicate_list.remove(duplicate)
+        duplicate.duplicate_finding.original_finding.remove(duplicate)
         duplicate.duplicate_finding = None
     duplicate.last_reviewed = timezone.now()
     duplicate.last_reviewed_by = request.user
     duplicate.save()
-    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+    return redirect_to_return_url_or_else(request, reverse('view_finding', args=(duplicate.id,)))

@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.urls import reverse
 from django.shortcuts import render
-from dojo.models import System_Settings
+from dojo.models import System_Settings, enable_disable_auditlog
 from dojo.utils import (add_breadcrumb,
                         get_celery_worker_status)
 from dojo.forms import SystemSettingsForm
@@ -16,10 +16,7 @@ logger = logging.getLogger(__name__)
 
 @user_passes_test(lambda u: u.is_superuser)
 def system_settings(request):
-    try:
-        system_settings_obj = System_Settings.objects.get()
-    except:
-        system_settings_obj = System_Settings()
+    system_settings_obj = System_Settings.objects.get(no_cache=True)
 
     # Celery needs to be set with the setting: CELERY_RESULT_BACKEND = 'db+sqlite:///dojo.celeryresults.sqlite'
     if hasattr(settings, 'CELERY_RESULT_BACKEND'):
@@ -71,6 +68,7 @@ def system_settings(request):
         form = SystemSettingsForm(request.POST, instance=system_settings_obj)
         if form.is_valid():
             new_settings = form.save()
+            enable_disable_auditlog(enable=new_settings.enable_auditlog)
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Settings saved.',

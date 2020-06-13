@@ -21,6 +21,7 @@ from dojo.tools.npm_audit.parser import NpmAuditParser
 from dojo.tools.php_symfony_security_check.parser import PhpSymfonySecurityCheckParser
 from dojo.tools.generic.parser import GenericFindingUploadCsvParser
 from dojo.tools.qualys.parser import QualysParser
+from dojo.tools.qualys_infrascan_webgui.parser import QualysInfraScanParser
 from dojo.tools.qualys_webapp.parser import QualysWebAppParser
 from dojo.tools.snyk.parser import SnykParser
 from dojo.tools.gosec.parser import GosecScannerParser
@@ -74,7 +75,12 @@ from dojo.tools.trivy.parser import TrivyParser
 from dojo.tools.outpost24.parser import Outpost24Parser
 from dojo.tools.burp_enterprise.parser import BurpEnterpriseHtmlParser
 from dojo.tools.anchore_enterprise.parser import AnchoreEnterprisePolicyCheckParser
-
+from dojo.tools.gitleaks.parser import GitleaksJSONParser
+from dojo.tools.harbor_vulnerability.parser import HarborVulnerabilityParser
+from dojo.tools.choctaw_hog.parser import ChoctawhogParser
+from dojo.tools.gitlab_sast.parser import GitlabSastReportParser
+from dojo.tools.yarn_audit.parser import YarnAuditParser
+from dojo.tools.bugcrowd.parser import BugCrowdCSVParser
 
 
 __author__ = 'Jay Paz'
@@ -140,6 +146,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = GenericFindingUploadCsvParser(file, test, active, verified)
     elif scan_type == 'Qualys Scan':
         parser = QualysParser(file, test)
+    elif scan_type == 'Qualys Infrastructure Scan (WebGUI XML)':
+        parser = QualysInfraScanParser(file, test)
     elif scan_type == 'Qualys Webapp Scan':
         parser = QualysWebAppParser(file, test)
     elif scan_type == "OpenVAS CSV":
@@ -242,6 +250,18 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = DsopParser(file, test)
     elif scan_type == 'Anchore Enterprise Policy Check':
         parser = AnchoreEnterprisePolicyCheckParser(file, test)
+    elif scan_type == 'Gitleaks Scan':
+        parser = GitleaksJSONParser(file, test)
+    elif scan_type == 'Harbor Vulnerability Scan':
+        parser = HarborVulnerabilityParser(file, test)
+    elif scan_type == 'Choctaw Hog Scan':
+        parser = ChoctawhogParser(file, test)
+    elif scan_type == 'GitLab SAST Report':
+        parser = GitlabSastReportParser(file, test)
+    elif scan_type == 'Yarn Audit Scan':
+        parser = YarnAuditParser(file, test)
+    elif scan_type == 'BugCrowd Scan':
+        parser = BugCrowdCSVParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 

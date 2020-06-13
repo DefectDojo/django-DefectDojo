@@ -55,6 +55,9 @@
                             {% if system_settings.enable_jira %}
                             <th>Jira</th>
                             {% endif %}
+                            {% if system_settings.enable_github %}
+                            <th>GitHub</th>
+                            {% endif %}
                             <th> Findings</th>
                             <th> Endpoints</th>
                             <th> Contact</th>
@@ -206,6 +209,19 @@
                                 {% endfor %}
                                 </td>
                                 {% endif %}
+
+                                {% if system_settings.enable_github %}
+                                <td class="text-center">
+                                {% for github_conf in prod.github_confs %}
+                                <i class="fa fa-bug has-popover" title="<i class='fa fa-bug'></i> <b>GitHub Configuration</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="bottom"
+                                  data-content="<b>GitHub:</b> {{ github_conf.git_conf }}<br/>
+                                  <b>Project Key:</b> {{ github_conf.git_project }}<br/>
+                                  <b>Push Notes:</b> {{ github_conf.push_notes }}">
+                                </i>
+                                {% endfor %}
+                                </td>
+                                {% endif %}
+
                                 <td class="text-center">
                                     {% if prod.findings_count %}
                                         <a href="{% url 'product_open_findings' prod.id %}?test__engagement__product={{ prod.id }}"><b>{{ prod.findings_count }}</b></a>
@@ -249,7 +265,7 @@
                     {% include "dojo/paging_snippet.html" with page=prod_list page_size=True %}
                 </div>
             {% else %}
-                <p class="text-center">No products found.</p>
+                <div id="no_products"><p class="text-center">No products found.</p></div>
             {% endif %}
         </div>
     </div>
@@ -297,16 +313,10 @@
                 drawCallback: function(){
                      $('.has-popover').popover({'trigger':'hover'});
                  },
-                "columns": [
-                    { "data": "action", render: function (data, type, row) {
-                            return type === 'export' ?  "" :  data;
-                    }},
-                    { "data": "product" , render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'b') :  data;
-                    }},
-                    { "data": "tags" , render: function (data, type, row) {
-                            return type === 'export' ?  getDojoExportValueFromTag(data, 'a') :  data;
-                    }},
+                 "columns": [
+                    { "data": "action" },
+                    { "data": "product" },
+                    { "data": "tags" },
                     { "data": "criticality" , render: function (data, type, row) {
                             return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
                     }},
@@ -316,38 +326,52 @@
                     { "data": "engagements", render: function (data, type, row) {
                             return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
                     }},
-                    { "data": "findings" , render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'b') :  data;
+                    {% if system_settings.enable_jira %}
+                    { "data": "jira", render: function (data, type, row) {
+                            return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
                     }},
-                    { "data": "endpoints" , render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'b') :  data;
+                    {% endif %}
+                    {% if system_settings.enable_github %}
+                    { "data": "github", render: function (data, type, row) {
+                            return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
                     }},
+                    {% endif %}
+                    { "data": "findings" },
+                    { "data": "endpoints" },
                     { "data": "contacts" },
                     { "data": "product_type" },
                 ],
-                order: [1],
-                "columnDefs": [
-                    { "orderable": false, "targets": [0] }
+                order: [],
+                columnDefs: [
+                    { 
+                        "orderable": false,
+                        "targets": [0]
+                    },
+                    {
+                        targets: [0],
+                        className: 'noVis'
+                    }
                 ],
                 dom: 'Bfrtip',
                 paging: false,
                 buttons: [
+                    {
+                        extend: 'colvis',
+                        columns: ':not(.noVis)'
+                    },
                     $.extend( true, {}, buttonCommon, {
-                        extend: 'colvis'
+                        extend: 'copy'
                     }),
                     $.extend( true, {}, buttonCommon, {
-                        extend: 'copyHtml5'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'excelHtml5',
+                        extend: 'excel',
                         autoFilter: true,
                         sheetName: 'Exported data',
                     }),
                     $.extend( true, {}, buttonCommon, {
-                        extend: 'csvHtml5'
+                        extend: 'csv'
                     }),
                     $.extend( true, {}, buttonCommon, {
-                        extend: 'pdfHtml5',
+                        extend: 'pdf',
                         orientation: 'landscape',
                         pageSize: 'LETTER'
                     }),

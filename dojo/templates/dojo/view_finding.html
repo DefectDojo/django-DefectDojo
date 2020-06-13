@@ -122,7 +122,7 @@
                             {% endif %}
                             <li role="presentation">
                                 <a href ="{% url 'upload_risk_acceptance$' finding.test.engagement.id%}">
-                                    <i class="fa fa-exclamation-circle"></i> Add Risk Exception
+                                    <i class="fa fa-exclamation-circle"></i> Add Risk Acceptance
                                 </a>
                             </li>
                             <li role="presentation">
@@ -185,7 +185,7 @@
                     {% endif %}
                     <th>Status</th>
                     {% if finding.risk_acceptance_set.all %}
-                        <th>Acceptance</th>
+                        <th>Risk Acceptance</th>
                     {% endif %}
                     {% if finding.duplicate_finding_set %}
                     <th>Parent</th>
@@ -224,8 +224,7 @@
                     {% if finding.scanner_confidence %}
                     <td> {{finding.get_scanner_confidence_text}}</td>
                     {% endif %}
-                    <td>{% if finding.under_review %}Under Review, {% endif %}{{ finding.status }}{% if finding.duplicate_finding.id %}, <a href="{% url 'view_finding' finding.duplicate_finding.id %}">Original
-                        {% endif %}</a></td>
+                    <td>{{ finding|finding_display_status|safe }}
                     {% if finding.duplicate_finding_set %}
                     <td>
                         <div class="align-top">
@@ -246,8 +245,11 @@
                     {% endif %}
                     {% if finding.risk_acceptance_set.all %}
                         <td>
-                            <a href="{% url 'view_risk' finding.test.engagement.id finding.risk_acceptance_set.all.0.id %}">
-                                View Risk Acceptance</a>
+                            {% for ra in finding.risk_acceptance_set.all|slice:":5" %}
+                                <a href="{% url 'view_risk' finding.test.engagement.id finding.risk_acceptance_set.all.0.id %}" class="fa fa-thumbs-up fa-lg has-popover" data-trigger="hover" data-placement="right"
+                                data-content="{{ finding.risk_acceptance_set.all.0.name }}"
+                                data-container="body" data-original-title="Risk Acceptance"></a>
+                            {% endfor %}
                         </td>
                     {% endif %}
                     <td>
@@ -292,78 +294,6 @@
             </table>
         </div>
     </div>
-    {% with findings=finding.similar_findings %}
-        {% if findings %}
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4>Similar Findings<span class="pull-right"><a data-toggle="collapse" href="#similar_findings"><i class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
-                </div>
-                <div id="similar_findings" class="panel-body collapse in">
-                    <table class="table table-striped table-hover centered">
-                        <tr>
-                            <th>Finding</th>
-                            <th>Status</th>
-                            <th>Tags</th>
-                            <th>Test</th>
-                            <th>Engagement</th>
-                            <th>Version</th>
-                            <th>CVE</th>
-                            <th>File</th>
-                            <th>Deduplicate?</th>
-                        </tr>
-                        {% for similar in findings %}
-                            <tr>
-                                <td>
-                                    <a target="#" data-toggle="tooltip" data-placement="bottom" title="{{ similar.title }}" href="{% url 'view_finding' similar.id %}">{{ similar.date }}</a>
-                                    {% with similar.notes.count as note_count %}
-                                        ({{ note_count }} note{{ note_count|pluralize }})
-                                    {% endwith %}
-                                </td>
-                                <td>{{ similar.status }}{% if similar.duplicate_finding_id %}, <a href="{% url 'view_finding' similar.duplicate_finding_id %}">Original</a> {% endif %}</td>
-                                <td>
-                                    {% if similar.tags %}
-                                        <small>
-                                            {% for tag in similar.tags %}
-                                                <a title="Search {{ tag }}" class="tag-label tag-color"
-                                                   href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
-                                            {% endfor %}
-                                        </small>
-                                    {% endif %}
-                                </td>
-                                <td><a href="{% url 'view_test' similar.test_id %}">{{ similar.test.test_type.name }}</a></td>
-                                <td><a href="{% url 'view_engagement' similar.test.engagement_id %}">{{ similar.test.engagement.name }}</a></td>
-                                <td>{{ similar.test.engagement.version }}</td>
-                                <td>{{ similar.cve }}</td>
-                                <td>{{ similar.file_path }}{% if similar.line > 0 %} (Line {{ similar.line }}){% endif %}</td>
-                                <td>
-                                    {% if similar.duplicate %}
-                                        <form method="post"
-                                              action="{% url 'reset_finding_duplicate_status' similar.id %}">
-                                            {% csrf_token %}
-                                            <input type="submit" value="Reset duplicate status"/>
-                                        </form>
-                                    {% elif finding.duplicate_finding_id != similar.id %}
-                                        <form method="post"
-                                              action="{% url 'mark_finding_duplicate' original_id=similar.id duplicate_id=finding.id %}">
-                                            {% csrf_token %}
-                                            <input type="submit" value="Use as original"/>
-                                        </form>
-                                        <form method="post"
-                                              action="{% url 'mark_finding_duplicate' duplicate_id=similar.id original_id=finding.id %}">
-                                            {% csrf_token %}
-                                            <input type="submit" value="Mark as duplicate"/>
-                                        </form>
-                                    {% else %}
-                                        <i>N/A</i>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </table>
-                </div>
-            </div>
-        {% endif %}
-    {% endwith %}
     {% if finding.static_finding or finding.line > 0 %}
         {% if finding.sast_source_object or finding.sast_sink_object or finding.sast_source_file_path or finding.sast_source_line > 0 %}
         {# For tools that give information on both source (start) and sink (end) of the attack vector #}
@@ -438,8 +368,9 @@
                 </tr>
                 <tr>
                     <td>
-                        <span>
-                           {{ finding.file_path }}
+                        <span>{{ finding.file_path }} 
+                            <i class="fa fa-copy fa-align-right copytoclipboard" title="copy to clipboard"
+                            data-clipboard-text="{{finding.file_path}}"></i>
                         </span>
                     </td>
                     <td>
@@ -517,6 +448,119 @@
             </div>
         </div>
     {% endif %}
+    {% if gissue and gconf %}
+    <div class="row to_highlight">
+        <div class="col-md-12">
+            <div class="panel panel-default endpoints table-responsive">
+                <div class="panel-heading">
+                    <h4>Github Link
+                        <span class="pull-right"><a data-toggle="collapse" href="#jira_link"><i
+                                class="glyphicon glyphicon-chevron-up"></i></a></span>
+                    </h4>
+                </div>
+                <div id="github_link" class="panel-body endpoint-panel table-responsive collapse in">
+                    <a href="{{gissue.issue_url }}"
+                       target="_blank"> {{gissue.issue_url}} </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% with findings=finding.similar_findings %}
+        {% if findings %}
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4>Similar Findings ({{ findings.count }}) <span class="pull-right"><a data-toggle="collapse" href="#similar_findings"><i class="glyphicon glyphicon-chevron-down"></i></a></span></h4>
+                </div>
+                <div id="similar_findings" class="panel-body collapse">
+                    <table class="table table-striped table-hover centered">
+                        <tr>
+                            <th>Title</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Test</th>
+                            <th>Engagement</th>
+                            {% if finding.cwe > 0 %}
+                            <th>CWE</th>
+                            {% endif %}
+                            <th>CVE</th>
+                            <th>File</th>
+                            <th>Deduplicate?</th>
+                        </tr>
+                        {% for similar in findings %}
+                            <tr>
+                                <td>
+                                    <a title="{{ similar.title }}" href="{% url 'view_finding' similar.id %}">{{ similar.title|truncatechars_html:80 }}</a>
+                                    {% if similar.tags %}
+                                    <small>
+                                        {% for tag in similar.tags %}
+                                            <a title="Search {{ tag }}" class="tag-label tag-color"
+                                               href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                        {% endfor %}
+                                    </small>
+                                    {% endif %}
+                                </td>
+                                <td>{{ similar.status }}{% if similar.duplicate_finding_id %}, <a href="{% url 'view_finding' similar.duplicate_finding_id %}">Original</a> {% endif %}</td>
+                                <td>
+                                    {{ similar.date|date }}</br>
+                                    {% with similar.notes.count as note_count %}
+                                        ({{ note_count }} note{{ note_count|pluralize }})
+                                    {% endwith %}
+                                </td>
+                                <td><a href="{% url 'view_test' similar.test_id %}">{{ similar.test.test_type.name }}</a></td>
+                                <td><a href="{% url 'view_engagement' similar.test.engagement_id %}">{{ similar.test.engagement.name }}</a>
+                                {% if similar.test.engagement.version %}
+                                    <sup>
+                                          <a target="_blank" class="tag-label tag-version" data-toggle="tooltip" data-placement="bottom" title="Product Version: {{ similar.test.engagement.version }}">
+                                          {{ similar.test.engagement.version }}</a>
+                                    </sup>
+                                {% endif %}
+                                </td>
+                                {% if finding.cwe > 0 %}
+                                <td>
+                                    <a target="_blank" href="https://cwe.mitre.org/data/definitions/{{ finding.cwe }}.html">
+                                        <i class="fa fa-external-link"></i> {{ finding.cwe }}
+                                    </a>
+                                </td>
+                                {% endif %}
+                                <td>{{ similar.cve }}</td>
+                                <td title="{{similar.file_path}}{% if similar.line > 0 %} (Line {{ similar.line }}){% endif %}">
+                                    {{ similar.file_path|truncatechars_html:20 }}{% if similar.line > 0 %} (Line {{ similar.line }}){% endif %}
+                                    <i class="fa fa-copy fa-align-right copytoclipboard" title="copy full path to clipboard"
+                                    data-clipboard-text="{{similar.file_path}}{% if similar.line > 0 %} (Line {{ similar.line }}){% endif %}"></i></td>
+                                <td>
+                                    {% if similar.duplicate %}
+                                        <form method="post"
+                                              action="{% url 'reset_finding_duplicate_status' similar.id %}">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
+                                            <input type="submit" value="Reset duplicate status"/>
+                                        </form>
+                                    {% elif finding.original_finding.id != similar.id %}
+                                        <form method="post"
+                                              action="{% url 'mark_finding_duplicate' original_id=similar.id duplicate_id=finding.id %}">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
+                                            <input type="submit" value="Use as original"/>
+                                        </form>
+                                        <form method="post"
+                                              action="{% url 'mark_finding_duplicate' duplicate_id=similar.id original_id=finding.id %}">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
+                                            <input type="submit" value="Mark as duplicate"/>
+                                        </form>
+                                    {% else %}
+                                        <i>N/A</i>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        {% endif %}
+    {% endwith %}
 
     {% with endpoints=finding.endpoints.all|get_vulnerable_endpoints %}
         {% if endpoints %}
@@ -884,6 +928,7 @@
     </div>
 {% endblock %}
 {% block postscript %}
+    <script src="{% static "clipboard/dist/clipboard.min.js" %}"></script>
     <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
     <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
     <script type="text/javascript">
@@ -990,5 +1035,7 @@
                 }
             });
         });
+
+        var clipboard = new ClipboardJS('.copytoclipboard');
     </script>
 {% endblock %}
