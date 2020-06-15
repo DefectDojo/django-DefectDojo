@@ -175,6 +175,7 @@ def edit_test(request, tid):
     form.initial['target_start'] = test.target_start.date()
     form.initial['target_end'] = test.target_end.date()
     form.initial['tags'] = [tag.name for tag in test.tags]
+    form.initial['description'] = test.description
 
     product_tab = Product_Tab(test.engagement.product.id, title="Edit Test", tab="engagements")
     product_tab.setEngagement(test.engagement)
