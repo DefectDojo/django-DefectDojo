@@ -114,3 +114,5 @@ quick.bash
 Pipfile
 Pipfile*
 
+# Helm dependencies
+helm/defectdojo/charts
