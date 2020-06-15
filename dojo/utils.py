@@ -2011,3 +2011,21 @@ def redirect_to_return_url_or_else(request, or_else):
     else:
         messages.add_message(request, messages.ERROR, 'Unable to redirect anywhere.', extra_tags='alert-danger')
         return HttpResponseRedirect(request.get_full_path())
+
+
+def file_size_mb(file_obj):
+    if file_obj:
+        file_obj.seek(0, 2)
+        size = file_obj.tell()
+        file_obj.seek(0, 0)
+        if size > 0:
+            return size / 1048576
+    return 0
+
+
+def is_scan_file_too_large(scan_file):
+    if hasattr(settings, "SCAN_FILE_MAX_SIZE"):
+        size = file_size_mb(scan_file)
+        if size > settings.SCAN_FILE_MAX_SIZE:
+            return True
+    return False
