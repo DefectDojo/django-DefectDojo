@@ -23,14 +23,17 @@ def get_text_severity(severity_id):
 
 class NessusCSVParser(object):
     def __init__(self, filename, test):
-        content = open(filename.temporary_file_path(), "rb").read().replace("\r", "\n")
+        content = open(filename.temporary_file_path(), "r").read().replace("\r", "\n")
+        #content = open(filename.temporary_file_path(), "rb").read().replace("\r", "\n")
         # content = re.sub("\"(.*?)\n(.*?)\"", "\"\1\2\"", content)
         # content = re.sub("(?<=\")\n", "\\\\n", content)
-        with open("%s-filtered" % filename.temporary_file_path(), "wb") as out:
+        with open("%s-filtered" % filename.temporary_file_path(), "w") as out:
+        # with open("%s-filtered" % filename.temporary_file_path(), "wb") as out:
             out.write(content)
             out.close()
 
-        with open("%s-filtered" % filename.temporary_file_path(), "rb") as scan_file:
+        with open("%s-filtered" % filename.temporary_file_path(), "r") as scan_file:
+        # with open("%s-filtered" % filename.temporary_file_path(), "rb") as scan_file:
             reader = csv.reader(scan_file,
                                 lineterminator="\n",
                                 quoting=csv.QUOTE_ALL)
@@ -47,7 +50,7 @@ class NessusCSVParser(object):
                 for h in ["severity", "endpoint",
                           "title", "description",
                           "mitigation", "references",
-                          "impact", "plugin_output", "port"]:
+                          "impact", "plugin_output", "port", "cve"]:
                     dat[h] = None
 
                 for i, var in enumerate(row):
@@ -56,7 +59,7 @@ class NessusCSVParser(object):
 
                     var = re.sub("(\A(\\n)+|(\\n)+\Z|\\r)", "", var)
                     var = re.sub("(\\n)+", "\n", var)
-
+                    
                     if heading[i] == "CVE":
                         if re.search("(CVE|CWE)", var) is None:
                             var = "CVE-%s" % str(var)
@@ -64,6 +67,7 @@ class NessusCSVParser(object):
                             dat['references'] = var + "\n" + dat['references']
                         else:
                             dat['references'] = var + "\n"
+                            dat['cve'] = var
                     elif heading[i] == "Risk":
                         if re.match("None", var) or not var:
                             dat['severity'] = "Info"
@@ -128,7 +132,8 @@ class NessusCSVParser(object):
                                    mitigation=dat['mitigation'] if dat['mitigation'] is not None else 'N/A',
                                    impact=dat['impact'],
                                    references=dat['references'],
-                                   url=dat['endpoint'])
+                                   url=dat['endpoint'],
+                                   cve=dat['cve'])
 
                     find.unsaved_endpoints = list()
                     dupes[dupe_key] = find
