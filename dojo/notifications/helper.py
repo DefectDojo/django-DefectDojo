@@ -10,27 +10,28 @@ logger = logging.getLogger(__name__)
 
 
 def create_notification(event=None, *args, **kwargs):
-    # System notifications
-    try:
-        system_notifications = Notifications.objects.get(user=None)
-    except Exception:
-        system_notifications = Notifications()
-
-    logger.debug('creating system notifications')
-
-    # send system notifications to all admin users
-    admin_users = Dojo_User.objects.filter(is_staff=True)
-    for admin_user in admin_users:
-        system_notifications.user = admin_user
-        process_notifications(event, system_notifications, *args, **kwargs)
 
     if 'recipients' in kwargs:
-        # mimic existing code so that when recipients is specified, no other personal notifications are sent.
+        # mimic existing code so that when recipients is specified, no other system or personal notifications are sent.
         logger.debug('creating notifications for recipients')
-        for recipient_notifications in Notifications.objects.filter(user__username__in=kwargs['recipients'], user__is_active=True):
+        for recipient_notifications in Notifications.objects.filter(user__username__in=kwargs['recipients'], user__is_active=True, product=None):
             # kwargs.update({'user': recipient_notifications.user})
             process_notifications(event, recipient_notifications, *args, **kwargs)
     else:
+        logger.debug('creating system notifications')
+        # send system notifications to all admin users
+
+        # System notifications
+        try:
+            system_notifications = Notifications.objects.get(user=None)
+        except Exception:
+            system_notifications = Notifications()
+
+        admin_users = Dojo_User.objects.filter(is_staff=True)
+        for admin_user in admin_users:
+            system_notifications.user = admin_user
+            process_notifications(event, system_notifications, *args, **kwargs)
+
         # Personal but global notifications
         # only retrieve users which have at least one notification type enabled for this event type.
         logger.debug('creating personal notifications')
@@ -92,7 +93,7 @@ def process_notifications(event, notifications=None, *args, **kwargs):
 
     sync = 'initiator' in kwargs and hasattr(kwargs['initiator'], 'usercontactinfo') and kwargs['initiator'].usercontactinfo.block_execution
 
-    logger.debug('sync: %s', sync)
+    logger.debug('sync: %s %s', sync, notifications.user)
     logger.debug('sending notifications ' + ('synchronously' if sync else 'asynchronously'))
     # logger.debug(vars(notifications))
 
