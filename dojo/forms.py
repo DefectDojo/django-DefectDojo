@@ -802,7 +802,7 @@ class DeleteEngagementForm(forms.ModelForm):
 
 class TestForm(forms.ModelForm):
     title = forms.CharField(max_length=255, required=False)
-    description = forms.CharField(widget=forms.Textarea(attrs={}), required=False)
+    description = forms.CharField(widget=forms.Textarea(attrs={'rows': '3'}), required=False)
     test_type = forms.ModelChoiceField(queryset=Test_Type.objects.all().order_by('name'))
     environment = forms.ModelChoiceField(
         queryset=Development_Environment.objects.all().order_by('name'))
