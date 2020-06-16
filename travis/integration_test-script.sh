@@ -31,7 +31,7 @@ export DD_BASE_URL='http://localhost:8080/'
 
 function fail() {
     echo "Error: $1 test failed\n"
-    docker-compose logs --tail="all" uwsgi
+    docker-compose logs --tail="120" uwsgi
     exit 1    
 }
 
