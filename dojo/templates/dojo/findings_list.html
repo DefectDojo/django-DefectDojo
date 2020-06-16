@@ -374,7 +374,7 @@
                     {% include "dojo/paging_snippet.html" with page=findings page_size=True%}
                 </div>
             {% else %}
-                <p class="text-center">No findings found.</p>
+                <div id="no_findings"><p class="text-center">No findings found.</p></div>                
             {% endif %}
         </div>
     </div>

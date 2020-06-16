@@ -2,7 +2,6 @@ from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import NoAlertPresentException
 import unittest
-import re
 import sys
 from base_test_class import BaseTestCase
 
@@ -11,8 +10,8 @@ class DojoTests(BaseTestCase):
 
     def test_login(self):
         driver = self.login_page()
-        loginTxt = driver.find_element_by_tag_name("BODY").text
-        self.assertTrue(re.search(r'Active Engagements', loginTxt))
+
+        self.assertTrue(self.is_text_present_on_page(text='Active Engagements'))
 
     def test_create_product(self):
         driver = self.login_page()
@@ -25,8 +24,8 @@ class DojoTests(BaseTestCase):
         driver.find_element_by_id("id_description").send_keys("QA Test 1 Description")
         Select(driver.find_element_by_id("id_prod_type")).select_by_visible_text("Research and Development")
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
-        productTxt = driver.find_element_by_tag_name("BODY").text
-        self.assertTrue(re.search(r'Product added successfully', productTxt))
+
+        self.assertTrue(self.is_success_message_present(text='Product added successfully'))
 
     def test_engagement(self):
         driver = self.login_page()
@@ -69,8 +68,7 @@ class DojoTests(BaseTestCase):
         driver.find_element_by_id("id_impact").send_keys("Impact")
         driver.find_element_by_name("_Finished").click()
 
-        findingTxt = driver.find_element_by_tag_name("BODY").text
-        self.assertTrue(re.search(r'Finding added successfully', findingTxt))
+        self.assertTrue(self.is_success_message_present(text='Finding added successfully'))
 
     def is_element_present(self, how, what):
         try:

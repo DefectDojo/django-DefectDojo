@@ -18,7 +18,10 @@ from dojo.tools.tool_issue_updater import tool_issue_updater, update_findings_fr
 from dojo.utils import sync_false_history, calculate_grade
 from dojo.reports.widgets import report_widget_factory
 from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_issue, \
-                       close_epic, create_notification, sync_rules, fix_loop_duplicates, rename_whitesource_finding, update_external_issue, add_external_issue, close_external_issue, reopen_external_issue
+                       close_epic, sync_rules, fix_loop_duplicates, \
+                       rename_whitesource_finding, update_external_issue, add_external_issue, \
+                       close_external_issue, reopen_external_issue
+from dojo.notifications.helper import create_notification
 
 
 import logging

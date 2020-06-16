@@ -140,7 +140,7 @@ def issue_r(raw_row, vuln, test, issueType):
 
 
 def qualys_webapp_parser(qualys_xml_file, test):
-    parser = etree.XMLParser(remove_blank_text=True, no_network=True, recover=True)
+    parser = etree.XMLParser(resolve_entities=False, remove_blank_text=True, no_network=True, recover=True)
     d = etree.parse(qualys_xml_file, parser)
 
     right = d.xpath('/WAS_WEBAPP_REPORT/RESULTS/WEB_APPLICATION/VULNERABILITY_LIST/VULNERABILITY')
