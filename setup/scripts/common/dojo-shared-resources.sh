@@ -423,7 +423,7 @@ function install_db() {
         if [ "$DBTYPE" == $MYSQL ]; then
             echo "Installing MySQL client (and server if not already installed)"
             if [ "$AUTO_DOCKER" == "yes" ]; then
-              DEBIAN_FRONTEND=noninteractive apt-get install -y mysql-server pwgen libmysqlclient-dev
+              DEBIAN_FRONTEND=noninteractive apt-get install -y mysql-server libmysqlclient-dev
               sudo service mysql start
             else
               sudo apt-get install -y libmysqlclient-dev mysql-server
