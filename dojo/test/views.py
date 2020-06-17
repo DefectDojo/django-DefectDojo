@@ -29,7 +29,7 @@ from dojo.models import Product, Finding, Test, Notes, Note_Type, BurpRawRequest
     Finding_Template, JIRA_PKey, Cred_Mapping, Dojo_User, JIRA_Issue, System_Settings
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting, \
-    Product_Tab, calculate_grade, log_jira_alert, max_safe, redirect_to_return_url_or_else
+    Product_Tab, calculate_grade, log_jira_alert, max_safe, redirect_to_return_url_or_else, is_scan_file_too_large
 from dojo.notifications.helper import create_notification
 from dojo.tasks import add_issue_task, update_issue_task
 from functools import reduce
@@ -635,6 +635,13 @@ def re_import_scan_results(request, tid):
             tags = request.POST.getlist('tags')
             ts = ", ".join(tags)
             test.tags = ts
+            if file and is_scan_file_too_large(file):
+                messages.add_message(request,
+                                     messages.ERROR,
+                                     "Report file is too large. Maximum supported size is {} MB".format(settings.SCAN_FILE_MAX_SIZE),
+                                     extra_tags='alert-danger')
+                return HttpResponseRedirect(reverse('re_import_scan_results', args=(test.id,)))
+
             try:
                 parser = import_parser_factory(file, test, active, verified)
             except ValueError:

@@ -69,6 +69,9 @@ django:
     annotations:
       # Restricts the type of ingress controller that can interact with our chart (nginx, traefik, ...)
       #kubernetes.io/ingress.class: nginx
+      # Depending on the size and complexity of your scans, you might want to increase the default ingress timeouts if you see repeated 504 Gateway Timeouts
+      #nginx.ingress.kubernetes.io/proxy-read-timeout: "1800"
+      #nginx.ingress.kubernetes.io/proxy-send-timeout: "1800"
   nginx:
     tls:
       enabled: false

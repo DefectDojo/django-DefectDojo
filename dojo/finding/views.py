@@ -1700,6 +1700,7 @@ def finding_bulk_update_all(request, pid=None):
                     prev_prod = None
                     for finding in finds:
                         if prev_prod != finding.test.engagement.product.id:
+                            # TODO this can be inefficient as most findings usually have the same product
                             calculate_grade(finding.test.engagement.product)
                             prev_prod = finding.test.engagement.product.id
 

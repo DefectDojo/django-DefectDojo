@@ -652,7 +652,7 @@ def view_engineer(request, eid):
     open_week = findings.filter(reduce(operator.or_, q_objects))
 
     accepted_week = [finding for ra in Risk_Acceptance.objects.filter(
-        reporter=user, created__range=[day_list[0], day_list[-1]])
+        owner=user, created__range=[day_list[0], day_list[-1]])
                      for finding in ra.accepted_findings.all()]
 
     q_objects = (Q(mitigated=d) for d in day_list)
@@ -681,7 +681,7 @@ def view_engineer(request, eid):
                                  month_start.month)[1],
                              tzinfo=timezone.get_current_timezone())
         for finding in [finding for ra in Risk_Acceptance.objects.filter(
-                created__range=[month_start, month_end], reporter=user)
+                created__range=[month_start, month_end], owner=user)
                         for finding in ra.accepted_findings.all()]:
             if finding.severity == 'Critical':
                 month[1] += 1
@@ -708,7 +708,7 @@ def view_engineer(request, eid):
             wk_range[1].strip() + " " + str(now.year), "%b %d %Y")
 
         for finding in [finding for ra in Risk_Acceptance.objects.filter(
-                created__range=[week_start, week_end], reporter=user)
+                created__range=[week_start, week_end], owner=user)
                         for finding in ra.accepted_findings.all()]:
             if finding.severity == 'Critical':
                 week[1] += 1
