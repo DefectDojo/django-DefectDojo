@@ -35,9 +35,15 @@ function fail() {
     exit 1    
 }
 
+failures=false
+function mark_failed() {
+    # can be used to mark the build as failed, but still continue to see what the rest of the test suite does
+    failures=true
+}
+
 function success() {
     echo "Grepping celery logs for errors:"
-    docker-compose logs --tail="all" celeryworker | grep -A 12 " ERROR" && exit 1
+    docker-compose logs --tail="all" celeryworker | grep -A 12 " ERROR" && mark_failed()
     echo "Success: $1 test passed\n"
 }
 
@@ -162,5 +168,10 @@ fi
 # else
 #     echo "Error: Zap integration test failed"; exit 1
 # fi
+
+if [ $failures = true ] ; then
+    echo "there were failures, for example ERRORs found in the celery worker logs"
+    exit 1
+fi
 
 exec echo "Done Running all configured integration tests."
