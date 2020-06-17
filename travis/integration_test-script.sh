@@ -44,7 +44,7 @@ function mark_failed_celery() {
 
 function success() {
     echo "Grepping celery logs for errors:"
-    docker-compose logs --tail="all" celeryworker | grep -A 12 " ERROR" && mark_failed_celery()
+    docker-compose logs --tail="all" celeryworker | grep -A 12 " ERROR" && mark_failed_celery
     echo "Success: $1 test passed\n"
 }
 
