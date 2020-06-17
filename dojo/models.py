@@ -2251,10 +2251,10 @@ class JIRA_Conf(models.Model):
         return [m.strip() for m in (self.false_positive_mapping_resolution or '').split(',')]
 
     def __unicode__(self):
-        return self.url + " | " + self.username
+        return self.configuration_name + " | " + self.url + " | " + self.username
 
     def __str__(self):
-        return self.url + " | " + self.username
+        return self.configuration_name + " | " + self.url + " | " + self.username
 
     def get_priority(self, status):
         if status == 'Info':
