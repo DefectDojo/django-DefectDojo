@@ -37,6 +37,8 @@ function fail() {
 
 function success() {
     echo "Success: $1 test passed\n"
+    echo "Grepping celery logs for errors:"
+    docker-compose logs --tail="all" celeryworker | grep " ERROR"
 }
 
 test="Product type integration tests"
