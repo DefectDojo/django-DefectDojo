@@ -762,14 +762,13 @@ def new_eng_for_app(request, pid, cicd=False):
             tags = request.POST.getlist('tags')
             t = ", ".join('"{0}"'.format(w) for w in tags)
             new_eng.tags = t
-            if get_system_setting('enable_jira'):
-                # Test to make sure there is a Jira project associated the product
-                try:
-                    jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=False)
-                    if jform.is_valid():
-                        add_epic_task.delay(new_eng, jform.cleaned_data.get('push_to_jira'))
-                except JIRA_PKey.DoesNotExist:
-                    pass
+            jform = None
+            if 'jiraform-push_to_jira' in request.POST:
+                jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=False)
+
+            if (form.is_valid() and jform is None) or (form.is_valid() and jform and jform.is_valid()):
+                if 'jiraform-push_to_jira' in request.POST:
+                    add_epic_task.delay(new_eng, jform.cleaned_data.get("push_to_jira"))
 
             messages.add_message(request,
                                  messages.SUCCESS,
