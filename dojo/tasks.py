@@ -21,9 +21,8 @@ from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_iss
                        close_epic, sync_rules, fix_loop_duplicates, \
                        rename_whitesource_finding, update_external_issue, add_external_issue, \
                        close_external_issue, reopen_external_issue
-from dojo.notifications.helper import send_alert_notification, send_hipchat_notification, send_mail_notification, send_slack_notification
+from dojo.notifications.helper import create_notification, send_alert_notification, send_hipchat_notification, send_mail_notification, send_slack_notification
 import logging
-
 
 fmt = getattr(settings, 'LOG_FORMAT', None)
 lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
