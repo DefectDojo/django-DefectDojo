@@ -193,19 +193,21 @@ def get_item(item_node, test):
         except:
             response = ""
         unsaved_req_resp.append({"req": request, "resp": response})
-    collab_details = list()
-    collab_text = None
+
+    collab_text = ""
     for event in item_node.findall('./collaboratorEvent'):
+        collab_details = list()
         collab_details.append(event.findall('interactionType')[0].text)
         collab_details.append(event.findall('originIp')[0].text)
         collab_details.append(event.findall('time')[0].text)
+
         if collab_details[0] == 'DNS':
             collab_details.append(event.findall('lookupType')[0].text)
             collab_details.append(event.findall('lookupHost')[0].text)
-            collab_text = "The Collaborator server received a " + collab_details[0] + " lookup of type " + collab_details[3] + \
+            collab_text += "The Collaborator server received a " + collab_details[0] + " lookup of type " + collab_details[3] + \
                 " for the domain name " + \
                 collab_details[4] + " at " + collab_details[2] + \
-                " originating from " + collab_details[1] + " ."
+                " originating from " + collab_details[1] + ". "
 
         for request_response in event.findall('./requestresponse'):
             try:
@@ -218,9 +220,9 @@ def get_item(item_node, test):
                 response = ""
             unsaved_req_resp.append({"req": request, "resp": response})
         if collab_details[0] == 'HTTP':
-            collab_text = "The Collaborator server received an " + \
+            collab_text += "The Collaborator server received an " + \
                 collab_details[0] + " request at " + collab_details[2] + \
-                " originating from " + collab_details[1] + " ."
+                " originating from " + collab_details[1] + ". "
 
     try:
         dupe_endpoint = Endpoint.objects.get(

@@ -4,6 +4,7 @@ import logging
 import operator
 import json
 import httplib2
+import base64
 from datetime import datetime
 import googleapiclient.discovery
 from google.oauth2 import service_account
