@@ -575,13 +575,13 @@ def finding_bulk_update(request, tid):
                     from dojo.tools import tool_issue_updater
                     tool_issue_updater.async_tool_issue_update(finding)
 
-                    push_anyway = finding.jira_conf_new().jira_pkey_set.first().push_all_issues
-                    if form.cleaned_data['push_to_jira'] or push_anyway:
-                        if finding.jira_conf_new() is None:
-                            log_jira_alert(
-                                'Finding cannot be pushed to jira as there is no jira configuration for this product.',
-                                finding)
-                        else:
+                    if finding.jira_conf_new() is None:
+                        log_jira_alert('Finding cannot be pushed to jira as there is no jira configuration for this product.', finding)
+                    else:
+                        push_anyway = finding.jira_conf_new().jira_pkey_set.first().push_all_issues
+                        # push_anyway = JIRA_PKey.objects.get(
+                        #     product=finding.test.engagement.product).push_all_issues
+                        if form.cleaned_data['push_to_jira'] or push_anyway:
                             if JIRA_Issue.objects.filter(finding=finding).exists():
                                 update_issue_task.delay(finding, True)
                             else:
