@@ -762,7 +762,6 @@ def new_eng_for_app(request, pid, cicd=False):
             tags = request.POST.getlist('tags')
             t = ", ".join('"{0}"'.format(w) for w in tags)
             new_eng.tags = t
-            jform = None
             if 'jiraform-push_to_jira' in request.POST:
                 jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=False)
 
