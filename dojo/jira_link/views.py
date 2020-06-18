@@ -35,7 +35,7 @@ def webhook(request):
 
     if request.method == 'POST':
         parsed = json.loads(request.body.decode('utf-8'))
-        if 'issue' in list(parsed.keys()):
+        if parsed.get('webhookEvent') == 'jira:issue_updated':
             jid = parsed['issue']['id']
             jissue = get_object_or_404(JIRA_Issue, jira_id=jid)
             if jissue.finding is not None:
@@ -90,7 +90,7 @@ def webhook(request):
                     eng.status = 'Completed'
                     eng.save()
            """
-        else:
+        if parsed.get('webhookEvent') == 'comment_created':
             comment_text = parsed['comment']['body']
             commentor = parsed['comment']['updateAuthor']['displayName']
             jid = parsed['comment']['self'].split('/')[7]
@@ -103,6 +103,9 @@ def webhook(request):
             finding.notes.add(new_note)
             finding.jira_change = timezone.now()
             finding.save()
+
+        if parsed.get('webhookEvent') not in ['comment_created', 'jira:issue_updated']:
+            logger.info('Unrecognized JIRA webhook event received: {}'.format(parsed.get('webhookEvent')))
     return HttpResponse('')
 
 

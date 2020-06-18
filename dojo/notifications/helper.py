@@ -10,22 +10,28 @@ logger = logging.getLogger(__name__)
 
 
 def create_notification(event=None, *args, **kwargs):
-    # System notifications
-    try:
-        system_notifications = Notifications.objects.get(user=None)
-    except Exception:
-        system_notifications = Notifications()
-
-    logger.debug('creating system notifications')
-    process_notifications(event, system_notifications, *args, **kwargs)
 
     if 'recipients' in kwargs:
-        # mimic existing code so that when recipients is specified, no other personal notifications are sent.
+        # mimic existing code so that when recipients is specified, no other system or personal notifications are sent.
         logger.debug('creating notifications for recipients')
-        for recipient_notifications in Notifications.objects.filter(user__username__in=kwargs['recipients'], user__is_active=True):
+        for recipient_notifications in Notifications.objects.filter(user__username__in=kwargs['recipients'], user__is_active=True, product=None):
             # kwargs.update({'user': recipient_notifications.user})
             process_notifications(event, recipient_notifications, *args, **kwargs)
     else:
+        logger.debug('creating system notifications')
+        # send system notifications to all admin users
+
+        # System notifications
+        try:
+            system_notifications = Notifications.objects.get(user=None)
+        except Exception:
+            system_notifications = Notifications()
+
+        admin_users = Dojo_User.objects.filter(is_staff=True)
+        for admin_user in admin_users:
+            system_notifications.user = admin_user
+            process_notifications(event, system_notifications, *args, **kwargs)
+
         # Personal but global notifications
         # only retrieve users which have at least one notification type enabled for this event type.
         logger.debug('creating personal notifications')
@@ -73,6 +79,7 @@ def create_notification_message(event, user, notification_type, *args, **kwargs)
     except Exception as e:
         logger.debug('template not found or not implemented yet: %s', template)
         kwargs["description"] = create_description(event, *args, **kwargs)
+        create_description(event, *args, **kwargs)
         notification = render_to_string('notifications/other.tpl', kwargs)
 
     return notification
@@ -87,9 +94,9 @@ def process_notifications(event, notifications=None, *args, **kwargs):
 
     sync = 'initiator' in kwargs and hasattr(kwargs['initiator'], 'usercontactinfo') and kwargs['initiator'].usercontactinfo.block_execution
 
-    logger.debug('sync: %s', sync)
+    logger.debug('sync: %s %s', sync, notifications.user)
     logger.debug('sending notifications ' + ('synchronously' if sync else 'asynchronously'))
-    logger.debug(vars(notifications))
+    # logger.debug(vars(notifications))
 
     slack_enabled = get_system_setting('enable_slack_notifications')
     hipchat_enabled = get_system_setting('enable_hipchat_notifications')
@@ -115,7 +122,6 @@ def process_notifications(event, notifications=None, *args, **kwargs):
         else:
             send_mail_notification(event, notifications.user, *args, **kwargs)
 
-    print(getattr(notifications, event, None))
     if 'alert' in getattr(notifications, event, None):
         if not sync:
             send_alert_notification_task.delay(event, notifications.user, *args, **kwargs)
