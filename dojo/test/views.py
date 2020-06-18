@@ -281,7 +281,8 @@ def add_findings(request, tid):
 
     if request.method == 'POST':
         form = AddFindingForm(request.POST)
-        if form['active'].value() is False or form['verified'].value() is False and 'jiraform-push_to_jira' in request.POST:
+        if (form['active'].value() is False or form['verified'].value() is False) \
+                and 'jiraform-push_to_jira' in request.POST:
             error = ValidationError('Findings must be active and verified to be pushed to JIRA',
                                     code='not_active_or_verified')
             if form['active'].value() is False:
