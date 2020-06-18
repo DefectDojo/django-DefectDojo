@@ -147,8 +147,6 @@ class BaseTestCase(unittest.TestCase):
         return len(elems) > 0
 
     def change_system_setting(self, id, enable=True):
-        # we set the admin user (ourselves) to have block_execution checked
-        # this will force dedupe to happen synchronously as the celeryworker is not reliable in travis
         print("changing system setting " + id + " enable: " + str(enable))
         driver = self.login_page()
         driver.get(self.base_url + 'system_settings')
@@ -176,10 +174,6 @@ class BaseTestCase(unittest.TestCase):
 
     def disable_system_setting(self, id):
         return self.change_system_setting(id, enable=False)
-
-    # def enable_block_execution(self):
-    # won't work, is on user profile instead of system settings
-    #     return self.enable_system_setting('id_block_execution')
 
     def enable_jira(self):
         return self.enable_system_setting('id_enable_jira')
