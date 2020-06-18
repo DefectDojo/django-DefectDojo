@@ -216,9 +216,6 @@ echo "Running test ${TEST}"
       docker-compose -f docker-compose.yml ps
 
       echo "run integration_test scripts"
-      # wait for containers to start from images and services to become available
-      sleep 100 # giving long enough time
-
       source ./travis/integration_test-script.sh
       ;;
     snyk)
