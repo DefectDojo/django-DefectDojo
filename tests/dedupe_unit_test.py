@@ -482,6 +482,7 @@ def suite():
     add_dedupe_tests_to_suite(suite)
     suite.addTest(DedupeTest('enable_jira'))
     suite.addTest(DedupeTest('enable_github'))
+    suite.addTest(DedupeTest('enable_block_execution'))
     add_dedupe_tests_to_suite(suite)
     return suite
 
