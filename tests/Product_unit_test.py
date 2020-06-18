@@ -384,6 +384,7 @@ def suite():
     add_product_tests_to_suite(suite)
     suite.addTest(ProductTest('enable_jira'))
     suite.addTest(ProductTest('enable_github'))
+    suite.addTest(ProductTest('enable_block_execution'))
     add_product_tests_to_suite(suite)
     return suite
 
