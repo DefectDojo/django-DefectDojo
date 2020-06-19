@@ -1791,13 +1791,25 @@ def get_slack_user_id(user_email):
 
     users = json.loads(res.text)
 
+    slack_user_is_found = False
     if users:
-        for member in users["members"]:
-            if "email" in member["profile"]:
-                if user_email == member["profile"]["email"]:
-                    if "id" in member:
-                        user_id = member["id"]
-                        break
+        if 'error' in users:
+            logger.error("Slack is complaining. See error message below.")
+            logger.error(users)
+        else:
+            for member in users["members"]:
+                if "email" in member["profile"]:
+                    if user_email == member["profile"]["email"]:
+                        if "id" in member:
+                            user_id = member["id"]
+                            logger.debug("Slack user ID is {}".format(user_id))
+                            slack_user_is_found = True
+                            break
+                    else:
+                        logger.warn("A user with email {} could not be found in this Slack workspace.".format(user_email))
+
+            if not slack_user_is_found:
+                logger.warn("The Slack user was not found.")
 
     return user_id
 

@@ -147,12 +147,14 @@ class System_Settings(models.Model):
         models.BooleanField(default=False,
                             verbose_name='Enable Slack notifications',
                             blank=False)
-    slack_channel = models.CharField(max_length=100, default='', blank=True)
+    slack_channel = models.CharField(max_length=100, default='', blank=True,
+                    help_text='Optional. Needed if you want to send global notifications.')
     slack_token = models.CharField(max_length=100, default='', blank=True,
                                    help_text='Token required for interacting '
                                              'with Slack. Get one at '
                                              'https://api.slack.com/tokens')
-    slack_username = models.CharField(max_length=100, default='', blank=True)
+    slack_username = models.CharField(max_length=100, default='', blank=True,
+                     help_text='Optional. Will take your bot name otherwise.')
     enable_hipchat_notifications = \
         models.BooleanField(default=False,
                             verbose_name='Enable HipChat notifications',
