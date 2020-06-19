@@ -15,14 +15,14 @@ import string
 
 from dojo.models import Finding, Endpoint
 
-__author__ = "Francisco Amato"
-__copyright__ = "Copyright (c) 2013, Infobyte LLC"
-__credits__ = ["Francisco Amato"]
+__author__ = "Francisco Amato & @JamesCullum"
+__copyright__ = "Copyright (c) 2013, Infobyte LLC & Panasonic Information Systems Company Europe"
+__credits__ = ["Francisco Amato", "@JamesCullum"]
 __license__ = ""
 __version__ = "1.0.0"
 __maintainer__ = "Francisco Amato"
 __email__ = "famato@infobytesec.com"
-__status__ = "Development"
+__status__ = "Production"
 
 
 class BurpXmlParser(object):
@@ -42,7 +42,10 @@ class BurpXmlParser(object):
         self.port = "80"
         self.host = None
 
-        tree = self.parse_xml(xml_output)
+        tree = None
+        if xml_output is not None:
+            tree = self.parse_xml(xml_output)
+
         if tree is not None:
             self.items = [data for data in self.get_items(tree, test)]
         else:
