@@ -43,7 +43,7 @@ For detailed documentation you can visit
 ## Supported Installation Options
 
 * [Docker / Docker Compose](DOCKER.md)
-* [Setup.bash](https://github.com/DefectDojo/django-DefectDojo/blob/master/setup/README.MD)
+* [Setup.bash](https://github.com/DefectDojo/django-DefectDojo/blob/master/setup/README.md)
 
 ## Getting Started
 
@@ -151,6 +151,7 @@ Proceeds are used for testing, infrastructure, etc.
 [![SDA-SE](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/sda-se-logo.png)](https://sda-se.com/)
 [![Signal-Iduna](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/signal-iduna.png)](https://signal-iduna.de/)
 [![WSO2](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/wso2-logo-for-screen.png)](https://wso2.com/)
+[![CloudBees](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/cloudbees-logo.png)](https://cloudbees.com/)
 
 Interested in becoming a sponsor and having your logo displayed? Please review
 our [sponsorship information](SPONSORING.md) or email greg.anderson@owasp.org

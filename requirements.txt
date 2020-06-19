@@ -1,7 +1,7 @@
 # requirements.txt for DefectDojo using Python 3.x
 asteval==0.9.18
 bleach>=3.1.0
-celery==4.4.3
+celery==4.4.5
 coverage==5.1
 defusedxml==0.6.0
 django_celery_results==1.2.1
@@ -9,7 +9,7 @@ django-auditlog==0.4.7
 git+https://github.com/DefectDojo/django-custom-field.git@4e095dd9119858e90fd21560e5618c6347e4ef1b#egg=django-custom-field
 django-dbbackup>=3.2.0
 django-environ==0.4.5
-django-filter==2.2.0
+django-filter==2.3.0
 django-imagekit==4.0.2
 django-multiselectfield==0.1.12
 django-polymorphic==2.1.2
@@ -46,15 +46,16 @@ requests>=2.22.0
 sqlalchemy  # Required by Celery broker transport
 supervisor==4.2.0
 urllib3==1.25.9
-uWSGI==2.0.18
+uWSGI==2.0.19.1
 vobject==0.9.6.1
 whitenoise>=4.1.2
-titlecase==0.12.0
+titlecase==1.1.1
 social-auth-app-django==3.4.0
 Python-jose==3.1.0
 gitpython>=2.1.13
 ptvsd>=4.2.7
-google-api-python-client==1.9.1
-google-auth==1.16.0
+google-auth==1.18.0
+google-api-python-client==1.9.3
 google-auth-oauthlib==0.4.1
 drf_yasg==1.17.1
+jsonlines==1.2.0  # requred by yarn audit parser

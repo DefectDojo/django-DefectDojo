@@ -592,11 +592,25 @@
 		"model": "dojo.test_type",
 		"pk": 176
 	},
+	{
+		"fields": {
+			"name": "Qualys Infrastructure Scan (WebGUI XML)"
+		},
+		"model": "dojo.test_type",
+		"pk": 177
+	},
+	{
+		"fields": {
+			"name": "BugCrowd "
+		},
+		"model": "dojo.test_type",
+		"pk": 178
+	},
   {
-    "fields": {
-        "name": "Qualys Infrastructure Scan (WebGUI XML)"
+		"fields": {
+		  "name": "Yarn Audit Scan"
     },
-    "model": "dojo.test_type",
-    "pk": 177
-  }
+		"model": "dojo.test_type",
+		"pk": 179
+	}
 ]

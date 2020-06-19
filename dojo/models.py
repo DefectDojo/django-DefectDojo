@@ -586,7 +586,7 @@ class Product(models.Model):
 
     created = models.DateTimeField(editable=False, null=True, blank=True)
     prod_type = models.ForeignKey(Product_Type, related_name='prod_type',
-                                  null=True, blank=True, on_delete=models.CASCADE)
+                                  null=False, blank=False, on_delete=models.CASCADE)
     updated = models.DateTimeField(editable=False, null=True, blank=True)
     tid = models.IntegerField(default=0, editable=False)
     authorized_users = models.ManyToManyField(User, blank=True)
@@ -1384,7 +1384,7 @@ class Finding(models.Model):
     sourcefile = models.TextField(null=True, blank=True, editable=False)
     param = models.TextField(null=True, blank=True, editable=False)
     payload = models.TextField(null=True, blank=True, editable=False)
-    hash_code = models.TextField(null=True, blank=True, editable=False)
+    hash_code = models.CharField(null=True, blank=True, editable=False, max_length=64)
 
     line = models.IntegerField(null=True, blank=True,
                                verbose_name="Line number",
@@ -1436,6 +1436,10 @@ class Finding(models.Model):
             models.Index(fields=['numerical_severity']),
             models.Index(fields=['date']),
             models.Index(fields=['title']),
+            models.Index(fields=['hash_code']),
+            models.Index(fields=['unique_id_from_tool']),
+            # models.Index(fields=['file_path']), # can't add index because the field has max length 4000.
+            models.Index(fields=['line']),
         ]
 
     @classmethod
@@ -1608,7 +1612,11 @@ class Finding(models.Model):
 
     def duplicate_finding_set(self):
         if self.duplicate:
-            return Finding.objects.get(id=self.duplicate_finding.id).original_finding.all().order_by('title')
+            if self.duplicate_finding is not None:
+                return Finding.objects.get(
+                    id=self.duplicate_finding.id).original_finding.all().order_by('title')
+            else:
+                return []
         else:
             return self.original_finding.all().order_by('title')
 
@@ -1695,7 +1703,7 @@ class Finding(models.Model):
         days = diff.days
         return days if days > 0 else 0
 
-    def sla(self):
+    def sla_days_remaining(self):
         sla_calculation = None
         severity = self.severity
         from dojo.utils import get_system_setting
@@ -1768,7 +1776,6 @@ class Finding(models.Model):
             return self.test.engagement.product.jira_pkey_set.all()[0].conf
         except:
             return None
-            pass
 
     # newer version that can work with prefetching due to array index isntead of first.
     def jira_pkey(self):
@@ -1794,10 +1801,10 @@ class Finding(models.Model):
 
         for e in self.endpoints.all():
             long_desc += str(e) + '\n\n'
-        long_desc += '*Description*: \n' + self.description + '\n\n'
-        long_desc += '*Mitigation*: \n' + self.mitigation + '\n\n'
-        long_desc += '*Impact*: \n' + self.impact + '\n\n'
-        long_desc += '*References*:' + self.references
+        long_desc += '*Description*: \n' + str(self.description) + '\n\n'
+        long_desc += '*Mitigation*: \n' + str(self.mitigation) + '\n\n'
+        long_desc += '*Impact*: \n' + str(self.impact) + '\n\n'
+        long_desc += '*References*:' + str(self.references)
         return long_desc
 
     def save(self, dedupe_option=True, false_history=False, rules_option=True,
@@ -1810,12 +1817,6 @@ class Finding(models.Model):
             self.jira_change = timezone.now()
             if not jira_issue_exists:
                 self.jira_creation = timezone.now()
-        # If the product has "Push_all_issues" enabled,
-        # then we're pushing this to JIRA no matter what
-        if not push_to_jira:
-            # only if there is a JIRA configuration
-            push_to_jira = self.jira_conf_new() and \
-                           self.jira_pkey().push_all_issues
 
         if self.pk is None:
             # We enter here during the first call from serializers.py
@@ -2300,10 +2301,10 @@ class JIRA_Conf(models.Model):
         return [m.strip() for m in (self.false_positive_mapping_resolution or '').split(',')]
 
     def __unicode__(self):
-        return self.url + " | " + self.username
+        return self.configuration_name + " | " + self.url + " | " + self.username
 
     def __str__(self):
-        return self.url + " | " + self.username
+        return self.configuration_name + " | " + self.url + " | " + self.username
 
     def get_priority(self, status):
         if status == 'Info':
@@ -3175,6 +3176,8 @@ admin.site.register(Cred_Mapping)
 admin.site.register(System_Settings, System_SettingsAdmin)
 admin.site.register(CWE)
 admin.site.register(Regulation)
+admin.site.register(Notifications)
+
 # Watson
 watson.register(Product)
 watson.register(Test)
