@@ -50,6 +50,9 @@ spec:
         envFrom:
         - configMapRef:
             name: {{ $fullName }}
+        - secretRef:
+            name: {{ $fullName }}-extrasecrets
+            optional: true    
         env:
         - name: DD_CELERY_BROKER_PASSWORD
           valueFrom:
@@ -66,11 +69,14 @@ spec:
               name: {{ .Values.mysql.existingSecret }}
               key: mysql-password
               {{- end }}
+<<<<<<< HEAD
         - name: DD_SECRET_KEY
           valueFrom:
             secretKeyRef:
               name: {{ $fullName }}
               key: DD_SECRET_KEY
+=======
+>>>>>>> 41f995b3... Injecting into bear and worker
         resources:
           {{- toYaml .Values.celery.worker.resources | nindent 10 }}
       {{- with .Values.celery.worker.nodeSelector }}
