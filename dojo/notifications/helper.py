@@ -78,6 +78,7 @@ def create_notification_message(event, user, notification_type, *args, **kwargs)
         notification = render_to_string(template, kwargs)
     except Exception as e:
         logger.debug('template not found or not implemented yet: %s', template)
+        kwargs["description"] = create_description(event, *args, **kwargs)
         create_description(event, *args, **kwargs)
         notification = render_to_string('notifications/other.tpl', kwargs)
 
@@ -130,25 +131,8 @@ def process_notifications(event, notifications=None, *args, **kwargs):
 
 def send_slack_notification(event, user=None, *args, **kwargs):
     from dojo.utils import get_system_setting, get_slack_user_id
-    try:
-        if user is not None:
-            if hasattr(user, 'usercontactinfo') and user.usercontactinfo.slack_username is not None:
-                slack_user_id = user.usercontactinfo.slack_user_id
-                if user.usercontactinfo.slack_user_id is None:
-                    # Lookup the slack userid
-                    slack_user_id = get_slack_user_id(
-                        user.usercontactinfo.slack_username)
-                    slack_user_save = UserContactInfo.objects.get(user_id=user.id)
-                    slack_user_save.slack_user_id = slack_user_id
-                    slack_user_save.save()
 
-                channel = '@%s' % slack_user_id
-            else:
-                # user has no slack username, skip
-                return
-        else:
-            channel = get_system_setting('slack_channel')
-
+    def _post_slack_message(channel):
         res = requests.request(
             method='POST',
             url='https://slack.com/api/chat.postMessage',
@@ -158,10 +142,42 @@ def send_slack_notification(event, user=None, *args, **kwargs):
                 'username': get_system_setting('slack_username'),
                 'text': create_notification_message(event, user, 'slack', *args, **kwargs)
             })
+
+        if 'error' in res.text:
+            logger.error("Slack is complaining. See raw text below.")
+            logger.error(res.text)
+
+    try:
+        # If the user has slack information on profile and chooses to receive slack notifications
+        # Will receive a DM
+        if user is not None:
+            if hasattr(user, 'usercontactinfo') and user.usercontactinfo.slack_username is not None:
+                slack_user_id = user.usercontactinfo.slack_user_id
+                if user.usercontactinfo.slack_user_id is None:
+                    # Lookup the slack userid the first time, then save it.
+                    slack_user_id = get_slack_user_id(
+                        user.usercontactinfo.slack_username)
+                    slack_user_save = UserContactInfo.objects.get(user_id=user.id)
+                    slack_user_save.slack_user_id = slack_user_id
+                    slack_user_save.save()
+
+                channel = '@{}'.format(slack_user_id)
+                _post_slack_message(channel)
+                # return here to avoid sending twice to the channel below
+                return
+            else:
+                logger.info("The user does not have a email address informed for Slack in profile.")
+
+        # This will trigger if slack notification somewhere is enabled
+        # e.g. System scope slack notifications, and not personal would still see this go through
+        if get_system_setting('slack_channel') is not None:
+            channel = get_system_setting('slack_channel')
+            logger.info("Sending notification to channel {}.".format(channel))
+            _post_slack_message(channel)
+
     except Exception as e:
         logger.exception(e)
         log_alert(e, *args, **kwargs)
-        pass
 
 
 def send_hipchat_notification(event, user=None, *args, **kwargs):
