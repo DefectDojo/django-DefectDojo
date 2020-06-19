@@ -40,6 +40,7 @@ annotations: {}
 # Components
 celery:
   broker: rabbitmq
+  replicas: 1
   logLevel: DEBUG
   beat:
     affinity: {}
@@ -199,4 +200,4 @@ redis:
 # Extra secrets can be created inside of extraSecrets block:
 # NOTE: This is just an exmaple, do not store sesitive data in plain text form, better inject it durring the deployment/upgrade by --set extraSecrets.secret=someSecret
 # extraSecrets:
-#  DD_SOCIAL_AUTH_AUTH0_SECRET: 'xxx'  
+#  DD_SOCIAL_AUTH_AUTH0_SECRET: 'xxx'

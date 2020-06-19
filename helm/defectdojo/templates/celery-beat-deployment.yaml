@@ -10,7 +10,7 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "defectdojo.chart" . }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.celery.beat.replicas }}
   selector:
     matchLabels:
       defectdojo.org/component: celery
