@@ -1,9 +1,13 @@
+import os.path
+
 from django.test import TestCase
 from dojo.tools.burp.parser import BurpXmlParser
 from dojo.models import Test
 
+
 def sample_path(file_name):
     return os.path.join('dojo/unittests/scans/burp', file_name)
+
 
 class TestBurpParser(TestCase):
 
@@ -16,10 +20,9 @@ class TestBurpParser(TestCase):
             parser = BurpXmlParser(test_file, Test())
 
         self.assertEqual(1, len(parser.items))
-    
+
     def test_burp_with_multiple_vulns_has_multiple_findings(self):
         with open(sample_path('seven_findings.xml')) as test_file:
             parser = BurpXmlParser(test_file, Test())
 
         self.assertEqual(7, len(parser.items))
-
