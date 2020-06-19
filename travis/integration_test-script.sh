@@ -177,8 +177,7 @@ fi
 
 if [ $celery_failures = true ] ; then
     echo "there ERRORs found in the celery worker logs, see above"
-    # for now report errors only, don't fail test as we have known errors also in 1.6.5 and dev which should not block this PR
-    # exit 1
+    exit 1
 fi
 
 exec echo "Done Running all configured integration tests."
