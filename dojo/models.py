@@ -180,7 +180,6 @@ class System_Settings(models.Model):
                                       'places, whereas if turned off '
                                       'Critical, High, Medium, etc will '
                                       'be displayed.')
-    false_positive_history = models.BooleanField(default=False, help_text="DefectDojo will automatically mark the finding as a false positive if the finding has been previously marked as a false positive.")
 
     url_prefix = models.CharField(max_length=300, default='', blank=True, help_text="URL prefix if DefectDojo is installed in it's own virtual subdirectory.")
     team_name = models.CharField(max_length=100, default='', blank=True)
@@ -1749,7 +1748,7 @@ class Finding(models.Model):
         long_desc += '*References*:' + str(self.references)
         return long_desc
 
-    def save(self, dedupe_option=True, false_history=False, rules_option=True,
+    def save(self, dedupe_option=True, rules_option=True,
              issue_updater_option=True, push_to_jira=False, *args, **kwargs):
         # Make changes to the finding before it's saved to add a CWE template
         new_finding = False
@@ -1763,7 +1762,6 @@ class Finding(models.Model):
         if self.pk is None:
             # We enter here during the first call from serializers.py
             logger.debug("Saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is None)")
-            false_history = True
             from dojo.utils import apply_cwe_to_template
             self = apply_cwe_to_template(self)
             # calling django.db.models superclass save method
@@ -1819,17 +1817,6 @@ class Finding(models.Model):
                     pass
             else:
                 deduplicationLogger.debug("skipping dedupe because it's disabled in system settings")
-        if system_settings.false_positive_history and false_history:
-            from dojo.tasks import async_false_history
-            from dojo.utils import sync_false_history
-            try:
-                if self.reporter.usercontactinfo.block_execution:
-                    sync_false_history(self, *args, **kwargs)
-                else:
-                    async_false_history.delay(self, *args, **kwargs)
-            except:
-                async_false_history.delay(self, *args, **kwargs)
-                pass
 
         # Title Casing
         from titlecase import titlecase

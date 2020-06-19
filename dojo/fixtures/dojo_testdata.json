@@ -124,7 +124,6 @@
       "enable_mail_notifications": false,
       "hipchat_token": "",
       "mail_notifications_from": "from@example.com",
-      "false_positive_history": false,
       "hipchat_site": "",
       "slack_token": "",
       "jira_minimum_severity": "High",

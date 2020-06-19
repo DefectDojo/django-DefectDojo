@@ -628,7 +628,7 @@ def import_scan_results(request, eid=None, pid=None):
                         item.active = active
                         item.verified = verified
 
-                    item.save(dedupe_option=False, false_history=True)
+                    item.save(dedupe_option=False)
 
                     if hasattr(item, 'unsaved_req_resp') and len(
                             item.unsaved_req_resp) > 0:
@@ -678,7 +678,7 @@ def import_scan_results(request, eid=None, pid=None):
 
                         item.endpoints.add(ep)
 
-                    item.save(false_history=True, push_to_jira=push_to_jira)
+                    item.save(push_to_jira=push_to_jira)
 
                     if item.unsaved_tags is not None:
                         item.tags = item.unsaved_tags

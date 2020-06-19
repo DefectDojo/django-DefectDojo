@@ -15,7 +15,7 @@ from dojo.signals import dedupe_signal
 import pdfkit
 from dojo.celery import app
 from dojo.tools.tool_issue_updater import tool_issue_updater, update_findings_from_source_issues
-from dojo.utils import sync_false_history, calculate_grade
+from dojo.utils import calculate_grade
 from dojo.reports.widgets import report_widget_factory
 from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_issue, \
                        close_epic, sync_rules, fix_loop_duplicates, \
@@ -308,12 +308,6 @@ def async_dedupe(new_finding, *args, **kwargs):
 def async_rules(new_finding, *args, **kwargs):
     logger.info("applying rules")
     sync_rules(new_finding, *args, **kwargs)
-
-
-@app.task(name='async_false_history')
-def async_false_history(new_finding, *args, **kwargs):
-    logger.info("running false_history")
-    sync_false_history(new_finding, *args, **kwargs)
 
 
 @app.task(name='tool_issue_updater')

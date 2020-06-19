@@ -336,7 +336,7 @@ def add_findings(request, tid):
                 if jform.is_valid():
                     push_to_jira = jform.cleaned_data.get('push_to_jira')
 
-            new_finding.save(false_history=True, push_to_jira=push_to_jira)
+            new_finding.save(push_to_jira=push_to_jira)
             create_notification(event='other',
                                 title='Addition of %s' % new_finding.title,
                                 description='Finding "%s" was added by %s' % (new_finding.title, request.user),
@@ -433,9 +433,9 @@ def add_temp_finding(request, tid, fid):
             # is template always False now in favor of new model Finding_Template
             # no further action needed here since this is already adding from template.
             new_finding.is_template = False
-            new_finding.save(dedupe_option=False, false_history=False)
+            new_finding.save(dedupe_option=False)
             new_finding.endpoints.set(form.cleaned_data['endpoints'])
-            new_finding.save(false_history=True)
+            new_finding.save()
             tags = request.POST.getlist('tags')
             t = ", ".join('"{0}"'.format(w) for w in tags)
             new_finding.tags = t

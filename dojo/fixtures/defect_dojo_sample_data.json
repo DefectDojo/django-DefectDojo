@@ -691,7 +691,6 @@
         "mail_notifications_from": "from@example.com",
         "mail_notifications_to": "",
         "s_finding_severity_naming": false,
-        "false_positive_history": false,
         "url_prefix": "",
         "team_name": "",
         "time_zone": "UTC",
