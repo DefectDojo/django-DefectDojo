@@ -36,6 +36,9 @@ spec:
         envFrom:
         - configMapRef:
             name: {{ $fullName }}
+        - secretRef:
+            name: {{ $fullName }}-extrasecrets
+            optional: true
         env:
         - name: DD_CELERY_BROKER_PASSWORD
           valueFrom:
