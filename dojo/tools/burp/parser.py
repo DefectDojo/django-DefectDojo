@@ -224,6 +224,12 @@ def get_item(item_node, test):
                 collab_details[0] + " request at " + collab_details[2] + \
                 " originating from " + collab_details[1] + ". "
 
+    test_product = None
+    try:
+        test_product = test.engagement.product
+    except:
+        pass
+
     try:
         dupe_endpoint = Endpoint.objects.get(
             protocol=protocol,
@@ -231,7 +237,7 @@ def get_item(item_node, test):
             path=path,
             query=None,
             fragment=None,
-            product=test.engagement.product)
+            product=test_product)
     except:
         dupe_endpoint = None
 
@@ -242,7 +248,7 @@ def get_item(item_node, test):
             path=path,
             query=None,
             fragment=None,
-            product=test.engagement.product)
+            product=test_product)
     else:
         endpoint = dupe_endpoint
 
@@ -254,14 +260,14 @@ def get_item(item_node, test):
                 path=None,
                 query=None,
                 fragment=None,
-                product=test.engagement.product)
+                product=test_product)
         except:
             dupe_endpoint = None
 
         if not dupe_endpoint:
             endpoints = [
                 endpoint,
-                Endpoint(host=ip, product=test.engagement.product)
+                Endpoint(host=ip, product=test_product)
             ]
         else:
             endpoints = [endpoint, dupe_endpoint]
