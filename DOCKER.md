@@ -70,6 +70,7 @@ For development, use:
 ```zsh
 cp dojo/settings/settings.dist.py dojo/settings/settings.py
 docker/setEnv.sh dev
+docker-compose pull
 docker-compose up
 ```
 
