@@ -95,6 +95,8 @@ def get_item(vulnerability, test):
         title = vulnerability['id'] + " - " + str(cve) + " - " + vulnerability['component']
     else:
         title = str(cve) + " - " + vulnerability['component']
+    component_name = vulnerability.get('component')
+    component_version = vulnerability.get('source_comp_id')[len(vulnerability.get('source_id', '')) + 1:]
 
     # create the finding object
     finding = Finding(
@@ -105,6 +107,8 @@ def get_item(vulnerability, test):
         severity=severity,
         description=(vulnerability['summary'] + "\n\n" + extra_desc).strip(),
         mitigation=mitigation,
+        component_name=component_name,
+        component_version=component_version,
         file_path=vulnerability.get('source_comp_id'),
         severity_justification="CVSS v3 base score: {}\nCVSS v2 base score: {}".format(cvss_v3, cvss_v2),
         static_finding=True,

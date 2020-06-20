@@ -81,9 +81,9 @@
                     </div>
                 </div>
                 {% if request.user.is_superuser %}
-                    <a href="{% url 'closed_findings' %}?mitigated=2&o=numerical_severity">
+                    <a href="{% url 'closed_findings' %}?mitigated=2&o=-mitigated">
                 {% else %}
-                    <a href="{% url 'closed_findings' %}?mitigated=2&mitigated_by={{ request.user.id }}&o=numerical_severity">
+                    <a href="{% url 'closed_findings' %}?mitigated=2&mitigated_by={{ request.user.id }}&o=-mitigated">
                 {% endif %}
                     <div class="panel-footer">
                         <span class="pull-left">View Finding Details</span>
@@ -253,7 +253,7 @@
     <script src="{% static "flot/jquery.flot.js" %}"></script>
     <script src="{% static "flot/jquery.flot.pie.js" %}"></script>
     <script src="{% static "flot/jquery.flot.time.js" %}"></script>
-    <script src="{% static "flot.tooltip/js/jquery.flot.tooltip.min.js" %}"></script>
+    <script src="{% static "jquery.flot.tooltip/js/jquery.flot.tooltip.min.js" %}"></script>
     <script src="{% static "flot/jquery.flot.stack.js" %}"></script>
     <script src="{% static "flot/jquery.flot.resize.js" %}"></script>
     {% if punchcard %}
@@ -262,7 +262,6 @@
         <script src="{% static "JUMFlot/javascripts/jquery.flot.bubbles.js" %}"></script>
     {% endif %}
     <script>
-        var highest_count = {{ highest_count }};
         $(function () {
             var options = {
                 xaxes: [{
@@ -369,6 +368,12 @@
                     grid: {
                         hoverable: true,
                     },
+                    tooltip:true,
+                    tooltipOpts: {
+                        content: function(label, xval, yval, flotItem) {
+                            return label+"<br>"+yval
+                        }
+                    }
                 });
             }
 

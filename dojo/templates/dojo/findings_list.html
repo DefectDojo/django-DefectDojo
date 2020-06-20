@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% load navigation_tags %}
 {% load display_tags %}
-{% load get_system_setting %}
 {% load static from staticfiles %}
 {% block content %}
     <div class="row">
@@ -47,26 +46,37 @@
                                     <option value="High">High</option>
                                     <option value="Critical">Critical</option>
                                 </select><br/><br/>
-                                <b>Status</b> <input id="id_status" name="status" type="checkbox" alt="Select to enable"/><br/>
+
+                                <label><b>Status</b><input id="id_bulk_status" name="status" type="checkbox" alt="Select to enable"/></label><br/>
+
                                 <label style="font-size: 80%; font-weight: normal; display: block">
-                                    <input id="id_active" name="active" type="checkbox" disabled/> <span>Active</span>
+                                    <input id="id_bulk_active" name="active" type="checkbox" disabled/> <span>Active</span>
                                 </label>
                                 <label style="font-size: 80%; font-weight: normal; display: block">
-                                    <input id="id_verified" name="verified" type="checkbox" disabled/> <span>Verified</span>
+                                    <input id="id_bulk_verified" name="verified" type="checkbox" disabled/> <span>Verified</span>
                                 </label>
                                 <label style="font-size: 80%; font-weight: normal; display: block">
-                                    <input id="id_false_p" name="false_p" type="checkbox" disabled/> <span>False Positive</span>
+                                    <input id="id_bulk_false_p" name="false_p" type="checkbox" disabled/> <span>False Positive</span>
                                 </label>
                                 <label style="font-size: 80%; font-weight: normal; display: block">
-                                    <input id="id_out_of_scope" name="out_of_scope" type="checkbox" disabled/>
+                                    <input id="id_bulk_out_of_scope" name="out_of_scope" type="checkbox" disabled/>
                                     <span>Out of scope</span>
                                 </label>
                                 <label style="font-size: 80%; font-weight: normal; display: block">
-                                    <input id="id_is_Mitigated" name="is_Mitigated" type="checkbox" disabled/>
+                                    <input id="id_bulk_is_Mitigated" name="is_Mitigated" type="checkbox" disabled/>
                                     <span>Mitigated</span>
                                 </label>
-                                {% if "enable_jira"|get_system_setting %}
-                                <b>Push to JIRA</b> <input id="id_push_tojira" name="push_to_jira" type="checkbox" alt="Select to push to JIRA"/><br/>
+                                <br/>
+                                {% if system_settings.enable_jira %}
+                                <label style="font-size: 80%; font-weight: bold; display: block">Push to Jira
+                                  <input id="id_push_tojira" name="push_to_jira" type="checkbox" alt="Select to push to JIRA"/>
+                                </label>
+                                {% endif %}
+                                {% if system_settings.enable_github %}
+                                <label style="font-size: 80%; font-weight: bold; display: block">Push to GitHub
+                                  <input id="id_push_togithub" name="push_to_github" type="checkbox" alt="Select to push to GitHub"/>
+                                </label>
+                                <br/>
                                 {% endif %}
                                 <label style="display: block">Tags</label>
                                 <label style="font-size: 80%; font-weight: normal; display: block; padding-right: 8px;">
@@ -128,16 +138,20 @@
                             <th class="nowrap">{% dojo_sort request 'Severity' 'numerical_severity' 'asc' %}</th>
                             <th class="nowrap">{% dojo_sort request 'Name' 'title' %}</th>
                             <th>CWE</th>
+                            {% if filter_name == 'Closed' %}
+                            <th class="nowrap">{% dojo_sort request 'Closed Date' 'mitigated'%}</th>
+                            {% else %}
                             <th class="nowrap">{% dojo_sort request 'Date' 'date'%}</th>
+                            {% endif %}
                             <th class="nowrap">Age</th>
-                            {% if 'enable_finding_sla'|fetch_system_setting %}
+                            {% if system_settings.enable_finding_sla %}
                             <th>SLA</th>
                             {% endif %}
                             <th>Reporter</th>
                             <th>Found By</th>
                             <th>Status</th>
                             <th>Jira</th>
-                            {% if "enable_jira"|get_system_setting %}
+                            {% if system_settings.enable_jira %}
                               {% if jira_config and product_tab or not product_tab %}
                                 <th>JIRA Age</th>
                                 <th>JIRA Change</th>
@@ -246,7 +260,7 @@
                                    </div>
                                 </td>
                                 {% endif %}
-                                <td>
+                                <td class="centered" data-order="{% severity_number_value finding.severity %}">
                                   <span class="label severity severity-{{ finding.severity }}">
                                       {{ finding.severity_display }}
                                   </span>
@@ -260,20 +274,24 @@
                                                       href="{% url 'view_finding' finding.id %}">{{ finding.id }}</a>
                                   {% endif %}
                                   {% if finding.file_path %}
-                                  <i class="fa dojo-sup fa-code has-popover" data-trigger="hover" data-content="{{ finding.file_path }}" data-placement="right" data-container="body" data-original-title="Files" title="">
+                                  <i class="fa dojo-sup fa-code has-popover" data-trigger="hover" data-content="{{ finding.file_path }}" data-placement="right" data-container="body" data-original-title="Files" title=""></i>
                                   {% else %}
                                     {% if finding.endpoints.all %}
                                       <i class="fa dojo-sup fa-sitemap has-popover" data-html="true" data-trigger="hover" data-content="
                                       {% for endpoint in finding.endpoints.all %}
                                         {{ endpoint }}<br/>
                                       {% endfor %}
-                                      " data-placement="right" data-container="body" data-original-title="Endpoints" title="">
+                                      " data-placement="right" data-container="body" data-original-title="Endpoints" title=""></i>
                                     {% endif %}
                                   {% endif %}
-                                  {% if finding.notes.all %}
-                                    <i class="fa fa-comment has-popover" data-trigger="hover" data-content="{{ finding.notes.all.0 }}" data-placement="left" data-container="body" data-original-title="Most Recent Note" title="">
+                                  {% if finding.component_name %}
+                                    <i class="fa dojo-sup fa-file has-popover" data-trigger="hover" data-placement="right"
+                                       data-content="{{ finding.component_name }} - {{ finding.component_version }}"
+                                       data-container="body" data-original-title="Component" title=""></i>
                                   {% endif %}
-                                  </i>
+                                  {% if finding.notes.all %}
+                                    <i class="fa fa-comment has-popover" data-trigger="hover" data-content="{{ finding.notes.all.0 }}" data-placement="left" data-container="body" data-original-title="Most Recent Note" title=""></i>
+                                  {% endif %}
                                     <sup>
                                         {% for tag in finding.tags %}
                                         <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
@@ -287,9 +305,13 @@
                                   </a>
                                 {% endif %}
                                 </td>
+                                {% if filter_name == 'Closed' %}
+                                <td class="nowrap">{{ finding.mitigated|date }}</td>
+                                {% else %}
                                 <td class="nowrap">{{ finding.date }}</td>
+                                {% endif %}
                                 <td>{{ finding.age }}</td>
-                                {% if 'enable_finding_sla'|fetch_system_setting %}
+                                {% if system_settings.enable_finding_sla %}
                                 <td>
                                   {{ finding|finding_sla }}
                                 </td>
@@ -302,25 +324,25 @@
                                   {% endif %}
                                 </td>
                                 <td>
-                                     {{ finding.get_found_by }}
+                                  <a target="#" data-toggle="tooltip" data-placement="bottom" title="Test: {{ finding.test }}">{{ finding.found_by.all|join:", " }}</a>
                                 </td>
                                 <td>{% if finding.under_review %}Under Review, {% endif %}{{ finding.status }}{% if finding.duplicate_finding.id %}, <a href="{% url 'view_finding' finding.duplicate_finding.id%}" data-toggle="tooltip" data-placement="top" title="{{ finding.duplicate_finding.title }}, {{ finding.duplicate_finding.created }}">Original</a>
                                   {% endif %}
                                 </td>
                                 <td class="nowrap">
-                                  {% if "enable_jira"|get_system_setting %}
-                                    {% if finding.jira.jira_key %}
-                                      <a href="{{finding.jira_conf.url}}/browse/{{finding.jira.jira_key}}" target="_blank" 
-                                           alt="Jira Bug - {{finding.jira.jira_key}}" data-toggle="tooltip" data-placement="bottom" title="{{finding.jira.jira_key}}"><i class="fa fa-bug fa-fw"></i></a>
+                                  {% if system_settings.enable_jira %}
+                                    {% if finding.has_jira_issue %}
+                                      <a href="{{finding.jira_conf_new.url}}/browse/{{finding.jira_issue.jira_key}}" target="_blank" 
+                                           alt="Jira Bug - {{finding.jira_issue.jira_key}}" data-toggle="tooltip" data-placement="bottom" title="{{finding.jira_issue.jira_key}}"><i class="fa fa-bug fa-fw"></i></a>
                                     {% endif %}
                                     {% if finding.notes.count %}
                                       <a href="{% url 'view_finding' finding.id %}#vuln_notes" alt="{{ finding.notes.count }} comment{{ finding.notes.count|pluralize }}">
                                         <span class="glyphicon glyphicon-comment"></span> {{ finding.notes.count }}
                                       </a>
-                                    {% endif %}
+                                    {% endif %}                                    
                                   {% endif %}
                                 </td>
-                                {% if "enable_jira"|get_system_setting %}
+                                {% if system_settings.enable_jira %}
                                   {% if jira_config and product_tab or not product_tab %}
                                       <td class="nowrap">
                                         {% if finding.jira_creation %}
@@ -340,7 +362,7 @@
                                 {% if show_product_column and product_tab is None %}
                                 <td><a
                                         href="{% url 'view_product' finding.test.engagement.product.id %}"
-                                        title="{{ finding.test.engagement.product }}">{{ finding.test.engagement.product }}</a>
+                                        title="{{ finding.test.engagement }}" alt="{{ finding.test.engagement.product }}">{{ finding.test.engagement.product }}</a>
                                 </td>
                                 {% endif %}
                             </tr>
@@ -352,7 +374,7 @@
                     {% include "dojo/paging_snippet.html" with page=findings page_size=True%}
                 </div>
             {% else %}
-                <p class="text-center">No findings found.</p>
+                <div id="no_findings"><p class="text-center">No findings found.</p></div>                
             {% endif %}
         </div>
     </div>
@@ -361,6 +383,91 @@
 {% endblock %}
 {% block postscript %}
     <script type="application/javascript" src="{% static "chosen/chosen.jquery.min.js" %}"></script>
+    <script type="application/javascript">
+        // DataTables Setup
+        $(document).ready(function() {
+            date =  new Date().toISOString().slice(0, 10);
+            var fileDated = 'Findings_List_' + date;
+            var buttonCommon = {
+                exportOptions: {
+                    columns: ':not(:eq(0), :eq(1))',
+                    stripHtml: true,
+                    stripNewlines: true,
+                    trim: true,
+                    orthogonal: 'export'
+                },
+                filename: fileDated,
+                title: 'Findings List'
+            };
+
+            // Mapping of table columns to objects for proper cleanup and data formatting
+            var dojoTable = $('#open_findings').DataTable({
+                drawCallback: function(){
+                      $('.has-popover').popover({'trigger':'hover'});
+                },
+                "columns": [	
+                    { "data": "checkbox" },
+                    { "data": "action" },
+                    { "data": "severity" },
+                    { "data": "finding" , render: function (data, type, row) {	
+                            return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;	
+                    }},	
+                    { "data": "cwe" },
+                    { "data": "found_date" },
+                    { "data": "finding_age" },
+                    {% if system_settings.enable_finding_sla %}	
+                    { "data": "finding_sla" },
+                    {% endif %}                    	
+                    { "data": "reported_by" },
+                    { "data": "found_by_test" }, 
+                    { "data": "status" },
+                    { "data": "jira_id" },
+                    {% if system_settings.enable_jira %}	
+                      {% if jira_config and product_tab or not product_tab %}                    	
+                        { "data": "jira_age" },
+                        { "data": "jira_change" },
+                      {% endif %}                          	
+                    {% endif %}	
+                    {% if show_product_column and product_tab is None %}	
+                        { "data": "product" },
+                    {% endif %}	
+                ],
+                order: [],
+                "columnDefs": [
+                    { 
+                        "orderable": false, "targets": [0, 1]
+                    }
+                ],
+                dom: 'Bfrtip',
+                paging: false,
+                buttons: [
+                    {
+                        extend: 'colvis',
+                        columns: ':not(.noVis)'
+                    },
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'copy'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'excel',
+                        autoFilter: true,
+                        sheetName: 'Exported data',
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'csv'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'pdf',
+                        orientation: 'landscape',
+                        pageSize: 'LETTER'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'print'
+                    }),
+                ],
+            });
+        });
+    </script>
     <script type="application/javascript">
         $(function () {
           $(".chosen-select").chosen({
@@ -401,13 +508,13 @@
             });
             check_checked_finding();
 
-            $('#id_status').on('click', function (e) {
+            $('#id_bulk_status').on('click', function (e) {
                 var checked = this.checked;
-                $('#bulk_edit_menu #id_active').prop('disabled', !checked);
-                $('#bulk_edit_menu #id_verified').prop('disabled', !checked);
-                $('#bulk_edit_menu #id_false_p').prop('disabled', !checked);
-                $('#bulk_edit_menu #id_out_of_scope').prop('disabled', !checked);
-                $('#bulk_edit_menu #id_is_Mitigated').prop('disabled', !checked);
+                $('#bulk_edit_menu #id_bulk_active').prop('disabled', !checked);
+                $('#bulk_edit_menu #id_bulk_verified').prop('disabled', !checked);
+                $('#bulk_edit_menu #id_bulk_false_p').prop('disabled', !checked);
+                $('#bulk_edit_menu #id_bulk_out_of_scope').prop('disabled', !checked);
+                $('#bulk_edit_menu #id_bulk_is_Mitigated').prop('disabled', !checked);
             })
             // Keep the dropdown menu open for selecting severity status
             $('.dropdown-menu').click(function(e) {
@@ -563,112 +670,7 @@
             };
 
         });
-    </script>
-    <script>
-        // DataTables Setup
-        $(document).ready(function() {
-            date =  new Date().toISOString().slice(0, 10);
-            var fileDated = 'Findings_List_' + date;
-            var buttonCommon = {
-                exportOptions: {
-                    columns: ':not(:eq(0), :eq(1))',
-                    stripHtml: true,
-                    stripNewlines: true,
-                    trim: true,
-                    orthogonal: 'export'
-                },
-                filename: fileDated,
-                title: 'Findings List'
-            };
 
-            // Mapping of table columns to objects for proper cleanup and data formatting
-            var dojoTable = $('#open_findings').DataTable({
-                drawCallback: function(){
-                    $('.has-popover').popover({'trigger':'hover'});
-                },
-                "columns": [
-                    { "data": "checkbox", render: function (data, type, row) {
-                            return type === 'export' ?  "" :  data;
-                    }},
-                    { "data": "action", render: function (data, type, row) {
-                            return type === 'export' ?  "" :  data;
-                    }},
-                    { "data": "severity" , render: function (data, type, row) {
-                            return type === 'export' ?  getDojoExportValueFromTag(data, 'span') :  data;
-                    }},
-                    { "data": "finding" , render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
-                    }},
-                    { "data": "cwe" , render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
-                    }},
-                    { "data": "found_date", render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
-                    }},
-                    { "data": "finding_age", render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
-                    } },
-                    { "data": "finding_sla", render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
-                    }},
-                    { "data": "reported_by", render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
-                    }},
-                    { "data": "found_by_test", render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
-                    }},
-                    { "data": "status", render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
-                    }},
-                    { "data": "jira_id", render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
-                    }},
-                    {% if "enable_jira"|get_system_setting %}
-                        { "data": "jira_age", render: function (data, type, row) {
-                                return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
-                        }},
-                        { "data": "jira_change", render: function (data, type, row) {
-                                return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
-                        }},
-                    {% endif %}
-                    {% if show_product_column and product_tab is None %}
-                        { "data": "product" , render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
-                        }},
-                    {% endif %}
-                ],
-                order: [2],
-                "columnDefs": [
-                    { "orderable": false, "targets": [0, 1] }
-                ],
-                dom: 'Bfrtip',
-                paging: false,
-                buttons: [
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'colvis'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'copyHtml5'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'excelHtml5',
-                        autoFilter: true,
-                        sheetName: 'Exported data',
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'csvHtml5'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'pdfHtml5',
-                        orientation: 'landscape',
-                        pageSize: 'LETTER'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'print'
-                    }),
-                ],
-            });
-        });
     </script>
     {% include "dojo/filter_js_snippet.html" %}
 {% endblock %}

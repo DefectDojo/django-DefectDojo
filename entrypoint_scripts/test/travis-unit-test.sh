@@ -18,7 +18,7 @@ export DD_DEBUG=True
 
 python manage.py makemigrations dojo
 python manage.py migrate
-python manage.py test dojo.unittests
+python manage.py test dojo.unittests -v 2
 
 deactivate
 

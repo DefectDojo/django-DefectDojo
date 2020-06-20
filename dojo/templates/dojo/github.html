@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load navigation_tags %}
+{% block content %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading tight">
+                    <h3 class="has-filters">
+                        Configuration List
+                        <div class="dropdown pull-right">
+                            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
+                                    data-toggle="dropdown" aria-expanded="true">
+                                <span class="fa fa-wrench"></span>
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right" role="menu"
+                                aria-labelledby="dropdownMenu1">
+                                    <li role="presentation">
+                                        <a href="{% url 'add_github' %}">
+                                            <i class="fa fa-plus"></i> Add Github Configuration
+                                        </a>
+                                    </li>
+                            </ul>
+                        </div>
+                    </h3>
+                </div>
+
+            </div>
+            {% if confs %}
+
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=confs page_size=True %}
+                </div>
+                <div class="panel panel-default table-responsive">
+                    <table id="products"
+                           class="tablesorter-bootstrap table table-bordered table-condensed table-striped">
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for conf in confs %}
+                            <tr>
+                                <td>
+                                        {{ conf.configuration_name }}
+                                </td>
+                                <td class="text-right">
+                                    <a class="text-danger" href="{% url 'delete_github' conf.id %}" >
+                                    <i class="fa fa-trash"></i> Delete
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=confs page_size=True %}
+                </div>
+            {% else %}
+                <p class="text-center">No configurations found.</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+{% block postscript %}
+    {% include "dojo/filter_js_snippet.html" %}
+{% endblock %}

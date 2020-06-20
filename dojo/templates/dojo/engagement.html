@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load navigation_tags %}
+{% load display_tags %}
 {% block content %}
     <div class="row">
         <div class="col-md-12">
@@ -51,22 +52,25 @@
                                         {% if e.active %}
 						<div class="lineContainer">
 							<a  style="display: inline" class="eng_link" href="{% url 'view_engagement' e.id %}">
-                                                {% if e.name %}{{ e.name }} {% endif %}{{ e.target_start }}</a>
+                                                {% if e.name %}{{ e.name }} {% endif %}{{ e.target_start|date }} - {{ e.target_end|date }}</a>
+                                                <sup>
+                                                    {% for tag in e.tags %}
+                                                         <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                                     {% endfor %}
+                                                </sup>                                                
+                                                {% if e.is_overdue %}<sup><div class="tag-label warning-color">{{ e.target_end|overdue }} overdue</div></sup>
+                                                {% endif %}                                                
 							| Lead: {{ e.lead.first_name }}
                                                         |
                                                         {%  for test in e.test_set.all %}
 								{% if test.lead %}
-                                                                <a href="{% url 'view_test' test.id %}"> {{ test }}: {{ test.lead.first_name }} </a> |
+                                                                <a href="{% url 'view_test' test.id %}"> {{ test }}: {{ test.lead.first_name }} ({{ test.updated|date}})</a> |
 								{% else %}
-                                                                <a href="{% url 'view_test' test.id %}"> {{ test }} </a> |
+                                                                <a href="{% url 'view_test' test.id %}"> {{ test }} ({{ test.updated|date}})</a> |
 								{% endif %}
                                                         {% endfor %}
 						</div>
-                                                <sup>
-                                                 {% for tag in e.tags %}
-                                                      <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
-                                                  {% endfor %}
-                                                </sup>
+
                                         {% endif %}
                                     {% endfor %}
                                 </td>
@@ -85,7 +89,7 @@
                     {% include "dojo/paging_snippet.html" with page=products page_size=True %}
                 </div>
             {% else %}
-                <h5> No active engagements </h5>
+                <div id="no_engagements"><h5 class="text-center"> No active engagements </h5></div>                
             {% endif %}
         </div>
     </div>

@@ -22,5 +22,5 @@ class Command(BaseCommand):
 
         for finding in findings:
             print("Checking issue:" + str(finding.id))
-            update_issue(finding, finding.status(), True)
+            update_issue(finding, True)
             print("########\n")

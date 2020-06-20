@@ -23,17 +23,24 @@ RUN pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
 FROM build AS collectstatic
 
 USER root
+ENV \
+  # This will point yarn to whatever version of node you decide to use
+  # due to the use of nodejs instead of node name in some distros
+  node="nodejs"
 RUN \
   apt-get -y update && \
   apt-get -y install apt-transport-https ca-certificates && \
-  curl -sSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add - && \
-  echo "deb https://deb.nodesource.com/node_11.x stretch main" | tee /etc/apt/sources.list.d/nodesource.list && \
+  curl -sSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add --no-tty - && \
+  curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
   curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
-  echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list && \
+  wget https://github.com/yarnpkg/yarn/releases/download/v1.21.0/yarn_1.21.0_all.deb && \
+  dpkg -i yarn_1.21.0_all.deb && \
   apt-get -y update && \
+  echo "$(yarn --version)" && \
   apt-get -y install nodejs && \
-  apt-get -y install --no-install-recommends yarn && \
+  echo "$(node --version)" && \
   apt-get clean && \
+  rm yarn_1.21.0_all.deb && \
   rm -rf /var/lib/apt/lists && \
   true
 
@@ -55,19 +62,28 @@ RUN \
   python3 manage.py collectstatic --noinput && \
   true
 
-FROM nginx:1.17.7@sha256:89a42c3ba15f09a3fbe39856bddacdf9e94cd03df7403cad4fc105088e268fc9
+FROM nginx:1.17.9@sha256:7ac7819e1523911399b798309025935a9968b277d86d50e5255465d6592c0266
 COPY --from=collectstatic /app/static/ /usr/share/nginx/html/static/
-COPY wsgi_params nginx/nginx.conf /etc/nginx/
-COPY docker/entrypoint-nginx.sh nginx/*.cer nginx/*.key /
+COPY wsgi_params nginx/nginx.conf nginx/nginx_TLS.conf /etc/nginx/
+COPY docker/entrypoint-nginx.sh /
 RUN \
+  apt-get -y update && \
+  apt-get -y install openssl && \
+  apt-get clean && \
   chmod -R g=u /var/cache/nginx && \
   chmod -R g=u /var/run && \
-  if [ -f /*.key -o -f /*.cer ]; then chown 1001 /*.key /*.cer; fi && \
+  mkdir -p /etc/nginx/ssl && \
+  chmod -R g=u /etc/nginx && \
   true
 ENV \
   DD_UWSGI_PASS="uwsgi_server" \
   DD_UWSGI_HOST="uwsgi" \
-  DD_UWSGI_PORT="3031"
+  DD_UWSGI_PORT="3031" \
+  GENERATE_TLS_CERTIFICATE="false" \
+  USE_TLS="false" \
+  NGINX_METRICS_ENABLED="false" \
+  METRICS_HTTP_AUTH_USER="" \
+  METRICS_HTTP_AUTH_PASSWORD=""
 USER 1001
 EXPOSE 8080
 ENTRYPOINT ["/entrypoint-nginx.sh"]

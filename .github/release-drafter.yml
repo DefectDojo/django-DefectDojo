@@ -1,5 +1,7 @@
-name-template: 'v$NEXT_PATCH_VERSION 🌈'
-tag-template: 'v$NEXT_PATCH_VERSION'
+name-template: '$NEXT_MINOR_VERSION 🌈'
+tag-template: '$NEXT_MINOR_VERSION'
+branches:
+  - master
 categories:
   - title: '🚀 New scanners'
     labels:
@@ -8,17 +10,23 @@ categories:
     labels:
       - 'feature'
       - 'enhancement'
+      - 'performance'
   - title: '🐛 Bug Fixes'
     labels:
       - 'fix'
       - 'bugfix'
       - 'bug'
   - title: '🧰 Maintenance'
-    labels: 
+    labels:
       - 'dependencies'
       - 'maintenance'
+  - title: '🚩 Requires settings change'
+    labels:
+      - 'settings_changes'
+  - title: '🚩 Security'
+    labels:
+      - 'security'
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 template: |
   ## Changes
-
   $CHANGES

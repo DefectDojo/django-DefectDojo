@@ -23,9 +23,16 @@ class NpmAuditParser(object):
                 tree = json.loads(str(data, 'utf-8'))
             except:
                 tree = json.loads(data)
-            subtree = tree.get('advisories')
         except:
-            raise Exception("Invalid format")
+            raise Exception("Invalid format, unable to parse json.")
+
+        if tree.get('error'):
+            error = tree.get('error')
+            code = error['code']
+            summary = error['summary']
+            raise ValueError('npm audit report contains errors: %s, %s', code, summary)
+
+        subtree = tree.get('advisories')
 
         return subtree
 
@@ -53,18 +60,33 @@ def get_item(item_node, test):
     else:
         severity = 'Info'
 
-    finding = Finding(title=item_node['title'] + " - " + "(" + item_node['module_name'] + ", " + item_node['vulnerable_versions'] + ")",
+    paths = ''
+    component_version = None
+    for npm_finding in item_node['findings']:
+        # use first version as component_version
+        component_version = npm_finding['version'] if not component_version else component_version
+        paths += "\n  - " + str(npm_finding['version']) + ":" + str(','.join(npm_finding['paths'][:25]))
+        if len(npm_finding['paths']) > 25:
+            paths += "\n  - ..... (list of paths truncated after 25 paths)"
+
+    dojo_finding = Finding(title=item_node['title'] + " - " + "(" + item_node['module_name'] + ", " + item_node['vulnerable_versions'] + ")",
                       test=test,
                       severity=severity,
-                      description=item_node['overview'] + "\n Vulnerable Module: " +
+                      file_path=item_node['findings'][0]['paths'][0],
+                      description=item_node['url'] + "\n" +
+                      item_node['overview'] + "\n Vulnerable Module: " +
                       item_node['module_name'] + "\n Vulnerable Versions: " +
                       str(item_node['vulnerable_versions']) + "\n Patched Version: " +
-                      str(item_node['patched_versions']) + "\n Vulnerable Path: " + str(item_node['findings'][0]['paths']) + "\n CWE: " +
+                      str(item_node['patched_versions']) + "\n Vulnerable Paths: " +
+                      str(paths) + "\n CWE: " +
                       str(item_node['cwe']) + "\n Access: " +
                       str(item_node['access']),
                       cwe=item_node['cwe'][4:],
+                      cve=item_node['cves'][0] if (len(item_node['cves']) > 0) else None,
                       mitigation=item_node['recommendation'],
                       references=item_node['url'],
+                      component_name=item_node['module_name'],
+                      component_version=component_version,
                       active=False,
                       verified=False,
                       false_p=False,
@@ -75,4 +97,4 @@ def get_item(item_node, test):
                       static_finding=True,
                       dynamic_finding=False)
 
-    return finding
+    return dojo_finding

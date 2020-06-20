@@ -18,7 +18,11 @@ from dojo.tools.tool_issue_updater import tool_issue_updater, update_findings_fr
 from dojo.utils import sync_false_history, calculate_grade
 from dojo.reports.widgets import report_widget_factory
 from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_issue, \
-                       close_epic, create_notification, sync_rules
+                       close_epic, sync_rules, fix_loop_duplicates, \
+                       rename_whitesource_finding, update_external_issue, add_external_issue, \
+                       close_external_issue, reopen_external_issue
+from dojo.notifications.helper import create_notification
+
 
 import logging
 fmt = getattr(settings, 'LOG_FORMAT', None)
@@ -223,6 +227,42 @@ def async_custom_pdf_report(self,
     return True
 
 
+@task(name='fix_loop_task')
+def fix_loop_task(*args, **kwargs):
+    logger.info("Executing Loop Duplicate Fix Job")
+    fix_loop_duplicates()
+
+
+@task(name='rename_whitesource_finding_task')
+def rename_whitesource_finding_task(*args, **kwargs):
+    logger.info("Executing Whitesource renaming and rehashing started.")
+    rename_whitesource_finding()
+
+
+@task(name='add_external_issue_task')
+def add_external_issue_task(find, external_issue_provider):
+    logger.info("add external issue task")
+    add_external_issue(find, external_issue_provider)
+
+
+@task(name='update_external_issue_task')
+def update_external_issue_task(find, old_status, external_issue_provider):
+    logger.info("update external issue task")
+    update_external_issue(find, old_status, external_issue_provider)
+
+
+@task(name='close_external_issue_task')
+def close_external_issue_task(find, note, external_issue_provider):
+    logger.info("close external issue task")
+    close_external_issue(find, note, external_issue_provider)
+
+
+@task(name='reopen_external_issue_task')
+def reopen_external_issue_task(find, note, external_issue_provider):
+    logger.info("reopen external issue task")
+    reopen_external_issue(find, note, external_issue_provider)
+
+
 @task(name='add_issue_task')
 def add_issue_task(find, push_to_jira):
     logger.info("add issue task")
@@ -230,9 +270,9 @@ def add_issue_task(find, push_to_jira):
 
 
 @task(name='update_issue_task')
-def update_issue_task(find, old_status, push_to_jira):
+def update_issue_task(find, push_to_jira):
     logger.info("update issue task")
-    update_issue(find, old_status, push_to_jira)
+    update_issue(find, push_to_jira)
 
 
 @task(name='add_epic_task')
@@ -291,19 +331,25 @@ def async_update_findings_from_source_issues(*args, **kwargs):
 
 @app.task(bind=True)
 def async_dupe_delete(*args, **kwargs):
-    logger.info("delete excess duplicates")
-    system_settings = System_Settings.objects.get()
-    if system_settings.delete_dupulicates:
+    try:
+        system_settings = System_Settings.objects.get()
+        enabled = system_settings.delete_dupulicates
         dupe_max = system_settings.max_dupes
+    except System_Settings.DoesNotExist:
+        enabled = False
+    if enabled:
+        logger.info("delete excess duplicates")
+        deduplicationLogger.info("delete excess duplicates")
         findings = Finding.objects \
-                .filter(duplicate_list__duplicate=True) \
-                .annotate(num_dupes=Count('duplicate_list')) \
+                .filter(original_finding__duplicate=True) \
+                .annotate(num_dupes=Count('original_finding')) \
                 .filter(num_dupes__gt=dupe_max)
         for finding in findings:
-            duplicate_list = finding.duplicate_list \
+            duplicate_list = finding.original_finding \
                     .filter(duplicate=True).order_by('date')
             dupe_count = len(duplicate_list) - dupe_max
             for finding in duplicate_list:
+                deduplicationLogger.debug('deleting finding {}:{} ({}))'.format(finding.id, finding.title, finding.hash_code))
                 finding.delete()
                 dupe_count = dupe_count - 1
                 if dupe_count == 0:

@@ -30,18 +30,21 @@ from dojo.filters import OpenFindingFilter, \
     OpenFingingSuperFilter, AcceptedFingingSuperFilter, \
     ClosedFingingSuperFilter, TemplateFindingFilter
 from dojo.forms import NoteForm, FindingNoteForm, CloseFindingForm, FindingForm, PromoteFindingForm, FindingTemplateForm, \
-    DeleteFindingTemplateForm, FindingImageFormSet, JIRAFindingForm, ReviewFindingForm, ClearFindingReviewForm, \
+    DeleteFindingTemplateForm, FindingImageFormSet, JIRAFindingForm, GITHUBFindingForm, ReviewFindingForm, ClearFindingReviewForm, \
     DefectFindingForm, StubFindingForm, DeleteFindingForm, DeleteStubFindingForm, ApplyFindingTemplateForm, \
     FindingFormID, FindingBulkUpdateForm, MergeFindings
 from dojo.models import Product_Type, Finding, Notes, NoteHistory, Note_Type, \
     Risk_Acceptance, BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, \
-    FindingImageAccessToken, JIRA_Issue, JIRA_PKey, Dojo_User, Cred_Mapping, Test, Product, User, Engagement
+    FindingImageAccessToken, JIRA_Issue, JIRA_PKey, GITHUB_PKey, GITHUB_Issue, Dojo_User, Cred_Mapping, Test, Product, User, Engagement
 from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_notifications, \
     add_comment, jira_get_resolution_id, jira_change_resolution_id, get_jira_connection, \
     get_system_setting, create_notification, apply_cwe_to_template, Product_Tab, calculate_grade, log_jira_alert
 
-from dojo.tasks import add_issue_task, update_issue_task, add_comment_task
+from dojo.tasks import add_issue_task, update_issue_task, update_external_issue_task, add_comment_task, \
+    add_external_issue_task, close_external_issue_task, reopen_external_issue_task
 from django.template.defaultfilters import pluralize
+from django.db.models.query import QuerySet
+
 
 logger = logging.getLogger(__name__)
 
@@ -131,6 +134,9 @@ def verified_findings(request, pid=None, eid=None, view=None):
         add_breadcrumb(title="Findings", top_level=not len(request.GET), request=request)
     if jira_config:
         jira_config = jira_config.conf_id
+
+    paged_findings.object_list = prefetch_for_findings(paged_findings.object_list)
+
     return render(
         request, 'dojo/findings_list.html', {
             'show_product_column': show_product_column,
@@ -232,6 +238,9 @@ def out_of_scope_findings(request, pid=None, eid=None, view=None):
         add_breadcrumb(title="Findings", top_level=not len(request.GET), request=request)
     if jira_config:
         jira_config = jira_config.conf_id
+
+    paged_findings.object_list = prefetch_for_findings(paged_findings.object_list)
+
     return render(
         request, 'dojo/findings_list.html', {
             'show_product_column': show_product_column,
@@ -333,6 +342,9 @@ def false_positive_findings(request, pid=None, eid=None, view=None):
         add_breadcrumb(title="Findings", top_level=not len(request.GET), request=request)
     if jira_config:
         jira_config = jira_config.conf_id
+
+    paged_findings.object_list = prefetch_for_findings(paged_findings.object_list)
+
     return render(
         request, 'dojo/findings_list.html', {
             'show_product_column': show_product_column,
@@ -434,6 +446,9 @@ def inactive_findings(request, pid=None, eid=None, view=None):
         add_breadcrumb(title="Findings", top_level=not len(request.GET), request=request)
     if jira_config:
         jira_config = jira_config.conf_id
+
+    paged_findings.object_list = prefetch_for_findings(paged_findings.object_list)
+
     return render(
         request, 'dojo/findings_list.html', {
             'show_product_column': show_product_column,
@@ -478,22 +493,24 @@ def open_findings(request, pid=None, eid=None, view=None):
         else:
             findings = Finding.objects.filter(active=True, duplicate=False).order_by('numerical_severity')
 
-    if request.user.is_staff:
-        findings = OpenFingingSuperFilter(
-            request.GET, queryset=findings, user=request.user, pid=pid)
-    else:
+    if not request.user.is_staff:
         findings = findings.filter(
             test__engagement__product__authorized_users__in=[request.user])
-        findings = OpenFindingFilter(
-            request.GET, queryset=findings, user=request.user, pid=pid)
 
     title_words = [
-        word for finding in findings.qs for word in finding.title.split()
+        word for finding in findings for word in finding.title.split()
         if len(word) > 2
     ]
-
     title_words = sorted(set(title_words))
-    paged_findings = get_page_items(request, findings.qs, 25)
+
+    if request.user.is_staff:
+        findings_filter = OpenFingingSuperFilter(
+            request.GET, queryset=findings, user=request.user, pid=pid)
+    else:
+        findings_filter = OpenFindingFilter(
+            request.GET, queryset=findings, user=request.user, pid=pid)
+
+    paged_findings = get_page_items(request, findings_filter.qs, 25)
 
     product_type = None
     if 'test__engagement__product__prod_type' in request.GET:
@@ -513,7 +530,7 @@ def open_findings(request, pid=None, eid=None, view=None):
 
     found_by = None
     try:
-        found_by = findings.found_by.all().distinct()
+        found_by = findings_filter.found_by.all().distinct()
     except:
         found_by = None
         pass
@@ -521,26 +538,34 @@ def open_findings(request, pid=None, eid=None, view=None):
     product_tab = None
     active_tab = None
     jira_config = None
+    github_config = None
 
     # Only show product tab view in product or engagement
     if pid:
         show_product_column = False
         product_tab = Product_Tab(pid, title="Findings", tab="findings")
         jira_config = JIRA_PKey.objects.filter(product=pid).first()
+        github_config = GITHUB_PKey.objects.filter(product=pid).first()
     elif eid and pid_local:
         show_product_column = False
         product_tab = Product_Tab(pid_local, title=eng.name, tab="engagements")
         jira_config = JIRA_PKey.objects.filter(product__engagement=eid).first()
+        github_config = GITHUB_PKey.objects.filter(product__engagement=eid).first()
     else:
         add_breadcrumb(title="Findings", top_level=not len(request.GET), request=request)
     if jira_config:
         jira_config = jira_config.conf_id
+    if github_config:
+        github_config = github_config.git_conf_id
+
+    paged_findings.object_list = prefetch_for_findings(paged_findings.object_list)
+
     return render(
         request, 'dojo/findings_list.html', {
             'show_product_column': show_product_column,
             "product_tab": product_tab,
             "findings": paged_findings,
-            "filtered": findings,
+            "filtered": findings_filter,
             "title_words": title_words,
             'found_by': found_by,
             'custom_breadcrumb': custom_breadcrumb,
@@ -548,7 +573,23 @@ def open_findings(request, pid=None, eid=None, view=None):
             'title': title,
             'tag_input': tags,
             'jira_config': jira_config,
+            'github_config': github_config,
         })
+
+
+def prefetch_for_findings(findings):
+    prefetched_findings = findings
+    if isinstance(findings, QuerySet):  # old code can arrive here with prods being a list because the query was already executed
+        prefetched_findings = prefetched_findings.select_related('reporter')
+        prefetched_findings = prefetched_findings.select_related('jira_issue')
+        prefetched_findings = prefetched_findings.prefetch_related('test__test_type')
+        prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__jira_pkey_set__conf')
+        prefetched_findings = prefetched_findings.prefetch_related('found_by')
+        prefetched_findings = prefetched_findings.prefetch_related('risk_acceptance_set')
+        # we could try to prefetch only the latest note with SubQuery and OuterRef, but I'm getting that MySql doesn't support limits in subqueries.
+        prefetched_findings = prefetched_findings.prefetch_related('notes')
+        prefetched_findings = prefetched_findings.prefetch_related('tagged_items__tag')
+    return prefetched_findings
 
 
 """
@@ -573,7 +614,9 @@ def accepted_findings(request, pid=None):
 
     product_tab = None
     if pid:
-        product_tab = Product_Tab(pid, title="Closed Findings", tab="findings")
+        product_tab = Product_Tab(pid, title="Accepted Findings", tab="findings")
+
+    paged_findings.object_list = prefetch_for_findings(paged_findings.object_list)
 
     return render(
         request, 'dojo/findings_list.html', {
@@ -595,11 +638,13 @@ def closed_findings(request, pid=None):
     ]
 
     title_words = sorted(set(title_words))
-    paged_findings = get_page_items(request, findings.qs, 25)
+    paged_findings = get_page_items(request, findings.qs.order_by('-mitigated'), 25)
 
     product_tab = None
     if pid:
         product_tab = Product_Tab(pid, title="Closed Findings", tab="findings")
+
+    paged_findings.object_list = prefetch_for_findings(paged_findings.object_list)
 
     return render(
         request, 'dojo/findings_list.html', {
@@ -647,6 +692,17 @@ def view_finding(request, fid):
         jconf = jpkey.conf
     except:
         jconf = None
+        pass
+    try:
+        gissue = GITHUB_Issue.objects.get(finding=finding)
+    except:
+        gissue = None
+        pass
+    try:
+        github_pkey = GITHUB_PKey.objects.get(product=finding.test.engagement.product)
+        gconf = github_pkey.git_conf
+    except:
+        gconf = None
         pass
     dojo_user = get_object_or_404(Dojo_User, id=user.id)
     if user.is_staff or user in finding.test.engagement.product.authorized_users.all(
@@ -719,6 +775,8 @@ def view_finding(request, fid):
             'burp_request': burp_request,
             'jissue': jissue,
             'jconf': jconf,
+            'gissue': gissue,
+            'gconf': gconf,
             'cred_finding': cred_finding,
             'creds': creds,
             'cred_engagement': cred_engagement,
@@ -749,6 +807,8 @@ def close_finding(request, fid):
     form = CloseFindingForm(missing_note_types=missing_note_types)
     if request.method == 'POST':
         form = CloseFindingForm(request.POST, missing_note_types=missing_note_types)
+
+        close_external_issue_task.delay(finding, 'Closed by defectdojo', 'github')
 
         if form.is_valid():
             now = timezone.now()
@@ -888,6 +948,8 @@ def reopen_finding(request, fid):
     finding.last_reviewed_by = request.user
     finding.save()
 
+    reopen_external_issue_task.delay(finding, 're-opened by defectdojo', 'github')
+
     messages.add_message(
         request,
         messages.SUCCESS,
@@ -969,16 +1031,29 @@ def edit_finding(request, fid):
     form.initial['tags'] = [tag.name for tag in finding.tags]
     form_error = False
     jform = None
+    jira_link_exists = False
+    push_all_issues_enabled = False
+
+    if get_system_setting('enable_jira') and finding.jira_conf_new() is not None:
+        push_all_issues_enabled = finding.test.engagement.product.jira_pkey_set.first().push_all_issues
+        jform = JIRAFindingForm(enabled=push_all_issues_enabled, prefix='jiraform')
+
     try:
         jissue = JIRA_Issue.objects.get(finding=finding)
-        enabled = True
+        jira_link_exists = True
     except:
-        enabled = False
-        pass
+        jira_link_exists = False
 
-    if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(
-            product=finding.test.engagement.product) != 0:
-        jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
+    try:
+        gissue = GITHUB_Issue.objects.get(finding=finding)
+        github_enabled = True
+    except:
+        github_enabled = False
+
+    gform = None
+    if get_system_setting('enable_github'):
+        if GITHUB_PKey.objects.filter(product=finding.test.engagement.product).exclude(git_conf_id=None):
+            gform = GITHUBFindingForm(enabled=github_enabled, prefix='githubform')
 
     if request.method == 'POST':
         form = FindingForm(request.POST, instance=finding, template=False)
@@ -1023,12 +1098,11 @@ def edit_finding(request, fid):
                 if parent_find_string:
                     parent_find = Finding.objects.get(id=int(parent_find_string.split(':')[0]))
                     new_finding.duplicate_finding = parent_find
-                    parent_find.duplicate_list.add(new_finding)
                     parent_find.found_by.add(new_finding.test.test_type)
             if not new_finding.duplicate and new_finding.duplicate_finding:
                 parent_find = new_finding.duplicate_finding
                 if parent_find.found_by is not new_finding.found_by:
-                    parent_find.duplicate_list.remove(new_finding)
+                    parent_find.original_finding.remove(new_finding)
                 parent_find.found_by.remove(new_finding.test.test_type)
                 new_finding.duplicate_finding = None
 
@@ -1041,19 +1115,38 @@ def edit_finding(request, fid):
             tags = request.POST.getlist('tags')
             t = ", ".join('"{0}"'.format(w) for w in tags)
             new_finding.tags = t
-            new_finding.save()
-            if 'jiraform-push_to_jira' in request.POST:
-                jform = JIRAFindingForm(
-                    request.POST, prefix='jiraform', enabled=enabled)
+
+            # Push to Jira?
+            push_to_jira = False
+            if push_all_issues_enabled:
+                push_to_jira = True
+            # elif 'jiraform-push_to_jira' in request.POST:
+            elif 'jiraform-push_to_jira' in request.POST:
+                jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=True)
                 if jform.is_valid():
-                    if JIRA_Issue.objects.filter(finding=new_finding).exists():
-                        update_issue_task.delay(
+                    # If we get here, this means the box got checked.
+                    # Currently, the jform is only 1 field, that checkbox.
+                    # Even though its value is 'on' and therefore should be True, it always returns False.
+                    # So putting a band-aid here to fix the issue.
+                    # Someone more knowledgeable can fix it later.
+                    # push_to_jira = jform.cleaned_data.get('push_to_jira')
+                    push_to_jira = True
+
+            if 'githubform-push_to_github' in request.POST:
+                gform = GITHUBFindingForm(
+                    request.POST, prefix='githubform', enabled=github_enabled)
+                if gform.is_valid():
+                    if GITHUB_Issue.objects.filter(finding=new_finding).exists():
+                        update_external_issue_task.delay(
                             new_finding, old_status,
-                            jform.cleaned_data.get('push_to_jira'))
+                            'github')
                     else:
-                        add_issue_task.delay(
+                        add_external_issue_task.delay(
                             new_finding,
-                            jform.cleaned_data.get('push_to_jira'))
+                            'github')
+
+            new_finding.save(push_to_jira=push_to_jira)
+
             tags = request.POST.getlist('tags')
             t = ", ".join('"{0}"'.format(w) for w in tags)
             new_finding.tags = t
@@ -1134,6 +1227,7 @@ def edit_finding(request, fid):
         'form': form,
         'finding': finding,
         'jform': jform,
+        'gform': gform,
         'dupes': finding_dupes,
     })
 
@@ -1353,6 +1447,7 @@ def choose_finding_template_options(request, tid, fid):
         'product_tab': product_tab,
         'template': template,
         'form': form,
+        'finding_tags': [tag.name for tag in finding.tags],
     })
 
 
@@ -1479,17 +1574,12 @@ def promote_to_finding(request, fid):
     test = finding.test
     form_error = False
     jira_available = False
+    enabled = False
+    jform = None
 
-    if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(
-            product=test.engagement.product) != 0:
-        jform = JIRAFindingForm(
-            request.POST,
-            prefix='jiraform',
-            enabled=JIRA_PKey.objects.get(
-                product=test.engagement.product).push_all_issues)
-        # jira_available = True
-    else:
-        jform = None
+    if get_system_setting('enable_jira') and test.engagement.product.jira_pkey_set.first() is not None:
+        enabled = test.engagement.product.jira_pkey_set.first().push_all_issues
+        jform = JIRAFindingForm(prefix='jiraform', enabled=enabled)
 
     product_tab = Product_Tab(finding.test.engagement.product.id, title="Promote Finding", tab="findings")
 
@@ -1521,18 +1611,31 @@ def promote_to_finding(request, fid):
 
             new_finding.save()
             new_finding.endpoints.set(form.cleaned_data['endpoints'])
-            new_finding.save()
 
-            finding.delete()
-            if 'jiraform' in request.POST:
-                jform = JIRAFindingForm(
-                    request.POST,
-                    prefix='jiraform',
-                    enabled=JIRA_PKey.objects.get(
-                        product=test.engagement.product).push_all_issues)
+            # Push to Jira?
+            push_to_jira = False
+            if enabled:
+                push_to_jira = True
+            elif 'jiraform-push_to_jira' in request.POST:
+                jform = JIRAFindingForm(request.POST, prefix='jiraform',
+                                        enabled=enabled)
                 if jform.is_valid():
-                    add_issue_task.delay(
-                        new_finding, jform.cleaned_data.get('push_to_jira'))
+                    push_to_jira = jform.cleaned_data.get('push_to_jira')
+
+            # Save it and push it to JIRA
+            new_finding.save(push_to_jira=push_to_jira)
+
+            # Delete potential finding
+            finding.delete()
+            if 'githubform' in request.POST:
+                gform = GITHUBFindingForm(
+                    request.POST,
+                    prefix='githubform',
+                    enabled=GITHUB_PKey.objects.get(
+                        product=test.engagement.product).push_all_issues)
+                if gform.is_valid():
+                    add_external_issue_task.delay(
+                        new_finding, 'github')
 
             messages.add_message(
                 request,
@@ -1561,6 +1664,7 @@ def promote_to_finding(request, fid):
             'test': test,
             'stub_finding': finding,
             'form_error': form_error,
+            'jform': jform,
         })
 
 
@@ -2045,6 +2149,19 @@ def finding_bulk_update_all(request, pid=None):
                                  is_Mitigated=form.cleaned_data['is_Mitigated'],
                                  last_reviewed=timezone.now(),
                                  last_reviewed_by=request.user)
+
+                if form.cleaned_data['push_to_github']:
+                    logger.info('push selected findings to github')
+                    finds = Finding.objects.filter(id__in=finding_to_update)
+                    for finding in finds:
+                        print('will push to GitHub finding: ' + str(finding))
+                        old_status = finding.status()
+                        if form.cleaned_data['push_to_github']:
+                            if GITHUB_Issue.objects.filter(finding=finding).exists():
+                                update_issue_task.delay(finding, old_status, True)
+                            else:
+                                add_external_issue_task.delay(finding, 'github')
+
                 if form.cleaned_data['tags']:
                     for finding in finds:
                         tags = request.POST.getlist('tags')
@@ -2060,16 +2177,20 @@ def finding_bulk_update_all(request, pid=None):
                             prev_prod = finding.test.engagement.product.id
 
                 for finding in finds:
-                    from dojo.tasks import async_tool_issue_updater
-                    async_tool_issue_updater.delay(finding)
+                    from dojo.tools import tool_issue_updater
+                    tool_issue_updater.async_tool_issue_update(finding)
 
-                    if JIRA_PKey.objects.filter(product=finding.test.engagement.product).count() == 0:
+                    # Because we never call finding.save() in a bulk update, we need to actually
+                    # push the JIRA stuff here, rather than in finding.save()
+                    if finding.jira_conf_new() is None:
                         log_jira_alert('Finding cannot be pushed to jira as there is no jira configuration for this product.', finding)
                     else:
-                        old_status = finding.status()
-                        if form.cleaned_data['push_to_jira']:
+                        push_anyway = finding.jira_conf_new().jira_pkey_set.first().push_all_issues
+                        # push_anyway = JIRA_PKey.objects.get(
+                        #     product=finding.test.engagement.product).push_all_issues
+                        if form.cleaned_data['push_to_jira'] or push_anyway:
                             if JIRA_Issue.objects.filter(finding=finding).exists():
-                                update_issue_task.delay(finding, old_status, True)
+                                update_issue_task.delay(finding, True)
                             else:
                                 add_issue_task.delay(finding, True)
 
@@ -2133,7 +2254,6 @@ def mark_finding_duplicate(request, original_id, duplicate_id):
     duplicate.last_reviewed = timezone.now()
     duplicate.last_reviewed_by = request.user
     duplicate.save()
-    original.duplicate_list.add(duplicate)
     original.found_by.add(duplicate.test.test_type)
     original.save()
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
@@ -2146,7 +2266,7 @@ def reset_finding_duplicate_status(request, duplicate_id):
     duplicate.duplicate = False
     duplicate.active = True
     if duplicate.duplicate_finding:
-        duplicate.duplicate_finding.duplicate_list.remove(duplicate)
+        duplicate.duplicate_finding.original_finding.remove(duplicate)
         duplicate.duplicate_finding = None
     duplicate.last_reviewed = timezone.now()
     duplicate.last_reviewed_by = request.user

@@ -1,0 +1,2034 @@
+{
+    "findings": {
+        "commandinjection": [
+            {
+                "service_type": "commandinjection",
+                "finding_description_slug": "command-injection",
+                "information": "Found command injection in parameter \"ip\" with method \"post\" for URL \"https://dvwa.dev.crashtest.cloud/vulnerabilities/exec/\", with payload \"; echo crashtest-security$((12*12))\"",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T22:29:41.770703Z"
+            }
+        ],
+        "csrf": [],
+        "cve": [],
+        "deserialization": [
+            {
+                "service_type": "deserialization",
+                "finding_description_slug": "insecure-deserialization",
+                "information": "Found insecure deserialization for method \"get\" with parameter \"data\" on \"https://dvwa.dev.crashtest.cloud/vulnerabilities/deserialize/\" with payload \"phpinfo();\"",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T22:26:56.842838Z"
+            }
+        ],
+        "fileinclusion": [
+            {
+                "service_type": "fileinclusion",
+                "finding_description_slug": "local-file-inclusion",
+                "information": "Found file inclusion with method \"get\" for parameter \"page\" on \"https://dvwa.dev.crashtest.cloud/vulnerabilities/fi/.\" with payload \"/etc/passwd\"",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T21:28:48.623009Z"
+            }
+        ],
+        "fingerprinting": [
+            {
+                "service_type": "fingerprinting",
+                "finding_description_slug": "fingerprint-web-application-framework",
+                "information": "Found PHP running in version 5.5.9.",
+                "cve_findings": [
+                    {
+                        "authentication": "NONE",
+                        "availability": "PARTIAL",
+                        "complexity": "LOW",
+                        "confidentiality": "PARTIAL",
+                        "cve_id": "CVE-2016-4072",
+                        "cvss": 7.5,
+                        "information": "The Phar extension in PHP before 5.5.34, 5.6.x before 5.6.20, and 7.x before 7.0.5 allows remote attackers to execute arbitrary code via a crafted filename, as demonstrated by mishandling of \\0 characters by the phar_analyze_path function in ext/phar/phar.c.",
+                        "integrity": "PARTIAL",
+                        "product": "php",
+                        "vector": "NETWORK",
+                        "version": "5.5.9"
+                    },
+                    {
+                        "authentication": "NONE",
+                        "availability": "PARTIAL",
+                        "complexity": "LOW",
+                        "confidentiality": "PARTIAL",
+                        "cve_id": "CVE-2016-4073",
+                        "cvss": 7.5,
+                        "information": "Multiple integer overflows in the mbfl_strcut function in ext/mbstring/libmbfl/mbfl/mbfilter.c in PHP before 5.5.34, 5.6.x before 5.6.20, and 7.x before 7.0.5 allow remote attackers to cause a denial of service (application crash) or possibly execute arbitrary code via a crafted mb_strcut call.",
+                        "integrity": "PARTIAL",
+                        "product": "php",
+                        "vector": "NETWORK",
+                        "version": "5.5.9"
+                    },
+                    {
+                        "authentication": "NONE",
+                        "availability": "COMPLETE",
+                        "complexity": "LOW",
+                        "confidentiality": "COMPLETE",
+                        "cve_id": "CVE-2014-0185",
+                        "cvss": 7.2,
+                        "information": "sapi/fpm/fpm/fpm_unix.c in the FastCGI Process Manager (FPM) in PHP before 5.4.28 and 5.5.x before 5.5.12 uses 0666 permissions for the UNIX socket, which allows local users to gain privileges via a crafted FastCGI client.",
+                        "integrity": "COMPLETE",
+                        "product": "php",
+                        "vector": "LOCAL",
+                        "version": "5.5.9"
+                    }
+                ],
+                "product": "PHP",
+                "version": "5.5.9",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:15:24.569411Z"
+            },
+            {
+                "service_type": "fingerprinting",
+                "finding_description_slug": "fingerprint-web-server",
+                "information": "The webserver is running Apache 2.4.7",
+                "cve_findings": [
+                    {
+                        "authentication": "NONE",
+                        "availability": "PARTIAL",
+                        "complexity": "MEDIUM",
+                        "confidentiality": "PARTIAL",
+                        "cve_id": "CVE-2018-1312",
+                        "cvss": 6.8,
+                        "information": "In Apache httpd 2.2.0 to 2.4.29, when generating an HTTP Digest authentication challenge, the nonce sent to prevent reply attacks was not correctly generated using a pseudo-random seed. In a cluster of servers using a common Digest authentication configuration, HTTP requests could be replayed across servers by an attacker without detection.",
+                        "integrity": "PARTIAL",
+                        "product": "apache",
+                        "vector": "NETWORK",
+                        "version": "2.4.7"
+                    },
+                    {
+                        "authentication": "NONE",
+                        "availability": "NONE",
+                        "complexity": "MEDIUM",
+                        "confidentiality": "NONE",
+                        "cve_id": "CVE-2014-8109",
+                        "cvss": 4.3,
+                        "information": "mod_lua.c in the mod_lua module in the Apache HTTP Server 2.3.x and 2.4.x through 2.4.10 does not support an httpd configuration in which the same Lua authorization provider is used with different arguments within different contexts, which allows remote attackers to bypass intended access restrictions in opportunistic circumstances by leveraging multiple Require directives, as demonstrated by a configuration that specifies authorization for one group to access a certain directory, and authorization for a second group to access a second directory.",
+                        "integrity": "PARTIAL",
+                        "product": "apache",
+                        "vector": "NETWORK",
+                        "version": "2.4.7"
+                    },
+                    {
+                        "authentication": "NONE",
+                        "availability": "NONE",
+                        "complexity": "MEDIUM",
+                        "confidentiality": "NONE",
+                        "cve_id": "CVE-2015-3185",
+                        "cvss": 4.3,
+                        "information": "The ap_some_auth_required function in server/request.c in the Apache HTTP Server 2.4.x before 2.4.14 does not consider that a Require directive may be associated with an authorization setting rather than an authentication setting, which allows remote attackers to bypass intended access restrictions in opportunistic circumstances by leveraging the presence of a module that relies on the 2.2 API behavior.",
+                        "integrity": "PARTIAL",
+                        "product": "apache",
+                        "vector": "NETWORK",
+                        "version": "2.4.7"
+                    },
+                    {
+                        "authentication": "NONE",
+                        "availability": "NONE",
+                        "complexity": "LOW",
+                        "confidentiality": "PARTIAL",
+                        "cve_id": "CVE-2016-0736",
+                        "cvss": 5,
+                        "information": "In Apache HTTP Server versions 2.4.0 to 2.4.23, mod_session_crypto was encrypting its data/cookie using the configured ciphers with possibly either CBC or ECB modes of operation (AES256-CBC by default), hence no selectable or builtin authenticated encryption. This made it vulnerable to padding oracle attacks, particularly with CBC.",
+                        "integrity": "NONE",
+                        "product": "apache",
+                        "vector": "NETWORK",
+                        "version": "2.4.7"
+                    },
+                    {
+                        "authentication": "NONE",
+                        "availability": "PARTIAL",
+                        "complexity": "LOW",
+                        "confidentiality": "NONE",
+                        "cve_id": "CVE-2016-2161",
+                        "cvss": 5,
+                        "information": "In Apache HTTP Server versions 2.4.0 to 2.4.23, malicious input to mod_auth_digest can cause the server to crash, and each instance continues to crash even for subsequently valid requests.",
+                        "integrity": "NONE",
+                        "product": "apache",
+                        "vector": "NETWORK",
+                        "version": "2.4.7"
+                    },
+                    {
+                        "authentication": "NONE",
+                        "availability": "PARTIAL",
+                        "complexity": "MEDIUM",
+                        "confidentiality": "PARTIAL",
+                        "cve_id": "CVE-2017-15715",
+                        "cvss": 6.8,
+                        "information": "In Apache httpd 2.4.0 to 2.4.29, the expression specified in <FilesMatch> could match '$' to a newline character in a malicious filename, rather than matching only the end of the filename. This could be exploited in environments where uploads of some files are are externally blocked, but only by matching the trailing portion of the filename.",
+                        "integrity": "PARTIAL",
+                        "product": "apache",
+                        "vector": "NETWORK",
+                        "version": "2.4.7"
+                    },
+                    {
+                        "authentication": "SINGLE",
+                        "availability": "NONE",
+                        "complexity": "MEDIUM",
+                        "confidentiality": "NONE",
+                        "cve_id": "CVE-2018-1283",
+                        "cvss": 3.5,
+                        "information": "In Apache httpd 2.4.0 to 2.4.29, when mod_session is configured to forward its session data to CGI applications (SessionEnv on, not the default), a remote user may influence their content by using a \"Session\" header. This comes from the \"HTTP_SESSION\" variable name used by mod_session to forward its data to CGIs, since the prefix \"HTTP_\" is also used by the Apache HTTP Server to pass HTTP header fields, per CGI specifications.",
+                        "integrity": "PARTIAL",
+                        "product": "apache",
+                        "vector": "NETWORK",
+                        "version": "2.4.7"
+                    },
+                    {
+                        "authentication": "NONE",
+                        "availability": "NONE",
+                        "complexity": "LOW",
+                        "confidentiality": "NONE",
+                        "cve_id": "CVE-2018-17199",
+                        "cvss": 5,
+                        "information": "In Apache HTTP Server 2.4 release 2.4.37 and prior, mod_session checks the session expiry time before decoding the session. This causes session expiry time to be ignored for mod_session_cookie sessions since the expiry time is loaded when the session is decoded.",
+                        "integrity": "PARTIAL",
+                        "product": "apache",
+                        "vector": "NETWORK",
+                        "version": "2.4.7"
+                    },
+                    {
+                        "authentication": "SINGLE",
+                        "availability": "PARTIAL",
+                        "complexity": "MEDIUM",
+                        "confidentiality": "PARTIAL",
+                        "cve_id": "CVE-2019-0217",
+                        "cvss": 6,
+                        "information": "In Apache HTTP Server 2.4 release 2.4.38 and prior, a race condition in mod_auth_digest when running in a threaded server could allow a user with valid credentials to authenticate using another username, bypassing configured access control restrictions.",
+                        "integrity": "PARTIAL",
+                        "product": "apache",
+                        "vector": "NETWORK",
+                        "version": "2.4.7"
+                    },
+                    {
+                        "authentication": "NONE",
+                        "availability": "NONE",
+                        "complexity": "LOW",
+                        "confidentiality": "PARTIAL",
+                        "cve_id": "CVE-2019-0220",
+                        "cvss": 5,
+                        "information": "A vulnerability was found in Apache HTTP Server 2.4.0 to 2.4.38. When the path component of a request URL contains multiple consecutive slashes ('/'), directives such as LocationMatch and RewriteRule must account for duplicates in regular expressions while other aspects of the servers processing will implicitly collapse them.",
+                        "integrity": "NONE",
+                        "product": "apache",
+                        "vector": "NETWORK",
+                        "version": "2.4.7"
+                    },
+                    {
+                        "authentication": "NONE",
+                        "availability": "NONE",
+                        "complexity": "MEDIUM",
+                        "confidentiality": "NONE",
+                        "cve_id": "CVE-2019-10092",
+                        "cvss": 4.3,
+                        "information": "In Apache HTTP Server 2.4.0-2.4.39, a limited cross-site scripting issue was reported affecting the mod_proxy error page. An attacker could cause the link on the error page to be malformed and instead point to a page of their choice. This would only be exploitable where a server was set up with proxying enabled but was misconfigured in such a way that the Proxy Error page was displayed.",
+                        "integrity": "PARTIAL",
+                        "product": "apache",
+                        "vector": "NETWORK",
+                        "version": "2.4.7"
+                    },
+                    {
+                        "authentication": "NONE",
+                        "availability": "NONE",
+                        "complexity": "MEDIUM",
+                        "confidentiality": "PARTIAL",
+                        "cve_id": "CVE-2019-10098",
+                        "cvss": 5.8,
+                        "information": "In Apache HTTP server 2.4.0 to 2.4.39, Redirects configured with mod_rewrite that were intended to be self-referential might be fooled by encoded newlines and redirect instead to an unexpected URL within the request URL.",
+                        "integrity": "PARTIAL",
+                        "product": "apache",
+                        "vector": "NETWORK",
+                        "version": "2.4.7"
+                    },
+                    {
+                        "authentication": "NONE",
+                        "availability": "NONE",
+                        "complexity": "LOW",
+                        "confidentiality": "PARTIAL",
+                        "cve_id": "CVE-2015-3184",
+                        "cvss": 5,
+                        "information": "mod_authz_svn in Apache Subversion 1.7.x before 1.7.21 and 1.8.x before 1.8.14, when using Apache httpd 2.4.x, does not properly restrict anonymous access, which allows remote anonymous users to read hidden files via the path name.",
+                        "integrity": "NONE",
+                        "product": "apache",
+                        "vector": "NETWORK",
+                        "version": "2.4.7"
+                    },
+                    {
+                        "authentication": "NONE",
+                        "availability": "NONE",
+                        "complexity": "LOW",
+                        "confidentiality": "NONE",
+                        "cve_id": "CVE-2016-8743",
+                        "cvss": 5,
+                        "information": "Apache HTTP Server, in all releases prior to 2.2.32 and 2.4.25, was liberal in the whitespace accepted from requests and sent in response lines and headers. Accepting these different behaviors represented a security concern when httpd participates in any chain of proxies or interacts with back-end application servers, either through mod_proxy or using conventional CGI mechanisms, and may result in request smuggling, response splitting and cache pollution.",
+                        "integrity": "PARTIAL",
+                        "product": "apache",
+                        "vector": "NETWORK",
+                        "version": "2.4.7"
+                    },
+                    {
+                        "authentication": "NONE",
+                        "availability": "PARTIAL",
+                        "complexity": "LOW",
+                        "confidentiality": "NONE",
+                        "cve_id": "CVE-2017-15710",
+                        "cvss": 5,
+                        "information": "In Apache httpd 2.0.23 to 2.0.65, 2.2.0 to 2.2.34, and 2.4.0 to 2.4.29, mod_authnz_ldap, if configured with AuthLDAPCharsetConfig, uses the Accept-Language header value to lookup the right charset encoding when verifying the user's credentials. If the header value is not present in the charset conversion table, a fallback mechanism is used to truncate it to a two characters value to allow a quick retry (for example, 'en-US' is truncated to 'en'). A header value of less than two characters forces an out of bound write of one NUL byte to a memory location that is not part of the string. In the worst case, quite unlikely, the process would crash which could be used as a Denial of Service attack. In the more likely case, this memory is already reserved for future use and the issue has no effect at all.",
+                        "integrity": "NONE",
+                        "product": "apache",
+                        "vector": "NETWORK",
+                        "version": "2.4.7"
+                    },
+                    {
+                        "authentication": "NONE",
+                        "availability": "PARTIAL",
+                        "complexity": "LOW",
+                        "confidentiality": "NONE",
+                        "cve_id": "CVE-2014-3523",
+                        "cvss": 5,
+                        "information": "Memory leak in the winnt_accept function in server/mpm/winnt/child.c in the WinNT MPM in the Apache HTTP Server 2.4.x before 2.4.10 on Windows, when the default AcceptFilter is enabled, allows remote attackers to cause a denial of service (memory consumption) via crafted requests.",
+                        "integrity": "NONE",
+                        "product": "apache",
+                        "vector": "NETWORK",
+                        "version": "2.4.7"
+                    },
+                    {
+                        "authentication": "NONE",
+                        "availability": "PARTIAL",
+                        "complexity": "MEDIUM",
+                        "confidentiality": "NONE",
+                        "cve_id": "CVE-2014-0117",
+                        "cvss": 4.3,
+                        "information": "The mod_proxy module in the Apache HTTP Server 2.4.x before 2.4.10, when a reverse proxy is enabled, allows remote attackers to cause a denial of service (child-process crash) via a crafted HTTP Connection header. Per vendor advisory http://httpd.apache.org/security/vulnerabilities_24.html\n\"A flaw was found in mod_proxy in httpd versions 2.4.6 to 2.4.9.\"",
+                        "integrity": "NONE",
+                        "product": "apache",
+                        "vector": "NETWORK",
+                        "version": "2.4.7"
+                    }
+                ],
+                "product": "Apache",
+                "version": "2.4.7",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:15:24.569411Z"
+            }
+        ],
+        "fuzzer": [
+            {
+                "service_type": "fuzzer",
+                "finding_description_slug": "fuzzer",
+                "information": "Retrieved https://dvwa.dev.crashtest.cloud/about.php by using a GET request on the URL without prior knowledge.",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:15:30.323619Z"
+            },
+            {
+                "service_type": "fuzzer",
+                "finding_description_slug": "fuzzer",
+                "information": "Retrieved https://dvwa.dev.crashtest.cloud/CHANGELOG.md by using a GET request on the URL without prior knowledge.",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:15:30.323619Z"
+            },
+            {
+                "service_type": "fuzzer",
+                "finding_description_slug": "fuzzer",
+                "information": "Retrieved https://dvwa.dev.crashtest.cloud/config/ by using a GET request on the URL without prior knowledge.",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:15:30.323619Z"
+            },
+            {
+                "service_type": "fuzzer",
+                "finding_description_slug": "fuzzer",
+                "information": "Retrieved https://dvwa.dev.crashtest.cloud/docs/ by using a GET request on the URL without prior knowledge.",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:15:30.323619Z"
+            },
+            {
+                "service_type": "fuzzer",
+                "finding_description_slug": "fuzzer",
+                "information": "Retrieved https://dvwa.dev.crashtest.cloud/.git/ by using a GET request on the URL without prior knowledge.",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:15:30.32362Z"
+            },
+            {
+                "service_type": "fuzzer",
+                "finding_description_slug": "fuzzer",
+                "information": "Retrieved https://dvwa.dev.crashtest.cloud/instructions.php by using a GET request on the URL without prior knowledge.",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:15:30.32362Z"
+            },
+            {
+                "service_type": "fuzzer",
+                "finding_description_slug": "fuzzer",
+                "information": "Retrieved https://dvwa.dev.crashtest.cloud/phpinfo.php by using a GET request on the URL without prior knowledge.",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:15:30.32362Z"
+            },
+            {
+                "service_type": "fuzzer",
+                "finding_description_slug": "fuzzer",
+                "information": "Retrieved https://dvwa.dev.crashtest.cloud/php.ini by using a GET request on the URL without prior knowledge.",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:15:30.32362Z"
+            },
+            {
+                "service_type": "fuzzer",
+                "finding_description_slug": "fuzzer",
+                "information": "Retrieved https://dvwa.dev.crashtest.cloud/README.md by using a GET request on the URL without prior knowledge.",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:15:30.32362Z"
+            },
+            {
+                "service_type": "fuzzer",
+                "finding_description_slug": "fuzzer",
+                "information": "Retrieved https://dvwa.dev.crashtest.cloud/setup.php by using a GET request on the URL without prior knowledge.",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:15:30.32362Z"
+            }
+        ],
+        "portscan": [
+            {
+                "service_type": "portscan",
+                "finding_description_slug": "portscan",
+                "information": "Found open port \"80/tcp\" with service name \"Apache httpd\"",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:15:36.792873Z"
+            },
+            {
+                "service_type": "portscan",
+                "finding_description_slug": "portscan",
+                "information": "Found open port \"443/tcp\" with service name \"Apache httpd\"",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:15:36.792874Z"
+            }
+        ],
+        "sqlinjection": [
+            {
+                "service_type": "sqlinjection",
+                "finding_description_slug": "sql-injection",
+                "information": "Found boolean-based blind sqlinjection for parameter id (GET) on https://dvwa.dev.crashtest.cloud/vulnerabilities/sqli/ with payload Submit=Submit&id=xyz' AND 4685=4685 AND 'tSYr'='tSYr",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T21:20:46.651287Z"
+            },
+            {
+                "service_type": "sqlinjection",
+                "finding_description_slug": "sql-injection",
+                "information": "Found boolean-based blind sqlinjection for parameter username (GET) on https://dvwa.dev.crashtest.cloud/vulnerabilities/brute/ with payload Login=Login&password=Crashtest123!&username=-4028' OR 8531=8531 AND 'sbti'='sbti",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T21:56:48.138785Z"
+            }
+        ],
+        "ssl": [
+            {
+                "service_type": "ssl",
+                "finding_description_slug": "ssl-sweet32",
+                "information": "64 bit block ciphers are used which are vulnerable to SWEET32 birthday attack. 3DES ciphers should be disabled.",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:23:19.022658Z"
+            },
+            {
+                "service_type": "ssl",
+                "finding_description_slug": "ssl-poodle-ssl",
+                "information": "The detected SSL version is vulnerable to SSL POODLE",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:23:19.022658Z"
+            },
+            {
+                "service_type": "ssl",
+                "finding_description_slug": "ssl-protocol-version",
+                "information": "TLS 1.1 is offered by the server. This version of TLS is deprecated. You should use TLS 1.2 or TLS 1.3",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:23:19.022659Z"
+            },
+            {
+                "service_type": "ssl",
+                "finding_description_slug": "ssl-order",
+                "information": "There is no cipher order configured. There should be a cipher order from strongest to weakest to prevent clients from using weaker ciphers before trying stronger ones first.",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:23:19.022659Z"
+            },
+            {
+                "service_type": "ssl",
+                "finding_description_slug": "ssl-protocol-version",
+                "information": "SSLv3 is offered by the server. SSLv3 is insecure and should not be used. TLS 1.2 or TLS 1.3 should be used instead.",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:23:19.022659Z"
+            },
+            {
+                "service_type": "ssl",
+                "finding_description_slug": "ssl-trust",
+                "information": "The CN or SAN in the certificate does not match the tested URL",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:23:19.022659Z"
+            },
+            {
+                "service_type": "ssl",
+                "finding_description_slug": "ssl-cookie-httponly",
+                "information": "The cookie with the name PHPSESSID does not have the flag httponly set. This may leak sensitive information. This was found on URL https://dvwa.dev.crashtest.cloud/.",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:23:19.022659Z"
+            },
+            {
+                "service_type": "ssl",
+                "finding_description_slug": "ssl-cookie-secure",
+                "information": "The cookie with the name PHPSESSID does not have the flag secure set. This may leak sensitive information. This was found on URL https://dvwa.dev.crashtest.cloud/.",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:23:19.022659Z"
+            },
+            {
+                "service_type": "ssl",
+                "finding_description_slug": "ssl-rc4",
+                "information": "The detected cipher uses the encryption algorithm RC4 which is vulnerable for various attacks",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:23:19.022659Z"
+            },
+            {
+                "service_type": "ssl",
+                "finding_description_slug": "ssl-cipherlist-average",
+                "information": "The server is configured to use average ciphers like SEED + 128+256 Bit CBC ciphers (AES, CAMELLIA and ARIA) which are deprecated",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:23:19.022659Z"
+            },
+            {
+                "service_type": "ssl",
+                "finding_description_slug": "ssl-crl-ocsp",
+                "information": "Neither CRL nor OCSP URI provided",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:23:19.022659Z"
+            },
+            {
+                "service_type": "ssl",
+                "finding_description_slug": "ssl-cbc-ssl3",
+                "information": "BEAST SSL3: The BEAST attack leverages weakness in the cipher block chaining (CBC) which allows man in the middle attacks.",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:23:19.022659Z"
+            },
+            {
+                "service_type": "ssl",
+                "finding_description_slug": "ssl-trust",
+                "information": "There is no subject alt name defined. Browsers are complaining.",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:23:19.022659Z"
+            },
+            {
+                "service_type": "ssl",
+                "finding_description_slug": "ssl-general",
+                "information": "The cipher that got negotiated (DHE-RSA-AES256-SHA256, 1024 bit DH (cbc)  (matching cipher in list missing)) could not be found in the list of ciphers that the server advertised",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:23:19.022659Z"
+            },
+            {
+                "service_type": "ssl",
+                "finding_description_slug": "ssl-algorithm",
+                "information": "Weak signature algorithm MD5 is used. You should use SHA-256, SHA-384 or SHA-512 instead",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:23:19.022659Z"
+            },
+            {
+                "service_type": "ssl",
+                "finding_description_slug": "ssl-cipherlist-low",
+                "information": "Low ciphers like DES, RC2, RC4 are used by the server. You should use a stronger cipher.",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:23:19.02266Z"
+            },
+            {
+                "service_type": "ssl",
+                "finding_description_slug": "ssl-x-content-type-options",
+                "information": "The X-Content-Type-Options header is not set for URL https://dvwa.dev.crashtest.cloud/.",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:23:19.02266Z"
+            },
+            {
+                "service_type": "ssl",
+                "finding_description_slug": "ssl-content-security-policy",
+                "information": "The Content-Security-Policy header is not set for URL https://dvwa.dev.crashtest.cloud/.",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:23:19.02266Z"
+            },
+            {
+                "service_type": "ssl",
+                "finding_description_slug": "ssl-x-frame-options",
+                "information": "The X-Frame-Options header is not set for URL https://dvwa.dev.crashtest.cloud/.",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:23:19.02266Z"
+            },
+            {
+                "service_type": "ssl",
+                "finding_description_slug": "ssl-protocol-version",
+                "information": "TLS 1.0 is offered by the server. This version of TLS is deprecated. You should use TLS 1.2 or TLS 1.3",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:23:19.02266Z"
+            },
+            {
+                "service_type": "ssl",
+                "finding_description_slug": "ssl-cipherlist-3des-idea",
+                "information": "Cipher suits based on DES (Data Encryption Standard) and IDEA (International Data Encryption Algorithm) are not recommended for general use in TLS. In TLS 1.2 and TLS 1.3 DES and IDEA are removed. You should use TLS 1.2 or TLS 1.3.",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:23:19.179766Z"
+            },
+            {
+                "service_type": "ssl",
+                "finding_description_slug": "ssl-logjam-common-primes",
+                "information": "LOGJAM vulnerability detected CVE-2015-4000",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:23:19.179766Z"
+            },
+            {
+                "service_type": "ssl",
+                "finding_description_slug": "ssl-beast",
+                "information": "VULNERABLE -- but also supports higher protocols  TLSv1.1 TLSv1.2 (likely mitigated)",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:23:19.179767Z"
+            },
+            {
+                "service_type": "ssl",
+                "finding_description_slug": "ssl-referrer-policy",
+                "information": "The Referrer-Policy header is not set for URL https://dvwa.dev.crashtest.cloud/.",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:23:19.179767Z"
+            },
+            {
+                "service_type": "ssl",
+                "finding_description_slug": "ssl-x-xss-protection",
+                "information": "The X-XSS-Protection header is not set for URL https://dvwa.dev.crashtest.cloud/.",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:23:19.179767Z"
+            },
+            {
+                "service_type": "ssl",
+                "finding_description_slug": "ssl-hsts",
+                "information": "HSTS is not offered by the server.",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:23:19.179767Z"
+            },
+            {
+                "service_type": "ssl",
+                "finding_description_slug": "ssl-cbc-tls1",
+                "information": "BEAST TLS1: The BEAST attack leverages weakness in the cipher block chaining (CBC) which allows man in the middle attacks.",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:23:19.179767Z"
+            },
+            {
+                "service_type": "ssl",
+                "finding_description_slug": "ssl-key-size",
+                "information": "The certificate key size is RSA 1024 bits.",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:23:19.179767Z"
+            }
+        ],
+        "xss": [
+            {
+                "service_type": "xss",
+                "finding_description_slug": "xss",
+                "information": "Found possible XSS vulnerability on site dvwa.dev.crashtest.cloud/vulnerabilities/xss_s/. The parameter 'txtName' seems vulnerable for payload '<svg 864ea340-0c78-45c3-848c-6cbd50a61450 \"ons>'",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:18:31.602261Z"
+            },
+            {
+                "service_type": "xss",
+                "finding_description_slug": "xss",
+                "information": "Found possible XSS vulnerability on site dvwa.dev.crashtest.cloud/vulnerabilities/xss_r/. The parameter 'name' seems vulnerable for payload '<svg c228bff3-bfb8-4143-8bde-31d3f363895f \"ons>'",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:21:08.709214Z"
+            },
+            {
+                "service_type": "xss",
+                "finding_description_slug": "xss",
+                "information": "Found possible XSS vulnerability on site dvwa.dev.crashtest.cloud/vulnerabilities/deserialize/. The parameter 'data' seems vulnerable for payload '<svg f7482fa8-695c-4622-a9a2-6d85898463b3 \"ons>'",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:22:09.726367Z"
+            },
+            {
+                "service_type": "xss",
+                "finding_description_slug": "xss",
+                "information": "Found possible XSS vulnerability on site dvwa.dev.crashtest.cloud/vulnerabilities/nosql/. The parameter 'text' seems vulnerable for payload '<svg 87b87ddb-d7b9-4245-842b-9ae8cfd22c6a \"ons>'",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:31:56.970251Z"
+            },
+            {
+                "service_type": "xss",
+                "finding_description_slug": "xss",
+                "information": "Found possible XSS vulnerability on site dvwa.dev.crashtest.cloud/vulnerabilities/nosql/. The parameter 'title' seems vulnerable for payload '<svg 7b2ce902-f15b-41d2-b306-74011d8d442e \"ons>'",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T20:31:56.970251Z"
+            }
+        ],
+        "xxe": [
+            {
+                "service_type": "xxe",
+                "finding_description_slug": "xxe",
+                "information": "Found XXE in parameter \"xml\" with method \"get\" for URL \"https://dvwa.dev.crashtest.cloud/vulnerabilities/xxe/\", with payload \"<?xml version='1.0' encoding='utf-8'?><!DOCTYPE creds [<!ELEMENT user ANY ><!ELEMENT pass ANY ><!ENTITY user SYSTEM 'file:///etc/passwd'>]><creds><user>%26user;</user><pass>%26user;</pass></creds>\"",
+                "details": {
+                    "request": {
+                        "has_findings": false
+                    }
+                },
+                "created_at": "2020-03-04T21:36:44.784334Z"
+            }
+        ]
+    },
+    "descriptions": [
+        {
+            "exploitability": 2.2,
+            "impact": 3.6,
+            "baseScore": 5.9,
+            "title": "SSL SWEET32",
+            "slug": "ssl-sweet32",
+            "description": "The server uses short block sizes, which makes it vulnerable to hit the same hash for multiple inputs. By observing the data for a longer period of time, an attacker can recover secure HTTP cookies.",
+            "reference_owasp": "https://www.owasp.org/index.php/Testing_for_Weak_SSL/TLS_Ciphers,_Insufficient_Transport_Layer_Protection_(OTG-CRYPST-001)",
+            "reference_resolution": "https://wiki.crashtest-security.com/prevent-ssl-sweet32",
+            "cvssAttackVector": 1,
+            "cvssAttackComplexity": 2,
+            "cvssPrivilegesRequired": 1,
+            "cvssUserInteraction": 1,
+            "cvssScope": 1,
+            "cvssConfidentiality": 3,
+            "cvssIntegrity": 1,
+            "cvssAvailability": 1,
+            "cvssExploitCodeMaturity": 0,
+            "cvssRemediationLevel": 0,
+            "cvssReportConfidence": 0,
+            "cvssConfidentialityRequirement": 0,
+            "cvssIntegrityRequirement": 0,
+            "cvssAvailabilityRequirement": 0,
+            "cvssModifiedAttackVector": 0,
+            "cvssModifiedAttackComplexity": 0,
+            "cvssModifiedPrivilegesRequired": 0,
+            "cvssModifiedUserInteraction": 0,
+            "cvssModifiedScope": 0,
+            "cvssModifiedConfidentiality": 0,
+            "cvssModifiedIntegrity": 0,
+            "cvssModifiedAvailability": 0,
+            "how_to_fix": "SWEET32 attacks can be prevented by using cipher suites with large block sizes. More details on what block sizes are considered large enough can be found in the knowledge database (see Recommendations)"
+        },
+        {
+            "exploitability": 2.2,
+            "impact": 5.2,
+            "baseScore": 7.4,
+            "title": "Certificate Revocation",
+            "slug": "ssl-crl-ocsp",
+            "description": "The webserver is badly configured regarding revoked certificates. Certificate Revocation Lists (CRLs) and the Online Certificate Status Protocol (OCSP) make sure, that users can verify the integraty of a server certificate.",
+            "reference_owasp": "https://www.owasp.org/index.php/Testing_for_Weak_SSL/TLS_Ciphers,_Insufficient_Transport_Layer_Protection_(OTG-CRYPST-001)",
+            "reference_resolution": "https://wiki.crashtest-security.com/renew-tls-certificates",
+            "cvssAttackVector": 1,
+            "cvssAttackComplexity": 2,
+            "cvssPrivilegesRequired": 1,
+            "cvssUserInteraction": 1,
+            "cvssScope": 1,
+            "cvssConfidentiality": 3,
+            "cvssIntegrity": 3,
+            "cvssAvailability": 1,
+            "cvssExploitCodeMaturity": 0,
+            "cvssRemediationLevel": 0,
+            "cvssReportConfidence": 0,
+            "cvssConfidentialityRequirement": 0,
+            "cvssIntegrityRequirement": 0,
+            "cvssAvailabilityRequirement": 0,
+            "cvssModifiedAttackVector": 0,
+            "cvssModifiedAttackComplexity": 0,
+            "cvssModifiedPrivilegesRequired": 0,
+            "cvssModifiedUserInteraction": 0,
+            "cvssModifiedScope": 0,
+            "cvssModifiedConfidentiality": 0,
+            "cvssModifiedIntegrity": 0,
+            "cvssModifiedAvailability": 0,
+            "how_to_fix": "The webserver is badly configured regarding revoked certificates. Certificate Revocation Lists (CRLs) and the Online Certificate Status Protocol (OCSP) make sure, that users can verify the integrity of a server certificate. If the certificate is compromised, these techniques allow the user, respectively the used certificate authority (CA) to revoke the compromised certificate. Therefore one can issue a new (valid) certificate and the compromised certificate (used by an attacker) will produce warnings when a user accesses their website. OCSP is the newer method to revoke certificates, as it allows certificate authorities to revoke certificates much faster without the need to update complete revocation lists potentially containing thousands of certificates. More details on how to enable OCSP can be found in the knowledge database (see Recommendations)"
+        },
+        {
+            "exploitability": 1.6,
+            "impact": 1.4,
+            "baseScore": 3.1,
+            "title": "SSL Cipher Block Chaining SSL3",
+            "slug": "ssl-cbc-ssl3",
+            "description": "The webserver is configured to allow connections encrypted with SSL V3 in Cipher Block Chaining Mode (CBC). Connections using this settings contain predictable information that allow an attacker to break the encryption using the BEAST attack.",
+            "reference_owasp": "https://www.owasp.org/index.php/Testing_for_Weak_SSL/TLS_Ciphers,_Insufficient_Transport_Layer_Protection_(OTG-CRYPST-001)",
+            "reference_resolution": "https://wiki.crashtest-security.com/disable-deprecated-ssl-protocol-versions",
+            "cvssAttackVector": 1,
+            "cvssAttackComplexity": 2,
+            "cvssPrivilegesRequired": 1,
+            "cvssUserInteraction": 2,
+            "cvssScope": 1,
+            "cvssConfidentiality": 2,
+            "cvssIntegrity": 1,
+            "cvssAvailability": 1,
+            "cvssExploitCodeMaturity": 0,
+            "cvssRemediationLevel": 0,
+            "cvssReportConfidence": 0,
+            "cvssConfidentialityRequirement": 0,
+            "cvssIntegrityRequirement": 0,
+            "cvssAvailabilityRequirement": 0,
+            "cvssModifiedAttackVector": 0,
+            "cvssModifiedAttackComplexity": 0,
+            "cvssModifiedPrivilegesRequired": 0,
+            "cvssModifiedUserInteraction": 0,
+            "cvssModifiedScope": 0,
+            "cvssModifiedConfidentiality": 0,
+            "cvssModifiedIntegrity": 0,
+            "cvssModifiedAvailability": 0,
+            "how_to_fix": "The webserver is using a deprecated SSL/TLS version and needs to be updated. The webserver needs to be configured to use strong and trusted certificates. In addition they need to be configured to use the newest version of SSL and TLS as well as strong cipher suites. More details on how to configure these certificates can be found in the knowledge database (see Recommendations)More details on how to fix this problem can be found in the knowledge database (see Recommendations)"
+        },
+        {
+            "exploitability": 3.9,
+            "impact": 2.5,
+            "baseScore": 6.5,
+            "title": "Content-Security-Policy Header",
+            "slug": "ssl-content-security-policy",
+            "description": "The Content-Security-Policy header tells the browser which domains are whitelisted to download further resources such as scripts, images or stylesheets from. This can prevent various XSS and other Cross-Site-Scripting attacks.",
+            "reference_owasp": "https://www.owasp.org/index.php/Testing_for_Weak_SSL/TLS_Ciphers,_Insufficient_Transport_Layer_Protection_(OTG-CRYPST-001)",
+            "reference_resolution": "https://wiki.crashtest-security.com/enable-security-headers",
+            "cvssAttackVector": 1,
+            "cvssAttackComplexity": 1,
+            "cvssPrivilegesRequired": 1,
+            "cvssUserInteraction": 1,
+            "cvssScope": 1,
+            "cvssConfidentiality": 2,
+            "cvssIntegrity": 2,
+            "cvssAvailability": 1,
+            "cvssExploitCodeMaturity": 0,
+            "cvssRemediationLevel": 0,
+            "cvssReportConfidence": 0,
+            "cvssConfidentialityRequirement": 0,
+            "cvssIntegrityRequirement": 0,
+            "cvssAvailabilityRequirement": 0,
+            "cvssModifiedAttackVector": 0,
+            "cvssModifiedAttackComplexity": 0,
+            "cvssModifiedPrivilegesRequired": 0,
+            "cvssModifiedUserInteraction": 0,
+            "cvssModifiedScope": 0,
+            "cvssModifiedConfidentiality": 0,
+            "cvssModifiedIntegrity": 0,
+            "cvssModifiedAvailability": 0,
+            "how_to_fix": "Configure the Content-Security-Policy header in a way that it only allows loading resources from trusted resources such as 'self'. Do not include 'unsafe-eval' or 'unsafe-eval' in order to prevent direct injections into the website."
+        },
+        {
+            "exploitability": 8.6,
+            "impact": 2.9,
+            "baseScore": 4.3,
+            "title": "SSL Cipher Block Chaining TLS1",
+            "slug": "ssl-cbc-tls1",
+            "description": "The webserver is configured to allow connections encrypted with TLS V1 in Cipher Block Chaining Mode (CBC). Connections using this settings contain predictable information that allow an attacker to break the encryption using the BEAST attack.",
+            "reference_owasp": "https://www.owasp.org/index.php/Testing_for_Weak_SSL/TLS_Ciphers,_Insufficient_Transport_Layer_Protection_(OTG-CRYPST-001)",
+            "reference_resolution": "https://wiki.crashtest-security.com/secure-tls-configuration",
+            "cvssAttackVector": 1,
+            "cvssAttackComplexity": 2,
+            "cvssPrivilegesRequired": 1,
+            "cvssUserInteraction": 1,
+            "cvssScope": 1,
+            "cvssConfidentiality": 2,
+            "cvssIntegrity": 1,
+            "cvssAvailability": 1,
+            "cvssExploitCodeMaturity": 0,
+            "cvssRemediationLevel": 0,
+            "cvssReportConfidence": 0,
+            "cvssConfidentialityRequirement": 0,
+            "cvssIntegrityRequirement": 0,
+            "cvssAvailabilityRequirement": 0,
+            "cvssModifiedAttackVector": 0,
+            "cvssModifiedAttackComplexity": 0,
+            "cvssModifiedPrivilegesRequired": 0,
+            "cvssModifiedUserInteraction": 0,
+            "cvssModifiedScope": 0,
+            "cvssModifiedConfidentiality": 0,
+            "cvssModifiedIntegrity": 0,
+            "cvssModifiedAvailability": 0,
+            "how_to_fix": "The webserver needs to be configured to use strong and trusted certificates. In addition they need to be configured to use the newest version of SSL and TLS as well as strong cipher suites. More details on how to configure these certificates can be found in the knowledge database (see Recommendations)"
+        },
+        {
+            "exploitability": 2.2,
+            "impact": 2.5,
+            "baseScore": 4.8,
+            "title": "TLS Key Size",
+            "slug": "ssl-key-size",
+            "description": "The security of a TLS connection heavily depends on the used keysize. The server offers a keysize which will result in a weak encryption.",
+            "reference_owasp": "https://www.owasp.org/index.php/Testing_for_Weak_SSL/TLS_Ciphers,_Insufficient_Transport_Layer_Protection_(OTG-CRYPST-001)",
+            "reference_resolution": "https://wiki.crashtest-security.com/increase-tls-key-size",
+            "cvssAttackVector": 1,
+            "cvssAttackComplexity": 2,
+            "cvssPrivilegesRequired": 1,
+            "cvssUserInteraction": 1,
+            "cvssScope": 1,
+            "cvssConfidentiality": 2,
+            "cvssIntegrity": 2,
+            "cvssAvailability": 1,
+            "cvssExploitCodeMaturity": 0,
+            "cvssRemediationLevel": 0,
+            "cvssReportConfidence": 0,
+            "cvssConfidentialityRequirement": 0,
+            "cvssIntegrityRequirement": 0,
+            "cvssAvailabilityRequirement": 0,
+            "cvssModifiedAttackVector": 0,
+            "cvssModifiedAttackComplexity": 0,
+            "cvssModifiedPrivilegesRequired": 0,
+            "cvssModifiedUserInteraction": 0,
+            "cvssModifiedScope": 0,
+            "cvssModifiedConfidentiality": 0,
+            "cvssModifiedIntegrity": 0,
+            "cvssModifiedAvailability": 0,
+            "how_to_fix": "The used TLS connection key is too small and therefore can be easily broken. This can be solved by choosing a certificate with a larger key size. More details on which certificates to choose can be found in the knowledge database (see Recommendations)"
+        },
+        {
+            "exploitability": 3.9,
+            "impact": 5.9,
+            "baseScore": 9.8,
+            "title": "Local File Inclusion",
+            "slug": "local-file-inclusion",
+            "description": "Local file inclusion allows an attacker to include arbitrary local files into the website",
+            "reference_owasp": "https://www.owasp.org/index.php/Testing_for_Local_File_Inclusion",
+            "reference_resolution": "https://wiki.crashtest-security.com/file-inclusion",
+            "cvssAttackVector": 0,
+            "cvssAttackComplexity": 0,
+            "cvssPrivilegesRequired": 0,
+            "cvssUserInteraction": 1,
+            "cvssScope": 0,
+            "cvssConfidentiality": 2,
+            "cvssIntegrity": 2,
+            "cvssAvailability": 2,
+            "cvssExploitCodeMaturity": 0,
+            "cvssRemediationLevel": 0,
+            "cvssReportConfidence": 0,
+            "cvssConfidentialityRequirement": 2,
+            "cvssIntegrityRequirement": 2,
+            "cvssAvailabilityRequirement": 2,
+            "cvssModifiedAttackVector": 1,
+            "cvssModifiedAttackComplexity": 1,
+            "cvssModifiedPrivilegesRequired": 1,
+            "cvssModifiedUserInteraction": 1,
+            "cvssModifiedScope": 1,
+            "cvssModifiedConfidentiality": 3,
+            "cvssModifiedIntegrity": 3,
+            "cvssModifiedAvailability": 3,
+            "how_to_fix": "Every user input has to be checked for malicious requests by the web application. For example, the files which are allowed to be included (whitelisted) are written into an array. For every request the web application should check the whitelist if the required file is allowed for inclusion."
+        },
+        {
+            "exploitability": 2.2,
+            "impact": 1.4,
+            "baseScore": 3.7,
+            "title": "SSL Cipherlist AVERAGE",
+            "slug": "ssl-cipherlist-average",
+            "description": "The server is configured to support average Ciphers like SEED + 128+256 Bit CBC ciphers (AES, CAMELLIA and ARIA). This means, that an attacker can make use of an insecure SSL/TLS connection.",
+            "reference_owasp": "https://www.owasp.org/index.php/Testing_for_Weak_SSL/TLS_Ciphers,_Insufficient_Transport_Layer_Protection_(OTG-CRYPST-001)",
+            "reference_resolution": "https://wiki.crashtest-security.com/secure-tls-configuration",
+            "cvssAttackVector": 1,
+            "cvssAttackComplexity": 2,
+            "cvssPrivilegesRequired": 1,
+            "cvssUserInteraction": 1,
+            "cvssScope": 1,
+            "cvssConfidentiality": 2,
+            "cvssIntegrity": 1,
+            "cvssAvailability": 1,
+            "cvssExploitCodeMaturity": 0,
+            "cvssRemediationLevel": 0,
+            "cvssReportConfidence": 0,
+            "cvssConfidentialityRequirement": 0,
+            "cvssIntegrityRequirement": 0,
+            "cvssAvailabilityRequirement": 0,
+            "cvssModifiedAttackVector": 0,
+            "cvssModifiedAttackComplexity": 0,
+            "cvssModifiedPrivilegesRequired": 0,
+            "cvssModifiedUserInteraction": 0,
+            "cvssModifiedScope": 0,
+            "cvssModifiedConfidentiality": 0,
+            "cvssModifiedIntegrity": 0,
+            "cvssModifiedAvailability": 0,
+            "how_to_fix": "The list of supported HTTPS ciphers includes insecure ciphers. This means, that an attacker can make use of in insecure SSL/TLS connection. In the SSL/TLS configuration, the allowed ciphers and their order should be set to match secure values. More details on how to set these values can be found in the knowledge database (see Recommendations)"
+        },
+        {
+            "exploitability": 2.2,
+            "impact": 2.5,
+            "baseScore": 4.8,
+            "title": "TLS Configuration",
+            "slug": "ssl-general",
+            "description": "There is a misconfiguration with your SSL/TLS configuration. SSL/TLS is responsible for encrypting traffic between your web application and a user's browser to prevent eavesdropping.",
+            "reference_owasp": "https://www.owasp.org/index.php/Testing_for_Weak_SSL/TLS_Ciphers,_Insufficient_Transport_Layer_Protection_(OTG-CRYPST-001)",
+            "reference_resolution": "https://wiki.crashtest-security.com/secure-tls-configuration",
+            "cvssAttackVector": 1,
+            "cvssAttackComplexity": 2,
+            "cvssPrivilegesRequired": 1,
+            "cvssUserInteraction": 1,
+            "cvssScope": 1,
+            "cvssConfidentiality": 2,
+            "cvssIntegrity": 2,
+            "cvssAvailability": 1,
+            "cvssExploitCodeMaturity": 0,
+            "cvssRemediationLevel": 0,
+            "cvssReportConfidence": 0,
+            "cvssConfidentialityRequirement": 0,
+            "cvssIntegrityRequirement": 0,
+            "cvssAvailabilityRequirement": 0,
+            "cvssModifiedAttackVector": 0,
+            "cvssModifiedAttackComplexity": 0,
+            "cvssModifiedPrivilegesRequired": 0,
+            "cvssModifiedUserInteraction": 0,
+            "cvssModifiedScope": 0,
+            "cvssModifiedConfidentiality": 0,
+            "cvssModifiedIntegrity": 0,
+            "cvssModifiedAvailability": 0,
+            "how_to_fix": "The webserver needs to be configured to use strong and trusted certificates. In addition they need to be configured to use the newest version of SSL and TLS as well as strong cipher suites. More details on how to configure these certificates can be found in the knowledge database (see Recommendations)"
+        },
+        {
+            "exploitability": 2.8,
+            "impact": 1.4,
+            "baseScore": 4.3,
+            "title": "X-Content-Type-Options Header",
+            "slug": "ssl-x-content-type-options",
+            "description": "The X-Content-Type-Options prevents the browser from trying to detect MIME-types on downloaded files. This protects against attacks in cases where a malicious file is offered with an unsuspicious MIME-type.",
+            "reference_owasp": "https://www.owasp.org/index.php/Testing_for_Weak_SSL/TLS_Ciphers,_Insufficient_Transport_Layer_Protection_(OTG-CRYPST-001)",
+            "reference_resolution": "https://wiki.crashtest-security.com/enable-security-headers",
+            "cvssAttackVector": 1,
+            "cvssAttackComplexity": 1,
+            "cvssPrivilegesRequired": 1,
+            "cvssUserInteraction": 2,
+            "cvssScope": 1,
+            "cvssConfidentiality": 1,
+            "cvssIntegrity": 2,
+            "cvssAvailability": 1,
+            "cvssExploitCodeMaturity": 0,
+            "cvssRemediationLevel": 0,
+            "cvssReportConfidence": 0,
+            "cvssConfidentialityRequirement": 0,
+            "cvssIntegrityRequirement": 0,
+            "cvssAvailabilityRequirement": 0,
+            "cvssModifiedAttackVector": 0,
+            "cvssModifiedAttackComplexity": 0,
+            "cvssModifiedPrivilegesRequired": 0,
+            "cvssModifiedUserInteraction": 0,
+            "cvssModifiedScope": 0,
+            "cvssModifiedConfidentiality": 0,
+            "cvssModifiedIntegrity": 0,
+            "cvssModifiedAvailability": 0,
+            "how_to_fix": "Set the X-Content-Type-Options header to 'nosniff' in order to prevent the browser from detecting MIME-types based on file content."
+        },
+        {
+            "exploitability": 2.8,
+            "impact": 3.6,
+            "baseScore": 6.5,
+            "title": "X-Frame-Options Header",
+            "slug": "ssl-x-frame-options",
+            "description": "The X-Frame-Options header declares whether this site may be embedded as a frame into other websites. If this header is not configured correctly, your application can be embedded into third party websites which makes it vulnerable for clickjacking attacks.",
+            "reference_owasp": "https://www.owasp.org/index.php/Testing_for_Weak_SSL/TLS_Ciphers,_Insufficient_Transport_Layer_Protection_(OTG-CRYPST-001)",
+            "reference_resolution": "https://wiki.crashtest-security.com/enable-security-headers",
+            "cvssAttackVector": 1,
+            "cvssAttackComplexity": 1,
+            "cvssPrivilegesRequired": 1,
+            "cvssUserInteraction": 2,
+            "cvssScope": 1,
+            "cvssConfidentiality": 1,
+            "cvssIntegrity": 3,
+            "cvssAvailability": 1,
+            "cvssExploitCodeMaturity": 0,
+            "cvssRemediationLevel": 0,
+            "cvssReportConfidence": 0,
+            "cvssConfidentialityRequirement": 0,
+            "cvssIntegrityRequirement": 0,
+            "cvssAvailabilityRequirement": 0,
+            "cvssModifiedAttackVector": 0,
+            "cvssModifiedAttackComplexity": 0,
+            "cvssModifiedPrivilegesRequired": 0,
+            "cvssModifiedUserInteraction": 0,
+            "cvssModifiedScope": 0,
+            "cvssModifiedConfidentiality": 0,
+            "cvssModifiedIntegrity": 0,
+            "cvssModifiedAvailability": 0,
+            "how_to_fix": "Configure the X-Frame-Options header as 'deny' to prevent it to be embedded at all. The values 'sameorigin' or 'allow-from DOMAIN' can be used to allow it to be embedded on certain websites while forbidding embedding on other websites"
+        },
+        {
+            "exploitability": 2.8,
+            "impact": 2.7,
+            "baseScore": 6.1,
+            "title": "X-XSS-Protection Header",
+            "slug": "ssl-x-xss-protection",
+            "description": "The X-XSS-Protection header tells the browser how it should handle detected XSS attacks. If this header is not configured correctly, XSS attacks may not be blocked despite being detected by the browser.",
+            "reference_owasp": "https://www.owasp.org/index.php/Testing_for_Weak_SSL/TLS_Ciphers,_Insufficient_Transport_Layer_Protection_(OTG-CRYPST-001)",
+            "reference_resolution": "https://wiki.crashtest-security.com/enable-security-headers",
+            "cvssAttackVector": 1,
+            "cvssAttackComplexity": 1,
+            "cvssPrivilegesRequired": 1,
+            "cvssUserInteraction": 2,
+            "cvssScope": 2,
+            "cvssConfidentiality": 2,
+            "cvssIntegrity": 2,
+            "cvssAvailability": 1,
+            "cvssExploitCodeMaturity": 0,
+            "cvssRemediationLevel": 0,
+            "cvssReportConfidence": 0,
+            "cvssConfidentialityRequirement": 0,
+            "cvssIntegrityRequirement": 0,
+            "cvssAvailabilityRequirement": 0,
+            "cvssModifiedAttackVector": 0,
+            "cvssModifiedAttackComplexity": 0,
+            "cvssModifiedPrivilegesRequired": 0,
+            "cvssModifiedUserInteraction": 0,
+            "cvssModifiedScope": 0,
+            "cvssModifiedConfidentiality": 0,
+            "cvssModifiedIntegrity": 0,
+            "cvssModifiedAvailability": 0,
+            "how_to_fix": "Configure the X-XSS-Protection header as '1' or '1; mode=block' to make sure that XSS attacks detected by the browser are sanitized or blocked."
+        },
+        {
+            "exploitability": 3.9,
+            "impact": 5.2,
+            "baseScore": 9.1,
+            "title": "SQL Injection",
+            "slug": "sql-injection",
+            "description": "Your application is vulnerable for an SQL injection. This allows an attacker to run SQL code in your database so that he may retrieve, change or delete data from your database.",
+            "reference_owasp": "https://www.owasp.org/index.php/Testing_for_SQL_Injection_(OTG-INPVAL-005)",
+            "reference_resolution": "https://wiki.crashtest-security.com/sql-injections",
+            "cvssAttackVector": 1,
+            "cvssAttackComplexity": 1,
+            "cvssPrivilegesRequired": 1,
+            "cvssUserInteraction": 1,
+            "cvssScope": 1,
+            "cvssConfidentiality": 3,
+            "cvssIntegrity": 3,
+            "cvssAvailability": 1,
+            "cvssExploitCodeMaturity": 0,
+            "cvssRemediationLevel": 0,
+            "cvssReportConfidence": 0,
+            "cvssConfidentialityRequirement": 0,
+            "cvssIntegrityRequirement": 0,
+            "cvssAvailabilityRequirement": 0,
+            "cvssModifiedAttackVector": 0,
+            "cvssModifiedAttackComplexity": 0,
+            "cvssModifiedPrivilegesRequired": 0,
+            "cvssModifiedUserInteraction": 0,
+            "cvssModifiedScope": 0,
+            "cvssModifiedConfidentiality": 0,
+            "cvssModifiedIntegrity": 0,
+            "cvssModifiedAvailability": 0,
+            "how_to_fix": "The simple answer is: Sanitize the users input before sending it to the database. Sanitizing includes escaping all potentially harmful characters to not let them effect the resulting SQL query. There are multiple ways to do so and most common frameworks also support ways to simplify this step. One possible solutions is, to use Object-relational mapping libraries to take care of the sanitizing. In case direct SQL queries are required, it is recommended to use so called \"prepared statements\". These are queries containing placeholders for the users input and while binding the input in the query, the users data will be escaped. More details on how to use these methods can be found in the knowledge database (see Recommendations)"
+        },
+        {
+            "exploitability": 3.9,
+            "impact": 1.4,
+            "baseScore": 5.3,
+            "title": "Fingerprint Web Application Framework",
+            "slug": "fingerprint-web-application-framework",
+            "description": "The installed web application framework(s) offer information about their version. This opens attackers the possibility to look for exploits specifically targetting the software running in its exact version.",
+            "reference_owasp": "https://www.owasp.org/index.php/Fingerprint_Web_Application_Framework_(OTG-INFO-008)",
+            "reference_resolution": "https://wiki.crashtest-security.com/prevent-web-application-framework-information-leakage",
+            "cvssAttackVector": 1,
+            "cvssAttackComplexity": 1,
+            "cvssPrivilegesRequired": 1,
+            "cvssUserInteraction": 1,
+            "cvssScope": 1,
+            "cvssConfidentiality": 1,
+            "cvssIntegrity": 2,
+            "cvssAvailability": 1,
+            "cvssExploitCodeMaturity": 0,
+            "cvssRemediationLevel": 0,
+            "cvssReportConfidence": 0,
+            "cvssConfidentialityRequirement": 0,
+            "cvssIntegrityRequirement": 0,
+            "cvssAvailabilityRequirement": 0,
+            "cvssModifiedAttackVector": 0,
+            "cvssModifiedAttackComplexity": 0,
+            "cvssModifiedPrivilegesRequired": 0,
+            "cvssModifiedUserInteraction": 0,
+            "cvssModifiedScope": 0,
+            "cvssModifiedConfidentiality": 0,
+            "cvssModifiedIntegrity": 0,
+            "cvssModifiedAvailability": 0,
+            "how_to_fix": "Depending on the used application there are multiple ways to remove version information. Some applications also share the information in multiple places, which makes it harder to remove it. Common places for version information are the filename of included libraries like \"jquery.3.2.1.min.js\" or the documentation within a file, where the version number is stated within the first lines. While some information is required to be left within these files as a part of the copyright, other information like the version number can be removed. Other places could be the footer of an application \"powered by Wordpress 4.9.1\" or meta-tags within the header of the website. Unlike servers, most web applications cannot remove these information via a config file and therefore need to be removed manually, by editing the specific templates and files. More details on how to fix this problem can be found in the knowledge database (see Recommendations)"
+        },
+        {
+            "exploitability": 2.2,
+            "impact": 2.5,
+            "baseScore": 4.8,
+            "title": "Insecure Cookies",
+            "slug": "ssl-cookie-secure",
+            "description": "Cookies that are not marked as secure can be transferred via an unencrypted connection. A man-in-the-middle attack can be used to get the contents of these cookies.",
+            "reference_owasp": "https://www.owasp.org/index.php/Testing_for_Weak_SSL/TLS_Ciphers,_Insufficient_Transport_Layer_Protection_(OTG-CRYPST-001)",
+            "reference_resolution": "https://wiki.crashtest-security.com/enable-secure-cookies",
+            "cvssAttackVector": 1,
+            "cvssAttackComplexity": 2,
+            "cvssPrivilegesRequired": 1,
+            "cvssUserInteraction": 1,
+            "cvssScope": 1,
+            "cvssConfidentiality": 2,
+            "cvssIntegrity": 2,
+            "cvssAvailability": 1,
+            "cvssExploitCodeMaturity": 0,
+            "cvssRemediationLevel": 0,
+            "cvssReportConfidence": 0,
+            "cvssConfidentialityRequirement": 0,
+            "cvssIntegrityRequirement": 0,
+            "cvssAvailabilityRequirement": 0,
+            "cvssModifiedAttackVector": 0,
+            "cvssModifiedAttackComplexity": 0,
+            "cvssModifiedPrivilegesRequired": 0,
+            "cvssModifiedUserInteraction": 0,
+            "cvssModifiedScope": 0,
+            "cvssModifiedConfidentiality": 0,
+            "cvssModifiedIntegrity": 0,
+            "cvssModifiedAvailability": 0,
+            "how_to_fix": "Cookies that are not marked as secure can be transferred via an unencrypted connection. A man-in-the-middle attack can be used to get the contents of these cookies. Cookies that are not marked as http-only can be read by local scripts. In case of an Cross-Site-Scripting (XSS) attack, an attacker is able to read these cookies. Depending on the cookie content, think of enabling both settings for all cookies. This is especially important for session cookies. More details on how to set these two settings can be found in the knowledge database (see Recommendations)"
+        },
+        {
+            "exploitability": 2.8,
+            "impact": 2.7,
+            "baseScore": 6.1,
+            "title": "Cross-Site Scripting (XSS)",
+            "slug": "xss",
+            "description": "Cross-Site Scripting (XSS) allows an attacker to send malicious code to a different user.",
+            "reference_owasp": "https://www.owasp.org/index.php/Testing_for_Reflected_Cross_site_scripting_(OTG-INPVAL-001)",
+            "reference_resolution": "https://wiki.crashtest-security.com/cross-site-scripting",
+            "cvssAttackVector": 1,
+            "cvssAttackComplexity": 1,
+            "cvssPrivilegesRequired": 1,
+            "cvssUserInteraction": 2,
+            "cvssScope": 2,
+            "cvssConfidentiality": 2,
+            "cvssIntegrity": 2,
+            "cvssAvailability": 1,
+            "cvssExploitCodeMaturity": 0,
+            "cvssRemediationLevel": 0,
+            "cvssReportConfidence": 0,
+            "cvssConfidentialityRequirement": 0,
+            "cvssIntegrityRequirement": 0,
+            "cvssAvailabilityRequirement": 0,
+            "cvssModifiedAttackVector": 0,
+            "cvssModifiedAttackComplexity": 0,
+            "cvssModifiedPrivilegesRequired": 0,
+            "cvssModifiedUserInteraction": 0,
+            "cvssModifiedScope": 0,
+            "cvssModifiedConfidentiality": 0,
+            "cvssModifiedIntegrity": 0,
+            "cvssModifiedAvailability": 0,
+            "how_to_fix": "XSS can be prevented by sanitizing the users input before saving to a database or returning it back to the user. In most cases the attacker injects JavaScript into the application. By escaping the \"<script>\" tags, this can be avoided. More details on how to fix this problem can be found in the knowledge database (see Recommendations)"
+        },
+        {
+            "exploitability": 2.2,
+            "impact": 2.5,
+            "baseScore": 4.8,
+            "title": "Non Httponly Cookies",
+            "slug": "ssl-cookie-httponly",
+            "description": "Cookies that are not marked as http-only can be read by local scripts. In case of an Cross-Site-Scripting (XSS) attack, an attacker is able to read these cookies.",
+            "reference_owasp": "https://www.owasp.org/index.php/Testing_for_Weak_SSL/TLS_Ciphers,_Insufficient_Transport_Layer_Protection_(OTG-CRYPST-001)",
+            "reference_resolution": "https://wiki.crashtest-security.com/enable-secure-cookies",
+            "cvssAttackVector": 1,
+            "cvssAttackComplexity": 2,
+            "cvssPrivilegesRequired": 1,
+            "cvssUserInteraction": 1,
+            "cvssScope": 1,
+            "cvssConfidentiality": 2,
+            "cvssIntegrity": 2,
+            "cvssAvailability": 1,
+            "cvssExploitCodeMaturity": 0,
+            "cvssRemediationLevel": 0,
+            "cvssReportConfidence": 0,
+            "cvssConfidentialityRequirement": 0,
+            "cvssIntegrityRequirement": 0,
+            "cvssAvailabilityRequirement": 0,
+            "cvssModifiedAttackVector": 0,
+            "cvssModifiedAttackComplexity": 0,
+            "cvssModifiedPrivilegesRequired": 0,
+            "cvssModifiedUserInteraction": 0,
+            "cvssModifiedScope": 0,
+            "cvssModifiedConfidentiality": 0,
+            "cvssModifiedIntegrity": 0,
+            "cvssModifiedAvailability": 0,
+            "how_to_fix": "Cookies that are not marked as secure can be transferred via an unencrypted connection. A man-in-the-middle attack can be used to get the contents of these cookies. Cookies that are not marked as http-only can be read by local scripts. In case of an Cross-Site-Scripting (XSS) attack, an attacker is able to read these cookies. Depending on the cookie content, think of enabling both settings for all cookies. This is especially important for session cookies. More details on how to set these two settings can be found in the knowledge database (see Recommendations)"
+        },
+        {
+            "exploitability": 2.8,
+            "impact": 1.4,
+            "baseScore": 4.3,
+            "title": "Referrer-Policy Header",
+            "slug": "ssl-referrer-policy",
+            "description": "The Referrer-Policy header defines how much information about the referrer is sent, when the user clicks on a link. A misconfiguration or missing header may leak sensitive information to third party websites that are visited by the click on a link.",
+            "reference_owasp": "https://www.owasp.org/index.php/Testing_for_Weak_SSL/TLS_Ciphers,_Insufficient_Transport_Layer_Protection_(OTG-CRYPST-001)",
+            "reference_resolution": "https://wiki.crashtest-security.com/enable-security-headers",
+            "cvssAttackVector": 1,
+            "cvssAttackComplexity": 1,
+            "cvssPrivilegesRequired": 1,
+            "cvssUserInteraction": 2,
+            "cvssScope": 1,
+            "cvssConfidentiality": 2,
+            "cvssIntegrity": 1,
+            "cvssAvailability": 1,
+            "cvssExploitCodeMaturity": 0,
+            "cvssRemediationLevel": 0,
+            "cvssReportConfidence": 0,
+            "cvssConfidentialityRequirement": 0,
+            "cvssIntegrityRequirement": 0,
+            "cvssAvailabilityRequirement": 0,
+            "cvssModifiedAttackVector": 0,
+            "cvssModifiedAttackComplexity": 0,
+            "cvssModifiedPrivilegesRequired": 0,
+            "cvssModifiedUserInteraction": 0,
+            "cvssModifiedScope": 0,
+            "cvssModifiedConfidentiality": 0,
+            "cvssModifiedIntegrity": 0,
+            "cvssModifiedAvailability": 0,
+            "how_to_fix": "Set the Referrer-Policy header to a secure value such as 'strict-origin-when-cross-origin' to overwrite the Referer header with your domain instead of the full path when clicking on external links and keep the Referer for internal links, but only when the connection is not downgraded from HTTPS to HTTP."
+        },
+        {
+            "exploitability": 3.9,
+            "impact": 5.9,
+            "baseScore": 9.8,
+            "title": "Command Injection",
+            "slug": "command-injection",
+            "description": "Command injection allows an attacker to execute arbitrary system commands.",
+            "reference_owasp": "https://www.owasp.org/index.php/Command_Injection",
+            "reference_resolution": "https://wiki.crashtest-security.com/command-injection",
+            "cvssAttackVector": 0,
+            "cvssAttackComplexity": 0,
+            "cvssPrivilegesRequired": 0,
+            "cvssUserInteraction": 0,
+            "cvssScope": 0,
+            "cvssConfidentiality": 2,
+            "cvssIntegrity": 2,
+            "cvssAvailability": 2,
+            "cvssExploitCodeMaturity": 0,
+            "cvssRemediationLevel": 0,
+            "cvssReportConfidence": 0,
+            "cvssConfidentialityRequirement": 2,
+            "cvssIntegrityRequirement": 2,
+            "cvssAvailabilityRequirement": 2,
+            "cvssModifiedAttackVector": 1,
+            "cvssModifiedAttackComplexity": 1,
+            "cvssModifiedPrivilegesRequired": 1,
+            "cvssModifiedUserInteraction": 1,
+            "cvssModifiedScope": 1,
+            "cvssModifiedConfidentiality": 3,
+            "cvssModifiedIntegrity": 3,
+            "cvssModifiedAvailability": 3,
+            "how_to_fix": "Every user input has to be checked for malicious requests by the web application. Untrusted user input should not be passed to functions like \"exec()\" or \"system()\" without a sanity check."
+        },
+        {
+            "exploitability": 0,
+            "impact": 0,
+            "baseScore": 0,
+            "title": "Portscanner",
+            "slug": "portscan",
+            "description": "Unneeded open ports on the webserver opens a large attack surface to a malicious user. This can be used to find unmaintained and possibly vulnerable network services that can be targeted.",
+            "reference_owasp": "https://www.owasp.org/index.php/Top_10_2014-I3_Insecure_Network_Services",
+            "reference_resolution": "https://wiki.crashtest-security.com/insecure-network-services-open-port-scanner",
+            "cvssAttackVector": 0,
+            "cvssAttackComplexity": 0,
+            "cvssPrivilegesRequired": 0,
+            "cvssUserInteraction": 0,
+            "cvssScope": 0,
+            "cvssConfidentiality": 0,
+            "cvssIntegrity": 0,
+            "cvssAvailability": 0,
+            "cvssExploitCodeMaturity": 0,
+            "cvssRemediationLevel": 0,
+            "cvssReportConfidence": 0,
+            "cvssConfidentialityRequirement": 0,
+            "cvssIntegrityRequirement": 0,
+            "cvssAvailabilityRequirement": 0,
+            "cvssModifiedAttackVector": 0,
+            "cvssModifiedAttackComplexity": 0,
+            "cvssModifiedPrivilegesRequired": 0,
+            "cvssModifiedUserInteraction": 0,
+            "cvssModifiedScope": 0,
+            "cvssModifiedConfidentiality": 0,
+            "cvssModifiedIntegrity": 0,
+            "cvssModifiedAvailability": 0,
+            "how_to_fix": "Unnecessarily open ports can be closed by setting up a firewall and block connections to all ports except of those that are needed by the server. Furthermore services that are not needed should be uninstalled."
+        },
+        {
+            "exploitability": 3.9,
+            "impact": 4.2,
+            "baseScore": 8.2,
+            "title": "SSL Protocol Version",
+            "slug": "ssl-protocol-version",
+            "description": "A SSL/TLS version offered by the server is outdated. The deprecated versions contain weak implementations that cannot be considered as secure anymore. Please use TLS 1.2 or TLS 1.3 instead.",
+            "reference_owasp": "https://www.owasp.org/index.php/Testing_for_Weak_SSL/TLS_Ciphers,_Insufficient_Transport_Layer_Protection_(OTG-CRYPST-001)",
+            "reference_resolution": "https://wiki.crashtest-security.com/disable-deprecated-ssl-protocol-versions",
+            "cvssAttackVector": 1,
+            "cvssAttackComplexity": 1,
+            "cvssPrivilegesRequired": 1,
+            "cvssUserInteraction": 1,
+            "cvssScope": 1,
+            "cvssConfidentiality": 3,
+            "cvssIntegrity": 2,
+            "cvssAvailability": 1,
+            "cvssExploitCodeMaturity": 0,
+            "cvssRemediationLevel": 0,
+            "cvssReportConfidence": 0,
+            "cvssConfidentialityRequirement": 0,
+            "cvssIntegrityRequirement": 0,
+            "cvssAvailabilityRequirement": 0,
+            "cvssModifiedAttackVector": 0,
+            "cvssModifiedAttackComplexity": 0,
+            "cvssModifiedPrivilegesRequired": 0,
+            "cvssModifiedUserInteraction": 0,
+            "cvssModifiedScope": 0,
+            "cvssModifiedConfidentiality": 0,
+            "cvssModifiedIntegrity": 0,
+            "cvssModifiedAvailability": 0,
+            "how_to_fix": "The webserver is using a deprecated SSL/TLS version and needs to be updated. The webserver needs to be configured to use strong and trusted certificates. In addition they need to be configured to use the newest version of SSL and TLS as well as strong cipher suites. More details on how to configure these certificates can be found in the knowledge database (see Recommendations)"
+        },
+        {
+            "exploitability": 2.2,
+            "impact": 5.2,
+            "baseScore": 7.4,
+            "title": "SSL Cipherlist LOW",
+            "slug": "ssl-cipherlist-low",
+            "description": "The server is configured to support low Ciphers like \"LOW:DES:RC2:RC4\". This means, that an attacker can make use of an insecure SSL/TLS connection.",
+            "reference_owasp": "https://www.owasp.org/index.php/Testing_for_Weak_SSL/TLS_Ciphers,_Insufficient_Transport_Layer_Protection_(OTG-CRYPST-001)",
+            "reference_resolution": "https://wiki.crashtest-security.com/secure-tls-configuration",
+            "cvssAttackVector": 1,
+            "cvssAttackComplexity": 2,
+            "cvssPrivilegesRequired": 1,
+            "cvssUserInteraction": 1,
+            "cvssScope": 1,
+            "cvssConfidentiality": 3,
+            "cvssIntegrity": 3,
+            "cvssAvailability": 1,
+            "cvssExploitCodeMaturity": 0,
+            "cvssRemediationLevel": 0,
+            "cvssReportConfidence": 0,
+            "cvssConfidentialityRequirement": 0,
+            "cvssIntegrityRequirement": 0,
+            "cvssAvailabilityRequirement": 0,
+            "cvssModifiedAttackVector": 0,
+            "cvssModifiedAttackComplexity": 0,
+            "cvssModifiedPrivilegesRequired": 0,
+            "cvssModifiedUserInteraction": 0,
+            "cvssModifiedScope": 0,
+            "cvssModifiedConfidentiality": 0,
+            "cvssModifiedIntegrity": 0,
+            "cvssModifiedAvailability": 0,
+            "how_to_fix": "The list of supported HTTPS ciphers includes insecure ciphers. This means, that an attacker can make use of in insecure SSL/TLS connection. In the SSL/TLS configuration, the allowed ciphers and their order should be set to match secure values. More details on how to set these values can be found in the knowledge database (see Recommendations)"
+        },
+        {
+            "exploitability": 2.2,
+            "impact": 5.2,
+            "baseScore": 7.4,
+            "title": "SSL Cipherlist 3DES IDEA",
+            "slug": "ssl-cipherlist-3des-idea",
+            "description": "The server is configured to support 3DES and IDEA Ciphers like \"3DES:IDEA\". This means, that an attacker can make use of an insecure SSL/TLS connection.",
+            "reference_owasp": "https://www.owasp.org/index.php/Testing_for_Weak_SSL/TLS_Ciphers,_Insufficient_Transport_Layer_Protection_(OTG-CRYPST-001)",
+            "reference_resolution": "https://wiki.crashtest-security.com/secure-tls-configuration",
+            "cvssAttackVector": 1,
+            "cvssAttackComplexity": 2,
+            "cvssPrivilegesRequired": 1,
+            "cvssUserInteraction": 1,
+            "cvssScope": 1,
+            "cvssConfidentiality": 3,
+            "cvssIntegrity": 3,
+            "cvssAvailability": 1,
+            "cvssExploitCodeMaturity": 0,
+            "cvssRemediationLevel": 0,
+            "cvssReportConfidence": 0,
+            "cvssConfidentialityRequirement": 0,
+            "cvssIntegrityRequirement": 0,
+            "cvssAvailabilityRequirement": 0,
+            "cvssModifiedAttackVector": 0,
+            "cvssModifiedAttackComplexity": 0,
+            "cvssModifiedPrivilegesRequired": 0,
+            "cvssModifiedUserInteraction": 0,
+            "cvssModifiedScope": 0,
+            "cvssModifiedConfidentiality": 0,
+            "cvssModifiedIntegrity": 0,
+            "cvssModifiedAvailability": 0,
+            "how_to_fix": "The list of supported HTTPS ciphers includes insecure ciphers. This means, that an attacker can make use of in insecure SSL/TLS connection. In the SSL/TLS configuration, the allowed ciphers and their order should be set to match secure values. More details on how to set these values can be found in the knowledge database (see Recommendations)"
+        },
+        {
+            "exploitability": 8.6,
+            "impact": 2.9,
+            "baseScore": 4.3,
+            "title": "SSL BEAST",
+            "slug": "ssl-beast",
+            "description": "The server is vulnerable for BEAST (Browser Exploit Against SSL/TLS) attacks. By using weaknesses in cipher block chaining, an attacker can use a Man-In-The-Middle attacks to decrypt and obtain authentication tokens.",
+            "reference_owasp": "https://www.owasp.org/index.php/Testing_for_Weak_SSL/TLS_Ciphers,_Insufficient_Transport_Layer_Protection_(OTG-CRYPST-001)",
+            "reference_resolution": "https://wiki.crashtest-security.com/prevent-ssl-beast",
+            "cvssAttackVector": 1,
+            "cvssAttackComplexity": 2,
+            "cvssPrivilegesRequired": 1,
+            "cvssUserInteraction": 1,
+            "cvssScope": 1,
+            "cvssConfidentiality": 2,
+            "cvssIntegrity": 1,
+            "cvssAvailability": 1,
+            "cvssExploitCodeMaturity": 0,
+            "cvssRemediationLevel": 0,
+            "cvssReportConfidence": 0,
+            "cvssConfidentialityRequirement": 0,
+            "cvssIntegrityRequirement": 0,
+            "cvssAvailabilityRequirement": 0,
+            "cvssModifiedAttackVector": 0,
+            "cvssModifiedAttackComplexity": 0,
+            "cvssModifiedPrivilegesRequired": 0,
+            "cvssModifiedUserInteraction": 0,
+            "cvssModifiedScope": 0,
+            "cvssModifiedConfidentiality": 0,
+            "cvssModifiedIntegrity": 0,
+            "cvssModifiedAvailability": 0,
+            "how_to_fix": "BEAST attacks can be prevented by ensuring, that neither SSLv3 nor TLSv1 are used. More details on how to fix this problem can be found in the knowledge database (see Recommendations)"
+        },
+        {
+            "exploitability": 2.2,
+            "impact": 2.5,
+            "baseScore": 4.8,
+            "title": "Missing HSTS",
+            "slug": "ssl-hsts",
+            "description": "The webserver does not offer HTTP Strict Transport Security (HSTS). HSTS enforces HTTPS connections, which prevents downgrade attacks to an insecure HTTP connection.",
+            "reference_owasp": "https://www.owasp.org/index.php/Testing_for_Weak_SSL/TLS_Ciphers,_Insufficient_Transport_Layer_Protection_(OTG-CRYPST-001)",
+            "reference_resolution": "https://wiki.crashtest-security.com/enable-hsts",
+            "cvssAttackVector": 1,
+            "cvssAttackComplexity": 2,
+            "cvssPrivilegesRequired": 1,
+            "cvssUserInteraction": 1,
+            "cvssScope": 1,
+            "cvssConfidentiality": 2,
+            "cvssIntegrity": 2,
+            "cvssAvailability": 1,
+            "cvssExploitCodeMaturity": 0,
+            "cvssRemediationLevel": 0,
+            "cvssReportConfidence": 0,
+            "cvssConfidentialityRequirement": 0,
+            "cvssIntegrityRequirement": 0,
+            "cvssAvailabilityRequirement": 0,
+            "cvssModifiedAttackVector": 0,
+            "cvssModifiedAttackComplexity": 0,
+            "cvssModifiedPrivilegesRequired": 0,
+            "cvssModifiedUserInteraction": 0,
+            "cvssModifiedScope": 0,
+            "cvssModifiedConfidentiality": 0,
+            "cvssModifiedIntegrity": 0,
+            "cvssModifiedAvailability": 0,
+            "how_to_fix": "The webserver does not offer HTTP Strict Transport Security (HSTS). HSTS enforces HTTPS connections. This prevents downgrade attacks to an insecure HTTP connection. Depending on the used SSL certificate and the webserver certain configurations have to be changed. More details on how to enable HSTS can be found in the knowledge database (see Recommendations)"
+        },
+        {
+            "exploitability": 1.6,
+            "impact": 1.4,
+            "baseScore": 3.1,
+            "title": "SSL POODLE",
+            "slug": "ssl-poodle-ssl",
+            "description": "The server is vulnerable for POODLE (Padding Oracle On Downgraded Legacy Encryption) attacks. With the Man-In-The-Middle attack using the SSL 3.0 Fallback, an attacker can expose data of encrypted connections.",
+            "reference_owasp": "https://www.owasp.org/index.php/Testing_for_Weak_SSL/TLS_Ciphers,_Insufficient_Transport_Layer_Protection_(OTG-CRYPST-001)",
+            "reference_resolution": "https://wiki.crashtest-security.com/prevent-ssl-poodle",
+            "cvssAttackVector": 1,
+            "cvssAttackComplexity": 2,
+            "cvssPrivilegesRequired": 1,
+            "cvssUserInteraction": 2,
+            "cvssScope": 1,
+            "cvssConfidentiality": 2,
+            "cvssIntegrity": 1,
+            "cvssAvailability": 1,
+            "cvssExploitCodeMaturity": 0,
+            "cvssRemediationLevel": 0,
+            "cvssReportConfidence": 0,
+            "cvssConfidentialityRequirement": 0,
+            "cvssIntegrityRequirement": 0,
+            "cvssAvailabilityRequirement": 0,
+            "cvssModifiedAttackVector": 0,
+            "cvssModifiedAttackComplexity": 0,
+            "cvssModifiedPrivilegesRequired": 0,
+            "cvssModifiedUserInteraction": 0,
+            "cvssModifiedScope": 0,
+            "cvssModifiedConfidentiality": 0,
+            "cvssModifiedIntegrity": 0,
+            "cvssModifiedAvailability": 0,
+            "how_to_fix": "POODLE attacks can be prevented by ensuring that TLS_FALLBACK_SCSV is enabled and a secure TLS configuration is used. More details on how to enable TLS_FALLBACK_SCSV and which configurations are secure, can be found in the knowledge database (see Recommendations)"
+        },
+        {
+            "exploitability": 2.2,
+            "impact": 1.4,
+            "baseScore": 3.7,
+            "title": "SSL LOGJAM Common Primes",
+            "slug": "ssl-logjam-common-primes",
+            "description": "The server is vulnerable for LOGJAM, a security vulnerability against a Diffie-Hellman key exchange using 512 to 1024 bit keys. The algorithm uses in most cases the same pregenerated prime numbers which makes it way easier (and cheaper) to crack such an encryption.",
+            "reference_owasp": "https://www.owasp.org/index.php/Testing_for_Weak_SSL/TLS_Ciphers,_Insufficient_Transport_Layer_Protection_(OTG-CRYPST-001)",
+            "reference_resolution": "https://wiki.crashtest-security.com/prevent-ssl-logjam",
+            "cvssAttackVector": 1,
+            "cvssAttackComplexity": 2,
+            "cvssPrivilegesRequired": 1,
+            "cvssUserInteraction": 1,
+            "cvssScope": 1,
+            "cvssConfidentiality": 1,
+            "cvssIntegrity": 2,
+            "cvssAvailability": 1,
+            "cvssExploitCodeMaturity": 0,
+            "cvssRemediationLevel": 0,
+            "cvssReportConfidence": 0,
+            "cvssConfidentialityRequirement": 0,
+            "cvssIntegrityRequirement": 0,
+            "cvssAvailabilityRequirement": 0,
+            "cvssModifiedAttackVector": 0,
+            "cvssModifiedAttackComplexity": 0,
+            "cvssModifiedPrivilegesRequired": 0,
+            "cvssModifiedUserInteraction": 0,
+            "cvssModifiedScope": 0,
+            "cvssModifiedConfidentiality": 0,
+            "cvssModifiedIntegrity": 0,
+            "cvssModifiedAvailability": 0,
+            "how_to_fix": "LOGJAM attacks can be prevented by using strong ciphers and avoiding weak primes. More details on what ciphers are considered strong can be found in the knowledge database (see Recommendations)"
+        },
+        {
+            "exploitability": 3.9,
+            "impact": 1.4,
+            "baseScore": 5.3,
+            "title": "Sensitive Data Exposure",
+            "slug": "fuzzer",
+            "description": "The server grants access to a file or directory which might contain sensitive data. This can either leak sensitive data itself or allow an attacker to use the provided information to prepare a further attack.",
+            "reference_owasp": "",
+            "reference_resolution": "https://wiki.crashtest-security.com/sensitive-data-exposure",
+            "cvssAttackVector": 1,
+            "cvssAttackComplexity": 1,
+            "cvssPrivilegesRequired": 1,
+            "cvssUserInteraction": 1,
+            "cvssScope": 1,
+            "cvssConfidentiality": 2,
+            "cvssIntegrity": 1,
+            "cvssAvailability": 1,
+            "cvssExploitCodeMaturity": 0,
+            "cvssRemediationLevel": 0,
+            "cvssReportConfidence": 0,
+            "cvssConfidentialityRequirement": 0,
+            "cvssIntegrityRequirement": 0,
+            "cvssAvailabilityRequirement": 0,
+            "cvssModifiedAttackVector": 0,
+            "cvssModifiedAttackComplexity": 0,
+            "cvssModifiedPrivilegesRequired": 0,
+            "cvssModifiedUserInteraction": 0,
+            "cvssModifiedScope": 0,
+            "cvssModifiedConfidentiality": 0,
+            "cvssModifiedIntegrity": 0,
+            "cvssModifiedAvailability": 0,
+            "how_to_fix": "In some cases, it is completely OK to expose certain file paths as long as it is on purpose. While they can be exposed on purpose, others may be unwillingly exposed. These paths can either be protected by Basic Auth (htaccess) or be removed as they might not be needed on a production environment. More details on how to avoid exposing unnecessary information can be found in the knowledge database (see Recommendations)"
+        },
+        {
+            "exploitability": 3.9,
+            "impact": 1.4,
+            "baseScore": 5.3,
+            "title": "Fingerprint Web Server",
+            "slug": "fingerprint-web-server",
+            "description": "The webserver publicly provides information about itself such as the name or version. This opens attackers the possibility to look for exploits specifically targetting the webserver in its exact version.",
+            "reference_owasp": "https://www.owasp.org/index.php/Fingerprint_Web_Server_(OTG-INFO-002)",
+            "reference_resolution": "https://wiki.crashtest-security.com/server-version-fingerprinting",
+            "cvssAttackVector": 1,
+            "cvssAttackComplexity": 1,
+            "cvssPrivilegesRequired": 1,
+            "cvssUserInteraction": 1,
+            "cvssScope": 1,
+            "cvssConfidentiality": 1,
+            "cvssIntegrity": 2,
+            "cvssAvailability": 1,
+            "cvssExploitCodeMaturity": 0,
+            "cvssRemediationLevel": 0,
+            "cvssReportConfidence": 0,
+            "cvssConfidentialityRequirement": 0,
+            "cvssIntegrityRequirement": 0,
+            "cvssAvailabilityRequirement": 0,
+            "cvssModifiedAttackVector": 0,
+            "cvssModifiedAttackComplexity": 0,
+            "cvssModifiedPrivilegesRequired": 0,
+            "cvssModifiedUserInteraction": 0,
+            "cvssModifiedScope": 0,
+            "cvssModifiedConfidentiality": 0,
+            "cvssModifiedIntegrity": 0,
+            "cvssModifiedAvailability": 0,
+            "how_to_fix": "The amount of information a server is sharing can be set in its configuration files. Depending on the used webserver, the configuration file can be found on different locations (see Recommendations to find the exact location). In most cases it is sufficient to change one or two settings to avoid publishing unnecessary information. After saving the changes, it is recommended to restart or reload the webserver to activate the changes."
+        },
+        {
+            "exploitability": 2.2,
+            "impact": 2.5,
+            "baseScore": 4.8,
+            "title": "SSL Cipher Order",
+            "slug": "ssl-order",
+            "description": "There is no cipher order for HTTPS ciphers set or the cipher order includes an insecure cipher. This means, that an attacker can make use of an insecure SSL/TLS connection.",
+            "reference_owasp": "https://www.owasp.org/index.php/Testing_for_Weak_SSL/TLS_Ciphers,_Insufficient_Transport_Layer_Protection_(OTG-CRYPST-001)",
+            "reference_resolution": "https://wiki.crashtest-security.com/configure-ssl-cipher-order",
+            "cvssAttackVector": 1,
+            "cvssAttackComplexity": 2,
+            "cvssPrivilegesRequired": 1,
+            "cvssUserInteraction": 1,
+            "cvssScope": 1,
+            "cvssConfidentiality": 2,
+            "cvssIntegrity": 2,
+            "cvssAvailability": 1,
+            "cvssExploitCodeMaturity": 0,
+            "cvssRemediationLevel": 0,
+            "cvssReportConfidence": 0,
+            "cvssConfidentialityRequirement": 0,
+            "cvssIntegrityRequirement": 0,
+            "cvssAvailabilityRequirement": 0,
+            "cvssModifiedAttackVector": 0,
+            "cvssModifiedAttackComplexity": 0,
+            "cvssModifiedPrivilegesRequired": 0,
+            "cvssModifiedUserInteraction": 0,
+            "cvssModifiedScope": 0,
+            "cvssModifiedConfidentiality": 0,
+            "cvssModifiedIntegrity": 0,
+            "cvssModifiedAvailability": 0,
+            "how_to_fix": "There is no cipher order for HTTPS ciphers set or the cipher order includes an insecure cipher. This means, that an attacker can make use of in insecure SSL/TLS connection. In the SSL/TLS configuration, the allowed ciphers and their order should be set to match secure values. More details on how to set these values can be found in the knowledge database (see Recommendations)"
+        },
+        {
+            "exploitability": 8.6,
+            "impact": 2.9,
+            "baseScore": 4.3,
+            "title": "SSL RC4",
+            "slug": "ssl-rc4",
+            "description": "The server supports RC4 (Rivest Cipher 4), which is a cipher stream that is considered insecure due to multiple known vulnerabilities.",
+            "reference_owasp": "https://www.owasp.org/index.php/Testing_for_Weak_SSL/TLS_Ciphers,_Insufficient_Transport_Layer_Protection_(OTG-CRYPST-001)",
+            "reference_resolution": "https://wiki.crashtest-security.com/disable-ssl-rc4",
+            "cvssAttackVector": 1,
+            "cvssAttackComplexity": 2,
+            "cvssPrivilegesRequired": 1,
+            "cvssUserInteraction": 1,
+            "cvssScope": 1,
+            "cvssConfidentiality": 2,
+            "cvssIntegrity": 1,
+            "cvssAvailability": 1,
+            "cvssExploitCodeMaturity": 0,
+            "cvssRemediationLevel": 0,
+            "cvssReportConfidence": 0,
+            "cvssConfidentialityRequirement": 0,
+            "cvssIntegrityRequirement": 0,
+            "cvssAvailabilityRequirement": 0,
+            "cvssModifiedAttackVector": 0,
+            "cvssModifiedAttackComplexity": 0,
+            "cvssModifiedPrivilegesRequired": 0,
+            "cvssModifiedUserInteraction": 0,
+            "cvssModifiedScope": 0,
+            "cvssModifiedConfidentiality": 0,
+            "cvssModifiedIntegrity": 0,
+            "cvssModifiedAvailability": 0,
+            "how_to_fix": "\"Rivest Cipher 4\" is considered insecure as there are multiple known vulnerabilities for it. It is recommended to replace the cipher with a strong encryption algorithm. More details on which ciphers to choose, can be found in the knowledge database (see Recommendations)"
+        },
+        {
+            "exploitability": 2.2,
+            "impact": 2.5,
+            "baseScore": 4.8,
+            "title": "SSL Insecure Algorithm",
+            "slug": "ssl-algorithm",
+            "description": "The used encryption algorithm has severe security issues.",
+            "reference_owasp": "https://www.owasp.org/index.php/Testing_for_Weak_SSL/TLS_Ciphers,_Insufficient_Transport_Layer_Protection_(OTG-CRYPST-001)",
+            "reference_resolution": "https://wiki.crashtest-security.com/disable-ssl-insecure-algorithm",
+            "cvssAttackVector": 1,
+            "cvssAttackComplexity": 2,
+            "cvssPrivilegesRequired": 1,
+            "cvssUserInteraction": 1,
+            "cvssScope": 1,
+            "cvssConfidentiality": 2,
+            "cvssIntegrity": 2,
+            "cvssAvailability": 1,
+            "cvssExploitCodeMaturity": 0,
+            "cvssRemediationLevel": 0,
+            "cvssReportConfidence": 0,
+            "cvssConfidentialityRequirement": 0,
+            "cvssIntegrityRequirement": 0,
+            "cvssAvailabilityRequirement": 0,
+            "cvssModifiedAttackVector": 0,
+            "cvssModifiedAttackComplexity": 0,
+            "cvssModifiedPrivilegesRequired": 0,
+            "cvssModifiedUserInteraction": 0,
+            "cvssModifiedScope": 0,
+            "cvssModifiedConfidentiality": 0,
+            "cvssModifiedIntegrity": 0,
+            "cvssModifiedAvailability": 0,
+            "how_to_fix": "One of the used encryption algorithms has severe security issues and needs to be replaced with a newer algorithm. More details on which cipher suites have strong encryption algorithms can be found in the knowledge database (see Recommendations)"
+        },
+        {
+            "exploitability": 2.2,
+            "impact": 5.9,
+            "baseScore": 8.1,
+            "title": "Insecure Deserialization",
+            "slug": "insecure-deserialization",
+            "description": "Insecure Deserialization allows an attacker to inject a manipulated object into the web application.",
+            "reference_owasp": "https://www.owasp.org/index.php/Top_10-2017_A8-Insecure_Deserialization",
+            "reference_resolution": "https://wiki.crashtest-security.com/insecure-deserialization",
+            "cvssAttackVector": 1,
+            "cvssAttackComplexity": 2,
+            "cvssPrivilegesRequired": 1,
+            "cvssUserInteraction": 1,
+            "cvssScope": 1,
+            "cvssConfidentiality": 2,
+            "cvssIntegrity": 2,
+            "cvssAvailability": 2,
+            "cvssExploitCodeMaturity": 0,
+            "cvssRemediationLevel": 0,
+            "cvssReportConfidence": 0,
+            "cvssConfidentialityRequirement": 0,
+            "cvssIntegrityRequirement": 0,
+            "cvssAvailabilityRequirement": 0,
+            "cvssModifiedAttackVector": 0,
+            "cvssModifiedAttackComplexity": 0,
+            "cvssModifiedPrivilegesRequired": 0,
+            "cvssModifiedUserInteraction": 0,
+            "cvssModifiedScope": 0,
+            "cvssModifiedConfidentiality": 0,
+            "cvssModifiedIntegrity": 0,
+            "cvssModifiedAvailability": 0,
+            "how_to_fix": "Do not pass untrusted serialized objects to the unserialize function"
+        },
+        {
+            "exploitability": 2.2,
+            "impact": 5.2,
+            "baseScore": 7.4,
+            "title": "SSL Trust",
+            "slug": "ssl-trust",
+            "description": "The X.509 certificate issued for this domain cannot be trusted. Clients such as browsers will show warnings or not be able to connect if they cannot trust the certificate. Trust issues arise if the common name in the certificate does not match the webserver domain or if the certificate is self-signed.",
+            "reference_owasp": "https://www.owasp.org/index.php/Testing_for_Weak_SSL/TLS_Ciphers,_Insufficient_Transport_Layer_Protection_(OTG-CRYPST-001)",
+            "reference_resolution": "https://wiki.crashtest-security.com/configure-trusted-certificates",
+            "cvssAttackVector": 1,
+            "cvssAttackComplexity": 2,
+            "cvssPrivilegesRequired": 1,
+            "cvssUserInteraction": 1,
+            "cvssScope": 1,
+            "cvssConfidentiality": 3,
+            "cvssIntegrity": 3,
+            "cvssAvailability": 1,
+            "cvssExploitCodeMaturity": 0,
+            "cvssRemediationLevel": 0,
+            "cvssReportConfidence": 0,
+            "cvssConfidentialityRequirement": 0,
+            "cvssIntegrityRequirement": 0,
+            "cvssAvailabilityRequirement": 0,
+            "cvssModifiedAttackVector": 0,
+            "cvssModifiedAttackComplexity": 0,
+            "cvssModifiedPrivilegesRequired": 0,
+            "cvssModifiedUserInteraction": 0,
+            "cvssModifiedScope": 0,
+            "cvssModifiedConfidentiality": 0,
+            "cvssModifiedIntegrity": 0,
+            "cvssModifiedAvailability": 0,
+            "how_to_fix": "The issued certificate is not consistent with the domain that delivered the certificate. To issue a trusted certificate, the certificate needs to contain the correct information for the web application such as the domain name as common name of the certificate. The certificate must be signed by a certificate authority (CA) that the users' browser trust. The webserver has then to be configured to present the certificate on incoming https requests. Guides on how to generate and use a trusted certificate can be found in the knowledge database (see Recommendations)"
+        },
+        {
+            "exploitability": 3.9,
+            "impact": 5.5,
+            "baseScore": 9.4,
+            "title": "XXE",
+            "slug": "xxe",
+            "description": "XXE allows an attacker to inject malicious XML documents into the website, which is then executed. This can lead to sensitive data disclosure or remote code execution.",
+            "reference_owasp": "https://www.owasp.org/index.php/XML_External_Entity_(XXE)_Processing",
+            "reference_resolution": "https://wiki.crashtest-security.com/xxe-processing",
+            "cvssAttackVector": 0,
+            "cvssAttackComplexity": 0,
+            "cvssPrivilegesRequired": 0,
+            "cvssUserInteraction": 0,
+            "cvssScope": 0,
+            "cvssConfidentiality": 2,
+            "cvssIntegrity": 2,
+            "cvssAvailability": 1,
+            "cvssExploitCodeMaturity": 0,
+            "cvssRemediationLevel": 0,
+            "cvssReportConfidence": 0,
+            "cvssConfidentialityRequirement": 2,
+            "cvssIntegrityRequirement": 2,
+            "cvssAvailabilityRequirement": 2,
+            "cvssModifiedAttackVector": 1,
+            "cvssModifiedAttackComplexity": 1,
+            "cvssModifiedPrivilegesRequired": 1,
+            "cvssModifiedUserInteraction": 1,
+            "cvssModifiedScope": 1,
+            "cvssModifiedConfidentiality": 3,
+            "cvssModifiedIntegrity": 3,
+            "cvssModifiedAvailability": 3,
+            "how_to_fix": "If XML documents are communicated from an untrusted source the XML processor should be configured to disallow any declared document type definition (DTD) included in the XML document."
+        }
+    ]
+}
