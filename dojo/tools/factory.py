@@ -80,6 +80,7 @@ from dojo.tools.harbor_vulnerability.parser import HarborVulnerabilityParser
 from dojo.tools.github_vulnerability.parser import GithubVulnerabilityParser
 from dojo.tools.choctaw_hog.parser import ChoctawhogParser
 from dojo.tools.gitlab_sast.parser import GitlabSastReportParser
+from dojo.tools.yarn_audit.parser import YarnAuditParser
 from dojo.tools.bugcrowd.parser import BugCrowdCSVParser
 
 
@@ -260,6 +261,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = ChoctawhogParser(file, test)
     elif scan_type == 'GitLab SAST Report':
         parser = GitlabSastReportParser(file, test)
+    elif scan_type == 'Yarn Audit Scan':
+        parser = YarnAuditParser(file, test)
     elif scan_type == 'BugCrowd Scan':
         parser = BugCrowdCSVParser(file, test)
     else:

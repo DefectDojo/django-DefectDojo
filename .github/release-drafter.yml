@@ -2,7 +2,6 @@ name-template: '$NEXT_MINOR_VERSION 🌈'
 tag-template: '$NEXT_MINOR_VERSION'
 branches:
   - master
-  - dev
 categories:
   - title: '🚀 New scanners'
     labels:
@@ -24,6 +23,9 @@ categories:
   - title: '🚩 Requires settings change'
     labels:
       - 'settings_changes'
+  - title: '🚩 Security'
+    labels:
+      - 'security'
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 template: |
   ## Changes

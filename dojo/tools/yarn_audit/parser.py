@@ -1,9 +1,9 @@
-import json
+import jsonlines
 
 from dojo.models import Finding
 
 
-class NpmAuditParser(object):
+class YarnAuditParser(object):
     def __init__(self, json_output, test):
 
         tree = self.parse_json(json_output)
@@ -18,31 +18,25 @@ class NpmAuditParser(object):
             self.items = []
             return
         try:
-            data = json_output.read()
-            try:
-                tree = json.loads(str(data, 'utf-8'))
-            except:
-                tree = json.loads(data)
+            data = []
+            reader = jsonlines.Reader(json_output)
+            for obj in reader:
+                data.append(obj)
         except:
-            raise Exception("Invalid format, unable to parse json.")
-
-        if tree.get('error'):
-            error = tree.get('error')
-            code = error['code']
-            summary = error['summary']
-            raise ValueError('npm audit report contains errors: %s, %s', code, summary)
-
-        subtree = tree.get('advisories')
-
-        return subtree
+            raise Exception("Invalid format")
+        return data
 
     def get_items(self, tree, test):
         items = {}
-
-        for key, node in tree.items():
-            item = get_item(node, test)
-            unique_key = str(node['id']) + str(node['module_name'])
-            items[unique_key] = item
+        for element in tree:
+            if element.get('type') == 'auditAdvisory':
+                node = element.get('data').get('advisory')
+                item = get_item(node, test)
+                unique_key = str(node.get('id')) + str(node.get('module_name'))
+                items[unique_key] = item
+            elif element.get('type') == 'error':
+                error = element.get('data')
+                raise ValueError('yarn audit report contains errors: %s', error)
 
         return list(items.values())
 
@@ -61,12 +55,9 @@ def get_item(item_node, test):
         severity = 'Info'
 
     paths = ''
-    component_version = None
-    for npm_finding in item_node['findings']:
-        # use first version as component_version
-        component_version = npm_finding['version'] if not component_version else component_version
-        paths += "\n  - " + str(npm_finding['version']) + ":" + str(','.join(npm_finding['paths'][:25]))
-        if len(npm_finding['paths']) > 25:
+    for finding in item_node['findings']:
+        paths += "\n  - " + str(finding['version']) + ":" + str(','.join(finding['paths'][:25]))
+        if len(finding['paths']) > 25:
             paths += "\n  - ..... (list of paths truncated after 25 paths)"
 
     dojo_finding = Finding(title=item_node['title'] + " - " + "(" + item_node['module_name'] + ", " + item_node['vulnerable_versions'] + ")",
@@ -86,7 +77,7 @@ def get_item(item_node, test):
                       mitigation=item_node['recommendation'],
                       references=item_node['url'],
                       component_name=item_node['module_name'],
-                      component_version=component_version,
+                      component_version=item_node['findings'][0]['version'],
                       active=False,
                       verified=False,
                       false_p=False,

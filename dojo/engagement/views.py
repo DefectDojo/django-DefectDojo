@@ -32,7 +32,7 @@ from dojo.models import Finding, Product, Engagement, Test, \
 from dojo.tools import handles_active_verified_statuses
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
-    FileIterWrapper, get_cal_event, message, get_system_setting, Product_Tab
+    FileIterWrapper, get_cal_event, message, get_system_setting, Product_Tab, is_scan_file_too_large
 from dojo.notifications.helper import create_notification
 from dojo.tasks import update_epic_task, add_epic_task
 from functools import reduce
@@ -544,6 +544,12 @@ def import_scan_results(request, eid=None, pid=None):
             if not any(scan_type in code
                        for code in ImportScanForm.SCAN_TYPE_CHOICES):
                 raise Http404()
+            if file and is_scan_file_too_large(file):
+                messages.add_message(request,
+                                     messages.ERROR,
+                                     "Report file is too large. Maximum supported size is {} MB".format(settings.SCAN_FILE_MAX_SIZE),
+                                     extra_tags='alert-danger')
+                return HttpResponseRedirect(reverse('import_scan_results', args=(eid,)))
 
             tt, t_created = Test_Type.objects.get_or_create(name=scan_type)
             # will save in development environment
