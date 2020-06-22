@@ -612,5 +612,12 @@
     },
 		"model": "dojo.test_type",
 		"pk": 179
+	},
+	{
+    "fields": {
+      "name": "ESLint Scan"
+    },
+    "model": "dojo.test_type",
+      "pk": 180
 	}
 ]
