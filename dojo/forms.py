@@ -388,6 +388,7 @@ class ImportScanForm(forms.Form):
                          ("Yarn Audit Scan", "Yarn Audit Scan"),
                          ("BugCrowd Scan", "BugCrowd Scan"),
                          ("GitLab SAST Report", "GitLab SAST Report"))
+                         ("AWS Security Hub Scan", "AWS Security Hub Scan"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
     scan_date = forms.DateTimeField(
