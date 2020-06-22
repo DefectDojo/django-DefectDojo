@@ -121,10 +121,10 @@ font-awesome@~4.4:
   resolved "https://registry.yarnpkg.com/font-awesome/-/font-awesome-4.4.0.tgz#9fe43f82cf72726badcbdb2704407aadaca17da9"
   integrity sha1-n+Q/gs9ycmuty9snBEB6rayhfak=
 
-fullcalendar@^3.10.2:
-  version "3.10.2"
-  resolved "https://registry.yarnpkg.com/fullcalendar/-/fullcalendar-3.10.2.tgz#9b1ba84bb02803621b761d1bba91a4f18affafb7"
-  integrity sha512-YWZaHdp8ZLBqhPz615PoXdA49ymsBTUF+MGDM6H3vyz71Pv/ZW9Pm9/Mj3x6n822k6bs2txFO7muRTSvBhsqKg==
+fullcalendar@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/fullcalendar/-/fullcalendar-5.0.0.tgz#b157278532fc3cbd31054a1fb5ea470544f68d9a"
+  integrity sha512-O1y3LIh77r4UYzi2TZl+XY3fhnwig7wyef5cdrsYrIxX55QLRXtTTzXz719lGsuBShDLmwn31tPhg85AF8s++w==
 
 good-listener@^1.2.2:
   version "1.2.2"

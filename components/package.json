@@ -16,7 +16,7 @@
     "flot": "flot/flot#~0.8.3",
     "flot-axis": "markrcote/flot-axislabels#*",
     "font-awesome": "^4.0.0",
-    "fullcalendar": "^3.10.2",
+    "fullcalendar": "^5.0.0",
     "google-code-prettify": "^1.0.0",
     "jquery": "^3.4.0",
     "jquery-highlight": "3.5.0",
