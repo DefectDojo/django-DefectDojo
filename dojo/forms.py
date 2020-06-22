@@ -384,7 +384,9 @@ class ImportScanForm(forms.Form):
                          ("Gitleaks Scan", "Gitleaks Scan"),
                          ("Choctaw Hog Scan", "Choctaw Hog Scan"),
                          ("Harbor Vulnerability Scan", "Harbor Vulnerability Scan"),
+<<<<<<< feature/github_vuln
                          ("Github Vulnerability Scan", "Github Vulnerability Scan"),
+=======
                          ("Yarn Audit Scan", "Yarn Audit Scan"),
                          ("BugCrowd Scan", "BugCrowd Scan"),
                          ("GitLab SAST Report", "GitLab SAST Report"))
