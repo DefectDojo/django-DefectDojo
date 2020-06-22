@@ -9,12 +9,13 @@ See the file 'doc/LICENSE' for the license information
 from defusedxml import ElementTree as ET
 
 import html2text
-
+import time
 from dojo.models import Endpoint, Finding
 
 __author__ = "Micaela Ranea Sanchez"
 __copyright__ = "Copyright (c) 2013, Infobyte LLC"
-__credits__ = ["Francisco Amato", "Federico Kirschbaum", "Micaela Ranea Sanchez", "German Riera"]
+__credits__ = ["Francisco Amato", "Federico Kirschbaum",
+               "Micaela Ranea Sanchez", "German Riera"]
 __license__ = ""
 __version__ = "1.0.0"
 __maintainer__ = "Micaela Ranea Sanchez"
@@ -44,6 +45,9 @@ class NexposeFullXmlParser(object):
             self.items = []
         self.tree = tree
         self.vulns = vulns
+        # for k,v in self.vulns.items():
+        #     print("Key",k , "Value", v ,"\n")
+        #     time.sleep(3)
 
     def parse_xml(self, xml_output):
         """
@@ -92,7 +96,8 @@ class NexposeFullXmlParser(object):
         if tag == 'orderedlist':
             i = 1
             for item in list(node):
-                ret += "<ol>" + str(i) + " " + self.parse_html_type(item) + "</ol>"
+                ret += "<ol>" + str(i) + " " + \
+                    self.parse_html_type(item) + "</ol>"
                 i += 1
         if tag == 'paragraph':
             if len(list(node)) > 0:
@@ -138,7 +143,8 @@ class NexposeFullXmlParser(object):
                     vuln = vulnsDefinitions[test.get('id').lower()]
                     for desc in list(test):
                         if 'pluginOutput' in vuln:
-                            vuln['pluginOutput'] += "\n\n" + self.parse_html_type(desc)
+                            vuln['pluginOutput'] += "\n\n" + \
+                                self.parse_html_type(desc)
                         else:
                             vuln['pluginOutput'] = self.parse_html_type(desc)
                     vulns.append(vuln)
@@ -155,15 +161,32 @@ class NexposeFullXmlParser(object):
             for vulnDef in vulnsDef.iter('vulnerability'):
                 vid = vulnDef.get('id').lower()
                 vector = vulnDef.get('cvssVector')
-
+                # time.sleep(2)
+                # print(vulnDef)
+                severity_chk = int(vulnDef.get('severity'))
+                # time.sleep(2)
+                # print(severity_chk)
+                if severity_chk >= 9:
+                    sev = int(0)
+                elif severity_chk >= 7:
+                    sev = int(1)
+                elif severity_chk >= 4:
+                    sev = int(2)
+                elif severity_chk < 4 and severity_chk >0:
+                    sev = int(3)
+                else:
+                    sev = int(4)
                 vuln = {
                     'desc': "",
                     'name': vulnDef.get('title'),
                     'refs': ["vector: " + vector, vid],
                     'resolution': "",
-                    'severity': (int(vulnDef.get('severity')) - 1) / 2,
+                    'severity': sev,
                     'tags': list()
                 }
+                # for k,v in vuln.items():
+                    # print("Key",k , "Value", v)
+                # time.sleep(3)
 
                 for item in list(vulnDef):
                     if item.tag == 'description':
@@ -173,13 +196,14 @@ class NexposeFullXmlParser(object):
                     if item.tag == 'exploits':
                         for exploit in list(item):
                             vuln['refs'].append(
-                                    str(exploit.get('title')).strip() + ' ' + str(exploit.get('link')).strip())
+                                str(exploit.get('title')).strip() + ' ' + str(exploit.get('link')).strip())
                     if item.tag == 'references':
                         for ref in list(item):
                             vuln['refs'].append(str(ref.text).strip())
                     if item.tag == 'solution':
                         for htmlType in list(item):
-                            vuln['resolution'] += self.parse_html_type(htmlType)
+                            vuln['resolution'] += self.parse_html_type(
+                                htmlType)
                     """
                     # there is currently no method to register tags in vulns
                     if item.tag == 'tags':
@@ -221,7 +245,8 @@ class NexposeFullXmlParser(object):
                         for services in endpoint.iter('services'):
                             for service in list(services):
                                 svc['name'] = service.get('name')
-                                svc['vulns'] = self.parse_tests_type(service, vulns)
+                                svc['vulns'] = self.parse_tests_type(
+                                    service, vulns)
 
                                 for configs in service.iter('configurations'):
                                     for config in list(configs):
@@ -259,31 +284,35 @@ class NexposeFullXmlParser(object):
                             refs += "\n"
                         find = Finding(title=vuln['name'],
                                        description=html2text.html2text(
-                                               vuln['desc'].strip()) + "\n\n" + html2text.html2text(vuln['pluginOutput'].strip()),
-                                       severity=sev,
-                                       numerical_severity=Finding.get_numerical_severity(sev),
-                                       mitigation=html2text.html2text(vuln['resolution']),
-                                       impact=vuln['refs'][0],
-                                       references=refs,
-                                       test=test,
-                                       active=False,
-                                       verified=False,
-                                       false_p=False,
-                                       duplicate=False,
-                                       out_of_scope=False,
-                                       mitigated=None,
-                                       dynamic_finding=True)
+                            vuln['desc'].strip()) + "\n\n" + html2text.html2text(vuln['pluginOutput'].strip()),
+                            severity=sev,
+                            numerical_severity=Finding.get_numerical_severity(
+                                           sev),
+                            mitigation=html2text.html2text(
+                                           vuln['resolution']),
+                            impact=vuln['refs'][0],
+                            references=refs,
+                            test=test,
+                            active=False,
+                            verified=False,
+                            false_p=False,
+                            duplicate=False,
+                            out_of_scope=False,
+                            mitigated=None,
+                            dynamic_finding=True)
                         find.unsaved_endpoints = list()
                         dupes[dupe_key] = find
 
-                    find.unsaved_endpoints.append(Endpoint(host=item['name'], product=test.engagement.product))
+                    find.unsaved_endpoints.append(
+                        Endpoint(host=item['name'], product=test.engagement.product))
                     for hostname in item['hostnames']:
-                        find.unsaved_endpoints.append(Endpoint(host=hostname, product=test.engagement.product))
+                        find.unsaved_endpoints.append(
+                            Endpoint(host=hostname, product=test.engagement.product))
                     for service in item['services']:
                         if len(service['vulns']) > 0:
                             find.unsaved_endpoints.append(
-                                    Endpoint(host=item['name'] + (":" + service['port']) if service[
-                                                                                                'port'] is not None else "",
-                                             product=test.engagement.product))
+                                Endpoint(host=item['name'] + (":" + service['port']) if service[
+                                    'port'] is not None else "",
+                                    product=test.engagement.product))
 
         return list(dupes.values())
