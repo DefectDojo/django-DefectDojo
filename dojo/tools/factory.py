@@ -82,7 +82,7 @@ from dojo.tools.choctaw_hog.parser import ChoctawhogParser
 from dojo.tools.gitlab_sast.parser import GitlabSastReportParser
 from dojo.tools.yarn_audit.parser import YarnAuditParser
 from dojo.tools.bugcrowd.parser import BugCrowdCSVParser
-from dojo.tools.securityhub.parser import AwsSecurityFindingFormatParser
+from dojo.tools.awssecurityhub.parser import AwsSecurityFindingFormatParser
 
 
 __author__ = 'Jay Paz'
