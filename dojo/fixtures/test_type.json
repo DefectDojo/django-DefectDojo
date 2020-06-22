@@ -606,7 +606,7 @@
 		"model": "dojo.test_type",
 		"pk": 178
 	},
-  {
+	{
 		"fields": {
 		  "name": "Yarn Audit Scan"
     },
@@ -614,10 +614,17 @@
 		"pk": 179
 	},
 	{
-    "fields": {
-      "name": "ESLint Scan"
-    },
-    "model": "dojo.test_type",
-      "pk": 180
+		"fields": {
+			"name": "ESLint Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 180
+	},
+	{
+		"fields": {
+		  "name": "AWS Security Hub Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 181
 	}
 ]
