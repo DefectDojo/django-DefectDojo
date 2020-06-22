@@ -286,21 +286,14 @@ def deduplicate_uid_or_hash_code(new_finding):
             continue
         break
 
-
 def set_duplicate(new_finding, existing_finding):
     if existing_finding.duplicate:
         raise Exception("Existing finding is a duplicate")
     if existing_finding.id == new_finding.id:
         raise Exception("Can not add duplicate to itself")
     deduplicationLogger.debug('New finding ' + str(new_finding.id) + ' is a duplicate of existing finding ' + str(existing_finding.id))
-    if (existing_finding.is_Mitigated or existing_finding.mitigated) and new_finding.active and not new_finding.is_Mitigated:
-        existing_finding.mitigated = new_finding.mitigated
-        existing_finding.is_Mitigated = new_finding.is_Mitigated
-        existing_finding.active = new_finding.active
-        existing_finding.verified = new_finding.verified
-        existing_finding.notes.create(author=existing_finding.reporter,
-                                      entry="This finding has been automatically re-openend as it was found in recent scans.")
-        existing_finding.save()
+    if is_duplicate_reopen(new_finding, existing_finding):
+        set_duplicate_reopen_(new_finding, existing_finding)
     new_finding.duplicate = True
     new_finding.active = False
     new_finding.verified = False
@@ -312,6 +305,20 @@ def set_duplicate(new_finding, existing_finding):
     super(Finding, new_finding).save()
     super(Finding, existing_finding).save()
 
+def is_duplicate_reopen(new_finding, existing_finding):
+    if (existing_finding.is_Mitigated or existing_finding.mitigated) and not existing_finding.out_of_scope and not existing_finding.false_p and new_finding.active and not new_finding.is_Mitigated:
+        return True
+    else:
+        return False
+
+def set_duplicate_reopen(new_finding, existing_finding):
+        existing_finding.mitigated = new_finding.mitigated
+        existing_finding.is_Mitigated = new_finding.is_Mitigated
+        existing_finding.active = new_finding.active
+        existing_finding.verified = new_finding.verified
+        existing_finding.notes.create(author=existing_finding.reporter,
+                                        entry="This finding has been automatically re-openend as it was found in recent scans.")
+        existing_finding.save()
 
 def removeLoop(finding_id, counter):
     # get latest status
