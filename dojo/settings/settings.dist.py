@@ -93,6 +93,7 @@ env = environ.Env(
     DD_SOCIAL_AUTH_GITLAB_SECRET=(str, ''),
     DD_SOCIAL_AUTH_GITLAB_API_URL=(str, 'https://gitlab.com'),
     DD_SOCIAL_AUTH_GITLAB_SCOPE=(list, ['api', 'read_user', 'openid', 'profile', 'email']),
+    DD_SAML2_ENABLED=(bool, False),
     # merging findings doesn't always work well with dedupe and reimport etc.
     # disable it if you see any issues (and report them on github)
     DD_DISABLE_FINDING_MERGE=(bool, False),
@@ -331,6 +332,53 @@ SOCIAL_AUTH_AUTH0_DOMAIN = env('DD_SOCIAL_AUTH_AUTH0_DOMAIN')
 SOCIAL_AUTH_AUTH0_SCOPE = env('DD_SOCIAL_AUTH_AUTH0_SCOPE')
 SOCIAL_AUTH_TRAILING_SLASH = env('DD_SOCIAL_AUTH_TRAILING_SLASH')
 
+
+# For configuration and customization options, see django-saml2-auth documentation
+# https://github.com/fangli/django-saml2-auth
+SAML2_ENABLED = env('DD_SAML2_ENABLED')
+SAML2_AUTH = {
+    # Metadata is required, choose either remote url or local file path
+    'METADATA_AUTO_CONF_URL': '[The auto(dynamic) metadata configuration URL of SAML2]',
+    'METADATA_LOCAL_FILE_PATH': '[The metadata configuration file path]',
+
+    # Optional settings below
+    # Custom target redirect URL after the user get logged in. Default to /admin if not set. This setting will be overwritten if you have parameter ?next= specificed in the login URL.
+    'DEFAULT_NEXT_URL': '/dashboard',
+    # Create a new Django user when a new user logs in. Defaults to True.
+    'CREATE_USER': True,
+    'NEW_USER_PROFILE': {
+        # The default group name when a new user logs in
+        'USER_GROUPS': [],
+        # The default active status for new users
+        'ACTIVE_STATUS': True,
+        # The staff status for new users
+        'STAFF_STATUS': True,
+        # The superuser status for new users
+        'SUPERUSER_STATUS': False,
+    },
+    # Change Email/UserName/FirstName/LastName to corresponding SAML2 userprofile attributes.
+    'ATTRIBUTES_MAP': {
+        'email': 'Email',
+        'username': 'UserName',
+        'first_name': 'FirstName',
+        'last_name': 'LastName',
+    },
+    'TRIGGER': {
+        'CREATE_USER': 'path.to.your.new.user.hook.method',
+        'BEFORE_LOGIN': 'path.to.your.login.hook.method',
+    },
+    # Custom URL to validate incoming SAML requests against
+    'ASSERTION_URL': 'https://mysite.com',
+    # Populates the Issuer element in authn request
+    'ENTITY_ID': 'https://mysite.com/saml2/acs/',
+    # Sets the Format property of authn NameIDPolicy element
+    'NAME_ID_FORMAT': None,
+    # Set this to True if you are running a Single Page Application (SPA) with Django Rest Framework (DRF), and are using JWT authentication to authorize client users
+    'USE_JWT': False,
+    # Redirect URL for the client if you are using JWT auth with DRF. See explanation below
+    'FRONTEND_URL': None,
+}
+
 LOGIN_EXEMPT_URLS = (
     r'^%sstatic/' % URL_PREFIX,
     r'^%swebhook/' % URL_PREFIX,
@@ -339,6 +387,8 @@ LOGIN_EXEMPT_URLS = (
     r'^%sfinding/image/(?P<token>[^/]+)$' % URL_PREFIX,
     r'^%sapi/v2/' % URL_PREFIX,
     r'complete/',
+    r'saml2/login',
+    r'saml2/acs',
     r'empty_questionnaire/([\d]+)/answer'
 )
 
