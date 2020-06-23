@@ -576,7 +576,7 @@
                         "name": "Github Vulnerability Scan"
                 },
                 "model": "dojo.test_type",
-                "pk": 178
+                "pk": 180
         },
 	{
 		"fields": {
