@@ -630,7 +630,7 @@ def re_import_scan_results(request, tid):
                 scan_date_time = timezone.make_aware(scan_date_time, timezone.get_default_timezone())
 
             min_sev = form.cleaned_data['minimum_severity']
-            file = request.FILES['file']
+            file = request.FILES.get('file', None)
             scan_type = test.test_type.name
             active = form.cleaned_data['active']
             verified = form.cleaned_data['verified']
