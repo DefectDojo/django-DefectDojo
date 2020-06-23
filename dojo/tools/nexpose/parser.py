@@ -7,9 +7,7 @@ See the file 'doc/LICENSE' for the license information
 
 
 from defusedxml import ElementTree as ET
-
 import html2text
-import time
 from dojo.models import Endpoint, Finding
 
 __author__ = "Micaela Ranea Sanchez"
@@ -161,18 +159,14 @@ class NexposeFullXmlParser(object):
             for vulnDef in vulnsDef.iter('vulnerability'):
                 vid = vulnDef.get('id').lower()
                 vector = vulnDef.get('cvssVector')
-                # time.sleep(2)
-                # print(vulnDef)
                 severity_chk = int(vulnDef.get('severity'))
-                # time.sleep(2)
-                # print(severity_chk)
                 if severity_chk >= 9:
                     sev = int(0)
                 elif severity_chk >= 7:
                     sev = int(1)
                 elif severity_chk >= 4:
                     sev = int(2)
-                elif severity_chk < 4 and severity_chk >0:
+                elif severity_chk < 4 and severity_chk > 0:
                     sev = int(3)
                 else:
                     sev = int(4)
@@ -184,10 +178,6 @@ class NexposeFullXmlParser(object):
                     'severity': sev,
                     'tags': list()
                 }
-                # for k,v in vuln.items():
-                    # print("Key",k , "Value", v)
-                # time.sleep(3)
-
                 for item in list(vulnDef):
                     if item.tag == 'description':
                         for htmlType in list(item):
