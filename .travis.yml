@@ -10,8 +10,7 @@ env:
     - CHANGE_MINIKUBE_NONE_USER=true
   matrix:
     - TEST=flake8
-    - TEST=integration_tests
-    - TEST=docker
+    - TEST=docker_integration_tests
     - BROKER=rabbitmq DATABASE=mysql
     - BROKER=rabbitmq DATABASE=postgresql
     - BROKER=redis DATABASE=mysql
