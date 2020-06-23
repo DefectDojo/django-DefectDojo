@@ -382,7 +382,11 @@ def close_finding(request, fid):
                 finding.last_reviewed = finding.mitigated
                 finding.last_reviewed_by = request.user
                 finding.endpoints.clear()
-                finding.save()
+                jira = get_jira_connection(finding)
+                if jira and JIRA_Issue.objects.filter(finding=finding).exists():
+                    finding.save(push_to_jira=True)
+                else:
+                    finding.save()
 
                 messages.add_message(
                     request,
@@ -496,7 +500,11 @@ def reopen_finding(request, fid):
     finding.mitigated_by = request.user
     finding.last_reviewed = finding.mitigated
     finding.last_reviewed_by = request.user
-    finding.save()
+    jira = get_jira_connection(finding)
+    if jira and JIRA_Issue.objects.filter(finding=finding).exists():
+        finding.save(push_to_jira=True)
+    else:
+        finding.save()
 
     reopen_external_issue_task.delay(finding, 're-opened by defectdojo', 'github')
 
