@@ -773,3 +773,6 @@ SILENCED_SYSTEM_CHECKS = ['mysql.E001']
 
 # Issue on benchmark : "The number of GET/POST parameters exceeded settings.DATA_UPLOAD_MAX_NUMBER_FIELD S"
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
+
+# Maximum size of a scan file in MB
+SCAN_FILE_MAX_SIZE = 100

@@ -64,6 +64,11 @@ spec:
               name: {{- if .Values.mysql.enabled }} defectdojo-mysql-specific {{- else }} {{ .Values.mysql.mysqlPasswordSecret }} {{- end }}
               key: mysql-password
               {{- end }}
+        - name: DD_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ $fullName }}
+              key: DD_SECRET_KEY
         resources:
           {{- toYaml .Values.celery.beat.resources | nindent 10 }}
       {{- with .Values.celery.beat.nodeSelector }}

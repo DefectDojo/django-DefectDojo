@@ -99,6 +99,7 @@ django:
 initializer:
   run: true
   keepSeconds: 60
+  affinity: {}
   nodeSelector: {}
   resources:
     requests:
@@ -140,6 +141,15 @@ postgresql:
   # instance, set enabled to false and provide the name of the secret on the
   # line below:
   # existingSecret: ""
+<<<<<<< HEAD
+=======
+  master:
+    affinity: {}
+    nodeSelector: {}
+  slave:
+    affinity: {}
+    nodeSelector: {}
+>>>>>>> upstream/dev
 
 rabbitmq:
   enabled: true
@@ -147,7 +157,8 @@ rabbitmq:
   rabbitmq:
     existingPasswordSecret: defectdojo-rabbitmq-specific
     existingErlangSecret: defectdojo-rabbitmq-specific
-
+    affinity: {}
+    nodeSelector: {}
 redis:
   enabled: false
   existingSecret: defectdojo-redis-specific

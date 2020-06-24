@@ -95,10 +95,7 @@ def simple_search(request):
                                 request.user]),))
 
                 if "template" in search_operator or search_operator == "":
-                    finding_templates = watson.search(clean_query, models=(
-                        Finding_Template.objects.filter(
-                            authorized_users__in=[
-                                request.user]),))
+                    finding_templates = watson.search(clean_query, models=(Finding_Template,))
 
                 if "test" in search_operator or search_operator == "":
                     tests = watson.search(
@@ -117,10 +114,8 @@ def simple_search(request):
                         Finding.objects.filter(
                             test__engagement__product__authorized_users__in=[
                                 request.user]), tags)
-                    tagged_finding_templates = TaggedItem.objects.get_by_model(
-                        Finding_Template.objects.filter(
-                            authorized_users__in=[
-                                request.user]), tags)
+                    tagged_finding_templates = TaggedItem.objects.get_by_model(Finding_Template,
+                                                                               tags)
                     tagged_tests = TaggedItem.objects.get_by_model(
                         Test.objects.filter(
                             engagement__product__authorized_users__in=[
