@@ -4,9 +4,8 @@ This section describes
 - defectdojo release cycle
 
 Please be careful to submit your pull requests to the correct branch: 
-- bugfix: latest  "release/x.y.z" branch
+- bugfix: latest  "release/a.b.x" branch (+ merge using a separate PR against the dev branch)
 - evolutions: dev branch
-- hotfixes: master branch
 
 If in doubt please use dev branch.
 
