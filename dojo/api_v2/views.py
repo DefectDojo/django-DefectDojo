@@ -170,7 +170,7 @@ class FindingViewSet(mixins.ListModelMixin,
     queryset = Finding.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'title', 'date', 'severity', 'description',
-                     'mitigated', 'endpoints', 'test', 'active', 'verified',
+                     'mitigated', 'is_Mitigated', 'endpoints', 'test', 'active', 'verified',
                      'false_p', 'reporter', 'url', 'out_of_scope',
                      'duplicate', 'test__engagement__product',
                      'test__engagement', 'unique_id_from_tool')
