@@ -68,8 +68,6 @@ spec:
               name: {{- if .Values.mysql.enabled }} defectdojo-mysql-specific {{- else }} {{ .Values.mysql.mysqlPasswordSecret }} {{- end }}
               key: mysql-password
               {{- end }}
-<<<<<<< HEAD
-=======
         - name: DD_SECRET_KEY
           valueFrom:
             secretKeyRef:
@@ -84,7 +82,6 @@ spec:
           value: {{- if or .Values.django.ingress.activateTLS .Values.django.nginx.tls.enabled }} "True" {{- else }} "False" {{- end }}
         - name: DD_CSRF_COOKIE_SECURE
           value: {{- if or .Values.django.ingress.activateTLS .Values.django.nginx.tls.enabled }} "True" {{- else }} "False" {{- end }}
->>>>>>> upstream/dev
         resources:
           {{- toYaml .Values.django.uwsgi.resources | nindent 10 }}
       - name: nginx
