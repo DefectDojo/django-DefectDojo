@@ -189,9 +189,17 @@ echo "Running test ${TEST}"
           echo "Skipping because not on dev branch"
       fi
       ;;
-    docker)
+    docker_integration_tests)
       echo "Validating docker compose"
-      build_containers
+      # change user id withn Docker container to user id of travis user
+      sed -i -e "s/USER\ 1001/USER\ `id -u`/g" ./Dockerfile.django
+      cp ./dojo/settings/settings.dist.py ./dojo/settings/settings.py
+      # incase of failure and you need to debug
+      # change the 'release' mode to 'dev' mode in order to activate debug=True
+      # make sure you remember to change back to 'release' before making a PR
+      source ./docker/setEnv.sh release
+      docker-compose build
+
       docker-compose up -d
       echo "Waiting for services to start"
       # Wait for services to become available
@@ -206,23 +214,8 @@ echo "Running test ${TEST}"
       fi
       echo "Docker compose container status"
       docker-compose -f docker-compose.yml ps
-      ;;
-    integration_tests)
+
       echo "run integration_test scripts"
-      # change user id withn Docker container to user id of travis user
-      sed -i -e "s/USER\ 1001/USER\ `id -u`/g" ./Dockerfile.django
-      cp ./dojo/settings/settings.dist.py ./dojo/settings/settings.py
-      # incase of failure and you need to debug
-      # change the 'release' mode to 'dev' mode in order to activate debug=True
-      # make sure you remember to change back to 'release' before making a PR
-      source ./docker/setEnv.sh release
-      docker-compose build
-
-      echo "Waiting for services to start"
-      docker-compose up -d
-      # wait for containers to start from images and services to become available
-      sleep 100 # giving long enough time
-
       source ./travis/integration_test-script.sh
       ;;
     snyk)

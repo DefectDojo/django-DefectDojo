@@ -7,7 +7,7 @@ from rest_framework.permissions import DjangoModelPermissions
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_yasg.utils import swagger_auto_schema
+from drf_yasg.utils import swagger_auto_schema, no_body
 
 from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Finding, \
@@ -46,6 +46,10 @@ class EndPointViewSet(mixins.ListModelMixin,
         else:
             return Endpoint.objects.all()
 
+    @swagger_auto_schema(
+        request_body=serializers.ReportGenerateOptionSerializer,
+        responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
+    )
     @action(detail=True, methods=['post'], permission_classes=[permissions.UserHasReportGeneratePermission])
     def generate_report(self, request, pk=None):
         endpoint = get_object_or_404(Endpoint.objects, id=pk)
@@ -93,18 +97,28 @@ class EngagementViewSet(mixins.ListModelMixin,
         else:
             return Engagement.objects.all()
 
+    @swagger_auto_schema(
+        request_body=no_body, responses={status.HTTP_200_OK: ""}
+    )
     @action(detail=True, methods=["post"])
     def close(self, request, pk=None):
         eng = get_object_or_404(Engagement.objects, id=pk)
         close_engagement(eng)
         return HttpResponse()
 
+    @swagger_auto_schema(
+        request_body=no_body, responses={status.HTTP_200_OK: ""}
+    )
     @action(detail=True, methods=["post"])
     def reopen(self, request, pk=None):
         eng = get_object_or_404(Engagement.objects, id=pk)
         reopen_engagement(eng)
         return HttpResponse()
 
+    @swagger_auto_schema(
+        request_body=serializers.ReportGenerateOptionSerializer,
+        responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
+    )
     @action(detail=True, methods=['post'], permission_classes=[permissions.UserHasReportGeneratePermission])
     def generate_report(self, request, pk=None):
         engagement = get_object_or_404(Engagement.objects, id=pk)
@@ -156,10 +170,10 @@ class FindingViewSet(mixins.ListModelMixin,
     queryset = Finding.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'title', 'date', 'severity', 'description',
-                     'mitigated', 'endpoints', 'test', 'active', 'verified',
+                     'mitigated', 'is_Mitigated', 'endpoints', 'test', 'active', 'verified',
                      'false_p', 'reporter', 'url', 'out_of_scope',
                      'duplicate', 'test__engagement__product',
-                     'test__engagement')
+                     'test__engagement', 'unique_id_from_tool')
 
     # Overriding mixins.UpdateModeMixin perform_update() method to grab push_to_jira
     # data and add that as a parameter to .save()
@@ -192,6 +206,15 @@ class FindingViewSet(mixins.ListModelMixin,
         else:
             return serializers.FindingSerializer
 
+    @swagger_auto_schema(
+        method='get',
+        responses={status.HTTP_200_OK: serializers.TagSerializer}
+    )
+    @swagger_auto_schema(
+        method='post',
+        request_body=serializers.TagSerializer,
+        responses={status.HTTP_200_OK: serializers.TagSerializer}
+    )
     @action(detail=True, methods=['get', 'post'])
     def tags(self, request, pk=None):
         finding = get_object_or_404(Finding.objects, id=pk)
@@ -215,6 +238,15 @@ class FindingViewSet(mixins.ListModelMixin,
         serialized_tags = serializers.TagSerializer({"tags": tags})
         return Response(serialized_tags.data)
 
+    @swagger_auto_schema(
+        method='get',
+        responses={status.HTTP_200_OK: serializers.FindingToNotesSerializer}
+    )
+    @swagger_auto_schema(
+        methods=['post', 'patch'],
+        request_body=serializers.AddNewNoteOptionSerializer,
+        responses={status.HTTP_200_OK: serializers.NoteSerializer}
+    )
     @action(detail=True, methods=["get", "post", "patch"])
     def notes(self, request, pk=None):
         finding = get_object_or_404(Finding.objects, id=pk)
@@ -255,7 +287,10 @@ class FindingViewSet(mixins.ListModelMixin,
         return Response(serialized_notes,
                 status=status.HTTP_200_OK)
 
-    @swagger_auto_schema(request_body=serializers.NoteSerializer)
+    @swagger_auto_schema(
+        request_body=serializers.FindingNoteSerializer,
+        responses={status.HTTP_200_OK: ""}
+    )
     @action(detail=True, methods=["patch"])
     def remove_note(self, request, pk=None):
         """Remove Note From Finding Note"""
@@ -279,6 +314,11 @@ class FindingViewSet(mixins.ListModelMixin,
         return Response({"Success": "Selected Note has been Removed successfully"},
             status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(
+        responses={status.HTTP_200_OK: None},
+        methods=['put', 'patch'],
+        request_body=serializers.TagSerializer
+    )
     @action(detail=True, methods=["put", "patch"])
     def remove_tags(self, request, pk=None):
         """ Remove Tag(s) from finding list of tags """
@@ -305,6 +345,10 @@ class FindingViewSet(mixins.ListModelMixin,
             return Response(delete_tags.errors,
                 status=status.HTTP_400_BAD_REQUEST)
 
+    @swagger_auto_schema(
+        request_body=serializers.ReportGenerateOptionSerializer,
+        responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
+    )
     @action(detail=False, methods=['post'])
     def generate_report(self, request):
         findings = Finding.objects.all()
@@ -398,6 +442,10 @@ class ProductViewSet(mixins.ListModelMixin,
         else:
             return self.queryset
 
+    @swagger_auto_schema(
+        request_body=serializers.ReportGenerateOptionSerializer,
+        responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
+    )
     @action(detail=True, methods=['post'], permission_classes=[permissions.UserHasReportGeneratePermission])
     def generate_report(self, request, pk=None):
         print('ProductViewSet.generate_report')
@@ -437,6 +485,10 @@ class ProductTypeViewSet(mixins.ListModelMixin,
         else:
             return Product_Type.objects.all()
 
+    @swagger_auto_schema(
+        request_body=serializers.ReportGenerateOptionSerializer,
+        responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
+    )
     @action(detail=True, methods=['post'], permission_classes=[permissions.UserHasReportGeneratePermission])
     def generate_report(self, request, pk=None):
         product_type = get_object_or_404(Product_Type.objects, id=pk)
@@ -574,6 +626,10 @@ class TestsViewSet(mixins.ListModelMixin,
         else:
             return serializers.TestSerializer
 
+    @swagger_auto_schema(
+        request_body=serializers.ReportGenerateOptionSerializer,
+        responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
+    )
     @action(detail=True, methods=['post'], permission_classes=[permissions.UserHasReportGeneratePermission])
     def generate_report(self, request, pk=None):
         test = get_object_or_404(Test.objects, id=pk)

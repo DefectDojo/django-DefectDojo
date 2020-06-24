@@ -47,6 +47,15 @@ class BaseClass():
                 response = self.client.post(self.url, self.payload)
 
             response = self.client.get(self.url, format='json')
+            # print("RESPONSE[0]:", response.data['results'])
+            # print("RESPONSE[0]:", response.data['results'][0])
+            # print("RESPONSE[0]:", response.data['results'][0]['id'])
+            # finding = Finding.objects.get(id=response.data['results'][0]['id'])
+            # print("RESPONSE.age:", response.data['results'][0]['age'])
+            # print("finding.age:", finding.age)
+
+            # print("RESPONSE.sla_days_remaining:", response.data['results'][0]['sla_days_remaining'])
+            # print("finding.sla_days_remaining:", finding.sla_days_remaining())
             self.assertEqual(200, response.status_code)
 
         @skipIfNotSubclass('CreateModelMixin')
@@ -143,7 +152,7 @@ class FindingsTest(BaseClass.RESTEndpointTest):
             "thread_id": 1,
             "found_by": [],
             "title": "DUMMY FINDING",
-            "date": "2017-12-31",
+            "date": "2020-05-20",
             "cwe": 1,
             "severity": "HIGH",
             "description": "TEST finding",

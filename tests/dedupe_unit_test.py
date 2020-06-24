@@ -446,7 +446,6 @@ class DedupeTest(BaseTestCase):
 def add_dedupe_tests_to_suite(suite):
     suite.addTest(ProductTest('test_create_product'))
     suite.addTest(DedupeTest('test_enable_deduplication'))
-    # suite.addTest(DedupeTest('test_enable_block_execution'))
     # Test same scanners - same engagement - static - dedupe
     suite.addTest(DedupeTest('test_delete_findings'))
     suite.addTest(DedupeTest('test_add_path_test_suite'))
@@ -482,6 +481,7 @@ def suite():
     add_dedupe_tests_to_suite(suite)
     suite.addTest(DedupeTest('enable_jira'))
     suite.addTest(DedupeTest('enable_github'))
+    suite.addTest(DedupeTest('enable_block_execution'))
     add_dedupe_tests_to_suite(suite)
     return suite
 
