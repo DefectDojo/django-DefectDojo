@@ -191,13 +191,13 @@ redis:
     slaveCount: 1
 
 # To add extra variables, that are not predefined it is possible to define in extraConfigs block, e.g. below:
-# NOTE: Do not store any king od sensitive information inside of if
+# NOTE  Do not store any king od sensitive information inside of if
 # extraConfig:
 #  DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED: 'true'
 #  DD_SOCIAL_AUTH_AUTH0_KEY: 'dev'
 #  DD_SOCIAL_AUTH_AUTH0_DOMAIN: 'xxxxx'
 
 # Extra secrets can be created inside of extraSecrets block:
-# NOTE: This is just an exmaple, do not store sesitive data in plain text form, better inject it durring the deployment/upgrade by --set extraSecrets.secret=someSecret
+# NOTE  This is just an exmaple, do not store sesitive data in plain text form, better inject it durring the deployment/upgrade by --set extraSecrets.secret=someSecret
 # extraSecrets:
 #  DD_SOCIAL_AUTH_AUTH0_SECRET: 'xxx'
