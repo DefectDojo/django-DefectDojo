@@ -10,6 +10,7 @@ from dojo.tools.crashtest_security_xml.parser import CrashtestSecurityXmlParser
 from dojo.tools.crashtest_security_json.parser import CrashtestSecurityJsonParser
 from dojo.tools.contrast.parser import ContrastCSVParser
 from dojo.tools.bandit.parser import BanditParser
+from dojo.tools.eslint.parser import ESLintParser
 from dojo.tools.appspider.parser import AppSpiderXMLParser
 from dojo.tools.arachni.parser import ArachniJSONParser
 from dojo.tools.vcg.parser import VCGParser
@@ -79,8 +80,9 @@ from dojo.tools.gitleaks.parser import GitleaksJSONParser
 from dojo.tools.harbor_vulnerability.parser import HarborVulnerabilityParser
 from dojo.tools.choctaw_hog.parser import ChoctawhogParser
 from dojo.tools.gitlab_sast.parser import GitlabSastReportParser
-
-
+from dojo.tools.yarn_audit.parser import YarnAuditParser
+from dojo.tools.bugcrowd.parser import BugCrowdCSVParser
+from dojo.tools.ccvs.parser import CCVSReportParser
 
 
 __author__ = 'Jay Paz'
@@ -122,6 +124,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = CrashtestSecurityXmlParser(file, test)
     elif scan_type == "Bandit Scan":
         parser = BanditParser(file, test)
+    elif scan_type == "ESLint Scan":
+        parser = ESLintParser(file, test)
     elif scan_type == "ZAP Scan":
         parser = ZapXmlParser(file, test)
     elif scan_type == "AppSpider Scan":
@@ -258,6 +262,12 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = ChoctawhogParser(file, test)
     elif scan_type == 'GitLab SAST Report':
         parser = GitlabSastReportParser(file, test)
+    elif scan_type == 'Yarn Audit Scan':
+        parser = YarnAuditParser(file, test)
+    elif scan_type == 'BugCrowd Scan':
+        parser = BugCrowdCSVParser(file, test)
+    elif scan_type == 'CCVS Report':
+        parser = CCVSReportParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 

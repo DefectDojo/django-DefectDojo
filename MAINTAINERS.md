@@ -24,13 +24,13 @@ Furthermore, maintainers that have not had any activities (commits, PR, PR revie
 * Aaron Weaver (@aaronweaver)
 * Matt Tesauro (@mtesauro)
 
-### Core Maintainers:
+### Core Maintainers
 * Valentijn Scholten (@valentijnscholten)
 * Fred Blaise (@madchap)
-* Jannik Jürgens (@alles-klar)
-* Pascal Trovatelli (@ptrovatelli)
 * Cody Maffucci (@Maffooch)
 
 ### Maintainers
 * Anthony Pipia (@apipia)
 * Saurabh (@dr3dd589)
+* Jannik Jürgens (@alles-klar)
+* Pascal Trovatelli (@ptrovatelli)

@@ -7,7 +7,7 @@ from dojo.models import Product, Engagement, Test, Finding, \
 from dojo.forms import ImportScanForm, SEVERITY_CHOICES
 from dojo.tools import requires_file
 from dojo.tools.factory import import_parser_factory
-from dojo.utils import max_safe
+from dojo.utils import max_safe, is_scan_file_too_large
 from dojo.notifications.helper import create_notification
 from django.urls import reverse
 from tagging.models import Tag
@@ -412,6 +412,8 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
     accepted_risks = RiskAcceptanceSerializer(many=True, read_only=True, source='risk_acceptance_set')
     push_to_jira = serializers.BooleanField(default=False)
+    age = serializers.IntegerField(read_only=True)
+    sla_days_remaining = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Finding
@@ -761,6 +763,9 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         file = data.get("file")
         if not file and requires_file(scan_type):
             raise serializers.ValidationError('Uploading a Report File is required for {}'.format(scan_type))
+        if file and is_scan_file_too_large(file):
+            raise serializers.ValidationError(
+                'Report file is too large. Maximum supported size is {} MB'.format(settings.SCAN_FILE_MAX_SIZE))
         return data
 
     def validate_scan_data(self, value):
@@ -964,6 +969,9 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         file = data.get("file")
         if not file and requires_file(scan_type):
             raise serializers.ValidationError('Uploading a Report File is required for {}'.format(scan_type))
+        if file and is_scan_file_too_large(file):
+            raise serializers.ValidationError(
+                'Report file is too large. Maximum supported size is {} MB'.format(settings.SCAN_FILE_MAX_SIZE))
         return data
 
     def validate_scan_data(self, value):
@@ -985,7 +993,7 @@ class NoteSerializer(serializers.ModelSerializer):
     author = UserSerializer(
         many=False, read_only=False)
     editor = UserSerializer(
-        read_only=False, many=False, allow_null=True)
+        read_only=False, many=False, allow_null=True, required=False)
 
     history = NoteHistorySerializer(read_only=True, many=True)
 
@@ -1052,8 +1060,8 @@ class ReportGenerateSerializer(serializers.Serializer):
     title = serializers.CharField(max_length=200)
     user_id = serializers.IntegerField()
     host = serializers.CharField(max_length=200)
-    finding_images = FindingToFindingImagesSerializer(many=True, allow_null=True)
-    finding_notes = FindingToNotesSerializer(many=True, allow_null=True)
+    finding_images = FindingToFindingImagesSerializer(many=True, allow_null=True, required=False)
+    finding_notes = FindingToNotesSerializer(many=True, allow_null=True, required=False)
 
 
 class TagSerializer(serializers.Serializer):
@@ -1082,3 +1090,7 @@ class SystemSettingsSerializer(serializers.Serializer):
 
         instance.save()
         return instance
+
+
+class FindingNoteSerializer(serializers.Serializer):
+    note_id = serializers.IntegerField()
