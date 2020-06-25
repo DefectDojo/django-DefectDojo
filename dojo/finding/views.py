@@ -581,17 +581,18 @@ def edit_finding(request, fid):
     form.initial['tags'] = [tag.name for tag in finding.tags]
     form_error = False
     jform = None
-    enabled = False
+    jira_link_exists = False
+    push_all_issues_enabled = False
 
     if get_system_setting('enable_jira') and finding.jira_conf_new() is not None:
-        enabled = finding.test.engagement.product.jira_pkey_set.first().push_all_issues
-        jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
+        push_all_issues_enabled = finding.test.engagement.product.jira_pkey_set.first().push_all_issues
+        jform = JIRAFindingForm(enabled=push_all_issues_enabled, prefix='jiraform')
 
     try:
         jissue = JIRA_Issue.objects.get(finding=finding)
-        enabled = True
+        jira_link_exists = True
     except:
-        enabled = False
+        jira_link_exists = False
 
     try:
         gissue = GITHUB_Issue.objects.get(finding=finding)
@@ -665,12 +666,19 @@ def edit_finding(request, fid):
 
             # Push to Jira?
             push_to_jira = False
-            if enabled:
+            if push_all_issues_enabled:
                 push_to_jira = True
+            # elif 'jiraform-push_to_jira' in request.POST:
             elif 'jiraform-push_to_jira' in request.POST:
-                jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=enabled)
+                jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=True)
                 if jform.is_valid():
-                    push_to_jira = jform.cleaned_data.get('push_to_jira')
+                    # If we get here, this means the box got checked.
+                    # Currently, the jform is only 1 field, that checkbox.
+                    # Even though its value is 'on' and therefore should be True, it always returns False.
+                    # So putting a band-aid here to fix the issue.
+                    # Someone more knowledgeable can fix it later.
+                    # push_to_jira = jform.cleaned_data.get('push_to_jira')
+                    push_to_jira = True
 
             if 'githubform-push_to_github' in request.POST:
                 gform = GITHUBFindingForm(
@@ -1710,12 +1718,13 @@ def finding_bulk_update_all(request, pid=None):
 
                     # Because we never call finding.save() in a bulk update, we need to actually
                     # push the JIRA stuff here, rather than in finding.save()
-                    push_anyway = finding.jira_conf_new().jira_pkey_set.first().push_all_issues
-                    if form.cleaned_data['push_to_jira'] or push_anyway:
-                        if finding.jira_conf_new() is None:
-                            log_jira_alert('Finding cannot be pushed to jira as there is no jira '
-                                           'configuration for this product.', finding)
-                        else:
+                    if finding.jira_conf_new() is None:
+                        log_jira_alert('Finding cannot be pushed to jira as there is no jira configuration for this product.', finding)
+                    else:
+                        push_anyway = finding.jira_conf_new().jira_pkey_set.first().push_all_issues
+                        # push_anyway = JIRA_PKey.objects.get(
+                        #     product=finding.test.engagement.product).push_all_issues
+                        if form.cleaned_data['push_to_jira'] or push_anyway:
                             if JIRA_Issue.objects.filter(finding=finding).exists():
                                 update_issue_task.delay(finding, True)
                             else:
