@@ -617,9 +617,16 @@
     },
     {
         "fields": {
-            "name": "HuskyCi"
+            "name": "CCVS Report"
         },
         "model": "dojo.test_type",
         "pk": 181
+    },
+    {
+        "fields": {
+            "name": "HuskyCi"
+        },
+        "model": "dojo.test_type",
+        "pk": 182
     }
 ]

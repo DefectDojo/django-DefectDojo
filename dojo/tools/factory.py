@@ -83,6 +83,7 @@ from dojo.tools.gitlab_sast.parser import GitlabSastReportParser
 from dojo.tools.yarn_audit.parser import YarnAuditParser
 from dojo.tools.bugcrowd.parser import BugCrowdCSVParser
 from dojo.tools.huskyci.parser import HuskyCIReportParser
+from dojo.tools.ccvs.parser import CCVSReportParser
 
 
 __author__ = 'Jay Paz'
@@ -268,6 +269,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = BugCrowdCSVParser(file, test)
     elif scan_type == 'HuskyCI Report':
         parser = HuskyCIReportParser(file, test)
+    elif scan_type == 'CCVS Report':
+        parser = CCVSReportParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 
