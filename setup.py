@@ -12,7 +12,7 @@ setup(
         'Django==2.2.13',
         'django-auditlog==0.4.7',
         'django-custom-field',
-        'django-filter==1.0.4',
+        'django-filter==2.3.0',
         'django-imagekit',
         'django-multiselectfield',
         'django-polymorphic==1.2',

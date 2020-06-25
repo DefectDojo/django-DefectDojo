@@ -10,6 +10,7 @@ from dojo.tools.crashtest_security_xml.parser import CrashtestSecurityXmlParser
 from dojo.tools.crashtest_security_json.parser import CrashtestSecurityJsonParser
 from dojo.tools.contrast.parser import ContrastCSVParser
 from dojo.tools.bandit.parser import BanditParser
+from dojo.tools.eslint.parser import ESLintParser
 from dojo.tools.appspider.parser import AppSpiderXMLParser
 from dojo.tools.arachni.parser import ArachniJSONParser
 from dojo.tools.vcg.parser import VCGParser
@@ -123,6 +124,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = CrashtestSecurityXmlParser(file, test)
     elif scan_type == "Bandit Scan":
         parser = BanditParser(file, test)
+    elif scan_type == "ESLint Scan":
+        parser = ESLintParser(file, test)
     elif scan_type == "ZAP Scan":
         parser = ZapXmlParser(file, test)
     elif scan_type == "AppSpider Scan":

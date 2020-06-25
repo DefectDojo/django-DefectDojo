@@ -35,7 +35,7 @@ def webhook(request):
 
     if request.method == 'POST':
         parsed = json.loads(request.body.decode('utf-8'))
-        if 'issue' in list(parsed.keys()):
+        if parsed.get('webhookEvent') == 'jira:issue_updated':
             jid = parsed['issue']['id']
             jissue = get_object_or_404(JIRA_Issue, jira_id=jid)
             if jissue.finding is not None:
@@ -90,7 +90,7 @@ def webhook(request):
                     eng.status = 'Completed'
                     eng.save()
            """
-        else:
+        if parsed.get('webhookEvent') == 'comment_created':
             comment_text = parsed['comment']['body']
             commentor = parsed['comment']['updateAuthor']['displayName']
             jid = parsed['comment']['self'].split('/')[7]
@@ -103,6 +103,9 @@ def webhook(request):
             finding.notes.add(new_note)
             finding.jira_change = timezone.now()
             finding.save()
+
+        if parsed.get('webhookEvent') not in ['comment_created', 'jira:issue_updated']:
+            logger.info('Unrecognized JIRA webhook event received: {}'.format(parsed.get('webhookEvent')))
     return HttpResponse('')
 
 
@@ -164,16 +167,16 @@ def express_new_jira(request):
                                      'JIRA Configuration Successfully Created.',
                                      extra_tags='alert-success')
                 create_notification(event='other',
-                                    title='New addition of JIRA URL %s' % jform.cleaned_data.get('url').rstrip('/'),
-                                    description='JIRA url "%s" was added by %s' %
-                                                (jform.cleaned_data.get('url').rstrip('/'), request.user),
+                                    title='New addition of JIRA: %s' % jform.cleaned_data.get('configuration_name'),
+                                    description='JIRA "%s" was added by %s' %
+                                                (jform.cleaned_data.get('configuration_name'), request.user),
                                     url=request.build_absolute_uri(reverse('jira')),
                                     )
                 return HttpResponseRedirect(reverse('jira', ))
             except:
                 messages.add_message(request,
                                      messages.ERROR,
-                                     'Unable to query other reuierd fields. They must be entered manually.',
+                                     'Unable to query other required fields. They must be entered manually.',
                                      extra_tags='alert-danger')
                 return HttpResponseRedirect(reverse('add_jira', ))
             return render(request, 'dojo/express_new_jira.html',
@@ -209,9 +212,9 @@ def new_jira(request):
                                      'JIRA Configuration Successfully Created.',
                                      extra_tags='alert-success')
                 create_notification(event='other',
-                                    title='New addition of JIRA URL %s' % jform.cleaned_data.get('url').rstrip('/'),
-                                    description='JIRA url "%s" was added by %s' %
-                                                (jform.cleaned_data.get('url').rstrip('/'), request.user),
+                                    title='New addition of JIRA: %s' % jform.cleaned_data.get('configuration_name'),
+                                    description='JIRA "%s" was added by %s' %
+                                                (jform.cleaned_data.get('configuration_name'), request.user),
                                     url=request.build_absolute_uri(reverse('jira')),
                                     )
                 return HttpResponseRedirect(reverse('jira', ))
@@ -250,9 +253,9 @@ def edit_jira(request, jid):
                                      'JIRA Configuration Successfully Created.',
                                      extra_tags='alert-success')
                 create_notification(event='other',
-                                    title='Edit of JIRA URL %s' % jform.cleaned_data.get('url').rstrip('/'),
-                                    description='JIRA url "%s" was edited by %s' %
-                                                (jform.cleaned_data.get('url').rstrip('/'), request.user),
+                                    title='Edit of JIRA: %s' % jform.cleaned_data.get('configuration_name'),
+                                    description='JIRA "%s" was edited by %s' %
+                                                (jform.cleaned_data.get('configuration_name'), request.user),
                                     url=request.build_absolute_uri(reverse('jira')),
                                     )
                 return HttpResponseRedirect(reverse('jira', ))
@@ -310,8 +313,8 @@ def delete_jira(request, tid):
                                      'JIRA Conf and relationships removed.',
                                      extra_tags='alert-success')
                 create_notification(event='other',
-                                    title='Deletion of JIRA URL %s' % jira_instance.url,
-                                    description='JIRA url "%s" was deleted by %s' % (jira_instance.url, request.user),
+                                    title='Deletion of JIRA: %s' % jira_instance.configuration_name,
+                                    description='JIRA "%s" was deleted by %s' % (jira_instance.configuration_name, request.user),
                                     url=request.build_absolute_uri(reverse('jira')),
                                     )
                 return HttpResponseRedirect(reverse('jira'))

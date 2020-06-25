@@ -769,11 +769,15 @@ def finding_display_status(finding):
         print('status2: ', display_status)
 
     if finding.duplicate:
-        url = reverse('view_finding', args=(finding.duplicate_finding.id, ))
-        name = finding.duplicate_finding.title + ', ' + finding.duplicate_finding.created.strftime('%b %d, %Y, %H:%M:%S')
-        link = '<a href="' + url + '" data-toggle="tooltip" data-placement="top" title="' + escape(name) + '">Duplicate</a>'
-        # print(link)
+        url = '#'
+        name = 'unknown'
+        if finding.duplicate_finding:
+            url = reverse('view_finding', args=(finding.duplicate_finding.id,))
+            name = finding.duplicate_finding.title + ', ' + \
+                   finding.duplicate_finding.created.strftime('%b %d, %Y, %H:%M:%S')
+
+        link = '<a href="' + url + '" data-toggle="tooltip" data-placement="top" title="' + escape(
+            name) + '">Duplicate</a>'
         display_status = display_status.replace('Duplicate', link)
-        print('status1: ', display_status)
 
     return display_status

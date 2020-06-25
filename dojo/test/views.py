@@ -4,6 +4,7 @@ import logging
 import operator
 import json
 import httplib2
+import base64
 from datetime import datetime
 import googleapiclient.discovery
 from google.oauth2 import service_account
@@ -29,7 +30,7 @@ from dojo.models import Product, Finding, Test, Notes, Note_Type, BurpRawRequest
     Finding_Template, JIRA_PKey, Cred_Mapping, Dojo_User, JIRA_Issue, System_Settings
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting, \
-    Product_Tab, calculate_grade, log_jira_alert, max_safe, redirect_to_return_url_or_else
+    Product_Tab, calculate_grade, log_jira_alert, max_safe, redirect_to_return_url_or_else, is_scan_file_too_large
 from dojo.notifications.helper import create_notification
 from dojo.tasks import add_issue_task, update_issue_task
 from functools import reduce
@@ -281,7 +282,8 @@ def add_findings(request, tid):
 
     if request.method == 'POST':
         form = AddFindingForm(request.POST)
-        if form['active'].value() is False or form['verified'].value() is False and 'jiraform-push_to_jira' in request.POST:
+        if (form['active'].value() is False or form['verified'].value() is False) \
+                and 'jiraform-push_to_jira' in request.POST:
             error = ValidationError('Findings must be active and verified to be pushed to JIRA',
                                     code='not_active_or_verified')
             if form['active'].value() is False:
@@ -575,13 +577,13 @@ def finding_bulk_update(request, tid):
                     from dojo.tools import tool_issue_updater
                     tool_issue_updater.async_tool_issue_update(finding)
 
-                    push_anyway = finding.jira_conf_new().jira_pkey_set.first().push_all_issues
-                    if form.cleaned_data['push_to_jira'] or push_anyway:
-                        if finding.jira_conf_new() is None:
-                            log_jira_alert(
-                                'Finding cannot be pushed to jira as there is no jira configuration for this product.',
-                                finding)
-                        else:
+                    if finding.jira_conf_new() is None:
+                        log_jira_alert('Finding cannot be pushed to jira as there is no jira configuration for this product.', finding)
+                    else:
+                        push_anyway = finding.jira_conf_new().jira_pkey_set.first().push_all_issues
+                        # push_anyway = JIRA_PKey.objects.get(
+                        #     product=finding.test.engagement.product).push_all_issues
+                        if form.cleaned_data['push_to_jira'] or push_anyway:
                             if JIRA_Issue.objects.filter(finding=finding).exists():
                                 update_issue_task.delay(finding, True)
                             else:
@@ -635,6 +637,13 @@ def re_import_scan_results(request, tid):
             tags = request.POST.getlist('tags')
             ts = ", ".join(tags)
             test.tags = ts
+            if file and is_scan_file_too_large(file):
+                messages.add_message(request,
+                                     messages.ERROR,
+                                     "Report file is too large. Maximum supported size is {} MB".format(settings.SCAN_FILE_MAX_SIZE),
+                                     extra_tags='alert-danger')
+                return HttpResponseRedirect(reverse('re_import_scan_results', args=(test.id,)))
+
             try:
                 parser = import_parser_factory(file, test, active, verified)
             except ValueError:
