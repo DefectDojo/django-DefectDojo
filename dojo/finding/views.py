@@ -382,10 +382,13 @@ def close_finding(request, fid):
                 finding.last_reviewed = finding.mitigated
                 finding.last_reviewed_by = request.user
                 finding.endpoints.clear()
-                push_all_issues_enabled = finding.test.engagement.product.jira_pkey_set.first().push_all_issues
-                if push_all_issues_enabled and JIRA_Issue.objects.filter(finding=finding).exists():
-                    finding.save(push_to_jira=True)
-                else:
+                try:
+                    jpkey = JIRA_PKey.objects.get(product=finding.test.engagement.product)
+                    if jpkey.push_all_issues and JIRA_Issue.objects.filter(finding=finding).exists():
+                        finding.save(push_to_jira=True)
+                    else:
+                        finding.save()
+                except JIRA_PKey.DoesNotExist:
                     finding.save()
 
                 messages.add_message(
@@ -500,11 +503,14 @@ def reopen_finding(request, fid):
     finding.mitigated_by = request.user
     finding.last_reviewed = finding.mitigated
     finding.last_reviewed_by = request.user
-    push_all_issues_enabled = finding.test.engagement.product.jira_pkey_set.first().push_all_issues
-    if push_all_issues_enabled and JIRA_Issue.objects.filter(finding=finding).exists():
-        finding.save(push_to_jira=True)
-    else:
-        finding.save()
+    try:
+       jpkey = JIRA_PKey.objects.get(product=finding.test.engagement.product)
+       if jpkey.push_all_issues and JIRA_Issue.objects.filter(finding=finding).exists():
+           finding.save(push_to_jira=True)
+       else:
+           finding.save()
+   except JIRA_PKey.DoesNotExist:
+       finding.save()
 
     reopen_external_issue_task.delay(finding, 're-opened by defectdojo', 'github')
 
