@@ -7,6 +7,7 @@ class TestNexposeParser(TestCase):
     def test_nexpose_parser_has_no_finding(self):
         testfile = open("dojo/unittests/scan/nexpose/no_vuln.json")
         parser = NexposeFullXmlParser(testfile, Test())
+        testfile.close()
         self.assertEqual(0, int(parser.items))
 
     def test_nexpose_parser_has_one_finding(self):
