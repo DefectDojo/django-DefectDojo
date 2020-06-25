@@ -5,19 +5,19 @@ from dojo.models import Test
 
 class TestNexposeParser(TestCase):
     def test_nexpose_parser_has_no_finding(self):
-        testfile = open("dojo/unittests/scan/nexpose/no_vuln.json")
+        testfile = open("dojo/unittests/scan/nexpose/no_vuln.xml")
         parser = NexposeFullXmlParser(testfile, Test())
         testfile.close()
         self.assertEqual(0, int(parser.items))
 
     def test_nexpose_parser_has_one_finding(self):
-        testfile = open("dojo/unittests/scan/nexpose/one_vuln.json")
+        testfile = open("dojo/unittests/scan/nexpose/one_vuln.xml")
         parser = NexposeFullXmlParser(testfile, Test())
         testfile.close()
         self.assertEqual(1, int(parser.items))
 
     def test_nexpose_parser_has_many_finding(self):
-        testfile = open("dojo/unittests/scan/nexpose/many_vulns.json")
+        testfile = open("dojo/unittests/scan/nexpose/many_vulns.xml")
         parser = NexposeFullXmlParser(testfile, Test())
         testfile.close()
         self.assertEqual(24, int(parser.items))
