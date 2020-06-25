@@ -332,6 +332,7 @@ class ImportScanForm(forms.Form):
                          ("SKF Scan", "SKF Scan"),
                          ("Clair Klar Scan", "Clair Klar Scan"),
                          ("Bandit Scan", "Bandit Scan"),
+                         ("ESLint Scan", "ESLint Scan"),
                          ("SSL Labs Scan", "SSL Labs Scan"),
                          ("Acunetix Scan", "Acunetix Scan"),
                          ("Fortify Scan", "Fortify Scan"),
@@ -384,8 +385,10 @@ class ImportScanForm(forms.Form):
                          ("Gitleaks Scan", "Gitleaks Scan"),
                          ("Choctaw Hog Scan", "Choctaw Hog Scan"),
                          ("Harbor Vulnerability Scan", "Harbor Vulnerability Scan"),
+                         ("Yarn Audit Scan", "Yarn Audit Scan"),
                          ("BugCrowd Scan", "BugCrowd Scan"),
-                         ("GitLab SAST Report", "GitLab SAST Report"))
+                         ("GitLab SAST Report", "GitLab SAST Report"),
+                         ("CCVS Report", "CCVS Report"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
     scan_date = forms.DateTimeField(

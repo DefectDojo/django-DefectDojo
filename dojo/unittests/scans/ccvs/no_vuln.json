@@ -1,0 +1,24 @@
+{
+    "id": "4ce2f2cc-72a0-4efc-858f-bc9722daaf96",
+    "status": "finished",
+    "created_at": "2020-06-23T14:12:44.176922Z",
+    "updated_at": "2020-06-23T14:14:05.899405Z",
+    "image": "docker-image:tag",
+    "vendors": {
+        "anchore_engine": {            
+            "output": "anchore_output",
+            "image_id": "sha256:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        },
+        "clair": {
+            "output": "clair_output",
+            "image_id": "sha256_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_yyyyyyyyyyyy"
+        }
+    },
+    "errors": [],
+    "result": "passed",
+    "ccvs_results": {
+        "anchore_engine": {},
+        "clair": {}
+    },
+    "whitelist": {}
+}

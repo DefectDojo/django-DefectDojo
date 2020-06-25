@@ -605,5 +605,26 @@
 		},
 		"model": "dojo.test_type",
 		"pk": 178
+	},
+  {
+		"fields": {
+		  "name": "Yarn Audit Scan"
+    },
+		"model": "dojo.test_type",
+		"pk": 179
+	},
+	{
+    "fields": {
+      "name": "ESLint Scan"
+    },
+    "model": "dojo.test_type",
+      "pk": 180
+	},
+	{
+    "fields": {
+      "name": "CCVS Report"
+    },
+    "model": "dojo.test_type",
+      "pk": 181
 	}
 ]
