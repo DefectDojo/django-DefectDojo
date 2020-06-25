@@ -382,8 +382,8 @@ def close_finding(request, fid):
                 finding.last_reviewed = finding.mitigated
                 finding.last_reviewed_by = request.user
                 finding.endpoints.clear()
-                jira = get_jira_connection(finding)
-                if jira and JIRA_Issue.objects.filter(finding=finding).exists():
+                push_all_issues_enabled = finding.test.engagement.product.jira_pkey_set.first().push_all_issues
+                if push_all_issues_enabled and JIRA_Issue.objects.filter(finding=finding).exists():
                     finding.save(push_to_jira=True)
                 else:
                     finding.save()
@@ -500,8 +500,8 @@ def reopen_finding(request, fid):
     finding.mitigated_by = request.user
     finding.last_reviewed = finding.mitigated
     finding.last_reviewed_by = request.user
-    jira = get_jira_connection(finding)
-    if jira and JIRA_Issue.objects.filter(finding=finding).exists():
+    push_all_issues_enabled = finding.test.engagement.product.jira_pkey_set.first().push_all_issues
+    if push_all_issues_enabled and JIRA_Issue.objects.filter(finding=finding).exists():
         finding.save(push_to_jira=True)
     else:
         finding.save()
