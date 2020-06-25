@@ -504,13 +504,13 @@ def reopen_finding(request, fid):
     finding.last_reviewed = finding.mitigated
     finding.last_reviewed_by = request.user
     try:
-       jpkey = JIRA_PKey.objects.get(product=finding.test.engagement.product)
-       if jpkey.push_all_issues and JIRA_Issue.objects.filter(finding=finding).exists():
-           finding.save(push_to_jira=True)
-       else:
-           finding.save()
-   except JIRA_PKey.DoesNotExist:
-       finding.save()
+        jpkey = JIRA_PKey.objects.get(product=finding.test.engagement.product)
+        if jpkey.push_all_issues and JIRA_Issue.objects.filter(finding=finding).exists():
+            finding.save(push_to_jira=True)
+        else:
+            finding.save()
+    except JIRA_PKey.DoesNotExist:
+        finding.save()
 
     reopen_external_issue_task.delay(finding, 're-opened by defectdojo', 'github')
 
