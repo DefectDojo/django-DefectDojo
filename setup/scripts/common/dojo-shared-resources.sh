@@ -381,13 +381,13 @@ function install_os_dependencies() {
         sudo yum install -y wget epel-release
         curl -sL https://rpm.nodesource.com/setup | sudo bash -
         sudo wget https://dl.yarnpkg.com/rpm/yarn.repo -O /etc/yum.repos.d/yarn.repo
-        sudo yum install gcc python-devel python-setuptools python-pip nodejs yarn wkhtmltopdf expect
+        sudo yum install gcc python-devel python-setuptools python-pip nodejs yarn wkhtmltopdf expect pwgen
         sudo yum groupinstall 'Development Tools'
     elif [[ ! -z "$APT_GET_CMD" ]]; then
         if [ "$AUTO_DOCKER" == "yes" ]; then
           apt-get update && apt-get install -y sudo git nano
         fi
-        sudo apt-get update && sudo apt-get install -y curl apt-transport-https expect
+        sudo apt-get update && sudo apt-get install -y curl apt-transport-https expect pwgen
         #Yarn
         curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
         echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
@@ -397,7 +397,7 @@ function install_os_dependencies() {
         sudo apt-get install -y apt-transport-https libjpeg-dev gcc libssl-dev python-dev python-pip nodejs yarn wkhtmltopdf build-essential
 
     elif [[ ! -z "$BREW_CMD" ]]; then
-        brew install gcc openssl python node npm yarn Caskroom/cask/wkhtmltopdf expect
+        brew install gcc openssl python node npm yarn Caskroom/cask/wkhtmltopdf expect pwgen
     else
         echo "ERROR! OS not supported, please try Docker. https://hub.docker.com/r/appsecpipeline/django-defectdojo/"
         exit 1;
@@ -423,7 +423,7 @@ function install_db() {
         if [ "$DBTYPE" == $MYSQL ]; then
             echo "Installing MySQL client (and server if not already installed)"
             if [ "$AUTO_DOCKER" == "yes" ]; then
-              DEBIAN_FRONTEND=noninteractive apt-get install -y mysql-server pwgen libmysqlclient-dev
+              DEBIAN_FRONTEND=noninteractive apt-get install -y mysql-server libmysqlclient-dev
               sudo service mysql start
             else
               sudo apt-get install -y libmysqlclient-dev mysql-server
