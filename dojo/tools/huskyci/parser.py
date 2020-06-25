@@ -53,7 +53,7 @@ class HuskyCIReportParser(object):
 
 def get_item(item_node, test):    
     # description
-    description = item_node.get('details')
+    description = item_node.get('details', '')
     if 'code' in item_node:
         description += "\nCode: " + item_node.get("code")
     if 'confidence' in item_node:
