@@ -38,20 +38,21 @@ class HuskyCIReportParser(object):
             tools_results = tree['huskyciresults'][language]
             for tool in tools_results:
                 severity_results = tools_results[tool]
-                for severity in severity_results:                    
+                for severity in severity_results:
                     vulns = severity_results[severity]
                     for vuln in vulns:
                         vuln['severity'] = severity[0:-5].lower().capitalize()
                         if vuln['severity'] not in ('High', 'Medium', 'Low'):
                             continue
-                        unique_key = hashlib.md5(str(vuln).encode('utf-8')).hexdigest()
+                        unique_key = hashlib.md5(
+                            str(vuln).encode('utf-8')).hexdigest()
                         item = get_item(vuln, test)
                         items[unique_key] = item
 
         return list(items.values())
 
 
-def get_item(item_node, test):    
+def get_item(item_node, test):
     # description
     description = item_node.get('details', '')
     if 'code' in item_node:
