@@ -1,16 +1,24 @@
 import json
+import csv
+
 from dojo.models import Finding
 
 
-class TwistlockParser(object):
-    def __init__(self, json_output, test):
 
+
+class TwistlockCSVParser(object):
+    pass
+
+
+class TwistlockJsonParser(object):
+    def parse(self, json_output, test):
         tree = self.parse_json(json_output)
-
+        items = []
         if tree:
-            self.items = [data for data in self.get_items(tree, test)]
+            items = [data for data in self.get_items(tree, test)]
         else:
-            self.items = []
+            items = []
+        return items
 
     def parse_json(self, json_output):
         try:
@@ -86,3 +94,20 @@ def get_item(vulnerability, test):
     finding.description = finding.description.strip()
 
     return finding
+
+
+class TwistlockParser(object):
+
+    def __init__(self, filename, test):
+        self.dupes = dict()
+
+        if filename is None:
+            self.items = []
+            return
+
+        if filename.name.lower().endswith('.json'):
+            self.items = TwistlockJsonParser().parse(filename, test)
+        elif filename.name.lower().endswith('.csv'):
+            self.items = TwistlockCSVParser(filename, test)
+        else:
+            raise Exception('Unknown File Format')
