@@ -1,5 +1,7 @@
-import json
+import io
 import csv
+import json
+import hashlib
 
 from dojo.models import Finding
 
@@ -7,7 +9,100 @@ from dojo.models import Finding
 
 
 class TwistlockCSVParser(object):
-    pass
+
+    @staticmethod
+    def get_field_from_row(row, column):
+        if row[column] is not None:
+            return row[column]
+        else:
+            return None
+
+    def parse_issue(self, row, test):
+
+        if not row:
+            return None
+
+        id_column = 4
+        line_column = 5
+        code_line_column = 6
+        vulnerability_id_column = 10
+        severity_column = 13
+        package_name_column = 14
+        package_version_column = 16
+        cvss_column = 18
+        fix_status_column = 19
+        description_column = 20
+
+        if self.get_field_from_row(row, vulnerability_id_column) is None:
+            data_vulnerability_id = ''
+        else:
+            data_vulnerability_id = self.get_field_from_row(row, vulnerability_id_column)
+
+        if self.get_field_from_row(row, package_version_column) is None:
+            data_package_version = ''
+        else:
+            data_package_version = self.get_field_from_row(row, package_version_column)
+
+        if self.get_field_from_row(row, fix_status_column) is None:
+            data_fix_status = ''
+        else:
+            data_fix_status = self.get_field_from_row(row, fix_status_column)
+
+        data_package_name = self.get_field_from_row(row, package_name_column)
+        data_id = self.get_field_from_row(row, id_column)
+        if self.get_field_from_row(row, severity_column) is '': 
+            data_severity = 'Info'
+        else:
+            data_severity = self.get_field_from_row(row, severity_column).capitalize()
+
+        data_cvss = self.get_field_from_row(row, cvss_column)
+        data_description = self.get_field_from_row(row, description_column)
+        finding = Finding(
+            title=data_vulnerability_id + ": " + data_package_name + " - " + data_package_version,
+            cve=data_vulnerability_id,
+            test=test,
+            severity=data_severity,
+            description= data_description + "<p> Vulnerable Package: " +
+            data_package_name + "</p><p> Current Version: " + str(
+                data_package_version) + "</p>",
+            mitigation=data_fix_status ,
+            #references=vulnerability['link'],
+            component_name=data_package_name,
+            component_version=data_package_version,
+            active=False,
+            verified=False,
+            false_p=False,
+            duplicate=False,
+            out_of_scope=False,
+            mitigated=None,
+            severity_justification="(CVSS v3 base score: {})".format(data_cvss),
+            impact=data_severity)
+
+        finding.description = finding.description.strip()
+
+        return finding
+
+    def parse(self, filename, test):
+        print(filename)
+        if filename is None:
+            self.items = ()
+            return
+        content = filename.read()
+        dupes = dict()
+        if type(content) is bytes:
+            content = content.decode('utf-8')
+        reader = csv.reader(io.StringIO(content), delimiter=',', quotechar='"')
+        firstline = True
+        for row in reader:
+            if firstline:
+                firstline = False
+                continue
+            finding = self.parse_issue(row, test)
+            if finding is not None:
+                key = hashlib.md5((finding.severity + '|' + finding.title + '|' + finding.description).encode('utf-8')).hexdigest()
+                if key not in dupes:
+                    dupes[key] = finding
+        return list(dupes.values())
 
 
 class TwistlockJsonParser(object):
@@ -108,6 +203,6 @@ class TwistlockParser(object):
         if filename.name.lower().endswith('.json'):
             self.items = TwistlockJsonParser().parse(filename, test)
         elif filename.name.lower().endswith('.csv'):
-            self.items = TwistlockCSVParser(filename, test)
+            self.items = TwistlockCSVParser().parse(filename, test)
         else:
             raise Exception('Unknown File Format')
