@@ -538,7 +538,7 @@ def search(request, tid):
                    })
 
 
-# bulk update and delete are combined, so we can't have the nice is_authorized decorator (yet)
+# bulk update and delete are combined, so we can't have the nice user_must_be_authorized decorator (yet)
 @user_passes_test(lambda u: u.is_staff)
 def finding_bulk_update(request, tid):
     test = get_object_or_404(Test, id=tid)
