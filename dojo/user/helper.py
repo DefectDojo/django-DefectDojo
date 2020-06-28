@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404
 logger = logging.getLogger(__name__)
 
 
-def ensure_permission(model, perm_type, arg, lookup="pk", view_func=None):
+def is_authorized(model, perm_type, arg, lookup="pk", view_func=None):
     # print('model: ', model)
     # print('arg: ', arg)
     # print('lookup: ', lookup)
@@ -46,7 +46,7 @@ def ensure_permission(model, perm_type, arg, lookup="pk", view_func=None):
     """
 
     if view_func is None:
-        return functools.partial(ensure_permission, model, perm_type, arg, lookup)
+        return functools.partial(is_authorized, model, perm_type, arg, lookup)
 
     @functools.wraps(view_func)
     def _wrapped(request, *args, **kwargs):

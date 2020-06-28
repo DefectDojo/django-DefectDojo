@@ -25,7 +25,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 from tagging.models import Tag
 from itertools import chain
-from dojo.user.helper import ensure_permission
+from dojo.user.helper import is_authorized
 
 from dojo.filters import OpenFindingFilter, \
     OpenFindingSuperFilter, AcceptedFindingSuperFilter, \
@@ -347,7 +347,7 @@ def view_finding(request, fid):
 
 
 # @user_passes_test(lambda u: u.is_staff)
-@ensure_permission(Finding, 'change', 'fid')
+@is_authorized(Finding, 'change', 'fid')
 def close_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     # in order to close a finding, we need to capture why it was closed
@@ -492,7 +492,7 @@ def defect_finding_review(request, fid):
 
 
 # @user_passes_test(lambda u: u.is_staff)
-@ensure_permission(Finding, 'change', 'fid')
+@is_authorized(Finding, 'change', 'fid')
 def reopen_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     finding.active = True
@@ -544,7 +544,7 @@ def apply_template_cwe(request, fid):
         return HttpResponseForbidden()
 
 
-@ensure_permission(Finding, 'delete', 'fid')
+@is_authorized(Finding, 'delete', 'fid')
 def delete_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
 
@@ -580,7 +580,7 @@ def delete_finding(request, fid):
 
 # @user_passes_test(lambda u: u.is_staff)
 # def edit_finding(request, finding):
-@ensure_permission(Finding, 'change', 'fid')
+@is_authorized(Finding, 'change', 'fid')
 def edit_finding(request, fid):
     print('fid=', fid)
     finding = get_object_or_404(Finding, id=fid)
@@ -776,7 +776,7 @@ def edit_finding(request, fid):
 
 
 # @user_passes_test(lambda u: u.is_staff)
-@ensure_permission(Finding, 'change', 'fid')
+@is_authorized(Finding, 'change', 'fid')
 def touch_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     finding.last_reviewed = timezone.now()
@@ -1665,7 +1665,7 @@ def merge_finding_product(request, pid):
     })
 
 
-# bulk update and delete are combined, so we can't have the nice ensure_permission decorator (yet)
+# bulk update and delete are combined, so we can't have the nice is_authorized decorator (yet)
 def finding_bulk_update_all(request, pid=None):
     form = FindingBulkUpdateForm(request.POST)
     if request.method == "POST":
