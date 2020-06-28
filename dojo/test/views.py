@@ -26,8 +26,8 @@ from dojo.filters import TemplateFindingFilter, OpenFindingFilter
 from dojo.forms import NoteForm, TestForm, FindingForm, \
     DeleteTestForm, AddFindingForm, \
     ImportScanForm, ReImportScanForm, FindingBulkUpdateForm, JIRAFindingForm
-from dojo.models import Product, Finding, Test, Notes, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, \
-    Finding_Template, JIRA_PKey, Cred_Mapping, Dojo_User, JIRA_Issue, System_Settings
+from dojo.models import Finding, Test, Notes, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, \
+    Finding_Template, JIRA_PKey, Cred_Mapping, Dojo_User, System_Settings
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting, \
     Product_Tab, calculate_grade, log_jira_alert, max_safe, redirect_to_return_url_or_else, is_scan_file_too_large
@@ -144,12 +144,16 @@ def prefetch_for_findings(findings):
     prefetched_findings = findings
     if isinstance(findings, QuerySet):  # old code can arrive here with prods being a list because the query was already executed
         prefetched_findings = prefetched_findings.select_related('reporter')
+        prefetched_findings = prefetched_findings.select_related('jira_issue')
+        prefetched_findings = prefetched_findings.prefetch_related('endpoints')
+        prefetched_findings = prefetched_findings.prefetch_related('test__test_type')
+        prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__jira_pkey_set__conf')
+        prefetched_findings = prefetched_findings.prefetch_related('found_by')
         prefetched_findings = prefetched_findings.prefetch_related('risk_acceptance_set')
         # we could try to prefetch only the latest note with SubQuery and OuterRef, but I'm getting that MySql doesn't support limits in subqueries.
         prefetched_findings = prefetched_findings.prefetch_related('notes')
-        prefetched_findings = prefetched_findings.prefetch_related('endpoints')
-        prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__jira_pkey_set__conf')
         prefetched_findings = prefetched_findings.prefetch_related('tagged_items__tag')
+        prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__authorized_users')
     else:
         logger.debug('unable to prefetch because query was already executed')
 
@@ -534,6 +538,7 @@ def search(request, tid):
                    })
 
 
+# bulk update and delete are combined, so we can't have the nice ensure_permission decorator (yet)
 @user_passes_test(lambda u: u.is_staff)
 def finding_bulk_update(request, tid):
     test = get_object_or_404(Test, id=tid)
@@ -543,6 +548,15 @@ def finding_bulk_update(request, tid):
         finding_to_update = request.POST.getlist('finding_to_update')
         if request.POST.get('delete_bulk_findings') and finding_to_update:
             finds = Finding.objects.filter(test=test, id__in=finding_to_update)
+
+            # make sure users are not deleting stuff they are not authorized for
+            if not request.user.is_staff and not request.user.is_superuser:
+                if not settings.AUTHORIZED_USERS_ALLOW_DELETE:
+                    raise PermissionDenied()
+
+                finds = finds.filter(
+                    test__engagement__product__authorized_users__in=[request.user])
+
             product = Product.objects.get(engagement__test=test)
             finds.delete()
             calculate_grade(product)
@@ -550,6 +564,15 @@ def finding_bulk_update(request, tid):
             if form.is_valid() and finding_to_update:
                 finding_to_update = request.POST.getlist('finding_to_update')
                 finds = Finding.objects.filter(test=test, id__in=finding_to_update)
+
+                # make sure users are not deleting stuff they are not authorized for
+                if not request.user.is_staff and not request.user.is_superuser:
+                    if not settings.AUTHORIZED_USERS_ALLOW_CHANGE:
+                        raise PermissionDenied()
+
+                    finds = finds.filter(
+                        test__engagement__product__authorized_users__in=[request.user])
+
                 if form.cleaned_data['severity']:
                     finds.update(severity=form.cleaned_data['severity'],
                                  numerical_severity=Finding.get_numerical_severity(form.cleaned_data['severity']),

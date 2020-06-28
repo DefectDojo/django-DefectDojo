@@ -25,6 +25,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 from tagging.models import Tag
 from itertools import chain
+from dojo.user.helper import ensure_permission
 
 from dojo.filters import OpenFindingFilter, \
     OpenFindingSuperFilter, AcceptedFindingSuperFilter, \
@@ -200,6 +201,7 @@ def prefetch_for_findings(findings):
         # we could try to prefetch only the latest note with SubQuery and OuterRef, but I'm getting that MySql doesn't support limits in subqueries.
         prefetched_findings = prefetched_findings.prefetch_related('notes')
         prefetched_findings = prefetched_findings.prefetch_related('tagged_items__tag')
+        prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__authorized_users')
     else:
         logger.debug('unable to prefetch because query was already executed')
 
@@ -344,7 +346,8 @@ def view_finding(request, fid):
         })
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@ensure_permission(Finding, 'change', 'fid')
 def close_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     # in order to close a finding, we need to capture why it was closed
@@ -488,7 +491,8 @@ def defect_finding_review(request, fid):
     })
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@ensure_permission(Finding, 'change', 'fid')
 def reopen_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     finding.active = True
@@ -540,6 +544,7 @@ def apply_template_cwe(request, fid):
         return HttpResponseForbidden()
 
 
+@ensure_permission(Finding, 'delete', 'fid')
 def delete_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
 
@@ -573,8 +578,11 @@ def delete_finding(request, fid):
         return HttpResponseForbidden()
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+# def edit_finding(request, finding):
+@ensure_permission(Finding, 'change', 'fid')
 def edit_finding(request, fid):
+    print('fid=', fid)
     finding = get_object_or_404(Finding, id=fid)
     old_status = finding.status()
     form = FindingForm(instance=finding, template=False)
@@ -767,7 +775,8 @@ def edit_finding(request, fid):
     })
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@ensure_permission(Finding, 'change', 'fid')
 def touch_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     finding.last_reviewed = timezone.now()
@@ -1656,13 +1665,22 @@ def merge_finding_product(request, pid):
     })
 
 
-@user_passes_test(lambda u: u.is_staff)
+# bulk update and delete are combined, so we can't have the nice ensure_permission decorator (yet)
 def finding_bulk_update_all(request, pid=None):
     form = FindingBulkUpdateForm(request.POST)
     if request.method == "POST":
         finding_to_update = request.POST.getlist('finding_to_update')
         if request.POST.get('delete_bulk_findings') and finding_to_update:
             finds = Finding.objects.filter(id__in=finding_to_update)
+
+            # make sure users are not deleting stuff they are not authorized for
+            if not request.user.is_staff and not request.user.is_superuser:
+                if not settings.AUTHORIZED_USERS_ALLOW_DELETE:
+                    raise PermissionDenied()
+
+                finds = finds.filter(
+                    test__engagement__product__authorized_users__in=[request.user])
+
             product_calc = list(Product.objects.filter(engagement__test__finding__id__in=finding_to_update).distinct())
             finds.delete()
             for prod in product_calc:
@@ -1671,6 +1689,15 @@ def finding_bulk_update_all(request, pid=None):
             if form.is_valid() and finding_to_update:
                 finding_to_update = request.POST.getlist('finding_to_update')
                 finds = Finding.objects.filter(id__in=finding_to_update).order_by("finding__test__engagement__product__id")
+
+                # make sure users are not deleting stuff they are not authorized for
+                if not request.user.is_staff and not request.user.is_superuser:
+                    if not settings.AUTHORIZED_USERS_ALLOW_CHANGE:
+                        raise PermissionDenied()
+
+                    finds = finds.filter(
+                        test__engagement__product__authorized_users__in=[request.user])
+
                 if form.cleaned_data['severity']:
                     finds.update(severity=form.cleaned_data['severity'],
                                  numerical_severity=Finding.get_numerical_severity(form.cleaned_data['severity']),

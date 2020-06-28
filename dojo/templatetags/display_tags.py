@@ -781,3 +781,32 @@ def finding_display_status(finding):
         display_status = display_status.replace('Duplicate', link)
 
     return display_status
+
+
+@register.filter
+def status_classes(finding):
+    classes = []
+    if finding.active:
+        classes.append('active_finding')
+    else:
+        classes.append('inactive_finding')
+
+    if finding.is_Mitigated:
+        classes.append('mitigated_finding')
+
+    if finding.is_risk_accepted():
+        classes.append('risk_accepted_finding')
+
+    return ' '.join(classes)
+
+
+@register.filter
+def is_authorized_for_change(user, finding):
+    # print('filter: is_authorized_for_change')
+    return finding.is_authorized(user, 'change')
+
+
+@register.filter
+def is_authorized_for_delete(user, finding):
+    # print('filter: is_authorized_for_delete')
+    return finding.is_authorized(user, 'delete')
