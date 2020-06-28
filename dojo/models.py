@@ -3125,7 +3125,9 @@ admin.site.register(Notifications)
 # Watson
 watson.register(Product)
 watson.register(Test)
-watson.register(Finding)
+watson.register(Finding, fields=('id', 'title', 'cve', 'url', 'severity', 'description', 'mitigation', 'impact', 'steps_to_reproduce',
+                                 'severity_justification', 'references', 'sourcefilepath', 'sourcefile', 'hash_code', 'file_path',
+                                 'component_name', 'component_version', 'unique_id_from_tool', ))
 watson.register(Finding_Template)
 watson.register(Endpoint)
 watson.register(Engagement)
