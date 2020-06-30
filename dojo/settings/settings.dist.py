@@ -120,7 +120,7 @@ env = environ.Env(
     # disable it if you see any issues (and report them on github)
     DD_DISABLE_FINDING_MERGE=(bool, False),
     # Set to True if you want to allow authorized users to make changes to findings or delete them
-    DD_AUTHORIZED_USERS_ALLOW_CHANGE=(bool, True),
+    DD_AUTHORIZED_USERS_ALLOW_CHANGE=(bool, False),
     DD_AUTHORIZED_USERS_ALLOW_DELETE=(bool, False),
 )
 
