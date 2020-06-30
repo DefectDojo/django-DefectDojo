@@ -25,14 +25,14 @@ from tagging.models import Tag
 from dojo.filters import TemplateFindingFilter, OpenFindingFilter
 from dojo.forms import NoteForm, TestForm, FindingForm, \
     DeleteTestForm, AddFindingForm, \
-    ImportScanForm, ReImportScanForm, FindingBulkUpdateForm, JIRAFindingForm
-from dojo.models import Product, Finding, Test, Notes, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, \
-    Finding_Template, JIRA_PKey, Cred_Mapping, Dojo_User, JIRA_Issue, System_Settings
+    ImportScanForm, ReImportScanForm, JIRAFindingForm
+from dojo.models import Finding, Test, Notes, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, \
+    Finding_Template, JIRA_PKey, Cred_Mapping, Dojo_User, System_Settings
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting, \
-    Product_Tab, calculate_grade, log_jira_alert, max_safe, redirect_to_return_url_or_else, is_scan_file_too_large
+    Product_Tab, max_safe, is_scan_file_too_large
 from dojo.notifications.helper import create_notification
-from dojo.tasks import add_issue_task, update_issue_task
+from dojo.tasks import add_issue_task
 from functools import reduce
 
 logger = logging.getLogger(__name__)
@@ -533,74 +533,6 @@ def search(request, tid):
                    'tid': tid,
                    'add_from_template': True,
                    })
-
-
-@user_passes_test(lambda u: u.is_staff)
-def finding_bulk_update(request, tid):
-    test = get_object_or_404(Test, id=tid)
-    form = FindingBulkUpdateForm(request.POST)
-
-    if request.method == "POST":
-        finding_to_update = request.POST.getlist('finding_to_update')
-        if request.POST.get('delete_bulk_findings') and finding_to_update:
-            finds = Finding.objects.filter(test=test, id__in=finding_to_update)
-            product = Product.objects.get(engagement__test=test)
-            finds.delete()
-            calculate_grade(product)
-        else:
-            if form.is_valid() and finding_to_update:
-                finding_to_update = request.POST.getlist('finding_to_update')
-                finds = Finding.objects.filter(test=test, id__in=finding_to_update)
-                if form.cleaned_data['severity']:
-                    finds.update(severity=form.cleaned_data['severity'],
-                                 numerical_severity=Finding.get_numerical_severity(form.cleaned_data['severity']),
-                                 last_reviewed=timezone.now(),
-                                 last_reviewed_by=request.user)
-                if form.cleaned_data['status']:
-                    finds.update(active=form.cleaned_data['active'],
-                                 verified=form.cleaned_data['verified'],
-                                 false_p=form.cleaned_data['false_p'],
-                                 out_of_scope=form.cleaned_data['out_of_scope'],
-                                 is_Mitigated=form.cleaned_data['is_Mitigated'],
-                                 last_reviewed=timezone.now(),
-                                 last_reviewed_by=request.user)
-                if form.cleaned_data['tags']:
-                    for finding in finds:
-                        tags = request.POST.getlist('tags')
-                        ts = ", ".join(tags)
-                        finding.tags = ts
-
-                # Update the grade as bulk edits don't go through save
-                if form.cleaned_data['severity'] or form.cleaned_data['status']:
-                    calculate_grade(test.engagement.product)
-
-                for finding in finds:
-                    from dojo.tools import tool_issue_updater
-                    tool_issue_updater.async_tool_issue_update(finding)
-
-                    if finding.jira_conf_new() is None:
-                        log_jira_alert('Finding cannot be pushed to jira as there is no jira configuration for this product.', finding)
-                    else:
-                        push_anyway = finding.jira_conf_new().jira_pkey_set.first().push_all_issues
-                        # push_anyway = JIRA_PKey.objects.get(
-                        #     product=finding.test.engagement.product).push_all_issues
-                        if form.cleaned_data['push_to_jira'] or push_anyway:
-                            if JIRA_Issue.objects.filter(finding=finding).exists():
-                                update_issue_task.delay(finding, True)
-                            else:
-                                add_issue_task.delay(finding, True)
-
-                messages.add_message(request,
-                                     messages.SUCCESS,
-                                     'Bulk edit of findings was successful.  Check to make sure it is what you intended.',
-                                     extra_tags='alert-success')
-            else:
-                messages.add_message(request,
-                                     messages.ERROR,
-                                     'Unable to process bulk update. Required fields were not selected.',
-                                     extra_tags='alert-danger')
-
-    return redirect_to_return_url_or_else(request, reverse('view_test', args=(test.id,)))
 
 
 @user_passes_test(lambda u: u.is_staff)

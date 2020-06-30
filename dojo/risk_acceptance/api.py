@@ -84,9 +84,10 @@ def _accept_risks(accepted_risks: List[AcceptedRisk], base_findings: QuerySet, o
         if findings.exists():
             # TODO we could use risk.cve to name the risk_acceptance, but would need to check for existing risk_acceptances in that case
             # so for now we add some timestamp based suffix
-            acceptance = Risk_Acceptance.objects.create(owner=owner, name=risk.cve + ' via api at ' + timezone.now().strftime('%b %d, %Y, %H:%M:%S'),
+            name = risk.cve + ' via api at ' + timezone.now().strftime('%b %d, %Y, %H:%M:%S')
+            acceptance = Risk_Acceptance.objects.create(owner=owner, name=name[:100],
                                                         compensating_control=risk.justification,
-                                                        accepted_by=risk.accepted_by)
+                                                        accepted_by=risk.accepted_by[:200])
             acceptance.accepted_findings.set(findings)
             acceptance.save()
             accepted.append(acceptance)
