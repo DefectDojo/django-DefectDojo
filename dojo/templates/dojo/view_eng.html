@@ -246,7 +246,7 @@
                         <tbody>
                         {% for test in tests %}
                             <tr>
-                                <td><a href="{% url 'view_test' test.id %}">{{ test }}</a>
+                                <td><a title="{{ test.description }}" href="{% url 'view_test' test.id %}">{{ test }}</a>
                                   {% if test.tags %}
                                       <sup>
                                           {% for tag in test.tags %}

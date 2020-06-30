@@ -1497,7 +1497,12 @@ div.tags .label {
 }
 
 .amber-color {
-  background: #ffc107
+  background: #ffc107;
+}
+
+.amber-color-with-padding {
+  background: #ffc107;
+  padding: .2em .6em .3em;
 }
 
 .tag-label:link {

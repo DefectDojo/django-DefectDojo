@@ -387,7 +387,9 @@ class ImportScanForm(forms.Form):
                          ("Harbor Vulnerability Scan", "Harbor Vulnerability Scan"),
                          ("Yarn Audit Scan", "Yarn Audit Scan"),
                          ("BugCrowd Scan", "BugCrowd Scan"),
-                         ("GitLab SAST Report", "GitLab SAST Report"))
+                         ("GitLab SAST Report", "GitLab SAST Report"),
+                         ("HuskyCI Report", "HuskyCI Report"),
+                         ("CCVS Report", "CCVS Report"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
     scan_date = forms.DateTimeField(
@@ -803,6 +805,7 @@ class DeleteEngagementForm(forms.ModelForm):
 
 class TestForm(forms.ModelForm):
     title = forms.CharField(max_length=255, required=False)
+    description = forms.CharField(widget=forms.Textarea(attrs={'rows': '3'}), required=False)
     test_type = forms.ModelChoiceField(queryset=Test_Type.objects.all().order_by('name'))
     environment = forms.ModelChoiceField(
         queryset=Development_Environment.objects.all().order_by('name'))
@@ -827,7 +830,7 @@ class TestForm(forms.ModelForm):
 
     class Meta:
         model = Test
-        fields = ['title', 'test_type', 'target_start', 'target_end',
+        fields = ['title', 'test_type', 'target_start', 'target_end', 'description',
                   'environment', 'percent_complete', 'tags', 'lead', 'version']
 
 

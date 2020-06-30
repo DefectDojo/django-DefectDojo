@@ -637,7 +637,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         if 'tags' in data:
             test.tags = ' '.join(data['tags'])
         try:
-            parser = import_parser_factory(data.get('file'),
+            parser = import_parser_factory(data.get('file', None),
                                            test,
                                            active,
                                            verified,
@@ -807,7 +807,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         active = data['active']
 
         try:
-            parser = import_parser_factory(data.get('file'),
+            parser = import_parser_factory(data.get('file', None),
                                            test,
                                            active,
                                            verified,

@@ -535,7 +535,7 @@ def import_scan_results(request, eid=None, pid=None):
                 engagement.active = True
                 engagement.status = 'In Progress'
                 engagement.save()
-            file = request.FILES.get('file')
+            file = request.FILES.get('file', None)
             scan_date = form.cleaned_data['scan_date']
             min_sev = form.cleaned_data['minimum_severity']
             active = form.cleaned_data['active']

@@ -10,6 +10,7 @@ from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from django.http import HttpResponse
+import django_saml2_auth.views
 
 
 from dojo import views
@@ -176,6 +177,13 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
+    # These are the SAML2 related URLs. You can change "^saml2_auth/" regex to
+    # any path you want, like "^sso_auth/", "^sso_login/", etc. (required)
+    url(r'^saml2/', include('django_saml2_auth.urls')),
+    # The following line will replace the default user login with SAML2 (optional)
+    # If you want to specific the after-login-redirect-URL, use parameter "?next=/the/path/you/want"
+    # with this view.
+    url(r'^saml2/login/$', django_saml2_auth.views.signin),
     #  tastypie api
     url(r'^%sapi/' % get_system_setting('url_prefix'), include(v1_api.urls)),
     #  Django Rest Framework API v2
