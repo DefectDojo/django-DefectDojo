@@ -120,11 +120,25 @@
                                   </a>
                               </li>
                             {% endif %}
-                            <li role="presentation">
-                                <a href ="{% url 'upload_risk_acceptance$' finding.test.engagement.id%}">
-                                    <i class="fa fa-exclamation-circle"></i> Add Risk Acceptance
+                            {% if finding.risk_acceptance_set.exists %}
+                                <li role="presentation">
+                                <a href="{% url 'simple_risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
+                                    <i class="fa fa-exclamation-circle"></i> Unaccept Risk
                                 </a>
-                            </li>
+                                </li>
+                            {% else %}
+                                <li role="presentation">
+                                    <a href="{% url 'simple_risk_accept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
+                                        <i class="fa fa-exclamation-circle"></i> Accept Risk (simple), or
+                                    </a>
+                                </li>
+                                <li role="presentation">
+                                    <a href ="{% url 'upload_risk_acceptance$' finding.test.engagement.id%}">
+                                        <i class="fa fa-exclamation-circle"></i> Add Full Risk Acceptance...
+                                    </a>
+                                </li>
+                            {% endif %}
+  
                             <li role="presentation">
                                 <a href="{% url 'action_history' finding|content_type finding.id %}">
                                     <i class="fa fa-history"></i> View History
@@ -246,7 +260,7 @@
                     {% if finding.risk_acceptance_set.all %}
                         <td>
                             {% for ra in finding.risk_acceptance_set.all|slice:":5" %}
-                                <a href="{% url 'view_risk' finding.test.engagement.id finding.risk_acceptance_set.all.0.id %}" class="fa fa-thumbs-up fa-lg has-popover" data-trigger="hover" data-placement="right"
+                                <a href="{% url 'view_risk' finding.test.engagement.id finding.risk_acceptance_set.all.0.id %}" class="fa fa-exclamation-circle fa-lg has-popover" data-trigger="hover" data-placement="right"
                                 data-content="{{ finding.risk_acceptance_set.all.0.name }}"
                                 data-container="body" data-original-title="Risk Acceptance"></a>
                             {% endfor %}

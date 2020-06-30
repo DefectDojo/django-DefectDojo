@@ -975,6 +975,12 @@ class FindingForm(forms.ModelForm):
     is_template = forms.BooleanField(label="Create Template?", required=False,
                                      help_text="A new finding template will be created from this finding.")
 
+    simple_risk_accept = forms.BooleanField(label="Accept Risk (simple)", required=False, help_text="Check to accept this risk and deactivate the finding. Uncheck to unaccept the risk. Use full risk acceptance from the dropdown menu if you need afvanced settings such as an expiry date.")
+
+    # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
+    field_order = ('title', 'date', 'cwe', 'cve', 'severity', 'description', 'mitigation', 'impact', 'steps_to_reproduce',
+                   'severity_justification', 'endpoints', 'references', 'is_template', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope', 'simple_risk_accept', 'under_defect_review')
+
     def __init__(self, *args, **kwargs):
         template = kwargs.pop('template')
         # Get tags from a template
@@ -987,6 +993,9 @@ class FindingForm(forms.ModelForm):
         t = [(tag.name, tag.name) for tag in tags]
         super(FindingForm, self).__init__(*args, **kwargs)
         self.fields['tags'].widget.choices = t
+        # print(self.instance.get_simple_risk_acceptance())
+        self.fields['simple_risk_accept'].initial = True if self.instance.is_simple_risk_accepted else False
+        # print(self.fields['simple_risk_accept'].initial)
 
     def clean(self):
         cleaned_data = super(FindingForm, self).clean()
@@ -996,11 +1005,14 @@ class FindingForm(forms.ModelForm):
         if cleaned_data['false_p'] and cleaned_data['verified']:
             raise forms.ValidationError('False positive findings cannot '
                                         'be verified.')
+        if cleaned_data['active'] and cleaned_data['simple_risk_accept']:
+            raise forms.ValidationError('Active findings cannot '
+                                        'be simple risk accepted.')
+
         return cleaned_data
 
     class Meta:
         model = Finding
-        order = ('title', 'severity', 'endpoints', 'description', 'impact')
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
                    'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change', 'sonarqube_issue')
 
@@ -1108,6 +1120,10 @@ class DeleteFindingTemplateForm(forms.ModelForm):
 
 class FindingBulkUpdateForm(forms.ModelForm):
     status = forms.BooleanField(required=False)
+    risk_acceptance = forms.BooleanField(required=False)
+    risk_accept = forms.BooleanField(required=False)
+    risk_unaccept = forms.BooleanField(required=False)
+
     push_to_jira = forms.BooleanField(required=False)
     push_to_github = forms.BooleanField(required=False)
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),

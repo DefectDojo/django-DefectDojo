@@ -332,7 +332,7 @@
             <div class="panel-heading">
                 <h4> Risk Acceptance
                     {% if can_add_risk %}
-                        <a title="Add Risk Acceptance" class="pull-right btn btn-sm btn-primary"
+                        <a title="Add Risk Acceptance..." class="pull-right btn btn-sm btn-primary"
                            href="{% url 'upload_risk_acceptance$' eng.id %}"><span class="fa fa-plus"></span></a>
                         </a>
                     {% endif %}
@@ -366,7 +366,7 @@
                                 <td>
                                     <a class="btn btn-sm btn-primary" href="{% url 'view_risk' eng.id risk.id %}">
                                         View
-                                        Approval</a>
+                                        Acceptance</a>
                                 </td>
                             </tr>
                         {% endfor %}
