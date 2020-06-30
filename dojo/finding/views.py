@@ -35,7 +35,7 @@ from dojo.forms import NoteForm, FindingNoteForm, CloseFindingForm, FindingForm,
     DefectFindingForm, StubFindingForm, DeleteFindingForm, DeleteStubFindingForm, ApplyFindingTemplateForm, \
     FindingFormID, FindingBulkUpdateForm, MergeFindings
 from dojo.models import Finding, Notes, NoteHistory, Note_Type, \
-    BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, \
+    BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, Risk_Acceptance, \
     FindingImageAccessToken, JIRA_Issue, JIRA_PKey, GITHUB_PKey, GITHUB_Issue, Dojo_User, Cred_Mapping, Test, Product, User, Engagement
 from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_notifications, \
     add_comment, jira_get_resolution_id, jira_change_resolution_id, get_jira_connection, \
@@ -46,7 +46,7 @@ from dojo.notifications.helper import create_notification
 from dojo.tasks import add_issue_task, update_issue_task, update_external_issue_task, add_comment_task, \
     add_external_issue_task, close_external_issue_task, reopen_external_issue_task
 from django.template.defaultfilters import pluralize
-from django.db.models import Q, QuerySet
+from django.db.models import Q, QuerySet, Prefetch
 
 logger = logging.getLogger(__name__)
 
@@ -662,6 +662,11 @@ def edit_finding(request, fid):
                 parent_find.found_by.remove(new_finding.test.test_type)
                 new_finding.duplicate_finding = None
 
+            if form['simple_risk_accept'].value():
+                new_finding.simple_risk_accept()
+            else:
+                new_finding.simple_risk_unaccept()
+
             create_template = new_finding.is_template
             # always false now since this will be deprecated soon in favor of new Finding_Template model
             new_finding.is_template = False
@@ -771,7 +776,7 @@ def edit_finding(request, fid):
         'jform': jform,
         'gform': gform,
         'dupes': finding_dupes,
-        'return_url': get_return_url(request.GET)
+        'return_url': get_return_url(request)
     })
 
 
@@ -782,7 +787,24 @@ def touch_finding(request, fid):
     finding.last_reviewed = timezone.now()
     finding.last_reviewed_by = request.user
     finding.save()
-    return HttpResponseRedirect(reverse('view_finding', args=(finding.id, )))
+    # print('request:')
+    # print(vars(request))
+    # print(request.GET['return_url'])
+    return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id, )))
+
+
+@user_passes_test(lambda u: u.is_staff)
+def simple_risk_accept(request, fid):
+    finding = get_object_or_404(Finding, id=fid)
+    finding.simple_risk_accept()
+    return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id, )))
+
+
+@user_passes_test(lambda u: u.is_staff)
+def simple_risk_unaccept(request, fid):
+    finding = get_object_or_404(Finding, id=fid)
+    finding.simple_risk_unaccept()
+    return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id, )))
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -1687,6 +1709,8 @@ def finding_bulk_update_all(request, pid=None):
                 calculate_grade(prod)
         else:
             if form.is_valid() and finding_to_update:
+                q_simple_risk_acceptance = Risk_Acceptance.objects.filter(name=Finding.SIMPLE_RISK_ACCEPTANCE_NAME)
+
                 finding_to_update = request.POST.getlist('finding_to_update')
                 finds = Finding.objects.filter(id__in=finding_to_update).order_by("finding__test__engagement__product__id")
 
@@ -1697,6 +1721,9 @@ def finding_bulk_update_all(request, pid=None):
 
                     finds = finds.filter(
                         test__engagement__product__authorized_users__in=[request.user])
+
+                finds = prefetch_for_findings(finds)
+                finds = finds.prefetch_related(Prefetch('test__engagement__risk_acceptance', queryset=q_simple_risk_acceptance, to_attr='simple_risk_acceptance'))
 
                 if form.cleaned_data['severity']:
                     finds.update(severity=form.cleaned_data['severity'],
@@ -1712,9 +1739,15 @@ def finding_bulk_update_all(request, pid=None):
                                  last_reviewed=timezone.now(),
                                  last_reviewed_by=request.user)
 
+                if form.cleaned_data['risk_acceptance']:
+                    for find in finds:
+                        if form.cleaned_data['risk_accept']:
+                            find.simple_risk_accept()
+                        elif form.cleaned_data['risk_unaccept']:
+                            find.simple_risk_unaccept()
+
                 if form.cleaned_data['push_to_github']:
                     logger.info('push selected findings to github')
-                    finds = Finding.objects.filter(id__in=finding_to_update)
                     for finding in finds:
                         print('will push to GitHub finding: ' + str(finding))
                         old_status = finding.status()
@@ -1730,10 +1763,10 @@ def finding_bulk_update_all(request, pid=None):
                         ts = ", ".join(tags)
                         finding.tags = ts
 
-                # Update the grade as bulk edits don't go through save
                 if form.cleaned_data['severity'] or form.cleaned_data['status']:
                     prev_prod = None
                     for finding in finds:
+                        # findings are ordered by product_id
                         if prev_prod != finding.test.engagement.product.id:
                             # TODO this can be inefficient as most findings usually have the same product
                             calculate_grade(finding.test.engagement.product)

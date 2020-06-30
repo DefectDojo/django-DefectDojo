@@ -33,9 +33,9 @@
                         <li class="dropdown-header">Choose wisely...</li>
                         <li style="padding-left: 8px;">
                           {% if product_tab %}
-                            <form action="{% url 'findings_bulk_all_product' product_tab.product.id %}" method="post" id="bulk_change_form">
+                            <form action="{% url 'finding_bulk_update_all_product' product_tab.product.id %}" method="post" id="bulk_change_form">
                           {% else %}
-                            <form action="{% url 'findings_bulk_all' %}" method="post" id="bulk_change_form">
+                            <form action="{% url 'finding_bulk_update_all' %}" method="post" id="bulk_change_form">
                           {% endif %}
                                 {% csrf_token %}
                                 <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />                                            
@@ -69,6 +69,16 @@
                                     <span>Mitigated</span>
                                 </label>
                                 <br/>
+
+                                <label><b>Risk Acceptance</b><input id="id_bulk_risk_acceptance" name="risk_acceptance" type="checkbox" alt="Select to enable"/></label><br/>
+                                <label style="font-size: 80%; font-weight: normal; display: block">
+                                    <input id="id_bulk_risk_accept" name="risk_accept" type="checkbox" disabled/> <span>Accept</span>
+                                </label>
+                                <label style="font-size: 80%; font-weight: normal; display: block">
+                                    <input id="id_bulk_risk_unaccept" name="risk_unaccept" type="checkbox" disabled/> <span>Unaccept</span>
+                                </label>
+
+                                <br>
                                 {% if system_settings.enable_jira %}
                                 <label style="font-size: 80%; font-weight: bold; display: block">Push to Jira
                                   <input id="id_push_tojira" name="push_to_jira" type="checkbox" alt="Select to push to JIRA"/>
@@ -218,7 +228,7 @@
                                        {% endif %}
                                        {% if user|is_authorized_for_change:finding %}                                       
                                        <li role="presentation">
-                                           <a href="{% url 'touch_finding' finding.id %}">
+                                           <a href="{% url 'touch_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
                                                <i class="fa fa-clock-o"></i> Touch Finding
                                            </a>
                                        </li>
@@ -251,7 +261,27 @@
                                         {% endif %}
                                        {% endif %}                                       
                                        <li class="divider"></li>
-                                       <li role="presentation">
+
+                                        {% if user.is_staff %}
+                                        {% if finding.risk_acceptance_set.exists %}
+                                            <li role="presentation">
+                                            <a href="{% url 'simple_risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
+                                                <i class="fa fa-exclamation-circle"></i> Unaccept Risk
+                                            </a>
+                                            </li>
+                                        {% else %}
+                                            <li role="presentation">
+                                                <a href="{% url 'simple_risk_accept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
+                                                    <i class="fa fa-exclamation-circle"></i> Accept Risk (simple), or
+                                                </a>
+                                            </li>
+                                            <li role="presentation">
+                                                <a href ="{% url 'upload_risk_acceptance$' finding.test.engagement.id%}">
+                                                    <i class="fa fa-exclamation-circle"></i> Add Full Risk Acceptance...
+                                                </a>
+                                            </li>
+                                        {% endif %}
+                                        {% endif %}                                       <li role="presentation">
                                            <a href="{% url 'action_history' finding|content_type finding.id %}">
                                                <i class="fa fa-history"></i> View History
                                            </a>
@@ -535,6 +565,13 @@
                 $('#bulk_edit_menu #id_bulk_out_of_scope').prop('disabled', !checked);
                 $('#bulk_edit_menu #id_bulk_is_Mitigated').prop('disabled', !checked);
             })
+
+            $('#id_bulk_risk_acceptance').on('click', function (e) {
+                var checked = this.checked;
+                $('#bulk_edit_menu #id_bulk_risk_accept').prop('disabled', !checked);
+                $('#bulk_edit_menu #id_bulk_risk_unaccept').prop('disabled', !checked);
+            })
+
             // Keep the dropdown menu open for selecting severity status
             $('.dropdown-menu').click(function(e) {
                 e.stopPropagation();
