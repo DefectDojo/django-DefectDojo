@@ -593,28 +593,28 @@
                             {% csrf_token %}
                             <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />                                            
                             <label style="font-size: 80%; font-weight: normal; display: block">
-                                <input id="id_bulk_active" name="active" type="checkbox"/> 
+                                <input id="id_bulk_active" label="active "name="active" type="checkbox"/> 
                                 <span>Active</span>
                             </label>
                             <label style="font-size: 80%; font-weight: normal; display: block">
-                                <input id="id_bulk_false_p" name="false_positive" type="checkbox"/> 
+                                <input id="id_bulk_false_p" label="false_positive name="false_positive" type="checkbox"/> 
                                 <span>False Positive</span>
                             </label>
                             <label style="font-size: 80%; font-weight: normal; display: block">
-                                <input id="id_bulk_out_of_scope" name="out_of_scope" type="checkbox"/>
+                                <input id="id_bulk_out_of_scope" label="out_of_scope" name="out_of_scope" type="checkbox"/>
                                 <span>Out of scope</span>
                             </label>
                             <label style="font-size: 80%; font-weight: normal; display: block">
-                                <input id="id_bulk_remediated" name="remediated" type="checkbox"/>
+                                <input id="id_bulk_remediated" label="remediated" name="remediated" type="checkbox"/>
                                 <span>Remediated</span>
                             </label>
                             <label style="font-size: 80%; font-weight: normal; display: block">
-                                <input id="id_bulk_risk_accepted" name="risk_accepted" type="checkbox"/>
+                                <input id="id_bulk_risk_accepted" label="risk_accepted" name="risk_accepted" type="checkbox"/>
                                 <span>Risk Accepted</span>
                             </label>
                             <br/>    
-                            <input type="hidden" value="{{ finding.id }}" name="finding_id">                
-                            <input type="submit" class="btn btn-sm btn-primary" value="Submit"/>
+                            <input type="hidden" value="{{ finding.id }}" label="finding_id" name="finding_id">                
+                            <input type="submit" class="btn btn-sm btn-primary" label="Submit" name="Submit" value="Submit"/>
                         </form>
                     </li>
                 </ul>
@@ -639,7 +639,7 @@
                                 {% if user.is_staff %}
                                     <th class="hidden-sm" title="Select all vulnerable endpoints." style="width: 10%;">
                                         <form class="inline-form" action="#">
-                                            <input type="checkbox" name="select_all_vulnerable" id="select_all_vulnerable"/>
+                                            <input type="checkbox" label="select_all_vulnerable" name="select_all_vulnerable" id="select_all_vulnerable"/>
                                         </form>
                                         <span>Select All</span>
                                     </th>
@@ -655,7 +655,7 @@
                                         {% if user.is_staff %}
                                             <td class="hidden-sm">
                                                 <form action="#">
-                                                    <input type="checkbox" name="select_vulnerable_{{ endpoint.id }}" id="{{ endpoint.id }}"
+                                                    <input type="checkbox" label="select_vulnerable_{{ endpoint.id }}" name="select_vulnerable_{{ endpoint.id }}" id="{{ endpoint.id }}"
                                                         class="select_one"/>
                                                 </form>
                                             </td>
@@ -699,7 +699,7 @@
                                 {% if user.is_staff %}
                                     <th class="hidden-sm" title="Select all remediated endpoints." style="width: 10%;">
                                         <form class="inline-form" action="#">
-                                            <input type="checkbox" name="select_all_remediated" id="select_all_remediated"/>
+                                            <input type="checkbox" label="select_all_remediated" name="select_all_remediated" id="select_all_remediated"/>
                                         </form>
                                         <span>Select All</span>
                                     </th>
@@ -715,7 +715,7 @@
                                         {% if user.is_staff %}
                                             <td class="hidden-sm">
                                                 <form action="#">
-                                                    <input type="checkbox" name="select_remediated_{{ endpoint.id }}" id="{{ endpoint.id }}"
+                                                    <input type="checkbox" label="select_remediated_{{ endpoint.id }}" name="select_remediated_{{ endpoint.id }}" id="{{ endpoint.id }}"
                                                         class="select_one"/>
                                                 </form>
                                             </td>
