@@ -519,7 +519,7 @@
                         {% if system_settings.enable_jira %}
                             {% if jira_config and product_tab or not product_tab %}
                                 <td>
-                                    <a href="{{finding.jira_conf.url}}/browse/{{finding.jira.jira_key}}" target="_blank"> {{finding.jira.jira_key}} </a>
+                                    <a href="{{finding.jira_conf_new.url}}/browse/{{finding.jira_issue.jira_key}}" target="_blank"> {{finding.jira_issue.jira_key}} </a>
                                 </td>
 
                                     <td class="nowrap">
