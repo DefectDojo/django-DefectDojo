@@ -31,6 +31,7 @@ from dojo.tag.prefetching_tag_descriptor import PrefetchingTagDescriptor
 from django.contrib.contenttypes.fields import GenericRelation
 from tagging.models import TaggedItem
 from dateutil.relativedelta import relativedelta
+from dojo.user.helper import user_is_authorized
 
 fmt = getattr(settings, 'LOG_FORMAT', None)
 lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
@@ -1443,6 +1444,10 @@ class Finding(models.Model):
             # models.Index(fields=['file_path']), # can't add index because the field has max length 4000.
             models.Index(fields=['line']),
         ]
+
+    def is_authorized(self, user, perm_type):
+        # print('finding.is_authorized')
+        return user_is_authorized(user, perm_type, self)
 
     @classmethod
     def unaccepted_open_findings(cls):
@@ -3183,7 +3188,9 @@ admin.site.register(Notifications)
 # Watson
 watson.register(Product)
 watson.register(Test)
-watson.register(Finding)
+watson.register(Finding, fields=('id', 'title', 'cve', 'url', 'severity', 'description', 'mitigation', 'impact', 'steps_to_reproduce',
+                                 'severity_justification', 'references', 'sourcefilepath', 'sourcefile', 'hash_code', 'file_path',
+                                 'component_name', 'component_version', 'unique_id_from_tool', ))
 watson.register(Finding_Template)
 watson.register(Endpoint)
 watson.register(Engagement)

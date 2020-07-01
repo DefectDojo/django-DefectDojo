@@ -153,14 +153,11 @@ def prefetch_for_findings(findings):
         prefetched_findings = prefetched_findings.prefetch_related('notes')
         prefetched_findings = prefetched_findings.prefetch_related('tagged_items__tag')
         prefetched_findings = prefetched_findings.prefetch_related('endpoints')
-
-    else:
+        prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__authorized_users')
         logger.debug('unable to prefetch because query was already executed')
-
     return prefetched_findings
 
 
-@user_passes_test(lambda u: u.is_staff)
 def edit_test(request, tid):
     test = get_object_or_404(Test, pk=tid)
     form = TestForm(instance=test)
@@ -539,6 +536,7 @@ def search(request, tid):
                    })
 
 
+# bulk update and delete are combined, so we can't have the nice user_must_be_authorized decorator (yet)
 @user_passes_test(lambda u: u.is_staff)
 def re_import_scan_results(request, tid):
     additional_message = "When re-uploading a scan, any findings not found in original scan will be updated as " \
