@@ -5,13 +5,13 @@ register = template.Library()
 
 @register.filter(name='get_vulnerable_endpoints')
 def get_vulnerable_endpoints(finding):
-    status_list = finding.endpoint_status.all().filter(remediated=False)
+    status_list = finding.endpoint_status.all().filter(mitigated=False)
     return [status.endpoint for status in status_list]
 
 
-@register.filter(name='get_remediated_endpoints')
-def get_remediated_endpoints(finding):
-    status_list = finding.endpoint_status.all().filter(remediated=True)
+@register.filter(name='get_mitigated_endpoints')
+def get_mitigated_endpoints(finding):
+    status_list = finding.endpoint_status.all().filter(mitigated=True)
     return [status.endpoint for status in status_list]
 
 
@@ -24,8 +24,8 @@ def endpoint_display_status(endpoint, finding):
         return "Risk Accepted"
     if status.out_of_scope:
         return "Out of Scope"
-    if status.remediated:
-        return "Remediated"
+    if status.mitigated:
+        return "Mitigated"
     return "Active"
 
 
@@ -42,12 +42,12 @@ def endpoint_date(endpoint, finding):
 
 
 @register.filter
-def endpoint_remediator(endpoint, finding):
+def endpoint_mitigator(endpoint, finding):
     status = Endpoint_Status.objects.get(endpoint=endpoint, finding=finding)
-    return status.remediated_by
+    return status.mitigated_by
 
 
 @register.filter
-def endpoint_remediated_time(endpoint, finding):
+def endpoint_mitigated_time(endpoint, finding):
     status = Endpoint_Status.objects.get(endpoint=endpoint, finding=finding)
-    return status.remediated_time
+    return status.mitigated_time

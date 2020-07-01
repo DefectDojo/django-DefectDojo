@@ -124,13 +124,13 @@ class EndpointStatusTest(BaseClass.RESTEndpointTest):
         self.payload = {
             'endpoint': 2,
             'finding': 2,
-            'remediated': False,
+            'mitigated': False,
             'false_positive': False,
             'risk_accepted': False,
             'out_of_scope': False,
             "date": "2017-01-12T00:00",
         }
-        self.update_fields = {'remediated': True}
+        self.update_fields = {'mitigated': True}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 

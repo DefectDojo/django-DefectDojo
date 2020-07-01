@@ -80,8 +80,8 @@ class EndpointStatusViewSet(mixins.ListModelMixin,
     serializer_class = serializers.EndpointStatusSerializer
     queryset = Endpoint_Status.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('remediated', 'false_positive', 'out_of_scope',
-                     'risk_accepted', 'remediated_by', 'finding', 'endpoint')
+    filter_fields = ('mitigated', 'false_positive', 'out_of_scope',
+                     'risk_accepted', 'mitigated_by', 'finding', 'endpoint')
 
 
 class EngagementViewSet(mixins.ListModelMixin,

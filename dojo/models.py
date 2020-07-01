@@ -1014,9 +1014,9 @@ class Endpoint_Params(models.Model):
 class Endpoint_Status(models.Model):
     date = models.DateTimeField(default=get_current_date)
     last_modified = models.DateTimeField(null=True, editable=False, default=get_current_datetime)
-    remediated = models.BooleanField(default=False, blank=True)
-    remediated_time = models.DateTimeField(editable=False, null=True, blank=True)
-    remediated_by = models.ForeignKey(User, editable=True, null=True, on_delete=models.CASCADE)
+    mitigated = models.BooleanField(default=False, blank=True)
+    mitigated_time = models.DateTimeField(editable=False, null=True, blank=True)
+    mitigated_by = models.ForeignKey(User, editable=True, null=True, on_delete=models.CASCADE)
     false_positive = models.BooleanField(default=False, blank=True)
     out_of_scope = models.BooleanField(default=False, blank=True)
     risk_accepted = models.BooleanField(default=False, blank=True)
@@ -1044,7 +1044,7 @@ class Endpoint(models.Model):
                                           "be omitted. For example 'section-13', 'paragraph-2'.")
     product = models.ForeignKey(Product, null=True, blank=True, on_delete=models.CASCADE)
     endpoint_params = models.ManyToManyField(Endpoint_Params, blank=True, editable=False)
-    remediated = models.BooleanField(default=False, blank=True)
+    mitigated = models.BooleanField(default=False, blank=True)
     endpoint_status = models.ManyToManyField(Endpoint_Status, blank=True, related_name='endpoint_endpoint_status')
 
     # used for prefetching tags because django-tagging doesn't support that out of the box

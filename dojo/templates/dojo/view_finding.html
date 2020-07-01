@@ -605,8 +605,8 @@
                                 <span>Out of scope</span>
                             </label>
                             <label style="font-size: 80%; font-weight: normal; display: block">
-                                <input id="id_bulk_remediated" label="remediated" name="remediated" type="checkbox"/>
-                                <span>Remediated</span>
+                                <input id="id_bulk_mitigated" label="mitigated" name="mitigated" type="checkbox"/>
+                                <span>Mitigated</span>
                             </label>
                             <label style="font-size: 80%; font-weight: normal; display: block">
                                 <input id="id_bulk_risk_accepted" label="risk_accepted" name="risk_accepted" type="checkbox"/>
@@ -622,126 +622,7 @@
         </div>
     </div>
 
-    {% with endpoints=finding|get_vulnerable_endpoints %}
-        {% if endpoints %}
-            <div class="row to_highlight">
-                <div class="col-md-12">
-                    <div class="panel panel-default table-responsive">
-                        <div class="panel-heading">
-                            <h4>Vulnerable Endpoints / Systems
-                                <span class="pull-right"><a data-toggle="collapse" href="#vuln_endpoints"><i
-                                        class="glyphicon glyphicon-chevron-up"></i></a></span>
-                            </h4>
-                        </div>
-                       
-                        <table id="vuln_endpoints" class="table-striped table table-hover">
-                            <thead>
-                                {% if user.is_staff %}
-                                    <th class="hidden-sm" title="Select all vulnerable endpoints." style="width: 10%;">
-                                        <form class="inline-form" action="#">
-                                            <input type="checkbox" label="select_all_vulnerable" name="select_all_vulnerable" id="select_all_vulnerable"/>
-                                        </form>
-                                        <span>Select All</span>
-                                    </th>
-                                {% endif %}
-                                <th>Endpoint</th>
-                                <th>Status</th>
-                                <th>Date Discovered</th>
-                                <th>Last Modified</th>
-                            </thead>
-                            <tbody>
-                                {% for endpoint in endpoints %}
-                                    <tr>
-                                        {% if user.is_staff %}
-                                            <td class="hidden-sm">
-                                                <form action="#">
-                                                    <input type="checkbox" label="select_vulnerable_{{ endpoint.id }}" name="select_vulnerable_{{ endpoint.id }}" id="{{ endpoint.id }}"
-                                                        class="select_one"/>
-                                                </form>
-                                            </td>
-                                        {% endif %}
-                                        <td>
-                                            <a data-toggle="tooltip" data-placement="top" data-original-title="{{ endpoint }}" href="{% url 'view_endpoint' endpoint.id %}">{{ endpoint|url_shortner }}</a>
-                                            {% if item.tags %}
-                                                <sup>
-                                                    {% for tag in item.tags %}
-                                                        <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
-                                                    {% endfor %}
-                                                </sup>
-                                            {% endif %}
-                                        </td>
-                                        <td>{{ endpoint|endpoint_display_status:finding|safe }}</td>
-                                        <td>{{ endpoint|endpoint_date:finding|date }}</td>
-                                        <td>{{ endpoint|endpoint_update_time:finding|date}}</td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        {% endif %}
-    {% endwith %}
-
-    {% with endpoints=finding|get_remediated_endpoints %}
-        {% if endpoints %}
-            <div class="row to_highlight">
-                <div class="col-md-12">
-                    <div class="panel panel-default table-responsive">
-                        <div class="panel-heading">
-                            <h4>Remediated Endpoints / Systems
-                                <span class="pull-right"><a data-toggle="collapse" href="#remd_endpoints"><i
-                                        class="glyphicon glyphicon-chevron-up"></i></a></span>
-                            </h4>
-                        </div>
-                        <table id="remd_endpoints" class="table-striped table table-hover">
-                            <thead>
-                                {% if user.is_staff %}
-                                    <th class="hidden-sm" title="Select all remediated endpoints." style="width: 10%;">
-                                        <form class="inline-form" action="#">
-                                            <input type="checkbox" label="select_all_remediated" name="select_all_remediated" id="select_all_remediated"/>
-                                        </form>
-                                        <span>Select All</span>
-                                    </th>
-                                {% endif %}
-                                <th>Endpoint</th>
-                                <th>Status</th>
-                                <th>Remediation Time</th>
-                                <th>Remediater</th>
-                            </thead>
-                            <tbody>
-                                {% for endpoint in endpoints %}
-                                    <tr>
-                                        {% if user.is_staff %}
-                                            <td class="hidden-sm">
-                                                <form action="#">
-                                                    <input type="checkbox" label="select_remediated_{{ endpoint.id }}" name="select_remediated_{{ endpoint.id }}" id="{{ endpoint.id }}"
-                                                        class="select_one"/>
-                                                </form>
-                                            </td>
-                                        {% endif %}
-                                        <td>
-                                            <a data-toggle="tooltip" data-placement="top" data-original-title="{{ endpoint }}" href="{% url 'view_endpoint' endpoint.id %}">{{ endpoint|url_shortner }}</a>
-                                            {% if item.tags %}
-                                                <sup>
-                                                    {% for tag in item.tags %}
-                                                        <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
-                                                    {% endfor %}
-                                                </sup>
-                                            {% endif %}
-                                        </td>
-                                        <td>{{ endpoint|endpoint_display_status:finding|safe }}</td>
-                                        <td>{{ endpoint|endpoint_remediated_time:finding|date }}</td>
-                                        <td>{{ endpoint|endpoint_remediator:finding|safe }}</td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        {% endif %}
-    {% endwith %}
+    {% include "dojo/snippets/endpoints.html" with finding=finding destination="UI" %}
 
     <div class="view-finding to_highlight">
         <div class="panel panel-default">
@@ -1131,7 +1012,7 @@
         function get_checkbox_values()
         {
             var checkbox_values_vuln = $("input[type=checkbox][name^='select_vulnerable_']");
-            var checkbox_values_rem = $("input[type=checkbox][name^='select_remediated_']");
+            var checkbox_values_rem = $("input[type=checkbox][name^='select_mitigated_']");
             var checkbox_values = Array.from(checkbox_values_vuln).concat(Array.from(checkbox_values_rem));
 
             return checkbox_values;
@@ -1142,7 +1023,7 @@
           var checkbox_values = get_checkbox_values();
           for (var i = 0; i < checkbox_values.length; i++) {
             if ($(checkbox_values[i]).prop("checked")) {
-              if ((checkbox_values[i].name != 'select_all_vulnerable') || (checkbox_values[i].name != 'select_all_remediated')) {
+              if ((checkbox_values[i].name != 'select_all_vulnerable') || (checkbox_values[i].name != 'select_all_mitigated')) {
                 checkbox_count++;
               }
             }
@@ -1177,12 +1058,12 @@
             $('#bulk_edit_menu #id_bulk_active').on("click", function (e){
                 var checked = this.checked;
                 $('#bulk_edit_menu #id_bulk_false_p').prop('disabled', checked);
-                $('#bulk_edit_menu #id_bulk_remediated').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_mitigated').prop('disabled', checked);
                 $('#bulk_edit_menu #id_bulk_false_p').prop('checked', false);
-                $('#bulk_edit_menu #id_bulk_remediated').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_mitigated').prop('checked', false);
             })
 
-            $('#bulk_edit_menu #id_bulk_remediated').on("click", function (e){
+            $('#bulk_edit_menu #id_bulk_mitigated').on("click", function (e){
                 var checked = this.checked;
                 $('#bulk_edit_menu #id_bulk_active').prop('disabled', checked);
                 $('#bulk_edit_menu #id_bulk_active').prop('checked', false);
@@ -1196,7 +1077,7 @@
                 $('#bulk_edit_menu #id_bulk_active').prop('checked', false);
                 $('#bulk_edit_menu #id_bulk_risk_accepted').prop('checked', false);
                 $('#bulk_edit_menu #id_bulk_out_of_scope').prop('checked', false);
-                $('#bulk_edit_menu #id_bulk_remediated').prop('checked', checked);
+                $('#bulk_edit_menu #id_bulk_mitigated').prop('checked', checked);
             })
 
             $('#bulk_edit_menu #id_bulk_risk_accepted').on("click", function (e){
@@ -1269,8 +1150,8 @@
                 }
             });
 
-             $('input#select_all_remediated').on('click', function (e) {
-                var checkbox_values = $("input[type=checkbox][name^='select_remediated']");
+             $('input#select_all_mitigated').on('click', function (e) {
+                var checkbox_values = $("input[type=checkbox][name^='select_mitigated']");
                 if ($(this).is(":checked")) {
                     for (var i = 0; i < checkbox_values.length; i++) {
                         $(checkbox_values[i]).prop('checked', true)
