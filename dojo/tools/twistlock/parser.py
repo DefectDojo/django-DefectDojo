@@ -50,7 +50,7 @@ class TwistlockCSVParser(object):
 
         data_package_name = self.get_field_from_row(row, package_name_column)
         data_id = self.get_field_from_row(row, id_column)
-        if self.get_field_from_row(row, severity_column) is '': 
+        if self.get_field_from_row(row, severity_column) == '':
             data_severity = 'Info'
         else:
             data_severity = self.get_field_from_row(row, severity_column).capitalize()
@@ -62,11 +62,10 @@ class TwistlockCSVParser(object):
             cve=data_vulnerability_id,
             test=test,
             severity=data_severity,
-            description= data_description + "<p> Vulnerable Package: " +
+            description=data_description + "<p> Vulnerable Package: " +
             data_package_name + "</p><p> Current Version: " + str(
                 data_package_version) + "</p>",
-            mitigation=data_fix_status ,
-            #references=vulnerability['link'],
+            mitigation=data_fix_status,
             component_name=data_package_name,
             component_version=data_package_version,
             active=False,
