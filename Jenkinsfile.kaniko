@@ -1,0 +1,224 @@
+import groovy.transform.Field
+
+@Field
+def DOCKER_IMAGES = [
+    django : [ 
+        image: "cloudbees/defectdojo-django",
+        dockerfile: "Dockerfile.django",
+    ],
+    nginx: [
+        image: "cloudbees/defectdojo-nginx",
+        dockerfile: "Dockerfile.nginx",
+    ]
+]
+
+@Library('prod-sec-libs') _1
+
+pipeline {
+
+    parameters {
+        string(
+            name: 'AnchoreAccount',
+            defaultValue: 'security',
+            description: 'Anchore account used to perform the image scanning'
+        )
+        string(
+            name: 'AnchoreCredentials',
+            defaultValue: 'anchore-g2-security',
+            description: 'Credentials to access the Anchore API'
+        )
+        string(
+            name: 'DefectDojoProduct',
+            defaultValue: 'DefectDojo',
+            description: 'Project name in DefectDojo where the image scanning results are uploaded'
+        )
+        string(
+            name: 'DefectDojoApiToken',
+            defaultValue: 'defect-dojo/srv-g2-import',
+            description: 'API Token to access DefectDojo API'
+        )
+        string(
+            name: 'ConfigFile',
+            defaultValue: 'config.toml',
+            description: "Config file for imgsec"
+        )
+        string(
+            name: 'SlackChannel',
+            defaultValue: "#group-prodsec-guild",
+            description: "Slack channel where the build notifications are sent"
+        )
+    }
+
+    options {
+        buildDiscarder(logRotator(numToKeepStr:'8'))
+        ansiColor('xterm')
+        disableConcurrentBuilds()
+    }
+
+    environment {
+        DOCKER_REPO_NAME = 'docker.io'
+    }
+
+    agent {
+        kubernetes {
+            label "defectdojo-build-${UUID.randomUUID().toString()}"
+            yamlFile 'KubePodKaniko.yaml'
+        }
+    }
+
+    stages {
+        stage('Image Version') {
+            steps {
+                script {
+                    echo "Reading docker image tag from git repository"
+                    env.DOCKER_IMG_VERSION = sh (
+                            script: 'git describe --always --tags',
+                            returnStdout: true
+                    ).trim()
+                }
+            }
+        }
+
+        stage ("Image Build") {
+            matrix {
+                agent {
+                    kubernetes {
+                        label "defectdojo-build-${UUID.randomUUID().toString()}"
+                        yamlFile 'KubePodKaniko.yaml'
+                    }
+                }
+                axes {
+                    axis {
+                        name 'IMAGE'
+                        values 'django', 'nginx'
+                    }
+                }
+                stages {
+                    stage('Build Image') {
+                        environment {
+                          PATH = "/busybox:/kaniko:$PATH"
+                        }
+
+                        steps {
+                            container(name: 'kaniko', shell: '/busybox/sh') {
+                                withCredentials([file(credentialsId: 'dockerhub-cbproductsecurity-PAT', variable: 'dockerconfig')]) {
+                                    sh (returnStdout: true, script: '''
+                                        mkdir -p /kaniko/.docker
+                                        cp ${dockerconfig} /kaniko/.docker/config.json
+                                    '''
+                                    )
+                                }
+                                withEnv(["DOCKER_IMAGE=${DOCKER_IMAGES.get(env.IMAGE).get('image')}",
+                                        "DOCKER_FILE=${DOCKER_IMAGES.get(env.IMAGE).get('dockerfile')}"]) {
+                                    sh (returnStdout: true, script: '''#!/busybox/sh
+                                        set -e
+                                        echo "docker file: $DOCKER_FILE"
+                                        echo "docker image: $DOCKER_IMAGE"
+                                        echo "docker image tag: $DOCKER_IMG_VERSION"
+
+                                        /kaniko/executor --context `pwd` --dockerfile=`pwd`/$DOCKER_FILE \
+                                        --destination $DOCKER_REPO_NAME/$DOCKER_IMAGE:$DOCKER_IMG_VERSION \
+                                        --destination $DOCKER_REPO_NAME/$DOCKER_IMAGE:latest
+                                    '''
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        stage ("Anchore Scan") {
+            matrix {
+                agent {
+                    kubernetes {
+                        label "defectdojo-scan-${UUID.randomUUID().toString()}"
+                        yamlFile 'KubePodImgsec.yaml'
+                    }
+                }
+                axes {
+                    axis {
+                        name 'IMAGE'
+                        values 'django', 'nginx'
+                    }
+                }
+                stages {
+                    stage('Config') {
+                        steps {
+                            script {
+                                stash name: "imgsec-config", includes: params.ConfigFile
+                            }
+                        }
+                    }
+                    stage("Scan Image") {
+                        steps {
+                            container(name: 'imgsec', shell: '/bin/bash') {
+                                unstash "imgsec-config"
+                                script {
+                                    env.ANCHORE_ACCOUNT = params.AnchoreAccount
+                                    env.DEFECT_DOJO_PRODUCT = params.DefectDojoProduct
+                                    env.CONFIG_FILE = params.ConfigFile
+                                    withCredentials([usernamePassword(credentialsId: params.AnchoreCredentials, 
+                                                usernameVariable: 'IMGSEC_SCAN_ANCHORE_USER', 
+                                                passwordVariable: 'IMGSEC_SCAN_ANCHORE_PASSWORD')]) {
+                                        withEnv(["DOCKER_IMAGE=${env.DOCKER_REPO_NAME}/${DOCKER_IMAGES.get(env.IMAGE).get('image')}:${env.DOCKER_IMG_VERSION}"]) {
+                                            sh(script: '''#!/bin/bash
+                                                set -ex
+
+                                                /usr/local/bin/imgsec scan \
+                                                    --config=${CONFIG_FILE} \
+                                                    --anchore_account=${ANCHORE_ACCOUNT} \
+                                                    ${DOCKER_IMAGE}
+                                            ''')
+                                        }
+                                    }
+                                    withCredentials([string(credentialsId: params.DefectDojoApiToken, 
+                                                variable: 'IMGSEC_UPLOAD_DEFECTDOJO_API_TOKEN')]) {
+                                        withEnv(["DOCKER_IMAGE=${env.DOCKER_REPO_NAME}/${DOCKER_IMAGES.get(env.IMAGE).get('image')}:${env.DOCKER_IMG_VERSION}"]) {
+                                            sh(script: '''#!/bin/bash
+                                                set -ex
+
+                                                /usr/local/bin/imgsec upload \
+                                                    --config=${CONFIG_FILE} \
+                                                    --defectdojo_product="${DEFECT_DOJO_PRODUCT}" \
+                                                    --defectdojo_engagement="${DOCKER_IMAGE}" \
+                                                    ${DOCKER_IMAGE}
+                                            ''')
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success { 
+            script { 
+                DOCKER_IMAGES.each{ imageName, imageDetails ->
+                    message = "${currentBuild.result}: docker image ${env.DOCKER_REPO_NAME}/${imageDetails.get('image')}:${env.DOCKER_IMG_VERSION} built and pushed. (`${env.JOB_NAME}` #${env.BUILD_NUMBER}:\n${env.BUILD_URL})"
+                    slackSend (
+                        channel: "${params.SlackChannel}",
+                        message: "${message}"
+                    )
+                }
+            }
+        }
+
+        failure {
+            script {
+                DOCKER_IMAGES.each{ imageName, imageDetails -> 
+                    message = "${currentBuild.result}: docker image ${env.DOCKER_REPO_NAME}/${imageDetails.get('image')}:${env.DOCKER_IMG_VERSION} failed to build. (`${env.JOB_NAME}` #${env.BUILD_NUMBER}:\n${env.BUILD_URL})"
+                    slackSend (
+                        channel: "${params.SlackChannel}",
+                        message: "${message}"
+                    )
+                }
+            }
+        }
+    }
+}

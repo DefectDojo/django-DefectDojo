@@ -1,0 +1,25 @@
+[scan]
+anchore_url = "https://anchore-api.cloudbees.com/v1"
+anchore_account = ""
+anchore_user = ""
+anchore_password = ""
+filter = ".*SNAPSHOT.*"
+timeout = 60 # minutes 
+bail = true # not fail the scan when the policy evaluation has failed
+skip_latest = true # skip latest tag from scanning
+quiet = false # turn off the info messages
+reports_dir = "results"
+
+[upload]
+defectdojo_url = "https://defectdojo.cloudbees.com/api/v2"
+defectdojo_scan_tag = "created-from-pipeline"
+defectdojo_api_token = "" # api token for DefectDojo API
+defectdojo_product = "" # product in defect dojo where the engagemetn is created
+defectdojo_engagement = "" # engagement in DefectDojo where the reports are beeing imported
+defectdojo_user_account_id = "" # user account id associated with the engagment update
+defectdojo_min_severity = "Medium" # min severity for uploaded findings (Info|Low|Medium|High|Critical)
+reports_dir = "results" # folder from where to upload the reports into DefectDojo
+vuln_report_type = "Anchore Engine Scan" # report type for vulnerabilties 
+policy_eval_report_type = "Anchore Enterprise Policy Check" # report type for policies evaluation
+quiet = false # turn off the info messages
+skip_reimport = true # skip reimporting the scan results into an existing engagement

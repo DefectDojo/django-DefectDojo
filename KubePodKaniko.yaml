@@ -1,0 +1,34 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    some-label: whatever
+spec:
+  containers:
+  - name: maven-java
+    image: adoptopenjdk/maven-openjdk8
+    command:
+    - cat
+    tty: true
+  - name: anchore
+    image: anchore/engine-cli:v0.7.0
+    command:
+    - cat
+    tty: true
+  - name: kaniko
+    image: gcr.io/kaniko-project/executor:debug-v0.19.0
+    imagePullPolicy: Always
+    command:
+    - cat
+    tty: true
+    resources:
+      requests:
+        memory: "6Gi"
+      limits:
+        memory: "8Gi"
+    volumeMounts:
+    - name: kaniko
+      mountPath: /kaniko/.docker/
+  volumes:
+  - name: kaniko
+    emptyDir: {}

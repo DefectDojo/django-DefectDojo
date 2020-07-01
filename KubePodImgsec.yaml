@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: imgsec-scanner
+spec:
+  containers:
+  - name: imgsec
+    imagePullPolicy: Always
+    image: cloudbees/imgsec:latest
+    resources:
+      requests:
+        memory: "1Gi"
+        cpu: 2
+      limits:
+        memory: "2Gi"
+        cpu: 2
+    tty: true
+    command:
+    - /bin/cat
