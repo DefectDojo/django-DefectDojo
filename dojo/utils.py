@@ -1357,35 +1357,40 @@ def add_issue(find, push_to_jira):
                 jira = JIRA(
                     server=jira_conf.url,
                     basic_auth=(jira_conf.username, jira_conf.password))
+
+                fields = {
+                        'project': {
+                            'key': jpkey.project_key
+                        },
+                        'summary': find.title,
+                        'description': jira_long_description(
+                            find.long_desc(), find.id,
+                            jira_conf.finding_text),
+                        'issuetype': {
+                            'name': jira_conf.default_issue_type
+                        },
+                        'priority': {
+                            'name': jira_conf.get_priority(find.severity)
+                        }
+                }
+
                 if jpkey.component:
-                    logger.debug('... with a component')
-                    new_issue = jira.create_issue(
-                        project=jpkey.project_key,
-                        summary=find.title,
-                        components=[
+                    fields['components'] = [
                             {
                                 'name': jpkey.component
                             },
-                        ],
-                        description=jira_long_description(
-                            find.long_desc(), find.id,
-                            jira_conf.finding_text),
-                        issuetype={'name': jira_conf.default_issue_type},
-                        priority={
-                            'name': jira_conf.get_priority(find.severity)
-                        })
-                else:
-                    logger.debug('... with no component')
-                    new_issue = jira.create_issue(
-                        project=jpkey.project_key,
-                        summary=find.title,
-                        description=jira_long_description(
-                            find.long_desc(), find.id,
-                            jira_conf.finding_text),
-                        issuetype={'name': jira_conf.default_issue_type},
-                        priority={
-                            'name': jira_conf.get_priority(find.severity)
-                        })
+                    ]
+
+                if System_Settings.objects.get().enable_finding_sla:
+                    # jira wants YYYY-MM-DD
+                    duedate = find.sla_deadline().strftime('%Y-%m-%d')
+                    # fields['duedate'] = '2020-12-31'
+                    fields['duedate'] = duedate
+
+                print('fields:')
+                print(fields)
+
+                new_issue = jira.create_issue(fields)
 
                 j_issue = JIRA_Issue(
                     jira_id=new_issue.id, jira_key=new_issue, finding=find)
