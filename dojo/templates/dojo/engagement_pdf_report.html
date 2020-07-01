@@ -283,7 +283,7 @@
                         </div>
                     </div>
                     
-                    {% with endpoints=finding.endpoints.all|get_vulnerable_endpoints %}
+                   {% with endpoints=finding|get_vulnerable_endpoints %}
                         {% if endpoints %}
                             <div class="row">
                                 <div class="col-md-12">
@@ -297,17 +297,23 @@
                                         </div>
 
                                         {% if endpoints %}
-                                            {% colgroup endpoints into 2 cols as grouped_items %}
-                                            <table class="table-striped table table table-condensed table-hover finding-endpoints">
-                                                {% for row in grouped_items %}
-                                                    <tr>
-                                                        {% for item in row %}
-                                                            <td>{% if item %}<i class="fa fa-circle"></i>
-                                                                {{ item }}{% endif %}
-                                                            </td>
-                                                        {% endfor %}
-                                                    </tr>
-                                                {% endfor %}
+                                            <table id="vuln_endpoints" class="table-striped table ">
+                                                <thead>
+                                                    <th>Endpoint</th>
+                                                    <th>Status</th>
+                                                    <th>Date Discovered</th>
+                                                    <th>Last Modified</th>
+                                                </thead>
+                                                <tbody>
+                                                    {% for endpoint in endpoints %}
+                                                        <tr>
+                                                            <td>{{ endpoint }}</td>
+                                                            <td>{{ endpoint|endpoint_display_status:finding|safe }}</td>
+                                                            <td>{{ endpoint|endpoint_date:finding|date }}</td>
+                                                            <td>{{ endpoint|endpoint_update_time:finding|date}}</td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                </tbody>
                                             </table>
                                         {% elif finding.file_path %}
                                             <table class="table-striped table table table-condensed table-hover finding-endpoints">
@@ -335,7 +341,7 @@
                         {% endif %}
                     {% endwith %}
 
-                    {% with endpoints=finding.endpoints.all|get_remediated_endpoints %}
+                    {% with endpoints=finding|get_remediated_endpoints %}
                         {% if endpoints %}
                             <div class="row">
                                 <div class="col-md-12">
@@ -349,17 +355,23 @@
                                         </div>
 
                                         {% if endpoints %}
-                                            {% colgroup endpoints into 2 cols as grouped_items %}
-                                            <table class="table-striped table table table-condensed table-hover finding-endpoints">
-                                                {% for row in grouped_items %}
-                                                    <tr>
-                                                        {% for item in row %}
-                                                            <td>{% if item %}<i class="fa fa-circle"></i>
-                                                                {{ item }}{% endif %}
-                                                            </td>
-                                                        {% endfor %}
-                                                    </tr>
-                                                {% endfor %}
+                                            <table id="remd_endpoints" class="table-striped table table-hover">
+                                                <thead>
+                                                    <th>Endpoint</th>
+                                                    <th>Status</th>
+                                                    <th>Remediation Time</th>
+                                                    <th>Remediater</th>
+                                                </thead>
+                                                <tbody>
+                                                    {% for endpoint in endpoints %}
+                                                        <tr>
+                                                            <td>{{ endpoint }}</td>
+                                                            <td>{{ endpoint|endpoint_display_status:finding|safe }}</td>
+                                                            <td>{{ endpoint|endpoint_remediated_time:finding|date }}</td>
+                                                            <td>{{ endpoint|endpoint_remediator:finding|safe }}</td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                </tbody>
                                             </table>
                                         {% elif finding.file_path %}
                                             <table class="table-striped table table table-condensed table-hover finding-endpoints">

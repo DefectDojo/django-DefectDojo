@@ -16,7 +16,7 @@ from django.db import DEFAULT_DB_ALIAS
 from dojo.filters import EndpointFilter
 from dojo.forms import EditEndpointForm, \
     DeleteEndpointForm, AddEndpointForm, DojoMetaDataForm
-from dojo.models import Product, Endpoint, Finding, System_Settings, DojoMeta
+from dojo.models import Product, Endpoint, Finding, System_Settings, DojoMeta, Endpoint_Status
 from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, get_system_setting, Product_Tab, calculate_grade
 from dojo.notifications.helper import create_notification
 
@@ -398,3 +398,40 @@ def endpoint_bulk_update_all(request, pid=None):
                                      'Unable to process bulk update. Required fields were not selected.',
                                      extra_tags='alert-danger')
     return HttpResponseRedirect(reverse('endpoints', args=()))
+
+
+@user_passes_test(lambda u: u.is_staff)
+def endpoint_status_bulk_update(request):
+    if request.method == "POST":
+        post = request.POST
+        endpoints_to_update = post.getlist('endpoints_to_update')
+        finding_id = int(post.get('finding_id'))
+        status_list = ['active', 'false_positive', 'remediated', 'out_of_scope', 'risk_accepted']
+        enable = [item for item in status_list if item in list(post.keys())]
+
+        if endpoints_to_update and len(enable) > 0:
+            endpoints = Endpoint.objects.filter(id__in=endpoints_to_update).order_by("endpoint_meta__product__id")
+            for endpoint in endpoints:
+                endpoint_status = Endpoint_Status.objects.get(
+                    endpoint=endpoint,
+                    finding__id=finding_id)
+                for status in status_list:
+                    if status in enable:
+                        endpoint_status.__setattr__(status, True)
+                        if status == 'remediated':
+                            endpoint_status.remediated_by = request.user
+                            endpoint_status.remediated_time = timezone.now()
+                    else:
+                        endpoint_status.__setattr__(status, False)
+                endpoint_status.last_modified = timezone.now()
+                endpoint_status.save()
+            messages.add_message(request,
+                                    messages.SUCCESS,
+                                    'Bulk edit of endpoints was successful. Check to make sure it is what you intended.',
+                                    extra_tags='alert-success')
+        else:
+            messages.add_message(request,
+                                    messages.ERROR,
+                                    'Unable to process bulk update. Required fields were not selected.',
+                                    extra_tags='alert-danger')
+    return HttpResponseRedirect(post['return_url'])

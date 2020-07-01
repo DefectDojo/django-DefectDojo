@@ -14,7 +14,7 @@ from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Find
     User, ScanSettings, Scan, Stub_Finding, Finding_Template, Notes, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Endpoint, JIRA_PKey, JIRA_Conf, DojoMeta, Development_Environment, \
-    Dojo_User, Note_Type, System_Settings, App_Analysis
+    Dojo_User, Note_Type, System_Settings, App_Analysis, Endpoint_Status
 
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import report_url_resolver
@@ -69,6 +69,19 @@ class EndPointViewSet(mixins.ListModelMixin,
         data = report_generate(request, endpoint, options)
         report = serializers.ReportGenerateSerializer(data)
         return Response(report.data)
+
+
+class EndpointStatusViewSet(mixins.ListModelMixin,
+                      mixins.RetrieveModelMixin,
+                      mixins.UpdateModelMixin,
+                      mixins.DestroyModelMixin,
+                      mixins.CreateModelMixin,
+                      viewsets.GenericViewSet):
+    serializer_class = serializers.EndpointStatusSerializer
+    queryset = Endpoint_Status.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('remediated', 'false_positive', 'out_of_scope',
+                     'risk_accepted', 'remediated_by', 'finding', 'endpoint')
 
 
 class EngagementViewSet(mixins.ListModelMixin,

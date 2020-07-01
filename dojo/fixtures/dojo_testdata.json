@@ -579,6 +579,22 @@
   },
   {
     "pk": 1,
+    "model": "dojo.endpoint_status",
+    "fields": {
+      "date": "2020-07-01T00:00:00Z",
+      "last_modified": "2020-07-01T17:45:39.791907Z",
+      "remediated": false,
+      "remediated_time": null,
+      "false_positive": false,
+      "out_of_scope": false,
+      "risk_accepted": false,
+      "remediated_by": null,
+      "endpoint": 2,
+      "finding": 2
+    }
+  },
+  {
+    "pk": 1,
     "model": "dojo.development_environment",
     "fields": {
       "name": "Ad officia praesentium sequi suscipit error iste qui nihil illum q"
