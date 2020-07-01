@@ -133,12 +133,14 @@
                        
                         <table id="vuln_endpoints" class="table-striped table table-hover">
                             <thead>
-                                <th class="hidden-sm" title="Select all vulnerable endpoints." style="width: 10%;">
-                                    <form class="inline-form" action="#">
-                                        <input type="checkbox" label="select_all_vulnerable" name="select_all_vulnerable" id="select_all_vulnerable"/>
-                                    </form>
-                                    <span>Select All</span>
-                                </th>
+                                {% if user|is_authorized_for_change:finding %}
+                                    <td class="hidden-sm">
+                                        <form action="#">
+                                            <input type="checkbox" label="select_vulnerable_{{ endpoint.id }}" name="select_vulnerable_{{ endpoint.id }}" id="{{ endpoint.id }}"
+                                                class="select_one"/>
+                                        </form>
+                                    </td>
+                                {% endif %}
                                 <th>Endpoint</th>
                                 <th>Status</th>
                                 <th>Date Discovered</th>
@@ -205,7 +207,7 @@
                             <tbody>
                                 {% for endpoint in endpoints %}
                                     <tr>
-                                        {% if user.is_staff %}
+                                        {% if user|is_authorized_for_change:finding %}
                                             <td class="hidden-sm">
                                                 <form action="#">
                                                     <input type="checkbox" label="select_mitigated_{{ endpoint.id }}" name="select_mitigated_{{ endpoint.id }}" id="{{ endpoint.id }}"
