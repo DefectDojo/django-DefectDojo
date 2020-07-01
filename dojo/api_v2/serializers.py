@@ -246,7 +246,7 @@ class ToolProductSettingsSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class EndpointStatusSerializer(serializers.ModelSerializer):    
+class EndpointStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Endpoint_Status
         fields = '__all__'
