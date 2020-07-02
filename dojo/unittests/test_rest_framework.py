@@ -180,6 +180,26 @@ class FindingsTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+class FindingRequestResponseTest(APITestCase):
+    fixtures = ['dojo_testdata.json']
+
+    def setUp(self):
+        testuser = User.objects.get(username='admin')
+        token = Token.objects.get(user=testuser)
+        self.client = APIClient()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+
+    def test_request_response_post(self):
+        payload = {"req_resp": [{"response": '200', "request": 'GET'}]}
+        response = self.client.post('/api/v2/findings/7/request_response/', payload)
+        print('response :: ', response.data)
+        self.assertEqual(200, response.status_code)
+
+    def test_request_response_get(self):
+        response = self.client.get('/api/v2/findings//request_response/', format='json')
+        self.assertEqual(response.data, {"req_resp": [{"request": "GET", "response": "200"}]})
+
+
 class FindingTemplatesTest(BaseClass.RESTEndpointTest):
     fixtures = ['dojo_testdata.json']
 
