@@ -9,7 +9,8 @@ def globalize_oauth_vars(request):
             'GOOGLE_ENABLED': settings.GOOGLE_OAUTH_ENABLED,
             'OKTA_ENABLED': settings.OKTA_OAUTH_ENABLED,
             'GITLAB_ENABLED': settings.GITLAB_OAUTH2_ENABLED,
-            'AZUREAD_TENANT_OAUTH2_ENABLED': settings.AZUREAD_TENANT_OAUTH2_ENABLED}
+            'AZUREAD_TENANT_OAUTH2_ENABLED': settings.AZUREAD_TENANT_OAUTH2_ENABLED,
+            'SAML2_ENABLED': settings.SAML2_ENABLED, }
 
 
 def bind_system_settings(request):
