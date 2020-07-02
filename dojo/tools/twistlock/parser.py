@@ -80,7 +80,6 @@ class TwistlockCSVParser(object):
         return finding
 
     def parse(self, filename, test):
-        print(filename)
         if filename is None:
             self.items = ()
             return
