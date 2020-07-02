@@ -2014,14 +2014,21 @@ def merge_sets_safe(set1, set2):
     # return {*set1, *set2}
 
 
-def get_return_url(request_params):
-    return request_params.get('return_url', None)
+def get_return_url(request):
+    return_url = request.POST.get('return_url', None)
+    print('return_url from POST: ', return_url)
+    if return_url is None or not return_url.strip():
+        # for some reason using request.GET.get('return_url') never works
+        return_url = request.GET['return_url'] if 'return_url' in request.GET else None
+        print('return_url from GET: ', return_url)
+
+    return return_url if return_url else None
 
 
 def redirect_to_return_url_or_else(request, or_else):
-    return_url = get_return_url(request.POST)
-    if return_url is not None and return_url.strip():
-        return HttpResponseRedirect(return_url)
+    return_url = get_return_url(request)
+    if return_url:
+        return HttpResponseRedirect(return_url.strip())
     elif or_else:
         return HttpResponseRedirect(or_else)
     else:
