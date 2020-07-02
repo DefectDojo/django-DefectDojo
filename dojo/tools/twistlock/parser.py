@@ -6,8 +6,6 @@ import hashlib
 from dojo.models import Finding
 
 
-
-
 class TwistlockCSVParser(object):
 
     @staticmethod
