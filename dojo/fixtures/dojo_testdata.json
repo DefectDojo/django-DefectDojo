@@ -1618,22 +1618,5 @@
       "user": 3,
       "created": "2018-04-16T06:54:35.940Z"
     }
-  },
-  {
-    "model": "dojo.app_analysis",
-    "pk": 1,
-    "fields": {
-        "product": 1,
-        "name": "Tomcat",
-        "user": [
-            "admin"
-        ],
-        "confidence": 100,
-        "version": "8.5.1",
-        "icon": null,
-        "website": null,
-        "website_found": null,
-        "created": "2018-08-16T16:58:23.908Z"
-    }
   }
 ]
