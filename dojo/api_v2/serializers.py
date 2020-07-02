@@ -748,6 +748,14 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 old_finding.notes.create(author=self.context['request'].user,
                                          entry="This finding has been automatically closed"
                                          " as it is not present anymore in recent scans.")
+                endpoint_status = old_finding.endpoint_status.all()
+                for status in endpoint_status:
+                    status.mitigated_by = self.context['request'].user
+                    status.mitigated_time = timezone.now()
+                    status.mitigated = True
+                    status.last_modified = timezone.now()
+                    status.save()
+
                 Tag.objects.add_tag(old_finding, 'stale')
                 old_finding.save()
 
@@ -869,6 +877,13 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                             entry="Re-activated by %s re-upload." % scan_type,
                             author=self.context['request'].user)
                         note.save()
+                        endpoint_status = finding.endpoint_status.all()
+                        for status in endpoint_status:
+                            status.mitigated_by = None
+                            status.mitigated_time = None
+                            status.mitigated = False
+                            status.last_modified = timezone.now()
+                            status.save()
                         finding.notes.add(note)
                         reactivated_items.append(finding)
                         reactivated_count += 1
@@ -932,6 +947,15 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     finding.is_Mitigated = True
                     finding.mitigated_by = self.context['request'].user
                     finding.active = False
+
+                    endpoint_status = finding.endpoint_status.all()
+                    for status in endpoint_status:
+                        status.mitigated_by = self.context['request'].user
+                        status.mitigated_time = timezone.now()
+                        status.mitigated = True
+                        status.last_modified = timezone.now()
+                        status.save()
+
                     finding.save(push_to_jira=push_to_jira)
                     note = Notes(entry="Mitigated by %s re-upload." % scan_type,
                                 author=self.context['request'].user)

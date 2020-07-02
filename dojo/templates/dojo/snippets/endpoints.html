@@ -134,12 +134,12 @@
                         <table id="vuln_endpoints" class="table-striped table table-hover">
                             <thead>
                                 {% if user|is_authorized_for_change:finding %}
-                                    <td class="hidden-sm">
-                                        <form action="#">
-                                            <input type="checkbox" label="select_vulnerable_{{ endpoint.id }}" name="select_vulnerable_{{ endpoint.id }}" id="{{ endpoint.id }}"
-                                                class="select_one"/>
+                                    <th class="hidden-sm" title="Select all vulnerable endpoints." style="width: 10%;">
+                                        <form class="inline-form" action="#">
+                                            <input type="checkbox" name="select_all_vulnerable" id="select_all_vulnerable"/>
                                         </form>
-                                    </td>
+                                        <span>Select All</span>
+                                    </th>
                                 {% endif %}
                                 <th>Endpoint</th>
                                 <th>Status</th>
@@ -194,11 +194,11 @@
                         <table id="remd_endpoints" class="table-striped table table-hover">
                             <thead>
                                 <th class="hidden-sm" title="Select all mitigated endpoints." style="width: 10%;">
-                                    <form class="inline-form" action="#">
-                                        <input type="checkbox" label="select_all_mitigated" name="select_all_mitigated" id="select_all_mitigated"/>
-                                    </form>
-                                    <span>Select All</span>
-                                </th>
+                                        <form class="inline-form" action="#">
+                                            <input type="checkbox" name="select_all_mitigated" id="select_all_mitigated"/>
+                                        </form>
+                                        <span>Select All</span>
+                                    </th>
                                 <th>Endpoint</th>
                                 <th>Status</th>
                                 <th>Mitigation Time</th>

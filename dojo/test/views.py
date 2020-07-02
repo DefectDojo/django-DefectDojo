@@ -657,6 +657,15 @@ def re_import_scan_results(request, tid):
                                 author=request.user)
                             note.save()
                             finding.notes.add(note)
+
+                            endpoint_status = finding.endpoint_status.all()
+                            for status in endpoint_status:
+                                status.mitigated_by = None
+                                status.mitigated_time = None
+                                status.mitigated = False
+                                status.last_modified = timezone.now()
+                                status.save()
+
                             reactivated_count += 1
                         new_items.append(finding.id)
                     else:
@@ -749,6 +758,13 @@ def re_import_scan_results(request, tid):
                         note.save()
                         finding.notes.add(note)
                         mitigated_count += 1
+
+                        for status in endpoint_status:
+                            status.mitigated_by = request.user
+                            status.mitigated_time = timezone.now()
+                            status.mitigated = True
+                            status.last_modified = timezone.now()
+                            status.save()
 
                 test.updated = max_safe([scan_date_time, test.updated])
                 test.engagement.updated = max_safe([scan_date_time, test.engagement.updated])
