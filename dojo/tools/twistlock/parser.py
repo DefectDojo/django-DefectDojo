@@ -11,7 +11,7 @@ class TwistlockCSVParser(object):
 
     def get_field_from_row_or_default(self, row, column, default_value):
         field = row[column]
-        if field is None or field is '':
+        if field is None or field == '':
             return default_value
         return field
 
@@ -37,7 +37,6 @@ class TwistlockCSVParser(object):
         data_package_name = self.get_field_from_row_or_default(row, package_name_column, '')
         data_id = self.get_field_from_row_or_default(row, id_column, '')
         data_severity = self.get_field_from_row_or_default(row, severity_column, 'Info').capitalize()
-        print("THE SEVERITY!! {}  but it was {}".format(data_severity,self.get_field_from_row_or_default(row, severity_column, 'InfoLALALA')))
         data_cvss = self.get_field_from_row_or_default(row, cvss_column, '')
         data_description = self.get_field_from_row_or_default(row, description_column, '')
 
@@ -90,7 +89,6 @@ class TwistlockCSVParser(object):
 class TwistlockJsonParser(object):
     def parse(self, json_output, test):
         tree = self.parse_json(json_output)
-        items = []
         if tree:
             items = [data for data in self.get_items(tree, test)]
         else:
