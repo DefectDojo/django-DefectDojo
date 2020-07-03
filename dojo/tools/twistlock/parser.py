@@ -1,6 +1,7 @@
 import io
 import csv
 import json
+
 import hashlib
 
 from dojo.models import Finding
@@ -8,12 +9,11 @@ from dojo.models import Finding
 
 class TwistlockCSVParser(object):
 
-    @staticmethod
-    def get_field_from_row(row, column):
-        if row[column] is not None:
-            return row[column]
-        else:
-            return None
+    def get_field_from_row_or_default(self, row, column, default_value):
+        field = row[column]
+        if field is None or field is '':
+            return default_value
+        return field
 
     def parse_issue(self, row, test):
 
@@ -30,31 +30,17 @@ class TwistlockCSVParser(object):
         cvss_column = 18
         fix_status_column = 19
         description_column = 20
+        print(row)
+        data_vulnerability_id = self.get_field_from_row_or_default(row, vulnerability_id_column, '')
+        data_package_version = self.get_field_from_row_or_default(row, package_version_column, '')
+        data_fix_status = self.get_field_from_row_or_default(row, fix_status_column, '')
+        data_package_name = self.get_field_from_row_or_default(row, package_name_column, '')
+        data_id = self.get_field_from_row_or_default(row, id_column, '')
+        data_severity = self.get_field_from_row_or_default(row, severity_column, 'Info').capitalize()
+        print("THE SEVERITY!! {}  but it was {}".format(data_severity,self.get_field_from_row_or_default(row, severity_column, 'InfoLALALA')))
+        data_cvss = self.get_field_from_row_or_default(row, cvss_column, '')
+        data_description = self.get_field_from_row_or_default(row, description_column, '')
 
-        if self.get_field_from_row(row, vulnerability_id_column) is None:
-            data_vulnerability_id = ''
-        else:
-            data_vulnerability_id = self.get_field_from_row(row, vulnerability_id_column)
-
-        if self.get_field_from_row(row, package_version_column) is None:
-            data_package_version = ''
-        else:
-            data_package_version = self.get_field_from_row(row, package_version_column)
-
-        if self.get_field_from_row(row, fix_status_column) is None:
-            data_fix_status = ''
-        else:
-            data_fix_status = self.get_field_from_row(row, fix_status_column)
-
-        data_package_name = self.get_field_from_row(row, package_name_column)
-        data_id = self.get_field_from_row(row, id_column)
-        if self.get_field_from_row(row, severity_column) == '':
-            data_severity = 'Info'
-        else:
-            data_severity = self.get_field_from_row(row, severity_column).capitalize()
-
-        data_cvss = self.get_field_from_row(row, cvss_column)
-        data_description = self.get_field_from_row(row, description_column)
         finding = Finding(
             title=data_vulnerability_id + ": " + data_package_name + " - " + data_package_version,
             cve=data_vulnerability_id,
