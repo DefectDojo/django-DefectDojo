@@ -1294,8 +1294,8 @@ def get_labels(find):
 
 def jira_long_description(find, jira_conf_finding_text):
     return (
+            "*Dojo URL:* " + str(get_full_url(find.get_absolute_url())) + "\n\n" +
             find.long_desc() +
-            "\n\n*Dojo URL:* " + str(get_full_url(find.get_absolute_url())) + "\n\n" +
             "\n\n*Dojo ID:* " + str(find.id) + "\n\n" +
             jira_conf_finding_text
     )
