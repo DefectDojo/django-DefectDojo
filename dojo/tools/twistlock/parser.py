@@ -89,10 +89,9 @@ class TwistlockCSVParser(object):
 class TwistlockJsonParser(object):
     def parse(self, json_output, test):
         tree = self.parse_json(json_output)
+        items = []
         if tree:
             items = [data for data in self.get_items(tree, test)]
-        else:
-            items = []
         return items
 
     def parse_json(self, json_output):
