@@ -1274,27 +1274,31 @@ def log_jira_message(text, finding):
         source='Jira')
 
 
-# Adds labels to a Jira issue
-def add_labels(find, issue):
+def get_labels(find):
     # Update Label with system setttings label
+    labels = []
     system_settings = System_Settings.objects.get()
-    labels = system_settings.jira_labels
-    if labels is None:
+    system_labels = system_settings.jira_labels
+    if system_labels is None:
         return
     else:
-        labels = labels.split()
-    if len(labels) > 0:
-        for label in labels:
-            issue.fields.labels.append(label)
+        system_labels = system_labels.split()
+    if len(system_labels) > 0:
+        for system_label in system_labels:
+            labels.append(system_label)
     # Update the label with the product name (underscore)
     prod_name = find.test.engagement.product.name.replace(" ", "_")
-    issue.fields.labels.append(prod_name)
-    issue.update(fields={"labels": issue.fields.labels})
+    labels.append(prod_name)
+    return labels
 
 
-def jira_long_description(find_description, find_id, jira_conf_finding_text):
-    return find_description + "\n\n*Dojo ID:* " + str(
-        find_id) + "\n\n" + jira_conf_finding_text
+def jira_long_description(find, jira_conf_finding_text):
+    return (
+            find.long_desc() +
+            "\n\n*Dojo URL:* " + str(get_full_url(find.get_absolute_url())) + "\n\n" +
+            "\n\n*Dojo ID:* " + str(find.id) + "\n\n" +
+            jira_conf_finding_text
+    )
 
 
 def add_external_issue(find, external_issue_provider):
@@ -1363,9 +1367,7 @@ def add_issue(find, push_to_jira):
                             'key': jpkey.project_key
                         },
                         'summary': find.title,
-                        'description': jira_long_description(
-                            find.long_desc(), find.id,
-                            jira_conf.finding_text),
+                        'description': jira_long_description(find, jira_conf.finding_text),
                         'issuetype': {
                             'name': jira_conf.default_issue_type
                         },
@@ -1380,6 +1382,10 @@ def add_issue(find, push_to_jira):
                                 'name': jpkey.component
                             },
                     ]
+
+                labels = get_labels(find)
+                if labels:
+                    fields['labels'] = labels
 
                 if System_Settings.objects.get().enable_finding_sla:
                     # jira wants YYYY-MM-DD
@@ -1397,9 +1403,6 @@ def add_issue(find, push_to_jira):
                 j_issue.save()
                 issue = jira.issue(new_issue.id)
 
-                # Add labels (security & product)
-                add_labels(find, new_issue)
-
                 # Upload dojo finding screenshots to Jira
                 for pic in find.images.all():
                     jira_attachment(
@@ -1414,6 +1417,7 @@ def add_issue(find, push_to_jira):
                 logger.error(e.text, find)
                 log_jira_alert(e.text, find)
         else:
+            log_jira_alert("A Finding needs to be both Active and Verified to be pushed to JIRA.", find)
             logger.warning("A Finding needs to be both Active and Verified to be pushed to JIRA.", find)
 
 
@@ -1480,6 +1484,10 @@ def update_issue(find, push_to_jira):
                 ]
                 fields = {"components": component}
 
+            labels = get_labels(find)
+            if labels:
+                fields['labels'] = labels
+
             # Upload dojo finding screenshots to Jira
             for pic in find.images.all():
                 jira_attachment(jira, issue,
@@ -1487,8 +1495,7 @@ def update_issue(find, push_to_jira):
 
             issue.update(
                 summary=find.title,
-                description=jira_long_description(find.long_desc(), find.id,
-                                                  jira_conf.finding_text),
+                description=jira_long_description(find, jira_conf.finding_text),
                 priority={'name': jira_conf.get_priority(find.severity)},
                 fields=fields)
             # print('\n\nSaving jira_change\n\n')
@@ -1496,7 +1503,7 @@ def update_issue(find, push_to_jira):
             # find.jira_change = timezone.now()
             # find.save()
             # Add labels(security & product)
-            add_labels(find, issue)
+
         except JIRAError as e:
             log_jira_alert(e.text, find)
 
@@ -1990,7 +1997,7 @@ def get_full_url(relative_url):
         return settings.SITE_URL + relative_url
     else:
         logger.warn('SITE URL undefined in settings, full_url cannot be created')
-        return relative_url
+        return "settings.SITE_URL" + relative_url
 
 
 @receiver(post_save, sender=Dojo_User)

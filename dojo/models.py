@@ -1449,6 +1449,10 @@ class Finding(models.Model):
         # print('finding.is_authorized')
         return user_is_authorized(user, perm_type, self)
 
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('view_finding', args=[str(self.id)])
+
     @classmethod
     def unaccepted_open_findings(cls):
         return cls.objects.filter(active=True, verified=True, duplicate=False, risk_acceptance__isnull=True)
@@ -1908,18 +1912,22 @@ class Finding(models.Model):
 
         # Adding a snippet here for push to JIRA so that it's in one place
         if push_to_jira:
-            from dojo.tasks import update_issue_task, add_issue_task
-            from dojo.utils import add_issue, update_issue
-            if jira_issue_exists:
-                if self.reporter.usercontactinfo.block_execution:
-                    update_issue(self, True)
+            if 'Active' in self.status() and 'Verified' in self.status():
+                from dojo.tasks import update_issue_task, add_issue_task
+                from dojo.utils import add_issue, update_issue
+                if jira_issue_exists:
+                    if self.reporter.usercontactinfo.block_execution:
+                        update_issue(self, True)
+                    else:
+                        update_issue_task.delay(self, True)
                 else:
-                    update_issue_task.delay(self, True)
+                    if self.reporter.usercontactinfo.block_execution:
+                        add_issue(self, True)
+                    else:
+                        add_issue_task.delay(self, True)
             else:
-                if self.reporter.usercontactinfo.block_execution:
-                    add_issue(self, True)
-                else:
-                    add_issue_task.delay(self, True)
+                from dojo.utils import log_jira_alert
+                log_jira_alert("A Finding needs to be both Active and Verified to be pushed to JIRA.", self)
 
     def delete(self, *args, **kwargs):
         for find in self.original_finding.all():
