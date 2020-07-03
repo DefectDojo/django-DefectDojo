@@ -119,6 +119,9 @@ env = environ.Env(
     # merging findings doesn't always work well with dedupe and reimport etc.
     # disable it if you see any issues (and report them on github)
     DD_DISABLE_FINDING_MERGE=(bool, False),
+    # Set to True if you want to allow authorized users to make changes to findings or delete them
+    DD_AUTHORIZED_USERS_ALLOW_CHANGE=(bool, False),
+    DD_AUTHORIZED_USERS_ALLOW_DELETE=(bool, False),
 )
 
 
@@ -354,7 +357,6 @@ SOCIAL_AUTH_AUTH0_DOMAIN = env('DD_SOCIAL_AUTH_AUTH0_DOMAIN')
 SOCIAL_AUTH_AUTH0_SCOPE = env('DD_SOCIAL_AUTH_AUTH0_SCOPE')
 SOCIAL_AUTH_TRAILING_SLASH = env('DD_SOCIAL_AUTH_TRAILING_SLASH')
 
-
 # For more configuration and customization options, see django-saml2-auth documentation
 # https://github.com/fangli/django-saml2-auth
 SAML2_ENABLED = env('DD_SAML2_ENABLED')
@@ -369,6 +371,9 @@ SAML2_AUTH = {
     'NEW_USER_PROFILE': env('DD_SAML2_NEW_USER_PROFILE'),
     'ATTRIBUTES_MAP': env('DD_SAML2_ATTRIBUTES_MAP'),
 }
+
+AUTHORIZED_USERS_ALLOW_CHANGE = env('DD_AUTHORIZED_USERS_ALLOW_CHANGE')
+AUTHORIZED_USERS_ALLOW_DELETE = env('DD_AUTHORIZED_USERS_ALLOW_DELETE')
 
 LOGIN_EXEMPT_URLS = (
     r'^%sstatic/' % URL_PREFIX,

@@ -795,3 +795,15 @@ def status_classes(finding):
         classes.append('risk_accepted_finding')
 
     return ' '.join(classes)
+
+
+@register.filter
+def is_authorized_for_change(user, finding):
+    # print('filter: is_authorized_for_change')
+    return finding.is_authorized(user, 'change')
+
+
+@register.filter
+def is_authorized_for_delete(user, finding):
+    # print('filter: is_authorized_for_delete')
+    return finding.is_authorized(user, 'delete')
