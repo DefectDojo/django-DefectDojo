@@ -1757,7 +1757,7 @@ class Finding(models.Model):
     # newer version that can work with prefetching
     def github_conf_new(self):
         try:
-            return self.test.engagement.product.github_pkey_set.all()[0].conf
+            return self.test.engagement.product.github_pkey_set.all()[0].git_conf
         except:
             return None
             pass

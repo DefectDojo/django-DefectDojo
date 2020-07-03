@@ -2042,6 +2042,7 @@ class JIRAFindingForm(forms.Form):
             self.fields['push_to_jira'].widget.attrs['checked'] = 'checked'
             self.fields['push_to_jira'].disabled = True
 
+    # existing_issue = forms.URLField(required=False, disabled=True, label="Existing JIRA issue", help_text = "Existing JIRA issue connected to this Finding")
     push_to_jira = forms.BooleanField(required=False, label="Push to JIRA")
 
 

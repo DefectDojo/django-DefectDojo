@@ -235,28 +235,6 @@ def view_finding(request, fid):
     except Finding_Template.DoesNotExist:
         pass
 
-    try:
-        jissue = JIRA_Issue.objects.get(finding=finding)
-    except:
-        jissue = None
-        pass
-    try:
-        jpkey = JIRA_PKey.objects.get(product=finding.test.engagement.product)
-        jconf = jpkey.conf
-    except:
-        jconf = None
-        pass
-    try:
-        gissue = GITHUB_Issue.objects.get(finding=finding)
-    except:
-        gissue = None
-        pass
-    try:
-        github_pkey = GITHUB_PKey.objects.get(product=finding.test.engagement.product)
-        gconf = github_pkey.git_conf
-    except:
-        gconf = None
-        pass
     dojo_user = get_object_or_404(Dojo_User, id=user.id)
     if user.is_staff or user in finding.test.engagement.product.authorized_users.all(
     ):
@@ -287,7 +265,7 @@ def view_finding(request, fid):
             finding.last_reviewed = new_note.date
             finding.last_reviewed_by = user
             finding.save()
-            if jissue is not None:
+            if finding.has_jira_issue():
                 add_comment_task(finding, new_note)
             if note_type_activation:
                 form = FindingNoteForm(available_note_types=available_note_types)
@@ -326,10 +304,6 @@ def view_finding(request, fid):
             'product_tab': product_tab,
             'finding': finding,
             'burp_request': burp_request,
-            'jissue': jissue,
-            'jconf': jconf,
-            'gissue': gissue,
-            'gconf': gconf,
             'cred_finding': cred_finding,
             'creds': creds,
             'cred_engagement': cred_engagement,
@@ -597,17 +571,7 @@ def edit_finding(request, fid):
         push_all_issues_enabled = finding.test.engagement.product.jira_pkey_set.first().push_all_issues
         jform = JIRAFindingForm(enabled=push_all_issues_enabled, prefix='jiraform')
 
-    try:
-        jissue = JIRA_Issue.objects.get(finding=finding)
-        jira_link_exists = True
-    except:
-        jira_link_exists = False
-
-    try:
-        gissue = GITHUB_Issue.objects.get(finding=finding)
-        github_enabled = True
-    except:
-        github_enabled = False
+    github_enabled = finding.has_github_issue()
 
     gform = None
     if get_system_setting('enable_github'):
