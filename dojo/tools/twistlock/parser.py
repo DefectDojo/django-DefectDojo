@@ -4,6 +4,7 @@ import json
 
 import hashlib
 
+from django.utils.html import escape
 from dojo.models import Finding
 
 
@@ -13,7 +14,7 @@ class TwistlockCSVParser(object):
         field = row[column]
         if field is None or field == '':
             return default_value
-        return field
+        return escape(field)
 
     def parse_issue(self, row, test):
 
