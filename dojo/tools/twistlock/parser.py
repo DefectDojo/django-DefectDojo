@@ -30,7 +30,6 @@ class TwistlockCSVParser(object):
         cvss_column = 18
         fix_status_column = 19
         description_column = 20
-        print(row)
         data_vulnerability_id = self.get_field_from_row_or_default(row, vulnerability_id_column, '')
         data_package_version = self.get_field_from_row_or_default(row, package_version_column, '')
         data_fix_status = self.get_field_from_row_or_default(row, fix_status_column, '')
