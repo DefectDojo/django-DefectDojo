@@ -318,6 +318,10 @@ class Dojo_User(User):
     def __str__(self):
         return self.get_full_name()
 
+    @staticmethod
+    def wants_block_execution(user):
+        return hasattr(user, 'usercontactinfo') and user.usercontactinfo.block_execution
+
 
 class UserContactInfo(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

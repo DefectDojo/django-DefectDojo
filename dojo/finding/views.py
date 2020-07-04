@@ -40,7 +40,7 @@ from dojo.models import Finding, Notes, NoteHistory, Note_Type, \
 from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_notifications, \
     add_comment, jira_get_resolution_id, jira_change_resolution_id, get_jira_connection, \
     get_system_setting, apply_cwe_to_template, Product_Tab, calculate_grade, log_jira_alert, \
-    redirect_to_return_url_or_else, get_return_url, add_issue, update_issue
+    redirect_to_return_url_or_else, get_return_url, add_issue, update_issue, add_external_issue, update_external_issue
 from dojo.notifications.helper import create_notification
 
 from dojo.tasks import add_issue_task, update_issue_task, update_external_issue_task, add_comment_task, \
@@ -663,13 +663,15 @@ def edit_finding(request, fid):
                     request.POST, prefix='githubform', enabled=github_enabled)
                 if gform.is_valid():
                     if GITHUB_Issue.objects.filter(finding=new_finding).exists():
-                        update_external_issue_task.delay(
-                            new_finding, old_status,
-                            'github')
+                        if Dojo_User.wants_block_execution(request.user):
+                            update_external_issue(new_finding, old_status, 'github')
+                        else:
+                            update_external_issue_task.delay(new_finding, old_status, 'github')
                     else:
-                        add_external_issue_task.delay(
-                            new_finding,
-                            'github')
+                        if Dojo_User.wants_block_execution(request.user):
+                            add_external_issue(new_finding, 'github')
+                        else:
+                            add_external_issue_task.delay(new_finding, 'github')
 
             new_finding.save(push_to_jira=push_to_jira)
 
@@ -1165,8 +1167,10 @@ def promote_to_finding(request, fid):
                     enabled=GITHUB_PKey.objects.get(
                         product=test.engagement.product).push_all_issues)
                 if gform.is_valid():
-                    add_external_issue_task.delay(
-                        new_finding, 'github')
+                    if Dojo_User.wants_block_execution(request.user):
+                        add_external_issue(new_finding, 'github')
+                    else:
+                        add_external_issue_task.delay(new_finding, 'github')
 
             messages.add_message(
                 request,
@@ -1718,9 +1722,15 @@ def finding_bulk_update_all(request, pid=None):
                         old_status = finding.status()
                         if form.cleaned_data['push_to_github']:
                             if GITHUB_Issue.objects.filter(finding=finding).exists():
-                                update_issue_task.delay(finding, old_status, True)
+                                if Dojo_User.wants_block_execution(request.user):
+                                    update_external_issue(finding, old_status, 'github')
+                                else:
+                                    update_external_issue_task.delay(finding, old_status, 'github')
                             else:
-                                add_external_issue_task.delay(finding, 'github')
+                                if Dojo_User.wants_block_execution(request.user):
+                                    add_external_issue(finding, 'github')
+                                else:
+                                    add_external_issue_task.delay(finding, 'github')
 
                 if form.cleaned_data['tags']:
                     for finding in finds:

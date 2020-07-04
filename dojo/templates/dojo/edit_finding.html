@@ -94,7 +94,7 @@
                     </label>
                     <div class="col-sm-10 form-control-static">
                         {% if finding.github_issue and finding.github_conf_new %}
-                            <a href="{{ finding.github_issue.issue_url }}" target="_blank" title="{{ finding.github_issue.issue_url }}"> {{finding.github_issue.issue_id}} </a>
+                            <a href="{{ finding.github_issue.issue_url }}" target="_blank" title="{{ finding.github_issue.issue_url }}">{{finding.github_issue.issue_url}}</a>
                         {% else %}
                             None
                         {% endif %}
