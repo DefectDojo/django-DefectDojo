@@ -18,6 +18,7 @@ from django.core.paginator import Paginator
 from django.urls import get_resolver, reverse
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
 from django.template.defaultfilters import pluralize
+from django.template.loader import render_to_string
 from django.utils import timezone
 from jira import JIRA
 from jira.exceptions import JIRAError
@@ -1292,13 +1293,12 @@ def get_labels(find):
     return labels
 
 
-def jira_long_description(find, jira_conf_finding_text):
-    return (
-            "*Dojo URL:* " + str(get_full_url(find.get_absolute_url())) + "\n\n" +
-            find.long_desc() +
-            "\n\n*Dojo ID:* " + str(find.id) + "\n\n" +
-            jira_conf_finding_text
-    )
+def jira_description(find):
+    template = 'issue-trackers/jira-description.tpl'
+    kwargs = {}
+    kwargs['finding'] = find
+    kwargs['jira_conf'] = find.jira_conf_new()
+    return render_to_string(template, kwargs)
 
 
 def add_external_issue(find, external_issue_provider):
@@ -1998,6 +1998,14 @@ def get_full_url(relative_url):
     else:
         logger.warn('SITE URL undefined in settings, full_url cannot be created')
         return "settings.SITE_URL" + relative_url
+
+
+def get_site_url():
+    if settings.SITE_URL:
+        return settings.SITE_URL
+    else:
+        logger.warn('SITE URL undefined in settings, full_url cannot be created')
+        return "settings.SITE_URL"
 
 
 @receiver(post_save, sender=Dojo_User)

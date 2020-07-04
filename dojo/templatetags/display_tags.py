@@ -790,3 +790,17 @@ def is_authorized_for_change(user, finding):
 def is_authorized_for_delete(user, finding):
     # print('filter: is_authorized_for_delete')
     return finding.is_authorized(user, 'delete')
+
+
+@register.filter
+def cwe_url(cwe):
+    if cwe is None:
+        return ''
+    return 'https://cwe.mitre.org/data/definitions/' + str(cwe) + '.html'
+
+
+@register.filter
+def cve_url(cve):
+    if cve is None:
+        return ''
+    return 'https://cve.mitre.org/cgi-bin/cvename.cgi?name=' + str(cve)
