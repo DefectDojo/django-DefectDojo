@@ -4,9 +4,9 @@
 {% url 'view_engagement' finding.test.engagement.id as engagement_url %}
 {% url 'view_test' finding.test.id as test_url %}
 {% url 'view_finding' finding.id as finding_url %}
-*Title: [{{ finding.title }}|{{ finding_url|full_url }}]
+*Title*: [{{ finding.title|jiraencode}}|{{ finding_url|full_url }}]
 
-*Dojo URL:* {{ finding_url|full_url }}
+*Defect Dojo link:* {{ finding_url|full_url }}
 
 *Severity:* {{ finding.severity }} 
 
@@ -40,7 +40,7 @@
 *References*:
 {{ finding.references }}
 
-*Dojo ID:* {{ finding.id }}
+*Defect Dojo ID:* {{ finding.id }}
 
 *Reporter:* [{{ finding.reporter.full_name }}|mailto:{{ finding.reporter.email }}]
 

@@ -794,13 +794,21 @@ def is_authorized_for_delete(user, finding):
 
 @register.filter
 def cwe_url(cwe):
-    if cwe is None:
+    if not cwe:
         return ''
     return 'https://cwe.mitre.org/data/definitions/' + str(cwe) + '.html'
 
 
 @register.filter
 def cve_url(cve):
-    if cve is None:
+    if not cve:
         return ''
     return 'https://cve.mitre.org/cgi-bin/cvename.cgi?name=' + str(cve)
+
+
+@register.filter
+def jiraencode(value):
+    if not value:
+        return value
+    # jira can't handle some characters inside [] tag for urls https://jira.atlassian.com/browse/CONFSERVER-4009
+    return value.replace("|", "").replace("@", "")

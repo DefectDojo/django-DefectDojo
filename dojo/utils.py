@@ -1367,7 +1367,7 @@ def add_issue(find, push_to_jira):
                             'key': jpkey.project_key
                         },
                         'summary': find.title,
-                        'description': jira_long_description(find, jira_conf.finding_text),
+                        'description': jira_description(find),
                         'issuetype': {
                             'name': jira_conf.default_issue_type
                         },
@@ -1495,7 +1495,7 @@ def update_issue(find, push_to_jira):
 
             issue.update(
                 summary=find.title,
-                description=jira_long_description(find, jira_conf.finding_text),
+                description=jira_description(find),
                 priority={'name': jira_conf.get_priority(find.severity)},
                 fields=fields)
             # print('\n\nSaving jira_change\n\n')
