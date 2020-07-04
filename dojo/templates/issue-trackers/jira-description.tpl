@@ -42,7 +42,4 @@
 
 *Defect Dojo ID:* {{ finding.id }}
 
-*Reporter:* [{{ finding.reporter.full_name }}|mailto:{{ finding.reporter.email }}]
-
-*Additional text:*
-{{ jira_conf.finding_text }}
+*Reporter:* [{{ finding.reporter.full_name }} ({{ finding.reporter.email }})|mailto:{{ finding.reporter.email }}]
