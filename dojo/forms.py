@@ -1696,6 +1696,11 @@ class JIRA_IssueForm(forms.ModelForm):
 class JIRAForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput, required=True)
 
+    def __init__(self, *args, **kwargs):
+        super(JIRAForm, self).__init__(*args, **kwargs)
+        if self.instance:
+            self.fields['password'].required = False
+
     class Meta:
         model = JIRA_Conf
         exclude = ['product']
