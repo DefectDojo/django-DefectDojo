@@ -171,7 +171,7 @@ fi
 # fi
 
 if [ $test_failures = true ] ; then
-    echo "there ERRORs found in the celery worker logs, see above"
+    echo "some tests have failed, see logs above"
     exit 1
 fi
 
