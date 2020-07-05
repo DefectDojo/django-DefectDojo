@@ -312,13 +312,6 @@ class Dojo_User(User):
                                     self.username)
         return full_name.strip()
 
-    @property
-    def full_name(self):
-        """
-        Returns the first_name plus the last_name, with a space in between.
-        """
-        return self.get_full_name()
-
     def __unicode__(self):
         return self.get_full_name()
 
