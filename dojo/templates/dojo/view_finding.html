@@ -295,14 +295,14 @@
                     {% endif %}
                     {% if finding.cwe > 0 %}
                         <td>
-                            <a target="_blank" href="https://cwe.mitre.org/data/definitions/{{ finding.cwe }}.html">
+                            <a target="_blank" href={{ finding.cwe|cwe_url }}">
                                 <i class="fa fa-external-link"></i> {{ finding.cwe }}
                             </a>
                         </td>
                     {% endif %}
                     {% if finding.cve|slice:":3" == 'CVE' %}
                         <td>
-                            <a target="_blank" href="https://cve.mitre.org/cgi-bin/cvename.cgi?name={{ finding.cve }}">
+                            <a target="_blank" href="{{ finding.cve |cve_url }}">
                                 <i class="fa fa-external-link"></i> {{ finding.cve }}
                             </a>
                         </td>
