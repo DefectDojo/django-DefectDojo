@@ -1376,7 +1376,7 @@ class Finding(models.Model):
     mitigated = models.DateTimeField(editable=False, null=True, blank=True)
     mitigated_by = models.ForeignKey(User, null=True, editable=False,
                                      related_name="mitigated_by", on_delete=models.CASCADE)
-    reporter = models.ForeignKey(Dojo_User, editable=False, default=1, related_name='reporter', on_delete=models.CASCADE)
+    reporter = models.ForeignKey(User, editable=False, default=1, related_name='reporter', on_delete=models.CASCADE)
     notes = models.ManyToManyField(Notes, blank=True,
                                    editable=False)
     numerical_severity = models.CharField(max_length=4)
