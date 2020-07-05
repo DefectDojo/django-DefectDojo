@@ -331,7 +331,7 @@ class Dojo_User(User):
 
 
 class UserContactInfo(models.Model):
-    user = models.OneToOneField(Dojo_User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     title = models.CharField(blank=True, null=True, max_length=150)
     phone_regex = RegexValidator(regex=r'^\+?1?\d{9,15}$',
                                  message="Phone number must be entered in the format: '+999999999'. "
@@ -603,7 +603,7 @@ class Product(models.Model):
                                   null=False, blank=False, on_delete=models.CASCADE)
     updated = models.DateTimeField(editable=False, null=True, blank=True)
     tid = models.IntegerField(default=0, editable=False)
-    authorized_users = models.ManyToManyField(Dojo_User, blank=True)
+    authorized_users = models.ManyToManyField(User, blank=True)
     prod_numeric_grade = models.IntegerField(null=True, blank=True)
 
     # Metadata
@@ -754,7 +754,7 @@ class Product(models.Model):
 class ScanSettings(models.Model):
     product = models.ForeignKey(Product, default=1, editable=False, on_delete=models.CASCADE)
     addresses = models.TextField(default="none")
-    user = models.ForeignKey(Dojo_User, editable=False, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, editable=False, on_delete=models.CASCADE)
     date = models.DateTimeField(editable=False, blank=True,
                                 default=get_current_datetime)
     frequency = models.CharField(max_length=10000, null=True,
@@ -907,7 +907,7 @@ class Engagement(models.Model):
     first_contacted = models.DateField(null=True, blank=True)
     target_start = models.DateField(null=False, blank=False)
     target_end = models.DateField(null=False, blank=False)
-    lead = models.ForeignKey(Dojo_User, editable=True, null=True, on_delete=models.CASCADE)
+    lead = models.ForeignKey(User, editable=True, null=True, on_delete=models.CASCADE)
     requester = models.ForeignKey(Contact, null=True, blank=True, on_delete=models.CASCADE)
     preset = models.ForeignKey(Engagement_Presets, null=True, blank=True, help_text="Settings and notes for performing this engagement.", on_delete=models.CASCADE)
     reason = models.CharField(max_length=2000, null=True, blank=True)
@@ -1190,7 +1190,7 @@ class NoteHistory(models.Model):
     data = models.TextField()
     time = models.DateTimeField(null=True, editable=False,
                                 default=get_current_datetime)
-    current_editor = models.ForeignKey(Dojo_User, editable=False, null=True, on_delete=models.CASCADE)
+    current_editor = models.ForeignKey(User, editable=False, null=True, on_delete=models.CASCADE)
 
 
 class Notes(models.Model):
@@ -1198,10 +1198,10 @@ class Notes(models.Model):
     entry = models.TextField()
     date = models.DateTimeField(null=False, editable=False,
                                 default=get_current_datetime)
-    author = models.ForeignKey(Dojo_User, related_name='editor_notes_set', editable=False, on_delete=models.CASCADE)
+    author = models.ForeignKey(User, related_name='editor_notes_set', editable=False, on_delete=models.CASCADE)
     private = models.BooleanField(default=False)
     edited = models.BooleanField(default=False)
-    editor = models.ForeignKey(Dojo_User, related_name='author_notes_set', editable=False, null=True, on_delete=models.CASCADE)
+    editor = models.ForeignKey(User, related_name='author_notes_set', editable=False, null=True, on_delete=models.CASCADE)
     edit_time = models.DateTimeField(null=True, editable=False,
                                 default=get_current_datetime)
     history = models.ManyToManyField(NoteHistory, blank=True,
@@ -1233,7 +1233,7 @@ class Development_Environment(models.Model):
 
 class Test(models.Model):
     engagement = models.ForeignKey(Engagement, editable=False, on_delete=models.CASCADE)
-    lead = models.ForeignKey(Dojo_User, editable=True, null=True, on_delete=models.CASCADE)
+    lead = models.ForeignKey(User, editable=True, null=True, on_delete=models.CASCADE)
     test_type = models.ForeignKey(Test_Type, on_delete=models.CASCADE)
     title = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
@@ -1291,7 +1291,7 @@ class Test(models.Model):
 
 class VA(models.Model):
     address = models.TextField(editable=False, default="none")
-    user = models.ForeignKey(Dojo_User, editable=False, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, editable=False, on_delete=models.CASCADE)
     result = models.ForeignKey(Test, editable=False, null=True, blank=True, on_delete=models.CASCADE)
     status = models.BooleanField(default=False, editable=False)
     start = models.CharField(max_length=100)
@@ -1372,7 +1372,7 @@ class Finding(models.Model):
     under_review = models.BooleanField(default=False)
     review_requested_by = models.ForeignKey(Dojo_User, null=True, blank=True,
                                             related_name='review_requested_by', on_delete=models.CASCADE)
-    reviewers = models.ManyToManyField(Dojo_User, blank=True)
+    reviewers = models.ManyToManyField(User, blank=True)
 
     # Defect Tracking Review
     under_defect_review = models.BooleanField(default=False)
@@ -1381,14 +1381,14 @@ class Finding(models.Model):
     is_Mitigated = models.BooleanField(default=False)
     thread_id = models.IntegerField(default=0, editable=False)
     mitigated = models.DateTimeField(editable=False, null=True, blank=True)
-    mitigated_by = models.ForeignKey(Dojo_User, null=True, editable=False,
+    mitigated_by = models.ForeignKey(User, null=True, editable=False,
                                      related_name="mitigated_by", on_delete=models.CASCADE)
     reporter = models.ForeignKey(Dojo_User, editable=False, default=1, related_name='reporter', on_delete=models.CASCADE)
     notes = models.ManyToManyField(Notes, blank=True,
                                    editable=False)
     numerical_severity = models.CharField(max_length=4)
     last_reviewed = models.DateTimeField(null=True, editable=False)
-    last_reviewed_by = models.ForeignKey(Dojo_User, null=True, editable=False,
+    last_reviewed_by = models.ForeignKey(User, null=True, editable=False,
                                          related_name='last_reviewed_by', on_delete=models.CASCADE)
     images = models.ManyToManyField('FindingImage', blank=True)
 
@@ -2004,7 +2004,7 @@ class Stub_Finding(models.Model):
     severity = models.CharField(max_length=200, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     test = models.ForeignKey(Test, editable=False, on_delete=models.CASCADE)
-    reporter = models.ForeignKey(Dojo_User, editable=False, default=1, on_delete=models.CASCADE)
+    reporter = models.ForeignKey(User, editable=False, default=1, on_delete=models.CASCADE)
 
     class Meta:
         ordering = ('-date', 'title')
@@ -2163,7 +2163,7 @@ class Report(models.Model):
     name = models.CharField(max_length=200)
     type = models.CharField(max_length=100, default='Finding')
     format = models.CharField(max_length=15, default='AsciiDoc')
-    requester = models.ForeignKey(Dojo_User, on_delete=models.CASCADE)
+    requester = models.ForeignKey(User, on_delete=models.CASCADE)
     task_id = models.CharField(max_length=50)
     file = models.FileField(upload_to='reports/%Y/%m/%d',
                             verbose_name='Report File', null=True)
@@ -2216,7 +2216,7 @@ class FindingImageAccessToken(models.Model):
     """This will allow reports to request the images without exposing the
     media root to the world without
     authentication"""
-    user = models.ForeignKey(Dojo_User, null=False, blank=False, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, null=False, blank=False, on_delete=models.CASCADE)
     image = models.ForeignKey(FindingImage, null=False, blank=False, on_delete=models.CASCADE)
     token = models.CharField(max_length=255)
     size = models.CharField(max_length=9,
@@ -2506,7 +2506,7 @@ class Alerts(models.Model):
     url = models.URLField(max_length=2000, null=True)
     source = models.CharField(max_length=100, default='Generic')
     icon = models.CharField(max_length=25, default='icon-user-check')
-    user_id = models.ForeignKey(Dojo_User, null=True, editable=False, on_delete=models.CASCADE)
+    user_id = models.ForeignKey(User, null=True, editable=False, on_delete=models.CASCADE)
     created = models.DateTimeField(null=False, editable=False, default=now)
 
     class Meta:
@@ -2586,7 +2586,7 @@ class Language_Type(models.Model):
 class Languages(models.Model):
     language = models.ForeignKey(Language_Type, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    user = models.ForeignKey(Dojo_User, editable=True, blank=True, null=True, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, editable=True, blank=True, null=True, on_delete=models.CASCADE)
     files = models.IntegerField(blank=True, null=True, verbose_name='Number of files')
     blank = models.IntegerField(blank=True, null=True, verbose_name='Number of blank lines')
     comment = models.IntegerField(blank=True, null=True, verbose_name='Number of comment lines')
@@ -2606,7 +2606,7 @@ class Languages(models.Model):
 class App_Analysis(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     name = models.CharField(max_length=200, null=False)
-    user = models.ForeignKey(Dojo_User, editable=True, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, editable=True, on_delete=models.CASCADE)
     confidence = models.IntegerField(blank=True, null=True, verbose_name='Confidence level')
     version = models.CharField(max_length=200, null=True, blank=True, verbose_name='Version Number')
     icon = models.CharField(max_length=200, null=True, blank=True)
@@ -3031,11 +3031,11 @@ class Answered_Survey(models.Model):
                                    on_delete=models.CASCADE)
     # what surveys have been answered
     survey = models.ForeignKey(Engagement_Survey, on_delete=models.CASCADE)
-    assignee = models.ForeignKey(Dojo_User, related_name='assignee',
+    assignee = models.ForeignKey(User, related_name='assignee',
                                   null=True, blank=True, editable=True,
                                   default=None, on_delete=models.CASCADE)
     # who answered it
-    responder = models.ForeignKey(Dojo_User, related_name='responder',
+    responder = models.ForeignKey(User, related_name='responder',
                                   null=True, blank=True, editable=True,
                                   default=None, on_delete=models.CASCADE)
     completed = models.BooleanField(default=False)
