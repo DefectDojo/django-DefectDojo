@@ -1856,3 +1856,19 @@ def reset_finding_duplicate_status(request, duplicate_id):
     duplicate.save()
 
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(duplicate.id,)))
+
+
+@user_must_be_authorized(Finding, 'change', 'fid')
+@require_POST
+def push_to_jira(request, fid):
+    finding = get_object_or_404(Finding, id=fid)
+    count = Alerts.objects.filter(user_id=request.user).count()
+    return JsonResponse({'count': count})
+
+
+@user_must_be_authorized(Finding, 'change', 'fid')
+@require_POST
+def disconnect_from_jira(request, fid):
+    finding = get_object_or_404(Finding, id=fid)
+    count = Alerts.objects.filter(user_id=request.user).count()
+    return JsonResponse({'count': count})

@@ -1592,3 +1592,11 @@ small {
   font-size:12px;
   font-weight:400;
 }
+
+.fa-minus-square {
+    color: red;
+}
+
+.fa-plus-square {
+    color: green;
+}

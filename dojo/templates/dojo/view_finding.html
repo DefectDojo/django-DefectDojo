@@ -437,7 +437,14 @@
                         {% if jira_issue %}
                             <a href="{{ jira_conf.url }}/browse/{{ jira_issue.jira_key }}"
                             target="_blank" title="{{ jira_conf.url }}/browse/{{ jira_issue.jira_key }}">{{ jira_issue.jira_key }}</a>
-                        {% endif %}                        
+
+                            <a href="{{ jira_conf.url }}/browse/{{ jira_issue.jira_key }}"
+                            target="_blank" title="{{ jira_conf.url }}/browse/{{ jira_issue.jira_key }}">
+                                <i class="fa fa-minus-square" title="Disconnect JIRA issue from this finding."></i>
+                            </a>
+                        {% else %}
+                            <i class="fa fa-plus-square" title="Create new JIRA issue from this finding."></i>
+                        {% endif %}
                         {% endwith %}
                         </td>
                     {% endif %}
