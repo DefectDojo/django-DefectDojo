@@ -360,7 +360,14 @@ def close_finding(request, fid):
                 finding.last_reviewed = finding.mitigated
                 finding.last_reviewed_by = request.user
                 finding.endpoints.clear()
-                finding.save()
+                try:
+                    jpkey = JIRA_PKey.objects.get(product=finding.test.engagement.product)
+                    if jpkey.push_all_issues and JIRA_Issue.objects.filter(finding=finding).exists():
+                        finding.save(push_to_jira=True)
+                    else:
+                        finding.save()
+                except JIRA_PKey.DoesNotExist:
+                    finding.save()
 
                 messages.add_message(
                     request,
@@ -475,7 +482,14 @@ def reopen_finding(request, fid):
     finding.mitigated_by = request.user
     finding.last_reviewed = finding.mitigated
     finding.last_reviewed_by = request.user
-    finding.save()
+    try:
+        jpkey = JIRA_PKey.objects.get(product=finding.test.engagement.product)
+        if jpkey.push_all_issues and JIRA_Issue.objects.filter(finding=finding).exists():
+            finding.save(push_to_jira=True)
+        else:
+            finding.save()
+    except JIRA_PKey.DoesNotExist:
+        finding.save()
 
     reopen_external_issue_task.delay(finding, 're-opened by defectdojo', 'github')
 
@@ -1902,7 +1916,7 @@ def finding_push_to_jira(request, fid):
     try:
         if finding.jira():
             logger.info('trying to push %d:%s to JIRA to update JIRA issue', finding.id, finding.title)
-            if finding.reporter.usercontactinfo.block_execution:
+            if hasattr(request.user, 'usercontactinfo') and request.user.usercontactinfo.block_execution:
                 update_issue(finding, True)
                 message = 'Linked JIRA issue succesfully updated, but check alerts for background errors.'
             else:
@@ -1910,7 +1924,7 @@ def finding_push_to_jira(request, fid):
                 message = 'Update to linked JIRA issue queued succesfully.'
         else:
             logger.info('trying to push %d:%s to JIRA to create a new JIRA issue', finding.id, finding.title)
-            if finding.reporter.usercontactinfo.block_execution:
+            if hasattr(request.user, 'usercontactinfo') and request.user.usercontactinfo.block_execution:
                 add_issue(finding, True)
                 message = 'JIRA issue created succesfully, but check alerts for background errors'
             else:
