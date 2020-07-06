@@ -2070,3 +2070,55 @@ def is_scan_file_too_large(scan_file):
         if size > settings.SCAN_FILE_MAX_SIZE:
             return True
     return False
+
+
+def sla_compute_and_notify():
+    def _notify(finding, title):
+        create_notification(
+            event='sla_breach',
+            title="SLA info for finding {}".format(finding.id),
+            description="T"
+        )
+
+    try:
+        system_settings = System_Settings.objects.get()
+        if system_settings.enable_finding_sla:
+            logger.info("About to process findings for SLA notifications.")
+            logger.debug("Active {}, Verified {}, Has JIRA {}, pre-breach {}, internal {}".format(
+                settings.SLA_NOTIFY_ACTIVE_ONLY,
+                settings.SLA_NOTIFY_VERIFIED_ONLY,
+                settings.SLA_NOTIFY_WITH_JIRA_ONLY,
+                settings.SLA_NOTIFY_PRE_BREACH,
+            ))
+
+            findings = Finding.objects \
+                .filter(
+                    active=settings.SLA_NOTIFY_ACTIVE_ONLY,
+                    verified=settings.SLA_NOTIFY_VERIFIED_ONLY,
+                    # jira_issue=settings.SLA_NOTIFY_WITH_JIRA_ONLY,
+                    # jira_finding_mappings__finding__isnull=False
+                )
+
+            logger.debug("Findings: {}".format(findings))
+            for finding in findings:
+                sla_age = finding.sla_days_remaining()
+                # if SLA is set to 0 in settings, it's a null.
+                if sla_age is None:
+                    sla_age = 0
+
+                print("Finding {} has {} days left to breach SLA.".format(finding.id, sla_age))
+                # The finding is within the pre-breach period
+                if (sla_age <= settings.SLA_NOTIFY_PRE_BREACH):
+                    logger.info("Security SLA pre-breach warning for finding ID {}".format(finding.id))
+                    _notify(finding, 'Security SLA pre-breach warning')
+                # The finding breaches the SLA today
+                elif (sla_age == 0):
+                    logger.info("Security SLA breach warning for finding ID {}".format(finding.id))
+                    _notify(finding, "Security SLA breaching today")
+                elif (sla_age < 0):
+                    logger.info("Finding {} has breached by {} days.".format(finding.id, sla_age))
+                else:
+                    logger.info("Finding not in SLA notification scope yet.")
+                
+    except System_Settings.DoesNotExist:
+        logger.info("Findings SLA is not enabled.")

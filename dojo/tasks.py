@@ -20,7 +20,7 @@ from dojo.reports.widgets import report_widget_factory
 from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_issue, \
                        close_epic, sync_rules, fix_loop_duplicates, \
                        rename_whitesource_finding, update_external_issue, add_external_issue, \
-                       close_external_issue, reopen_external_issue
+                       close_external_issue, reopen_external_issue, sla_compute_and_notify
 from dojo.notifications.helper import create_notification, send_alert_notification, send_hipchat_notification, send_mail_notification, send_slack_notification
 import logging
 
@@ -382,3 +382,8 @@ def send_hipchat_notification_task(*args, **kwargs):
 def send_alert_notification_task(*args, **kwargs):
     logger.debug("send_alert_notification")
     send_alert_notification(*args, **kwargs)
+
+@app.task(name='async_sla_compute_and_notify')
+def async_sla_compute_and_notify_task(*args, **kwargs):
+    logger.debug("Computing SLAs and notifying as needed")
+    sla_compute_and_notify(*args, **kwargs)

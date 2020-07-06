@@ -1,6 +1,7 @@
 # Django settings for DefectDojo
 import os
 from datetime import timedelta
+from celery.schedules import crontab
 
 import environ
 root = environ.Path(__file__) - 3  # Three folders back
@@ -375,6 +376,12 @@ SAML2_AUTH = {
 AUTHORIZED_USERS_ALLOW_CHANGE = env('DD_AUTHORIZED_USERS_ALLOW_CHANGE')
 AUTHORIZED_USERS_ALLOW_DELETE = env('DD_AUTHORIZED_USERS_ALLOW_DELETE')
 
+SLA_NOTIFY_ACTIVE_ONLY = True
+SLA_NOTIFY_VERIFIED_ONLY = False
+SLA_NOTIFY_WITH_JIRA_ONLY = False
+SLA_NOTIFY_PRE_BREACH = 2
+SLA_NOTIFY_RECURRENT_INTERVAL = 2
+
 LOGIN_EXEMPT_URLS = (
     r'^%sstatic/' % URL_PREFIX,
     r'^%swebhook/' % URL_PREFIX,
@@ -625,6 +632,10 @@ CELERY_BEAT_SCHEDULE = {
     'update-findings-from-source-issues': {
         'task': 'dojo.tasks.async_update_findings_from_source_issues',
         'schedule': timedelta(hours=3),
+    },
+    'compute-sla-age-and-notify': {
+        'task': 'dojo.tasks.async_sla_compute_and_notify',
+        'schedule': crontab(hour=7, minute=30),
     }
 }
 
