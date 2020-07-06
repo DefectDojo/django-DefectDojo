@@ -102,7 +102,7 @@ def process_notifications(event, notifications=None, *args, **kwargs):
     hipchat_enabled = get_system_setting('enable_hipchat_notifications')
     mail_enabled = get_system_setting('enable_mail_notifications')
 
-    from dojo.tasks import send_slack_notification_task, send_alert_notification, send_hipchat_notification_task, send_mail_notification_task
+    from dojo.tasks import send_slack_notification_task, send_hipchat_notification_task, send_mail_notification_task
 
     if slack_enabled and 'slack' in getattr(notifications, event):
         if not sync:
