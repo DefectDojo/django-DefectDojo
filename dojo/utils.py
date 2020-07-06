@@ -1335,6 +1335,7 @@ def reopen_external_issue(find, note, external_issue_provider):
 
 
 def add_issue(find, push_to_jira):
+    logger.info('trying to create a new jira issue for %d:%s', find.id, find.title)
     eng = Engagement.objects.get(test=find.test)
     prod = Product.objects.get(engagement=eng)
     jira_minimum_threshold = Finding.get_number_severity(System_Settings.objects.get().jira_minimum_severity)
@@ -1362,6 +1363,8 @@ def add_issue(find, push_to_jira):
                     server=jira_conf.url,
                     basic_auth=(jira_conf.username, jira_conf.password))
 
+                meta = None
+
                 fields = {
                         'project': {
                             'key': jpkey.project_key
@@ -1388,13 +1391,32 @@ def add_issue(find, push_to_jira):
                     fields['labels'] = labels
 
                 if System_Settings.objects.get().enable_finding_sla:
-                    # jira wants YYYY-MM-DD
-                    duedate = find.sla_deadline().strftime('%Y-%m-%d')
-                    # fields['duedate'] = '2020-12-31'
-                    fields['duedate'] = duedate
+                    # populate duedate field, but only if it's available for this project + issuetype
+                    # meta = jira.createmeta(projectKeys=jpkey.project_key, expand="fields")
+                    if not meta:
+                        meta = jira_meta(jira, jpkey)
+                    # print('VALENTIJN:', meta['projects'][0]['issuetypes'][0]['fields']['summary'])
 
-                print('fields:')
-                print(fields)
+                    if 'duedate' in meta['projects'][0]['issuetypes'][0]['fields']:
+                        # print('DUE: ', meta['projects'][0]['issuetypes'][0]['fields']['duedate'])
+
+                        # jira wants YYYY-MM-DD
+                        duedate = find.sla_deadline().strftime('%Y-%m-%d')
+                        # fields['duedate'] = '2020-12-31'
+                        fields['duedate'] = duedate
+
+                if len(find.endpoints.all()) > 0:
+                    if not meta:
+                        meta = jira_meta(jira, jpkey)
+
+                    if 'environment' in meta['projects'][0]['issuetypes'][0]['fields']:
+                        # print('ENV: ', meta['projects'][0]['issuetypes'][0]['fields']['environment'])
+
+                        environment = "\n".join([str(endpoint) for endpoint in find.endpoints.all()])
+                        fields['environment'] = environment
+
+                # print('fields:')
+                # print(fields)
 
                 new_issue = jira.create_issue(fields)
 
@@ -1419,6 +1441,10 @@ def add_issue(find, push_to_jira):
         else:
             log_jira_alert("A Finding needs to be both Active and Verified to be pushed to JIRA.", find)
             logger.warning("A Finding needs to be both Active and Verified to be pushed to JIRA.", find)
+
+
+def jira_meta(jira, jpkey):
+    return jira.createmeta(projectKeys=jpkey.project_key, issuetypeNames=jpkey.conf.default_issue_type, expand="projects.issuetypes.fields")
 
 
 def jira_attachment(jira, issue, file, jira_filename=None):
@@ -1455,6 +1481,7 @@ def jira_check_attachment(issue, source_file_name):
 
 
 def update_issue(find, push_to_jira):
+    logger.info('trying to update a linked jira issue for %d:%s', find.id, find.title)
     prod = Product.objects.get(
         engagement=Engagement.objects.get(test=find.test))
     jpkey = JIRA_PKey.objects.get(product=prod)
@@ -1468,6 +1495,8 @@ def update_issue(find, push_to_jira):
                 server=jira_conf.url,
                 basic_auth=(jira_conf.username, jira_conf.password))
             issue = jira.issue(j_issue.jira_id)
+
+            meta = None
 
             fields = {}
             # Only update the component if it didn't exist earlier in Jira, this is to avoid assigning multiple components to an item
@@ -1488,10 +1517,22 @@ def update_issue(find, push_to_jira):
             if labels:
                 fields['labels'] = labels
 
+            if len(find.endpoints.all()) > 0:
+                if not meta:
+                    meta = jira_meta(jira, jpkey)
+
+                if 'environment' in meta['projects'][0]['issuetypes'][0]['fields']:
+                    print('ENV: ', meta['projects'][0]['issuetypes'][0]['fields']['environment'])
+
+                    environment = "\n".join([str(endpoint) for endpoint in find.endpoints.all()])
+                    fields['environment'] = environment
+
             # Upload dojo finding screenshots to Jira
             for pic in find.images.all():
                 jira_attachment(jira, issue,
                                 settings.MEDIA_ROOT + pic.image_large.name)
+
+            print('jira update fields: ', fields)
 
             issue.update(
                 summary=find.title,
@@ -1610,6 +1651,7 @@ def add_epic(eng, push_to_jira):
 
 
 def add_comment(find, note, force_push=False):
+    logger.debug('trying to add a comment to a linked jira issue for: %d:%s', find.id, find.title)
     if not note.private:
         prod = Product.objects.get(
             engagement=Engagement.objects.get(test=find.test))

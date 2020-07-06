@@ -1858,17 +1858,79 @@ def reset_finding_duplicate_status(request, duplicate_id):
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(duplicate.id,)))
 
 
-@user_must_be_authorized(Finding, 'change', 'fid')
-@require_POST
-def push_to_jira(request, fid):
-    finding = get_object_or_404(Finding, id=fid)
-    count = Alerts.objects.filter(user_id=request.user).count()
-    return JsonResponse({'count': count})
+# @user_must_be_authorized(Finding, 'change', 'fid')
+# @require_POST
+# def push_to_jira(request, fid):
+#     finding = get_object_or_404(Finding, id=fid)
+#     count = Alerts.objects.filter(user_id=request.user).count()
+#     return JsonResponse({'count': count})
 
 
 @user_must_be_authorized(Finding, 'change', 'fid')
-@require_POST
-def disconnect_from_jira(request, fid):
+def finding_unlink_jira(request, fid):
     finding = get_object_or_404(Finding, id=fid)
-    count = Alerts.objects.filter(user_id=request.user).count()
-    return JsonResponse({'count': count})
+    logger.info('trying to unlink a linked jira issue from %d:%s', finding.id, finding.title)
+    if finding.jira():
+        try:
+            finding.jira_issue.delete()
+
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                'Link to JIRA issue succesfully deleted',
+                extra_tags='alert-success')
+
+        except:
+            messages.add_message(
+                request,
+                messages.ERROR,
+                'Link to JIRA could not be deleted',
+                extra_tags='alert-danger')
+    else:
+        messages.add_message(
+            request,
+            messages.ERROR,
+            'Link to JIRA not found',
+            extra_tags='alert-danger')
+
+    return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id,)))
+
+
+@user_must_be_authorized(Finding, 'change', 'fid')
+def finding_push_to_jira(request, fid):
+    finding = get_object_or_404(Finding, id=fid)
+    try:
+        if finding.jira():
+            logger.info('trying to push %d:%s to JIRA to update JIRA issue', finding.id, finding.title)
+            if finding.reporter.usercontactinfo.block_execution:
+                update_issue(finding, True)
+                message = 'Linked JIRA issue succesfully updated, but check alerts for background errors.'
+            else:
+                update_issue_task.delay(finding, True)
+                message = 'Update to linked JIRA issue queued succesfully.'
+        else:
+            logger.info('trying to push %d:%s to JIRA to create a new JIRA issue', finding.id, finding.title)
+            if finding.reporter.usercontactinfo.block_execution:
+                add_issue(finding, True)
+                message = 'JIRA issue created succesfully, but check alerts for background errors'
+            else:
+                add_issue_task.delay(finding, True)
+                message = 'JIRA issue creation queued succesfully.'
+
+        # it may look like succes here, but the add_issue and update_issue are swallowing exceptions
+        # but cant't change too much now without having a test suite, so leave as is for now with the addition warning message to check alerts for background errors.
+
+        messages.add_message(
+            request,
+            messages.SUCCESS,
+            message,
+            extra_tags='alert-success')
+    except:
+        logger.error('Error pushing to JIRA: ', exc_info=True)
+        messages.add_message(
+            request,
+            messages.ERROR,
+            'Error pushing to JIRA',
+            extra_tags='alert-danger')
+
+    return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id,)))

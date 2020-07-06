@@ -438,12 +438,16 @@
                             <a href="{{ jira_conf.url }}/browse/{{ jira_issue.jira_key }}"
                             target="_blank" title="{{ jira_conf.url }}/browse/{{ jira_issue.jira_key }}">{{ jira_issue.jira_key }}</a>
 
-                            <a href="{{ jira_conf.url }}/browse/{{ jira_issue.jira_key }}"
-                            target="_blank" title="{{ jira_conf.url }}/browse/{{ jira_issue.jira_key }}">
-                                <i class="fa fa-minus-square" title="Disconnect JIRA issue from this finding."></i>
+                            <a href="{% url 'finding_unlink_jira' finding.id %}" title="Disconnect JIRA issue from this finding.">
+                                <i class="fa fa-minus-square" title="Unlink JIRA issue from this finding."></i>
+                            </a>
+                            <a href="{% url 'finding_push_to_jira' finding.id %}" title="Create JIRA issue for this finding.">
+                                <i class="fa fa-exchange" title="Update JIRA issue with data from this finding."></i>
                             </a>
                         {% else %}
-                            <i class="fa fa-plus-square" title="Create new JIRA issue from this finding."></i>
+                            <a href="{% url 'finding_push_to_jira' finding.id %}" title="Create JIRA issue for this finding.">
+                                <i class="fa fa-plus-square" title="Create new JIRA issue from this finding."></i>
+                            </a>
                         {% endif %}
                         {% endwith %}
                         </td>
