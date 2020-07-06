@@ -9,10 +9,17 @@
 *Defect Dojo link:* {{ finding_url|full_url }}
 
 *Severity:* {{ finding.severity }} 
+{% if finding.cwe > 0 %}
+*CWE:* [CWE-{{ finding.cwe }}|{{ finding.cwe|cwe_url }}]
+{% else %}
+*CWE:* Unknown
+{% endif %}
 
-*CWE:* [{{ finding.cwe }}|{{ finding.cwe|cwe_url }}]
-
+{% if finding.cve %}
 *CVE:* [{{ finding.cve }}|{{ finding.cve|cve_url }}]
+{% else %}
+*CVE:* Unknown
+{% endif %}
 
 *Product/Engagement/Test:* [{{ finding.test.engagement.product.name }}|{{ product_url|full_url }}] / [{{ finding.test.engagement.name }}|{{ engagement_url|full_url }}] / [{{ finding.test }}|{{ test_url|full_url }}]
 
