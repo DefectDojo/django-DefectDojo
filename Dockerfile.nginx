@@ -64,14 +64,12 @@ RUN \
   python3 manage.py collectstatic --noinput && \
   true
 
-FROM nginx:1.19.0@sha256:0efad4d09a419dc6d574c3c3baacb804a530acd61d5eba72cb1f14e1f5ac0c8f
+FROM nginx:1.19.0-alpine@sha256:ee5a9b68e8d4a4b8b48318ff08ad5489bd1ce52b357bf48c511968a302bc347b
 COPY --from=collectstatic /app/static/ /usr/share/nginx/html/static/
 COPY wsgi_params nginx/nginx.conf nginx/nginx_TLS.conf /etc/nginx/
 COPY docker/entrypoint-nginx.sh /
 RUN \
-  apt-get -y update && \
-  apt-get -y install openssl && \
-  apt-get clean && \
+  apk add --no-cache openssl && \
   chmod -R g=u /var/cache/nginx && \
   chmod -R g=u /var/run && \
   mkdir -p /etc/nginx/ssl && \
