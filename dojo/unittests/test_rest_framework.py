@@ -112,6 +112,7 @@ class AppAnalysisTest(BaseClass.RESTEndpointTest):
             'created': '2018-08-16T16:58:23.908Z'
         }
         self.update_fields = {'version': '9.0'}
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
 class EndpointStatusTest(BaseClass.RESTEndpointTest):
