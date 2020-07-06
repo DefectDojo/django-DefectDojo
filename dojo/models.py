@@ -318,6 +318,10 @@ class Dojo_User(User):
     def __str__(self):
         return self.get_full_name()
 
+    @staticmethod
+    def wants_block_execution(user):
+        return hasattr(user, 'usercontactinfo') and user.usercontactinfo.block_execution
+
 
 class UserContactInfo(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -1449,6 +1453,10 @@ class Finding(models.Model):
         # print('finding.is_authorized')
         return user_is_authorized(user, perm_type, self)
 
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('view_finding', args=[str(self.id)])
+
     @classmethod
     def unaccepted_open_findings(cls):
         return cls.objects.filter(active=True, verified=True, duplicate=False, risk_acceptance__isnull=True)
@@ -1725,6 +1733,9 @@ class Finding(models.Model):
                 sla_calculation = sla_age - age
         return sla_calculation
 
+    def sla_deadline(self):
+        return self.date + relativedelta(days=self.sla_days_remaining())
+
     def github(self):
         try:
             return self.github_issue
@@ -1750,7 +1761,7 @@ class Finding(models.Model):
     # newer version that can work with prefetching
     def github_conf_new(self):
         try:
-            return self.test.engagement.product.github_pkey_set.all()[0].conf
+            return self.test.engagement.product.github_pkey_set.all()[0].git_conf
         except:
             return None
             pass
@@ -1906,10 +1917,17 @@ class Finding(models.Model):
         # Adding a snippet here for push to JIRA so that it's in one place
         if push_to_jira:
             from dojo.tasks import update_issue_task, add_issue_task
+            from dojo.utils import add_issue, update_issue
             if jira_issue_exists:
-                update_issue_task.delay(self, True)
+                if self.reporter.usercontactinfo.block_execution:
+                    update_issue(self, True)
+                else:
+                    update_issue_task.delay(self, True)
             else:
-                add_issue_task.delay(self, True)
+                if self.reporter.usercontactinfo.block_execution:
+                    add_issue(self, True)
+                else:
+                    add_issue_task.delay(self, True)
 
     def delete(self, *args, **kwargs):
         for find in self.original_finding.all():

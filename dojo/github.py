@@ -118,10 +118,19 @@ def add_external_issue_github(find, prod, eng):
             logger.debug('Look for project: ' + github_product_key.git_project)
             repo = g.get_repo(github_product_key.git_project)
             logger.debug('Found repo: ' + str(repo.url))
-            issue = repo.create_issue(title=find.title, body=find.long_desc(), labels=["defectdojo", "security / " + find.severity])
+            issue = repo.create_issue(title=find.title, body=long_description(find), labels=["defectdojo", "security / " + find.severity])
             logger.debug('created issue: ' + str(issue.html_url))
             g_issue = GITHUB_Issue(issue_id=issue.number, issue_url=issue.html_url, finding=find)
             g_issue.save()
         except:
             e = sys.exc_info()[0]
             logger.error('cannot create finding in github: ' + e)
+
+
+def long_description(find):
+    from dojo.utils import get_full_url
+    return (
+            "*Dojo URL:* " + str(get_full_url(find.get_absolute_url())) + "\n\n" +
+            find.long_desc() +
+            "\n\n*Dojo ID:* " + str(find.id) + "\n\n"
+    )

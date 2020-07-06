@@ -390,6 +390,12 @@
                     {% if finding.component_version %}
                     <th>Component Version</th>
                     {% endif %}
+                    {% if finding.jira_conf_new %}
+                    <th>JIRA</th>
+                    {% endif %}                    
+                    {% if finding.github_conf_new %}
+                    <th>GitHub</th>
+                    {% endif %}                    
                 </tr>
                 <tr>
                     <td>
@@ -424,6 +430,29 @@
                         </span>
                     </td>
                     {% endif %}
+                    {% with jira_conf=finding.jira_conf_new %}
+                    {% if jira_conf%}
+                        <td>
+                        {% with jira_issue=finding.jira_issue %}
+                        {% if jira_issue %}
+                            <a href="{{ jira_conf.url }}/browse/{{ jira_issue.jira_key }}"
+                            target="_blank" title="{{ jira_conf.url }}/browse/{{ jira_issue.jira_key }}">{{ jira_issue.jira_key }}</a>
+                        {% endif %}                        
+                        {% endwith %}
+                        </td>
+                    {% endif %}
+                    {% endwith %}                    
+                    {% with github_conf=finding.github_conf_new %}                    
+                    {% if github_conf %}
+                        <td>
+                        {% with github_issue=finding.github_issue %}
+                        {% if github_issue %}
+                            <a href="{{ github_issue.issue_url }}" target="_blank" title="{{ github_issue.issue_url }}">#{{ github_issue.issue_id }}</a>                            
+                        {% endif %}                        
+                        {% endwith %}
+                        </td>
+                    {% endif %}
+                    {% endwith %}
                 </tr>
             </table>
         </div>
@@ -455,43 +484,6 @@
             </table>
         </div>
     {% endif %}
-    {% if jissue and jconf %}
-        <div class="row to_highlight">
-            <div class="col-md-12">
-                <div class="panel panel-default endpoints table-responsive">
-                    <div class="panel-heading">
-                        <h4>JIRA Link
-                            <span class="pull-right"><a data-toggle="collapse" href="#jira_link"><i
-                                    class="glyphicon glyphicon-chevron-up"></i></a></span>
-                        </h4>
-                    </div>
-                    <div id="jira_link" class="panel-body endpoint-panel table-responsive collapse in">
-                        <a href="{{ jconf.url }}/browse/{{ jissue.jira_key }}"
-                           target="_blank"> {{ jconf.url }}/browse/{{ jissue.jira_key }} </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    {% endif %}
-    {% if gissue and gconf %}
-    <div class="row to_highlight">
-        <div class="col-md-12">
-            <div class="panel panel-default endpoints table-responsive">
-                <div class="panel-heading">
-                    <h4>Github Link
-                        <span class="pull-right"><a data-toggle="collapse" href="#jira_link"><i
-                                class="glyphicon glyphicon-chevron-up"></i></a></span>
-                    </h4>
-                </div>
-                <div id="github_link" class="panel-body endpoint-panel table-responsive collapse in">
-                    <a href="{{gissue.issue_url }}"
-                       target="_blank"> {{gissue.issue_url}} </a>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% endif %}
-
     {% with findings=finding.similar_findings %}
         {% if findings %}
             <div class="panel panel-default">
