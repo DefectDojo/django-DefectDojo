@@ -1518,6 +1518,8 @@ def update_issue(find, push_to_jira):
                 url=req_url,
                 auth=HTTPBasicAuth(jira_conf.username, jira_conf.password),
                 json=json_data)
+            if r.status_code != 204:
+                logger.warn("JIRA transition failed with error: {}".format(r.text))
             find.jira_change = timezone.now()
             find.save()
         elif 'Active' in find.status() and 'Verified' in find.status():
@@ -1527,6 +1529,8 @@ def update_issue(find, push_to_jira):
                 url=req_url,
                 auth=HTTPBasicAuth(jira_conf.username, jira_conf.password),
                 json=json_data)
+            if r.status_code != 204:
+                logger.warn("JIRA transition failed with error: {}".format(r.text))
             find.jira_change = timezone.now()
             find.save()
 
@@ -1547,6 +1551,8 @@ def close_epic(eng, push_to_jira):
                 url=req_url,
                 auth=HTTPBasicAuth(jira_conf.username, jira_conf.password),
                 json=json_data)
+            if r.status_code != 204:
+                logger.warn("JIRA close epic failed with error: {}".format(r.text))
         except Exception as e:
             log_jira_generic_alert('Jira Engagement/Epic Close Error', str(e))
             pass
