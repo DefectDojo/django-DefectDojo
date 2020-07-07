@@ -223,12 +223,8 @@
                         <th>Date Mitigated</th>
                         <th>Mitigated By</th>
                     {% endif %}
-                    {% if finding.cwe > 0 %}
                         <th>CWE</th>
-                    {% endif %}
-                    {% if finding.cve %}
                         <th>CVE</th>
-                    {% endif %}
                     <th>Found by</th>
                 </tr>
                 <tr>
@@ -293,16 +289,16 @@
                         <td>{{ finding.mitigated }}</td>
                         <td>{{ finding.mitigated_by }}</td>
                     {% endif %}
-                    {% if finding.cwe > 0 %}
                         <td>
-                            <a target="_blank" href="https://cwe.mitre.org/data/definitions/{{ finding.cwe }}.html">
+                        {% if finding.cwe > 0 %}
+                            <a target="_blank" href={{ finding.cwe|cwe_url }}">
                                 <i class="fa fa-external-link"></i> {{ finding.cwe }}
                             </a>
+                        {% endif %}
                         </td>
-                    {% endif %}
                     {% if finding.cve|slice:":3" == 'CVE' %}
                         <td>
-                            <a target="_blank" href="https://cve.mitre.org/cgi-bin/cvename.cgi?name={{ finding.cve }}">
+                            <a target="_blank" href="{{ finding.cve |cve_url }}">
                                 <i class="fa fa-external-link"></i> {{ finding.cve }}
                             </a>
                         </td>
