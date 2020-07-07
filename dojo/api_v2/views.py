@@ -325,7 +325,7 @@ class FindingViewSet(mixins.ListModelMixin,
             status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
-        responses={status.HTTP_200_OK: None},
+        responses={status.HTTP_200_OK: ""},
         methods=['put', 'patch'],
         request_body=serializers.TagSerializer
     )
