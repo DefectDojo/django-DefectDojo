@@ -1398,7 +1398,6 @@ def add_issue(find, push_to_jira):
                     if 'duedate' in meta['projects'][0]['issuetypes'][0]['fields']:
                         # jira wants YYYY-MM-DD
                         duedate = find.sla_deadline().strftime('%Y-%m-%d')
-                        # fields['duedate'] = '2020-12-31'
                         fields['duedate'] = duedate
 
                 if len(find.endpoints.all()) > 0:
@@ -1409,8 +1408,7 @@ def add_issue(find, push_to_jira):
                         environment = "\n".join([str(endpoint) for endpoint in find.endpoints.all()])
                         fields['environment'] = environment
 
-                # print('fields:')
-                # print(fields)
+                logger.debug('sending fields to JIRA: %s', fields)
 
                 new_issue = jira.create_issue(fields)
 
@@ -1524,7 +1522,7 @@ def update_issue(find, push_to_jira):
                 jira_attachment(jira, issue,
                                 settings.MEDIA_ROOT + pic.image_large.name)
 
-            print('jira update fields: ', fields)
+            logger.debug('sending fields to JIRA: %s', fields)
 
             issue.update(
                 summary=find.title,
@@ -2076,11 +2074,11 @@ def merge_sets_safe(set1, set2):
 
 def get_return_url(request):
     return_url = request.POST.get('return_url', None)
-    print('return_url from POST: ', return_url)
+    # print('return_url from POST: ', return_url)
     if return_url is None or not return_url.strip():
         # for some reason using request.GET.get('return_url') never works
         return_url = request.GET['return_url'] if 'return_url' in request.GET else None
-        print('return_url from GET: ', return_url)
+        # print('return_url from GET: ', return_url)
 
     return return_url if return_url else None
 

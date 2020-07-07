@@ -571,7 +571,6 @@ def delete_finding(request, fid):
 # def edit_finding(request, finding):
 @user_must_be_authorized(Finding, 'change', 'fid')
 def edit_finding(request, fid):
-    print('fid=', fid)
     finding = get_object_or_404(Finding, id=fid)
     old_status = finding.status()
     form = FindingForm(instance=finding, template=False)
@@ -1732,7 +1731,7 @@ def finding_bulk_update_all(request, pid=None):
                 if form.cleaned_data['push_to_github']:
                     logger.info('push selected findings to github')
                     for finding in finds:
-                        print('will push to GitHub finding: ' + str(finding))
+                        logger.debug('will push to GitHub finding: ' + str(finding))
                         old_status = finding.status()
                         if form.cleaned_data['push_to_github']:
                             if GITHUB_Issue.objects.filter(finding=finding).exists():
