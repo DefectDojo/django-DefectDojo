@@ -28,7 +28,8 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     ScansViewSet, StubFindingsViewSet, TestsViewSet, TestTypesViewSet, \
     ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
     UsersViewSet, ImportScanView, ReImportScanView, ProductTypeViewSet, DojoMetaViewSet, \
-    DevelopmentEnvironmentViewSet, NotesViewSet, NoteTypeViewSet, SystemSettingsViewSet
+    DevelopmentEnvironmentViewSet, NotesViewSet, NoteTypeViewSet, SystemSettingsViewSet, \
+    AppAnalysisViewSet
 
 from dojo.utils import get_system_setting
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
@@ -98,6 +99,7 @@ v1_api.register(BuildDetails())
 
 # v2 api written in django-rest-framework
 v2_api = DefaultRouter()
+v2_api.register(r'technologies', AppAnalysisViewSet)
 v2_api.register(r'endpoints', EndPointViewSet)
 v2_api.register(r'engagements', EngagementViewSet)
 v2_api.register(r'development_environments', DevelopmentEnvironmentViewSet)
