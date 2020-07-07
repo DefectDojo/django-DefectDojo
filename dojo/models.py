@@ -31,6 +31,7 @@ from dojo.tag.prefetching_tag_descriptor import PrefetchingTagDescriptor
 from django.contrib.contenttypes.fields import GenericRelation
 from tagging.models import TaggedItem
 from dateutil.relativedelta import relativedelta
+from dojo.user.helper import user_is_authorized
 
 fmt = getattr(settings, 'LOG_FORMAT', None)
 lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
@@ -316,6 +317,10 @@ class Dojo_User(User):
 
     def __str__(self):
         return self.get_full_name()
+
+    @staticmethod
+    def wants_block_execution(user):
+        return hasattr(user, 'usercontactinfo') and user.usercontactinfo.block_execution
 
 
 class UserContactInfo(models.Model):
@@ -1323,6 +1328,9 @@ class Sonarqube_Product(models.Model):
 
 
 class Finding(models.Model):
+
+    SIMPLE_RISK_ACCEPTANCE_NAME = 'Simple Builtin Risk Acceptance'
+
     title = models.CharField(max_length=511)
     date = models.DateField(default=get_current_date)
     cwe = models.IntegerField(default=0, null=True, blank=True)
@@ -1441,9 +1449,64 @@ class Finding(models.Model):
             models.Index(fields=['line']),
         ]
 
+    def is_authorized(self, user, perm_type):
+        # print('finding.is_authorized')
+        return user_is_authorized(user, perm_type, self)
+
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('view_finding', args=[str(self.id)])
+
     @classmethod
     def unaccepted_open_findings(cls):
         return cls.objects.filter(active=True, verified=True, duplicate=False, risk_acceptance__isnull=True)
+
+    # gets or creates the simple risk acceptance instance connected to the engagement. only contains this finding if it is simple accepted
+    def get_simple_risk_acceptance(self, create=True):
+        if hasattr(self.test.engagement, 'simple_risk_acceptance') and len(self.test.engagement.simple_risk_acceptance) > 0:
+            return self.test.engagement.simple_risk_acceptance[0]
+
+        simple_risk_acceptance = self.test.engagement.risk_acceptance.filter(name=Finding.SIMPLE_RISK_ACCEPTANCE_NAME).prefetch_related('accepted_findings').first()
+        if simple_risk_acceptance is None:
+            simple_risk_acceptance = Risk_Acceptance.objects.create(
+                    owner_id=1,
+                    name=Finding.SIMPLE_RISK_ACCEPTANCE_NAME,
+                    compensating_control='These findings are accepted using a simple risk acceptance without expiration date, '
+                    'approval document or compensating control information. Unaccept and use full risk acceptance if you '
+                    'need to have more control over those fields.'
+            )
+            self.test.engagement.risk_acceptance.add(simple_risk_acceptance)
+        return simple_risk_acceptance
+
+    def simple_risk_accept(self):
+        # adding to ManyToMany will not cause duplicate entries
+        self.get_simple_risk_acceptance().accepted_findings.add(self)
+        # risk accepted, so finding no longer considered active
+        self.active = False
+        self.save()
+
+    def simple_risk_unaccept(self):
+        print('unaccepting risk')
+        # removing from ManyToMany will not fail for non-existing entries
+        self.get_simple_risk_acceptance().accepted_findings.remove(self)
+        # risk acceptance no longer in place, so reactivate, but only when it makes sense
+
+        # for now also remove from any other risk acceptance as differianting between simple and full here would clutter the menu.
+        # also currently you can only add a finding to 1 risk acceptance, so this would only affect old findings added to multiple
+        # risk acceptances in some obcure way
+        self.remove_from_any_risk_acceptance()
+        if not self.mitigated and not self.false_p and not self.out_of_scope and not self.risk_acceptance_set.exists():
+            self.active = True
+            self.save()
+
+    @property
+    def is_simple_risk_accepted(self):
+        if self.get_simple_risk_acceptance(create=False) is not None:
+            return self.get_simple_risk_acceptance().accepted_findings.filter(id=self.id).exists()
+            # print('exists: ', exists)
+            # return exists
+
+        return False
 
     @property
     def similar_findings(self):
@@ -1670,6 +1733,9 @@ class Finding(models.Model):
                 sla_calculation = sla_age - age
         return sla_calculation
 
+    def sla_deadline(self):
+        return self.date + relativedelta(days=self.sla_days_remaining())
+
     def github(self):
         try:
             return self.github_issue
@@ -1695,7 +1761,7 @@ class Finding(models.Model):
     # newer version that can work with prefetching
     def github_conf_new(self):
         try:
-            return self.test.engagement.product.github_pkey_set.all()[0].conf
+            return self.test.engagement.product.github_pkey_set.all()[0].git_conf
         except:
             return None
             pass
@@ -1722,12 +1788,20 @@ class Finding(models.Model):
             pass
         return jconf
 
-    # newer version that can work with prefetching
+    # newer version that can work with prefetching due to array index isntead of first.
     def jira_conf_new(self):
         try:
             return self.test.engagement.product.jira_pkey_set.all()[0].conf
         except:
             return None
+
+    # newer version that can work with prefetching due to array index isntead of first.
+    def jira_pkey(self):
+        try:
+            return self.test.engagement.product.jira_pkey_set.all()[0]
+        except:
+            return None
+            pass
 
     def long_desc(self):
         long_desc = ''
@@ -1812,7 +1886,7 @@ class Finding(models.Model):
             if system_settings.enable_deduplication:
                 from dojo.tasks import async_dedupe
                 try:
-                    if self.reporter.usercontactinfo.block_execution:
+                    if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
                         dedupe_signal.send(sender=self.__class__, new_finding=self)
                     else:
                         async_dedupe.delay(self, *args, **kwargs)
@@ -1825,7 +1899,7 @@ class Finding(models.Model):
             from dojo.tasks import async_false_history
             from dojo.utils import sync_false_history
             try:
-                if self.reporter.usercontactinfo.block_execution:
+                if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
                     sync_false_history(self, *args, **kwargs)
                 else:
                     async_false_history.delay(self, *args, **kwargs)
@@ -1843,10 +1917,17 @@ class Finding(models.Model):
         # Adding a snippet here for push to JIRA so that it's in one place
         if push_to_jira:
             from dojo.tasks import update_issue_task, add_issue_task
+            from dojo.utils import add_issue, update_issue
             if jira_issue_exists:
-                update_issue_task.delay(self, True)
+                if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
+                    update_issue(self, True)
+                else:
+                    update_issue_task.delay(self, True)
             else:
-                add_issue_task.delay(self, True)
+                if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
+                    add_issue(self, True)
+                else:
+                    add_issue_task.delay(self, True)
 
     def delete(self, *args, **kwargs):
         for find in self.original_finding.all():
@@ -3125,7 +3206,9 @@ admin.site.register(Notifications)
 # Watson
 watson.register(Product)
 watson.register(Test)
-watson.register(Finding)
+watson.register(Finding, fields=('id', 'title', 'cve', 'url', 'severity', 'description', 'mitigation', 'impact', 'steps_to_reproduce',
+                                 'severity_justification', 'references', 'sourcefilepath', 'sourcefile', 'hash_code', 'file_path',
+                                 'component_name', 'component_version', 'unique_id_from_tool', ))
 watson.register(Finding_Template)
 watson.register(Endpoint)
 watson.register(Engagement)

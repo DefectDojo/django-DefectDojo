@@ -9,7 +9,7 @@ setup(
     description="Tool for managing vulnerability engagements",
     install_requires=[
         'defusedxml',
-        'Django==2.2.13',
+        'Django==2.2.14',
         'django-auditlog==0.4.7',
         'django-custom-field',
         'django-filter==2.3.0',
@@ -67,7 +67,7 @@ setup(
         'json-lines==1.2.0'  # requred by yarn audit parser
     ],
 
-    extras_require={'mysql': ['mysqlclient==1.3.12']},
+    extras_require={'mysql': ['mysqlclient==2.0.0']},
 
     dependency_links=[
         "https://github.com/grendel513/python-pdfkit/tarball/master#egg=pdfkit-0.5.0"

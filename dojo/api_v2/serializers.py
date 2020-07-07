@@ -3,7 +3,7 @@ from dojo.models import Product, Engagement, Test, Finding, \
     Finding_Template, Test_Type, Development_Environment, NoteHistory, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Product_Type, JIRA_Conf, Endpoint, BurpRawRequestResponse, JIRA_PKey, \
-    Notes, DojoMeta, FindingImage, Note_Type
+    Notes, DojoMeta, FindingImage, Note_Type, App_Analysis
 from dojo.forms import ImportScanForm, SEVERITY_CHOICES
 from dojo.tools import requires_file
 from dojo.tools.factory import import_parser_factory
@@ -216,6 +216,12 @@ class EngagementSerializer(TaggitSerializer, serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     'Your target start date exceeds your target end date')
         return data
+
+
+class AppAnalysisSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = App_Analysis
+        fields = '__all__'
 
 
 class ToolTypeSerializer(serializers.ModelSerializer):
@@ -630,7 +636,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         if 'tags' in data:
             test.tags = ' '.join(data['tags'])
         try:
-            parser = import_parser_factory(data.get('file'),
+            parser = import_parser_factory(data.get('file', None),
                                            test,
                                            active,
                                            verified,
@@ -800,7 +806,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         active = data['active']
 
         try:
-            parser = import_parser_factory(data.get('file'),
+            parser = import_parser_factory(data.get('file', None),
                                            test,
                                            active,
                                            verified,
