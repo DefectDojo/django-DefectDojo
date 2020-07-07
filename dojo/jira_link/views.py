@@ -233,24 +233,32 @@ def new_jira(request):
 @user_passes_test(lambda u: u.is_staff)
 def edit_jira(request, jid):
     jira = JIRA_Conf.objects.get(pk=jid)
+    jira_password_from_db = jira.password
     if request.method == 'POST':
         jform = JIRAForm(request.POST, instance=jira)
         if jform.is_valid():
             try:
                 jira_server = jform.cleaned_data.get('url').rstrip('/')
                 jira_username = jform.cleaned_data.get('username')
-                jira_password = jform.cleaned_data.get('password')
+
+                if jform.cleaned_data.get('password'):
+                    jira_password = jform.cleaned_data.get('password')
+                else:
+                    # on edit the password is optional
+                    jira_password = jira_password_from_db
 
                 # Instantiate JIRA instance for validating url, username and password
                 JIRA(server=jira_server,
-                     basic_auth=(jira_username, jira_password))
+                    basic_auth=(jira_username, jira_password))
 
                 new_j = jform.save(commit=False)
                 new_j.url = jira_server
+                # on edit the password is optional
+                new_j.password = jira_password
                 new_j.save()
                 messages.add_message(request,
                                      messages.SUCCESS,
-                                     'JIRA Configuration Successfully Created.',
+                                     'JIRA Configuration Successfully Saved.',
                                      extra_tags='alert-success')
                 create_notification(event='other',
                                     title='Edit of JIRA: %s' % jform.cleaned_data.get('configuration_name'),
@@ -259,7 +267,8 @@ def edit_jira(request, jid):
                                     url=request.build_absolute_uri(reverse('jira')),
                                     )
                 return HttpResponseRedirect(reverse('jira', ))
-            except Exception:
+            except Exception as e:
+                logger.error(e)
                 messages.add_message(request,
                                      messages.ERROR,
                                      'Unable to authenticate. Please check the URL, username, and password.',
