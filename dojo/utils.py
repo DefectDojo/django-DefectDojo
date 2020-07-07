@@ -1396,14 +1396,15 @@ def add_issue(find, push_to_jira):
                         meta = jira_meta(jira, jpkey)
 
                     if 'duedate' in meta['projects'][0]['issuetypes'][0]['fields']:
-                        # print('DUE: ', meta['projects'][0]['issuetypes'][0]['fields']['duedate'])
-
                         # jira wants YYYY-MM-DD
                         duedate = find.sla_deadline().strftime('%Y-%m-%d')
+                        fields['duedate'] = duedate
+
+                if len(find.endpoints.all()) > 0:
+                    if not meta:
                         meta = jira_meta(jira, jpkey)
 
                     if 'environment' in meta['projects'][0]['issuetypes'][0]['fields']:
-
                         environment = "\n".join([str(endpoint) for endpoint in find.endpoints.all()])
                         fields['environment'] = environment
 
