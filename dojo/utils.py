@@ -1392,14 +1392,10 @@ def add_issue(find, push_to_jira):
 
                 if System_Settings.objects.get().enable_finding_sla:
                     # populate duedate field, but only if it's available for this project + issuetype
-                    # meta = jira.createmeta(projectKeys=jpkey.project_key, expand="fields")
                     if not meta:
                         meta = jira_meta(jira, jpkey)
-                    # print('VALENTIJN:', meta['projects'][0]['issuetypes'][0]['fields']['summary'])
 
                     if 'duedate' in meta['projects'][0]['issuetypes'][0]['fields']:
-                        # print('DUE: ', meta['projects'][0]['issuetypes'][0]['fields']['duedate'])
-
                         # jira wants YYYY-MM-DD
                         duedate = find.sla_deadline().strftime('%Y-%m-%d')
                         # fields['duedate'] = '2020-12-31'
@@ -1410,8 +1406,6 @@ def add_issue(find, push_to_jira):
                         meta = jira_meta(jira, jpkey)
 
                     if 'environment' in meta['projects'][0]['issuetypes'][0]['fields']:
-                        # print('ENV: ', meta['projects'][0]['issuetypes'][0]['fields']['environment'])
-
                         environment = "\n".join([str(endpoint) for endpoint in find.endpoints.all()])
                         fields['environment'] = environment
 
@@ -1522,8 +1516,6 @@ def update_issue(find, push_to_jira):
                     meta = jira_meta(jira, jpkey)
 
                 if 'environment' in meta['projects'][0]['issuetypes'][0]['fields']:
-                    print('ENV: ', meta['projects'][0]['issuetypes'][0]['fields']['environment'])
-
                     environment = "\n".join([str(endpoint) for endpoint in find.endpoints.all()])
                     fields['environment'] = environment
 
