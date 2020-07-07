@@ -14,26 +14,28 @@ import requests
 from dateutil.relativedelta import relativedelta, MO, SU
 from django.conf import settings
 from django.core.mail import send_mail
-from django.core.mail import EmailMessage
 from django.core.paginator import Paginator
 from django.urls import get_resolver, reverse
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
 from django.template.defaultfilters import pluralize
-from django.template.loader import render_to_string
 from django.utils import timezone
 from jira import JIRA
 from jira.exceptions import JIRAError
 from django.dispatch import receiver
 from dojo.signals import dedupe_signal
+from django.db.models.signals import post_save
 import calendar as tcalendar
 from dojo.github import add_external_issue_github, update_external_issue_github, close_external_issue_github, reopen_external_issue_github
-
 from dojo.models import Finding, Engagement, Finding_Template, Product, JIRA_PKey, JIRA_Issue,\
-    Dojo_User, User, Alerts, System_Settings, Notifications, UserContactInfo, Endpoint, Benchmark_Type, \
+    Dojo_User, User, System_Settings, Notifications, Endpoint, Benchmark_Type, \
     Language_Type, Languages, Rule, Test_Type
 from asteval import Interpreter
 from requests.auth import HTTPBasicAuth
+from dojo.notifications.helper import create_notification
 import logging
+import itertools
+from django.contrib import messages
+from django.http import HttpResponseRedirect
 
 
 logger = logging.getLogger(__name__)
@@ -654,13 +656,10 @@ def get_punchcard_data(findings, start_date, weeks):
         first_sunday = start_date - relativedelta(weekday=SU(-1))
         last_sunday = start_date + relativedelta(weeks=weeks)
 
-        print(first_sunday)
-        print(last_sunday)
-
         # reminder: The first week of a year is the one that contains the year’s first Thursday
         # so we could have for 29/12/2019: week=1 and year=2019 :-D. So using week number from db is not practical
 
-        severities_by_day = findings.filter(created__gte=first_sunday).filter(created__lt=last_sunday) \
+        severities_by_day = findings.filter(created__date__gte=first_sunday).filter(created__date__lt=last_sunday) \
                                     .values('created__date') \
                                     .annotate(count=Count('id')) \
                                     .order_by('created__date')
@@ -726,9 +725,9 @@ def get_punchcard_data(findings, start_date, weeks):
 
         # add week in progress + empty weeks on the end if needed
         while tick < weeks + 1:
-            print(tick)
+            # print(tick)
             week_data, label = get_week_data(start_of_week, tick, day_counts)
-            print(week_data, label)
+            # print(week_data, label)
             punchcard.extend(week_data)
             ticks.append(label)
             tick += 1
@@ -786,11 +785,11 @@ def get_period_counts_legacy(findings,
             end_date = new_date + relativedelta(weeks=1, weekday=MO(1))
 
         closed_in_range_count = findings_closed.filter(
-            mitigated__range=[new_date, end_date]).count()
+            mitigated__date__range=[new_date, end_date]).count()
 
         if accepted_findings:
             risks_a = accepted_findings.filter(
-                risk_acceptance__created__range=[
+                risk_acceptance__created__date__range=[
                     datetime(
                         new_date.year,
                         new_date.month,
@@ -885,11 +884,11 @@ def get_period_counts(active_findings,
             end_date = new_date + relativedelta(weeks=1, weekday=MO(1))
 
         closed_in_range_count = findings_closed.filter(
-            mitigated__range=[new_date, end_date]).count()
+            mitigated__date__range=[new_date, end_date]).count()
 
         if accepted_findings:
             risks_a = accepted_findings.filter(
-                risk_acceptance__created__range=[
+                risk_acceptance__created__date__range=[
                     datetime(
                         new_date.year,
                         new_date.month,
@@ -1049,7 +1048,7 @@ def opened_in_period(start_date, end_date, pt):
         end_date,
         'closed':
         Finding.objects.filter(
-            mitigated__range=[start_date, end_date],
+            mitigated__date__range=[start_date, end_date],
             test__engagement__product__prod_type=pt,
             severity__in=('Critical', 'High', 'Medium', 'Low')).aggregate(
                 total=Sum(
@@ -1175,6 +1174,15 @@ def get_page_items(request, items, page_size, param_name='page'):
     return paginator.get_page(page)
 
 
+def get_page_items_and_count(request, items, page_size, param_name='page'):
+    size = request.GET.get('page_size', page_size)
+    paginator = Paginator(items, size)
+    page = request.GET.get(param_name)
+
+    # new get_page method will handle invalid page value, out of bounds pages, etc
+    return paginator.get_page(page), paginator.count
+
+
 def handle_uploaded_threat(f, eng):
     name, extension = os.path.splitext(f.name)
     with open(settings.MEDIA_ROOT + '/threat/%s%s' % (eng.id, extension),
@@ -1266,27 +1274,31 @@ def log_jira_message(text, finding):
         source='Jira')
 
 
-# Adds labels to a Jira issue
-def add_labels(find, issue):
+def get_labels(find):
     # Update Label with system setttings label
+    labels = []
     system_settings = System_Settings.objects.get()
-    labels = system_settings.jira_labels
-    if labels is None:
+    system_labels = system_settings.jira_labels
+    if system_labels is None:
         return
     else:
-        labels = labels.split()
-    if len(labels) > 0:
-        for label in labels:
-            issue.fields.labels.append(label)
+        system_labels = system_labels.split()
+    if len(system_labels) > 0:
+        for system_label in system_labels:
+            labels.append(system_label)
     # Update the label with the product name (underscore)
     prod_name = find.test.engagement.product.name.replace(" ", "_")
-    issue.fields.labels.append(prod_name)
-    issue.update(fields={"labels": issue.fields.labels})
+    labels.append(prod_name)
+    return labels
 
 
-def jira_long_description(find_description, find_id, jira_conf_finding_text):
-    return find_description + "\n\n*Dojo ID:* " + str(
-        find_id) + "\n\n" + jira_conf_finding_text
+def jira_long_description(find, jira_conf_finding_text):
+    return (
+            "*Dojo URL:* " + str(get_full_url(find.get_absolute_url())) + "\n\n" +
+            find.long_desc() +
+            "\n\n*Dojo ID:* " + str(find.id) + "\n\n" +
+            jira_conf_finding_text
+    )
 
 
 def add_external_issue(find, external_issue_provider):
@@ -1349,43 +1361,64 @@ def add_issue(find, push_to_jira):
                 jira = JIRA(
                     server=jira_conf.url,
                     basic_auth=(jira_conf.username, jira_conf.password))
+
+                meta = None
+
+                fields = {
+                        'project': {
+                            'key': jpkey.project_key
+                        },
+                        'summary': find.title,
+                        'description': jira_long_description(find, jira_conf.finding_text),
+                        'issuetype': {
+                            'name': jira_conf.default_issue_type
+                        },
+                        'priority': {
+                            'name': jira_conf.get_priority(find.severity)
+                        }
+                }
+
                 if jpkey.component:
-                    logger.debug('... with a component')
-                    new_issue = jira.create_issue(
-                        project=jpkey.project_key,
-                        summary=find.title,
-                        components=[
+                    fields['components'] = [
                             {
                                 'name': jpkey.component
                             },
-                        ],
-                        description=jira_long_description(
-                            find.long_desc(), find.id,
-                            jira_conf.finding_text),
-                        issuetype={'name': jira_conf.default_issue_type},
-                        priority={
-                            'name': jira_conf.get_priority(find.severity)
-                        })
-                else:
-                    logger.debug('... with no component')
-                    new_issue = jira.create_issue(
-                        project=jpkey.project_key,
-                        summary=find.title,
-                        description=jira_long_description(
-                            find.long_desc(), find.id,
-                            jira_conf.finding_text),
-                        issuetype={'name': jira_conf.default_issue_type},
-                        priority={
-                            'name': jira_conf.get_priority(find.severity)
-                        })
+                    ]
+
+                labels = get_labels(find)
+                if labels:
+                    fields['labels'] = labels
+
+                if System_Settings.objects.get().enable_finding_sla:
+                    # populate duedate field, but only if it's available for this project + issuetype
+                    # meta = jira.createmeta(projectKeys=jpkey.project_key, expand="fields")
+                    if not meta:
+                        meta = jira_meta(jira, jpkey)
+
+                    if 'duedate' in meta['projects'][0]['issuetypes'][0]['fields']:
+                        # print('DUE: ', meta['projects'][0]['issuetypes'][0]['fields']['duedate'])
+
+                        # jira wants YYYY-MM-DD
+                        duedate = find.sla_deadline().strftime('%Y-%m-%d')
+                        fields['duedate'] = duedate
+
+                if len(find.endpoints.all()) > 0:
+                    if not meta:
+                        meta = jira_meta(jira, jpkey)
+
+                    if 'environment' in meta['projects'][0]['issuetypes'][0]['fields']:
+
+                        environment = "\n".join([str(endpoint) for endpoint in find.endpoints.all()])
+                        fields['environment'] = environment
+
+                logger.debug('sending fields to JIRA: %s', fields)
+
+                new_issue = jira.create_issue(fields)
 
                 j_issue = JIRA_Issue(
                     jira_id=new_issue.id, jira_key=new_issue, finding=find)
                 j_issue.save()
                 issue = jira.issue(new_issue.id)
-
-                # Add labels (security & product)
-                add_labels(find, new_issue)
 
                 # Upload dojo finding screenshots to Jira
                 for pic in find.images.all():
@@ -1401,7 +1434,12 @@ def add_issue(find, push_to_jira):
                 logger.error(e.text, find)
                 log_jira_alert(e.text, find)
         else:
+            log_jira_alert("A Finding needs to be both Active and Verified to be pushed to JIRA.", find)
             logger.warning("A Finding needs to be both Active and Verified to be pushed to JIRA.", find)
+
+
+def jira_meta(jira, jpkey):
+    return jira.createmeta(projectKeys=jpkey.project_key, issuetypeNames=jpkey.conf.default_issue_type, expand="projects.issuetypes.fields")
 
 
 def jira_attachment(jira, issue, file, jira_filename=None):
@@ -1452,6 +1490,8 @@ def update_issue(find, push_to_jira):
                 basic_auth=(jira_conf.username, jira_conf.password))
             issue = jira.issue(j_issue.jira_id)
 
+            meta = None
+
             fields = {}
             # Only update the component if it didn't exist earlier in Jira, this is to avoid assigning multiple components to an item
             if issue.fields.components:
@@ -1467,23 +1507,36 @@ def update_issue(find, push_to_jira):
                 ]
                 fields = {"components": component}
 
+            labels = get_labels(find)
+            if labels:
+                fields['labels'] = labels
+
+            if len(find.endpoints.all()) > 0:
+                if not meta:
+                    meta = jira_meta(jira, jpkey)
+
+                if 'environment' in meta['projects'][0]['issuetypes'][0]['fields']:
+                    environment = "\n".join([str(endpoint) for endpoint in find.endpoints.all()])
+                    fields['environment'] = environment
+
             # Upload dojo finding screenshots to Jira
             for pic in find.images.all():
                 jira_attachment(jira, issue,
                                 settings.MEDIA_ROOT + pic.image_large.name)
 
+            logger.debug('sending fields to JIRA: %s', fields)
+
             issue.update(
                 summary=find.title,
-                description=jira_long_description(find.long_desc(), find.id,
-                                                  jira_conf.finding_text),
+                description=jira_long_description(find, jira_conf.finding_text),
                 priority={'name': jira_conf.get_priority(find.severity)},
                 fields=fields)
-            print('\n\nSaving jira_change\n\n')
+            # print('\n\nSaving jira_change\n\n')
             # Moving this to finding.save()
             # find.jira_change = timezone.now()
             # find.save()
             # Add labels(security & product)
-            add_labels(find, issue)
+
         except JIRAError as e:
             log_jira_alert(e.text, find)
 
@@ -1498,6 +1551,8 @@ def update_issue(find, push_to_jira):
                 url=req_url,
                 auth=HTTPBasicAuth(jira_conf.username, jira_conf.password),
                 json=json_data)
+            if r.status_code != 204:
+                logger.warn("JIRA transition failed with error: {}".format(r.text))
             find.jira_change = timezone.now()
             find.save()
         elif 'Active' in find.status() and 'Verified' in find.status():
@@ -1507,6 +1562,8 @@ def update_issue(find, push_to_jira):
                 url=req_url,
                 auth=HTTPBasicAuth(jira_conf.username, jira_conf.password),
                 json=json_data)
+            if r.status_code != 204:
+                logger.warn("JIRA transition failed with error: {}".format(r.text))
             find.jira_change = timezone.now()
             find.save()
 
@@ -1527,6 +1584,8 @@ def close_epic(eng, push_to_jira):
                 url=req_url,
                 auth=HTTPBasicAuth(jira_conf.username, jira_conf.password),
                 json=json_data)
+            if r.status_code != 204:
+                logger.warn("JIRA close epic failed with error: {}".format(r.text))
         except Exception as e:
             log_jira_generic_alert('Jira Engagement/Epic Close Error', str(e))
             pass
@@ -1590,27 +1649,28 @@ def add_epic(eng, push_to_jira):
 
 
 def add_comment(find, note, force_push=False):
-    prod = Product.objects.get(
-        engagement=Engagement.objects.get(test=find.test))
+    if not note.private:
+        prod = Product.objects.get(
+            engagement=Engagement.objects.get(test=find.test))
 
-    try:
-        jpkey = JIRA_PKey.objects.get(product=prod)
-        jira_conf = jpkey.conf
+        try:
+            jpkey = JIRA_PKey.objects.get(product=prod)
+            jira_conf = jpkey.conf
 
-        if jpkey.push_notes or force_push is True:
-            try:
-                jira = JIRA(
-                    server=jira_conf.url,
-                    basic_auth=(jira_conf.username, jira_conf.password))
-                j_issue = JIRA_Issue.objects.get(finding=find)
-                jira.add_comment(
-                    j_issue.jira_id,
-                    '(%s): %s' % (note.author.get_full_name(), note.entry))
-            except Exception as e:
-                log_jira_generic_alert('Jira Add Comment Error', str(e))
-                pass
-    except JIRA_PKey.DoesNotExist:
-        pass
+            if jpkey.push_notes or force_push is True:
+                try:
+                    jira = JIRA(
+                        server=jira_conf.url,
+                        basic_auth=(jira_conf.username, jira_conf.password))
+                    j_issue = JIRA_Issue.objects.get(finding=find)
+                    jira.add_comment(
+                        j_issue.jira_id,
+                        '(%s): %s' % (note.author.get_full_name(), note.entry))
+                except Exception as e:
+                    log_jira_generic_alert('Jira Add Comment Error', str(e))
+                    pass
+        except JIRA_PKey.DoesNotExist:
+            pass
 
 
 def send_review_email(request, user, finding, users, new_note):
@@ -1768,11 +1828,7 @@ def prepare_for_view(encrypted_value):
 
 
 def get_system_setting(setting):
-    try:
-        system_settings = System_Settings.objects.get()
-    except:
-        system_settings = System_Settings()
-
+    system_settings = System_Settings.objects.get()
     return getattr(system_settings, setting, None)
 
 
@@ -1786,162 +1842,27 @@ def get_slack_user_id(user_email):
 
     users = json.loads(res.text)
 
+    slack_user_is_found = False
     if users:
-        for member in users["members"]:
-            if "email" in member["profile"]:
-                if user_email == member["profile"]["email"]:
-                    if "id" in member:
-                        user_id = member["id"]
-                        break
+        if 'error' in users:
+            logger.error("Slack is complaining. See error message below.")
+            logger.error(users)
+        else:
+            for member in users["members"]:
+                if "email" in member["profile"]:
+                    if user_email == member["profile"]["email"]:
+                        if "id" in member:
+                            user_id = member["id"]
+                            logger.debug("Slack user ID is {}".format(user_id))
+                            slack_user_is_found = True
+                            break
+                    else:
+                        logger.warn("A user with email {} could not be found in this Slack workspace.".format(user_email))
+
+            if not slack_user_is_found:
+                logger.warn("The Slack user was not found.")
 
     return user_id
-
-
-def create_notification(event=None, **kwargs):
-    def create_description(event):
-        if "description" not in kwargs.keys():
-            if event == 'product_added':
-                kwargs["description"] = "Product " + kwargs['title'] + " has been created successfully."
-            else:
-                kwargs["description"] = "Event " + str(event) + " has occured."
-
-    def create_notification_message(event, notification_type):
-        template = 'notifications/%s.tpl' % event.replace('/', '')
-        kwargs.update({'type': notification_type})
-        try:
-            notification = render_to_string(template, kwargs)
-        except:
-            create_description(event)
-            notification = render_to_string('notifications/other.tpl', kwargs)
-
-        return notification
-
-    def send_slack_notification(channel):
-        try:
-            res = requests.request(
-                method='POST',
-                url='https://slack.com/api/chat.postMessage',
-                data={
-                    'token': get_system_setting('slack_token'),
-                    'channel': channel,
-                    'username': get_system_setting('slack_username'),
-                    'text': create_notification_message(event, 'slack')
-                })
-        except Exception as e:
-            log_alert(e)
-            pass
-
-    def send_hipchat_notification(channel):
-        try:
-            # We use same template for HipChat as for slack
-            res = requests.request(
-                method='POST',
-                url='https://%s/v2/room/%s/notification?auth_token=%s' %
-                (get_system_setting('hipchat_site'), channel,
-                 get_system_setting('hipchat_token')),
-                data={
-                    'message': create_notification_message(event, 'slack'),
-                    'message_format': 'text'
-                })
-        except Exception as e:
-            log_alert(e)
-            pass
-
-    def send_mail_notification(address):
-        subject = '%s notification' % get_system_setting('team_name')
-        if 'title' in kwargs:
-            subject += ': %s' % kwargs['title']
-        try:
-            email = EmailMessage(
-                subject,
-                create_notification_message(event, 'mail'),
-                get_system_setting('mail_notifications_from'),
-                [address],
-                headers={"From": "{}".format(get_system_setting('mail_notifications_from'))}
-            )
-            email.send(fail_silently=False)
-
-        except Exception as e:
-            log_alert(e)
-            pass
-
-    def send_alert_notification(user=None):
-        icon = kwargs.get('icon', 'info-circle')
-        alert = Alerts(
-            user_id=user,
-            title=kwargs.get('title'),
-            description=create_notification_message(event, 'alert'),
-            url=kwargs.get('url', reverse('alerts')),
-            icon=icon,
-            source=Notifications._meta.get_field(event).verbose_name.title())
-        alert.save()
-
-    def log_alert(e):
-        users = Dojo_User.objects.filter(is_superuser=True)
-        for user in users:
-            alert = Alerts(
-                user_id=user,
-                url=kwargs.get('url', reverse('alerts')),
-                title='Notification issue',
-                description="%s" % e,
-                icon="exclamation-triangle",
-                source="Notifications")
-            alert.save()
-
-    # Global notifications
-    try:
-        notifications = Notifications.objects.get(user=None)
-    except Exception as e:
-        notifications = Notifications()
-
-    slack_enabled = get_system_setting('enable_slack_notifications')
-    hipchat_enabled = get_system_setting('enable_hipchat_notifications')
-    mail_enabled = get_system_setting('enable_mail_notifications')
-
-    if slack_enabled and 'slack' in getattr(notifications, event):
-        send_slack_notification(get_system_setting('slack_channel'))
-
-    if hipchat_enabled and 'hipchat' in getattr(notifications, event):
-        send_hipchat_notification(get_system_setting('hipchat_channel'))
-
-    if mail_enabled and 'mail' in getattr(notifications, event):
-        send_mail_notification(get_system_setting('mail_notifications_to'))
-
-    if 'alert' in getattr(notifications, event, None):
-        send_alert_notification()
-
-    # Personal notifications
-    if 'recipients' in kwargs:
-        users = User.objects.filter(username__in=kwargs['recipients'])
-    else:
-        users = User.objects.filter(is_superuser=True)
-    for user in users:
-        try:
-            notifications = Notifications.objects.get(user=user)
-        except Exception as e:
-            notifications = Notifications()
-
-        if slack_enabled and 'slack' in getattr(
-                notifications,
-                event) and user.usercontactinfo.slack_username is not None:
-            slack_user_id = user.usercontactinfo.slack_user_id
-            if user.usercontactinfo.slack_user_id is None:
-                # Lookup the slack userid
-                slack_user_id = get_slack_user_id(
-                    user.usercontactinfo.slack_username)
-                slack_user_save = UserContactInfo.objects.get(user_id=user.id)
-                slack_user_save.slack_user_id = slack_user_id
-                slack_user_save.save()
-
-            send_slack_notification('@%s' % slack_user_id)
-
-        # HipChat doesn't seem to offer direct message functionality, so no HipChat PM functionality here...
-
-        if mail_enabled and 'mail' in getattr(notifications, event):
-            send_mail_notification(user.email)
-
-        if 'alert' in getattr(notifications, event):
-            send_alert_notification(user)
 
 
 def calculate_grade(product):
@@ -2108,3 +2029,77 @@ def truncate_with_dots(the_string, max_length_including_dots):
 
 def max_safe(list):
     return max(i for i in list if i is not None)
+
+
+def get_full_url(relative_url):
+    if settings.SITE_URL:
+        return settings.SITE_URL + relative_url
+    else:
+        logger.warn('SITE URL undefined in settings, full_url cannot be created')
+        return "settings.SITE_URL" + relative_url
+
+
+@receiver(post_save, sender=Dojo_User)
+def set_default_notifications(sender, instance, created, **kwargs):
+    # for new user we create a Notifications object so the default 'alert' notifications work
+    # this needs to be a signal to make it also work for users created via ldap, oauth and other authentication backends
+    if created:
+        logger.info('creating default set of notifications for: ' + str(instance))
+        notifications = Notifications()
+        notifications.user = instance
+        notifications.save()
+
+
+@receiver(post_save, sender=Engagement)
+def engagement_post_Save(sender, instance, created, **kwargs):
+    if created:
+        engagement = instance
+        title = 'Engagement created for ' + str(engagement.product) + ': ' + str(engagement.name)
+        create_notification(event='engagement_added', title=title, engagement=engagement, product=engagement.product,
+                            url=reverse('view_engagement', args=(engagement.id,)))
+
+
+def merge_sets_safe(set1, set2):
+    return set(itertools.chain(set1 or [], set2 or []))
+    # This concat looks  better, but requires Python 3.6+
+    # return {*set1, *set2}
+
+
+def get_return_url(request):
+    return_url = request.POST.get('return_url', None)
+    # print('return_url from POST: ', return_url)
+    if return_url is None or not return_url.strip():
+        # for some reason using request.GET.get('return_url') never works
+        return_url = request.GET['return_url'] if 'return_url' in request.GET else None
+        # print('return_url from GET: ', return_url)
+
+    return return_url if return_url else None
+
+
+def redirect_to_return_url_or_else(request, or_else):
+    return_url = get_return_url(request)
+    if return_url:
+        return HttpResponseRedirect(return_url.strip())
+    elif or_else:
+        return HttpResponseRedirect(or_else)
+    else:
+        messages.add_message(request, messages.ERROR, 'Unable to redirect anywhere.', extra_tags='alert-danger')
+        return HttpResponseRedirect(request.get_full_path())
+
+
+def file_size_mb(file_obj):
+    if file_obj:
+        file_obj.seek(0, 2)
+        size = file_obj.tell()
+        file_obj.seek(0, 0)
+        if size > 0:
+            return size / 1048576
+    return 0
+
+
+def is_scan_file_too_large(scan_file):
+    if hasattr(settings, "SCAN_FILE_MAX_SIZE"):
+        size = file_size_mb(scan_file)
+        if size > settings.SCAN_FILE_MAX_SIZE:
+            return True
+    return False

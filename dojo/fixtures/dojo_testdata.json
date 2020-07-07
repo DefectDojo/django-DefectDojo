@@ -331,6 +331,23 @@
   },
   {
     "pk": 1,
+    "model": "dojo.app_analysis",
+    "fields": {
+      "product": 1,
+      "name": "Tomcat",
+      "user": [
+          "admin"
+      ],
+      "confidence": 100,
+      "version": "8.5.1",
+      "icon": null,
+      "website": null,
+      "website_found": null,
+      "created": "2018-08-16T16:58:23.908Z"
+    }
+  },
+  {
+    "pk": 1,
     "model": "dojo.scansettings",
     "fields": {
       "product": 1,
@@ -623,7 +640,7 @@
       "last_reviewed_by": null,
       "reviewers": [],
       "static_finding": false,
-      "date": "2018-01-01",
+      "date": "2020-05-21",
       "references": "",
       "images": [],
       "payload": null,
@@ -1112,6 +1129,17 @@
       "project_key": "key3"
     }
   },
+  {
+    "pk": 1,
+    "model": "dojo.note_type", 
+    "fields": {
+      "name": "Test Note Type", 
+      "description": "not that much", 
+      "is_single": false, 
+      "is_active": true, 
+      "is_mandatory": false
+    }
+  }, 
   {
     "pk": 1,
     "model": "dojo.tool_type",

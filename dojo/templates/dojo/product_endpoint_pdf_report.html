@@ -94,10 +94,10 @@
                 <div class="col-md-6">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <h5>Accepted Findings</h5>
+                            <h5>Risk Accepted Findings</h5>
                         </div>
                         <div class="panel-body">
-                            <div id="reported_findings" class="graph"></div>
+                            <div id="accepted_findings" class="graph"></div>
                         </div>
                     </div>
                 </div>
@@ -517,7 +517,7 @@
                 }
             ];
 
-            $.plot("#reported_findings", data, {
+            $.plot("#accepted_findings", data, {
                 series: {
                     stack: true,
                     bars: {

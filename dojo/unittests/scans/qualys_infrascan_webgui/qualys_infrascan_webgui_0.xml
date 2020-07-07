@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE SCAN SYSTEM "https://qualysguard.qg2.apps.qualys.com/scan-1.dtd">
+<SCAN value="scan/1222134912.63524">
+
+<HEADER>
+  <KEY value="USERNAME">Username</KEY>
+  <KEY value="COMPANY"><![CDATA[Company Name]]></KEY>
+  <KEY value="DATE">2019-04-02T10:14:53Z</KEY>
+  <KEY value="TITLE"><![CDATA[Report Title]]></KEY>
+  <KEY value="TARGET"><![CDATA[10.1.10.1]]></KEY>
+  <KEY value="EXCLUDED_TARGET"><![CDATA[N/A]]></KEY>
+  <KEY value="DURATION">04:29:11</KEY>
+  <KEY value="SCAN_HOST">ScanHost</KEY>
+  <KEY value="NBHOST_ALIVE">1</KEY>
+  <KEY value="NBHOST_TOTAL">1</KEY>
+  <KEY value="REPORT_TYPE">On-demand</KEY>
+  <KEY value="OPTIONS"><![CDATA[Full TCP scan, Standard UDP port list, parallel ML scaling disabled for appliances, Load balancer detection OFF, Windows Authentication ON, Unix Authentication ON, Oracle Authentication ON, SNMP Authentication ON, Oracle Listener Authentication ON, VMware Authentication ON, DB2 Authentication ON, HTTP Authentication ON, MySQL Authentication ON, ICMP Host Discovery, Overall Performance: Custom, Hosts to Scan in Parallel - External Scanners: 5, Hosts to Scan in Parallel - Scanner Appliances: 3, Total Processes to Run in Parallel: 2, HTTP Processes to Run in Parallel: 2, Packet (Burst) Delay: Long, Intensity: Low]]></KEY>
+  <KEY value="STATUS">FINISHED</KEY>
+  <OPTION_PROFILE>
+    <OPTION_PROFILE_TITLE option_profile_default="0"><![CDATA[Option Profile]]></OPTION_PROFILE_TITLE>
+  </OPTION_PROFILE>
+</HEADER>
+
+<IP value="10.1.10.1" name="host1.example.com">
+  <OS><![CDATA[Ubuntu 11]]></OS>
+  <VULNS>
+  </VULNS>
+</IP>
+</SCAN>
+<!-- CONFIDENTIAL AND PROPRIETARY INFORMATION. Qualys provides the QualysGuard Service "As Is," without any warranty of any kind. Qualys makes no warranty that the information contained in this report is complete or error-free. Copyright 2020, Qualys, Inc. //--> 

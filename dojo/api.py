@@ -21,13 +21,13 @@ from dojo.models import Product, Engagement, Test, Finding, \
     Finding_Template, Test_Type, Development_Environment, \
     BurpRawRequestResponse, Endpoint, Notes, JIRA_PKey, JIRA_Conf, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
-    Languages, Language_Type, App_Analysis, Product_Type
+    Languages, Language_Type, App_Analysis, Product_Type, Note_Type
 from dojo.forms import ProductForm, EngForm, TestForm, \
     ScanSettingsForm, FindingForm, StubFindingForm, FindingTemplateForm, \
     ImportScanForm, SEVERITY_CHOICES, JIRAForm, JIRA_PKeyForm, EditEndpointForm, \
     JIRA_IssueForm, ToolConfigForm, ToolProductSettingsForm, \
     ToolTypeForm, LanguagesTypeForm, Languages_TypeTypeForm, App_AnalysisTypeForm, \
-    Development_EnvironmentForm, Product_TypeForm, Test_TypeForm
+    Development_EnvironmentForm, Product_TypeForm, Test_TypeForm, NoteTypeForm
 from dojo.tools import requires_file
 from dojo.tools.factory import import_parser_factory
 from datetime import datetime
@@ -497,6 +497,44 @@ class Tool_ConfigurationResource(BaseModelResource):
         @property
         def validation(self):
             return ModelFormValidation(form_class=ToolConfigForm, resource=Tool_ConfigurationResource)
+
+
+"""
+    /api/v1/note_type/
+    GET [/id/], DELETE [/id/]
+    Expects: no params or id
+    Returns Note_TypeResource
+    Relevant apply filter ?test_type=?, ?id=?
+
+    POST, PUT, DLETE [/id/]
+"""
+
+
+class Note_TypeResource(BaseModelResource):
+
+    # note_type = fields.ForeignKey(Note_Type, 'note_Type')
+
+    class Meta:
+        resource_name = 'note_type'
+        list_allowed_methods = ['get', 'post', 'put', 'delete']
+        detail_allowed_methods = ['get', 'post', 'put', 'delete']
+        queryset = Note_Type.objects.all()
+        include_resource_uri = True
+        filtering = {
+            'id': ALL,
+            'name': ALL,
+            'description': ALL_WITH_RELATIONS,
+            'is_single': ALL,
+            'is_active': ALL,
+            'is_mandatory': ALL,
+        }
+        authentication = DojoApiKeyAuthentication()
+        authorization = DjangoAuthorization()
+        serializer = Serializer(formats=['json'])
+
+        @property
+        def validation(self):
+            return ModelFormValidation(form_class=NoteTypeForm, resource=Note_TypeResource)
 
 
 """
@@ -1471,7 +1509,7 @@ class ImportScanResource(MultipartResource, Resource):
         t.tags = bundle.data['tags']
 
         try:
-            parser = import_parser_factory(bundle.data.get('file'), t, bundle.data['active'], bundle.data['verified'],
+            parser = import_parser_factory(bundle.data.get('file', None), t, bundle.data['active'], bundle.data['verified'],
                                            bundle.data['scan_type'])
         except ValueError:
             raise NotFound("Parser ValueError")
@@ -1654,7 +1692,7 @@ class ReImportScanResource(MultipartResource, Resource):
         active = bundle.obj.__getattr__('active')
 
         try:
-            parser = import_parser_factory(bundle.data.get('file'), test, active, verified, scan_type)
+            parser = import_parser_factory(bundle.data.get('file', None), test, active, verified, scan_type)
         except ValueError:
             raise NotFound("Parser ValueError")
 
