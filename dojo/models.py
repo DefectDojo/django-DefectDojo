@@ -318,6 +318,10 @@ class Dojo_User(User):
     def __str__(self):
         return self.get_full_name()
 
+    @staticmethod
+    def wants_block_execution(user):
+        return hasattr(user, 'usercontactinfo') and user.usercontactinfo.block_execution
+
 
 class UserContactInfo(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -1450,6 +1454,10 @@ class Finding(models.Model):
         # print('finding.is_authorized')
         return user_is_authorized(user, perm_type, self)
 
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('view_finding', args=[str(self.id)])
+
     @classmethod
     def unaccepted_open_findings(cls):
         return cls.objects.filter(active=True, verified=True, duplicate=False, risk_acceptance__isnull=True)
@@ -1757,7 +1765,7 @@ class Finding(models.Model):
     # newer version that can work with prefetching
     def github_conf_new(self):
         try:
-            return self.test.engagement.product.github_pkey_set.all()[0].conf
+            return self.test.engagement.product.github_pkey_set.all()[0].git_conf
         except:
             return None
             pass
@@ -1882,7 +1890,7 @@ class Finding(models.Model):
             if system_settings.enable_deduplication:
                 from dojo.tasks import async_dedupe
                 try:
-                    if self.reporter.usercontactinfo.block_execution:
+                    if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
                         dedupe_signal.send(sender=self.__class__, new_finding=self)
                     else:
                         async_dedupe.delay(self, *args, **kwargs)
@@ -1895,7 +1903,7 @@ class Finding(models.Model):
             from dojo.tasks import async_false_history
             from dojo.utils import sync_false_history
             try:
-                if self.reporter.usercontactinfo.block_execution:
+                if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
                     sync_false_history(self, *args, **kwargs)
                 else:
                     async_false_history.delay(self, *args, **kwargs)
@@ -1915,12 +1923,12 @@ class Finding(models.Model):
             from dojo.tasks import update_issue_task, add_issue_task
             from dojo.utils import add_issue, update_issue
             if jira_issue_exists:
-                if self.reporter.usercontactinfo.block_execution:
+                if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
                     update_issue(self, True)
                 else:
                     update_issue_task.delay(self, True)
             else:
-                if self.reporter.usercontactinfo.block_execution:
+                if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
                     add_issue(self, True)
                 else:
                     add_issue_task.delay(self, True)

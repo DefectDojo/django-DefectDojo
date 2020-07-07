@@ -1,14 +1,14 @@
 from dojo.models import Product, Engagement, Test, Finding, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     User, ScanSettings, Scan, Stub_Finding, Endpoint, JIRA_PKey, JIRA_Conf, \
-    Finding_Template, Note_Type
+    Finding_Template, Note_Type, App_Analysis
 
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraConfigurationsViewSet, \
     JiraIssuesViewSet, JiraViewSet, ProductViewSet, ScanSettingsViewSet, \
     ScansViewSet, StubFindingsViewSet, TestsViewSet, \
     ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
-    UsersViewSet, ImportScanView, NoteTypeViewSet
+    UsersViewSet, ImportScanView, NoteTypeViewSet, AppAnalysisViewSet
 
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
@@ -90,6 +90,28 @@ class BaseClass():
             response = self.client.put(
                 relative_url, self.payload)
             self.assertEqual(200, response.status_code)
+
+
+class AppAnalysisTest(BaseClass.RESTEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = App_Analysis
+        self.viewname = 'app_analysis'
+        self.viewset = AppAnalysisViewSet
+        self.payload = {
+            'product': 1,
+            'name': 'Tomcat',
+            'user': 1,
+            'confidence': 100,
+            'version': '8.5.1',
+            'icon': '',
+            'website': '',
+            'website_found': '',
+            'created': '2018-08-16T16:58:23.908Z'
+        }
+        self.update_fields = {'version': '9.0'}
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
 class EndpointTest(BaseClass.RESTEndpointTest):

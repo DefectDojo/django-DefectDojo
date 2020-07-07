@@ -40,7 +40,7 @@ from dojo.models import Finding, Notes, NoteHistory, Note_Type, \
 from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_notifications, \
     add_comment, jira_get_resolution_id, jira_change_resolution_id, get_jira_connection, \
     get_system_setting, apply_cwe_to_template, Product_Tab, calculate_grade, log_jira_alert, \
-    redirect_to_return_url_or_else, get_return_url, add_issue, update_issue
+    redirect_to_return_url_or_else, get_return_url, add_issue, update_issue, add_external_issue, update_external_issue
 from dojo.notifications.helper import create_notification
 
 from dojo.tasks import add_issue_task, update_issue_task, update_external_issue_task, add_comment_task, \
@@ -235,28 +235,6 @@ def view_finding(request, fid):
     except Finding_Template.DoesNotExist:
         pass
 
-    try:
-        jissue = JIRA_Issue.objects.get(finding=finding)
-    except:
-        jissue = None
-        pass
-    try:
-        jpkey = JIRA_PKey.objects.get(product=finding.test.engagement.product)
-        jconf = jpkey.conf
-    except:
-        jconf = None
-        pass
-    try:
-        gissue = GITHUB_Issue.objects.get(finding=finding)
-    except:
-        gissue = None
-        pass
-    try:
-        github_pkey = GITHUB_PKey.objects.get(product=finding.test.engagement.product)
-        gconf = github_pkey.git_conf
-    except:
-        gconf = None
-        pass
     dojo_user = get_object_or_404(Dojo_User, id=user.id)
     if user.is_staff or user in finding.test.engagement.product.authorized_users.all(
     ):
@@ -287,7 +265,7 @@ def view_finding(request, fid):
             finding.last_reviewed = new_note.date
             finding.last_reviewed_by = user
             finding.save()
-            if jissue is not None:
+            if finding.has_jira_issue():
                 add_comment_task(finding, new_note)
             if note_type_activation:
                 form = FindingNoteForm(available_note_types=available_note_types)
@@ -326,10 +304,6 @@ def view_finding(request, fid):
             'product_tab': product_tab,
             'finding': finding,
             'burp_request': burp_request,
-            'jissue': jissue,
-            'jconf': jconf,
-            'gissue': gissue,
-            'gconf': gconf,
             'cred_finding': cred_finding,
             'creds': creds,
             'cred_engagement': cred_engagement,
@@ -386,7 +360,14 @@ def close_finding(request, fid):
                 finding.last_reviewed = finding.mitigated
                 finding.last_reviewed_by = request.user
                 finding.endpoints.clear()
-                finding.save()
+                try:
+                    jpkey = JIRA_PKey.objects.get(product=finding.test.engagement.product)
+                    if jpkey.push_all_issues and JIRA_Issue.objects.filter(finding=finding).exists():
+                        finding.save(push_to_jira=True)
+                    else:
+                        finding.save()
+                except JIRA_PKey.DoesNotExist:
+                    finding.save()
 
                 messages.add_message(
                     request,
@@ -501,7 +482,14 @@ def reopen_finding(request, fid):
     finding.mitigated_by = request.user
     finding.last_reviewed = finding.mitigated
     finding.last_reviewed_by = request.user
-    finding.save()
+    try:
+        jpkey = JIRA_PKey.objects.get(product=finding.test.engagement.product)
+        if jpkey.push_all_issues and JIRA_Issue.objects.filter(finding=finding).exists():
+            finding.save(push_to_jira=True)
+        else:
+            finding.save()
+    except JIRA_PKey.DoesNotExist:
+        finding.save()
 
     reopen_external_issue_task.delay(finding, 're-opened by defectdojo', 'github')
 
@@ -583,7 +571,6 @@ def delete_finding(request, fid):
 # def edit_finding(request, finding):
 @user_must_be_authorized(Finding, 'change', 'fid')
 def edit_finding(request, fid):
-    print('fid=', fid)
     finding = get_object_or_404(Finding, id=fid)
     old_status = finding.status()
     form = FindingForm(instance=finding, template=False)
@@ -597,17 +584,7 @@ def edit_finding(request, fid):
         push_all_issues_enabled = finding.test.engagement.product.jira_pkey_set.first().push_all_issues
         jform = JIRAFindingForm(enabled=push_all_issues_enabled, prefix='jiraform')
 
-    try:
-        jissue = JIRA_Issue.objects.get(finding=finding)
-        jira_link_exists = True
-    except:
-        jira_link_exists = False
-
-    try:
-        gissue = GITHUB_Issue.objects.get(finding=finding)
-        github_enabled = True
-    except:
-        github_enabled = False
+    github_enabled = finding.has_github_issue()
 
     gform = None
     if get_system_setting('enable_github'):
@@ -699,13 +676,15 @@ def edit_finding(request, fid):
                     request.POST, prefix='githubform', enabled=github_enabled)
                 if gform.is_valid():
                     if GITHUB_Issue.objects.filter(finding=new_finding).exists():
-                        update_external_issue_task.delay(
-                            new_finding, old_status,
-                            'github')
+                        if Dojo_User.wants_block_execution(request.user):
+                            update_external_issue(new_finding, old_status, 'github')
+                        else:
+                            update_external_issue_task.delay(new_finding, old_status, 'github')
                     else:
-                        add_external_issue_task.delay(
-                            new_finding,
-                            'github')
+                        if Dojo_User.wants_block_execution(request.user):
+                            add_external_issue(new_finding, 'github')
+                        else:
+                            add_external_issue_task.delay(new_finding, 'github')
 
             new_finding.save(push_to_jira=push_to_jira)
 
@@ -1201,8 +1180,10 @@ def promote_to_finding(request, fid):
                     enabled=GITHUB_PKey.objects.get(
                         product=test.engagement.product).push_all_issues)
                 if gform.is_valid():
-                    add_external_issue_task.delay(
-                        new_finding, 'github')
+                    if Dojo_User.wants_block_execution(request.user):
+                        add_external_issue(new_finding, 'github')
+                    else:
+                        add_external_issue_task.delay(new_finding, 'github')
 
             messages.add_message(
                 request,
@@ -1750,13 +1731,19 @@ def finding_bulk_update_all(request, pid=None):
                 if form.cleaned_data['push_to_github']:
                     logger.info('push selected findings to github')
                     for finding in finds:
-                        print('will push to GitHub finding: ' + str(finding))
+                        logger.debug('will push to GitHub finding: ' + str(finding))
                         old_status = finding.status()
                         if form.cleaned_data['push_to_github']:
                             if GITHUB_Issue.objects.filter(finding=finding).exists():
-                                update_issue_task.delay(finding, old_status, True)
+                                if Dojo_User.wants_block_execution(request.user):
+                                    update_external_issue(finding, old_status, 'github')
+                                else:
+                                    update_external_issue_task.delay(finding, old_status, 'github')
                             else:
-                                add_external_issue_task.delay(finding, 'github')
+                                if Dojo_User.wants_block_execution(request.user):
+                                    add_external_issue(finding, 'github')
+                                else:
+                                    add_external_issue_task.delay(finding, 'github')
 
                 if form.cleaned_data['tags']:
                     for finding in finds:
