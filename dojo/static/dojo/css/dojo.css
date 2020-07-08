@@ -1593,10 +1593,18 @@ small {
   font-weight:400;
 }
 
-.fa-minus-square {
+.fa-minus-square, .fa-trash {
     color: red;
 }
 
-.fa-plus-square, .fa-exchange {
+.fa-plus-square, .fa-exchange, .fa-share-square {
     color: green;
+}
+
+.fa-asterisk {
+    color: blue;
+}
+
+#jira i:hover {
+    cursor: pointer;
 }

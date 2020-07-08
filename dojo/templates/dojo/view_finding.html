@@ -437,20 +437,16 @@
                 </td>
                 {% endif %}
                 {% if finding.jira_conf_new or finding.jira_issue %}
-                    <td>
+                    <td id="jira">
                     {% if finding.jira_issue %}
                         <a href="{{ finding.jira_conf_new.url }}/browse/{{ finding.jira_issue.jira_key }}"
                         target="_blank" title="{{ finding.jira_conf_new.url }}/browse/{{ finding.jira_issue.jira_key }}">{{ finding.jira_issue.jira_key }}</a>
-
-                        <a href="{% url 'finding_unlink_jira' finding.id %}" title="Disconnect JIRA issue from this finding.">
-                            <i class="fa fa-minus-square" title="Unlink JIRA issue from this finding."></i>
-                        </a>
-                        <a href="{% url 'finding_push_to_jira' finding.id %}" title="Create JIRA issue for this finding.">
-                            <i class="fa fa-exchange" title="Update JIRA issue with data from this finding."></i>
-                        </a>
+                        <i id="unlink_jira" class="fa fa-trash" title="Unlink JIRA issue from this finding."></i>
+                        <i id="push_to_jira" class="fa fa-share-square" title="Push finding data to linked JIRA issue."></i>
                     {% else %}
-                        <a href="{% url 'finding_push_to_jira' finding.id %}" title="Create JIRA issue for this finding.">
-                            <i class="fa fa-plus-square" title="Create new JIRA issue from this finding."></i>
+                        <i id="push_to_jira" class="fa fa-share-square" title="Create JIRA issue for this finding"></i>
+                        <a href="{% url 'finding_link_to_jira' finding.id %}" title="Link existing JIRA issue to finding.">
+                            <i class="fa fa-asterisk" title="Link existing JIRA issue to finding."></i>
                         </a>
                     {% endif %}
                     </td>
@@ -1059,6 +1055,46 @@
                     }
                 }
             });
+        });
+
+        function jira_action(elem, url) {
+            $(elem).removeClass().addClass('fa fa-spinner fa-spin')
+
+            $.ajax({
+                type: "post",
+                dataType:'json',
+                data: '',
+                context: this, 
+                url: url,
+                // The ``X-CSRFToken`` evidently can't be set in the
+                // ``headers`` option, so force it here.
+                // This method requires jQuery 1.5+.
+                beforeSend: function (jqXHR, settings) {
+                    // Pull the token out of the DOM.
+                    jqXHR.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
+                },
+                success: function (data, textStatus, jqXHR) {
+                    console.log(textStatus)
+                    console.log(data)
+                },
+                error: function (request, status, error) {
+                    console.log('error')
+                    console.log(request.responseText)
+                },
+                complete: function(e) {
+                    console.log('complete')
+                    console.log(this)                        
+                    location.reload()
+                }
+            });
+        }
+
+        $("#push_to_jira").on('click', function(e) {
+            jira_action(this,'{% url 'finding_push_to_jira' finding.id %}')
+        });
+
+        $("#unlink_jira").on('click', function(e) {
+            jira_action(this,'{% url 'finding_unlink_jira' finding.id %}')
         });
 
         var clipboard = new ClipboardJS('.copytoclipboard');

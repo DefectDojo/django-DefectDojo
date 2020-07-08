@@ -15,7 +15,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core import serializers
 from django.urls import reverse
-from django.http import Http404, HttpResponse
+from django.http import Http404, HttpResponse, JsonResponse
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.http import StreamingHttpResponse
 from django.shortcuts import render, get_object_or_404
@@ -1878,9 +1878,9 @@ def reset_finding_duplicate_status(request, duplicate_id):
 #     count = Alerts.objects.filter(user_id=request.user).count()
 #     return JsonResponse({'count': count})
 
-
 @user_must_be_authorized(Finding, 'change', 'fid')
-def finding_unlink_jira(request, fid):
+@require_POST
+def unlink_jira(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     logger.info('trying to unlink a linked jira issue from %d:%s', finding.id, finding.title)
     if finding.jira():
@@ -1893,24 +1893,57 @@ def finding_unlink_jira(request, fid):
                 'Link to JIRA issue succesfully deleted',
                 extra_tags='alert-success')
 
+            return JsonResponse({'result': 'OK'})
         except:
             messages.add_message(
                 request,
                 messages.ERROR,
                 'Link to JIRA could not be deleted',
                 extra_tags='alert-danger')
+
+            return HttpResponse(status=500)
     else:
         messages.add_message(
             request,
             messages.ERROR,
             'Link to JIRA not found',
             extra_tags='alert-danger')
+        return HttpResponse(status=400)
 
-    return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id,)))
+
+# @user_must_be_authorized(Finding, 'change', 'fid')
+# def finding_unlink_jira(request, fid):
+#     finding = get_object_or_404(Finding, id=fid)
+#     logger.info('trying to unlink a linked jira issue from %d:%s', finding.id, finding.title)
+#     if finding.jira():
+#         try:
+#             # finding.jira_issue.delete()
+
+#             messages.add_message(
+#                 request,
+#                 messages.SUCCESS,
+#                 'Link to JIRA issue succesfully deleted',
+#                 extra_tags='alert-success')
+
+#         except:
+#             messages.add_message(
+#                 request,
+#                 messages.ERROR,
+#                 'Link to JIRA could not be deleted',
+#                 extra_tags='alert-danger')
+#     else:
+#         messages.add_message(
+#             request,
+#             messages.ERROR,
+#             'Link to JIRA not found',
+#             extra_tags='alert-danger')
+
+#     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id,)))
 
 
 @user_must_be_authorized(Finding, 'change', 'fid')
-def finding_push_to_jira(request, fid):
+@require_POST
+def push_to_jira(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     try:
         if finding.jira():
@@ -1938,6 +1971,7 @@ def finding_push_to_jira(request, fid):
             messages.SUCCESS,
             message,
             extra_tags='alert-success')
+        return JsonResponse({'result': 'OK'})
     except:
         logger.error('Error pushing to JIRA: ', exc_info=True)
         messages.add_message(
@@ -1945,5 +1979,11 @@ def finding_push_to_jira(request, fid):
             messages.ERROR,
             'Error pushing to JIRA',
             extra_tags='alert-danger')
+        return HttpResponse(status=500)
+    # return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id,)))
 
+
+@user_must_be_authorized(Finding, 'change', 'fid')
+def finding_link_to_jira(request, fid):
+    finding = get_object_or_404(Finding, id=fid)
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id,)))
