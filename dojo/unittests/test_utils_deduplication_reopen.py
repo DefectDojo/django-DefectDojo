@@ -1,7 +1,8 @@
 from django.test import TestCase
 import datetime
-from dojo.utils import dojo_crypto_encrypt, prepare_for_view, set_duplicate, fix_loop_duplicates
+from dojo.utils import set_duplicate, fix_loop_duplicates
 from dojo.models import Finding
+
 
 class TestDuplicationReopen(TestCase):
     fixtures = ['dojo_testdata.json']
@@ -24,7 +25,7 @@ class TestDuplicationReopen(TestCase):
 
         self.finding_c = Finding.objects.get(id=4)
         self.finding_c.duplicate = False
-        self.finding_c.out_of_scope = True        
+        self.finding_c.out_of_scope = True
         self.finding_c.duplicate_finding = None
         self.finding_c.pk = None
         self.finding_c.save()
@@ -46,7 +47,7 @@ class TestDuplicationReopen(TestCase):
 
     def test_false_positive_reopen(self):
         self.finding_a.active = False
-        self.finding_a.verified = False # in the gui, a FP can not be true
+        self.finding_a.verified = False  # in the gui, a FP can not be true
         set_duplicate(self.finding_b, self.finding_a)
         self.finding_b.duplicate = True
         self.finding_b.duplicate_finding = self.finding_a
