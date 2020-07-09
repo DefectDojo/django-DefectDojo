@@ -1129,6 +1129,7 @@ class FindingBulkUpdateForm(forms.ModelForm):
     risk_unaccept = forms.BooleanField(required=False)
 
     push_to_jira = forms.BooleanField(required=False)
+    # unlink_from_jira = forms.BooleanField(required=False)
     push_to_github = forms.BooleanField(required=False)
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
                            required=False)

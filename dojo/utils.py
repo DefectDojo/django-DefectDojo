@@ -29,7 +29,7 @@ import calendar as tcalendar
 from dojo.github import add_external_issue_github, update_external_issue_github, close_external_issue_github, reopen_external_issue_github
 from dojo.models import Finding, Engagement, Finding_Template, Product, JIRA_PKey, JIRA_Issue,\
     Dojo_User, User, System_Settings, Notifications, Endpoint, Benchmark_Type, \
-    Language_Type, Languages, Rule, Test_Type
+    Language_Type, Languages, Rule, Test_Type, Notes
 from asteval import Interpreter
 from requests.auth import HTTPBasicAuth
 from dojo.notifications.helper import create_notification
@@ -1417,6 +1417,20 @@ def add_issue(find, push_to_jira):
                 j_issue.save()
                 issue = jira.issue(new_issue.id)
 
+                find.jira_creation = timezone.now()
+                find.jira_change = timezone.now()
+                find.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
+
+                jira_issue_url = find.jira_issue.jira_key
+                if find.jira_conf_new():
+                    jira_issue_url = find.jira_conf_new().url + '/' + new_issue.id
+
+                new_note = Notes()
+                new_note.entry = 'created JIRA issue %s from finding' % (jira_issue_url)
+                new_note.author = find.reporter  # quick hack because we don't have request.user here
+                new_note.save()
+                find.notes.add(new_note)
+
                 # Upload dojo finding screenshots to Jira
                 for pic in find.images.all():
                     jira_attachment(
@@ -1529,11 +1543,9 @@ def update_issue(find, push_to_jira):
                 description=jira_description(find),
                 priority={'name': jira_conf.get_priority(find.severity)},
                 fields=fields)
-            # print('\n\nSaving jira_change\n\n')
-            # Moving this to finding.save()
-            # find.jira_change = timezone.now()
-            # find.save()
-            # Add labels(security & product)
+
+            find.jira_change = timezone.now()
+            find.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
 
         except JIRAError as e:
             log_jira_alert(e.text, find)

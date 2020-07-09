@@ -461,6 +461,39 @@
             </tr>
         </table>
     </div>
+    <div id="jira_existing_issue" class="panel panel-default">
+        <table id="error_notes" class="table-striped table table-condensed table-hover centered">
+            <tr>
+                <th>Existing JIRA issue</th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+            <tr>
+                <td>
+                    <span>{{ finding.file_path }} 
+                        <i class="fa fa-copy fa-align-right copytoclipboard" title="copy to clipboard"
+                        data-clipboard-text="{{finding.file_path}}"></i>
+                    </span>
+                </td>
+                <td>
+                    <span>
+                        {{ finding.line }}
+                    </span>
+                </td>
+                <td>
+                    <span>
+                        {{ finding.nb_occurences }}
+                    </span>
+                </td>
+                <td>
+                    <span>
+                        {{ finding.component_name }}
+                    </span>
+                </td>
+            </tr>
+        </table>
+    </div>
     {% endif %}    
     {% if finding.param or finding.payload %}
         <div class="panel panel-default">

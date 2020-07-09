@@ -1764,15 +1764,19 @@ def finding_bulk_update_all(request, pid=None):
                     from dojo.tools import tool_issue_updater
                     tool_issue_updater.async_tool_issue_update(finding)
 
+                    if form.cleaned_data['unlink_from_jira']:
+                        print('unlinking!!')
+                        if finding.has_jira_issue():
+                            finding_unlink_jira(request, finding)
+
                     # Because we never call finding.save() in a bulk update, we need to actually
                     # push the JIRA stuff here, rather than in finding.save()
-                    if finding.jira_conf_new() is None:
-                        log_jira_alert('Finding cannot be pushed to jira as there is no jira configuration for this product.', finding)
-                    else:
-                        push_anyway = finding.jira_conf_new().jira_pkey_set.first().push_all_issues
-                        # push_anyway = JIRA_PKey.objects.get(
-                        #     product=finding.test.engagement.product).push_all_issues
-                        if form.cleaned_data['push_to_jira'] or push_anyway:
+                    push_anyway = finding.jira_conf_new() and finding.jira_conf_new().jira_pkey_set.first() and finding.jira_conf_new().jira_pkey_set.first().push_all_issues
+
+                    if form.cleaned_data['push_to_jira'] or push_anyway:
+                        if not finding.jira_conf_new():
+                            log_jira_alert('Finding cannot be pushed to jira as there is no jira configuration for this product.', finding)
+                        else:
                             if JIRA_Issue.objects.filter(finding=finding).exists():
                                 if request.user.usercontactinfo.block_execution:
                                     update_issue(finding, True)
@@ -1885,7 +1889,7 @@ def unlink_jira(request, fid):
     logger.info('trying to unlink a linked jira issue from %d:%s', finding.id, finding.title)
     if finding.jira():
         try:
-            finding.jira_issue.delete()
+            finding_unlink_jira(request, finding)
 
             messages.add_message(
                 request,
@@ -1987,3 +1991,20 @@ def push_to_jira(request, fid):
 def finding_link_to_jira(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id,)))
+
+
+def finding_unlink_jira(request, finding):
+    finding.jira_issue.delete()
+    finding.jira_creation = None
+    finding.jira_change = None
+    finding.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
+
+    jira_issue_url = finding.jira_issue.jira_key
+    if finding.jira_conf_new():
+        jira_issue_url = finding.jira_conf_new().url + '/' + finding.jira_issue.jira_key
+
+    new_note = Notes()
+    new_note.entry = 'unlinked JIRA issue %s from finding' % (jira_issue_url)
+    new_note.author = request.user
+    new_note.save()
+    finding.notes.add(new_note)
