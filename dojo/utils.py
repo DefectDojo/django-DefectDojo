@@ -2076,49 +2076,69 @@ def sla_compute_and_notify():
     def _notify(finding, title):
         create_notification(
             event='sla_breach',
-            title="SLA info for finding {}".format(finding.id),
-            description="T"
+            title=title,
+            finding=finding,
+            sla_age=sla_age
         )
+
+        # TODO JIRA comment as needed
 
     try:
         system_settings = System_Settings.objects.get()
         if system_settings.enable_finding_sla:
             logger.info("About to process findings for SLA notifications.")
-            logger.debug("Active {}, Verified {}, Has JIRA {}, pre-breach {}, internal {}".format(
+            logger.debug("Active {}, Verified {}, Has JIRA {}, pre-breach {}".format(
                 settings.SLA_NOTIFY_ACTIVE_ONLY,
                 settings.SLA_NOTIFY_VERIFIED_ONLY,
                 settings.SLA_NOTIFY_WITH_JIRA_ONLY,
                 settings.SLA_NOTIFY_PRE_BREACH,
             ))
 
+            # TODO be able to specify products 
+            # TODO Q query for AND/OR on flags
+            if settings.SLA_NOTIFY_WITH_JIRA_ONLY:
+                findings = Finding.objects.exclude(jira_issue__isnull=False)
             findings = Finding.objects \
                 .filter(
                     active=settings.SLA_NOTIFY_ACTIVE_ONLY,
                     verified=settings.SLA_NOTIFY_VERIFIED_ONLY,
-                    # jira_issue=settings.SLA_NOTIFY_WITH_JIRA_ONLY,
-                    # jira_finding_mappings__finding__isnull=False
                 )
 
             logger.debug("Findings: {}".format(findings))
             for finding in findings:
                 sla_age = finding.sla_days_remaining()
-                # if SLA is set to 0 in settings, it's a null.
+                # if SLA is set to 0 in settings, it's a null. And setting at 0 means no SLA apparently.
                 if sla_age is None:
                     sla_age = 0
 
-                print("Finding {} has {} days left to breach SLA.".format(finding.id, sla_age))
+                logger.debug("Finding {} has {} days left to breach SLA.".format(finding.id, sla_age))
+                if (sla_age < 0):
+                    logger.info("Finding {} has breached by {} days.".format(finding.id, abs(sla_age)))
+                    _notify(finding, 'Finding {} - SLA breached! Overdue notice'.format(finding.id))
                 # The finding is within the pre-breach period
-                if (sla_age <= settings.SLA_NOTIFY_PRE_BREACH):
+                elif (sla_age > 0) and (sla_age <= settings.SLA_NOTIFY_PRE_BREACH):
                     logger.info("Security SLA pre-breach warning for finding ID {}".format(finding.id))
-                    _notify(finding, 'Security SLA pre-breach warning')
+                    _notify(finding, 'Finding {} - SLA pre-breach warning'.format(finding.id))
                 # The finding breaches the SLA today
                 elif (sla_age == 0):
                     logger.info("Security SLA breach warning for finding ID {}".format(finding.id))
-                    _notify(finding, "Security SLA breaching today")
-                elif (sla_age < 0):
-                    logger.info("Finding {} has breached by {} days.".format(finding.id, sla_age))
+                    _notify(finding, "Finding {} - SLA breaching today".format(finding.id))
                 else:
-                    logger.info("Finding not in SLA notification scope yet.")
+                    logger.debug("Finding not within SLA breach settings.")
+                
+                jira_config = finding.jira_conf_new()
+                if jira_config is not None:
+                    logger.debug("JIRA config is {}".format(jira_config))
+                    sla_notification_enabled = jira_config.sla_notification
+                    logger.debug("JIRA SLA notification as comment is {}".format(sla_notification_enabled))
+
+                    if finding.has_jira_issue():
+                        jira_url = jira_config.url
+                        jira_issue = finding.jira_issue.jira_key
+                        jira_issue_url = "{}/browse/{}".format(jira_url, jira_issue)
+                        logger.debug("JIRA issue is {}".format(jira_issue_url))
+                    else:
+                        logger.debug("This finding does not have a JIRA issue.")
                 
     except System_Settings.DoesNotExist:
         logger.info("Findings SLA is not enabled.")
