@@ -67,7 +67,7 @@ setup(
         'json-lines==1.2.0'  # requred by yarn audit parser
     ],
 
-    extras_require={'mysql': ['mysqlclient==2.0.0']},
+    extras_require={'mysql': ['mysqlclient==2.0.1']},
 
     dependency_links=[
         "https://github.com/grendel513/python-pdfkit/tarball/master#egg=pdfkit-0.5.0"
