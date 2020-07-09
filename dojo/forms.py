@@ -27,7 +27,7 @@ from dojo.models import Finding, Product_Type, Product, Note_Type, ScanSettings,
     Languages, Language_Type, App_Analysis, Objects, Benchmark_Product, Benchmark_Requirement, \
     Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta, Sonarqube_Product, \
     Engagement_Survey, Answered_Survey, TextAnswer, ChoiceAnswer, Choice, Question, TextQuestion, \
-    ChoiceQuestion, General_Survey
+    ChoiceQuestion, General_Survey, Regulation
 
 from dojo.tools import requires_file, SCAN_SONARQUBE_API
 
@@ -1774,6 +1774,12 @@ class DeleteJIRAConfForm(forms.ModelForm):
 class ToolTypeForm(forms.ModelForm):
     class Meta:
         model = Tool_Type
+        exclude = ['product']
+
+
+class RegulationForm(forms.ModelForm):
+    class Meta:
+        model = Regulation
         exclude = ['product']
 
 

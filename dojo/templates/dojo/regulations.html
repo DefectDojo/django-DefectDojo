@@ -6,7 +6,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading tight">
                     <h3 class="has-filters">
-                        Regulation
+                        Regulations
                         <div class="dropdown pull-right">
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
@@ -16,8 +16,8 @@
                             <ul class="dropdown-menu dropdown-menu-right" role="menu"
                                 aria-labelledby="dropdownMenu1">
                                     <li role="presentation">
-                                        <a href="{% url 'add_tool_type' %}">
-                                            <i class="fa fa-plus"></i> Add Tool Configuration
+                                        <a href="{% url 'new_regulation' %}">
+                                            <i class="fa fa-plus"></i> Add regulation
                                         </a>
                                     </li>
                             </ul>
@@ -40,6 +40,7 @@
                             <th>Acronym</th>
                             <th>Jurisdiction</th>
                             <th>Category</th>
+                            <th>Reference</th>
                             <th>Description</th>
                         </tr>
                         </thead>
@@ -47,7 +48,7 @@
                         {% for conf in confs %}
                             <tr>
                                 <td>
-                                    <a href="{% url 'edit_tool_type' conf.id %}"><b>{{ conf.name }}</b></a>
+                                    <a href="{% url 'edit_regulations' conf.id %}"><b>{{ conf.name }}</b></a>
                                 </td>
                                 <td>
                                         {{ conf.acronym }}
@@ -57,6 +58,9 @@
                                 </td>
                                 <td>
                                         {{ conf.category }}
+                                </td>
+                                <td>
+                                        {{ conf.reference }}
                                 </td>
                                 <td>
                                         {{ conf.description }}

@@ -7,7 +7,7 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from dojo.utils import add_breadcrumb
-from dojo.forms import ToolTypeForm
+from dojo.forms import RegulationForm
 from dojo.models import Regulation
 
 
@@ -15,40 +15,41 @@ logger = logging.getLogger(__name__)
 
 @user_passes_test(lambda u: u.is_staff)
 def new_regulation(request):
-    # if request.method == 'POST':
-    #     tform = ToolTypeForm(request.POST, instance=Tool_Type())
-    #     if tform.is_valid():
-    #         tform.save()
-    #         messages.add_message(request,
-    #                              messages.SUCCESS,
-    #                              'Tool Type Configuration Successfully Created.',
-    #                              extra_tags='alert-success')
-    #         return HttpResponseRedirect(reverse('tool_type', ))
-    # else:
-    #     tform = ToolTypeForm()
-    #     add_breadcrumb(title="New Tool Type Configuration", top_level=False, request=request)
-    return render(request, 'dojo/new_tool_type.html',
-                  {'tform': tform})
-
-
-@user_passes_test(lambda u: u.is_staff)
-def edit_regulations(request, ttid):
-    tool_type = Tool_Type.objects.get(pk=ttid)
     if request.method == 'POST':
-        tform = ToolTypeForm(request.POST, instance=tool_type)
+        tform = RegulationForm(request.POST, instance=Regulation())
         if tform.is_valid():
             tform.save()
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 'Tool Type Configuration Successfully Updated.',
+                                 'Regulation Successfully Created.',
                                  extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('tool_type', ))
+            return HttpResponseRedirect(reverse('regulations', ))
     else:
-        tform = ToolTypeForm(instance=tool_type)
-    add_breadcrumb(title="Edit Tool Type Configuration", top_level=False, request=request)
+        tform = RegulationForm()
+        logging.info(tform)
+        add_breadcrumb(title="New regulation", top_level=False, request=request)
+    return render(request, 'dojo/new_regulation.html',
+                  {'form': tform})
+
+
+@user_passes_test(lambda u: u.is_staff)
+def edit_regulations(request, ttid):
+    regulation = Regulation.objects.get(pk=ttid)
+    if request.method == 'POST':
+        tform = RegulationForm(request.POST, instance=regulation)
+        if tform.is_valid():
+            tform.save()
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'Regulation Successfully Updated.',
+                                 extra_tags='alert-success')
+            return HttpResponseRedirect(reverse('regulations', ))
+    else:
+        tform = RegulationForm(instance=regulation)
+    add_breadcrumb(title="Edit Regulation", top_level=False, request=request)
 
     return render(request,
-                  'dojo/edit_tool_type.html',
+                  'dojo/edit_regulation.html',
                   {
                       'tform': tform,
                   })
