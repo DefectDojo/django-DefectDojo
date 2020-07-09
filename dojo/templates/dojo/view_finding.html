@@ -1050,6 +1050,8 @@
 
         $("#unlink_jira").on('click', function(e) {
             jira_action(this,'{% url 'finding_unlink_jira' finding.id %}')
+        });
+
         var checkbox_count = 0;
         function get_checkbox_values()
         {
