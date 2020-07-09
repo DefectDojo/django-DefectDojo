@@ -26,7 +26,6 @@ def new_regulation(request):
             return HttpResponseRedirect(reverse('regulations', ))
     else:
         tform = RegulationForm()
-        logging.info(tform)
         add_breadcrumb(title="New regulation", top_level=False, request=request)
     return render(request, 'dojo/new_regulation.html',
                   {'form': tform})
@@ -53,8 +52,6 @@ def edit_regulations(request, ttid):
                   {
                       'tform': tform,
                   })
-
-
 
 
 @user_passes_test(lambda u: u.is_staff)
