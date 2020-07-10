@@ -960,7 +960,7 @@ class FindingForm(forms.ModelForm):
     date = forms.DateField(required=True,
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     cwe = forms.IntegerField(required=False)
-    cve = forms.CharField(max_length=28, required=False)
+    cve = forms.CharField(max_length=28, required=False, strip=False)
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -1003,6 +1003,8 @@ class FindingForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super(FindingForm, self).clean()
+
+        cleaned_data['cve'] = None if cleaned_data['cve'] == '' else cleaned_data['cve']
         if (cleaned_data['active'] or cleaned_data['verified']) and cleaned_data['duplicate']:
             raise forms.ValidationError('Duplicate findings cannot be'
                                         ' verified or active')
