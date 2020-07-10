@@ -18,6 +18,7 @@ from django.core.paginator import Paginator
 from django.urls import get_resolver, reverse
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
 from django.template.defaultfilters import pluralize
+from django.template.loader import render_to_string
 from django.utils import timezone
 from jira import JIRA
 from jira.exceptions import JIRAError
@@ -1292,13 +1293,12 @@ def get_labels(find):
     return labels
 
 
-def jira_long_description(find, jira_conf_finding_text):
-    return (
-            "*Dojo URL:* " + str(get_full_url(find.get_absolute_url())) + "\n\n" +
-            find.long_desc() +
-            "\n\n*Dojo ID:* " + str(find.id) + "\n\n" +
-            jira_conf_finding_text
-    )
+def jira_description(find):
+    template = 'issue-trackers/jira-description.tpl'
+    kwargs = {}
+    kwargs['finding'] = find
+    kwargs['jira_conf'] = find.jira_conf_new()
+    return render_to_string(template, kwargs)
 
 
 def add_external_issue(find, external_issue_provider):
@@ -1362,12 +1362,14 @@ def add_issue(find, push_to_jira):
                     server=jira_conf.url,
                     basic_auth=(jira_conf.username, jira_conf.password))
 
+                meta = None
+
                 fields = {
                         'project': {
                             'key': jpkey.project_key
                         },
                         'summary': find.title,
-                        'description': jira_long_description(find, jira_conf.finding_text),
+                        'description': jira_description(find),
                         'issuetype': {
                             'name': jira_conf.default_issue_type
                         },
@@ -1388,13 +1390,25 @@ def add_issue(find, push_to_jira):
                     fields['labels'] = labels
 
                 if System_Settings.objects.get().enable_finding_sla:
-                    # jira wants YYYY-MM-DD
-                    duedate = find.sla_deadline().strftime('%Y-%m-%d')
-                    # fields['duedate'] = '2020-12-31'
-                    fields['duedate'] = duedate
+                    # populate duedate field, but only if it's available for this project + issuetype
+                    # meta = jira.createmeta(projectKeys=jpkey.project_key, expand="fields")
+                    if not meta:
+                        meta = jira_meta(jira, jpkey)
 
-                print('fields:')
-                print(fields)
+                    if 'duedate' in meta['projects'][0]['issuetypes'][0]['fields']:
+                        # jira wants YYYY-MM-DD
+                        duedate = find.sla_deadline().strftime('%Y-%m-%d')
+                        fields['duedate'] = duedate
+
+                if len(find.endpoints.all()) > 0:
+                    if not meta:
+                        meta = jira_meta(jira, jpkey)
+
+                    if 'environment' in meta['projects'][0]['issuetypes'][0]['fields']:
+                        environment = "\n".join([str(endpoint) for endpoint in find.endpoints.all()])
+                        fields['environment'] = environment
+
+                logger.debug('sending fields to JIRA: %s', fields)
 
                 new_issue = jira.create_issue(fields)
 
@@ -1419,6 +1433,10 @@ def add_issue(find, push_to_jira):
         else:
             log_jira_alert("A Finding needs to be both Active and Verified to be pushed to JIRA.", find)
             logger.warning("A Finding needs to be both Active and Verified to be pushed to JIRA.", find)
+
+
+def jira_meta(jira, jpkey):
+    return jira.createmeta(projectKeys=jpkey.project_key, issuetypeNames=jpkey.conf.default_issue_type, expand="projects.issuetypes.fields")
 
 
 def jira_attachment(jira, issue, file, jira_filename=None):
@@ -1469,6 +1487,8 @@ def update_issue(find, push_to_jira):
                 basic_auth=(jira_conf.username, jira_conf.password))
             issue = jira.issue(j_issue.jira_id)
 
+            meta = None
+
             fields = {}
             # Only update the component if it didn't exist earlier in Jira, this is to avoid assigning multiple components to an item
             if issue.fields.components:
@@ -1488,14 +1508,24 @@ def update_issue(find, push_to_jira):
             if labels:
                 fields['labels'] = labels
 
+            if len(find.endpoints.all()) > 0:
+                if not meta:
+                    meta = jira_meta(jira, jpkey)
+
+                if 'environment' in meta['projects'][0]['issuetypes'][0]['fields']:
+                    environment = "\n".join([str(endpoint) for endpoint in find.endpoints.all()])
+                    fields['environment'] = environment
+
             # Upload dojo finding screenshots to Jira
             for pic in find.images.all():
                 jira_attachment(jira, issue,
                                 settings.MEDIA_ROOT + pic.image_large.name)
 
+            logger.debug('sending fields to JIRA: %s', fields)
+
             issue.update(
                 summary=find.title,
-                description=jira_long_description(find, jira_conf.finding_text),
+                description=jira_description(find),
                 priority={'name': jira_conf.get_priority(find.severity)},
                 fields=fields)
             # print('\n\nSaving jira_change\n\n')
@@ -2006,6 +2036,14 @@ def get_full_url(relative_url):
         return "settings.SITE_URL" + relative_url
 
 
+def get_site_url():
+    if settings.SITE_URL:
+        return settings.SITE_URL
+    else:
+        logger.warn('SITE URL undefined in settings, full_url cannot be created')
+        return "settings.SITE_URL"
+
+
 @receiver(post_save, sender=Dojo_User)
 def set_default_notifications(sender, instance, created, **kwargs):
     # for new user we create a Notifications object so the default 'alert' notifications work
@@ -2034,11 +2072,11 @@ def merge_sets_safe(set1, set2):
 
 def get_return_url(request):
     return_url = request.POST.get('return_url', None)
-    print('return_url from POST: ', return_url)
+    # print('return_url from POST: ', return_url)
     if return_url is None or not return_url.strip():
         # for some reason using request.GET.get('return_url') never works
         return_url = request.GET['return_url'] if 'return_url' in request.GET else None
-        print('return_url from GET: ', return_url)
+        # print('return_url from GET: ', return_url)
 
     return return_url if return_url else None
 

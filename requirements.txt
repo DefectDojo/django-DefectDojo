@@ -2,7 +2,7 @@
 asteval==0.9.18
 bleach>=3.1.0
 celery==4.4.6
-coverage==5.1
+coverage==5.2
 defusedxml==0.6.0
 django_celery_results==1.2.1
 django-auditlog==0.4.7
@@ -31,7 +31,7 @@ jira==2.0.0
 PyGithub==1.51
 lxml==4.5.1
 Markdown==3.2.2
-mysqlclient==2.0.0
+mysqlclient==2.0.1
 pandas>=0.25
 xlrd>=1.0.0
 pdfkit==0.6.1

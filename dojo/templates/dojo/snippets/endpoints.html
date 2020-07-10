@@ -1,0 +1,240 @@
+{% load display_tags %}
+{% load static from staticfiles %}
+{% load get_endpoint_status %}
+
+{% if destination == "Report" %}
+    {% with endpoints=finding|get_vulnerable_endpoints %}
+        {% if endpoints %}
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="panel panel-info endpoints table-responsive">
+                        <div class="panel-heading">
+                            {% if finding.file_path %}
+                            <h6> Location </h6>
+                            {%  else %}
+                            <h6>Vulnerable Endpoints / Systems</h6>
+                            {% endif %}
+                        </div>
+
+                        {% if endpoints %}
+                            <table id="vuln_endpoints" class="table-striped table ">
+                                <thead>
+                                    <th>Endpoint</th>
+                                    <th>Status</th>
+                                    <th>Date Discovered</th>
+                                    <th>Last Modified</th>
+                                </thead>
+                                <tbody>
+                                    {% for endpoint in endpoints %}
+                                        <tr>
+                                            <td>{{ endpoint }}</td>
+                                            <td>{{ endpoint|endpoint_display_status:finding|safe }}</td>
+                                            <td>{{ endpoint|endpoint_date:finding|date }}</td>
+                                            <td>{{ endpoint|endpoint_update_time:finding|date}}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        {% elif finding.file_path %}
+                            <table class="table-striped table table table-condensed table-hover finding-endpoints">
+                                <tr>
+                                    <th style="text-align: center;padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">
+                                        File Path
+                                    </th>
+                                    <th style="text-align: center;padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">
+                                        Line Number
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">{{ finding.file_path }}</td>
+                                    <td style=" text-align:center; padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">{{ finding.line }}</td>
+                                </tr>
+                            </table>
+                        {% else %}
+                            <div id="vuln_endpoints" class="panel-body endpoint-panel table-responsive">
+                                No endpoints.
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    {% with endpoints=finding|get_mitigated_endpoints %}
+        {% if endpoints %}
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="panel panel-info endpoints table-responsive">
+                        <div class="panel-heading">
+                            {% if finding.file_path %}
+                            <h6> Location </h6>
+                            {%  else %}
+                            <h6>Mitigated Endpoints / Systems</h6>
+                            {% endif %}
+                        </div>
+
+                        {% if endpoints %}
+                            <table id="remd_endpoints" class="table-striped table table-hover">
+                                <thead>
+                                    <th>Endpoint</th>
+                                    <th>Status</th>
+                                    <th>Mitigation Time</th>
+                                    <th>Mitigator</th>
+                                </thead>
+                                <tbody>
+                                    {% for endpoint in endpoints %}
+                                        <tr>
+                                            <td>{{ endpoint }}</td>
+                                            <td>{{ endpoint|endpoint_display_status:finding|safe }}</td>
+                                            <td>{{ endpoint|endpoint_mitigated_time:finding|date }}</td>
+                                            <td>{{ endpoint|endpoint_mitigator:finding|safe }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        {% elif finding.file_path %}
+                            <table class="table-striped table table table-condensed table-hover finding-endpoints">
+                                <tr>
+                                    <th style="text-align: center;padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">
+                                        File Path
+                                    </th>
+                                    <th style="text-align: center;padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">
+                                        Line Number
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">{{ finding.file_path }}</td>
+                                    <td style=" text-align:center; padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">{{ finding.line }}</td>
+                                </tr>
+                            </table>
+                        {% else %}
+                            <div id="vuln_endpoints" class="panel-body endpoint-panel table-responsive">
+                                No endpoints.
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    {% endwith %}
+{% else %}
+    {% with endpoints=finding|get_vulnerable_endpoints %}
+        {% if endpoints %}
+            <div class="row to_highlight">
+                <div class="col-md-12">
+                    <div class="panel panel-default table-responsive">
+                        <div class="panel-heading">
+                            <h4>Vulnerable Endpoints / Systems
+                                <span class="pull-right"><a data-toggle="collapse" href="#vuln_endpoints"><i
+                                        class="glyphicon glyphicon-chevron-up"></i></a></span>
+                            </h4>
+                        </div>
+                       
+                        <table id="vuln_endpoints" class="table-striped table table-hover">
+                            <thead>
+                                {% if user|is_authorized_for_change:finding %}
+                                    <th class="hidden-sm" title="Select all vulnerable endpoints." style="width: 10%;">
+                                        <form class="inline-form" action="#">
+                                            <input type="checkbox" label="select_all_vulnerable" name="select_all_vulnerable" id="select_all_vulnerable"/>
+                                        </form>
+                                        <span>Select All</span>
+                                    </th>
+                                {% endif %}
+                                <th>Endpoint</th>
+                                <th>Status</th>
+                                <th>Date Discovered</th>
+                                <th>Last Modified</th>
+                            </thead>
+                            <tbody>
+                                {% for endpoint in endpoints %}
+                                    <tr>
+                                        {% if user.is_staff %}
+                                            <td class="hidden-sm">
+                                                <form action="#">
+                                                    <input type="checkbox" label="select_vulnerable_{{ endpoint.id }}" name="select_vulnerable_{{ endpoint.id }}" id="{{ endpoint.id }}"
+                                                        class="select_one"/>
+                                                </form>
+                                            </td>
+                                        {% endif %}
+                                        <td>
+                                            <a data-toggle="tooltip" data-placement="top" data-original-title="{{ endpoint }}" href="{% url 'view_endpoint' endpoint.id %}">{{ endpoint|url_shortner }}</a>
+                                            {% if item.tags %}
+                                                <sup>
+                                                    {% for tag in item.tags %}
+                                                        <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                                    {% endfor %}
+                                                </sup>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ endpoint|endpoint_display_status:finding|safe }}</td>
+                                        <td>{{ endpoint|endpoint_date:finding|date }}</td>
+                                        <td>{{ endpoint|endpoint_update_time:finding|date}}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    {% with endpoints=finding|get_mitigated_endpoints %}
+        {% if endpoints %}
+            <div class="row to_highlight">
+                <div class="col-md-12">
+                    <div class="panel panel-default table-responsive">
+                        <div class="panel-heading">
+                            <h4>Mitigated Endpoints / Systems
+                                <span class="pull-right"><a data-toggle="collapse" href="#remd_endpoints"><i
+                                        class="glyphicon glyphicon-chevron-up"></i></a></span>
+                            </h4>
+                        </div>
+                        <table id="remd_endpoints" class="table-striped table table-hover">
+                            <thead>
+                                <th class="hidden-sm" title="Select all mitigated endpoints." style="width: 10%;">
+                                        <form class="inline-form" action="#">
+                                            <input type="checkbox" label="select_all_mitigated" name="select_all_mitigated" id="select_all_mitigated"/>
+                                        </form>
+                                        <span>Select All</span>
+                                    </th>
+                                <th>Endpoint</th>
+                                <th>Status</th>
+                                <th>Mitigation Time</th>
+                                <th>Mitigator</th>
+                            </thead>
+                            <tbody>
+                                {% for endpoint in endpoints %}
+                                    <tr>
+                                        {% if user|is_authorized_for_change:finding %}
+                                            <td class="hidden-sm">
+                                                <form action="#">
+                                                    <input type="checkbox" label="select_mitigated_{{ endpoint.id }}" name="select_mitigated_{{ endpoint.id }}" id="{{ endpoint.id }}"
+                                                        class="select_one"/>
+                                                </form>
+                                            </td>
+                                        {% endif %}
+                                        <td>
+                                            <a data-toggle="tooltip" data-placement="top" data-original-title="{{ endpoint }}" href="{% url 'view_endpoint' endpoint.id %}">{{ endpoint|url_shortner }}</a>
+                                            {% if item.tags %}
+                                                <sup>
+                                                    {% for tag in item.tags %}
+                                                        <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                                    {% endfor %}
+                                                </sup>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ endpoint|endpoint_display_status:finding|safe }}</td>
+                                        <td>{{ endpoint|endpoint_mitigated_time:finding|date }}</td>
+                                        <td>{{ endpoint|endpoint_mitigator:finding|safe }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    {% endwith %}
+{% endif %}

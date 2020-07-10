@@ -889,7 +889,7 @@ class AddFindingForm(forms.ModelForm):
         model = Finding
         order = ('title', 'severity', 'endpoints', 'description', 'impact')
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
-                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change')
+                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change', 'endpoint_status')
 
 
 class AdHocFindingForm(forms.ModelForm):
@@ -927,7 +927,7 @@ class AdHocFindingForm(forms.ModelForm):
         model = Finding
         order = ('title', 'severity', 'endpoints', 'description', 'impact')
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
-                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change')
+                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change', 'endpoint_status')
 
 
 class PromoteFindingForm(forms.ModelForm):
@@ -951,7 +951,7 @@ class PromoteFindingForm(forms.ModelForm):
     class Meta:
         model = Finding
         order = ('title', 'severity', 'endpoints', 'description', 'impact')
-        exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'active', 'false_p', 'verified', 'is_template',
+        exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'active', 'false_p', 'verified', 'is_template', 'endpoint_status'
                    'duplicate', 'out_of_scope', 'images', 'under_review', 'reviewers', 'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change')
 
 
@@ -1018,7 +1018,7 @@ class FindingForm(forms.ModelForm):
     class Meta:
         model = Finding
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
-                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change', 'sonarqube_issue')
+                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change', 'sonarqube_issue', 'endpoint_status')
 
 
 class StubFindingForm(forms.ModelForm):
@@ -1110,7 +1110,7 @@ class FindingTemplateForm(forms.ModelForm):
     class Meta:
         model = Finding_Template
         order = ('title', 'cwe', 'cve', 'severity', 'description', 'impact')
-        exclude = ('numerical_severity', 'is_Mitigated', 'last_used')
+        exclude = ('numerical_severity', 'is_Mitigated', 'last_used', 'endpoint_status')
 
 
 class DeleteFindingTemplateForm(forms.ModelForm):
@@ -1699,6 +1699,11 @@ class JIRA_IssueForm(forms.ModelForm):
 
 class JIRAForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput, required=True)
+
+    def __init__(self, *args, **kwargs):
+        super(JIRAForm, self).__init__(*args, **kwargs)
+        if self.instance:
+            self.fields['password'].required = False
 
     class Meta:
         model = JIRA_Conf

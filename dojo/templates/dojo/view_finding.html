@@ -223,12 +223,8 @@
                         <th>Date Mitigated</th>
                         <th>Mitigated By</th>
                     {% endif %}
-                    {% if finding.cwe > 0 %}
                         <th>CWE</th>
-                    {% endif %}
-                    {% if finding.cve %}
                         <th>CVE</th>
-                    {% endif %}
                     <th>Found by</th>
                 </tr>
                 <tr>
@@ -293,16 +289,16 @@
                         <td>{{ finding.mitigated }}</td>
                         <td>{{ finding.mitigated_by }}</td>
                     {% endif %}
-                    {% if finding.cwe > 0 %}
                         <td>
-                            <a target="_blank" href="https://cwe.mitre.org/data/definitions/{{ finding.cwe }}.html">
+                        {% if finding.cwe > 0 %}
+                            <a target="_blank" href={{ finding.cwe|cwe_url }}">
                                 <i class="fa fa-external-link"></i> {{ finding.cwe }}
                             </a>
+                        {% endif %}
                         </td>
-                    {% endif %}
                     {% if finding.cve|slice:":3" == 'CVE' %}
                         <td>
-                            <a target="_blank" href="https://cve.mitre.org/cgi-bin/cvename.cgi?name={{ finding.cve }}">
+                            <a target="_blank" href="{{ finding.cve |cve_url }}">
                                 <i class="fa fa-external-link"></i> {{ finding.cve }}
                             </a>
                         </td>
@@ -375,89 +371,90 @@
                 </tr>
             </table>
         </div>
-        {% else %}
-        <div class="panel panel-default">
-            <table id="error_notes" class="table-striped table table-condensed table-hover centered">
-                <tr>
-                    <th>Location</th>
-                    <th>Line Number</th>
-                    {% if finding.nb_occurences %}
-                    <th>Nb occurences</th>
-                    {% endif %}
-                    {% if finding.component_name %}
-                    <th>Component Name</th>
-                    {% endif %}
-                    {% if finding.component_version %}
-                    <th>Component Version</th>
-                    {% endif %}
-                    {% if finding.jira_conf_new %}
-                    <th>JIRA</th>
-                    {% endif %}                    
-                    {% if finding.github_conf_new %}
-                    <th>GitHub</th>
-                    {% endif %}                    
-                </tr>
-                <tr>
-                    <td>
-                        <span>{{ finding.file_path }} 
-                            <i class="fa fa-copy fa-align-right copytoclipboard" title="copy to clipboard"
-                            data-clipboard-text="{{finding.file_path}}"></i>
-                        </span>
-                    </td>
-                    <td>
-                        <span>
-                           {{ finding.line }}
-                        </span>
-                    </td>
-                    {% if finding.nb_occurences %}
-                    <td>
-                        <span>
-                           {{ finding.nb_occurences }}
-                        </span>
-                    </td>
-                    {% endif %}
-                    {% if finding.component_name %}
-                    <td>
-                        <span>
-                            {{ finding.component_name }}
-                        </span>
-                    </td>
-                    {% endif %}
-                    {% if finding.component_version %}
-                    <td>
-                        <span>
-                            {{ finding.component_version }}
-                        </span>
-                    </td>
-                    {% endif %}
-                    {% with jira_conf=finding.jira_conf_new %}
-                    {% if jira_conf%}
-                        <td>
-                        {% with jira_issue=finding.jira_issue %}
-                        {% if jira_issue %}
-                            <a href="{{ jira_conf.url }}/browse/{{ jira_issue.jira_key }}"
-                            target="_blank" title="{{ jira_conf.url }}/browse/{{ jira_issue.jira_key }}">{{ jira_issue.jira_key }}</a>
-                        {% endif %}                        
-                        {% endwith %}
-                        </td>
-                    {% endif %}
-                    {% endwith %}                    
-                    {% with github_conf=finding.github_conf_new %}                    
-                    {% if github_conf %}
-                        <td>
-                        {% with github_issue=finding.github_issue %}
-                        {% if github_issue %}
-                            <a href="{{ github_issue.issue_url }}" target="_blank" title="{{ github_issue.issue_url }}">#{{ github_issue.issue_id }}</a>                            
-                        {% endif %}                        
-                        {% endwith %}
-                        </td>
-                    {% endif %}
-                    {% endwith %}
-                </tr>
-            </table>
-        </div>
         {% endif %}
     {% endif %}
+    {% if finding.static_finding or finding.line > 0 or finding.jira_conf_new or finding.jira_issue or finding.github_issue or finding.github_conf_new %}
+    <div class="panel panel-default">
+        <table id="error_notes" class="table-striped table table-condensed table-hover centered">
+            <tr>
+                {% if finding.file_path %}                
+                <th>Location</th>
+                {% endif %}
+                {% if finding.line %}                                
+                <th>Line Number</th>
+                {% endif %}                
+                {% if finding.nb_occurences %}
+                <th>Nb occurences</th>
+                {% endif %}
+                {% if finding.component_name %}
+                <th>Component Name</th>
+                {% endif %}
+                {% if finding.component_version %}
+                <th>Component Version</th>
+                {% endif %}
+                {% if finding.jira_conf_new or finding.jira_issue %}
+                <th>JIRA</th>
+                {% endif %}                    
+                {% if finding.github_conf_new or finding.github_issue %}
+                <th>GitHub</th>
+                {% endif %}                    
+            </tr>
+            <tr>
+                {% if finding.file_path %}
+                <td>
+                    <span>{{ finding.file_path }} 
+                        <i class="fa fa-copy fa-align-right copytoclipboard" title="copy to clipboard"
+                        data-clipboard-text="{{finding.file_path}}"></i>
+                    </span>
+                </td>
+                {% endif %}                
+                {% if finding.line %}                
+                <td>
+                    <span>
+                        {{ finding.line }}
+                    </span>
+                </td>
+                {% endif %}                
+                {% if finding.nb_occurences %}
+                <td>
+                    <span>
+                        {{ finding.nb_occurences }}
+                    </span>
+                </td>
+                {% endif %}
+                {% if finding.component_name %}
+                <td>
+                    <span>
+                        {{ finding.component_name }}
+                    </span>
+                </td>
+                {% endif %}
+                {% if finding.component_version %}
+                <td>
+                    <span>
+                        {{ finding.component_version }}
+                    </span>
+                </td>
+                {% endif %}
+                {% if finding.jira_conf_new or finding.jira_issue %}
+                    <td>
+                    {% if finding.jira_issue %}
+                        <a href="{{ finding.jira_conf_new.url }}/browse/{{ finding.jira_issue.jira_key }}"
+                        target="_blank" title="{{ finding.jira_conf_new.url }}/browse/{{ finding.jira_issue.jira_key }}">{{ finding.jira_issue.jira_key }}</a>
+                    {% endif %}                        
+                    </td>
+                {% endif %}
+                {% if finding.github_conf_new or finding.github_issue %}
+                    <td>
+                    {% if finding.github_issue %}
+                        <a href="{{ finding.github_issue.issue_url }}" target="_blank" title="{{ finding.github_issue.issue_url }}">#{{ finding.github_issue.issue_id }}</a>                            
+                    {% endif %}                        
+                    </td>
+                {% endif %}
+            </tr>
+        </table>
+    </div>
+    {% endif %}    
     {% if finding.param or finding.payload %}
         <div class="panel panel-default">
             <table id="error_notes" class="table-striped table table-condensed table-hover">
@@ -579,95 +576,50 @@
         {% endif %}
     {% endwith %}
 
-    {% with endpoints=finding.endpoints.all|get_vulnerable_endpoints %}
-        {% if endpoints %}
-            <div class="row to_highlight">
-                <div class="col-md-12">
-                    <div class="panel panel-default endpoints table-responsive">
-                        <div class="panel-heading">
-                            <h4>Vulnerable Endpoints / Systems
-                                <span class="pull-right"><a data-toggle="collapse" href="#vuln_endpoints"><i
-                                        class="glyphicon glyphicon-chevron-up"></i></a></span>
-                            </h4>
-                        </div>
-                        {% if endpoints %}
-                            {% colgroup endpoints into 3 cols as grouped_items %}
-                                <table id="vuln_endpoints" class="table-striped table table-condensed table-hover finding-endpoints">
-                                    {% for row in grouped_items %}
-                                        <tr>
-                                            {% for item in row %}
-                                                <td>
-                                                    {% if item %}
-                                                        <i class="fa fa-circle"></i>
-                                                        <a data-toggle="tooltip" data-placement="top" data-original-title="{{ item }}" href="{% url 'view_endpoint' item.id %}">{{ item|url_shortner }}</a>
-                                                        {% if item.tags %}
-                                                            <sup>
-                                                                {% for tag in item.tags %}
-                                                                    <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
-                                                                {% endfor %}
-                                                            </sup>
-                                                        {% endif %}
-                                                    {% endif %}
-                                                </td>
-                                            {% endfor %}
-                                        </tr>
-                                    {% endfor %}
-                                </table>
-                        {% else %}
-                            <div id="vuln_endpoints" class="panel-body endpoint-panel table-responsive collapse in">
-                                No endpoints.
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
+    <div class="hidden" style="padding-bottom: 5px;" id="bulk_edit_menu">
+        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+            <div class="btn-group mr-2" role="group" aria-label="Second group">
+                <button class="btn btn-sm btn-primary dropdown-toggle" type="button" id="dropdownMenu2"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                    Bulk Edit
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" id="bulk_edit">
+                    <li style="padding-left: 8px;">
+                        <form action="{% url 'endpoints_status_bulk' %}" method="post" id="bulk_change_form">
+                            {% csrf_token %}
+                            <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />                                            
+                            <label style="font-size: 80%; font-weight: normal; display: block">
+                                <input id="id_bulk_active" label="active "name="active" type="checkbox"/> 
+                                <span>Active</span>
+                            </label>
+                            <label style="font-size: 80%; font-weight: normal; display: block">
+                                <input id="id_bulk_false_p" label="false_positive name="false_positive" type="checkbox"/> 
+                                <span>False Positive</span>
+                            </label>
+                            <label style="font-size: 80%; font-weight: normal; display: block">
+                                <input id="id_bulk_out_of_scope" label="out_of_scope" name="out_of_scope" type="checkbox"/>
+                                <span>Out of scope</span>
+                            </label>
+                            <label style="font-size: 80%; font-weight: normal; display: block">
+                                <input id="id_bulk_mitigated" label="mitigated" name="mitigated" type="checkbox"/>
+                                <span>Mitigated</span>
+                            </label>
+                            <label style="font-size: 80%; font-weight: normal; display: block">
+                                <input id="id_bulk_risk_accepted" label="risk_accepted" name="risk_accepted" type="checkbox"/>
+                                <span>Risk Accepted</span>
+                            </label>
+                            <br/>    
+                            <input type="hidden" value="{{ finding.id }}" label="finding_id" name="finding_id">                
+                            <input type="submit" class="btn btn-sm btn-primary" label="Submit" name="Submit" value="Submit"/>
+                        </form>
+                    </li>
+                </ul>
             </div>
-        {% endif %}
-    {% endwith %}
+        </div>
+    </div>
 
-    {% with endpoints=finding.endpoints.all|get_remediated_endpoints %}
-        {% if endpoints %}
-            <div class="row to_highlight">
-                <div class="col-md-12">
-                    <div class="panel panel-default endpoints table-responsive">
-                        <div class="panel-heading">
-                            <h4>Remediated Endpoints / Systems
-                                <span class="pull-right"><a data-toggle="collapse" href="#vuln_endpoints"><i
-                                        class="glyphicon glyphicon-chevron-up"></i></a></span>
-                            </h4>
-                        </div>
-                        {% if endpoints %}
-                            {% colgroup endpoints into 3 cols as grouped_items %}
-                                <table id="vuln_endpoints" class="table-striped table table-condensed table-hover finding-endpoints">
-                                    {% for row in grouped_items %}
-                                        <tr>
-                                            {% for item in row %}
-                                                <td>
-                                                    {% if item %}
-                                                        <i class="fa fa-circle"></i>
-                                                        <a data-toggle="tooltip" data-placement="top" data-original-title="{{ item }}" href="{% url 'view_endpoint' item.id %}">{{ item|url_shortner }}</a>
-                                                        {% if item.tags %}
-                                                            <sup>
-                                                                {% for tag in item.tags %}
-                                                                    <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
-                                                                {% endfor %}
-                                                            </sup>
-                                                        {% endif %}
-                                                    {% endif %}
-                                                </td>
-                                            {% endfor %}
-                                        </tr>
-                                    {% endfor %}
-                                </table>
-                        {% else %}
-                            <div id="vuln_endpoints" class="panel-body endpoint-panel table-responsive collapse in">
-                                No endpoints.
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        {% endif %}
-    {% endwith %}
+    {% include "dojo/snippets/endpoints.html" with finding=finding destination="UI" %}
 
     <div class="view-finding to_highlight">
         <div class="panel panel-default">
@@ -1049,6 +1001,165 @@
                         $("img#to_replace").attr('src', $(thumbnails[index + 1]).data('imageurl'));
                         $("#caption_to_replace").html($(thumbnails[index + 1]).data('caption'));
                     }
+                }
+            });
+        });
+
+        var checkbox_count = 0;
+        function get_checkbox_values()
+        {
+            var checkbox_values_vuln = $("input[type=checkbox][name^='select_vulnerable_']");
+            var checkbox_values_rem = $("input[type=checkbox][name^='select_mitigated_']");
+            var checkbox_values = Array.from(checkbox_values_vuln).concat(Array.from(checkbox_values_rem));
+
+            return checkbox_values;
+        }
+
+        function check_checked_finding()
+        {
+          var checkbox_values = get_checkbox_values();
+          for (var i = 0; i < checkbox_values.length; i++) {
+            if ($(checkbox_values[i]).prop("checked")) {
+              if ((checkbox_values[i].name != 'select_all_vulnerable') || (checkbox_values[i].name != 'select_all_mitigated')) {
+                checkbox_count++;
+              }
+            }
+          }
+          if (checkbox_count > 0)
+          {
+              $('div#bulk_edit_menu').removeClass('hidden');
+          }
+        }
+
+        $(function () {
+            $(document).ready(function(){
+              $('[data-toggle="tooltip"]').tooltip();
+            });
+            check_checked_finding();
+
+            // Keep the dropdown menu open for selecting severity status
+            $('.dropdown-menu').click(function(e) {
+                e.stopPropagation();
+            });
+            //Ensures dropdown has proper zindex
+            $('.table-responsive').on('show.bs.dropdown', function () {
+              $('.table-responsive').css( "overflow", "inherit" );
+            });
+
+            $('.table-responsive').on('hide.bs.dropdown', function () {
+              $('.table-responsive').css( "overflow", "auto" );
+            })
+
+            $('[data-toggle="tooltip"]').tooltip();
+
+            $('#bulk_edit_menu #id_bulk_active').on("click", function (e){
+                var checked = this.checked;
+                $('#bulk_edit_menu #id_bulk_false_p').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_mitigated').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_false_p').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_mitigated').prop('checked', false);
+            })
+
+            $('#bulk_edit_menu #id_bulk_mitigated').on("click", function (e){
+                var checked = this.checked;
+                $('#bulk_edit_menu #id_bulk_active').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_active').prop('checked', false);
+            })
+
+            $('#bulk_edit_menu #id_bulk_false_p').on("click", function (e){
+                var checked = this.checked;
+                $('#bulk_edit_menu #id_bulk_active').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_risk_accepted').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_out_of_scope').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_active').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_risk_accepted').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_out_of_scope').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_mitigated').prop('checked', checked);
+            })
+
+            $('#bulk_edit_menu #id_bulk_risk_accepted').on("click", function (e){
+                var checked = this.checked;
+                $('#bulk_edit_menu #id_bulk_false_p').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_out_of_scope').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_false_p').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_out_of_scope').prop('checked', false);
+            })
+
+            $('#bulk_edit_menu #id_bulk_out_of_scope').on("click", function (e){
+                var checked = this.checked;
+                $('#bulk_edit_menu #id_bulk_risk_accepted').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_false_p').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_risk_accepted').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_false_p').prop('checked', false);
+            })
+
+            $('input[type="checkbox"]').change(function () {
+              checkbox_count = 0;
+              finding = $(this).attr("name");
+              if (finding.indexOf("select_") >= 0)
+              {
+                var checkbox_values = get_checkbox_values();
+                for (var i = 0; i < checkbox_values.length; i++) {
+                  if ($(checkbox_values[i]).prop("checked")) {
+                    checkbox_count++;
+                  }
+                }
+
+                if ($(this).prop("checked")) {
+                  $('div#bulk_edit_menu').removeClass('hidden');
+                } else {
+                  checkbox_count--;
+                  var checkbox_values = get_checkbox_values();
+                  var checked = false;
+
+                  for (var i = 0; i < checkbox_values.length; i++) {
+                    if ($(checkbox_values[i]).prop("checked")) {
+                      checked = true;
+                    }
+                  }
+                  if (checked == false) {
+                    $('div#bulk_edit_menu').addClass('hidden');
+                  }
+                }
+
+              }
+            });
+            $('form#bulk_change_form').on('submit', function(e){
+                $('input[type=checkbox].select_one:checked').each(function(){
+                    var hidden_input = $('<input type="hidden" value="' + this.id + '" name="endpoints_to_update">')
+                    $('form#bulk_change_form').append(hidden_input);
+                });
+            });
+
+            $('input#select_all_vulnerable').on('click', function (e) {
+                var checkbox_values = $("input[type=checkbox][name^='select_vulnerable']");
+                if ($(this).is(":checked")) {
+                    for (var i = 0; i < checkbox_values.length; i++) {
+                        $(checkbox_values[i]).prop('checked', true)
+                    }
+                    $('div#bulk_edit_menu').removeClass('hidden');
+                }
+                else {
+                    for (var i = 0; i < checkbox_values.length; i++) {
+                        $(checkbox_values[i]).prop('checked', false)
+                    }
+                    $('div#bulk_edit_menu').addClass('hidden');
+                }
+            });
+
+             $('input#select_all_mitigated').on('click', function (e) {
+                var checkbox_values = $("input[type=checkbox][name^='select_mitigated']");
+                if ($(this).is(":checked")) {
+                    for (var i = 0; i < checkbox_values.length; i++) {
+                        $(checkbox_values[i]).prop('checked', true)
+                    }
+                    $('div#bulk_edit_menu').removeClass('hidden');
+                }
+                else {
+                    for (var i = 0; i < checkbox_values.length; i++) {
+                        $(checkbox_values[i]).prop('checked', false)
+                    }
+                    $('div#bulk_edit_menu').addClass('hidden');
                 }
             });
         });
