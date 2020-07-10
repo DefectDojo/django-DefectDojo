@@ -44,6 +44,7 @@ celery:
   beat:
     affinity: {}
     nodeSelector: {}
+    replicas: 1
     resources:
       requests:
         cpu: 100m
