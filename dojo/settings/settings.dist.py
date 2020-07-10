@@ -377,10 +377,10 @@ AUTHORIZED_USERS_ALLOW_CHANGE = env('DD_AUTHORIZED_USERS_ALLOW_CHANGE')
 AUTHORIZED_USERS_ALLOW_DELETE = env('DD_AUTHORIZED_USERS_ALLOW_DELETE')
 
 # Setting SLA_NOTIFY_ACTIVE and SLA_NOTIFY_ACTIVE_VERIFIED to False will disable the feature
-SLA_NOTIFY_ACTIVE = False
+SLA_NOTIFY_ACTIVE = False  # this will include 'verified' findings as well.
 SLA_NOTIFY_ACTIVE_VERIFIED = True
-SLA_NOTIFY_WITH_JIRA_ONLY = False
-SLA_NOTIFY_PRE_BREACH = 3
+SLA_NOTIFY_WITH_JIRA_ONLY = False  # this will include 'verified' findings as well.
+SLA_NOTIFY_PRE_BREACH = 3  # in days, notification until date of breach
 
 LOGIN_EXEMPT_URLS = (
     r'^%sstatic/' % URL_PREFIX,
