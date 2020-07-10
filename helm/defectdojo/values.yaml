@@ -40,7 +40,6 @@ annotations: {}
 # Components
 celery:
   broker: rabbitmq
-  replicas: 1
   logLevel: DEBUG
   beat:
     affinity: {}
