@@ -3,7 +3,8 @@ from dojo.models import Product, Engagement, Test, Finding, \
     Finding_Template, Test_Type, Development_Environment, NoteHistory, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Product_Type, JIRA_Conf, Endpoint, BurpRawRequestResponse, JIRA_PKey, \
-    Notes, DojoMeta, FindingImage, Note_Type, App_Analysis, Endpoint_Status
+    Notes, DojoMeta, FindingImage, Note_Type, App_Analysis, Endpoint_Status, \
+    Regulation
 from dojo.forms import ImportScanForm, SEVERITY_CHOICES
 from dojo.tools import requires_file
 from dojo.tools.factory import import_parser_factory
@@ -229,6 +230,11 @@ class ToolTypeSerializer(serializers.ModelSerializer):
         model = Tool_Type
         fields = '__all__'
 
+
+class RegulationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Regulation
+        fields = '__all__'
 
 class ToolConfigurationSerializer(serializers.ModelSerializer):
     configuration_url = serializers.CharField(source='url')
