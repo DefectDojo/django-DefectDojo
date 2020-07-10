@@ -34,11 +34,11 @@ monitoring:
 # Components
 celery:
   broker: rabbitmq
-  replicas: 1
   logLevel: DEBUG
   beat:
     affinity: {}
     nodeSelector: {}
+    replicas: 1
     resources:
       requests:
         cpu: 100m
