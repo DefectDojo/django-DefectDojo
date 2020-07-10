@@ -2215,6 +2215,6 @@ def sla_compute_and_notify():
                 elif (sla_age == 0):
                     logger.info("Security SLA breach warning. Finding ID {} breaching today ({})".format(finding.id, sla_age))
                     _notify(finding, "Finding {} - SLA is breaching today".format(finding.id))
-                
+
     except System_Settings.DoesNotExist:
         logger.info("Findings SLA is not enabled.")
