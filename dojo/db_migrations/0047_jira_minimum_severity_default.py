@@ -5,6 +5,11 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
+    def set_default_to_low(apps, schema_editor):
+        system_settings = apps.get_model('dojo', 'System_Settings')
+        system_settings.jira_minimum_severity = 'Low'
+        system_settings.save()
+
     dependencies = [
         ('dojo', '0046_endpoint_status'),
     ]
@@ -15,4 +20,6 @@ class Migration(migrations.Migration):
             name='jira_minimum_severity',
             field=models.CharField(blank=True, choices=[('Critical', 'Critical'), ('High', 'High'), ('Medium', 'Medium'), ('Low', 'Low'), ('Info', 'Info')], default='Low', max_length=20, null=True),
         ),
+
+        migrations.RunPython(set_default_to_low)
     ]
