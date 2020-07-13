@@ -17,4 +17,4 @@ class TestNexposeParser(TestCase):
     def test_nexpose_parser_has_many_finding(self):
         testfile = open("dojo/unittests/scans/nexpose/many_vulns.xml")
         parser = NexposeFullXmlParser(testfile, Test())
-        self.assertEqual(50, len(self.parser.items))
+        self.assertEqual(157, len(self.parser.items))
