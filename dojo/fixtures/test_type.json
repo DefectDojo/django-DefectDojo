@@ -568,6 +568,13 @@
     },
     {
         "fields": {
+            "name": "Github Vulnerability Scan"
+        },
+        "model": "dojo.test_type",
+        "pk": 183
+    },
+    {
+        "fields": {
             "name": "Gitleaks Scan"
         },
         "model": "dojo.test_type",
