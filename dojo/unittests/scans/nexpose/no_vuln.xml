@@ -11,6 +11,14 @@
 <Paragraph>
 	<Paragraph>No response</Paragraph></Paragraph>
 </test>
+</tests>
+</service>
+</services>
+</endpoint>
+</endpoints>
+</node>
+</nodes><VulnerabilityDefinitions>
+<vulnerability>
 </vulnerability>
 </VulnerabilityDefinitions>
 </NexposeReport>
