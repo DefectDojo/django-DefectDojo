@@ -17,57 +17,22 @@
 			</tests>
 			<nodes></nodes>
 			<VulnerabilityDefinitions>
-				<vulnerability id="weak-crypto-key" title="Weak Cryptographic Key" severity="3" pciSeverity="3" cvssScore="3.2" cvssVector="(AV:A/AC:H/Au:N/C:P/I:P/A:N)" published="20050101T000000000" added="20111024T000000000" modified="20130718T000000000">
+				<vulnerability id="adobe-apsb13-03-CVE-2013-0632" title="APSB13-03: Security updates available for Adobe ColdFusion (CVE-2013-0632)" severity="10" pciSeverity="5" cvssScore="10.0" cvssVector="(AV:N/AC:L/Au:N/C:C/I:C/A:C)" published="20130115T000000000" added="20130327T000000000" modified="20131031T000000000">
 					<description>
 
 						<ContainerBlockElement>
 
-							<Paragraph>
-       The key length used by a cryptographic algorithm determines the highest
-       security it can offer. Newly discovered theoretical attacks and hardware
-       advances constantly erode this security level over time.  Taking this
-       into account, as of 2011, governmental, academic, and private
-       organizations providing guidance on cryptographic security, such as
-       the 
-								<URLLink LinkURL="http://www.nist.gov" LinkTitle="http://www.nist.gov" href="http://www.nist.gov">National Institute of Standards and Technology</URLLink> (NIST),
-       the 
-								<URLLink LinkURL="http://www.ecrypt.eu.org" LinkTitle="http://www.ecrypt.eu.org" href="http://www.ecrypt.eu.org">European Network of Excellence in Cryptology II</URLLink> (ECRYPT II),
-       make the following general recommendations to provide short to medium term
-       security against even the most well-funded attackers (eg. intelligence agencies):
-    
-								<UnorderedList>
-									<ListItem>Symmetric key lengths of at least 80-112 bits.</ListItem>
-									<ListItem>Elliptic curve key lengths of at least 160-224 bits.</ListItem>
-									<ListItem>RSA key lengths of at least 1248-2048 bits.
-          In particular, the CA/Browser Forum
-          
-										<URLLink LinkURL="http://www.cabforum.org/EV_Certificate_Guidelines.pdf" LinkTitle="http://www.cabforum.org/EV_Certificate_Guidelines.pdf" href="http://www.cabforum.org/EV_Certificate_Guidelines.pdf">Extended Validation (EV) Guidelines</URLLink>
-          require a minimum key length of 2048 bits.
-          Also, current research shows that factoring a 1024-bit RSA modulus
-          
-										<URLLink LinkURL="http://people.csail.mit.edu/tromer/papers/tromer-phd-dissertation-11pt.pdf" LinkTitle="http://people.csail.mit.edu/tromer/papers/tromer-phd-dissertation-11pt.pdf" href="http://people.csail.mit.edu/tromer/papers/tromer-phd-dissertation-11pt.pdf">is within practical reach.</URLLink>
-									</ListItem>
-									<ListItem>DSA key lengths of at least 2048 bits.</ListItem>
-								</UnorderedList>
-							</Paragraph>
-
-							<Paragraph>
-       Additionally, starting in 2014, the Certificate Authority/Browser Forum has mandated that 1024-bit RSA keys no
-       longer be supported for SSL certificates or code signing.
-							</Paragraph>
+							<Paragraph>Adobe ColdFusion 9.0, 9.0.1, 9.0.2, and 10 allows remote attackers to bypass authentication and possibly execute arbitrary code via unspecified vectors, as exploited in the wild in January 2013.</Paragraph>
 						</ContainerBlockElement>
 					</description>
 					<references>
-						<reference source="URL">http://www.symantec.com/page.jsp?id=1024-bit-certificate-support</reference>
-						<reference source="URL">http://csrc.nist.gov/publications/nistpubs/800-131A/sp800-131A.pdf</reference>
-						<reference source="URL">http://csrc.nist.gov/groups/ST/toolkit/key_management.html</reference>
-						<reference source="URL">http://www.bundesnetzagentur.de/SharedDocs/Downloads/DE/BNetzA/Sachgebiete/QES/Veroeffentlichungen/Algorithmen/2011_2_AlgoKatpdf.pdf</reference>
-						<reference source="URL">http://www.ecrypt.eu.org/documents/D.SPA.17.pdf</reference>
-						<reference source="URL">http://www.keylength.com</reference>
-						<reference source="URL">http://www.ssi.gouv.fr/IMG/pdf/RGS_B_1.pdf</reference>
+						<reference source="CVE">CVE-2013-0632</reference>
+						<reference source="URL">http://www.adobe.com/support/security/bulletins/apsb13-03.html</reference>
 					</references>
 					<tags>
-						<tag>Network</tag>
+						<tag>Adobe</tag>
+						<tag>Adobe ColdFusion</tag>
+						<tag>Remote Execution</tag>
 						<tag>Web</tag>
 					</tags>
 					<solution>
@@ -75,14 +40,54 @@
 						<ContainerBlockElement>
 							<Paragraph>
 								<Paragraph>
-           If the weak key is used in an X.509 certificate (for example for an HTTPS server),
-           generate a longer key and recreate the certificate.
+      Adobe recommends ColdFusion customers update their installation using the
+      instructions provided in the technote
+      
+									<URLLink LinkURL="http://helpx.adobe.com/coldfusion/kb/coldfusion-security-hotfix-apsb13-03.html" LinkTitle="http://helpx.adobe.com/coldfusion/kb/coldfusion-security-hotfix-apsb13-03.html" href="http://helpx.adobe.com/coldfusion/kb/coldfusion-security-hotfix-apsb13-03.html">APSB13-03 technote</URLLink>.
 								</Paragraph>
-							</Paragraph>
-							<Paragraph>
-        Please also refer to 
-								<URLLink LinkURL="http://csrc.nist.gov/publications/nistpubs/800-131A/sp800-131A.pdf" LinkTitle="http://csrc.nist.gov/publications/nistpubs/800-131A/sp800-131A.pdf" href="http://csrc.nist.gov/publications/nistpubs/800-131A/sp800-131A.pdf">NIST&#39;s 
-        recommendations on cryptographic algorithms and key lengths</URLLink>.
+								<Paragraph>
+      Customers should also inspect files and scheduled tasks of unknown origin
+      located in the CFIDE, CFIDE/adminapi or webroot directories, and remove
+      any suspicious files (some examples of malicious file names include
+      h.cfm, i.cfm, h9.cfm, r.cfm, adss.cfm or fusebox.cfm).
+								</Paragraph>
+								<Paragraph>
+      Additionally, Adobe recommends that customers follow security best
+      practices, which include the following steps to harden their ColdFusion
+      server:
+      
+									<UnorderedList>
+										<ListItem>
+          Configure a username and password for Remote Development Services (RDS)
+          that is different from the Administrator account. After configuring the
+          RDS account, users should disable RDS if not needed.
+										</ListItem>
+										<ListItem>
+          Disable external access to the following directories for all hosted
+          sites:
+          
+											<UnorderedList>
+												<ListItem>/CFIDE/administrator</ListItem>
+												<ListItem>/CFIDE/adminapi</ListItem>
+												<ListItem>/CFIDE/componentutils</ListItem>
+											</UnorderedList>
+										</ListItem>
+										<ListItem>
+          Implement access control restrictions for the Administrator interface and
+          internal applications via the Administrator Console (in ColdFusion
+          version 10) or within your web server&#39;s access control mechanisms for
+          versions 9.0.2 and below.
+										</ListItem>
+										<ListItem>
+          Ensure your ColdFusion product has the latest hotfix applied.
+										</ListItem>
+										<ListItem>
+          Refer to the ColdFusion 9 Lockdown Guide and ColdFusion 10 Lockdown Guide
+          for security best practices and further information on these hardening
+          techniques.
+										</ListItem>
+									</UnorderedList>
+								</Paragraph>
 							</Paragraph>
 						</ContainerBlockElement>
 					</solution>
