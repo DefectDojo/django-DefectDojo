@@ -4,7 +4,6 @@ from dojo.models import Test
 
 
 class TestNexposeParser(TestCase):
-    
     def test_nexpose_parser_has_no_finding(self):
         testfile = open("dojo/unittests/scans/nexpose/no_vuln.xml")
         parser = NexposeFullXmlParser(testfile, Test())
