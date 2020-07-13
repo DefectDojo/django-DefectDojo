@@ -1,26 +1,23 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <NexposeReport version="1.0">
-<scans>
-<scan id="1" name="Localhost" startTime="20131127T050242739" endTime="20131127T115513233" status="stopped"/>
-</scans><nodes>
-<node address="192.168.1.1" status="alive" device-id="7">
-<fingerprints>
-<os  certainty="0.70" device-class="General" vendor="Linux" family="Linux" product="Linux" version="2.6.9"/>
-</fingerprints>
-<tests>
-<test id="generic-icmp-netmask" status="not-vulnerable">
-
-<Paragraph>
-	<Paragraph>No response</Paragraph></Paragraph>
-</test>
-</tests>
-</service>
-</services>
-</endpoint>
-</endpoints>
-</node>
-</nodes><VulnerabilityDefinitions>
-<vulnerability>
-</vulnerability>
-</VulnerabilityDefinitions>
+	<scans>
+		<scan id="1" name="Localhost" startTime="20131127T050242739" endTime="20131127T115513233" status="stopped"/>
+	</scans>
+	<nodes>
+		<node address="192.168.1.1" status="alive" device-id="7">
+			<fingerprints>
+				<os  certainty="0.70" device-class="General" vendor="Linux" family="Linux" product="Linux" version="2.6.9"/>
+			</fingerprints>
+			<tests>
+				<test id="generic-icmp-netmask" status="not-vulnerable">
+					<Paragraph>
+						<Paragraph>No response</Paragraph>
+					</Paragraph>
+				</test>
+			</tests>
+		</node>
+	</nodes>
+	<VulnerabilityDefinitions>
+		<vulnerability></vulnerability>
+	</VulnerabilityDefinitions>
 </NexposeReport>
