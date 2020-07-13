@@ -9,13 +9,13 @@ class TestNexposeParser(TestCase):
         self.assertEqual(0, len(parser.items))
 
     def test_nexpose_parser_has_one_finding(self):
-        testfile = open("dojo/unittests/scans/nexpose/one_vuln.xml")
+        testfile = open("dojo/unittests/scans/nexpose/one_vuln.xml",'r')
         parser = NexposeFullXmlParser(testfile, Test())
         testfile.close()
         self.assertEqual(1, len(parser.items))
 
     def test_nexpose_parser_has_many_finding(self):
-        testfile = open("dojo/unittests/scans/nexpose/many_vulns.xml")
+        testfile = open("dojo/unittests/scans/nexpose/many_vulns.xml", 'r')
         parser = NexposeFullXmlParser(testfile, Test())
         testfile.close()
         self.assertEqual(24, len(parser.items))
