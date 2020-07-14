@@ -7,7 +7,7 @@ import multiselectfield.db.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0046_endpoint_status'),
+        ('dojo', '0047_jira_minimum_severity_default'),
     ]
 
     operations = [
