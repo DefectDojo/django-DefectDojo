@@ -8,14 +8,13 @@ class Migration(migrations.Migration):
     def set_default_to_low(apps, schema_editor):
         system_settings = apps.get_model('dojo', 'system_settings')
         try:
-            ss = system_settings.objects.get(id=1)
+            ss = system_settings.objects.all().first()
             jira_sev_value = ss.jira_minimum_severity
             if jira_sev_value is None:
                 ss.jira_minimum_severity = 'Low'
                 ss.save()
         except Exception as e:
             # probably a test run such as running unittest, no values in table
-            print("No data migration because of exception caught: {}".format(e))
             pass
 
     dependencies = [
