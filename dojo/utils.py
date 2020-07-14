@@ -2139,10 +2139,10 @@ def sla_compute_and_notify():
             sla_age=sla_age
         )
 
-        if sla_notification_enabled:
-            if jira_config and jira_issue:
-                logger.debug("Creating JIRA comment to notify of SLA breach information.")
-                add_simple_jira_comment(jira_config, jira_issue, title)
+        if do_jira_sla_comment:
+            # inferred ## if jira_config and jira_issue:
+            logger.debug("Creating JIRA comment to notify of SLA breach information.")
+            add_simple_jira_comment(jira_config, jira_issue, title)
 
     # exit early on flags
     if not settings.SLA_NOTIFY_ACTIVE and not settings.SLA_NOTIFY_ACTIVE_VERIFIED_ONLY:
@@ -2162,7 +2162,6 @@ def sla_compute_and_notify():
                 settings.SLA_NOTIFY_PRE_BREACH,
             ))
 
-            # TODO be able to specify products
             query = None
             if settings.SLA_NOTIFY_ACTIVE:
                 query = Q(active=True, is_Mitigated=False, duplicate=False)
@@ -2190,18 +2189,25 @@ def sla_compute_and_notify():
                 if sla_age is None:
                     sla_age = 0
 
+                do_jira_sla_comment = False
                 if finding.has_jira_issue():
                     jira_config = finding.jira_conf_new()
                     if jira_config is not None:
                         logger.debug("JIRA config for finding is {}".format(jira_config))
-                        sla_notification_enabled = jira_config.sla_notification
-                        logger.debug("JIRA SLA notification as comment is {}".format(sla_notification_enabled))
+                        # global config or product config set, product level takes precedence
+                        product_jira_sla_comment_enabled = finding.test.engagement.product.jira_pkey_set.first().sla_notification
+                        logger.debug("Product setting for JIRA comment: {}".format(product_jira_sla_comment_enabled))
+                        jiraconfig_sla_notification_enabled = jira_config.sla_notification
+                        logger.debug("Global JIRA SLA notification as comment is {}".format(jiraconfig_sla_notification_enabled))
 
-                    if sla_notification_enabled:
-                        jira_issue = finding.jira_issue
-                        logger.debug("JIRA issue is {}".format(jira_issue.jira_key))
-                    else:
-                        logger.debug("This finding does not have a JIRA issue.")
+                        if jiraconfig_sla_notification_enabled or product_jira_sla_comment_enabled:
+                            logger.debug("Global setting {} -- Product setting {}".format(
+                                jiraconfig_sla_notification_enabled,
+                                product_jira_sla_comment_enabled
+                            ))
+                            do_jira_sla_comment = True
+                            jira_issue = finding.jira_issue
+                            logger.debug("JIRA issue is {}".format(jira_issue.jira_key))
 
                 logger.debug("Finding {} has {} days left to breach SLA.".format(finding.id, sla_age))
                 if (sla_age < 0):

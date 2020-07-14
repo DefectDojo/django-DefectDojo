@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='jira_conf',
             name='sla_notification',
-            field=models.BooleanField(default=True, verbose_name='Send SLA notifications as comment?'),
+            field=models.BooleanField(default=True, verbose_name='Globally send SLA notifications as comment?', help_text="This setting can be overidden at the Product level"),
         ),
         migrations.AddField(
             model_name='notifications',
