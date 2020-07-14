@@ -64,6 +64,14 @@ else
     fail $test
 fi
 
+test="Notes integration tests"
+echo "Running: $test"
+if python3 tests/Notes_unit_test.py ; then
+    success $test
+else
+    fail $test
+fi
+
 test="Endpoint integration tests"
 echo "Running: $test"
 if python3 tests/Endpoint_unit_test.py ; then

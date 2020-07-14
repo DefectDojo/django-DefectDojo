@@ -387,7 +387,7 @@
 
 <div class="panel panel-default">
   <div class="panel-heading">
-    <h4>Additional Features<span class="pull-right"><a data-toggle="collapse" href="#add_feat">
+    <h4>Additional Features<span class="pull-right"><a name="collapsible" data-toggle="collapse" href="#add_feat">
       <i class="glyphicon glyphicon-chevron-down"></i></a></span></h4>
   </div>
   
@@ -396,7 +396,7 @@
     {% if eng.engagement_type == "Interactive" %}
       <div class="panel panel-default">
         <div class="panel-heading">
-          <h4> Check List<span class="pull-right"><a data-toggle="collapse" href="#add_feat_check_list">
+          <h4> Check List<span class="pull-right"><a name="collapsible" data-toggle="collapse" href="#add_feat_check_list">
             <i class="glyphicon glyphicon-chevron-down"></i></a></span>
             {% if user.is_staff %}
               {% if check %}
@@ -475,7 +475,7 @@
 
       <div class="panel-heading">
         <h4>Questionnaires<span class="pull-right">
-          <a data-toggle="collapse" href="#add_feat_survey">
+          <a name="collapsible" data-toggle="collapse" href="#add_feat_survey">
             <i class="glyphicon glyphicon-chevron-down"></i></a></span>
             {% add_surveys eng %}
         </h4>
@@ -518,7 +518,7 @@
 
       <div class="panel-heading">
         <h4>Notes<span class="pull-right">
-          <a data-toggle="collapse" href="#add_feat_notes">
+          <a name="collapsible" data-toggle="collapse" href="#add_feat_notes">
             <i class="glyphicon glyphicon-chevron-down"></i></a></span>
         </h4>
       </div>
@@ -528,7 +528,7 @@
           {% include "dojo/form_fields.html" with form=form %}
           <div class="form-group">
               <div class="col-sm-offset-2 col-sm-10">
-                  <input class="btn btn-primary" type="submit" label="Add Notes" value="Add Note"/>
+                  <input class="btn btn-primary" type="submit" id="add_note" label="Add Notes" value="Add Note"/>
               </div>
           </div>
         </form>
