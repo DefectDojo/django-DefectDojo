@@ -13,4 +13,4 @@ class TestNexposeParser(TestCase):
         testfile = open("dojo/unittests/scans/nexpose/many_vulns.xml")
         parser = NexposeFullXmlParser(testfile, Test())
         testfile.close()
-        self.assertEqual(135, len(parser.items))
+        self.assertEqual(125, len(parser.items))
