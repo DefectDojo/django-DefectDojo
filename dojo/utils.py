@@ -2140,8 +2140,7 @@ def sla_compute_and_notify():
         )
 
         if do_jira_sla_comment:
-            # inferred ## if jira_config and jira_issue:
-            logger.debug("Creating JIRA comment to notify of SLA breach information.")
+            logger.info("Creating JIRA comment to notify of SLA breach information.")
             add_simple_jira_comment(jira_config, jira_issue, title)
 
     # exit early on flags
@@ -2178,13 +2177,12 @@ def sla_compute_and_notify():
                     query
                 ).exclude(id__in=no_jira_findings)
 
-            logger.debug("Findings: {}".format(findings))
             for finding in findings:
-                # A finding with 'Info' severity will not be considered for SLA notifications
+                # A finding with 'Info' severity will not be considered for SLA notifications (not in model)
                 if finding.severity == 'Info':
                     continue
-                sla_age = finding.sla_days_remaining()
 
+                sla_age = finding.sla_days_remaining()
                 # if SLA is set to 0 in settings, it's a null. And setting at 0 means no SLA apparently.
                 if sla_age is None:
                     sla_age = 0
@@ -2196,9 +2194,7 @@ def sla_compute_and_notify():
                         logger.debug("JIRA config for finding is {}".format(jira_config))
                         # global config or product config set, product level takes precedence
                         product_jira_sla_comment_enabled = finding.test.engagement.product.jira_pkey_set.first().sla_notification
-                        logger.debug("Product setting for JIRA comment: {}".format(product_jira_sla_comment_enabled))
                         jiraconfig_sla_notification_enabled = jira_config.sla_notification
-                        logger.debug("Global JIRA SLA notification as comment is {}".format(jiraconfig_sla_notification_enabled))
 
                         if jiraconfig_sla_notification_enabled or product_jira_sla_comment_enabled:
                             logger.debug("Global setting {} -- Product setting {}".format(
