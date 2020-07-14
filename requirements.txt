@@ -29,7 +29,7 @@ html2text==2020.1.16
 humanize==2.5.0
 jira==2.0.0
 PyGithub==1.51
-lxml==4.5.1
+lxml==4.5.2
 Markdown==3.2.2
 mysqlclient==2.0.1
 pandas>=0.25
@@ -54,7 +54,7 @@ social-auth-app-django==4.0.0
 Python-jose==3.1.0
 gitpython>=2.1.13
 ptvsd>=4.2.7
-google-auth==1.18.0
+google-auth==1.19.0
 google-api-python-client==1.9.3
 google-auth-oauthlib==0.4.1
 drf_yasg==1.17.1

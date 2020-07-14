@@ -136,7 +136,7 @@ class System_Settings(models.Model):
                     ('Info', 'Info'))
     jira_minimum_severity = models.CharField(max_length=20, blank=True,
                                              null=True, choices=jira_choices,
-                                             default='None')
+                                             default='Low')
     jira_labels = models.CharField(max_length=200, blank=True, null=True,
                                    help_text='JIRA issue labels space seperated')
 
