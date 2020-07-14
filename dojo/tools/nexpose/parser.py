@@ -293,11 +293,11 @@ class NexposeFullXmlParser(object):
                         find.unsaved_endpoints = list()
                         dupes[dupe_key] = find
 
-                    find.unsaved_endpoints.append(
-                        Endpoint(host=item['name'], product=test.engagement.product))
-                    for hostname in item['hostnames']:
-                        find.unsaved_endpoints.append(
-                            Endpoint(host=hostname, product=test.engagement.product))
+                    # find.unsaved_endpoints.append(
+                    #     Endpoint(host=item['name'], product=test.engagement.product))
+                    # for hostname in item['hostnames']:
+                    #     find.unsaved_endpoints.append(
+                    #         Endpoint(host=hostname, product=test.engagement.product))
                     for service in item['services']:
                         if len(service['vulns']) > 0:
                             find.unsaved_endpoints.append(
