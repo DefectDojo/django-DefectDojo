@@ -21,4 +21,9 @@ class Migration(migrations.Migration):
             name='sla_breach',
             field=multiselectfield.db.fields.MultiSelectField(blank=True, choices=[('slack', 'slack'), ('hipchat', 'hipchat'), ('mail', 'mail'), ('alert', 'alert')], default='alert', help_text='Get notified of upcoming SLA breaches', max_length=24, verbose_name='SLA breach'),
         ),
+        migrations.AddField(
+            model_name='jira_pkey',
+            name='sla_notification',
+            field=models.BooleanField(default=True, verbose_name='Send SLA notifications as comment?'),
+        ),
     ]
