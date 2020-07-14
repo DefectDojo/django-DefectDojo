@@ -331,6 +331,23 @@
   },
   {
     "pk": 1,
+    "model": "dojo.app_analysis",
+    "fields": {
+      "product": 1,
+      "name": "Tomcat",
+      "user": [
+          "admin"
+      ],
+      "confidence": 100,
+      "version": "8.5.1",
+      "icon": null,
+      "website": null,
+      "website_found": null,
+      "created": "2018-08-16T16:58:23.908Z"
+    }
+  },
+  {
+    "pk": 1,
     "model": "dojo.scansettings",
     "fields": {
       "product": 1,
@@ -558,6 +575,22 @@
       "query": null,
       "path": null,
       "port": 22
+    }
+  },
+  {
+    "pk": 1,
+    "model": "dojo.endpoint_status",
+    "fields": {
+      "date": "2020-07-01T00:00:00Z",
+      "last_modified": "2020-07-01T17:45:39.791907Z",
+      "mitigated": false,
+      "mitigated_time": null,
+      "false_positive": false,
+      "out_of_scope": false,
+      "risk_accepted": false,
+      "mitigated_by": null,
+      "endpoint": 2,
+      "finding": 2
     }
   },
   {
