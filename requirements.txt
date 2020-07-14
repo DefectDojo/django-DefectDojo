@@ -14,7 +14,7 @@ django-imagekit==4.0.2
 django-multiselectfield==0.1.12
 django-polymorphic==2.1.2
 django-crispy-forms==1.9.1
-django_extensions==2.2.9
+django_extensions==3.0.2
 django-rest-swagger==2.2.0
 django-slack==5.14.4
 django-tagging==0.5.0
@@ -22,20 +22,20 @@ git+https://github.com/DefectDojo/django-tastypie-swagger.git@c7c5629480dc20cadd
 django-tastypie==0.14.2
 django-watson==1.5.5
 django-prometheus==2.0.0
-Django==2.2.13
+Django==2.2.14
 djangorestframework==3.11.0
 gunicorn==20.0.4
 html2text==2020.1.16
-humanize==2.4.0
+humanize==2.4.1
 jira==2.0.0
 PyGithub==1.51
 lxml==4.5.1
 Markdown==3.2.2
-mysqlclient==1.4.6
+mysqlclient==2.0.0
 pandas>=0.25
 xlrd>=1.0.0
 pdfkit==0.6.1
-Pillow==7.1.2  # required by django-imagekit
+Pillow==7.2.0  # required by django-imagekit
 psycopg2-binary==2.8.5
 cryptography==2.9.2
 python-dateutil==2.8.1
@@ -59,3 +59,4 @@ google-api-python-client==1.9.3
 google-auth-oauthlib==0.4.1
 drf_yasg==1.17.1
 jsonlines==1.2.0  # requred by yarn audit parser
+django-saml2-auth==2.2.1
