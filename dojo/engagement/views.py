@@ -357,7 +357,6 @@ def view_engagement(request, eid):
                 form = NoteForm()
             url = request.build_absolute_uri(reverse("view_engagement", args=(eng.id,)))
             title = "Engagement: %s on %s" % (eng.name, eng.product.name)
-            process_notifications(request, new_note, url, title)
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Note added successfully.',
