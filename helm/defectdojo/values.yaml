@@ -31,6 +31,8 @@ admin:
 monitoring:
   enabled: false
 
+annotations: {}
+
 # Components
 celery:
   broker: rabbitmq
@@ -111,20 +113,19 @@ initializer:
 mysql:
   enabled: false
   mysqlUser: defectdojo
+  mysqlPassword: 
   existingSecret: defectdojo-mysql-specific
   mysqlDatabase: defectdojo
   service:
     port: 3306  
   # To use an external mySQL instance, set enabled to false and uncomment
   # the line below:
-  # mysqlServer: ""
-  # To use an external secret for the password for an external mySQL instance,
-  # set enabled to false and provide the name of the secret on the line below:
-  # mysqlPasswordSecret: ""  
+  mysqlServer: "127.0.0.1"
 
 postgresql:
   enabled: true
   postgresqlUsername: defectdojo
+  postgresqlPassword: 
   postgresqlDatabase: defectdojo
   existingSecret: defectdojo-postgresql-specific
   persistence:
@@ -135,17 +136,25 @@ postgresql:
     port: 5432  
   # To use an external PostgreSQL instance, set enabled to false and uncomment
   # the line below:
-  # postgresServer: ""
-  # To use an external secret for the password for PostgreSQL
-  # instance, set enabled to false and provide the name of the secret on the
-  # line below:
-  # existingSecret: ""
+  postgresServer: "127.0.0.1"
   master:
     affinity: {}
     nodeSelector: {}
   slave:
     affinity: {}
     nodeSelector: {}
+
+# Google CloudSQL support in GKE via gce-proxy
+cloudsql:
+  # To use CloudSQL in GKE set 'enable: true'
+  enabled: true
+  image:
+    # set repo and image tag of gce-proxy
+    repository: gcr.io/cloudsql-docker/gce-proxy
+    tag: 1.17
+    pullPolicy: IfNotPresent
+  # set CloudSQL instance: 'project:zone:instancname'
+  instance: ""
 
 rabbitmq:
   enabled: true
@@ -155,9 +164,9 @@ rabbitmq:
     existingErlangSecret: defectdojo-rabbitmq-specific
     affinity: {}
     nodeSelector: {}
+
 redis:
   enabled: false
   existingSecret: defectdojo-redis-specific
   cluster:
     slaveCount: 1
-
