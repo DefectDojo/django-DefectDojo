@@ -2123,7 +2123,7 @@ def is_scan_file_too_large(scan_file):
     return False
 
 
-def sla_compute_and_notify():
+def sla_compute_and_notify(*args, **kwargs):
     """
     The SLA computation and notification will be disabled if the user opts out
     of the Findings SLA on the System Settings page.

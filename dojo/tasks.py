@@ -384,7 +384,7 @@ def send_alert_notification_task(*args, **kwargs):
     send_alert_notification(*args, **kwargs)
 
 
-@app.task(name='async_sla_compute_and_notify')
+@app.task(name='dojo.tasks.async_sla_compute_and_notify')
 def async_sla_compute_and_notify_task(*args, **kwargs):
     logger.debug("Computing SLAs and notifying as needed")
     sla_compute_and_notify(*args, **kwargs)
