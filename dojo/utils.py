@@ -2193,8 +2193,8 @@ def sla_compute_and_notify():
                     if jira_config is not None:
                         logger.debug("JIRA config for finding is {}".format(jira_config))
                         # global config or product config set, product level takes precedence
-                        product_jira_sla_comment_enabled = finding.test.engagement.product.jira_pkey_set.first().sla_notification
-                        jiraconfig_sla_notification_enabled = jira_config.sla_notification
+                        product_jira_sla_comment_enabled = finding.test.engagement.product.jira_pkey_set.first().product_jira_sla_notification
+                        jiraconfig_sla_notification_enabled = jira_config.global_jira_sla_notification
 
                         if jiraconfig_sla_notification_enabled or product_jira_sla_comment_enabled:
                             logger.debug("Global setting {} -- Product setting {}".format(
