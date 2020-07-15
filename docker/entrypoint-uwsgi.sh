@@ -8,5 +8,4 @@ exec uwsgi \
   --enable-threads \
   --processes 2 \
   --threads 2 \
-  --wsgi dojo.wsgi:application \
-  --buffer-size="${DD_UWSGI_BUFFER_SIZE:-4096}"
+  --wsgi dojo.wsgi:application
