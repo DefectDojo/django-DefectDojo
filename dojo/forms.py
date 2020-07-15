@@ -2038,6 +2038,8 @@ class GITHUBFindingForm(forms.Form):
 class JIRAFindingForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.enabled = kwargs.pop('enabled') or False
+        self.instance = kwargs.pop('instance') or None
+
         super(JIRAFindingForm, self).__init__(*args, **kwargs)
         self.fields['push_to_jira'] = forms.BooleanField()
         self.fields['push_to_jira'].required = False
@@ -2052,7 +2054,21 @@ class JIRAFindingForm(forms.Form):
             self.fields['push_to_jira'].widget.attrs['checked'] = 'checked'
             self.fields['push_to_jira'].disabled = True
 
+        if self.instance and self.instance.has_jira_issue():
+            # print('has jira')
+            # print('self.instance.jira_issue.jira_key: ', self.instance.jira_issue.jira_key)
+            self.initial['jira_issue'] = self.instance.jira_issue.jira_key
+
+    def clean(self):
+        print('not valid bro1')
+        cleaned_data = super(JIRAFindingForm, self).clean()
+        print('not valid bro2')
+        # self._errors['email'] = [u'Email is already in use']
+        raise forms.ValidationError('valentijn validation')
+
+    jira_issue = forms.CharField(required=False, label="Linked JIRA Issue")
     push_to_jira = forms.BooleanField(required=False, label="Push to JIRA")
+    link_existing_jira = forms.BooleanField(required=False, label="Link existing JIRA", help_text='Linking an existing JIRA issue will result in Defect Dojo overwriting the description field in JIRA.')
 
 
 class GoogleSheetFieldsForm(forms.Form):

@@ -445,9 +445,9 @@
                         <i id="push_to_jira" class="fa fa-share-square" title="Push finding data to linked JIRA issue."></i>
                     {% else %}
                         <i id="push_to_jira" class="fa fa-share-square" title="Create JIRA issue for this finding"></i>
-                        <a href="{% url 'finding_link_to_jira' finding.id %}" title="Link existing JIRA issue to finding.">
+                        {% comment %} <a href="{% url 'finding_link_to_jira' finding.id %}" title="Link existing JIRA issue to finding.">
                             <i class="fa fa-asterisk" title="Link existing JIRA issue to finding."></i>
-                        </a>
+                        </a> {% endcomment %}
                     {% endif %}
                     </td>
                 {% endif %}
@@ -461,38 +461,13 @@
             </tr>
         </table>
     </div>
-    <div id="jira_existing_issue" class="panel panel-default">
-        <table id="error_notes" class="table-striped table table-condensed table-hover centered">
-            <tr>
-                <th>Existing JIRA issue</th>
-                <th></th>
-                <th></th>
-                <th></th>
-            </tr>
-            <tr>
-                <td>
-                    <span>{{ finding.file_path }} 
-                        <i class="fa fa-copy fa-align-right copytoclipboard" title="copy to clipboard"
-                        data-clipboard-text="{{finding.file_path}}"></i>
-                    </span>
-                </td>
-                <td>
-                    <span>
-                        {{ finding.line }}
-                    </span>
-                </td>
-                <td>
-                    <span>
-                        {{ finding.nb_occurences }}
-                    </span>
-                </td>
-                <td>
-                    <span>
-                        {{ finding.component_name }}
-                    </span>
-                </td>
-            </tr>
-        </table>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4>Add Existing JIRA issue <span class="pull-right"><a data-toggle="collapse" href="#similar_findings"><i class="glyphicon glyphicon-chevron-down"></i></a></span></h4>
+        </div>
+        <div id="existing_jira_finding" class="panel-body collapse">
+            FORM TO BE ADDED
+        </div>
     </div>
     {% endif %}    
     {% if finding.param or finding.payload %}
