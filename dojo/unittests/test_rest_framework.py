@@ -263,7 +263,7 @@ class JiraConfigurationsTest(BaseClass.RESTEndpointTest):
             "high_mapping_severity": "LOW",
             "critical_mapping_severity": "LOW",
             "finding_text": "",
-            "sla_notification": False
+            "global_jira_sla_notification": False
         }
         self.update_fields = {'epic_name_id': 1}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)

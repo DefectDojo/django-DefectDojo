@@ -1048,7 +1048,7 @@
       "high_mapping_severity": "test severity",
       "password": "user1",
       "epic_name_id": 111,
-      "sla_notification": false
+      "global_jira_sla_notification": false
     }
   },
   {
