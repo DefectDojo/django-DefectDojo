@@ -430,7 +430,7 @@ class JiraViewSet(mixins.ListModelMixin,
                      'push_all_issues', 'enable_engagement_epic_mapping',
                      'push_notes')
 
-        
+
 class SonarqubeIssueViewSet(mixins.ListModelMixin,
                                 mixins.RetrieveModelMixin,
                                 mixins.DestroyModelMixin,

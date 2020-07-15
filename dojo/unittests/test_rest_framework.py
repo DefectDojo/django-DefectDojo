@@ -307,7 +307,7 @@ class JiraTest(BaseClass.RESTEndpointTest):
         self.update_fields = {'conf': 3}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
-    
+
 class SonarqubeIssueTest(BaseClass.RESTEndpointTest):
     fixtures = ['dojo_testdata.json']
 
