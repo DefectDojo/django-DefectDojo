@@ -71,7 +71,6 @@ COPY docker/entrypoint-nginx.sh /
 RUN \
   apk add --no-cache openssl && \
   chmod -R g=u /var/cache/nginx && \
-  chmod -R g=u /var/run && \
   mkdir -p /etc/nginx/ssl && \
   chmod -R g=u /etc/nginx && \
   true

@@ -74,7 +74,6 @@ COPY tests/ ./tests/
 RUN \
   mkdir -p dojo/migrations && \
   chmod g=u dojo/migrations && \
-  chmod g=u /var/run && \
   true
 USER root
 RUN chmod -R 0777 /app
