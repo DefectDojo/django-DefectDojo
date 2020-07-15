@@ -42,6 +42,11 @@ class BaseClass():
 
         @skipIfNotSubclass('ListModelMixin')
         def test_list(self):
+
+            if hasattr(self.endpoint_model, 'tags') and self.payload:
+                # create a new instance first to make sure there's at least 1 instance with tags set by payload to trigger tag handling code
+                response = self.client.post(self.url, self.payload)
+
             response = self.client.get(self.url, format='json')
             self.assertEqual(200, response.status_code)
 
@@ -93,6 +98,7 @@ class EndpointTest(BaseClass.RESTEndpointTest):
             'query': 'test=true',
             'fragment': 'test-1',
             'product': 1,
+            "tags": ["mytag", "yourtag"]
         }
         self.update_fields = {'protocol': 'ftp'}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
@@ -263,7 +269,7 @@ class ProductTest(BaseClass.RESTEndpointTest):
             "prod_type": 1,
             "name": "Test Product",
             "description": "test product",
-            "tags": ["mytag"]
+            "tags": ["mytag", "yourtag"]
         }
         self.update_fields = {'prod_type': 2}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
@@ -335,6 +341,7 @@ class TestsTest(BaseClass.RESTEndpointTest):
             "target_end": "2017-01-12T00:00",
             "percent_complete": 0,
             "lead": 2,
+            "tags": []
         }
         self.update_fields = {'percent_complete': 100}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
@@ -482,6 +489,7 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
             "file": open('tests/zap_sample.xml'),
             "engagement": 1,
             "lead": 2,
+            "tags": ["'ci/cd, api"]
         }
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 

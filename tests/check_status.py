@@ -5,33 +5,10 @@ import time
 import unittest
 import sys
 import requests
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.common.exceptions import NoAlertPresentException
-from selenium.common.exceptions import NoSuchElementException
+from base_test_class import BaseTestCase
 
 
-class Login(unittest.TestCase):
-    def setUp(self):
-        self.options = Options()
-        self.options.add_argument("--headless")
-        self.driver = webdriver.Chrome('chromedriver', chrome_options=self.options)
-        self.driver.implicitly_wait(500)
-        self.base_url = "http://localhost:8080/"
-        self.verificationErrors = []
-        self.accept_next_alert = True
-
-    def login_page(self):
-        driver = self.driver
-        driver.get(self.base_url + "login")
-        cred_user_elem = driver.find_element_by_id("id_username")
-        cred_user_elem.clear()
-        cred_user_elem.send_keys(os.environ['DD_ADMIN_USER'])
-        cred_pass_elem = driver.find_element_by_id("id_password")
-        cred_pass_elem.clear()
-        cred_pass_elem.send_keys(os.environ['DD_ADMIN_PASSWORD'])
-        driver.find_element_by_css_selector("button.btn.btn-success").click()
-        return driver
+class Login(BaseTestCase):
 
     def get_api_key(self):
         driver = self.login_page()
@@ -79,36 +56,6 @@ class Login(unittest.TestCase):
         r = requests.get(api_url, headers=headers, verify=False)
         self.assertEqual(r.status_code, 200)
 
-    def is_element_present(self, how, what):
-        try:
-            self.driver.find_element(by=how, value=what)
-        except NoSuchElementException as e:
-            return False
-        return True
-
-    def is_alert_present(self):
-        try:
-            self.driver.switch_to_alert()
-        except NoAlertPresentException as e:
-            return False
-        return True
-
-    def close_alert_and_get_its_text(self):
-        try:
-            alert = self.driver.switch_to_alert()
-            alert_text = alert.text
-            if self.accept_next_alert:
-                alert.accept()
-            else:
-                alert.dismiss()
-            return alert_text
-        finally:
-            self.accept_next_alert = True
-
-    def tearDown(self):
-        self.driver.quit()
-        self.assertEqual([], self.verificationErrors)
-
 
 def suite():
     suite = unittest.TestSuite()
@@ -118,6 +65,7 @@ def suite():
 
 
 if __name__ == "__main__":
-    runner = unittest.TextTestRunner(descriptions=True, failfast=True)
+    runner = unittest.TextTestRunner(descriptions=True, failfast=True, verbosity=2)
     ret = not runner.run(suite()).wasSuccessful()
+    BaseTestCase.tearDownDriver()
     sys.exit(ret)

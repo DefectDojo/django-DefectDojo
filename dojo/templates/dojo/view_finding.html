@@ -177,7 +177,7 @@
                 {% endif %}
                 <tr>
                     <th>Severity</th>
-                    {% if 'enable_finding_sla'|fetch_system_setting %}
+                    {% if system_settings.enable_finding_sla %}
                     <th>SLA</th>
                     {% endif %}
                     {% if finding.scanner_confidence %}
@@ -216,7 +216,7 @@
                             {% endif %}
                         </span>
                     </td>
-                    {% if 'enable_finding_sla'|fetch_system_setting %}
+                    {% if system_settings.enable_finding_sla %}
                     <td>
                       {{ finding|finding_sla }}
                     </td>
@@ -292,6 +292,178 @@
             </table>
         </div>
     </div>
+    {% if finding.static_finding or finding.line > 0 %}
+        {% if finding.sast_source_object or finding.sast_sink_object or finding.sast_source_file_path or finding.sast_source_line > 0 %}
+        {# For tools that give information on both source (start) and sink (end) of the attack vector #}
+        
+        <div class="panel panel-default">
+            <table id="sast_source" class="table-striped table table-condensed table-hover centered">
+                <tr>
+                    <th>Source Filepath</th>
+                    <th>Source Line Number</th>
+                    <th>Source Object</th>
+                </tr>
+                <tr>
+                    <td>
+                        <span>
+                           {{ finding.sast_source_file_path }}
+                        </span>
+                    </td>
+                    <td>
+                        <span>
+                           {{ finding.sast_source_line }}
+                        </span>
+                    </td>
+                    <td>
+                        <span>
+                           {{ finding.sast_source_object }}
+                        </span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="panel panel-default">
+            <table id="sast_sink" class="table-striped table table-condensed table-hover centered">
+                <tr>
+                    <th>Sink Filepath</th>
+                    <th>Sink Line Number</th>
+                    <th>Sink Object</th>
+                </tr>
+                <tr>
+                    <td>
+                        <span>
+                           {{ finding.file_path }}
+                        </span>
+                    </td>
+                    <td>
+                        <span>
+                           {{ finding.line }}
+                        </span>
+                    </td>
+                    <td>
+                        <span>
+                           {{ finding.sast_sink_object }}
+                        </span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        {% else %}
+        <div class="panel panel-default">
+            <table id="error_notes" class="table-striped table table-condensed table-hover centered">
+                <tr>
+                    <th>Location</th>
+                    <th>Line Number</th>
+                    {% if finding.nb_occurences %}
+                    <th>Nb occurences</th>
+                    {% endif %}
+                    {% if finding.component_name %}
+                    <th>Component Name</th>
+                    {% endif %}
+                    {% if finding.component_version %}
+                    <th>Component Version</th>
+                    {% endif %}
+                </tr>
+                <tr>
+                    <td>
+                        <span>
+                           {{ finding.file_path }}
+                        </span>
+                    </td>
+                    <td>
+                        <span>
+                           {{ finding.line }}
+                        </span>
+                    </td>
+                    {% if finding.nb_occurences %}
+                    <td>
+                        <span>
+                           {{ finding.nb_occurences }}
+                        </span>
+                    </td>
+                    {% endif %}
+                    {% if finding.component_name %}
+                    <td>
+                        <span>
+                            {{ finding.component_name }}
+                        </span>
+                    </td>
+                    {% endif %}
+                    {% if finding.component_version %}
+                    <td>
+                        <span>
+                            {{ finding.component_version }}
+                        </span>
+                    </td>
+                    {% endif %}
+                </tr>
+            </table>
+        </div>
+        {% endif %}
+    {% endif %}
+    {% if finding.param or finding.payload %}
+        <div class="panel panel-default">
+            <table id="error_notes" class="table-striped table table-condensed table-hover">
+                <tr>
+                    <th>Injected Parameter(s)</th>
+                    {% if finding.payload %}
+                    <th>Payload</th>
+                    {% endif %}
+                </tr>
+                <tr>
+                    <td>
+                        <span>
+                             {{ finding.param|default_if_none:"" }}
+                        </span>
+                    </td>
+                    {% if finding.payload %}
+                    <td>
+                        <span>
+                             {{ finding.payload|default_if_none:"" }}
+                        </span>
+                    </td>
+                    {% endif %}
+                </tr>
+            </table>
+        </div>
+    {% endif %}
+    {% if jissue and jconf %}
+        <div class="row to_highlight">
+            <div class="col-md-12">
+                <div class="panel panel-default endpoints table-responsive">
+                    <div class="panel-heading">
+                        <h4>JIRA Link
+                            <span class="pull-right"><a data-toggle="collapse" href="#jira_link"><i
+                                    class="glyphicon glyphicon-chevron-up"></i></a></span>
+                        </h4>
+                    </div>
+                    <div id="jira_link" class="panel-body endpoint-panel table-responsive collapse in">
+                        <a href="{{ jconf.url }}/browse/{{ jissue.jira_key }}"
+                           target="_blank"> {{ jconf.url }}/browse/{{ jissue.jira_key }} </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    {% if gissue and gconf %}
+    <div class="row to_highlight">
+        <div class="col-md-12">
+            <div class="panel panel-default endpoints table-responsive">
+                <div class="panel-heading">
+                    <h4>Github Link
+                        <span class="pull-right"><a data-toggle="collapse" href="#jira_link"><i
+                                class="glyphicon glyphicon-chevron-up"></i></a></span>
+                    </h4>
+                </div>
+                <div id="github_link" class="panel-body endpoint-panel table-responsive collapse in">
+                    <a href="{{gissue.issue_url }}"
+                       target="_blank"> {{gissue.issue_url}} </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     {% with findings=finding.similar_findings %}
         {% if findings %}
             <div class="panel panel-default">
@@ -364,139 +536,6 @@
             </div>
         {% endif %}
     {% endwith %}
-    {% if finding.static_finding or finding.line > 0 %}
-        {% if finding.sast_source_object or finding.sast_sink_object or finding.sast_source_file_path or finding.sast_source_line > 0 %}
-        {# For tools that give information on both source (start) and sink (end) of the attack vector #}
-        
-        <div class="panel panel-default">
-            <table id="sast_source" class="table-striped table table-condensed table-hover centered">
-                <tr>
-                    <th>Source Filepath</th>
-                    <th>Source Line Number</th>
-                    <th>Source Object</th>
-                </tr>
-                <tr>
-                    <td>
-                        <span>
-                           {{ finding.sast_source_file_path }}
-                        </span>
-                    </td>
-                    <td>
-                        <span>
-                           {{ finding.sast_source_line }}
-                        </span>
-                    </td>
-                    <td>
-                        <span>
-                           {{ finding.sast_source_object }}
-                        </span>
-                    </td>
-                </tr>
-            </table>
-        </div>
-        <div class="panel panel-default">
-            <table id="sast_sink" class="table-striped table table-condensed table-hover centered">
-                <tr>
-                    <th>Sink Filepath</th>
-                    <th>Sink Line Number</th>
-                    <th>Sink Object</th>
-                </tr>
-                <tr>
-                    <td>
-                        <span>
-                           {{ finding.file_path }}
-                        </span>
-                    </td>
-                    <td>
-                        <span>
-                           {{ finding.line }}
-                        </span>
-                    </td>
-                    <td>
-                        <span>
-                           {{ finding.sast_sink_object }}
-                        </span>
-                    </td>
-                </tr>
-            </table>
-        </div>
-        {% else %}
-        <div class="panel panel-default">
-            <table id="error_notes" class="table-striped table table-condensed table-hover centered">
-                <tr>
-                    <th>Location</th>
-                    <th>Line Number</th>
-                    {% if finding.nb_occurences %}
-                    <th>Nb occurences</th>
-                    {% endif %}
-                </tr>
-                <tr>
-                    <td>
-                        <span>
-                           {{ finding.file_path }}
-                        </span>
-                    </td>
-                    <td>
-                        <span>
-                           {{ finding.line }}
-                        </span>
-                    </td>
-                    {% if finding.nb_occurences %}
-                    <td>
-                        <span>
-                           {{ finding.nb_occurences }}
-                        </span>
-                    </td>
-                    {% endif %}
-                </tr>
-            </table>
-        </div>
-        {% endif %}
-    {% endif %}
-    {% if finding.param or finding.payload %}
-        <div class="panel panel-default">
-            <table id="error_notes" class="table-striped table table-condensed table-hover">
-                <tr>
-                    <th>Injected Parameter(s)</th>
-                    {% if finding.payload %}
-                    <th>Payload</th>
-                    {% endif %}
-                </tr>
-                <tr>
-                    <td>
-                        <span>
-                             {{ finding.param|default_if_none:"" }}
-                        </span>
-                    </td>
-                    {% if finding.payload %}
-                    <td>
-                        <span>
-                             {{ finding.payload|default_if_none:"" }}
-                        </span>
-                    </td>
-                    {% endif %}
-                </tr>
-            </table>
-        </div>
-    {% endif %}
-    {% if jissue and jconf %}
-        <div class="row to_highlight">
-            <div class="col-md-12">
-                <div class="panel panel-default endpoints table-responsive">
-                    <div class="panel-heading">
-                        <h4>JIRA Link
-                            <span class="pull-right"><a data-toggle="collapse" href="#jira_link"><i
-                                    class="glyphicon glyphicon-chevron-up"></i></a></span>
-                        </h4>
-                    </div>
-                    <div id="jira_link" class="panel-body endpoint-panel table-responsive collapse in">
-                        <a href="{{ jconf.url }}/browse/{{ jissue.jira_key }}"
-                           target="_blank"> {{ jconf.url }}/browse/{{ jissue.jira_key }} </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    {% endif %}
 
     {% with endpoints=finding.endpoints.all|get_vulnerable_endpoints %}
         {% if endpoints %}
@@ -860,7 +899,7 @@
     </div>
 
     <div class="protip">
-       <i class="fa fa-lightbulb-o"></i> <strong>ProTip!</strong> Type <kbd>e</kbd> to edit any finding.
+       <i class="fa fa-lightbulb-o"></i> <strong>ProTip!</strong> Type <kbd>e</kbd> to edit any finding, <kbd>p</kbd> and <kbd>n</kbd> to navigate to the previous or next finding.
     </div>
 {% endblock %}
 {% block postscript %}
@@ -911,8 +950,17 @@
             $('[data-toggle="tooltip"]').tooltip()
         });
 
+        // keyboard shortcuts
         $(document).on('keypress', null, 'e', function () {
             window.location.assign('{% url 'edit_finding' finding.id %}');
+        });
+        
+        $(document).on('keypress', null, 'p', function () {
+            window.location.assign('{% url 'view_finding' prev_finding.id %}');
+        });
+        
+        $(document).on('keypress', null, 'n', function () {
+            window.location.assign('{% url 'view_finding' next_finding.id %}');
         });
 
         $('a.delete-finding').on('click', function (e) {

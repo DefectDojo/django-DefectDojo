@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% load navigation_tags %}
 {% load display_tags %}
-{% load get_system_setting %}
 {% block content %}
     <div class="row">
         <div class="col-md-12">
@@ -17,7 +16,7 @@
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu"
                                 aria-labelledby="dropdownMenu1">
-                                {% if request.user.is_staff %}
+                                {% if user.is_staff %}
                                     <li role="presentation">
                                         <a href="{% url 'new_product' %}">
                                             <i class="fa fa-plus"></i> Add Product
@@ -35,7 +34,7 @@
                     </h3>
                 </div>
                 <div id="the-filters" class="panel-body collapse {% if request.META.QUERY_STRING %}in{% endif %}">
-                    {% include "dojo/filter_snippet.html" with form=prods.form %}
+                    {% include "dojo/filter_snippet.html" with form=prod_filter.form %}
                 </div>
             </div>
             {% if prod_list %}
@@ -53,8 +52,11 @@
                             <th> Criticality</th>
                             <th> Metadata</th>
                             <th>Eng.</th>
-                            {% if "enable_jira"|get_system_setting %}
+                            {% if system_settings.enable_jira %}
                             <th>Jira</th>
+                            {% endif %}
+                            {% if system_settings.enable_github %}
+                            <th>GitHub</th>
                             {% endif %}
                             <th> Findings</th>
                             <th> Endpoints</th>
@@ -193,20 +195,37 @@
                                     data-content="No Engagements Exist"></i>
                                   {% endif %}
                                 </td>
-                                {% if "enable_jira"|get_system_setting %}
+                                {% if system_settings.enable_jira %}
                                 <td class="text-center">
-                                {% for jira in prod.id|get_jira_conf %}
-                                <i class="fa fa-bug has-popover" title="<i class='fa fa-bug'></i> <b>Jira Configuration</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="bottom"
-                                  data-content="<b>Jira:</b> {{ jira.conf }}<br/>
-                                  <b>Project Key:</b> {{ jira.project_key }}<br/>
-                                  <b>Component:</b> {{ jira.component }}<br/>
-                                  <b>Push All Issues:</b> {{ jira.push_all_issues }}<br/>
-                                  <b>Engagement Epic Mapping:</b> {{ jira.enable_engagement_epic_mapping }}<br/>
-                                  <b>Push Notes:</b> {{ jira.push_notes }}">
-                                </i>
+                                {% for jira_conf in prod.jira_confs %}
+                                  {% if jira_conf.conf is not None %}
+                                  <i class="fa fa-bug has-popover" title="<i class='fa fa-bug'></i> <b>Jira Configuration</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="bottom"
+                                    data-content="<b>Jira:</b> {{ jira_conf.conf }}<br/>
+                                    <b>Project Key:</b> {{ jira_conf.project_key }}<br/>
+                                    <b>Component:</b> {{ jira_conf.component }}<br/>
+                                    <b>Push All Issues:</b> {{ jira_conf.push_all_issues }}<br/>
+                                    <b>Engagement Epic Mapping:</b> {{ jira_conf.enable_engagement_epic_mapping }}<br/>
+                                    <b>Push Notes:</b> {{ jira_conf.push_notes }}">
+                                  </i>
+                                  {% endif %}
                                 {% endfor %}
                                 </td>
                                 {% endif %}
+
+                                {% if system_settings.enable_github %}
+                                <td class="text-center">
+                                {% for github_conf in prod.github_confs %}
+                                  {% if github_conf.git_conf is not None %}
+                                    <i class="fa fa-bug has-popover" title="<i class='fa fa-bug'></i> <b>GitHub Configuration</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="bottom"
+                                      data-content="<b>GitHub:</b> {{ github_conf.git_conf }}<br/>
+                                      <b>Project Key:</b> {{ github_conf.git_project }}<br/>
+                                      <b>Push Notes:</b> {{ github_conf.push_notes }}">
+                                    </i>
+                                  {% endif %}
+                                {% endfor %}
+                                </td>
+                                {% endif %}
+
                                 <td class="text-center">
                                     {% if prod.findings_count %}
                                         <a href="{% url 'product_open_findings' prod.id %}?test__engagement__product={{ prod.id }}"><b>{{ prod.findings_count }}</b></a>
@@ -215,7 +234,7 @@
                                     {% endif %}
                                 </td>
                                 <td class="text-center">
-                                  {% if prod.findings_count %}
+                                  {% if prod.endpoints_count %}
                                     <a href="{% url 'vulnerable_endpoints' %}?product={{ prod.id }}"><b>{{ prod.endpoint_count }}</b></a>
                                   {% else %}
                                       0
@@ -250,7 +269,7 @@
                     {% include "dojo/paging_snippet.html" with page=prod_list page_size=True %}
                 </div>
             {% else %}
-                <p class="text-center">No products found.</p>
+                <div id="no_products"><p class="text-center">No products found.</p></div>
             {% endif %}
         </div>
     </div>
@@ -298,16 +317,10 @@
                 drawCallback: function(){
                      $('.has-popover').popover({'trigger':'hover'});
                  },
-                "columns": [
-                    { "data": "action", render: function (data, type, row) {
-                            return type === 'export' ?  "" :  data;
-                    }},
-                    { "data": "product" , render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'b') :  data;
-                    }},
-                    { "data": "tags" , render: function (data, type, row) {
-                            return type === 'export' ?  getDojoExportValueFromTag(data, 'a') :  data;
-                    }},
+                 "columns": [
+                    { "data": "action" },
+                    { "data": "product" },
+                    { "data": "tags" },
                     { "data": "criticality" , render: function (data, type, row) {
                             return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
                     }},
@@ -317,38 +330,45 @@
                     { "data": "engagements", render: function (data, type, row) {
                             return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
                     }},
-                    { "data": "findings" , render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'b') :  data;
+                    {% if system_settings.enable_jira %}
+                    { "data": "jira", render: function (data, type, row) {
+                            return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
                     }},
-                    { "data": "endpoints" , render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'b') :  data;
+                    {% endif %}
+                    {% if system_settings.enable_github %}
+                    { "data": "github", render: function (data, type, row) {
+                            return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
                     }},
+                    {% endif %}
+                    { "data": "findings" },
+                    { "data": "endpoints" },
                     { "data": "contacts" },
                     { "data": "product_type" },
                 ],
-                order: [1],
+                order: [],
                 "columnDefs": [
                     { "orderable": false, "targets": [0] }
                 ],
                 dom: 'Bfrtip',
                 paging: false,
                 buttons: [
+                    {
+                        extend: 'colvis',
+                        columns: ':not(.noVis)'
+                    },
                     $.extend( true, {}, buttonCommon, {
-                        extend: 'colvis'
+                        extend: 'copy'
                     }),
                     $.extend( true, {}, buttonCommon, {
-                        extend: 'copyHtml5'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'excelHtml5',
+                        extend: 'excel',
                         autoFilter: true,
                         sheetName: 'Exported data',
                     }),
                     $.extend( true, {}, buttonCommon, {
-                        extend: 'csvHtml5'
+                        extend: 'csv'
                     }),
                     $.extend( true, {}, buttonCommon, {
-                        extend: 'pdfHtml5',
+                        extend: 'pdf',
                         orientation: 'landscape',
                         pageSize: 'LETTER'
                     }),

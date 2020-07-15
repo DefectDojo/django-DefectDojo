@@ -505,9 +505,8 @@
         <script src="{% static "JUMFlot/javascripts/jquery.flot.bubbles.js" %}"></script>
     {% endif %}
     <script src="{% static "flot/jquery.flot.time.js" %}"></script>
-    <script src="{% static "flot.tooltip/js/jquery.flot.tooltip.min.js" %}"></script>
+    <script src="{% static "jquery.flot.tooltip/js/jquery.flot.tooltip.min.js" %}"></script>
     <script type="text/javascript">
-        var highest_count = {{ highest_count }};
         $(function () {
             if (document.referrer.indexOf('simple_search') > 0) {
                 var terms = '';

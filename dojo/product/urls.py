@@ -15,8 +15,6 @@ urlpatterns = [
         views.import_scan_results_prod, name='import_scan_results_prod'),
     url(r'^product/(?P<pid>\d+)/metrics$', views.view_product_metrics,
         name='view_product_metrics'),
-    url(r'^product/(?P<pid>\d+)/details$', views.view_product_details,
-        name='view_product_details'),
     url(r'^product/(?P<pid>\d+)/edit$', views.edit_product,
         name='edit_product'),
     url(r'^product/(?P<pid>\d+)/delete$', views.delete_product,

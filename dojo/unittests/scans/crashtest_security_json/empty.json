@@ -1,0 +1,17 @@
+{
+    "findings": {
+        "commandinjection": [],
+        "csrf": [],
+        "cve": [],
+        "deserialization": [],
+        "fileinclusion": [],
+        "fingerprinting": [],
+        "fuzzer": [],
+        "portscan": [],
+        "sqlinjection": [],
+        "ssl": [],
+        "xss": [],
+        "xxe": []
+    },
+    "descriptions": []
+}

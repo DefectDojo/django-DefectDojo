@@ -16,6 +16,8 @@ class Outpost24Parser:
             mitigation = detail.findtext('solution')
             impact = detail.findtext('information')
             cvss_score = detail.findtext('cvss_v3_score') or detail.findtext('cvss_score')
+            if not cvss_score:
+                cvss_score = 0
             if cvss_score:
                 score = float(cvss_score)
                 if score < 4:
@@ -46,7 +48,11 @@ class Outpost24Parser:
             host = detail.findtext('ip')
             if host:
                 protocol = detail.findtext('./portinfo/service')
-                port = int(detail.findtext('./portinfo/portnumber'))
+                try:
+                    port = int(detail.findtext('./portinfo/portnumber'))
+                except ValueError as ve:
+                    print("General port given. Assigning 0 as default.")
+                    port = 0
                 finding.unsaved_endpoints.append(Endpoint(protocol=protocol, host=host, port=port))
             items.append(finding)
         self._items = items

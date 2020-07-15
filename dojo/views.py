@@ -2,11 +2,12 @@ import logging
 
 from auditlog.models import LogEntry
 from django.contrib.contenttypes.models import ContentType
+from django.contrib import messages
 from django.http import Http404
 from django.shortcuts import render
 from dojo.models import Engagement, Test, Finding, Endpoint, Product
 from dojo.filters import LogEntryFilter
-from dojo.utils import get_page_items, Product_Tab
+from dojo.utils import get_page_items, Product_Tab, get_system_setting
 
 logger = logging.getLogger(__name__)
 
@@ -60,6 +61,13 @@ def action_history(request, cid, oid):
                                       object_pk=obj.id).order_by('-timestamp')
     history = LogEntryFilter(request.GET, queryset=history)
     paged_history = get_page_items(request, history.qs, 25)
+
+    if not get_system_setting('enable_auditlog'):
+        messages.add_message(
+            request,
+            messages.WARNING,
+            'Audit logging is currently disabled in System Settings.',
+            extra_tags='alert-danger')
 
     return render(request, 'dojo/action_history.html',
                   {"history": paged_history,

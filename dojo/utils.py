@@ -1,4 +1,3 @@
-import calendar as tcalendar
 import re
 import binascii
 import os
@@ -12,11 +11,11 @@ from datetime import date, datetime
 from math import pi, sqrt
 import vobject
 import requests
-from dateutil.relativedelta import relativedelta, MO
+from dateutil.relativedelta import relativedelta, MO, SU
 from django.conf import settings
 from django.core.mail import send_mail
 from django.core.mail import EmailMessage
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.paginator import Paginator
 from django.urls import get_resolver, reverse
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
 from django.template.defaultfilters import pluralize
@@ -26,14 +25,17 @@ from jira import JIRA
 from jira.exceptions import JIRAError
 from django.dispatch import receiver
 from dojo.signals import dedupe_signal
+import calendar as tcalendar
+from dojo.github import add_external_issue_github, update_external_issue_github, close_external_issue_github, reopen_external_issue_github
 
-from dojo.models import Finding, Engagement, Finding_Template, Product, JIRA_PKey, JIRA_Issue, \
+from dojo.models import Finding, Engagement, Finding_Template, Product, JIRA_PKey, JIRA_Issue,\
     Dojo_User, User, Alerts, System_Settings, Notifications, UserContactInfo, Endpoint, Benchmark_Type, \
-    Language_Type, Languages, Rule
+    Language_Type, Languages, Rule, Test_Type
 from asteval import Interpreter
 from requests.auth import HTTPBasicAuth
-
 import logging
+
+
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
@@ -71,7 +73,7 @@ def sync_false_history(new_finding, *args, **kwargs):
     if total_findings.count() > 0:
         new_finding.false_p = True
         new_finding.active = False
-        new_finding.verified = False
+        new_finding.verified = True
         super(Finding, new_finding).save(*args, **kwargs)
 
 
@@ -82,8 +84,11 @@ def is_deduplication_on_engagement_mismatch(new_finding, to_duplicate_finding):
 
 @receiver(dedupe_signal, sender=Finding)
 def sync_dedupe(sender, *args, **kwargs):
-    system_settings = System_Settings.objects.get()
-    if system_settings.enable_deduplication:
+    try:
+        enabled = System_Settings.objects.get().enable_deduplication
+    except System_Settings.DoesNotExist:
+        enabled = False
+    if enabled:
         new_finding = kwargs['new_finding']
         deduplicationLogger.debug('sync_dedupe for: ' + str(new_finding.id) +
                     ":" + str(new_finding.title))
@@ -107,6 +112,8 @@ def sync_dedupe(sender, *args, **kwargs):
         else:
             deduplicationLogger.debug("no configuration per parser found; using legacy algorithm")
             deduplicate_legacy(new_finding)
+    else:
+        deduplicationLogger.debug("skipping dedupe because it's disabled in system settings get()")
 
 
 def deduplicate_legacy(new_finding):
@@ -175,8 +182,12 @@ def deduplicate_legacy(new_finding):
         #    and (endpoints or (line and file_path)
         # ---------------------------------------------------------
         if ((flag_endpoints or flag_line_path) and flag_hash):
-            set_duplicate(new_finding, find)
-            super(Finding, new_finding).save()
+            try:
+                set_duplicate(new_finding, find)
+            except Exception as e:
+                deduplicationLogger.debug(str(e))
+                continue
+
             break
 
 
@@ -204,8 +215,11 @@ def deduplicate_unique_id_from_tool(new_finding):
             deduplicationLogger.debug(
                 'deduplication_on_engagement_mismatch, skipping dedupe.')
             continue
-        set_duplicate(new_finding, find)
-        super(Finding, new_finding).save()
+        try:
+            set_duplicate(new_finding, find)
+        except Exception as e:
+            deduplicationLogger.debug(str(e))
+            continue
         break
 
 
@@ -231,8 +245,11 @@ def deduplicate_hash_code(new_finding):
             deduplicationLogger.debug(
                 'deduplication_on_engagement_mismatch, skipping dedupe.')
             continue
-        set_duplicate(new_finding, find)
-        super(Finding, new_finding).save()
+        try:
+            set_duplicate(new_finding, find)
+        except Exception as e:
+            deduplicationLogger.debug(str(e))
+            continue
         break
 
 
@@ -260,19 +277,113 @@ def deduplicate_uid_or_hash_code(new_finding):
             deduplicationLogger.debug(
                 'deduplication_on_engagement_mismatch, skipping dedupe.')
             continue
-        set_duplicate(new_finding, find)
-        super(Finding, new_finding).save()
+        try:
+            set_duplicate(new_finding, find)
+        except Exception as e:
+            deduplicationLogger.debug(str(e))
+            continue
         break
 
 
 def set_duplicate(new_finding, existing_finding):
+    if existing_finding.duplicate:
+        raise Exception("Existing finding is a duplicate")
+    if existing_finding.id == new_finding.id:
+        raise Exception("Can not add duplicate to itself")
     deduplicationLogger.debug('New finding ' + str(new_finding.id) + ' is a duplicate of existing finding ' + str(existing_finding.id))
+    if (existing_finding.is_Mitigated or existing_finding.mitigated) and new_finding.active and not new_finding.is_Mitigated:
+        existing_finding.mitigated = new_finding.mitigated
+        existing_finding.is_Mitigated = new_finding.is_Mitigated
+        existing_finding.active = new_finding.active
+        existing_finding.verified = new_finding.verified
+        existing_finding.notes.create(author=existing_finding.reporter,
+                                      entry="This finding has been automatically re-openend as it was found in recent scans.")
+        existing_finding.save()
     new_finding.duplicate = True
     new_finding.active = False
     new_finding.verified = False
     new_finding.duplicate_finding = existing_finding
-    existing_finding.duplicate_list.add(new_finding)
+    for find in new_finding.original_finding.all():
+        new_finding.original_finding.remove(find)
+        set_duplicate(find, existing_finding)
     existing_finding.found_by.add(new_finding.test.test_type)
+    super(Finding, new_finding).save()
+    super(Finding, existing_finding).save()
+
+
+def removeLoop(finding_id, counter):
+    # get latest status
+    finding = Finding.objects.get(id=finding_id)
+    real_original = finding.duplicate_finding
+
+    if not real_original or real_original is None:
+        return
+
+    if finding_id == real_original.id:
+        finding.duplicate_finding = None
+        super(Finding, finding).save()
+        return
+
+    # Only modify the findings if the original ID is lower to get the oldest finding as original
+    if (real_original.id > finding_id) and (real_original.duplicate_finding is not None):
+        tmp = finding_id
+        finding_id = real_original.id
+        real_original = Finding.objects.get(id=tmp)
+        finding = Finding.objects.get(id=finding_id)
+
+    if real_original in finding.original_finding.all():
+        # remove the original from the duplicate list if it is there
+        finding.original_finding.remove(real_original)
+        super(Finding, finding).save()
+    if counter <= 0:
+        # Maximum recursion depth as safety method to circumvent recursion here
+        return
+    for f in finding.original_finding.all():
+        # for all duplicates set the original as their original, get rid of self in between
+        f.duplicate_finding = real_original
+        super(Finding, f).save()
+        super(Finding, real_original).save()
+        removeLoop(f.id, counter - 1)
+
+
+def fix_loop_duplicates():
+    candidates = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).all().order_by("-id")
+    deduplicationLogger.info("Identified %d Findings with Loops" % len(candidates))
+    for find_id in candidates.values_list('id', flat=True):
+        removeLoop(find_id, 5)
+
+    new_originals = Finding.objects.filter(duplicate_finding__isnull=True, duplicate=True)
+    for f in new_originals:
+        deduplicationLogger.info("New Original: %d " % f.id)
+        f.duplicate = False
+        super(Finding, f).save()
+
+    loop_count = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).count()
+    deduplicationLogger.info("%d Finding found with Loops" % loop_count)
+
+
+def rename_whitesource_finding():
+    whitesource_id = Test_Type.objects.get(name="Whitesource Scan").id
+    findings = Finding.objects.filter(found_by=whitesource_id)
+    findings = findings.order_by('-pk')
+    logger.info("######## Updating Hashcodes - deduplication is done in background using django signals upon finding save ########")
+    for finding in findings:
+        logger.info("Updating Whitesource Finding with id: %d" % finding.id)
+        lib_name_begin = re.search('\\*\\*Library Filename\\*\\* : ', finding.description).span(0)[1]
+        lib_name_end = re.search('\\*\\*Library Description\\*\\*', finding.description).span(0)[0]
+        lib_name = finding.description[lib_name_begin:lib_name_end - 1]
+        if finding.cve is None:
+            finding.title = "CVE-None | " + lib_name
+        else:
+            finding.title = finding.cve + " | " + lib_name
+        if not finding.cwe:
+            logger.debug('Set cwe for finding %d to 1035 if not an cwe Number is set' % finding.id)
+            finding.cwe = 1035
+        finding.title = finding.title.rstrip()  # delete \n at the end of the title
+        from titlecase import titlecase
+        finding.title = titlecase(finding.title)
+        finding.hash_code = finding.compute_hash_code()
+        finding.save()
 
 
 def sync_rules(new_finding, *args, **kwargs):
@@ -536,60 +647,116 @@ def add_breadcrumb(parent=None,
     request.session['dojo_breadcrumbs'] = crumbs
 
 
-def get_punchcard_data(findings, weeks_between, start_date):
-    punchcard = list()
-    ticks = list()
-    highest_count = 0
-    tick = 0
-    week_count = 1
+def get_punchcard_data(findings, start_date, weeks):
+    # use try catch to make sure any teething bugs in the bunchcard don't break the dashboard
+    try:
+        # gather findings over past half year, make sure to start on a sunday
+        first_sunday = start_date - relativedelta(weekday=SU(-1))
+        last_sunday = start_date + relativedelta(weeks=weeks)
 
-    # mon 0, tues 1, wed 2, thurs 3, fri 4, sat 5, sun 6
-    # sat 0, sun 6, mon 5, tue 4, wed 3, thur 2, fri 1
-    day_offset = {0: 5, 1: 4, 2: 3, 3: 2, 4: 1, 5: 0, 6: 6}
-    for x in range(-1, weeks_between):
-        # week starts the monday before
-        new_date = start_date + relativedelta(weeks=x, weekday=MO(1))
-        end_date = new_date + relativedelta(weeks=1)
-        append_tick = True
-        days = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0}
-        for finding in findings:
-            try:
-                if new_date < datetime.combine(finding.date, datetime.min.time(
-                )).replace(tzinfo=timezone.get_current_timezone()) <= end_date:
-                    # [0,0,(20*.02)]
-                    # [week, day, weight]
-                    days[day_offset[finding.date.weekday()]] += 1
-                    if days[day_offset[finding.date.weekday()]] > highest_count:
-                        highest_count = days[day_offset[
-                            finding.date.weekday()]]
-            except:
-                if new_date < finding.date <= end_date:
-                    # [0,0,(20*.02)]
-                    # [week, day, weight]
-                    days[day_offset[finding.date.weekday()]] += 1
-                    if days[day_offset[finding.date.weekday()]] > highest_count:
-                        highest_count = days[day_offset[
-                            finding.date.weekday()]]
-                pass
+        print(first_sunday)
+        print(last_sunday)
 
-        if sum(days.values()) > 0:
-            for day, count in list(days.items()):
-                punchcard.append([tick, day, count])
-                if append_tick:
-                    ticks.append([
-                        tick,
-                        new_date.strftime(
-                            "<span class='small'>%m/%d<br/>%Y</span>")
-                    ])
-                    append_tick = False
+        # reminder: The first week of a year is the one that contains the year’s first Thursday
+        # so we could have for 29/12/2019: week=1 and year=2019 :-D. So using week number from db is not practical
+
+        severities_by_day = findings.filter(created__gte=first_sunday).filter(created__lt=last_sunday) \
+                                    .values('created__date') \
+                                    .annotate(count=Count('id')) \
+                                    .order_by('created__date')
+
+        # return empty stuff if no findings to be statted
+        if severities_by_day.count() <= 0:
+            return None, None
+
+        # day of the week numbers:
+        # javascript  database python
+        # sun 6         1       6
+        # mon 5         2       0
+        # tue 4         3       1
+        # wed 3         4       2
+        # thu 2         5       3
+        # fri 1         6       4
+        # sat 0         7       5
+
+        # map from python to javascript, do not use week numbers or day numbers from database.
+        day_offset = {0: 5, 1: 4, 2: 3, 3: 2, 4: 1, 5: 0, 6: 6}
+
+        punchcard = list()
+        ticks = list()
+        highest_day_count = 0
+        tick = 0
+        day_counts = [0, 0, 0, 0, 0, 0, 0]
+
+        start_of_week = timezone.make_aware(datetime.combine(first_sunday, datetime.min.time()))
+        start_of_next_week = start_of_week + relativedelta(weeks=1)
+        day_counts = [0, 0, 0, 0, 0, 0, 0]
+
+        for day in severities_by_day:
+            created = day['created__date']
+            day_count = day['count']
+
+            created = timezone.make_aware(datetime.combine(created, datetime.min.time()))
+
+            # print('%s %s %s', created, created.weekday(), calendar.day_name[created.weekday()], day_count)
+
+            if created < start_of_week:
+                raise ValueError('date found outside supported range: ' + str(created))
+            else:
+                if created >= start_of_week and created < start_of_next_week:
+                    # add day count to current week data
+                    day_counts[day_offset[created.weekday()]] = day_count
+                    highest_day_count = max(highest_day_count, day_count)
+                else:
+                    # created >= start_of_next_week, so store current week, prepare for next
+                    while created >= start_of_next_week:
+                        week_data, label = get_week_data(start_of_week, tick, day_counts)
+                        punchcard.extend(week_data)
+                        ticks.append(label)
+                        tick += 1
+
+                        # new week, new values!
+                        day_counts = [0, 0, 0, 0, 0, 0, 0]
+                        start_of_week = start_of_next_week
+                        start_of_next_week += relativedelta(weeks=1)
+
+                    # finally a day that falls into the week bracket
+                    day_counts[day_offset[created.weekday()]] = day_count
+                    highest_day_count = max(highest_day_count, day_count)
+
+        # add week in progress + empty weeks on the end if needed
+        while tick < weeks + 1:
+            print(tick)
+            week_data, label = get_week_data(start_of_week, tick, day_counts)
+            print(week_data, label)
+            punchcard.extend(week_data)
+            ticks.append(label)
             tick += 1
-        week_count += 1
-    # adjust the size
-    ratio = (sqrt(highest_count / pi))
-    for punch in punchcard:
-        punch[2] = (sqrt(punch[2] / pi)) / ratio
 
-    return punchcard, ticks, highest_count
+            day_counts = [0, 0, 0, 0, 0, 0, 0]
+            start_of_week = start_of_next_week
+            start_of_next_week += relativedelta(weeks=1)
+
+        # adjust the size or circles
+        ratio = (sqrt(highest_day_count / pi))
+        for punch in punchcard:
+            # front-end needs both the count for the label and the ratios of the radii of the circles
+            punch.append(punch[2])
+            punch[2] = (sqrt(punch[2] / pi)) / ratio
+
+        return punchcard, ticks
+
+    except Exception as e:
+        logger.exception('Not showing punchcard graph due to exception gathering data', e)
+        return None, None
+
+
+def get_week_data(week_start_date, tick, day_counts):
+    data = []
+    for i in range(0, len(day_counts)):
+        data.append([tick, i, day_counts[i]])
+    label = [tick, week_start_date.strftime("<span class='small'>%m/%d<br/>%Y</span>")]
+    return data, label
 
 
 # 5 params
@@ -1004,16 +1171,8 @@ def get_page_items(request, items, page_size, param_name='page'):
     paginator = Paginator(items, size)
     page = request.GET.get(param_name)
 
-    try:
-        page = paginator.page(page)
-    except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
-        page = paginator.page(1)
-    except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
-        page = paginator.page(paginator.num_pages)
-
-    return page
+    # new get_page method will handle invalid page value, out of bounds pages, etc
+    return paginator.get_page(page)
 
 
 def handle_uploaded_threat(f, eng):
@@ -1086,10 +1245,12 @@ def log_jira_generic_alert(title, description):
 
 # Logs the error to the alerts table, which appears in the notification toolbar
 def log_jira_alert(error, finding):
+    prod_name = finding.test.engagement.product.name
     create_notification(
         event='jira_update',
-        title='Jira update issue',
+        title='Jira update issue (' + truncate_with_dots(prod_name, 25) + ')',
         description='Finding: ' + str(finding.id) + ', ' + error,
+        url=reverse('view_finding', args=(finding.id, )),
         icon='bullseye',
         source='Jira')
 
@@ -1128,90 +1289,122 @@ def jira_long_description(find_description, find_id, jira_conf_finding_text):
         find_id) + "\n\n" + jira_conf_finding_text
 
 
-def add_issue(find, push_to_jira):
-    logger.debug('adding issue: ' + str(find))
+def add_external_issue(find, external_issue_provider):
     eng = Engagement.objects.get(test=find.test)
     prod = Product.objects.get(engagement=eng)
+    logger.debug('adding external issue with provider: ' + external_issue_provider)
 
-    if JIRA_PKey.objects.filter(product=prod).count() == 0:
-        log_jira_alert(
-            'Finding cannot be pushed to jira as there is no jira configuration for this product.', find)
-        return
+    if external_issue_provider == 'github':
+        add_external_issue_github(find, prod, eng)
 
-    jpkey = JIRA_PKey.objects.get(product=prod)
-    jira_conf = jpkey.conf
+
+def update_external_issue(find, old_status, external_issue_provider):
+    prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
+    eng = Engagement.objects.get(test=find.test)
+
+    if external_issue_provider == 'github':
+        update_external_issue_github(find, prod, eng)
+
+
+def close_external_issue(find, note, external_issue_provider):
+    prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
+    eng = Engagement.objects.get(test=find.test)
+
+    if external_issue_provider == 'github':
+        close_external_issue_github(find, note, prod, eng)
+
+
+def reopen_external_issue(find, note, external_issue_provider):
+    prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
+    eng = Engagement.objects.get(test=find.test)
+
+    if external_issue_provider == 'github':
+        reopen_external_issue_github(find, note, prod, eng)
+
+
+def add_issue(find, push_to_jira):
+    eng = Engagement.objects.get(test=find.test)
+    prod = Product.objects.get(engagement=eng)
+    jira_minimum_threshold = Finding.get_number_severity(System_Settings.objects.get().jira_minimum_severity)
 
     if push_to_jira:
+        if JIRA_PKey.objects.filter(product=prod).count() == 0:
+            logger.error("Finding {} cannot be pushed to JIRA as there is no JIRA configuration for this product.".format(find.id))
+            log_jira_alert('Finding cannot be pushed to JIRA as there is no JIRA configuration for this product.', find)
+            return
+
+        jpkey = JIRA_PKey.objects.get(product=prod)
+        jira_conf = jpkey.conf
+
         if 'Active' in find.status() and 'Verified' in find.status():
-            if ((jpkey.push_all_issues and Finding.get_number_severity(
-                    System_Settings.objects.get().jira_minimum_severity) >=
-                 Finding.get_number_severity(find.severity))):
-                log_jira_alert(
-                    'Finding below jira_minimum_severity threshold.', find)
+            if jira_minimum_threshold > Finding.get_number_severity(find.severity):
+                log_jira_alert('Finding below the minimum jira severity threshold.', find)
+                logger.warn("Finding {} is below the minimum jira severity threshold.".format(find.id))
+                logger.warn("The JIRA issue will NOT be created.")
+                return
 
-            else:
-                logger.debug('Trying to create a new JIRA issue')
-                try:
-                    JIRAError.log_to_tempfile = False
-                    jira = JIRA(
-                        server=jira_conf.url,
-                        basic_auth=(jira_conf.username, jira_conf.password))
-                    if jpkey.component:
-                        new_issue = jira.create_issue(
-                            project=jpkey.project_key,
-                            summary=find.title,
-                            components=[
-                                {
-                                    'name': jpkey.component
-                                },
-                            ],
-                            description=jira_long_description(
-                                find.long_desc(), find.id,
-                                jira_conf.finding_text),
-                            issuetype={'name': jira_conf.default_issue_type},
-                            priority={
-                                'name': jira_conf.get_priority(find.severity)
-                            })
-                    else:
-                        new_issue = jira.create_issue(
-                            project=jpkey.project_key,
-                            summary=find.title,
-                            description=jira_long_description(
-                                find.long_desc(), find.id,
-                                jira_conf.finding_text),
-                            issuetype={'name': jira_conf.default_issue_type},
-                            priority={
-                                'name': jira_conf.get_priority(find.severity)
-                            })
-                    j_issue = JIRA_Issue(
-                        jira_id=new_issue.id, jira_key=new_issue, finding=find)
-                    j_issue.save()
-                    find.jira_creation = timezone.now()
-                    find.jira_change = find.jira_creation
-                    find.save()
-                    issue = jira.issue(new_issue.id)
+            logger.debug('Trying to create a new JIRA issue for finding {}...'.format(find.id))
+            try:
+                JIRAError.log_to_tempfile = False
+                jira = JIRA(
+                    server=jira_conf.url,
+                    basic_auth=(jira_conf.username, jira_conf.password))
+                if jpkey.component:
+                    logger.debug('... with a component')
+                    new_issue = jira.create_issue(
+                        project=jpkey.project_key,
+                        summary=find.title,
+                        components=[
+                            {
+                                'name': jpkey.component
+                            },
+                        ],
+                        description=jira_long_description(
+                            find.long_desc(), find.id,
+                            jira_conf.finding_text),
+                        issuetype={'name': jira_conf.default_issue_type},
+                        priority={
+                            'name': jira_conf.get_priority(find.severity)
+                        })
+                else:
+                    logger.debug('... with no component')
+                    new_issue = jira.create_issue(
+                        project=jpkey.project_key,
+                        summary=find.title,
+                        description=jira_long_description(
+                            find.long_desc(), find.id,
+                            jira_conf.finding_text),
+                        issuetype={'name': jira_conf.default_issue_type},
+                        priority={
+                            'name': jira_conf.get_priority(find.severity)
+                        })
 
-                    # Add labels (security & product)
-                    add_labels(find, new_issue)
-                    # Upload dojo finding screenshots to Jira
-                    for pic in find.images.all():
-                        jira_attachment(
-                            jira, issue,
-                            settings.MEDIA_ROOT + pic.image_large.name)
+                j_issue = JIRA_Issue(
+                    jira_id=new_issue.id, jira_key=new_issue, finding=find)
+                j_issue.save()
+                issue = jira.issue(new_issue.id)
 
-                        # if jpkey.enable_engagement_epic_mapping:
-                        #      epic = JIRA_Issue.objects.get(engagement=eng)
-                        #      issue_list = [j_issue.jira_id,]
-                        #      jira.add_issues_to_epic(epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
-                except JIRAError as e:
-                    log_jira_alert(e.text, find)
+                # Add labels (security & product)
+                add_labels(find, new_issue)
+
+                # Upload dojo finding screenshots to Jira
+                for pic in find.images.all():
+                    jira_attachment(
+                        jira, issue,
+                        settings.MEDIA_ROOT + pic.image_large.name)
+
+                    # if jpkey.enable_engagement_epic_mapping:
+                    #      epic = JIRA_Issue.objects.get(engagement=eng)
+                    #      issue_list = [j_issue.jira_id,]
+                    #      jira.add_issues_to_epic(epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
+            except JIRAError as e:
+                logger.error(e.text, find)
+                log_jira_alert(e.text, find)
         else:
-            log_jira_alert("Finding not active or not verified.",
-                           find)
+            logger.warning("A Finding needs to be both Active and Verified to be pushed to JIRA.", find)
 
 
 def jira_attachment(jira, issue, file, jira_filename=None):
-
     basename = file
     if jira_filename is None:
         basename = os.path.basename(file)
@@ -1244,7 +1437,7 @@ def jira_check_attachment(issue, source_file_name):
     return file_exists
 
 
-def update_issue(find, old_status, push_to_jira):
+def update_issue(find, push_to_jira):
     prod = Product.objects.get(
         engagement=Engagement.objects.get(test=find.test))
     jpkey = JIRA_PKey.objects.get(product=prod)
@@ -1286,8 +1479,9 @@ def update_issue(find, old_status, push_to_jira):
                 priority={'name': jira_conf.get_priority(find.severity)},
                 fields=fields)
             print('\n\nSaving jira_change\n\n')
-            find.jira_change = timezone.now()
-            find.save()
+            # Moving this to finding.save()
+            # find.jira_change = timezone.now()
+            # find.save()
             # Add labels(security & product)
             add_labels(find, issue)
         except JIRAError as e:
@@ -1298,23 +1492,23 @@ def update_issue(find, old_status, push_to_jira):
         if 'Inactive' in find.status() or 'Mitigated' in find.status(
         ) or 'False Positive' in find.status(
         ) or 'Out of Scope' in find.status() or 'Duplicate' in find.status():
-            if 'Active' in old_status:
-                json_data = {'transition': {'id': jira_conf.close_status_key}}
-                r = requests.post(
-                    url=req_url,
-                    auth=HTTPBasicAuth(jira_conf.username, jira_conf.password),
-                    json=json_data)
-                find.jira_change = timezone.now()
-                find.save()
+            # if 'Active' in old_status:
+            json_data = {'transition': {'id': jira_conf.close_status_key}}
+            r = requests.post(
+                url=req_url,
+                auth=HTTPBasicAuth(jira_conf.username, jira_conf.password),
+                json=json_data)
+            find.jira_change = timezone.now()
+            find.save()
         elif 'Active' in find.status() and 'Verified' in find.status():
-            if 'Inactive' in old_status:
-                json_data = {'transition': {'id': jira_conf.open_status_key}}
-                r = requests.post(
-                    url=req_url,
-                    auth=HTTPBasicAuth(jira_conf.username, jira_conf.password),
-                    json=json_data)
-                find.jira_change = timezone.now()
-                find.save()
+            # if 'Inactive' in old_status:
+            json_data = {'transition': {'id': jira_conf.open_status_key}}
+            r = requests.post(
+                url=req_url,
+                auth=HTTPBasicAuth(jira_conf.username, jira_conf.password),
+                json=json_data)
+            find.jira_change = timezone.now()
+            find.save()
 
 
 def close_epic(eng, push_to_jira):
@@ -1444,21 +1638,24 @@ def send_review_email(request, user, finding, users, new_note):
 
 def process_notifications(request, note, parent_url, parent_title):
     regex = re.compile(r'(?:\A|\s)@(\w+)\b')
+
     usernames_to_check = set([un.lower() for un in regex.findall(note.entry)])
+
     users_to_notify = [
         User.objects.filter(username=username).get()
         for username in usernames_to_check
         if User.objects.filter(is_active=True, username=username).exists()
     ]  # is_staff also?
-    user_posting = request.user
+
     if len(note.entry) > 200:
         note.entry = note.entry[:200]
         note.entry += "..."
+
     create_notification(
         event='user_mentioned',
         section=parent_title,
         note=note,
-        user=request.user,
+        initiator=request.user,
         title='%s jotted a note' % request.user,
         url=parent_url,
         icon='commenting',
@@ -1901,3 +2098,13 @@ def apply_cwe_to_template(finding, override=False):
             template.save()
 
     return finding
+
+
+def truncate_with_dots(the_string, max_length_including_dots):
+    if not the_string:
+        return the_string
+    return (the_string[:max_length_including_dots - 3] + '...' if len(the_string) > max_length_including_dots else the_string)
+
+
+def max_safe(list):
+    return max(i for i in list if i is not None)

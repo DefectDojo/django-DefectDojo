@@ -16,7 +16,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import user_passes_test
 
-from dojo.models import Finding, System_Settings, Test, Dojo_User, Note_Type, NoteHistory, Notes
+from dojo.models import Finding, System_Settings, Test, Dojo_User, Note_Type, NoteHistory, Notes, Sonarqube_Issue
 from dojo.forms import GoogleSheetFieldsForm
 from dojo.utils import add_breadcrumb, Product_Tab
 
@@ -39,6 +39,7 @@ def configure_google_sheets(request):
             else:
                 initial['Protect ' + field.name] = True
         initial['drive_folder_ID'] = system_settings.drive_folder_ID
+        initial['email_address'] = system_settings.email_address
         initial['enable_service'] = system_settings.enable_google_sheets
         form = GoogleSheetFieldsForm(all_fields=fields, initial=initial, credentials_required=False)
     else:
@@ -53,6 +54,7 @@ def configure_google_sheets(request):
             system_settings.column_widths = ""
             system_settings.credentials = ""
             system_settings.drive_folder_ID = ""
+            system_settings.email_address = ""
             system_settings.enable_google_sheets = False
             system_settings.save()
             messages.add_message(
@@ -92,6 +94,7 @@ def configure_google_sheets(request):
                     system_settings.column_widths = column_widths
                     system_settings.credentials = cred_str
                     system_settings.drive_folder_ID = drive_folder_ID
+                    system_settings.email_address = form.cleaned_data['email_address']
                     system_settings.enable_google_sheets = form.cleaned_data['enable_service']
                     system_settings.save()
                     if initial:
@@ -135,8 +138,8 @@ def validate_drive_authentication(request, cred_str, drive_folder_ID):
             extra_tags='alert-danger')
         return False
     else:
-        sheets_service = googleapiclient.discovery.build('sheets', 'v4', credentials=credentials)
-        drive_service = googleapiclient.discovery.build('drive', 'v3', credentials=credentials)
+        sheets_service = googleapiclient.discovery.build('sheets', 'v4', credentials=credentials, cache_discovery=False)
+        drive_service = googleapiclient.discovery.build('drive', 'v3', credentials=credentials, cache_discovery=False)
         spreadsheet = {
             'properties': {
                 'title': 'Test spreadsheet'
@@ -204,7 +207,7 @@ def export_to_sheet(request, tid):
     SCOPES = ['https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/spreadsheets']
     credentials = service_account.Credentials.from_service_account_info(service_account_info, scopes=SCOPES)
     try:
-        drive_service = googleapiclient.discovery.build('drive', 'v3', credentials=credentials)
+        drive_service = googleapiclient.discovery.build('drive', 'v3', credentials=credentials, cache_discovery=False)
         folder_id = system_settings.drive_folder_ID
         files = drive_service.files().list(q="mimeType='application/vnd.google-apps.spreadsheet' and parents in '%s' and name='%s'" % (folder_id, spreadsheet_name),
                                               spaces='drive',
@@ -261,16 +264,22 @@ def export_to_sheet(request, tid):
     except googleapiclient.errors.HttpError as error:
         error_message = 'There is a problem with the Google Sheets Sync Configuration. Contact your system admin to solve the issue.'
         return render(request, 'google_sheet_error.html', {'error_message': error_message})
+    except Exception as e:
+        error_message = e
+        return render(request, 'google_sheet_error.html', {'error_message': error_message})
 
 
 def create_googlesheet(request, tid):
+    user_email = request.user.email
+    if not user_email:
+        raise Exception('User must have an email address to use this feature.')
     test = Test.objects.get(id=tid)
     system_settings = get_object_or_404(System_Settings, id=1)
     service_account_info = json.loads(system_settings.credentials)
     SCOPES = ['https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/spreadsheets']
     credentials = service_account.Credentials.from_service_account_info(service_account_info, scopes=SCOPES)
-    sheets_service = googleapiclient.discovery.build('sheets', 'v4', credentials=credentials)
-    drive_service = googleapiclient.discovery.build('drive', 'v3', credentials=credentials)
+    sheets_service = googleapiclient.discovery.build('sheets', 'v4', credentials=credentials, cache_discovery=False)
+    drive_service = googleapiclient.discovery.build('drive', 'v3', credentials=credentials, cache_discovery=False)
     # Create a new spreadsheet
     spreadsheet_name = test.engagement.product.name + "-" + test.engagement.name + "-" + str(test.id)
     spreadsheet = {
@@ -289,7 +298,7 @@ def create_googlesheet(request, tid):
                                         addParents=folder_id,
                                         removeParents=previous_parents,
                                         fields='id, parents').execute()
-    user_email = request.user.email
+    # Share created Spreadsheet with current user
     drive_service.permissions().create(body={'type': 'user', 'role': 'writer', 'emailAddress': user_email}, fileId=spreadsheetId).execute()
     populate_sheet(tid, spreadsheetId)
 
@@ -300,7 +309,7 @@ def sync_findings(request, tid, spreadsheetId):
     service_account_info = json.loads(system_settings.credentials)
     SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
     credentials = service_account.Credentials.from_service_account_info(service_account_info, scopes=SCOPES)
-    sheets_service = googleapiclient.discovery.build('sheets', 'v4', credentials=credentials)
+    sheets_service = googleapiclient.discovery.build('sheets', 'v4', credentials=credentials, cache_discovery=False)
     res = {}
     spreadsheet = sheets_service.spreadsheets().get(spreadsheetId=spreadsheetId).execute()
     sheet_names = []
@@ -311,7 +320,10 @@ def sync_findings(request, tid, spreadsheetId):
             sheet_names.append(date)
         except:
             pass
-    sheet_title = str(max(sheet_names))
+    try:
+        sheet_title = str(max(sheet_names))
+    except:
+        raise Exception('Existing Google Spreadsheet has errors. Delete the speadsheet and export again.')
     res['sheet_title'] = sheet_title
 
     result = sheets_service.spreadsheets().values().get(spreadsheetId=spreadsheetId, range=sheet_title).execute()
@@ -443,9 +455,10 @@ def populate_sheet(tid, spreadsheetId):
     system_settings = get_object_or_404(System_Settings, id=1)
     service_account_info = json.loads(system_settings.credentials)
     service_account_email = service_account_info['client_email']
+    email_address = system_settings.email_address
     SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
     credentials = service_account.Credentials.from_service_account_info(service_account_info, scopes=SCOPES)
-    sheets_service = googleapiclient.discovery.build('sheets', 'v4', credentials=credentials)
+    sheets_service = googleapiclient.discovery.build('sheets', 'v4', credentials=credentials, cache_discovery=False)
     findings_list = get_findings_list(tid)
     row_count = len(findings_list)
     column_count = len(findings_list[0])
@@ -548,6 +561,7 @@ def populate_sheet(tid, spreadsheetId):
                                   "editors": {
                                         "users": [
                                             service_account_email,
+                                            email_address
                                         ]
                                   },
                                   # "description": "Protecting total row",
@@ -618,6 +632,7 @@ def populate_sheet(tid, spreadsheetId):
                                   "editors": {
                                         "users": [
                                             service_account_email,
+                                            email_address
                                         ]
                                   },
                                   "warningOnly": False
@@ -745,13 +760,14 @@ def populate_sheet(tid, spreadsheetId):
                               "editors": {
                                     "users": [
                                         service_account_email,
+                                        email_address
                                     ]
                               },
                               "warningOnly": False
                         }
                   }
             })
-        elif column_name[:6] == '[note]':
+        elif column_name[:6] == '[note]' or column_name[:11] == '[duplicate]':
             body["requests"].append({
                   "autoResizeDimensions": {
                         "dimensions": {
@@ -767,6 +783,7 @@ def populate_sheet(tid, spreadsheetId):
 
 def get_findings_list(tid):
     test = Test.objects.get(id=tid)
+    system_settings = get_object_or_404(System_Settings, id=1)
     findings = Finding.objects.filter(test=test).order_by('numerical_severity')
     active_note_types = Note_Type.objects.filter(is_active=True).order_by('id')
     note_type_activation = active_note_types.count()
@@ -783,11 +800,15 @@ def get_findings_list(tid):
     for finding in findings:
         finding_details = []
         for field in fields:
-            value = eval("finding." + field.name)
+            value = getattr(finding, field.name)
             if type(value) == datetime.date or type(value) == Test or type(value) == datetime.datetime:
-                var = str(eval("finding." + field.name))
+                var = str(value)
             elif type(value) == User or type(value) == Dojo_User:
                 var = value.username
+            elif type(value) == Finding:
+                var = value.id
+            elif type(value) == Sonarqube_Issue:
+                var = value.key
             else:
                 var = value
             finding_details.append(var)
@@ -856,6 +877,29 @@ def get_findings_list(tid):
             for i in range(missing_notes_count):
                 findings_list[f + 1].append('')
                 findings_list[f + 1].append('')
+
+    if system_settings.enable_deduplication:
+        if note_type_activation:
+            for note_type in active_note_types:
+                findings_list[0].append('[duplicate] ' + note_type.name)
+            for f in range(findings.count()):
+                original_finding = findings[f].duplicate_finding
+                for note_type in active_note_types:
+                    try:
+                        note = original_finding.notes.filter(note_type=note_type).latest('date')
+                        findings_list[f + 1].append(note.entry)
+                    except:
+                        findings_list[f + 1].append('')
+        else:
+            findings_list[0].append('[duplicate] note')
+            for f in range(findings.count()):
+                original_finding = findings[f].duplicate_finding
+                try:
+                    note = original_finding.notes.latest('date')
+                    findings_list[f + 1].append(note.entry)
+                except:
+                    findings_list[f + 1].append('')
+
     findings_list[0].append('Last column')
     for f in range(findings.count()):
         findings_list[f + 1].append('-')

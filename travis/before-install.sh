@@ -14,5 +14,5 @@ sudo npm install -g snyk
 
 
 # Install Deployment
-sudo curl https://cli-assets.heroku.com/install-ubuntu.sh | sh
-
+# Disabled because it breaks the build currently due to an error. It's not used currently.
+# sudo curl https://cli-assets.heroku.com/install-ubuntu.sh | sh

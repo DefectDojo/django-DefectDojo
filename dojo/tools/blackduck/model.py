@@ -8,6 +8,8 @@ BlackduckFinding = namedtuple('BlackduckFinding', [
     'description',
     'security_risk',
     'impact',
+    'component_name',
+    'component_version',
     'vuln_source',
     'url',
     'channel_version_origin_id',
