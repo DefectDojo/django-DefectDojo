@@ -149,12 +149,16 @@ if [ -z "${TEST}" ]; then
   echo "Testing DefectDojo Service"
   kubectl port-forward --namespace=default service/defectdojo-django 8080:80
 
-  # curl -s -o "/dev/null" http://defectdojo.default.minikube.local:8080 -m 120
-  # CR=$(curl -s -m 10 -I http://defectdojo.default.minikube.local:8080/login?next= | egrep "^HTTP" | cut  -d' ' -f2)
-  curl -s http://localhost:8080 -m 120 -vvv
-  curl -s -m 10 -I http://localhost:8080/login?next= -vvv
-  curl -s http://localhost:80 -m 120 -vvv
-  curl -s -m 10 -I http://localhost:80/login?next= -vvv
+  echo '::1       defectdojo.default.minikube.local' | sudo tee -a /etc/hosts
+  echo '127.0.0.1 defectdojo.default.minikube.local' | sudo tee -a /etc/hosts
+
+  curl -s http://defectdojo.default.minikube.local:8080 -m 120 -vvv
+  curl -s -m 10 -I http://defectdojo.default.minikube.local:8080/login?next= -vvv
+  CR=$(curl -s -m 10 -I http://defectdojo.default.minikube.local:8080/login?next= | egrep "^HTTP" | cut  -d' ' -f2)
+  # curl -s http://localhost:8080 -m 120 -vvv
+  # curl -s -m 10 -I http://localhost:8080/login?next= -vvv
+  # curl -s http://localhost:80 -m 120 -vvv
+  # curl -s -m 10 -I http://localhost:80/login?next= -vvv
   
   CR=$(curl -s -m 10 -I http://localhost:8080/login?next= | egrep "^HTTP" | cut  -d' ' -f2)
   if [ "$CR" != 200 ]; then
