@@ -155,6 +155,11 @@ if [ -z "${TEST}" ]; then
   curl -s http://defectdojo.default.minikube.local:8080 -m 120 -vvv
   curl -s -m 10 -I http://defectdojo.default.minikube.local:8080/login?next= -vvv
   CR=$(curl -s -m 10 -I http://defectdojo.default.minikube.local:8080/login?next= | egrep "^HTTP" | cut  -d' ' -f2)
+
+  curl -s http://defectdojo.default.minikube.local -m 120 -vvv
+  curl -s -m 10 -I http://defectdojo.default.minikube.local/login?next= -vvv
+  CR=$(curl -s -m 10 -I http://defectdojo.default.minikube.local/login?next= | egrep "^HTTP" | cut  -d' ' -f2)
+
   # curl -s http://localhost:8080 -m 120 -vvv
   # curl -s -m 10 -I http://localhost:8080/login?next= -vvv
   # curl -s http://localhost:80 -m 120 -vvv
