@@ -128,6 +128,14 @@ if [ -z "${TEST}" ]; then
     ${HELM_DATABASE_SETTINGS} \
     --set createSecret=true
 
+  echo "describe"
+  sudo kubectl describe --namespace=default service/defectdojo-django
+  echo "json"
+  sudo kubectl describe --namespace=default service/defectdojo-django -o json
+    echo "jsonpath"
+  sudo kubectl describe --namespace=default service/defectdojo-django -o=jsonpath='{.spec.clusterIP}'  
+  echo "yaml grep"
+  sudo kubectl get --namespace=default svc service/defectdojo-django -o yaml | grep ip
 
   echo -n "Waiting for DefectDojo to become ready "
   i=0
@@ -147,21 +155,13 @@ if [ -z "${TEST}" ]; then
   fi
 
   echo "Testing DefectDojo Service"
-  sudo kubectl port-forward --namespace=default service/defectdojo-django 8080:80
-  echo "describe"
-  sudo kubectl describe --namespace=default service/defectdojo-django
-  echo "json"
-  sudo kubectl describe --namespace=default service/defectdojo-django -o json
-    echo "jsonpath"
-  sudo kubectl describe --namespace=default service/defectdojo-django -o=jsonpath='{.spec.clusterIP}'  
-  echo "yaml grep"
-  sudo kubectl get --namespace=default svc service/defectdojo-django -o yaml | grep ip
-
+  sudo kubectl port-forward --namespace=default service/defectdojo-django 8080:8888
+  
   echo '::1       defectdojo.default.minikube.local' | sudo tee -a /etc/hosts
   echo '127.0.0.1 defectdojo.default.minikube.local' | sudo tee -a /etc/hosts
 
-  curl -s http://defectdojo.default.minikube.local:8080 -m 120 -vvv
-  curl -s -m 10 -I http://defectdojo.default.minikube.local:8080/login?next= -vvv
+  curl -s http://defectdojo.default.minikube.local:8888 -m 120 -vvv
+  curl -s -m 10 -I http://defectdojo.default.minikube.local:8888/login?next= -vvv
   CR=$(curl -s -m 10 -I http://defectdojo.default.minikube.local:8080/login?next= | egrep "^HTTP" | cut  -d' ' -f2)
 
   curl -s http://defectdojo.default.minikube.local -m 120 -vvv
