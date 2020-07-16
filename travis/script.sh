@@ -130,6 +130,15 @@ if [ -z "${TEST}" ]; then
 
   echo "describe"
   sudo kubectl describe --namespace=default service/defectdojo-django
+  echo "describe2"
+  sudo kubectl describe --namespace=default service/defectdojo-django | grep IP
+  echo "describe3"
+  sudo kubectl describe --namespace=default service/defectdojo-django | grep IP | cut  -d' ' -f2
+  echo "describe4"
+  DD_HOST=$(sudo kubectl describe --namespace=default service/defectdojo-django | grep IP | cut  -d' ' -f2)
+  echo DD_HOST: $DD_HOST
+
+
   echo "json"
   sudo kubectl describe --namespace=default service/defectdojo-django -o json
     echo "jsonpath"
@@ -164,16 +173,16 @@ if [ -z "${TEST}" ]; then
   curl -s -m 10 -I http://defectdojo.default.minikube.local:8888/login?next= -vvv
   CR=$(curl -s -m 10 -I http://defectdojo.default.minikube.local:8080/login?next= | egrep "^HTTP" | cut  -d' ' -f2)
 
-  curl -s http://defectdojo.default.minikube.local -m 120 -vvv
-  curl -s -m 10 -I http://defectdojo.default.minikube.local/login?next= -vvv
-  CR=$(curl -s -m 10 -I http://defectdojo.default.minikube.local/login?next= | egrep "^HTTP" | cut  -d' ' -f2)
+  curl -s http://$DD_HOST:8080 -m 120 -vvv
+  curl -s -m 10 -I http://$DD_HOST:8080/login?next= -vvv
+  CR=$(curl -s -m 10 -I http://$DD_HOST:8080/login?next= | egrep "^HTTP" | cut  -d' ' -f2)
 
   # curl -s http://localhost:8080 -m 120 -vvv
   # curl -s -m 10 -I http://localhost:8080/login?next= -vvv
   # curl -s http://localhost:80 -m 120 -vvv
   # curl -s -m 10 -I http://localhost:80/login?next= -vvv
   
-  CR=$(curl -s -m 10 -I http://localhost:8080/login?next= | egrep "^HTTP" | cut  -d' ' -f2)
+  CR=$(curl -s -m 10 -I http://$DD_HOST:8080/login?next= | egrep "^HTTP" | cut  -d' ' -f2)
   if [ "$CR" != 200 ]; then
     echo "ERROR: cannot display login screen; got HTTP code $CR"
     sudo kubectl logs --selector=defectdojo.org/component=django -c uwsgi
