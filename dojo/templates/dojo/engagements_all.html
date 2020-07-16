@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load navigation_tags %}
+{% load display_tags %}
 {% block content %}
     <div class="row" xmlns="http://www.w3.org/1999/html">
         <div class="col-md-12">
@@ -25,11 +26,10 @@
                         <thead>
                         <tr>
                             <th>Product</th>
-                            <th>Tags</th>
                             <th>Product Type</th>
                             <th>Engagement Name</th>
                             <th>Status</th>
-                            <th>Target Start</th>
+                            <th>Period</th>
                             <th>Lead</th>
                             <th>Tests</th>
                             {% if user.is_staff %}
@@ -44,43 +44,44 @@
                                 <tr>
 
                                     <td class="prod_name"><a href="{% url 'view_product' p.id %}">{{ p.name }}</a>
-                                    </td>
-                                    <!-- Tags column -->
-                                    <td>
                                         <sup>
                                             {% for tag in p.tags %}
-                                                <a title="Search {{ tag }}" class="tag-label tag-color"
-                                                   href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                            <a title="Search {{ tag }}" class="tag-label tag-color"
+                                            href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                             {% endfor %}
                                         </sup>
                                     </td>
-                                    <!-- End of Tags Column -->
                                     <td class="prod_name">
                                         <a href="{% url 'product_type_metrics' p.prod_type.id %}">{{ p.prod_type.name }}</a>
                                     </td>
                                     <td>
                                         <a style="display: inline" class="eng_link"
                                            href="{% url 'view_engagement' e.id %}">
-                                            {% if e.name %}{{ e.name }} {% endif %}<br>
+                                            {% if e.name %}{{ e.name }} {% endif %}
                                         </a>
+                                        <sup>
+                                            {% for tag in e.tags %}
+                                            <a title="Search {{ tag }}" class="tag-label tag-color"
+                                            href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                            {% endfor %}
+                                        </sup>
+                                        <br>
                                     </td>
                                     <td> {{ e.status }} </td>
-                                    <td> {{ e.target_start }} </td>
+                                    <td> {{ e.target_start|date }} - {{ e.target_end|date }} 
+                                        {% if e.is_overdue %}<sup><div class="tag-label warning-color">{{ e.target_end|overdue }} overdue</div></sup>
+                                        {% endif %}
+                                    </td>
                                     <td> {{ e.lead.first_name }}</td>
                                     <td> {% for test in e.test_set.all %}
                                         {% if test.lead %}
-                                            <a href="{% url 'view_test' test.id %}"> {{ test }}: {{ test.lead.first_name }} </a>
+                                            <a href="{% url 'view_test' test.id %}"> {{ test }}: {{ test.lead.first_name }} ({{ test.updated|date}})</a>
                                         {% else %}
-                                            <a href="{% url 'view_test' test.id %}"> {{ test }} </a>
+                                            <a href="{% url 'view_test' test.id %}"> {{ test }} ({{ test.updated|date}})</a>
                                         {% endif %}
                                         <br>
                                     {% endfor %}
-                                        <sup>
-                                            {% for tag in e.tags %}
-                                                <a title="Search {{ tag }}" class="tag-label tag-color"
-                                                   href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
-                                            {% endfor %}
-                                        </sup></td>
+                                    </td>
                                     {% if user.is_staff %}
                                         <td>
                                             <a class="btn btn-sm btn-success" href="{% url 'new_eng_for_prod' p.id %}">
@@ -99,7 +100,7 @@
                     {% include "dojo/paging_snippet.html" with page=products page_size=True %}
                 </div>
             {% else %}
-                <h5> No engagements found </h5>
+            <div id="no_engagements"><h5 class="text-center"> No engagements found </h5></div>
             {% endif %}
         </div>
     </div>
@@ -133,7 +134,7 @@
             var fileDated = 'Engagements_List_' + date;
             var buttonCommon = {
                 exportOptions: {
-                    columns: ':not(:eq(8))',
+                    columns: ':not(:eq(7))',
                     stripHtml: true,
                     stripNewlines: true,
                     trim: true,
@@ -145,57 +146,32 @@
 
             // Mapping of table columns to objects for proper cleanup and data formatting
             var dojoTable = $('#engagements').DataTable({
-                "columns": [
-                    { "data": "product" , render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
-                    }},
-                    { "data": "tags" , render: function (data, type, row) {
-                            return type === 'export' ?  getDojoExportValueFromTag(data, 'a') :  data;
-                    }},
-                    { "data": "product_type" , render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
-                    }},
-                    { "data": "eng_name" , render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
-                    }},
-                    { "data": "status", render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
-                    } },
-                    { "data": "target_start", render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
-                    }},
-                    { "data": "lead", render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
-                    }},
-                    { "data": "tests" , render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
-                    }},
-                    { "data": "action", render: function (data, type, row) {
-                            return type === 'export' ?  "" :  data;
-                    }},
-                ],
-                "columnDefs": [
-                    { "orderable": false, "targets": [8] }
+                columnDefs: [
+                    { 
+                        "orderable": false,
+                        "targets": [0]
+                    },
                 ],
                 dom: 'Bfrtip',
                 paging: false,
                 buttons: [
+                    {
+                        extend: 'colvis',
+                        columns: ':not(.noVis)'
+                    },
                     $.extend( true, {}, buttonCommon, {
-                        extend: 'colvis'
+                        extend: 'copy'
                     }),
                     $.extend( true, {}, buttonCommon, {
-                        extend: 'copyHtml5'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'excelHtml5',
+                        extend: 'excel',
                         autoFilter: true,
                         sheetName: 'Exported data',
                     }),
                     $.extend( true, {}, buttonCommon, {
-                        extend: 'csvHtml5'
+                        extend: 'csv'
                     }),
                     $.extend( true, {}, buttonCommon, {
-                        extend: 'pdfHtml5',
+                        extend: 'pdf',
                         orientation: 'landscape',
                         pageSize: 'LETTER'
                     }),

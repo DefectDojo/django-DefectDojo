@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% load display_tags %}
-{% load get_system_setting %}
 {% load humanize %}
 {% load static from staticfiles %}
 {% block add_styles %}
@@ -115,7 +114,7 @@
                     <div class="panel-heading">
                         <div class="clearfix">
                             <h4 class="pull-left">
-                            Engagement Presets <small>{{ eng.preset.title|truncatechars:60 }}</small>
+                            Engagement Presets <small>{{ eng.preset.title|truncatechars_html:60 }}</small>
                             </h4>
                             <div class="dropdown pull-right">
                                 <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
@@ -257,8 +256,8 @@
                                 </td>
                                 <td>
                                   <ul>
-                                   <li class="dropdown" style="list-style:none;">
-                                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                                   <li class="dropdown" style="list-style:none;position:absolute">
+                                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
                                          <ul class="dropdown-menu">
                                            <li>
                                              <a class="" href="{% url 'view_test' test.id %}">
@@ -293,7 +292,7 @@
                                        </li>
                                    </ul>
                                 </td>
-                                <td>{{ test.target_start.date }} - {{ test.target_end.date }}</td>
+                                <td>{{ test.target_start|date }} - {{ test.target_end|date }}</td>
                                 <td>
                                   {% if test.lead.get_full_name and test.lead.get_full_name.strip %}
                                       {{ test.lead.get_full_name }}
@@ -359,7 +358,7 @@
                                 <td>{{ risk.created }}</td>
                                 <td>{{ risk.expiration_date|default_if_none:"" }}</td>
                                 <td>{{ risk.accepted_by|default_if_none:"" }}</td>
-                                <td>{{ risk.accepted_findings.all|length }}</td>
+                                <td>{{ risk.accepted_findings.count }}</td>
                                 <td><a href="{% url 'download_risk' eng.id risk.id %}">{{ risk.filename }}</a></td>
                                 <td>
                                     <a class="btn btn-sm btn-primary" href="{% url 'view_risk' eng.id risk.id %}">
@@ -512,7 +511,7 @@
           <tr>
             <td><strong>Length</strong></td>
             <td>{{ eng.target_start|datediff_time:eng.target_end }}
-              {% if eng.target_end|overdue and eng.status != 'Completed'%}
+              {% if eng.is_overdue and eng.status != 'Completed'%}
               <sup>
                 <div class="tag-label warning-color">
                   {{ eng.target_end|overdue }} overdue
@@ -593,7 +592,7 @@
             </tr>
             <tr>
               <td><strong>Commit Hash</strong></td>
-              <td>{{ eng.commit_hash|notspecified|truncatechars:13 }}</td>
+              <td>{{ eng.commit_hash|notspecified|truncatechars_html:13 }}</td>
             </tr>
             <tr>
               <td><strong>Branch/Tag</strong></td>
@@ -728,8 +727,8 @@
 </div>
 </div>
 <div class="protip">
-   <i class="fa fa-lightbulb-o"></i> <strong>ProTip!</strong> Type <kbd>e</kbd> to edit this engagement. Type <kbd>i</kbd> to import scan results or <kbd>a</kbd> to add tests.
-</div>
+    <i class="fa fa-lightbulb-o"></i> <strong>ProTip!</strong> Type <kbd>e</kbd> to edit this engagement. Type <kbd>i</kbd> to import scan results or <kbd>a</kbd> to add tests.
+ </div>
 {% endblock %}
 {% block postscript %}
     <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
@@ -771,9 +770,18 @@
 
                 $('input#simple_search').val(terms);
             }
+
+            $('#shareSurveyModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget) // Button that triggered the modal
+            var path = button.data('whatever') // Extract info from data-* attributes
+            // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+            // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+            var modal = $(this)
+            var http = location.protocol;
+            var slashes = http.concat("//");
+            var host = slashes.concat(window.location.host);
+            modal.find('p#surveyURL').text('Survey URL: ' + host + path)
+            })
         });
-
-
-
     </script>
 {% endblock %}

@@ -8,6 +8,7 @@ root = environ.Path(__file__) - 3  # Three folders back
 env = environ.Env(
     # Set casting and default values
     DD_DEBUG=(bool, False),
+    DD_DJANGO_METRICS_ENABLED=(bool, False),
     DD_LOGIN_REDIRECT_URL=(str, '/'),
     DD_DJANGO_ADMIN_ENABLED=(bool, False),
     DD_SESSION_COOKIE_HTTPONLY=(bool, True),
@@ -68,18 +69,29 @@ env = environ.Env(
     DD_SECRET_KEY=(str, '.'),
     DD_CREDENTIAL_AES_256_KEY=(str, '.'),
     DD_DATA_UPLOAD_MAX_MEMORY_SIZE=(int, 8388608),  # Max post size set to 8mb
-    DD_SOCIAL_AUTH_GOOGLE_OAUTH2_ENABLE=(bool, 'False'),
+    DD_SOCIAL_AUTH_TRAILING_SLASH=(bool, True),
+    DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED=(bool, False),
+    DD_SOCIAL_AUTH_AUTH0_KEY=(str, ''),
+    DD_SOCIAL_AUTH_AUTH0_SECRET=(str, ''),
+    DD_SOCIAL_AUTH_AUTH0_DOMAIN=(str, ''),
+    DD_SOCIAL_AUTH_AUTH0_SCOPE=(list, ['openid', 'profile', 'email']),
+    DD_SOCIAL_AUTH_GOOGLE_OAUTH2_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_GOOGLE_OAUTH2_KEY=(str, ''),
     DD_SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET=(str, ''),
-    DD_SOCIAL_AUTH_OKTA_OAUTH2_ENABLED=(bool, 'False'),
+    DD_SOCIAL_AUTH_OKTA_OAUTH2_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_OKTA_OAUTH2_KEY=(str, ''),
     DD_SOCIAL_AUTH_OKTA_OAUTH2_SECRET=(str, ''),
     DD_SOCIAL_AUTH_OKTA_OAUTH2_API_URL=(str, 'https://{your-org-url}/oauth2/default'),
-    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_ENABLED=(bool, 'False'),
+    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_KEY=(str, ''),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_SECRET=(str, ''),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID=(str, ''),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE=(str, 'https://graph.microsoft.com/'),
+    DD_SOCIAL_AUTH_GITLAB_OAUTH2_ENABLED=(bool, False),
+    DD_SOCIAL_AUTH_GITLAB_KEY=(str, ''),
+    DD_SOCIAL_AUTH_GITLAB_SECRET=(str, ''),
+    DD_SOCIAL_AUTH_GITLAB_API_URL=(str, 'https://gitlab.com'),
+    DD_SOCIAL_AUTH_GITLAB_SCOPE=(list, ['api', 'read_user', 'openid', 'profile', 'email']),
 )
 
 
@@ -210,8 +222,7 @@ STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    os.path.join(os.path.dirname(DOJO_ROOT), 'components', 'node_modules',
-                 '@yarn_components'),
+    os.path.join(os.path.dirname(DOJO_ROOT), 'components', 'node_modules'),
 )
 
 # List of finder classes that know how to find static files in
@@ -253,9 +264,11 @@ LOGIN_URL = '/login'
 
 # These are the individidual modules supported by social-auth
 AUTHENTICATION_BACKENDS = (
+    'social_core.backends.auth0.Auth0OAuth2',
     'social_core.backends.google.GoogleOAuth2',
     'dojo.okta.OktaOAuth2',
     'social_core.backends.azuread_tenant.AzureADTenantOAuth2',
+    'social_core.backends.gitlab.GitLabOAuth2',
     'django.contrib.auth.backends.RemoteUserBackend',
     'django.contrib.auth.backends.ModelBackend',
 )
@@ -274,12 +287,14 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.user.user_details',
 )
 
+CLASSIC_AUTH_ENABLED = True
+
 SOCIAL_AUTH_STRATEGY = 'social_django.strategy.DjangoStrategy'
 SOCIAL_AUTH_STORAGE = 'social_django.models.DjangoStorage'
 SOCIAL_AUTH_ADMIN_USER_SEARCH_FIELDS = ['username', 'first_name', 'last_name', 'email']
 SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL = True
 
-GOOGLE_OAUTH_ENABLED = env('DD_SOCIAL_AUTH_GOOGLE_OAUTH2_ENABLE')
+GOOGLE_OAUTH_ENABLED = env('DD_SOCIAL_AUTH_GOOGLE_OAUTH2_ENABLED')
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = env('DD_SOCIAL_AUTH_GOOGLE_OAUTH2_KEY')
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = env('DD_SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET')
 SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS = ['']
@@ -298,6 +313,19 @@ SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_SECRET = env('DD_SOCIAL_AUTH_AZUREAD_TENANT_OA
 SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID = env('DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID')
 SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE = env('DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE')
 
+GITLAB_OAUTH2_ENABLED = env('DD_SOCIAL_AUTH_GITLAB_OAUTH2_ENABLED')
+SOCIAL_AUTH_GITLAB_KEY = env('DD_SOCIAL_AUTH_GITLAB_KEY')
+SOCIAL_AUTH_GITLAB_SECRET = env('DD_SOCIAL_AUTH_GITLAB_SECRET')
+SOCIAL_AUTH_GITLAB_API_URL = env('DD_SOCIAL_AUTH_GITLAB_API_URL')
+SOCIAL_AUTH_GITLAB_SCOPE = env('DD_SOCIAL_AUTH_GITLAB_SCOPE')
+
+AUTH0_OAUTH2_ENABLED = env('DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED')
+SOCIAL_AUTH_AUTH0_KEY = env('DD_SOCIAL_AUTH_AUTH0_KEY')
+SOCIAL_AUTH_AUTH0_SECRET = env('DD_SOCIAL_AUTH_AUTH0_SECRET')
+SOCIAL_AUTH_AUTH0_DOMAIN = env('DD_SOCIAL_AUTH_AUTH0_DOMAIN')
+SOCIAL_AUTH_AUTH0_SCOPE = env('DD_SOCIAL_AUTH_AUTH0_SCOPE')
+SOCIAL_AUTH_TRAILING_SLASH = env('DD_SOCIAL_AUTH_TRAILING_SLASH')
+
 LOGIN_EXEMPT_URLS = (
     r'^%sstatic/' % URL_PREFIX,
     r'^%swebhook/' % URL_PREFIX,
@@ -305,10 +333,8 @@ LOGIN_EXEMPT_URLS = (
     r'^%sreports/cover$' % URL_PREFIX,
     r'^%sfinding/image/(?P<token>[^/]+)$' % URL_PREFIX,
     r'^%sapi/v2/' % URL_PREFIX,
-    r'complete/google-oauth2/',
-    r'complete/okta-oauth2/',
+    r'complete/',
     r'empty_survey/([\d]+)/answer'
-    r'complete/azuread-tenant-oauth2/',
 )
 
 # ------------------------------------------------------------------------------
@@ -432,6 +458,8 @@ TEMPLATES = [
                 'social_django.context_processors.backends',
                 'social_django.context_processors.login_redirect',
                 'dojo.context_processors.globalize_oauth_vars',
+                'dojo.context_processors.bind_system_settings',
+                'dojo.context_processors.bind_alert_count',
             ],
         },
     },
@@ -467,7 +495,7 @@ INSTALLED_APPS = (
     'rest_framework.authtoken',
     'rest_framework_swagger',
     'dbbackup',
-    'taggit_serializer',
+    # 'taggit_serializer',
     # 'axes'
     'django_celery_results',
     'social_django',
@@ -487,8 +515,9 @@ DJANGO_MIDDLEWARE_CLASSES = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'dojo.middleware.LoginRequiredMiddleware',
-    'dojo.middleware.TimezoneMiddleware',
     'social_django.middleware.SocialAuthExceptionMiddleware',
+    'watson.middleware.SearchContextMiddleware',
+    'auditlog.middleware.AuditlogMiddleware',
 ]
 
 MIDDLEWARE = DJANGO_MIDDLEWARE_CLASSES
@@ -551,6 +580,25 @@ CELERY_BEAT_SCHEDULE = {
 
 
 # ------------------------------------
+# Monitoring Metrics
+# ------------------------------------
+# address issue when running ./manage.py collectstatic
+# reference: https://github.com/korfuri/django-prometheus/issues/34
+PROMETHEUS_EXPORT_MIGRATIONS = False
+# django metrics for monitoring
+if env('DD_DJANGO_METRICS_ENABLED'):
+    DJANGO_METRICS_ENABLED = env('DD_DJANGO_METRICS_ENABLED')
+    INSTALLED_APPS = INSTALLED_APPS + ('django_prometheus',)
+    MIDDLEWARE = ['django_prometheus.middleware.PrometheusBeforeMiddleware', ] + \
+        MIDDLEWARE + \
+        ['django_prometheus.middleware.PrometheusAfterMiddleware', ]
+    database_engine = DATABASES.get('default').get('ENGINE')
+    DATABASES['default']['ENGINE'] = database_engine.replace('django.', 'django_prometheus.', 1)
+    # CELERY_RESULT_BACKEND.replace('django.core','django_prometheus.', 1)
+    LOGIN_EXEMPT_URLS += (r'^%sdjango_metrics/' % URL_PREFIX,)
+
+
+# ------------------------------------
 # Hashcode configuration
 # ------------------------------------
 # List of fields used to compute the hash_code
@@ -566,11 +614,15 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'SonarQube Scan': ['cwe', 'severity', 'file_path'],
     'Dependency Check Scan': ['cve', 'file_path'],
     # possible improvment: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
-    'NPM Audit Scan': ['title', 'severity'],
+    'NPM Audit Scan': ['title', 'severity', 'file_path', 'cve', 'cwe'],
     # possible improvment: in the scanner put the library name into file_path, then dedup on cve + file_path + severity
     'Whitesource Scan': ['title', 'severity', 'description'],
     'ZAP Scan': ['cwe', 'endpoints', 'severity'],
-    'Qualys Scan': ['title', 'endpoints', 'severity']
+    'Qualys Scan': ['title', 'endpoints', 'severity'],
+    'PHP Symfony Security Check': ['title', 'cve'],
+    # for backwards compatibility because someone decided to rename this scanner:
+    'Symfony Security Check': ['title', 'cve'],
+    'DSOP Scan': ['cve'],
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
@@ -583,13 +635,14 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'NPM Audit Scan': True,
     'Whitesource Scan': True,
     'ZAP Scan': False,
-    'Qualys Scan': True
+    'Qualys Scan': True,
+    'DSOP Scan': True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
 # 'endpoints' is a pseudo field that uses the endpoints (for dynamic scanners)
 # 'unique_id_from_tool' is often not needed here as it can be used directly in the dedupe algorithm, but it's also possible to use it for hashing
-HASHCODE_ALLOWED_FIELDS = ['title', 'cwe', 'cve', 'line', 'file_path', 'description', 'endpoints', 'unique_id_from_tool', 'severity']
+HASHCODE_ALLOWED_FIELDS = ['title', 'cwe', 'cve', 'line', 'file_path', 'component_name', 'component_version', 'description', 'endpoints', 'unique_id_from_tool', 'severity']
 
 # ------------------------------------
 # Deduplication configuration
@@ -617,7 +670,11 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'NPM Audit Scan': DEDUPE_ALGO_HASH_CODE,
     'Whitesource Scan': DEDUPE_ALGO_HASH_CODE,
     'ZAP Scan': DEDUPE_ALGO_HASH_CODE,
-    'Qualys Scan': DEDUPE_ALGO_HASH_CODE
+    'Qualys Scan': DEDUPE_ALGO_HASH_CODE,
+    'PHP Symfony Security Check': DEDUPE_ALGO_HASH_CODE,
+    # for backwards compatibility because someone decided to rename this scanner:
+    'Symfony Security Check': DEDUPE_ALGO_HASH_CODE,
+    'DSOP Scan': DEDUPE_ALGO_HASH_CODE,
 }
 
 # ------------------------------------------------------------------------------

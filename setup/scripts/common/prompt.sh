@@ -329,6 +329,21 @@ prompt_for_config_vals() {
 		esac
     done
 
+	# Sanity check answers, and exit if DB does not yet exist and DBTYPE is not mysql
+	if [ ! "$DB_TYPE" = "MySQL" ] && [ "$DB_EXISTS" = false ]; then
+	    echo ""
+		echo "##############################################################################"
+		echo "#  AN ERROR HAS OCCURED                                                      #"
+		echo "##############################################################################"
+	    echo ""
+		echo "  You answered that the $DB_TYPE doesn't already exist"
+	    echo "  This installer currently can only create MySQL databases."
+	    echo "  Please create a database manually and re-run this installer"
+	    echo "  Exiting..."
+	    echo ""
+	    exit 1
+	fi
+
 	# Sanity check answers, and exit if DB is remote and doesn't exists aka beyond the scope of this installer
 	# Case 1: Remote database + database doesn't exist
 	if [ "$DB_LOCAL" = false ] && [ "$DB_EXISTS" = false ]; then
@@ -487,4 +502,13 @@ prompt_for_config_vals() {
 	echo "  End of interactive portion of the installer "
 	echo "=============================================================================="
 	echo ""
+}
+
+print_eol_message() {
+    echo
+    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    echo " The setup.bash installation method will be EOL on 2020-12-31 "
+    echo " A likely successor will be godojo (https://github.com/mtesauro/godojo) "
+    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    echo
 }

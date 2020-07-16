@@ -325,7 +325,7 @@
   <script src="{% static "flot/jquery.flot.js" %}"></script>
   <script src="{% static "flot/jquery.flot.pie.js" %}"></script>
   <script src="{% static "flot/jquery.flot.time.js" %}"></script>
-  <script src="{% static "flot.tooltip/js/jquery.flot.tooltip.min.js" %}"></script>
+  <script src="{% static "jquery.flot.tooltip/js/jquery.flot.tooltip.min.js" %}"></script>
   <script src="{% static "flot/jquery.flot.stack.js" %}"></script>
   <script src="{% static "flot/jquery.flot.resize.js" %}"></script>
   <script type="text/javascript">
@@ -343,6 +343,7 @@
         $('input#simple_search').val(terms);
       }
 
+      {% if languages and langSummary.files__count > 0 %}
       severity_pie();
       function severity_pie() {
           var data = [
@@ -373,6 +374,7 @@
               },
           });
         }
+        {% endif %}        
     });
 
   </script>

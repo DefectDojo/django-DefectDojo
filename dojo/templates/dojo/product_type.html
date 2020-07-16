@@ -52,8 +52,8 @@
                         <tbody>
                         {% for pt in pts %}
                             <tr>
-                                <td><a href="{% url 'product_type_metrics' pt.id %}"> {{ pt.name }} </a></td>
-                                <td><a href="{% url 'product' %}?prod_type={{ pt.id }}">{{ pt.products_count }}</a></td>
+                                <td><a href="{% url 'product' %}?prod_type={{ pt.id }}">{{ pt.name }}</a></td>
+                                <td><a href="{% url 'product_type_metrics' pt.id %}"> {{ pt.prod_count }} </a></td>
                                 <td>
                                     <a href="{% url 'open_findings' %}?test__engagement__product__prod_type={{ pt.id }}">
                                         {{ pt.findings_count }}

@@ -50,7 +50,9 @@ class AnchoreEngineScanParser(object):
 
             references = item['url']
 
-            dupe_key = data['imageDigest'] + "|" + item['feed'] + "|" + item['feed_group'] + "|" + item['package'] + '|' + item['vuln']
+            dupe_key = data['imageDigest'] + '|' + item['feed'] + '|' + item['feed_group'] \
+                + '|' + item['package_name'] + '|' + item['package_version'] + '|' \
+                + '|' + item['package_path'] + '|' + item['vuln']
 
             if dupe_key in dupes:
                 find = dupes[dupe_key]
@@ -68,6 +70,8 @@ class AnchoreEngineScanParser(object):
                     impact=impact,
                     references=references,
                     file_path=item["package_path"],
+                    component_name=item['package_name'],
+                    component_version=item['package_version'],
                     url=item['url'],
                     date=find_date,
                     static_finding=True,

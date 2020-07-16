@@ -1,42 +1,21 @@
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import NoAlertPresentException
 import unittest
-import re
-import os
 import sys
+from base_test_class import BaseTestCase
 
 
-class DojoTests(unittest.TestCase):
-    def setUp(self):
-        self.options = Options()
-        self.options.add_argument("--headless")
-        self.driver = webdriver.Chrome('chromedriver', chrome_options=self.options)
-        self.driver.implicitly_wait(30)
-        self.base_url = "http://localhost:8080/"
-        self.verificationErrors = []
-        self.accept_next_alert = True
-
-    def login_page(self):
-        driver = self.driver
-        driver.get(self.base_url + "login")
-        driver.find_element_by_id("id_username").clear()
-        driver.find_element_by_id("id_username").send_keys(os.environ['DD_ADMIN_USER'])
-        driver.find_element_by_id("id_password").clear()
-        driver.find_element_by_id("id_password").send_keys(os.environ['DD_ADMIN_PASSWORD'])
-        driver.find_element_by_css_selector("button.btn.btn-success").click()
-        return driver
+class DojoTests(BaseTestCase):
 
     def test_login(self):
         driver = self.login_page()
-        loginTxt = driver.find_element_by_tag_name("BODY").text
-        self.assertTrue(re.search(r'Active Engagements', loginTxt))
+
+        self.assertTrue(self.is_text_present_on_page(text='Active Engagements'))
 
     def test_create_product(self):
         driver = self.login_page()
-        driver.get(self.base_url + "product")
+        self.goto_product_overview(driver)
         driver.find_element_by_id("dropdownMenu1").click()
         driver.find_element_by_link_text("Add Product").click()
         driver.find_element_by_id("id_name").clear()
@@ -45,13 +24,13 @@ class DojoTests(unittest.TestCase):
         driver.find_element_by_id("id_description").send_keys("QA Test 1 Description")
         Select(driver.find_element_by_id("id_prod_type")).select_by_visible_text("Research and Development")
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
-        productTxt = driver.find_element_by_tag_name("BODY").text
-        self.assertTrue(re.search(r'Product added successfully', productTxt))
+
+        self.assertTrue(self.is_success_message_present(text='Product added successfully'))
 
     def test_engagement(self):
         driver = self.login_page()
         driver = self.driver
-        driver.get(self.base_url + "product")
+        self.goto_product_overview(driver)
         driver.find_element_by_link_text("Product List").click()
         driver.find_element_by_xpath("//table[@id='products']/tbody/tr[1]/td[5]/a").click()
 
@@ -89,8 +68,7 @@ class DojoTests(unittest.TestCase):
         driver.find_element_by_id("id_impact").send_keys("Impact")
         driver.find_element_by_name("_Finished").click()
 
-        findingTxt = driver.find_element_by_tag_name("BODY").text
-        self.assertTrue(re.search(r'Finding added successfully', findingTxt))
+        self.assertTrue(self.is_success_message_present(text='Finding added successfully'))
 
     def is_element_present(self, how, what):
         try:
@@ -118,10 +96,6 @@ class DojoTests(unittest.TestCase):
         finally:
             self.accept_next_alert = True
 
-    def tearDown(self):
-        self.driver.quit()
-        self.assertEqual([], self.verificationErrors)
-
 
 def suite():
     suite = unittest.TestSuite()
@@ -130,6 +104,7 @@ def suite():
 
 
 if __name__ == "__main__":
-    runner = unittest.TextTestRunner(descriptions=True, failfast=True)
+    runner = unittest.TextTestRunner(descriptions=True, failfast=True, verbosity=2)
     ret = not runner.run(suite()).wasSuccessful()
+    BaseTestCase.tearDownDriver()
     sys.exit(ret)

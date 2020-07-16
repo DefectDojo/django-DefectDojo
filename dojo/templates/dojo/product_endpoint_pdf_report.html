@@ -322,7 +322,7 @@
                            <pre>{{ req.get_request }}</pre>
                         {% if req.get_response %}
                            <h6>Response {{forloop.counter}}</h6>
-                           <pre>{{ req.get_response|truncatechars:800 }}</pre>
+                           <pre>{{ req.get_response|truncatechars_html:800 }}</pre>
                         {% endif %}
                         {% endfor %}
                         {% endif %}
@@ -401,7 +401,7 @@
     <script src="{{ host }}{% static "flot/jquery.flot.resize.js" %}"></script>
     <script src="{{ host }}{% static "flot-axis/jquery.flot.axislabels.js" %}"></script>
     {% if punchcard %}
-        <script src="{{ host }}{% static "flot.tooltip/js/jquery.flot.tooltip.min.js" %}"></script>
+        <script src="{{ host }}{% static "jquery.flot.tooltip/js/jquery.flot.tooltip.min.js" %}"></script>
         <script src="{{ host }}{% static "JUMFlot/javascripts/JUMFlot.min.js" %}"></script>
         <script src="{{ host }}{% static "JUMFlot/javascripts/jquery.flot.mouse.js" %}"></script>
         <script src="{{ host }}{% static "JUMFlot/javascripts/jquery.flot.bubbles.js" %}"></script>

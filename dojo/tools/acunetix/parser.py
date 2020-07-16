@@ -14,8 +14,10 @@ class AcunetixScannerParser(object):
     """
 
     def __init__(self, xml_output, test):
-        acunetix_defectdojo_findings = get_defectdojo_findings(xml_output)
         self.items = []
+        if xml_output is None:
+            return
+        acunetix_defectdojo_findings = get_defectdojo_findings(xml_output)
         self.set_defectdojo_findings(acunetix_defectdojo_findings, test)
 
     def set_defectdojo_findings(self, acunetix_defectdojo_findings, test):
@@ -77,7 +79,10 @@ def get_cwe_number(cwe):
     :param cwe:
     :return: cwe number
     """
-    return cwe.split("-")[1]
+    if cwe is None:
+        return None
+    else:
+        return cwe.split("-")[1]
 
 
 def get_severity(severity):

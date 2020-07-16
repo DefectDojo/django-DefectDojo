@@ -1,60 +1,45 @@
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import Select
 import unittest
-import re
 import sys
-import os
+from base_test_class import BaseTestCase
+from Product_unit_test import ProductTest
 
 
-# first thing first. We have to create product, just to make sure there is atleast 1 product available
-# to assign endpoints to when creating or editing any.
-# importing Product_unit_test as a module
-# set relative path
-dir_path = os.path.dirname(os.path.realpath(__file__))
-try:  # First Try for python 3
-    import importlib.util
-    product_unit_test_module = importlib.util.spec_from_file_location("Product_unit_test",
-        os.path.join(dir_path, 'Product_unit_test.py'))  # using ',' allows python to determine the type of separator to use.
-    product_unit_test = importlib.util.module_from_spec(product_unit_test_module)
-    product_unit_test_module.loader.exec_module(product_unit_test)
-except:  # This will work for python2 if above fails
-    import imp
-    product_unit_test = imp.load_source('Product_unit_test',
-        os.path.join(dir_path, 'Product_unit_test.py'))
+class TestUnitTest(BaseTestCase):
 
+    def test_view_test(self):
+        # View existing test from ProductTest()
+        # Login to the site.
+        driver = self.login_page()
 
-class TestUnitTest(unittest.TestCase):
-    def setUp(self):
-        # Initialize the driver
-        # When used with Travis, chromdriver is stored in the same
-        # directory as the unit tests
-        self.options = Options()
-        self.options.add_argument("--headless")
-        self.driver = webdriver.Chrome('chromedriver', chrome_options=self.options)
-        # Allow a little time for the driver to initialize
-        self.driver.implicitly_wait(30)
-        # Set the base address of the dojo
-        self.base_url = "http://localhost:8080/"
-        self.verificationErrors = []
-        self.accept_next_alert = True
+        # goto engagemnent list (and wait for javascript to load)
+        self.goto_all_engagements_overview(driver)
 
-    def login_page(self):
-        # Make a member reference to the driver
-        driver = self.driver
-        # Navigate to the login page
-        driver.get(self.base_url + "login")
-        # Good practice to clear the entry before typing
-        driver.find_element_by_id("id_username").clear()
-        # These credentials will be used by Travis when testing new PRs
-        # They will not work when testing on your own build
-        # Be sure to change them before submitting a PR
-        driver.find_element_by_id("id_username").send_keys(os.environ['DD_ADMIN_USER'])
-        driver.find_element_by_id("id_password").clear()
-        driver.find_element_by_id("id_password").send_keys(os.environ['DD_ADMIN_PASSWORD'])
-        # "Click" the but the login button
-        driver.find_element_by_css_selector("button.btn.btn-success").click()
-        return driver
+        # Select a previously created engagement title
+        driver.find_element_by_partial_link_text("Ad Hoc Engagement").click()
+
+        driver.find_element_by_partial_link_text("Pen Test").click()
+
+        driver.find_element_by_id("select_all").click()
+
+        # bulk edit dropdown menu
+        driver.find_element_by_id("dropdownMenu2").click()
+
+        bulk_edit_menu = driver.find_element_by_id("bulk_edit_menu")
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_active").is_enabled(), False)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_verified").is_enabled(), False)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_false_p").is_enabled(), False)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_out_of_scope").is_enabled(), False)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_is_Mitigated").is_enabled(), False)
+
+        driver.find_element_by_id("id_bulk_status").click()
+
+        bulk_edit_menu = driver.find_element_by_id("bulk_edit_menu")
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_active").is_enabled(), True)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_verified").is_enabled(), True)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_false_p").is_enabled(), True)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_out_of_scope").is_enabled(), True)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_is_Mitigated").is_enabled(), True)
 
     def test_create_test(self):
         # To create test for a product
@@ -63,7 +48,9 @@ class TestUnitTest(unittest.TestCase):
         # Username and password will be gotten from environ
         driver = self.login_page()
         # Navigate to the Product page to select the product we created earlier
-        driver.get(self.base_url + "product")
+        self.goto_product_overview(driver)
+        # wait for product_wrapper div as datatables javascript modifies the DOM on page load.
+        driver.find_element_by_id('products_wrapper')
         # Select and click on the particular product to create test for
         driver.find_element_by_link_text("QA Test").click()
         # "Click" the dropdown option
@@ -102,15 +89,15 @@ class TestUnitTest(unittest.TestCase):
         # submit
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
         # Query the site to determine if the Test has been added
-        productTxt = driver.find_element_by_tag_name("BODY").text
+
         # Assert on the query to determine success or failure
-        self.assertTrue(re.search(r'Test added successfully', productTxt))
+        self.assertTrue(self.is_success_message_present(text='Test added successfully'))
 
     def test_edit_test(self):
         # Login to the site.
         driver = self.login_page()
         # Navigate to the engagement page
-        driver.get(self.base_url + "engagement")
+        self.goto_active_engagements_overview(driver)
         # Select a previously created engagement title
         driver.find_element_by_partial_link_text("Quick Security Testing").click()
         # "Click" the dropdown button to see options
@@ -122,15 +109,15 @@ class TestUnitTest(unittest.TestCase):
         # "Click" the submit button to complete the transaction
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
         # Query the site to determine if the Test has been updated
-        productTxt = driver.find_element_by_tag_name("BODY").text
+
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(re.search(r'Test saved.', productTxt))
+        self.assertTrue(self.is_success_message_present(text='Test saved.'))
 
     def test_add_note(self):
         # Login to the site.
         driver = self.login_page()
         # Navigate to the engagement page
-        driver.get(self.base_url + "engagement")
+        self.goto_active_engagements_overview(driver)
         # Select a previously created engagement title
         driver.find_element_by_partial_link_text("Quick Security Testing").click()
         # "Click" the dropdown button to see options
@@ -143,16 +130,16 @@ class TestUnitTest(unittest.TestCase):
         # "Click" the submit button to complete the transaction
         driver.find_element_by_xpath("//input[@value='Add Note']").click()
         # Query the site to determine if the Test has been updated
-        productTxt = driver.find_element_by_tag_name("BODY").text
+
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(re.search(r'Note added successfully.', productTxt))
+        self.assertTrue(self.is_success_message_present(text='Note added successfully.'))
 
     def test_delete_test(self):
         # Login to the site. Password will have to be modified
         # to match an admin password in your own container
         driver = self.login_page()
         # Navigate to the engagement page
-        driver.get(self.base_url + "engagement")
+        self.goto_active_engagements_overview(driver)
         # Select a previously created engagement title
         driver.find_element_by_partial_link_text("Quick Security Testing").click()
         # "Click" the dropdown button to see options
@@ -165,29 +152,28 @@ class TestUnitTest(unittest.TestCase):
         # "Click" the delete button to complete the transaction
         driver.find_element_by_css_selector("button.btn.btn-danger").click()
         # Query the site to determine if the product has been added
-        productTxt = driver.find_element_by_tag_name("BODY").text
-        # Assert ot the query to dtermine status of failure
-        self.assertTrue(re.search(r'Test and relationships removed.', productTxt))
 
-    def tearDown(self):
-        self.driver.quit()
-        self.assertEqual([], self.verificationErrors)
+        # Assert ot the query to dtermine status of failure
+        self.assertTrue(self.is_success_message_present(text='Test and relationships removed.'))
 
 
 def suite():
     suite = unittest.TestSuite()
     # Add each test the the suite to be run
     # success and failure is output by the test
-    suite.addTest(product_unit_test.ProductTest('test_create_product'))
+    suite.addTest(ProductTest('test_create_product'))
+    suite.addTest(ProductTest('test_add_product_finding'))
+    suite.addTest(TestUnitTest('test_view_test'))
     suite.addTest(TestUnitTest('test_create_test'))
     suite.addTest(TestUnitTest('test_edit_test'))
     # suite.addTest(TestUnitTest('test_add_note'))
     # suite.addTest(TestUnitTest('test_delete_test'))
-    suite.addTest(product_unit_test.ProductTest('test_delete_product'))
+    suite.addTest(ProductTest('test_delete_product'))
     return suite
 
 
 if __name__ == "__main__":
-    runner = unittest.TextTestRunner(descriptions=True, failfast=True)
+    runner = unittest.TextTestRunner(descriptions=True, failfast=True, verbosity=2)
     ret = not runner.run(suite()).wasSuccessful()
+    BaseTestCase.tearDownDriver()
     sys.exit(ret)

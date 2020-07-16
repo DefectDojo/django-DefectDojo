@@ -1,0 +1,963 @@
+[
+    {
+        "sha256:8fdd536f0caa79bb924b9c1b9451b49957322d1b07ab23def8c9a49448e5d462": {
+            "gcr.io/jenkinsxio/builder-maven:latest": [
+                {
+                    "detail": {
+                        "policy": {
+                            "blacklisted_images": [], 
+                            "comment": "Default bundle", 
+                            "id": "2c53a13c-1765-11e8-82ef-23527761d060", 
+                            "mappings": [
+                                {
+                                    "id": "c4f9bf74-dc38-4ddf-b5cf-00e9c0074611", 
+                                    "image": {
+                                        "type": "tag", 
+                                        "value": "*"
+                                    }, 
+                                    "name": "default", 
+                                    "policy_id": "48e6f7d6-1765-11e8-b5f9-8b6f228548b6", 
+                                    "registry": "*", 
+                                    "repository": "*", 
+                                    "whitelist_ids": [
+                                        "37fd763e-1765-11e8-add4-3b16c029ac5c"
+                                    ]
+                                }
+                            ], 
+                            "name": "Default bundle", 
+                            "policies": [
+                                {
+                                    "comment": "System default policy", 
+                                    "id": "48e6f7d6-1765-11e8-b5f9-8b6f228548b6", 
+                                    "name": "DefaultPolicy", 
+                                    "rules": [
+                                        {
+                                            "action": "STOP", 
+                                            "gate": "dockerfile", 
+                                            "id": "ce7b8000-829b-4c27-8122-69cd59018400", 
+                                            "params": [
+                                                {
+                                                    "name": "ports", 
+                                                    "value": "22"
+                                                }, 
+                                                {
+                                                    "name": "type", 
+                                                    "value": "blacklist"
+                                                }
+                                            ], 
+                                            "trigger": "exposed_ports"
+                                        }, 
+                                        {
+                                            "action": "WARN", 
+                                            "gate": "dockerfile", 
+                                            "id": "312d9e41-1c05-4e2f-ad89-b7d34b0855bb", 
+                                            "params": [
+                                                {
+                                                    "name": "instruction", 
+                                                    "value": "HEALTHCHECK"
+                                                }, 
+                                                {
+                                                    "name": "check", 
+                                                    "value": "not_exists"
+                                                }
+                                            ], 
+                                            "trigger": "instruction"
+                                        }, 
+                                        {
+                                            "action": "WARN", 
+                                            "gate": "vulnerabilities", 
+                                            "id": "6b5c14e7-a6f7-48cc-99d2-959273a2c6fa", 
+                                            "params": [
+                                                {
+                                                    "name": "max_days_since_sync", 
+                                                    "value": "2"
+                                                }
+                                            ], 
+                                            "trigger": "stale_feed_data"
+                                        }, 
+                                        {
+                                            "action": "WARN", 
+                                            "gate": "vulnerabilities", 
+                                            "id": "3e79ea94-18c4-4d26-9e29-3b9172a62c2e", 
+                                            "params": [], 
+                                            "trigger": "vulnerability_data_unavailable"
+                                        }, 
+                                        {
+                                            "action": "WARN", 
+                                            "gate": "vulnerabilities", 
+                                            "id": "6063fdde-b1c5-46af-973a-915739451ac4", 
+                                            "params": [
+                                                {
+                                                    "name": "package_type", 
+                                                    "value": "all"
+                                                }, 
+                                                {
+                                                    "name": "severity_comparison", 
+                                                    "value": "="
+                                                }, 
+                                                {
+                                                    "name": "severity", 
+                                                    "value": "medium"
+                                                }
+                                            ], 
+                                            "trigger": "package"
+                                        }, 
+                                        {
+                                            "action": "STOP", 
+                                            "gate": "vulnerabilities", 
+                                            "id": "b30e8abc-444f-45b1-8a37-55be1b8c8bb5", 
+                                            "params": [
+                                                {
+                                                    "name": "package_type", 
+                                                    "value": "all"
+                                                }, 
+                                                {
+                                                    "name": "severity_comparison", 
+                                                    "value": ">"
+                                                }, 
+                                                {
+                                                    "name": "severity", 
+                                                    "value": "medium"
+                                                }
+                                            ], 
+                                            "trigger": "package"
+                                        }
+                                    ], 
+                                    "version": "1_0"
+                                }
+                            ], 
+                            "version": "1_0", 
+                            "whitelisted_images": [], 
+                            "whitelists": [
+                                {
+                                    "comment": "Default global whitelist", 
+                                    "id": "37fd763e-1765-11e8-add4-3b16c029ac5c", 
+                                    "items": [], 
+                                    "name": "Global Whitelist", 
+                                    "version": "1_0"
+                                }
+                            ]
+                        }, 
+                        "result": {
+                            "bundle": {
+                                "blacklisted_images": [], 
+                                "comment": "Default bundle", 
+                                "id": "2c53a13c-1765-11e8-82ef-23527761d060", 
+                                "mappings": [
+                                    {
+                                        "id": "c4f9bf74-dc38-4ddf-b5cf-00e9c0074611", 
+                                        "image": {
+                                            "type": "tag", 
+                                            "value": "*"
+                                        }, 
+                                        "name": "default", 
+                                        "policy_id": "48e6f7d6-1765-11e8-b5f9-8b6f228548b6", 
+                                        "registry": "*", 
+                                        "repository": "*", 
+                                        "whitelist_ids": [
+                                            "37fd763e-1765-11e8-add4-3b16c029ac5c"
+                                        ]
+                                    }
+                                ], 
+                                "name": "Default bundle", 
+                                "policies": [
+                                    {
+                                        "comment": "System default policy", 
+                                        "id": "48e6f7d6-1765-11e8-b5f9-8b6f228548b6", 
+                                        "name": "DefaultPolicy", 
+                                        "rules": [
+                                            {
+                                                "action": "STOP", 
+                                                "gate": "dockerfile", 
+                                                "id": "ce7b8000-829b-4c27-8122-69cd59018400", 
+                                                "params": [
+                                                    {
+                                                        "name": "ports", 
+                                                        "value": "22"
+                                                    }, 
+                                                    {
+                                                        "name": "type", 
+                                                        "value": "blacklist"
+                                                    }
+                                                ], 
+                                                "trigger": "exposed_ports"
+                                            }, 
+                                            {
+                                                "action": "WARN", 
+                                                "gate": "dockerfile", 
+                                                "id": "312d9e41-1c05-4e2f-ad89-b7d34b0855bb", 
+                                                "params": [
+                                                    {
+                                                        "name": "instruction", 
+                                                        "value": "HEALTHCHECK"
+                                                    }, 
+                                                    {
+                                                        "name": "check", 
+                                                        "value": "not_exists"
+                                                    }
+                                                ], 
+                                                "trigger": "instruction"
+                                            }, 
+                                            {
+                                                "action": "WARN", 
+                                                "gate": "vulnerabilities", 
+                                                "id": "6b5c14e7-a6f7-48cc-99d2-959273a2c6fa", 
+                                                "params": [
+                                                    {
+                                                        "name": "max_days_since_sync", 
+                                                        "value": "2"
+                                                    }
+                                                ], 
+                                                "trigger": "stale_feed_data"
+                                            }, 
+                                            {
+                                                "action": "WARN", 
+                                                "gate": "vulnerabilities", 
+                                                "id": "3e79ea94-18c4-4d26-9e29-3b9172a62c2e", 
+                                                "params": [], 
+                                                "trigger": "vulnerability_data_unavailable"
+                                            }, 
+                                            {
+                                                "action": "WARN", 
+                                                "gate": "vulnerabilities", 
+                                                "id": "6063fdde-b1c5-46af-973a-915739451ac4", 
+                                                "params": [
+                                                    {
+                                                        "name": "package_type", 
+                                                        "value": "all"
+                                                    }, 
+                                                    {
+                                                        "name": "severity_comparison", 
+                                                        "value": "="
+                                                    }, 
+                                                    {
+                                                        "name": "severity", 
+                                                        "value": "medium"
+                                                    }
+                                                ], 
+                                                "trigger": "package"
+                                            }, 
+                                            {
+                                                "action": "STOP", 
+                                                "gate": "vulnerabilities", 
+                                                "id": "b30e8abc-444f-45b1-8a37-55be1b8c8bb5", 
+                                                "params": [
+                                                    {
+                                                        "name": "package_type", 
+                                                        "value": "all"
+                                                    }, 
+                                                    {
+                                                        "name": "severity_comparison", 
+                                                        "value": ">"
+                                                    }, 
+                                                    {
+                                                        "name": "severity", 
+                                                        "value": "medium"
+                                                    }
+                                                ], 
+                                                "trigger": "package"
+                                            }
+                                        ], 
+                                        "version": "1_0"
+                                    }
+                                ], 
+                                "version": "1_0", 
+                                "whitelisted_images": [], 
+                                "whitelists": [
+                                    {
+                                        "comment": "Default global whitelist", 
+                                        "id": "37fd763e-1765-11e8-add4-3b16c029ac5c", 
+                                        "items": [], 
+                                        "name": "Global Whitelist", 
+                                        "version": "1_0"
+                                    }
+                                ]
+                            }, 
+                            "created_at": 1583501981, 
+                            "evaluation_problems": [], 
+                            "final_action": "stop", 
+                            "final_action_reason": "policy_evaluation", 
+                            "image_digest": "sha256:8fdd536f0caa79bb924b9c1b9451b49957322d1b07ab23def8c9a49448e5d462", 
+                            "image_id": "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                            "last_modified": 1583501981, 
+                            "matched_blacklisted_images_rule": false, 
+                            "matched_mapping_rule": {
+                                "id": "c4f9bf74-dc38-4ddf-b5cf-00e9c0074611", 
+                                "image": {
+                                    "type": "tag", 
+                                    "value": "*"
+                                }, 
+                                "name": "default", 
+                                "policy_id": "48e6f7d6-1765-11e8-b5f9-8b6f228548b6", 
+                                "registry": "*", 
+                                "repository": "*", 
+                                "whitelist_ids": [
+                                    "37fd763e-1765-11e8-add4-3b16c029ac5c"
+                                ]
+                            }, 
+                            "matched_whitelisted_images_rule": false, 
+                            "result": {
+                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0": {
+                                    "result": {
+                                        "final_action": "stop", 
+                                        "header": [
+                                            "Image_Id", 
+                                            "Repo_Tag", 
+                                            "Trigger_Id", 
+                                            "Gate", 
+                                            "Trigger", 
+                                            "Check_Output", 
+                                            "Gate_Action", 
+                                            "Whitelisted", 
+                                            "Policy_Id"
+                                        ], 
+                                        "row_count": 57, 
+                                        "rows": [
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "41cb7cdf04850e33a11f80c42bf660b3", 
+                                                "dockerfile", 
+                                                "instruction", 
+                                                "Dockerfile directive 'HEALTHCHECK' not found, matching condition 'not_exists' check", 
+                                                "warn", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2015-2992+struts-core-1.3.8.jar", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "MEDIUM Vulnerability found in non-os package type (java) - /root/.m2/repository/org/apache/struts/struts-core/1.3.8/struts-core-1.3.8.jar (CVE-2015-2992 - https://nvd.nist.gov/vuln/detail/CVE-2015-2992)", 
+                                                "warn", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2012-0394+struts-core-1.3.8.jar", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "MEDIUM Vulnerability found in non-os package type (java) - /root/.m2/repository/org/apache/struts/struts-core/1.3.8/struts-core-1.3.8.jar (CVE-2012-0394 - https://nvd.nist.gov/vuln/detail/CVE-2012-0394)", 
+                                                "warn", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2015-2992+struts-taglib-1.3.8.jar", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "MEDIUM Vulnerability found in non-os package type (java) - /root/.m2/repository/org/apache/struts/struts-taglib/1.3.8/struts-taglib-1.3.8.jar (CVE-2015-2992 - https://nvd.nist.gov/vuln/detail/CVE-2015-2992)", 
+                                                "warn", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2012-0394+struts-taglib-1.3.8.jar", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "MEDIUM Vulnerability found in non-os package type (java) - /root/.m2/repository/org/apache/struts/struts-taglib/1.3.8/struts-taglib-1.3.8.jar (CVE-2012-0394 - https://nvd.nist.gov/vuln/detail/CVE-2012-0394)", 
+                                                "warn", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2015-2992+struts-tiles-1.3.8.jar", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "MEDIUM Vulnerability found in non-os package type (java) - /root/.m2/repository/org/apache/struts/struts-tiles/1.3.8/struts-tiles-1.3.8.jar (CVE-2015-2992 - https://nvd.nist.gov/vuln/detail/CVE-2015-2992)", 
+                                                "warn", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2012-0394+struts-tiles-1.3.8.jar", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "MEDIUM Vulnerability found in non-os package type (java) - /root/.m2/repository/org/apache/struts/struts-tiles/1.3.8/struts-tiles-1.3.8.jar (CVE-2012-0394 - https://nvd.nist.gov/vuln/detail/CVE-2012-0394)", 
+                                                "warn", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2019-10010+openapi-generator-cli-4.0.0.jar:commonmark", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "MEDIUM Vulnerability found in non-os package type (java) - /root/.m2/repository/org/openapitools/openapi-generator-cli/4.0.0/openapi-generator-cli-4.0.0.jar:commonmark (CVE-2019-10010 - https://nvd.nist.gov/vuln/detail/CVE-2019-10010)", 
+                                                "warn", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2019-10010+openapi-generator-cli-4.0.0.jar:commonmark", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "MEDIUM Vulnerability found in non-os package type (java) - /usr/openapi/openapi-generator-cli-4.0.0.jar:commonmark (CVE-2019-10010 - https://nvd.nist.gov/vuln/detail/CVE-2019-10010)", 
+                                                "warn", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2014-9365+Python-2.7.5", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "MEDIUM Vulnerability found in non-os package type (python) - /usr/lib64/python2.7/lib-dynload/Python (CVE-2014-9365 - https://nvd.nist.gov/vuln/detail/CVE-2014-9365)", 
+                                                "warn", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2014-7185+Python-2.7.5", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "MEDIUM Vulnerability found in non-os package type (python) - /usr/lib64/python2.7/lib-dynload/Python (CVE-2014-7185 - https://nvd.nist.gov/vuln/detail/CVE-2014-7185)", 
+                                                "warn", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2013-7440+Python-2.7.5", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "MEDIUM Vulnerability found in non-os package type (python) - /usr/lib64/python2.7/lib-dynload/Python (CVE-2013-7440 - https://nvd.nist.gov/vuln/detail/CVE-2013-7440)", 
+                                                "warn", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2013-7040+Python-2.7.5", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "MEDIUM Vulnerability found in non-os package type (python) - /usr/lib64/python2.7/lib-dynload/Python (CVE-2013-7040 - https://nvd.nist.gov/vuln/detail/CVE-2013-7040)", 
+                                                "warn", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2014-4616+Python-2.7.5", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "MEDIUM Vulnerability found in non-os package type (python) - /usr/lib64/python2.7/lib-dynload/Python (CVE-2014-4616 - https://nvd.nist.gov/vuln/detail/CVE-2014-4616)", 
+                                                "warn", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2018-19787+lxml-3.2.1", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "MEDIUM Vulnerability found in non-os package type (python) - /usr/lib64/python2.7/site-packages/lxml (CVE-2018-19787 - https://nvd.nist.gov/vuln/detail/CVE-2018-19787)", 
+                                                "warn", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2014-3146+lxml-3.2.1", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "MEDIUM Vulnerability found in non-os package type (python) - /usr/lib64/python2.7/site-packages/lxml (CVE-2014-3146 - https://nvd.nist.gov/vuln/detail/CVE-2014-3146)", 
+                                                "warn", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2015-6420+commons-collections-3.2.1.jar", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "HIGH Vulnerability found in non-os package type (java) - /root/.m2/repository/commons-collections/commons-collections/3.2.1/commons-collections-3.2.1.jar (CVE-2015-6420 - https://nvd.nist.gov/vuln/detail/CVE-2015-6420)", 
+                                                "stop", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2015-0899+struts-core-1.3.8.jar", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "HIGH Vulnerability found in non-os package type (java) - /root/.m2/repository/org/apache/struts/struts-core/1.3.8/struts-core-1.3.8.jar (CVE-2015-0899 - https://nvd.nist.gov/vuln/detail/CVE-2015-0899)", 
+                                                "stop", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2013-2115+struts-core-1.3.8.jar", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "HIGH Vulnerability found in non-os package type (java) - /root/.m2/repository/org/apache/struts/struts-core/1.3.8/struts-core-1.3.8.jar (CVE-2013-2115 - https://nvd.nist.gov/vuln/detail/CVE-2013-2115)", 
+                                                "stop", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2015-0899+struts-taglib-1.3.8.jar", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "HIGH Vulnerability found in non-os package type (java) - /root/.m2/repository/org/apache/struts/struts-taglib/1.3.8/struts-taglib-1.3.8.jar (CVE-2015-0899 - https://nvd.nist.gov/vuln/detail/CVE-2015-0899)", 
+                                                "stop", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2013-2115+struts-taglib-1.3.8.jar", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "HIGH Vulnerability found in non-os package type (java) - /root/.m2/repository/org/apache/struts/struts-taglib/1.3.8/struts-taglib-1.3.8.jar (CVE-2013-2115 - https://nvd.nist.gov/vuln/detail/CVE-2013-2115)", 
+                                                "stop", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2015-0899+struts-tiles-1.3.8.jar", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "HIGH Vulnerability found in non-os package type (java) - /root/.m2/repository/org/apache/struts/struts-tiles/1.3.8/struts-tiles-1.3.8.jar (CVE-2015-0899 - https://nvd.nist.gov/vuln/detail/CVE-2015-0899)", 
+                                                "stop", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2013-2115+struts-tiles-1.3.8.jar", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "HIGH Vulnerability found in non-os package type (java) - /root/.m2/repository/org/apache/struts/struts-tiles/1.3.8/struts-tiles-1.3.8.jar (CVE-2013-2115 - https://nvd.nist.gov/vuln/detail/CVE-2013-2115)", 
+                                                "stop", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2020-8492+Python-2.7.5", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "HIGH Vulnerability found in non-os package type (python) - /usr/lib64/python2.7/lib-dynload/Python (CVE-2020-8492 - https://nvd.nist.gov/vuln/detail/CVE-2020-8492)", 
+                                                "stop", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2019-9674+Python-2.7.5", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "HIGH Vulnerability found in non-os package type (python) - /usr/lib64/python2.7/lib-dynload/Python (CVE-2019-9674 - https://nvd.nist.gov/vuln/detail/CVE-2019-9674)", 
+                                                "stop", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2014-1912+Python-2.7.5", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "HIGH Vulnerability found in non-os package type (python) - /usr/lib64/python2.7/lib-dynload/Python (CVE-2014-1912 - https://nvd.nist.gov/vuln/detail/CVE-2014-1912)", 
+                                                "stop", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2017-1000487+plexus-utils-3.0.15.jar", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "CRITICAL Vulnerability found in non-os package type (java) - /root/.m2/repository/org/codehaus/plexus/plexus-utils/3.0.15/plexus-utils-3.0.15.jar (CVE-2017-1000487 - https://nvd.nist.gov/vuln/detail/CVE-2017-1000487)", 
+                                                "stop", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2019-14893+openapi-generator-cli-4.0.0.jar:jackson-databind", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "CRITICAL Vulnerability found in non-os package type (java) - /root/.m2/repository/org/openapitools/openapi-generator-cli/4.0.0/openapi-generator-cli-4.0.0.jar:jackson-databind (CVE-2019-14893 - https://nvd.nist.gov/vuln/detail/CVE-2019-14893)", 
+                                                "stop", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2019-14892+openapi-generator-cli-4.0.0.jar:jackson-databind", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "CRITICAL Vulnerability found in non-os package type (java) - /root/.m2/repository/org/openapitools/openapi-generator-cli/4.0.0/openapi-generator-cli-4.0.0.jar:jackson-databind (CVE-2019-14892 - https://nvd.nist.gov/vuln/detail/CVE-2019-14892)", 
+                                                "stop", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2020-8840+openapi-generator-cli-4.0.0.jar:jackson-databind", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "CRITICAL Vulnerability found in non-os package type (java) - /root/.m2/repository/org/openapitools/openapi-generator-cli/4.0.0/openapi-generator-cli-4.0.0.jar:jackson-databind (CVE-2020-8840 - https://nvd.nist.gov/vuln/detail/CVE-2020-8840)", 
+                                                "stop", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2019-20330+openapi-generator-cli-4.0.0.jar:jackson-databind", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "CRITICAL Vulnerability found in non-os package type (java) - /root/.m2/repository/org/openapitools/openapi-generator-cli/4.0.0/openapi-generator-cli-4.0.0.jar:jackson-databind (CVE-2019-20330 - https://nvd.nist.gov/vuln/detail/CVE-2019-20330)", 
+                                                "stop", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2019-17531+openapi-generator-cli-4.0.0.jar:jackson-databind", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "CRITICAL Vulnerability found in non-os package type (java) - /root/.m2/repository/org/openapitools/openapi-generator-cli/4.0.0/openapi-generator-cli-4.0.0.jar:jackson-databind (CVE-2019-17531 - https://nvd.nist.gov/vuln/detail/CVE-2019-17531)", 
+                                                "stop", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2019-17267+openapi-generator-cli-4.0.0.jar:jackson-databind", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "CRITICAL Vulnerability found in non-os package type (java) - /root/.m2/repository/org/openapitools/openapi-generator-cli/4.0.0/openapi-generator-cli-4.0.0.jar:jackson-databind (CVE-2019-17267 - https://nvd.nist.gov/vuln/detail/CVE-2019-17267)", 
+                                                "stop", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2019-16943+openapi-generator-cli-4.0.0.jar:jackson-databind", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "CRITICAL Vulnerability found in non-os package type (java) - /root/.m2/repository/org/openapitools/openapi-generator-cli/4.0.0/openapi-generator-cli-4.0.0.jar:jackson-databind (CVE-2019-16943 - https://nvd.nist.gov/vuln/detail/CVE-2019-16943)", 
+                                                "stop", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2019-16942+openapi-generator-cli-4.0.0.jar:jackson-databind", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "CRITICAL Vulnerability found in non-os package type (java) - /root/.m2/repository/org/openapitools/openapi-generator-cli/4.0.0/openapi-generator-cli-4.0.0.jar:jackson-databind (CVE-2019-16942 - https://nvd.nist.gov/vuln/detail/CVE-2019-16942)", 
+                                                "stop", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2019-16335+openapi-generator-cli-4.0.0.jar:jackson-databind", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "CRITICAL Vulnerability found in non-os package type (java) - /root/.m2/repository/org/openapitools/openapi-generator-cli/4.0.0/openapi-generator-cli-4.0.0.jar:jackson-databind (CVE-2019-16335 - https://nvd.nist.gov/vuln/detail/CVE-2019-16335)", 
+                                                "stop", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2019-14540+openapi-generator-cli-4.0.0.jar:jackson-databind", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "CRITICAL Vulnerability found in non-os package type (java) - /root/.m2/repository/org/openapitools/openapi-generator-cli/4.0.0/openapi-generator-cli-4.0.0.jar:jackson-databind (CVE-2019-14540 - https://nvd.nist.gov/vuln/detail/CVE-2019-14540)", 
+                                                "stop", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2018-8088+openapi-generator-cli-4.0.0.jar:slf4j-ext", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "CRITICAL Vulnerability found in non-os package type (java) - /root/.m2/repository/org/openapitools/openapi-generator-cli/4.0.0/openapi-generator-cli-4.0.0.jar:slf4j-ext (CVE-2018-8088 - https://nvd.nist.gov/vuln/detail/CVE-2018-8088)", 
+                                                "stop", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2019-14893+openapi-generator-cli-4.0.0.jar:jackson-databind", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "CRITICAL Vulnerability found in non-os package type (java) - /usr/openapi/openapi-generator-cli-4.0.0.jar:jackson-databind (CVE-2019-14893 - https://nvd.nist.gov/vuln/detail/CVE-2019-14893)", 
+                                                "stop", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2019-14892+openapi-generator-cli-4.0.0.jar:jackson-databind", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "CRITICAL Vulnerability found in non-os package type (java) - /usr/openapi/openapi-generator-cli-4.0.0.jar:jackson-databind (CVE-2019-14892 - https://nvd.nist.gov/vuln/detail/CVE-2019-14892)", 
+                                                "stop", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2020-8840+openapi-generator-cli-4.0.0.jar:jackson-databind", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "CRITICAL Vulnerability found in non-os package type (java) - /usr/openapi/openapi-generator-cli-4.0.0.jar:jackson-databind (CVE-2020-8840 - https://nvd.nist.gov/vuln/detail/CVE-2020-8840)", 
+                                                "stop", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2019-20330+openapi-generator-cli-4.0.0.jar:jackson-databind", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "CRITICAL Vulnerability found in non-os package type (java) - /usr/openapi/openapi-generator-cli-4.0.0.jar:jackson-databind (CVE-2019-20330 - https://nvd.nist.gov/vuln/detail/CVE-2019-20330)", 
+                                                "stop", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2019-17531+openapi-generator-cli-4.0.0.jar:jackson-databind", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "CRITICAL Vulnerability found in non-os package type (java) - /usr/openapi/openapi-generator-cli-4.0.0.jar:jackson-databind (CVE-2019-17531 - https://nvd.nist.gov/vuln/detail/CVE-2019-17531)", 
+                                                "stop", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2019-17267+openapi-generator-cli-4.0.0.jar:jackson-databind", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "CRITICAL Vulnerability found in non-os package type (java) - /usr/openapi/openapi-generator-cli-4.0.0.jar:jackson-databind (CVE-2019-17267 - https://nvd.nist.gov/vuln/detail/CVE-2019-17267)", 
+                                                "stop", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2019-16943+openapi-generator-cli-4.0.0.jar:jackson-databind", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "CRITICAL Vulnerability found in non-os package type (java) - /usr/openapi/openapi-generator-cli-4.0.0.jar:jackson-databind (CVE-2019-16943 - https://nvd.nist.gov/vuln/detail/CVE-2019-16943)", 
+                                                "stop", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2019-16942+openapi-generator-cli-4.0.0.jar:jackson-databind", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "CRITICAL Vulnerability found in non-os package type (java) - /usr/openapi/openapi-generator-cli-4.0.0.jar:jackson-databind (CVE-2019-16942 - https://nvd.nist.gov/vuln/detail/CVE-2019-16942)", 
+                                                "stop", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2019-16335+openapi-generator-cli-4.0.0.jar:jackson-databind", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "CRITICAL Vulnerability found in non-os package type (java) - /usr/openapi/openapi-generator-cli-4.0.0.jar:jackson-databind (CVE-2019-16335 - https://nvd.nist.gov/vuln/detail/CVE-2019-16335)", 
+                                                "stop", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2019-14540+openapi-generator-cli-4.0.0.jar:jackson-databind", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "CRITICAL Vulnerability found in non-os package type (java) - /usr/openapi/openapi-generator-cli-4.0.0.jar:jackson-databind (CVE-2019-14540 - https://nvd.nist.gov/vuln/detail/CVE-2019-14540)", 
+                                                "stop", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2018-8088+openapi-generator-cli-4.0.0.jar:slf4j-ext", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "CRITICAL Vulnerability found in non-os package type (java) - /usr/openapi/openapi-generator-cli-4.0.0.jar:slf4j-ext (CVE-2018-8088 - https://nvd.nist.gov/vuln/detail/CVE-2018-8088)", 
+                                                "stop", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2019-9948+Python-2.7.5", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "CRITICAL Vulnerability found in non-os package type (python) - /usr/lib64/python2.7/lib-dynload/Python (CVE-2019-9948 - https://nvd.nist.gov/vuln/detail/CVE-2019-9948)", 
+                                                "stop", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "CVE-2017-1000158+Python-2.7.5", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "CRITICAL Vulnerability found in non-os package type (python) - /usr/lib64/python2.7/lib-dynload/Python (CVE-2017-1000158 - https://nvd.nist.gov/vuln/detail/CVE-2017-1000158)", 
+                                                "stop", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "RHSA-2019:4326+fribidi", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "HIGH Vulnerability found in os package type (rpm) - fribidi (RHSA-2019:4326 - https://access.redhat.com/errata/RHSA-2019:4326)", 
+                                                "stop", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "RHSA-2017:0372+kernel-debug-devel", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "HIGH Vulnerability found in os package type (rpm) - kernel-debug-devel (RHSA-2017:0372 - https://access.redhat.com/errata/RHSA-2017:0372)", 
+                                                "stop", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "RHSA-2020:0374+kernel-debug-devel", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "HIGH Vulnerability found in os package type (rpm) - kernel-debug-devel (RHSA-2020:0374 - https://access.redhat.com/errata/RHSA-2020:0374)", 
+                                                "stop", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "RHSA-2017:0372+kernel-headers", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "HIGH Vulnerability found in os package type (rpm) - kernel-headers (RHSA-2017:0372 - https://access.redhat.com/errata/RHSA-2017:0372)", 
+                                                "stop", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "RHSA-2020:0374+kernel-headers", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "HIGH Vulnerability found in os package type (rpm) - kernel-headers (RHSA-2020:0374 - https://access.redhat.com/errata/RHSA-2020:0374)", 
+                                                "stop", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ], 
+                                            [
+                                                "c1d974aa689be7e7bd02120230be10de2ea3f3beb85b1c4975cfb218b8468ef0", 
+                                                "gcr.io/jenkinsxio/builder-maven:latest", 
+                                                "RHSA-2020:0227+sqlite", 
+                                                "vulnerabilities", 
+                                                "package", 
+                                                "HIGH Vulnerability found in os package type (rpm) - sqlite (RHSA-2020:0227 - https://access.redhat.com/errata/RHSA-2020:0227)", 
+                                                "stop", 
+                                                false, 
+                                                "48e6f7d6-1765-11e8-b5f9-8b6f228548b6"
+                                            ]
+                                        ]
+                                    }
+                                }, 
+                                "policy_data": [], 
+                                "policy_name": "", 
+                                "whitelist_data": [], 
+                                "whitelist_names": []
+                            }, 
+                            "status": "fail", 
+                            "tag": "gcr.io/jenkinsxio/builder-maven:latest", 
+                            "user_id": "jenkins-x"
+                        }
+                    }, 
+                    "last_evaluation": "2020-03-06T13:40:10Z", 
+                    "policyId": "2c53a13c-1765-11e8-82ef-23527761d060", 
+                    "status": "fail"
+                }
+            ]
+        }
+    }
+]
