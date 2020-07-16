@@ -168,30 +168,6 @@ if [ -z "${TEST}" ]; then
   sudo kubectl logs --selector=defectdojo.org/component=django -c uwsgi
   echo
 
-  echo "Testing DefectDojo Service"
-  # sudo kubectl port-forward --namespace=default service/defectdojo-django 8080:80
-  
-  # echo '::1       defectdojo.default.minikube.local' | sudo tee -a /etc/hosts
-  # echo '127.0.0.1 defectdojo.default.minikube.local' | sudo tee -a /etc/hosts
-
-  # curl -s http://defectdojo.default.minikube.local:8888 -m 120 -vvv
-  # curl -s -m 10 -I http://defectdojo.default.minikube.local:8888/login?next= -vvv
-  # CR=$(curl -s -m 10 -I http://defectdojo.default.minikube.local:8080/login?next= | egrep "^HTTP" | cut  -d' ' -f2)
-
-  # curl -s http://localhost:8080 -m 120 -vvv
-  # curl -s -m 10 -I http://localhost:8080/login?next= -vvv
-
-  curl -s http://$DD_HOST -vvv
-  curl -s -m 10 -I http://$DD_HOST/login?next= -vvv
-  CR=$(curl -s -m 10 -I http://$DD_HOST/login?next= | egrep "^HTTP" | cut  -d' ' -f2)
-  echo CR: $CR
-      
-  if [ "$CR" != 200 ]; then
-    echo "ERROR: cannot display login screen; got HTTP code $CR"
-    sudo kubectl logs --selector=defectdojo.org/component=django -c uwsgi
-    exit 1
-  fi
-
   echo
   echo "UWSGI logs"
   sudo kubectl logs --selector=defectdojo.org/component=django -c uwsgi
@@ -212,6 +188,35 @@ if [ -z "${TEST}" ]; then
   echo
   echo "Pods"
   sudo kubectl get pods
+
+
+  echo "Testing DefectDojo Service"
+  # sudo kubectl port-forward --namespace=default service/defectdojo-django 8080:80
+  
+  # echo '::1       defectdojo.default.minikube.local' | sudo tee -a /etc/hosts
+  # echo '127.0.0.1 defectdojo.default.minikube.local' | sudo tee -a /etc/hosts
+
+  # curl -s http://defectdojo.default.minikube.local:8888 -m 120 -vvv
+  # curl -s -m 10 -I http://defectdojo.default.minikube.local:8888/login?next= -vvv
+  # CR=$(curl -s -m 10 -I http://defectdojo.default.minikube.local:8080/login?next= | egrep "^HTTP" | cut  -d' ' -f2)
+
+  # curl -s http://localhost:8080 -m 120 -vvv
+  # curl -s -m 10 -I http://localhost:8080/login?next= -vvv
+
+  curl -s http://$DD_HOST:8080 -vvv
+  curl -s -m 10 -I http://$DD_HOST:8080/login?next= -vvv
+  
+  curl -s http://$DD_HOST -vvv
+  curl -s -m 10 -I http://$DD_HOST/login?next= -vvv
+
+  CR=$(curl -s -m 10 -I http://$DD_HOST/login?next= | egrep "^HTTP" | cut  -d' ' -f2)
+  echo CR: $CR
+      
+  if [ "$CR" != 200 ]; then
+    echo "ERROR: cannot display login screen; got HTTP code $CR"
+    sudo kubectl logs --selector=defectdojo.org/component=django -c uwsgi
+    exit 1
+  fi
 
   # Uninstall
   echo "Deleting DefectDojo from Kubernetes"
