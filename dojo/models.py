@@ -1753,6 +1753,7 @@ class Finding(models.Model):
         long_desc += '*Description*: \n' + str(self.description) + '\n\n'
         long_desc += '*Mitigation*: \n' + str(self.mitigation) + '\n\n'
         long_desc += '*Impact*: \n' + str(self.impact) + '\n\n'
+        long_desc += '*Steps to reproduce*: \n' + str(self.steps_to_reproduce) + '\n\n'
         long_desc += '*References*:' + str(self.references)
         return long_desc
 
