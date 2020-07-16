@@ -147,13 +147,19 @@ if [ -z "${TEST}" ]; then
   fi
 
   echo "Testing DefectDojo Service"
+  kubectl port-forward --namespace=default service/defectdojo-django 8080:80
+
   # curl -s -o "/dev/null" http://defectdojo.default.minikube.local:8080 -m 120
   # CR=$(curl -s -m 10 -I http://defectdojo.default.minikube.local:8080/login?next= | egrep "^HTTP" | cut  -d' ' -f2)
-  curl -s -o "/dev/null" http://localhost:8080 -m 120
+  curl -s http://localhost:8080 -m 120 -vvv
+  curl -s -m 10 -I http://localhost:8080/login?next= -vvv
+  curl -s http://localhost:80 -m 120 -vvv
+  curl -s -m 10 -I http://localhost:80/login?next= -vvv
+  
   CR=$(curl -s -m 10 -I http://localhost:8080/login?next= | egrep "^HTTP" | cut  -d' ' -f2)
   if [ "$CR" != 200 ]; then
     echo "ERROR: cannot display login screen; got HTTP code $CR"
-    docker-compose logs  --tail="all" uwsgi
+    sudo kubectl logs --selector=defectdojo.org/component=django -c uwsgi
     exit 1
   fi
 
