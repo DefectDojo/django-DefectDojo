@@ -131,11 +131,11 @@ if [ -z "${TEST}" ]; then
   echo "describe"
   sudo kubectl describe --namespace=default service/defectdojo-django
   echo "describe2"
-  sudo kubectl describe --namespace=default service/defectdojo-django | grep IP
+  sudo kubectl describe --namespace=default service/defectdojo-django | grep 'IP:'
   echo "describe3"
-  sudo kubectl describe --namespace=default service/defectdojo-django | grep IP | cut  -d' ' -f2
+  sudo kubectl describe --namespace=default service/defectdojo-django | grep 'IP:' | cut -d ':' -f 2 | xargs
   echo "describe4"
-  DD_HOST=$(sudo kubectl describe --namespace=default service/defectdojo-django | grep IP | cut  -d' ' -f2)
+  DD_HOST=$(sudo kubectl describe --namespace=default service/defectdojo-django | grep 'IP:' | cut -d ':' -f 2 | xargs)
   echo DD_HOST: $DD_HOST
 
 
