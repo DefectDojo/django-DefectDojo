@@ -54,7 +54,7 @@ social-auth-app-django==4.0.0
 Python-jose==3.1.0
 gitpython>=2.1.13
 ptvsd>=4.2.7
-google-auth==1.19.0
+google-auth==1.19.1
 google-api-python-client==1.10.0
 google-auth-oauthlib==0.4.1
 drf_yasg==1.17.1
