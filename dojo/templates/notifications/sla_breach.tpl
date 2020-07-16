@@ -11,14 +11,13 @@ Hello {{ user.get_full_name }},
 {% url 'view_finding' finding.id as finding_url %}
     {% if sla_age < 0 %}
     This security finding has breached its SLA.
-    {% days_status_verb = 'overdue' %}
+    <p>
+    - Day(s) overdue: {{sla}}
     {% else %}
     A security finding is about to breach its SLA.
-    {% days_status_verb = 'remaining' %}
-    {% endif %}
-
     <p>
-    - Days {{ days_status_verb }}: {{abs(sla_age)}}
+    - Day(s) remaining: {{sla}}
+    {% endif %}
     <br/>
     - Title: <a href="{{finding_url|full_url}}">{{finding.title}}</a>
     <br/>
