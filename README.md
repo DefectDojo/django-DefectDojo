@@ -41,9 +41,9 @@ For detailed documentation you can visit
 [Read the Docs](https://defectdojo.readthedocs.io/).
 
 ## Supported Installation Options
-* [Kubernetes](KUBERNETES.md)
-* [Setup.bash](https://github.com/DefectDojo/django-DefectDojo/blob/dev/setup/README.md)
-* [Docker](DOCKER.md)
+
+* [Docker / Docker Compose](DOCKER.md)
+* [Setup.bash](https://github.com/DefectDojo/django-DefectDojo/blob/master/setup/README.md)
 
 ## Getting Started
 
@@ -119,6 +119,7 @@ Project Moderators can help you with pull requests or feedback on dev ideas.
 * Jay Paz ([@jjpaz](https://twitter.com/jjpaz)) – Jay was a DefectDojo
   maintainer for years. He performed Dojo's first UI overhaul, optimized code structure/features, and added numerous enhancements.
 
+
 ## Contributing
 
 We greatly appreciate all of our
@@ -145,10 +146,12 @@ Proceeds are used for testing, infrastructure, etc.
 [![Xing](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/XING_logo.png)](https://corporate.xing.com/en/about-xing/security/)
 [![10Security](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/10Security-logo.png)](https://10security.com/services-by-technology/defectdojo-commercial-support/)
 [![GCSecurity](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/gc_logo_2018.png)](https://gcsec.com.br/)
+[![ISAAC](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/isaac.png)](https://isaac.nl "ISAAC")
 [![Timo-Pagel](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/timo-pagel-logo.png )](https://pagel.pro/)
 [![SDA-SE](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/sda-se-logo.png)](https://sda-se.com/)
 [![Signal-Iduna](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/signal-iduna.png)](https://signal-iduna.de/)
 [![WSO2](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/wso2-logo-for-screen.png)](https://wso2.com/)
+[![CloudBees](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/cloudbees-logo.png)](https://cloudbees.com/)
 
 Interested in becoming a sponsor and having your logo displayed? Please review
 our [sponsorship information](SPONSORING.md) or email greg.anderson@owasp.org

@@ -20,14 +20,14 @@ from dojo.templatetags.display_tags import get_level
 from dojo.filters import ProductFilter, EngagementFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAPKeyForm, JIRAFindingForm, AdHocFindingForm, \
                        EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm, ProductNotificationsForm, \
-                       GITHUB_Product_Form, GITHUBFindingForm
+                       GITHUB_Product_Form, GITHUBFindingForm, App_AnalysisTypeForm
 from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, GITHUB_PKey, Finding_Template, \
                         Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, \
-                        Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications
+                        Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, Dojo_User
 from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, Product_Tab, get_punchcard_data
 from dojo.notifications.helper import create_notification
 from custom_field.models import CustomFieldValue, CustomField
-from dojo.tasks import add_epic_task, add_external_issue_task
+from dojo.tasks import add_epic_task, add_external_issue_task, add_external_issue
 from tagging.models import Tag
 from tagging.utils import get_tag_list
 from django.db.models import Prefetch
@@ -762,14 +762,12 @@ def new_eng_for_app(request, pid, cicd=False):
             tags = request.POST.getlist('tags')
             t = ", ".join('"{0}"'.format(w) for w in tags)
             new_eng.tags = t
-            if get_system_setting('enable_jira'):
-                # Test to make sure there is a Jira project associated the product
-                try:
-                    jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=False)
-                    if jform.is_valid():
-                        add_epic_task.delay(new_eng, jform.cleaned_data.get('push_to_jira'))
-                except JIRA_PKey.DoesNotExist:
-                    pass
+            if 'jiraform-push_to_jira' in request.POST:
+                jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=False)
+
+            if (form.is_valid() and jform is None) or (form.is_valid() and jform and jform.is_valid()):
+                if 'jiraform-push_to_jira' in request.POST:
+                    add_epic_task.delay(new_eng, jform.cleaned_data.get("push_to_jira"))
 
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -802,6 +800,26 @@ def new_eng_for_app(request, pid, cicd=False):
                    'product_tab': product_tab,
                    'jform': jform
                    })
+
+
+@user_passes_test(lambda u: u.is_staff)
+def new_tech_for_prod(request, pid):
+    prod = Product.objects.get(id=pid)
+    if request.method == 'POST':
+        form = App_AnalysisTypeForm(request.POST)
+        if form.is_valid():
+            tech = form.save(commit=False)
+            tech.product_id = pid
+            tech.save()
+            messages.add_message(request,
+                                messages.SUCCESS,
+                                'Technology added successfully.',
+                                extra_tags='alert-success')
+            return HttpResponseRedirect(reverse('view_product', args=(pid,)))
+
+    form = App_AnalysisTypeForm()
+    return render(request, 'dojo/new_tech.html',
+                {'form': form, 'pid': pid})
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -849,8 +867,11 @@ def edit_meta_data(request, pid):
                 if value:
                     cfv.value = value
                     cfv.save()
-                else:
-                    cfv.delete()
+            if key.startswith('delete_'):
+                cfv_id = int(key.split('_')[2])
+                cfv = get_object_or_404(DojoMeta, id=cfv_id)
+                cfv.delete()
+
         messages.add_message(request,
                              messages.SUCCESS,
                              'Metadata edited successfully.',
@@ -949,7 +970,11 @@ def ad_hoc_finding(request, pid):
             if 'githubform-push_to_github' in request.POST:
                 gform = GITHUBFindingForm(request.POST, prefix='jiragithub', enabled=enabled)
                 if gform.is_valid():
-                    add_external_issue_task.delay(new_finding, 'github')
+                    if Dojo_User.wants_block_execution(request.user):
+                        add_external_issue(new_finding, 'github')
+                    else:
+                        add_external_issue_task.delay(new_finding, 'github')
+
                 messages.add_message(request,
                                      messages.SUCCESS,
                                      'Finding added successfully to github.',

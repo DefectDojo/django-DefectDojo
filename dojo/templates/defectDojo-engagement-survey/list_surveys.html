@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="row">
+        <div class="col-md-10">
+            {% if surveys %}
+                <div class="panel panel-default table-responsive">
+                    <table class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Question Count</th>
+                            <th>Active</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for survey in surveys %}
+                            <tr>
+                                <td><a title="{{ survey.name }}"
+                                                      href="{% url 'edit_survey' survey.id %}">{{ survey.name }}</a>
+                                </td>
+                                <td class="nowrap">{{ survey.questions.all|length }}</td>
+                                <td>{{ survey.active }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% include "dojo/paging_snippet.html" with page=surveys %}
+            {% else %}
+                No questionnaires found.
+            {% endif %}
+        
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    General Engagement Questionnaires
+                    <a title="Add Questionnaire" class="pull-right btn btn-sm btn-primary" href="/empty_questionnaire"><span class="fa fa-plus"></span></a>
+                </div>
+                <div class="panel-body">
+                    {% if general %}
+                        <table id="general" class="tablesorter-bootstrap table table-condensed table-striped">
+                            <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Number Responses</th>
+                                <th>Generated</th>
+                                <th>Expiration</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            {% for survey in general %}
+                                <tr>
+                                    <td>{{ survey.survey.name }}</td>
+                                    <td algin="center">{{ survey.num_responses }}</td> 
+                                    <td>{{ survey.generated }}</td>
+                                    <td>{{ survey.expiration }}</td> 
+                                    <td>
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-sm btn-primary" data-toggle="modal"
+                                                    data-target="#shareSurveyModal"
+                                                    data-whatever="/empty_questionnaire/{{ survey.id }}/answer">
+                                                <i class="fa fa-share-alt"></i> Share Questionnaire
+                                            </button>
+                                            <a class="btn btn-sm btn-danger"
+                                                href="general_questionnaire/{{ survey.id }}/delete"> Delete
+                                            Questionnaire </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    {% else %}
+                        <div class="panel-body">
+                            <p>No questionnaires found.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="panel panel-default filters">
+                {% if filtered.form %}
+                    {% if request.user.is_staff %}
+                        <div class="panel-heading">Actions</div>
+                        <div class="panel-body centered">
+                            <a class="btn btn-sm btn-primary" href="{% url 'create_survey' %}">
+                                Create Questionnaire
+                            </a>
+                        </div>
+                    {% endif %}
+                    <div class="panel-heading">Filters</div>
+                    <form method="get" class="panel-body">
+                        {{ filtered.form.as_p }}
+                        <div class="centered">
+                            <input type="submit" class="btn btn-primary inline top" label="submit" value="Apply"/><br/><br/>
+                            <a href="{% url 'survey' %}"> [Clear Filters] </a>
+                        </div>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="shareSurveyModal" tabindex="-1" role="dialog" aria-labelledby="shareSurveyModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="shareSurveyModalLabel">Share Questionnaire Link</h4>
+                </div>
+                <div class="modal-body">
+                    <p id="surveyURL"></p>
+                    <div class="alert alert-info" role="alert">
+                        <b>Note:</b> Only users that are authorized for {{ eng.product}} will be allowed to answer
+                        this questionnaire.
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block postscript %}
+    <script type="application/javascript">
+        $('#shareSurveyModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget) // Button that triggered the modal
+            var path = button.data('whatever') // Extract info from data-* attributes
+            // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+            // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+            var modal = $(this)
+            var http = location.protocol;
+            var slashes = http.concat("//");
+            var host = slashes.concat(window.location.host);
+            modal.find('p#surveyURL').text('Questionnaire URL: ' + host + path)
+        })
+    </script>
+{% endblock %}
+

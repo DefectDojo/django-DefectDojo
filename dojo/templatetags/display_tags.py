@@ -271,7 +271,7 @@ def finding_sla(finding):
 
     title = ""
     severity = finding.severity
-    find_sla = finding.sla()
+    find_sla = finding.sla_days_remaining()
     sla_age = get_system_setting('sla_' + severity.lower())
     if finding.mitigated:
         status = "blue"
@@ -746,3 +746,69 @@ def full_url(url):
 @register.filter
 def setting_enabled(name):
     return getattr(settings, name, False)
+
+
+@register.filter
+def finding_display_status(finding):
+    # add urls for some statuses
+    # outputs html, so make sure to escape user provided fields
+    display_status = finding.status()
+    if finding.risk_acceptance_set.all():
+        url = reverse('view_risk', args=(finding.test.engagement.id, finding.risk_acceptance_set.all()[0].id, ))
+        name = finding.risk_acceptance_set.all()[0].name
+        link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-content="' + escape(name) + '" data-container="body" data-original-title="Risk Acceptance">Risk Accepted</a>'
+        # print(link)
+        display_status = display_status.replace('Risk Accepted', link)
+
+    if finding.under_review:
+        url = reverse('defect_finding_review', args=(finding.id, ))
+        link = '<a href="' + url + '">Under Review</a>'
+        display_status = display_status.replace('Under Review', link)
+
+    if finding.duplicate:
+        url = '#'
+        name = 'unknown'
+        if finding.duplicate_finding:
+            url = reverse('view_finding', args=(finding.duplicate_finding.id,))
+            name = finding.duplicate_finding.title + ', ' + \
+                   finding.duplicate_finding.created.strftime('%b %d, %Y, %H:%M:%S')
+
+        link = '<a href="' + url + '" data-toggle="tooltip" data-placement="top" title="' + escape(
+            name) + '">Duplicate</a>'
+        display_status = display_status.replace('Duplicate', link)
+
+    return display_status
+
+
+@register.filter
+def is_authorized_for_change(user, finding):
+    # print('filter: is_authorized_for_change')
+    return finding.is_authorized(user, 'change')
+
+
+@register.filter
+def is_authorized_for_delete(user, finding):
+    # print('filter: is_authorized_for_delete')
+    return finding.is_authorized(user, 'delete')
+
+
+@register.filter
+def cwe_url(cwe):
+    if not cwe:
+        return ''
+    return 'https://cwe.mitre.org/data/definitions/' + str(cwe) + '.html'
+
+
+@register.filter
+def cve_url(cve):
+    if not cve:
+        return ''
+    return 'https://cve.mitre.org/cgi-bin/cvename.cgi?name=' + str(cve)
+
+
+@register.filter
+def jiraencode(value):
+    if not value:
+        return value
+    # jira can't handle some characters inside [] tag for urls https://jira.atlassian.com/browse/CONFSERVER-4009
+    return value.replace("|", "").replace("@", "")

@@ -93,9 +93,35 @@ env = environ.Env(
     DD_SOCIAL_AUTH_GITLAB_SECRET=(str, ''),
     DD_SOCIAL_AUTH_GITLAB_API_URL=(str, 'https://gitlab.com'),
     DD_SOCIAL_AUTH_GITLAB_SCOPE=(list, ['api', 'read_user', 'openid', 'profile', 'email']),
+    DD_SAML2_ENABLED=(bool, False),
+    DD_SAML2_METADATA_AUTO_CONF_URL=(str, ''),
+    DD_SAML2_METADATA_LOCAL_FILE_PATH=(str, ''),
+    DD_SAML2_ASSERTION_URL=(str, ''),
+    DD_SAML2_ENTITY_ID=(str, ''),
+    DD_SAML2_DEFAULT_NEXT_URL=(str, '/dashboard'),
+    DD_SAML2_NEW_USER_PROFILE=(dict, {
+        # The default group name when a new user logs in
+        'USER_GROUPS': [],
+        # The default active status for new users
+        'ACTIVE_STATUS': True,
+        # The staff status for new users
+        'STAFF_STATUS': False,
+        # The superuser status for new users
+        'SUPERUSER_STATUS': False,
+    }),
+    DD_SAML2_ATTRIBUTES_MAP=(dict, {
+        # Change Email/UserName/FirstName/LastName to corresponding SAML2 userprofile attributes.
+        'email': 'Email',
+        'username': 'UserName',
+        'first_name': 'FirstName',
+        'last_name': 'LastName',
+    }),
     # merging findings doesn't always work well with dedupe and reimport etc.
     # disable it if you see any issues (and report them on github)
     DD_DISABLE_FINDING_MERGE=(bool, False),
+    # Set to True if you want to allow authorized users to make changes to findings or delete them
+    DD_AUTHORIZED_USERS_ALLOW_CHANGE=(bool, False),
+    DD_AUTHORIZED_USERS_ALLOW_DELETE=(bool, False),
 )
 
 
@@ -331,6 +357,24 @@ SOCIAL_AUTH_AUTH0_DOMAIN = env('DD_SOCIAL_AUTH_AUTH0_DOMAIN')
 SOCIAL_AUTH_AUTH0_SCOPE = env('DD_SOCIAL_AUTH_AUTH0_SCOPE')
 SOCIAL_AUTH_TRAILING_SLASH = env('DD_SOCIAL_AUTH_TRAILING_SLASH')
 
+# For more configuration and customization options, see django-saml2-auth documentation
+# https://github.com/fangli/django-saml2-auth
+SAML2_ENABLED = env('DD_SAML2_ENABLED')
+SAML2_AUTH = {
+    # Metadata is required, choose either remote url or local file path
+    'METADATA_AUTO_CONF_URL': env('DD_SAML2_METADATA_AUTO_CONF_URL'),
+    'METADATA_LOCAL_FILE_PATH': env('DD_SAML2_METADATA_LOCAL_FILE_PATH'),
+    'ASSERTION_URL': env('DD_SAML2_ASSERTION_URL'),
+    'ENTITY_ID': env('DD_SAML2_ENTITY_ID'),
+    # Optional settings below
+    'DEFAULT_NEXT_URL': env('DD_SAML2_DEFAULT_NEXT_URL'),
+    'NEW_USER_PROFILE': env('DD_SAML2_NEW_USER_PROFILE'),
+    'ATTRIBUTES_MAP': env('DD_SAML2_ATTRIBUTES_MAP'),
+}
+
+AUTHORIZED_USERS_ALLOW_CHANGE = env('DD_AUTHORIZED_USERS_ALLOW_CHANGE')
+AUTHORIZED_USERS_ALLOW_DELETE = env('DD_AUTHORIZED_USERS_ALLOW_DELETE')
+
 LOGIN_EXEMPT_URLS = (
     r'^%sstatic/' % URL_PREFIX,
     r'^%swebhook/' % URL_PREFIX,
@@ -339,7 +383,9 @@ LOGIN_EXEMPT_URLS = (
     r'^%sfinding/image/(?P<token>[^/]+)$' % URL_PREFIX,
     r'^%sapi/v2/' % URL_PREFIX,
     r'complete/',
-    r'empty_survey/([\d]+)/answer'
+    r'saml2/login',
+    r'saml2/acs',
+    r'empty_questionnaire/([\d]+)/answer'
 )
 
 # ------------------------------------------------------------------------------
@@ -482,13 +528,11 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'polymorphic',  # provides admin templates
-    'overextends',
     'django.contrib.admin',
     'django.contrib.humanize',
     'gunicorn',
     'tastypie',
     'auditlog',
-    'defectDojo_engagement_survey',
     'dojo',
     'tastypie_swagger',
     'watson',
@@ -621,6 +665,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Dependency Check Scan': ['cve', 'file_path'],
     # possible improvment: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
     'NPM Audit Scan': ['title', 'severity', 'file_path', 'cve', 'cwe'],
+    # possible improvment: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
+    'Yarn Audit Scan': ['title', 'severity', 'file_path', 'cve', 'cwe'],
     # possible improvment: in the scanner put the library name into file_path, then dedup on cve + file_path + severity
     'Whitesource Scan': ['title', 'severity', 'description'],
     'ZAP Scan': ['title', 'cwe', 'endpoints', 'severity'],
@@ -641,6 +687,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'SonarQube Scan': False,
     'Dependency Check Scan': True,
     'NPM Audit Scan': True,
+    'Yarn Audit Scan': True,
     'Whitesource Scan': True,
     'ZAP Scan': False,
     'Qualys Scan': True,
@@ -676,6 +723,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'SonarQube Scan': DEDUPE_ALGO_HASH_CODE,
     'Dependency Check Scan': DEDUPE_ALGO_HASH_CODE,
     'NPM Audit Scan': DEDUPE_ALGO_HASH_CODE,
+    'Yarn Audit Scan': DEDUPE_ALGO_HASH_CODE,
     'Whitesource Scan': DEDUPE_ALGO_HASH_CODE,
     'ZAP Scan': DEDUPE_ALGO_HASH_CODE,
     'Qualys Scan': DEDUPE_ALGO_HASH_CODE,
@@ -771,3 +819,6 @@ SILENCED_SYSTEM_CHECKS = ['mysql.E001']
 
 # Issue on benchmark : "The number of GET/POST parameters exceeded settings.DATA_UPLOAD_MAX_NUMBER_FIELD S"
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
+
+# Maximum size of a scan file in MB
+SCAN_FILE_MAX_SIZE = 100
