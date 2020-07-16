@@ -147,13 +147,15 @@ if [ -z "${TEST}" ]; then
   fi
 
   echo "Testing DefectDojo Service"
-  kubectl port-forward --namespace=default service/defectdojo-django 8080:80
+  sudo kubectl port-forward --namespace=default service/defectdojo-django 8080:80
   echo "describe"
-  kubectl describe --namespace=default service/defectdojo-django
-  echo "json out"
-  kubectl describe --namespace=default service/defectdojo-django -o jsonpath='{.spec.clusterIP}'  
+  sudo kubectl describe --namespace=default service/defectdojo-django
+  echo "json"
+  sudo kubectl describe --namespace=default service/defectdojo-django -o json
+    echo "jsonpath"
+  sudo kubectl describe --namespace=default service/defectdojo-django -o=jsonpath='{.spec.clusterIP}'  
   echo "yaml grep"
-  kubectl get svc <your-service> -o yaml | grep ip
+  sudo kubectl get --namespace=default svc service/defectdojo-django -o yaml | grep ip
 
   echo '::1       defectdojo.default.minikube.local' | sudo tee -a /etc/hosts
   echo '127.0.0.1 defectdojo.default.minikube.local' | sudo tee -a /etc/hosts
