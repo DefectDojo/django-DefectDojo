@@ -163,6 +163,11 @@ if [ -z "${TEST}" ]; then
     return_value=1
   fi
 
+  echo
+  echo "UWSGI logs"
+  sudo kubectl logs --selector=defectdojo.org/component=django -c uwsgi
+  echo
+
   echo "Testing DefectDojo Service"
   # sudo kubectl port-forward --namespace=default service/defectdojo-django 8080:80
   
@@ -173,12 +178,12 @@ if [ -z "${TEST}" ]; then
   # curl -s -m 10 -I http://defectdojo.default.minikube.local:8888/login?next= -vvv
   # CR=$(curl -s -m 10 -I http://defectdojo.default.minikube.local:8080/login?next= | egrep "^HTTP" | cut  -d' ' -f2)
 
-  curl -s http://localhost:8080 -m 120 -vvv
-  curl -s -m 10 -I http://localhost:8080/login?next= -vvv
+  # curl -s http://localhost:8080 -m 120 -vvv
+  # curl -s -m 10 -I http://localhost:8080/login?next= -vvv
 
-  curl -s http://$DD_HOST:8080 -m 120 -vvv
-  curl -s -m 10 -I http://$DD_HOST:8080/login?next= -vvv
-  CR=$(curl -s -m 10 -I http://$DD_HOST:8080/login?next= | egrep "^HTTP" | cut  -d' ' -f2)
+  curl -s http://$DD_HOST -vvv
+  curl -s -m 10 -I http://$DD_HOST/login?next= -vvv
+  CR=$(curl -s -m 10 -I http://$DD_HOST/login?next= | egrep "^HTTP" | cut  -d' ' -f2)
   echo CR: $CR
       
   if [ "$CR" != 200 ]; then
