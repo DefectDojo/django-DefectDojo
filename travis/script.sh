@@ -145,6 +145,16 @@ if [ -z "${TEST}" ]; then
   if [[ ${i} -gt ${TIMEOUT} ]]; then
     return_value=1
   fi
+
+  echo "Testing DefectDojo Service"
+  curl -s -o "/dev/null" http://defectdojo.default.minikube.local:8080 -m 120
+  CR=$(curl -s -m 10 -I http://defectdojo.default.minikube.local:8080/login?next= | egrep "^HTTP" | cut  -d' ' -f2)
+  if [ "$CR" != 200 ]; then
+    echo "ERROR: cannot display login screen; got HTTP code $CR"
+    docker-compose logs  --tail="all" uwsgi
+    exit 1
+  fi
+
   echo
   echo "UWSGI logs"
   sudo kubectl logs --selector=defectdojo.org/component=django -c uwsgi
