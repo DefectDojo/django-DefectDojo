@@ -30,6 +30,7 @@ from dojo.models import Finding, Product_Type, Product, Note_Type, ScanSettings,
     ChoiceQuestion, General_Survey
 
 from dojo.tools import requires_file, SCAN_SONARQUBE_API
+from dojo.utils import jira_get_issue
 
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')
 
@@ -2038,15 +2039,15 @@ class GITHUBFindingForm(forms.Form):
 
 class JIRAFindingForm(forms.Form):
     def __init__(self, *args, **kwargs):
-        self.enabled = kwargs.pop('enabled') or False
-        self.instance = kwargs.pop('instance') or None
+        self.push_all = kwargs.pop('push_all', False)
+        self.instance = kwargs.pop('instance', None)
 
         super(JIRAFindingForm, self).__init__(*args, **kwargs)
         self.fields['push_to_jira'] = forms.BooleanField()
         self.fields['push_to_jira'].required = False
         self.fields['push_to_jira'].help_text = "Checking this will overwrite content of your JIRA issue, or create one."
         self.fields['push_to_jira'].label = "Push to JIRA"
-        if self.enabled:
+        if self.push_all:
             # This will show the checkbox as checked and greyed out, this way the user is aware
             # that issues will be pushed to JIRA, given their product-level settings.
             self.fields['push_to_jira'].help_text = \
@@ -2055,21 +2056,56 @@ class JIRAFindingForm(forms.Form):
             self.fields['push_to_jira'].widget.attrs['checked'] = 'checked'
             self.fields['push_to_jira'].disabled = True
 
-        if self.instance and self.instance.has_jira_issue():
-            # print('has jira')
-            # print('self.instance.jira_issue.jira_key: ', self.instance.jira_issue.jira_key)
-            self.initial['jira_issue'] = self.instance.jira_issue.jira_key
+        if self.instance:
+            print('self.instance.has_jira_issue: ', self.instance.has_jira_issue())
+            if self.instance.has_jira_issue():
+                self.initial['jira_issue'] = self.instance.jira_issue.jira_key
+        else:
+            # self.fields.pop('jira_issue')
+            self.fields['jira_issue'].widget = forms.TextInput(attrs={'placeholder': 'Leave empty and check push to jira to create a new JIRA issue'})
+
 
     def clean(self):
-        print('not valid bro1')
         cleaned_data = super(JIRAFindingForm, self).clean()
-        print('not valid bro2')
-        # self._errors['email'] = [u'Email is already in use']
-        raise forms.ValidationError('valentijn validation')
+        jira_issue_key = self.cleaned_data.get('jira_issue')
+        finding = self.instance
+        if finding:
+            if jira_issue_key:
+                jira_issue_need_to_exist = False
+
+                # changing jira link on finding
+                if finding.has_jira_issue() and jira_issue_key != finding.jira_issue.jira_key:
+                    jira_issue_need_to_exist = True
+
+                # adding existing jira issue to finding without jira link
+                if not finding.has_jira_issue():
+                    jira_issue_need_to_exist = True
+
+                if jira_issue_need_to_exist:
+                    jira_issue = jira_get_issue(self.instance, jira_issue_key)
+                    if not jira_issue:
+                        raise ValidationError('JIRA issue ' + jira_issue_key + ' does not exist or cannot be retrieved')
 
     jira_issue = forms.CharField(required=False, label="Linked JIRA Issue")
     push_to_jira = forms.BooleanField(required=False, label="Push to JIRA")
-    link_existing_jira = forms.BooleanField(required=False, label="Link existing JIRA", help_text='Linking an existing JIRA issue will result in Defect Dojo overwriting the description field in JIRA.')
+
+
+class JIRAImportScanForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        self.push_all = kwargs.pop('push_all', False)
+
+        super(JIRAImportScanForm, self).__init__(*args, **kwargs)
+        if self.push_all:
+            # This will show the checkbox as checked and greyed out, this way the user is aware
+            # that issues will be pushed to JIRA, given their product-level settings.
+            self.fields['push_to_jira'].help_text = \
+                "Push all issues is enabled on this product. If you do not wish to push all issues" \
+                " to JIRA, please disable Push all issues on this product."
+            self.fields['push_to_jira'].widget.attrs['checked'] = 'checked'
+            self.fields['push_to_jira'].disabled = True
+
+    push_to_jira = forms.BooleanField(required=False, label="Push to JIRA", help_text="Checking this will create a new jira issue for each new finding.")
+
 
 
 class GoogleSheetFieldsForm(forms.Form):

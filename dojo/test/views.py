@@ -25,7 +25,7 @@ from tagging.models import Tag
 from dojo.filters import TemplateFindingFilter, OpenFindingFilter
 from dojo.forms import NoteForm, TestForm, FindingForm, \
     DeleteTestForm, AddFindingForm, \
-    ImportScanForm, ReImportScanForm, JIRAFindingForm
+    ImportScanForm, ReImportScanForm, JIRAFindingForm, JIRAImportScanForm
 from dojo.models import Finding, Test, Notes, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, \
     Finding_Template, JIRA_PKey, Cred_Mapping, Dojo_User, System_Settings, Endpoint_Status
 from dojo.tools.factory import import_parser_factory
@@ -274,11 +274,11 @@ def add_findings(request, tid):
     form_error = False
     jform = None
     form = AddFindingForm(initial={'date': timezone.now().date()})
-    enabled = False
+    push_all_jira_issues = False
 
     if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(product=test.engagement.product).count() != 0:
-        enabled = test.engagement.product.jira_pkey_set.first().push_all_issues
-        jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
+        push_all_jira_issues = test.engagement.product.jira_pkey_set.first().push_all_issues
+        jform = JIRAFindingForm(push_all=push_all_jira_issues, prefix='jiraform')
     else:
         jform = None
 
@@ -332,10 +332,10 @@ def add_findings(request, tid):
 
             # Push to jira?
             push_to_jira = False
-            if enabled:
+            if push_all_jira_issues:
                 push_to_jira = True
             elif 'jiraform-push_to_jira' in request.POST:
-                jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=enabled)
+                jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues)
                 if jform.is_valid():
                     push_to_jira = jform.cleaned_data.get('push_to_jira')
 
@@ -401,6 +401,13 @@ def add_temp_finding(request, tid, fid):
     test = get_object_or_404(Test, id=tid)
     finding = get_object_or_404(Finding_Template, id=fid)
     findings = Finding_Template.objects.all()
+    push_all_jira_issues = False
+
+    if get_system_setting('enable_jira'):
+        push_all_jira_issues = test.engagement.product.jira_pkey_set.first().push_all_issues
+        jform = JIRAFindingForm(push_all=push_all_jira_issues, prefix='jiraform')
+    else:
+        jform = None
 
     if request.method == 'POST':
         form = FindingForm(request.POST, template=True)
@@ -443,7 +450,7 @@ def add_temp_finding(request, tid, fid):
             t = ", ".join('"{0}"'.format(w) for w in tags)
             new_finding.tags = t
             if 'jiraform-push_to_jira' in request.POST:
-                jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=True)
+                jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues)
                 if jform.is_valid():
                     if request.user.usercontactinfo.block_execution:
                         add_issue(new_finding, jform.cleaned_data.get('push_to_jira'))
@@ -500,11 +507,6 @@ def add_temp_finding(request, tid, fid):
                                     'references': finding.references,
                                     'numerical_severity': finding.numerical_severity,
                                     'tags': [tag.name for tag in finding.tags]})
-        if get_system_setting('enable_jira'):
-            enabled = test.engagement.product.jira_pkey_set.first().push_all_issues
-            jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
-        else:
-            jform = None
 
     product_tab = Product_Tab(test.engagement.product.id, title="Add Finding", tab="engagements")
     product_tab.setEngagement(test.engagement)
@@ -551,12 +553,12 @@ def re_import_scan_results(request, tid):
     engagement = test.engagement
     form = ReImportScanForm()
     jform = None
-    enabled = False
+    push_all_jira_issues = False
 
     # Decide if we need to present the Push to JIRA form
     if get_system_setting('enable_jira') and engagement.product.jira_pkey_set.first() is not None:
-        enabled = engagement.product.jira_pkey_set.first().push_all_issues
-        jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
+        push_all_jira_issues = engagement.product.jira_pkey_set.first().push_all_issues
+        jform = JIRAImportScanForm(push_all=push_all_jira_issues, prefix='jiraform')
 
     form.initial['tags'] = [tag.name for tag in test.tags]
     if request.method == "POST":
@@ -608,11 +610,11 @@ def re_import_scan_results(request, tid):
                 # Push to Jira?
 
                 push_to_jira = False
-                if enabled:
+                if push_all_jira_issues:
                     push_to_jira = True
                 elif 'jiraform-push_to_jira' in request.POST:
-                    jform = JIRAFindingForm(request.POST, prefix='jiraform',
-                                            enabled=enabled)
+                    jform = JIRAImportScanForm(request.POST, prefix='jiraform',
+                                            push_all=push_all_jira_issues)
                     if jform.is_valid():
                         push_to_jira = jform.cleaned_data.get('push_to_jira')
                 for item in items:

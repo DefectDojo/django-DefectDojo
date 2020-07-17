@@ -41,7 +41,8 @@ from dojo.models import Finding, Notes, NoteHistory, Note_Type, \
 from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_notifications, \
     add_comment, jira_get_resolution_id, jira_change_resolution_id, get_jira_connection, \
     get_system_setting, apply_cwe_to_template, Product_Tab, calculate_grade, log_jira_alert, \
-    redirect_to_return_url_or_else, get_return_url, add_issue, update_issue, add_external_issue, update_external_issue
+    redirect_to_return_url_or_else, get_return_url, add_issue, update_issue, add_external_issue, update_external_issue, \
+    jira_get_issue
 from dojo.notifications.helper import create_notification
 
 from dojo.tasks import add_issue_task, update_issue_task, update_external_issue_task, add_comment_task, \
@@ -574,19 +575,20 @@ def delete_finding(request, fid):
 def edit_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     old_status = finding.status()
-    print('1')
     form = FindingForm(instance=finding, template=False)
-    print('2')
     form.initial['tags'] = [tag.name for tag in finding.tags]
     form_error = False
     jform = None
     jira_link_exists = False
-    push_all_issues_enabled = False
+    push_all_jira_issues = False
+
+    # for key, value in request.POST.items():
+    #     print(f'Key: {key}')
+    #     print(f'Value: {value}')
 
     if get_system_setting('enable_jira') and finding.jira_conf_new() is not None:
-        push_all_issues_enabled = finding.test.engagement.product.jira_pkey_set.first().push_all_issues
-        print('jform valentijn!')
-        jform = JIRAFindingForm(enabled=push_all_issues_enabled, prefix='jiraform', instance=finding)
+        push_all_jira_issues = finding.test.engagement.product.jira_pkey_set.first().push_all_issues
+        jform = JIRAFindingForm(push_all=push_all_jira_issues, prefix='jiraform', instance=finding)
 
     github_enabled = finding.has_github_issue()
 
@@ -595,14 +597,9 @@ def edit_finding(request, fid):
         if GITHUB_PKey.objects.filter(product=finding.test.engagement.product).exclude(git_conf_id=None):
             gform = GITHUBFindingForm(enabled=github_enabled, prefix='githubform')
     
-    if not jform.is_valid():
-        print('jform errors: ', jform.errors)
-
     if request.method == 'POST':
-        print('3')
         form = FindingForm(request.POST, instance=finding, template=False)
         
-        print('4')
         if finding.active:
             if (form['active'].value() is False or form['false_p'].value()) and form['duplicate'].value() is False:
                 note_type_activation = Note_Type.objects.filter(is_active=True).count()
@@ -622,132 +619,155 @@ def edit_finding(request, fid):
                                          messages.ERROR,
                                          'Can not set a finding as inactive or false positive without adding all mandatory notes',
                                          extra_tags='alert-danger')
-        print('5')
-        if form.is_valid():
-            print('6')
-            jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=False, instance=finding)            
-            if jform.is_valid():
-                print('7')
-                new_finding = form.save(commit=False)
-                new_finding.test = finding.test
-                new_finding.numerical_severity = Finding.get_numerical_severity(
-                    new_finding.severity)
-                if new_finding.false_p or new_finding.active is False:
-                    new_finding.mitigated = timezone.now()
-                    new_finding.mitigated_by = request.user
-                if new_finding.active is True:
-                    new_finding.false_p = False
-                    new_finding.mitigated = None
-                    new_finding.mitigated_by = None
-                if new_finding.duplicate:
-                    new_finding.duplicate = True
-                    new_finding.active = False
-                    new_finding.verified = False
-                    parent_find_string = request.POST.get('duplicate_choice', '')
-                    if parent_find_string:
-                        parent_find = Finding.objects.get(id=int(parent_find_string.split(':')[0]))
-                        new_finding.duplicate_finding = parent_find
-                        parent_find.found_by.add(new_finding.test.test_type)
-                if not new_finding.duplicate and new_finding.duplicate_finding:
-                    parent_find = new_finding.duplicate_finding
-                    if parent_find.found_by is not new_finding.found_by:
-                        parent_find.original_finding.remove(new_finding)
-                    parent_find.found_by.remove(new_finding.test.test_type)
-                    new_finding.duplicate_finding = None
 
-                if form['simple_risk_accept'].value():
-                    new_finding.simple_risk_accept()
-                else:
-                    new_finding.simple_risk_unaccept()
+        jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=False, instance=finding)
 
-                create_template = new_finding.is_template
-                # always false now since this will be deprecated soon in favor of new Finding_Template model
-                new_finding.is_template = False
-                new_finding.endpoints.set(form.cleaned_data['endpoints'])
-                new_finding.last_reviewed = timezone.now()
-                new_finding.last_reviewed_by = request.user
-                tags = request.POST.getlist('tags')
-                t = ", ".join('"{0}"'.format(w) for w in tags)
-                new_finding.tags = t
+        print('form.is_valid: ', form.is_valid())
+        print('jform.is_valid: ', jform.is_valid())
 
+        if form.is_valid() and (jform.is_valid() or jform is None):
+            print('jform.jira_issue: ', jform.cleaned_data.get('jira_issue'))
+            print('jform.push_to_jira: ', jform.cleaned_data.get('push_to_jira'))
+            new_finding = form.save(commit=False)
+            new_finding.test = finding.test
+            new_finding.numerical_severity = Finding.get_numerical_severity(
+                new_finding.severity)
+            if new_finding.false_p or new_finding.active is False:
+                new_finding.mitigated = timezone.now()
+                new_finding.mitigated_by = request.user
+            if new_finding.active is True:
+                new_finding.false_p = False
+                new_finding.mitigated = None
+                new_finding.mitigated_by = None
+            if new_finding.duplicate:
+                new_finding.duplicate = True
+                new_finding.active = False
+                new_finding.verified = False
+                parent_find_string = request.POST.get('duplicate_choice', '')
+                if parent_find_string:
+                    parent_find = Finding.objects.get(id=int(parent_find_string.split(':')[0]))
+                    new_finding.duplicate_finding = parent_find
+                    parent_find.found_by.add(new_finding.test.test_type)
+            if not new_finding.duplicate and new_finding.duplicate_finding:
+                parent_find = new_finding.duplicate_finding
+                if parent_find.found_by is not new_finding.found_by:
+                    parent_find.original_finding.remove(new_finding)
+                parent_find.found_by.remove(new_finding.test.test_type)
+                new_finding.duplicate_finding = None
+
+            if form['simple_risk_accept'].value():
+                new_finding.simple_risk_accept()
+            else:
+                new_finding.simple_risk_unaccept()
+
+            create_template = new_finding.is_template
+            # always false now since this will be deprecated soon in favor of new Finding_Template model
+            new_finding.is_template = False
+            new_finding.endpoints.set(form.cleaned_data['endpoints'])
+            new_finding.last_reviewed = timezone.now()
+            new_finding.last_reviewed_by = request.user
+            tags = request.POST.getlist('tags')
+            t = ", ".join('"{0}"'.format(w) for w in tags)
+            new_finding.tags = t
+
+            push_to_jira = False
+            jira_message = None
+            if jform and jform.is_valid():
                 # Push to Jira?
-                push_to_jira = False
-                if push_all_issues_enabled:
-                    push_to_jira = True
-                # elif 'jiraform-push_to_jira' in request.POST:
-                elif 'jiraform-push_to_jira' in request.POST:
-                    jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=True)
-                    if jform.is_valid():
-                        # If we get here, this means the box got checked.
-                        # Currently, the jform is only 1 field, that checkbox.
-                        # Even though its value is 'on' and therefore should be True, it always returns False.
-                        # So putting a band-aid here to fix the issue.
-                        # Someone more knowledgeable can fix it later.
-                        # push_to_jira = jform.cleaned_data.get('push_to_jira')
-                        push_to_jira = True
+                push_to_jira = push_all_jira_issues or jform.cleaned_data.get('push_to_jira')
 
-                if 'githubform-push_to_github' in request.POST:
-                    gform = GITHUBFindingForm(
-                        request.POST, prefix='githubform', enabled=github_enabled)
-                    if gform.is_valid():
-                        if GITHUB_Issue.objects.filter(finding=new_finding).exists():
-                            if Dojo_User.wants_block_execution(request.user):
-                                update_external_issue(new_finding, old_status, 'github')
-                            else:
-                                update_external_issue_task.delay(new_finding, old_status, 'github')
+                # if the jira issue key was changed, update database
+                new_jira_issue_key = jform.cleaned_data.get('jira_issue')
+                if new_finding.has_jira_issue():
+                    jira_issue = new_finding.jira_issue
+
+                    # everything in DD around JIRA integration is based on the internal id of the issue in JIRA
+                    # instead of on the public jira issue key.
+                    # I have no idea why, but it means we have to retrieve the issue from JIRA to get the internal JIRA id.
+                    # we can assume the issue exist, which is already checked in the validation of the jform
+
+                    if not new_jira_issue_key:
+                        finding_unlink_jira(request, new_finding)
+                        jira_message = 'Link to JIRA issue removed successfully.'
+
+                    elif new_jira_issue_key != new_finding.jira_issue.jira_key:
+                        finding_unlink_jira(request, new_finding)
+                        finding_link_jira(request, new_finding, new_jira_issue_key)
+                        jira_message = 'Changed JIRA link successfully.'
+                else:
+                    if new_jira_issue_key:
+                        finding_link_jira(request, new_finding, new_jira_issue_key)
+                        jira_message = 'Linked a JIRA issue successfully.'
+
+            if 'githubform-push_to_github' in request.POST:
+                gform = GITHUBFindingForm(
+                    request.POST, prefix='githubform', enabled=github_enabled)
+                if gform.is_valid():
+                    if GITHUB_Issue.objects.filter(finding=new_finding).exists():
+                        if Dojo_User.wants_block_execution(request.user):
+                            update_external_issue(new_finding, old_status, 'github')
                         else:
-                            if Dojo_User.wants_block_execution(request.user):
-                                add_external_issue(new_finding, 'github')
-                            else:
-                                add_external_issue_task.delay(new_finding, 'github')
+                            update_external_issue_task.delay(new_finding, old_status, 'github')
+                    else:
+                        if Dojo_User.wants_block_execution(request.user):
+                            add_external_issue(new_finding, 'github')
+                        else:
+                            add_external_issue_task.delay(new_finding, 'github')
 
-                new_finding.save(push_to_jira=push_to_jira)
+            new_finding.save(push_to_jira=push_to_jira)
 
-                tags = request.POST.getlist('tags')
-                t = ", ".join('"{0}"'.format(w) for w in tags)
-                new_finding.tags = t
+            tags = request.POST.getlist('tags')
+            t = ", ".join('"{0}"'.format(w) for w in tags)
+            new_finding.tags = t
 
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                'Finding saved successfully.',
+                extra_tags='alert-success')
+
+            if jira_message:
                 messages.add_message(
                     request,
                     messages.SUCCESS,
-                    'Finding saved successfully.',
+                    jira_message,
                     extra_tags='alert-success')
-                if create_template:
-                    templates = Finding_Template.objects.filter(
-                        title=new_finding.title)
-                    if len(templates) > 0:
-                        messages.add_message(
-                            request,
-                            messages.ERROR,
-                            'A finding template was not created.  A template with this title already '
-                            'exists.',
-                            extra_tags='alert-danger')
-                    else:
-                        template = Finding_Template(
-                            title=new_finding.title,
-                            cwe=new_finding.cwe,
-                            severity=new_finding.severity,
-                            description=new_finding.description,
-                            mitigation=new_finding.mitigation,
-                            impact=new_finding.impact,
-                            references=new_finding.references,
-                            numerical_severity=new_finding.numerical_severity)
-                        template.save()
-                        messages.add_message(
-                            request,
-                            messages.SUCCESS,
-                            'A finding template was also created.',
-                            extra_tags='alert-success')
 
-                return redirect_to_return_url_or_else(request, reverse('view_finding', args=(new_finding.id,)))
-            else:
-                print('8')
-                messages.add_message(
-                    request,
-                    messages.ERROR,
-                    'There appears to be errors on the form, please correct below.',
-                    extra_tags='alert-danger')
-                form_error = True
+            if create_template:
+                templates = Finding_Template.objects.filter(
+                    title=new_finding.title)
+                if len(templates) > 0:
+                    messages.add_message(
+                        request,
+                        messages.ERROR,
+                        'A finding template was not created.  A template with this title already '
+                        'exists.',
+                        extra_tags='alert-danger')
+                else:
+                    template = Finding_Template(
+                        title=new_finding.title,
+                        cwe=new_finding.cwe,
+                        severity=new_finding.severity,
+                        description=new_finding.description,
+                        mitigation=new_finding.mitigation,
+                        impact=new_finding.impact,
+                        references=new_finding.references,
+                        numerical_severity=new_finding.numerical_severity)
+                    template.save()
+                    messages.add_message(
+                        request,
+                        messages.SUCCESS,
+                        'A finding template was also created.',
+                        extra_tags='alert-success')
+
+            return redirect_to_return_url_or_else(request, reverse('view_finding', args=(new_finding.id,)))
+        else:
+            messages.add_message(
+                request,
+                messages.ERROR,
+                'There appears to be errors on the form, please correct below.',
+                extra_tags='alert-danger')
+            form_error = True
 
     if form_error and 'endpoints' in form.cleaned_data:
         form.fields['endpoints'].queryset = form.cleaned_data['endpoints']
@@ -765,7 +785,10 @@ def edit_finding(request, fid):
             title=finding.title).exclude(
             id=finding.id)
     product_tab = Product_Tab(finding.test.engagement.product.id, title="Edit Finding", tab="findings")
-    print('jform:')
+    print('form.errors:')
+    print(form.errors.as_text())
+
+    print('jform.errors:')
     print(jform.errors.as_text())
     return render(request, 'dojo/edit_finding.html', {
         'product_tab': product_tab,
@@ -1138,12 +1161,12 @@ def promote_to_finding(request, fid):
     test = finding.test
     form_error = False
     jira_available = False
-    enabled = False
+    push_all_jira_issues = False
     jform = None
 
     if get_system_setting('enable_jira') and test.engagement.product.jira_pkey_set.first() is not None:
-        enabled = test.engagement.product.jira_pkey_set.first().push_all_issues
-        jform = JIRAFindingForm(prefix='jiraform', enabled=enabled)
+        push_all_jira_issues = test.engagement.product.jira_pkey_set.first().push_all_issues
+        jform = JIRAFindingForm(prefix='jiraform', push_all=push_all_jira_issues)
 
     product_tab = Product_Tab(finding.test.engagement.product.id, title="Promote Finding", tab="findings")
 
@@ -1178,11 +1201,11 @@ def promote_to_finding(request, fid):
 
             # Push to Jira?
             push_to_jira = False
-            if enabled:
+            if push_all_jira_issues:
                 push_to_jira = True
             elif 'jiraform-push_to_jira' in request.POST:
                 jform = JIRAFindingForm(request.POST, prefix='jiraform',
-                                        enabled=enabled)
+                                        push_all=push_all_jira_issues)
                 if jform.is_valid():
                     push_to_jira = jform.cleaned_data.get('push_to_jira')
 
@@ -1782,10 +1805,10 @@ def finding_bulk_update_all(request, pid=None):
                     from dojo.tools import tool_issue_updater
                     tool_issue_updater.async_tool_issue_update(finding)
 
-                    if form.cleaned_data['unlink_from_jira']:
-                        print('unlinking!!')
-                        if finding.has_jira_issue():
-                            finding_unlink_jira(request, finding)
+                    # not sure yet if we want to support bulk unlink, so leave as commented out for now
+                    # if form.cleaned_data['unlink_from_jira']:
+                    #     if finding.has_jira_issue():
+                    #         finding_unlink_jira(request, finding)
 
                     # Because we never call finding.save() in a bulk update, we need to actually
                     # push the JIRA stuff here, rather than in finding.save()
@@ -2005,13 +2028,46 @@ def push_to_jira(request, fid):
     # return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id,)))
 
 
-@user_must_be_authorized(Finding, 'change', 'fid')
-def finding_link_to_jira(request, fid):
-    finding = get_object_or_404(Finding, id=fid)
-    return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id,)))
+# @user_must_be_authorized(Finding, 'change', 'fid')
+# def finding_link_to_jira(request, fid):
+#     finding = get_object_or_404(Finding, id=fid)
+#     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id,)))
+def finding_link_jira(request, finding, new_jira_issue_key):
+    logger.debug('linking existing jira issue %s for finding %i', new_jira_issue_key, finding.id)
+
+    existing_jira_issue = jira_get_issue(finding, new_jira_issue_key)
+
+    if not existing_jira_issue:
+        raise ValueError('JIRA issue not found or cannot be retrieved: ' + new_jira_issue_key)
+
+    jira_issue = JIRA_Issue(
+        jira_id=existing_jira_issue.id,
+        jira_key=existing_jira_issue.key,
+        finding=finding)
+
+    jira_issue.jira_key = new_jira_issue_key
+    jira_issue.save()
+
+    # jira timestampe are in iso format: 'updated': '2020-07-17T09:49:51.447+0200'
+    # seems to be a pain to parse these in python < 3.7, so for now just record the curent time as
+    # as the timestamp the jira link was created / updated in DD
+    finding.jira_creation = timezone.now()
+    finding.jira_change = timezone.now()
+    finding.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
+
+    jira_issue_url = finding.jira_issue.jira_key
+    if finding.jira_conf_new():
+        jira_issue_url = finding.jira_conf_new().url + '/' + finding.jira_issue.jira_key
+
+    new_note = Notes()
+    new_note.entry = 'linked JIRA issue %s to finding' % (jira_issue_url)
+    new_note.author = request.user
+    new_note.save()
+    finding.notes.add(new_note)
 
 
 def finding_unlink_jira(request, finding):
+    logger.debug('removing linked jira issue %s for finding %i', finding.jira_issue.jira_key, finding.id)
     finding.jira_issue.delete()
     finding.jira_creation = None
     finding.jira_change = None

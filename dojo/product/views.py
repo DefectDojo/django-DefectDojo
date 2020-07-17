@@ -908,17 +908,17 @@ def ad_hoc_finding(request, pid):
                     target_start=timezone.now(), target_end=timezone.now())
         test.save()
     form_error = False
-    enabled = False
+    push_all_jira_issues = False
     jform = None
     gform = None
     form = AdHocFindingForm(initial={'date': timezone.now().date()})
     if get_system_setting('enable_jira') and \
             test.engagement.product.jira_pkey_set.first() is not None:
-        enabled = test.engagement.product.jira_pkey_set.first().push_all_issues
-        jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
+        push_all_jira_issues = test.engagement.product.jira_pkey_set.first().push_all_issues
+        jform = JIRAFindingForm(push_all=push_all_jira_issues, prefix='jiraform')
     if get_system_setting('enable_github'):
         if GITHUB_PKey.objects.filter(product=test.engagement.product).count() != 0:
-            gform = GITHUBFindingForm(enabled=enabled, prefix='githubform')
+            gform = GITHUBFindingForm(enabled=push_all_jira_issues, prefix='githubform')
     else:
         gform = None
     if request.method == 'POST':
@@ -955,11 +955,11 @@ def ad_hoc_finding(request, pid):
 
             # Push to Jira?
             push_to_jira = False
-            if enabled:
+            if push_all_jira_issues:
                 push_to_jira = True
             elif 'jiraform-push_to_jira' in request.POST:
                 jform = JIRAFindingForm(request.POST, prefix='jiraform',
-                                        enabled=enabled)
+                                        push_all=push_all_jira_issues)
                 if jform.is_valid():
                     push_to_jira = jform.cleaned_data.get('push_to_jira')
 
@@ -968,7 +968,7 @@ def ad_hoc_finding(request, pid):
                                      'Finding added successfully.',
                                      extra_tags='alert-success')
             if 'githubform-push_to_github' in request.POST:
-                gform = GITHUBFindingForm(request.POST, prefix='jiragithub', enabled=enabled)
+                gform = GITHUBFindingForm(request.POST, prefix='jiragithub', enabled=push_all_jira_issues)
                 if gform.is_valid():
                     if Dojo_User.wants_block_execution(request.user):
                         add_external_issue(new_finding, 'github')

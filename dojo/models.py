@@ -743,6 +743,22 @@ class Product(models.Model):
             findings_list.append(i.id)
         return findings_list
 
+    @property
+    def jira_pkey(self):
+        try:
+            return self.jira_pkey_set.all()[0]
+        except:
+            return None
+
+    @property
+    def jira_conf(self):
+        try:
+            return self.jira_pkey_set.all()[0].conf
+        except:
+            return None
+
+
+
 
 class ScanSettings(models.Model):
     product = models.ForeignKey(Product, default=1, editable=False, on_delete=models.CASCADE)

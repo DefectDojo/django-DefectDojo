@@ -1423,10 +1423,10 @@ def add_issue(find, push_to_jira):
 
                 jira_issue_url = find.jira_issue.jira_key
                 if find.jira_conf_new():
-                    jira_issue_url = find.jira_conf_new().url + '/' + new_issue.id
+                    jira_issue_url = find.jira_conf_new().url + '/' + new_issue.key
 
                 new_note = Notes()
-                new_note.entry = 'created JIRA issue %s from finding' % (jira_issue_url)
+                new_note.entry = 'created JIRA issue %s for finding' % (jira_issue_url)
                 new_note.author = find.reporter  # quick hack because we don't have request.user here
                 new_note.save()
                 find.notes.add(new_note)
@@ -1656,6 +1656,20 @@ def add_epic(eng, push_to_jira):
             log_jira_generic_alert('Jira Engagement/Epic Creation Error',
                                    message + error)
             pass
+
+def jira_get_issue(finding, issue_key):
+    jpkey = finding.jira_pkey()
+    jira_conf = jpkey.conf
+    jira = JIRA(
+        server=jira_conf.url,
+        basic_auth=(jira_conf.username, jira_conf.password))
+    try:
+        issue = jira.issue(issue_key)
+        print(vars(issue))
+        return issue
+    except JIRAError as jira_error:
+        logger.debug('error retrieving jira issue ' + issue_key + ' ' + str(jira_error))
+        return None
 
 
 def add_comment(find, note, force_push=False):
