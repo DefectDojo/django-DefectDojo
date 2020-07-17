@@ -191,7 +191,7 @@ if [ -z "${TEST}" ]; then
 
 
   echo "Testing DefectDojo Service"
-  # sudo kubectl port-forward --namespace=default service/defectdojo-django 8080:80
+  sudo kubectl port-forward --namespace=default service/defectdojo-django 80:8080
   
   # echo '::1       defectdojo.default.minikube.local' | sudo tee -a /etc/hosts
   # echo '127.0.0.1 defectdojo.default.minikube.local' | sudo tee -a /etc/hosts
