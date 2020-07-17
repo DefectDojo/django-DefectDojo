@@ -716,6 +716,16 @@ class ToolTypesViewSet(mixins.ListModelMixin,
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'name', 'description')
 
+class RegulationsViewSet(mixins.ListModelMixin,
+                         mixins.RetrieveModelMixin,
+                         mixins.CreateModelMixin,
+                         mixins.UpdateModelMixin,
+                         viewsets.GenericViewSet):
+    serializer_class = serializers.RegulationSerializer
+    queryset = Regulation.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'name', 'description')
+
 
 class UsersViewSet(mixins.ListModelMixin,
                    mixins.RetrieveModelMixin,
