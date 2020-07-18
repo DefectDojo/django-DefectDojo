@@ -276,12 +276,7 @@ def add_findings(request, tid):
     jform = None
     form = AddFindingForm(initial={'date': timezone.now().date()})
     push_all_jira_issues = False
-
-    if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(product=test.engagement.product).count() != 0:
-        push_all_jira_issues = test.engagement.product.jira_pkey_set.first().push_all_issues
-        jform = JIRAFindingForm(push_all=push_all_jira_issues, prefix='jiraform', jira_pkey=test.engagement.product.jira_pkey)
-    else:
-        jform = None
+    use_jira = get_system_setting('enable_jira') and test.engagement.product.jira_pkey is not None    
 
     if request.method == 'POST':
         form = AddFindingForm(request.POST)
@@ -316,15 +311,18 @@ def add_findings(request, tid):
                                      messages.ERROR,
                                      'Can not set a finding as inactive or false positive without adding all mandatory notes',
                                      extra_tags='alert-danger')
-
-        jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_pkey=test.engagement.product.jira_pkey)
+        if use_jira:
+            jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_pkey=test.engagement.product.jira_pkey)
 
         print('form.is_valid: ', form.is_valid())
-        print('jform.is_valid: ', jform.is_valid())
+        
+        if jform:
+            print('jform.is_valid: ', jform.is_valid())
 
-        if form.is_valid() and (jform.is_valid() or jform is None):
-            print('jform.jira_issue: ', jform.cleaned_data.get('jira_issue'))
-            print('jform.push_to_jira: ', jform.cleaned_data.get('push_to_jira'))
+        if form.is_valid() and (jform is None or jform.is_valid()):
+            if jform:
+                print('jform.jira_issue: ', jform.cleaned_data.get('jira_issue'))
+                print('jform.push_to_jira: ', jform.cleaned_data.get('push_to_jira'))
 
             new_finding = form.save(commit=False)
             new_finding.test = test
@@ -418,6 +416,11 @@ def add_findings(request, tid):
                                  messages.ERROR,
                                  'The form has errors, please correct them below.',
                                  extra_tags='alert-danger')
+    else:
+        if use_jira:
+            push_all_jira_issues = test.engagement.product.jira_pkey.push_all_issues
+            jform = JIRAFindingForm(push_all=push_all_jira_issues, prefix='jiraform', jira_pkey=test.engagement.product.jira_pkey)
+    
     product_tab = Product_Tab(test.engagement.product.id, title="Add Finding", tab="engagements")
     product_tab.setEngagement(test.engagement)
     return render(request, 'dojo/add_findings.html',

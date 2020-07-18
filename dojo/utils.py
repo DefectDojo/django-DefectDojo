@@ -1338,7 +1338,7 @@ def reopen_external_issue(find, note, external_issue_provider):
 def add_issue(find, push_to_jira):
     logger.info('trying to create a new jira issue for %d:%s', find.id, find.title)
 
-    # traceback.print_stack()    
+    traceback.print_stack()    
 
     eng = Engagement.objects.get(test=find.test)
     prod = Product.objects.get(engagement=eng)

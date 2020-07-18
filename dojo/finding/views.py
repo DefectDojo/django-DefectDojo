@@ -581,22 +581,15 @@ def edit_finding(request, fid):
     jform = None
     jira_link_exists = False
     push_all_jira_issues = False
+    gform = None
+    use_jira = get_system_setting('enable_jira') and finding.jira_conf_new() is not None    
 
     # for key, value in request.POST.items():
     #     print(f'Key: {key}')
     #     print(f'Value: {value}')
 
-    if get_system_setting('enable_jira') and finding.jira_conf_new() is not None:
-        push_all_jira_issues = finding.test.engagement.product.jira_pkey_set.first().push_all_issues
-        jform = JIRAFindingForm(push_all=push_all_jira_issues, prefix='jiraform', instance=finding)
-
     github_enabled = finding.has_github_issue()
 
-    gform = None
-    if get_system_setting('enable_github'):
-        if GITHUB_PKey.objects.filter(product=finding.test.engagement.product).exclude(git_conf_id=None):
-            gform = GITHUBFindingForm(enabled=github_enabled, prefix='githubform')
-    
     if request.method == 'POST':
         form = FindingForm(request.POST, instance=finding, template=False)
         
@@ -620,14 +613,17 @@ def edit_finding(request, fid):
                                          'Can not set a finding as inactive or false positive without adding all mandatory notes',
                                          extra_tags='alert-danger')
 
-        jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, instance=finding)
+        if use_jira:
+            jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, instance=finding)
 
         print('form.is_valid: ', form.is_valid())
-        print('jform.is_valid: ', jform.is_valid())
+        if jform:
+            print('jform.is_valid: ', jform.is_valid())
 
-        if form.is_valid() and (jform.is_valid() or jform is None):
-            print('jform.jira_issue: ', jform.cleaned_data.get('jira_issue'))
-            print('jform.push_to_jira: ', jform.cleaned_data.get('push_to_jira'))
+        if form.is_valid() and (jform is None or jform.is_valid()):
+            if jform:
+                print('jform.jira_issue: ', jform.cleaned_data.get('jira_issue'))
+                print('jform.push_to_jira: ', jform.cleaned_data.get('push_to_jira'))
             new_finding = form.save(commit=False)
             new_finding.test = finding.test
             new_finding.numerical_severity = Finding.get_numerical_severity(
@@ -768,6 +764,14 @@ def edit_finding(request, fid):
                 'There appears to be errors on the form, please correct below.',
                 extra_tags='alert-danger')
             form_error = True
+    else:
+        if use_jira:
+            push_all_jira_issues = finding.test.engagement.product.jira_pkey.push_all_issues
+            jform = JIRAFindingForm(push_all=push_all_jira_issues, prefix='jiraform', instance=finding)
+
+        if get_system_setting('enable_github'):
+            if GITHUB_PKey.objects.filter(product=finding.test.engagement.product).exclude(git_conf_id=None):
+                gform = GITHUBFindingForm(enabled=github_enabled, prefix='githubform')
 
     if form_error and 'endpoints' in form.cleaned_data:
         form.fields['endpoints'].queryset = form.cleaned_data['endpoints']
@@ -788,8 +792,9 @@ def edit_finding(request, fid):
     print('form.errors:')
     print(form.errors.as_text())
 
-    print('jform.errors:')
-    print(jform.errors.as_text())
+    if jform:
+        print('jform.errors:')
+        print(jform.errors.as_text())
     return render(request, 'dojo/edit_finding.html', {
         'product_tab': product_tab,
         'form': form,
@@ -1163,33 +1168,21 @@ def promote_to_finding(request, fid):
     jira_available = False
     push_all_jira_issues = False
     jform = None
+    use_jira = get_system_setting('enable_jira') and test.engagement.product.jira_pkey is not None    
 
-    if get_system_setting('enable_jira') and test.engagement.product.jira_pkey_set.first() is not None:
-        push_all_jira_issues = test.engagement.product.jira_pkey_set.first().push_all_issues
-        jform = JIRAFindingForm(prefix='jiraform', push_all=push_all_jira_issues, jira_pkey=test.engagement.product.jira_pkey)
-
-    product_tab = Product_Tab(finding.test.engagement.product.id, title="Promote Finding", tab="findings")
-
-    form = PromoteFindingForm(
-        initial={
-            'title': finding.title,
-            'product_tab': product_tab,
-            'date': finding.date,
-            'severity': finding.severity,
-            'description': finding.description,
-            'test': finding.test,
-            'reporter': finding.reporter
-        })
     if request.method == 'POST':
         form = PromoteFindingForm(request.POST)
-        jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_pkey=test.engagement.product.jira_pkey)
+        if use_jira:
+            jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_pkey=test.engagement.product.jira_pkey)
 
         print('form.is_valid: ', form.is_valid())
-        print('jform.is_valid: ', jform.is_valid())
+        if jform:
+            print('jform.is_valid: ', jform.is_valid())
 
-        if form.is_valid() and (jform.is_valid() or jform is None):
-            print('jform.jira_issue: ', jform.cleaned_data.get('jira_issue'))
-            print('jform.push_to_jira: ', jform.cleaned_data.get('push_to_jira'))
+        if form.is_valid() and (jform is None or jform.is_valid()):
+            if jform:
+                print('jform.jira_issue: ', jform.cleaned_data.get('jira_issue'))
+                print('jform.push_to_jira: ', jform.cleaned_data.get('push_to_jira'))
 
             new_finding = form.save(commit=False)
             new_finding.test = test
@@ -1276,7 +1269,24 @@ def promote_to_finding(request, fid):
                 messages.ERROR,
                 'The form has errors, please correct them below.',
                 extra_tags='alert-danger')
+    else:
+        if use_jira:
+            push_all_jira_issues = test.engagement.product.jira_pkey_set.first().push_all_issues
+            jform = JIRAFindingForm(prefix='jiraform', push_all=push_all_jira_issues, jira_pkey=test.engagement.product.jira_pkey)
 
+    product_tab = Product_Tab(finding.test.engagement.product.id, title="Promote Finding", tab="findings")
+
+    form = PromoteFindingForm(
+        initial={
+            'title': finding.title,
+            'product_tab': product_tab,
+            'date': finding.date,
+            'severity': finding.severity,
+            'description': finding.description,
+            'test': finding.test,
+            'reporter': finding.reporter
+        })
+    
     return render(
         request, 'dojo/promote_to_finding.html', {
             'form': form,

@@ -177,6 +177,7 @@ def edit_engagement(request, eid):
     if eng.engagement_type == "CI/CD":
         ci_cd_form = True
     jform = None
+    use_jira = get_system_setting('enable_jira') and eng.product.jira_pkey is not None
 
     if request.method == 'POST':
         form = EngForm(request.POST, instance=eng, cicd=ci_cd_form, product=eng.product.id)
@@ -232,9 +233,8 @@ def edit_engagement(request, eid):
             enabled = False
             pass
 
-        if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(
-                product=eng.product).count() != 0:
-            jform = JIRAEngagementForm(prefix='jiraform', instance=eng)
+        if use_jira:
+            jform = JIRAEngagementForm(prefix='jiraform', instance=eng, jira_pkey=eng.product.jira_pkey)
         else:
             jform = None
 

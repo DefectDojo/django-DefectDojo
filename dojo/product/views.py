@@ -740,11 +740,13 @@ def delete_product(request, pid):
 def new_eng_for_app(request, pid, cicd=False):
     jform = None
     prod = Product.objects.get(id=pid)
+    use_jira = get_system_setting('enable_jira') and prod.jira_pkey() is not None    
+
     if request.method == 'POST':
 
-        for key, value in request.POST.items():
-            print(f'Key: {key}')
-            print(f'Value: {value}')
+        # for key, value in request.POST.items():
+        #     print(f'Key: {key}')
+        #     print(f'Value: {value}')
 
         form = EngForm(request.POST, cicd=cicd)
         if form.is_valid():
@@ -772,9 +774,10 @@ def new_eng_for_app(request, pid, cicd=False):
                 jform = JIRAEngagementForm(request.POST, prefix='jiraform')
 
             print('form.is_valid: ', form.is_valid())
-            print('jform.is_valid: ', jform.is_valid())
+            if jform:
+                print('jform.is_valid: ', jform.is_valid())
 
-            if (form.is_valid() and jform is None) or (form.is_valid() and jform and jform.is_valid()):
+            if form.is_valid() and (jform is None or  jform.is_valid()):
                 if 'jiraform-push_to_jira' in request.POST:
                     if request.user.usercontactinfo.block_execution:
                         logger.debug('calling add_epic')
@@ -798,9 +801,8 @@ def new_eng_for_app(request, pid, cicd=False):
                 return HttpResponseRedirect(reverse('view_engagement', args=(new_eng.id,)))
     else:
         form = EngForm(initial={'lead': request.user, 'target_start': timezone.now().date(), 'target_end': timezone.now().date() + timedelta(days=7), 'product': prod.id}, cicd=cicd, product=prod.id)
-        if get_system_setting('enable_jira'):
-            if JIRA_PKey.objects.filter(product=prod).count() != 0:
-                jform = JIRAEngagementForm(prefix='jiraform')
+        if use_jira:
+            jform = JIRAEngagementForm(prefix='jiraform')
 
     product_tab = Product_Tab(pid, title="New Engagement", tab="engagements")
     return render(request, 'dojo/new_eng.html',
@@ -920,15 +922,8 @@ def ad_hoc_finding(request, pid):
     jform = None
     gform = None
     form = AdHocFindingForm(initial={'date': timezone.now().date()})
-    if get_system_setting('enable_jira') and \
-            test.engagement.product.jira_pkey_set.first() is not None:
-        push_all_jira_issues = test.engagement.product.jira_pkey_set.first().push_all_issues
-        jform = JIRAFindingForm(push_all=push_all_jira_issues, prefix='jiraform', jira_pkey=test.engagement.product.jira_pkey)
-    if get_system_setting('enable_github'):
-        if GITHUB_PKey.objects.filter(product=test.engagement.product).count() != 0:
-            gform = GITHUBFindingForm(enabled=push_all_jira_issues, prefix='githubform')
-    else:
-        gform = None
+    use_jira = get_system_setting('enable_jira') and test.engagement.product.jira_pkey is not None
+
     if request.method == 'POST':
         form = AdHocFindingForm(request.POST)
         if (form['active'].value() is False or form['false_p'].value()) and form['duplicate'].value() is False:
@@ -946,13 +941,14 @@ def ad_hoc_finding(request, pid):
                                      messages.ERROR,
                                      'Can not set a finding as inactive or false positive without adding all mandatory notes',
                                      extra_tags='alert-danger')
-        
-        jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_pkey=test.engagement.product.jira_pkey)
+        if use_jira:
+            jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_pkey=test.engagement.product.jira_pkey)
 
         print('form.is_valid: ', form.is_valid())
-        print('jform.is_valid: ', jform.is_valid())
+        if jform:
+            print('jform.is_valid: ', jform.is_valid())
 
-        if form.is_valid() and (jform.is_valid() or jform is None):
+        if form.is_valid() and (jform is None or jform.is_valid()):
             new_finding = form.save(commit=False)
             new_finding.test = test
             new_finding.reporter = request.user
@@ -967,8 +963,6 @@ def ad_hoc_finding(request, pid):
             new_finding.save()
             new_finding.endpoints.set(form.cleaned_data['endpoints'])
 
-            jform = JIRAFindingForm(request.POST, prefix='jiraform',
-                                    push_all=push_all_jira_issues, jira_pkey=test.engagement.product.jira_pkey)
             # Push to jira?
             push_to_jira = False
             jira_message = None
@@ -1002,7 +996,6 @@ def ad_hoc_finding(request, pid):
                         finding_link_jira(request, new_finding, new_jira_issue_key)
                         jira_message = 'Linked a JIRA issue successfully.'
 
-
             if 'githubform-push_to_github' in request.POST:
                 gform = GITHUBFindingForm(request.POST, prefix='jiragithub', enabled=push_all_jira_issues)
                 if gform.is_valid():
@@ -1010,7 +1003,7 @@ def ad_hoc_finding(request, pid):
                         add_external_issue(new_finding, 'github')
                     else:
                         add_external_issue_task.delay(new_finding, 'github')
-                                     
+
             new_finding.save(push_to_jira=push_to_jira)
 
             messages.add_message(request,
@@ -1054,6 +1047,17 @@ def ad_hoc_finding(request, pid):
                                  messages.ERROR,
                                  'The form has errors, please correct them below.',
                                  extra_tags='alert-danger')
+    else:
+        if use_jira:
+            push_all_jira_issues = test.engagement.product.jira_pkey_set.first().push_all_issues
+            jform = JIRAFindingForm(push_all=push_all_jira_issues, prefix='jiraform', jira_pkey=test.engagement.product.jira_pkey)
+
+        if get_system_setting('enable_github'):
+            if GITHUB_PKey.objects.filter(product=test.engagement.product).count() != 0:
+                gform = GITHUBFindingForm(enabled=push_all_jira_issues, prefix='githubform')
+        else:
+            gform = None
+    
     product_tab = Product_Tab(pid, title="Add Finding", tab="engagements")
     product_tab.setEngagement(eng)
     return render(request, 'dojo/ad_hoc_findings.html',
