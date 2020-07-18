@@ -34,7 +34,7 @@ from dojo.utils import get_page_items, get_page_items_and_count, add_breadcrumb,
 from dojo.notifications.helper import create_notification
 from dojo.tasks import add_issue_task
 from functools import reduce
-from dojo.finding.views import finding_link_jira,finding_unlink_jira
+from dojo.finding.views import finding_link_jira, finding_unlink_jira
 
 logger = logging.getLogger(__name__)
 parse_logger = logging.getLogger('dojo')
@@ -276,7 +276,7 @@ def add_findings(request, tid):
     jform = None
     form = AddFindingForm(initial={'date': timezone.now().date()})
     push_all_jira_issues = False
-    use_jira = get_system_setting('enable_jira') and test.engagement.product.jira_pkey is not None    
+    use_jira = get_system_setting('enable_jira') and test.engagement.product.jira_pkey is not None
 
     if request.method == 'POST':
         form = AddFindingForm(request.POST)
@@ -315,7 +315,7 @@ def add_findings(request, tid):
             jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_pkey=test.engagement.product.jira_pkey)
 
         print('form.is_valid: ', form.is_valid())
-        
+
         if jform:
             print('jform.is_valid: ', jform.is_valid())
 
@@ -420,7 +420,7 @@ def add_findings(request, tid):
         if use_jira:
             push_all_jira_issues = test.engagement.product.jira_pkey.push_all_issues
             jform = JIRAFindingForm(push_all=push_all_jira_issues, prefix='jiraform', jira_pkey=test.engagement.product.jira_pkey)
-    
+
     product_tab = Product_Tab(test.engagement.product.id, title="Add Finding", tab="engagements")
     product_tab.setEngagement(test.engagement)
     return render(request, 'dojo/add_findings.html',

@@ -740,7 +740,7 @@ def delete_product(request, pid):
 def new_eng_for_app(request, pid, cicd=False):
     jform = None
     prod = Product.objects.get(id=pid)
-    use_jira = get_system_setting('enable_jira') and prod.jira_pkey() is not None    
+    use_jira = get_system_setting('enable_jira') and prod.jira_pkey is not None
 
     if request.method == 'POST':
 
@@ -777,7 +777,7 @@ def new_eng_for_app(request, pid, cicd=False):
             if jform:
                 print('jform.is_valid: ', jform.is_valid())
 
-            if form.is_valid() and (jform is None or  jform.is_valid()):
+            if form.is_valid() and (jform is None or jform.is_valid()):
                 if 'jiraform-push_to_jira' in request.POST:
                     if request.user.usercontactinfo.block_execution:
                         logger.debug('calling add_epic')
@@ -1057,7 +1057,7 @@ def ad_hoc_finding(request, pid):
                 gform = GITHUBFindingForm(enabled=push_all_jira_issues, prefix='githubform')
         else:
             gform = None
-    
+
     product_tab = Product_Tab(pid, title="Add Finding", tab="engagements")
     product_tab.setEngagement(eng)
     return render(request, 'dojo/ad_hoc_findings.html',

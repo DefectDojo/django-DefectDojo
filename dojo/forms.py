@@ -2148,7 +2148,7 @@ class JIRAEngagementForm(forms.Form):
             if self.instance.has_jira_issue():
                 self.fields['push_to_jira'].widget.attrs['checked'] = 'checked'
                 self.fields['push_to_jira'].label = 'Update JIRA Epic'
-                self.fields['push_to_jira'].help_text='Checking this will update the existing EPIC in JIRA.'
+                self.fields['push_to_jira'].help_text = 'Checking this will update the existing EPIC in JIRA.'
 
     push_to_jira = forms.BooleanField(required=False, label="Create EPIC", help_text="Checking this will create an EPIC in JIRA for this engagement.")
 

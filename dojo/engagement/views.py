@@ -24,7 +24,7 @@ from dojo.filters import EngagementFilter
 from dojo.forms import CheckForm, \
     UploadThreatForm, UploadRiskForm, NoteForm, DoneForm, \
     EngForm, TestForm, ReplaceRiskAcceptanceForm, AddFindingsRiskAcceptanceForm, DeleteEngagementForm, ImportScanForm, \
-    JIRAFindingForm, CredMappingForm, JIRAEngagementForm, JIRAImportScanForm
+    CredMappingForm, JIRAEngagementForm, JIRAImportScanForm
 from dojo.models import Finding, Product, Engagement, Test, \
     Check_List, Test_Type, Notes, \
     Risk_Acceptance, Development_Environment, BurpRawRequestResponse, Endpoint, \
@@ -226,12 +226,6 @@ def edit_engagement(request, eid):
                     reverse('view_engagement', args=(eng.id, )))
     else:
         form = EngForm(initial={'product': eng.product.id}, instance=eng, cicd=ci_cd_form, product=eng.product.id)
-        try:
-            # jissue = JIRA_Issue.objects.get(engagement=eng)
-            enabled = True
-        except:
-            enabled = False
-            pass
 
         if use_jira:
             jform = JIRAEngagementForm(prefix='jiraform', instance=eng, jira_pkey=eng.product.jira_pkey)

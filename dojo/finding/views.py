@@ -26,7 +26,6 @@ from django.views.decorators.http import require_POST
 from tagging.models import Tag
 from itertools import chain
 from dojo.user.helper import user_must_be_authorized
-from django import forms
 
 from dojo.filters import OpenFindingFilter, \
     OpenFindingSuperFilter, AcceptedFindingSuperFilter, \
@@ -582,7 +581,7 @@ def edit_finding(request, fid):
     jira_link_exists = False
     push_all_jira_issues = False
     gform = None
-    use_jira = get_system_setting('enable_jira') and finding.jira_conf_new() is not None    
+    use_jira = get_system_setting('enable_jira') and finding.jira_conf_new() is not None
 
     # for key, value in request.POST.items():
     #     print(f'Key: {key}')
@@ -592,7 +591,7 @@ def edit_finding(request, fid):
 
     if request.method == 'POST':
         form = FindingForm(request.POST, instance=finding, template=False)
-        
+
         if finding.active:
             if (form['active'].value() is False or form['false_p'].value()) and form['duplicate'].value() is False:
                 note_type_activation = Note_Type.objects.filter(is_active=True).count()
@@ -1168,7 +1167,7 @@ def promote_to_finding(request, fid):
     jira_available = False
     push_all_jira_issues = False
     jform = None
-    use_jira = get_system_setting('enable_jira') and test.engagement.product.jira_pkey is not None    
+    use_jira = get_system_setting('enable_jira') and test.engagement.product.jira_pkey is not None
 
     if request.method == 'POST':
         form = PromoteFindingForm(request.POST)
@@ -1286,7 +1285,7 @@ def promote_to_finding(request, fid):
             'test': finding.test,
             'reporter': finding.reporter
         })
-    
+
     return render(
         request, 'dojo/promote_to_finding.html', {
             'form': form,

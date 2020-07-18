@@ -37,7 +37,7 @@ import logging
 import itertools
 from django.contrib import messages
 from django.http import HttpResponseRedirect
-import traceback
+# import traceback
 
 
 logger = logging.getLogger(__name__)
@@ -1338,7 +1338,7 @@ def reopen_external_issue(find, note, external_issue_provider):
 def add_issue(find, push_to_jira):
     logger.info('trying to create a new jira issue for %d:%s', find.id, find.title)
 
-    traceback.print_stack()    
+    # traceback.print_stack()
 
     eng = Engagement.objects.get(test=find.test)
     prod = Product.objects.get(engagement=eng)
@@ -1661,6 +1661,7 @@ def add_epic(eng, push_to_jira):
             log_jira_generic_alert('Jira Engagement/Epic Creation Error',
                                    message + error)
             pass
+
 
 def jira_get_issue(jpkey, issue_key):
     jira_conf = jpkey.conf
