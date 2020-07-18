@@ -20,11 +20,11 @@ from dojo.templatetags.display_tags import get_level
 from dojo.filters import ProductFilter, EngagementFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAPKeyForm, JIRAFindingForm, AdHocFindingForm, \
                        EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm, ProductNotificationsForm, \
-                       GITHUB_Product_Form, GITHUBFindingForm, App_AnalysisTypeForm
+                       GITHUB_Product_Form, GITHUBFindingForm, App_AnalysisTypeForm, JIRAEngagementForm
 from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, GITHUB_PKey, Finding_Template, \
                         Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, \
                         Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, Dojo_User
-from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, Product_Tab, get_punchcard_data
+from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, Product_Tab, get_punchcard_data, add_epic
 from dojo.notifications.helper import create_notification
 from custom_field.models import CustomFieldValue, CustomField
 from dojo.tasks import add_epic_task, add_external_issue_task, add_external_issue
@@ -33,6 +33,7 @@ from tagging.utils import get_tag_list
 from django.db.models import Prefetch
 from django.db.models.query import QuerySet
 from github import Github
+from dojo.finding.views import finding_link_jira, finding_unlink_jira
 
 logger = logging.getLogger(__name__)
 
@@ -740,6 +741,11 @@ def new_eng_for_app(request, pid, cicd=False):
     jform = None
     prod = Product.objects.get(id=pid)
     if request.method == 'POST':
+
+        for key, value in request.POST.items():
+            print(f'Key: {key}')
+            print(f'Value: {value}')
+
         form = EngForm(request.POST, cicd=cicd)
         if form.is_valid():
             new_eng = form.save(commit=False)
@@ -763,11 +769,19 @@ def new_eng_for_app(request, pid, cicd=False):
             t = ", ".join('"{0}"'.format(w) for w in tags)
             new_eng.tags = t
             if 'jiraform-push_to_jira' in request.POST:
-                jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=False)
+                jform = JIRAEngagementForm(request.POST, prefix='jiraform')
+
+            print('form.is_valid: ', form.is_valid())
+            print('jform.is_valid: ', jform.is_valid())
 
             if (form.is_valid() and jform is None) or (form.is_valid() and jform and jform.is_valid()):
                 if 'jiraform-push_to_jira' in request.POST:
-                    add_epic_task.delay(new_eng, jform.cleaned_data.get("push_to_jira"))
+                    if request.user.usercontactinfo.block_execution:
+                        logger.debug('calling add_epic')
+                        add_epic(new_eng, jform.cleaned_data.get("push_to_jira"))
+                    else:
+                        logger.debug('calling add_epic_task')
+                        add_epic_task.delay(new_eng, jform.cleaned_data.get("push_to_jira"))
 
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -786,13 +800,7 @@ def new_eng_for_app(request, pid, cicd=False):
         form = EngForm(initial={'lead': request.user, 'target_start': timezone.now().date(), 'target_end': timezone.now().date() + timedelta(days=7), 'product': prod.id}, cicd=cicd, product=prod.id)
         if get_system_setting('enable_jira'):
             if JIRA_PKey.objects.filter(product=prod).count() != 0:
-                # Enabled must be false in this case, because this Push-to-jira is more about
-                # epics then findings.
-                jform = JIRAFindingForm(prefix='jiraform', enabled=False)
-                # Feels like we should probably inform the user that this particular checkbox
-                # is more about epics and engagements than findings and issues.
-                jform.fields['push_to_jira'].help_text = "Checking this will add an EPIC for this engagement."
-                jform.fields['push_to_jira'].label = "Create EPIC"
+                jform = JIRAEngagementForm(prefix='jiraform')
 
     product_tab = Product_Tab(pid, title="New Engagement", tab="engagements")
     return render(request, 'dojo/new_eng.html',
@@ -915,7 +923,7 @@ def ad_hoc_finding(request, pid):
     if get_system_setting('enable_jira') and \
             test.engagement.product.jira_pkey_set.first() is not None:
         push_all_jira_issues = test.engagement.product.jira_pkey_set.first().push_all_issues
-        jform = JIRAFindingForm(push_all=push_all_jira_issues, prefix='jiraform')
+        jform = JIRAFindingForm(push_all=push_all_jira_issues, prefix='jiraform', jira_pkey=test.engagement.product.jira_pkey)
     if get_system_setting('enable_github'):
         if GITHUB_PKey.objects.filter(product=test.engagement.product).count() != 0:
             gform = GITHUBFindingForm(enabled=push_all_jira_issues, prefix='githubform')
@@ -938,7 +946,13 @@ def ad_hoc_finding(request, pid):
                                      messages.ERROR,
                                      'Can not set a finding as inactive or false positive without adding all mandatory notes',
                                      extra_tags='alert-danger')
-        if form.is_valid():
+        
+        jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_pkey=test.engagement.product.jira_pkey)
+
+        print('form.is_valid: ', form.is_valid())
+        print('jform.is_valid: ', jform.is_valid())
+
+        if form.is_valid() and (jform.is_valid() or jform is None):
             new_finding = form.save(commit=False)
             new_finding.test = test
             new_finding.reporter = request.user
@@ -953,20 +967,42 @@ def ad_hoc_finding(request, pid):
             new_finding.save()
             new_finding.endpoints.set(form.cleaned_data['endpoints'])
 
-            # Push to Jira?
+            jform = JIRAFindingForm(request.POST, prefix='jiraform',
+                                    push_all=push_all_jira_issues, jira_pkey=test.engagement.product.jira_pkey)
+            # Push to jira?
             push_to_jira = False
-            if push_all_jira_issues:
-                push_to_jira = True
-            elif 'jiraform-push_to_jira' in request.POST:
-                jform = JIRAFindingForm(request.POST, prefix='jiraform',
-                                        push_all=push_all_jira_issues)
-                if jform.is_valid():
-                    push_to_jira = jform.cleaned_data.get('push_to_jira')
+            jira_message = None
+            if jform and jform.is_valid():
+                # Push to Jira?
+                logger.debug('jira form valid')
+                push_to_jira = push_all_jira_issues or jform.cleaned_data.get('push_to_jira')
 
-                messages.add_message(request,
-                                     messages.SUCCESS,
-                                     'Finding added successfully.',
-                                     extra_tags='alert-success')
+                # if the jira issue key was changed, update database
+                new_jira_issue_key = jform.cleaned_data.get('jira_issue')
+                if new_finding.has_jira_issue():
+                    jira_issue = new_finding.jira_issue
+
+                    # everything in DD around JIRA integration is based on the internal id of the issue in JIRA
+                    # instead of on the public jira issue key.
+                    # I have no idea why, but it means we have to retrieve the issue from JIRA to get the internal JIRA id.
+                    # we can assume the issue exist, which is already checked in the validation of the jform
+
+                    if not new_jira_issue_key:
+                        finding_unlink_jira(request, new_finding)
+                        jira_message = 'Link to JIRA issue removed successfully.'
+
+                    elif new_jira_issue_key != new_finding.jira_issue.jira_key:
+                        finding_unlink_jira(request, new_finding)
+                        finding_link_jira(request, new_finding, new_jira_issue_key)
+                        jira_message = 'Changed JIRA link successfully.'
+                else:
+                    logger.debug('finding has no jira issue yet')
+                    if new_jira_issue_key:
+                        logger.debug('finding has no jira issue yet, but jira issue specified in request. trying to link.')
+                        finding_link_jira(request, new_finding, new_jira_issue_key)
+                        jira_message = 'Linked a JIRA issue successfully.'
+
+
             if 'githubform-push_to_github' in request.POST:
                 gform = GITHUBFindingForm(request.POST, prefix='jiragithub', enabled=push_all_jira_issues)
                 if gform.is_valid():
@@ -974,12 +1010,13 @@ def ad_hoc_finding(request, pid):
                         add_external_issue(new_finding, 'github')
                     else:
                         add_external_issue_task.delay(new_finding, 'github')
-
-                messages.add_message(request,
-                                     messages.SUCCESS,
-                                     'Finding added successfully to github.',
-                                     extra_tags='alert-success')
+                                     
             new_finding.save(push_to_jira=push_to_jira)
+
+            messages.add_message(request,
+                                    messages.SUCCESS,
+                                    'Finding added successfully.',
+                                    extra_tags='alert-success')
 
             if create_template:
                 templates = Finding_Template.objects.filter(title=new_finding.title)

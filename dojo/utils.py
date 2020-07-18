@@ -37,6 +37,7 @@ import logging
 import itertools
 from django.contrib import messages
 from django.http import HttpResponseRedirect
+import traceback
 
 
 logger = logging.getLogger(__name__)
@@ -1336,6 +1337,9 @@ def reopen_external_issue(find, note, external_issue_provider):
 
 def add_issue(find, push_to_jira):
     logger.info('trying to create a new jira issue for %d:%s', find.id, find.title)
+
+    # traceback.print_stack()    
+
     eng = Engagement.objects.get(test=find.test)
     prod = Product.objects.get(engagement=eng)
     jira_minimum_threshold = Finding.get_number_severity(System_Settings.objects.get().jira_minimum_severity)
@@ -1413,7 +1417,7 @@ def add_issue(find, push_to_jira):
                 new_issue = jira.create_issue(fields)
 
                 j_issue = JIRA_Issue(
-                    jira_id=new_issue.id, jira_key=new_issue, finding=find)
+                    jira_id=new_issue.id, jira_key=new_issue.key, finding=find)
                 j_issue.save()
                 issue = jira.issue(new_issue.id)
 
@@ -1442,11 +1446,11 @@ def add_issue(find, push_to_jira):
                     #      issue_list = [j_issue.jira_id,]
                     #      jira.add_issues_to_epic(epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
             except JIRAError as e:
-                logger.error(e.text, find)
+                logger.error(e.text)
                 log_jira_alert(e.text, find)
         else:
             log_jira_alert("A Finding needs to be both Active and Verified to be pushed to JIRA.", find)
-            logger.warning("A Finding needs to be both Active and Verified to be pushed to JIRA.", find)
+            logger.warning("A Finding needs to be both Active and Verified to be pushed to JIRA: %s", find)
 
 
 def jira_meta(jira, jpkey):
@@ -1620,6 +1624,7 @@ def update_epic(eng, push_to_jira):
 
 
 def add_epic(eng, push_to_jira):
+    logger.info('trying to create a new jira EPIC for %d:%s', eng.id, eng.name)
     engagement = eng
     prod = Product.objects.get(engagement=engagement)
     jpkey = JIRA_PKey.objects.get(product=prod)
@@ -1643,7 +1648,7 @@ def add_epic(eng, push_to_jira):
             new_issue = jira.create_issue(fields=issue_dict)
             j_issue = JIRA_Issue(
                 jira_id=new_issue.id,
-                jira_key=new_issue,
+                jira_key=new_issue.key,
                 engagement=engagement)
             j_issue.save()
         except Exception as e:
@@ -1657,18 +1662,18 @@ def add_epic(eng, push_to_jira):
                                    message + error)
             pass
 
-def jira_get_issue(finding, issue_key):
-    jpkey = finding.jira_pkey()
+def jira_get_issue(jpkey, issue_key):
     jira_conf = jpkey.conf
-    jira = JIRA(
-        server=jira_conf.url,
-        basic_auth=(jira_conf.username, jira_conf.password))
     try:
+        jira = JIRA(
+            server=jira_conf.url,
+            basic_auth=(jira_conf.username, jira_conf.password))
         issue = jira.issue(issue_key)
         print(vars(issue))
         return issue
     except JIRAError as jira_error:
         logger.debug('error retrieving jira issue ' + issue_key + ' ' + str(jira_error))
+        log_jira_generic_alert('error retrieving jira issue ' + issue_key, str(jira_error))
         return None
 
 

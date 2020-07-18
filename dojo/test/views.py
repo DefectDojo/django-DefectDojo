@@ -34,6 +34,7 @@ from dojo.utils import get_page_items, get_page_items_and_count, add_breadcrumb,
 from dojo.notifications.helper import create_notification
 from dojo.tasks import add_issue_task
 from functools import reduce
+from dojo.finding.views import finding_link_jira,finding_unlink_jira
 
 logger = logging.getLogger(__name__)
 parse_logger = logging.getLogger('dojo')
@@ -278,7 +279,7 @@ def add_findings(request, tid):
 
     if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(product=test.engagement.product).count() != 0:
         push_all_jira_issues = test.engagement.product.jira_pkey_set.first().push_all_issues
-        jform = JIRAFindingForm(push_all=push_all_jira_issues, prefix='jiraform')
+        jform = JIRAFindingForm(push_all=push_all_jira_issues, prefix='jiraform', jira_pkey=test.engagement.product.jira_pkey)
     else:
         jform = None
 
@@ -315,7 +316,16 @@ def add_findings(request, tid):
                                      messages.ERROR,
                                      'Can not set a finding as inactive or false positive without adding all mandatory notes',
                                      extra_tags='alert-danger')
-        if form.is_valid():
+
+        jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_pkey=test.engagement.product.jira_pkey)
+
+        print('form.is_valid: ', form.is_valid())
+        print('jform.is_valid: ', jform.is_valid())
+
+        if form.is_valid() and (jform.is_valid() or jform is None):
+            print('jform.jira_issue: ', jform.cleaned_data.get('jira_issue'))
+            print('jform.push_to_jira: ', jform.cleaned_data.get('push_to_jira'))
+
             new_finding = form.save(commit=False)
             new_finding.test = test
             new_finding.reporter = request.user
@@ -327,17 +337,43 @@ def add_findings(request, tid):
             create_template = new_finding.is_template
             # always false now since this will be deprecated soon in favor of new Finding_Template model
             new_finding.is_template = False
-            new_finding.save(dedupe_option=False)
+            new_finding.save(dedupe_option=False, push_to_jira=False)
             new_finding.endpoints.set(form.cleaned_data['endpoints'])
+
+            print('jira handling')
 
             # Push to jira?
             push_to_jira = False
-            if push_all_jira_issues:
-                push_to_jira = True
-            elif 'jiraform-push_to_jira' in request.POST:
-                jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues)
-                if jform.is_valid():
-                    push_to_jira = jform.cleaned_data.get('push_to_jira')
+            jira_message = None
+            if jform and jform.is_valid():
+                # Push to Jira?
+                logger.debug('jira form valid')
+                push_to_jira = push_all_jira_issues or jform.cleaned_data.get('push_to_jira')
+
+                # if the jira issue key was changed, update database
+                new_jira_issue_key = jform.cleaned_data.get('jira_issue')
+                if new_finding.has_jira_issue():
+                    jira_issue = new_finding.jira_issue
+
+                    # everything in DD around JIRA integration is based on the internal id of the issue in JIRA
+                    # instead of on the public jira issue key.
+                    # I have no idea why, but it means we have to retrieve the issue from JIRA to get the internal JIRA id.
+                    # we can assume the issue exist, which is already checked in the validation of the jform
+
+                    if not new_jira_issue_key:
+                        finding_unlink_jira(request, new_finding)
+                        jira_message = 'Link to JIRA issue removed successfully.'
+
+                    elif new_jira_issue_key != new_finding.jira_issue.jira_key:
+                        finding_unlink_jira(request, new_finding)
+                        finding_link_jira(request, new_finding, new_jira_issue_key)
+                        jira_message = 'Changed JIRA link successfully.'
+                else:
+                    logger.debug('finding has no jira issue yet')
+                    if new_jira_issue_key:
+                        logger.debug('finding has no jira issue yet, but jira issue specified in request. trying to link.')
+                        finding_link_jira(request, new_finding, new_jira_issue_key)
+                        jira_message = 'Linked a JIRA issue successfully.'
 
             new_finding.save(false_history=True, push_to_jira=push_to_jira)
             create_notification(event='other',
@@ -405,7 +441,7 @@ def add_temp_finding(request, tid, fid):
 
     if get_system_setting('enable_jira'):
         push_all_jira_issues = test.engagement.product.jira_pkey_set.first().push_all_issues
-        jform = JIRAFindingForm(push_all=push_all_jira_issues, prefix='jiraform')
+        jform = JIRAFindingForm(push_all=push_all_jira_issues, prefix='jiraform', jira_pkey=test.engagement.product.jira_pkey)
     else:
         jform = None
 
@@ -450,7 +486,7 @@ def add_temp_finding(request, tid, fid):
             t = ", ".join('"{0}"'.format(w) for w in tags)
             new_finding.tags = t
             if 'jiraform-push_to_jira' in request.POST:
-                jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues)
+                jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_pkey=test.engagement.product.jira_pkey)
                 if jform.is_valid():
                     if request.user.usercontactinfo.block_execution:
                         add_issue(new_finding, jform.cleaned_data.get('push_to_jira'))
@@ -673,7 +709,7 @@ def re_import_scan_results(request, tid):
                     else:
                         item.test = test
                         if item.date == timezone.now().date():
-                            item.date = test.target_start
+                            item.date = test.target_start.date()
                         item.reporter = request.user
                         item.last_reviewed = timezone.now()
                         item.last_reviewed_by = request.user

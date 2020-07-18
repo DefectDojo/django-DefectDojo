@@ -117,6 +117,10 @@ def process_notifications(event, notifications=None, *args, **kwargs):
             send_hipchat_notification(event, notifications.user, *args, **kwargs)
 
     if mail_enabled and 'mail' in getattr(notifications, event):
+        # print(f' Args: {args}')
+        # print(f' Kwargs: {kwargs}')
+        # print(event)
+        # print(notifications.user)
         if not sync:
             send_mail_notification_task.delay(event, notifications.user, *args, **kwargs)
         else:

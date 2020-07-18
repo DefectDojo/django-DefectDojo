@@ -31,6 +31,10 @@ from dojo.models import Finding, Product_Type, Product, Note_Type, ScanSettings,
 
 from dojo.tools import requires_file, SCAN_SONARQUBE_API
 from dojo.utils import jira_get_issue
+from django.urls import reverse
+import logging
+
+logger = logging.getLogger(__name__)
 
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')
 
@@ -2041,6 +2045,10 @@ class JIRAFindingForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.push_all = kwargs.pop('push_all', False)
         self.instance = kwargs.pop('instance', None)
+        self.jira_pkey = kwargs.pop('jira_pkey', None)
+
+        if self.instance is None and self.jira_pkey is None:
+            raise ValueError('either and finding instance or jira_pkey is needed')
 
         super(JIRAFindingForm, self).__init__(*args, **kwargs)
         self.fields['push_to_jira'] = forms.BooleanField()
@@ -2063,28 +2071,50 @@ class JIRAFindingForm(forms.Form):
         else:
             # self.fields.pop('jira_issue')
             self.fields['jira_issue'].widget = forms.TextInput(attrs={'placeholder': 'Leave empty and check push to jira to create a new JIRA issue'})
-
+        self.fields['jira_issue'].widget = forms.TextInput(attrs={'placeholder': 'Leave empty and check push to jira to create a new JIRA issue'})
 
     def clean(self):
+        logger.debug('validating jirafindingform')
         cleaned_data = super(JIRAFindingForm, self).clean()
-        jira_issue_key = self.cleaned_data.get('jira_issue')
+        jira_issue_key_new = self.cleaned_data.get('jira_issue')
         finding = self.instance
-        if finding:
-            if jira_issue_key:
-                jira_issue_need_to_exist = False
+        jpkey = self.jira_pkey
+        if jira_issue_key_new:
+            if finding:
+                # in theory there can multiple jira instances that have similar projects
+                # so checking by only the jira issue key can lead to false positives
+                # so we check also the jira internal id of the jira issue
+                # if the key and id are equal, it is probably the same jira instance and the same issue
+                # the database model is lacking some relations to also include the jira config name or url here
+                # and I don't want to change too much now. this should cover most usecases.
 
+                jira_issue_need_to_exist = False
                 # changing jira link on finding
-                if finding.has_jira_issue() and jira_issue_key != finding.jira_issue.jira_key:
+                if finding.has_jira_issue() and jira_issue_key_new != finding.jira_issue.jira_key:
                     jira_issue_need_to_exist = True
 
                 # adding existing jira issue to finding without jira link
                 if not finding.has_jira_issue():
                     jira_issue_need_to_exist = True
 
-                if jira_issue_need_to_exist:
-                    jira_issue = jira_get_issue(self.instance, jira_issue_key)
-                    if not jira_issue:
-                        raise ValidationError('JIRA issue ' + jira_issue_key + ' does not exist or cannot be retrieved')
+                jpkey = finding.jira_pkey()
+            else:
+                jira_issue_need_to_exist = True
+
+            if jira_issue_need_to_exist:
+                jira_issue_new = jira_get_issue(jpkey, jira_issue_key_new)
+                if not jira_issue_new:
+                    raise ValidationError('JIRA issue ' + jira_issue_key_new + ' does not exist or cannot be retrieved')
+
+                logger.debug('checking if provided jira issue id already is linked to another finding')
+                jira_issues = JIRA_Issue.objects.filter(jira_id=jira_issue_new.id, jira_key=jira_issue_key_new).exclude(engagement__isnull=False)
+
+                if self.instance:
+                    # just be sure we exclude the finding that is being edited
+                    jira_issues = jira_issues.exclude(finding=finding)
+
+                if len(jira_issues) > 0:
+                    raise ValidationError('JIRA issue ' + jira_issue_key_new + ' already linked to ' + reverse('view_finding', args=(jira_issues[0].finding_id,)))
 
     jira_issue = forms.CharField(required=False, label="Linked JIRA Issue")
     push_to_jira = forms.BooleanField(required=False, label="Push to JIRA")
@@ -2106,6 +2136,21 @@ class JIRAImportScanForm(forms.Form):
 
     push_to_jira = forms.BooleanField(required=False, label="Push to JIRA", help_text="Checking this will create a new jira issue for each new finding.")
 
+
+class JIRAEngagementForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        self.instance = kwargs.pop('instance', None)
+
+        super(JIRAEngagementForm, self).__init__(*args, **kwargs)
+
+        if self.instance:
+            print('self.instance.has_jira_issue: ', self.instance.has_jira_issue())
+            if self.instance.has_jira_issue():
+                self.fields['push_to_jira'].widget.attrs['checked'] = 'checked'
+                self.fields['push_to_jira'].label = 'Update JIRA Epic'
+                self.fields['push_to_jira'].help_text='Checking this will update the existing EPIC in JIRA.'
+
+    push_to_jira = forms.BooleanField(required=False, label="Create EPIC", help_text="Checking this will create an EPIC in JIRA for this engagement.")
 
 
 class GoogleSheetFieldsForm(forms.Form):

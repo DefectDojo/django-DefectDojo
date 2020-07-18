@@ -1013,6 +1013,14 @@ class Engagement(models.Model):
         self.risk_acceptance.add(*accepted_risks)
 
 
+    def has_jira_issue(self):
+        try:
+            issue = self.jira_issue
+            return True
+        except JIRA_Issue.DoesNotExist:
+            return False
+
+
 class CWE(models.Model):
     url = models.CharField(max_length=1000)
     description = models.CharField(max_length=2000)
@@ -1861,10 +1869,6 @@ class Finding(models.Model):
         new_finding = False
 
         jira_issue_exists = JIRA_Issue.objects.filter(finding=self).exists()
-        if push_to_jira:
-            self.jira_change = timezone.now()
-            if not jira_issue_exists:
-                self.jira_creation = timezone.now()
 
         if self.pk is None:
             # We enter here during the first call from serializers.py
@@ -1946,6 +1950,7 @@ class Finding(models.Model):
 
         # Adding a snippet here for push to JIRA so that it's in one place
         if push_to_jira:
+            logger.debug('pushing to jira from finding.save()')
             from dojo.tasks import update_issue_task, add_issue_task
             from dojo.utils import add_issue, update_issue
             if jira_issue_exists:

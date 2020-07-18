@@ -620,7 +620,7 @@ def edit_finding(request, fid):
                                          'Can not set a finding as inactive or false positive without adding all mandatory notes',
                                          extra_tags='alert-danger')
 
-        jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=False, instance=finding)
+        jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, instance=finding)
 
         print('form.is_valid: ', form.is_valid())
         print('jform.is_valid: ', jform.is_valid())
@@ -1166,7 +1166,7 @@ def promote_to_finding(request, fid):
 
     if get_system_setting('enable_jira') and test.engagement.product.jira_pkey_set.first() is not None:
         push_all_jira_issues = test.engagement.product.jira_pkey_set.first().push_all_issues
-        jform = JIRAFindingForm(prefix='jiraform', push_all=push_all_jira_issues)
+        jform = JIRAFindingForm(prefix='jiraform', push_all=push_all_jira_issues, jira_pkey=test.engagement.product.jira_pkey)
 
     product_tab = Product_Tab(finding.test.engagement.product.id, title="Promote Finding", tab="findings")
 
@@ -1182,7 +1182,15 @@ def promote_to_finding(request, fid):
         })
     if request.method == 'POST':
         form = PromoteFindingForm(request.POST)
-        if form.is_valid():
+        jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_pkey=test.engagement.product.jira_pkey)
+
+        print('form.is_valid: ', form.is_valid())
+        print('jform.is_valid: ', jform.is_valid())
+
+        if form.is_valid() and (jform.is_valid() or jform is None):
+            print('jform.jira_issue: ', jform.cleaned_data.get('jira_issue'))
+            print('jform.push_to_jira: ', jform.cleaned_data.get('push_to_jira'))
+
             new_finding = form.save(commit=False)
             new_finding.test = test
             new_finding.reporter = request.user
@@ -1199,15 +1207,38 @@ def promote_to_finding(request, fid):
             new_finding.save()
             new_finding.endpoints.set(form.cleaned_data['endpoints'])
 
-            # Push to Jira?
+            # Push to jira?
             push_to_jira = False
-            if push_all_jira_issues:
-                push_to_jira = True
-            elif 'jiraform-push_to_jira' in request.POST:
-                jform = JIRAFindingForm(request.POST, prefix='jiraform',
-                                        push_all=push_all_jira_issues)
-                if jform.is_valid():
-                    push_to_jira = jform.cleaned_data.get('push_to_jira')
+            jira_message = None
+            if jform and jform.is_valid():
+                # Push to Jira?
+                logger.debug('jira form valid')
+                push_to_jira = push_all_jira_issues or jform.cleaned_data.get('push_to_jira')
+
+                # if the jira issue key was changed, update database
+                new_jira_issue_key = jform.cleaned_data.get('jira_issue')
+                if new_finding.has_jira_issue():
+                    jira_issue = new_finding.jira_issue
+
+                    # everything in DD around JIRA integration is based on the internal id of the issue in JIRA
+                    # instead of on the public jira issue key.
+                    # I have no idea why, but it means we have to retrieve the issue from JIRA to get the internal JIRA id.
+                    # we can assume the issue exist, which is already checked in the validation of the jform
+
+                    if not new_jira_issue_key:
+                        finding_unlink_jira(request, new_finding)
+                        jira_message = 'Link to JIRA issue removed successfully.'
+
+                    elif new_jira_issue_key != new_finding.jira_issue.jira_key:
+                        finding_unlink_jira(request, new_finding)
+                        finding_link_jira(request, new_finding, new_jira_issue_key)
+                        jira_message = 'Changed JIRA link successfully.'
+                else:
+                    logger.debug('finding has no jira issue yet')
+                    if new_jira_issue_key:
+                        logger.debug('finding has no jira issue yet, but jira issue specified in request. trying to link.')
+                        finding_link_jira(request, new_finding, new_jira_issue_key)
+                        jira_message = 'Linked a JIRA issue successfully.'
 
             # Save it and push it to JIRA
             new_finding.save(push_to_jira=push_to_jira)
@@ -2035,7 +2066,7 @@ def push_to_jira(request, fid):
 def finding_link_jira(request, finding, new_jira_issue_key):
     logger.debug('linking existing jira issue %s for finding %i', new_jira_issue_key, finding.id)
 
-    existing_jira_issue = jira_get_issue(finding, new_jira_issue_key)
+    existing_jira_issue = jira_get_issue(finding.jira_pkey(), new_jira_issue_key)
 
     if not existing_jira_issue:
         raise ValueError('JIRA issue not found or cannot be retrieved: ' + new_jira_issue_key)
