@@ -758,8 +758,6 @@ class Product(models.Model):
             return None
 
 
-
-
 class ScanSettings(models.Model):
     product = models.ForeignKey(Product, default=1, editable=False, on_delete=models.CASCADE)
     addresses = models.TextField(default="none")
@@ -1011,7 +1009,6 @@ class Engagement(models.Model):
 
     def accept_risks(self, accepted_risks):
         self.risk_acceptance.add(*accepted_risks)
-
 
     def has_jira_issue(self):
         try:
