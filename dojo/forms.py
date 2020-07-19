@@ -2068,9 +2068,7 @@ class JIRAFindingForm(forms.Form):
             print('self.instance.has_jira_issue: ', self.instance.has_jira_issue())
             if self.instance.has_jira_issue():
                 self.initial['jira_issue'] = self.instance.jira_issue.jira_key
-        else:
-            # self.fields.pop('jira_issue')
-            self.fields['jira_issue'].widget = forms.TextInput(attrs={'placeholder': 'Leave empty and check push to jira to create a new JIRA issue'})
+
         self.fields['jira_issue'].widget = forms.TextInput(attrs={'placeholder': 'Leave empty and check push to jira to create a new JIRA issue'})
 
     def clean(self):
@@ -2116,7 +2114,10 @@ class JIRAFindingForm(forms.Form):
                 if len(jira_issues) > 0:
                     raise ValidationError('JIRA issue ' + jira_issue_key_new + ' already linked to ' + reverse('view_finding', args=(jira_issues[0].finding_id,)))
 
-    jira_issue = forms.CharField(required=False, label="Linked JIRA Issue")
+    jira_issue = forms.CharField(required=False, label="Linked JIRA Issue",
+                validators=[validators.RegexValidator(
+                    regex=r'^[A-Z][A-Z_0-9]+-\d+$',
+                    message='JIRA issue key must be in XXXX-nnnn format ([A-Z][A-Z_0-9]+-\\d+)')])
     push_to_jira = forms.BooleanField(required=False, label="Push to JIRA")
 
 
