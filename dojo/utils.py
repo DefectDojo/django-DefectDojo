@@ -2172,16 +2172,14 @@ def sla_compute_and_notify(*args, **kwargs):
             if settings.SLA_NOTIFY_WITH_JIRA_ONLY:
                 logger.debug("Ignoring findings that are not linked to a JIRA issue")
                 no_jira_findings = Finding.objects.exclude(jira_issue__isnull=False)
+
+            # A finding with 'Info' severity will not be considered for SLA notifications (not in model)
             findings = Finding.objects \
                 .filter(
                     query
-                ).exclude(id__in=no_jira_findings)
+                ).exclude(severity__in='Info').exclude(id__in=no_jira_findings)
 
             for finding in findings:
-                # A finding with 'Info' severity will not be considered for SLA notifications (not in model)
-                if finding.severity == 'Info':
-                    continue
-
                 sla_age = finding.sla_days_remaining()
                 # if SLA is set to 0 in settings, it's a null. And setting at 0 means no SLA apparently.
                 if sla_age is None:

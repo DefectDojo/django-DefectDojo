@@ -387,4 +387,7 @@ def send_alert_notification_task(*args, **kwargs):
 @app.task(name='dojo.tasks.async_sla_compute_and_notify')
 def async_sla_compute_and_notify_task(*args, **kwargs):
     logger.debug("Computing SLAs and notifying as needed")
-    sla_compute_and_notify(*args, **kwargs)
+    try:
+        sla_compute_and_notify(*args, **kwargs)
+    except Exception as e:
+        logger.error("An unexpected error was thrown calling the SLA code: {}".format(e))
