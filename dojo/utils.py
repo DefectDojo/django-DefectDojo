@@ -16,7 +16,7 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.core.paginator import Paginator
 from django.urls import get_resolver, reverse
-from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
+from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count, Prefetch
 from django.template.defaultfilters import pluralize
 from django.template.loader import render_to_string
 from django.utils import timezone
@@ -37,6 +37,7 @@ import logging
 import itertools
 from django.contrib import messages
 from django.http import HttpResponseRedirect
+
 
 
 logger = logging.getLogger(__name__)
@@ -2175,9 +2176,11 @@ def sla_compute_and_notify(*args, **kwargs):
 
             # A finding with 'Info' severity will not be considered for SLA notifications (not in model)
             findings = Finding.objects \
-                .filter(
-                    query
-                ).exclude(severity__in='Info').exclude(id__in=no_jira_findings)
+                .filter(query) \
+                .select_related('jira_issue') \
+                .prefetch_related(Prefetch('test__engagement__product__jira_pkey_set__conf')) \
+                .exclude(severity='Info') \
+                .exclude(id__in=no_jira_findings)
 
             for finding in findings:
                 sla_age = finding.sla_days_remaining()
@@ -2191,7 +2194,11 @@ def sla_compute_and_notify(*args, **kwargs):
                     if jira_config is not None:
                         logger.debug("JIRA config for finding is {}".format(jira_config))
                         # global config or product config set, product level takes precedence
-                        product_jira_sla_comment_enabled = finding.test.engagement.product.jira_pkey_set.first().product_jira_sla_notification
+                        try:
+                            # TODO: see new property from #2649 to then replace
+                            product_jira_sla_comment_enabled = finding.test.engagement.product.jira_pkey_set.first().product_jira_sla_notification
+                        except:
+                            logger.error("The product is not linked to a JIRA configuration! Something is weird here.")
                         jiraconfig_sla_notification_enabled = jira_config.global_jira_sla_notification
 
                         if jiraconfig_sla_notification_enabled or product_jira_sla_comment_enabled:
