@@ -16,7 +16,7 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.core.paginator import Paginator
 from django.urls import get_resolver, reverse
-from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count, Prefetch
+from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
 from django.template.defaultfilters import pluralize
 from django.template.loader import render_to_string
 from django.utils import timezone
@@ -2175,7 +2175,6 @@ def sla_compute_and_notify(*args, **kwargs):
                 logger.debug("Ignoring findings that are not linked to a JIRA issue")
                 no_jira_findings = Finding.objects.exclude(jira_issue__isnull=False)
 
-            # A finding with 'Info' severity will not be considered for SLA notifications (not in model)
             total_count = 0
             pre_breach_count = 0
             post_breach_count = 0
@@ -2186,6 +2185,7 @@ def sla_compute_and_notify(*args, **kwargs):
             # Taking away for now, since the prefetch is not efficient
             # .select_related('jira_issue') \
             # .prefetch_related(Prefetch('test__engagement__product__jira_pkey_set__conf')) \
+            # A finding with 'Info' severity will not be considered for SLA notifications (not in model)
             findings = Finding.objects \
                 .filter(query) \
                 .exclude(severity='Info') \
