@@ -355,11 +355,8 @@ def edit_meta_data(request, eid):
                 if value:
                     cfv.value = value
                     cfv.save()
-            if key.startswith('delete_'):
-                cfv_id = int(key.split('_')[2])
-                cfv = get_object_or_404(DojoMeta, id=cfv_id)
-                cfv.delete()
-
+                else:
+                    cfv.delete()
         messages.add_message(request,
                              messages.SUCCESS,
                              'Metadata edited successfully.',

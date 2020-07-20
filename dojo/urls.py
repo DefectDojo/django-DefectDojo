@@ -217,8 +217,4 @@ if hasattr(settings, 'DJANGO_ADMIN_ENABLED'):
         urlpatterns += [url(r'^%sadmin/' % get_system_setting('url_prefix'), admin.site.urls)]
 
 if settings.DEBUG:
-    import debug_toolbar
-    urlpatterns.insert(0, url(r"^__debug__/", include(debug_toolbar.urls)))
-
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-

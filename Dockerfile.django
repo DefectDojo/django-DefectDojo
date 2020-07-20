@@ -78,7 +78,7 @@ RUN \
   true
 USER root
 RUN chmod -R 0777 /app
-USER 1000
+USER 1001
 ENV \
   DD_ADMIN_USER=admin \
   DD_ADMIN_MAIL=admin@defectdojo.local \
