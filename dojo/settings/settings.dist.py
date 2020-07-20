@@ -381,6 +381,7 @@ SLA_NOTIFY_ACTIVE = False  # this will include 'verified' findings as well.
 SLA_NOTIFY_ACTIVE_VERIFIED_ONLY = True
 SLA_NOTIFY_WITH_JIRA_ONLY = False  # this will include 'verified' findings as well.
 SLA_NOTIFY_PRE_BREACH = 3  # in days, notification until date of breach
+SLA_NOTIFY_POST_BREACH = 7  # in days, skip over these old findings you don't care about anymore.
 
 LOGIN_EXEMPT_URLS = (
     r'^%sstatic/' % URL_PREFIX,

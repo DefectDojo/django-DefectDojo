@@ -2146,7 +2146,7 @@ def sla_compute_and_notify(*args, **kwargs):
 
     # exit early on flags
     if not settings.SLA_NOTIFY_ACTIVE and not settings.SLA_NOTIFY_ACTIVE_VERIFIED_ONLY:
-        logger.info("Will not notify on SLA breach per user configured flags")
+        logger.info("Will not notify on SLA breach per user configured settings")
         return
 
     jira_issue = None
@@ -2155,11 +2155,12 @@ def sla_compute_and_notify(*args, **kwargs):
         system_settings = System_Settings.objects.get()
         if system_settings.enable_finding_sla:
             logger.info("About to process findings for SLA notifications.")
-            logger.debug("Active {}, Verified {}, Has JIRA {}, pre-breach {}".format(
+            logger.debug("Active {}, Verified {}, Has JIRA {}, pre-breach {}, post-breach {}".format(
                 settings.SLA_NOTIFY_ACTIVE,
                 settings.SLA_NOTIFY_ACTIVE_VERIFIED_ONLY,
                 settings.SLA_NOTIFY_WITH_JIRA_ONLY,
                 settings.SLA_NOTIFY_PRE_BREACH,
+                settings.SLA_NOTIFY_POST_BREACH,
             ))
 
             query = None
@@ -2175,30 +2176,49 @@ def sla_compute_and_notify(*args, **kwargs):
                 no_jira_findings = Finding.objects.exclude(jira_issue__isnull=False)
 
             # A finding with 'Info' severity will not be considered for SLA notifications (not in model)
+            total_count = 0
+            pre_breach_count = 0
+            post_breach_count = 0
+            post_breach_no_notify_count = 0
+            jira_count = 0
+            at_breach_count = 0
+
+            # Taking away for now, since the prefetch is not efficient
+            # .select_related('jira_issue') \
+            # .prefetch_related(Prefetch('test__engagement__product__jira_pkey_set__conf')) \
             findings = Finding.objects \
                 .filter(query) \
-                .select_related('jira_issue') \
-                .prefetch_related(Prefetch('test__engagement__product__jira_pkey_set__conf')) \
                 .exclude(severity='Info') \
                 .exclude(id__in=no_jira_findings)
 
             for finding in findings:
+                total_count += 1
                 sla_age = finding.sla_days_remaining()
                 # if SLA is set to 0 in settings, it's a null. And setting at 0 means no SLA apparently.
                 if sla_age is None:
                     sla_age = 0
 
+                if (sla_age < 0) and (settings.SLA_NOTIFY_POST_BREACH < abs(sla_age)):
+                    post_breach_no_notify_count += 1
+                    # Skip finding if breached for too long
+                    logger.info("Finding {} is breached the SLA for {} days. Skipping notifications.".format(finding.id, abs(sla_age)))
+                    # finding is breached for too long, don't care anymore.
+                    continue
+
                 do_jira_sla_comment = False
                 if finding.has_jira_issue():
+                    jira_count += 1
                     jira_config = finding.jira_conf_new()
                     if jira_config is not None:
                         logger.debug("JIRA config for finding is {}".format(jira_config))
                         # global config or product config set, product level takes precedence
                         try:
-                            # TODO: see new property from #2649 to then replace
-                            product_jira_sla_comment_enabled = finding.test.engagement.product.jira_pkey_set.first().product_jira_sla_notification
-                        except:
+                            # TODO: see new property from #2649 to then replace, somehow not working with prefetching though.
+                            product_jira_sla_comment_enabled = finding.test.engagement.product.jira_pkey_set.all()[0].product_jira_sla_notification
+                        except Exception as e:
                             logger.error("The product is not linked to a JIRA configuration! Something is weird here.")
+                            logger.error("Error is: {}".format(e))
+
                         jiraconfig_sla_notification_enabled = jira_config.global_jira_sla_notification
 
                         if jiraconfig_sla_notification_enabled or product_jira_sla_comment_enabled:
@@ -2212,16 +2232,28 @@ def sla_compute_and_notify(*args, **kwargs):
 
                 logger.debug("Finding {} has {} days left to breach SLA.".format(finding.id, sla_age))
                 if (sla_age < 0):
+                    post_breach_count += 1
                     logger.info("Finding {} has breached by {} days.".format(finding.id, abs(sla_age)))
                     _notify(finding, 'Finding {} - SLA breached by {} day(s)! Overdue notice'.format(finding.id, abs(sla_age)))
                 # The finding is within the pre-breach period
                 elif (sla_age > 0) and (sla_age <= settings.SLA_NOTIFY_PRE_BREACH):
+                    pre_breach_count += 1
                     logger.info("Security SLA pre-breach warning for finding ID {}. Days remaining: {}".format(finding.id, sla_age))
                     _notify(finding, 'Finding {} - SLA pre-breach warning - {} day(s) left'.format(finding.id, sla_age))
                 # The finding breaches the SLA today
                 elif (sla_age == 0):
+                    at_breach_count += 1
                     logger.info("Security SLA breach warning. Finding ID {} breaching today ({})".format(finding.id, sla_age))
                     _notify(finding, "Finding {} - SLA is breaching today".format(finding.id))
+
+            logger.info("SLA run results: Pre-breach: {}, at-breach: {}, post-breach: {} post-breach-no-notify: {}, with-jira: {}, TOTAL: {}".format(
+                pre_breach_count,
+                at_breach_count,
+                post_breach_count,
+                post_breach_no_notify_count,
+                jira_count,
+                total_count
+            ))
 
     except System_Settings.DoesNotExist:
         logger.info("Findings SLA is not enabled.")
