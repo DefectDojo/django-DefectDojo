@@ -4,15 +4,15 @@ from setuptools import setup
 
 setup(
     name='DefectDojo',
-    version='1.5.4',
+    version='1.7.0-dev',
     author='Greg Anderson',
     description="Tool for managing vulnerability engagements",
     install_requires=[
         'defusedxml',
-        'Django==2.2.12',
-        'django-auditlog==0.4.0',
+        'Django==2.2.14',
+        'django-auditlog==0.4.7',
         'django-custom-field',
-        'django-filter==1.0.4',
+        'django-filter==2.3.0',
         'django-imagekit',
         'django-multiselectfield',
         'django-polymorphic==1.2',
@@ -24,7 +24,7 @@ setup(
         'django-tastypie-swagger',
         'django-tastypie>=0.12.2',
         'django-rest-swagger==2.1.2',
-        'djangorestframework==3.7.7',
+        'djangorestframework==3.11.0',
         'django-environ==0.4.5',
         'django-axes',
         'gunicorn>=19.1.1',
@@ -63,10 +63,11 @@ setup(
         'django-dbbackup>=3.2.0',
         'whitenoise==4.1.4',
         'django-environ==0.4.5',
-        'titlecase'
+        'titlecase',
+        'json-lines==1.2.0'  # requred by yarn audit parser
     ],
 
-    extras_require={'mysql': ['mysqlclient==1.3.12']},
+    extras_require={'mysql': ['mysqlclient==2.0.1']},
 
     dependency_links=[
         "https://github.com/grendel513/python-pdfkit/tarball/master#egg=pdfkit-0.5.0"

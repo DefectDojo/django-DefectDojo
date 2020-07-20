@@ -206,7 +206,7 @@
                                             <a href="{% url 'open_findings' %}">Open Findings</a>
                                         </li>
                                         <li>
-                                            <a href="{% url 'accepted_findings' %}">Accepted Findings</a>
+                                            <a href="{% url 'accepted_findings' %}">Risk Accepted Findings</a>
                                         </li>
                                         <li>
                                             <a href="{% url 'all_findings' %}">All Findings</a>
@@ -394,7 +394,7 @@
                       <li><a href="{% url 'product_open_findings' product_tab.product.id %}?active=2&verified=2&false_p=3&duplicate=2&out_of_scope=1&test__engagement__product={{ product_tab.product.id }}&severity=Critical"><i class="fa fa-exclamation-triangle"></i> View Critical Findings</a></li>
                       <li><a href="{% url 'product_open_findings' product_tab.product.id %}?active=2&verified=2&false_p=3&duplicate=2&out_of_scope=1&test__engagement__product={{ product_tab.product.id }}&date=2"><i class="fa fa-calendar"></i> View Findings from Last 7 Days </a></li>
                       <li role="separator" class="divider"></li>
-                      <li><a href="{% url 'product_accepted_findings' product_tab.product.id %}?test__engagement__product={{ product_tab.product.id }}"><i class="fa fa-check"></i> View Accepted Findings</a></li>
+                      <li><a href="{% url 'product_accepted_findings' product_tab.product.id %}?test__engagement__product={{ product_tab.product.id }}"><i class="fa fa-check"></i> View Risk Accepted Findings</a></li>
                       <li><a href="{% url 'product_all_findings' product_tab.product.id %}?test__engagement__product={{ product_tab.product.id }}"><i class="fa fa-search"></i> View All Findings</a></li>
                       <li><a href="{% url 'product_closed_findings' product_tab.product.id %}?test__engagement__product={{ product_tab.product.id }}"><i class="fa fa-fire-extinguisher"></i>&nbsp;&nbsp;View Closed Findings </a></li>
                       {% if user.is_staff %}
@@ -447,12 +447,12 @@
                         </li>
                         <li role="presentation">
                             <a class="" href="{% url 'add_meta_data' product_tab.product.id %}">
-                                <i class="fa fa-list-alt"></i> Add Custom Fields
+                                <i class="fa fa-plus"></i> Add Custom Fields
                             </a>
                         </li>
                         <li role="presentation">
                             <a class="" href="{% url 'new_object' product_tab.product.id %}">
-                                <i class="fa fa-list-alt"></i> Add Product Tracking Files
+                                <i class="fa fa-plus"></i> Add Product Tracking Files
                             </a>
                         </li>
                         <li role="separator" class="divider"></li>
@@ -463,7 +463,7 @@
                         </li>
                         <li role="presentation">
                             <a href="{% url 'all_cred_product' product_tab.product.id %}">
-                                <i class="fa fa-plus"></i> View Credentials
+                                <i class="fa fa-list-alt"></i> View Credentials
                             </a>
                         </li>
                         <li role="separator" class="divider"></li>
@@ -474,7 +474,7 @@
                         </li>
                         <li role="presentation">
                             <a href="{% url 'all_tool_product' product_tab.product.id %}">
-                                <i class="fa fa-plus"></i> View Tools
+                                <i class="fa fa-list-alt"></i> View Tools
                             </a>
                         </li>
                         <li role="separator" class="divider"></li>
@@ -485,7 +485,7 @@
                         </li>
                         <li role="presentation">
                             <a href="{% url 'engagement_presets' product_tab.product.id %}">
-                                <i class="fa fa-plus"></i> View Engagement Presets
+                                <i class="fa fa-list-alt"></i> View Engagement Presets
                             </a>
                         </li>
                         <li role="separator" class="divider"></li>

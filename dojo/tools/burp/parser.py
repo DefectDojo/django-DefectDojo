@@ -15,14 +15,14 @@ import string
 
 from dojo.models import Finding, Endpoint
 
-__author__ = "Francisco Amato"
-__copyright__ = "Copyright (c) 2013, Infobyte LLC"
-__credits__ = ["Francisco Amato"]
+__author__ = "Francisco Amato & @JamesCullum"
+__copyright__ = "Copyright (c) 2013, Infobyte LLC & Panasonic Information Systems Company Europe"
+__credits__ = ["Francisco Amato", "@JamesCullum"]
 __license__ = ""
 __version__ = "1.0.0"
 __maintainer__ = "Francisco Amato"
 __email__ = "famato@infobytesec.com"
-__status__ = "Development"
+__status__ = "Production"
 
 
 class BurpXmlParser(object):
@@ -42,7 +42,10 @@ class BurpXmlParser(object):
         self.port = "80"
         self.host = None
 
-        tree = self.parse_xml(xml_output)
+        tree = None
+        if xml_output is not None:
+            tree = self.parse_xml(xml_output)
+
         if tree is not None:
             self.items = [data for data in self.get_items(tree, test)]
         else:
@@ -193,19 +196,21 @@ def get_item(item_node, test):
         except:
             response = ""
         unsaved_req_resp.append({"req": request, "resp": response})
-    collab_details = list()
-    collab_text = None
+
+    collab_text = ""
     for event in item_node.findall('./collaboratorEvent'):
+        collab_details = list()
         collab_details.append(event.findall('interactionType')[0].text)
         collab_details.append(event.findall('originIp')[0].text)
         collab_details.append(event.findall('time')[0].text)
+
         if collab_details[0] == 'DNS':
             collab_details.append(event.findall('lookupType')[0].text)
             collab_details.append(event.findall('lookupHost')[0].text)
-            collab_text = "The Collaborator server received a " + collab_details[0] + " lookup of type " + collab_details[3] + \
+            collab_text += "The Collaborator server received a " + collab_details[0] + " lookup of type " + collab_details[3] + \
                 " for the domain name " + \
                 collab_details[4] + " at " + collab_details[2] + \
-                " originating from " + collab_details[1] + " ."
+                " originating from " + collab_details[1] + ". "
 
         for request_response in event.findall('./requestresponse'):
             try:
@@ -218,9 +223,15 @@ def get_item(item_node, test):
                 response = ""
             unsaved_req_resp.append({"req": request, "resp": response})
         if collab_details[0] == 'HTTP':
-            collab_text = "The Collaborator server received an " + \
+            collab_text += "The Collaborator server received an " + \
                 collab_details[0] + " request at " + collab_details[2] + \
-                " originating from " + collab_details[1] + " ."
+                " originating from " + collab_details[1] + ". "
+
+    test_product = None
+    try:
+        test_product = test.engagement.product
+    except:
+        pass
 
     try:
         dupe_endpoint = Endpoint.objects.get(
@@ -229,7 +240,7 @@ def get_item(item_node, test):
             path=path,
             query=None,
             fragment=None,
-            product=test.engagement.product)
+            product=test_product)
     except:
         dupe_endpoint = None
 
@@ -240,7 +251,7 @@ def get_item(item_node, test):
             path=path,
             query=None,
             fragment=None,
-            product=test.engagement.product)
+            product=test_product)
     else:
         endpoint = dupe_endpoint
 
@@ -252,14 +263,14 @@ def get_item(item_node, test):
                 path=None,
                 query=None,
                 fragment=None,
-                product=test.engagement.product)
+                product=test_product)
         except:
             dupe_endpoint = None
 
         if not dupe_endpoint:
             endpoints = [
                 endpoint,
-                Endpoint(host=ip, product=test.engagement.product)
+                Endpoint(host=ip, product=test_product)
             ]
         else:
             endpoints = [endpoint, dupe_endpoint]

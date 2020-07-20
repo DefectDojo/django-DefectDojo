@@ -8,8 +8,12 @@ from dojo.forms import SimpleSearchForm
 from dojo.models import Finding, Finding_Template, Product, Test, Endpoint, Engagement, Languages, \
     App_Analysis
 from dojo.utils import add_breadcrumb
+import re
 
 logger = logging.getLogger(__name__)
+
+# explicitly use our own regex pattern here as django-watson is sensitive so we want to control it here independently of models.py etc.
+cve_pattern = re.compile(r'(^CVE-(1999|2\d{3})-(0\d{2}[0-9]|[1-9]\d{3,}))$')
 
 
 def simple_search(request):
@@ -43,13 +47,27 @@ def simple_search(request):
             search_operator = ""
             # Check for search operator like finding:, endpoint:, test: product:
             original_clean_query = clean_query
+            # print('clean_query: ', clean_query)
             if ":" in clean_query:
                 operator = clean_query.split(":")
                 search_operator = operator[0]
                 clean_query = operator[1].lstrip()
+
+            # if the query contains hyphens, django-watson will escape these leading to problems.
+            # for cve we make this workaround because we really want to be able to search for CVEs
+            # problem still remains for other case, i.e. searching for "valentijn-scholten" will return no results because of the hyphen.
+            # see:
+            # - https://github.com/etianen/django-watson/issues/223
+            # - https://github.com/DefectDojo/django-DefectDojo/issues/1092
+            # - https://github.com/DefectDojo/django-DefectDojo/issues/2081
+
+            if bool(cve_pattern.match(clean_query)):
+                clean_query = '\'' + clean_query + '\''
+                # print('new clean_query: ', clean_query)
+
             tags = clean_query
             if request.user.is_staff:
-                if "finding" in search_operator or search_operator == "":
+                if "finding" in search_operator or "cve" in search_operator or "id" in search_operator or search_operator == "":
                     findings = watson.search(clean_query, models=(Finding,))
 
                 if "template" in search_operator or search_operator == "":
@@ -88,17 +106,14 @@ def simple_search(request):
                     app_analysis = App_Analysis.objects.filter(name__icontains=clean_query)
 
             else:
-                if "finding" in search_operator or search_operator == "":
+                if "finding" in search_operator or "cve" in search_operator or "id" in search_operator or search_operator == "":
                     findings = watson.search(clean_query, models=(
                         Finding.objects.filter(
                             test__engagement__product__authorized_users__in=[
                                 request.user]),))
 
                 if "template" in search_operator or search_operator == "":
-                    finding_templates = watson.search(clean_query, models=(
-                        Finding_Template.objects.filter(
-                            authorized_users__in=[
-                                request.user]),))
+                    finding_templates = watson.search(clean_query, models=(Finding_Template,))
 
                 if "test" in search_operator or search_operator == "":
                     tests = watson.search(
@@ -117,10 +132,8 @@ def simple_search(request):
                         Finding.objects.filter(
                             test__engagement__product__authorized_users__in=[
                                 request.user]), tags)
-                    tagged_finding_templates = TaggedItem.objects.get_by_model(
-                        Finding_Template.objects.filter(
-                            authorized_users__in=[
-                                request.user]), tags)
+                    tagged_finding_templates = TaggedItem.objects.get_by_model(Finding_Template,
+                                                                               tags)
                     tagged_tests = TaggedItem.objects.get_by_model(
                         Test.objects.filter(
                             engagement__product__authorized_users__in=[

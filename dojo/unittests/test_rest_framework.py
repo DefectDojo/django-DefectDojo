@@ -1,14 +1,14 @@
 from dojo.models import Product, Engagement, Test, Finding, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     User, ScanSettings, Scan, Stub_Finding, Endpoint, JIRA_PKey, JIRA_Conf, \
-    Finding_Template, Note_Type
+    Finding_Template, Note_Type, App_Analysis, Endpoint_Status
 
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraConfigurationsViewSet, \
     JiraIssuesViewSet, JiraViewSet, ProductViewSet, ScanSettingsViewSet, \
     ScansViewSet, StubFindingsViewSet, TestsViewSet, \
     ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
-    UsersViewSet, ImportScanView, NoteTypeViewSet
+    UsersViewSet, ImportScanView, NoteTypeViewSet, AppAnalysisViewSet, EndpointStatusViewSet
 
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
@@ -48,6 +48,15 @@ class BaseClass():
                 response = self.client.post(self.url, self.payload)
 
             response = self.client.get(self.url, format='json')
+            # print("RESPONSE[0]:", response.data['results'])
+            # print("RESPONSE[0]:", response.data['results'][0])
+            # print("RESPONSE[0]:", response.data['results'][0]['id'])
+            # finding = Finding.objects.get(id=response.data['results'][0]['id'])
+            # print("RESPONSE.age:", response.data['results'][0]['age'])
+            # print("finding.age:", finding.age)
+
+            # print("RESPONSE.sla_days_remaining:", response.data['results'][0]['sla_days_remaining'])
+            # print("finding.sla_days_remaining:", finding.sla_days_remaining())
             self.assertEqual(200, response.status_code)
 
         @skipIfNotSubclass('CreateModelMixin')
@@ -82,6 +91,48 @@ class BaseClass():
             response = self.client.put(
                 relative_url, self.payload)
             self.assertEqual(200, response.status_code)
+
+
+class AppAnalysisTest(BaseClass.RESTEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = App_Analysis
+        self.viewname = 'app_analysis'
+        self.viewset = AppAnalysisViewSet
+        self.payload = {
+            'product': 1,
+            'name': 'Tomcat',
+            'user': 1,
+            'confidence': 100,
+            'version': '8.5.1',
+            'icon': '',
+            'website': '',
+            'website_found': '',
+            'created': '2018-08-16T16:58:23.908Z'
+        }
+        self.update_fields = {'version': '9.0'}
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class EndpointStatusTest(BaseClass.RESTEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Endpoint_Status
+        self.viewname = 'endpoint_status'
+        self.viewset = EndpointStatusViewSet
+        self.payload = {
+            'endpoint': 2,
+            'finding': 2,
+            'mitigated': False,
+            'false_positive': False,
+            'risk_accepted': False,
+            'out_of_scope': False,
+            "date": "2017-01-12T00:00",
+        }
+        self.update_fields = {'mitigated': True}
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
 class EndpointTest(BaseClass.RESTEndpointTest):
@@ -144,7 +195,7 @@ class FindingsTest(BaseClass.RESTEndpointTest):
             "thread_id": 1,
             "found_by": [],
             "title": "DUMMY FINDING",
-            "date": "2017-12-31",
+            "date": "2020-05-20",
             "cwe": 1,
             "severity": "HIGH",
             "description": "TEST finding",

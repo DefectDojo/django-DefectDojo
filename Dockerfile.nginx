@@ -3,13 +3,15 @@
 # The code for the build image should be idendical with the code in
 # Dockerfile.django to use the caching mechanism of Docker.
 
-FROM python:3.5.9-buster@sha256:1baef6be00b82fbd77f1b60ab227a1dbede6f23825ce1b7f1e9c6f7d1469a45c as build
+FROM python:3.6.11-slim-buster@sha256:9111ff37d96bdcd84bcac261951ac410ee276144eb8a02f06e5907ff4ff2ffea as build
 WORKDIR /app
 RUN \
   apt-get -y update && \
   apt-get -y install \
+    build-essential \
     dnsutils \
     default-mysql-client \
+    libmariadb-dev-compat \
     postgresql-client \
     xmlsec1 \
     git \
@@ -29,7 +31,7 @@ ENV \
   node="nodejs"
 RUN \
   apt-get -y update && \
-  apt-get -y install apt-transport-https ca-certificates && \
+  apt-get -y install apt-transport-https ca-certificates curl wget && \
   curl -sSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add --no-tty - && \
   curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
   curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
@@ -62,14 +64,12 @@ RUN \
   python3 manage.py collectstatic --noinput && \
   true
 
-FROM nginx:1.17.10@sha256:8269a7352a7dad1f8b3dc83284f195bac72027dd50279422d363d49311ab7d9b
+FROM nginx:1.19.1-alpine@sha256:966f134cf5ddeb12a56ede0f40fff754c0c0a749182295125f01a83957391d84
 COPY --from=collectstatic /app/static/ /usr/share/nginx/html/static/
 COPY wsgi_params nginx/nginx.conf nginx/nginx_TLS.conf /etc/nginx/
 COPY docker/entrypoint-nginx.sh /
 RUN \
-  apt-get -y update && \
-  apt-get -y install openssl && \
-  apt-get clean && \
+  apk add --no-cache openssl && \
   chmod -R g=u /var/cache/nginx && \
   chmod -R g=u /var/run && \
   mkdir -p /etc/nginx/ssl && \

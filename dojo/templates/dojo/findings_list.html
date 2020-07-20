@@ -20,6 +20,7 @@
                 <div class="clearfix">
                     {% include "dojo/paging_snippet.html" with page=findings page_size=True %}
                 </div>
+            {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled %}
             <div class="hidden" style="padding-bottom: 5px;" id="bulk_edit_menu">
                 <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
                   <div class="btn-group mr-2" role="group" aria-label="Second group">
@@ -32,9 +33,9 @@
                         <li class="dropdown-header">Choose wisely...</li>
                         <li style="padding-left: 8px;">
                           {% if product_tab %}
-                            <form action="{% url 'findings_bulk_all_product' product_tab.product.id %}" method="post" id="bulk_change_form">
+                            <form action="{% url 'finding_bulk_update_all_product' product_tab.product.id %}" method="post" id="bulk_change_form">
                           {% else %}
-                            <form action="{% url 'findings_bulk_all' %}" method="post" id="bulk_change_form">
+                            <form action="{% url 'finding_bulk_update_all' %}" method="post" id="bulk_change_form">
                           {% endif %}
                                 {% csrf_token %}
                                 <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />                                            
@@ -68,6 +69,16 @@
                                     <span>Mitigated</span>
                                 </label>
                                 <br/>
+
+                                <label><b>Risk Acceptance</b><input id="id_bulk_risk_acceptance" name="risk_acceptance" type="checkbox" alt="Select to enable"/></label><br/>
+                                <label style="font-size: 80%; font-weight: normal; display: block">
+                                    <input id="id_bulk_risk_accept" name="risk_accept" type="checkbox" disabled/> <span>Accept</span>
+                                </label>
+                                <label style="font-size: 80%; font-weight: normal; display: block">
+                                    <input id="id_bulk_risk_unaccept" name="risk_unaccept" type="checkbox" disabled/> <span>Unaccept</span>
+                                </label>
+
+                                <br>
                                 {% if system_settings.enable_jira %}
                                 <label style="font-size: 80%; font-weight: bold; display: block">Push to Jira
                                   <input id="id_push_tojira" name="push_to_jira" type="checkbox" alt="Select to push to JIRA"/>
@@ -92,6 +103,7 @@
                         </li>
                     </ul>
                   </div>
+                  {% endif %}
                   <div class="btn-group mr-2" role="group" aria-label="Bulk Actions">
                     {% if product_tab and not 'DISABLE_FINDING_MERGE'|setting_enabled %}
                     <button type="button" class="btn btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom" title="Merge Findings">
@@ -100,11 +112,13 @@
                       </a>
                     </button>
                     {% endif %}
+                    {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled %}
                     <button type="button" class="btn btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom" title="Delete Findings">
                       <a class="white-color delete-bulk" href="#" alt="Delete Findings">
                         <i class="fa fa-trash"></i>
                       </a>
                     </button>
+                    {% endif %}
                   </div>
                 </div>
             </div>
@@ -113,7 +127,7 @@
                            class="tablesorter-bootstrap table table-condensed table-striped table-hover">
                         <thead>
                         <tr>
-                          {% if user.is_staff %}
+                          {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled %}
                           <th class="hidden-sm centered" title="Select all visible findings.">
                               <div class="dropdown">
                                   <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
@@ -134,9 +148,9 @@
                                   </ul>
                               </div>
                             </th>
-                            <th>Act.</th>
                             {% endif %}
-                            <th class="nowrap">{% dojo_sort request 'Severity' 'numerical_severity' 'asc' %}</th>
+                            <th>Act.</th>
+                            <th class="nowrap, centered">{% dojo_sort request 'Severity' 'numerical_severity' 'asc' %}</th>
                             <th class="nowrap">{% dojo_sort request 'Name' 'title' %}</th>
                             <th>CWE</th>
                             {% if filter_name == 'Closed' %}
@@ -166,13 +180,14 @@
                         <tbody>
                         {% for finding in findings %}
                             <tr class="{% if finding.active %}active_finding{% else %}inactive_finding{% endif %}">
-                                {% if user.is_staff %}
+                                {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled%}
                                 <td class="hidden-sm centered">
                                     <form action="#">
                                         <input type="checkbox" name="select_{{ finding.id }}" id="{{ finding.id }}"
                                                class="select_one {{ finding.severity }}"/>
                                     </form>
                                 </td>
+                                {% endif %}
                                 <td class="nowrap">
                                   <div class="align-top">
                                     <div class="dropdown">
@@ -183,12 +198,15 @@
                                             <i class="fa fa-arrow-circle-right"></i> View
                                           </a>
                                        </li>
-                                        <li>
+                                       {% if user|is_authorized_for_change:finding %}
+                                       <li>
                                           <a class="" href="{% url 'edit_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
                                           <i class="fa fa-pencil-square-o"></i> Edit
                                           </a>
                                        </li>
+                                       {% endif %}
                                        <li class="divider"></li>
+                                       {% if user.is_staff %}
                                        <li role="presentation">
                                            <a href="{% url 'manage_images' finding.id %}">
                                                <i class="fa fa-file-image-o"></i> Manage Images
@@ -207,12 +225,15 @@
                                                </a>
                                            </li>
                                        {% endif %}
-
+                                       {% endif %}
+                                       {% if user|is_authorized_for_change:finding %}                                       
                                        <li role="presentation">
-                                           <a href="{% url 'touch_finding' finding.id %}">
+                                           <a href="{% url 'touch_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
                                                <i class="fa fa-clock-o"></i> Touch Finding
                                            </a>
                                        </li>
+                                       {% endif %}                                       
+                                       {% if user.is_staff %}                                       
                                        <li role="presentation">
                                            <a href="{% url 'mktemplate' finding.id %}">
                                                <i class="fa fa-copy"></i> Make Finding a Template
@@ -223,25 +244,49 @@
                                                <i class="fa fa-copy"></i> Apply Template to Finding
                                            </a>
                                        </li>
-                                       {% if finding.active %}
-                                           <li role="presentation">
-                                               <a href="{% url 'close_finding' finding.id %}">
-                                                   <i class="fa fa-fire-extinguisher"></i> Close Finding
-                                               </a>
-                                           </li>
-                                       {% else %}
-                                           <li role="presentation">
-                                               <a href="{% url 'reopen_finding' finding.id %}">
-                                                   <i class="fa fa-bug"></i> Open Finding
-                                               </a>
-                                           </li>
-                                       {% endif %}
-                                       <li role="presentation">
+                                       {% endif %}                                       
+                                       {% if user|is_authorized_for_change:finding %}
+                                        {% if finding.active %}
+                                            <li role="presentation">
+                                                <a href="{% url 'close_finding' finding.id %}">
+                                                    <i class="fa fa-fire-extinguisher"></i> Close Finding
+                                                </a>
+                                            </li>
+                                        {% else %}
+                                            <li role="presentation">
+                                                <a href="{% url 'reopen_finding' finding.id %}">
+                                                    <i class="fa fa-bug"></i> Open Finding
+                                                </a>
+                                            </li>
+                                        {% endif %}
+                                       {% endif %}                                       
+                                       <li class="divider"></li>
+
+                                        {% if user.is_staff %}
+                                        {% if finding.risk_acceptance_set.exists %}
+                                            <li role="presentation">
+                                            <a href="{% url 'simple_risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
+                                                <i class="fa fa-exclamation-circle"></i> Unaccept Risk
+                                            </a>
+                                            </li>
+                                        {% else %}
+                                            <li role="presentation">
+                                                <a href="{% url 'simple_risk_accept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
+                                                    <i class="fa fa-exclamation-circle"></i> Accept Risk (simple), or
+                                                </a>
+                                            </li>
+                                            <li role="presentation">
+                                                <a href ="{% url 'upload_risk_acceptance$' finding.test.engagement.id%}">
+                                                    <i class="fa fa-exclamation-circle"></i> Add Full Risk Acceptance...
+                                                </a>
+                                            </li>
+                                        {% endif %}
+                                        {% endif %}                                       <li role="presentation">
                                            <a href="{% url 'action_history' finding|content_type finding.id %}">
                                                <i class="fa fa-history"></i> View History
                                            </a>
                                        </li>
-                                       <li class="divider"></li>
+                                       {% if user|is_authorized_for_delete:finding %}
                                        <li>
                                          <form method="post" action="{% url 'delete_finding' finding.id %}"
                                               style="display: inline" class="form-inline form" id="delete-finding-menu-{{ finding.id }}-form">
@@ -253,11 +298,11 @@
                                            <i class="fa fa-trash"></i> Delete
                                          </a>
                                        </li>
+                                       {% endif %}
                                       </ul>
                                     </div>
                                    </div>
                                 </td>
-                                {% endif %}
                                 <td class="centered" data-order="{% severity_number_value finding.severity %}">
                                   <span class="label severity severity-{{ finding.severity }}">
                                       {{ finding.severity_display }}
@@ -324,8 +369,7 @@
                                 <td>
                                   <a target="#" data-toggle="tooltip" data-placement="bottom" title="Test: {{ finding.test }}">{{ finding.found_by.all|join:", " }}</a>
                                 </td>
-                                <td>{% if finding.under_review %}Under Review, {% endif %}{{ finding.status }}{% if finding.duplicate_finding.id %}, <a href="{% url 'view_finding' finding.duplicate_finding.id%}" data-toggle="tooltip" data-placement="top" title="{{ finding.duplicate_finding.title }}, {{ finding.duplicate_finding.created }}">Original</a>
-                                  {% endif %}
+                                <td>{{ finding|finding_display_status|safe }}
                                 </td>
                                 <td class="nowrap">
                                   {% if system_settings.enable_jira %}
@@ -404,7 +448,9 @@
                       $('.has-popover').popover({'trigger':'hover'});
                 },
                 "columns": [	
+                    {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled %}
                     { "data": "checkbox" },
+                    {% endif %}
                     { "data": "action" },
                     { "data": "severity" },
                     { "data": "finding" , render: function (data, type, row) {	
@@ -519,6 +565,13 @@
                 $('#bulk_edit_menu #id_bulk_out_of_scope').prop('disabled', !checked);
                 $('#bulk_edit_menu #id_bulk_is_Mitigated').prop('disabled', !checked);
             })
+
+            $('#id_bulk_risk_acceptance').on('click', function (e) {
+                var checked = this.checked;
+                $('#bulk_edit_menu #id_bulk_risk_accept').prop('disabled', !checked);
+                $('#bulk_edit_menu #id_bulk_risk_unaccept').prop('disabled', !checked);
+            })
+
             // Keep the dropdown menu open for selecting severity status
             $('.dropdown-menu').click(function(e) {
                 e.stopPropagation();

@@ -147,8 +147,6 @@ class BaseTestCase(unittest.TestCase):
         return len(elems) > 0
 
     def change_system_setting(self, id, enable=True):
-        # we set the admin user (ourselves) to have block_execution checked
-        # this will force dedupe to happen synchronously as the celeryworker is not reliable in travis
         print("changing system setting " + id + " enable: " + str(enable))
         driver = self.login_page()
         driver.get(self.base_url + 'system_settings')
@@ -177,10 +175,6 @@ class BaseTestCase(unittest.TestCase):
     def disable_system_setting(self, id):
         return self.change_system_setting(id, enable=False)
 
-    # def enable_block_execution(self):
-    # won't work, is on user profile instead of system settings
-    #     return self.enable_system_setting('id_block_execution')
-
     def enable_jira(self):
         return self.enable_system_setting('id_enable_jira')
 
@@ -192,6 +186,19 @@ class BaseTestCase(unittest.TestCase):
 
     def enable_github(self):
         return self.enable_system_setting('id_enable_github')
+
+    def enable_block_execution(self):
+        # we set the admin user (ourselves) to have block_execution checked
+        # this will force dedupe to happen synchronously, among other things like notifications, rules, ...
+        driver = self.login_page()
+        driver.get(self.base_url + 'profile')
+        if not driver.find_element_by_id('id_block_execution').is_selected():
+            driver.find_element_by_xpath('//*[@id="id_block_execution"]').click()
+            # save settings
+            driver.find_element_by_css_selector("input.btn.btn-primary").click()
+            # check if it's enabled after reload
+            self.assertTrue(driver.find_element_by_id('id_block_execution').is_selected())
+        return driver
 
     def is_alert_present(self):
         try:
@@ -299,8 +306,8 @@ def on_exception_html_source_logger(func):
             return func(self, *args, **kwargs)
 
         except Exception as e:
-            # print(self.driver.page_source)
-            print("exception url:", self.driver.current_url)
+            print("exception occured at url:", self.driver.current_url)
+            print("page source:", self.driver.page_source)
             f = open("selenium_page_source.html", "w", encoding='utf-8')
             f.writelines(self.driver.page_source)
             # time.sleep(30)
