@@ -377,11 +377,14 @@ AUTHORIZED_USERS_ALLOW_CHANGE = env('DD_AUTHORIZED_USERS_ALLOW_CHANGE')
 AUTHORIZED_USERS_ALLOW_DELETE = env('DD_AUTHORIZED_USERS_ALLOW_DELETE')
 
 # Setting SLA_NOTIFY_ACTIVE and SLA_NOTIFY_ACTIVE_VERIFIED to False will disable the feature
-SLA_NOTIFY_ACTIVE = False  # this will include 'verified' findings as well.
+# If you import thousands of Active findings through your pipeline everyday,
+# and make the choice of enabling SLA notifications for non-verified findings,
+# be mindful of performance.
+SLA_NOTIFY_ACTIVE = False  # this will include 'verified' findings as well as non-verified.
 SLA_NOTIFY_ACTIVE_VERIFIED_ONLY = True
-SLA_NOTIFY_WITH_JIRA_ONLY = False  # this will include 'verified' findings as well.
-SLA_NOTIFY_PRE_BREACH = 3  # in days, notification until date of breach
-SLA_NOTIFY_POST_BREACH = 7  # in days, skip notifications for findings that go past
+SLA_NOTIFY_WITH_JIRA_ONLY = False  # Based on the 2 above, but only with a JIRA link
+SLA_NOTIFY_PRE_BREACH = 3  # in days, notify between dayofbreach minus this number until dayofbreach
+SLA_NOTIFY_POST_BREACH = 7  # in days, skip notifications for findings that go past dayofbreach plus this number
 
 LOGIN_EXEMPT_URLS = (
     r'^%sstatic/' % URL_PREFIX,
