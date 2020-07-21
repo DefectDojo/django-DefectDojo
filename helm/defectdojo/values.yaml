@@ -147,7 +147,7 @@ postgresql:
 # Google CloudSQL support in GKE via gce-proxy
 cloudsql:
   # To use CloudSQL in GKE set 'enable: true'
-  enabled: true
+  enabled: false
   image:
     # set repo and image tag of gce-proxy
     repository: gcr.io/cloudsql-docker/gce-proxy
