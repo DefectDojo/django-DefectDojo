@@ -44,6 +44,7 @@ spec:
               name: {{ .Values.mysql.existingSecret }}
               key: mysql-password
               {{- end }}
+              key: {{ if eq .Values.database "postgresql" }}{{ .Values.database }}-password{{ end }}{{ if eq .Values.database "mysql" }}{{ .Values.database }}-root-password{{ end }}
         - name: DD_DEBUG
           value: 'True'
   restartPolicy: Never
