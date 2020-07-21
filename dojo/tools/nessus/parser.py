@@ -23,14 +23,14 @@ def get_text_severity(severity_id):
 
 class NessusCSVParser(object):
     def __init__(self, filename, test):
-        content = open(filename.temporary_file_path(), "rb").read().replace("\r", "\n")
+        content = open(filename.temporary_file_path(), "r").read().replace("\r", "\n")
         # content = re.sub("\"(.*?)\n(.*?)\"", "\"\1\2\"", content)
         # content = re.sub("(?<=\")\n", "\\\\n", content)
-        with open("%s-filtered" % filename.temporary_file_path(), "wb") as out:
+        with open("%s-filtered" % filename.temporary_file_path(), "w") as out:
             out.write(content)
             out.close()
 
-        with open("%s-filtered" % filename.temporary_file_path(), "rb") as scan_file:
+        with open("%s-filtered" % filename.temporary_file_path(), "r") as scan_file:
             reader = csv.reader(scan_file,
                                 lineterminator="\n",
                                 quoting=csv.QUOTE_ALL)

@@ -81,6 +81,7 @@ class ProductTest(BaseTestCase):
         # Select and click on the particular product to edit
         driver.find_element_by_link_text("QA Test").click()
         # "Click" the dropdown option
+        # driver.execute_script("window.scrollTo(0, 0)")
         driver.find_element_by_id("dropdownMenu1").click()
         # Click on the 'Edit' option
         driver.find_element_by_link_text("Edit").click()
@@ -324,6 +325,7 @@ class ProductTest(BaseTestCase):
         # Select the specific product to delete
         driver.find_element_by_link_text("QA Test").click()
         # Click the drop down menu
+        # driver.execute_script("window.scrollTo(0, 0)")
         driver.find_element_by_id('dropdownMenu1').click()
         # "Click" the Delete option
         driver.find_element_by_link_text("Delete").click()
@@ -372,6 +374,7 @@ def add_product_tests_to_suite(suite):
     suite.addTest(ProductTest('test_add_product_tracking_files'))
     suite.addTest(ProductTest('test_edit_product_tracking_files'))
     suite.addTest(ProductTest('test_list_products'))
+    suite.addTest(ProductTest('test_product_notifications_change'))
     suite.addTest(ProductTest('test_delete_product'))
     return suite
 
@@ -381,6 +384,7 @@ def suite():
     add_product_tests_to_suite(suite)
     suite.addTest(ProductTest('enable_jira'))
     suite.addTest(ProductTest('enable_github'))
+    suite.addTest(ProductTest('enable_block_execution'))
     add_product_tests_to_suite(suite)
     return suite
 

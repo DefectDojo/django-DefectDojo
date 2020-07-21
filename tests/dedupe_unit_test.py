@@ -56,8 +56,6 @@ class DedupeTest(BaseTestCase):
             driver.find_element_by_xpath('//*[@id="id_enable_deduplication"]').click()
             # save settings
             driver.find_element_by_css_selector("input.btn.btn-primary").click()
-            # Temporary fix for the caching issue, see https://github.com/DefectDojo/django-DefectDojo/issues/2164
-            time.sleep(30)
             # check if it's enabled after reload
             driver.get(self.base_url + 'system_settings')
             self.assertTrue(driver.find_element_by_id('id_enable_deduplication').is_selected())
@@ -89,7 +87,7 @@ class DedupeTest(BaseTestCase):
 
         self.assertTrue('No findings found.' in text)
         # check that user was redirect back to url where it came from based on return_url
-        # self.assertTrue(driver.current_url.endswith('page=1'))
+        self.assertTrue(driver.current_url.endswith('page=1'))
 
 
 # --------------------------------------------------------------------------------------------------------
@@ -448,7 +446,6 @@ class DedupeTest(BaseTestCase):
 def add_dedupe_tests_to_suite(suite):
     suite.addTest(ProductTest('test_create_product'))
     suite.addTest(DedupeTest('test_enable_deduplication'))
-    # suite.addTest(DedupeTest('test_enable_block_execution'))
     # Test same scanners - same engagement - static - dedupe
     suite.addTest(DedupeTest('test_delete_findings'))
     suite.addTest(DedupeTest('test_add_path_test_suite'))
@@ -484,6 +481,7 @@ def suite():
     add_dedupe_tests_to_suite(suite)
     suite.addTest(DedupeTest('enable_jira'))
     suite.addTest(DedupeTest('enable_github'))
+    suite.addTest(DedupeTest('enable_block_execution'))
     add_dedupe_tests_to_suite(suite)
     return suite
 

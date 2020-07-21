@@ -38,8 +38,8 @@
 				<div class="hidden" style="padding-bottom: 5px;" id="bulk_remedy">
 					<form action="{% url 'endpoints_bulk_all' %}" method="post" id="bulk_change_form">
 						{% csrf_token %}
-						<button class="btn btn-sm btn-primary" type="submit" id="remedy_endpoint" title="Remediate Endpoints">
-                Bulk Remediate
+						<button class="btn btn-sm btn-primary" type="submit" id="remedy_endpoint" title="Mitigate Endpoints">
+                Bulk Mitigate
             </button>
 						<button type="button" class="btn btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom" title="Delete Endpoint">
 								<a class="white-color delete-bulk" href="#" alt="Delete Endpoints">
@@ -109,8 +109,8 @@
                                   {% endif %}
                                 </td>
                                 <td>
-                                  {% if e.remediated%}
-                                    Remediated
+                                  {% if e.mitigated%}
+                                    Mitigated
                                   {% else %}
                                     Vulnerable
                                   {% endif %}
