@@ -28,11 +28,11 @@ from dojo.forms import CheckForm, \
 from dojo.models import Finding, Product, Engagement, Test, \
     Check_List, Test_Type, Notes, \
     Risk_Acceptance, Development_Environment, BurpRawRequestResponse, Endpoint, \
-    JIRA_PKey, JIRA_Issue, Cred_Mapping, Dojo_User, System_Settings
+    JIRA_PKey, JIRA_Issue, Cred_Mapping, Dojo_User, System_Settings, Endpoint_Status
 from dojo.tools import handles_active_verified_statuses
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
-    FileIterWrapper, get_cal_event, message, get_system_setting, Product_Tab
+    FileIterWrapper, get_cal_event, message, get_system_setting, Product_Tab, is_scan_file_too_large
 from dojo.notifications.helper import create_notification
 from dojo.tasks import update_epic_task, add_epic_task
 from functools import reduce
@@ -535,7 +535,7 @@ def import_scan_results(request, eid=None, pid=None):
                 engagement.active = True
                 engagement.status = 'In Progress'
                 engagement.save()
-            file = request.FILES.get('file')
+            file = request.FILES.get('file', None)
             scan_date = form.cleaned_data['scan_date']
             min_sev = form.cleaned_data['minimum_severity']
             active = form.cleaned_data['active']
@@ -544,6 +544,12 @@ def import_scan_results(request, eid=None, pid=None):
             if not any(scan_type in code
                        for code in ImportScanForm.SCAN_TYPE_CHOICES):
                 raise Http404()
+            if file and is_scan_file_too_large(file):
+                messages.add_message(request,
+                                     messages.ERROR,
+                                     "Report file is too large. Maximum supported size is {} MB".format(settings.SCAN_FILE_MAX_SIZE),
+                                     extra_tags='alert-danger')
+                return HttpResponseRedirect(reverse('import_scan_results', args=(eid,)))
 
             tt, t_created = Test_Type.objects.get_or_create(name=scan_type)
             # will save in development environment
@@ -659,8 +665,13 @@ def import_scan_results(request, eid=None, pid=None):
                             query=endpoint.query,
                             fragment=endpoint.fragment,
                             product=t.engagement.product)
+                        eps, created = Endpoint_Status.objects.get_or_create(
+                            finding=item,
+                            endpoint=ep)
+                        ep.endpoint_status.add(eps)
 
                         item.endpoints.add(ep)
+                        item.endpoint_status.add(eps)
                     for endpoint in form.cleaned_data['endpoints']:
                         ep, created = Endpoint.objects.get_or_create(
                             protocol=endpoint.protocol,
@@ -669,8 +680,13 @@ def import_scan_results(request, eid=None, pid=None):
                             query=endpoint.query,
                             fragment=endpoint.fragment,
                             product=t.engagement.product)
+                        eps, created = Endpoint_Status.objects.get_or_create(
+                            finding=item,
+                            endpoint=ep)
+                        ep.endpoint_status.add(eps)
 
                         item.endpoints.add(ep)
+                        item.endpoint_status.add(eps)
 
                     item.save(false_history=True, push_to_jira=push_to_jira)
 

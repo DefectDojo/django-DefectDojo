@@ -12,7 +12,7 @@
     "datatables": "1.10.18",
     "drmonty-datatables-plugins": "^1.0.0",
     "drmonty-datatables-responsive": "^1.0.0",
-    "easymde": "^2.10.1",
+    "easymde": "^2.11.0",
     "flot": "flot/flot#~0.8.3",
     "flot-axis": "markrcote/flot-axislabels#*",
     "font-awesome": "^4.0.0",
@@ -25,7 +25,7 @@
     "jquery.hotkeys": "jeresig/jquery.hotkeys#master",
     "justgage": "^1.3.0",
     "metismenu": "~3.0.6",
-    "moment": "^2.26.0",
+    "moment": "^2.27.0",
     "morris.js": "morrisjs/morris.js",
     "startbootstrap-sb-admin-2": "1.0.7"
   },

@@ -48,6 +48,7 @@ class FindingTest(BaseTestCase):
         self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_out_of_scope").is_enabled(), True)
         self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_is_Mitigated").is_enabled(), True)
 
+    @on_exception_html_source_logger
     def test_edit_finding(self):
         # The Name of the Finding created by test_add_product_finding => 'App Vulnerable to XSS'
         # Test To Add Finding To product
@@ -208,8 +209,6 @@ class FindingTest(BaseTestCase):
         driver = self.login_page()
         # Navigate to All Finding page
         print("\nListing findings \n")
-        driver.get(self.base_url + "finding")
-        self.assertNoConsoleErrors()
         self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
         driver.find_element_by_link_text("App Vulnerable to XSS").click()
@@ -303,11 +302,13 @@ class FindingTest(BaseTestCase):
         # check that user was redirect back to url where it came from based on return_url
 
 
-def add_finding_tests_to_suite(suite, jira=False, github=False):
+def add_finding_tests_to_suite(suite, jira=False, github=False, block_execution=False):
     if jira:
         suite.addTest(FindingTest('enable_jira'))
     if github:
         suite.addTest(FindingTest('enable_github'))
+    if block_execution:
+        suite.addTest(FindingTest('enable_block_execution'))
 
     # Add each test the the suite to be run
     # success and failure is output by the test
@@ -340,8 +341,8 @@ def add_finding_tests_to_suite(suite, jira=False, github=False):
 
 def suite():
     suite = unittest.TestSuite()
-    add_finding_tests_to_suite(suite, jira=False, github=False)
-    add_finding_tests_to_suite(suite, jira=True, github=True)
+    add_finding_tests_to_suite(suite, jira=False, github=False, block_execution=False)
+    add_finding_tests_to_suite(suite, jira=True, github=True, block_execution=True)
     return suite
 
 

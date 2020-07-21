@@ -14,7 +14,7 @@ from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Find
     User, ScanSettings, Scan, Stub_Finding, Finding_Template, Notes, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Endpoint, JIRA_PKey, JIRA_Conf, DojoMeta, Development_Environment, \
-    Dojo_User, Note_Type, System_Settings
+    Dojo_User, Note_Type, System_Settings, App_Analysis, Endpoint_Status
 
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import report_url_resolver
@@ -69,6 +69,19 @@ class EndPointViewSet(mixins.ListModelMixin,
         data = report_generate(request, endpoint, options)
         report = serializers.ReportGenerateSerializer(data)
         return Response(report.data)
+
+
+class EndpointStatusViewSet(mixins.ListModelMixin,
+                      mixins.RetrieveModelMixin,
+                      mixins.UpdateModelMixin,
+                      mixins.DestroyModelMixin,
+                      mixins.CreateModelMixin,
+                      viewsets.GenericViewSet):
+    serializer_class = serializers.EndpointStatusSerializer
+    queryset = Endpoint_Status.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('mitigated', 'false_positive', 'out_of_scope',
+                     'risk_accepted', 'mitigated_by', 'finding', 'endpoint')
 
 
 class EngagementViewSet(mixins.ListModelMixin,
@@ -140,6 +153,16 @@ class EngagementViewSet(mixins.ListModelMixin,
         return Response(report.data)
 
 
+class AppAnalysisViewSet(mixins.ListModelMixin,
+                        mixins.RetrieveModelMixin,
+                        mixins.UpdateModelMixin,
+                        mixins.DestroyModelMixin,
+                        mixins.CreateModelMixin,
+                        viewsets.GenericViewSet):
+    serializer_class = serializers.AppAnalysisSerializer
+    queryset = App_Analysis.objects.all()
+
+
 class FindingTemplatesViewSet(mixins.ListModelMixin,
                               mixins.RetrieveModelMixin,
                               mixins.UpdateModelMixin,
@@ -170,7 +193,7 @@ class FindingViewSet(mixins.ListModelMixin,
     queryset = Finding.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'title', 'date', 'severity', 'description',
-                     'mitigated', 'endpoints', 'test', 'active', 'verified',
+                     'mitigated', 'is_Mitigated', 'endpoints', 'test', 'active', 'verified',
                      'false_p', 'reporter', 'url', 'out_of_scope',
                      'duplicate', 'test__engagement__product',
                      'test__engagement', 'unique_id_from_tool')
@@ -315,7 +338,7 @@ class FindingViewSet(mixins.ListModelMixin,
             status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
-        responses={status.HTTP_200_OK: None},
+        responses={status.HTTP_200_OK: ""},
         methods=['put', 'patch'],
         request_body=serializers.TagSerializer
     )

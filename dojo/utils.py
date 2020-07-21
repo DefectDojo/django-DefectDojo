@@ -18,6 +18,7 @@ from django.core.paginator import Paginator
 from django.urls import get_resolver, reverse
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
 from django.template.defaultfilters import pluralize
+from django.template.loader import render_to_string
 from django.utils import timezone
 from jira import JIRA
 from jira.exceptions import JIRAError
@@ -75,7 +76,7 @@ def sync_false_history(new_finding, *args, **kwargs):
     if total_findings.count() > 0:
         new_finding.false_p = True
         new_finding.active = False
-        new_finding.verified = False
+        new_finding.verified = True
         super(Finding, new_finding).save(*args, **kwargs)
 
 
@@ -1274,27 +1275,30 @@ def log_jira_message(text, finding):
         source='Jira')
 
 
-# Adds labels to a Jira issue
-def add_labels(find, issue):
+def get_labels(find):
     # Update Label with system setttings label
+    labels = []
     system_settings = System_Settings.objects.get()
-    labels = system_settings.jira_labels
-    if labels is None:
+    system_labels = system_settings.jira_labels
+    if system_labels is None:
         return
     else:
-        labels = labels.split()
-    if len(labels) > 0:
-        for label in labels:
-            issue.fields.labels.append(label)
+        system_labels = system_labels.split()
+    if len(system_labels) > 0:
+        for system_label in system_labels:
+            labels.append(system_label)
     # Update the label with the product name (underscore)
     prod_name = find.test.engagement.product.name.replace(" ", "_")
-    issue.fields.labels.append(prod_name)
-    issue.update(fields={"labels": issue.fields.labels})
+    labels.append(prod_name)
+    return labels
 
 
-def jira_long_description(find_description, find_id, jira_conf_finding_text):
-    return find_description + "\n\n*Dojo ID:* " + str(
-        find_id) + "\n\n" + jira_conf_finding_text
+def jira_description(find):
+    template = 'issue-trackers/jira-description.tpl'
+    kwargs = {}
+    kwargs['finding'] = find
+    kwargs['jira_conf'] = find.jira_conf_new()
+    return render_to_string(template, kwargs)
 
 
 def add_external_issue(find, external_issue_provider):
@@ -1333,86 +1337,109 @@ def reopen_external_issue(find, note, external_issue_provider):
 def add_issue(find, push_to_jira):
     eng = Engagement.objects.get(test=find.test)
     prod = Product.objects.get(engagement=eng)
+    jira_minimum_threshold = Finding.get_number_severity(System_Settings.objects.get().jira_minimum_severity)
 
     if push_to_jira:
         if JIRA_PKey.objects.filter(product=prod).count() == 0:
-            log_jira_alert('Finding cannot be pushed to jira as there is no jira configuration for this product.', find)
+            logger.error("Finding {} cannot be pushed to JIRA as there is no JIRA configuration for this product.".format(find.id))
+            log_jira_alert('Finding cannot be pushed to JIRA as there is no JIRA configuration for this product.', find)
             return
 
         jpkey = JIRA_PKey.objects.get(product=prod)
         jira_conf = jpkey.conf
 
         if 'Active' in find.status() and 'Verified' in find.status():
-            if ((jpkey.push_all_issues and Finding.get_number_severity(
-                    System_Settings.objects.get().jira_minimum_severity) >=
-                 Finding.get_number_severity(find.severity))):
-                log_jira_alert(
-                    'Finding below jira_minimum_severity threshold.', find)
+            if jira_minimum_threshold > Finding.get_number_severity(find.severity):
+                log_jira_alert('Finding below the minimum jira severity threshold.', find)
+                logger.warn("Finding {} is below the minimum jira severity threshold.".format(find.id))
+                logger.warn("The JIRA issue will NOT be created.")
+                return
 
-            else:
-                logger.debug('Trying to create a new JIRA issue')
-                try:
-                    JIRAError.log_to_tempfile = False
-                    jira = JIRA(
-                        server=jira_conf.url,
-                        basic_auth=(jira_conf.username, jira_conf.password))
-                    if jpkey.component:
-                        new_issue = jira.create_issue(
-                            project=jpkey.project_key,
-                            summary=find.title,
-                            components=[
-                                {
-                                    'name': jpkey.component
-                                },
-                            ],
-                            description=jira_long_description(
-                                find.long_desc(), find.id,
-                                jira_conf.finding_text),
-                            issuetype={'name': jira_conf.default_issue_type},
-                            priority={
-                                'name': jira_conf.get_priority(find.severity)
-                            })
-                    else:
-                        new_issue = jira.create_issue(
-                            project=jpkey.project_key,
-                            summary=find.title,
-                            description=jira_long_description(
-                                find.long_desc(), find.id,
-                                jira_conf.finding_text),
-                            issuetype={'name': jira_conf.default_issue_type},
-                            priority={
-                                'name': jira_conf.get_priority(find.severity)
-                            })
-                    j_issue = JIRA_Issue(
-                        jira_id=new_issue.id, jira_key=new_issue, finding=find)
-                    j_issue.save()
-                    # Moving this to the save function
-                    # find.jira_creation = timezone.now()
-                    # find.jira_change = find.jira_creation
-                    # find.save()
-                    issue = jira.issue(new_issue.id)
+            logger.debug('Trying to create a new JIRA issue for finding {}...'.format(find.id))
+            try:
+                JIRAError.log_to_tempfile = False
+                jira = JIRA(
+                    server=jira_conf.url,
+                    basic_auth=(jira_conf.username, jira_conf.password))
 
-                    # Add labels (security & product)
-                    add_labels(find, new_issue)
-                    # Upload dojo finding screenshots to Jira
-                    for pic in find.images.all():
-                        jira_attachment(
-                            jira, issue,
-                            settings.MEDIA_ROOT + pic.image_large.name)
+                meta = None
 
-                        # if jpkey.enable_engagement_epic_mapping:
-                        #      epic = JIRA_Issue.objects.get(engagement=eng)
-                        #      issue_list = [j_issue.jira_id,]
-                        #      jira.add_issues_to_epic(epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
-                except JIRAError as e:
-                    log_jira_alert(e.text, find)
+                fields = {
+                        'project': {
+                            'key': jpkey.project_key
+                        },
+                        'summary': find.title,
+                        'description': jira_description(find),
+                        'issuetype': {
+                            'name': jira_conf.default_issue_type
+                        },
+                        'priority': {
+                            'name': jira_conf.get_priority(find.severity)
+                        }
+                }
+
+                if jpkey.component:
+                    fields['components'] = [
+                            {
+                                'name': jpkey.component
+                            },
+                    ]
+
+                labels = get_labels(find)
+                if labels:
+                    fields['labels'] = labels
+
+                if System_Settings.objects.get().enable_finding_sla:
+                    # populate duedate field, but only if it's available for this project + issuetype
+                    # meta = jira.createmeta(projectKeys=jpkey.project_key, expand="fields")
+                    if not meta:
+                        meta = jira_meta(jira, jpkey)
+
+                    if 'duedate' in meta['projects'][0]['issuetypes'][0]['fields']:
+                        # jira wants YYYY-MM-DD
+                        duedate = find.sla_deadline().strftime('%Y-%m-%d')
+                        fields['duedate'] = duedate
+
+                if len(find.endpoints.all()) > 0:
+                    if not meta:
+                        meta = jira_meta(jira, jpkey)
+
+                    if 'environment' in meta['projects'][0]['issuetypes'][0]['fields']:
+                        environment = "\n".join([str(endpoint) for endpoint in find.endpoints.all()])
+                        fields['environment'] = environment
+
+                logger.debug('sending fields to JIRA: %s', fields)
+
+                new_issue = jira.create_issue(fields)
+
+                j_issue = JIRA_Issue(
+                    jira_id=new_issue.id, jira_key=new_issue, finding=find)
+                j_issue.save()
+                issue = jira.issue(new_issue.id)
+
+                # Upload dojo finding screenshots to Jira
+                for pic in find.images.all():
+                    jira_attachment(
+                        jira, issue,
+                        settings.MEDIA_ROOT + pic.image_large.name)
+
+                    # if jpkey.enable_engagement_epic_mapping:
+                    #      epic = JIRA_Issue.objects.get(engagement=eng)
+                    #      issue_list = [j_issue.jira_id,]
+                    #      jira.add_issues_to_epic(epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
+            except JIRAError as e:
+                logger.error(e.text, find)
+                log_jira_alert(e.text, find)
         else:
-            log_jira_alert("Finding not active or not verified.",
-                           find)
+            log_jira_alert("A Finding needs to be both Active and Verified to be pushed to JIRA.", find)
+            logger.warning("A Finding needs to be both Active and Verified to be pushed to JIRA.", find)
+
+
+def jira_meta(jira, jpkey):
+    return jira.createmeta(projectKeys=jpkey.project_key, issuetypeNames=jpkey.conf.default_issue_type, expand="projects.issuetypes.fields")
 
 
 def jira_attachment(jira, issue, file, jira_filename=None):
-
     basename = file
     if jira_filename is None:
         basename = os.path.basename(file)
@@ -1460,6 +1487,8 @@ def update_issue(find, push_to_jira):
                 basic_auth=(jira_conf.username, jira_conf.password))
             issue = jira.issue(j_issue.jira_id)
 
+            meta = None
+
             fields = {}
             # Only update the component if it didn't exist earlier in Jira, this is to avoid assigning multiple components to an item
             if issue.fields.components:
@@ -1475,15 +1504,28 @@ def update_issue(find, push_to_jira):
                 ]
                 fields = {"components": component}
 
+            labels = get_labels(find)
+            if labels:
+                fields['labels'] = labels
+
+            if len(find.endpoints.all()) > 0:
+                if not meta:
+                    meta = jira_meta(jira, jpkey)
+
+                if 'environment' in meta['projects'][0]['issuetypes'][0]['fields']:
+                    environment = "\n".join([str(endpoint) for endpoint in find.endpoints.all()])
+                    fields['environment'] = environment
+
             # Upload dojo finding screenshots to Jira
             for pic in find.images.all():
                 jira_attachment(jira, issue,
                                 settings.MEDIA_ROOT + pic.image_large.name)
 
+            logger.debug('sending fields to JIRA: %s', fields)
+
             issue.update(
                 summary=find.title,
-                description=jira_long_description(find.long_desc(), find.id,
-                                                  jira_conf.finding_text),
+                description=jira_description(find),
                 priority={'name': jira_conf.get_priority(find.severity)},
                 fields=fields)
             # print('\n\nSaving jira_change\n\n')
@@ -1491,7 +1533,7 @@ def update_issue(find, push_to_jira):
             # find.jira_change = timezone.now()
             # find.save()
             # Add labels(security & product)
-            add_labels(find, issue)
+
         except JIRAError as e:
             log_jira_alert(e.text, find)
 
@@ -1506,6 +1548,8 @@ def update_issue(find, push_to_jira):
                 url=req_url,
                 auth=HTTPBasicAuth(jira_conf.username, jira_conf.password),
                 json=json_data)
+            if r.status_code != 204:
+                logger.warn("JIRA transition failed with error: {}".format(r.text))
             find.jira_change = timezone.now()
             find.save()
         elif 'Active' in find.status() and 'Verified' in find.status():
@@ -1515,6 +1559,8 @@ def update_issue(find, push_to_jira):
                 url=req_url,
                 auth=HTTPBasicAuth(jira_conf.username, jira_conf.password),
                 json=json_data)
+            if r.status_code != 204:
+                logger.warn("JIRA transition failed with error: {}".format(r.text))
             find.jira_change = timezone.now()
             find.save()
 
@@ -1535,6 +1581,8 @@ def close_epic(eng, push_to_jira):
                 url=req_url,
                 auth=HTTPBasicAuth(jira_conf.username, jira_conf.password),
                 json=json_data)
+            if r.status_code != 204:
+                logger.warn("JIRA close epic failed with error: {}".format(r.text))
         except Exception as e:
             log_jira_generic_alert('Jira Engagement/Epic Close Error', str(e))
             pass
@@ -1598,27 +1646,28 @@ def add_epic(eng, push_to_jira):
 
 
 def add_comment(find, note, force_push=False):
-    prod = Product.objects.get(
-        engagement=Engagement.objects.get(test=find.test))
+    if not note.private:
+        prod = Product.objects.get(
+            engagement=Engagement.objects.get(test=find.test))
 
-    try:
-        jpkey = JIRA_PKey.objects.get(product=prod)
-        jira_conf = jpkey.conf
+        try:
+            jpkey = JIRA_PKey.objects.get(product=prod)
+            jira_conf = jpkey.conf
 
-        if jpkey.push_notes or force_push is True:
-            try:
-                jira = JIRA(
-                    server=jira_conf.url,
-                    basic_auth=(jira_conf.username, jira_conf.password))
-                j_issue = JIRA_Issue.objects.get(finding=find)
-                jira.add_comment(
-                    j_issue.jira_id,
-                    '(%s): %s' % (note.author.get_full_name(), note.entry))
-            except Exception as e:
-                log_jira_generic_alert('Jira Add Comment Error', str(e))
-                pass
-    except JIRA_PKey.DoesNotExist:
-        pass
+            if jpkey.push_notes or force_push is True:
+                try:
+                    jira = JIRA(
+                        server=jira_conf.url,
+                        basic_auth=(jira_conf.username, jira_conf.password))
+                    j_issue = JIRA_Issue.objects.get(finding=find)
+                    jira.add_comment(
+                        j_issue.jira_id,
+                        '(%s): %s' % (note.author.get_full_name(), note.entry))
+                except Exception as e:
+                    log_jira_generic_alert('Jira Add Comment Error', str(e))
+                    pass
+        except JIRA_PKey.DoesNotExist:
+            pass
 
 
 def send_review_email(request, user, finding, users, new_note):
@@ -1646,21 +1695,24 @@ def send_review_email(request, user, finding, users, new_note):
 
 def process_notifications(request, note, parent_url, parent_title):
     regex = re.compile(r'(?:\A|\s)@(\w+)\b')
+
     usernames_to_check = set([un.lower() for un in regex.findall(note.entry)])
+
     users_to_notify = [
         User.objects.filter(username=username).get()
         for username in usernames_to_check
         if User.objects.filter(is_active=True, username=username).exists()
     ]  # is_staff also?
-    user_posting = request.user
+
     if len(note.entry) > 200:
         note.entry = note.entry[:200]
         note.entry += "..."
+
     create_notification(
         event='user_mentioned',
         section=parent_title,
         note=note,
-        user=request.user,
+        initiator=request.user,
         title='%s jotted a note' % request.user,
         url=parent_url,
         icon='commenting',
@@ -1787,13 +1839,25 @@ def get_slack_user_id(user_email):
 
     users = json.loads(res.text)
 
+    slack_user_is_found = False
     if users:
-        for member in users["members"]:
-            if "email" in member["profile"]:
-                if user_email == member["profile"]["email"]:
-                    if "id" in member:
-                        user_id = member["id"]
-                        break
+        if 'error' in users:
+            logger.error("Slack is complaining. See error message below.")
+            logger.error(users)
+        else:
+            for member in users["members"]:
+                if "email" in member["profile"]:
+                    if user_email == member["profile"]["email"]:
+                        if "id" in member:
+                            user_id = member["id"]
+                            logger.debug("Slack user ID is {}".format(user_id))
+                            slack_user_is_found = True
+                            break
+                    else:
+                        logger.warn("A user with email {} could not be found in this Slack workspace.".format(user_email))
+
+            if not slack_user_is_found:
+                logger.warn("The Slack user was not found.")
 
     return user_id
 
@@ -1969,7 +2033,15 @@ def get_full_url(relative_url):
         return settings.SITE_URL + relative_url
     else:
         logger.warn('SITE URL undefined in settings, full_url cannot be created')
-        return relative_url
+        return "settings.SITE_URL" + relative_url
+
+
+def get_site_url():
+    if settings.SITE_URL:
+        return settings.SITE_URL
+    else:
+        logger.warn('SITE URL undefined in settings, full_url cannot be created')
+        return "settings.SITE_URL"
 
 
 @receiver(post_save, sender=Dojo_User)
@@ -1998,16 +2070,41 @@ def merge_sets_safe(set1, set2):
     # return {*set1, *set2}
 
 
-def get_return_url(request_params):
-    return request_params.get('return_url', None)
+def get_return_url(request):
+    return_url = request.POST.get('return_url', None)
+    # print('return_url from POST: ', return_url)
+    if return_url is None or not return_url.strip():
+        # for some reason using request.GET.get('return_url') never works
+        return_url = request.GET['return_url'] if 'return_url' in request.GET else None
+        # print('return_url from GET: ', return_url)
+
+    return return_url if return_url else None
 
 
 def redirect_to_return_url_or_else(request, or_else):
-    return_url = get_return_url(request.POST)
-    if return_url is not None and return_url.strip():
-        return HttpResponseRedirect(return_url)
+    return_url = get_return_url(request)
+    if return_url:
+        return HttpResponseRedirect(return_url.strip())
     elif or_else:
         return HttpResponseRedirect(or_else)
     else:
         messages.add_message(request, messages.ERROR, 'Unable to redirect anywhere.', extra_tags='alert-danger')
         return HttpResponseRedirect(request.get_full_path())
+
+
+def file_size_mb(file_obj):
+    if file_obj:
+        file_obj.seek(0, 2)
+        size = file_obj.tell()
+        file_obj.seek(0, 0)
+        if size > 0:
+            return size / 1048576
+    return 0
+
+
+def is_scan_file_too_large(scan_file):
+    if hasattr(settings, "SCAN_FILE_MAX_SIZE"):
+        size = file_size_mb(scan_file)
+        if size > settings.SCAN_FILE_MAX_SIZE:
+            return True
+    return False

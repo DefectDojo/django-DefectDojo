@@ -98,6 +98,7 @@ django:
 initializer:
   run: true
   keepSeconds: 60
+  affinity: {}
   nodeSelector: {}
   resources:
     requests:
@@ -138,7 +139,13 @@ postgresql:
   # To use an external secret for the password for PostgreSQL
   # instance, set enabled to false and provide the name of the secret on the
   # line below:
-  # existingSecret: ""    
+  # existingSecret: ""
+  master:
+    affinity: {}
+    nodeSelector: {}
+  slave:
+    affinity: {}
+    nodeSelector: {}
 
 rabbitmq:
   enabled: true
@@ -146,7 +153,8 @@ rabbitmq:
   rabbitmq:
     existingPasswordSecret: defectdojo-rabbitmq-specific
     existingErlangSecret: defectdojo-rabbitmq-specific
-
+    affinity: {}
+    nodeSelector: {}
 redis:
   enabled: false
   existingSecret: defectdojo-redis-specific

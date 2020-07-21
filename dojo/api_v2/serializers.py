@@ -3,11 +3,11 @@ from dojo.models import Product, Engagement, Test, Finding, \
     Finding_Template, Test_Type, Development_Environment, NoteHistory, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Product_Type, JIRA_Conf, Endpoint, BurpRawRequestResponse, JIRA_PKey, \
-    Notes, DojoMeta, FindingImage, Note_Type, System_Settings
+    Notes, DojoMeta, FindingImage, Note_Type, App_Analysis, Endpoint_Status
 from dojo.forms import ImportScanForm, SEVERITY_CHOICES
 from dojo.tools import requires_file
 from dojo.tools.factory import import_parser_factory
-from dojo.utils import max_safe
+from dojo.utils import max_safe, is_scan_file_too_large
 from dojo.notifications.helper import create_notification
 from django.urls import reverse
 from tagging.models import Tag
@@ -218,6 +218,12 @@ class EngagementSerializer(TaggitSerializer, serializers.ModelSerializer):
         return data
 
 
+class AppAnalysisSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = App_Analysis
+        fields = '__all__'
+
+
 class ToolTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tool_Type
@@ -237,6 +243,12 @@ class ToolProductSettingsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tool_Product_Settings
+        fields = '__all__'
+
+
+class EndpointStatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Endpoint_Status
         fields = '__all__'
 
 
@@ -630,7 +642,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         if 'tags' in data:
             test.tags = ' '.join(data['tags'])
         try:
-            parser = import_parser_factory(data.get('file'),
+            parser = import_parser_factory(data.get('file', None),
                                            test,
                                            active,
                                            verified,
@@ -736,6 +748,14 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 old_finding.notes.create(author=self.context['request'].user,
                                          entry="This finding has been automatically closed"
                                          " as it is not present anymore in recent scans.")
+                endpoint_status = old_finding.endpoint_status.all()
+                for status in endpoint_status:
+                    status.mitigated_by = self.context['request'].user
+                    status.mitigated_time = timezone.now()
+                    status.mitigated = True
+                    status.last_modified = timezone.now()
+                    status.save()
+
                 Tag.objects.add_tag(old_finding, 'stale')
                 old_finding.save()
 
@@ -757,6 +777,9 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         file = data.get("file")
         if not file and requires_file(scan_type):
             raise serializers.ValidationError('Uploading a Report File is required for {}'.format(scan_type))
+        if file and is_scan_file_too_large(file):
+            raise serializers.ValidationError(
+                'Report file is too large. Maximum supported size is {} MB'.format(settings.SCAN_FILE_MAX_SIZE))
         return data
 
     def validate_scan_data(self, value):
@@ -797,7 +820,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         active = data['active']
 
         try:
-            parser = import_parser_factory(data.get('file'),
+            parser = import_parser_factory(data.get('file', None),
                                            test,
                                            active,
                                            verified,
@@ -854,6 +877,13 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                             entry="Re-activated by %s re-upload." % scan_type,
                             author=self.context['request'].user)
                         note.save()
+                        endpoint_status = finding.endpoint_status.all()
+                        for status in endpoint_status:
+                            status.mitigated_by = None
+                            status.mitigated_time = None
+                            status.mitigated = False
+                            status.last_modified = timezone.now()
+                            status.save()
                         finding.notes.add(note)
                         reactivated_items.append(finding)
                         reactivated_count += 1
@@ -917,6 +947,15 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     finding.is_Mitigated = True
                     finding.mitigated_by = self.context['request'].user
                     finding.active = False
+
+                    endpoint_status = finding.endpoint_status.all()
+                    for status in endpoint_status:
+                        status.mitigated_by = self.context['request'].user
+                        status.mitigated_time = timezone.now()
+                        status.mitigated = True
+                        status.last_modified = timezone.now()
+                        status.save()
+
                     finding.save(push_to_jira=push_to_jira)
                     note = Notes(entry="Mitigated by %s re-upload." % scan_type,
                                 author=self.context['request'].user)
@@ -960,6 +999,9 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         file = data.get("file")
         if not file and requires_file(scan_type):
             raise serializers.ValidationError('Uploading a Report File is required for {}'.format(scan_type))
+        if file and is_scan_file_too_large(file):
+            raise serializers.ValidationError(
+                'Report file is too large. Maximum supported size is {} MB'.format(settings.SCAN_FILE_MAX_SIZE))
         return data
 
     def validate_scan_data(self, value):
