@@ -29,14 +29,23 @@ echo "export DD_ADMIN_USER=admin" >> ~/.profile && \
 
 export DD_BASE_URL='http://localhost:8080/'
 
+test_failures=false
 function fail() {
     echo "Error: $1 test failed\n"
     docker-compose logs --tail="120" uwsgi
-    exit 1    
+    test_failures=true
 }
 
 function success() {
+    echo "Grepping celery logs for errors:"
+    docker-compose logs --tail="all" celeryworker | grep -A 12 " ERROR" && mark_failed_celery
     echo "Success: $1 test passed\n"
+}
+
+celery_failures=false
+function mark_failed_celery() {
+    # can be used to mark the build as failed, but still continue to see what the rest of the test suite does
+    celery_failures=true
 }
 
 test="Product type integration tests"
@@ -160,5 +169,15 @@ fi
 # else
 #     echo "Error: Zap integration test failed"; exit 1
 # fi
+
+if [ $test_failures = true ] ; then
+    echo "some tests have failed, see logs above"
+    exit 1
+fi
+
+if [ $celery_failures = true ] ; then
+    echo "there ERRORs found in the celery worker logs, see above"
+    exit 1
+fi
 
 exec echo "Done Running all configured integration tests."

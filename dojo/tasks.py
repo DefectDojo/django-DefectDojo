@@ -21,10 +21,9 @@ from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_iss
                        close_epic, sync_rules, fix_loop_duplicates, \
                        rename_whitesource_finding, update_external_issue, add_external_issue, \
                        close_external_issue, reopen_external_issue
-from dojo.notifications.helper import create_notification
-
-
+from dojo.notifications.helper import create_notification, send_alert_notification, send_hipchat_notification, send_mail_notification, send_slack_notification
 import logging
+
 fmt = getattr(settings, 'LOG_FORMAT', None)
 lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
 logging.basicConfig(format=fmt, level=lvl)
@@ -301,7 +300,7 @@ def add_comment_task(find, note):
 
 @app.task(name='async_dedupe')
 def async_dedupe(new_finding, *args, **kwargs):
-    deduplicationLogger.debug("running deduplication")
+    deduplicationLogger.debug("running async deduplication")
     dedupe_signal.send(sender=new_finding.__class__, new_finding=new_finding)
 
 
@@ -359,3 +358,27 @@ def async_dupe_delete(*args, **kwargs):
 @task(name='celery_status', ignore_result=False)
 def celery_status():
     return True
+
+
+@app.task(name='send_slack_notification')
+def send_slack_notification_task(*args, **kwargs):
+    logger.debug("send_slack_notification async")
+    send_slack_notification(*args, **kwargs)
+
+
+@app.task(name='send_mail_notification')
+def send_mail_notification_task(*args, **kwargs):
+    logger.debug("send_mail_notification async")
+    send_mail_notification(*args, **kwargs)
+
+
+@app.task(name='send_hipchat_notification')
+def send_hipchat_notification_task(*args, **kwargs):
+    logger.debug("send_hipchat_notification async")
+    send_hipchat_notification(*args, **kwargs)
+
+
+@app.task(name='send_alert_notification')
+def send_alert_notification_task(*args, **kwargs):
+    logger.debug("send_alert_notification")
+    send_alert_notification(*args, **kwargs)

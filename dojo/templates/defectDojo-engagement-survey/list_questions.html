@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load display_tags %}
+{% block content %}
+    <div class="row">
+        <div class="col-md-10">
+            {% if questions %}
+                <div class="panel panel-default table-responsive">
+                    <table class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
+                        <thead>
+                        <tr>
+                            <th>Text</th>
+                            <th>Optional</th>
+                            <th>Type</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for question in questions %}
+                            <tr>
+                                <td><a title="{{ question.text }}"
+                                                      href="{% url 'edit_question' question.id %}">{{ question.text }}</a>
+                                </td>
+                                <td class="nowrap text-center">{{ question.optional|yesno|capfirst }}</td>
+                                <td class="nowrap text-center">{{ question|content_type_str|capfirst }} </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% include "dojo/paging_snippet.html" with page=questions %}
+            {% else %}
+                No Questionnaires found.
+            {% endif %}
+        </div>
+        <div class="col-md-2">
+            <div class="panel panel-default filters">
+                {% if filtered.form %}
+                    {% if request.user.is_staff %}
+                        <div class="panel-heading">Actions</div>
+                        <div class="panel-body centered">
+                            <a class="btn btn-sm btn-primary" href="{% url 'create_question' %}">
+                                Create Question
+                            </a>
+                        </div>
+                    {% endif %}
+                    <div class="panel-heading">Filters</div>
+                    <form method="get" class="panel-body">
+                        {{ filtered.form.as_p }}
+                        <div class="centered">
+                            <input type="submit" class="btn btn-primary inline top" label="submit" value="Apply"/><br/><br/>
+                            <a href="{% url 'questions' %}"> [Clear Filters] </a>
+                        </div>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-md-2">
+
+        </div>
+    </div>
+{% endblock %}

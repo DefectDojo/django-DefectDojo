@@ -15,8 +15,8 @@
             <div class="clearfix">
                 <h4 class="pull-left to_highlight finding-title">
                     {{ endpoint.host_no_port }}
-                    {% if endpoint.remediated %}
-                        - Remediated
+                    {% if endpoint.mitigated %}
+                        - Mitigated
                     {% else %}
                         - Vulnerable
                     {% endif %}
@@ -141,7 +141,7 @@
 
     <div class="panel panel-default endpoints table-responsive">
         <div class="panel-heading">
-            {% if vulnerable and not endpoint.remediated %}
+            {% if vulnerable and not endpoint.mitigated %}
             <h4>Vulnerable Services</h4>
             {% else %}
             <h4>Endpoints Services</h4>

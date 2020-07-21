@@ -1,0 +1,9 @@
+[
+    [
+        "ampache",
+        "<4.0.0",
+        "3.8.2",
+        "ampache 4.0.0:\r\n* Resolves CVE-2019-12385 for the SQL Injection\r\n* Resolves CVE-2019-12386 for the persistent XSS\r\n* Resolves NS-18-046 Multiple Reflected Cross-site Scripting Vulnerabilities in Ampache 3.9.0",
+        "37863"
+    ]
+]

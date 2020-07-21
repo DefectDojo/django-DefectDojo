@@ -6,14 +6,14 @@
 {% endblock %}
 
 {% block content %}
-    <h3> {% if scope == 'global' %}Global{% else %}Personal{% endif %} Notification Settings </h3>
+    <h3> {% if scope == 'system' %}System{% else %}Personal{% endif %} Notification Settings </h3>
     <form class="form-inline col-sm-10" method="post" id="notform">{% csrf_token %}
         <div class="container" style="width:50%">
             {% if request.user.is_superuser %}
                <div class="col-sm-5">
-                   <label for="notification-scope">Scope <span class="fa fa-question-circle has-popover" data-trigger="hover" data-content="Destinations for global notifications are configured in System Settings. Destinations for personal notifications are taken from your personal contact details (personal Slack notifications will be sent to you as a direct message)."/></label>
+                   <label for="notification-scope">Scope <span class="fa fa-question-circle has-popover" data-trigger="hover" data-content="Destinations for system notifications are configured in System Settings. Destinations for personal notifications are taken from your personal contact details (personal Slack notifications will be sent to you as a direct message)."/></label>
                     <select data-placeholder="Scope" id="notification-scope" class="chosen-select form-control"/>
-                        <option value="global">Global</option>
+                        <option value="system">System</option>
                          <option value="personal">Personal</option>
                      </select>
                 </div>
@@ -21,10 +21,23 @@
                 <p>&nbsp;</p>
                 <p>&nbsp;</p>
             {% endif %}
-             <table class="table table-hover col-sm-5">
+            {% if scope == 'system' %}
+                <p class="amber-color-with-padding">These notification settings apply <u>globally</u> to all products and will be sent to all super / staff users.</p>
+            {% else %}
+                <p class="amber-color-with-padding">These notification settings apply <u>globally</u> to all products that you have read access to and will be sent to you only.</p>
+                <p> If you want only notifications for certain products you should disable everything here and enable notifications on those products.</p>
+            {% endif %}
+            {% for u in not_users %}
+                <p>{{ u.username }} {{ u.applicable_notifications_count }}</p>
+                {% for n in u.applicable_notifications %}
+                    <p>{{ n.id }} {{ n.product.id }}, {{ n.user }}, e:{{ n.engagement_added}}, t:{{ n.test_added}}, scan:{{ n.scan_added }} </p>
+                {% endfor %}
+                <p>{{ u.merged_notifications.scan_added }}</p>
+            {% endfor %}
+            <table class="table table-hover col-sm-5">
                 <thead>
                     <tr>
-                        <th>Event</th><th>Slack</th><th>HipChat</th><th>Mail</th><th>Alert</th>
+                        <th>Event</th><th class="centered">Slack</th><th class="centered">HipChat</th><th class="centered">Mail</th><th class="centered">Alert</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -32,10 +45,14 @@
                     {% if field.auto_id %}
                         <tr>
                             <td>{{ field.label }}{% if field.field.required%}<sup>*</sup>{% endif %}
+                                {% if field.help_text %}
+                                <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="{{ field.help_text }}" data-placement="right" data-container="body">
+                                </i>
+                            {% endif %}
                             </td>
                     {% endif %}
                     {% for pk,c in field.field.widget.choices %}
-                        <td class="{{ classes.value }} {% if field|is_multiple_checkbox %}multiple-checkbox{% endif %}">
+                        <td class="centered">
                             <input type="checkbox" name="{{ field.name }}" {% if c in field.value %}checked{% endif %} value="{{ c }}"/>
                         </td>
                     {% endfor %}
