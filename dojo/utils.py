@@ -2200,9 +2200,8 @@ def sla_compute_and_notify(*args, **kwargs):
 
                 if (sla_age < 0) and (settings.SLA_NOTIFY_POST_BREACH < abs(sla_age)):
                     post_breach_no_notify_count += 1
-                    # Skip finding if breached for too long
-                    logger.info("Finding {} is breached the SLA for {} days. Skipping notifications.".format(finding.id, abs(sla_age)))
-                    # finding is breached for too long, don't care anymore.
+                    # Skip finding notification if breached for too long
+                    logger.debug("Finding {} breached the SLA {} days ago. Skipping notifications.".format(finding.id, abs(sla_age)))
                     continue
 
                 do_jira_sla_comment = False
