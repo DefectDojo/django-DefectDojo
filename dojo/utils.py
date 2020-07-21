@@ -29,7 +29,7 @@ import calendar as tcalendar
 from dojo.github import add_external_issue_github, update_external_issue_github, close_external_issue_github, reopen_external_issue_github
 from dojo.models import Finding, Engagement, Finding_Template, Product, JIRA_PKey, JIRA_Issue,\
     Dojo_User, User, System_Settings, Notifications, Endpoint, Benchmark_Type, \
-    Language_Type, Languages, Rule, Test_Type
+    Language_Type, Languages, Rule, Test_Type, Notes
 from asteval import Interpreter
 from requests.auth import HTTPBasicAuth
 from dojo.notifications.helper import create_notification
@@ -37,6 +37,7 @@ import logging
 import itertools
 from django.contrib import messages
 from django.http import HttpResponseRedirect
+# import traceback
 
 
 logger = logging.getLogger(__name__)
@@ -1335,6 +1336,10 @@ def reopen_external_issue(find, note, external_issue_provider):
 
 
 def add_issue(find, push_to_jira):
+    logger.info('trying to create a new jira issue for %d:%s', find.id, find.title)
+
+    # traceback.print_stack()
+
     eng = Engagement.objects.get(test=find.test)
     prod = Product.objects.get(engagement=eng)
     jira_minimum_threshold = Finding.get_number_severity(System_Settings.objects.get().jira_minimum_severity)
@@ -1391,7 +1396,6 @@ def add_issue(find, push_to_jira):
 
                 if System_Settings.objects.get().enable_finding_sla:
                     # populate duedate field, but only if it's available for this project + issuetype
-                    # meta = jira.createmeta(projectKeys=jpkey.project_key, expand="fields")
                     if not meta:
                         meta = jira_meta(jira, jpkey)
 
@@ -1413,9 +1417,23 @@ def add_issue(find, push_to_jira):
                 new_issue = jira.create_issue(fields)
 
                 j_issue = JIRA_Issue(
-                    jira_id=new_issue.id, jira_key=new_issue, finding=find)
+                    jira_id=new_issue.id, jira_key=new_issue.key, finding=find)
                 j_issue.save()
                 issue = jira.issue(new_issue.id)
+
+                find.jira_creation = timezone.now()
+                find.jira_change = timezone.now()
+                find.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
+
+                jira_issue_url = find.jira_issue.jira_key
+                if find.jira_conf_new():
+                    jira_issue_url = find.jira_conf_new().url + '/' + new_issue.key
+
+                new_note = Notes()
+                new_note.entry = 'created JIRA issue %s for finding' % (jira_issue_url)
+                new_note.author = find.reporter  # quick hack because we don't have request.user here
+                new_note.save()
+                find.notes.add(new_note)
 
                 # Upload dojo finding screenshots to Jira
                 for pic in find.images.all():
@@ -1428,11 +1446,11 @@ def add_issue(find, push_to_jira):
                     #      issue_list = [j_issue.jira_id,]
                     #      jira.add_issues_to_epic(epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
             except JIRAError as e:
-                logger.error(e.text, find)
+                logger.error(e.text)
                 log_jira_alert(e.text, find)
         else:
             log_jira_alert("A Finding needs to be both Active and Verified to be pushed to JIRA.", find)
-            logger.warning("A Finding needs to be both Active and Verified to be pushed to JIRA.", find)
+            logger.warning("A Finding needs to be both Active and Verified to be pushed to JIRA: %s", find)
 
 
 def jira_meta(jira, jpkey):
@@ -1473,6 +1491,7 @@ def jira_check_attachment(issue, source_file_name):
 
 
 def update_issue(find, push_to_jira):
+    logger.info('trying to update a linked jira issue for %d:%s', find.id, find.title)
     prod = Product.objects.get(
         engagement=Engagement.objects.get(test=find.test))
     jpkey = JIRA_PKey.objects.get(product=prod)
@@ -1528,11 +1547,9 @@ def update_issue(find, push_to_jira):
                 description=jira_description(find),
                 priority={'name': jira_conf.get_priority(find.severity)},
                 fields=fields)
-            # print('\n\nSaving jira_change\n\n')
-            # Moving this to finding.save()
-            # find.jira_change = timezone.now()
-            # find.save()
-            # Add labels(security & product)
+
+            find.jira_change = timezone.now()
+            find.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
 
         except JIRAError as e:
             log_jira_alert(e.text, find)
@@ -1607,6 +1624,7 @@ def update_epic(eng, push_to_jira):
 
 
 def add_epic(eng, push_to_jira):
+    logger.info('trying to create a new jira EPIC for %d:%s', eng.id, eng.name)
     engagement = eng
     prod = Product.objects.get(engagement=engagement)
     jpkey = JIRA_PKey.objects.get(product=prod)
@@ -1630,7 +1648,7 @@ def add_epic(eng, push_to_jira):
             new_issue = jira.create_issue(fields=issue_dict)
             j_issue = JIRA_Issue(
                 jira_id=new_issue.id,
-                jira_key=new_issue,
+                jira_key=new_issue.key,
                 engagement=engagement)
             j_issue.save()
         except Exception as e:
@@ -1645,7 +1663,23 @@ def add_epic(eng, push_to_jira):
             pass
 
 
+def jira_get_issue(jpkey, issue_key):
+    jira_conf = jpkey.conf
+    try:
+        jira = JIRA(
+            server=jira_conf.url,
+            basic_auth=(jira_conf.username, jira_conf.password))
+        issue = jira.issue(issue_key)
+        print(vars(issue))
+        return issue
+    except JIRAError as jira_error:
+        logger.debug('error retrieving jira issue ' + issue_key + ' ' + str(jira_error))
+        log_jira_generic_alert('error retrieving jira issue ' + issue_key, str(jira_error))
+        return None
+
+
 def add_comment(find, note, force_push=False):
+    logger.debug('trying to add a comment to a linked jira issue for: %d:%s', find.id, find.title)
     if not note.private:
         prod = Product.objects.get(
             engagement=Engagement.objects.get(test=find.test))

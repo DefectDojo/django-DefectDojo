@@ -665,7 +665,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     continue
 
                 item.test = test
-                item.date = test.target_start
+                item.date = test.target_start.date()
                 item.reporter = self.context['request'].user
                 item.last_reviewed = timezone.now()
                 item.last_reviewed_by = self.context['request'].user
