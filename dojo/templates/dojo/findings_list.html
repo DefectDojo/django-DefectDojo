@@ -83,6 +83,9 @@
                                 <label style="font-size: 80%; font-weight: bold; display: block">Push to Jira
                                   <input id="id_push_tojira" name="push_to_jira" type="checkbox" alt="Select to push to JIRA"/>
                                 </label>
+                                {% comment %} <label style="font-size: 80%; font-weight: bold; display: block">Unlink JIRA issues
+                                  <input id="unlink_from_jira" name="unlink_from_jira" type="checkbox" alt="Select to unlink JIRA issues from Defect Dojo findings"/>
+                                </label> {% endcomment %}
                                 {% endif %}
                                 {% if system_settings.enable_github %}
                                 <label style="font-size: 80%; font-weight: bold; display: block">Push to GitHub
