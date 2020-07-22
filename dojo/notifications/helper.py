@@ -77,6 +77,7 @@ def create_notification_message(event, user, notification_type, *args, **kwargs)
     try:
         notification = render_to_string(template, kwargs)
     except Exception as e:
+        logger.debug("exception is {}".format(e))
         logger.debug('template not found or not implemented yet: %s', template)
         kwargs["description"] = create_description(event, *args, **kwargs)
         create_description(event, *args, **kwargs)
