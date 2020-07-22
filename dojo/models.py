@@ -2348,6 +2348,7 @@ class JIRA_Conf(models.Model):
     finding_text = models.TextField(null=True, blank=True, help_text="Additional text that will be added to the finding in Jira. For example including how the finding was created or who to contact for more information.")
     accepted_mapping_resolution = models.CharField(null=True, blank=True, max_length=300, help_text="JIRA resolution names (comma-separated values) that maps to an Accepted Finding")
     false_positive_mapping_resolution = models.CharField(null=True, blank=True, max_length=300, help_text="JIRA resolution names (comma-separated values) that maps to a False Positive Finding")
+    global_jira_sla_notification = models.BooleanField(default=True, blank=False, verbose_name="Globally send SLA notifications as comment?", help_text="This setting can be overidden at the Product level")
 
     @property
     def accepted_resolutions(self):
@@ -2424,6 +2425,7 @@ class JIRA_PKey(models.Model):
     enable_engagement_epic_mapping = models.BooleanField(default=False,
                                                          blank=True)
     push_notes = models.BooleanField(default=False, blank=True)
+    product_jira_sla_notification = models.BooleanField(default=True, blank=False, verbose_name="Send SLA notifications as comment?")
 
     def __unicode__(self):
         return self.product.name + " | " + self.project_key
@@ -2434,8 +2436,8 @@ class JIRA_PKey(models.Model):
 
 NOTIFICATION_CHOICES = (
     ("slack", "slack"), ("hipchat", "hipchat"), ("mail", "mail"),
-    ("alert", "alert"))
-
+    ("alert", "alert")
+)
 
 class Notifications(models.Model):
     product_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
@@ -2453,6 +2455,9 @@ class Notifications(models.Model):
     other = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     user = models.ForeignKey(Dojo_User, default=None, null=True, editable=False, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, default=None, null=True, editable=False, on_delete=models.CASCADE)
+    sla_breach = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True,
+        verbose_name="SLA breach",
+        help_text="Get notified of upcoming SLA breaches")
 
     class Meta:
         constraints = [
@@ -2499,6 +2504,7 @@ class Notifications(models.Model):
                 result.code_review = merge_sets_safe(result.code_review, notifications.code_review)
                 result.review_requested = merge_sets_safe(result.review_requested, notifications.review_requested)
                 result.other = merge_sets_safe(result.other, notifications.other)
+                result.sla_breach = merge_sets_safe(result.sla_breach, notifications.sla_breach)
 
         return result
 

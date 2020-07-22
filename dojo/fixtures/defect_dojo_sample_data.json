@@ -24284,7 +24284,8 @@
         "medium_mapping_severity": "test severity",
         "high_mapping_severity": "test severity",
         "critical_mapping_severity": "test severity",
-        "finding_text": ""
+        "finding_text": "",
+        "global_jira_sla_notification": false
     }
 },
 {
