@@ -1,7 +1,8 @@
+{{- $fullName := include "defectdojo.fullname" . -}}
 kind: ServiceAccount
 apiVersion: v1
 metadata:
-  name: defectdojo
+  name: {{ $fullName }}
   labels:
     app.kubernetes.io/name: {{ include "defectdojo.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
