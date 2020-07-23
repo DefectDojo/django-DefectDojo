@@ -1,12 +1,12 @@
 from django.core.management.base import BaseCommand
 from django.db.models import Count
-from dojo.models import Endpoint, Finding, Endpoint_Status
+from dojo.models import Finding, Endpoint_Status
 
 
 """
 Author: Cody Maffucci
 This script will create endpoint status objects for findings and endpoints for
-databases that already contain those objects. This script should only be run when 
+databases that already contain those objects. This script should only be run when
 upgrading to 1.7.0 as it is unnecessary for fresh installs
 """
 
@@ -26,7 +26,7 @@ class Command(BaseCommand):
                     finding=finding,
                     endpoint=endpoint,
                     date=finding.date,
-                    )
+                )
                 # If the endpoint was mitigated in the older fashion, update the status to reflect that
                 if endpoint.mitigated:
                     status.mitigated = True
