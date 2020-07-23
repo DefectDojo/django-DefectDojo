@@ -111,7 +111,7 @@ def get_item_v2(item, test):
     else:
         mitigation = 'No known mitigation'
 
-    return Finding(title=f'{cve}: {file_path}',
+    return Finding(title=str(cve) + ': ' + str(file_path),
                    description=description,
                    url=url,
                    cwe=0,
