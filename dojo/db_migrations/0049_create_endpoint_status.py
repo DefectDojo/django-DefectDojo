@@ -18,24 +18,30 @@ class Migration(migrations.Migration):
             # Get the list of endpoints on the current finding
             endpoints = finding.endpoints.all()
             for endpoint in endpoints:
-                # Create a new status for each endpoint
-                status, created = Endpoint_Status.objects.get_or_create(
-                    finding=finding,
-                    endpoint=endpoint,
-                )
-                # Check if the status object was created, otherwise, there is nothing to do
-                if created:
-                    status.date = finding.date
-                    # If the parent endpoint was mitigated with the old system,
-                    # reflect the same on the endpoint status object
-                    if endpoint.mitigated:
-                        status.mitigated = True
-                        status.mitigated_by = finding.reporter
-                    # Save the status object with at least one updated field
-                    status.save()
-                    # Attach the status to the endpoint and finding
-                    endpoint.endpoint_status.add(status)
-                    finding.endpoint_status.add(status)
+                # Superflous error checking
+                try: 
+                    # Create a new status for each endpoint
+                    status, created = Endpoint_Status.objects.get_or_create(
+                        finding=finding,
+                        endpoint=endpoint,
+                    )
+                    # Check if the status object was created, otherwise, there is nothing to do
+                    if created:
+                        status.date = finding.date
+                        # If the parent endpoint was mitigated with the old system,
+                        # reflect the same on the endpoint status object
+                        if endpoint.mitigated:
+                            status.mitigated = True
+                            status.mitigated_by = finding.reporter
+                        # Save the status object with at least one updated field
+                        status.save()
+                        # Attach the status to the endpoint and finding
+                        endpoint.endpoint_status.add(status)
+                        finding.endpoint_status.add(status)
+                except Exception as e:
+                    # Something wild happened
+                    print(e)
+                    pass
 
     dependencies = [
         ('dojo', '0048_sla_notifications'),
