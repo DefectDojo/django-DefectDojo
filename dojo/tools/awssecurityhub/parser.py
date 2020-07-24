@@ -2,6 +2,7 @@ from dojo.models import Finding
 from datetime import datetime
 import json
 
+
 class AwsSecurityFindingFormatParser:
     def __init__(self, filehandle, test):
         tree = self.parse_json(filehandle)
@@ -23,14 +24,16 @@ class AwsSecurityFindingFormatParser:
         items = {}
         findings = tree.get('Findings')
 
-        if not findings: return list()
+        if not findings:
+            return list()
 
         for node in findings:
             item = get_item(node, test)
             key = node['Id']
             items[key] = item
-        
+
         return list(items.values())
+
 
 def get_item(finding, test):
     title = finding.get('Title', "")
@@ -49,7 +52,7 @@ def get_item(finding, test):
 
     if finding.get('Compliance', {}).get('Status', "PASSED"):
         mitigated = datetime.strptime(
-            finding.get('LastObservedAt', datetime.utcnow()), 
+            finding.get('LastObservedAt', datetime.utcnow()),
             "%Y-%m-%dT%H:%M:%S.%fZ"
         )
     else:

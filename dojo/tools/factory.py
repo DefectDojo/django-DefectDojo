@@ -271,8 +271,6 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = YarnAuditParser(file, test)
     elif scan_type == 'BugCrowd Scan':
         parser = BugCrowdCSVParser(file, test)
-    elif scan_type == 'AWS Security Hub Scan':
-        parser = AwsSecurityFindingFormatParser(file, test)
     elif scan_type == 'HuskyCI Report':
         parser = HuskyCIReportParser(file, test)
     elif scan_type == 'CCVS Report':
