@@ -119,7 +119,7 @@ mysql:
   mysqlUser: defectdojo
   mysqlPassword: ""
   mysqlRootPassword: ""
-  secret: defectdojo-mysql-specific
+  existingSecret: defectdojo-mysql-specific
   mysqlDatabase: defectdojo
   service:
     port: 3306  
@@ -132,7 +132,7 @@ postgresql:
   postgresqlUsername: defectdojo
   postgresqlPassword: ""
   postgresqlDatabase: defectdojo
-  secret: defectdojo-postgresql-specific
+  existingSecret: defectdojo-postgresql-specific
   persistence:
     enabled: true
   replication:

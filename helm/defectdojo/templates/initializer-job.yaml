@@ -18,7 +18,7 @@ spec:
         app.kubernetes.io/name: {{ include "defectdojo.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
-      serviceAccountName: {{- $fullName }}
+      serviceAccountName: {{ $fullName }}
       {{- if .Values.imagePullSecrets }}
       imagePullSecrets:
       - name: {{ .Values.imagePullSecrets }}
@@ -53,10 +53,10 @@ spec:
           valueFrom:
             secretKeyRef:
               {{- if eq .Values.database "postgresql" }}
-              name: {{ .Values.postgresql.secret }}
+              name: {{ .Values.postgresql.existingSecret }}
               key: postgresql-password
               {{- else if eq .Values.database "mysql" }}
-              name: {{ .Values.mysql.secret }}
+              name: {{ .Values.mysql.existingSecret }}
               key: mysql-password
               {{- end }}
         resources:

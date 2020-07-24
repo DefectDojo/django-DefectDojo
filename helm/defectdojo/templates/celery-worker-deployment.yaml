@@ -60,10 +60,10 @@ spec:
           valueFrom:
             secretKeyRef:
               {{- if eq .Values.database "postgresql" }}
-              name: {{ .Values.postgresql.secret }}
+              name: {{ .Values.postgresql.existingSecret }}
               key: postgresql-password
               {{- else if eq .Values.database "mysql" }}
-              name: {{ .Values.mysql.secret }}
+              name: {{ .Values.mysql.existingSecret }}
               key: mysql-password
               {{- end }}
         - name: DD_SECRET_KEY
