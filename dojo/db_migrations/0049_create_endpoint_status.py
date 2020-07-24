@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
             endpoints = finding.endpoints.all()
             for endpoint in endpoints:
                 # Superflous error checking
-                try: 
+                try:
                     # Create a new status for each endpoint
                     status, created = Endpoint_Status.objects.get_or_create(
                         finding=finding,
