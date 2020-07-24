@@ -24,9 +24,13 @@ tag: latest
 
 admin:
   user: admin
+  password:
   firstName: Administrator
   lastName: User
   mail: admin@defectdojo.local
+  secretKey:
+  credentialAes256Key:
+  metricsHttpAuthPassword:
 
 monitoring:
   enabled: false
@@ -113,7 +117,8 @@ initializer:
 mysql:
   enabled: false
   mysqlUser: defectdojo
-  mysqlPassword: 
+  mysqlPassword: ""
+  mysqlRootPassword: ""
   existingSecret: defectdojo-mysql-specific
   mysqlDatabase: defectdojo
   service:
@@ -125,7 +130,7 @@ mysql:
 postgresql:
   enabled: true
   postgresqlUsername: defectdojo
-  postgresqlPassword: 
+  postgresqlPassword: ""
   postgresqlDatabase: defectdojo
   existingSecret: defectdojo-postgresql-specific
   persistence:
@@ -160,6 +165,8 @@ rabbitmq:
   enabled: true
   replicas: 1
   rabbitmq:
+    password: ""
+    erlangCookie: ""
     existingPasswordSecret: defectdojo-rabbitmq-specific
     existingErlangSecret: defectdojo-rabbitmq-specific
     affinity: {}
@@ -168,5 +175,6 @@ rabbitmq:
 redis:
   enabled: false
   existingSecret: defectdojo-redis-specific
+  password: ""
   cluster:
     slaveCount: 1
