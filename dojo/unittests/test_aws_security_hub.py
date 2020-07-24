@@ -9,7 +9,7 @@ def sample_path(file_name):
     return os.path.join('dojo/unittests/scans/awssecurityhub', file_name)
 
 
-class AwsSecurityFindingFormatParser(TestCase):
+class TestAwsSecurityFindingFormatParser(TestCase):
 
     def test_no_findings(self):
         parser = AwsSecurityFindingFormatParser(None, Test())
