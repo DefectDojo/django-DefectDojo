@@ -447,12 +447,12 @@
                         </li>
                         <li role="presentation">
                             <a class="" href="{% url 'add_meta_data' product_tab.product.id %}">
-                                <i class="fa fa-list-alt"></i> Add Custom Fields
+                                <i class="fa fa-plus"></i> Add Custom Fields
                             </a>
                         </li>
                         <li role="presentation">
                             <a class="" href="{% url 'new_object' product_tab.product.id %}">
-                                <i class="fa fa-list-alt"></i> Add Product Tracking Files
+                                <i class="fa fa-plus"></i> Add Product Tracking Files
                             </a>
                         </li>
                         <li role="separator" class="divider"></li>
@@ -463,7 +463,7 @@
                         </li>
                         <li role="presentation">
                             <a href="{% url 'all_cred_product' product_tab.product.id %}">
-                                <i class="fa fa-plus"></i> View Credentials
+                                <i class="fa fa-list-alt"></i> View Credentials
                             </a>
                         </li>
                         <li role="separator" class="divider"></li>
@@ -474,7 +474,7 @@
                         </li>
                         <li role="presentation">
                             <a href="{% url 'all_tool_product' product_tab.product.id %}">
-                                <i class="fa fa-plus"></i> View Tools
+                                <i class="fa fa-list-alt"></i> View Tools
                             </a>
                         </li>
                         <li role="separator" class="divider"></li>
@@ -485,7 +485,7 @@
                         </li>
                         <li role="presentation">
                             <a href="{% url 'engagement_presets' product_tab.product.id %}">
-                                <i class="fa fa-plus"></i> View Engagement Presets
+                                <i class="fa fa-list-alt"></i> View Engagement Presets
                             </a>
                         </li>
                         <li role="separator" class="divider"></li>
@@ -650,6 +650,18 @@
                                            '<i class="fa fa-angle-right"></i></a></li>');
             });
         }
+
+        $("#id_jiraform-jira_issue").on('paste', function(e) {
+            var clipboardData = e.clipboardData || e.originalEvent.clipboardData || window.clipboardData;
+            var pastedData = clipboardData.getData('text');
+
+            $this = $(this)
+            // if someone entered/pasted a full URL, we strip evertyhing until last '/'
+            setTimeout(function (elem) {
+                $this.val($this.val().substring($this.val().lastIndexOf("/") + 1));
+            }, 100);
+        });
+
     });
 </script>
 

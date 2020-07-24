@@ -146,16 +146,16 @@ class ReportRiskAcceptanceFilter(ChoiceFilter):
     def any(self, qs, name):
         return qs.all()
 
-    def accpeted(self, qs, name):
+    def accepted(self, qs, name):
         return qs.filter(risk_acceptance__isnull=False)
 
-    def not_accpeted(self, qs, name):
+    def not_accepted(self, qs, name):
         return qs.filter(risk_acceptance__isnull=True)
 
     options = {
         '': (_('Either'), any),
-        1: (_('Yes'), accpeted),
-        2: (_('No'), not_accpeted),
+        1: (_('Yes'), accepted),
+        2: (_('No'), not_accepted),
     }
 
     def __init__(self, *args, **kwargs):
@@ -352,6 +352,9 @@ class OpenFindingFilter(DojoFilter):
     test__engagement__product = ModelMultipleChoiceFilter(
         queryset=Product.objects.all(),
         label="Product")
+    test__engagement__risk_acceptance = ReportRiskAcceptanceFilter(
+        label="Risk Accepted")
+
     if get_system_setting('enable_jira'):
         jira_issue = BooleanFilter(field_name='jira_issue',
                                    lookup_expr='isnull',
@@ -433,6 +436,8 @@ class ClosedFindingFilter(DojoFilter):
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.all(),
         label="Product Type")
+    test__engagement__risk_acceptance = ReportRiskAcceptanceFilter(
+        label="Risk Accepted")
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -558,6 +563,8 @@ class ProductFindingFilter(DojoFilter):
     severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     test__test_type = ModelMultipleChoiceFilter(
         queryset=Test_Type.objects.all())
+    test__engagement__risk_acceptance = ReportRiskAcceptanceFilter(
+        label="Risk Accepted")
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -736,7 +743,7 @@ class EndpointFilter(DojoFilter):
     path = CharFilter(lookup_expr='icontains')
     query = CharFilter(lookup_expr='icontains')
     fragment = CharFilter(lookup_expr='icontains')
-    remediated = CharFilter(lookup_expr='icontains')
+    mitigated = CharFilter(lookup_expr='icontains')
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -757,7 +764,7 @@ class EndpointFilter(DojoFilter):
 
     class Meta:
         model = Endpoint
-        exclude = ['remediated']
+        exclude = ['mitigated']
 
 
 class EndpointReportFilter(DojoFilter):

@@ -1,6 +1,7 @@
 # Django settings for DefectDojo
 import os
 from datetime import timedelta
+from celery.schedules import crontab
 
 import environ
 root = environ.Path(__file__) - 3  # Three folders back
@@ -93,9 +94,35 @@ env = environ.Env(
     DD_SOCIAL_AUTH_GITLAB_SECRET=(str, ''),
     DD_SOCIAL_AUTH_GITLAB_API_URL=(str, 'https://gitlab.com'),
     DD_SOCIAL_AUTH_GITLAB_SCOPE=(list, ['api', 'read_user', 'openid', 'profile', 'email']),
+    DD_SAML2_ENABLED=(bool, False),
+    DD_SAML2_METADATA_AUTO_CONF_URL=(str, ''),
+    DD_SAML2_METADATA_LOCAL_FILE_PATH=(str, ''),
+    DD_SAML2_ASSERTION_URL=(str, ''),
+    DD_SAML2_ENTITY_ID=(str, ''),
+    DD_SAML2_DEFAULT_NEXT_URL=(str, '/dashboard'),
+    DD_SAML2_NEW_USER_PROFILE=(dict, {
+        # The default group name when a new user logs in
+        'USER_GROUPS': [],
+        # The default active status for new users
+        'ACTIVE_STATUS': True,
+        # The staff status for new users
+        'STAFF_STATUS': False,
+        # The superuser status for new users
+        'SUPERUSER_STATUS': False,
+    }),
+    DD_SAML2_ATTRIBUTES_MAP=(dict, {
+        # Change Email/UserName/FirstName/LastName to corresponding SAML2 userprofile attributes.
+        'email': 'Email',
+        'username': 'UserName',
+        'first_name': 'FirstName',
+        'last_name': 'LastName',
+    }),
     # merging findings doesn't always work well with dedupe and reimport etc.
     # disable it if you see any issues (and report them on github)
     DD_DISABLE_FINDING_MERGE=(bool, False),
+    # Set to True if you want to allow authorized users to make changes to findings or delete them
+    DD_AUTHORIZED_USERS_ALLOW_CHANGE=(bool, False),
+    DD_AUTHORIZED_USERS_ALLOW_DELETE=(bool, False),
 )
 
 
@@ -331,6 +358,34 @@ SOCIAL_AUTH_AUTH0_DOMAIN = env('DD_SOCIAL_AUTH_AUTH0_DOMAIN')
 SOCIAL_AUTH_AUTH0_SCOPE = env('DD_SOCIAL_AUTH_AUTH0_SCOPE')
 SOCIAL_AUTH_TRAILING_SLASH = env('DD_SOCIAL_AUTH_TRAILING_SLASH')
 
+# For more configuration and customization options, see django-saml2-auth documentation
+# https://github.com/fangli/django-saml2-auth
+SAML2_ENABLED = env('DD_SAML2_ENABLED')
+SAML2_AUTH = {
+    # Metadata is required, choose either remote url or local file path
+    'METADATA_AUTO_CONF_URL': env('DD_SAML2_METADATA_AUTO_CONF_URL'),
+    'METADATA_LOCAL_FILE_PATH': env('DD_SAML2_METADATA_LOCAL_FILE_PATH'),
+    'ASSERTION_URL': env('DD_SAML2_ASSERTION_URL'),
+    'ENTITY_ID': env('DD_SAML2_ENTITY_ID'),
+    # Optional settings below
+    'DEFAULT_NEXT_URL': env('DD_SAML2_DEFAULT_NEXT_URL'),
+    'NEW_USER_PROFILE': env('DD_SAML2_NEW_USER_PROFILE'),
+    'ATTRIBUTES_MAP': env('DD_SAML2_ATTRIBUTES_MAP'),
+}
+
+AUTHORIZED_USERS_ALLOW_CHANGE = env('DD_AUTHORIZED_USERS_ALLOW_CHANGE')
+AUTHORIZED_USERS_ALLOW_DELETE = env('DD_AUTHORIZED_USERS_ALLOW_DELETE')
+
+# Setting SLA_NOTIFY_ACTIVE and SLA_NOTIFY_ACTIVE_VERIFIED to False will disable the feature
+# If you import thousands of Active findings through your pipeline everyday,
+# and make the choice of enabling SLA notifications for non-verified findings,
+# be mindful of performance.
+SLA_NOTIFY_ACTIVE = False  # this will include 'verified' findings as well as non-verified.
+SLA_NOTIFY_ACTIVE_VERIFIED_ONLY = True
+SLA_NOTIFY_WITH_JIRA_ONLY = False  # Based on the 2 above, but only with a JIRA link
+SLA_NOTIFY_PRE_BREACH = 3  # in days, notify between dayofbreach minus this number until dayofbreach
+SLA_NOTIFY_POST_BREACH = 7  # in days, skip notifications for findings that go past dayofbreach plus this number
+
 LOGIN_EXEMPT_URLS = (
     r'^%sstatic/' % URL_PREFIX,
     r'^%swebhook/' % URL_PREFIX,
@@ -339,6 +394,8 @@ LOGIN_EXEMPT_URLS = (
     r'^%sfinding/image/(?P<token>[^/]+)$' % URL_PREFIX,
     r'^%sapi/v2/' % URL_PREFIX,
     r'complete/',
+    r'saml2/login',
+    r'saml2/acs',
     r'empty_questionnaire/([\d]+)/answer'
 )
 
@@ -579,6 +636,10 @@ CELERY_BEAT_SCHEDULE = {
     'update-findings-from-source-issues': {
         'task': 'dojo.tasks.async_update_findings_from_source_issues',
         'schedule': timedelta(hours=3),
+    },
+    'compute-sla-age-and-notify': {
+        'task': 'dojo.tasks.async_sla_compute_and_notify',
+        'schedule': crontab(hour=7, minute=30),
     }
 }
 

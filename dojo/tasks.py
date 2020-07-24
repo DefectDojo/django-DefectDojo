@@ -20,8 +20,8 @@ from dojo.reports.widgets import report_widget_factory
 from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_issue, \
                        close_epic, sync_rules, fix_loop_duplicates, \
                        rename_whitesource_finding, update_external_issue, add_external_issue, \
-                       close_external_issue, reopen_external_issue
-from dojo.notifications.helper import create_notification, send_alert_notification, send_hipchat_notification, send_mail_notification, send_slack_notification
+                       close_external_issue, reopen_external_issue, sla_compute_and_notify
+from dojo.notifications.helper import create_notification, send_hipchat_notification, send_mail_notification, send_slack_notification
 import logging
 
 fmt = getattr(settings, 'LOG_FORMAT', None)
@@ -378,7 +378,10 @@ def send_hipchat_notification_task(*args, **kwargs):
     send_hipchat_notification(*args, **kwargs)
 
 
-@app.task(name='send_alert_notification')
-def send_alert_notification_task(*args, **kwargs):
-    logger.debug("send_alert_notification")
-    send_alert_notification(*args, **kwargs)
+@app.task(name='dojo.tasks.async_sla_compute_and_notify')
+def async_sla_compute_and_notify_task(*args, **kwargs):
+    logger.debug("Computing SLAs and notifying as needed")
+    try:
+        sla_compute_and_notify(*args, **kwargs)
+    except Exception as e:
+        logger.error("An unexpected error was thrown calling the SLA code: {}".format(e))

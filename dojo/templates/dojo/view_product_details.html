@@ -117,7 +117,9 @@
   <div class="col-md-6">
     <div class="panel panel-default">
       <div class="panel-heading">
-        <h3 class="panel-title"><span class="fa fa-bolt" aria-hidden="true"></span> Technologies {%if app_analysis%}({{ app_analysis.count }}){%endif%}</h3>
+        <h3 class="panel-title"><span class="fa fa-bolt" aria-hidden="true"></span> Technologies {%if app_analysis%}({{ app_analysis.count }}){%endif%}
+          <a title="Add New Technology" class="pull-right btn btn-sm btn-primary" href="/product/{{ prod.id }}/new_technology"><span class="fa fa-plus"></span> </a>
+        </h3>      
       </div>
       <ul class="list-group">
       {% for app in app_analysis %}
@@ -327,7 +329,11 @@
       <table class="table table-striped">
         <tbody>
           <tr>
-              <td id="saving_notifications">&nbsp;</td><td class="centered">Slack</td><td class="centered">HipChat</td><td class="centered">Mail</td><td class="centered">Alert</td>
+              <td id="saving_notifications">&nbsp;</td>
+              <td class="centered">Slack</td>
+              <td class="centered">HipChat</td>
+              <td class="centered">Mail</td>
+              <td class="centered">Alert</td>
           </tr>
           {% for field in personal_notifications_form.visible_fields %}
           <tr>
@@ -362,6 +368,9 @@
   <script src="{% static "flot/jquery.flot.stack.js" %}"></script>
   <script src="{% static "flot/jquery.flot.resize.js" %}"></script>
   <script type="text/javascript">
+    $(function(){
+               $('[data-toggle="tooltip"]').tooltip();
+    });
     $(function() {
       if (document.referrer.indexOf('simple_search') > 0) {
         var terms = '';

@@ -1,0 +1,184 @@
+{
+    "id": "ff4cc20c-fdd8-4297-bd21-3703daba1bef",
+    "status": "finished",
+    "created_at": "2020-06-23T14:12:44.176922Z",
+    "updated_at": "2020-06-23T14:14:05.899405Z",
+    "image": "docker-image:tag",
+    "vendors": {
+        "anchore_engine": {            
+            "output": "anchore_output",
+            "image_id": "sha256:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        },
+        "clair": {
+            "output": "clair_output",
+            "image_id": "sha256_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_yyyyyyyyyyyy"
+        }
+    },
+    "errors": [],
+    "result": "failed",
+    "ccvs_results": {
+        "anchore_engine": {
+            "low_vulns": [
+                {
+                    "fix": "232-25+deb9u7",
+                    "url": "https://security-tracker.debian.org/tracker/CVE-2018-16866",
+                    "name": "CVE-2018-16866",
+                    "severity": "Low",
+                    "package_name": "libsystemd0",
+                    "package_version": "232-25+deb9u4"
+                },
+                {
+                    "fix": "232-25+deb9u8",
+                    "url": "https://security-tracker.debian.org/tracker/CVE-2019-3815",
+                    "name": "CVE-2019-3815",
+                    "severity": "Low",
+                    "package_name": "libsystemd0",
+                    "package_version": "232-25+deb9u4"
+                },
+                {
+                    "fix": "232-25+deb9u7",
+                    "url": "https://security-tracker.debian.org/tracker/CVE-2018-16866",
+                    "name": "CVE-2018-16866",
+                    "severity": "Low",
+                    "package_name": "libudev1",
+                    "package_version": "232-25+deb9u4"
+                },
+                {
+                    "fix": "232-25+deb9u8",
+                    "url": "https://security-tracker.debian.org/tracker/CVE-2019-3815",
+                    "name": "CVE-2019-3815",
+                    "severity": "Low",
+                    "package_name": "libudev1",
+                    "package_version": "232-25+deb9u4"
+                }
+            ],
+            "high_vulns": [
+                {
+                    "fix": "1.4.9",
+                    "url": "https://security-tracker.debian.org/tracker/CVE-2019-3462",
+                    "name": "CVE-2019-3462",
+                    "severity": "High",
+                    "package_name": "apt",
+                    "package_version": "1.4.8"
+                },
+                {
+                    "fix": "1.4.9",
+                    "url": "https://security-tracker.debian.org/tracker/CVE-2019-3462",
+                    "name": "CVE-2019-3462",
+                    "severity": "High",
+                    "package_name": "libapt-pkg5.0",
+                    "package_version": "1.4.8"
+                }
+            ],
+            "medium_vulns": [
+                {
+                    "fix": "1.4.10",
+                    "url": "https://security-tracker.debian.org/tracker/CVE-2020-3810",
+                    "name": "CVE-2020-3810",
+                    "severity": "Medium",
+                    "package_name": "apt",
+                    "package_version": "1.4.8"
+                },
+                {
+                    "fix": "1.43.4-2+deb9u1",
+                    "url": "https://security-tracker.debian.org/tracker/CVE-2019-5094",
+                    "name": "CVE-2019-5094",
+                    "severity": "Medium",
+                    "package_name": "e2fslibs",
+                    "package_version": "1.43.4-2"
+                }
+            ],
+            "negligible_vulns": [
+                {
+                    "fix": "None",
+                    "url": "https://security-tracker.debian.org/tracker/CVE-2011-3374",
+                    "name": "CVE-2011-3374",
+                    "severity": "Negligible",
+                    "package_name": "apt",
+                    "package_version": "1.4.8"
+                },
+                {
+                    "fix": "None",
+                    "url": "https://security-tracker.debian.org/tracker/CVE-2017-18018",
+                    "name": "CVE-2017-18018",
+                    "severity": "Negligible",
+                    "package_name": "coreutils",
+                    "package_version": "8.26-3"
+                },
+                {
+                    "fix": "None",
+                    "url": "https://security-tracker.debian.org/tracker/CVE-2011-3374",
+                    "name": "CVE-2011-3374",
+                    "severity": "Negligible",
+                    "package_name": "libapt-pkg5.0",
+                    "package_version": "1.4.8"
+                }
+            ]
+        },
+        "clair": {
+            "low_vulns": [
+                {
+                    "fix": null,
+                    "url": "https://security-tracker.debian.org/tracker/CVE-2019-17543",
+                    "name": "CVE-2019-17543",
+                    "severity": "Low",
+                    "package_name": "lz4",
+                    "package_version": "0.0~r131-2"
+                },
+                {
+                    "fix": null,
+                    "url": "https://security-tracker.debian.org/tracker/CVE-2019-7665",
+                    "name": "CVE-2019-7665",
+                    "severity": "Low",
+                    "package_name": "elfutils",
+                    "package_version": "0.168-1"
+                }
+            ],
+            "unknown_vulns": [
+                {
+                    "fix": null,
+                    "url": "https://security-tracker.debian.org/tracker/CVE-2020-3810",
+                    "name": "CVE-2020-3810",
+                    "severity": "Unknown",
+                    "package_name": "apt",
+                    "package_version": "1.4.8"
+                },
+                {
+                    "fix": "1.4.9",
+                    "url": "https://security-tracker.debian.org/tracker/CVE-2019-3462",
+                    "name": "CVE-2019-3462",
+                    "severity": "Unknown",
+                    "package_name": "apt",
+                    "package_version": "1.4.8"
+                }
+            ],
+            "negligible_vulns": [
+                {
+                    "fix": null,
+                    "url": "https://security-tracker.debian.org/tracker/CVE-2011-3374",
+                    "name": "CVE-2011-3374",
+                    "severity": "Negligible",
+                    "package_name": "apt",
+                    "package_version": "1.4.8"
+                },
+                {
+                    "fix": null,
+                    "url": "https://security-tracker.debian.org/tracker/CVE-2019-7148",
+                    "name": "CVE-2019-7148",
+                    "severity": "Negligible",
+                    "package_name": "elfutils",
+                    "package_version": "0.168-1"
+                },
+                {
+                    "fix": null,
+                    "url": "https://security-tracker.debian.org/tracker/CVE-2019-19882",
+                    "name": "CVE-2019-19882",
+                    "severity": "Negligible",
+                    "package_name": "shadow",
+                    "package_version": "1:4.4-4.1"
+                }
+            ]
+        }
+    },
+    "whitelist": {}
+}

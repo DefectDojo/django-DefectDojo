@@ -246,7 +246,7 @@
                         <tbody>
                         {% for test in tests %}
                             <tr>
-                                <td><a href="{% url 'view_test' test.id %}">{{ test }}</a>
+                                <td><a title="{{ test.description }}" href="{% url 'view_test' test.id %}">{{ test }}</a>
                                   {% if test.tags %}
                                       <sup>
                                           {% for tag in test.tags %}
@@ -332,7 +332,7 @@
             <div class="panel-heading">
                 <h4> Risk Acceptance
                     {% if can_add_risk %}
-                        <a title="Add Risk Acceptance" class="pull-right btn btn-sm btn-primary"
+                        <a title="Add Risk Acceptance..." class="pull-right btn btn-sm btn-primary"
                            href="{% url 'upload_risk_acceptance$' eng.id %}"><span class="fa fa-plus"></span></a>
                         </a>
                     {% endif %}
@@ -366,7 +366,7 @@
                                 <td>
                                     <a class="btn btn-sm btn-primary" href="{% url 'view_risk' eng.id risk.id %}">
                                         View
-                                        Approval</a>
+                                        Acceptance</a>
                                 </td>
                             </tr>
                         {% endfor %}
@@ -614,7 +614,7 @@
           {% if jissue and jconf %}
           <tr>
             <td><strong>Jira</strong></td>
-            <td><a href="{{ jconf.url }}/browse/{{ jissue.jira_key }}" target="_blank"><i class="fa fa-external-link"></i> Jira Epic</a></td>
+            <td><a href="{{ jconf.url }}/browse/{{ jissue.jira_key }}" target="_blank"><i class="fa fa-external-link"></i> Jira Epic ({{ jissue.jira_key }})</a></td>
           </tr>
           {% endif %}
           <tr>

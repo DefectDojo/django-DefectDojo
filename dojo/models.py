@@ -31,6 +31,7 @@ from dojo.tag.prefetching_tag_descriptor import PrefetchingTagDescriptor
 from django.contrib.contenttypes.fields import GenericRelation
 from tagging.models import TaggedItem
 from dateutil.relativedelta import relativedelta
+from dojo.user.helper import user_is_authorized
 
 fmt = getattr(settings, 'LOG_FORMAT', None)
 lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
@@ -135,7 +136,7 @@ class System_Settings(models.Model):
                     ('Info', 'Info'))
     jira_minimum_severity = models.CharField(max_length=20, blank=True,
                                              null=True, choices=jira_choices,
-                                             default='None')
+                                             default='Low')
     jira_labels = models.CharField(max_length=200, blank=True, null=True,
                                    help_text='JIRA issue labels space seperated')
 
@@ -316,6 +317,10 @@ class Dojo_User(User):
 
     def __str__(self):
         return self.get_full_name()
+
+    @staticmethod
+    def wants_block_execution(user):
+        return hasattr(user, 'usercontactinfo') and user.usercontactinfo.block_execution
 
 
 class UserContactInfo(models.Model):
@@ -738,6 +743,20 @@ class Product(models.Model):
             findings_list.append(i.id)
         return findings_list
 
+    @property
+    def jira_pkey(self):
+        try:
+            return self.jira_pkey_set.all()[0]
+        except:
+            return None
+
+    @property
+    def jira_conf(self):
+        try:
+            return self.jira_pkey_set.all()[0].conf
+        except:
+            return None
+
 
 class ScanSettings(models.Model):
     product = models.ForeignKey(Product, default=1, editable=False, on_delete=models.CASCADE)
@@ -991,6 +1010,13 @@ class Engagement(models.Model):
     def accept_risks(self, accepted_risks):
         self.risk_acceptance.add(*accepted_risks)
 
+    def has_jira_issue(self):
+        try:
+            issue = self.jira_issue
+            return True
+        except JIRA_Issue.DoesNotExist:
+            return False
+
 
 class CWE(models.Model):
     url = models.CharField(max_length=1000)
@@ -1004,6 +1030,19 @@ class Endpoint_Params(models.Model):
     method_type = (('GET', 'GET'),
                    ('POST', 'POST'))
     method = models.CharField(max_length=20, blank=False, null=True, choices=method_type)
+
+
+class Endpoint_Status(models.Model):
+    date = models.DateTimeField(default=get_current_date)
+    last_modified = models.DateTimeField(null=True, editable=False, default=get_current_datetime)
+    mitigated = models.BooleanField(default=False, blank=True)
+    mitigated_time = models.DateTimeField(editable=False, null=True, blank=True)
+    mitigated_by = models.ForeignKey(User, editable=True, null=True, on_delete=models.CASCADE)
+    false_positive = models.BooleanField(default=False, blank=True)
+    out_of_scope = models.BooleanField(default=False, blank=True)
+    risk_accepted = models.BooleanField(default=False, blank=True)
+    endpoint = models.ForeignKey('Endpoint', null=True, blank=True, on_delete=models.CASCADE, related_name='status_endpoint')
+    finding = models.ForeignKey('Finding', null=True, blank=True, on_delete=models.CASCADE, related_name='status_finding')
 
 
 class Endpoint(models.Model):
@@ -1025,9 +1064,9 @@ class Endpoint(models.Model):
                                 help_text="The fragment identifier which follows the hash mark. The hash mark should "
                                           "be omitted. For example 'section-13', 'paragraph-2'.")
     product = models.ForeignKey(Product, null=True, blank=True, on_delete=models.CASCADE)
-    endpoint_params = models.ManyToManyField(Endpoint_Params, blank=True,
-                                             editable=False)
-    remediated = models.BooleanField(default=False, blank=True)
+    endpoint_params = models.ManyToManyField(Endpoint_Params, blank=True, editable=False)
+    mitigated = models.BooleanField(default=False, blank=True)
+    endpoint_status = models.ManyToManyField(Endpoint_Status, blank=True, related_name='endpoint_endpoint_status')
 
     # used for prefetching tags because django-tagging doesn't support that out of the box
     tagged_items = GenericRelation(TaggedItem)
@@ -1323,6 +1362,9 @@ class Sonarqube_Product(models.Model):
 
 
 class Finding(models.Model):
+
+    SIMPLE_RISK_ACCEPTANCE_NAME = 'Simple Builtin Risk Acceptance'
+
     title = models.CharField(max_length=511)
     date = models.DateField(default=get_current_date)
     cwe = models.IntegerField(default=0, null=True, blank=True)
@@ -1338,6 +1380,7 @@ class Finding(models.Model):
     steps_to_reproduce = models.TextField(null=True, blank=True)
     severity_justification = models.TextField(null=True, blank=True)
     endpoints = models.ManyToManyField(Endpoint, blank=True)
+    endpoint_status = models.ManyToManyField(Endpoint_Status, blank=True, related_name='finding_endpoint_status')
     unsaved_endpoints = []
     unsaved_request = None
     unsaved_response = None
@@ -1441,9 +1484,64 @@ class Finding(models.Model):
             models.Index(fields=['line']),
         ]
 
+    def is_authorized(self, user, perm_type):
+        # print('finding.is_authorized')
+        return user_is_authorized(user, perm_type, self)
+
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('view_finding', args=[str(self.id)])
+
     @classmethod
     def unaccepted_open_findings(cls):
         return cls.objects.filter(active=True, verified=True, duplicate=False, risk_acceptance__isnull=True)
+
+    # gets or creates the simple risk acceptance instance connected to the engagement. only contains this finding if it is simple accepted
+    def get_simple_risk_acceptance(self, create=True):
+        if hasattr(self.test.engagement, 'simple_risk_acceptance') and len(self.test.engagement.simple_risk_acceptance) > 0:
+            return self.test.engagement.simple_risk_acceptance[0]
+
+        simple_risk_acceptance = self.test.engagement.risk_acceptance.filter(name=Finding.SIMPLE_RISK_ACCEPTANCE_NAME).prefetch_related('accepted_findings').first()
+        if simple_risk_acceptance is None:
+            simple_risk_acceptance = Risk_Acceptance.objects.create(
+                    owner_id=1,
+                    name=Finding.SIMPLE_RISK_ACCEPTANCE_NAME,
+                    compensating_control='These findings are accepted using a simple risk acceptance without expiration date, '
+                    'approval document or compensating control information. Unaccept and use full risk acceptance if you '
+                    'need to have more control over those fields.'
+            )
+            self.test.engagement.risk_acceptance.add(simple_risk_acceptance)
+        return simple_risk_acceptance
+
+    def simple_risk_accept(self):
+        # adding to ManyToMany will not cause duplicate entries
+        self.get_simple_risk_acceptance().accepted_findings.add(self)
+        # risk accepted, so finding no longer considered active
+        self.active = False
+        self.save()
+
+    def simple_risk_unaccept(self):
+        print('unaccepting risk')
+        # removing from ManyToMany will not fail for non-existing entries
+        self.get_simple_risk_acceptance().accepted_findings.remove(self)
+        # risk acceptance no longer in place, so reactivate, but only when it makes sense
+
+        # for now also remove from any other risk acceptance as differianting between simple and full here would clutter the menu.
+        # also currently you can only add a finding to 1 risk acceptance, so this would only affect old findings added to multiple
+        # risk acceptances in some obcure way
+        self.remove_from_any_risk_acceptance()
+        if not self.mitigated and not self.false_p and not self.out_of_scope and not self.risk_acceptance_set.exists():
+            self.active = True
+            self.save()
+
+    @property
+    def is_simple_risk_accepted(self):
+        if self.get_simple_risk_acceptance(create=False) is not None:
+            return self.get_simple_risk_acceptance().accepted_findings.filter(id=self.id).exists()
+            # print('exists: ', exists)
+            # return exists
+
+        return False
 
     @property
     def similar_findings(self):
@@ -1670,6 +1768,9 @@ class Finding(models.Model):
                 sla_calculation = sla_age - age
         return sla_calculation
 
+    def sla_deadline(self):
+        return self.date + relativedelta(days=self.sla_days_remaining())
+
     def github(self):
         try:
             return self.github_issue
@@ -1695,7 +1796,7 @@ class Finding(models.Model):
     # newer version that can work with prefetching
     def github_conf_new(self):
         try:
-            return self.test.engagement.product.github_pkey_set.all()[0].conf
+            return self.test.engagement.product.github_pkey_set.all()[0].git_conf
         except:
             return None
             pass
@@ -1722,12 +1823,20 @@ class Finding(models.Model):
             pass
         return jconf
 
-    # newer version that can work with prefetching
+    # newer version that can work with prefetching due to array index isntead of first.
     def jira_conf_new(self):
         try:
             return self.test.engagement.product.jira_pkey_set.all()[0].conf
         except:
             return None
+
+    # newer version that can work with prefetching due to array index isntead of first.
+    def jira_pkey(self):
+        try:
+            return self.test.engagement.product.jira_pkey_set.all()[0]
+        except:
+            return None
+            pass
 
     def long_desc(self):
         long_desc = ''
@@ -1757,10 +1866,6 @@ class Finding(models.Model):
         new_finding = False
 
         jira_issue_exists = JIRA_Issue.objects.filter(finding=self).exists()
-        if push_to_jira:
-            self.jira_change = timezone.now()
-            if not jira_issue_exists:
-                self.jira_creation = timezone.now()
 
         if self.pk is None:
             # We enter here during the first call from serializers.py
@@ -1812,7 +1917,7 @@ class Finding(models.Model):
             if system_settings.enable_deduplication:
                 from dojo.tasks import async_dedupe
                 try:
-                    if self.reporter.usercontactinfo.block_execution:
+                    if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
                         dedupe_signal.send(sender=self.__class__, new_finding=self)
                     else:
                         async_dedupe.delay(self, *args, **kwargs)
@@ -1825,7 +1930,7 @@ class Finding(models.Model):
             from dojo.tasks import async_false_history
             from dojo.utils import sync_false_history
             try:
-                if self.reporter.usercontactinfo.block_execution:
+                if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
                     sync_false_history(self, *args, **kwargs)
                 else:
                     async_false_history.delay(self, *args, **kwargs)
@@ -1842,11 +1947,19 @@ class Finding(models.Model):
 
         # Adding a snippet here for push to JIRA so that it's in one place
         if push_to_jira:
+            logger.debug('pushing to jira from finding.save()')
             from dojo.tasks import update_issue_task, add_issue_task
+            from dojo.utils import add_issue, update_issue
             if jira_issue_exists:
-                update_issue_task.delay(self, True)
+                if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
+                    update_issue(self, True)
+                else:
+                    update_issue_task.delay(self, True)
             else:
-                add_issue_task.delay(self, True)
+                if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
+                    add_issue(self, True)
+                else:
+                    add_issue_task.delay(self, True)
 
     def delete(self, *args, **kwargs):
         for find in self.original_finding.all():
@@ -2235,6 +2348,7 @@ class JIRA_Conf(models.Model):
     finding_text = models.TextField(null=True, blank=True, help_text="Additional text that will be added to the finding in Jira. For example including how the finding was created or who to contact for more information.")
     accepted_mapping_resolution = models.CharField(null=True, blank=True, max_length=300, help_text="JIRA resolution names (comma-separated values) that maps to an Accepted Finding")
     false_positive_mapping_resolution = models.CharField(null=True, blank=True, max_length=300, help_text="JIRA resolution names (comma-separated values) that maps to a False Positive Finding")
+    global_jira_sla_notification = models.BooleanField(default=True, blank=False, verbose_name="Globally send SLA notifications as comment?", help_text="This setting can be overidden at the Product level")
 
     @property
     def accepted_resolutions(self):
@@ -2311,6 +2425,7 @@ class JIRA_PKey(models.Model):
     enable_engagement_epic_mapping = models.BooleanField(default=False,
                                                          blank=True)
     push_notes = models.BooleanField(default=False, blank=True)
+    product_jira_sla_notification = models.BooleanField(default=True, blank=False, verbose_name="Send SLA notifications as comment?")
 
     def __unicode__(self):
         return self.product.name + " | " + self.project_key
@@ -2321,8 +2436,8 @@ class JIRA_PKey(models.Model):
 
 NOTIFICATION_CHOICES = (
     ("slack", "slack"), ("hipchat", "hipchat"), ("mail", "mail"),
-    ("alert", "alert"))
-
+    ("alert", "alert")
+)
 
 class Notifications(models.Model):
     product_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
@@ -2340,6 +2455,9 @@ class Notifications(models.Model):
     other = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     user = models.ForeignKey(Dojo_User, default=None, null=True, editable=False, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, default=None, null=True, editable=False, on_delete=models.CASCADE)
+    sla_breach = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True,
+        verbose_name="SLA breach",
+        help_text="Get notified of upcoming SLA breaches")
 
     class Meta:
         constraints = [
@@ -2386,6 +2504,7 @@ class Notifications(models.Model):
                 result.code_review = merge_sets_safe(result.code_review, notifications.code_review)
                 result.review_requested = merge_sets_safe(result.review_requested, notifications.review_requested)
                 result.other = merge_sets_safe(result.other, notifications.other)
+                result.sla_breach = merge_sets_safe(result.sla_breach, notifications.sla_breach)
 
         return result
 
@@ -3125,7 +3244,9 @@ admin.site.register(Notifications)
 # Watson
 watson.register(Product)
 watson.register(Test)
-watson.register(Finding)
+watson.register(Finding, fields=('id', 'title', 'cve', 'url', 'severity', 'description', 'mitigation', 'impact', 'steps_to_reproduce',
+                                 'severity_justification', 'references', 'sourcefilepath', 'sourcefile', 'hash_code', 'file_path',
+                                 'component_name', 'component_version', 'unique_id_from_tool', ))
 watson.register(Finding_Template)
 watson.register(Endpoint)
 watson.register(Engagement)

@@ -1509,7 +1509,7 @@ class ImportScanResource(MultipartResource, Resource):
         t.tags = bundle.data['tags']
 
         try:
-            parser = import_parser_factory(bundle.data.get('file'), t, bundle.data['active'], bundle.data['verified'],
+            parser = import_parser_factory(bundle.data.get('file', None), t, bundle.data['active'], bundle.data['verified'],
                                            bundle.data['scan_type'])
         except ValueError:
             raise NotFound("Parser ValueError")
@@ -1526,7 +1526,7 @@ class ImportScanResource(MultipartResource, Resource):
                     continue
 
                 item.test = t
-                item.date = t.target_start
+                item.date = t.target_start.date()
                 item.reporter = bundle.request.user
                 item.last_reviewed = timezone.now()
                 item.last_reviewed_by = bundle.request.user
@@ -1692,7 +1692,7 @@ class ReImportScanResource(MultipartResource, Resource):
         active = bundle.obj.__getattr__('active')
 
         try:
-            parser = import_parser_factory(bundle.data.get('file'), test, active, verified, scan_type)
+            parser = import_parser_factory(bundle.data.get('file', None), test, active, verified, scan_type)
         except ValueError:
             raise NotFound("Parser ValueError")
 
@@ -1743,7 +1743,7 @@ class ReImportScanResource(MultipartResource, Resource):
                     new_items.append(find.id)
                 else:
                     item.test = test
-                    item.date = test.target_start
+                    item.date = test.target_start.date()
                     item.reporter = bundle.request.user
                     item.last_reviewed = timezone.now()
                     item.last_reviewed_by = bundle.request.user

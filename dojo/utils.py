@@ -18,6 +18,7 @@ from django.core.paginator import Paginator
 from django.urls import get_resolver, reverse
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
 from django.template.defaultfilters import pluralize
+from django.template.loader import render_to_string
 from django.utils import timezone
 from jira import JIRA
 from jira.exceptions import JIRAError
@@ -28,7 +29,7 @@ import calendar as tcalendar
 from dojo.github import add_external_issue_github, update_external_issue_github, close_external_issue_github, reopen_external_issue_github
 from dojo.models import Finding, Engagement, Finding_Template, Product, JIRA_PKey, JIRA_Issue,\
     Dojo_User, User, System_Settings, Notifications, Endpoint, Benchmark_Type, \
-    Language_Type, Languages, Rule, Test_Type
+    Language_Type, Languages, Rule, Test_Type, Notes
 from asteval import Interpreter
 from requests.auth import HTTPBasicAuth
 from dojo.notifications.helper import create_notification
@@ -36,6 +37,8 @@ import logging
 import itertools
 from django.contrib import messages
 from django.http import HttpResponseRedirect
+# import traceback
+
 
 
 logger = logging.getLogger(__name__)
@@ -1274,27 +1277,30 @@ def log_jira_message(text, finding):
         source='Jira')
 
 
-# Adds labels to a Jira issue
-def add_labels(find, issue):
+def get_labels(find):
     # Update Label with system setttings label
+    labels = []
     system_settings = System_Settings.objects.get()
-    labels = system_settings.jira_labels
-    if labels is None:
+    system_labels = system_settings.jira_labels
+    if system_labels is None:
         return
     else:
-        labels = labels.split()
-    if len(labels) > 0:
-        for label in labels:
-            issue.fields.labels.append(label)
+        system_labels = system_labels.split()
+    if len(system_labels) > 0:
+        for system_label in system_labels:
+            labels.append(system_label)
     # Update the label with the product name (underscore)
     prod_name = find.test.engagement.product.name.replace(" ", "_")
-    issue.fields.labels.append(prod_name)
-    issue.update(fields={"labels": issue.fields.labels})
+    labels.append(prod_name)
+    return labels
 
 
-def jira_long_description(find_description, find_id, jira_conf_finding_text):
-    return find_description + "\n\n*Dojo ID:* " + str(
-        find_id) + "\n\n" + jira_conf_finding_text
+def jira_description(find):
+    template = 'issue-trackers/jira-description.tpl'
+    kwargs = {}
+    kwargs['finding'] = find
+    kwargs['jira_conf'] = find.jira_conf_new()
+    return render_to_string(template, kwargs)
 
 
 def add_external_issue(find, external_issue_provider):
@@ -1331,6 +1337,10 @@ def reopen_external_issue(find, note, external_issue_provider):
 
 
 def add_issue(find, push_to_jira):
+    logger.info('trying to create a new jira issue for %d:%s', find.id, find.title)
+
+    # traceback.print_stack()
+
     eng = Engagement.objects.get(test=find.test)
     prod = Product.objects.get(engagement=eng)
     jira_minimum_threshold = Finding.get_number_severity(System_Settings.objects.get().jira_minimum_severity)
@@ -1357,43 +1367,74 @@ def add_issue(find, push_to_jira):
                 jira = JIRA(
                     server=jira_conf.url,
                     basic_auth=(jira_conf.username, jira_conf.password))
+
+                meta = None
+
+                fields = {
+                        'project': {
+                            'key': jpkey.project_key
+                        },
+                        'summary': find.title,
+                        'description': jira_description(find),
+                        'issuetype': {
+                            'name': jira_conf.default_issue_type
+                        },
+                        'priority': {
+                            'name': jira_conf.get_priority(find.severity)
+                        }
+                }
+
                 if jpkey.component:
-                    logger.debug('... with a component')
-                    new_issue = jira.create_issue(
-                        project=jpkey.project_key,
-                        summary=find.title,
-                        components=[
+                    fields['components'] = [
                             {
                                 'name': jpkey.component
                             },
-                        ],
-                        description=jira_long_description(
-                            find.long_desc(), find.id,
-                            jira_conf.finding_text),
-                        issuetype={'name': jira_conf.default_issue_type},
-                        priority={
-                            'name': jira_conf.get_priority(find.severity)
-                        })
-                else:
-                    logger.debug('... with no component')
-                    new_issue = jira.create_issue(
-                        project=jpkey.project_key,
-                        summary=find.title,
-                        description=jira_long_description(
-                            find.long_desc(), find.id,
-                            jira_conf.finding_text),
-                        issuetype={'name': jira_conf.default_issue_type},
-                        priority={
-                            'name': jira_conf.get_priority(find.severity)
-                        })
+                    ]
+
+                labels = get_labels(find)
+                if labels:
+                    fields['labels'] = labels
+
+                if System_Settings.objects.get().enable_finding_sla:
+                    # populate duedate field, but only if it's available for this project + issuetype
+                    if not meta:
+                        meta = jira_meta(jira, jpkey)
+
+                    if 'duedate' in meta['projects'][0]['issuetypes'][0]['fields']:
+                        # jira wants YYYY-MM-DD
+                        duedate = find.sla_deadline().strftime('%Y-%m-%d')
+                        fields['duedate'] = duedate
+
+                if len(find.endpoints.all()) > 0:
+                    if not meta:
+                        meta = jira_meta(jira, jpkey)
+
+                    if 'environment' in meta['projects'][0]['issuetypes'][0]['fields']:
+                        environment = "\n".join([str(endpoint) for endpoint in find.endpoints.all()])
+                        fields['environment'] = environment
+
+                logger.debug('sending fields to JIRA: %s', fields)
+
+                new_issue = jira.create_issue(fields)
 
                 j_issue = JIRA_Issue(
-                    jira_id=new_issue.id, jira_key=new_issue, finding=find)
+                    jira_id=new_issue.id, jira_key=new_issue.key, finding=find)
                 j_issue.save()
                 issue = jira.issue(new_issue.id)
 
-                # Add labels (security & product)
-                add_labels(find, new_issue)
+                find.jira_creation = timezone.now()
+                find.jira_change = timezone.now()
+                find.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
+
+                jira_issue_url = find.jira_issue.jira_key
+                if find.jira_conf_new():
+                    jira_issue_url = find.jira_conf_new().url + '/' + new_issue.key
+
+                new_note = Notes()
+                new_note.entry = 'created JIRA issue %s for finding' % (jira_issue_url)
+                new_note.author = find.reporter  # quick hack because we don't have request.user here
+                new_note.save()
+                find.notes.add(new_note)
 
                 # Upload dojo finding screenshots to Jira
                 for pic in find.images.all():
@@ -1406,10 +1447,15 @@ def add_issue(find, push_to_jira):
                     #      issue_list = [j_issue.jira_id,]
                     #      jira.add_issues_to_epic(epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
             except JIRAError as e:
-                logger.error(e.text, find)
+                logger.error(e.text)
                 log_jira_alert(e.text, find)
         else:
-            logger.warning("A Finding needs to be both Active and Verified to be pushed to JIRA.", find)
+            log_jira_alert("A Finding needs to be both Active and Verified to be pushed to JIRA.", find)
+            logger.warning("A Finding needs to be both Active and Verified to be pushed to JIRA: %s", find)
+
+
+def jira_meta(jira, jpkey):
+    return jira.createmeta(projectKeys=jpkey.project_key, issuetypeNames=jpkey.conf.default_issue_type, expand="projects.issuetypes.fields")
 
 
 def jira_attachment(jira, issue, file, jira_filename=None):
@@ -1446,6 +1492,7 @@ def jira_check_attachment(issue, source_file_name):
 
 
 def update_issue(find, push_to_jira):
+    logger.info('trying to update a linked jira issue for %d:%s', find.id, find.title)
     prod = Product.objects.get(
         engagement=Engagement.objects.get(test=find.test))
     jpkey = JIRA_PKey.objects.get(product=prod)
@@ -1459,6 +1506,8 @@ def update_issue(find, push_to_jira):
                 server=jira_conf.url,
                 basic_auth=(jira_conf.username, jira_conf.password))
             issue = jira.issue(j_issue.jira_id)
+
+            meta = None
 
             fields = {}
             # Only update the component if it didn't exist earlier in Jira, this is to avoid assigning multiple components to an item
@@ -1475,23 +1524,34 @@ def update_issue(find, push_to_jira):
                 ]
                 fields = {"components": component}
 
+            labels = get_labels(find)
+            if labels:
+                fields['labels'] = labels
+
+            if len(find.endpoints.all()) > 0:
+                if not meta:
+                    meta = jira_meta(jira, jpkey)
+
+                if 'environment' in meta['projects'][0]['issuetypes'][0]['fields']:
+                    environment = "\n".join([str(endpoint) for endpoint in find.endpoints.all()])
+                    fields['environment'] = environment
+
             # Upload dojo finding screenshots to Jira
             for pic in find.images.all():
                 jira_attachment(jira, issue,
                                 settings.MEDIA_ROOT + pic.image_large.name)
 
+            logger.debug('sending fields to JIRA: %s', fields)
+
             issue.update(
                 summary=find.title,
-                description=jira_long_description(find.long_desc(), find.id,
-                                                  jira_conf.finding_text),
+                description=jira_description(find),
                 priority={'name': jira_conf.get_priority(find.severity)},
                 fields=fields)
-            # print('\n\nSaving jira_change\n\n')
-            # Moving this to finding.save()
-            # find.jira_change = timezone.now()
-            # find.save()
-            # Add labels(security & product)
-            add_labels(find, issue)
+
+            find.jira_change = timezone.now()
+            find.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
+
         except JIRAError as e:
             log_jira_alert(e.text, find)
 
@@ -1506,6 +1566,8 @@ def update_issue(find, push_to_jira):
                 url=req_url,
                 auth=HTTPBasicAuth(jira_conf.username, jira_conf.password),
                 json=json_data)
+            if r.status_code != 204:
+                logger.warn("JIRA transition failed with error: {}".format(r.text))
             find.jira_change = timezone.now()
             find.save()
         elif 'Active' in find.status() and 'Verified' in find.status():
@@ -1515,6 +1577,8 @@ def update_issue(find, push_to_jira):
                 url=req_url,
                 auth=HTTPBasicAuth(jira_conf.username, jira_conf.password),
                 json=json_data)
+            if r.status_code != 204:
+                logger.warn("JIRA transition failed with error: {}".format(r.text))
             find.jira_change = timezone.now()
             find.save()
 
@@ -1535,6 +1599,8 @@ def close_epic(eng, push_to_jira):
                 url=req_url,
                 auth=HTTPBasicAuth(jira_conf.username, jira_conf.password),
                 json=json_data)
+            if r.status_code != 204:
+                logger.warn("JIRA close epic failed with error: {}".format(r.text))
         except Exception as e:
             log_jira_generic_alert('Jira Engagement/Epic Close Error', str(e))
             pass
@@ -1559,6 +1625,7 @@ def update_epic(eng, push_to_jira):
 
 
 def add_epic(eng, push_to_jira):
+    logger.info('trying to create a new jira EPIC for %d:%s', eng.id, eng.name)
     engagement = eng
     prod = Product.objects.get(engagement=engagement)
     jpkey = JIRA_PKey.objects.get(product=prod)
@@ -1582,7 +1649,7 @@ def add_epic(eng, push_to_jira):
             new_issue = jira.create_issue(fields=issue_dict)
             j_issue = JIRA_Issue(
                 jira_id=new_issue.id,
-                jira_key=new_issue,
+                jira_key=new_issue.key,
                 engagement=engagement)
             j_issue.save()
         except Exception as e:
@@ -1597,7 +1664,23 @@ def add_epic(eng, push_to_jira):
             pass
 
 
+def jira_get_issue(jpkey, issue_key):
+    jira_conf = jpkey.conf
+    try:
+        jira = JIRA(
+            server=jira_conf.url,
+            basic_auth=(jira_conf.username, jira_conf.password))
+        issue = jira.issue(issue_key)
+        print(vars(issue))
+        return issue
+    except JIRAError as jira_error:
+        logger.debug('error retrieving jira issue ' + issue_key + ' ' + str(jira_error))
+        log_jira_generic_alert('error retrieving jira issue ' + issue_key, str(jira_error))
+        return None
+
+
 def add_comment(find, note, force_push=False):
+    logger.debug('trying to add a comment to a linked jira issue for: %d:%s', find.id, find.title)
     if not note.private:
         prod = Product.objects.get(
             engagement=Engagement.objects.get(test=find.test))
@@ -1620,6 +1703,19 @@ def add_comment(find, note, force_push=False):
                     pass
         except JIRA_PKey.DoesNotExist:
             pass
+
+
+def add_simple_jira_comment(jira_conf, jira_issue, comment):
+    try:
+        jira = JIRA(
+            server=jira_conf.url,
+            basic_auth=(jira_conf.username, jira_conf.password)
+        )
+        jira.add_comment(
+            jira_issue.jira_id, comment
+        )
+    except Exception as e:
+        log_jira_generic_alert('Jira Add Comment Error', str(e))
 
 
 def send_review_email(request, user, finding, users, new_note):
@@ -1985,7 +2081,15 @@ def get_full_url(relative_url):
         return settings.SITE_URL + relative_url
     else:
         logger.warn('SITE URL undefined in settings, full_url cannot be created')
-        return relative_url
+        return "settings.SITE_URL" + relative_url
+
+
+def get_site_url():
+    if settings.SITE_URL:
+        return settings.SITE_URL
+    else:
+        logger.warn('SITE URL undefined in settings, full_url cannot be created')
+        return "settings.SITE_URL"
 
 
 @receiver(post_save, sender=Dojo_User)
@@ -2014,14 +2118,21 @@ def merge_sets_safe(set1, set2):
     # return {*set1, *set2}
 
 
-def get_return_url(request_params):
-    return request_params.get('return_url', None)
+def get_return_url(request):
+    return_url = request.POST.get('return_url', None)
+    # print('return_url from POST: ', return_url)
+    if return_url is None or not return_url.strip():
+        # for some reason using request.GET.get('return_url') never works
+        return_url = request.GET['return_url'] if 'return_url' in request.GET else None
+        # print('return_url from GET: ', return_url)
+
+    return return_url if return_url else None
 
 
 def redirect_to_return_url_or_else(request, or_else):
-    return_url = get_return_url(request.POST)
-    if return_url is not None and return_url.strip():
-        return HttpResponseRedirect(return_url)
+    return_url = get_return_url(request)
+    if return_url:
+        return HttpResponseRedirect(return_url.strip())
     elif or_else:
         return HttpResponseRedirect(or_else)
     else:
@@ -2045,3 +2156,137 @@ def is_scan_file_too_large(scan_file):
         if size > settings.SCAN_FILE_MAX_SIZE:
             return True
     return False
+
+
+def sla_compute_and_notify(*args, **kwargs):
+    """
+    The SLA computation and notification will be disabled if the user opts out
+    of the Findings SLA on the System Settings page.
+
+    Notifications are managed the usual way, so you'd have to opt-in.
+    Exception is for JIRA issues, which would get a comment anyways.
+    """
+    def _notify(finding, title):
+        create_notification(
+            event='sla_breach',
+            title=title,
+            finding=finding,
+            sla_age=sla_age
+        )
+
+        if do_jira_sla_comment:
+            logger.info("Creating JIRA comment to notify of SLA breach information.")
+            add_simple_jira_comment(jira_config, jira_issue, title)
+
+    # exit early on flags
+    if not settings.SLA_NOTIFY_ACTIVE and not settings.SLA_NOTIFY_ACTIVE_VERIFIED_ONLY:
+        logger.info("Will not notify on SLA breach per user configured settings")
+        return
+
+    jira_issue = None
+    jira_config = None
+    try:
+        system_settings = System_Settings.objects.get()
+        if system_settings.enable_finding_sla:
+            logger.info("About to process findings for SLA notifications.")
+            logger.debug("Active {}, Verified {}, Has JIRA {}, pre-breach {}, post-breach {}".format(
+                settings.SLA_NOTIFY_ACTIVE,
+                settings.SLA_NOTIFY_ACTIVE_VERIFIED_ONLY,
+                settings.SLA_NOTIFY_WITH_JIRA_ONLY,
+                settings.SLA_NOTIFY_PRE_BREACH,
+                settings.SLA_NOTIFY_POST_BREACH,
+            ))
+
+            query = None
+            if settings.SLA_NOTIFY_ACTIVE:
+                query = Q(active=True, is_Mitigated=False, duplicate=False)
+            if settings.SLA_NOTIFY_ACTIVE_VERIFIED_ONLY:
+                query = Q(active=True, verified=True, is_Mitigated=False, duplicate=False)
+            logger.debug("My query: {}".format(query))
+
+            no_jira_findings = {}
+            if settings.SLA_NOTIFY_WITH_JIRA_ONLY:
+                logger.debug("Ignoring findings that are not linked to a JIRA issue")
+                no_jira_findings = Finding.objects.exclude(jira_issue__isnull=False)
+
+            total_count = 0
+            pre_breach_count = 0
+            post_breach_count = 0
+            post_breach_no_notify_count = 0
+            jira_count = 0
+            at_breach_count = 0
+
+            # Taking away for now, since the prefetch is not efficient
+            # .select_related('jira_issue') \
+            # .prefetch_related(Prefetch('test__engagement__product__jira_pkey_set__conf')) \
+            # A finding with 'Info' severity will not be considered for SLA notifications (not in model)
+            findings = Finding.objects \
+                .filter(query) \
+                .exclude(severity='Info') \
+                .exclude(id__in=no_jira_findings)
+
+            for finding in findings:
+                total_count += 1
+                sla_age = finding.sla_days_remaining()
+                # if SLA is set to 0 in settings, it's a null. And setting at 0 means no SLA apparently.
+                if sla_age is None:
+                    sla_age = 0
+
+                if (sla_age < 0) and (settings.SLA_NOTIFY_POST_BREACH < abs(sla_age)):
+                    post_breach_no_notify_count += 1
+                    # Skip finding notification if breached for too long
+                    logger.debug("Finding {} breached the SLA {} days ago. Skipping notifications.".format(finding.id, abs(sla_age)))
+                    continue
+
+                do_jira_sla_comment = False
+                if finding.has_jira_issue():
+                    jira_count += 1
+                    jira_config = finding.jira_conf_new()
+                    if jira_config is not None:
+                        logger.debug("JIRA config for finding is {}".format(jira_config))
+                        # global config or product config set, product level takes precedence
+                        try:
+                            # TODO: see new property from #2649 to then replace, somehow not working with prefetching though.
+                            product_jira_sla_comment_enabled = finding.test.engagement.product.jira_pkey_set.all()[0].product_jira_sla_notification
+                        except Exception as e:
+                            logger.error("The product is not linked to a JIRA configuration! Something is weird here.")
+                            logger.error("Error is: {}".format(e))
+
+                        jiraconfig_sla_notification_enabled = jira_config.global_jira_sla_notification
+
+                        if jiraconfig_sla_notification_enabled or product_jira_sla_comment_enabled:
+                            logger.debug("Global setting {} -- Product setting {}".format(
+                                jiraconfig_sla_notification_enabled,
+                                product_jira_sla_comment_enabled
+                            ))
+                            do_jira_sla_comment = True
+                            jira_issue = finding.jira_issue
+                            logger.debug("JIRA issue is {}".format(jira_issue.jira_key))
+
+                logger.debug("Finding {} has {} days left to breach SLA.".format(finding.id, sla_age))
+                if (sla_age < 0):
+                    post_breach_count += 1
+                    logger.info("Finding {} has breached by {} days.".format(finding.id, abs(sla_age)))
+                    _notify(finding, 'Finding {} - SLA breached by {} day(s)! Overdue notice'.format(finding.id, abs(sla_age)))
+                # The finding is within the pre-breach period
+                elif (sla_age > 0) and (sla_age <= settings.SLA_NOTIFY_PRE_BREACH):
+                    pre_breach_count += 1
+                    logger.info("Security SLA pre-breach warning for finding ID {}. Days remaining: {}".format(finding.id, sla_age))
+                    _notify(finding, 'Finding {} - SLA pre-breach warning - {} day(s) left'.format(finding.id, sla_age))
+                # The finding breaches the SLA today
+                elif (sla_age == 0):
+                    at_breach_count += 1
+                    logger.info("Security SLA breach warning. Finding ID {} breaching today ({})".format(finding.id, sla_age))
+                    _notify(finding, "Finding {} - SLA is breaching today".format(finding.id))
+
+            logger.info("SLA run results: Pre-breach: {}, at-breach: {}, post-breach: {} post-breach-no-notify: {}, with-jira: {}, TOTAL: {}".format(
+                pre_breach_count,
+                at_breach_count,
+                post_breach_count,
+                post_breach_no_notify_count,
+                jira_count,
+                total_count
+            ))
+
+    except System_Settings.DoesNotExist:
+        logger.info("Findings SLA is not enabled.")

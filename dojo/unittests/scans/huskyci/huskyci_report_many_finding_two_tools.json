@@ -1,0 +1,284 @@
+{
+    "RID": "dJGmk5FB4gIr3mwqr3OXNp4wGAWV8jCo",
+    "repositoryURL": "https://github.com/globocom/huskyCI.git",
+    "repositoryBranch": "poc-python-safety",
+    "commitAuthors": [
+        "jr.joserenato.jr@gmail.com"
+    ],
+    "status": "finished",
+    "result": "failed",
+    "errorFound": "",
+    "containers": [
+        {
+            "CID": "4ccefa1b799e36ebd1607eedf4fbc53c38505e8edb7b5f1fa096ae83976ad5e5",
+            "securityTest": {
+                "name": "gitleaks",
+                "image": "huskyci/gitleaks",
+                "imageTag": "2.1.0",
+                "cmd": "mkdir -p ~/.ssh &&\necho 'GIT_PRIVATE_SSH_KEY' > ~/.ssh/huskyci_id_rsa &&\nchmod 600 ~/.ssh/huskyci_id_rsa &&\necho \"IdentityFile ~/.ssh/huskyci_id_rsa\" >> /etc/ssh/ssh_config &&\necho \"StrictHostKeyChecking no\" >> /etc/ssh/ssh_config &&\nGIT_TERMINAL_PROMPT=0 git clone -b %GIT_BRANCH% --single-branch %GIT_REPO% code --quiet 2> /tmp/errorGitCloneGitleaks\nif [ $? -eq 0 ]; then\n    touch /tmp/results.json\n    timeout -t 360 $(which gitleaks) --log=warn --report=/tmp/results.json --repo-path=./code --branch=%GIT_BRANCH% --repo-config &> /tmp/errorGitleaks\n    if [[ $? -eq 124 || $? -eq 143 ]]; then #timeout exit codes\n        echo 'ERROR_TIMEOUT_GITLEAKS'\n        cat /tmp/errorGitleaks\n    elif [ $? -eq 2 ]; then\n        echo 'ERROR_RUNNING_GITLEAKS'\n        cat /tmp/errorGitleaks\n    else\n        jq -j -M -c . /tmp/results.json\n    fi\nelse\n    echo \"ERROR_CLONING\"\n    cat /tmp/errorGitCloneGitleaks\nfi\n",
+                "type": "Generic",
+                "language": "",
+                "default": true,
+                "timeOutSeconds": 360
+            },
+            "cStatus": "finished",
+            "cOutput": "",
+            "cResult": "passed",
+            "cInfo": "No issues found.",
+            "startedAt": "2020-06-25T15:48:41.582Z",
+            "finishedAt": "2020-06-25T15:48:44.641Z"
+        },
+        {
+            "CID": "4014c46c7fdec3e6a52871b46a3eeed9c07e22dddb04de865e8e4ae9dc4e66c5",
+            "securityTest": {
+                "name": "gitauthors",
+                "image": "huskyci/gitauthors",
+                "imageTag": "2.18.4",
+                "cmd": "mkdir -p ~/.ssh &&\necho 'GIT_PRIVATE_SSH_KEY' > ~/.ssh/huskyci_id_rsa &&\nchmod 600 ~/.ssh/huskyci_id_rsa &&\necho \"IdentityFile ~/.ssh/huskyci_id_rsa\" >> /etc/ssh/ssh_config &&\necho \"StrictHostKeyChecking no\" >> /etc/ssh/ssh_config &&\nGIT_TERMINAL_PROMPT=0 git clone %GIT_REPO% code --quiet 2> /tmp/errorGitCloneEnry\ncd code\ngit branch -a | egrep 'remotes/origin/master' 1> /dev/null 2> /dev/null\nif [ $? -ne 0 ]; then\n  echo \"{\\\"authors\\\":[]}\"\n  exit 0\nfi\ngit checkout %GIT_BRANCH% --quiet\nif [ $? -eq 0 ]; then\n  for i in $(git log origin/master.. --pretty=\"%ae\" | sort -u); do\n    jsonMiddle=\"\\\"$i\\\",$jsonMiddle\"\n  done\n  length=${#jsonMiddle}\n  endindex=$(expr $length - 1)\n  authors=\"${jsonMiddle:0:$endindex}\"\n  echo \"{\\\"authors\\\":[$authors]}\"\nelse\n  echo \"ERROR_CLONING\"\n  cat /tmp/errorGitCloneEnry\nfi\n",
+                "type": "Generic",
+                "language": "",
+                "default": true,
+                "timeOutSeconds": 60
+            },
+            "cStatus": "finished",
+            "cOutput": "{\"authors\":[\"jr.joserenato.jr@gmail.com\"]}\r\n",
+            "cResult": "passed",
+            "cInfo": "No issues found.",
+            "startedAt": "2020-06-25T15:48:41.582Z",
+            "finishedAt": "2020-06-25T15:48:52.146Z"
+        },
+        {
+            "CID": "0a60eafd698b554f8ea203dc0abd5f2d648cb94140035d3109862918d307c1ff",
+            "securityTest": {
+                "name": "safety",
+                "image": "huskyci/safety",
+                "imageTag": "1.9.0",
+                "cmd": "mkdir -p ~/.ssh &&\necho 'GIT_PRIVATE_SSH_KEY' > ~/.ssh/huskyci_id_rsa &&\nchmod 600 ~/.ssh/huskyci_id_rsa &&\necho \"IdentityFile ~/.ssh/huskyci_id_rsa\" >> /etc/ssh/ssh_config &&\necho \"StrictHostKeyChecking no\" >> /etc/ssh/ssh_config &&\nGIT_TERMINAL_PROMPT=0 git clone -b %GIT_BRANCH% --single-branch %GIT_REPO% code --quiet 2> /tmp/errorGitCloneSafety\nif [ $? -eq 0 ]; then\n  cd code\n  if [ -f Pipfile.lock ]; then\n    jq -r '.default | to_entries[] | if (.value.version | length) > 0 then \"\\(.key)\\(.value.version)\" else \"\\(.key)\" end' Pipfile.lock >> requirements.txt\n    sort -u -o requirements.txt requirements.txt\n  fi\n  find . -maxdepth 3 -name requirements.txt -exec cat {} \\; > safety_huskyci_analysis_all_requirements.txt\n  if [ -s safety_huskyci_analysis_all_requirements.txt ]; then\n    cat safety_huskyci_analysis_all_requirements.txt | grep '=' | grep -v '#' 1> safety_huskyci_analysis_requirements_raw.txt\n    sed -i -e 's/>=/==/g; s/<=/==/g' safety_huskyci_analysis_requirements_raw.txt\n    cat safety_huskyci_analysis_requirements_raw.txt | cut -f1 -d \",\" > safety_huskyci_analysis_requirements.txt\n    safety check -r safety_huskyci_analysis_requirements.txt --json > /tmp/safety_huskyci_analysis_output.json 2> /tmp/errorRunning\n    safety check -r safety_huskyci_analysis_requirements_raw.txt --json > /dev/null 2> /tmp/warning\n    if [ -f /tmp/warning ]; then\n      if grep -q \"unpinned requirement\" \"/tmp/warning\"; then\n        cat /tmp/warning\n      fi\n      jq -c '{\"issues\":map({\"dependency\": .[0], \"vulnerable_below\": .[1], \"installed_verson\": .[2], \"description\": .[3], \"id\": .[4]})}' /tmp/safety_huskyci_analysis_output.json > /tmp/output.json\n      cat /tmp/output.json\n    else\n      echo \"ERROR_RUNNING_SAFETY\"\n      cat /tmp/errorRunning\n    fi\n  else\n    echo \"ERROR_REQ_NOT_FOUND\"\n  fi\nelse\n  echo \"ERROR_CLONING\"\n  cat /tmp/errorGitCloneSafety\nfi\n",
+                "type": "Language",
+                "language": "Python",
+                "default": true,
+                "timeOutSeconds": 360
+            },
+            "cStatus": "finished",
+            "cOutput": "{\"issues\":[{\"dependency\":\"django\",\"vulnerable_below\":\"<1.11.27\",\"installed_verson\":\"1.3.10\",\"description\":\"Django before 1.11.27, 2.x before 2.2.9, and 3.x before 3.0.1 allows account takeover. A suitably crafted email address (that is equal to an existing user's email address after case transformation of Unicode characters) would allow an attacker to be sent a password reset token for the matched user account. (One mitigation in the new releases is to send password reset tokens only to the registered user email address.) See CVE-2019-19844.\",\"id\":\"37771\"},{\"dependency\":\"django\",\"vulnerable_below\":\"<1.4.18\",\"installed_verson\":\"1.3.10\",\"description\":\"The django.util.http.is_safe_url function in Django before 1.4.18, 1.6.x before 1.6.10, and 1.7.x before 1.7.3 does not properly handle leading whitespaces, which allows remote attackers to conduct cross-site scripting (XSS) attacks via a crafted URL, related to redirect URLs, as demonstrated by a \\\\\\\"\\\\\\\\njavascript:\\\\\\\" URL.\",\"id\":\"33071\"},{\"dependency\":\"django\",\"vulnerable_below\":\"<1.4.18\",\"installed_verson\":\"1.3.10\",\"description\":\"The django.views.static.serve view in Django before 1.4.18, 1.6.x before 1.6.10, and 1.7.x before 1.7.3 reads files an entire line at a time, which allows remote attackers to cause a denial of service (memory consumption) via a long line in a file.\",\"id\":\"33072\"},{\"dependency\":\"django\",\"vulnerable_below\":\"<1.4.18\",\"installed_verson\":\"1.3.10\",\"description\":\"Django before 1.4.18, 1.6.x before 1.6.10, and 1.7.x before 1.7.3 allows remote attackers to spoof WSGI headers by using an _ (underscore) character instead of a - (dash) character in an HTTP header, as demonstrated by an X-Auth_User header.\",\"id\":\"33070\"},{\"dependency\":\"django\",\"vulnerable_below\":\"<1.4.20\",\"installed_verson\":\"1.3.10\",\"description\":\"The utils.http.is_safe_url function in Django before 1.4.20, 1.5.x, 1.6.x before 1.6.11, 1.7.x before 1.7.7, and 1.8.x before 1.8c1 does not properly validate URLs, which allows remote attackers to conduct cross-site scripting (XSS) attacks via a control character in a URL, as demonstrated by a \\\\\\\\x08javascript: URL.\",\"id\":\"25713\"},{\"dependency\":\"django\",\"vulnerable_below\":\"<1.7.11\",\"installed_verson\":\"1.3.10\",\"description\":\"The get_format function in utils/formats.py in Django before 1.7.x before 1.7.11, 1.8.x before 1.8.7, and 1.9.x before 1.9rc2 might allow remote attackers to obtain sensitive application secrets via a settings key in place of a date/time format setting, as demonstrated by SECRET_KEY.\",\"id\":\"25714\"},{\"dependency\":\"django\",\"vulnerable_below\":\"<1.7.6\",\"installed_verson\":\"1.3.10\",\"description\":\"Cross-site scripting (XSS) vulnerability in the contents function in admin/helpers.py in Django before 1.7.6 and 1.8 before 1.8b2 allows remote attackers to inject arbitrary web script or HTML via a model attribute in ModelAdmin.readonly_fields, as demonstrated by a @property.\",\"id\":\"25715\"},{\"dependency\":\"django\",\"vulnerable_below\":\"<1.8.10\",\"installed_verson\":\"1.3.10\",\"description\":\"The password hasher in contrib/auth/hashers.py in Django before 1.8.10 and 1.9.x before 1.9.3 allows remote attackers to enumerate users via a timing attack involving login requests.\",\"id\":\"33074\"},{\"dependency\":\"django\",\"vulnerable_below\":\"<1.8.10\",\"installed_verson\":\"1.3.10\",\"description\":\"The utils.http.is_safe_url function in Django before 1.8.10 and 1.9.x before 1.9.3 allows remote attackers to redirect users to arbitrary web sites and conduct phishing attacks or possibly conduct cross-site scripting (XSS) attacks via a URL containing basic authentication, as demonstrated by http://mysite.example.com\\\\\\\\@attacker.com.\",\"id\":\"33073\"},{\"dependency\":\"django\",\"vulnerable_below\":\"<1.8.15\",\"installed_verson\":\"1.3.10\",\"description\":\"The cookie parsing code in Django before 1.8.15 and 1.9.x before 1.9.10, when used on a site with Google Analytics, allows remote attackers to bypass an intended CSRF protection mechanism by setting arbitrary cookies.\",\"id\":\"25718\"},{\"dependency\":\"flask\",\"vulnerable_below\":\"<0.12.3\",\"installed_verson\":\"0.5.1\",\"description\":\"flask version Before 0.12.3 contains a CWE-20: Improper Input Validation vulnerability in flask that can result in Large amount of memory usage possibly leading to denial of service. This attack appear to be exploitable via Attacker provides JSON data in incorrect encoding. This vulnerability appears to have been fixed in 0.12.3.\",\"id\":\"36388\"},{\"dependency\":\"flask\",\"vulnerable_below\":\"<0.6.1\",\"installed_verson\":\"0.5.1\",\"description\":\"flask 0.6.1 fixes a security problem that allowed clients to download arbitrary files  if the host server was a windows based operating system and the client  uses backslashes to escape the directory the files where exposed from.\",\"id\":\"25820\"},{\"dependency\":\"jinja2\",\"vulnerable_below\":\"<2.7.3\",\"installed_verson\":\"2.7.2\",\"description\":\"The default configuration for bccache.FileSystemBytecodeCache in Jinja2 before 2.7.2 does not properly create temporary files, which allows local users to gain privileges via a crafted .cache file with a name starting with __jinja2_ in /tmp.\",\"id\":\"25866\"}]}\r\n",
+            "cResult": "failed",
+            "cInfo": "Issues found.",
+            "startedAt": "2020-06-25T15:48:41.582Z",
+            "finishedAt": "2020-06-25T15:49:18.19Z"
+        },
+        {
+            "CID": "611d4745ac365b921df73ce54947f10461bd0d1026c845cef4487310e340e003",
+            "securityTest": {
+                "name": "bandit",
+                "image": "huskyci/bandit",
+                "imageTag": "1.6.2",
+                "cmd": "mkdir -p ~/.ssh &&\necho 'GIT_PRIVATE_SSH_KEY' > ~/.ssh/huskyci_id_rsa &&\nchmod 600 ~/.ssh/huskyci_id_rsa &&\necho \"IdentityFile ~/.ssh/huskyci_id_rsa\" >> /etc/ssh/ssh_config &&\necho \"StrictHostKeyChecking no\" >> /etc/ssh/ssh_config &&\nGIT_TERMINAL_PROMPT=0 git clone -b %GIT_BRANCH% --single-branch %GIT_REPO% code --quiet 2> /tmp/errorGitCloneBandit\nif [ $? -eq 0 ]; then\n  cd code\n  chmod +x /usr/local/bin/husky-file-ignore.sh\n  husky-file-ignore.sh 2> /tmp/errorBanditIgnoreScript 1> /dev/null\n  bandit -r . -f json 2> /dev/null > results.json\n  jq -j -M -c . results.json\nelse\n  echo \"ERROR_CLONING\"\n  cat /tmp/errorGitCloneBandit\nfi\n",
+                "type": "Language",
+                "language": "Python",
+                "default": true,
+                "timeOutSeconds": 360
+            },
+            "cStatus": "finished",
+            "cOutput": "{\"errors\":[],\"generated_at\":\"2020-06-25T15:49:29Z\",\"metrics\":{\"./main.py\":{\"CONFIDENCE.HIGH\":1,\"CONFIDENCE.LOW\":0,\"CONFIDENCE.MEDIUM\":2,\"CONFIDENCE.UNDEFINED\":0,\"SEVERITY.HIGH\":0,\"SEVERITY.LOW\":2,\"SEVERITY.MEDIUM\":1,\"SEVERITY.UNDEFINED\":0,\"loc\":5,\"nosec\":0},\"_totals\":{\"CONFIDENCE.HIGH\":1,\"CONFIDENCE.LOW\":0,\"CONFIDENCE.MEDIUM\":2,\"CONFIDENCE.UNDEFINED\":0,\"SEVERITY.HIGH\":0,\"SEVERITY.LOW\":2,\"SEVERITY.MEDIUM\":1,\"SEVERITY.UNDEFINED\":0,\"loc\":5,\"nosec\":0}},\"results\":[{\"code\":\"1 secret = 'password123!'\\n2 \\n3 password = 'thisisnotapassword' #nohusky\\n4 \\n\",\"filename\":\"./main.py\",\"issue_confidence\":\"MEDIUM\",\"issue_severity\":\"LOW\",\"issue_text\":\"Possible hardcoded password: 'password123!'\",\"line_number\":1,\"line_range\":[1,2],\"more_info\":\"https://bandit.readthedocs.io/en/latest/plugins/b105_hardcoded_password_string.html\",\"test_id\":\"B105\",\"test_name\":\"hardcoded_password_string\"},{\"code\":\"2 \\n3 password = 'thisisnotapassword' #nohusky\\n4 \\n5 command = 'print \\\"this command is not secure!!\\\"'\\n\",\"filename\":\"./main.py\",\"issue_confidence\":\"MEDIUM\",\"issue_severity\":\"LOW\",\"issue_text\":\"Possible hardcoded password: 'thisisnotapassword'\",\"line_number\":3,\"line_range\":[3,4],\"more_info\":\"https://bandit.readthedocs.io/en/latest/plugins/b105_hardcoded_password_string.html\",\"test_id\":\"B105\",\"test_name\":\"hardcoded_password_string\"},{\"code\":\"6 \\n7 exec(command)\\n8 \\n\",\"filename\":\"./main.py\",\"issue_confidence\":\"HIGH\",\"issue_severity\":\"MEDIUM\",\"issue_text\":\"Use of exec detected.\",\"line_number\":7,\"line_range\":[7],\"more_info\":\"https://bandit.readthedocs.io/en/latest/plugins/b102_exec_used.html\",\"test_id\":\"B102\",\"test_name\":\"exec_used\"}]}",
+            "cResult": "failed",
+            "cInfo": "Issues found.",
+            "startedAt": "2020-06-25T15:48:41.582Z",
+            "finishedAt": "2020-06-25T15:49:29.336Z"
+        }
+    ],
+    "startedAt": "2020-06-25T15:48:39.736Z",
+    "finishedAt": "2020-06-25T15:49:29.337Z",
+    "codes": [
+        {
+            "language": "Python",
+            "files": [
+                "main.py"
+            ]
+        }
+    ],
+    "huskyciresults": {
+        "goresults": {
+            "gosecoutput": {}
+        },
+        "pythonresults": {
+            "banditoutput": {
+                "nosecvulns": [
+                    {
+                        "language": "Python",
+                        "securitytool": "Bandit",
+                        "severity": "NOSEC",
+                        "confidence": "MEDIUM",
+                        "file": "./main.py",
+                        "line": "3",
+                        "code": "2 \n3 password = 'thisisnotapassword' #nohusky\n4 \n5 command = 'print \"this command is not secure!!\"'\n",
+                        "details": "Possible hardcoded password: 'thisisnotapassword'",
+                        "title": "Possible hardcoded password: 'thisisnotapassword'"
+                    }
+                ],
+                "lowvulns": [
+                    {
+                        "language": "Python",
+                        "securitytool": "Bandit",
+                        "severity": "LOW",
+                        "confidence": "MEDIUM",
+                        "file": "./main.py",
+                        "line": "1",
+                        "code": "1 secret = 'password123!'\n2 \n3 password = 'thisisnotapassword' #nohusky\n4 \n",
+                        "details": "Possible hardcoded password: 'password123!'",
+                        "title": "Possible hardcoded password: 'password123!'"
+                    }
+                ],
+                "mediumvulns": [
+                    {
+                        "language": "Python",
+                        "securitytool": "Bandit",
+                        "severity": "MEDIUM",
+                        "confidence": "HIGH",
+                        "file": "./main.py",
+                        "line": "7",
+                        "code": "6 \n7 exec(command)\n8 \n",
+                        "details": "Use of exec detected.",
+                        "title": "Use of exec detected."
+                    }
+                ]
+            },
+            "safetyoutput": {
+                "highvulns": [
+                    {
+                        "language": "Python",
+                        "securitytool": "Safety",
+                        "severity": "high",
+                        "code": "django ",
+                        "details": "Django before 1.11.27, 2.x before 2.2.9, and 3.x before 3.0.1 allows account takeover. A suitably crafted email address (that is equal to an existing user's email address after case transformation of Unicode characters) would allow an attacker to be sent a password reset token for the matched user account. (One mitigation in the new releases is to send password reset tokens only to the registered user email address.) See CVE-2019-19844.",
+                        "title": "Vulnerable Dependency: django (<1.11.27)",
+                        "vulnerablebelow": "<1.11.27"
+                    },
+                    {
+                        "language": "Python",
+                        "securitytool": "Safety",
+                        "severity": "high",
+                        "code": "django ",
+                        "details": "The django.util.http.is_safe_url function in Django before 1.4.18, 1.6.x before 1.6.10, and 1.7.x before 1.7.3 does not properly handle leading whitespaces, which allows remote attackers to conduct cross-site scripting (XSS) attacks via a crafted URL, related to redirect URLs, as demonstrated by a \\\"\\\\njavascript:\\\" URL.",
+                        "title": "Vulnerable Dependency: django (<1.4.18)",
+                        "vulnerablebelow": "<1.4.18"
+                    },
+                    {
+                        "language": "Python",
+                        "securitytool": "Safety",
+                        "severity": "high",
+                        "code": "django ",
+                        "details": "The django.views.static.serve view in Django before 1.4.18, 1.6.x before 1.6.10, and 1.7.x before 1.7.3 reads files an entire line at a time, which allows remote attackers to cause a denial of service (memory consumption) via a long line in a file.",
+                        "title": "Vulnerable Dependency: django (<1.4.18)",
+                        "vulnerablebelow": "<1.4.18"
+                    },
+                    {
+                        "language": "Python",
+                        "securitytool": "Safety",
+                        "severity": "high",
+                        "code": "django ",
+                        "details": "Django before 1.4.18, 1.6.x before 1.6.10, and 1.7.x before 1.7.3 allows remote attackers to spoof WSGI headers by using an _ (underscore) character instead of a - (dash) character in an HTTP header, as demonstrated by an X-Auth_User header.",
+                        "title": "Vulnerable Dependency: django (<1.4.18)",
+                        "vulnerablebelow": "<1.4.18"
+                    },
+                    {
+                        "language": "Python",
+                        "securitytool": "Safety",
+                        "severity": "high",
+                        "code": "django ",
+                        "details": "The utils.http.is_safe_url function in Django before 1.4.20, 1.5.x, 1.6.x before 1.6.11, 1.7.x before 1.7.7, and 1.8.x before 1.8c1 does not properly validate URLs, which allows remote attackers to conduct cross-site scripting (XSS) attacks via a control character in a URL, as demonstrated by a \\\\x08javascript: URL.",
+                        "title": "Vulnerable Dependency: django (<1.4.20)",
+                        "vulnerablebelow": "<1.4.20"
+                    },
+                    {
+                        "language": "Python",
+                        "securitytool": "Safety",
+                        "severity": "high",
+                        "code": "django ",
+                        "details": "The get_format function in utils/formats.py in Django before 1.7.x before 1.7.11, 1.8.x before 1.8.7, and 1.9.x before 1.9rc2 might allow remote attackers to obtain sensitive application secrets via a settings key in place of a date/time format setting, as demonstrated by SECRET_KEY.",
+                        "title": "Vulnerable Dependency: django (<1.7.11)",
+                        "vulnerablebelow": "<1.7.11"
+                    },
+                    {
+                        "language": "Python",
+                        "securitytool": "Safety",
+                        "severity": "high",
+                        "code": "django ",
+                        "details": "Cross-site scripting (XSS) vulnerability in the contents function in admin/helpers.py in Django before 1.7.6 and 1.8 before 1.8b2 allows remote attackers to inject arbitrary web script or HTML via a model attribute in ModelAdmin.readonly_fields, as demonstrated by a @property.",
+                        "title": "Vulnerable Dependency: django (<1.7.6)",
+                        "vulnerablebelow": "<1.7.6"
+                    },
+                    {
+                        "language": "Python",
+                        "securitytool": "Safety",
+                        "severity": "high",
+                        "code": "django ",
+                        "details": "The password hasher in contrib/auth/hashers.py in Django before 1.8.10 and 1.9.x before 1.9.3 allows remote attackers to enumerate users via a timing attack involving login requests.",
+                        "title": "Vulnerable Dependency: django (<1.8.10)",
+                        "vulnerablebelow": "<1.8.10"
+                    },
+                    {
+                        "language": "Python",
+                        "securitytool": "Safety",
+                        "severity": "high",
+                        "code": "django ",
+                        "details": "The utils.http.is_safe_url function in Django before 1.8.10 and 1.9.x before 1.9.3 allows remote attackers to redirect users to arbitrary web sites and conduct phishing attacks or possibly conduct cross-site scripting (XSS) attacks via a URL containing basic authentication, as demonstrated by http://mysite.example.com\\\\@attacker.com.",
+                        "title": "Vulnerable Dependency: django (<1.8.10)",
+                        "vulnerablebelow": "<1.8.10"
+                    },
+                    {
+                        "language": "Python",
+                        "securitytool": "Safety",
+                        "severity": "high",
+                        "code": "django ",
+                        "details": "The cookie parsing code in Django before 1.8.15 and 1.9.x before 1.9.10, when used on a site with Google Analytics, allows remote attackers to bypass an intended CSRF protection mechanism by setting arbitrary cookies.",
+                        "title": "Vulnerable Dependency: django (<1.8.15)",
+                        "vulnerablebelow": "<1.8.15"
+                    },
+                    {
+                        "language": "Python",
+                        "securitytool": "Safety",
+                        "severity": "high",
+                        "code": "flask ",
+                        "details": "flask version Before 0.12.3 contains a CWE-20: Improper Input Validation vulnerability in flask that can result in Large amount of memory usage possibly leading to denial of service. This attack appear to be exploitable via Attacker provides JSON data in incorrect encoding. This vulnerability appears to have been fixed in 0.12.3.",
+                        "title": "Vulnerable Dependency: flask (<0.12.3)",
+                        "vulnerablebelow": "<0.12.3"
+                    },
+                    {
+                        "language": "Python",
+                        "securitytool": "Safety",
+                        "severity": "high",
+                        "code": "flask ",
+                        "details": "flask 0.6.1 fixes a security problem that allowed clients to download arbitrary files  if the host server was a windows based operating system and the client  uses backslashes to escape the directory the files where exposed from.",
+                        "title": "Vulnerable Dependency: flask (<0.6.1)",
+                        "vulnerablebelow": "<0.6.1"
+                    },
+                    {
+                        "language": "Python",
+                        "securitytool": "Safety",
+                        "severity": "high",
+                        "code": "jinja2 ",
+                        "details": "The default configuration for bccache.FileSystemBytecodeCache in Jinja2 before 2.7.2 does not properly create temporary files, which allows local users to gain privileges via a crafted .cache file with a name starting with __jinja2_ in /tmp.",
+                        "title": "Vulnerable Dependency: jinja2 (<2.7.3)",
+                        "vulnerablebelow": "<2.7.3"
+                    }
+                ]
+            }
+        },
+        "javascriptresults": {
+            "npmauditoutput": {},
+            "yarnauditoutput": {}
+        },
+        "rubyresults": {
+            "brakemanoutput": {}
+        },
+        "javaresults": {
+            "spotbugsoutput": {}
+        },
+        "hclresults": {
+            "tfsecoutput": {}
+        },
+        "genericresults": {
+            "gitleaksoutput": {}
+        }
+    }
+}
