@@ -85,7 +85,7 @@ from dojo.tools.yarn_audit.parser import YarnAuditParser
 from dojo.tools.bugcrowd.parser import BugCrowdCSVParser
 from dojo.tools.huskyci.parser import HuskyCIReportParser
 from dojo.tools.ccvs.parser import CCVSReportParser
-from dojo.tools.securityhub.parser import AwsSecurityFindingFormatParser
+from dojo.tools.awssecurityhub.parser import AwsSecurityFindingFormatParser
 
 
 __author__ = 'Jay Paz'

@@ -1,7 +1,7 @@
 import os.path
 
 from django.test import TestCase
-from dojo.tools.securityhub.parser import AwsSecurityFindingFormatParser
+from dojo.tools.awssecurityhub.parser import AwsSecurityFindingFormatParser
 from dojo.models import Test
 
 
