@@ -15,10 +15,15 @@ class AwsSecurityFindingFormatParser:
     def parse_json(self, filehandle):
         try:
             data = filehandle.read()
-            tree = json.loads(data)
-            return tree
         except:
-            raise AttributeError("Invalid ASFF data")
+            return None
+
+        try:
+            tree = json.loads(data)
+        except:
+            raise Exception("Invalid format")
+
+        return tree
 
     def get_items(self, tree, test):
         items = {}
