@@ -107,11 +107,11 @@ def get_item_v2(item, test):
     if solution:
         mitigation = solution
     elif fix_version:
-        mitigation = f'Upgrade to {fix_version}'
+        mitigation = ('Upgrade to ' + str(fix_version))
     else:
         mitigation = 'No known mitigation'
 
-    return Finding(title=f'{cve}: {file_path}',
+    return Finding(title=str(cve) + ': ' + str(file_path),
                    description=description,
                    url=url,
                    cwe=0,
