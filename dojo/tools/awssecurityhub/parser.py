@@ -15,7 +15,7 @@ class AwsSecurityFindingFormatParser:
     def parse_json(self, filehandle):
         try:
             data = filehandle.read()
-            tree = json.loads(str(data, 'utf-8'))
+            tree = json.loads(data)
             return tree
         except:
             raise AttributeError("Invalid ASFF data")
