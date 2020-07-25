@@ -23,6 +23,7 @@ class GitleaksJSONParser(object):
         data = filename.read()
 
         for issue in self.parse_json(data):
+            line = None
             file_path = issue["file"]
             reason = issue["rule"]
             titleText = "Hard Coded " + reason + " in: " + file_path
@@ -35,8 +36,6 @@ class GitleaksJSONParser(object):
             if "lineNumber" in issue:
                 description += "**Line:** %i\n" % issue["lineNumber"]
                 line = issue["lineNumber"]
-            else:
-                line = None
             if "operation" in issue:
                 description += "**Operation:** " + issue["operation"] + "\n"
             description += "\n**String Found:**\n" + issue["line"].replace(issue["offender"], "REDACTED") + "\n"
