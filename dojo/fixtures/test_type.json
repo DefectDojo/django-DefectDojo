@@ -635,5 +635,12 @@
         },
         "model": "dojo.test_type",
         "pk": 182
+    },
+    {
+        "fields": {
+            "name": "AWS Security Hub Scan"
+        },
+        "model": "dojo.test_type",
+		"pk": 183
     }
 ]
