@@ -398,6 +398,8 @@ class ImportScanForm(forms.Form):
                          ("Yarn Audit Scan", "Yarn Audit Scan"),
                          ("BugCrowd Scan", "BugCrowd Scan"),
                          ("GitLab SAST Report", "GitLab SAST Report"),
+                         ("AWS Security Hub Scan", "AWS Security Hub Scan"),
+                         ("GitLab SAST Report", "GitLab SAST Report"),
                          ("HuskyCI Report", "HuskyCI Report"),
                          ("CCVS Report", "CCVS Report"))
 
