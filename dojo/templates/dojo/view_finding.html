@@ -958,7 +958,6 @@
                 var i = $($(this).find('i').get(0));
                 i.toggleClass('glyphicon-chevron-up').toggleClass('glyphicon-chevron-down');
             })
-            $('[data-toggle="tooltip"]').tooltip()
         });
 
         // keyboard shortcuts
@@ -1088,9 +1087,6 @@
         }
 
         $(function () {
-            $(document).ready(function(){
-              $('[data-toggle="tooltip"]').tooltip();
-            });
             check_checked_finding();
 
             // Keep the dropdown menu open for selecting severity status
@@ -1105,8 +1101,6 @@
             $('.table-responsive').on('hide.bs.dropdown', function () {
               $('.table-responsive').css( "overflow", "auto" );
             })
-
-            $('[data-toggle="tooltip"]').tooltip();
 
             $('#bulk_edit_menu #id_bulk_active').on("click", function (e){
                 var checked = this.checked;
