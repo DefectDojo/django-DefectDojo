@@ -28,7 +28,7 @@ class ESLintParser(object):
                 continue
 
             for message in item["messages"]:
-                title = message["message"] + " Test ID: " + message["ruleId"]
+                title = str(message["message"]) + " Test ID: " + str(message["ruleId"])
 
                 #  ##### Finding details information ######
                 findingdetail += "Filename: " + item["filePath"] + "\n"
