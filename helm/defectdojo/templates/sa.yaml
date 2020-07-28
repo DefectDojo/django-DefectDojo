@@ -1,8 +1,8 @@
-{{- if .Values.createRedisSecret -}}
+{{- $fullName := include "defectdojo.fullname" . -}}
+kind: ServiceAccount
 apiVersion: v1
-kind: Secret
 metadata:
-  name: {{ .Values.redis.existingSecret }}
+  name: {{ $fullName }}
   labels:
     app.kubernetes.io/name: {{ include "defectdojo.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
@@ -12,11 +12,6 @@ metadata:
     helm.sh/resource-policy: keep
     helm.sh/hook: "pre-install"
     helm.sh/hook-delete-policy: "before-hook-creation"
-type: Opaque
-data:
-{{- if .Values.redis.password }}
-  redis-password: {{ .Values.redis.password | b64enc | quote }}
-{{- else }}
-  redis-password: {{ randAlphaNum 10 | b64enc | quote }}
-{{- end }}
-{{- end }}
+    {{- with .Values.annotations }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
