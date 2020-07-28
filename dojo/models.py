@@ -1948,18 +1948,18 @@ class Finding(models.Model):
         # Adding a snippet here for push to JIRA so that it's in one place
         if push_to_jira:
             logger.debug('pushing to jira from finding.save()')
-            from dojo.tasks import update_issue_task, add_issue_task
-            from dojo.utils import add_issue, update_issue
+            from dojo.tasks import update_jira_issue_task, add_jira_issue_task
+            from dojo.utils import add_jira_issue, update_jira_issue
             if jira_issue_exists:
                 if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
-                    update_issue(self, True)
+                    update_jira_issue(self, True)
                 else:
-                    update_issue_task.delay(self, True)
+                    update_jira_issue_task.delay(self, True)
             else:
                 if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
-                    add_issue(self, True)
+                    add_jira_issue(self, True)
                 else:
-                    add_issue_task.delay(self, True)
+                    add_jira_issue_task.delay(self, True)
 
     def delete(self, *args, **kwargs):
         for find in self.original_finding.all():
@@ -2438,6 +2438,7 @@ NOTIFICATION_CHOICES = (
     ("slack", "slack"), ("hipchat", "hipchat"), ("mail", "mail"),
     ("alert", "alert")
 )
+
 
 class Notifications(models.Model):
     product_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)

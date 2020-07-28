@@ -40,11 +40,11 @@ from dojo.models import Finding, Notes, NoteHistory, Note_Type, \
 from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_notifications, \
     add_comment, jira_get_resolution_id, jira_change_resolution_id, get_jira_connection, \
     get_system_setting, apply_cwe_to_template, Product_Tab, calculate_grade, log_jira_alert, \
-    redirect_to_return_url_or_else, get_return_url, add_issue, update_issue, add_external_issue, update_external_issue, \
+    redirect_to_return_url_or_else, get_return_url, add_jira_issue, update_jira_issue, add_external_issue, update_external_issue, \
     jira_get_issue
 from dojo.notifications.helper import create_notification
 
-from dojo.tasks import add_issue_task, update_issue_task, update_external_issue_task, add_comment_task, \
+from dojo.tasks import add_jira_issue_task, update_jira_issue_task, update_external_issue_task, add_comment_task, \
     add_external_issue_task, close_external_issue_task, reopen_external_issue_task
 from django.template.defaultfilters import pluralize
 from django.db.models import Q, QuerySet, Prefetch
@@ -1860,14 +1860,14 @@ def finding_bulk_update_all(request, pid=None):
                         else:
                             if JIRA_Issue.objects.filter(finding=finding).exists():
                                 if request.user.usercontactinfo.block_execution:
-                                    update_issue(finding, True)
+                                    update_jira_issue(finding, True)
                                 else:
-                                    update_issue_task.delay(finding, True)
+                                    update_jira_issue_task.delay(finding, True)
                             else:
                                 if request.user.usercontactinfo.block_execution:
-                                    add_issue(finding, True)
+                                    add_jira_issue(finding, True)
                                 else:
-                                    add_issue_task.delay(finding, True)
+                                    add_jira_issue_task.delay(finding, True)
 
                 messages.add_message(request,
                                      messages.SUCCESS,
@@ -2034,21 +2034,21 @@ def push_to_jira(request, fid):
         if finding.jira():
             logger.info('trying to push %d:%s to JIRA to update JIRA issue', finding.id, finding.title)
             if hasattr(request.user, 'usercontactinfo') and request.user.usercontactinfo.block_execution:
-                update_issue(finding, True)
+                update_jira_issue(finding, True)
                 message = 'Linked JIRA issue succesfully updated, but check alerts for background errors.'
             else:
-                update_issue_task.delay(finding, True)
+                update_jira_issue_task.delay(finding, True)
                 message = 'Update to linked JIRA issue queued succesfully.'
         else:
             logger.info('trying to push %d:%s to JIRA to create a new JIRA issue', finding.id, finding.title)
             if hasattr(request.user, 'usercontactinfo') and request.user.usercontactinfo.block_execution:
-                add_issue(finding, True)
+                add_jira_issue(finding, True)
                 message = 'JIRA issue created succesfully, but check alerts for background errors'
             else:
-                add_issue_task.delay(finding, True)
+                add_jira_issue_task.delay(finding, True)
                 message = 'JIRA issue creation queued succesfully.'
 
-        # it may look like succes here, but the add_issue and update_issue are swallowing exceptions
+        # it may look like succes here, but the add_jira_issue and update_jira_issue are swallowing exceptions
         # but cant't change too much now without having a test suite, so leave as is for now with the addition warning message to check alerts for background errors.
 
         messages.add_message(
