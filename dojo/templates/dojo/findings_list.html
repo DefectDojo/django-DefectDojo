@@ -320,10 +320,10 @@
                                                       href="{% url 'view_finding' finding.id %}">{{ finding.id }}</a>
                                   {% endif %}
                                   {% if finding.file_path %}
-                                  <i class="fa dojo-sup fa-code has-popover" data-trigger="hover" data-content="{{ finding.file_path }}" data-placement="right" data-container="body" data-original-title="Files" title=""></i>
+                                  <i class="fa fa-code has-popover dojo-sup" data-trigger="hover" data-content="{{ finding.file_path }}" data-placement="right" data-container="body" data-original-title="Files" title=""></i>
                                   {% else %}
                                     {% if finding.endpoints.all %}
-                                      <i class="fa dojo-sup fa-sitemap has-popover" data-html="true" data-trigger="hover" data-content="
+                                      <i class="fa fa-sitemap has-popover dojo-sup" data-html="true" data-trigger="hover" data-content="
                                       {% for endpoint in finding.endpoints.all %}
                                         {{ endpoint }}<br/>
                                       {% endfor %}
@@ -331,18 +331,21 @@
                                     {% endif %}
                                   {% endif %}
                                   {% if finding.component_name %}
-                                    <i class="fa dojo-sup fa-file has-popover" data-trigger="hover" data-placement="right"
+                                    <i class="fa fa-file has-popover dojo-sup" data-trigger="hover" data-placement="right"
                                        data-content="{{ finding.component_name }} - {{ finding.component_version }}"
                                        data-container="body" data-original-title="Component" title=""></i>
                                   {% endif %}
                                   {% if finding.notes.all %}
-                                    <i class="fa fa-comment has-popover" data-trigger="hover" data-content="{{ finding.notes.all.0 }}" data-placement="left" data-container="body" data-original-title="Most Recent Note" title=""></i>
+                                    <i class="glyphicon glyphicon-comment has-popover dojo-sup" data-trigger="hover" data-content="{{ finding.notes.all.0 }}" data-placement="left" data-container="body" data-original-title="Most Recent Note ({{ finding.notes.count }} total)" title=""></i>
+                                    <a href="{% url 'view_finding' finding.id %}#vuln_notes" class="dojo-sup" alt="{{ finding.notes.count }} note{{ finding.notes.count|pluralize }}">
+                                        ({{ finding.notes.count }})
+                                    </a>
                                   {% endif %}
-                                    <sup>
-                                        {% for tag in finding.tags %}
-                                        <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
-                                        {% endfor %}
-                                    </sup>
+                                  <sup>
+                                      {% for tag in finding.tags %}
+                                      <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                      {% endfor %}
+                                  </sup>
                                 </td>
                                 <td class="nowrap">
                                 {% if finding.cwe > 0 %}
@@ -380,11 +383,6 @@
                                       <a href="{{finding.jira_conf_new.url}}/browse/{{finding.jira_issue.jira_key}}" target="_blank" 
                                            alt="Jira Bug - {{finding.jira_issue.jira_key}}" data-toggle="tooltip" data-placement="bottom" title="{{finding.jira_issue.jira_key}}"><i class="fa fa-bug fa-fw"></i></a>
                                     {% endif %}
-                                    {% if finding.notes.count %}
-                                      <a href="{% url 'view_finding' finding.id %}#vuln_notes" alt="{{ finding.notes.count }} comment{{ finding.notes.count|pluralize }}">
-                                        <span class="glyphicon glyphicon-comment"></span> {{ finding.notes.count }}
-                                      </a>
-                                    {% endif %}                                    
                                   {% endif %}
                                 </td>
                                 {% if system_settings.enable_jira %}
@@ -555,9 +553,6 @@
           }
         }
         $(function () {
-            $(document).ready(function(){
-              $('[data-toggle="tooltip"]').tooltip();
-            });
             check_checked_finding();
 
             $('#id_bulk_status').on('click', function (e) {
@@ -595,7 +590,6 @@
                   $( form_element ).submit();
               }
             });
-            $('[data-toggle="tooltip"]').tooltip();
 
             var availableTags = [
                 {% for word in title_words %}
