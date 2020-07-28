@@ -963,7 +963,7 @@ class Engagement(models.Model):
     source_code_management_server = models.ForeignKey(Tool_Configuration, null=True, blank=True, verbose_name="SCM Server", help_text="Source code server for CI/CD test", related_name='source_code_management_server', on_delete=models.CASCADE)
     source_code_management_uri = models.URLField(max_length=600, null=True, blank=True, editable=True, verbose_name="Repo", help_text="Resource link to source code")
     orchestration_engine = models.ForeignKey(Tool_Configuration, verbose_name="Orchestration Engine", help_text="Orchestration service responsible for CI/CD test", null=True, blank=True, related_name='orchestration', on_delete=models.CASCADE)
-    deduplication_on_engagement = models.BooleanField(default=False)
+    deduplication_on_engagement = models.BooleanField(default=False, verbose_name="Deduplication within this engagement only", help_text="If enabled deduplication will only mark a finding in this engagement as duplicate of another finding if both findings are in this engagement. If disabled, deduplication is on the product level.")
 
     # used for prefetching tags because django-tagging doesn't support that out of the box
     tagged_items = GenericRelation(TaggedItem)
@@ -2438,6 +2438,7 @@ NOTIFICATION_CHOICES = (
     ("slack", "slack"), ("hipchat", "hipchat"), ("mail", "mail"),
     ("alert", "alert")
 )
+
 
 class Notifications(models.Model):
     product_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
