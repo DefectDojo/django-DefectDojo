@@ -228,7 +228,7 @@ def edit_engagement(request, eid):
         form = EngForm(initial={'product': eng.product.id}, instance=eng, cicd=ci_cd_form, product=eng.product.id)
 
         if use_jira:
-            jform = JIRAEngagementForm(prefix='jiraform', instance=eng, jira_pkey=eng.product.jira_pkey)
+            jform = JIRAEngagementForm(prefix='jiraform', instance=eng)
         else:
             jform = None
 
