@@ -1521,7 +1521,6 @@ class Finding(models.Model):
         self.save()
 
     def simple_risk_unaccept(self):
-        print('unaccepting risk')
         # removing from ManyToMany will not fail for non-existing entries
         self.get_simple_risk_acceptance().accepted_findings.remove(self)
         # risk acceptance no longer in place, so reactivate, but only when it makes sense
@@ -2467,22 +2466,20 @@ class Notifications(models.Model):
 
     @classmethod
     def merge_notifications_list(cls, notifications_list):
-        print('merging')
         if not notifications_list:
-            print('return empty list')
             return []
 
         result = None
         for notifications in notifications_list:
-            print('id: ', notifications.id)
-            print('not.user.get_full_name: ', notifications.user.get_full_name())
+            # print('id: ', notifications.id)
+            # print('not.user.get_full_name: ', notifications.user.get_full_name())
             if result is None:
                 # we start by copying the first instance, because creating a new instance would set all notification columns to 'alert' :-()
                 result = notifications
                 # result.pk = None # detach from db
             else:
                 # from dojo.utils import concat_comma_separated_strings
-                print('combining: ' + str(result.scan_added) + ' with ' + str(notifications.scan_added))
+                # print('combining: ' + str(result.scan_added) + ' with ' + str(notifications.scan_added))
                 # result.scan_added = (result.scan_added or []).extend(notifications.scan_added)
                 # if result.scan_added:
                 #     result.scan_added.extend(notifications.scan_added)

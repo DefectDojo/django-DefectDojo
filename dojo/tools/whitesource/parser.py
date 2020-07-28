@@ -67,7 +67,7 @@ class WhitesourceJSONParser(object):
                             topfix_node.get('fixResolution')
                         )
                 except Exception as e:
-                    print("Error handling topFix node. {}").format(e)
+                    ("Error handling topFix node. {}").format(e)
 
             filepaths = []
             if 'sourceFiles' in node:

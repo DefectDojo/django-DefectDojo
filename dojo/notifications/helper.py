@@ -238,7 +238,7 @@ def send_mail_notification(event, user=None, *args, **kwargs):
 
 
 def send_alert_notification(event, user=None, *args, **kwargs):
-    print('sending alert notification')
+    logger.info('sending alert notification')
     try:
         icon = kwargs.get('icon', 'info-circle')
         alert = Alerts(

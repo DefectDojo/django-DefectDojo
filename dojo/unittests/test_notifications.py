@@ -18,22 +18,22 @@ class TestNotifications(TestCase):
 
         global_personal_notifications = Notifications.objects.get(id=global_personal_notifications.id)
 
-        print(vars(global_personal_notifications))
+        # print(vars(global_personal_notifications))
 
         personal_product_notifications.product_added = ['mail']
         personal_product_notifications.test_added = ['mail', 'alert']
         personal_product_notifications.scan_added = None
-        print(vars(personal_product_notifications))
+        # print(vars(personal_product_notifications))
 
         personal_product_notifications.save()
 
         personal_product_notifications = Notifications.objects.get(id=personal_product_notifications.id)
 
-        print(vars(personal_product_notifications))
+        # print(vars(personal_product_notifications))
 
         merged_notifications = Notifications.merge_notifications_list([global_personal_notifications, personal_product_notifications])
 
-        print(vars(merged_notifications))
+        # print(vars(merged_notifications))
 
         self.assertEqual('alert' in merged_notifications.product_added, True)
         self.assertEqual('mail' in merged_notifications.product_added, True)

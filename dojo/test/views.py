@@ -314,15 +314,10 @@ def add_findings(request, tid):
         if use_jira:
             jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_pkey=test.engagement.product.jira_pkey)
 
-        print('form.is_valid: ', form.is_valid())
-
-        if jform:
-            print('jform.is_valid: ', jform.is_valid())
-
         if form.is_valid() and (jform is None or jform.is_valid()):
             if jform:
-                print('jform.jira_issue: ', jform.cleaned_data.get('jira_issue'))
-                print('jform.push_to_jira: ', jform.cleaned_data.get('push_to_jira'))
+                logger.debug('jform.jira_issue: %s', jform.cleaned_data.get('jira_issue'))
+                logger.debug('jform.push_to_jira: %s', jform.cleaned_data.get('push_to_jira'))
 
             new_finding = form.save(commit=False)
             new_finding.test = test
@@ -338,14 +333,11 @@ def add_findings(request, tid):
             new_finding.save(dedupe_option=False, push_to_jira=False)
             new_finding.endpoints.set(form.cleaned_data['endpoints'])
 
-            print('jira handling')
-
             # Push to jira?
             push_to_jira = False
             jira_message = None
             if jform and jform.is_valid():
                 # Push to Jira?
-                logger.debug('jira form valid')
                 push_to_jira = push_all_jira_issues or jform.cleaned_data.get('push_to_jira')
 
                 # if the jira issue key was changed, update database

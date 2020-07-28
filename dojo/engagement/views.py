@@ -603,8 +603,8 @@ def import_scan_results(request, eid=None, pid=None):
                         push_to_jira = jform.cleaned_data.get('push_to_jira')
 
                 for item in parser.items:
-                    print("item blowup")
-                    print(item)
+                    # print("item blowup")
+                    # print(item)
                     sev = item.severity
                     if sev == 'Information' or sev == 'Informational':
                         sev = 'Info'

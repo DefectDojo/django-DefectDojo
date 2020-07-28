@@ -1670,7 +1670,7 @@ def jira_get_issue(jpkey, issue_key):
             server=jira_conf.url,
             basic_auth=(jira_conf.username, jira_conf.password))
         issue = jira.issue(issue_key)
-        print(vars(issue))
+        # print(vars(issue))
         return issue
     except JIRAError as jira_error:
         logger.debug('error retrieving jira issue ' + issue_key + ' ' + str(jira_error))

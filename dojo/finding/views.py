@@ -615,14 +615,11 @@ def edit_finding(request, fid):
         if use_jira:
             jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, instance=finding)
 
-        print('form.is_valid: ', form.is_valid())
-        if jform:
-            print('jform.is_valid: ', jform.is_valid())
-
         if form.is_valid() and (jform is None or jform.is_valid()):
             if jform:
-                print('jform.jira_issue: ', jform.cleaned_data.get('jira_issue'))
-                print('jform.push_to_jira: ', jform.cleaned_data.get('push_to_jira'))
+                logger.debug('jform.jira_issue: %s', jform.cleaned_data.get('jira_issue'))
+                logger.debug('jform.push_to_jira: %s', jform.cleaned_data.get('push_to_jira'))
+
             new_finding = form.save(commit=False)
             new_finding.test = finding.test
             new_finding.numerical_severity = Finding.get_numerical_severity(
@@ -788,12 +785,7 @@ def edit_finding(request, fid):
             title=finding.title).exclude(
             id=finding.id)
     product_tab = Product_Tab(finding.test.engagement.product.id, title="Edit Finding", tab="findings")
-    print('form.errors:')
-    print(form.errors.as_text())
 
-    if jform:
-        print('jform.errors:')
-        print(jform.errors.as_text())
     return render(request, 'dojo/edit_finding.html', {
         'product_tab': product_tab,
         'form': form,
@@ -1174,14 +1166,10 @@ def promote_to_finding(request, fid):
         if use_jira:
             jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_pkey=test.engagement.product.jira_pkey)
 
-        print('form.is_valid: ', form.is_valid())
-        if jform:
-            print('jform.is_valid: ', jform.is_valid())
-
         if form.is_valid() and (jform is None or jform.is_valid()):
             if jform:
-                print('jform.jira_issue: ', jform.cleaned_data.get('jira_issue'))
-                print('jform.push_to_jira: ', jform.cleaned_data.get('push_to_jira'))
+                logger.debug('jform.jira_issue: %s', jform.cleaned_data.get('jira_issue'))
+                logger.debug('jform.push_to_jira: %s', jform.cleaned_data.get('push_to_jira'))
 
             new_finding = form.save(commit=False)
             new_finding.test = test
