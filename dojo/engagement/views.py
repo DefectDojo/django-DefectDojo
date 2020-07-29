@@ -228,7 +228,7 @@ def edit_engagement(request, eid):
         form = EngForm(initial={'product': eng.product.id}, instance=eng, cicd=ci_cd_form, product=eng.product.id)
 
         if use_jira:
-            jform = JIRAEngagementForm(prefix='jiraform', instance=eng, jira_pkey=eng.product.jira_pkey)
+            jform = JIRAEngagementForm(prefix='jiraform', instance=eng)
         else:
             jform = None
 
@@ -603,8 +603,8 @@ def import_scan_results(request, eid=None, pid=None):
                         push_to_jira = jform.cleaned_data.get('push_to_jira')
 
                 for item in parser.items:
-                    print("item blowup")
-                    print(item)
+                    # print("item blowup")
+                    # print(item)
                     sev = item.severity
                     if sev == 'Information' or sev == 'Informational':
                         sev = 'Info'

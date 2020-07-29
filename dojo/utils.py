@@ -40,7 +40,6 @@ from django.http import HttpResponseRedirect
 # import traceback
 
 
-
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
@@ -1336,7 +1335,7 @@ def reopen_external_issue(find, note, external_issue_provider):
         reopen_external_issue_github(find, note, prod, eng)
 
 
-def add_issue(find, push_to_jira):
+def add_jira_issue(find, push_to_jira):
     logger.info('trying to create a new jira issue for %d:%s', find.id, find.title)
 
     # traceback.print_stack()
@@ -1432,7 +1431,7 @@ def add_issue(find, push_to_jira):
 
                 new_note = Notes()
                 new_note.entry = 'created JIRA issue %s for finding' % (jira_issue_url)
-                new_note.author = find.reporter  # quick hack because we don't have request.user here
+                new_note.author, created = User.objects.get_or_create(username='JIRA')  # quick hack copied from webhook because we don't have request.user here
                 new_note.save()
                 find.notes.add(new_note)
 
@@ -1445,7 +1444,7 @@ def add_issue(find, push_to_jira):
                     # if jpkey.enable_engagement_epic_mapping:
                     #      epic = JIRA_Issue.objects.get(engagement=eng)
                     #      issue_list = [j_issue.jira_id,]
-                    #      jira.add_issues_to_epic(epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
+                    #      jira.add_jira_issues_to_epic(epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
             except JIRAError as e:
                 logger.error(e.text)
                 log_jira_alert(e.text, find)
@@ -1491,7 +1490,7 @@ def jira_check_attachment(issue, source_file_name):
     return file_exists
 
 
-def update_issue(find, push_to_jira):
+def update_jira_issue(find, push_to_jira):
     logger.info('trying to update a linked jira issue for %d:%s', find.id, find.title)
     prod = Product.objects.get(
         engagement=Engagement.objects.get(test=find.test))
@@ -1671,7 +1670,7 @@ def jira_get_issue(jpkey, issue_key):
             server=jira_conf.url,
             basic_auth=(jira_conf.username, jira_conf.password))
         issue = jira.issue(issue_key)
-        print(vars(issue))
+        # print(vars(issue))
         return issue
     except JIRAError as jira_error:
         logger.debug('error retrieving jira issue ' + issue_key + ' ' + str(jira_error))

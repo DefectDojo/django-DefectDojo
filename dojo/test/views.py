@@ -30,9 +30,9 @@ from dojo.models import Finding, Test, Notes, Note_Type, BurpRawRequestResponse,
     Finding_Template, JIRA_PKey, Cred_Mapping, Dojo_User, System_Settings, Endpoint_Status
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting, \
-    Product_Tab, max_safe, is_scan_file_too_large, add_issue
+    Product_Tab, max_safe, is_scan_file_too_large, add_jira_issue
 from dojo.notifications.helper import create_notification
-from dojo.tasks import add_issue_task
+from dojo.tasks import add_jira_issue_task
 from functools import reduce
 from dojo.finding.views import finding_link_jira, finding_unlink_jira
 
@@ -155,7 +155,9 @@ def prefetch_for_findings(findings):
         prefetched_findings = prefetched_findings.prefetch_related('tagged_items__tag')
         prefetched_findings = prefetched_findings.prefetch_related('endpoints')
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__authorized_users')
+    else:
         logger.debug('unable to prefetch because query was already executed')
+
     return prefetched_findings
 
 
@@ -314,15 +316,10 @@ def add_findings(request, tid):
         if use_jira:
             jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_pkey=test.engagement.product.jira_pkey)
 
-        print('form.is_valid: ', form.is_valid())
-
-        if jform:
-            print('jform.is_valid: ', jform.is_valid())
-
         if form.is_valid() and (jform is None or jform.is_valid()):
             if jform:
-                print('jform.jira_issue: ', jform.cleaned_data.get('jira_issue'))
-                print('jform.push_to_jira: ', jform.cleaned_data.get('push_to_jira'))
+                logger.debug('jform.jira_issue: %s', jform.cleaned_data.get('jira_issue'))
+                logger.debug('jform.push_to_jira: %s', jform.cleaned_data.get('push_to_jira'))
 
             new_finding = form.save(commit=False)
             new_finding.test = test
@@ -338,14 +335,11 @@ def add_findings(request, tid):
             new_finding.save(dedupe_option=False, push_to_jira=False)
             new_finding.endpoints.set(form.cleaned_data['endpoints'])
 
-            print('jira handling')
-
             # Push to jira?
             push_to_jira = False
             jira_message = None
             if jform and jform.is_valid():
                 # Push to Jira?
-                logger.debug('jira form valid')
                 push_to_jira = push_all_jira_issues or jform.cleaned_data.get('push_to_jira')
 
                 # if the jira issue key was changed, update database
@@ -492,9 +486,9 @@ def add_temp_finding(request, tid, fid):
                 jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_pkey=test.engagement.product.jira_pkey)
                 if jform.is_valid():
                     if request.user.usercontactinfo.block_execution:
-                        add_issue(new_finding, jform.cleaned_data.get('push_to_jira'))
+                        add_jira_issue(new_finding, jform.cleaned_data.get('push_to_jira'))
                     else:
-                        add_issue_task.delay(new_finding, jform.cleaned_data.get('push_to_jira'))
+                        add_jira_issue_task.delay(new_finding, jform.cleaned_data.get('push_to_jira'))
 
             messages.add_message(request,
                                  messages.SUCCESS,

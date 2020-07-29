@@ -1,6 +1,9 @@
 from .parser_helper import get_defectdojo_findings
 from dojo.models import Finding
 import re
+import logging
+
+logger = logging.getLogger(__name__)
 
 __author__ = "Vijay Bheemineni"
 __license__ = "MIT"
@@ -50,7 +53,7 @@ class AcunetixScannerParser(object):
                 )
                 defectdojo_findings.append(finding)
             else:
-                print(("Duplicate finding : {defectdojo_title}".format(defectdojo_title=defectdojo_title)))
+                logger.debug(("Duplicate finding : {defectdojo_title}".format(defectdojo_title=defectdojo_title)))
 
         self.items = defectdojo_findings
 
@@ -69,7 +72,7 @@ def get_defectdojo_date(date):
     mon = date[1]
     year = date[2]
     defectdojo_date = "{year}-{mon}-{day}".format(year=year, mon=mon, day=day)
-    print(defectdojo_date)
+    # print(defectdojo_date)
     return defectdojo_date
 
 

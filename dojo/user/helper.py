@@ -73,7 +73,7 @@ def user_must_be_authorized(model, perm_type, arg, lookup="pk", view_func=None):
             logger.warn('User %s is not authorized to %s for %s', request.user, perm_type, obj)
             raise PermissionDenied()
 
-        print('user is authorized for: ', obj)
+        # print('user is authorized for: ', obj)
         # Django doesn't seem to easily support just passing on the original positional parameters
         # so we resort to explicitly putting lookup_value here (which is for example the 'fid' parameter)
         return view_func(request, lookup_value, *args, **kwargs)
