@@ -29,7 +29,7 @@ class ESLintParser(object):
 
             for message in item["messages"]:
 
-                if message["message"] is  None:
+                if message["message"] is None:
                     title = str("Finding Not defined")
                 else:
                     title = str(message["message"])
