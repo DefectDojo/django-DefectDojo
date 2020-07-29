@@ -28,7 +28,15 @@ class ESLintParser(object):
                 continue
 
             for message in item["messages"]:
-                title = str(message["message"]) + " Test ID: " + str(message["ruleId"])
+
+                if message["message"] == None:
+                    title = str("Finding Not defined")
+                else:
+                    title = str(message["message"])
+
+                if message["ruleId"] != None:
+                    title = title + ' Test ID: ' + str(message["ruleId"])
+
 
                 #  ##### Finding details information ######
                 findingdetail += "Filename: " + item["filePath"] + "\n"
