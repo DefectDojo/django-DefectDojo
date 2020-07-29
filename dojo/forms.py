@@ -1005,9 +1005,7 @@ class FindingForm(forms.ModelForm):
         t = [(tag.name, tag.name) for tag in tags]
         super(FindingForm, self).__init__(*args, **kwargs)
         self.fields['tags'].widget.choices = t
-        # print(self.instance.get_simple_risk_acceptance())
         self.fields['simple_risk_accept'].initial = True if self.instance.is_simple_risk_accepted else False
-        # print(self.fields['simple_risk_accept'].initial)
 
     def clean(self):
         cleaned_data = super(FindingForm, self).clean()
@@ -2068,7 +2066,6 @@ class JIRAFindingForm(forms.Form):
             self.fields['push_to_jira'].disabled = True
 
         if self.instance:
-            print('self.instance.has_jira_issue: ', self.instance.has_jira_issue())
             if self.instance.has_jira_issue():
                 self.initial['jira_issue'] = self.instance.jira_issue.jira_key
 
@@ -2148,7 +2145,6 @@ class JIRAEngagementForm(forms.Form):
         super(JIRAEngagementForm, self).__init__(*args, **kwargs)
 
         if self.instance:
-            print('self.instance.has_jira_issue: ', self.instance.has_jira_issue())
             if self.instance.has_jira_issue():
                 self.fields['push_to_jira'].widget.attrs['checked'] = 'checked'
                 self.fields['push_to_jira'].label = 'Update JIRA Epic'

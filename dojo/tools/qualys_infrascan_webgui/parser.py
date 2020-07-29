@@ -42,7 +42,7 @@ def report_writer(report_dic, output_filename):
         csvWriter = utfdictcsv.DictUnicodeWriter(outFile, REPORT_HEADERS, quoting=csv.QUOTE_ALL)
         csvWriter.writerow(CUSTOM_HEADERS)
         csvWriter.writerows(report_dic)
-    print("Successfully parsed.")
+    logger.debug("Successfully parsed.")
 
 
 def issue_r(raw_row, vuln, scan_date):
@@ -203,7 +203,7 @@ if __name__ == "__main__":
     try:
         qualys_parser(args.qualys_xml_file)
     except IOError:
-        print("[!] Error processing file: {}".format(args.qualys_xml_file))
+        logger.error("[!] Error processing file: {}".format(args.qualys_xml_file))
         exit()
 
 

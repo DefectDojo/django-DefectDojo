@@ -109,12 +109,7 @@ def view_product(request, pid):
     prod = get_object_or_404(prod_query, id=pid)
     auth = request.user.is_staff or request.user in prod.authorized_users.all()
 
-    # instance = Notificationws.objects.filter(user=request.user).filter(product=prod).first()
-    # print(vars(instance))
-
     personal_notifications_form = ProductNotificationsForm(instance=Notifications.objects.filter(user=request.user).filter(product=prod).first())
-
-    print(vars(personal_notifications_form))
 
     if not auth:
         # will render 403
@@ -773,10 +768,6 @@ def new_eng_for_app(request, pid, cicd=False):
             if 'jiraform-push_to_jira' in request.POST:
                 jform = JIRAEngagementForm(request.POST, prefix='jiraform')
 
-            print('form.is_valid: ', form.is_valid())
-            if jform:
-                print('jform.is_valid: ', jform.is_valid())
-
             if form.is_valid() and (jform is None or jform.is_valid()):
                 if 'jiraform-push_to_jira' in request.POST:
                     if request.user.usercontactinfo.block_execution:
@@ -943,10 +934,6 @@ def ad_hoc_finding(request, pid):
                                      extra_tags='alert-danger')
         if use_jira:
             jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_pkey=test.engagement.product.jira_pkey)
-
-        print('form.is_valid: ', form.is_valid())
-        if jform:
-            print('jform.is_valid: ', jform.is_valid())
 
         if form.is_valid() and (jform is None or jform.is_valid()):
             new_finding = form.save(commit=False)
@@ -1165,15 +1152,14 @@ def delete_engagement_presets(request, pid, eid):
 
 
 def edit_notifications(request, pid):
-    print('editing them notifications')
     prod = get_object_or_404(Product, id=pid)
     if request.method == 'POST':
         product_notifications = Notifications.objects.filter(user=request.user).filter(product=prod).first()
         if not product_notifications:
             product_notifications = Notifications(user=request.user, product=prod)
-            print('no existing product notifications found')
+            logger.debug('no existing product notifications found')
         else:
-            print('existing product notifications found')
+            logger.debug('existing product notifications found')
 
         form = ProductNotificationsForm(request.POST, instance=product_notifications)
         # print(vars(form))
