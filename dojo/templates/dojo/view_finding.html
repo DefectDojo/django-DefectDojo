@@ -213,7 +213,7 @@
                         <th>Risk Acceptance</th>
                     {% endif %}
                     {% if finding.duplicate_finding_set %}
-                    <th>Parent</th>
+                    <th>Duplicate set</th>
                     {% endif %}
                     <th>Type</th>
                     <th>Date discovered</th>
@@ -462,14 +462,6 @@
             </tr>
         </table>
     </div>
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <h4>Add Existing JIRA issue <span class="pull-right"><a data-toggle="collapse" href="#similar_findings"><i class="glyphicon glyphicon-chevron-down"></i></a></span></h4>
-        </div>
-        <div id="existing_jira_finding" class="panel-body collapse">
-            FORM TO BE ADDED
-        </div>
-    </div>
     {% endif %}    
     {% if finding.param or finding.payload %}
         <div class="panel panel-default">
@@ -561,24 +553,38 @@
                                     data-clipboard-text="{{similar.file_path}}{% if similar.line > 0 %} (Line {{ similar.line }}){% endif %}"></i></td>
                                 <td>
                                     {% if similar.duplicate %}
+                                        {% if similar.duplicate_finding.id == finding.duplicate_finding.id %}
+                                            <p>This is a similar finding which is a duplicate of the same finding</p>
+                                        {% else %}
+                                            <p>This is a similar finding which is a duplicate of some other finding</p>
+                                        {% endif%}
                                         <form method="post"
                                               action="{% url 'reset_finding_duplicate_status' similar.id %}">
                                             {% csrf_token %}
                                             <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
-                                            <input type="submit" value="Reset duplicate status"/>
+                                            <input type="submit" value="Reset duplicate status of similar finding"  title="This will reset the duplicate status of this similar finding" />
                                         </form>
-                                    {% elif finding.original_finding.id != similar.id %}
+                                    {% elif finding.duplicate_finding.id == similar.id %}
+                                        <p>This is the original for this finding</p>
+                                        <form method="post"
+                                              action="{% url 'reset_finding_duplicate_status' finding.id %}">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
+                                            <input type="submit" value="Reset duplicate status of current finding" title="This will remove the current finding as duplicate of this similar finding, so duplicate becomes False." />
+                                        </form>
+                                    {% elif finding.duplicate_finding.id != similar.id %}
+                                        <p>This is a similar finding which with no (direct) relationships to the current finding</p>
                                         <form method="post"
                                               action="{% url 'mark_finding_duplicate' original_id=similar.id duplicate_id=finding.id %}">
                                             {% csrf_token %}
                                             <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
-                                            <input type="submit" value="Use as original"/>
+                                            <input type="submit" value="Use as original" title="use this similar finding as original for the current finding. link to existing original finding will be removed" />
                                         </form>
                                         <form method="post"
                                               action="{% url 'mark_finding_duplicate' duplicate_id=similar.id original_id=finding.id %}">
                                             {% csrf_token %}
                                             <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
-                                            <input type="submit" value="Mark as duplicate"/>
+                                            <input type="submit" value="Mark as duplicate" title="set this similar finding as duplicate of the current finding" />
                                         </form>
                                     {% else %}
                                         <i>N/A</i>

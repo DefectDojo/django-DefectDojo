@@ -1663,8 +1663,9 @@ class Finding(models.Model):
     def duplicate_finding_set(self):
         if self.duplicate:
             if self.duplicate_finding is not None:
-                return Finding.objects.get(
+                originals = Finding.objects.get(
                     id=self.duplicate_finding.id).original_finding.all().order_by('title')
+                return originals  # we need to add the duplicate_finding  here as well
             else:
                 return []
         else:
@@ -2438,6 +2439,7 @@ NOTIFICATION_CHOICES = (
     ("slack", "slack"), ("hipchat", "hipchat"), ("mail", "mail"),
     ("alert", "alert")
 )
+
 
 class Notifications(models.Model):
     product_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
