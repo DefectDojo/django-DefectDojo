@@ -216,7 +216,7 @@
                     <th>Original</th>
                     {% endif %}
                     {% if finding.duplicate_finding_set and not finding.duplicate %}
-                        <th title="Findings that marked as duplicate of this finding">Duplicates</th>
+                        <th title="Findings that are marked as duplicate of this finding">Duplicates</th>
                     {% elif finding.duplicate_finding_set and finding.duplicate %}
                         <th title="Findings that are also marked as duplicates of the same original finding">Duplicate Swarm</th>
                     {% endif %}
