@@ -827,3 +827,8 @@ def finding_extended_title(finding):
         result += ' (CWE-' + str(finding.cwe) + ')'
 
     return result
+
+
+@register.filter
+def finding_duplicate_swarm_size(finding):
+    return len(finding.duplicate_finding_set()) + (1 if finding.duplicate_finding else 0)

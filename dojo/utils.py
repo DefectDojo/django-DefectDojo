@@ -40,7 +40,6 @@ from django.http import HttpResponseRedirect
 # import traceback
 
 
-
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 

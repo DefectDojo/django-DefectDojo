@@ -1563,7 +1563,14 @@ class Finding(models.Model):
         if self.unique_id_from_tool:
             similar = similar.filter(unique_id_from_tool=self.unique_id_from_tool)
 
+        similar = similar.exclude(id__in=self.duplicate_finding_set())
+        if self.duplicate_finding:
+            similar = similar.exclude(id=self.duplicate_finding.id)
+
         identical = Finding.objects.all().filter(test__engagement__product=self.test.engagement.product).filter(hash_code=self.hash_code).exclude(pk=self.pk)
+        identical = identical.exclude(id__in=self.duplicate_finding_set())
+        if self.duplicate_finding:
+            identical = identical.exclude(id=self.duplicate_finding.id)
 
         return (similar.exclude(pk=self.pk) | identical)[:10]
 

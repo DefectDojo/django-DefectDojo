@@ -218,7 +218,7 @@
                     {% if finding.duplicate_finding_set and not finding.duplicate %}
                         <th title="Findings that marked as duplicate of this finding">Duplicates</th>
                     {% elif finding.duplicate_finding_set and finding.duplicate %}
-                        <th title="Findings that are also makred as duplicates of the same original finding">Duplicate swarm</th>
+                        <th title="Findings that are also makred as duplicates of the same original finding">Swarm member</th>
                     {% endif %}
                     <th>Type</th>
                     <th>Date discovered</th>
@@ -261,7 +261,7 @@
                                     <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
                                     <li>
                                         <a class="" href="{% url 'view_finding' finding.duplicate_finding.id %}">
-                                        <i class="fa fa-bug"></i> {{ finding.duplicate_finding|finding_extended_title }}</i>
+                                        <i class="fa fa-bug" title="valentino"></i> {{ finding.duplicate_finding|finding_extended_title }}</i>
                                         </a>
                                     </li>
                                     </ul>
@@ -515,13 +515,178 @@
             </table>
         </div>
     {% endif %}
+    {% if finding.duplicate_finding_set %}
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>Duplicate Swarm ({{ finding|finding_duplicate_swarm_size }})<span class="pull-right"><a data-toggle="collapse" href="#duplicate_tree"><i class="glyphicon glyphicon-chevron-down"></i></a></span></h4>
+            </div>
+            <div id="duplicate_tree" class="panel-body">
+                <table class="table table-striped table-hover centered">
+                    <tr>
+                        <th>Relationship</th>
+                        <th>Title</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Test</th>
+                        <th>Engagement</th>
+                        {% if finding.cwe > 0 %}
+                        <th>CWE</th>
+                        {% endif %}
+                        <th>CVE</th>
+                        <th>File</th>
+                        <th>Deduplicate?</th>
+                    </tr>
+                    {% if finding.duplicate_finding %}
+                        {% with similar=finding.duplicate_finding %}
+                            <tr>
+                                <td title="The finding on the top of this page is a duplicate of this so called original finding">Original (root)</td>
+                                <td>
+                                    <a title="{{ similar.title }}" href="{% url 'view_finding' similar.id %}">{{ similar.title|truncatechars_html:80 }}</a>
+                                    {% if similar.tags %}
+                                    <small>
+                                        {% for tag in similar.tags %}
+                                            <a title="Search {{ tag }}" class="tag-label tag-color"
+                                                href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                        {% endfor %}
+                                    </small>
+                                    {% endif %}
+                                </td>
+                                <td>{{ similar|finding_display_status|safe }}</td>                                
+                                <td>
+                                    {{ similar.date|date }}</br>
+                                    {% with similar.notes.count as note_count %}
+                                        ({{ note_count }} note{{ note_count|pluralize }})
+                                    {% endwith %}
+                                </td>
+                                <td><a href="{% url 'view_test' similar.test_id %}">{{ similar.test.test_type.name }}</a></td>
+                                <td><a href="{% url 'view_engagement' similar.test.engagement_id %}">{{ similar.test.engagement.name }}</a>
+                                {% if similar.test.engagement.version %}
+                                    <sup>
+                                            <a target="_blank" class="tag-label tag-version" data-toggle="tooltip" data-placement="bottom" title="Product Version: {{ similar.test.engagement.version }}">
+                                            {{ similar.test.engagement.version }}</a>
+                                    </sup>
+                                {% endif %}
+                                </td>
+                                {% if finding.cwe > 0 %}
+                                <td>
+                                    <a target="_blank" href="https://cwe.mitre.org/data/definitions/{{ finding.cwe }}.html">
+                                        <i class="fa fa-external-link"></i> {{ finding.cwe }}
+                                    </a>
+                                </td>
+                                {% endif %}
+                                <td>{{ similar.cve }}</td>
+                                <td title="{{similar.file_path}}{% if similar.line > 0 %} (Line {{ similar.line }}){% endif %}">
+                                    {{ similar.file_path|truncatechars_html:20 }}{% if similar.line > 0 %} (Line {{ similar.line }}){% endif %}
+                                    <i class="fa fa-copy fa-align-right copytoclipboard" title="copy full path to clipboard"
+                                    data-clipboard-text="{{similar.file_path}}{% if similar.line > 0 %} (Line {{ similar.line }}){% endif %}"></i></td>
+                                <td>
+                                    {% if similar == finding.duplicate_finding %}
+                                        <form method="post"
+                                                action="{% url 'reset_finding_duplicate_status' similar.id %}">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
+                                            <input type="submit" value="Reverse the relationship"  title="This will make the current finding on this page the root of the swarm. The original(root) will become a member of the swarm, effectively marked as duplicate of the new root." />
+                                        </form>
+                                    {% endif %}
+                                    {% if finding.duplicate_finding %}
+                                        <form method="post"
+                                                action="{% url 'reset_finding_duplicate_status' finding.id %}">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
+                                            <input type="submit" value="Reset duplicate status of current finding" title="This will remove the current finding from the swarm, effectively marking it no longer duplicate." />
+                                        </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endwith %}
+                    {% endif %}
+                    {% for similar in finding.duplicate_finding_set %}
+                        <tr>
+                            <td title="This finding is a duplicate of the same original above">Duplicate swarm</td>
+                            <td>
+                                <a title="{{ similar.title }}" href="{% url 'view_finding' similar.id %}">{{ similar.title|truncatechars_html:80 }}</a>
+                                {% if similar.tags %}
+                                <small>
+                                    {% for tag in similar.tags %}
+                                        <a title="Search {{ tag }}" class="tag-label tag-color"
+                                            href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                    {% endfor %}
+                                </small>
+                                {% endif %}
+                            </td>
+                            <td>{{ similar|finding_display_status|safe }}</td>
+                            <td>
+                                {{ similar.date|date }}</br>
+                                {% with similar.notes.count as note_count %}
+                                    ({{ note_count }} note{{ note_count|pluralize }})
+                                {% endwith %}
+                            </td>
+                            <td><a href="{% url 'view_test' similar.test_id %}">{{ similar.test.test_type.name }}</a></td>
+                            <td><a href="{% url 'view_engagement' similar.test.engagement_id %}">{{ similar.test.engagement.name }}</a>
+                            {% if similar.test.engagement.version %}
+                                <sup>
+                                        <a target="_blank" class="tag-label tag-version" data-toggle="tooltip" data-placement="bottom" title="Product Version: {{ similar.test.engagement.version }}">
+                                        {{ similar.test.engagement.version }}</a>
+                                </sup>
+                            {% endif %}
+                            </td>
+                            {% if finding.cwe > 0 %}
+                            <td>
+                                <a target="_blank" href="https://cwe.mitre.org/data/definitions/{{ finding.cwe }}.html">
+                                    <i class="fa fa-external-link"></i> {{ finding.cwe }}
+                                </a>
+                            </td>
+                            {% endif %}
+                            <td>{{ similar.cve }}</td>
+                            <td title="{{similar.file_path}}{% if similar.line > 0 %} (Line {{ similar.line }}){% endif %}">
+                                {{ similar.file_path|truncatechars_html:20 }}{% if similar.line > 0 %} (Line {{ similar.line }}){% endif %}
+                                <i class="fa fa-copy fa-align-right copytoclipboard" title="copy full path to clipboard"
+                                data-clipboard-text="{{similar.file_path}}{% if similar.line > 0 %} (Line {{ similar.line }}){% endif %}"></i></td>
+                            <td>
+                                {% if similar.duplicate %}
+                                    <form method="post"
+                                            action="{% url 'reset_finding_duplicate_status' similar.id %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
+                                        <input type="submit" value="Reset duplicate status of similar finding"  title="This will reset the duplicate status of this similar finding" />
+                                    </form>
+                                {% elif finding.duplicate_finding.id == similar.id %}
+                                    <form method="post"
+                                            action="{% url 'reset_finding_duplicate_status' finding.id %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
+                                        <input type="submit" value="Reset duplicate status of current finding" title="This will remove the current finding as duplicate of this similar finding, so duplicate becomes False." />
+                                    </form>
+                                {% elif finding.duplicate_finding.id != similar.id %}
+                                    <form method="post"
+                                            action="{% url 'mark_finding_duplicate' original_id=similar.id duplicate_id=finding.id %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
+                                        <input type="submit" value="Use as original" title="use this similar finding as original for the current finding. link to existing original finding will be removed" />
+                                    </form>
+                                    <form method="post"
+                                            action="{% url 'mark_finding_duplicate' duplicate_id=similar.id original_id=finding.id %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
+                                        <input type="submit" value="Mark as duplicate" title="set this similar finding as duplicate of the current finding" />
+                                    </form>
+                                {% else %}
+                                    <i>N/A</i>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    {% endif %}
     {% with findings=finding.similar_findings %}
         {% if findings %}
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h4>Similar Findings ({{ findings.count }}) <span class="pull-right"><a data-toggle="collapse" href="#similar_findings"><i class="glyphicon glyphicon-chevron-down"></i></a></span></h4>
                 </div>
-                <div id="similar_findings" class="panel-body collapse">
+                <div id="similar_findings" class="panel-body">
                     <table class="table table-striped table-hover centered">
                         <tr>
                             <th>Title</th>
@@ -579,11 +744,6 @@
                                     data-clipboard-text="{{similar.file_path}}{% if similar.line > 0 %} (Line {{ similar.line }}){% endif %}"></i></td>
                                 <td>
                                     {% if similar.duplicate %}
-                                        {% if similar.duplicate_finding.id == finding.duplicate_finding.id %}
-                                            <p>This is a similar finding which is a duplicate of the same finding</p>
-                                        {% else %}
-                                            <p>This is a similar finding which is a duplicate of some other finding</p>
-                                        {% endif%}
                                         <form method="post"
                                               action="{% url 'reset_finding_duplicate_status' similar.id %}">
                                             {% csrf_token %}
