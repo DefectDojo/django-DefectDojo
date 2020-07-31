@@ -30,6 +30,11 @@ from dojo.models import Finding, Product_Type, Product, Note_Type, ScanSettings,
     ChoiceQuestion, General_Survey, Regulation
 
 from dojo.tools import requires_file, SCAN_SONARQUBE_API
+from dojo.utils import jira_get_issue
+from django.urls import reverse
+import logging
+
+logger = logging.getLogger(__name__)
 
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')
 
@@ -389,8 +394,11 @@ class ImportScanForm(forms.Form):
                          ("Gitleaks Scan", "Gitleaks Scan"),
                          ("Choctaw Hog Scan", "Choctaw Hog Scan"),
                          ("Harbor Vulnerability Scan", "Harbor Vulnerability Scan"),
+                         ("Github Vulnerability Scan", "Github Vulnerability Scan"),
                          ("Yarn Audit Scan", "Yarn Audit Scan"),
                          ("BugCrowd Scan", "BugCrowd Scan"),
+                         ("GitLab SAST Report", "GitLab SAST Report"),
+                         ("AWS Security Hub Scan", "AWS Security Hub Scan"),
                          ("GitLab SAST Report", "GitLab SAST Report"),
                          ("HuskyCI Report", "HuskyCI Report"),
                          ("CCVS Report", "CCVS Report"))
@@ -997,9 +1005,7 @@ class FindingForm(forms.ModelForm):
         t = [(tag.name, tag.name) for tag in tags]
         super(FindingForm, self).__init__(*args, **kwargs)
         self.fields['tags'].widget.choices = t
-        # print(self.instance.get_simple_risk_acceptance())
         self.fields['simple_risk_accept'].initial = True if self.instance.is_simple_risk_accepted else False
-        # print(self.fields['simple_risk_accept'].initial)
 
     def clean(self):
         cleaned_data = super(FindingForm, self).clean()
@@ -1129,6 +1135,7 @@ class FindingBulkUpdateForm(forms.ModelForm):
     risk_unaccept = forms.BooleanField(required=False)
 
     push_to_jira = forms.BooleanField(required=False)
+    # unlink_from_jira = forms.BooleanField(required=False)
     push_to_github = forms.BooleanField(required=False)
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
                            required=False)
@@ -1965,10 +1972,11 @@ class ProductNotificationsForm(forms.ModelForm):
             self.initial['engagement_added'] = ''
             self.initial['test_added'] = ''
             self.initial['scan_added'] = ''
+            self.initial['sla_breach'] = ''
 
     class Meta:
         model = Notifications
-        fields = ['engagement_added', 'test_added', 'scan_added']
+        fields = ['engagement_added', 'test_added', 'scan_added', 'sla_breach']
 
 
 class AjaxChoiceField(forms.ChoiceField):
@@ -2042,13 +2050,19 @@ class GITHUBFindingForm(forms.Form):
 
 class JIRAFindingForm(forms.Form):
     def __init__(self, *args, **kwargs):
-        self.enabled = kwargs.pop('enabled') or False
+        self.push_all = kwargs.pop('push_all', False)
+        self.instance = kwargs.pop('instance', None)
+        self.jira_pkey = kwargs.pop('jira_pkey', None)
+
+        if self.instance is None and self.jira_pkey is None:
+            raise ValueError('either and finding instance or jira_pkey is needed')
+
         super(JIRAFindingForm, self).__init__(*args, **kwargs)
         self.fields['push_to_jira'] = forms.BooleanField()
         self.fields['push_to_jira'].required = False
         self.fields['push_to_jira'].help_text = "Checking this will overwrite content of your JIRA issue, or create one."
         self.fields['push_to_jira'].label = "Push to JIRA"
-        if self.enabled:
+        if self.push_all:
             # This will show the checkbox as checked and greyed out, this way the user is aware
             # that issues will be pushed to JIRA, given their product-level settings.
             self.fields['push_to_jira'].help_text = \
@@ -2057,7 +2071,92 @@ class JIRAFindingForm(forms.Form):
             self.fields['push_to_jira'].widget.attrs['checked'] = 'checked'
             self.fields['push_to_jira'].disabled = True
 
+        if self.instance:
+            if self.instance.has_jira_issue():
+                self.initial['jira_issue'] = self.instance.jira_issue.jira_key
+
+        self.fields['jira_issue'].widget = forms.TextInput(attrs={'placeholder': 'Leave empty and check push to jira to create a new JIRA issue'})
+
+    def clean(self):
+        logger.debug('validating jirafindingform')
+        cleaned_data = super(JIRAFindingForm, self).clean()
+        jira_issue_key_new = self.cleaned_data.get('jira_issue')
+        finding = self.instance
+        jpkey = self.jira_pkey
+        if jira_issue_key_new:
+            if finding:
+                # in theory there can multiple jira instances that have similar projects
+                # so checking by only the jira issue key can lead to false positives
+                # so we check also the jira internal id of the jira issue
+                # if the key and id are equal, it is probably the same jira instance and the same issue
+                # the database model is lacking some relations to also include the jira config name or url here
+                # and I don't want to change too much now. this should cover most usecases.
+
+                jira_issue_need_to_exist = False
+                # changing jira link on finding
+                if finding.has_jira_issue() and jira_issue_key_new != finding.jira_issue.jira_key:
+                    jira_issue_need_to_exist = True
+
+                # adding existing jira issue to finding without jira link
+                if not finding.has_jira_issue():
+                    jira_issue_need_to_exist = True
+
+                jpkey = finding.jira_pkey()
+            else:
+                jira_issue_need_to_exist = True
+
+            if jira_issue_need_to_exist:
+                jira_issue_new = jira_get_issue(jpkey, jira_issue_key_new)
+                if not jira_issue_new:
+                    raise ValidationError('JIRA issue ' + jira_issue_key_new + ' does not exist or cannot be retrieved')
+
+                logger.debug('checking if provided jira issue id already is linked to another finding')
+                jira_issues = JIRA_Issue.objects.filter(jira_id=jira_issue_new.id, jira_key=jira_issue_key_new).exclude(engagement__isnull=False)
+
+                if self.instance:
+                    # just be sure we exclude the finding that is being edited
+                    jira_issues = jira_issues.exclude(finding=finding)
+
+                if len(jira_issues) > 0:
+                    raise ValidationError('JIRA issue ' + jira_issue_key_new + ' already linked to ' + reverse('view_finding', args=(jira_issues[0].finding_id,)))
+
+    jira_issue = forms.CharField(required=False, label="Linked JIRA Issue",
+                validators=[validators.RegexValidator(
+                    regex=r'^[A-Z][A-Z_0-9]+-\d+$',
+                    message='JIRA issue key must be in XXXX-nnnn format ([A-Z][A-Z_0-9]+-\\d+)')])
     push_to_jira = forms.BooleanField(required=False, label="Push to JIRA")
+
+
+class JIRAImportScanForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        self.push_all = kwargs.pop('push_all', False)
+
+        super(JIRAImportScanForm, self).__init__(*args, **kwargs)
+        if self.push_all:
+            # This will show the checkbox as checked and greyed out, this way the user is aware
+            # that issues will be pushed to JIRA, given their product-level settings.
+            self.fields['push_to_jira'].help_text = \
+                "Push all issues is enabled on this product. If you do not wish to push all issues" \
+                " to JIRA, please disable Push all issues on this product."
+            self.fields['push_to_jira'].widget.attrs['checked'] = 'checked'
+            self.fields['push_to_jira'].disabled = True
+
+    push_to_jira = forms.BooleanField(required=False, label="Push to JIRA", help_text="Checking this will create a new jira issue for each new finding.")
+
+
+class JIRAEngagementForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        self.instance = kwargs.pop('instance', None)
+
+        super(JIRAEngagementForm, self).__init__(*args, **kwargs)
+
+        if self.instance:
+            if self.instance.has_jira_issue():
+                self.fields['push_to_jira'].widget.attrs['checked'] = 'checked'
+                self.fields['push_to_jira'].label = 'Update JIRA Epic'
+                self.fields['push_to_jira'].help_text = 'Checking this will update the existing EPIC in JIRA.'
+
+    push_to_jira = forms.BooleanField(required=False, label="Create EPIC", help_text="Checking this will create an EPIC in JIRA for this engagement.")
 
 
 class GoogleSheetFieldsForm(forms.Form):

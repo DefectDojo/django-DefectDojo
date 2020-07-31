@@ -16,7 +16,7 @@ data:
   DD_ALLOWED_HOSTS: {{ .Values.host }}
   DD_CELERY_BROKER_SCHEME: {{ if eq .Values.celery.broker "rabbitmq" }}amqp{{ end }}{{ if eq .Values.celery.broker "redis" }}redis{{ end }}
   DD_CELERY_BROKER_USER: '{{ if eq .Values.celery.broker "rabbitmq" }}user{{ end }}'
-  DD_CELERY_BROKER_HOST: {{ $fullName }}-{{ if eq .Values.celery.broker "rabbitmq" }}rabbitmq{{ end }}{{ if eq .Values.celery.broker "redis" }}redis-master{{ end }}
+  DD_CELERY_BROKER_HOST: {{ .Release.Name }}-{{ if eq .Values.celery.broker "rabbitmq" }}rabbitmq{{ end }}{{ if eq .Values.celery.broker "redis" }}redis-master{{ end }}
   DD_CELERY_BROKER_PORT: '{{ if eq .Values.celery.broker "rabbitmq" }}5672{{ end }}{{ if eq .Values.celery.broker "redis" }}6379{{ end }}'
   DD_CELERY_LOG_LEVEL: {{ .Values.celery.logLevel }}
   DD_DATABASE_ENGINE: django.db.backends.{{ if eq .Values.database "postgresql" }}postgresql{{ end }}{{ if eq .Values.database "mysql" }}mysql{{ end }}

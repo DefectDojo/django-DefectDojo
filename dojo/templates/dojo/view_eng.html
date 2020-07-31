@@ -614,7 +614,7 @@
           {% if jissue and jconf %}
           <tr>
             <td><strong>Jira</strong></td>
-            <td><a href="{{ jconf.url }}/browse/{{ jissue.jira_key }}" target="_blank"><i class="fa fa-external-link"></i> Jira Epic</a></td>
+            <td><a href="{{ jconf.url }}/browse/{{ jissue.jira_key }}" target="_blank"><i class="fa fa-external-link"></i> Jira Epic ({{ jissue.jira_key }})</a></td>
           </tr>
           {% endif %}
           <tr>
@@ -810,9 +810,6 @@
                 i.toggleClass('glyphicon-chevron-up').toggleClass('glyphicon-chevron-down');
             });
 
-            $(document).ready(function(){
-              $('[data-toggle="tooltip"]').tooltip();
-            });
             //Ensures dropdown has proper zindex
             $('.table-responsive').on('show.bs.dropdown', function () {
               $('.table-responsive').css( "overflow", "inherit" );

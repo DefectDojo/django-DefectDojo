@@ -108,4 +108,9 @@ urlpatterns = [
         views.delete_template, name='delete_template'),
     url(r'^template/export$',
         views.export_templates_to_json, name='export_template'),
+
+    url(r'^finding/(?P<fid>\d+)/jira/unlink', views.unlink_jira, name='finding_unlink_jira'),
+    url(r'^finding/(?P<fid>\d+)/jira/push', views.push_to_jira, name='finding_push_to_jira'),
+    # url(r'^finding/(?P<fid>\d+)/jira/push', views.finding_link_to_jira, name='finding_link_to_jira'),
+
 ]

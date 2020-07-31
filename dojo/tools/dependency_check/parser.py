@@ -50,13 +50,13 @@ class DependencyCheckParser(object):
             severity = self.get_field_value(cvssv2_node, 'severity').lower().capitalize()
         else:
             severity = self.get_field_value(vulnerability, 'severity').lower().capitalize()
-        print("severity: " + severity)
+        # print("severity: " + severity)
         if severity in SEVERITY:
             severity = severity
         else:
             tag = "Severity is inaccurate : " + str(severity)
             title += " | " + tag
-            print("Warning: Inaccurate severity detected. Setting it's severity to Medium level.\n" + "Title is :" + title)
+            logger.warn("Warning: Inaccurate severity detected. Setting it's severity to Medium level.\n" + "Title is :" + title)
             severity = "Medium"
 
         reference_detail = None
