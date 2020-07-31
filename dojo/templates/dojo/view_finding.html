@@ -212,8 +212,13 @@
                     {% if finding.risk_acceptance_set.all %}
                         <th>Risk Acceptance</th>
                     {% endif %}
-                    {% if finding.duplicate_finding_set %}
-                    <th>Duplicate set</th>
+                    {% if finding.duplicate_finding %}
+                    <th>Original</th>
+                    {% endif %}
+                    {% if finding.duplicate_finding_set and not finding.duplicate %}
+                        <th title="Findings that marked as duplicate of this finding">Duplicates</th>
+                    {% elif finding.duplicate_finding_set and finding.duplicate %}
+                        <th title="Findings that are also makred as duplicates of the same original finding">Duplicate swarm</th>
                     {% endif %}
                     <th>Type</th>
                     <th>Date discovered</th>
@@ -246,22 +251,43 @@
                     <td> {{finding.get_scanner_confidence_text}}</td>
                     {% endif %}
                     <td>{{ finding|finding_display_status|safe }}
+                    {% if finding.duplicate_finding %}
+                        <td>
+                            <div class="align-top">
+                                <div class="dropdown">
+                                    <a class="fa fa-bug" href="{% url 'view_finding' finding.duplicate_finding.id %}" title="{{ finding.duplicate_finding|finding_extended_title }}"/>
+
+                                    <a href="#" data-toggle="dropdown">&nbsp;<i class="fa fa-ellipsis-v"></i>&nbsp;</a>
+                                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+                                    <li>
+                                        <a class="" href="{% url 'view_finding' finding.duplicate_finding.id %}">
+                                        <i class="fa fa-bug"></i> {{ finding.duplicate_finding|finding_extended_title }}</i>
+                                        </a>
+                                    </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </td>
+                    {% endif %}
                     {% if finding.duplicate_finding_set %}
                     <td>
                         <div class="align-top">
-                        <div class="dropdown">
-                          Duplicate List <a href="#" data-toggle="dropdown">&nbsp;<i class="fa fa-ellipsis-v"></i>&nbsp;</a>
-                          <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
-                          {% for duplicate in finding.duplicate_finding_set %}
-                              <li>
-                                <a class="" href="{% url 'view_finding' duplicate.id %}">
-                                  <i class="fa fa-bug"></i> {{ duplicate.title }}, <i>{{ duplicate.date }}</i>
-                                </a>
-                              </li>
-                          {%  endfor %}
-                            </ul>
-                          </div>
-                      </div>
+                            <div class="dropdown">
+                                {% for duplicate in finding.duplicate_finding_set %}
+                                    <a class="fa fa-bug" href="{% url 'view_finding' duplicate.id %}" title="{{ duplicate|finding_extended_title }}"/>
+                                {%  endfor %}                                                                
+                                <a href="#" data-toggle="dropdown">&nbsp;<i class="fa fa-ellipsis-v"></i>&nbsp;</a>
+                                <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+                                {% for duplicate in finding.duplicate_finding_set %}
+                                    <li>
+                                        <a class="" href="{% url 'view_finding' duplicate.id %}">
+                                        <i class="fa fa-bug"></i> {{ duplicate|finding_extended_title }}</i>
+                                        </a>
+                                    </li>
+                                {%  endfor %}
+                                </ul>
+                            </div>
+                        </div>
                     </td>
                     {% endif %}
                     {% if finding.risk_acceptance_set.all %}

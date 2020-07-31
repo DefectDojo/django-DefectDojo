@@ -812,3 +812,18 @@ def jiraencode(value):
         return value
     # jira can't handle some characters inside [] tag for urls https://jira.atlassian.com/browse/CONFSERVER-4009
     return value.replace("|", "").replace("@", "")
+
+
+@register.filter
+def finding_extended_title(finding):
+    if not finding:
+        return ''
+    result = finding.title
+
+    if finding.cve:
+        result += ' (' + finding.cve + ')'
+
+    if finding.cwe:
+        result += ' (CWE-' + str(finding.cwe) + ')'
+
+    return result
