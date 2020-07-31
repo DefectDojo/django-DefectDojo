@@ -58,6 +58,6 @@ google-auth==1.19.2
 google-api-python-client==1.10.0
 google-auth-oauthlib==0.4.1
 drf_yasg==1.17.1
-python-gitlab==2.2.0
+python-gitlab==2.4.0
 jsonlines==1.2.0  # requred by yarn audit parser
 django-saml2-auth==2.2.1
