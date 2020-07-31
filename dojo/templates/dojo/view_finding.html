@@ -218,7 +218,7 @@
                     {% if finding.duplicate_finding_set and not finding.duplicate %}
                         <th title="Findings that marked as duplicate of this finding">Duplicates</th>
                     {% elif finding.duplicate_finding_set and finding.duplicate %}
-                        <th title="Findings that are also makred as duplicates of the same original finding">Swarm member</th>
+                        <th title="Findings that are also marked as duplicates of the same original finding">Duplicate Swarm</th>
                     {% endif %}
                     <th>Type</th>
                     <th>Date discovered</th>
@@ -529,9 +529,7 @@
                         <th>Date</th>
                         <th>Test</th>
                         <th>Engagement</th>
-                        {% if finding.cwe > 0 %}
                         <th>CWE</th>
-                        {% endif %}
                         <th>CVE</th>
                         <th>File</th>
                         <th>Deduplicate?</th>
@@ -567,13 +565,13 @@
                                     </sup>
                                 {% endif %}
                                 </td>
-                                {% if finding.cwe > 0 %}
                                 <td>
-                                    <a target="_blank" href="https://cwe.mitre.org/data/definitions/{{ finding.cwe }}.html">
-                                        <i class="fa fa-external-link"></i> {{ finding.cwe }}
+                                    {% if similar.cwe > 0 %}
+                                    <a target="_blank" href="{{ similar.cwe|cwe_url }}">
+                                        <i class="fa fa-external-link"></i> {{ similar.cwe }}
                                     </a>
+                                    {% endif %}
                                 </td>
-                                {% endif %}
                                 <td>{{ similar.cve }}</td>
                                 <td title="{{similar.file_path}}{% if similar.line > 0 %} (Line {{ similar.line }}){% endif %}">
                                     {{ similar.file_path|truncatechars_html:20 }}{% if similar.line > 0 %} (Line {{ similar.line }}){% endif %}
@@ -602,7 +600,7 @@
                     {% endif %}
                     {% for similar in finding.duplicate_finding_set %}
                         <tr>
-                            <td title="This finding is a duplicate of the same original above">Duplicate swarm</td>
+                            <td title="This finding is a duplicate of the same original above">Swarm member</td>
                             <td>
                                 <a title="{{ similar.title }}" href="{% url 'view_finding' similar.id %}">{{ similar.title|truncatechars_html:80 }}</a>
                                 {% if similar.tags %}
@@ -630,13 +628,13 @@
                                 </sup>
                             {% endif %}
                             </td>
-                            {% if finding.cwe > 0 %}
                             <td>
-                                <a target="_blank" href="https://cwe.mitre.org/data/definitions/{{ finding.cwe }}.html">
-                                    <i class="fa fa-external-link"></i> {{ finding.cwe }}
+                                {% if similar.cwe > 0 %}
+                                <a target="_blank" href="{{ similar.cwe|cwe_url }}">
+                                    <i class="fa fa-external-link"></i> {{ similar.cwe }}
                                 </a>
+                                {% endif %}
                             </td>
-                            {% endif %}
                             <td>{{ similar.cve }}</td>
                             <td title="{{similar.file_path}}{% if similar.line > 0 %} (Line {{ similar.line }}){% endif %}">
                                 {{ similar.file_path|truncatechars_html:20 }}{% if similar.line > 0 %} (Line {{ similar.line }}){% endif %}
@@ -689,20 +687,20 @@
                 <div id="similar_findings" class="panel-body">
                     <table class="table table-striped table-hover centered">
                         <tr>
+                            <th>Relationship</th>
                             <th>Title</th>
                             <th>Status</th>
                             <th>Date</th>
                             <th>Test</th>
                             <th>Engagement</th>
-                            {% if finding.cwe > 0 %}
                             <th>CWE</th>
-                            {% endif %}
                             <th>CVE</th>
                             <th>File</th>
                             <th>Deduplicate?</th>
                         </tr>
                         {% for similar in findings %}
                             <tr>
+                                <td>Similar</td>
                                 <td>
                                     <a title="{{ similar.title }}" href="{% url 'view_finding' similar.id %}">{{ similar.title|truncatechars_html:80 }}</a>
                                     {% if similar.tags %}
@@ -730,13 +728,13 @@
                                     </sup>
                                 {% endif %}
                                 </td>
-                                {% if finding.cwe > 0 %}
                                 <td>
-                                    <a target="_blank" href="https://cwe.mitre.org/data/definitions/{{ finding.cwe }}.html">
-                                        <i class="fa fa-external-link"></i> {{ finding.cwe }}
+                                    {% if similar.cwe > 0 %}
+                                    <a target="_blank" href="{{ similar.cwe|cwe_url }}">
+                                        <i class="fa fa-external-link"></i> {{ similar.cwe }}
                                     </a>
+                                    {% endif %}
                                 </td>
-                                {% endif %}
                                 <td>{{ similar.cve }}</td>
                                 <td title="{{similar.file_path}}{% if similar.line > 0 %} (Line {{ similar.line }}){% endif %}">
                                     {{ similar.file_path|truncatechars_html:20 }}{% if similar.line > 0 %} (Line {{ similar.line }}){% endif %}
@@ -751,7 +749,6 @@
                                             <input type="submit" value="Reset duplicate status of similar finding"  title="This will reset the duplicate status of this similar finding" />
                                         </form>
                                     {% elif finding.duplicate_finding.id == similar.id %}
-                                        <p>This is the original for this finding</p>
                                         <form method="post"
                                               action="{% url 'reset_finding_duplicate_status' finding.id %}">
                                             {% csrf_token %}
@@ -759,7 +756,6 @@
                                             <input type="submit" value="Reset duplicate status of current finding" title="This will remove the current finding as duplicate of this similar finding, so duplicate becomes False." />
                                         </form>
                                     {% elif finding.duplicate_finding.id != similar.id %}
-                                        <p>This is a similar finding which with no (direct) relationships to the current finding</p>
                                         <form method="post"
                                               action="{% url 'mark_finding_duplicate' original_id=similar.id duplicate_id=finding.id %}">
                                             {% csrf_token %}
