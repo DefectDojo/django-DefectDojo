@@ -1573,7 +1573,7 @@ class Finding(models.Model):
             identical = identical.exclude(id=self.duplicate_finding.id)
 
         # TODO: remove this temp testing code Valentijn
-        temp = Finding.objects.all().filter(id=49046)
+        temp = Finding.objects.all().filter(id__in=[49046, 51314])
 
         return (similar.exclude(pk=self.pk) | identical | temp)[:10]
 
