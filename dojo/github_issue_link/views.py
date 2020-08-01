@@ -50,7 +50,7 @@ def new_github(request):
                                      extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('github', ))
             except Exception as info:
-                print(info)
+                logger.error(info)
                 messages.add_message(request,
                                      messages.ERROR,
                                      'Unable to authenticate on github.',

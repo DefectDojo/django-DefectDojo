@@ -963,7 +963,7 @@ class Engagement(models.Model):
     source_code_management_server = models.ForeignKey(Tool_Configuration, null=True, blank=True, verbose_name="SCM Server", help_text="Source code server for CI/CD test", related_name='source_code_management_server', on_delete=models.CASCADE)
     source_code_management_uri = models.URLField(max_length=600, null=True, blank=True, editable=True, verbose_name="Repo", help_text="Resource link to source code")
     orchestration_engine = models.ForeignKey(Tool_Configuration, verbose_name="Orchestration Engine", help_text="Orchestration service responsible for CI/CD test", null=True, blank=True, related_name='orchestration', on_delete=models.CASCADE)
-    deduplication_on_engagement = models.BooleanField(default=False)
+    deduplication_on_engagement = models.BooleanField(default=False, verbose_name="Deduplication within this engagement only", help_text="If enabled deduplication will only mark a finding in this engagement as duplicate of another finding if both findings are in this engagement. If disabled, deduplication is on the product level.")
 
     # used for prefetching tags because django-tagging doesn't support that out of the box
     tagged_items = GenericRelation(TaggedItem)
@@ -1521,7 +1521,6 @@ class Finding(models.Model):
         self.save()
 
     def simple_risk_unaccept(self):
-        print('unaccepting risk')
         # removing from ManyToMany will not fail for non-existing entries
         self.get_simple_risk_acceptance().accepted_findings.remove(self)
         # risk acceptance no longer in place, so reactivate, but only when it makes sense
@@ -1959,18 +1958,18 @@ class Finding(models.Model):
         # Adding a snippet here for push to JIRA so that it's in one place
         if push_to_jira:
             logger.debug('pushing to jira from finding.save()')
-            from dojo.tasks import update_issue_task, add_issue_task
-            from dojo.utils import add_issue, update_issue
+            from dojo.tasks import update_jira_issue_task, add_jira_issue_task
+            from dojo.utils import add_jira_issue, update_jira_issue
             if jira_issue_exists:
                 if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
-                    update_issue(self, True)
+                    update_jira_issue(self, True)
                 else:
-                    update_issue_task.delay(self, True)
+                    update_jira_issue_task.delay(self, True)
             else:
                 if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
-                    add_issue(self, True)
+                    add_jira_issue(self, True)
                 else:
-                    add_issue_task.delay(self, True)
+                    add_jira_issue_task.delay(self, True)
 
     def delete(self, *args, **kwargs):
         for find in self.original_finding.all():
@@ -2478,22 +2477,20 @@ class Notifications(models.Model):
 
     @classmethod
     def merge_notifications_list(cls, notifications_list):
-        print('merging')
         if not notifications_list:
-            print('return empty list')
             return []
 
         result = None
         for notifications in notifications_list:
-            print('id: ', notifications.id)
-            print('not.user.get_full_name: ', notifications.user.get_full_name())
+            # print('id: ', notifications.id)
+            # print('not.user.get_full_name: ', notifications.user.get_full_name())
             if result is None:
                 # we start by copying the first instance, because creating a new instance would set all notification columns to 'alert' :-()
                 result = notifications
                 # result.pk = None # detach from db
             else:
                 # from dojo.utils import concat_comma_separated_strings
-                print('combining: ' + str(result.scan_added) + ' with ' + str(notifications.scan_added))
+                # print('combining: ' + str(result.scan_added) + ' with ' + str(notifications.scan_added))
                 # result.scan_added = (result.scan_added or []).extend(notifications.scan_added)
                 # if result.scan_added:
                 #     result.scan_added.extend(notifications.scan_added)

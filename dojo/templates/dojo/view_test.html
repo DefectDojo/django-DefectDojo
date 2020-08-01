@@ -483,7 +483,10 @@
                               {% endif %}
                             {% endif %}
                              {% if finding.notes.all %}
-                                    <i class="fa fa-comment has-popover" data-trigger="hover" data-content="{{ finding.notes.all.0 }}" data-placement="left" data-container="body" data-original-title="Most Recent Note" title=""></i>
+                                <i class="glyphicon glyphicon-comment has-popover dojo-sup" data-trigger="hover" data-content="{{ finding.notes.all.0 }}" data-placement="left" data-container="body" data-original-title="Most Recent Note ({{ finding.notes.count }} total)" title=""></i>
+                                <a href="{% url 'view_finding' finding.id %}#vuln_notes" class="dojo-sup" alt="{{ finding.notes.count }} note{{ finding.notes.count|pluralize }}">
+                                    ({{ finding.notes.count }})
+                                </a>
                              {% endif %}
                           {% if finding.tags %}
                               <sup>
@@ -778,10 +781,6 @@
         });
 
         $(function () {
-            $(document).ready(function(){
-              $('[data-toggle="tooltip"]').tooltip();
-            });
-
             check_checked_finding();
             $('#id_bulk_status').on('click', function (e) {
                 var checked = this.checked;
@@ -929,7 +928,6 @@
             }
             ;
 
-
             $('form#quick-add-form').on("submit", function (e) {
                 if ($("input#quick_add_finding").val().length == 0) {
                   alert('Potential finding description needs a value.');
@@ -998,7 +996,7 @@
         });
 
         // DataTables setup
-        $(document).ready(function() {
+        $(document).ready(function(){
             date =  new Date().toISOString().slice(0, 10);
             var fileDated = 'Findings_List_' + date;
             var buttonCommon = {
@@ -1015,6 +1013,9 @@
 
             // Mapping of table columns to objects for proper cleanup and data formatting
             var dojoTable = $('#test_findings').DataTable({
+                drawCallback: function(){
+                    $('.has-popover').popover({'trigger':'hover'});
+                },
                 "columns": [
                     {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled %}                    
                     { "data": "dropdown" },

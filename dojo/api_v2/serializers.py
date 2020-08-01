@@ -976,10 +976,10 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             test.save()
             test.engagement.save()
 
-            print(len(new_items))
-            print(reactivated_count)
-            print(mitigated_count)
-            print(unchanged_count - mitigated_count)
+            # print(len(new_items))
+            # print(reactivated_count)
+            # print(mitigated_count)
+            # print(unchanged_count - mitigated_count)
 
             updated_count = mitigated_count + reactivated_count + len(new_items)
             if updated_count > 0:
