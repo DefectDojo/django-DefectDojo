@@ -250,7 +250,15 @@
                     {% if finding.scanner_confidence %}
                     <td> {{finding.get_scanner_confidence_text}}</td>
                     {% endif %}
-                    <td>{{ finding|finding_display_status|safe }}
+                    <td>
+                        <div class="align-top">                    
+                            {% if finding.duplicate %}
+                                {% include "dojo/finding_related_actions.html" with similar_finding=finding finding_context=finding intro=finding|finding_display_status|safe %}
+                            {% else %}
+                                {{ finding|finding_display_status|safe }}
+                            {% endif%}
+                        </div>
+                    </td>
                     {% if finding.duplicate_finding %}
                         <td>
                             <div class="align-top">
@@ -527,13 +535,13 @@
         </div>
     {% endif %}
 
-    {% if finding.similar_findings %}
+    {% if similar_findings %}
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h4>Similar Findings ({{ findings.count }}) <span class="pull-right"><a data-toggle="collapse" href="#similar_findings"><i class="glyphicon glyphicon-chevron-down"></i></a></span></h4>
+                <h4>Similar Findings ({{ similar_findings.count }}) <span class="pull-right"><a data-toggle="collapse" href="#similar_findings"><i class="glyphicon glyphicon-chevron-down"></i></a></span></h4>
             </div>
             <div id="similar_findings" class="panel-body">
-                {% include "dojo/finding_related_list.html" with finding_context=finding finding_list=finding.similar_findings %}
+                {% include "dojo/finding_related_list.html" with finding_context=finding finding_list=similar_findings %}
             </div>
     {% endif %}
 

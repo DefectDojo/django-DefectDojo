@@ -318,7 +318,8 @@ def view_finding(request, fid):
             'findings_list': findings,
             'findings_list_lastElement': findings[lastPos],
             'prev_finding': prev_finding,
-            'next_finding': next_finding
+            'next_finding': next_finding,
+            'similar_findings': finding.similar_findings
         })
 
 
@@ -1912,7 +1913,7 @@ def get_missing_mandatory_notetypes(finding):
     return queryset
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Finding, 'change', 'finding_id')
 @require_POST
 def mark_finding_duplicate(request, original_id, duplicate_id):
     original = get_object_or_404(Finding, id=original_id)
@@ -1940,7 +1941,7 @@ def mark_finding_duplicate(request, original_id, duplicate_id):
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(duplicate.id,)))
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Finding, 'change', 'finding_id')
 @require_POST
 def reset_finding_duplicate_status(request, duplicate_id):
     duplicate = get_object_or_404(Finding, id=duplicate_id)
@@ -1956,12 +1957,40 @@ def reset_finding_duplicate_status(request, duplicate_id):
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(duplicate.id,)))
 
 
+@user_must_be_authorized(Finding, 'change', 'finding_id')
+@require_POST
+def set_finding_as_original(request, finding_id, new_original_id):
+    # original = get_object_or_404(Finding, id=original_id)
+    # duplicate = get_object_or_404(Finding, id=duplicate_id)
+
+    # if original.test.engagement != duplicate.test.engagement:
+    #     if original.test.engagement.deduplication_on_engagement or duplicate.test.engagement.deduplication_on_engagement:
+    #         messages.add_message(
+    #             request,
+    #             messages.ERROR,
+    #             'Marking finding as duplicate/original failed as they are not in the same engagement and deduplication_on_engagement is enabled for at least one of them',
+    #             extra_tags='alert-danger')
+    #         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+    # duplicate.duplicate = True
+    # duplicate.active = False
+    # duplicate.verified = False
+    # duplicate.duplicate_finding = original
+    # duplicate.last_reviewed = timezone.now()
+    # duplicate.last_reviewed_by = request.user
+    # duplicate.save()
+    # original.found_by.add(duplicate.test.test_type)
+    # original.save()
+
+    return redirect_to_return_url_or_else(request, reverse('view_finding', args=(duplicate.id,)))
+
 # @user_must_be_authorized(Finding, 'change', 'fid')
 # @require_POST
 # def push_to_jira(request, fid):
 #     finding = get_object_or_404(Finding, id=fid)
 #     count = Alerts.objects.filter(user_id=request.user).count()
 #     return JsonResponse({'count': count})
+
 
 @user_must_be_authorized(Finding, 'change', 'fid')
 @require_POST

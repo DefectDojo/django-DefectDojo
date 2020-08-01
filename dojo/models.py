@@ -1572,7 +1572,10 @@ class Finding(models.Model):
         if self.duplicate_finding:
             identical = identical.exclude(id=self.duplicate_finding.id)
 
-        return (similar.exclude(pk=self.pk) | identical)[:10]
+        # TODO: remove this temp testing code Valentijn
+        temp = Finding.objects.all().filter(id=49046)
+
+        return (similar.exclude(pk=self.pk) | identical | temp)[:10]
 
     def compute_hash_code(self):
         if hasattr(settings, 'HASHCODE_FIELDS_PER_SCANNER') and hasattr(settings, 'HASHCODE_ALLOWS_NULL_CWE') and hasattr(settings, 'HASHCODE_ALLOWED_FIELDS'):
