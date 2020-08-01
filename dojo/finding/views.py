@@ -1948,7 +1948,7 @@ def reset_finding_duplicate_status(request, duplicate_id):
     duplicate.duplicate = False
     duplicate.active = True
     if duplicate.duplicate_finding:
-        duplicate.duplicate_finding.original_finding.remove(duplicate)
+        # duplicate.duplicate_finding.original_finding.remove(duplicate)
         duplicate.duplicate_finding = None
     duplicate.last_reviewed = timezone.now()
     duplicate.last_reviewed_by = request.user
@@ -1982,7 +1982,7 @@ def set_finding_as_original(request, finding_id, new_original_id):
     # original.found_by.add(duplicate.test.test_type)
     # original.save()
 
-    return redirect_to_return_url_or_else(request, reverse('view_finding', args=(duplicate.id,)))
+    return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding_id,)))
 
 # @user_must_be_authorized(Finding, 'change', 'fid')
 # @require_POST
