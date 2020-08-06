@@ -293,8 +293,8 @@
                                             <form method="post" action="{% url 'delete_finding' finding.id %}"
                                                   style="display: inline" class="form-inline form" id="delete-finding-menu-{{ finding.id }}-form">
                                                 {% csrf_token %}
-                                                <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
-                                                <input type="hidden" name="id" value="{{ finding.id }}"/>
+                                                <input type="hidden" label="return_url" aria-label="return_url" name="return_url" value="{{ request.get_full_path }}" />
+                                                <input type="hidden" label="id" aria-label="id" name="id" value="{{ finding.id }}"/>
                                             </form>
                                             <a class="text-danger delete-finding" id="delete-finding-menu-{{ finding.id }}" href="#">
                                               <i class="fa fa-trash"></i> Delete

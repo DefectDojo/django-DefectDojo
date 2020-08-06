@@ -297,7 +297,7 @@
                                     <div class="dropdown">
                                         <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" aria-label="Severity Filter">
-                                            <form class="inline-form" action="#"><input type="checkbox" name="select_all" label="select_all"
+                                            <form class="inline-form" action="#"><input type="checkbox" name="select_all" label="select_all" aria-label="select_all"
                                                                                         id="select_all"/></form>
                                             <span class="caret"></span>
                                         </button>
@@ -341,7 +341,7 @@
                             <td class="hidden-sm centered">
                                 <form action="#">
                                     <input type="checkbox" name="select_{{ finding.id }}" id="{{ finding.id }}"
-                                        class="select_one {{ finding.severity }}"/>
+                                        label="select_one" aria-label="select_one" class="select_one {{ finding.severity }}"/>
                                 </form>
                             </td>
                         {% endif %}

@@ -97,7 +97,7 @@
                                     </li>
                                     <form id="apply-cwe-finding-form" method="post" action="{% url 'apply_template_cwe' finding.id %}">
                                         {% csrf_token %}
-                                        <input type="hidden" name="id" value="{{ finding.id }}"/>
+                                        <input type="hidden" label="apply_template" aria-label="apply_template" name="id" value="{{ finding.id }}"/>
                                     </form>
                                 {% else %}
                                     <li role="presentation">
@@ -162,7 +162,7 @@
                                 </li>
                                 <form id="delete-finding-form" method="post" action="{% url 'delete_finding' finding.id %}">
                                     {% csrf_token %}
-                                    <input type="hidden" name="id" value="{{ finding.id }}"/>
+                                    <input type="hidden" label="delete_finding" aria-label="delete_finding" name="id" value="{{ finding.id }}"/>
                                 </form>
                                 </li>
                             {% endif %}
