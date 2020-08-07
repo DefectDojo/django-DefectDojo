@@ -35,7 +35,7 @@ from django.db.models import Prefetch
 from django.db.models.query import QuerySet
 from github import Github
 from dojo.finding.views import finding_link_jira, finding_unlink_jira
-from dojo.user.helper import user_must_be_authorized
+from dojo.user.helper import user_must_be_authorized, user_is_authorized
 
 
 logger = logging.getLogger(__name__)
@@ -736,10 +736,12 @@ def delete_product(request, pid):
 
 
 # @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Product, 'staff', 'pid')
 def new_eng_for_app(request, pid, cicd=False):
     jform = None
     prod = Product.objects.get(id=pid)
+    if not user_is_authorized(request.user, 'staff', prod):
+        raise PermissionDenied
+
     use_jira = get_system_setting('enable_jira') and prod.jira_pkey is not None
 
     if request.method == 'POST':
@@ -830,7 +832,6 @@ def new_tech_for_prod(request, pid):
 
 
 # @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Product, 'staff', 'pid')
 def new_eng_for_app_cicd(request, pid):
     return new_eng_for_app(request, pid, True)
 

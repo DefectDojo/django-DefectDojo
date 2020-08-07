@@ -1017,7 +1017,7 @@
                     $('.has-popover').popover({'trigger':'hover'});
                 },
                 "columns": [
-                    {% if user|is_authorized_for_change:finding or user|is_authorized_for_delete:finding %}                    
+                    {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled %}                    
                     { "data": "dropdown" },
                     {% endif %}
                     { "data": "action" },

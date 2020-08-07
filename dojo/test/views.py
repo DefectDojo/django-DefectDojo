@@ -444,8 +444,7 @@ def add_findings(request, tid):
                    })
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Test, 'staff', 'tid')
+@user_passes_test(lambda u: u.is_staff)
 def add_temp_finding(request, tid, fid):
     jform = None
     test = get_object_or_404(Test, id=tid)

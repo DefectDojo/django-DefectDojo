@@ -524,8 +524,7 @@ def reopen_finding(request, fid):
     return HttpResponseRedirect(reverse('view_finding', args=(finding.id, )))
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Finding, 'staff', 'fid')
+@user_passes_test(lambda u: u.is_staff)
 def apply_template_cwe(request, fid):
     finding = get_object_or_404(Finding, id=fid)
 
@@ -960,8 +959,7 @@ def clear_finding_review(request, fid):
     })
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Finding, 'staff', 'fid')
+@user_passes_test(lambda u: u.is_staff)
 def mktemplate(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     templates = Finding_Template.objects.filter(title=finding.title)
@@ -997,8 +995,7 @@ def mktemplate(request, fid):
     return HttpResponseRedirect(reverse('view_finding', args=(finding.id, )))
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Finding, 'staff', 'fid')
+@user_passes_test(lambda u: u.is_staff)
 def find_template_to_apply(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     test = get_object_or_404(Test, id=finding.test.id)
@@ -1041,8 +1038,7 @@ def find_template_to_apply(request, fid):
         })
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Finding, 'staff', 'fid')
+@user_passes_test(lambda u: u.is_staff)
 def choose_finding_template_options(request, tid, fid):
     finding = get_object_or_404(Finding, id=fid)
     template = get_object_or_404(Finding_Template, id=tid)
@@ -1059,8 +1055,7 @@ def choose_finding_template_options(request, tid, fid):
     })
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Finding, 'staff', 'fid')
+@user_passes_test(lambda u: u.is_staff)
 def apply_template_to_finding(request, fid, tid):
     finding = get_object_or_404(Finding, id=fid)
     template = get_object_or_404(Finding_Template, id=tid)
@@ -1107,8 +1102,7 @@ def apply_template_to_finding(request, fid, tid):
             reverse('view_finding', args=(finding.id, )))
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Test, 'staff', 'tid')
+@user_passes_test(lambda u: u.is_staff)
 def add_stub_finding(request, tid):
     test = get_object_or_404(Test, id=tid)
     form = StubFindingForm()
@@ -1768,16 +1762,22 @@ def merge_finding_product(request, pid):
 
 
 # bulk update and delete are combined, so we can't have the nice user_must_be_authorized decorator (yet)
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Product, 'staff', 'pid')
+@user_passes_test(lambda u: u.is_staff)
+# @user_must_be_authorized(Product, 'staff', 'pid')
 def finding_bulk_update_all(request, pid=None):
     form = FindingBulkUpdateForm(request.POST)
     if request.method == "POST":
         finding_to_update = request.POST.getlist('finding_to_update')
         if request.POST.get('delete_bulk_findings') and finding_to_update:
             finds = Finding.objects.filter(id__in=finding_to_update)
-            finds = finds.filter(
-                test__engagement__product__authorized_users__in=[request.user])
+
+            # make sure users are not deleting stuff they are not authorized for
+            if not request.user.is_staff and not request.user.is_superuser:
+                if not settings.AUTHORIZED_USERS_ALLOW_DELETE:
+                    raise PermissionDenied()
+
+                finds = finds.filter(
+                    test__engagement__product__authorized_users__in=[request.user])
 
             product_calc = list(Product.objects.filter(engagement__test__finding__id__in=finding_to_update).distinct())
             finds.delete()
@@ -1789,8 +1789,14 @@ def finding_bulk_update_all(request, pid=None):
 
                 finding_to_update = request.POST.getlist('finding_to_update')
                 finds = Finding.objects.filter(id__in=finding_to_update).order_by("finding__test__engagement__product__id")
-                finds = finds.filter(
-                    test__engagement__product__authorized_users__in=[request.user])
+
+                # make sure users are not deleting stuff they are not authorized for
+                if not request.user.is_staff and not request.user.is_superuser:
+                    if not settings.AUTHORIZED_USERS_ALLOW_CHANGE:
+                        raise PermissionDenied()
+
+                    finds = finds.filter(
+                        test__engagement__product__authorized_users__in=[request.user])
 
                 finds = prefetch_for_findings(finds)
                 finds = finds.prefetch_related(Prefetch('test__engagement__risk_acceptance', queryset=q_simple_risk_acceptance, to_attr='simple_risk_acceptance'))
