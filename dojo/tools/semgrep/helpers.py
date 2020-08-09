@@ -14,35 +14,18 @@ def create_dedupe_key(check_id='', path='', start='', end=''):
 
 
 def format_code(code):
-    try:
-        return str(code)
-
-    except Exception as err:
-        return None
+    return _format_by_type(input=code)
 
 
-def format_linenums(linenums={}):
-    try:
-        if not isinstance(linenums, dict):
-            return None
-
-        return ' '.join([f"{k}: {linenums[k]}" for k in linenums])
-
-    except Exception as err:
-        return None
+def format_linenums(linenums):
+    return _format_by_type(input=linenums)
 
 
-def format_message(message=()):
-    try:
-        if not isinstance(message, list):
-            return None
-
-        return ''.join(message)
-    except Exception as err:
-        return None
+def format_message(message):
+    return _format_by_type(input=message)
 
 
-def format_metavars(metavars={}):
+def format_metavars(metavars):
     try:
         if not isinstance(metavars, dict):
             return None
@@ -53,7 +36,18 @@ def format_metavars(metavars={}):
         return None
 
 def format_references(references=()):
-    if not isinstance(message, list):
-        return None
+    return _format_by_type(input=references)
 
-    return ''.join(message)
+def _format_by_type(input='', separator='\n'):
+    try:
+        if isinstance(input, str):
+            return input
+
+        if isinstance(input, list):
+            return separator.join(list)
+
+        if isinstance(input, dict):
+            return separator.join([f"{k}: {input[k]}" for k in input])
+
+    except Exception as err:
+        return None
