@@ -38,6 +38,7 @@ def format_metavars(metavars):
 def format_references(references=()):
     return _format_by_type(input=references)
 
+
 def _format_by_type(input='', separator='\n'):
     try:
         if isinstance(input, str):
