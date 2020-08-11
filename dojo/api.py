@@ -1713,7 +1713,7 @@ class ReImportScanResource(MultipartResource, Resource):
                     continue
 
                 from titlecase import titlecase
-                item.title = titlecase(self.title)
+                item.title = titlecase(item.title)
                 if scan_type == 'Veracode Scan' or scan_type == 'Arachni Scan':
                     find = Finding.objects.filter(title=item.title,
                                                   test__id=test.id,

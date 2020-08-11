@@ -870,7 +870,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     continue
 
                 from titlecase import titlecase
-                item.title = titlecase(self.title)
+                item.title = titlecase(item.title)
                 if scan_type == 'Veracode Scan' or scan_type == 'Arachni Scan':
                     findings = Finding.objects.filter(
                         title=item.title,
