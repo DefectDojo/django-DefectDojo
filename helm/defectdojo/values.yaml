@@ -126,14 +126,7 @@ mysql:
     port: 3306
   # To use an external mySQL instance, set enabled to false and uncomment
   # the line below:
-<<<<<<< HEAD
   mysqlServer: "127.0.0.1"
-=======
-  # mysqlServer: ""
-  # To use an external secret for the password for an external mySQL instance,
-  # set enabled to false and provide the name of the secret on the line below:
-  # mysqlPasswordSecret: ""
->>>>>>> de616dd149e360f60c0e08d50c866b347d49001b
 
 postgresql:
   enabled: true
@@ -186,18 +179,16 @@ redis:
   password: ""
   cluster:
     slaveCount: 1
-<<<<<<< HEAD
-=======
-
+#
 # To add extra variables, that are not predefined it is possible to define in extraConfigs block, e.g. below:
 # NOTE  Do not store any kind of sensitive information inside of if
-# extraConfig:
+# extraConfigs:
 #  DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED: 'true'
 #  DD_SOCIAL_AUTH_AUTH0_KEY: 'dev'
 #  DD_SOCIAL_AUTH_AUTH0_DOMAIN: 'xxxxx'
-
+#
 # Extra secrets can be created inside of extraSecrets block:
 # NOTE  This is just an exmaple, do not store sensitive data in plain text form, better inject it during the deployment/upgrade by --set extraSecrets.secret=someSecret
 # extraSecrets:
 #  DD_SOCIAL_AUTH_AUTH0_SECRET: 'xxx'
->>>>>>> de616dd149e360f60c0e08d50c866b347d49001b
+#
