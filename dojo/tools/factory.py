@@ -86,6 +86,7 @@ from dojo.tools.bugcrowd.parser import BugCrowdCSVParser
 from dojo.tools.huskyci.parser import HuskyCIReportParser
 from dojo.tools.ccvs.parser import CCVSReportParser
 from dojo.tools.awssecurityhub.parser import AwsSecurityFindingFormatParser
+from dojo.tools.semgrep.parser import SemgrepJSONParser
 
 
 __author__ = 'Jay Paz'
