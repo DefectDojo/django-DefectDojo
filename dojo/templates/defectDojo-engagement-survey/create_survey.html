@@ -10,7 +10,7 @@
                     <input class="btn btn-primary" type="submit" label="create_survey" name="create_survey" value="Update Questionnaire"/>
                     <input class="btn btn-primary" type="submit" label="add_questions" name="add_questions"
                            value="Edit Questions"/>
-                    <a class="btn btn-danger" href="{% url 'delete_questionnaire' survey.id %}">Delete Questionnaire</a>
+                    <a class="btn btn-danger" href="{% url 'delete_survey' survey.id %}">Delete Questionnaire</a>
                 {% else %}
                     <input class="btn btn-primary" type="submit" label="create_survey" name="create_survey" value="Create Questionnaire"/>
                     <input class="btn btn-primary" type="submit" label="add_questions" name="add_questions"
