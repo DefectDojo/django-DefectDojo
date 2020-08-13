@@ -437,22 +437,38 @@
                 </td>
                 {% endif %}
                 {% if finding.jira_conf_new or finding.jira_issue %}
-                    <td>
+                    <td id="jira">
                     {% if finding.jira_issue %}
                         <a href="{{ finding.jira_conf_new.url }}/browse/{{ finding.jira_issue.jira_key }}"
                         target="_blank" title="{{ finding.jira_conf_new.url }}/browse/{{ finding.jira_issue.jira_key }}">{{ finding.jira_issue.jira_key }}</a>
-                    {% endif %}                        
+                        <i id="unlink_jira" class="fa fa-trash" title="Unlink JIRA issue from this finding."></i>
+                        <i id="push_to_jira" class="fa fa-share-square" title="Push finding data to linked JIRA issue."></i>
+                    {% else %}
+                        None
+                        <i id="push_to_jira" class="fa fa-share-square" title="Create JIRA issue for this finding"></i>
+                        {% comment %} <a href="{% url 'finding_link_to_jira' finding.id %}" title="Link existing JIRA issue to finding.">
+                            <i class="fa fa-asterisk" title="Link existing JIRA issue to finding."></i>
+                        </a> {% endcomment %}
+                    {% endif %}
                     </td>
                 {% endif %}
                 {% if finding.github_conf_new or finding.github_issue %}
                     <td>
                     {% if finding.github_issue %}
                         <a href="{{ finding.github_issue.issue_url }}" target="_blank" title="{{ finding.github_issue.issue_url }}">#{{ finding.github_issue.issue_id }}</a>                            
-                    {% endif %}                        
+                    {% endif %}
                     </td>
                 {% endif %}
             </tr>
         </table>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4>Add Existing JIRA issue <span class="pull-right"><a data-toggle="collapse" href="#similar_findings"><i class="glyphicon glyphicon-chevron-down"></i></a></span></h4>
+        </div>
+        <div id="existing_jira_finding" class="panel-body collapse">
+            FORM TO BE ADDED
+        </div>
     </div>
     {% endif %}    
     {% if finding.param or finding.payload %}
@@ -942,7 +958,6 @@
                 var i = $($(this).find('i').get(0));
                 i.toggleClass('glyphicon-chevron-up').toggleClass('glyphicon-chevron-down');
             })
-            $('[data-toggle="tooltip"]').tooltip()
         });
 
         // keyboard shortcuts
@@ -1005,6 +1020,46 @@
             });
         });
 
+        function jira_action(elem, url) {
+            $(elem).removeClass().addClass('fa fa-spinner fa-spin')
+
+            $.ajax({
+                type: "post",
+                dataType:'json',
+                data: '',
+                context: this, 
+                url: url,
+                // The ``X-CSRFToken`` evidently can't be set in the
+                // ``headers`` option, so force it here.
+                // This method requires jQuery 1.5+.
+                beforeSend: function (jqXHR, settings) {
+                    // Pull the token out of the DOM.
+                    jqXHR.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
+                },
+                success: function (data, textStatus, jqXHR) {
+                    console.log(textStatus)
+                    console.log(data)
+                },
+                error: function (request, status, error) {
+                    console.log('error')
+                    console.log(request.responseText)
+                },
+                complete: function(e) {
+                    console.log('complete')
+                    console.log(this)                        
+                    location.reload()
+                }
+            });
+        }
+
+        $("#push_to_jira").on('click', function(e) {
+            jira_action(this,'{% url 'finding_push_to_jira' finding.id %}')
+        });
+
+        $("#unlink_jira").on('click', function(e) {
+            jira_action(this,'{% url 'finding_unlink_jira' finding.id %}')
+        });
+
         var checkbox_count = 0;
         function get_checkbox_values()
         {
@@ -1032,9 +1087,6 @@
         }
 
         $(function () {
-            $(document).ready(function(){
-              $('[data-toggle="tooltip"]').tooltip();
-            });
             check_checked_finding();
 
             // Keep the dropdown menu open for selecting severity status
@@ -1049,8 +1101,6 @@
             $('.table-responsive').on('hide.bs.dropdown', function () {
               $('.table-responsive').css( "overflow", "auto" );
             })
-
-            $('[data-toggle="tooltip"]').tooltip();
 
             $('#bulk_edit_menu #id_bulk_active').on("click", function (e){
                 var checked = this.checked;

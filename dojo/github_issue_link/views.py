@@ -33,15 +33,15 @@ def express_new_github(request):
 @user_passes_test(lambda u: u.is_staff)
 def new_github(request):
     if request.method == 'POST':
-        jform = GITHUBForm(request.POST, instance=GITHUB_Conf())
-        if jform.is_valid():
+        gform = GITHUBForm(request.POST, instance=GITHUB_Conf())
+        if gform.is_valid():
             try:
-                api_key = jform.cleaned_data.get('api_key')
+                api_key = gform.cleaned_data.get('api_key')
                 g = Github(api_key)
                 user = g.get_user()
                 logger.debug('Using user ' + user.login)
 
-                new_j = jform.save(commit=False)
+                new_j = gform.save(commit=False)
                 new_j.api_key = api_key
                 new_j.save()
                 messages.add_message(request,
@@ -50,17 +50,17 @@ def new_github(request):
                                      extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('github', ))
             except Exception as info:
-                print(info)
+                logger.error(info)
                 messages.add_message(request,
                                      messages.ERROR,
                                      'Unable to authenticate on github.',
                                      extra_tags='alert-danger')
                 return HttpResponseRedirect(reverse('github', ))
     else:
-        jform = GITHUBForm()
+        gform = GITHUBForm()
         add_breadcrumb(title="New Github Configuration", top_level=False, request=request)
         return render(request, 'dojo/new_github.html',
-                    {'jform': jform})
+                    {'gform': gform})
 
 
 @user_passes_test(lambda u: u.is_staff)

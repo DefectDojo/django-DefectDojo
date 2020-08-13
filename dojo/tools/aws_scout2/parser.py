@@ -100,7 +100,7 @@ class AWSScout2Parser(object):
     def formatview(self, depth):
         if depth > 1:
             return "* "
-            print("depth hit")
+            # print("depth hit")
         else:
             return ""
 
