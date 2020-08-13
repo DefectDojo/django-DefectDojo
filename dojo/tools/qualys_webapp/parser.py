@@ -2,183 +2,185 @@
 #
 # -*- coding:utf-8 -*-
 
-import argparse
-import csv
+import xml
+import re
+import base64
 from dojo.models import Finding, Endpoint
 from urllib.parse import urlparse
-################################################################
-
-# Non-standard libraries
-try:
-    from lxml import etree
-except ImportError:
-    print("Missing lxml library. Please install using PIP. https://pypi.python.org/pypi/lxml/3.4.2")
-    exit()
-
-try:
-    import html2text
-except ImportError:
-    print("Missing html2text library. Please install using PIP. https://pypi.python.org/pypi/html2text/2015.2.18")
-    exit()
-
-# Custom libraries
-try:
-    from . import utfdictcsv
-except ImportError:
-    print("Missing dict to csv converter custom library. utfdictcsv.py should be in the same path as this file.")
-    exit()
-
-################################################################
-
-CUSTOM_HEADERS = {'CVSS_score': 'CVSS Score',
-                  'ip_address': 'IP Address',
-                  'fqdn': 'FQDN',
-                  'os': 'OS',
-                  'port_status': 'Port',
-                  'vuln_name': 'Vulnerability',
-                  'vuln_description': 'Description',
-                  'solution': 'Solution',
-                  'links': 'Links',
-                  'cve': 'CVE'}
-
-REPORT_HEADERS = ['CVSS_score',
-                  'ip_address',
-                  'fqdn',
-                  'os',
-                  'port_status',
-                  'vuln_name',
-                  'vuln_description',
-                  'solution',
-                  'links',
-                  'cve']
-
-################################################################
 
 
-def htmltext(blob):
-    h = html2text.HTML2Text()
-    h.ignore_links = False
-    return h.handle(blob)
+SEVERITY_MATCH = ['Informational',
+                   'Low',
+                   'Medium',
+                   'High',
+                   'Critical']
 
 
-def report_writer(report_dic, output_filename):
-    with open(output_filename, "wb") as outFile:
-        csvWriter = utfdictcsv.DictUnicodeWriter(outFile, REPORT_HEADERS, quoting=csv.QUOTE_ALL)
-        csvWriter.writerow(CUSTOM_HEADERS)
-        csvWriter.writerows(report_dic)
-    print("Successfully parsed.")
+# Parse 'CWE-XXXX' format to strip just the numbers
+def get_cwe(cwe):
+    cweSearch = re.search("CWE-([0-9]*)", cwe, re.IGNORECASE)
+    if cweSearch:
+        return cweSearch.group(1)
+    else:
+        return 0
 
-################################################################
+
+# Inputs are a list of endpoints and request/response pairs and doctors
+# them to fit their respective model structures and the adds them to a
+# newly generated Finding
+def attach_extras(endpoints, requests, responses, finding):
+    if finding is None:
+        finding = Finding()
+        finding.unsaved_req_resp = list()
+        finding.unsaved_endpoints = list()
+
+    for endpoint in endpoints:
+        parsedUrl = urlparse(endpoint)
+        protocol = parsedUrl.scheme
+        query = parsedUrl.query
+        fragment = parsedUrl.fragment
+        path = parsedUrl.path
+        port = ""  # Set port to empty string by default
+        # Split the returned network address into host and
+        try:  # If there is port number attached to host address
+            host, port = parsedUrl.netloc.split(':')
+        except:  # there's no port attached to address
+            host = parsedUrl.netloc
+
+        finding.unsaved_endpoints.append(Endpoint(
+                    host=host, port=port,
+                    path=path,
+                    protocol=protocol,
+                    query=query, fragment=fragment))
+
+    for i in range(0, len(requests)):
+        if requests[i] != '' or responses[i] != '':
+            finding.unsaved_req_resp.append({"req": requests[i], "resp": responses[i]})
+
+    return finding
 
 
-def issue_r(raw_row, vuln, test, issueType):
-    ret_rows = []
-    issue_row = {}
+# Build a request string by checking for all possible field that could be
+# found in the this section of the report
+def get_request(request):
+    if request is not None:
+        header = ''
+        header += str(request.findtext('METHOD')) + ': '
+        header += str(request.findtext('URL')) + '\n'
+        headers = request.find('HEADERS')
+        if headers is not None:
+            for head in headers.iter('HEADER'):
+                header += str(head.findtext('key')) + ': '
+                header += str(head.findtext('value')) + '\n'
+        return str(header)
+    return ''
 
-    _gid = raw_row.findtext('QID')
-    _temp = issue_row
-    param = None
-    payload = None
 
-    if(issueType == "vul"):
-        url = raw_row.findtext('URL')
-        param = raw_row.findtext('PARAM')
-        payload = raw_row.findtext('PAYLOADS/PAYLOAD/PAYLOAD')
-        parts = urlparse(url)
+# Build a response string by decrypting the value in the response
+def get_response(response):
+    if response is not None:
+        enc_resp = str(response.findtext('CONTENTS'))
+        resp = base64.b64decode(enc_resp).decode('utf-8')
+        return resp
+    return ''
 
-        ep = Endpoint(protocol=parts.scheme,
-                 host=parts.netloc,
-                 path=parts.path,
-                 query=parts.query,
-                 fragment=parts.fragment,
-                 product=test.engagement.product)
 
-    search = "//GLOSSARY/QID_LIST/QID"
-    r = vuln.xpath('/WAS_WEBAPP_REPORT/GLOSSARY/QID_LIST/QID')
+# Retrieve request and response pairs and return a list of requests
+# and a list of responses from a single vulnerability
+def get_request_response(payloads):
+    requests = []
+    responses = []
+    for payload in payloads.iter('PAYLOAD'):
+        requests.append(str(get_request(payload.find('REQUEST'))))
+        responses.append(str(get_response(payload.find('RESPONSE'))))
+    return [requests, responses]
 
-    for vuln_item in r:
-        if vuln_item is not None:
-            if vuln_item.findtext('QID') == _gid:
-                finding = Finding()
 
-                _temp['vuln_name'] = vuln_item.findtext('TITLE')
-                _temp['vuln_solution'] = vuln_item.findtext('SOLUTION')
-                _temp['vuln_description'] = htmltext(vuln_item.findtext('DESCRIPTION'))
-                _temp['impact'] = htmltext(vuln_item.findtext('IMPACT'))
-                _temp['CVSS_score'] = vuln_item.findtext('CVSS_BASE')
-                _temp['Severity'] = vuln_item.findtext('SEVERITY')
+# Traverse and retreive any information in the VULNERABILITY_LIST
+# section of the report. This includes all endpoints and request/response pairs
+def get_vulnerabilities(vulnerabilities):
+    findings = {}
+    # Iterate through all vulnerabilites to pull necessary info
+    for vuln in vulnerabilities:
+        urls = []
+        requests = response = ''
+        qid = int(vuln.findtext('QID'))
+        urls.append(str(vuln.findtext('URL')))
+        access_path = vuln.find('ACCESS_PATH')
+        if access_path is not None:
+            urls += [url.text for url in access_path.iter('URL')]
+        payloads = vuln.find('PAYLOADS')
+        if payloads is not None:
+            req_resps = get_request_response(payloads)
 
-                if _temp['Severity'] is not None:
-                    if float(_temp['Severity']) == 1:
-                        _temp['Severity'] = "Info"
-                    elif float(_temp['Severity']) == 2:
-                        _temp['Severity'] = "Low"
-                    elif float(_temp['Severity']) == 3:
-                        _temp['Severity'] = "Medium"
-                    elif float(_temp['Severity']) == 4:
-                        _temp['Severity'] = "High"
-                    else:
-                        _temp['Severity'] = "Critical"
-                print("Finding None")
+        finding = findings.get(qid, None)
+        findings[qid] = attach_extras(urls, req_resps[0], req_resps[1], finding)
+    return findings
 
-                finding = None
 
-                if issueType == "vul":
-                    finding = Finding(title=_temp['vuln_name'], mitigation=_temp['vuln_solution'],
-                                         description=_temp['vuln_description'], param=param, payload=payload, severity=_temp['Severity'], impact=_temp['impact'])
+# Retrieve information from a single glossary entry such as description,
+# severity, title, impact, mitigation, and CWE
+def get_glossary_item(glossary, finding):
+    title = str(glossary.findtext('TITLE'))
+    if title is not None:
+        finding.title = title
+    severity = int(glossary.findtext('SEVERITY'))
+    if severity is not None:
+        finding.severity = SEVERITY_MATCH[severity - 1]
+    description = str(glossary.findtext('DESCRIPTION'))
+    if description is not None:
+        finding.description = description
+    impact = str(glossary.findtext('IMPACT'))
+    if impact is not None:
+        finding.impact = impact
+    solution = str(glossary.findtext('SOLUTION'))
+    if solution is not None:
+        finding.mitigation = solution
+    cwe = str(glossary.findtext('CWE'))
+    if cwe is not None:
+        finding.cwe = int(get_cwe(cwe))
+    return finding
 
-                    finding.unsaved_endpoints = list()
-                    finding.unsaved_endpoints.append(ep)
-                else:
-                    finding = Finding(title=_temp['vuln_name'], mitigation=_temp['vuln_solution'],
-                                         description=_temp['vuln_description'], param=param, payload=payload,
-                                         severity=_temp['Severity'], impact=_temp['impact'])
 
-                ret_rows.append(finding)
+# Retrieve information from a single information gathered entry
+def get_info_item(info_gathered, finding):
+    data = str(info_gathered.findtext('DATA'))
+    if data is not None:
+        finding.description += '\n\n' + data
+    return finding
 
-    return ret_rows
+
+# Create finding items for all vulnerabilities in the report
+def get_items(vulnerabilities, info_gathered, glossary):
+    ig_qid_list = [int(ig.findtext('QID')) for ig in info_gathered]
+    g_qid_list = [int(g.findtext('QID')) for g in glossary]
+
+    # This dict has findings mapped by QID to remove any duplicates
+    findings = get_vulnerabilities(vulnerabilities)
+
+    for qid, finding in findings.items():
+        if qid in g_qid_list:
+            index = g_qid_list.index(qid)
+            findings[qid] = get_glossary_item(glossary[index], finding)
+        if qid in ig_qid_list:
+            index = ig_qid_list.index(qid)
+            findings[qid] = get_info_item(glossary[index], finding)
+
+    return findings
 
 
 def qualys_webapp_parser(qualys_xml_file, test):
-    parser = etree.XMLParser(remove_blank_text=True, no_network=True, recover=True)
-    d = etree.parse(qualys_xml_file, parser)
+    if qualys_xml_file is None:
+        return []
 
-    right = d.xpath('/WAS_WEBAPP_REPORT/RESULTS/WEB_APPLICATION/VULNERABILITY_LIST/VULNERABILITY')
-    # r = d.xpath('/WAS_SCAN_REPORT/RESULTS/VULNERABILITY_LIST/VULNERABILITY')
-    left = d.xpath('/WAS_WEBAPP_REPORT/RESULTS/WEB_APPLICATION/INFORMATION_GATHERED_LIST/INFORMATION_GATHERED')
-    # l = d.xpath('/WAS_SCAN_REPORT/RESULTS/INFORMATION_GATHERED_LIST/INFORMATION_GATHERED')
+    tree = xml.etree.ElementTree.parse(qualys_xml_file)
+    vulnerabilities = tree.findall('./RESULTS/VULNERABILITY_LIST/VULNERABILITY')
+    info_gathered = tree.findall('./RESULTS/INFORMATION_GATHERED_LIST/INFORMATION_GATHERED')
+    glossary = tree.findall('./GLOSSARY/QID_LIST/QID')
 
-    master_list = []
+    items = list(get_items(vulnerabilities, info_gathered, glossary).values())
 
-    for issue in right:
-        master_list += issue_r(issue, d, test, "vul")
-
-    for issue in left:
-        master_list += issue_r(issue, d, test, "info")
-
-    return master_list
-
-################################################################
-
-
-if __name__ == "__main__":
-
-    # Parse args
-    aparser = argparse.ArgumentParser(description='Converts Qualys XML results to .csv file.')
-    aparser.add_argument('--out',
-                        dest='outfile',
-                        default='qualys.csv',
-                        help="WARNING: By default, output will overwrite current path to the file named 'qualys.csv'")
-    aparser.add_argument('qualys_xml_file',
-                        type=str,
-                        help='Qualys xml file.')
-    args = aparser.parse_args()
-
-    try:
-        qualys_parser(args.qualys_xml_file)
-    except IOError:
-        print("[!] Error processing file: {}".format(args.qualys_xml_file))
-        exit()
+    return items
 
 
 class QualysWebAppParser(object):

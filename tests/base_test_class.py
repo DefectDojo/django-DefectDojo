@@ -3,11 +3,12 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import NoAlertPresentException
 
 import unittest
 import os
 import re
-
+# import time
 
 dd_driver = None
 dd_driver_options = None
@@ -31,9 +32,10 @@ class BaseTestCase(unittest.TestCase):
             # the next 2 maybe needed in some scenario's for example on WSL or other headless situations
             dd_driver_options.add_argument("--no-sandbox")
             # dd_driver_options.add_argument("--disable-dev-shm-usage")
+            dd_driver_options.add_argument("--disable-gpu")  # on windows sometimes chrome can't start with certain gpu driver versions, even in headless mode
 
             # start maximized or at least with sufficient with because datatables will hide certain controls when the screen is too narrow
-            dd_driver_options.add_argument("--window-size=1280,768")
+            dd_driver_options.add_argument("--window-size=1280,1024")
             # dd_driver_options.add_argument("--start-maximized")
 
             dd_driver_options.set_capability("acceptInsecureCerts", True)
@@ -45,7 +47,8 @@ class BaseTestCase(unittest.TestCase):
             # change path of chromedriver according to which directory you have chromedriver.
             print('starting chromedriver with options: ', vars(dd_driver_options), desired)
             dd_driver = webdriver.Chrome('chromedriver', chrome_options=dd_driver_options, desired_capabilities=desired)
-            dd_driver.implicitly_wait(30)
+            # best practice is only use explicit waits
+            dd_driver.implicitly_wait(1)
 
         cls.driver = dd_driver
         cls.base_url = os.environ['DD_BASE_URL']
@@ -65,28 +68,20 @@ class BaseTestCase(unittest.TestCase):
         driver.find_element_by_id("id_password").clear()
         driver.find_element_by_id("id_password").send_keys(os.environ['DD_ADMIN_PASSWORD'])
         driver.find_element_by_css_selector("button.btn.btn-success").click()
-        text = driver.find_element_by_tag_name("BODY").text
-        self.assertFalse(re.search(r'Please enter a correct username and password', text))
+
+        self.assertFalse(self.is_element_by_css_selector_present('.alert-danger', 'Please enter a correct username and password'))
         return driver
 
     def goto_product_overview(self, driver):
         driver.get(self.base_url + "product")
-        body = driver.find_element_by_tag_name("BODY").text
-        # print('BODY:')
-        # print(body)
-        # print('re.search:', re.search(r'No products found', body))
-
-        if re.search(r'No products found', body):
-            return driver
-
-        # wait for product_wrapper div as datatables javascript modifies the DOM on page load.
-        WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.ID, "products_wrapper")))
+        self.wait_for_datatable_if_content("no_products", "products_wrapper")
 
     def goto_active_engagements_overview(self, driver):
         # return self.goto_engagements_internal(driver, 'engagement')
         # engagement overview doesn't seem to have the datatables yet modifying the DOM
         # https://github.com/DefectDojo/django-DefectDojo/issues/2173
         driver.get(self.base_url + 'engagement')
+        # self.goto_engagements_internal(driver, 'engagement')
         return driver
 
     def goto_all_engagements_overview(self, driver):
@@ -94,21 +89,64 @@ class BaseTestCase(unittest.TestCase):
 
     def goto_engagements_internal(self, driver, rel_url):
         driver.get(self.base_url + rel_url)
-        body = driver.find_element_by_tag_name("BODY").text
-        # print('BODY:')
-        # print(body)
-        # print('re.search:', re.search(r'No products found', body))
-
-        if re.search(r'No engagements found', body):
-            return driver
-
-        # wait for engagements_wrapper div as datatables javascript modifies the DOM on page load.
-        WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.ID, "engagements_wrapper")))
+        self.wait_for_datatable_if_content("no_engagements", "engagements_wrapper")
         return driver
 
+    def goto_all_findings_list(self, driver):
+        driver.get(self.base_url + "finding")
+        self.wait_for_datatable_if_content("no_findings", "open_findings_wrapper")
+
+    def wait_for_datatable_if_content(self, no_content_id, wrapper_id):
+        no_content = None
+        try:
+            no_content = self.driver.find_element_by_id(no_content_id)
+        except:
+            pass
+
+        if no_content is None:
+            # wait for product_wrapper div as datatables javascript modifies the DOM on page load.
+            WebDriverWait(self.driver, 30).until(EC.presence_of_element_located((By.ID, wrapper_id)))
+
+    def is_element_by_css_selector_present(self, selector, text=None):
+        elems = self.driver.find_elements_by_css_selector(selector)
+        if len(elems) == 0:
+            # print('no elements!')
+            return False
+
+        if text is None:
+            return True
+
+        for elem in elems:
+            print(elem.text)
+            if text in elem.text:
+                # print('contains!')
+                return True
+
+        # print('text mismatch!')
+        return False
+
+    def is_success_message_present(self, text=None):
+        return self.is_element_by_css_selector_present('.alert-success', text=text)
+
+    def is_error_message_present(self, text=None):
+        return self.is_element_by_css_selector_present('.alert-danger', text=text)
+
+    def is_text_present_on_page(self, text):
+        # DEBUG: couldn't find:  Product type added successfully. path:  //*[contains(text(),'Product type added successfully.')]
+        # can't get this xpath to work
+        # path = "//*[contains(text(), '" + text + "')]"
+        # elems = self.driver.find_elements_by_xpath(path)
+        # if len(elems) == 0:
+        #     print("DEBUG: couldn't find: ", text, "path: ", path)
+
+        body = self.driver.find_element_by_tag_name("body")
+        return re.search(text, body.text)
+
+    def element_exists_by_id(self, id):
+        elems = self.driver.find_elements_by_id(id)
+        return len(elems) > 0
+
     def change_system_setting(self, id, enable=True):
-        # we set the admin user (ourselves) to have block_execution checked
-        # this will force dedupe to happen synchronously as the celeryworker is not reliable in travis
         print("changing system setting " + id + " enable: " + str(enable))
         driver = self.login_page()
         driver.get(self.base_url + 'system_settings')
@@ -137,10 +175,6 @@ class BaseTestCase(unittest.TestCase):
     def disable_system_setting(self, id):
         return self.change_system_setting(id, enable=False)
 
-    # def enable_block_execution(self):
-    # won't work, is on user profile instead of system settings
-    #     return self.enable_system_setting('id_block_execution')
-
     def enable_jira(self):
         return self.enable_system_setting('id_enable_jira')
 
@@ -153,10 +187,23 @@ class BaseTestCase(unittest.TestCase):
     def enable_github(self):
         return self.enable_system_setting('id_enable_github')
 
+    def enable_block_execution(self):
+        # we set the admin user (ourselves) to have block_execution checked
+        # this will force dedupe to happen synchronously, among other things like notifications, rules, ...
+        driver = self.login_page()
+        driver.get(self.base_url + 'profile')
+        if not driver.find_element_by_id('id_block_execution').is_selected():
+            driver.find_element_by_xpath('//*[@id="id_block_execution"]').click()
+            # save settings
+            driver.find_element_by_css_selector("input.btn.btn-primary").click()
+            # check if it's enabled after reload
+            self.assertTrue(driver.find_element_by_id('id_block_execution').is_selected())
+        return driver
+
     def is_alert_present(self):
         try:
             self.driver.switch_to_alert()
-        except NoAlertPresentException as e:
+        except NoAlertPresentException:
             return False
         return True
 
@@ -259,7 +306,11 @@ def on_exception_html_source_logger(func):
             return func(self, *args, **kwargs)
 
         except Exception as e:
-            print(self.driver.page_source)
+            print("exception occured at url:", self.driver.current_url)
+            print("page source:", self.driver.page_source)
+            f = open("selenium_page_source.html", "w", encoding='utf-8')
+            f.writelines(self.driver.page_source)
+            # time.sleep(30)
             raise(e)
 
     return wrapper

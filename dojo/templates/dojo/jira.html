@@ -38,25 +38,33 @@
                         <tr>
                             <th>Name</th>
                             <th>URL</th>
-                            <th> Username</th>
-                            <th></th>
+                            <th>Username</th>
+                            <th>Action</th>
                         </tr>
                         </thead>
                         <tbody>
                         {% for conf in confs %}
                             <tr>
                                 <td>
-                                        {{ conf.configuration_name }}
+                                    <a href="{% url 'edit_jira' conf.id %}"><b>{{ conf.configuration_name }}</b></a>
                                 </td>
                                 <td>
-                                    <a href="{% url 'edit_jira' conf.id %}"><b>{{ conf.url }}</b></a>
+                                    <a href="{{ conf.url }}">{{ conf.url }}
+                                    <i class="fa fa-external-link" aria-hidden="true"></i>
+                                    </a>
                                 </td>
                                 <td>
                                         {{ conf.username }}
                                 </td>
                                 <td>
-                                    <a class="text-danger" href="{% url 'delete_jira' conf.id %}" >
-                                    <i class="fa fa-trash"></i> Delete
+                                    <a href="{% url 'edit_jira' conf.id %}" class="btn btn-sm btn-success">
+                                        <i class="fa fa-pencil"></i>
+                                        Edit
+                                    </a>
+                                    <a href="{% url 'delete_jira' conf.id %}" class="btn btn-sm btn-warning">
+                                        <i class="fa fa-trash"></i>
+                                        Delete
+                                    </a>
                                     </a>
                                 </td>
                             </tr>

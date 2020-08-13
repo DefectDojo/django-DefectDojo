@@ -1,18 +1,17 @@
-#!/bin/sh
+#!/bin/bash
 
 echo "Waiting 60s for services to start"
 # Wait for services to become available
 sleep 60
 echo "Testing DefectDojo Service"
 curl -s -o "/dev/null" $DD_BASE_URL -m 120
-CR=$(curl -s -m 10 -I "${DD_BASE_URL}login?next=/" | egrep "^HTTP" | cut  -d' ' -f2)
+CR=$(curl --insecure -s -m 10 -I "${DD_BASE_URL}login?next=/" | egrep "^HTTP" | cut  -d' ' -f2)
 if [ "$CR" != 200 ]; then
     echo "ERROR: cannot display login screen; got HTTP code $CR"
     exit 1
 fi
 
 # Run available unittests with a simple setup
-echo "Running Product type integration tests"
 # All available Integrationtest Scripts are activated below
 # If successsful, A successs message is printed and the script continues
 # If any script is unsuccesssful a failure message is printed and the test script
@@ -30,106 +29,120 @@ function success() {
 test="Product type integration tests"
 echo "Running: $test"
 if python3 tests/Product_type_unit_test.py ; then
-    echo "Success: Product type integration tests passed"
+    success $test
 else
-    echo "Error: Product type integration test failed."; exit 1
+    fail $test
 fi
 
-echo "Running Product integration tests"
+test="Product integration tests"
+echo "Running: $test"
 if python3 tests/Product_unit_test.py ; then 
-    echo "Success: Product integration tests passed"
+    success $test
 else
-    echo "Error: Product integration test failed"; exit 1
+    fail $test
 fi
 
-echo "Running Endpoint integration tests"
+test="Endpoint integration tests"
+echo "Running: $test"
 if python3 tests/Endpoint_unit_test.py ; then
-    echo "Success: Endpoint integration tests passed"
+    success $test
 else
-    echo "Error: Endpoint integration test failed"; exit 1
+    fail $test
 fi
 
-echo "Running Engagement integration tests"
+test="Engagement integration tests"
+echo "Running: $test"
 if python3 tests/Engagement_unit_test.py ; then
-    echo "Success: Engagement integration tests passed"
+    success $test
 else
-    echo "Error: Engagement integration test failed"; exit 1
+    fail $test
 fi
 
-echo "Running Environment integration tests"
+test="Environment integration tests"
+echo "Running: $test"
 if python3 tests/Environment_unit_test.py ; then 
-    echo "Success: Environment integration tests passed"
+    success $test
 else
-    echo "Error: Environment integration test failed"; exit 1
+    fail $test
 fi
 
-echo "Running Finding integration tests"
+test="Finding integration tests"
+echo "Running: $test"
 if python3 tests/Finding_unit_test.py ; then
-    echo "Success: Finding integration tests passed"
+    success $test
 else
-    echo "Error: Finding integration test failed"; exit 1
+    fail $test
 fi
 
-echo "Running Test integration tests"
+test="Test integration tests"
+echo "Running: $test"
 if python3 tests/Test_unit_test.py ; then
-    echo "Success: Test integration tests passed"
+    success $test
 else
-    echo "Error: Test integration test failed"; exit 1
+    fail $test
 fi
 
-echo "Running User integration tests"
+test=echo "User integration tests"
+echo "Running: $test"
 if python3 tests/User_unit_test.py ; then
-    echo "Success: User integration tests passed"
+    success $test
 else
-    echo "Error: User integration test failed"; exit 1
+    fail $test
 fi
 
-echo "Running Ibm Appscan integration test"
+test="Ibm Appscan integration test"
+echo "Running: $test"
 if python3 tests/ibm_appscan_test.py ; then
-    echo "Success: Ibm AppScan integration tests passed"
+    success $test
 else
-    echo "Error: Ibm AppScan integration test failed"; exit 1
+    fail $test
 fi
 
-echo "Running Smoke integration test"
-if python3 tests/smoke_test.py ; then
-    echo "Success: Smoke integration tests passed"
-else
-    echo "Error: Smoke integration test failed"; exit 1
-fi
+# all smoke tests are already covered by other testcases above/below
+# test="Smoke integration test"
+# echo "Running: $test"
+# if python3 tests/smoke_test.py ; then
+#     success $test
+# else
+#     fail $test
+# fi
 
-echo "Running Check Status test"
+test="Check Status test"
+echo "Running: $test"
 if python3 tests/check_status.py ; then
-    echo "Success: check status tests passed"
+    success $test
 else
-    echo "Error: Check status tests failed"; exit 1
+    fail $test
 fi
 
-echo "Running Dedupe integration tests"
+test="Dedupe integration tests"
+echo "Running: $test"
 if python3 tests/dedupe_unit_test.py ; then
-    echo "Success: Dedupe integration tests passed"
+    success $test
 else
-    echo "Error: Dedupe integration test failed"; exit 1
+    fail $test
 fi
+
+
 
 # The below tests are commented out because they are still an unstable work in progress
 ## Once Ready they can be uncommented.
 
-# echo "Running Import Scanner integration test"
+# echo "Import Scanner integration test"
 # if python3 tests/Import_scanner_unit_test.py ; then
 #     echo "Success: Import Scanner integration tests passed" 
 # else
 #     echo "Error: Import Scanner integration test failed"; exit 1
 # fi
 
-# echo "Running Check Status UI integration test"
+# echo "Check Status UI integration test"
 # if python3 tests/check_status_ui.py ; then
 #     echo "Success: Check Status UI tests passed"
 # else
 #     echo "Error: Check Status UI test failed"; exit 1
 # fi
 
-# echo "Running Zap integration test"
+# echo "Zap integration test"
 # if python3 tests/zap.py ; then
 #     echo "Success: zap integration tests passed"
 # else

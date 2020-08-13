@@ -1,7 +1,7 @@
 import logging
 from django.contrib import messages
 from django.contrib.auth import authenticate, logout
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import user_passes_test, login_required
 from django.core import serializers
 from django.core.exceptions import PermissionDenied
 from django.urls import reverse
@@ -166,6 +166,7 @@ def migrate_alerts(request):
                     {'alerts': alerts})
 
 
+@login_required
 def alerts_json(request, limit=None):
     limit = request.GET.get('limit')
     if limit:
