@@ -2,6 +2,7 @@ from hashlib import md5
 from json import dumps
 
 def create_dedupe_key(check_id='', path='', start='', end=''):
+
     try:
         if not all([check_id, path, start, end]):
             return None
@@ -29,13 +30,12 @@ def format_metavars(metavars):
     try:
         if not isinstance(metavars, dict):
             return None
-        
         return dumps(metavars)
-
     except Exception as err:
         return None
 
 def format_references(references=()):
+
     return _format_by_type(input=references)
 
 
@@ -49,6 +49,5 @@ def _format_by_type(input='', separator='\n'):
 
         if isinstance(input, dict):
             return separator.join([f"{k}: {input[k]}" for k in input])
-
     except Exception as err:
         return None
