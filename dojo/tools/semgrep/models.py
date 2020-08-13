@@ -1,9 +1,8 @@
-from helpers import (create_dedupe_key,
-                     format_code, 
+from dojo.tools.semgrep.helpers import (create_dedupe_key,
+                     format_code,
                      format_linenums,
                      format_message,
-                     format_metavars,
-                     format_references)
+                     format_metavarss)
 
 class SemgrepJSONResult:
 

@@ -89,6 +89,7 @@ from dojo.tools.awssecurityhub.parser import AwsSecurityFindingFormatParser
 from dojo.tools.semgrep.parser import SemgrepJSONParser
 
 
+
 __author__ = 'Jay Paz'
 
 
@@ -278,6 +279,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = CCVSReportParser(file, test)
     elif scan_type == 'AWS Security Hub Scan':
         parser = AwsSecurityFindingFormatParser(file, test)
+    elif scan_type == 'Semgrep JSON Report':
+        parser = SemgrepJSONParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 
