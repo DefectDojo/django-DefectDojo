@@ -854,3 +854,7 @@ def finding_related_action_classes(related_action):
 @register.filter
 def finding_related_action_title(related_action):
     return finding_related_action_title_dict.get(related_action, '')
+
+
+def product_findings(product):
+    return Finding.objects.filter(test__engagement__product=product)
