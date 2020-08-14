@@ -60,7 +60,6 @@ class RiskReconParser(object):
                     severity=sev,
                     mitigation='N/A',
                     impact='N/A',
-                    date=item.get('last_seen'),
                     static_finding=False,
                     dynamic_finding=True)
 
