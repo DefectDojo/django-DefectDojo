@@ -1,17 +1,42 @@
-from hashlib import md5
 import json
 from dojo.models import Finding
 from dojo.tools.semgrep.models import SemgrepJSONResult
 
-
 class SemgrepJSONParser(object):
+
     def __init__(self, filehandle, test):
         tree = self.parse_json(filehandle)
 
+        self.items = []
         if tree:
-            self.items = self.get_items(tree, test)
-        else:
-            self.items = None
+            results = tree.get('results')
+
+            if not results:
+                return
+
+            for item in results:
+                title=item['check_id']
+                path=item['path']
+                f = SemgrepJSONResult(item)
+
+                findingItem=Finding(
+                    title=title,
+                    severity=f.severity,
+                    numerical_severity=Finding.get_numerical_severity(f.severity),
+                    description=f.message,
+                    mitigation='N/A',
+                    file_path=path,
+                    line=42,
+                    active=False,
+                    verified=False,
+                    url='N/A',
+                    impact='N/A',
+                    static_finding=True,
+                    test=test
+                )
+
+
+                self.items.append(findingItem)
 
     def parse_json(self, filehandle):
         try:
@@ -26,33 +51,4 @@ class SemgrepJSONParser(object):
 
         return tree
 
-    def get_items(self, tree, test):
-        dupes = dict()
-        results = tree.get('results')
 
-        if not results:
-            return None
-
-        for finding in results:
-            f = SemgrepJSONResult(finding)
-            dupes[f.dedupe_key] = Finding(
-                title=f.check_id,
-                severity=f.severity,
-                description=f.message,
-                mitigation=f.fix,
-                references=f.references,
-                file_path=f.path,
-                line=' '.join([f.start, f.end]),
-                cve=None,
-                cwe=f.cwe,
-                active=True,
-                verified=False,
-                false_p=False,
-                duplicate=False,
-                out_of_scope=False,
-                impact='No impact provided',
-                static_finding=True,
-                test=self.test
-            )
-
-        return dupes
