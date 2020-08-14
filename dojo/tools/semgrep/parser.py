@@ -4,6 +4,7 @@ from dojo.tools.semgrep.models import SemgrepJSONResult
 
 class SemgrepJSONParser(object):
 
+
     def __init__(self, filehandle, test):
         tree = self.parse_json(filehandle)
 
@@ -15,11 +16,11 @@ class SemgrepJSONParser(object):
                 return
 
             for item in results:
-                title=item['check_id']
-                path=item['path']
+                title = item['check_id']
+                path = item['path']
                 f = SemgrepJSONResult(item)
 
-                findingItem=Finding(
+                findingItem = Finding(
                     title=title,
                     severity=f.severity,
                     numerical_severity=Finding.get_numerical_severity(f.severity),
@@ -34,8 +35,6 @@ class SemgrepJSONParser(object):
                     static_finding=True,
                     test=test
                 )
-
-
                 self.items.append(findingItem)
 
     def parse_json(self, filehandle):
@@ -50,5 +49,3 @@ class SemgrepJSONParser(object):
             raise Exception("Invalid format")
 
         return tree
-
-
