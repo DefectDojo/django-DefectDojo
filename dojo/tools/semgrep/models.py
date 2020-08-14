@@ -3,9 +3,8 @@ from dojo.tools.semgrep.helpers import (format_code,
                                         format_message,
                                         format_metavars)
 
+
 class SemgrepJSONResult:
-
-
     def __init__(self, path='', start={}, end={}, extra={}):
         self.path = path
         self.start = format_linenums(start)
