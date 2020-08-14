@@ -1,23 +1,23 @@
-from dojo.tools.semgrep.helpers import (create_dedupe_key,
-                                        format_code,
+from dojo.tools.semgrep.helpers import (format_code,
                                         format_linenums,
                                         format_message,
                                         format_metavars)
 
 class SemgrepJSONResult:
 
-    def __init__(self,  path='', start={}, end={}, extra={}):
+
+    def __init__(self, path='', start={}, end={}, extra={}):
         self.path = path
         self.start = format_linenums(start)
         self.end = format_linenums(end)
 
         self.severity = "Info"
-        self.cwe=42
-        self.message="Detected by semgrep rule"
-        self.fix="None"
-        self.lines="None"
-        self.references="Detected by semgrep rule"
-        self.test="SemGrep rule"
+        self.cwe = 42
+        self.message = "Detected by semgrep rule"
+        self.fix = "None"
+        self.lines = "None"
+        self.references = "Detected by semgrep rule"
+        self.test = "SemGrep rule"
 
         if not extra:
             return
@@ -36,11 +36,11 @@ class SemgrepJSONResult:
         # Convert Semgrep severity to defectDojo Severity
         semSeverity = metadata.get('severity')
 
-        if semSeverity=="WARNING":
-            self.severity="Low"
+        if semSeverity == "WARNING":
+            self.severity = "Low"
 
-        if semSeverity=="ERROR":
-            self.severity="High"
+        if semSeverity == "ERROR":
+            self.severity = "High"
 
         self.references = format_message(metadata.get('message'))
         self.source_rule_url = metadata.get('source-rule-url')
