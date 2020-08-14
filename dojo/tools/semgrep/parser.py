@@ -2,9 +2,8 @@ import json
 from dojo.models import Finding
 from dojo.tools.semgrep.models import SemgrepJSONResult
 
+
 class SemgrepJSONParser(object):
-
-
     def __init__(self, filehandle, test):
         tree = self.parse_json(filehandle)
 
