@@ -17,6 +17,21 @@
     {%  if jform %}
         <h4> JIRA </h4>
         <hr>
+		<div class="form-group">
+			<label class="col-sm-2 control-label" for="id_jira_issue">JIRA URL
+				<i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="JIRA URL connected to this product or engagment" data-placement="right" data-container="body" data-original-title="" title="">
+				</i>
+			</label>
+			<div class="col-sm-10 form-control-static">
+				{% if product_tab.product.jira_conf %}
+					<a href="{{ product_tab.product.jira_conf.url }}/browse/{{ product_tab.product.jira_pkey.project_key }}"
+					target="_blank"> {{ product_tab.product.jira_conf.url }}/browse/{{ product_tab.product.jira_pkey.project_key }} </a>
+				{% else %}
+				None
+				{% endif %}
+			</div>
+		</div>
+
         {% include "dojo/form_fields.html" with form=jform %}
     {% endif %}
 	<div class="form-group">
@@ -35,6 +50,7 @@
 	<li><b>Anchore-Engine</b> - Anchore-CLI JSON vulnerability report format.</li>
 	<li><b>Anchore Enterprise Policy Check</b> - Anchore-CLI JSON policy check report format.</li>
 	<li><b>Aqua Scan</b> - Aqua scan JSON report format.</li>
+	<li><b>AWS Security Hub</b> - AWS Security Hub exports in JSON format.</li>
 	<li><b>AWS Scout2 Scanner</b> - JS file in scout2-report/inc-awsconfig/aws_config.js.</li>
 	<li><b>AWS Prowler Scanner</b> - Prowler file can be imported as a CSV file (-M csv).</li>
 	<li><b>Arachni Scanner</b> - Arachni JSON report format.</li>

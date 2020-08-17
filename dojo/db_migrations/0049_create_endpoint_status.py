@@ -44,7 +44,7 @@ class Migration(migrations.Migration):
                     pass
 
     dependencies = [
-        ('dojo', '0047_jira_minimum_severity_default'),
+        ('dojo', '0048_sla_notifications'),
     ]
 
     operations = [migrations.RunPython(create_status_objects)]

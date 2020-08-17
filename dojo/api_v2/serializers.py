@@ -3,7 +3,9 @@ from dojo.models import Product, Engagement, Test, Finding, \
     Finding_Template, Test_Type, Development_Environment, NoteHistory, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Product_Type, JIRA_Conf, Endpoint, BurpRawRequestResponse, JIRA_PKey, \
-    Notes, DojoMeta, FindingImage, Note_Type, App_Analysis, Endpoint_Status
+    Notes, DojoMeta, FindingImage, Note_Type, App_Analysis, Endpoint_Status, \
+    Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product
+
 from dojo.forms import ImportScanForm, SEVERITY_CHOICES
 from dojo.tools import requires_file
 from dojo.tools.factory import import_parser_factory
@@ -357,6 +359,24 @@ class JIRASerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class SonarqubeIssueSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Sonarqube_Issue
+        fields = '__all__'
+
+
+class SonarqubeIssueTransitionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Sonarqube_Issue_Transition
+        fields = '__all__'
+
+
+class SonarqubeProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Sonarqube_Product
+        fields = '__all__'
+
+
 class DevelopmentEnvironmentSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -665,7 +685,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     continue
 
                 item.test = test
-                item.date = test.target_start
+                item.date = test.target_start.date()
                 item.reporter = self.context['request'].user
                 item.last_reviewed = timezone.now()
                 item.last_reviewed_by = self.context['request'].user
@@ -976,10 +996,10 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             test.save()
             test.engagement.save()
 
-            print(len(new_items))
-            print(reactivated_count)
-            print(mitigated_count)
-            print(unchanged_count - mitigated_count)
+            # print(len(new_items))
+            # print(reactivated_count)
+            # print(mitigated_count)
+            # print(unchanged_count - mitigated_count)
 
             updated_count = mitigated_count + reactivated_count + len(new_items)
             if updated_count > 0:
