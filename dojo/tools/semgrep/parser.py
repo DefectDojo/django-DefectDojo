@@ -49,4 +49,3 @@ class SemgrepJSONParser(object):
             raise Exception("Invalid format")
 
         return tree
-
