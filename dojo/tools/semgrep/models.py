@@ -1,4 +1,4 @@
-from helpers import (create_dedupe_key,
+from dojo.tools.semgrep.helpers import (create_dedupe_key,
                      format_code, 
                      format_linenums,
                      format_message,

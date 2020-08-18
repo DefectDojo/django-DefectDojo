@@ -39,13 +39,13 @@ def format_references(references=()):
     return _format_by_type(input=references)
 
 
-def _format_by_type(input='', separator='\n'):
+def _format_by_type(input='', separator=' '):
     try:
         if isinstance(input, str):
             return input
 
         if isinstance(input, list):
-            return separator.join(list)
+            return separator.join(input)
 
         if isinstance(input, dict):
             return separator.join([f"{k}: {input[k]}" for k in input])
