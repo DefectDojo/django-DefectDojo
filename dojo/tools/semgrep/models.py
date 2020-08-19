@@ -39,7 +39,7 @@ class SemgrepJSONResult:
         self.owasp = metadata.get('owasp')
 
         # Convert Semgrep severity to defectDojo Severity
-        semSeverity = metadata.get('severity')
+        semSeverity = extra.get('severity')
 
         if semSeverity == "WARNING":
             self.severity = "Low"
