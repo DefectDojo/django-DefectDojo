@@ -34,7 +34,9 @@ class SemgrepJSONResult:
             return
 
         # parse CWE
-        self.title = metadata.get("cwe").partition(':')[2]
+        if metadata.get("cwe").partition(':')[2]:
+            self.title = metadata.get("cwe").partition(':')[2]
+
         self.cwe = metadata.get("cwe").partition(':')[0].partition('-')[2]
         self.owasp = metadata.get('owasp')
 
