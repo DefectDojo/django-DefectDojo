@@ -113,3 +113,5 @@ quick.bash
 Pipfile
 Pipfile*
 
+#ignore local added certs
+certs/
