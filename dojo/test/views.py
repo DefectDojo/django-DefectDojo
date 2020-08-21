@@ -664,6 +664,8 @@ def re_import_scan_results(request, tid):
                     # Try to find the existing finding
                     # If it's Veracode or Arachni, then we consider the description for some
                     # reason...
+                    from titlecase import titlecase
+                    item.title = titlecase(item.title)
                     if scan_type == 'Veracode Scan' or scan_type == 'Arachni Scan':
                         finding = Finding.objects.filter(title=item.title,
                                                         test__id=test.id,
