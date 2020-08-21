@@ -12,7 +12,7 @@ django-environ==0.4.5
 django-filter==2.3.0
 django-imagekit==4.0.2
 django-multiselectfield==0.1.12
-django-polymorphic==2.1.2
+django-polymorphic==3.0.0
 django-crispy-forms==1.9.2
 django_extensions==3.0.5
 django-rest-swagger==2.2.0
