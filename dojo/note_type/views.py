@@ -17,8 +17,7 @@ logger = logging.getLogger(__name__)
 @user_passes_test(lambda u: u.is_superuser)
 def note_type(request):
     initial_queryset = Note_Type.objects.all().order_by('name')
-    name_words = [note_type.name for note_type in
-                  initial_queryset]
+    name_words = initial_queryset.values_list('name', flat=True)
     ntl = NoteTypesFilter(request.GET, queryset=initial_queryset)
     nts = get_page_items(request, ntl.qs, 25)
     add_breadcrumb(title="Note Type List", top_level=True, request=request)

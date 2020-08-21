@@ -2,29 +2,29 @@ set DD_ADMIN_USER=admin
 set DD_ADMIN_PASSWORD=admin
 set DD_BASE_URL=http://localhost:8080/
 
-REM echo "Running Product type integration tests"
-REM python tests/Product_type_unit_test.py
-REM if %ERRORLEVEL% NEQ 0 GOTO END
+echo "Running Product type integration tests"
+python tests/Product_type_unit_test.py
+if %ERRORLEVEL% NEQ 0 GOTO END
 
-REM echo "Running Dedupe integration tests"
-REM python tests/dedupe_unit_test.py
-REM if %ERRORLEVEL% NEQ 0 GOTO END
+echo "Running Product integration tests"
+python tests/Product_unit_test.py
+if %ERRORLEVEL% NEQ 0 GOTO END
 
-REM echo "Running Endpoint integration tests"
-REM python tests/Endpoint_unit_test.py
-REM if %ERRORLEVEL% NEQ 0 GOTO END
+echo "Running Endpoint integration tests"
+python tests/Endpoint_unit_test.py
+if %ERRORLEVEL% NEQ 0 GOTO END
 
-REM echo "Running Engagement integration tests"
-REM python tests/Engagement_unit_test.py
-REM if %ERRORLEVEL% NEQ 0 GOTO END
+echo "Running Engagement integration tests"
+python tests/Engagement_unit_test.py
+if %ERRORLEVEL% NEQ 0 GOTO END
 
-REM echo "Running Environment integration tests"
-REM python tests/Environment_unit_test.py 
-REM if %ERRORLEVEL% NEQ 0 GOTO END
+echo "Running Environment integration tests"
+python tests/Environment_unit_test.py 
+if %ERRORLEVEL% NEQ 0 GOTO END
 
-REM echo "Running Finding integration tests"
-REM python tests/Finding_unit_test.py
-REM if %ERRORLEVEL% NEQ 0 GOTO END
+echo "Running Finding integration tests"
+python tests/Finding_unit_test.py
+if %ERRORLEVEL% NEQ 0 GOTO END
 
 echo "Running Test integration tests"
 python tests/Test_unit_test.py
@@ -47,9 +47,11 @@ echo "Running Check Status test"
 python tests/check_status.py
 if %ERRORLEVEL% NEQ 0 GOTO END
 
-echo "Running Product integration tests"
-python tests/Product_unit_test.py
+echo "Running Dedupe integration tests"
+python tests/dedupe_unit_test.py
 if %ERRORLEVEL% NEQ 0 GOTO END
+
+
 
 REM REM  The below tests are commented out because they are still an unstable work in progress
 REM REM Once Ready they can be uncommented.

@@ -32,13 +32,13 @@ class GitleaksJSONParser(object):
             description += "**Author:** " + issue["author"] + " <" + issue["email"] + ">" + "\n"
             description += "**Reason:** " + reason + "\n"
             description += "**Path:** " + file_path + "\n"
-            description += "\n**String Found:**\n" + issue["line"] + "\n"
+            description += "\n**String Found:**\n" + issue["line"].replace(issue["offender"], "REDACTED") + "\n"
 
             severity = "High"
             if "Github" in reason or "AWS" in reason or "Heroku" in reason:
                 severity = "Critical"
 
-            dupe_key = hashlib.md5((file_path + issue["line"] + issue["commit"]).encode("utf-8")).hexdigest()
+            dupe_key = hashlib.md5((issue["offender"]).encode("utf-8")).hexdigest()
 
             if dupe_key not in self.dupes:
                 self.dupes[dupe_key] = Finding(title=titleText,

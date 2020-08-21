@@ -11,7 +11,19 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 class FindingTest(BaseTestCase):
 
-    def test_list_finding(self):
+    def test_list_findings_all(self):
+        return self.test_list_findings('finding/all')
+
+    def test_list_findings_closed(self):
+        return self.test_list_findings('finding/closed')
+
+    def test_list_findings_accepted(self):
+        return self.test_list_findings('finding/accepted')
+
+    def test_list_findings_open(self):
+        return self.test_list_findings('finding/open')
+
+    def test_list_findings(self, suffix):
         # bulk edit dropdown menu
         driver = self.login_page()
         driver.get(self.base_url + "finding")
@@ -36,6 +48,7 @@ class FindingTest(BaseTestCase):
         self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_out_of_scope").is_enabled(), True)
         self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_is_Mitigated").is_enabled(), True)
 
+    @on_exception_html_source_logger
     def test_edit_finding(self):
         # The Name of the Finding created by test_add_product_finding => 'App Vulnerable to XSS'
         # Test To Add Finding To product
@@ -196,8 +209,6 @@ class FindingTest(BaseTestCase):
         driver = self.login_page()
         # Navigate to All Finding page
         print("\nListing findings \n")
-        driver.get(self.base_url + "finding")
-        self.assertNoConsoleErrors()
         self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
         driver.find_element_by_link_text("App Vulnerable to XSS").click()
@@ -262,7 +273,6 @@ class FindingTest(BaseTestCase):
         with WaitForPageLoad(driver, timeout=50):
             driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
         # Query the site to determine if the finding has been added
-
         # print("\n\nDebug Print Log: findingTxt fetched: {}\n".format(productTxt))
         # print("Checking for '.*ZAP Scan processed, a total of 4 findings were processed.*'")
         # Assert ot the query to dtermine status of failure
@@ -292,19 +302,23 @@ class FindingTest(BaseTestCase):
         # check that user was redirect back to url where it came from based on return_url
 
 
-def add_finding_tests_to_suite(suite, jira=False, github=False):
+def add_finding_tests_to_suite(suite, jira=False, github=False, block_execution=False):
     if jira:
         suite.addTest(FindingTest('enable_jira'))
     if github:
         suite.addTest(FindingTest('enable_github'))
-
-    # suite.addTest(FindingTest('test_delete_finding_template'))
+    if block_execution:
+        suite.addTest(FindingTest('enable_block_execution'))
 
     # Add each test the the suite to be run
     # success and failure is output by the test
     suite.addTest(ProductTest('test_create_product'))
     suite.addTest(ProductTest('test_add_product_finding'))
-    suite.addTest(FindingTest('test_list_finding'))
+    # TODO add some more findings with different statuses
+    suite.addTest(FindingTest('test_list_findings_all'))
+    suite.addTest(FindingTest('test_list_findings_closed'))
+    suite.addTest(FindingTest('test_list_findings_accepted'))
+    suite.addTest(FindingTest('test_list_findings_open'))
     suite.addTest(FindingTest('test_edit_finding'))
     suite.addTest(FindingTest('test_add_image'))
     suite.addTest(FindingTest('test_delete_image'))
@@ -327,8 +341,8 @@ def add_finding_tests_to_suite(suite, jira=False, github=False):
 
 def suite():
     suite = unittest.TestSuite()
-    add_finding_tests_to_suite(suite, jira=False, github=False)
-    add_finding_tests_to_suite(suite, jira=True, github=True)
+    add_finding_tests_to_suite(suite, jira=False, github=False, block_execution=False)
+    add_finding_tests_to_suite(suite, jira=True, github=True, block_execution=True)
     return suite
 
 

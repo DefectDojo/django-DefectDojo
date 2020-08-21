@@ -31,6 +31,11 @@ class DependencyCheckParser(object):
 
         title = '{0} | {1}'.format(filename, name)
         cve = name[:28]
+        if cve and not cve.startswith('CVE'):
+            # for vulnerability sources which have a CVE, it is the start of the 'name'.
+            # for other sources, we have to set it to None
+            cve = None
+
         # Use CWE-1035 as fallback
         cwe = 1035  # Vulnerable Third Party Component
         if cwe_field:
