@@ -2,6 +2,10 @@
 import unittest
 import sys
 from base_test_class import BaseTestCase
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver import ActionChains
 
 
 class UserTest(BaseTestCase):
@@ -122,6 +126,10 @@ def suite():
     suite.addTest(UserTest('test_create_user'))
     suite.addTest(UserTest('test_user_edit_permissions'))
     suite.addTest(UserTest('test_user_delete'))
+
+    # not really for the user we created, but still related to user settings
+    suite.addTest(UserTest('test_user_notifications_change'))
+
     return suite
 
 

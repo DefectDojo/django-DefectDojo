@@ -754,6 +754,10 @@ table.centered th {
     text-align: center;
 }
 
+table.centered td {
+    text-align: center;
+}
+
 .text-critical {
     color: #d9534f
 }
@@ -832,6 +836,10 @@ h4.finding-title {
 
 .panel-heading span.clickable {
     cursor: pointer;
+}
+
+#test-pulldown .popover-content {
+    color: #000000;
 }
 
 span.endpoint_product {
@@ -1488,7 +1496,12 @@ div.tags .label {
 }
 
 .amber-color {
-  background: #ffc107
+  background: #ffc107;
+}
+
+.amber-color-with-padding {
+  background: #ffc107;
+  padding: .2em .6em .3em;
 }
 
 .tag-label:link {

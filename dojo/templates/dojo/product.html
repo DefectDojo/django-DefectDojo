@@ -346,8 +346,15 @@
                     { "data": "product_type" },
                 ],
                 order: [],
-                "columnDefs": [
-                    { "orderable": false, "targets": [0] }
+                columnDefs: [
+                    { 
+                        "orderable": false,
+                        "targets": [0]
+                    },
+                    {
+                        targets: [0],
+                        className: 'noVis'
+                    }
                 ],
                 dom: 'Bfrtip',
                 paging: false,

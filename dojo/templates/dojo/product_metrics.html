@@ -109,147 +109,13 @@
                     <div class="panel-heading">
                         <div class="row">
                             <div class="col-xs-12">
-                                <i class="fa fa-bug fa-2x"></i>
-
-                                <div class="pull-right inline-block text-right">
-                                    <span class=" fa-2x">{{ inactive_findings|length }}</span>
-                                    <span><a href="{% url 'product_inactive_findings' prod.id %}?test__engagement__product={{ prod.id }}">Inactive
-                                        Finding{{ inactive_findings|length|pluralize }} <i
-                                                class="fa fa-arrow-circle-right"></i></a>
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="panel-body">
-                        <div id="inactive_findings" class="graph"></div>
-                    </div>
-                    <div class="panel-footer">
-                        <i title="Ingested since {{ start_date }}"
-                           class="text-info fa fa-info-circle"></i>
-                        <small>Ingested since {{ start_date|date:"D., M. d, Y" }}</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <div class="row">
-                            <div class="col-xs-12">
-                                <i class="fa fa-bug fa-2x"></i>
-
-                                <div class="pull-right inline-block text-right">
-                                    <span class=" fa-2x">{{ open_findings|length }}</span>
-                                    <span><a href="{% url 'product_open_findings' prod.id %}?test__engagement__product={{ prod.id }}">Open
-                                        Finding{{ open_findings|length|pluralize }} <i
-                                                class="fa fa-arrow-circle-right"></i></a>
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="panel-body">
-                        <div id="open_findings" class="graph"></div>
-                    </div>
-                    <div class="panel-footer">
-                        <i title="Accepted since {{ start_date }}"
-                           class="text-info fa fa-info-circle"></i>
-                        <small>Opened since {{ start_date|date:"D., M. d, Y" }}</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <div class="row">
-                            <div class="col-xs-12">
-                                <i class="fa fa-fire-extinguisher fa-2x"></i>
-
-                                <div class="text-right pull-right">
-                                    <span class="fa-2x">{{ closed_findings|length }}</span>
-                                    <span><a href="{% url 'closed_findings' %}?test__engagement__product={{ prod.id }}">Closed
-                                        Finding{{ closed_findings|length|pluralize }} <i
-                                                class="fa fa-arrow-circle-right"></i></a>
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="panel-body">
-                        <div id="closed_findings" class="graph"></div>
-                    </div>
-                    <div class="panel-footer">
-                        <i title="Accepted since {{ start_date }}"
-                           class="text-info fa fa-info-circle"></i>
-                        <small>Closed since {{ start_date|date:"D., M. d, Y" }}</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <div class="row">
-                            <div class="col-xs-12">
-                                <i class="fa fa-fire-extinguisher fa-2x"></i>
-
-                                <div class="text-right pull-right">
-                                    <span class="fa-2x">{{ false_positive_findings|length }}</span>
-                                    <span><a href="{% url 'product_false_positive_findings' prod.id %}?test__engagement__product={{ prod.id }}">False-postive
-                                        Finding{{ false_positive_findings|length|pluralize }} <i
-                                                class="fa fa-arrow-circle-right"></i></a>
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="panel-body">
-                        <div id="false_positive_findings" class="graph"></div>
-                    </div>
-                    <div class="panel-footer">
-                        <i title="Flagged since {{ start_date }}"
-                           class="text-info fa fa-info-circle"></i>
-                        <small>Flagged since {{ start_date|date:"D., M. d, Y" }}</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <div class="row">
-                            <div class="col-xs-12">
-                                <i class="fa fa-check fa-2x"></i>
-
-                                <div class="pull-right text-right">
-                                    <span class="fa-2x">{{ accepted_findings|length }}</span>
-                                    <span><a
-                                            href="{% url 'accepted_findings' %}?test__engagement__product={{ prod.id }}">Accepted
-                                    Findings <i class="fa fa-arrow-circle-right"></i></a>
-                                </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="panel-body">
-                        <div id="reported_findings" class="graph"></div>
-                    </div>
-                    <div class="panel-footer">
-                        <i title="Accepted since {{ start_date }}"
-                           class="text-info fa fa-info-circle"></i>
-                        <small>Accepted since {{ start_date|date:"D., M. d, Y" }}</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <div class="row">
-                            <div class="col-xs-12">
                                 <i class="fa fa-crosshairs fa-2x"></i>
 
                                 <div class="pull-right inline-block text-right">
                                     <span class=" fa-2x">{{ verified_findings|length }}</span>
                                     <span><a
-                                            href="{% url 'product_verified_findings' prod.id %}?test__engagement__product={{ prod.id }}">Verified
+                                            href="{% url 'product_verified_findings' prod.id %}?test__engagement__product={{ prod.id }}"
+                                            title="Findings that are open/active and verified">Verified
                                         Finding{{ verified_findings|length|pluralize }} <i
                                                 class="fa fa-arrow-circle-right"></i></a>
                                     </span>
@@ -272,12 +138,125 @@
                     <div class="panel-heading">
                         <div class="row">
                             <div class="col-xs-12">
+                                <i class="fa fa-bug fa-2x"></i>
+
+                                <div class="pull-right inline-block text-right">
+                                    <span class=" fa-2x">{{ open_findings|length }}</span>
+                                    <span><a href="{% url 'product_open_findings' prod.id %}?test__engagement__product={{ prod.id }}"
+                                        title="Findings that are open/active, but not (yet) verified">Open
+                                        Finding{{ open_findings|length|pluralize }} <i
+                                                class="fa fa-arrow-circle-right"></i></a>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div id="open_findings" class="graph"></div>
+                    </div>
+                    <div class="panel-footer">
+                        <i title="Opened since {{ start_date }}"
+                           class="text-info fa fa-info-circle"></i>
+                        <small>Opened since {{ start_date|date:"D., M. d, Y" }}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <i class="fa fa-check fa-2x"></i>
+
+                                <div class="pull-right text-right">
+                                    <span class="fa-2x">{{ accepted_findings|length }}</span>
+                                    <span><a
+                                            href="{% url 'accepted_findings' %}?test__engagement__product={{ prod.id }}"
+                                            title="Findings that have been accepted in a risk acceptance.">Risk Accepted
+                                    Findings <i class="fa fa-arrow-circle-right"></i></a>
+                                </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div id="accepted_findings" class="graph"></div>
+                    </div>
+                    <div class="panel-footer">
+                        <i title="Accepted since {{ start_date }}"
+                           class="text-info fa fa-info-circle"></i>
+                        <small>Risk Accepted since {{ start_date|date:"D., M. d, Y" }}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <i class="fa fa-fire-extinguisher fa-2x"></i>
+
+                                <div class="text-right pull-right">
+                                    <span class="fa-2x">{{ closed_findings|length }}</span>
+                                    <span><a href="{% url 'closed_findings' %}?test__engagement__product={{ prod.id }}"
+                                             title="Findings that are closed and mitigated.">Closed
+                                        Finding{{ closed_findings|length|pluralize }} <i
+                                                class="fa fa-arrow-circle-right"></i></a>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div id="closed_findings" class="graph"></div>
+                    </div>
+                    <div class="panel-footer">
+                        <i title="Closed since {{ start_date }}"
+                           class="text-info fa fa-info-circle"></i>
+                        <small>Closed since {{ start_date|date:"D., M. d, Y" }}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <i class="fa fa-fire-extinguisher fa-2x"></i>
+
+                                <div class="text-right pull-right">
+                                    <span class="fa-2x">{{ false_positive_findings|length }}</span>
+                                    <span><a href="{% url 'product_false_positive_findings' prod.id %}?test__engagement__product={{ prod.id }}"
+                                             title="Findings that are marked as false postive.">False-postive
+                                        Finding{{ false_positive_findings|length|pluralize }} <i
+                                                class="fa fa-arrow-circle-right"></i></a>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div id="false_positive_findings" class="graph"></div>
+                    </div>
+                    <div class="panel-footer">
+                        <i title="Flagged since {{ start_date }}"
+                           class="text-info fa fa-info-circle"></i>
+                        <small>Flagged since {{ start_date|date:"D., M. d, Y" }}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-12">
                                 <i class="fa fa-fire-extinguisher fa-2x"></i>
 
                                 <div class="pull-right inline-block text-right">
                                     <span class=" fa-2x">{{ out_of_scope_findings|length }}</span>
                                     <span><a
-                                            href="{% url 'product_out_of_scope_findings' prod.id %}?test__engagement__product={{ prod.id }}">Out Of Scope
+                                            href="{% url 'product_out_of_scope_findings' prod.id %}?test__engagement__product={{ prod.id }}"
+                                            title="Findings that are marked as out of scope.">Out Of Scope
                                         Finding{{ out_of_scope_findings|length|pluralize }} <i
                                                 class="fa fa-arrow-circle-right"></i></a>
                                     </span>
@@ -295,8 +274,64 @@
                     </div>
                 </div>
             </div>
-          </div>
-      </div>
+            <div class="col-md-3">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <i class="fa fa-bullseye fa-2x"></i>
+
+                                <div class="text-right pull-right">
+                                    <span class="fa-2x">{{ all_findings|length }}</span>
+                                    <span><a href="{% url 'product_false_positive_findings' prod.id %}?test__engagement__product={{ prod.id }}"
+                                            title="All findings.">Total 
+                                        Finding{{ all_findings|length|pluralize }} <i
+                                                class="fa fa-arrow-circle-right"></i></a>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div id="all_findings" class="graph"></div>
+                    </div>
+                    <div class="panel-footer">
+                        <i title="Since {{ start_date }}"
+                           class="text-info fa fa-info-circle"></i>
+                        <small>Since {{ start_date|date:"D., M. d, Y" }}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <i class="fa fa-bug fa-2x"></i>
+
+                                <div class="pull-right inline-block text-right">
+                                    <span class=" fa-2x">{{ inactive_findings|length }}</span>
+                                    <span><a href="{% url 'product_inactive_findings' prod.id %}?test__engagement__product={{ prod.id }}"
+                                             title="Findings that are not active but not mitigated for some reason">Inactive
+                                        Finding{{ inactive_findings|length|pluralize }} <i
+                                                class="fa fa-arrow-circle-right"></i></a>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div id="inactive_findings" class="graph"></div>
+                    </div>
+                    <div class="panel-footer">
+                        <i title="Ingested since {{ start_date }}"
+                           class="text-info fa fa-info-circle"></i>
+                        <small>Ingested since {{ start_date|date:"D., M. d, Y" }}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="panel panel-default">
         <div class="panel-heading tight">
@@ -483,11 +518,9 @@
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
-    </div>
-
+</div>
 {% endblock %}
 {% block postscript %}
     <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
@@ -541,6 +574,7 @@
             closed_findings();
             false_positive_findings();
             out_of_scope_findings();
+            all_findings();
             new_findings();
             open_close_weekly();
             severity_weekly();
@@ -656,7 +690,7 @@
                 }
             ];
 
-            $.plot("#reported_findings", data, {
+            $.plot("#accepted_findings", data, {
                 series: {
                     stack: true,
                     bars: {
@@ -1340,6 +1374,138 @@
                 xaxis: {
                     ticks: ticks,
                 },
+            });
+        }
+        ;
+
+        function all_findings() {
+            var critical = 0;
+            var high = 0;
+            var medium = 0;
+            var low = 0;
+            var info = 0;
+            var ticks = [
+                [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
+            ];
+
+            {% for f in all_findings %}
+                {% if f.severity == 'Critical' %}
+                    critical += 1;
+                {% elif f.severity == 'High' %}
+                    high += 1;
+                {% elif f.severity == 'Medium' %}
+                    medium += 1;
+                {% elif f.severity == 'Low' %}
+                    low += 1;
+                {% elif f.severity == 'Info' %}
+                    info += 1;
+                {% endif %}
+            {% endfor %}
+
+            var d1 = [
+                [0, critical],
+            ];
+            var d2 = [
+                [1, high],
+            ];
+            var d3 = [
+                [2, medium],
+            ];
+            var d4 = [
+                [3, low],
+            ];
+            var d5 = [
+                [4, info],
+            ];
+
+            var data = [
+                {
+                    label: "Critical",
+                    data: d1,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 1,
+                        fillColor: "#d9534f"
+                    },
+                    color: "#d9534f"
+                },
+                {
+                    label: "High",
+                    data: d2,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 2,
+                        fillColor: "#f0ad4e"
+                    },
+                    color: "#f0ad4e"
+                },
+                {
+                    label: "Medium",
+                    data: d3,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 3,
+                        fillColor: "#f0de28"
+                    },
+                    color: "#f0de28"
+                },
+                {
+                    label: "Low",
+                    data: d4,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 4,
+                        fillColor: "#337ab7"
+                    },
+                    color: "#337ab7"
+                },
+                {
+                    label: "info",
+                    data: d5,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 4,
+                        fillColor: "#80699B"
+                    },
+                    color: "#80699B"
+                }
+            ];
+
+            $.plot("#all_findings", data, {
+                series: {
+                    stack: true,
+                    bars: {
+                        show: true,
+                        barWidth: .9,
+                        'align': "center",
+                    },
+
+                },
+                grid: {
+                    hoverable: false,
+                    borderWidth: 1,
+                    borderColor: '#e7e7e7',
+
+                },
+                tooltip: false,
+                legend: {
+                    show: false,
+                    position: "ne"
+                },
+                xaxis: {
+                    ticks: ticks,
+                },
+
             });
         }
         ;

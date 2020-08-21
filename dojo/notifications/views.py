@@ -9,13 +9,12 @@ from dojo.models import Notifications
 from dojo.utils import add_breadcrumb
 from dojo.forms import NotificationsForm
 
-
 logger = logging.getLogger(__name__)
 
 
 def personal_notifications(request):
     try:
-        notifications_obj = Notifications.objects.get(user=request.user)
+        notifications_obj = Notifications.objects.get(user=request.user, product__isnull=True)
     except:
         notifications_obj = Notifications(user=request.user)
 
@@ -30,16 +29,18 @@ def personal_notifications(request):
                                  extra_tags='alert-success')
 
     add_breadcrumb(title="Personal notification settings", top_level=False, request=request)
+
     return render(request, 'dojo/notifications.html',
                   {'form': form,
                    'scope': 'personal',
-                   'admin': request.user.is_superuser})
+                   'admin': request.user.is_superuser
+                   })
 
 
 @user_passes_test(lambda u: u.is_superuser)
-def global_notifications(request):
+def system_notifications(request):
     try:
-        notifications_obj = Notifications.objects.get(user=None)
+        notifications_obj = Notifications.objects.get(user=None, product__isnull=True)
     except:
         notifications_obj = Notifications(user=None)
 
@@ -53,8 +54,8 @@ def global_notifications(request):
                                  'Settings saved.',
                                  extra_tags='alert-success')
 
-    add_breadcrumb(title="Global notification settings", top_level=False, request=request)
+    add_breadcrumb(title="System notification settings", top_level=False, request=request)
     return render(request, 'dojo/notifications.html',
                   {'form': form,
-                   'scope': 'global',
+                   'scope': 'system',
                    'admin': request.user.is_superuser})
