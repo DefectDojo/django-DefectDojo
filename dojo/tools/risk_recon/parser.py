@@ -37,14 +37,17 @@ class RiskReconParser(object):
             findingdetail += '**Value:** ' + item.get('finding_data_value') + '\n'
             findingdetail += '**Hosting Provider:** ' + item.get('hosting_provider') + '\n'
             findingdetail += '**Host Name:** ' + item.get('host_name') + '\n'
+            findingdetail += '**Security Domain:** ' + item.get('security_domain') + '\n'
+            findingdetail += '**Security Criteria:** ' + item.get('security_criteria') + '\n'
             findingdetail += '**Asset Value:** ' + item.get('asset_value') + '\n'
             findingdetail += '**Country:** ' + item.get('country_name') + '\n'
             findingdetail += '**Priority:** ' + item.get('priority') + '\n'
+            findingdetail += '**First Seen:** ' + item.get('first_seen') + '\n'
 
             sev = item.get('severity', "").capitalize()
             sev = "Info" if not sev else sev
 
-            tags = item.get('security_domain') + ', ' + item.get('security_criteria')
+            tags = item.get('security_domain')[:20] + ', ' + item.get('security_criteria')[:20]
 
             dupe_key = title + '|' + tags + '|' + findingdetail
 
