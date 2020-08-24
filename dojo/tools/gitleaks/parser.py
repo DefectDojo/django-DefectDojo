@@ -23,6 +23,7 @@ class GitleaksJSONParser(object):
         data = filename.read()
 
         for issue in self.parse_json(data):
+            line = None
             file_path = issue["file"]
             reason = issue["rule"]
             titleText = "Hard Coded " + reason + " in: " + file_path
@@ -32,13 +33,18 @@ class GitleaksJSONParser(object):
             description += "**Author:** " + issue["author"] + " <" + issue["email"] + ">" + "\n"
             description += "**Reason:** " + reason + "\n"
             description += "**Path:** " + file_path + "\n"
-            description += "\n**String Found:**\n" + issue["line"] + "\n"
+            if "lineNumber" in issue:
+                description += "**Line:** %i\n" % issue["lineNumber"]
+                line = issue["lineNumber"]
+            if "operation" in issue:
+                description += "**Operation:** " + issue["operation"] + "\n"
+            description += "\n**String Found:**\n" + issue["line"].replace(issue["offender"], "REDACTED") + "\n"
 
             severity = "High"
             if "Github" in reason or "AWS" in reason or "Heroku" in reason:
                 severity = "Critical"
 
-            dupe_key = hashlib.md5((file_path + issue["line"] + issue["commit"]).encode("utf-8")).hexdigest()
+            dupe_key = hashlib.md5((issue["offender"]).encode("utf-8")).hexdigest()
 
             if dupe_key not in self.dupes:
                 self.dupes[dupe_key] = Finding(title=titleText,
@@ -52,6 +58,7 @@ class GitleaksJSONParser(object):
                                   mitigation="Secrets and passwords should be stored in a secure vault and/or secure storage.",
                                   impact="This weakness can lead to the exposure of resources or functionality to unintended actors, possibly providing attackers with sensitive information or even execute arbitrary code.",
                                   file_path=file_path,
+                                  line=line,
                                   dynamic_finding=False,
                                   static_finding=True)
         self.items = list(self.dupes.values())

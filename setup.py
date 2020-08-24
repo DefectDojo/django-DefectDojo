@@ -4,12 +4,12 @@ from setuptools import setup
 
 setup(
     name='DefectDojo',
-    version='1.7.0-dev',
+    version='1.8.0-dev',
     author='Greg Anderson',
     description="Tool for managing vulnerability engagements",
     install_requires=[
         'defusedxml',
-        'Django==2.2.14',
+        'Django==2.2.15',
         'django-auditlog==0.4.7',
         'django-custom-field',
         'django-filter==2.3.0',
@@ -24,7 +24,7 @@ setup(
         'django-tastypie-swagger',
         'django-tastypie>=0.12.2',
         'django-rest-swagger==2.1.2',
-        'djangorestframework==3.11.0',
+        'djangorestframework==3.11.1',
         'django-environ==0.4.5',
         'django-axes',
         'gunicorn>=19.1.1',

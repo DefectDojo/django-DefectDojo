@@ -650,6 +650,18 @@
                                            '<i class="fa fa-angle-right"></i></a></li>');
             });
         }
+
+        $("#id_jiraform-jira_issue").on('paste', function(e) {
+            var clipboardData = e.clipboardData || e.originalEvent.clipboardData || window.clipboardData;
+            var pastedData = clipboardData.getData('text');
+
+            $this = $(this)
+            // if someone entered/pasted a full URL, we strip evertyhing until last '/'
+            setTimeout(function (elem) {
+                $this.val($this.val().substring($this.val().lastIndexOf("/") + 1));
+            }, 100);
+        });
+
     });
 </script>
 

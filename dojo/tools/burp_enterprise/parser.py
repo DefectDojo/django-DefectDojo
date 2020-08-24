@@ -57,8 +57,8 @@ class BurpEnterpriseHtmlParser(object):
                     s += self.get_content(elem)
         return s
 
-    def get_items(self, tree):
-        # Check that there is at least one vulnerability (the vulnerabilities table is absent when no vuln are found)
+    # Get the endpoints and severities associated with each vulnerability
+    def pre_allocate_items(self, tree):
         items = list()
         endpoint_text = tree.xpath("/html/body/div/div[contains(@class, 'section')]/h1")
         severities = tree.xpath("/html/body/div/div[contains(@class, 'section')]/table[contains(@class, 'issue-table')]/tbody")
@@ -88,10 +88,16 @@ class BurpEnterpriseHtmlParser(object):
                     vuln['CWE'] = ''
                     vuln['Response'] = ''
                     vuln['Request'] = ''
-                    vuln['Endpoint'] = url + endpoint
+                    vuln['Endpoint'] = [url + endpoint]
+                    vuln['URL'] = url
                     items.append(vuln)
+        return items
 
+    def get_items(self, tree):
+        # Check that there is at least one vulnerability (the vulnerabilities table is absent when no vuln are found)
+        items = self.pre_allocate_items(tree)
         vulns = tree.xpath("/html/body/div/div[contains(@class, 'section details')]/div[contains(@class, 'issue-container')]")
+
         if(len(vulns) > 0):
             dict_index = 0
             description = ['Issue detail:', 'Issue description']
@@ -104,10 +110,14 @@ class BurpEnterpriseHtmlParser(object):
             for issue in vulns:
                 elems = list(issue.iterchildren())
                 curr_vuln = items[dict_index]
-                if vuln is None or curr_vuln['Endpoint'] != vuln['Endpoint']:
+                if vuln is None or (curr_vuln['Title'] != vuln['Title'] or curr_vuln['URL'] != vuln['URL']):
                     vuln = curr_vuln
                     merge = False
                 else:
+                    if curr_vuln['Endpoint'][0] not in vuln['Endpoint']:
+                        vuln_list = vuln['Endpoint']
+                        vuln_list.append(curr_vuln['Endpoint'][0])
+                        vuln['Endpoint'] = vuln_list
                     merge = True
 
                 for index in range(3, len(elems), 2):
@@ -118,7 +128,8 @@ class BurpEnterpriseHtmlParser(object):
                     # Description
                     if primary in description:
                         if merge:
-                            vuln['Description'] = vuln['Description'] + field + '\n\n'
+                            if field != vuln['Description'].split('\n')[1]:
+                                vuln['Description'] = vuln['Description'] + field + '\n\n'
                         else:
                             vuln['Description'] = vuln['Description'] + details
                     # Impact
@@ -188,26 +199,26 @@ class BurpEnterpriseHtmlParser(object):
                     unsaved_req_resp.append({"req": requests[index], "resp": responses[index]})
                 find.unsaved_req_resp = unsaved_req_resp
 
-            url = details.get('Endpoint')
-            parsedUrl = urlparse(url)
-            protocol = parsedUrl.scheme
-            query = parsedUrl.query
-            fragment = parsedUrl.fragment
-            path = parsedUrl.path
-            port = ""  # Set port to empty string by default
-            # Split the returned network address into host and
-            try:  # If there is port number attached to host address
-                host, port = parsedUrl.netloc.split(':')
-            except:  # there's no port attached to address
-                host = parsedUrl.netloc
-
             find.unsaved_endpoints = list()
             self.dupes[aggregateKeys] = find
 
-            find.unsaved_endpoints.append(Endpoint(
-                    host=host, port=port,
-                    path=path,
-                    protocol=protocol,
-                    query=query, fragment=fragment))
+            for url in details.get('Endpoint'):
+                parsedUrl = urlparse(url)
+                protocol = parsedUrl.scheme
+                query = parsedUrl.query
+                fragment = parsedUrl.fragment
+                path = parsedUrl.path
+                port = ""  # Set port to empty string by default
+                # Split the returned network address into host and
+                try:  # If there is port number attached to host address
+                    host, port = parsedUrl.netloc.split(':')
+                except:  # there's no port attached to address
+                    host = parsedUrl.netloc
+
+                find.unsaved_endpoints.append(Endpoint(
+                        host=host, port=port,
+                        path=path,
+                        protocol=protocol,
+                        query=query, fragment=fragment))
 
         return list(self.dupes.values())
