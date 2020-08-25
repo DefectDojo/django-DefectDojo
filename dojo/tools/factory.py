@@ -86,6 +86,7 @@ from dojo.tools.bugcrowd.parser import BugCrowdCSVParser
 from dojo.tools.huskyci.parser import HuskyCIReportParser
 from dojo.tools.ccvs.parser import CCVSReportParser
 from dojo.tools.awssecurityhub.parser import AwsSecurityFindingFormatParser
+from dojo.tools.risk_recon.parser import RiskReconParser
 
 
 __author__ = 'Jay Paz'
@@ -277,6 +278,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = CCVSReportParser(file, test)
     elif scan_type == 'AWS Security Hub Scan':
         parser = AwsSecurityFindingFormatParser(file, test)
+    elif scan_type == 'Risk Recon API Importer':
+        parser = RiskReconParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 
