@@ -34,7 +34,14 @@ def new_regulation(request):
 @user_passes_test(lambda u: u.is_staff)
 def edit_regulations(request, ttid):
     regulation = Regulation.objects.get(pk=ttid)
-    if request.method == 'POST':
+    if request.method == 'POST' and request.POST.get('delete'):
+        Regulation.objects.filter(pk=ttid).delete()
+        messages.add_message(request,
+                             messages.SUCCESS,
+                             'Regulation Deleted.',
+                             extra_tags='alert-success')
+        return HttpResponseRedirect(reverse('regulations', ))
+    elif request.method == 'POST':
         tform = RegulationForm(request.POST, instance=regulation)
         if tform.is_valid():
             tform.save()
