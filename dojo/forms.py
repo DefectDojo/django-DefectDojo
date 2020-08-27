@@ -1,7 +1,6 @@
 import re
 from datetime import datetime, date
 from urllib.parse import urlsplit, urlunsplit
-
 import pickle
 from crispy_forms.bootstrap import InlineRadios, InlineCheckboxes
 from crispy_forms.helper import FormHelper
@@ -877,11 +876,24 @@ class AddFindingForm(forms.ModelForm):
             'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
     mitigation = forms.CharField(widget=forms.Textarea)
     impact = forms.CharField(widget=forms.Textarea)
+    request = forms.CharField(widget=forms.Textarea, required=False)
+    response = forms.CharField(widget=forms.Textarea, required=False)
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
                                                widget=MultipleSelectWithPopPlusMinus(attrs={'size': '11'}))
     references = forms.CharField(widget=forms.Textarea, required=False)
     is_template = forms.BooleanField(label="Create Template?", required=False,
                                      help_text="A new finding template will be created from this finding.")
+
+    # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
+    field_order = ('title', 'date', 'cwe', 'cve', 'severity', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
+                   'severity_justification', 'endpoints', 'references', 'is_template', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope', 'simple_risk_accept', 'under_defect_review')
+
+    def __init__(self, *args, **kwargs):
+        req_resp = kwargs.pop('req_resp')
+        super(AddFindingForm, self).__init__(*args, **kwargs)
+        if req_resp:
+            self.fields['request'].initial = req_resp[0]
+            self.fields['response'].initial = req_resp[1]
 
     def clean(self):
         # self.fields['endpoints'].queryset = Endpoint.objects.all()
@@ -915,11 +927,24 @@ class AdHocFindingForm(forms.ModelForm):
             'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
     mitigation = forms.CharField(widget=forms.Textarea)
     impact = forms.CharField(widget=forms.Textarea)
+    request = forms.CharField(widget=forms.Textarea, required=False)
+    response = forms.CharField(widget=forms.Textarea, required=False)
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
                                                widget=MultipleSelectWithPopPlusMinus(attrs={'size': '11'}))
     references = forms.CharField(widget=forms.Textarea, required=False)
     is_template = forms.BooleanField(label="Create Template?", required=False,
                                      help_text="A new finding template will be created from this finding.")
+
+    # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
+    field_order = ('title', 'date', 'cwe', 'cve', 'severity', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
+                   'severity_justification', 'endpoints', 'references', 'is_template', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope', 'simple_risk_accept', 'under_defect_review')
+
+    def __init__(self, *args, **kwargs):
+        req_resp = kwargs.pop('req_resp')
+        super(AdHocFindingForm, self).__init__(*args, **kwargs)
+        if req_resp:
+            self.fields['request'].initial = req_resp[0]
+            self.fields['response'].initial = req_resp[1]
 
     def clean(self):
         # self.fields['endpoints'].queryset = Endpoint.objects.all()
@@ -934,7 +959,6 @@ class AdHocFindingForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        order = ('title', 'severity', 'endpoints', 'description', 'impact')
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
                    'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change', 'endpoint_status')
 
@@ -978,6 +1002,8 @@ class FindingForm(forms.ModelForm):
             'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
     mitigation = forms.CharField(widget=forms.Textarea)
     impact = forms.CharField(widget=forms.Textarea)
+    request = forms.CharField(widget=forms.Textarea)
+    response = forms.CharField(widget=forms.Textarea)
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
                                                widget=MultipleSelectWithPopPlusMinus(attrs={'size': '11'}))
     references = forms.CharField(widget=forms.Textarea, required=False)
@@ -991,7 +1017,7 @@ class FindingForm(forms.ModelForm):
     simple_risk_accept = forms.BooleanField(label="Accept Risk (simple)", required=False, help_text="Check to accept this risk and deactivate the finding. Uncheck to unaccept the risk. Use full risk acceptance from the dropdown menu if you need afvanced settings such as an expiry date.")
 
     # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
-    field_order = ('title', 'date', 'cwe', 'cve', 'severity', 'description', 'mitigation', 'impact', 'steps_to_reproduce',
+    field_order = ('title', 'date', 'cwe', 'cve', 'severity', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
                    'severity_justification', 'endpoints', 'references', 'is_template', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope', 'simple_risk_accept', 'under_defect_review')
 
     def __init__(self, *args, **kwargs):
@@ -1003,10 +1029,14 @@ class FindingForm(forms.ModelForm):
         else:
             tags = Tag.objects.usage_for_model(Finding)
 
+        req_resp = kwargs.pop('req_resp')
         t = [(tag.name, tag.name) for tag in tags]
         super(FindingForm, self).__init__(*args, **kwargs)
         self.fields['tags'].widget.choices = t
         self.fields['simple_risk_accept'].initial = True if self.instance.is_simple_risk_accepted else False
+        if req_resp:
+            self.fields['request'].initial = req_resp[0]
+            self.fields['response'].initial = req_resp[1]
 
     def clean(self):
         cleaned_data = super(FindingForm, self).clean()
