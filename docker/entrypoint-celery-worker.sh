@@ -10,9 +10,15 @@ do
 done
 echo
 
+if [ "${DD_CELERY_WORKER_POOL_TYPE}" == "prefork" ]; then
+  EXTRA_PARAMS="--autoscale=${DD_CELERY_WORKER_AUTOSCALE_MAX},${DD_CELERY_WORKER_AUTOSCALE_MIN} \
+    --prefetch-multiplier=${DD_CELERY_WORKER_PREFETCH_MULTIPLIER} \ "
+fi
+
 C_FORCE_ROOT=true exec celery \
   --app=dojo \
   worker \
   --loglevel="${DD_CELERY_LOG_LEVEL}" \
-  --pool=solo \
-  --concurrency=1
+  --pool="${DD_CELERY_WORKER_POOL_TYPE}" \
+  ${EXTRA_PARAMS}
+  --concurrency=${DD_CELERY_WORKER_CONCURRENCY}
