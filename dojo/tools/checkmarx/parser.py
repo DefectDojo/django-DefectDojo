@@ -97,7 +97,7 @@ class CheckmarxXMLParser(object):
         description, lastPathnode = self.get_description_file_name_aggregated(query, result)
         sinkFilename = lastPathnode.find('FileName').text
         title = "{} ({})".format(titleStart, ntpath.basename(sinkFilename))
-
+        false_p = result.get('FalsePositive')
         aggregateKeys = "{}{}{}{}".format(categories, cwe, name, sinkFilename)
 
         if not(aggregateKeys in dupes):
@@ -107,7 +107,8 @@ class CheckmarxXMLParser(object):
                            test=self.test,
                            active=False,
                            verified=False,
-                           false_p=result.get('FalsePositive') == "True",
+                           # this may be overwritten later by another member of the aggregate, see "else" below
+                           false_p=(false_p == "True"),
                            # Concatenates the query information with this specific finding information
                            description=findingdetail + '-----\n' + description,
                            severity=sev,
@@ -127,6 +128,9 @@ class CheckmarxXMLParser(object):
             find = dupes[aggregateKeys]
             find.description = "{}\n-----\n{}".format(find.description, description)
             find.nb_occurences = find.nb_occurences + 1
+            # If at least one of the findings in the aggregate is exploitable, the defectdojo finding should not be "false positive"
+            if(false_p == "False"):
+                dupes[aggregateKeys].false_p = False
 
     # Iterate over function calls / assignments to extract finding description and last pathnode
     def get_description_file_name_aggregated(self, query, result):
