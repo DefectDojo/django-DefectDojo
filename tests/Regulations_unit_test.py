@@ -36,31 +36,32 @@ class RegulationTest(BaseTestCase):
         driver.find_element_by_css_selector(".col-sm-offset-2 > .btn").click()
 
         self.assertTrue(self.is_success_message_present(text='Regulation Successfully Created.'))
-    '''
-    def test_edit_environment(self):
+
+    def test_edit_regulation(self):
         driver = self.login_page()
-        driver.get(self.base_url + "dev_env")
-        driver.find_element_by_link_text("environment test").click()
+        driver.get(self.base_url + "regulations")
+        driver.find_element_by_link_text("Regulations").click()
+        driver.find_element_by_link_text("PSA_TEST").click()
         driver.find_element_by_id("id_name").clear()
-        driver.find_element_by_id("id_name").send_keys("Edited environment test")
-        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+        driver.find_element_by_id("id_name").send_keys("Edited PSA test")
+        driver.find_element_by_id("submit").click()
+        self.assertTrue(self.is_success_message_present(text='Regulation Successfully Updated.'))
 
-        self.assertTrue(self.is_success_message_present(text='Regulation Successfully Created.'))
-
-    def test_delete_environment(self):
+    def test_delete_regulation(self):
         driver = self.login_page()
-        driver.get(self.base_url + "dev_env")
-        driver.find_element_by_link_text("Edited environment test").click()
-        driver.find_element_by_css_selector("input.btn.btn-danger").click()
+        driver.get(self.base_url + "regulations")
+        driver.find_element_by_link_text("Regulations").click()
+        driver.find_element_by_link_text("Edited PSA test").click()
+        driver.find_element_by_id("delete").click()
 
-        self.assertTrue(self.is_success_message_present(text='Environment deleted successfully.'))
-    '''
+        self.assertTrue(self.is_success_message_present(text='Regulation Deleted.'))
+
 
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(RegulationTest('test_create_regulation'))
-    # suite.addTest(EnvironmentTest('test_edit_environment'))
-    # suite.addTest(EnvironmentTest('test_delete_environment'))
+    suite.addTest(RegulationTest('test_edit_regulation'))
+    suite.addTest(RegulationTest('test_delete_regulation'))
     return suite
 
 
