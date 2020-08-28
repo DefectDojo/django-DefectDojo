@@ -1542,40 +1542,6 @@ class Finding(models.Model):
 
         return False
 
-    @property
-    def similar_findings(self):
-        similar = Finding.objects.all()
-
-        if self.test.engagement.deduplication_on_engagement:
-            similar = similar.filter(test__engagement=self.test.engagement)
-        else:
-            similar = similar.filter(test__engagement__product=self.test.engagement.product)
-
-        if self.cve:
-            similar = similar.filter(cve=self.cve)
-        if self.cwe:
-            similar = similar.filter(cwe=self.cwe)
-        if self.file_path:
-            similar = similar.filter(file_path=self.file_path)
-        if self.line:
-            similar = similar.filter(line=self.line)
-        if self.unique_id_from_tool:
-            similar = similar.filter(unique_id_from_tool=self.unique_id_from_tool)
-
-        similar = similar.exclude(id__in=self.duplicate_finding_set())
-        if self.duplicate_finding:
-            similar = similar.exclude(id=self.duplicate_finding.id)
-
-        identical = Finding.objects.all().filter(test__engagement__product=self.test.engagement.product).filter(hash_code=self.hash_code).exclude(pk=self.pk)
-        identical = identical.exclude(id__in=self.duplicate_finding_set())
-        if self.duplicate_finding:
-            identical = identical.exclude(id=self.duplicate_finding.id)
-
-        # TODO: remove this temp testing code Valentijn
-        temp = Finding.objects.all().filter(id__in=[49046, 51314])
-
-        return (similar.exclude(pk=self.pk) | identical | temp)[:10]
-
     def compute_hash_code(self):
         if hasattr(settings, 'HASHCODE_FIELDS_PER_SCANNER') and hasattr(settings, 'HASHCODE_ALLOWS_NULL_CWE') and hasattr(settings, 'HASHCODE_ALLOWED_FIELDS'):
             # Default fields

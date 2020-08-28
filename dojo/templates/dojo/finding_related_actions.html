@@ -3,75 +3,33 @@
 {% load static from staticfiles %}
 
 {% if user|is_authorized_for_change:finding %}
-    {% comment %}
-        logical operator ordering in django is or -> and -> not -> in -> ==, !=, <, >, <=, >=. 
-        parenthesis are not supported.... 
-        and nested ifs would breakt he next elif.... 
-    {% endcomment %}
-    {% if similar_finding.test.engagement != finding_context.test.engagement and (similar_finding.test.engagement.deduplication_on_engagement or finding_context.test.engagement.deduplication_on_engagement) %}
-        <span title="This finding is in a different engagement and deduplication_inside_engagment is enabled here or in that finding">None</span>        
-    {% elif finding_context.duplicate_finding == similar_finding %}
-        {% comment %} Original of the swarm, no actions {% endcomment %}
-        <span title="Use action on another row, or the finding on top of the page to change the Original of the swarm">None</span>
-    {% elif similar_finding.original_finding.all %}
-        <span title="This finding is similar, but is already an original in a different swarm. Remove it from that swarm before you connect it to this swarm.">None</span>
+    {% comment %} {{ similar_finding.related_actions }} {% endcomment %}
+    {% if similar_finding.related_actions.0.action == 'None'%}
+        <span title="{{similar_finding.related_actions.0.reason}}">None</span>
     {% else %}
-        <div class="dropdown">
-            {{ intro }}
-            <a href="#" data-toggle="dropdown">&nbsp;<i class="fa fa-ellipsis-v"></i>&nbsp;</a>
-            <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                {% if similar_finding.duplicate %}
-                    <li role="presentation">
-                        <a href="#" onclick="submit_duplicate_status_action('{% url 'reset_finding_duplicate_status' similar_finding.id %}')">
-                            <i class="fa fa-eraser"></i>
-                            <span title="This will remove the finding from the swarm, effectively marking it no longer as duplicate.">
-                                Reset duplicate status
-                            </span>
-                        </a>
-                    </li>
+    <div class="dropdown">
+        {{ intro }}
+        <a href="#" data-toggle="dropdown">&nbsp;<i class="fa fa-ellipsis-v"></i>&nbsp;</a>
+        <ul class="dropdown-menu dropdown-menu-right" role="menu" id="related_actions_{{similar_finding.id}}">
+        {% for action in similar_finding.related_actions %}
+            <li role="presentation">
+                {% if action.action == 'reset_finding_duplicate_status' %}
+                    <a href="#" onclick="submit_related_action('{% url 'reset_finding_duplicate_status' similar_finding.id %}'); $('#related_actions_{{similar_finding.id}}').dropdown('toggle')">
+                {% elif action.action == 'set_finding_as_original' %}
+                    <a href="#" onclick="submit_related_action('{% url 'set_finding_as_original' finding_id=finding_context.id new_original_id=similar_finding.id %}'); $('#related_actions_{{similar_finding.id}}').dropdown('toggle')">
+                {% elif action.action == 'mark_finding_duplicate' %}
+                    <a href="#" onclick="submit_related_action('{% url 'mark_finding_duplicate' duplicate_id=similar_finding.id original_id=finding_context.id %}'); $('#related_actions_{{similar_finding.id}}').dropdown('toggle')">
                 {% endif %}
-
-                {% if not finding.duplicate or similar_finding.duplicate_finding == finding_context.duplicate_finding %}
-                    {% comment %} Must be in same swarm to become original {% endcomment %}
-                    <li role="presentation">
-                        <a href="#" onclick="submit_duplicate_status_action('{% url 'set_finding_as_original' finding_id=finding_context.id new_original_id=similar_finding.id %}')">
-                            <i class="fa fa-superpowers"></i>
-                            <span title="Sets this finding as the Original for the whole swarm. The existing Original will be downgraded to become a member of the swarm and, togther with the other members, will be marked as duplicate of the new Original.">
-                                Set as original
-                            </span>
-                        </a>
-                    </li>
-                {% endif %}
-
-                {% if not finding.duplicate or similar_finding.duplicate_finding != finding_context.duplicate_finding %}
-                    {% comment %} Similar finding outside swarm {% endcomment %}
-                    <li role="presentation">
-                        <a href="#" onclick="submit_duplicate_status_action('{% url 'mark_finding_duplicate' duplicate_id=similar_finding.id original_id=similar_finding.id %}')">
-                        {% comment %} <a href="#" onclick="$('#mark_as_duplicate_{{similar_finding.id}}').submit();"> {% endcomment %}
-                            <i class="fa fa-copy"></i>
-                            {% if not similar_finding.duplicate %}
-                                <span title="Will mark this finding as duplicate duplicate of the original finding in this swarm, effectively adding it to the swarm.">
-                                    Mark as duplicate
-                                </span>
-                            {% else %}
-                                {% comment %} If duplicate, it is in a different swarm as per parent if {% endcomment %}
-                                <span title="Will mark this finding as duplicate duplicate of the original finding in this swarm, effectively adding it to the swarm and removing it from the other swarm.">
-                                    Mark as duplicate in this swarm
-                                </span>
-                            {% endif %}
-                        </a>
-                    </li>
-                {% endif %}
-
-            {% endif %}
-            </ul>
-   
-            {% comment %} Add all forms, but hidden. Actions controlled in dropdown menu. {% endcomment %}
-            <form method="post" style="display: none" id="duplicate_status_action">
-                {% csrf_token %}
-                <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
-            </form>
-        </div>
+                    <i class="{{ action.action|finding_related_action_classes }}"></i>
+                    <span title="{{ action.reason }}">
+                        {{ action.action|finding_related_action_title }}
+                    </span>
+                </a>
+            </li>
+        {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
 {% else %}
     <span title="You're not authorized to edit this finding">None</span>
 {% endif %}

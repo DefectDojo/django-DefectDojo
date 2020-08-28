@@ -2,10 +2,12 @@
 {% load display_tags %}
 {% load static from staticfiles %}
 <tr>
-    {% if finding_context.duplicate_finding == similar_finding %}
-        <td title="The finding on the top of this page is a duplicate of this so called original finding">Original</td>
-    {% elif similar_finding.duplicate_finding == finding_context.duplicate_finding %}
-        <td title="This finding is a duplicate of the same original above">Swarm member</td>
+    {% if similar_finding.duplicate_finding == finding_context %}
+        <td title="The finding on the top of this page is the original for this related finding">Duplicate{% if finding_context == similar_finding %}(this){% endif %}</td>
+    {% elif finding_context.duplicate_finding == similar_finding %}
+        <td title="The finding on the top of this page is a duplicate of this so called original finding">Original{% if finding_context == similar_finding %} (this){% endif %}</td>
+    {% elif similar_finding.duplicate and similar_finding.duplicate_finding == finding_context.duplicate_finding %}
+        <td title="This finding is a duplicate of the same original above">Duplicate{% if finding_context == similar_finding %}(this){% endif %}</td>
     {% else %}
         <td title="This finding shares fields values with the finding on this page because of which it looks similar">Similar</td>
     {% endif %}
