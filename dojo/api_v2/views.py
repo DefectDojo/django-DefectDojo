@@ -15,7 +15,7 @@ from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Find
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Endpoint, JIRA_PKey, JIRA_Conf, DojoMeta, Development_Environment, \
     Dojo_User, Note_Type, System_Settings, App_Analysis, Endpoint_Status, \
-    Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulations
+    Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation
 
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import report_url_resolver
@@ -758,6 +758,7 @@ class ToolTypesViewSet(mixins.ListModelMixin,
 class RegulationsViewSet(mixins.ListModelMixin,
                          mixins.RetrieveModelMixin,
                          mixins.CreateModelMixin,
+                         mixins.DestroyModelMixin,
                          mixins.UpdateModelMixin,
                          viewsets.GenericViewSet):
     serializer_class = serializers.RegulationSerializer

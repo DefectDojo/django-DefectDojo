@@ -73,13 +73,14 @@ class Regulation(models.Model):
     FINANCE_CATEGORY = 'finance'
     EDUCATION_CATEGORY = 'education'
     MEDICAL_CATEGORY = 'medical'
+    CORPORATE_CATEGORY = 'corporate'
     OTHER_CATEGORY = 'other'
     CATEGORY_CHOICES = (
         (PRIVACY_CATEGORY, _('Privacy')),
         (FINANCE_CATEGORY, _('Finance')),
         (EDUCATION_CATEGORY, _('Education')),
         (MEDICAL_CATEGORY, _('Medical')),
-        (MEDICAL_CATEGORY, _('Corporate')),
+        (CORPORATE_CATEGORY, _('Corporate')),
         (OTHER_CATEGORY, _('Other')),
     )
 
