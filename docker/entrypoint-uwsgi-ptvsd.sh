@@ -20,4 +20,4 @@ exec uwsgi \
   --enable-threads --lazy-apps --honour-stdin \
   --reload-mercy 1 \
   --worker-reload-mercy 1 \
-
+  --buffer-size="${DD_UWSGI_BUFFER_SIZE:-4096}"

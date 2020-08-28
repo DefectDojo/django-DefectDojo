@@ -30,13 +30,15 @@ import calendar as tcalendar
 from dojo.github import add_external_issue_github, update_external_issue_github, close_external_issue_github, reopen_external_issue_github
 from dojo.models import Finding, Engagement, Finding_Template, Product, JIRA_PKey, JIRA_Issue,\
     Dojo_User, User, System_Settings, Notifications, Endpoint, Benchmark_Type, \
-    Language_Type, Languages, Rule, Test_Type
+    Language_Type, Languages, Rule, Test_Type, Notes
 from asteval import Interpreter
 from requests.auth import HTTPBasicAuth
 from dojo.notifications.helper import create_notification
 import logging
 import itertools
 from django.contrib import messages
+from django.http import HttpResponseRedirect
+# import traceback
 
 
 logger = logging.getLogger(__name__)
@@ -294,14 +296,8 @@ def set_duplicate(new_finding, existing_finding):
     if existing_finding.id == new_finding.id:
         raise Exception("Can not add duplicate to itself")
     deduplicationLogger.debug('New finding ' + str(new_finding.id) + ' is a duplicate of existing finding ' + str(existing_finding.id))
-    if (existing_finding.is_Mitigated or existing_finding.mitigated) and new_finding.active and not new_finding.is_Mitigated:
-        existing_finding.mitigated = new_finding.mitigated
-        existing_finding.is_Mitigated = new_finding.is_Mitigated
-        existing_finding.active = new_finding.active
-        existing_finding.verified = new_finding.verified
-        existing_finding.notes.create(author=existing_finding.reporter,
-                                      entry="This finding has been automatically re-openend as it was found in recent scans.")
-        existing_finding.save()
+    if is_duplicate_reopen(new_finding, existing_finding):
+        set_duplicate_reopen_(new_finding, existing_finding)
     new_finding.duplicate = True
     new_finding.active = False
     new_finding.verified = False
@@ -312,6 +308,23 @@ def set_duplicate(new_finding, existing_finding):
     existing_finding.found_by.add(new_finding.test.test_type)
     super(Finding, new_finding).save()
     super(Finding, existing_finding).save()
+
+
+def is_duplicate_reopen(new_finding, existing_finding):
+    if (existing_finding.is_Mitigated or existing_finding.mitigated) and not existing_finding.out_of_scope and not existing_finding.false_p and new_finding.active and not new_finding.is_Mitigated:
+        return True
+    else:
+        return False
+
+
+def set_duplicate_reopen(new_finding, existing_finding):
+    existing_finding.mitigated = new_finding.mitigated
+    existing_finding.is_Mitigated = new_finding.is_Mitigated
+    existing_finding.active = new_finding.active
+    existing_finding.verified = new_finding.verified
+    existing_finding.notes.create(author=existing_finding.reporter,
+                                    entry="This finding has been automatically re-openend as it was found in recent scans.")
+    existing_finding.save()
 
 
 def removeLoop(finding_id, counter):
@@ -1334,7 +1347,11 @@ def reopen_external_issue(find, note, external_issue_provider):
         reopen_external_issue_github(find, note, prod, eng)
 
 
-def add_issue(find, push_to_jira):
+def add_jira_issue(find, push_to_jira):
+    logger.info('trying to create a new jira issue for %d:%s', find.id, find.title)
+
+    # traceback.print_stack()
+
     eng = Engagement.objects.get(test=find.test)
     prod = Product.objects.get(engagement=eng)
     jira_minimum_threshold = Finding.get_number_severity(System_Settings.objects.get().jira_minimum_severity)
@@ -1391,7 +1408,6 @@ def add_issue(find, push_to_jira):
 
                 if System_Settings.objects.get().enable_finding_sla:
                     # populate duedate field, but only if it's available for this project + issuetype
-                    # meta = jira.createmeta(projectKeys=jpkey.project_key, expand="fields")
                     if not meta:
                         meta = jira_meta(jira, jpkey)
 
@@ -1413,9 +1429,23 @@ def add_issue(find, push_to_jira):
                 new_issue = jira.create_issue(fields)
 
                 j_issue = JIRA_Issue(
-                    jira_id=new_issue.id, jira_key=new_issue, finding=find)
+                    jira_id=new_issue.id, jira_key=new_issue.key, finding=find)
                 j_issue.save()
                 issue = jira.issue(new_issue.id)
+
+                find.jira_creation = timezone.now()
+                find.jira_change = timezone.now()
+                find.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
+
+                jira_issue_url = find.jira_issue.jira_key
+                if find.jira_conf_new():
+                    jira_issue_url = find.jira_conf_new().url + '/' + new_issue.key
+
+                new_note = Notes()
+                new_note.entry = 'created JIRA issue %s for finding' % (jira_issue_url)
+                new_note.author, created = User.objects.get_or_create(username='JIRA')  # quick hack copied from webhook because we don't have request.user here
+                new_note.save()
+                find.notes.add(new_note)
 
                 # Upload dojo finding screenshots to Jira
                 for pic in find.images.all():
@@ -1426,13 +1456,13 @@ def add_issue(find, push_to_jira):
                     # if jpkey.enable_engagement_epic_mapping:
                     #      epic = JIRA_Issue.objects.get(engagement=eng)
                     #      issue_list = [j_issue.jira_id,]
-                    #      jira.add_issues_to_epic(epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
+                    #      jira.add_jira_issues_to_epic(epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
             except JIRAError as e:
-                logger.error(e.text, find)
+                logger.error(e.text)
                 log_jira_alert(e.text, find)
         else:
             log_jira_alert("A Finding needs to be both Active and Verified to be pushed to JIRA.", find)
-            logger.warning("A Finding needs to be both Active and Verified to be pushed to JIRA.", find)
+            logger.warning("A Finding needs to be both Active and Verified to be pushed to JIRA: %s", find)
 
 
 def jira_meta(jira, jpkey):
@@ -1472,7 +1502,8 @@ def jira_check_attachment(issue, source_file_name):
     return file_exists
 
 
-def update_issue(find, push_to_jira):
+def update_jira_issue(find, push_to_jira):
+    logger.info('trying to update a linked jira issue for %d:%s', find.id, find.title)
     prod = Product.objects.get(
         engagement=Engagement.objects.get(test=find.test))
     jpkey = JIRA_PKey.objects.get(product=prod)
@@ -1528,11 +1559,9 @@ def update_issue(find, push_to_jira):
                 description=jira_description(find),
                 priority={'name': jira_conf.get_priority(find.severity)},
                 fields=fields)
-            # print('\n\nSaving jira_change\n\n')
-            # Moving this to finding.save()
-            # find.jira_change = timezone.now()
-            # find.save()
-            # Add labels(security & product)
+
+            find.jira_change = timezone.now()
+            find.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
 
         except JIRAError as e:
             log_jira_alert(e.text, find)
@@ -1607,6 +1636,7 @@ def update_epic(eng, push_to_jira):
 
 
 def add_epic(eng, push_to_jira):
+    logger.info('trying to create a new jira EPIC for %d:%s', eng.id, eng.name)
     engagement = eng
     prod = Product.objects.get(engagement=engagement)
     jpkey = JIRA_PKey.objects.get(product=prod)
@@ -1630,7 +1660,7 @@ def add_epic(eng, push_to_jira):
             new_issue = jira.create_issue(fields=issue_dict)
             j_issue = JIRA_Issue(
                 jira_id=new_issue.id,
-                jira_key=new_issue,
+                jira_key=new_issue.key,
                 engagement=engagement)
             j_issue.save()
         except Exception as e:
@@ -1645,7 +1675,23 @@ def add_epic(eng, push_to_jira):
             pass
 
 
+def jira_get_issue(jpkey, issue_key):
+    jira_conf = jpkey.conf
+    try:
+        jira = JIRA(
+            server=jira_conf.url,
+            basic_auth=(jira_conf.username, jira_conf.password))
+        issue = jira.issue(issue_key)
+        # print(vars(issue))
+        return issue
+    except JIRAError as jira_error:
+        logger.debug('error retrieving jira issue ' + issue_key + ' ' + str(jira_error))
+        log_jira_generic_alert('error retrieving jira issue ' + issue_key, str(jira_error))
+        return None
+
+
 def add_comment(find, note, force_push=False):
+    logger.debug('trying to add a comment to a linked jira issue for: %d:%s', find.id, find.title)
     if not note.private:
         prod = Product.objects.get(
             engagement=Engagement.objects.get(test=find.test))
@@ -1668,6 +1714,19 @@ def add_comment(find, note, force_push=False):
                     pass
         except JIRA_PKey.DoesNotExist:
             pass
+
+
+def add_simple_jira_comment(jira_conf, jira_issue, comment):
+    try:
+        jira = JIRA(
+            server=jira_conf.url,
+            basic_auth=(jira_conf.username, jira_conf.password)
+        )
+        jira.add_comment(
+            jira_issue.jira_id, comment
+        )
+    except Exception as e:
+        log_jira_generic_alert('Jira Add Comment Error', str(e))
 
 
 def send_review_email(request, user, finding, users, new_note):
@@ -2122,3 +2181,137 @@ def is_scan_file_too_large(scan_file):
         if size > settings.SCAN_FILE_MAX_SIZE:
             return True
     return False
+
+
+def sla_compute_and_notify(*args, **kwargs):
+    """
+    The SLA computation and notification will be disabled if the user opts out
+    of the Findings SLA on the System Settings page.
+
+    Notifications are managed the usual way, so you'd have to opt-in.
+    Exception is for JIRA issues, which would get a comment anyways.
+    """
+    def _notify(finding, title):
+        create_notification(
+            event='sla_breach',
+            title=title,
+            finding=finding,
+            sla_age=sla_age
+        )
+
+        if do_jira_sla_comment:
+            logger.info("Creating JIRA comment to notify of SLA breach information.")
+            add_simple_jira_comment(jira_config, jira_issue, title)
+
+    # exit early on flags
+    if not settings.SLA_NOTIFY_ACTIVE and not settings.SLA_NOTIFY_ACTIVE_VERIFIED_ONLY:
+        logger.info("Will not notify on SLA breach per user configured settings")
+        return
+
+    jira_issue = None
+    jira_config = None
+    try:
+        system_settings = System_Settings.objects.get()
+        if system_settings.enable_finding_sla:
+            logger.info("About to process findings for SLA notifications.")
+            logger.debug("Active {}, Verified {}, Has JIRA {}, pre-breach {}, post-breach {}".format(
+                settings.SLA_NOTIFY_ACTIVE,
+                settings.SLA_NOTIFY_ACTIVE_VERIFIED_ONLY,
+                settings.SLA_NOTIFY_WITH_JIRA_ONLY,
+                settings.SLA_NOTIFY_PRE_BREACH,
+                settings.SLA_NOTIFY_POST_BREACH,
+            ))
+
+            query = None
+            if settings.SLA_NOTIFY_ACTIVE:
+                query = Q(active=True, is_Mitigated=False, duplicate=False)
+            if settings.SLA_NOTIFY_ACTIVE_VERIFIED_ONLY:
+                query = Q(active=True, verified=True, is_Mitigated=False, duplicate=False)
+            logger.debug("My query: {}".format(query))
+
+            no_jira_findings = {}
+            if settings.SLA_NOTIFY_WITH_JIRA_ONLY:
+                logger.debug("Ignoring findings that are not linked to a JIRA issue")
+                no_jira_findings = Finding.objects.exclude(jira_issue__isnull=False)
+
+            total_count = 0
+            pre_breach_count = 0
+            post_breach_count = 0
+            post_breach_no_notify_count = 0
+            jira_count = 0
+            at_breach_count = 0
+
+            # Taking away for now, since the prefetch is not efficient
+            # .select_related('jira_issue') \
+            # .prefetch_related(Prefetch('test__engagement__product__jira_pkey_set__conf')) \
+            # A finding with 'Info' severity will not be considered for SLA notifications (not in model)
+            findings = Finding.objects \
+                .filter(query) \
+                .exclude(severity='Info') \
+                .exclude(id__in=no_jira_findings)
+
+            for finding in findings:
+                total_count += 1
+                sla_age = finding.sla_days_remaining()
+                # if SLA is set to 0 in settings, it's a null. And setting at 0 means no SLA apparently.
+                if sla_age is None:
+                    sla_age = 0
+
+                if (sla_age < 0) and (settings.SLA_NOTIFY_POST_BREACH < abs(sla_age)):
+                    post_breach_no_notify_count += 1
+                    # Skip finding notification if breached for too long
+                    logger.debug("Finding {} breached the SLA {} days ago. Skipping notifications.".format(finding.id, abs(sla_age)))
+                    continue
+
+                do_jira_sla_comment = False
+                if finding.has_jira_issue():
+                    jira_count += 1
+                    jira_config = finding.jira_conf_new()
+                    if jira_config is not None:
+                        logger.debug("JIRA config for finding is {}".format(jira_config))
+                        # global config or product config set, product level takes precedence
+                        try:
+                            # TODO: see new property from #2649 to then replace, somehow not working with prefetching though.
+                            product_jira_sla_comment_enabled = finding.test.engagement.product.jira_pkey_set.all()[0].product_jira_sla_notification
+                        except Exception as e:
+                            logger.error("The product is not linked to a JIRA configuration! Something is weird here.")
+                            logger.error("Error is: {}".format(e))
+
+                        jiraconfig_sla_notification_enabled = jira_config.global_jira_sla_notification
+
+                        if jiraconfig_sla_notification_enabled or product_jira_sla_comment_enabled:
+                            logger.debug("Global setting {} -- Product setting {}".format(
+                                jiraconfig_sla_notification_enabled,
+                                product_jira_sla_comment_enabled
+                            ))
+                            do_jira_sla_comment = True
+                            jira_issue = finding.jira_issue
+                            logger.debug("JIRA issue is {}".format(jira_issue.jira_key))
+
+                logger.debug("Finding {} has {} days left to breach SLA.".format(finding.id, sla_age))
+                if (sla_age < 0):
+                    post_breach_count += 1
+                    logger.info("Finding {} has breached by {} days.".format(finding.id, abs(sla_age)))
+                    _notify(finding, 'Finding {} - SLA breached by {} day(s)! Overdue notice'.format(finding.id, abs(sla_age)))
+                # The finding is within the pre-breach period
+                elif (sla_age > 0) and (sla_age <= settings.SLA_NOTIFY_PRE_BREACH):
+                    pre_breach_count += 1
+                    logger.info("Security SLA pre-breach warning for finding ID {}. Days remaining: {}".format(finding.id, sla_age))
+                    _notify(finding, 'Finding {} - SLA pre-breach warning - {} day(s) left'.format(finding.id, sla_age))
+                # The finding breaches the SLA today
+                elif (sla_age == 0):
+                    at_breach_count += 1
+                    logger.info("Security SLA breach warning. Finding ID {} breaching today ({})".format(finding.id, sla_age))
+                    _notify(finding, "Finding {} - SLA is breaching today".format(finding.id))
+
+            logger.info("SLA run results: Pre-breach: {}, at-breach: {}, post-breach: {} post-breach-no-notify: {}, with-jira: {}, TOTAL: {}".format(
+                pre_breach_count,
+                at_breach_count,
+                post_breach_count,
+                post_breach_no_notify_count,
+                jira_count,
+                total_count
+            ))
+
+    except System_Settings.DoesNotExist:
+        logger.info("Findings SLA is not enabled.")

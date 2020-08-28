@@ -30,14 +30,18 @@
             <table class="table table-hover col-sm-5">
                 <thead>
                     <tr>
-                        <th>Event</th><th class="centered">Slack</th><th class="centered">HipChat</th><th class="centered">Mail</th><th class="centered">Alert</th>
+                        <th>Event</th>
+                        <th class="centered">Slack</th>
+                        <th class="centered">HipChat</th>
+                        <th class="centered">Mail</th>
+                        <th class="centered">Alert</th>
                     </tr>
                 </thead>
                 <tbody>
                 {% for field in form.visible_fields %}
                     {% if field.auto_id %}
                         <tr>
-                            <td>{{ field.label }}{% if field.field.required%}<sup>*</sup>{% endif %}
+                            <td>{{ field.label }}{% if field.field.required %}<sup>*</sup>{% endif %}
                                 {% if field.help_text %}
                                 <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="{{ field.help_text }}" data-placement="right" data-container="body">
                                 </i>
