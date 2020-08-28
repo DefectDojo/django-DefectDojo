@@ -514,6 +514,27 @@ def product_endpoint_report(request, pid):
                                  'Your report is building.',
                                  extra_tags='alert-success')
             return HttpResponseRedirect(reverse('reports'))
+        elif report_format == 'HTML':
+            return render(request,
+                          template,
+                          {
+                           'product_type': None,
+                           'product': product,
+                           'engagement': None,
+                           'test': None,
+                           'endpoint': None,
+                           'endpoints': endpoints.qs,
+                           'findings': None,
+                           'include_finding_notes': include_finding_notes,
+                           'include_finding_images': include_finding_images,
+                           'include_executive_summary': include_executive_summary,
+                           'include_table_of_contents': include_table_of_contents,
+                           'user': request.user,
+                           'title': 'Generate Report',
+
+                           })
+
+
         else:
             raise Http404()
 
