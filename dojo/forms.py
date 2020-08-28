@@ -401,6 +401,7 @@ class ImportScanForm(forms.Form):
                          ("AWS Security Hub Scan", "AWS Security Hub Scan"),
                          ("GitLab SAST Report", "GitLab SAST Report"),
                          ("HuskyCI Report", "HuskyCI Report"),
+                         ("Risk Recon API Importer", "Risk Recon API Importer"),
                          ("CCVS Report", "CCVS Report"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])

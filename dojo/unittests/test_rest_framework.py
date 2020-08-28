@@ -1,14 +1,17 @@
 from dojo.models import Product, Engagement, Test, Finding, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     User, ScanSettings, Scan, Stub_Finding, Endpoint, JIRA_PKey, JIRA_Conf, \
-    Finding_Template, Note_Type, App_Analysis, Endpoint_Status
+    Finding_Template, Note_Type, App_Analysis, Endpoint_Status, \
+    Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product
 
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraConfigurationsViewSet, \
     JiraIssuesViewSet, JiraViewSet, ProductViewSet, ScanSettingsViewSet, \
     ScansViewSet, StubFindingsViewSet, TestsViewSet, \
     ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
-    UsersViewSet, ImportScanView, NoteTypeViewSet, AppAnalysisViewSet, EndpointStatusViewSet
+    UsersViewSet, ImportScanView, NoteTypeViewSet, AppAnalysisViewSet, \
+    EndpointStatusViewSet, SonarqubeIssueViewSet, SonarqubeIssueTransitionViewSet, \
+    SonarqubeProductViewSet
 
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
@@ -303,6 +306,55 @@ class JiraTest(BaseClass.RESTEndpointTest):
             "conf": 2,
         }
         self.update_fields = {'conf': 3}
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class SonarqubeIssueTest(BaseClass.RESTEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Sonarqube_Issue
+        self.viewname = 'sonarqube_issue'
+        self.viewset = SonarqubeIssueViewSet
+        self.payload = {
+            "key": "AREwS5n5TxsFUNm31CxP",
+            "status": "OPEN",
+            "type": "VULNERABILITY"
+        }
+        self.update_fields = {'key': 'AREwS5n5TxsFUNm31CxP'}
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class SonarqubeIssuesTransitionTest(BaseClass.RESTEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Sonarqube_Issue_Transition
+        self.viewname = 'sonarqube_issue_transition'
+        self.viewset = SonarqubeIssuesTransitionTest
+        self.payload = {
+            "sonarqube_issue": 1,
+            "finding_status": "Active, Verified",
+            "sonarqube_status": "OPEN",
+            "transitions": "confirm"
+        }
+        self.update_fields = {'sonarqube_status': 'CLOSED'}
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class SonarqubeProductTest(BaseClass.RESTEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Sonarqube_Product
+        self.viewname = 'sonarqube_product'
+        self.viewset = JiraViewSet
+        self.payload = {
+            "product": 2,
+            "sonarqube_project_key": "dojo_sonar_key",
+            "sonarqube_tool_config": 3
+        }
+        self.update_fields = {'sonarqube_tool_config': 2}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
