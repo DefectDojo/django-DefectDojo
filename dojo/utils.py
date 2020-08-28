@@ -1705,9 +1705,11 @@ def add_comment(find, note, force_push=False):
                         server=jira_conf.url,
                         basic_auth=(jira_conf.username, jira_conf.password))
                     j_issue = JIRA_Issue.objects.get(finding=find)
-                    jira.add_comment(
+                    jira_comment = jira.add_comment(
                         j_issue.jira_id,
                         '(%s): %s' % (note.author.get_full_name(), note.entry))
+                    note.jira_id = int(jira_comment.id)
+                    note.save()
                 except Exception as e:
                     log_jira_generic_alert('Jira Add Comment Error', str(e))
                     pass

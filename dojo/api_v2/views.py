@@ -1,3 +1,6 @@
+# Standard library imports
+import logging
+
 from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -28,6 +31,7 @@ from dojo.utils import get_period_counts_legacy, get_system_setting
 from dojo.api_v2 import serializers, permissions
 from django.db.models import Count, Q
 
+logger = logging.getLogger(__name__)
 
 class EndPointViewSet(mixins.ListModelMixin,
                       mixins.RetrieveModelMixin,
@@ -275,23 +279,33 @@ class FindingViewSet(mixins.ListModelMixin,
     def notes(self, request, pk=None):
         finding = get_object_or_404(Finding.objects, id=pk)
         if request.method == 'POST':
+            note_type = None
+            jira_id = -1
             new_note = serializers.AddNewNoteOptionSerializer(data=request.data)
             if new_note.is_valid():
-                entry = new_note.validated_data['entry']
-                private = new_note.validated_data['private']
-                note_type = new_note.validated_data['note_type']
+                try:
+                    entry = new_note.validated_data['entry']
+                    private = new_note.validated_data['private']
+                    if 'note_type' in request.data:
+                        note_type = request.data['note_type']
+                    if 'jira_id' in request.data:
+                        jira_id = request.data['jira_id']
+                except Exception as e:
+                    logger.error(e)
+                    return Response(new_note.errors,
+                        status=status.HTTP_400_BAD_REQUEST)
             else:
                 return Response(new_note.errors,
                     status=status.HTTP_400_BAD_REQUEST)
 
             author = request.user
-            note = Notes(entry=entry, author=author, private=private, note_type=note_type)
+            note = Notes(entry=entry, author=author, private=private, note_type=note_type, jira_id=jira_id)
             note.save()
             finding.notes.add(note)
 
             serialized_note = serializers.NoteSerializer({
                 "author": author, "entry": entry,
-                "private": private
+                "private": private, "jira_id": note.jira_id
             })
             result = serializers.FindingToNotesSerializer({
                 "finding_id": finding, "notes": [serialized_note.data]

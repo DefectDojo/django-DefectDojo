@@ -1225,6 +1225,7 @@ class Notes(models.Model):
     entry = models.TextField()
     date = models.DateTimeField(null=False, editable=False,
                                 default=get_current_datetime)
+    jira_id = models.IntegerField(null=True, blank=True)
     author = models.ForeignKey(User, related_name='editor_notes_set', editable=False, on_delete=models.CASCADE)
     private = models.BooleanField(default=False)
     edited = models.BooleanField(default=False)

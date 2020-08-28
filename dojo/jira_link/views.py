@@ -91,24 +91,30 @@ def webhook(request):
                     eng.save()
            """
         if parsed.get('webhookEvent') == 'comment_created':
-            comment_text = parsed['comment']['body']
-            commentor = parsed['comment']['updateAuthor']['displayName']
-            jid = parsed['comment']['self'].split('/')[7]
-            jissue = JIRA_Issue.objects.get(jira_id=jid)
-            jira = JIRA_Conf.objects.values_list('username', flat=True)
-            for jira_userid in jira:
-                if jira_userid.lower() in commentor.lower():
-                    return HttpResponse('')
-                    break
-            finding = jissue.finding
-            new_note = Notes()
-            new_note.entry = '(%s): %s' % (commentor, comment_text)
-            new_note.author, created = User.objects.get_or_create(username='JIRA')
-            new_note.save()
-            finding.notes.add(new_note)
-            finding.jira_change = timezone.now()
-            finding.save()
-            create_notification(event='other', title='JIRA Update - %s' % (jissue.finding), url=reverse("view_finding", args=(jissue.id,)), icon='check')
+            # Only create a note if it doesn't exist locally (to avoid loops).
+            jira_note_creation_date = datetime.strptime(str(parsed['comment']['created']), "%Y-%m-%dT%H:%M:%S.%f%z")
+            try:
+                note = Notes.objects.get(jira_id=parsed['comment']['id'])
+                logger.info('Note already created from DefectDojo, skipping creation')
+            except Notes.DoesNotExist:
+                logger.info('Note created from Jira, creating it in DefectDojo')
+                comment_text = parsed['comment']['body']
+                commentor = parsed['comment']['updateAuthor']['displayName']
+                jid = parsed['comment']['self'].split('/')[7]
+                jissue = JIRA_Issue.objects.get(jira_id=jid)
+                finding = jissue.finding
+                new_note = Notes()
+                new_note.entry = '(%s): %s' % (commentor, comment_text)
+                new_note.author, created = User.objects.get_or_create(username='JIRA')
+                new_note.date = jira_note_creation_date
+                new_note.save()
+                finding.notes.add(new_note)
+                finding.jira_change = timezone.now()
+                finding.save()
+                create_notification(event='other', title='JIRA Update - %s' % (jissue.finding), url=reverse("view_finding", args=(jissue.id,)), icon='check')
+            except Exception as e:
+                print("catch all")
+                logger.error(str(e))
 
         if parsed.get('webhookEvent') not in ['comment_created', 'jira:issue_updated']:
             logger.info('Unrecognized JIRA webhook event received: {}'.format(parsed.get('webhookEvent')))
