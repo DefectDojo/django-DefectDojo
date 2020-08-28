@@ -2213,7 +2213,7 @@ def similar_findings(request, finding):
     # TODO: remove this temp testing code Valentijn
     temp = Finding.objects.all().filter(id__in=[49046, 51314, 59225, 59227, 59229, 59223])
 
-    result = (temp | similar.exclude(pk=finding.pk) | identical )[:10]
+    result = (temp | similar.exclude(pk=finding.pk) | identical)[:10]
     for similar_finding in result:
         similar_finding.related_actions = calculate_possible_related_actions_for_similar_finding(request, finding, similar_finding)
 
