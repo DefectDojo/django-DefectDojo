@@ -2,6 +2,7 @@
 
 export DD_BASE_URL='http://localhost:8080/'
 
+
 # All available Unittest Scripts are activated below
 # If successful, A success message is printed and the script continues
 # If any script is unsuccessful a failure message is printed and the test script
