@@ -691,6 +691,7 @@ class SimilarFindingFilter(DojoFilter):
         queryset = super().filter_queryset(*args, **kwargs)
         if not self.user.is_staff:
             queryset = queryset.filter(test__engagement__product__authorized_users__in=[self.user])
+        queryset = queryset.exclude(pk=self.finding.pk)
         return queryset
 
 

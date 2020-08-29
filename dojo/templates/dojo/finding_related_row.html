@@ -4,7 +4,7 @@
 <tr>
     {% if similar_finding.duplicate_finding == finding_context %}
         <td title="The finding on the top of this page is the original for this related finding">Duplicate{% if finding_context == similar_finding %}(this){% endif %}</td>
-    {% elif finding_context.duplicate_finding == similar_finding %}
+    {% elif finding_context.duplicate_finding == similar_finding  or finding_context == similar_finding%}
         <td title="The finding on the top of this page is a duplicate of this so called original finding">Original{% if finding_context == similar_finding %} (this){% endif %}</td>
     {% elif similar_finding.duplicate and similar_finding.duplicate_finding == finding_context.duplicate_finding %}
         <td title="This finding is a duplicate of the same original above">Duplicate{% if finding_context == similar_finding %}(this){% endif %}</td>
@@ -59,12 +59,12 @@
         <td></td>
     {% endif%}
 
+    <td>
     {% if system_settings.enable_jira and similar_finding.jira_issue %}
         <a href="{{ similar_finding.jira_conf_new.url }}/browse/{{ similar_finding.jira_issue.jira_key }}"
         target="_blank" title="{{ similar_finding.jira_conf_new.url }}/browse/{{ similar_finding.jira_issue.jira_key }}">{{ similar_finding.jira_issue.jira_key }}</a>
-    {% else %}
-        <td></td>    
     {% endif %}
+    </td>    
 
     <td>
         {% include "dojo/finding_related_actions.html" with similar_finding=similar_finding finding_context=finding %}

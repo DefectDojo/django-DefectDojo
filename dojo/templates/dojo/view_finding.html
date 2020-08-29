@@ -532,30 +532,33 @@
             <div class="panel-heading">
                 <h4>Duplicate Cluster ({{ finding|finding_duplicate_cluster_size }})<span class="pull-right"><a data-toggle="collapse" href="#duplicate_tree"><i class="glyphicon glyphicon-chevron-down"></i></a></span></h4>
             </div>
-            <div id="duplicate_tree" class="panel-body">
-                {% include "dojo/finding_related_list.html" with finding_context=finding finding_first_related=finding.duplicate_finding finding_list=duplicate_cluster %}
+            <div id="duplicate_tree" class="panel-body collapse">
+                {% if finding.duplicate_finding %}
+                    {% include "dojo/finding_related_list.html" with finding_context=finding finding_first_related=finding.duplicate_finding finding_list=duplicate_cluster %}
+                {% else %}
+                    {% include "dojo/finding_related_list.html" with finding_context=finding finding_first_related=finding finding_list=duplicate_cluster %}
+                {% endif %}
             </div>
         </div>
     {% endif %}
 
-    {% comment %} {% if similar_findings %} {% endcomment %}
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h4>Similar Findings ({{ similar_findings.count }}) 
+                <h4 class="has-filters">Similar Findings ({{ similar_findings.count }}) 
                     <span class="pull-right"><a data-toggle="collapse" href=".similar_findings"><i class="glyphicon glyphicon-chevron-down"></i></a></span>
-                    <span class="pull-right similar_findings collapse" aria-expanded="false"><button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary dropup" aria-expanded="false"> <i class="fa fa-filter"></i> <i class="caret"></i> </button></span>
+                    {% comment %} <span class="pull-right similar_findings collapse" aria-expanded="false"><button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary dropdown" aria-expanded="false"> <i class="fa fa-filter"></i> <i class="caret"></i> </button></span> {% endcomment %}
+                    <div class="similar_findings dropdown pull-right collapse"></div>
                 </h4>
             </div>
-            {% comment %} {% if similar_findings_filter %} {% endcomment %}
             <div id="the-filters" class="panel-body collapse">
                 {% include "dojo/filter_snippet.html" with form=similar_findings_filter.form %}
             </div>
-            {% comment %} {% endif %}         {% endcomment %}
             {% if similar_findings_filter %}            
-            <div id="similar_findings" class="panel-body similar_findings">
-                {% include "dojo/finding_related_list.html" with finding_context=finding finding_list=similar_findings %}
-            </div>
-    {% endif %}
+                <div id="similar_findings" class="panel-body similar_findings collapse">
+                    {% include "dojo/finding_related_list.html" with finding_context=finding finding_list=similar_findings %}
+                </div>
+            {% endif %}
+        </div>
 
     {% comment %} Add a form to (ab)use to submit any actions related to similar/duplicates as POST requests {% endcomment %}
     <form method="post" style="display: none" id="related_action">
@@ -1193,5 +1196,14 @@
             related_action_form.attr('action', url)
             related_action.submit()        
         }
+
+        {% comment %} $('#show-filters').on('click', function () {
+            $(this).toggleClass("dropup");
+        })
+
+        $(".dojo-filter-set :input").not("button").addClass("form-control input-sm"); {% endcomment %}
+
     </script>
+
+    {% include "dojo/filter_js_snippet.html" %}
 {% endblock %}
