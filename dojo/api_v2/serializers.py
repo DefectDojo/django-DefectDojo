@@ -3,7 +3,9 @@ from dojo.models import Product, Engagement, Test, Finding, \
     Finding_Template, Test_Type, Development_Environment, NoteHistory, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Product_Type, JIRA_Conf, Endpoint, BurpRawRequestResponse, JIRA_PKey, \
-    Notes, DojoMeta, FindingImage, Note_Type, App_Analysis, Endpoint_Status
+    Notes, DojoMeta, FindingImage, Note_Type, App_Analysis, Endpoint_Status, \
+    Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product
+
 from dojo.forms import ImportScanForm, SEVERITY_CHOICES
 from dojo.tools import requires_file
 from dojo.tools.factory import import_parser_factory
@@ -354,6 +356,24 @@ class JIRAConfSerializer(serializers.ModelSerializer):
 class JIRASerializer(serializers.ModelSerializer):
     class Meta:
         model = JIRA_PKey
+        fields = '__all__'
+
+
+class SonarqubeIssueSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Sonarqube_Issue
+        fields = '__all__'
+
+
+class SonarqubeIssueTransitionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Sonarqube_Issue_Transition
+        fields = '__all__'
+
+
+class SonarqubeProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Sonarqube_Product
         fields = '__all__'
 
 
@@ -849,6 +869,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                         Finding.SEVERITIES[min_sev]):
                     continue
 
+                from titlecase import titlecase
+                item.title = titlecase(item.title)
                 if scan_type == 'Veracode Scan' or scan_type == 'Arachni Scan':
                     findings = Finding.objects.filter(
                         title=item.title,

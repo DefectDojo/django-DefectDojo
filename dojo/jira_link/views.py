@@ -95,6 +95,11 @@ def webhook(request):
             commentor = parsed['comment']['updateAuthor']['displayName']
             jid = parsed['comment']['self'].split('/')[7]
             jissue = JIRA_Issue.objects.get(jira_id=jid)
+            jira = JIRA_Conf.objects.values_list('username', flat=True)
+            for jira_userid in jira:
+                if jira_userid.lower() in commentor.lower():
+                    return HttpResponse('')
+                    break
             finding = jissue.finding
             new_note = Notes()
             new_note.entry = '(%s): %s' % (commentor, comment_text)
@@ -103,6 +108,7 @@ def webhook(request):
             finding.notes.add(new_note)
             finding.jira_change = timezone.now()
             finding.save()
+            create_notification(event='other', title='JIRA Update - %s' % (jissue.finding), url=reverse("view_finding", args=(jissue.id,)), icon='check')
 
         if parsed.get('webhookEvent') not in ['comment_created', 'jira:issue_updated']:
             logger.info('Unrecognized JIRA webhook event received: {}'.format(parsed.get('webhookEvent')))
