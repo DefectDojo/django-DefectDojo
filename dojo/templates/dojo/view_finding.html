@@ -538,12 +538,21 @@
         </div>
     {% endif %}
 
-    {% if similar_findings %}
+    {% comment %} {% if similar_findings %} {% endcomment %}
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h4>Similar Findings ({{ similar_findings.count }}) <span class="pull-right"><a data-toggle="collapse" href="#similar_findings"><i class="glyphicon glyphicon-chevron-down"></i></a></span></h4>
+                <h4>Similar Findings ({{ similar_findings.count }}) 
+                    <span class="pull-right"><a data-toggle="collapse" href=".similar_findings"><i class="glyphicon glyphicon-chevron-down"></i></a></span>
+                    <span class="pull-right similar_findings collapse" aria-expanded="false"><button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary dropup" aria-expanded="false"> <i class="fa fa-filter"></i> <i class="caret"></i> </button></span>
+                </h4>
             </div>
-            <div id="similar_findings" class="panel-body">
+            {% comment %} {% if similar_findings_filter %} {% endcomment %}
+            <div id="the-filters" class="panel-body collapse">
+                {% include "dojo/filter_snippet.html" with form=similar_findings_filter.form %}
+            </div>
+            {% comment %} {% endif %}         {% endcomment %}
+            {% if similar_findings_filter %}            
+            <div id="similar_findings" class="panel-body similar_findings">
                 {% include "dojo/finding_related_list.html" with finding_context=finding finding_list=similar_findings %}
             </div>
     {% endif %}

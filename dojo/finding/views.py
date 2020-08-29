@@ -29,7 +29,7 @@ from dojo.user.helper import user_must_be_authorized
 
 from dojo.filters import OpenFindingFilter, \
     OpenFindingSuperFilter, AcceptedFindingSuperFilter, \
-    ClosedFindingSuperFilter, TemplateFindingFilter
+    ClosedFindingSuperFilter, TemplateFindingFilter, SimilarFindingFilter
 from dojo.forms import NoteForm, FindingNoteForm, CloseFindingForm, FindingForm, PromoteFindingForm, FindingTemplateForm, \
     DeleteFindingTemplateForm, FindingImageFormSet, JIRAFindingForm, GITHUBFindingForm, ReviewFindingForm, ClearFindingReviewForm, \
     DefectFindingForm, StubFindingForm, DeleteFindingForm, DeleteStubFindingForm, ApplyFindingTemplateForm, \
@@ -303,6 +303,14 @@ def view_finding(request, fid):
     if finding.duplicate_finding:
         finding.duplicate_finding.related_actions = calculate_possible_related_actions_for_similar_finding(request, finding, finding.duplicate_finding)
 
+    # similar_findings = get_similar_findings(request, finding)
+    similar_findings_filter = SimilarFindingFilter(request.GET, queryset=Finding.objects.all(), user=request.user, finding=finding)
+    logger.debug('similar query: %s', similar_findings_filter.qs.query)
+    similar_findings = prefetch_for_findings(similar_findings_filter.qs[:10])
+    for similar_finding in similar_findings:
+        similar_finding.related_actions = calculate_possible_related_actions_for_similar_finding(request, finding, similar_finding)
+        logger.debug('jira_conf_new: %s', similar_finding.jira_conf_new())
+
     product_tab = Product_Tab(finding.test.engagement.product.id, title="View Finding", tab="findings")
     lastPos = (len(findings)) - 1
     return render(
@@ -325,7 +333,8 @@ def view_finding(request, fid):
             'prev_finding': prev_finding,
             'next_finding': next_finding,
             'duplicate_cluster': duplicate_cluster(request, finding),
-            'similar_findings': similar_findings(request, finding)
+            'similar_findings': similar_findings,
+            'similar_findings_filter': similar_findings_filter
         })
 
 
@@ -2182,8 +2191,11 @@ def finding_unlink_jira(request, finding):
     finding.notes.add(new_note)
 
 
-def similar_findings(request, finding):
+def get_similar_findings(request, finding):
     similar = Finding.objects.all()
+
+    if not request.user.is_staff:
+        similar = similar.filter(test__engagement__product__authorized_users__in=[request.user])
 
     if finding.test.engagement.deduplication_on_engagement:
         similar = similar.filter(test__engagement=finding.test.engagement)
@@ -2224,9 +2236,12 @@ def similar_findings(request, finding):
 def duplicate_cluster(request, finding):
     duplicate_cluster = finding.duplicate_finding_set()
 
+    duplicate_cluster = prefetch_for_findings(duplicate_cluster)
+
     # populate actions for findings in duplicate cluster
     for duplicate_member in duplicate_cluster:
         duplicate_member.related_actions = calculate_possible_related_actions_for_similar_finding(request, finding, duplicate_member)
+        logger.debug('dupe: jira_conf_new: %s', duplicate_member.jira_conf_new())
 
     return duplicate_cluster
 
@@ -2268,6 +2283,6 @@ def calculate_possible_related_actions_for_similar_finding(request, finding, sim
                 actions.append({'action': 'mark_finding_duplicate', 'reason': 'Will mark this finding as duplicate of the finding on this page.'})
                 actions.append({'action': 'set_finding_as_original', 'reason': 'Sets this finding as the Original marking the finding on this page as duplicate of this original.'})
 
-    # logger.debug('related_actions for %i: %s', similar_finding.id, {finding.id: actions})
+    logger.debug('related_actions for %i: %s', similar_finding.id, {finding.id: actions})
 
     return actions
