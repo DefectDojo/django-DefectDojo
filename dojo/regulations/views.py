@@ -13,6 +13,7 @@ from dojo.models import Regulation
 
 logger = logging.getLogger(__name__)
 
+
 @user_passes_test(lambda u: u.is_staff)
 def new_regulation(request):
     if request.method == 'POST':
@@ -63,9 +64,9 @@ def edit_regulations(request, ttid):
 
 @user_passes_test(lambda u: u.is_staff)
 def regulations(request):
-     confs = Regulation.objects.all().order_by('name')
-     add_breadcrumb(title="Regulations", top_level=not len(request.GET), request=request)
-     return render(request,
-                   'dojo/regulations.html',
-                   {'confs': confs,
-                    })
+    confs = Regulation.objects.all().order_by('name')
+    add_breadcrumb(title="Regulations", top_level=not len(request.GET), request=request)
+    return render(request,
+                  'dojo/regulations.html',
+                  {'confs': confs,
+                   })

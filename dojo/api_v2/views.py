@@ -755,6 +755,7 @@ class ToolTypesViewSet(mixins.ListModelMixin,
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'name', 'description')
 
+
 class RegulationsViewSet(mixins.ListModelMixin,
                          mixins.RetrieveModelMixin,
                          mixins.CreateModelMixin,
