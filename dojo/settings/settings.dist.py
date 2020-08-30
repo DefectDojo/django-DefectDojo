@@ -371,7 +371,7 @@ SAML2_AUTH = {
 }
 
 # Metadata is required, choose either remote url or local file path
-if 'DD_SAML2_METADATA_AUTO_CONF_URL' in os.environ:
+if 'DD_SAML2_METADATA_AUTO_CONF_URL' in os.environ or len(env('DD_SAML2_METADATA_AUTO_CONF_URL')) > 0:
     SAML2_AUTH['METADATA_AUTO_CONF_URL'] = env('DD_SAML2_METADATA_AUTO_CONF_URL')
 else:
     SAML2_AUTH['METADATA_LOCAL_FILE_PATH'] = env('DD_SAML2_METADATA_LOCAL_FILE_PATH')
