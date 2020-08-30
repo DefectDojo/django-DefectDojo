@@ -12,7 +12,7 @@ class AWSScout2Parser(object):
     pdepth = 0
 
     def __init__(self, filename, test):
-        raw_data = filename.read()
+        raw_data = filename.read()  # noqa
         raw_data = raw_data.replace("aws_info =", "")
         data = json.loads(raw_data)
         find_date = datetime.now()
