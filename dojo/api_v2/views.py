@@ -289,6 +289,9 @@ class FindingViewSet(mixins.ListModelMixin,
             note.save()
             finding.notes.add(note)
 
+            if finding.has_jira_issue():
+                add_comment_task(finding, note)
+
             serialized_note = serializers.NoteSerializer({
                 "author": author, "entry": entry,
                 "private": private
@@ -467,7 +470,6 @@ class SonarqubeProductViewSet(mixins.ListModelMixin,
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'product', 'sonarqube_project_key',
                      'sonarqube_tool_config')
-
 
 
 class DojoMetaViewSet(mixins.ListModelMixin,
