@@ -15,8 +15,8 @@ env:
     - BROKER=rabbitmq DATABASE=postgresql
     - BROKER=redis DATABASE=mysql
     - BROKER=redis DATABASE=postgresql
-    - BROKER=redismq DATABASE=postgresql REPLICATION=enabled
-#    - BROKER=redismq DATABASE=mysql REPLICATION=enabled
+    - BROKER=rabbitmq DATABASE=postgresql REPLICATION=enabled
+    - BROKER=rabbitmq DATABASE=postgresql EXTRAVAL=enabled
     - TEST=snyk
 matrix:
   allow_failures:

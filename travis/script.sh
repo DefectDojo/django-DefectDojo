@@ -128,7 +128,20 @@ if [ -z "${TEST}" ]; then
       --set postgresql.replication.enabled=true \
     "
     ;;
-esac
+  esac
+  # Test does it propagates extra vars and secrets
+  case "${EXTRAVAL}" in
+    enabled)
+    HELM_DATABASE_SETTINGS=" \
+      --set database=postgresql \
+      --set postgresql.enabled=true \
+      --set mysql.enabled=false \
+      --set createPostgresqlSecret=true \
+      --set extraConfigs.DD_EXAMPLE_CONFIG=test \
+      --set extraSecrets.DD_EXAMPLE_SECRET=test \
+    "
+    ;;
+  esac
   # Install DefectDojo into Kubernetes and wait for it
   sudo helm install \
     ./helm/defectdojo \
