@@ -15,12 +15,14 @@ env:
     - BROKER=rabbitmq DATABASE=postgresql
     - BROKER=redis DATABASE=mysql
     - BROKER=redis DATABASE=postgresql
+    - BROKER=redismq DATABASE=postgresql REPLICATION=enabled
+#    - BROKER=redismq DATABASE=mysql REPLICATION=enabled
     - TEST=snyk
-matrix: 
+matrix:
   allow_failures:
     - env: TEST=snyk
 jobs:
-  include:  
+  include:
     - stage: deploy
       env: TEST=deploy
 before_install: ['./travis/before-install.sh']

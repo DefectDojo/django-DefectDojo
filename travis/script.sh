@@ -71,7 +71,7 @@ if [ -z "${TEST}" ]; then
   sudo helm dependency update ./helm/defectdojo
 
   # Set Helm settings for the broker
-  case "${BROKER}" in 
+  case "${BROKER}" in
     rabbitmq)
       HELM_BROKER_SETTINGS=" \
         --set redis.enabled=false \
@@ -118,6 +118,17 @@ if [ -z "${TEST}" ]; then
       ;;
   esac
 
+  case "${REPLICATION}" in
+    enabled)
+    HELM_DATABASE_SETTINGS=" \
+      --set database=postgresql \
+      --set postgresql.enabled=true \
+      --set mysql.enabled=false \
+      --set createPostgresqlSecret=true \
+      --set postgresql.replication.enabled=true \
+    "
+    ;;
+esac
   # Install DefectDojo into Kubernetes and wait for it
   sudo helm install \
     ./helm/defectdojo \
