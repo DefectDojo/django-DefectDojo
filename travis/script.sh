@@ -176,12 +176,16 @@ if [ -z "${TEST}" ]; then
 
   # Test is extra config injected
   travis_fold start defectdojo_tests_extravars
-  if [[ "${HELM_CONFIG_SECRET_SETTINGS}" == "enabled"]];
+  if [[ "${HELM_CONFIG_SECRET_SETTINGS}" == "enabled" ]]
   then
-    sudo kubectl exec -i $(sudo kubectl get pods -o name | grep django | \
-    sed "s/pod\///g") -c uwsgi printenv | grep testme
+    items = `sudo kubectl exec -i $(sudo kubectl get pods -o name | grep django | \
+    sed "s/pod\///g") -c uwsgi printenv | grep testme | wc -l`
+    echo "Number of items $items"
+    if [[ $items < 2 ]]; then
+      return_value=1
+    fi
   fi
-
+  travis_fold end defectdojo_tests_extravars
   # Run all tests
   travis_fold start defectdojo_tests
   echo "Running tests."
