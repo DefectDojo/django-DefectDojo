@@ -12,7 +12,7 @@ class AWSScout2Parser(object):
     pdepth = 0
 
     def __init__(self, filename, test):
-        #filename is instance of class 'django.core.files.uploadedfile.TemporaryUploadedFile'>
+        # filename is instance of class 'django.core.files.uploadedfile.TemporaryUploadedFile'>
         with open(filename.temporary_file_path(), "r") as fileobj:
             raw_data = fileobj.read()
             raw_data = raw_data.replace("aws_info =", "")

@@ -472,7 +472,6 @@ class SonarqubeProductViewSet(mixins.ListModelMixin,
                      'sonarqube_tool_config')
 
 
-
 class DojoMetaViewSet(mixins.ListModelMixin,
                      mixins.RetrieveModelMixin,
                      mixins.DestroyModelMixin,
