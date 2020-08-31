@@ -178,7 +178,7 @@ if [ -z "${TEST}" ]; then
   travis_fold start defectdojo_tests_extravars
   if [[ "${EXTRAVAL}" == "enabled" ]]
   then
-    items = `sudo kubectl exec -i $(sudo kubectl get pods -o name | grep django | \
+    items=`sudo kubectl exec -i $(sudo kubectl get pods -o name | grep django | \
     sed "s/pod\///g") -c uwsgi printenv | grep testme | wc -l`
     echo "Number of items $items"
     if [[ $items < 2 ]]; then
