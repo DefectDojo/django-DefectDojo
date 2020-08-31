@@ -176,7 +176,7 @@ if [ -z "${TEST}" ]; then
 
   # Test is extra config injected
   travis_fold start defectdojo_tests_extravars
-  if [[ "${HELM_CONFIG_SECRET_SETTINGS}" == "enabled" ]]
+  if [[ "${EXTRAVAL}" == "enabled" ]]
   then
     items = `sudo kubectl exec -i $(sudo kubectl get pods -o name | grep django | \
     sed "s/pod\///g") -c uwsgi printenv | grep testme | wc -l`
