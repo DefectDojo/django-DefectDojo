@@ -189,7 +189,7 @@ redis:
   cluster:
     slaveCount: 1
 
-# To add extra variables, that are not predefined it is possible to define in extraConfigs block, e.g. below:
+# To add extra variables not predefined by helm config it is possible to define in extraConfigs block, e.g. below:
 # NOTE  Do not store any kind of sensitive information inside of it
 # extraConfig:
 #  DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED: 'true'
