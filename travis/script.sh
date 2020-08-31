@@ -132,13 +132,9 @@ if [ -z "${TEST}" ]; then
   # Test does it propagates extra vars and secrets
   case "${EXTRAVAL}" in
     enabled)
-    HELM_DATABASE_SETTINGS=" \
-      --set database=postgresql \
-      --set postgresql.enabled=true \
-      --set mysql.enabled=false \
-      --set createPostgresqlSecret=true \
-      --set extraConfigs.DD_EXAMPLE_CONFIG=test \
-      --set extraSecrets.DD_EXAMPLE_SECRET=test \
+    HELM_CONFIG_SECRET_SETTINGS=" \
+      --set extraConfigs.DD_EXAMPLE_CONFIG=testme \
+      --set extraSecrets.DD_EXAMPLE_SECRET=testme \
     "
     ;;
   esac
@@ -150,6 +146,7 @@ if [ -z "${TEST}" ]; then
     --set imagePullPolicy=Never \
     ${HELM_BROKER_SETTINGS} \
     ${HELM_DATABASE_SETTINGS} \
+    ${HELM_CONFIG_SECRET_SETTINGS} \
     --set createSecret=true
 
 
@@ -176,6 +173,14 @@ if [ -z "${TEST}" ]; then
   echo "DefectDojo is up and running."
   sudo kubectl get pods
   travis_fold end minikube_install
+
+  # Test is extra config injected
+  travis_fold start defectdojo_tests_extravars
+  if [[ "${HELM_CONFIG_SECRET_SETTINGS}" == "enabled"]];
+  then
+    sudo kubectl exec -i $(sudo kubectl get pods -o name | grep django | \
+    sed "s/pod\///g") -c uwsgi printenv | grep testme
+  fi
 
   # Run all tests
   travis_fold start defectdojo_tests
