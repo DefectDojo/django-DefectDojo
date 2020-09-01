@@ -163,7 +163,7 @@
                                   </sup>
                                 </td>
                                 <td>
-                                    <a href="{% url 'view_engagement' finding.object.test.engagement.id %}">{{ finding.object.test.engagement.name }}</a>
+                                    {% comment %} <a href="{% url 'view_engagement' finding.object.test.engagement.id %}">{{ finding.object.test.engagement.name }}</a> {% endcomment %}
                                 </td>
                                 <td>
                                     <a href="{% url 'view_test' finding.object.test.id %}">
