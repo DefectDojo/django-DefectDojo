@@ -90,7 +90,7 @@
                                         <a class="search-finding"
                                             href="{% url 'view_product' product.object.id %}">{{ product.object.name }}</a>
                                     {% else %}
-                                        {{ product.object.name }}
+                                        VALENTIJN{{ product.object.name }}
                                     {% endif %}
                                     <sup>
                                         {% for tag in product.object.tags %}
@@ -129,8 +129,14 @@
                                      {{ finding.object.severity_display }}
                                   </span>
                                 </td>
-                                <td><a class="search-finding"
-                                       href="{% url 'view_finding' finding.object.id %}">{{ finding.object.title }}</a>
+                                <td>
+                                    {% comment %} it appears sometimes the finding id is missing from the search index, even after rebuilding the watson index {% endcomment %}
+                                    {% if finding.object.id %}
+                                        <a class="search-finding"
+                                        href="{% url 'view_finding' finding.object.id %}">{{ finding.object.title }}</a>
+                                    {% else %}
+                                        VALENTIJN{{ finding.object.title }}
+                                    {% endif %}
                                     <sup>
                                         {% for tag in finding.object.tags %}
                                             <a title="Search {{ tag }}" class="tag-label tag-color"
@@ -146,8 +152,8 @@
                                 <td>
                                     {% if finding.object.test.engagement.product.id %}
                                         <a href="{% url 'view_product' finding.object.test.engagement.product.id %}">{{ finding.object.test.engagement.product.name }}</a>
-                                    {% else %
-                                        {{ finding.object.test.engagement.product.name }}
+                                    {% else %}
+                                        VALENTIJN{{ finding.object.test.engagement.product.name }}
                                     {% endif %}
                                   <sup>
                                       {% for tag in finding.object.test.engagement.product.tags %}
