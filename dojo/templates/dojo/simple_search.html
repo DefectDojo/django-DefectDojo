@@ -135,7 +135,7 @@
                                         <a class="search-finding"
                                         href="{% url 'view_finding' finding.object.id %}">{{ finding.object.title }}</a>
                                     {% else %}
-                                        VALENTIJN{{ finding.object.title }}
+                                        {{ finding.id }}{{finding.title}}{{ finding.object.title }}
                                     {% endif %}
                                     <sup>
                                         {% for tag in finding.object.tags %}
