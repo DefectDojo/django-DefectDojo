@@ -123,8 +123,14 @@
                                      {{ finding.object.severity_display }}
                                   </span>
                                 </td>
-                                <td><a class="search-finding"
-                                       href="{% url 'view_finding' finding.object.id %}">{{ finding.object.title }}</a>
+                                <td>
+                                    {% comment %} it appears sometimes the finding id is missing from the search index, even after rebuilding the watson index {% endcomment %}
+                                    {% if finding.object.id %}
+                                        <a class="search-finding"
+                                        href="{% url 'view_finding' finding.object.id %}">{{ finding.object.title }}</a>
+                                    {% else %}
+                                        {{ finding.object.title }}
+                                    {% endif %}
                                     <sup>
                                         {% for tag in finding.object.tags %}
                                             <a title="Search {{ tag }}" class="tag-label tag-color"
