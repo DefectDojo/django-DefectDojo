@@ -18,17 +18,17 @@ class AWSProwlerParser(object):
         df = pd.read_csv(filename, header=0, error_bad_lines=False)
 
         for i, row in df.iterrows():
-            profile = df.ix[i, 'PROFILE']
-            account = df.ix[i, 'ACCOUNT_NUM']
-            region = df.ix[i, 'REGION']
-            title_id = df.ix[i, 'TITLE_ID']
-            result = df.ix[i, 'RESULT']
-            scored = df.ix[i, 'SCORED']
-            level = df.ix[i, 'LEVEL']
-            title_text = df.ix[i, 'TITLE_TEXT']
+            profile = df.loc[i, 'PROFILE']
+            account = df.loc[i, 'ACCOUNT_NUM']
+            region = df.loc[i, 'REGION']
+            title_id = df.loc[i, 'TITLE_ID']
+            result = df.loc[i, 'RESULT']
+            scored = df.loc[i, 'SCORED']
+            level = df.loc[i, 'LEVEL']
+            title_text = df.loc[i, 'TITLE_TEXT']
             title_text = re.sub(r'\[.*\]\s', '', title_text)
             title_text_trunc = Truncator(title_text).words(8)
-            notes = df.ix[i, 'NOTES']
+            notes = df.loc[i, 'NOTES']
 
             sev = self.getCriticalityRating(result, level)
             description = "**Region:** " + region + "\n\n" + notes + "\n"
