@@ -83,9 +83,17 @@
                         </thead>
                         <tbody>
                         {% for product in products %}
+                            {% comment %} sometimes the index contains references to findings that no longer exist. even after rebuilding the index. {% endcomment %}
+                            {% if product.object.id %}                        
                             <tr>
-                                <td><a class="search-finding"
-                                       href="{% url 'view_product' product.object.id %}">{{ product.object.name }}</a>
+                                <td>
+                                    {% comment %} it appears sometimes the finding id is missing from the search index, even after rebuilding the watson index {% endcomment %}
+                                    {% if product.object.id %}
+                                        <a class="search-finding"
+                                            href="{% url 'view_product' product.object.id %}">{{ product.object.name }}</a>
+                                    {% else %}
+                                        VALENTIJN{{ product.object.name }}
+                                    {% endif %}
                                     <sup>
                                         {% for tag in product.object.tags %}
                                             <a title="Search {{ tag }}" class="tag-label tag-color"
@@ -95,6 +103,7 @@
                                 </td>
                                 <td>{{ product.object.description|truncatechars_html:150|markdown_render }}</td>
                             </tr>
+                            {% endif %}
                         {% endfor %}
                         </tbody>
                     </table>
@@ -117,47 +126,52 @@
                         </thead>
                         <tbody>
                         {% for finding in findings %}
-                            <tr>
-                                <td>
-                                  <span class="label severity severity-{{ finding.object.severity }}">
-                                     {{ finding.object.severity_display }}
-                                  </span>
-                                </td>
-                                <td><a class="search-finding"
-                                       href="{% url 'view_finding' finding.object.id %}">{{ finding.object.title }}</a>
-                                    <sup>
-                                        {% for tag in finding.object.tags %}
-                                            <a title="Search {{ tag }}" class="tag-label tag-color"
-                                               href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
-                                        {% endfor %}
-                                    </sup>
-                                </td>
-                                <td>
-                                    {{ finding.object.status }}
-                                    {% if finding.object.duplicate_finding.id %}, <a href="{% url 'view_finding' finding.object.duplicate_finding.id%}" data-toggle="tooltip" data-placement="top" title="{{ finding.object.title }}, {{ finding.object.created }}">Original</a>{% endif %}
-                                </td>
-                                <td>{{ finding.object.date }}</td>
-                                <td><a href="{% url 'view_product' finding.object.test.engagement.product.id %}">{{ finding.object.test.engagement.product.name }}</a>
-                                  <sup>
-                                      {% for tag in finding.object.test.engagement.product.tags %}
-                                          <a title="Search {{ tag }}" class="tag-label tag-color"
-                                             href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
-                                      {% endfor %}
-                                  </sup>
-                                </td>
-                                <td>
-                                    <a href="{% url 'view_engagement' finding.object.test.engagement.id %}">{{ finding.object.test.engagement.name }}</a>
-                                </td>
-                                <td>
-                                    <a href="{% url 'view_test' finding.object.test.id %}">
-                                        {% if finding.object.test.title is None %}
-                                            {{finding.object.test.test_type}}
-                                        {% else %}
-                                            {{finding.object.test.title }}
-                                        {% endif %}
-                                    </a>
-                                </td>
-                            </tr>
+                            {% comment %} sometimes the index contains references to findings that no longer exist. even after rebuilding the index. {% endcomment %}
+                            {% if finding.object.id %}
+                                <tr>
+                                    <td>
+                                    <span class="label severity severity-{{ finding.object.severity }}">
+                                        {{ finding.object.severity_display }}
+                                    </span>
+                                    </td>
+                                    <td>
+                                        <a class="search-finding"
+                                        href="{% url 'view_finding' finding.object.id %}">{{ finding.object.title }}</a>
+                                        <sup>
+                                            {% for tag in finding.object.tags %}
+                                                <a title="Search {{ tag }}" class="tag-label tag-color"
+                                                href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                            {% endfor %}
+                                        </sup>
+                                    </td>
+                                    <td>
+                                        {{ finding.object.status }}
+                                        {% if finding.object.duplicate_finding.id %}, <a href="{% url 'view_finding' finding.object.duplicate_finding.id%}" data-toggle="tooltip" data-placement="top" title="{{ finding.object.title }}, {{ finding.object.created }}">Original</a>{% endif %}
+                                    </td>
+                                    <td>{{ finding.object.date }}</td>
+                                    <td>
+                                        <a href="{% url 'view_product' finding.object.test.engagement.product.id %}">{{ finding.object.test.engagement.product.name }}</a>
+                                        <sup>
+                                            {% for tag in finding.object.test.engagement.product.tags %}
+                                                <a title="Search {{ tag }}" class="tag-label tag-color"
+                                                    href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                            {% endfor %}
+                                        </sup>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'view_engagement' finding.object.test.engagement.id %}">{{ finding.object.test.engagement.name }}</a>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'view_test' finding.object.test.id %}">
+                                            {% if finding.object.test.title is None %}
+                                                {{finding.object.test.test_type}}
+                                            {% else %}
+                                                {{finding.object.test.title }}
+                                            {% endif %}
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endif %}
                         {% endfor %}
                         </tbody>
                     </table>
@@ -176,6 +190,8 @@
                         </thead>
                         <tbody>
                         {% for finding_template in finding_templates %}
+                            {% comment %} sometimes the index contains references to findings that no longer exist. even after rebuilding the index. {% endcomment %}
+                            {% if finding_template.object.id %}                            
                             <tr>
                                 <td><a class="search-finding"
                                        href="{% url 'edit_template' finding_template.object.id %}">{{ finding_template.object.title }}</a>
@@ -188,6 +204,7 @@
                                 </td>
                                 <td>{{ finding_template.object.description }}</td>
                             </tr>
+                            {% endif %}
                         {% endfor %}
                         </tbody>
                     </table>
@@ -208,6 +225,8 @@
                         </thead>
                         <tbody>
                         {% for engagement in engagements %}
+                            {% comment %} sometimes the index contains references to findings that no longer exist. even after rebuilding the index. {% endcomment %}
+                            {% if engagement.object.id %}                            
                             <tr>
                                 <td><a class="search-finding"
                                        href="{% url 'view_engagement' engagement.object.id %}">{{ engagement.object.name }}</a>
@@ -229,6 +248,7 @@
                                 <td>{{ engagement.object.target_start|date }} - {{ engagement.object.target_end|date }}</td>
                                 <td>{{ engagement.object.status }}</td>
                             </tr>
+                            {% endif %}                            
                         {% endfor %}
                         </tbody>
                     </table>
@@ -250,6 +270,8 @@
                         </thead>
                         <tbody>
                         {% for test in tests %}
+                            {% comment %} sometimes the index contains references to findings that no longer exist. even after rebuilding the index. {% endcomment %}
+                            {% if test.object.id %}                            
                             <tr>
                                 <td><a class="search-finding"
                                        href="{% url 'view_test' test.object.id %}">{{ test.object.test_type }}</a>
@@ -279,6 +301,7 @@
                                 <td>{{ test.object.engagement.target_start|date }} - {{ test.object.engagement.target_end|date }}</td>
                                 <td>{{ test.object.engagement.status }}</td>
                             </tr>
+                            {% endif %}                            
                         {% endfor %}
                         </tbody>
                     </table>
