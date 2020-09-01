@@ -41,6 +41,7 @@ def simple_search(request):
 
     if request.method == 'GET' and "query" in request.GET:
         form = SimpleSearchForm(request.GET)
+        original_clean_query = ""
         if form.is_valid():
             cookie = True
             clean_query = form.cleaned_data['query']
