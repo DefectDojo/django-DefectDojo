@@ -26,14 +26,13 @@ build_containers() {
 
 return_value=0
 if [ -z "${TEST}" ]; then
-  eval $(minikube docker-env)
-  build_containers
   # Start Minikube
   travis_fold start minikube_install
   minikube start \
     --driver=docker \
     --kubernetes-version="${K8S_VERSION}"
-
+  eval $(minikube docker-env)
+  build_containers
   # Configure Kubernetes context and test it
   minikube update-context
   kubectl cluster-info
