@@ -123,58 +123,52 @@
                         </thead>
                         <tbody>
                         {% for finding in findings %}
-                            <tr>
-                                <td>
-                                  <span class="label severity severity-{{ finding.object.severity }}">
-                                     {{ finding.object.severity_display }}
-                                  </span>
-                                </td>
-                                <td>
-                                    {% comment %} it appears sometimes the finding id is missing from the search index, even after rebuilding the watson index {% endcomment %}
-                                    {% if finding.object.id %}
+                            {% comment %} sometimes the index contains references to findings that no longer exist. even after rebuilding the index. {% endcomment %}
+                            {% if finding.object.id %}
+                                <tr>
+                                    <td>
+                                    <span class="label severity severity-{{ finding.object.severity }}">
+                                        {{ finding.object.severity_display }}
+                                    </span>
+                                    </td>
+                                    <td>
                                         <a class="search-finding"
                                         href="{% url 'view_finding' finding.object.id %}">{{ finding.object.title }}</a>
-                                    {% else %}
-                                        {{ finding.id }}{{finding.title}}{{ finding.object.title }}
-                                    {% endif %}
-                                    <sup>
-                                        {% for tag in finding.object.tags %}
-                                            <a title="Search {{ tag }}" class="tag-label tag-color"
-                                               href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
-                                        {% endfor %}
-                                    </sup>
-                                </td>
-                                <td>
-                                    {{ finding.object.status }}
-                                    {% if finding.object.duplicate_finding.id %}, <a href="{% url 'view_finding' finding.object.duplicate_finding.id%}" data-toggle="tooltip" data-placement="top" title="{{ finding.object.title }}, {{ finding.object.created }}">Original</a>{% endif %}
-                                </td>
-                                <td>{{ finding.object.date }}</td>
-                                <td>
-                                    {% if finding.object.test.engagement.product.id %}
+                                        <sup>
+                                            {% for tag in finding.object.tags %}
+                                                <a title="Search {{ tag }}" class="tag-label tag-color"
+                                                href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                            {% endfor %}
+                                        </sup>
+                                    </td>
+                                    <td>
+                                        {{ finding.object.status }}
+                                        {% if finding.object.duplicate_finding.id %}, <a href="{% url 'view_finding' finding.object.duplicate_finding.id%}" data-toggle="tooltip" data-placement="top" title="{{ finding.object.title }}, {{ finding.object.created }}">Original</a>{% endif %}
+                                    </td>
+                                    <td>{{ finding.object.date }}</td>
+                                    <td>
                                         <a href="{% url 'view_product' finding.object.test.engagement.product.id %}">{{ finding.object.test.engagement.product.name }}</a>
-                                    {% else %}
-                                        VALENTIJN{{ finding.object.test.engagement.product.name }}
-                                    {% endif %}
-                                  <sup>
-                                      {% for tag in finding.object.test.engagement.product.tags %}
-                                          <a title="Search {{ tag }}" class="tag-label tag-color"
-                                             href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
-                                      {% endfor %}
-                                  </sup>
-                                </td>
-                                <td>
-                                    {% comment %} <a href="{% url 'view_engagement' finding.object.test.engagement.id %}">{{ finding.object.test.engagement.name }}</a> {% endcomment %}
-                                </td>
-                                <td>
-                                    {% comment %} <a href="{% url 'view_test' finding.object.test.id %}"> {% endcomment %}
-                                        {% if finding.object.test.title is None %}
-                                            {{finding.object.test.test_type}}
-                                        {% else %}
-                                            {{finding.object.test.title }}
-                                        {% endif %}
-                                    </a>
-                                </td>
-                            </tr>
+                                        <sup>
+                                            {% for tag in finding.object.test.engagement.product.tags %}
+                                                <a title="Search {{ tag }}" class="tag-label tag-color"
+                                                    href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                            {% endfor %}
+                                        </sup>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'view_engagement' finding.object.test.engagement.id %}">{{ finding.object.test.engagement.name }}</a>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'view_test' finding.object.test.id %}">
+                                            {% if finding.object.test.title is None %}
+                                                {{finding.object.test.test_type}}
+                                            {% else %}
+                                                {{finding.object.test.title }}
+                                            {% endif %}
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endif %}
                         {% endfor %}
                         </tbody>
                     </table>
