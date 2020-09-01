@@ -83,6 +83,8 @@
                         </thead>
                         <tbody>
                         {% for product in products %}
+                            {% comment %} sometimes the index contains references to findings that no longer exist. even after rebuilding the index. {% endcomment %}
+                            {% if product.object.id %}                        
                             <tr>
                                 <td>
                                     {% comment %} it appears sometimes the finding id is missing from the search index, even after rebuilding the watson index {% endcomment %}
@@ -101,6 +103,7 @@
                                 </td>
                                 <td>{{ product.object.description|truncatechars_html:150|markdown_render }}</td>
                             </tr>
+                            {% endif %}
                         {% endfor %}
                         </tbody>
                     </table>
@@ -187,6 +190,8 @@
                         </thead>
                         <tbody>
                         {% for finding_template in finding_templates %}
+                            {% comment %} sometimes the index contains references to findings that no longer exist. even after rebuilding the index. {% endcomment %}
+                            {% if finding_template.object.id %}                            
                             <tr>
                                 <td><a class="search-finding"
                                        href="{% url 'edit_template' finding_template.object.id %}">{{ finding_template.object.title }}</a>
@@ -199,6 +204,7 @@
                                 </td>
                                 <td>{{ finding_template.object.description }}</td>
                             </tr>
+                            {% endif %}
                         {% endfor %}
                         </tbody>
                     </table>
@@ -219,6 +225,8 @@
                         </thead>
                         <tbody>
                         {% for engagement in engagements %}
+                            {% comment %} sometimes the index contains references to findings that no longer exist. even after rebuilding the index. {% endcomment %}
+                            {% if engagement.object.id %}                            
                             <tr>
                                 <td><a class="search-finding"
                                        href="{% url 'view_engagement' engagement.object.id %}">{{ engagement.object.name }}</a>
@@ -240,6 +248,7 @@
                                 <td>{{ engagement.object.target_start|date }} - {{ engagement.object.target_end|date }}</td>
                                 <td>{{ engagement.object.status }}</td>
                             </tr>
+                            {% endif %}                            
                         {% endfor %}
                         </tbody>
                     </table>
@@ -261,6 +270,8 @@
                         </thead>
                         <tbody>
                         {% for test in tests %}
+                            {% comment %} sometimes the index contains references to findings that no longer exist. even after rebuilding the index. {% endcomment %}
+                            {% if test.object.id %}                            
                             <tr>
                                 <td><a class="search-finding"
                                        href="{% url 'view_test' test.object.id %}">{{ test.object.test_type }}</a>
@@ -290,6 +301,7 @@
                                 <td>{{ test.object.engagement.target_start|date }} - {{ test.object.engagement.target_end|date }}</td>
                                 <td>{{ test.object.engagement.status }}</td>
                             </tr>
+                            {% endif %}                            
                         {% endfor %}
                         </tbody>
                     </table>
