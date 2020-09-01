@@ -84,8 +84,14 @@
                         <tbody>
                         {% for product in products %}
                             <tr>
-                                <td><a class="search-finding"
-                                       href="{% url 'view_product' product.object.id %}">{{ product.object.name }}</a>
+                                <td>
+                                    {% comment %} it appears sometimes the finding id is missing from the search index, even after rebuilding the watson index {% endcomment %}
+                                    {% if product.object.id %}
+                                        <a class="search-finding"
+                                            href="{% url 'view_product' product.object.id %}">{{ product.object.name }}</a>
+                                    {% else %}
+                                        {{ product.object.name }}
+                                    {% endif %}
                                     <sup>
                                         {% for tag in product.object.tags %}
                                             <a title="Search {{ tag }}" class="tag-label tag-color"
