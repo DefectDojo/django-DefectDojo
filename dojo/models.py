@@ -1543,30 +1543,6 @@ class Finding(models.Model):
 
         return False
 
-    @property
-    def similar_findings(self):
-        similar = Finding.objects.all()
-
-        if self.test.engagement.deduplication_on_engagement:
-            similar = similar.filter(test__engagement=self.test.engagement)
-        else:
-            similar = similar.filter(test__engagement__product=self.test.engagement.product)
-
-        if self.cve:
-            similar = similar.filter(cve=self.cve)
-        if self.cwe:
-            similar = similar.filter(cwe=self.cwe)
-        if self.file_path:
-            similar = similar.filter(file_path=self.file_path)
-        if self.line:
-            similar = similar.filter(line=self.line)
-        if self.unique_id_from_tool:
-            similar = similar.filter(unique_id_from_tool=self.unique_id_from_tool)
-
-        identical = Finding.objects.all().filter(test__engagement__product=self.test.engagement.product).filter(hash_code=self.hash_code).exclude(pk=self.pk)
-
-        return (similar.exclude(pk=self.pk) | identical)[:10]
-
     def compute_hash_code(self):
         if hasattr(settings, 'HASHCODE_FIELDS_PER_SCANNER') and hasattr(settings, 'HASHCODE_ALLOWS_NULL_CWE') and hasattr(settings, 'HASHCODE_ALLOWED_FIELDS'):
             # Default fields
@@ -1663,8 +1639,9 @@ class Finding(models.Model):
     def duplicate_finding_set(self):
         if self.duplicate:
             if self.duplicate_finding is not None:
-                return Finding.objects.get(
+                originals = Finding.objects.get(
                     id=self.duplicate_finding.id).original_finding.all().order_by('title')
+                return originals  # we need to add the duplicate_finding  here as well
             else:
                 return []
         else:
