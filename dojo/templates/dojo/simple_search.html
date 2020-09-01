@@ -166,7 +166,7 @@
                                     {% comment %} <a href="{% url 'view_engagement' finding.object.test.engagement.id %}">{{ finding.object.test.engagement.name }}</a> {% endcomment %}
                                 </td>
                                 <td>
-                                    <a href="{% url 'view_test' finding.object.test.id %}">
+                                    {% comment %} <a href="{% url 'view_test' finding.object.test.id %}"> {% endcomment %}
                                         {% if finding.object.test.title is None %}
                                             {{finding.object.test.test_type}}
                                         {% else %}
