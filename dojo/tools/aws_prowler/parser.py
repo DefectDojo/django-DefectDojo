@@ -14,6 +14,7 @@ class AWSProwlerParser(object):
     def __init__(self, filename, test):
         find_date = datetime.now()
         dupes = {}
+        account = None
 
         df = pd.read_csv(filename, header=0, error_bad_lines=False)
 
