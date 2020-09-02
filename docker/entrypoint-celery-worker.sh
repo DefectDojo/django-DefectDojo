@@ -20,5 +20,5 @@ C_FORCE_ROOT=true exec celery \
   worker \
   --loglevel="${DD_CELERY_LOG_LEVEL}" \
   --pool="${DD_CELERY_WORKER_POOL_TYPE}" \
-  --concurrency=${DD_CELERY_WORKER_CONCURRENCY} \
+  --concurrency=${DD_CELERY_WORKER_CONCURRENCY:-1} \
   ${EXTRA_PARAMS}
