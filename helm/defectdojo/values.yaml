@@ -67,8 +67,8 @@ celery:
     tolerations: []
     app_settings:
       pool_type: solo
-      # Performance improved celery worker config when needing to deal with a lot of findings.
-      # Comment out the "solo" line, and uncomment the following.
+      # Performance improved celery worker config when needing to deal with a lot of findings (e.g deduplication ops)
+      # Comment out the "solo" line, and uncomment the following lines.
       # pool_type: prefork
       # autoscale_min: 2
       # autoscale_max: 8
