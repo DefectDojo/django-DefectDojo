@@ -15,7 +15,7 @@ setup(
         'django-filter==2.3.0',
         'django-imagekit',
         'django-multiselectfield',
-        'django-polymorphic==1.2',
+        'django-polymorphic==3.0.0',
         'django-crispy-forms',
         'django_extensions',
         'django-rest-swagger==2.1.2',
