@@ -5,37 +5,13 @@ register = template.Library()
 
 @register.filter(name='get_vulnerable_endpoints')
 def get_vulnerable_endpoints(finding):
-    containsEndpointStatus = False
-    for obj in finding:
-        if (obj.endpoint_status == 'dojo.Endpoint_Status.None'):
-            containsEndpointStatus = True
-    if (not containsEndpointStatus):
-        return []
     status_list = finding.endpoint_status.all().filter(mitigated=False)
     return [status.endpoint for status in status_list]
 
 
 @register.filter(name='get_mitigated_endpoints')
 def get_mitigated_endpoints(finding):
-    containsEndpointStatus = False
-    for obj in finding:
-        if (obj.endpoint_status == 'dojo.Endpoint_Status.None'):
-            containsEndpointStatus = True
-    if (not containsEndpointStatus):
-        return []
     status_list = finding.endpoint_status.all().filter(mitigated=True)
-    return [status.endpoint for status in status_list]
-
-
-@register.filter(name='get_remediated_endpoints')
-def get_remediated_endpoints(finding):
-    containsEndpointStatus = False
-    for obj in finding:
-        if (obj.endpoint_status == 'dojo.Endpoint_Status.None'):
-            containsEndpointStatus = True
-    if (not containsEndpointStatus):
-        return []
-    status_list = finding.endpoint_status.all().filter(remediated=True)
     return [status.endpoint for status in status_list]
 
 
