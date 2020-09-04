@@ -1,5 +1,4 @@
 #!/bin/sh
-set -x
 umask 0002
 
 id
