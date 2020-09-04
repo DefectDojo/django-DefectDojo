@@ -1,6 +1,8 @@
 #!/bin/sh
-
+set -x
 umask 0002
+
+id
 
 echo -n "Waiting for database to be reachable "
 until echo "select 1;" | python3 manage.py dbshell > /dev/null
@@ -10,9 +12,8 @@ do
 done
 echo
 
-C_FORCE_ROOT=true exec celery \
-  --app=dojo \
-  worker \
-  --loglevel="${DD_CELERY_LOG_LEVEL}" \
-  --pool=solo \
-  --concurrency=1
+exec celery worker \
+    --app=dojo \
+    --loglevel="${DD_CELERY_LOG_LEVEL}" \
+    --pool=solo \
+    --concurrency=1

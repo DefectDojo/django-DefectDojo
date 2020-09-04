@@ -36,8 +36,12 @@ services:
       DD_CELERY_BROKER_PASSWORD: ${DD_CELERY_BROKER_USER:-guest}
       DD_SECRET_KEY: ${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}
       DD_CREDENTIAL_AES_256_KEY: ${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}
+    volumes:
+      - defectdojo_media:/app/media
   celerybeat:
     image: defectdojo/defectdojo-django:latest
+    # needed to run as root, in order to drop privileges on celery. what's worst?
+    user: root
     depends_on:
       - mysql
       - rabbitmq
@@ -89,3 +93,4 @@ services:
     image: rabbitmq:3.7.26@sha256:be00c655a6d4a1012358a3a51d57e2b33d926b181a65863a568adc103edfdb91
 volumes:
   defectdojo_data: {}
+  defectdojo_media: {}

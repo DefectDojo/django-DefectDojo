@@ -26,6 +26,9 @@ RUN pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
 
 FROM python:3.6.12-slim-buster@sha256:09bb81730d8d3f1b208d9c5ba4be66747ef29323597bedab6404b884a016685d
 WORKDIR /app
+ARG uid=1001
+ARG appuser=defectdojo
+ENV appuser ${appuser}
 RUN \
   apt-get -y update && \
   # ugly fix to install postgresql-client without errors
@@ -74,11 +77,19 @@ COPY tests/ ./tests/
 RUN \
   mkdir -p dojo/migrations && \
   chmod g=u dojo/migrations && \
-  chmod g=u /var/run && \
   true
 USER root
-RUN chmod -R 0777 /app
-USER 1001
+RUN \
+    adduser --system --no-create-home --disabled-password --gecos '' \
+        --uid ${uid} ${appuser}
+RUN \
+    chown -R ${appuser} /app && \
+    chmod 0700 /app && \
+    chmod 0750 -R /app/*
+RUN \
+    mkdir /var/run/${appuser} && \
+    chown ${appuser} /var/run/${appuser}
+USER ${appuser}
 ENV \
   DD_ADMIN_USER=admin \
   DD_ADMIN_MAIL=admin@defectdojo.local \
