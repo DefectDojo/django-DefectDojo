@@ -2242,7 +2242,7 @@ def calculate_possible_related_actions_for_similar_finding(request, finding, sim
     else:
         if similar_finding.duplicate_finding:
             # reset duplicate status is always possible
-            actions.append({'action': 'reset_finding_duplicate_status', 'reason': 'This will remove the finding from the cluster, effectively marking it no longer as duplicate'})
+            actions.append({'action': 'reset_finding_duplicate_status', 'reason': 'This will remove the finding from the cluster, effectively marking it no longer as duplicate. Will not trigger deduplication logic after saving.'})
 
             # logger.debug(similar_finding.duplicate_finding)
             # logger.debug(finding)
