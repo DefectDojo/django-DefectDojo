@@ -1009,7 +1009,7 @@ class FindingForm(forms.ModelForm):
         self.fields['simple_risk_accept'].initial = True if self.instance.is_simple_risk_accepted else False
 
         if self.instance.duplicate:
-            self.fields['duplicate'].help_text = "Original finding that is being duplicated here (readonly). Use view finding page to manage duplicate relationships. Unchecking duplicate here will reset this findings duplicate status."
+            self.fields['duplicate'].help_text = "Original finding that is being duplicated here (readonly). Use view finding page to manage duplicate relationships. Unchecking duplicate here will reset this findings duplicate status, but will trigger deduplication logic."
         else:
             self.fields['duplicate'].help_text = "You can mark findings as duplicate only from the view finding page."
 
