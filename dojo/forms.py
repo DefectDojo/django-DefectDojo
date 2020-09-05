@@ -1008,6 +1008,11 @@ class FindingForm(forms.ModelForm):
         self.fields['tags'].widget.choices = t
         self.fields['simple_risk_accept'].initial = True if self.instance.is_simple_risk_accepted else False
 
+        if self.instance.duplicate:
+            self.fields['duplicate'].help_text = "Original finding that is being duplicated here (readonly, use view finding page to manage duplicate relationships)"
+        else:
+            self.fields['duplicate'].help_text = "You can mark findings as duplicate only from the view finding page. Unchecking duplicate here will reset this findings duplicate status, but will run the deuplication logic after saving."
+
     def clean(self):
         cleaned_data = super(FindingForm, self).clean()
         if (cleaned_data['active'] or cleaned_data['verified']) and cleaned_data['duplicate']:
