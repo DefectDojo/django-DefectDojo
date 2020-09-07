@@ -657,6 +657,10 @@ def re_import_scan_results(request, tid):
                         sev = 'Info'
                         item.severity = sev
 
+                    # existing findings may be from before we had component_name/version fields
+                    component_name = item.component_name if hasattr(item, 'component_name') else None
+                    component_version = item.component_version if hasattr(item, 'component_version') else None
+
                     # If it doesn't clear minimum severity, move on
                     if Finding.SEVERITIES[sev] > Finding.SEVERITIES[min_sev]:
                         continue
@@ -688,6 +692,11 @@ def re_import_scan_results(request, tid):
                             finding.mitigated_by = None
                             finding.active = True
                             finding.verified = verified
+
+                            # existing findings may be from before we had component_name/version fields
+                            finding.component_name = finding.component_name if finding.component_name else component_name
+                            finding.component_version = finding.component_version if finding.component_version else component_version
+
                             finding.save()
                             note = Notes(
                                 entry="Re-activated by %s re-upload." % scan_type,
@@ -704,6 +713,13 @@ def re_import_scan_results(request, tid):
                                 status.save()
 
                             reactivated_count += 1
+                        else:
+                            # existing findings may be from before we had component_name/version fields
+                            if not finding.component_name or not finding.component_version:
+                                finding.component_name = finding.component_name if finding.component_name else component_name
+                                finding.component_version = finding.component_version if finding.component_version else component_version
+                                finding.save(dedupe_option=False, push_to_jira=False)
+
                         new_items.append(finding.id)
                     else:
                         item.test = test
@@ -714,6 +730,7 @@ def re_import_scan_results(request, tid):
                         item.last_reviewed_by = request.user
                         item.verified = verified
                         item.active = active
+
                         # Save it
                         item.save(dedupe_option=False)
                         finding_added_count += 1

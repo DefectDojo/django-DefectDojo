@@ -1,5 +1,5 @@
 # requirements.txt for DefectDojo using Python 3.x
-asteval==0.9.18
+asteval==0.9.19
 bleach>=3.1.0
 celery==4.4.7
 coverage==5.2.1
@@ -14,7 +14,7 @@ django-imagekit==4.0.2
 django-multiselectfield==0.1.12
 django-polymorphic==3.0.0
 django-crispy-forms==1.9.2
-django_extensions==3.0.5
+django_extensions==3.0.6
 django-rest-swagger==2.2.0
 django-slack==5.15.2
 django-tagging==0.5.0
@@ -22,7 +22,7 @@ git+https://github.com/DefectDojo/django-tastypie-swagger.git@c7c5629480dc20cadd
 django-tastypie==0.14.2
 django-watson==1.5.5
 django-prometheus==2.1.0
-Django==2.2.15
+Django==2.2.16
 djangorestframework==3.11.1
 gunicorn==20.0.4
 html2text==2020.1.16
@@ -60,6 +60,7 @@ google-auth-oauthlib==0.4.1
 drf_yasg==1.17.1
 jsonlines==1.2.0  # requred by yarn audit parser
 django-saml2-auth==2.2.1
+cpe==1.2.1
 django-cachalot==2.2.0
 django-debug-toolbar==2.2
 django-debug-toolbar-request-history==0.1.3

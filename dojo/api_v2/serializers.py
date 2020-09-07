@@ -869,9 +869,6 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
 
             for item in items:
                 sev = item.severity
-                # temp code to set component fields on existing findings
-                component_name = item.component_name if hasattr(item, 'component_name') else None
-                component_version = item.component_version if hasattr(item, 'component_version') else None
 
                 if sev == 'Information' or sev == 'Informational':
                     sev = 'Info'
@@ -879,6 +876,10 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 if (Finding.SEVERITIES[sev] >
                         Finding.SEVERITIES[min_sev]):
                     continue
+
+                # existing findings may be from before we had component_name/version fields
+                component_name = item.component_name if hasattr(item, 'component_name') else None
+                component_version = item.component_version if hasattr(item, 'component_version') else None
 
                 from titlecase import titlecase
                 item.title = titlecase(item.title)
@@ -905,9 +906,10 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                         finding.mitigated_by = None
                         finding.active = True
                         finding.verified = verified
-                        # temp code to set component fields on existing findings
-                        finding.component_name = component_name
-                        finding.component_version = component_version
+
+                        # existing findings may be from before we had component_name/version fields
+                        finding.component_name = finding.component_name if finding.component_name else component_name
+                        finding.component_version = finding.component_version if finding.component_version else component_version
 
                         finding.save()
                         note = Notes(
@@ -925,10 +927,11 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                         reactivated_items.append(finding)
                         reactivated_count += 1
                     else:
-                        # temp code to set component fields on existing findings
-                        finding.component_name = component_name
-                        finding.component_version = component_version
-                        finding.save()
+                        # existing findings may be from before we had component_name/version fields
+                        if not finding.component_name or not finding.component_version:
+                            finding.component_name = finding.component_name if finding.component_name else component_name
+                            finding.component_version = finding.component_version if finding.component_version else component_version
+                            finding.save(dedupe_option=False, push_to_jira=False)
 
                         unchanged_items.append(finding)
                         unchanged_count += 1

@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 def create_notification(event=None, *args, **kwargs):
+    from dojo.utils import get_system_setting
 
     if 'recipients' in kwargs:
         # mimic existing code so that when recipients is specified, no other system or personal notifications are sent.
@@ -27,10 +28,14 @@ def create_notification(event=None, *args, **kwargs):
         except Exception:
             system_notifications = Notifications()
 
-        admin_users = Dojo_User.objects.filter(is_staff=True)
-        for admin_user in admin_users:
-            system_notifications.user = admin_user
+        # Send to dedicated channel if defined, or send to all admin users
+        if get_system_setting('slack_channel') is not None:
             process_notifications(event, system_notifications, *args, **kwargs)
+        else:
+            admin_users = Dojo_User.objects.filter(is_staff=True)
+            for admin_user in admin_users:
+                system_notifications.user = admin_user
+                process_notifications(event, system_notifications, *args, **kwargs)
 
         # Personal but global notifications
         # only retrieve users which have at least one notification type enabled for this event type.

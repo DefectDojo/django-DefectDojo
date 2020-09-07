@@ -13,6 +13,7 @@ class TestPhpSymfonySecurityCheckerParser(TestCase):
         testfile = open("dojo/unittests/scans/php_symfony_security_check_sample/php_symfony_no_vuln.json")
         parser = PhpSymfonySecurityCheckParser(testfile, Test())
         testfile.close()
+        items = parser.items
         self.assertEqual(0, len(parser.items))
 
     def test_php_symfony_security_check_parser_with_one_criticle_vuln_has_one_findings(self):
@@ -25,4 +26,7 @@ class TestPhpSymfonySecurityCheckerParser(TestCase):
         testfile = open("dojo/unittests/scans/php_symfony_security_check_sample/php_symfony_many_vuln.json")
         parser = PhpSymfonySecurityCheckParser(testfile, Test())
         testfile.close()
-        self.assertEqual(8, len(parser.items))
+        items = parser.items
+        self.assertEqual(8, len(items))
+        self.assertEqual('symfony/cache', items[0].component_name)
+        self.assertEqual('3.4.16', items[0].component_version)

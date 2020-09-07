@@ -26,23 +26,22 @@ build_containers() {
 
 return_value=0
 if [ -z "${TEST}" ]; then
-  build_containers
-
   # Start Minikube
   travis_fold start minikube_install
-  sudo minikube start \
-    --vm-driver=none \
+  minikube start \
+    --driver=docker \
     --kubernetes-version="${K8S_VERSION}"
-
+  eval $(minikube docker-env)
+  build_containers
   # Configure Kubernetes context and test it
-  sudo minikube update-context
-  sudo kubectl cluster-info
+  minikube update-context
+  kubectl cluster-info
 
   # Enable Nginx ingress add-on and wait for it
-  sudo minikube addons enable ingress
+  minikube addons enable ingress
   echo -n "Waiting for Nginx ingress controller "
-  until [[ "True" == "$(sudo kubectl get pod \
-    --selector=app.kubernetes.io/name=nginx-ingress-controller \
+  until [[ "True" == "$(kubectl get pod \
+    --selector=app.kubernetes.io/component=controller,app.kubernetes.io/name=ingress-nginx \
     --namespace=kube-system \
     -o 'jsonpath={.items[*].status.conditions[?(@.type=="Ready")].status}')" ]]
   do
@@ -52,9 +51,9 @@ if [ -z "${TEST}" ]; then
   echo
 
   # Create Helm and wait for Tiller to become ready
-  sudo helm init
+  helm init
   echo -n "Waiting for Tiller "
-  until [[ "True" == "$(sudo kubectl get pod \
+  until [[ "True" == "$(kubectl get pod \
     --selector=name=tiller \
     --namespace=kube-system \
     -o 'jsonpath={.items[*].status.conditions[?(@.type=="Ready")].status}')" ]]
@@ -65,13 +64,13 @@ if [ -z "${TEST}" ]; then
   echo
 
   # Update Helm repository
-  sudo helm repo update
+  helm repo update
 
   # Update Helm dependencies for DefectDojo
-  sudo helm dependency update ./helm/defectdojo
+  helm dependency update ./helm/defectdojo
 
   # Set Helm settings for the broker
-  case "${BROKER}" in 
+  case "${BROKER}" in
     rabbitmq)
       HELM_BROKER_SETTINGS=" \
         --set redis.enabled=false \
@@ -119,7 +118,7 @@ if [ -z "${TEST}" ]; then
   esac
 
   # Install DefectDojo into Kubernetes and wait for it
-  sudo helm install \
+  helm install \
     ./helm/defectdojo \
     --name=defectdojo \
     --set django.ingress.enabled=false \
@@ -133,7 +132,7 @@ if [ -z "${TEST}" ]; then
   i=0
   # Timeout value so that the wait doesn't timeout the travis build (faster fail)
   TIMEOUT=20
-  until [[ "True" == "$(sudo kubectl get pod \
+  until [[ "True" == "$(kubectl get pod \
       --selector=defectdojo.org/component=django \
       -o 'jsonpath={.items[*].status.conditions[?(@.type=="Ready")].status}')" \
       || ${i} -gt ${TIMEOUT} ]]
@@ -147,29 +146,29 @@ if [ -z "${TEST}" ]; then
   fi
   echo
   echo "UWSGI logs"
-  sudo kubectl logs --selector=defectdojo.org/component=django -c uwsgi
+  kubectl logs --selector=defectdojo.org/component=django -c uwsgi
   echo
   echo "DefectDojo is up and running."
-  sudo kubectl get pods
+  kubectl get pods
   travis_fold end minikube_install
 
   # Run all tests
   travis_fold start defectdojo_tests
   echo "Running tests."
-  sudo helm test defectdojo
+  helm test defectdojo
   # Check exit status
   return_value=${?}
   echo
   echo "Unit test results"
-  sudo kubectl logs defectdojo-unit-tests
+  kubectl logs defectdojo-unit-tests
   echo
   echo "Pods"
-  sudo kubectl get pods
+  kubectl get pods
 
   # Uninstall
   echo "Deleting DefectDojo from Kubernetes"
-  sudo helm delete defectdojo --purge
-  sudo kubectl get pods
+  helm delete defectdojo --purge
+  kubectl get pods
   travis_fold end defectdojo_tests
 
   exit ${return_value}
