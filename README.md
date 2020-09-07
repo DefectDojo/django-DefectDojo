@@ -24,7 +24,7 @@ docker-compose build
 docker-compose up
 ```
 
-Navigate to <http://localhost:8080>. Get your [login credentials](https://github.com/DefectDojo/django-DefectDojo/blob/dev/DOCKER.md#access-the-application).
+Navigate to <http://localhost:8080>. Get your [login credentials](https://github.com/DefectDojo/django-DefectDojo/blob/master/DOCKER.md#access-the-application).
 
 ## Documentation
 
