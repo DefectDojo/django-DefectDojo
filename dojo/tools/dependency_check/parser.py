@@ -84,7 +84,7 @@ class DependencyCheckParser(object):
                         if version_node:
                             component_version = self.get_field_value(version_node, 'value')
 
-            logger.debug('returning name/version: %s %s', component_name, component_version)
+            # logger.debug('returning name/version: %s %s', component_name, component_version)
         except:
             logger.exception('error parsing component_name and component_version')
             logger.debug('dependency: %s', ElementTree.tostring(dependency, encoding='utf8', method='xml'))
