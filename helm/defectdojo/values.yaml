@@ -123,14 +123,10 @@ mysql:
   existingSecret: defectdojo-mysql-specific
   mysqlDatabase: defectdojo
   service:
-    port: 3306
   # To use an external mySQL instance, set enabled to false and uncomment
   # the line below:
   mysqlServer: "127.0.0.1"
-  # mysqlServer: ""
-  # To use an external secret for the password for an external mySQL instance,
-  # set enabled to false and provide the name of the secret on the line below:
-  # mysqlPasswordSecret: ""
+
 
 postgresql:
   enabled: true
@@ -143,7 +139,6 @@ postgresql:
   replication:
     enabled: false
   service:
-    port: 5432
   # To use an external PostgreSQL instance, set enabled to false and uncomment
   # the line below:
   postgresServer: "127.0.0.1"
@@ -165,11 +160,6 @@ cloudsql:
     pullPolicy: IfNotPresent
   # set CloudSQL instance: 'project:zone:instancname'
   instance: ""
-  # postgresServer: ""
-  # To use an external secret for the password for PostgreSQL
-  # instance, set enabled to false and provide the name of the secret on the
-  # line below:
-  # existingSecret: ""
 
 rabbitmq:
   enabled: true

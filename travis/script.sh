@@ -177,19 +177,19 @@ if [ -z "${TEST}" ]; then
   if [[ "${REPLICATION}" == "enabled" ]]
   then
     travis_fold start defectdojo_tests_replication
-    items=`sudo kubectl get pods -o name | grep slave | wc -l`
+    items=`kubectl get pods -o name | grep slave | wc -l`
     echo "Number of replicas $items"
     if [[ $items < 1 ]]; then
       return_value=1
     fi
   travis_fold end defectdojo_tests_replication
   fi
-  
+
   # Test extra config and secret by looking 2 enviroment values testme
   if [[ "${EXTRAVAL}" == "enabled" ]]
   then
     travis_fold start defectdojo_tests_extravars
-    items=`sudo kubectl exec -i $(sudo kubectl get pods -o name | grep django | \
+    items=`kubectl exec -i $(kubectl get pods -o name | grep django | \
     sed "s/pod\///g") -c uwsgi printenv | grep testme | wc -l`
     echo "Number of items $items"
     if [[ $items < 2 ]]; then
