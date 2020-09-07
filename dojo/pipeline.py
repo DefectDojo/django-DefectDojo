@@ -4,7 +4,7 @@ from django.conf import settings
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
-from dojo.models import Engagement, Product, Product_Type
+from dojo.models import Engagement, Product, Product_Type, Test
 from social_core.backends.azuread_tenant import AzureADTenantOAuth2
 from social_core.backends.google import GoogleOAuth2
 
@@ -61,7 +61,7 @@ def modify_permissions(backend, uid, user=None, social=None, *args, **kwargs):
         user.is_staff = False
         if settings.GITLAB_PROJECT_AUTO_IMPORT is True:
             # Add engagement creation permission if auto_import is set
-            user.user_permissions.set([Permission.objects.get(codename='add_engagement', content_type=ContentType.objects.get_for_model(Engagement))])
+            user.user_permissions.set([Permission.objects.get(codename='add_engagement', content_type=ContentType.objects.get_for_model(Engagement)),Permission.objects.get(codename='add_test', content_type=ContentType.objects.get_for_model(Test))])
 
 
 def update_product_access(backend, uid, user=None, social=None, *args, **kwargs):
