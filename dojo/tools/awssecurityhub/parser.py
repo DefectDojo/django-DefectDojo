@@ -27,7 +27,8 @@ class AwsSecurityFindingFormatParser:
 
     def get_items(self, tree, test):
         items = {}
-        findings = tree.get('Findings')
+        # DefectDojo/django-DefectDojo/issues/2780
+        findings = tree.get('Findings', tree.get('findings', None))
 
         if not findings:
             return list()
