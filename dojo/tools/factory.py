@@ -283,7 +283,7 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
     elif scan_type == 'Risk Recon API Importer':
         parser = RiskReconParser(file, test)
     elif scan_type == 'DrHeader JSON Importer':
-        parser = RiskReconParser(file, test)
+        parser = DrHeaderJSONParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 
