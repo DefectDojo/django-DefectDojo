@@ -13,15 +13,6 @@ product and application information, schedule scans, triage vulnerabilities and
 push findings into defect trackers.
 Consolidate your findings into one source of truth with DefectDojo.
 
-## Demo
-
-Try out DefectDojo in our
-[testing environment](https://defectdojo.herokuapp.com/) with the following
-credentials.
-
-* admin / defectdojo@demo#appsec
-* product_manager / defectdojo@demo#product
-
 ## Quick Start
 
 ```sh
@@ -33,7 +24,7 @@ docker-compose build
 docker-compose up
 ```
 
-Navigate to <http://localhost:8080>.
+Navigate to <http://localhost:8080>. Get your [login credentials](https://github.com/DefectDojo/django-DefectDojo/blob/dev/DOCKER.md#access-the-application).
 
 ## Documentation
 
