@@ -117,6 +117,26 @@ if [ -z "${TEST}" ]; then
       ;;
   esac
 
+  case "${REPLICATION}" in
+    enabled)
+    HELM_DATABASE_SETTINGS=" \
+      --set database=postgresql \
+      --set postgresql.enabled=true \
+      --set mysql.enabled=false \
+      --set createPostgresqlSecret=true \
+      --set postgresql.replication.enabled=true \
+    "
+    ;;
+  esac
+  # Test does it propagates extra vars and secrets
+  case "${EXTRAVAL}" in
+    enabled)
+    HELM_CONFIG_SECRET_SETTINGS=" \
+      --set extraConfigs.DD_EXAMPLE_CONFIG=testme \
+      --set extraSecrets.DD_EXAMPLE_SECRET=testme \
+    "
+    ;;
+  esac
   # Install DefectDojo into Kubernetes and wait for it
   helm install \
     ./helm/defectdojo \
@@ -125,6 +145,7 @@ if [ -z "${TEST}" ]; then
     --set imagePullPolicy=Never \
     ${HELM_BROKER_SETTINGS} \
     ${HELM_DATABASE_SETTINGS} \
+    ${HELM_CONFIG_SECRET_SETTINGS} \
     --set createSecret=true
 
 
@@ -151,6 +172,31 @@ if [ -z "${TEST}" ]; then
   echo "DefectDojo is up and running."
   kubectl get pods
   travis_fold end minikube_install
+
+  # Test if postgres has replication enabled
+  if [[ "${REPLICATION}" == "enabled" ]]
+  then
+    travis_fold start defectdojo_tests_replication
+    items=`sudo kubectl get pods -o name | grep slave | wc -l`
+    echo "Number of replicas $items"
+    if [[ $items < 1 ]]; then
+      return_value=1
+    fi
+  travis_fold end defectdojo_tests_replication
+  fi
+  
+  # Test extra config and secret by looking 2 enviroment values testme
+  if [[ "${EXTRAVAL}" == "enabled" ]]
+  then
+    travis_fold start defectdojo_tests_extravars
+    items=`sudo kubectl exec -i $(sudo kubectl get pods -o name | grep django | \
+    sed "s/pod\///g") -c uwsgi printenv | grep testme | wc -l`
+    echo "Number of items $items"
+    if [[ $items < 2 ]]; then
+      return_value=1
+    fi
+  travis_fold end defectdojo_tests_extravars
+  fi
 
   # Run all tests
   travis_fold start defectdojo_tests
