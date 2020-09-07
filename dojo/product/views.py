@@ -174,10 +174,10 @@ def view_product(request, pid):
                   'authorized': auth,
                   'personal_notifications_form': personal_notifications_form})
 
-def view_product_modules(request, pid):
+def view_product_components(request, pid):
     prod = get_object_or_404(Product, id=pid)
-    product_tab = Product_Tab(pid, title="modules", tab="modules")
-    return render(request, 'dojo/product_modules.html', {
+    product_tab = Product_Tab(pid, title="Product", tab="components")
+    return render(request, 'dojo/product_components.html', {
                     'prod': prod,
                     'product_tab': product_tab,
     })
