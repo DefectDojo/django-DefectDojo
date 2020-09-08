@@ -111,6 +111,9 @@ class DependencyCheckParser(object):
                 #     <name>version</name>
                 #     <value>3.1.1</value>
                 # </evidence>'
+                # will find the first product and version node. if there are multiple it may not pick the best
+                # since 6.0.0 howoever it seems like there's always a packageurl above so not sure if we need the effort to
+                # implement more logic here
                 product_node = evidence_collected_node.find('.//' + self.namespace + 'evidence[@type="product"]')
                 if product_node:
                     component_name = self.get_field_value(product_node, 'value')

@@ -575,16 +575,6 @@ class TestDependencyCheckParser(TestCase):
         self.assertEqual(7, len(items))
         # test also different component_name formats
 
-        # i = 0
-        # for item in items:
-        #     print(str(i))
-        #     i += 1
-        #     print(item.title)
-        #     # print(item.component_name)
-        #     # print(item.component_version)
-        #     print(item.description)
-        #     print(item.severity)
-
         # identifier -> package url java
         self.assertEqual(items[0].title, 'adapter-ear1.ear: dom4j-2.1.1.jar | CVE-0000-0001')
         self.assertEqual(items[0].component_name, 'org.dom4j:dom4j')
