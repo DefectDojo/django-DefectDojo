@@ -276,12 +276,12 @@ def add_findings(request, tid):
     test = Test.objects.get(id=tid)
     form_error = False
     jform = None
-    form = AddFindingForm(initial={'date': timezone.now().date()})
+    form = AddFindingForm(initial={'date': timezone.now().date()}, req_resp=None)
     push_all_jira_issues = False
     use_jira = get_system_setting('enable_jira') and test.engagement.product.jira_pkey is not None
 
     if request.method == 'POST':
-        form = AddFindingForm(request.POST)
+        form = AddFindingForm(request.POST, req_resp=None)
         if (form['active'].value() is False or form['verified'].value() is False) \
                 and 'jiraform-push_to_jira' in request.POST:
             error = ValidationError('Findings must be active and verified to be pushed to JIRA',
@@ -373,6 +373,15 @@ def add_findings(request, tid):
                                 description='Finding "%s" was added by %s' % (new_finding.title, request.user),
                                 url=request.build_absolute_uri(reverse('view_finding', args=(new_finding.id,))),
                                 icon="exclamation-triangle")
+
+            if 'request' in form.cleaned_data or 'response' in form.cleaned_data:
+                burp_rr = BurpRawRequestResponse(
+                    finding=new_finding,
+                    burpRequestBase64=base64.b64encode(form.cleaned_data['request'].encode()),
+                    burpResponseBase64=base64.b64encode(form.cleaned_data['response'].encode()),
+                )
+                burp_rr.clean()
+                burp_rr.save()
 
             if create_template:
                 templates = Finding_Template.objects.filter(title=new_finding.title)
