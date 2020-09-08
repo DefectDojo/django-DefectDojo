@@ -30,7 +30,7 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     UsersViewSet, ImportScanView, ReImportScanView, ProductTypeViewSet, DojoMetaViewSet, \
     DevelopmentEnvironmentViewSet, NotesViewSet, NoteTypeViewSet, SystemSettingsViewSet, \
     AppAnalysisViewSet, EndpointStatusViewSet, SonarqubeIssueViewSet, SonarqubeIssueTransitionViewSet, \
-    SonarqubeProductViewSet
+    SonarqubeProductViewSet, RegulationsViewSet
 
 from dojo.utils import get_system_setting
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
@@ -63,6 +63,7 @@ from dojo.note_type.urls import urlpatterns as note_type_urls
 from dojo.google_sheet.urls import urlpatterns as google_sheets_urls
 from dojo.banner.urls import urlpatterns as banner_urls
 from dojo.survey.urls import urlpatterns as survey_urls
+from dojo.regulations.urls import urlpatterns as regulations
 
 admin.autodiscover()
 
@@ -130,6 +131,7 @@ v2_api.register(r'metadata', DojoMetaViewSet, basename='metadata')
 v2_api.register(r'notes', NotesViewSet)
 v2_api.register(r'note_type', NoteTypeViewSet)
 v2_api.register(r'system_settings', SystemSettingsViewSet)
+v2_api.register(r'regulations', RegulationsViewSet)
 
 ur = []
 ur += dev_env_urls
@@ -161,6 +163,7 @@ ur += notes_urls
 ur += note_type_urls
 ur += google_sheets_urls
 ur += banner_urls
+ur += regulations
 
 swagger_urls = [
     url(r'^$', SwaggerView.as_view(), name='index'),
