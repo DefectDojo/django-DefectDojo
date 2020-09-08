@@ -7,6 +7,7 @@ from defusedxml import ElementTree
 from dojo.models import Finding
 
 from cpe import CPE
+from packageurl import PackageURL
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +55,20 @@ class DependencyCheckParser(object):
                 #     </package>
                 # </identifiers>
 
-                # TODO what happens when there multiple evidencecollectednodes with product or version as type?
+                package_node = identifiers_node.find('.//' + self.namespace + 'package')
+                if package_node:
+                    logger.debug('package string: ' + self.get_field_value(package_node, 'id'))
+                    id = self.get_field_value(package_node, 'id')
+
+                    purl = PackageURL.from_string(id)
+                    purl_parts = purl.to_dict()
+                    component_name = purl_parts['namespace'] + ':' if purl_parts['namespace'] and len(purl_parts['namespace']) > 0 else ''
+                    component_name += purl_parts['name'] if purl_parts['name'] and len(purl_parts['name']) > 0 else ''
+                    component_name = component_name if component_name else None
+
+                    component_version = purl_parts['version'] if purl_parts['version'] and len(purl_parts['version']) > 0 else ''
+                    return component_name, component_version
+
                 cpe_node = identifiers_node.find('.//' + self.namespace + 'identifier[@type="cpe"]')
                 if cpe_node:
                     logger.debug('cpe string: ' + self.get_field_value(cpe_node, 'name'))
@@ -71,37 +85,41 @@ class DependencyCheckParser(object):
                     # logger.debug('get_target_software: ' + str(cpe.get_target_software()))
                     # logger.debug('get_vendor: ' + str(cpe.get_vendor()))
                     # logger.debug('get_update: ' + str(cpe.get_update()))
-                else:
-                    maven_node = identifiers_node.find('.//' + self.namespace + 'identifier[@type="maven"]')
-                    if maven_node:
-                        # logger.debug('maven_string: ' + self.get_field_value(maven_node, 'name'))
-                        maven_parts = self.get_field_value(maven_node, 'name').split(':')
-                        # logger.debug('maven_parts:' + str(maven_parts))
-                        if len(maven_parts) == 3:
-                            component_name = maven_parts[0] + ':' + maven_parts[1]
-                            component_version = maven_parts[2]
-            else:
-                evidence_collected_node = dependency.find(self.namespace + 'evidenceCollected')
-                if evidence_collected_node:
-                    # <evidenceCollected>
-                    # <evidence type="product" confidence="HIGH">
-                    #     <source>file</source>
-                    #     <name>name</name>
-                    #     <value>jquery</value>
-                    # </evidence>
-                    # <evidence type="version" confidence="HIGH">
-                    #     <source>file</source>
-                    #     <name>version</name>
-                    #     <value>3.1.1</value>
-                    # </evidence>'
-                    product_node = evidence_collected_node.find('.//' + self.namespace + 'evidence[@type="product"]')
-                    if product_node:
-                        component_name = self.get_field_value(product_node, 'value')
-                        version_node = evidence_collected_node.find('.//' + self.namespace + 'evidence[@type="version"]')
-                        if version_node:
-                            component_version = self.get_field_value(version_node, 'value')
+                    return component_name, component_version
 
-            # logger.debug('returning name/version: %s %s', component_name, component_version)
+                maven_node = identifiers_node.find('.//' + self.namespace + 'identifier[@type="maven"]')
+                if maven_node:
+                    # logger.debug('maven_string: ' + self.get_field_value(maven_node, 'name'))
+                    maven_parts = self.get_field_value(maven_node, 'name').split(':')
+                    # logger.debug('maven_parts:' + str(maven_parts))
+                    if len(maven_parts) == 3:
+                        component_name = maven_parts[0] + ':' + maven_parts[1]
+                        component_version = maven_parts[2]
+                        return component_name, component_version
+
+            # TODO what happens when there multiple evidencecollectednodes with product or version as type?
+            evidence_collected_node = dependency.find(self.namespace + 'evidenceCollected')
+            if evidence_collected_node:
+                # <evidenceCollected>
+                # <evidence type="product" confidence="HIGH">
+                #     <source>file</source>
+                #     <name>name</name>
+                #     <value>jquery</value>
+                # </evidence>
+                # <evidence type="version" confidence="HIGH">
+                #     <source>file</source>
+                #     <name>version</name>
+                #     <value>3.1.1</value>
+                # </evidence>'
+                product_node = evidence_collected_node.find('.//' + self.namespace + 'evidence[@type="product"]')
+                if product_node:
+                    component_name = self.get_field_value(product_node, 'value')
+                    version_node = evidence_collected_node.find('.//' + self.namespace + 'evidence[@type="version"]')
+                    if version_node:
+                        component_version = self.get_field_value(version_node, 'value')
+
+                    return component_name, component_version
+
         except:
             logger.exception('error parsing component_name and component_version')
             logger.debug('dependency: %s', ElementTree.tostring(dependency, encoding='utf8', method='xml'))
