@@ -97,6 +97,18 @@ class DependencyCheckParser(object):
                         component_version = maven_parts[2]
                         return component_name, component_version
 
+                        # TODO
+                        # include identifiers in description?
+                        # <identifiers>
+                        #     <package confidence="HIGH">
+                        #         <id>pkg:maven/org.dom4j/dom4j@2.1.1.redhat-00001</id>
+                        #         <url>https://ossindex.sonatype.org/component/pkg:maven/org.dom4j/dom4j@2.1.1.redhat-00001</url>
+                        #     </package>
+                        #     <vulnerabilityIds confidence="HIGHEST">
+                        #         <id>cpe:2.3:a:dom4j_project:dom4j:2.1.1.hat-00001:*:*:*:*:*:*:*</id>
+                        #         <url>https://nvd.nist.gov/vuln/search/results?form_type=Advanced&amp;results_type=overview&amp;search_type=all&amp;cpe_vendor=cpe%3A%2F%3Adom4j_project&amp;cpe_product=cpe%3A%2F%3Adom4j_project%3Adom4j&amp;cpe_version=cpe%3A%2F%3Adom4j_project%3Adom4j%3A2.1.1.hat-00001</url>
+                        #     </vulnerabilityIds>
+
             # TODO what happens when there multiple evidencecollectednodes with product or version as type?
             evidence_collected_node = dependency.find(self.namespace + 'evidenceCollected')
             if evidence_collected_node:
@@ -239,7 +251,7 @@ class DependencyCheckParser(object):
                     for vulnerability in vulnerabilities.findall(
                             self.namespace + 'vulnerability'):
 
-                        # relateddependencies are ignored in this parser, but should be imported because you might miss vulnerable dependencies otherwise
+                        # TODO relateddependencies are ignored in this parser, but should be imported because you might miss vulnerable dependencies otherwise
                         # <relatedDependencies>
                         #     <relatedDependency>
                         #         <fileName>client-offer-service-ear-1.0-SNAPSHOT-deployment-prod.zip: h2-console.war</fileName>
@@ -272,18 +284,7 @@ class DependencyCheckParser(object):
                         #     </identifiers>
                         # </relatedDependency>
 
-                        # include identifiers in description?
-                        # <identifiers>
-                        #     <package confidence="HIGH">
-                        #         <id>pkg:maven/org.dom4j/dom4j@2.1.1.redhat-00001</id>
-                        #         <url>https://ossindex.sonatype.org/component/pkg:maven/org.dom4j/dom4j@2.1.1.redhat-00001</url>
-                        #     </package>
-                        #     <vulnerabilityIds confidence="HIGHEST">
-                        #         <id>cpe:2.3:a:dom4j_project:dom4j:2.1.1.hat-00001:*:*:*:*:*:*:*</id>
-                        #         <url>https://nvd.nist.gov/vuln/search/results?form_type=Advanced&amp;results_type=overview&amp;search_type=all&amp;cpe_vendor=cpe%3A%2F%3Adom4j_project&amp;cpe_product=cpe%3A%2F%3Adom4j_project%3Adom4j&amp;cpe_version=cpe%3A%2F%3Adom4j_project%3Adom4j%3A2.1.1.hat-00001</url>
-                        #     </vulnerabilityIds>
-
-                        # include vulnerablesoftware in description?
+                        # TODO include vulnerablesoftware in description?
                         # <vulnerableSoftware>
                         #     <software>cpe:2.3:a:netapp:snapmanager:-:*:*:*:*:sap:*:*</software>
                         #     <software versionStartIncluding="18.1.0.0" versionEndIncluding="18.8.19.0">cpe:2.3:a:oracle:primavera_p6_enterprise_project_portfolio_management:*:*:*:*:*:*:*:*</software>
