@@ -27,7 +27,7 @@ from dojo.models import Finding, Product_Type, Product, Note_Type, ScanSettings,
     Languages, Language_Type, App_Analysis, Objects, Benchmark_Product, Benchmark_Requirement, \
     Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta, Sonarqube_Product, \
     Engagement_Survey, Answered_Survey, TextAnswer, ChoiceAnswer, Choice, Question, TextQuestion, \
-    ChoiceQuestion, General_Survey
+    ChoiceQuestion, General_Survey, Regulation
 
 from dojo.tools import requires_file, SCAN_SONARQUBE_API
 from dojo.utils import jira_get_issue
@@ -1008,6 +1008,11 @@ class FindingForm(forms.ModelForm):
         self.fields['tags'].widget.choices = t
         self.fields['simple_risk_accept'].initial = True if self.instance.is_simple_risk_accepted else False
 
+        if self.instance.duplicate:
+            self.fields['duplicate'].help_text = "Original finding that is being duplicated here (readonly). Use view finding page to manage duplicate relationships. Unchecking duplicate here will reset this findings duplicate status, but will trigger deduplication logic."
+        else:
+            self.fields['duplicate'].help_text = "You can mark findings as duplicate only from the view finding page."
+
     def clean(self):
         cleaned_data = super(FindingForm, self).clean()
         if (cleaned_data['active'] or cleaned_data['verified']) and cleaned_data['duplicate']:
@@ -1782,6 +1787,12 @@ class DeleteJIRAConfForm(forms.ModelForm):
 class ToolTypeForm(forms.ModelForm):
     class Meta:
         model = Tool_Type
+        exclude = ['product']
+
+
+class RegulationForm(forms.ModelForm):
+    class Meta:
+        model = Regulation
         exclude = ['product']
 
 

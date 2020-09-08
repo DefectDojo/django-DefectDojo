@@ -4,7 +4,7 @@ from dojo.models import Product, Engagement, Test, Finding, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Product_Type, JIRA_Conf, Endpoint, BurpRawRequestResponse, JIRA_PKey, \
     Notes, DojoMeta, FindingImage, Note_Type, App_Analysis, Endpoint_Status, \
-    Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product
+    Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation
 
 from dojo.forms import ImportScanForm, SEVERITY_CHOICES
 from dojo.tools import requires_file
@@ -231,6 +231,11 @@ class ToolTypeSerializer(serializers.ModelSerializer):
         model = Tool_Type
         fields = '__all__'
 
+
+class RegulationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Regulation
+        fields = '__all__'
 
 class ToolConfigurationSerializer(serializers.ModelSerializer):
     configuration_url = serializers.CharField(source='url')

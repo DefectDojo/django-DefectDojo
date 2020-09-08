@@ -114,3 +114,10 @@ quick.bash
 Pipfile
 Pipfile*
 
+
+#ignore locally added certs
+certs/
+
+# Helm dependencies
+helm/defectdojo/charts
+

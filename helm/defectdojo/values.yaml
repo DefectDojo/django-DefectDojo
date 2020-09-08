@@ -44,6 +44,7 @@ celery:
   beat:
     affinity: {}
     nodeSelector: {}
+    replicas: 1
     resources:
       requests:
         cpu: 100m
@@ -122,10 +123,10 @@ mysql:
   existingSecret: defectdojo-mysql-specific
   mysqlDatabase: defectdojo
   service:
-    port: 3306  
   # To use an external mySQL instance, set enabled to false and uncomment
   # the line below:
   mysqlServer: "127.0.0.1"
+
 
 postgresql:
   enabled: true
@@ -138,7 +139,6 @@ postgresql:
   replication:
     enabled: false
   service:
-    port: 5432  
   # To use an external PostgreSQL instance, set enabled to false and uncomment
   # the line below:
   postgresServer: "127.0.0.1"
@@ -178,3 +178,15 @@ redis:
   password: ""
   cluster:
     slaveCount: 1
+
+# To add extra variables not predefined by helm config it is possible to define in extraConfigs block, e.g. below:
+# NOTE  Do not store any kind of sensitive information inside of it
+# extraConfigs:
+#  DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED: 'true'
+#  DD_SOCIAL_AUTH_AUTH0_KEY: 'dev'
+#  DD_SOCIAL_AUTH_AUTH0_DOMAIN: 'xxxxx'
+
+# Extra secrets can be created inside of extraSecrets block:
+# NOTE  This is just an exmaple, do not store sensitive data in plain text form, better inject it during the deployment/upgrade by --set extraSecrets.secret=someSecret
+# extraSecrets:
+#  DD_SOCIAL_AUTH_AUTH0_SECRET: 'xxx'

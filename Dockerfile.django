@@ -67,6 +67,7 @@ COPY \
   docker/entrypoint-unit-tests.sh \
   docker/entrypoint-unit-tests-devDocker.sh \
   docker/wait-for-it.sh \
+  certs/* \
   /
 COPY wsgi.py manage.py tests/unit-tests.sh ./
 COPY dojo/ ./dojo/
