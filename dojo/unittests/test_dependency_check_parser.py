@@ -318,6 +318,20 @@ class TestDependencyCheckParser(TestCase):
             <md5/>
             <sha1/>
             <sha256/>
+            <relatedDependencies>
+                <relatedDependency>
+                    <filePath>/var/lib/adapter-ear8.ear/dom4j-2.1.1.jar</filePath>
+                    <sha256>a520752f350909c191db45a598a88fcca2fa5db17a340dee6b3d0e36f4122e11</sha256>
+                    <sha1>080c5a481cd7abf27bfd4b48edf73b1cb214085e</sha1>
+                    <md5>add18b9f953221ff565cf7a34aac0ed9</md5>
+                </relatedDependency>
+                <relatedDependency>
+                    <filePath>/var/lib/adapter-ear1.ear/dom4j-extensions-2.1.1.jar</filePath>
+                    <sha256>a520752f350909c191db45a598a88fcca2fa5db17a340dee6b3d0e36f4122e11</sha256>
+                    <sha1>080c5a481cd7abf27bfd4b48edf73b1cb214085e</sha1>
+                    <md5>add18b9f953221ff565cf7a34aac0ed9</md5>
+                </relatedDependency>
+            </relatedDependencies>
             <projectReferences>
                 <projectReference>package-lock.json: transitive</projectReference>
             </projectReferences>
@@ -613,7 +627,7 @@ class TestDependencyCheckParser(TestCase):
         self.assertEqual(items[2].severity, 'High')
         self.assertEqual(items[2].file_path, '/var/lib/adapter-ear1.ear/dom4j-extensions-2.1.1.jar')
 
-        # identifier -> package url javascript, no vulnerabilitids, 3 vulnerabilities
+        # identifier -> package url javascript, no vulnerabilitids, 3 vulnerabilities, relateddependencies without filename (pre v6.0.0)
         self.assertEqual(items[3].title, 'yargs-parser:5.0.0 | 1500')
         self.assertEqual(items[3].component_name, 'yargs-parser')
         self.assertEqual(items[3].component_version, '5.0.0')

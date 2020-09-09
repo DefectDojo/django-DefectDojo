@@ -34,7 +34,12 @@ class DependencyCheckParser(object):
 
     def get_filename_and_path_from_dependency(self, dependency, related_dependency):
         if related_dependency:
-            return self.get_field_value(related_dependency, 'fileName'), self.get_field_value(related_dependency, 'filePath')
+            if self.get_field_value(related_dependency, 'fileName'):
+                return self.get_field_value(related_dependency, 'fileName'), self.get_field_value(related_dependency, 'filePath')
+            else:
+                # without filename, it would be just a duplicate finding so we have to skip it. filename is only present for relateddependencies since v6.0.0
+                # logger.debug('related_dependency: %s', ElementTree.tostring(related_dependency, encoding='utf8', method='xml'))
+                return None, None
         else:
             return self.get_field_value(dependency, 'fileName'), self.get_field_value(dependency, 'filePath')
 
@@ -86,7 +91,7 @@ class DependencyCheckParser(object):
 
                 cpe_node = identifiers_node.find('.//' + self.namespace + 'identifier[@type="cpe"]')
                 if cpe_node:
-                    logger.debug('cpe string: ' + self.get_field_value(cpe_node, 'name'))
+                    # logger.debug('cpe string: ' + self.get_field_value(cpe_node, 'name'))
                     cpe = CPE(self.get_field_value(cpe_node, 'name'))
                     component_name = cpe.get_vendor()[0] + ':' if len(cpe.get_vendor()) > 0 else ''
                     component_name += cpe.get_product()[0] if len(cpe.get_product()) > 0 else ''
@@ -159,6 +164,9 @@ class DependencyCheckParser(object):
     def get_finding_from_vulnerability(self, dependency, related_dependency, vulnerability, test):
         dependency_filename, dependency_filepath = self.get_filename_and_path_from_dependency(dependency, related_dependency)
         # logger.debug('dependency_filename: %s', dependency_filename)
+
+        if dependency_filename is None:
+            return None
 
         name = self.get_field_value(vulnerability, 'name')
         cwes_node = vulnerability.find(self.namespace + 'cwes')
