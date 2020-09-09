@@ -228,7 +228,7 @@ class DependencyCheckParser(object):
 
         return Finding(
             title=title,
-            file_path=dependency_filepath,
+            file_path=dependency_filename,
             test=test,
             cwe=cwe,
             cve=cve,
