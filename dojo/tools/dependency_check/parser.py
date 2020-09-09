@@ -15,15 +15,30 @@ SEVERITY = ['Info', 'Low', 'Medium', 'High', 'Critical']
 
 
 class DependencyCheckParser(object):
+    def add_finding(self, finding):
+        if finding is not None:
+            key_str = '{}|{}|{}'.format(finding.severity,
+                                            finding.title,
+                                            finding.description)
+            key = hashlib.md5(key_str.encode('utf-8')).hexdigest()
+
+            if key not in self.dupes:
+                self.dupes[key] = finding
+            # else:
+                # print('skipping: ' + finding.title)
+
     def get_field_value(self, parent_node, field_name):
         field_node = parent_node.find(self.namespace + field_name)
         field_value = '' if field_node is None else field_node.text
         return field_value
 
-    def get_filename_from_dependency(self, dependency):
-        return self.get_field_value(dependency, 'fileName')
+    def get_filename_and_path_from_dependency(self, dependency, related_dependency):
+        if related_dependency:
+            return self.get_field_value(related_dependency, 'fileName'), self.get_field_value(related_dependency, 'filePath')
+        else:
+            return self.get_field_value(dependency, 'fileName'), self.get_field_value(dependency, 'filePath')
 
-    def get_component_name_and_version_from_dependency(self, dependency):
+    def get_component_name_and_version_from_dependency(self, dependency, related_dependency):
         component_name, component_version = None, None
         # big try catch to avoid crashint the parser on some unexpected stuff
         try:
@@ -141,8 +156,8 @@ class DependencyCheckParser(object):
 
         return component_name, component_version
 
-    def get_finding_from_vulnerability(self, dependency, vulnerability, test):
-        dependency_filename = self.get_filename_from_dependency(dependency)
+    def get_finding_from_vulnerability(self, dependency, related_dependency, vulnerability, test):
+        dependency_filename, dependency_filepath = self.get_filename_and_path_from_dependency(dependency, related_dependency)
         # logger.debug('dependency_filename: %s', dependency_filename)
 
         name = self.get_field_value(vulnerability, 'name')
@@ -201,11 +216,11 @@ class DependencyCheckParser(object):
                                      'source: {1}\n' \
                                      'url: {2}\n\n'.format(name, source, url)
 
-        component_name, component_version = self.get_component_name_and_version_from_dependency(dependency)
+        component_name, component_version = self.get_component_name_and_version_from_dependency(dependency, related_dependency)
 
         return Finding(
             title=title,
-            file_path=dependency_filename,
+            file_path=dependency_filepath,
             test=test,
             cwe=cwe,
             cve=cve,
@@ -251,6 +266,11 @@ class DependencyCheckParser(object):
                     for vulnerability in vulnerabilities.findall(
                             self.namespace + 'vulnerability'):
 
+                        finding = self.get_finding_from_vulnerability(dependency, None,
+                            vulnerability, test)
+
+                        self.add_finding(finding)
+
                         # TODO relateddependencies are ignored in this parser, but should be imported because you might miss vulnerable dependencies otherwise
                         # <relatedDependencies>
                         #     <relatedDependency>
@@ -284,38 +304,31 @@ class DependencyCheckParser(object):
                         #     </identifiers>
                         # </relatedDependency>
 
-                        # TODO include vulnerablesoftware in description?
-                        # <vulnerableSoftware>
-                        #     <software>cpe:2.3:a:netapp:snapmanager:-:*:*:*:*:sap:*:*</software>
-                        #     <software versionStartIncluding="18.1.0.0" versionEndIncluding="18.8.19.0">cpe:2.3:a:oracle:primavera_p6_enterprise_project_portfolio_management:*:*:*:*:*:*:*:*</software>
-                        #     <software>cpe:2.3:a:oracle:rapid_planning:12.2:*:*:*:*:*:*:*</software>
-                        #     <software versionStartIncluding="19.12.0.0" versionEndIncluding="19.12.6.0">cpe:2.3:a:oracle:primavera_p6_enterprise_project_portfolio_management:*:*:*:*:*:*:*:*</software>
-                        #     <software>cpe:2.3:a:netapp:snapmanager:-:*:*:*:*:oracle:*:*</software>
-                        #     <software versionStartIncluding="16.1.0.0" versionEndIncluding="16.2.20.1">cpe:2.3:a:oracle:primavera_p6_enterprise_project_portfolio_management:*:*:*:*:*:*:*:*</software>
-                        #     <software>cpe:2.3:a:netapp:oncommand_workflow_automation:-:*:*:*:*:*:*:*</software>
-                        #     <software>cpe:2.3:a:oracle:retail_integration_bus:16.0:*:*:*:*:*:*:*</software>
-                        #     <software versionStartIncluding="2.0.0" versionEndExcluding="2.0.3">cpe:2.3:a:dom4j_project:dom4j:*:*:*:*:*:*:*:*</software>
-                        #     <software vulnerabilityIdMatched="true" versionStartIncluding="2.1.0" versionEndExcluding="2.1.3">cpe:2.3:a:dom4j_project:dom4j:*:*:*:*:*:*:*:*</software>
-                        #     <software>cpe:2.3:a:oracle:retail_integration_bus:15.0:*:*:*:*:*:*:*</software>
-                        #     <software>cpe:2.3:a:netapp:snapcenter:-:*:*:*:*:*:*:*</software>
-                        #     <software versionStartIncluding="17.1.0.0" versionEndIncluding="17.12.17.1">cpe:2.3:a:oracle:primavera_p6_enterprise_project_portfolio_management:*:*:*:*:*:*:*:*</software>
-                        #     <software>cpe:2.3:a:netapp:oncommand_api_services:-:*:*:*:*:*:*:*</software>
-                        #     <software>cpe:2.3:a:oracle:rapid_planning:12.1:*:*:*:*:*:*:*</software>
-                        #     <software>cpe:2.3:a:netapp:snap_creator_framework:-:*:*:*:*:*:*:*</software>
-                        # </vulnerableSoftware>
-
-                        finding = self.get_finding_from_vulnerability(dependency,
-                            vulnerability, test)
-
-                        if finding is not None:
-                            key_str = '{}|{}|{}'.format(finding.severity,
-                                                         finding.title,
-                                                         finding.description)
-                            key = hashlib.md5(key_str.encode('utf-8')).hexdigest()
-
-                            if key not in self.dupes:
-                                self.dupes[key] = finding
-                            else:
-                                print('skipping: ' + finding.title)
+                        relatedDependencies = dependency.find(self.namespace + 'relatedDependencies')
+                        if relatedDependencies:
+                            for relatedDependency in relatedDependencies.findall(self.namespace + 'relatedDependency'):
+                                finding = self.get_finding_from_vulnerability(dependency, relatedDependency, vulnerability, test)
+                                self.add_finding(finding)
 
         self.items = list(self.dupes.values())
+
+
+# future idea include vulnerablesoftware in description?
+# <vulnerableSoftware>
+#     <software>cpe:2.3:a:netapp:snapmanager:-:*:*:*:*:sap:*:*</software>
+#     <software versionStartIncluding="18.1.0.0" versionEndIncluding="18.8.19.0">cpe:2.3:a:oracle:primavera_p6_enterprise_project_portfolio_management:*:*:*:*:*:*:*:*</software>
+#     <software>cpe:2.3:a:oracle:rapid_planning:12.2:*:*:*:*:*:*:*</software>
+#     <software versionStartIncluding="19.12.0.0" versionEndIncluding="19.12.6.0">cpe:2.3:a:oracle:primavera_p6_enterprise_project_portfolio_management:*:*:*:*:*:*:*:*</software>
+#     <software>cpe:2.3:a:netapp:snapmanager:-:*:*:*:*:oracle:*:*</software>
+#     <software versionStartIncluding="16.1.0.0" versionEndIncluding="16.2.20.1">cpe:2.3:a:oracle:primavera_p6_enterprise_project_portfolio_management:*:*:*:*:*:*:*:*</software>
+#     <software>cpe:2.3:a:netapp:oncommand_workflow_automation:-:*:*:*:*:*:*:*</software>
+#     <software>cpe:2.3:a:oracle:retail_integration_bus:16.0:*:*:*:*:*:*:*</software>
+#     <software versionStartIncluding="2.0.0" versionEndExcluding="2.0.3">cpe:2.3:a:dom4j_project:dom4j:*:*:*:*:*:*:*:*</software>
+#     <software vulnerabilityIdMatched="true" versionStartIncluding="2.1.0" versionEndExcluding="2.1.3">cpe:2.3:a:dom4j_project:dom4j:*:*:*:*:*:*:*:*</software>
+#     <software>cpe:2.3:a:oracle:retail_integration_bus:15.0:*:*:*:*:*:*:*</software>
+#     <software>cpe:2.3:a:netapp:snapcenter:-:*:*:*:*:*:*:*</software>
+#     <software versionStartIncluding="17.1.0.0" versionEndIncluding="17.12.17.1">cpe:2.3:a:oracle:primavera_p6_enterprise_project_portfolio_management:*:*:*:*:*:*:*:*</software>
+#     <software>cpe:2.3:a:netapp:oncommand_api_services:-:*:*:*:*:*:*:*</software>
+#     <software>cpe:2.3:a:oracle:rapid_planning:12.1:*:*:*:*:*:*:*</software>
+#     <software>cpe:2.3:a:netapp:snap_creator_framework:-:*:*:*:*:*:*:*</software>
+# </vulnerableSoftware>
