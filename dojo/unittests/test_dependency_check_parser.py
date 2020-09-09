@@ -230,9 +230,25 @@ class TestDependencyCheckParser(TestCase):
         </dependency>
         <dependency>
             <fileName>adapter-ear1.ear: dom4j-2.1.1.jar</fileName>
-            <filePath>C:\\Projectestproject\\libraries\\component2.dll</filePath>
+            <filePath>/var/lib/adapter-ear1.ear/dom4j-2.1.1.jar</filePath>
             <md5>21b24bc199530e07cb15d93c7f929f04</md5>
             <sha1>a29f196740ab608199488c574f536529b5c21242</sha1>
+            <relatedDependencies>
+                <relatedDependency>
+                    <fileName>adapter-ear8.ear: dom4j-2.1.1.jar</fileName>
+                    <filePath>/var/lib/adapter-ear8.ear/dom4j-2.1.1.jar</filePath>
+                    <sha256>a520752f350909c191db45a598a88fcca2fa5db17a340dee6b3d0e36f4122e11</sha256>
+                    <sha1>080c5a481cd7abf27bfd4b48edf73b1cb214085e</sha1>
+                    <md5>add18b9f953221ff565cf7a34aac0ed9</md5>
+                </relatedDependency>
+                <relatedDependency>
+                    <fileName>adapter-ear1.ear: dom4j-extensions-2.1.1.jar</fileName>
+                    <filePath>/var/lib/adapter-ear1.ear/dom4j-extensions-2.1.1.jar</filePath>
+                    <sha256>a520752f350909c191db45a598a88fcca2fa5db17a340dee6b3d0e36f4122e11</sha256>
+                    <sha1>080c5a481cd7abf27bfd4b48edf73b1cb214085e</sha1>
+                    <md5>add18b9f953221ff565cf7a34aac0ed9</md5>
+                </relatedDependency>
+            </relatedDependencies>
             <evidenceCollected>
                 <evidence type="vendor" confidence="HIGH">
                     <source>file</source>
@@ -476,10 +492,10 @@ class TestDependencyCheckParser(TestCase):
             <md5>21b24bc199530e07cb15d93c7f929f04</md5>
             <sha1>a29f196740ab608199488c574f536529b5c21242</sha1>
             <evidenceCollected>
-                <evidence type="vendor" confidence="HIGH">
+                <evidence type="version" confidence="HIGH">
                     <source>file</source>
                     <name>name</name>
-                    <value>org.jdom</value>
+                    <value>2.1.1</value>
                 </evidence>
                 <evidence type="product" confidence="HIGH">
                     <source>file</source>
@@ -572,53 +588,68 @@ class TestDependencyCheckParser(TestCase):
         testfile = TestFile("dependency-check-report.xml", content)
         parser = DependencyCheckParser(testfile, Test())
         items = parser.items
-        self.assertEqual(7, len(items))
+        self.assertEqual(9, len(items))
         # test also different component_name formats
 
-        # identifier -> package url java
+        # identifier -> package url java + 2 relateddependencies
         self.assertEqual(items[0].title, 'adapter-ear1.ear: dom4j-2.1.1.jar | CVE-0000-0001')
         self.assertEqual(items[0].component_name, 'org.dom4j:dom4j')
         self.assertEqual(items[0].component_version, '2.1.1.redhat-00001')
         self.assertEqual(items[0].description, 'Description of a bad vulnerability.')
         self.assertEqual(items[0].severity, 'High')
+        self.assertEqual(items[0].file_path, '/var/lib/adapter-ear1.ear/dom4j-2.1.1.jar')
+
+        self.assertEqual(items[1].title, 'adapter-ear8.ear: dom4j-2.1.1.jar | CVE-0000-0001')
+        self.assertEqual(items[1].component_name, 'org.dom4j:dom4j')
+        self.assertEqual(items[1].component_version, '2.1.1.redhat-00001')
+        self.assertEqual(items[1].description, 'Description of a bad vulnerability.')
+        self.assertEqual(items[1].severity, 'High')
+        self.assertEqual(items[1].file_path, '/var/lib/adapter-ear8.ear/dom4j-2.1.1.jar')
+
+        self.assertEqual(items[2].title, 'adapter-ear1.ear: dom4j-extensions-2.1.1.jar | CVE-0000-0001')
+        self.assertEqual(items[2].component_name, 'org.dom4j:dom4j')
+        self.assertEqual(items[2].component_version, '2.1.1.redhat-00001')
+        self.assertEqual(items[2].description, 'Description of a bad vulnerability.')
+        self.assertEqual(items[2].severity, 'High')
+        self.assertEqual(items[2].file_path, '/var/lib/adapter-ear1.ear/dom4j-extensions-2.1.1.jar')
 
         # identifier -> package url javascript, no vulnerabilitids, 3 vulnerabilities
-        self.assertEqual(items[1].title, 'yargs-parser:5.0.0 | 1500')
-        self.assertEqual(items[1].component_name, 'yargs-parser')
-        self.assertEqual(items[1].component_version, '5.0.0')
-        # assert fails due to special characters, not too important
-        # self.assertEqual(items[1].description, "Affected versions of `yargs-parser` are vulnerable to prototype pollution. Arguments are not properly sanitized, allowing an attacker to modify the prototype of `Object`, causing the addition or modification of an existing property that will exist on all objects.Parsing the argument `--foo.__proto__.bar baz&apos;` adds a `bar` property with value `baz` to all objects. This is only exploitable if attackers have control over the arguments being passed to `yargs-parser`.")
-        self.assertEqual(items[1].severity, 'Low')
-
-        self.assertEqual(items[2].title, 'yargs-parser:5.0.0 | CVE-2020-7608')
-        self.assertEqual(items[2].component_name, 'yargs-parser')
-        self.assertEqual(items[2].component_version, '5.0.0')
-        self.assertEqual(items[2].description, 'yargs-parser could be tricked into adding or modifying properties of Object.prototype using a "__proto__" payload.')
-        self.assertEqual(items[2].severity, 'High')
-
-        self.assertEqual(items[3].title, "yargs-parser:5.0.0 | CWE-400: Uncontrolled Resource Consumption ('Resource Exhaustion')")
+        self.assertEqual(items[3].title, 'yargs-parser:5.0.0 | 1500')
         self.assertEqual(items[3].component_name, 'yargs-parser')
         self.assertEqual(items[3].component_version, '5.0.0')
-        self.assertEqual(items[3].description, "The software does not properly restrict the size or amount of resources that are requested or influenced by an actor, which can be used to consume more resources than intended.")
-        self.assertEqual(items[3].severity, 'High')
+        # assert fails due to special characters, not too important
+        # self.assertEqual(items[1].description, "Affected versions of `yargs-parser` are vulnerable to prototype pollution. Arguments are not properly sanitized, allowing an attacker to modify the prototype of `Object`, causing the addition or modification of an existing property that will exist on all objects.Parsing the argument `--foo.__proto__.bar baz&apos;` adds a `bar` property with value `baz` to all objects. This is only exploitable if attackers have control over the arguments being passed to `yargs-parser`.")
+        self.assertEqual(items[3].severity, 'Low')
 
-        # identifier -> cpe java
-        self.assertEqual(items[4].title, 'adapter-ear2.ear: dom4j-2.1.1.jar | CVE-0000-0001')
-        self.assertEqual(items[0].component_name, 'org.dom4j:dom4j')
-        self.assertEqual(items[0].component_version, '2.1.1.redhat-00001')
+        self.assertEqual(items[4].title, 'yargs-parser:5.0.0 | CVE-2020-7608')
+        self.assertEqual(items[4].component_name, 'yargs-parser')
+        self.assertEqual(items[4].component_version, '5.0.0')
+        self.assertEqual(items[4].description, 'yargs-parser could be tricked into adding or modifying properties of Object.prototype using a "__proto__" payload.')
         self.assertEqual(items[4].severity, 'High')
 
-        # identifier -> maven java
-        self.assertEqual(items[5].title, 'adapter-ear3.ear: dom4j-2.1.1.jar | CVE-0000-0001')
-        self.assertEqual(items[0].component_name, 'org.dom4j:dom4j')
-        self.assertEqual(items[0].component_version, '2.1.1.redhat-00001')
+        self.assertEqual(items[5].title, "yargs-parser:5.0.0 | CWE-400: Uncontrolled Resource Consumption ('Resource Exhaustion')")
+        self.assertEqual(items[5].component_name, 'yargs-parser')
+        self.assertEqual(items[5].component_version, '5.0.0')
+        self.assertEqual(items[5].description, "The software does not properly restrict the size or amount of resources that are requested or influenced by an actor, which can be used to consume more resources than intended.")
         self.assertEqual(items[5].severity, 'High')
 
-        # evidencecollected -> single product + single verison javascript
-        self.assertEqual(items[6].title, 'adapter-ear4.ear: liquibase-core-3.5.3.jar: jquery.js | CVE-0000-0001')
-        self.assertEqual(items[6].component_name, 'jquery')
-        self.assertEqual(items[6].component_version, '3.1.1')
+        # identifier -> cpe java
+        self.assertEqual(items[6].title, 'adapter-ear2.ear: dom4j-2.1.1.jar | CVE-0000-0001')
+        self.assertEqual(items[6].component_name, 'org.dom4j:dom4j')
+        self.assertEqual(items[6].component_version, '2.1.1.redhat-00001')
         self.assertEqual(items[6].severity, 'High')
+
+        # identifier -> maven java
+        self.assertEqual(items[7].title, 'adapter-ear3.ear: dom4j-2.1.1.jar | CVE-0000-0001')
+        self.assertEqual(items[7].component_name, 'dom4j')
+        self.assertEqual(items[7].component_version, '2.1.1')
+        self.assertEqual(items[7].severity, 'High')
+
+        # evidencecollected -> single product + single verison javascript
+        self.assertEqual(items[8].title, 'adapter-ear4.ear: liquibase-core-3.5.3.jar: jquery.js | CVE-0000-0001')
+        self.assertEqual(items[8].component_name, 'jquery')
+        self.assertEqual(items[8].component_version, '3.1.1')
+        self.assertEqual(items[8].severity, 'High')
 
         # evidencecollected -> multiple product + multiple version
         # TODO? Seems like since v6.0.0 there's always a packageurl
