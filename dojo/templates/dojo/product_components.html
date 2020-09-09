@@ -14,7 +14,7 @@
             </div>
         </div>
         <div class="clearfix">
-            <!-- Page numbers-->
+
         </div>
         <div class="panel panel-default table-responsive">
             <table id="products" class="tablesorter-bootstrap table table-condensed table-striped">
@@ -28,13 +28,21 @@
                     </tr>
                 </thead>
                 <tbody>
+                    {% for result in result  %}
                     <tr>
-                        <td>component.name</td>
-                        <td>12.0.2.12</td>
-                        <td>231</td>
-                        <td>100</td>
-                        <td>331</td>
+                        <td>{{ result.component_name  }}</td>
+                        <td>{{result.component_version}} </td>
+                        <td>{{result.active}}</td>
+                        <td>0</td>
+                        <td>
+                    {% if result.total %}
+                            <a href="{% url 'open_findings' %}?component_name={{ result.component_name }}&component_version={{result.component_version}}"><b>{{ result.total }}</b></a>
+                        {% else %}
+                            0
+                    {% endif %}
+                    </td>
                     </tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </div>

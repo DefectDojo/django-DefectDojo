@@ -177,9 +177,23 @@ def view_product(request, pid):
 def view_product_components(request, pid):
     prod = get_object_or_404(Product, id=pid)
     product_tab = Product_Tab(pid, title="Product", tab="components")
+    active_findings = Finding.objects.filter(test__engagement__product=prod, active=True)
+
+    res = []
+    for finding in active_findings:
+        comp = {
+            "component_name" : finding.component_name,
+            "component_version" : finding.component_version,
+            "total" : len(Finding.objects.filter(component_name= finding.component_name, component_version= finding.component_version, active=True)),
+            "active" : len(Finding.objects.filter(component_name=finding.component_name, component_version= finding.component_version, test__engagement__product=prod))
+        }
+        res.append(comp)
+    
+
     return render(request, 'dojo/product_components.html', {
                     'prod': prod,
                     'product_tab': product_tab,
+                    'result' : res,
     })
 
 def view_product_metrics(request, pid):
