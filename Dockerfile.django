@@ -82,12 +82,10 @@ RUN \
 USER root
 RUN \
     adduser --system --no-create-home --disabled-password --gecos '' \
-        --uid ${uid} ${appuser}
-RUN \
+        --uid ${uid} ${appuser} && \
     chown -R ${appuser} /app && \
     chmod 0700 /app && \
-    chmod 0750 -R /app/*
-RUN \
+    chmod 0750 -R /app/* \
     mkdir /var/run/${appuser} && \
     chown ${appuser} /var/run/${appuser}
 USER ${appuser}
