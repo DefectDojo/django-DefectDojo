@@ -35,7 +35,7 @@ class PhpSymfonySecurityCheckParser(object):
         for dependency_name, dependency_data in list(tree.items()):
             advisories = dependency_data.get('advisories')
             dependency_version = dependency_data['version']
-            if dependency_version.startswith('v'):
+            if dependency_version and dependency_version.startswith('v'):
                 dependency_version = dependency_version[1:]
 
             for advisory in advisories:
