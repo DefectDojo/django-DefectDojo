@@ -184,8 +184,11 @@ def view_product_components(request, pid):
         comp = {
             "component_name" : finding.component_name,
             "component_version" : finding.component_version,
-            "total" : len(Finding.objects.filter(component_name= finding.component_name, component_version= finding.component_version, active=True)),
-            "active" : len(Finding.objects.filter(component_name=finding.component_name, component_version= finding.component_version, test__engagement__product=prod))
+            "product": pid,
+            "total" : len(Finding.objects.filter(component_name= finding.component_name, 
+                component_version= finding.component_version, active=True)),
+            "active" : len(Finding.objects.filter(component_name=finding.component_name, component_version=
+                finding.component_version, active=True, test__engagement__product=prod))
         }
         res.append(comp)
     

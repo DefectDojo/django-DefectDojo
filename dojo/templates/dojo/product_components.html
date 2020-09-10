@@ -17,7 +17,7 @@
 
         </div>
         <div class="panel panel-default table-responsive">
-            <table id="products" class="tablesorter-bootstrap table table-condensed table-striped">
+            <table id="components" class="tablesorter-bootstrap table table-condensed table-striped">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -32,15 +32,25 @@
                     <tr>
                         <td>{{ result.component_name  }}</td>
                         <td>{{result.component_version}} </td>
-                        <td>{{result.active}}</td>
-                        <td>0</td>
                         <td>
-                    {% if result.total %}
-                            <a href="{% url 'open_findings' %}?component_name={{ result.component_name }}&component_version={{result.component_version}}"><b>{{ result.total }}</b></a>
-                        {% else %}
+                            {% if result.total %}
+                            <a
+                                href="{% url 'open_findings' %}?component_name={{ result.component_name }}&component_version={{result.component_version}}&test__engagement__product={{result.product}}"><b>{{ result.active }}</b></a>
+                            {% else %}
                             0
-                    {% endif %}
-                    </td>
+                            {% endif %}
+                        </td>
+                        <td>
+                            0
+                        </td>
+                        <td>
+                            {% if result.total %}
+                            <a
+                                href="{% url 'open_findings' %}?component_name={{ result.component_name }}&component_version={{result.component_version}}"><b>{{ result.total }}</b></a>
+                            {% else %}
+                            0
+                            {% endif %}
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
