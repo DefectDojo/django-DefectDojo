@@ -16,6 +16,16 @@ def get_mitigated_endpoints(finding):
 
 
 @register.filter
+def vulnerable_endpoint_count(finding):
+    return finding.endpoint_status.all().filter(mitigated=False).count()
+
+
+@register.filter
+def mitigated_endpoint_count(finding):
+    return finding.endpoint_status.all().filter(mitigated=True).count()
+
+
+@register.filter
 def endpoint_display_status(endpoint, finding):
     status = Endpoint_Status.objects.get(endpoint=endpoint, finding=finding)
     if status.false_positive:
@@ -51,3 +61,9 @@ def endpoint_mitigator(endpoint, finding):
 def endpoint_mitigated_time(endpoint, finding):
     status = Endpoint_Status.objects.get(endpoint=endpoint, finding=finding)
     return status.mitigated_time
+
+
+@register.filter
+def endpoint_check_active(endpoint, finding):
+    status = Endpoint_Status.objects.get(endpoint=endpoint, finding=finding)
+    return not status.mitigated

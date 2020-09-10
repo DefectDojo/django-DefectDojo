@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load navigation_tags %}
 {% load display_tags %}
+{% load get_endpoint_status %}
 {% load static from staticfiles %}
 {% block content %}
     <div class="row">
@@ -323,11 +324,15 @@
                                   <i class="fa fa-code has-popover dojo-sup" data-trigger="hover" data-content="{{ finding.file_path }}" data-placement="right" data-container="body" data-original-title="Files" title=""></i>
                                   {% else %}
                                     {% if finding.endpoints.all %}
-                                      <i class="fa fa-sitemap has-popover dojo-sup" data-html="true" data-trigger="hover" data-content="
+                                      <i class="fa fa-sitemap has-popover dojo-sup" data-html="true" data-trigger="hover" data-content='
                                       {% for endpoint in finding.endpoints.all %}
-                                        {{ endpoint }}<br/>
+                                        {% if endpoint|endpoint_check_active:finding %}
+                                          &#10005; {{ endpoint }}<br/>
+                                        {% else %}
+                                          &#10003; {{ endpoint }}<br/>
+                                        {% endif %}
                                       {% endfor %}
-                                      " data-placement="right" data-container="body" data-original-title="Endpoints" title=""></i>
+                                      ' data-placement="right" data-container="body" data-original-title="Endpoints ({{finding|vulnerable_endpoint_count}} Active, {{finding|mitigated_endpoint_count}} Mitigated)" title=""></i>
                                     {% endif %}
                                   {% endif %}
                                   {% if finding.component_name %}
