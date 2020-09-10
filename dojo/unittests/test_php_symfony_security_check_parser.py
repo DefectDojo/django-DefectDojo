@@ -14,7 +14,7 @@ class TestPhpSymfonySecurityCheckerParser(TestCase):
         parser = PhpSymfonySecurityCheckParser(testfile, Test())
         testfile.close()
         items = parser.items
-        self.assertEqual(0, len(parser.items))
+        self.assertEqual(0, len(items))
 
     def test_php_symfony_security_check_parser_with_one_criticle_vuln_has_one_findings(self):
         testfile = open("dojo/unittests/scans/php_symfony_security_check_sample/php_symfony_one_vuln.json")
