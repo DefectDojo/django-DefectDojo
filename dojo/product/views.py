@@ -177,26 +177,34 @@ def view_product(request, pid):
 def view_product_components(request, pid):
     prod = get_object_or_404(Product, id=pid)
     product_tab = Product_Tab(pid, title="Product", tab="components")
-    active_findings = Finding.objects.filter(test__engagement__product=prod, active=True)
+    active_findings = Finding.objects.filter(test__engagement__product=prod, duplicate=False, active=True)
 
-    res = []
-    for finding in active_findings:
-        comp = {
+
+    items, item_comps, item_vers= [], [], []
+    for item in active_findings:
+        if item.component_name not in item_comps and item.component_version not in item_vers:
+            items.append(item)
+            item_comps.append(item.component_name)
+            item_vers.append(item.component_version)
+    # For loop samenvoegen
+    result = []
+    for finding in items:
+        component = {
             "component_name" : finding.component_name,
             "component_version" : finding.component_version,
             "product": pid,
-            "total" : len(Finding.objects.filter(component_name= finding.component_name, 
-                component_version= finding.component_version, active=True)),
-            "active" : len(Finding.objects.filter(component_name=finding.component_name, component_version=
-                finding.component_version, active=True, test__engagement__product=prod))
+            "total" : Finding.objects.filter(component_name= finding.component_name, component_version= finding.component_version, 
+            active=True).count(),
+            "active" : Finding.objects.filter(component_name=finding.component_name, component_version= finding.component_version, 
+            active=True, test__engagement__product=prod).count()
         }
-        res.append(comp)
+        result.append(component)
     
 
     return render(request, 'dojo/product_components.html', {
                     'prod': prod,
                     'product_tab': product_tab,
-                    'result' : res,
+                    'result' : result,
     })
 
 def view_product_metrics(request, pid):
