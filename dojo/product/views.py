@@ -180,25 +180,23 @@ def view_product_components(request, pid):
     active_findings = Finding.objects.filter(test__engagement__product=prod, duplicate=False, active=True)
 
 
-    items, item_comps, item_vers= [], [], []
-    for item in active_findings:
-        if item.component_name not in item_comps and item.component_version not in item_vers:
-            items.append(item)
-            item_comps.append(item.component_name)
-            item_vers.append(item.component_version)
-    # For loop samenvoegen
+    item_comps, item_vers= [], []
+
     result = []
-    for finding in items:
-        component = {
-            "component_name" : finding.component_name,
-            "component_version" : finding.component_version,
-            "product": pid,
-            "total" : Finding.objects.filter(component_name= finding.component_name, component_version= finding.component_version, 
-            active=True).count(),
-            "active" : Finding.objects.filter(component_name=finding.component_name, component_version= finding.component_version, 
-            active=True, test__engagement__product=prod).count()
-        }
-        result.append(component)
+    for finding in active_findings:
+        if finding.component_name not in item_comps and finding.component_version not in item_vers:
+            component = {
+                "component_name" : finding.component_name,
+                "component_version" : finding.component_version,
+                "product": pid,
+                "total" : Finding.objects.filter(component_name= finding.component_name, component_version= finding.component_version, 
+                active=True).count(),
+                "active" : Finding.objects.filter(component_name=finding.component_name, component_version= finding.component_version, 
+                active=True, test__engagement__product=prod).count()
+            }
+            result.append(component)
+            item_comps.append(finding.component_name)
+            item_vers.append(finding.component_version)
     
 
     return render(request, 'dojo/product_components.html', {
