@@ -33,7 +33,7 @@ helm repo update
 Helm >= v3
 ```zsh
 helm repo add stable https://kubernetes-charts.storage.googleapis.com/
-helm repo add bitname https://charts.bitnami.com/bitnami
+helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo update
 ```
 Then pull the dependent charts:
