@@ -81,7 +81,7 @@ env = environ.Env(
     DD_SOCIAL_AUTH_GOOGLE_OAUTH2_KEY=(str, ''),
     DD_SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET=(str, ''),
     DD_SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS=(list, ['']),
-    DD_SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_EMAILS = (list, ['']),
+    DD_SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_EMAILS=(list, ['']),
     DD_SOCIAL_AUTH_OKTA_OAUTH2_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_OKTA_OAUTH2_KEY=(str, ''),
     DD_SOCIAL_AUTH_OKTA_OAUTH2_SECRET=(str, ''),
@@ -125,11 +125,11 @@ env = environ.Env(
     # Set to True if you want to allow authorized users to make changes to findings or delete them
     DD_AUTHORIZED_USERS_ALLOW_CHANGE=(bool, False),
     DD_AUTHORIZED_USERS_ALLOW_DELETE=(bool, False),
-    DD_SLA_NOTIFY_ACTIVE = (bool, False),
-    DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY = (bool, True),
-    DD_SLA_NOTIFY_WITH_JIRA_ONLY = (bool, False),
-    DD_SLA_NOTIFY_PRE_BREACH = (int, 3),
-    DD_SLA_NOTIFY_POST_BREACH = (int, 7),
+    DD_SLA_NOTIFY_ACTIVE=(bool, False),
+    DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY=(bool, True),
+    DD_SLA_NOTIFY_WITH_JIRA_ONLY=(bool, False),
+    DD_SLA_NOTIFY_PRE_BREACH=(int, 3),
+    DD_SLA_NOTIFY_POST_BREACH=(int, 7),
 )
 
 
