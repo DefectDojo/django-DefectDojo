@@ -203,6 +203,7 @@ def prefetch_for_findings(findings):
         prefetched_findings = prefetched_findings.prefetch_related('notes')
         prefetched_findings = prefetched_findings.prefetch_related('tagged_items__tag')
         prefetched_findings = prefetched_findings.prefetch_related('endpoints')
+        prefetched_findings = prefetched_findings.prefetch_related('endpoint_status')
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__authorized_users')
     else:
         logger.debug('unable to prefetch because query was already executed')
