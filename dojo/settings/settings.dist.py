@@ -362,9 +362,6 @@ SOCIAL_AUTH_TRAILING_SLASH = env('DD_SOCIAL_AUTH_TRAILING_SLASH')
 # https://github.com/fangli/django-saml2-auth
 SAML2_ENABLED = env('DD_SAML2_ENABLED')
 SAML2_AUTH = {
-    # Metadata is required, choose either remote url or local file path
-    'METADATA_AUTO_CONF_URL': env('DD_SAML2_METADATA_AUTO_CONF_URL'),
-    'METADATA_LOCAL_FILE_PATH': env('DD_SAML2_METADATA_LOCAL_FILE_PATH'),
     'ASSERTION_URL': env('DD_SAML2_ASSERTION_URL'),
     'ENTITY_ID': env('DD_SAML2_ENTITY_ID'),
     # Optional settings below
@@ -372,6 +369,13 @@ SAML2_AUTH = {
     'NEW_USER_PROFILE': env('DD_SAML2_NEW_USER_PROFILE'),
     'ATTRIBUTES_MAP': env('DD_SAML2_ATTRIBUTES_MAP'),
 }
+
+# Metadata is required, choose either remote url or local file path
+if 'DD_SAML2_METADATA_AUTO_CONF_URL' in os.environ or len(env('DD_SAML2_METADATA_AUTO_CONF_URL')) > 0:
+    SAML2_AUTH['METADATA_AUTO_CONF_URL'] = env('DD_SAML2_METADATA_AUTO_CONF_URL')
+else:
+    SAML2_AUTH['METADATA_LOCAL_FILE_PATH'] = env('DD_SAML2_METADATA_LOCAL_FILE_PATH')
+
 
 AUTHORIZED_USERS_ALLOW_CHANGE = env('DD_AUTHORIZED_USERS_ALLOW_CHANGE')
 AUTHORIZED_USERS_ALLOW_DELETE = env('DD_AUTHORIZED_USERS_ALLOW_DELETE')
@@ -692,6 +696,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     # for backwards compatibility because someone decided to rename this scanner:
     'Symfony Security Check': ['title', 'cve'],
     'DSOP Scan': ['cve'],
+    'Trivy Scan': ['title', 'severity', 'cve', 'cwe'],
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
@@ -707,6 +712,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'ZAP Scan': False,
     'Qualys Scan': True,
     'DSOP Scan': True,
+    'Trivy Scan': True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -748,6 +754,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     # for backwards compatibility because someone decided to rename this scanner:
     'Symfony Security Check': DEDUPE_ALGO_HASH_CODE,
     'DSOP Scan': DEDUPE_ALGO_HASH_CODE,
+    'Trivy Scan': DEDUPE_ALGO_HASH_CODE,
 }
 
 DISABLE_FINDING_MERGE = env('DD_DISABLE_FINDING_MERGE')

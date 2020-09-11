@@ -1,6 +1,5 @@
 #  engagements
 import logging
-import os
 from datetime import datetime
 import operator
 import base64
@@ -11,7 +10,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
 from django.urls import reverse
 from django.db.models import Q
-from django.http import HttpResponseRedirect, StreamingHttpResponse, Http404, HttpResponse
+from django.http import HttpResponseRedirect, StreamingHttpResponse, Http404, HttpResponse, FileResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.cache import cache_page
 from django.utils import timezone
@@ -228,7 +227,7 @@ def edit_engagement(request, eid):
         form = EngForm(initial={'product': eng.product.id}, instance=eng, cicd=ci_cd_form, product=eng.product.id)
 
         if use_jira:
-            jform = JIRAEngagementForm(prefix='jiraform', instance=eng, jira_pkey=eng.product.jira_pkey)
+            jform = JIRAEngagementForm(prefix='jiraform', instance=eng)
         else:
             jform = None
 
@@ -603,8 +602,8 @@ def import_scan_results(request, eid=None, pid=None):
                         push_to_jira = jform.cleaned_data.get('push_to_jira')
 
                 for item in parser.items:
-                    print("item blowup")
-                    print(item)
+                    # print("item blowup")
+                    # print(item)
                     sev = item.severity
                     if sev == 'Information' or sev == 'Informational':
                         sev = 'Info'
@@ -1095,17 +1094,8 @@ def upload_threatmodel(request, eid):
 
 @user_passes_test(lambda u: u.is_staff)
 def view_threatmodel(request, eid):
-    import mimetypes
-
-    mimetypes.init()
     eng = get_object_or_404(Engagement, pk=eid)
-    mimetype, encoding = mimetypes.guess_type(eng.tmodel_path)
-    response = StreamingHttpResponse(FileIterWrapper(open(eng.tmodel_path)))
-    fileName, fileExtension = os.path.splitext(eng.tmodel_path)
-    response[
-        'Content-Disposition'] = 'attachment; filename=threatmodel' + fileExtension
-    response['Content-Type'] = mimetype
-
+    response = FileResponse(open(eng.tmodel_path, 'rb'))
     return response
 
 

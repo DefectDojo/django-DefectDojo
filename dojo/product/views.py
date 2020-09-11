@@ -1,6 +1,7 @@
 # #  product
 import calendar as tcalendar
 import logging
+import base64
 from collections import OrderedDict
 from datetime import datetime, date, timedelta
 from math import ceil
@@ -23,7 +24,7 @@ from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm
                        GITHUB_Product_Form, GITHUBFindingForm, App_AnalysisTypeForm, JIRAEngagementForm
 from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, GITHUB_PKey, Finding_Template, \
                         Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, \
-                        Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, Dojo_User
+                        Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, Dojo_User, BurpRawRequestResponse
 from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, Product_Tab, get_punchcard_data, add_epic
 from dojo.notifications.helper import create_notification
 from custom_field.models import CustomFieldValue, CustomField
@@ -109,12 +110,7 @@ def view_product(request, pid):
     prod = get_object_or_404(prod_query, id=pid)
     auth = request.user.is_staff or request.user in prod.authorized_users.all()
 
-    # instance = Notificationws.objects.filter(user=request.user).filter(product=prod).first()
-    # print(vars(instance))
-
     personal_notifications_form = ProductNotificationsForm(instance=Notifications.objects.filter(user=request.user).filter(product=prod).first())
-
-    print(vars(personal_notifications_form))
 
     if not auth:
         # will render 403
@@ -773,10 +769,6 @@ def new_eng_for_app(request, pid, cicd=False):
             if 'jiraform-push_to_jira' in request.POST:
                 jform = JIRAEngagementForm(request.POST, prefix='jiraform')
 
-            print('form.is_valid: ', form.is_valid())
-            if jform:
-                print('jform.is_valid: ', jform.is_valid())
-
             if form.is_valid() and (jform is None or jform.is_valid()):
                 if 'jiraform-push_to_jira' in request.POST:
                     if request.user.usercontactinfo.block_execution:
@@ -921,11 +913,11 @@ def ad_hoc_finding(request, pid):
     push_all_jira_issues = False
     jform = None
     gform = None
-    form = AdHocFindingForm(initial={'date': timezone.now().date()})
+    form = AdHocFindingForm(initial={'date': timezone.now().date()}, req_resp=None)
     use_jira = get_system_setting('enable_jira') and test.engagement.product.jira_pkey is not None
 
     if request.method == 'POST':
-        form = AdHocFindingForm(request.POST)
+        form = AdHocFindingForm(request.POST, req_resp=None)
         if (form['active'].value() is False or form['false_p'].value()) and form['duplicate'].value() is False:
             closing_disabled = Note_Type.objects.filter(is_mandatory=True, is_active=True).count()
             if closing_disabled != 0:
@@ -943,10 +935,6 @@ def ad_hoc_finding(request, pid):
                                      extra_tags='alert-danger')
         if use_jira:
             jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_pkey=test.engagement.product.jira_pkey)
-
-        print('form.is_valid: ', form.is_valid())
-        if jform:
-            print('jform.is_valid: ', jform.is_valid())
 
         if form.is_valid() and (jform is None or jform.is_valid()):
             new_finding = form.save(commit=False)
@@ -1005,6 +993,15 @@ def ad_hoc_finding(request, pid):
                         add_external_issue_task.delay(new_finding, 'github')
 
             new_finding.save(push_to_jira=push_to_jira)
+
+            if 'request' in form.cleaned_data or 'response' in form.cleaned_data:
+                burp_rr = BurpRawRequestResponse(
+                    finding=new_finding,
+                    burpRequestBase64=base64.b64encode(form.cleaned_data['request'].encode()),
+                    burpResponseBase64=base64.b64encode(form.cleaned_data['response'].encode()),
+                )
+                burp_rr.clean()
+                burp_rr.save()
 
             messages.add_message(request,
                                     messages.SUCCESS,
@@ -1165,15 +1162,14 @@ def delete_engagement_presets(request, pid, eid):
 
 
 def edit_notifications(request, pid):
-    print('editing them notifications')
     prod = get_object_or_404(Product, id=pid)
     if request.method == 'POST':
         product_notifications = Notifications.objects.filter(user=request.user).filter(product=prod).first()
         if not product_notifications:
             product_notifications = Notifications(user=request.user, product=prod)
-            print('no existing product notifications found')
+            logger.debug('no existing product notifications found')
         else:
-            print('existing product notifications found')
+            logger.debug('existing product notifications found')
 
         form = ProductNotificationsForm(request.POST, instance=product_notifications)
         # print(vars(form))

@@ -29,7 +29,8 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
     UsersViewSet, ImportScanView, ReImportScanView, ProductTypeViewSet, DojoMetaViewSet, \
     DevelopmentEnvironmentViewSet, NotesViewSet, NoteTypeViewSet, SystemSettingsViewSet, \
-    AppAnalysisViewSet, EndpointStatusViewSet
+    AppAnalysisViewSet, EndpointStatusViewSet, SonarqubeIssueViewSet, SonarqubeIssueTransitionViewSet, \
+    SonarqubeProductViewSet, RegulationsViewSet
 
 from dojo.utils import get_system_setting
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
@@ -62,6 +63,7 @@ from dojo.note_type.urls import urlpatterns as note_type_urls
 from dojo.google_sheet.urls import urlpatterns as google_sheets_urls
 from dojo.banner.urls import urlpatterns as banner_urls
 from dojo.survey.urls import urlpatterns as survey_urls
+from dojo.regulations.urls import urlpatterns as regulations
 
 admin.autodiscover()
 
@@ -113,6 +115,9 @@ v2_api.register(r'products', ProductViewSet)
 v2_api.register(r'product_types', ProductTypeViewSet)
 v2_api.register(r'scan_settings', ScanSettingsViewSet)
 v2_api.register(r'scans', ScansViewSet)
+v2_api.register(r'sonarqube_issues', SonarqubeIssueViewSet)
+v2_api.register(r'sonarqube_transitions', SonarqubeIssueTransitionViewSet)
+v2_api.register(r'sonarqube_product_configurations', SonarqubeProductViewSet)
 v2_api.register(r'stub_findings', StubFindingsViewSet)
 v2_api.register(r'tests', TestsViewSet)
 v2_api.register(r'test_types', TestTypesViewSet)
@@ -126,6 +131,7 @@ v2_api.register(r'metadata', DojoMetaViewSet, basename='metadata')
 v2_api.register(r'notes', NotesViewSet)
 v2_api.register(r'note_type', NoteTypeViewSet)
 v2_api.register(r'system_settings', SystemSettingsViewSet)
+v2_api.register(r'regulations', RegulationsViewSet)
 
 ur = []
 ur += dev_env_urls
@@ -157,6 +163,7 @@ ur += notes_urls
 ur += note_type_urls
 ur += google_sheets_urls
 ur += banner_urls
+ur += regulations
 
 swagger_urls = [
     url(r'^$', SwaggerView.as_view(), name='index'),

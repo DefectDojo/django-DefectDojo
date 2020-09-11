@@ -30,9 +30,9 @@ from dojo.models import Finding, Test, Notes, Note_Type, BurpRawRequestResponse,
     Finding_Template, JIRA_PKey, Cred_Mapping, Dojo_User, System_Settings, Endpoint_Status
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting, \
-    Product_Tab, max_safe, is_scan_file_too_large, add_issue
+    Product_Tab, max_safe, is_scan_file_too_large, add_jira_issue
 from dojo.notifications.helper import create_notification
-from dojo.tasks import add_issue_task
+from dojo.tasks import add_jira_issue_task
 from functools import reduce
 from dojo.finding.views import finding_link_jira, finding_unlink_jira
 
@@ -155,7 +155,9 @@ def prefetch_for_findings(findings):
         prefetched_findings = prefetched_findings.prefetch_related('tagged_items__tag')
         prefetched_findings = prefetched_findings.prefetch_related('endpoints')
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__authorized_users')
+    else:
         logger.debug('unable to prefetch because query was already executed')
+
     return prefetched_findings
 
 
@@ -274,12 +276,12 @@ def add_findings(request, tid):
     test = Test.objects.get(id=tid)
     form_error = False
     jform = None
-    form = AddFindingForm(initial={'date': timezone.now().date()})
+    form = AddFindingForm(initial={'date': timezone.now().date()}, req_resp=None)
     push_all_jira_issues = False
     use_jira = get_system_setting('enable_jira') and test.engagement.product.jira_pkey is not None
 
     if request.method == 'POST':
-        form = AddFindingForm(request.POST)
+        form = AddFindingForm(request.POST, req_resp=None)
         if (form['active'].value() is False or form['verified'].value() is False) \
                 and 'jiraform-push_to_jira' in request.POST:
             error = ValidationError('Findings must be active and verified to be pushed to JIRA',
@@ -314,15 +316,10 @@ def add_findings(request, tid):
         if use_jira:
             jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_pkey=test.engagement.product.jira_pkey)
 
-        print('form.is_valid: ', form.is_valid())
-
-        if jform:
-            print('jform.is_valid: ', jform.is_valid())
-
         if form.is_valid() and (jform is None or jform.is_valid()):
             if jform:
-                print('jform.jira_issue: ', jform.cleaned_data.get('jira_issue'))
-                print('jform.push_to_jira: ', jform.cleaned_data.get('push_to_jira'))
+                logger.debug('jform.jira_issue: %s', jform.cleaned_data.get('jira_issue'))
+                logger.debug('jform.push_to_jira: %s', jform.cleaned_data.get('push_to_jira'))
 
             new_finding = form.save(commit=False)
             new_finding.test = test
@@ -338,14 +335,11 @@ def add_findings(request, tid):
             new_finding.save(dedupe_option=False, push_to_jira=False)
             new_finding.endpoints.set(form.cleaned_data['endpoints'])
 
-            print('jira handling')
-
             # Push to jira?
             push_to_jira = False
             jira_message = None
             if jform and jform.is_valid():
                 # Push to Jira?
-                logger.debug('jira form valid')
                 push_to_jira = push_all_jira_issues or jform.cleaned_data.get('push_to_jira')
 
                 # if the jira issue key was changed, update database
@@ -379,6 +373,15 @@ def add_findings(request, tid):
                                 description='Finding "%s" was added by %s' % (new_finding.title, request.user),
                                 url=request.build_absolute_uri(reverse('view_finding', args=(new_finding.id,))),
                                 icon="exclamation-triangle")
+
+            if 'request' in form.cleaned_data or 'response' in form.cleaned_data:
+                burp_rr = BurpRawRequestResponse(
+                    finding=new_finding,
+                    burpRequestBase64=base64.b64encode(form.cleaned_data['request'].encode()),
+                    burpResponseBase64=base64.b64encode(form.cleaned_data['response'].encode()),
+                )
+                burp_rr.clean()
+                burp_rr.save()
 
             if create_template:
                 templates = Finding_Template.objects.filter(title=new_finding.title)
@@ -492,9 +495,9 @@ def add_temp_finding(request, tid, fid):
                 jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_pkey=test.engagement.product.jira_pkey)
                 if jform.is_valid():
                     if request.user.usercontactinfo.block_execution:
-                        add_issue(new_finding, jform.cleaned_data.get('push_to_jira'))
+                        add_jira_issue(new_finding, jform.cleaned_data.get('push_to_jira'))
                     else:
-                        add_issue_task.delay(new_finding, jform.cleaned_data.get('push_to_jira'))
+                        add_jira_issue_task.delay(new_finding, jform.cleaned_data.get('push_to_jira'))
 
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -670,6 +673,8 @@ def re_import_scan_results(request, tid):
                     # Try to find the existing finding
                     # If it's Veracode or Arachni, then we consider the description for some
                     # reason...
+                    from titlecase import titlecase
+                    item.title = titlecase(item.title)
                     if scan_type == 'Veracode Scan' or scan_type == 'Arachni Scan':
                         finding = Finding.objects.filter(title=item.title,
                                                         test__id=test.id,

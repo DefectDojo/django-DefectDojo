@@ -40,7 +40,6 @@ from django.http import HttpResponseRedirect
 # import traceback
 
 
-
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
@@ -296,14 +295,8 @@ def set_duplicate(new_finding, existing_finding):
     if existing_finding.id == new_finding.id:
         raise Exception("Can not add duplicate to itself")
     deduplicationLogger.debug('New finding ' + str(new_finding.id) + ' is a duplicate of existing finding ' + str(existing_finding.id))
-    if (existing_finding.is_Mitigated or existing_finding.mitigated) and new_finding.active and not new_finding.is_Mitigated:
-        existing_finding.mitigated = new_finding.mitigated
-        existing_finding.is_Mitigated = new_finding.is_Mitigated
-        existing_finding.active = new_finding.active
-        existing_finding.verified = new_finding.verified
-        existing_finding.notes.create(author=existing_finding.reporter,
-                                      entry="This finding has been automatically re-openend as it was found in recent scans.")
-        existing_finding.save()
+    if is_duplicate_reopen(new_finding, existing_finding):
+        set_duplicate_reopen_(new_finding, existing_finding)
     new_finding.duplicate = True
     new_finding.active = False
     new_finding.verified = False
@@ -314,6 +307,23 @@ def set_duplicate(new_finding, existing_finding):
     existing_finding.found_by.add(new_finding.test.test_type)
     super(Finding, new_finding).save()
     super(Finding, existing_finding).save()
+
+
+def is_duplicate_reopen(new_finding, existing_finding):
+    if (existing_finding.is_Mitigated or existing_finding.mitigated) and not existing_finding.out_of_scope and not existing_finding.false_p and new_finding.active and not new_finding.is_Mitigated:
+        return True
+    else:
+        return False
+
+
+def set_duplicate_reopen(new_finding, existing_finding):
+    existing_finding.mitigated = new_finding.mitigated
+    existing_finding.is_Mitigated = new_finding.is_Mitigated
+    existing_finding.active = new_finding.active
+    existing_finding.verified = new_finding.verified
+    existing_finding.notes.create(author=existing_finding.reporter,
+                                    entry="This finding has been automatically re-openend as it was found in recent scans.")
+    existing_finding.save()
 
 
 def removeLoop(finding_id, counter):
@@ -1336,7 +1346,7 @@ def reopen_external_issue(find, note, external_issue_provider):
         reopen_external_issue_github(find, note, prod, eng)
 
 
-def add_issue(find, push_to_jira):
+def add_jira_issue(find, push_to_jira):
     logger.info('trying to create a new jira issue for %d:%s', find.id, find.title)
 
     # traceback.print_stack()
@@ -1432,7 +1442,7 @@ def add_issue(find, push_to_jira):
 
                 new_note = Notes()
                 new_note.entry = 'created JIRA issue %s for finding' % (jira_issue_url)
-                new_note.author = find.reporter  # quick hack because we don't have request.user here
+                new_note.author, created = User.objects.get_or_create(username='JIRA')  # quick hack copied from webhook because we don't have request.user here
                 new_note.save()
                 find.notes.add(new_note)
 
@@ -1445,7 +1455,7 @@ def add_issue(find, push_to_jira):
                     # if jpkey.enable_engagement_epic_mapping:
                     #      epic = JIRA_Issue.objects.get(engagement=eng)
                     #      issue_list = [j_issue.jira_id,]
-                    #      jira.add_issues_to_epic(epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
+                    #      jira.add_jira_issues_to_epic(epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
             except JIRAError as e:
                 logger.error(e.text)
                 log_jira_alert(e.text, find)
@@ -1491,7 +1501,7 @@ def jira_check_attachment(issue, source_file_name):
     return file_exists
 
 
-def update_issue(find, push_to_jira):
+def update_jira_issue(find, push_to_jira):
     logger.info('trying to update a linked jira issue for %d:%s', find.id, find.title)
     prod = Product.objects.get(
         engagement=Engagement.objects.get(test=find.test))
@@ -1671,7 +1681,7 @@ def jira_get_issue(jpkey, issue_key):
             server=jira_conf.url,
             basic_auth=(jira_conf.username, jira_conf.password))
         issue = jira.issue(issue_key)
-        print(vars(issue))
+        # print(vars(issue))
         return issue
     except JIRAError as jira_error:
         logger.debug('error retrieving jira issue ' + issue_key + ' ' + str(jira_error))

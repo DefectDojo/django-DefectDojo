@@ -14,7 +14,8 @@ from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Find
     User, ScanSettings, Scan, Stub_Finding, Finding_Template, Notes, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Endpoint, JIRA_PKey, JIRA_Conf, DojoMeta, Development_Environment, \
-    Dojo_User, Note_Type, System_Settings, App_Analysis, Endpoint_Status
+    Dojo_User, Note_Type, System_Settings, App_Analysis, Endpoint_Status, \
+    Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation
 
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import report_url_resolver
@@ -284,6 +285,9 @@ class FindingViewSet(mixins.ListModelMixin,
             note.save()
             finding.notes.add(note)
 
+            if finding.has_jira_issue():
+                add_comment_task(finding, note)
+
             serialized_note = serializers.NoteSerializer({
                 "author": author, "entry": entry,
                 "private": private
@@ -424,6 +428,44 @@ class JiraViewSet(mixins.ListModelMixin,
     filter_fields = ('id', 'conf', 'product', 'component', 'project_key',
                      'push_all_issues', 'enable_engagement_epic_mapping',
                      'push_notes')
+
+
+class SonarqubeIssueViewSet(mixins.ListModelMixin,
+                                mixins.RetrieveModelMixin,
+                                mixins.DestroyModelMixin,
+                                mixins.UpdateModelMixin,
+                                mixins.CreateModelMixin,
+                                viewsets.GenericViewSet):
+    serializer_class = serializers.SonarqubeIssueSerializer
+    queryset = Sonarqube_Issue.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'key', 'status', 'type')
+
+
+class SonarqubeIssueTransitionViewSet(mixins.ListModelMixin,
+                        mixins.RetrieveModelMixin,
+                        mixins.DestroyModelMixin,
+                        mixins.CreateModelMixin,
+                        mixins.UpdateModelMixin,
+                        viewsets.GenericViewSet):
+    serializer_class = serializers.SonarqubeIssueTransitionSerializer
+    queryset = Sonarqube_Issue_Transition.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'sonarqube_issue', 'finding_status',
+                     'sonarqube_status', 'transitions')
+
+
+class SonarqubeProductViewSet(mixins.ListModelMixin,
+                  mixins.RetrieveModelMixin,
+                  mixins.DestroyModelMixin,
+                  mixins.UpdateModelMixin,
+                  mixins.CreateModelMixin,
+                  viewsets.GenericViewSet):
+    serializer_class = serializers.SonarqubeProductSerializer
+    queryset = Sonarqube_Product.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'product', 'sonarqube_project_key',
+                     'sonarqube_tool_config')
 
 
 class DojoMetaViewSet(mixins.ListModelMixin,
@@ -708,6 +750,18 @@ class ToolTypesViewSet(mixins.ListModelMixin,
                        viewsets.GenericViewSet):
     serializer_class = serializers.ToolTypeSerializer
     queryset = Tool_Type.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'name', 'description')
+
+
+class RegulationsViewSet(mixins.ListModelMixin,
+                         mixins.RetrieveModelMixin,
+                         mixins.CreateModelMixin,
+                         mixins.DestroyModelMixin,
+                         mixins.UpdateModelMixin,
+                         viewsets.GenericViewSet):
+    serializer_class = serializers.RegulationSerializer
+    queryset = Regulation.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'name', 'description')
 

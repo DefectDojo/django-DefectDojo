@@ -77,7 +77,7 @@
                           </li>
                           {% if threat != 'none' %}
                           <li role="presentation">
-                                  <a href="{% url 'view_threatmodel' eng.id %}"><i class="fa fa-file-text-o"></i> Download Threat Model</a>
+                                  <a href="{% url 'view_threatmodel' eng.id %}" download><i class="fa fa-file-text-o"></i> Download Threat Model</a>
                           </li>
                             {% if user.is_staff %}
                             <li role="presentation">
@@ -810,9 +810,6 @@
                 i.toggleClass('glyphicon-chevron-up').toggleClass('glyphicon-chevron-down');
             });
 
-            $(document).ready(function(){
-              $('[data-toggle="tooltip"]').tooltip();
-            });
             //Ensures dropdown has proper zindex
             $('.table-responsive').on('show.bs.dropdown', function () {
               $('.table-responsive').css( "overflow", "inherit" );

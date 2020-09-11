@@ -159,17 +159,17 @@ jquery.hotkeys@jeresig/jquery.hotkeys#master:
   version "0.2.0"
   resolved "https://codeload.github.com/jeresig/jquery.hotkeys/tar.gz/f24f1da275aab7881ab501055c256add6f690de4"
 
-"jquery@>= 1.0.0", jquery@>=1.7, jquery@>=1.7.0, jquery@^3.4.0:
-  version "3.4.1"
-  resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.4.1.tgz#714f1f8d9dde4bdfa55764ba37ef214630d80ef2"
-  integrity sha512-36+AdBzCL+y6qjw5Tx7HgzeGCzC81MDDgaUP8ld2zhx58HdqXGoBd+tHdrBMiyjGQs0Hxs/MLZTu/eHNJJuWPw==
+"jquery@>= 1.0.0", jquery@>=1.7, jquery@>=1.7.0, jquery@^3.5.1:
+  version "3.5.1"
+  resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.5.1.tgz#d7b4d08e1bfdb86ad2f1a3d039ea17304717abb5"
+  integrity sha512-XwIBPqcMn57FxfT+Go5pzySnm4KWkT1Tv7gjrpT1srtf8Weynl6R273VJ5GjkRb51IzMp5nbaPjJXMWeju2MKg==
 
-justgage@^1.3.0:
-  version "1.3.5"
-  resolved "https://registry.yarnpkg.com/justgage/-/justgage-1.3.5.tgz#b07b3f9c4e3d2d025d82c15521d21b3ae461ef34"
-  integrity sha512-5P71LcTEqhg4Rh1rDKo9JgkE2cCZvHnKuagD80MXtEGvidLmRPm309YEwM2BHdEP4Q5DPwGUYjWQm4QY1QR4Yg==
+justgage@^1.4.0:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/justgage/-/justgage-1.4.0.tgz#c978fba491db53d121bc244faec142fd40a6b839"
+  integrity sha512-ziX2FAidHHBTTCKMPODEgGpOxAYfESjHkUNbfsOJfoJkucOZOPuZpXgRds3dMveWI2k0MEN9r0I223hzyQvweg==
   dependencies:
-    raphael "^2.2.8"
+    raphael "^2.3.0"
 
 marked@^1.1.1:
   version "1.1.1"
@@ -190,7 +190,7 @@ morris.js@morrisjs/morris.js:
   version "0.5.1"
   resolved "https://codeload.github.com/morrisjs/morris.js/tar.gz/14530d0733801d5bef1264cf3d062ecace7e326b"
 
-raphael@^2.2.8:
+raphael@^2.3.0:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/raphael/-/raphael-2.3.0.tgz#eabeb09dba861a1d4cee077eaafb8c53f3131f89"
   integrity sha512-w2yIenZAQnp257XUWGni4bLMVxpUpcIl7qgxEgDIXtmSypYtlNxfXWpOBxs7LBTps5sDwhRnrToJrMUrivqNTQ==

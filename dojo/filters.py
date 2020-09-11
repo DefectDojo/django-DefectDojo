@@ -1,5 +1,6 @@
 __author__ = 'Jay Paz'
 import collections
+import logging
 from datetime import timedelta, datetime
 
 from auditlog.models import LogEntry
@@ -18,6 +19,8 @@ from dojo.models import Dojo_User, Product_Type, Finding, Product, Test_Type, \
     Engagement_Survey, Question, TextQuestion, ChoiceQuestion
 from dojo.utils import get_system_setting
 from django.contrib.contenttypes.models import ContentType
+
+logger = logging.getLogger(__name__)
 
 local_tz = timezone(get_system_setting('time_zone'))
 
@@ -732,6 +735,92 @@ class ProductFindingFilter(DojoFilter):
                    if type(finding.cwe) is int and finding.cwe is not None and finding.cwe > 0 and finding.cwe not in cwe)
         cwe = collections.OrderedDict(sorted(cwe.items()))
         self.form.fields['cwe'].choices = list(cwe.items())
+
+
+class SimilarFindingFilter(DojoFilter):
+    cve = CharFilter(lookup_expr='icontains')
+    cwe = NumberFilter()
+    title = CharFilter(lookup_expr='icontains')
+    duplicate = ReportBooleanFilter()
+    # sourcefile = CharFilter(lookup_expr='icontains')
+    file_path = CharFilter(lookup_expr='icontains')
+    mitigated = DateRangeFilter(label="Mitigated Date")
+    date = DateRangeFilter()
+    component_name = CharFilter(lookup_expr='icontains')
+    component_version = CharFilter(lookup_expr='icontains')
+    jira_issue__jira_key = CharFilter(lookup_expr='icontains')
+
+    test__test_type = ModelMultipleChoiceFilter(
+        queryset=Test_Type.objects.all())
+    test__engagement__product = ModelMultipleChoiceFilter(
+        queryset=Product.objects.all(),
+        label="Product")
+    test__engagement__product__prod_type = ModelMultipleChoiceFilter(
+        queryset=Product_Type.objects.all(),
+        label="Product Type")
+
+    if get_system_setting('enable_jira'):
+        jira_issue = BooleanFilter(field_name='jira_issue',
+                                   lookup_expr='isnull',
+                                   exclude=True,
+                                   label='JIRA issue')
+
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ('numerical_severity', 'numerical_severity'),
+            ('date', 'date'),
+            ('title', 'title'),
+            ('test__engagement__product__name',
+             'test__engagement__product__name'),
+        ),
+
+    )
+
+    class Meta:
+        model = Finding
+        fields = ['cwe', 'hash_code', 'unique_id_from_tool', 'line', 'id']
+
+    def __init__(self, data=None, *args, **kwargs):
+        self.user = None
+        if 'user' in kwargs:
+            self.user = kwargs.pop('user')
+
+        self.finding = None
+        if 'finding' in kwargs:
+            self.finding = kwargs.pop('finding')
+
+        logger.debug('DATA: %s', data)
+
+        # if filterset is bound, use initial values as defaults
+        if not data:
+            # get a mutable copy of the QueryDict
+            data = data.copy()
+
+            data['cve'] = self.finding.cve
+            data['cwe'] = self.finding.cwe
+            data['file_path'] = self.finding.file_path
+            data['line'] = self.finding.line
+            data['unique_id_from_tool'] = self.finding.unique_id_from_tool
+            data['test__test_type'] = self.finding.test.test_type
+            data['test__engagement__product'] = self.finding.test.engagement.product
+            data['test__engagement__product__prod_type'] = self.finding.test.engagement.product.prod_type
+
+            logger.debug('DATA2: %s', data)
+
+        super().__init__(data, *args, **kwargs)
+
+        if self.user is not None and not self.user.is_staff:
+            if self.form.fields.get('test__engagement__product'):
+                qs = Product.objects.filter(authorized_users__in=[self.user])
+                self.form.fields['test__engagement__product'].queryset = qs
+
+    def filter_queryset(self, *args, **kwargs):
+        queryset = super().filter_queryset(*args, **kwargs)
+        if not self.user.is_staff:
+            queryset = queryset.filter(test__engagement__product__authorized_users__in=[self.user])
+        queryset = queryset.exclude(pk=self.finding.pk)
+        return queryset
 
 
 class TemplateFindingFilter(DojoFilter):
