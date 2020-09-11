@@ -174,30 +174,15 @@ def view_product(request, pid):
                   'authorized': auth,
                   'personal_notifications_form': personal_notifications_form})
 
-def view_product_components(request, pid):
+def view_product_components(request, pid):  
     prod = get_object_or_404(Product, id=pid)
     product_tab = Product_Tab(pid, title="Product", tab="components")
-    active_findings = Finding.objects.filter(test__engagement__product=prod, duplicate=False, active=True)
 
-
-    item_comps, item_vers= [], []
-
-    result = []
-    for finding in active_findings:
-        if finding.component_name not in item_comps and finding.component_version not in item_vers:
-            component = {
-                "component_name" : finding.component_name,
-                "component_version" : finding.component_version,
-                "product": pid,
-                "total" : Finding.objects.filter(component_name= finding.component_name, component_version= finding.component_version, 
-                active=True).count(),
-                "active" : Finding.objects.filter(component_name=finding.component_name, component_version= finding.component_version, 
-                active=True, test__engagement__product=prod).count()
-            }
-            result.append(component)
-            item_comps.append(finding.component_name)
-            item_vers.append(finding.component_version)
-    
+    component_query = Finding.objects.filter(active=True, duplicate=False).values("component_name", "component_version")
+    component_query = component_query.annotate(total=Count('id')).order_by('component_name','component_version')
+    component_query = component_query.annotate(active=Count('id',filter=Q(test__engagement__product__id=pid)))
+    component_query = component_query.order_by('component_name','component_version')
+    result = component_query.filter(active__gte=1)
 
     return render(request, 'dojo/product_components.html', {
                     'prod': prod,
@@ -241,7 +226,6 @@ def view_product_metrics(request, pid):
     tests = Test.objects.filter(engagement__product=prod).prefetch_related('finding_set')
 
     risk_acceptances = Risk_Acceptance.objects.filter(engagement__in=Engagement.objects.filter(product=prod))
-
     accepted_findings = [finding for ra in risk_acceptances
                          for finding in ra.accepted_findings.all()]
 

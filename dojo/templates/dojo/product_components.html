@@ -33,9 +33,9 @@
                         <td>{{ result.component_name  }}</td>
                         <td>{{result.component_version}} </td>
                         <td>
-                            {% if result.total %}
+                            {% if result.active %}
                             <a
-                                href="{% url 'open_findings' %}?component_name={{ result.component_name }}&component_version={{result.component_version}}&test__engagement__product={{result.product}}"><b>{{ result.active }}</b></a>
+                                href="{% url 'open_findings' %}?component_name={{ result.component_name }}&component_version={{result.component_version}}&test__engagement__product={{prod.id}}"><b>{{ result.active }}</b></a>
                             {% else %}
                             0
                             {% endif %}
