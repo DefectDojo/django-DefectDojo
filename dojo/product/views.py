@@ -178,11 +178,11 @@ def view_product_components(request, pid):
     prod = get_object_or_404(Product, id=pid)
     product_tab = Product_Tab(pid, title="Product", tab="components")
 
-    component_query = Finding.objects.filter(active=True, duplicate=False).values("component_name", "component_version")
+    component_query = Finding.objects.filter(test__engagement__product__id=pid).values("component_name", "component_version")
     component_query = component_query.annotate(total=Count('id')).order_by('component_name','component_version')
-    component_query = component_query.annotate(active=Count('id',filter=Q(test__engagement__product__id=pid)))
-    component_query = component_query.order_by('component_name','component_version')
-    result = component_query.filter(active__gte=1)
+    component_query = component_query.annotate(active=Count('id',filter=Q(active=True)))
+    component_query = component_query.annotate(duplicate=(Count('id', filter=Q(duplicate=True))))
+    result = component_query
 
     return render(request, 'dojo/product_components.html', {
                     'prod': prod,

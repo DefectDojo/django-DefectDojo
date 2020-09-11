@@ -41,12 +41,17 @@
                             {% endif %}
                         </td>
                         <td>
+                            {% if result.duplicate %}
+                            <a
+                                href="{% url 'findings' %}?component_name={{ result.component_name }}&component_version={{result.component_version}}&test__engagement__product={{prod.id}}&duplicate=1"><b>{{ result.duplicate }}</b></a>
+                            {% else %}
                             0
+                            {% endif %}
                         </td>
                         <td>
                             {% if result.total %}
                             <a
-                                href="{% url 'open_findings' %}?component_name={{ result.component_name }}&component_version={{result.component_version}}"><b>{{ result.total }}</b></a>
+                                href="{% url 'findings' %}?component_name={{ result.component_name }}&component_version={{result.component_version}}&test__engagement__product={{prod.id}}"><b>{{ result.total }}</b></a>
                             {% else %}
                             0
                             {% endif %}
