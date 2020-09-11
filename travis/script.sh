@@ -63,6 +63,9 @@ if [ -z "${TEST}" ]; then
   done
   echo
 
+  # add bitnami repo
+  helm repo add bitnami https://charts.bitnami.com/bitnami
+
   # Update Helm repository
   helm repo update
 
