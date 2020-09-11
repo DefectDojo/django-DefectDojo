@@ -129,7 +129,7 @@ env = environ.Env(
     DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY = (bool, True),
     DD_SLA_NOTIFY_WITH_JIRA_ONLY = (bool, False),
     DD_SLA_NOTIFY_PRE_BREACH = (int, 3),
-    DD_SLA_NOTIFY_POST_BREACH = (int, 3),
+    DD_SLA_NOTIFY_POST_BREACH = (int, 7),
 )
 
 
