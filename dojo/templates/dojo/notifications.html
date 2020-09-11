@@ -22,12 +22,11 @@
                 <p>&nbsp;</p>
             {% endif %}
             {% if scope == 'system' %}
-                <p>These notification settings apply <u>globally</u> to all products and will be sent to all super / staff users.</p>
+                <p class="amber-color-with-padding">These notification settings apply <u>globally</u> to all products and will be sent to all super / staff users.</p>
             {% else %}
-                <p>These notification settings apply <u>globally</u> to all products that you have read access to and will be sent to you only.</p>
+                <p class="amber-color-with-padding">These notification settings apply <u>globally</u> to all products that you have read access to and will be sent to you only.</p>
                 <p> If you want only notifications for certain products you should disable everything here and enable notifications on those products.</p>
             {% endif %}
-            <br/>BREAK<br/>
             {% for u in not_users %}
                 <p>{{ u.username }} {{ u.applicable_notifications_count }}</p>
                 {% for n in u.applicable_notifications %}
@@ -38,14 +37,18 @@
             <table class="table table-hover col-sm-5">
                 <thead>
                     <tr>
-                        <th>Event</th><th class="centered">Slack</th><th class="centered">HipChat</th><th class="centered">Mail</th><th class="centered">Alert</th>
+                        <th>Event</th>
+                        <th class="centered">Slack</th>
+                        <th class="centered">HipChat</th>
+                        <th class="centered">Mail</th>
+                        <th class="centered">Alert</th>
                     </tr>
                 </thead>
                 <tbody>
                 {% for field in form.visible_fields %}
                     {% if field.auto_id %}
                         <tr>
-                            <td>{{ field.label }}{% if field.field.required%}<sup>*</sup>{% endif %}
+                            <td>{{ field.label }}{% if field.field.required %}<sup>*</sup>{% endif %}
                                 {% if field.help_text %}
                                 <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="{{ field.help_text }}" data-placement="right" data-container="body">
                                 </i>

@@ -24,6 +24,10 @@
     <script type="text/javascript">
         $(function () {
             $(document).on('keypress', function(e) {
+                // return immediately if any of the search box is in focus while doing the keypress
+                if (e.target.getAttribute('type') === 'search' || e.target.id === 'simple_search') {
+                  return;
+                }
                 var key = String.fromCharCode(e.which);
                 if (key =='a') {
                   {% if engagement_type == "CI/CD" %}
@@ -33,7 +37,6 @@
                   {% endif %}
                 }
             });
-            $('[data-toggle="tooltip"]').tooltip();
             //Ensures dropdown has proper zindex
             $('.table-responsive').on('show.bs.dropdown', function () {
               $('.table-responsive').css( "overflow", "inherit" );

@@ -56,7 +56,7 @@
                             <th>Jira</th>
                             {% endif %}
                             {% if system_settings.enable_github %}
-                            <th>Github</th>
+                            <th>GitHub</th>
                             {% endif %}
                             <th> Findings</th>
                             <th> Endpoints</th>
@@ -198,14 +198,16 @@
                                 {% if system_settings.enable_jira %}
                                 <td class="text-center">
                                 {% for jira_conf in prod.jira_confs %}
-                                <i class="fa fa-bug has-popover" title="<i class='fa fa-bug'></i> <b>Jira Configuration</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="bottom"
-                                  data-content="<b>Jira:</b> {{ jira_conf.conf }}<br/>
-                                  <b>Project Key:</b> {{ jira_conf.project_key }}<br/>
-                                  <b>Component:</b> {{ jira_conf.component }}<br/>
-                                  <b>Push All Issues:</b> {{ jira_conf.push_all_issues }}<br/>
-                                  <b>Engagement Epic Mapping:</b> {{ jira_conf.enable_engagement_epic_mapping }}<br/>
-                                  <b>Push Notes:</b> {{ jira_conf.push_notes }}">
-                                </i>
+                                  {% if jira_conf.conf is not None %}
+                                  <i class="fa fa-bug has-popover" title="<i class='fa fa-bug'></i> <b>Jira Configuration</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="bottom"
+                                    data-content="<b>Jira:</b> {{ jira_conf.conf }}<br/>
+                                    <b>Project Key:</b> {{ jira_conf.project_key }}<br/>
+                                    <b>Component:</b> {{ jira_conf.component }}<br/>
+                                    <b>Push All Issues:</b> {{ jira_conf.push_all_issues }}<br/>
+                                    <b>Engagement Epic Mapping:</b> {{ jira_conf.enable_engagement_epic_mapping }}<br/>
+                                    <b>Push Notes:</b> {{ jira_conf.push_notes }}">
+                                  </i>
+                                  {% endif %}
                                 {% endfor %}
                                 </td>
                                 {% endif %}
@@ -213,11 +215,13 @@
                                 {% if system_settings.enable_github %}
                                 <td class="text-center">
                                 {% for github_conf in prod.github_confs %}
-                                <i class="fa fa-bug has-popover" title="<i class='fa fa-bug'></i> <b>Github Configuration</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="bottom"
-                                  data-content="<b>Github:</b> {{ github_conf.git_conf }}<br/>
-                                  <b>Project Key:</b> {{ github_conf.git_project }}<br/>
-                                  <b>Push Notes:</b> {{ github_conf.push_notes }}">
-                                </i>
+                                  {% if github_conf.git_conf is not None %}
+                                    <i class="fa fa-bug has-popover" title="<i class='fa fa-bug'></i> <b>GitHub Configuration</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="bottom"
+                                      data-content="<b>GitHub:</b> {{ github_conf.git_conf }}<br/>
+                                      <b>Project Key:</b> {{ github_conf.git_project }}<br/>
+                                      <b>Push Notes:</b> {{ github_conf.push_notes }}">
+                                    </i>
+                                  {% endif %}
                                 {% endfor %}
                                 </td>
                                 {% endif %}
@@ -265,7 +269,7 @@
                     {% include "dojo/paging_snippet.html" with page=prod_list page_size=True %}
                 </div>
             {% else %}
-                <p class="text-center">No products found.</p>
+                <div id="no_products"><p class="text-center">No products found.</p></div>
             {% endif %}
         </div>
     </div>
@@ -313,16 +317,10 @@
                 drawCallback: function(){
                      $('.has-popover').popover({'trigger':'hover'});
                  },
-                "columns": [
-                    { "data": "action", render: function (data, type, row) {
-                            return type === 'export' ?  "" :  data;
-                    }},
-                    { "data": "product" , render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'b') :  data;
-                    }},
-                    { "data": "tags" , render: function (data, type, row) {
-                            return type === 'export' ?  getDojoExportValueFromTag(data, 'a') :  data;
-                    }},
+                 "columns": [
+                    { "data": "action" },
+                    { "data": "product" },
+                    { "data": "tags" },
                     { "data": "criticality" , render: function (data, type, row) {
                             return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
                     }},
@@ -337,38 +335,47 @@
                             return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
                     }},
                     {% endif %}
-                    { "data": "findings" , render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'b') :  data;
+                    {% if system_settings.enable_github %}
+                    { "data": "github", render: function (data, type, row) {
+                            return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
                     }},
-                    { "data": "endpoints" , render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'b') :  data;
-                    }},
+                    {% endif %}
+                    { "data": "findings" },
+                    { "data": "endpoints" },
                     { "data": "contacts" },
                     { "data": "product_type" },
                 ],
-                order: [1, "asc"],
-                "columnDefs": [
-                    { "orderable": false, "targets": [0] }
+                order: [],
+                columnDefs: [
+                    { 
+                        "orderable": false,
+                        "targets": [0]
+                    },
+                    {
+                        targets: [0],
+                        className: 'noVis'
+                    }
                 ],
                 dom: 'Bfrtip',
                 paging: false,
                 buttons: [
+                    {
+                        extend: 'colvis',
+                        columns: ':not(.noVis)'
+                    },
                     $.extend( true, {}, buttonCommon, {
-                        extend: 'colvis'
+                        extend: 'copy'
                     }),
                     $.extend( true, {}, buttonCommon, {
-                        extend: 'copyHtml5'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'excelHtml5',
+                        extend: 'excel',
                         autoFilter: true,
                         sheetName: 'Exported data',
                     }),
                     $.extend( true, {}, buttonCommon, {
-                        extend: 'csvHtml5'
+                        extend: 'csv'
                     }),
                     $.extend( true, {}, buttonCommon, {
-                        extend: 'pdfHtml5',
+                        extend: 'pdf',
                         orientation: 'landscape',
                         pageSize: 'LETTER'
                     }),

@@ -514,6 +514,23 @@ def product_endpoint_report(request, pid):
                                  'Your report is building.',
                                  extra_tags='alert-success')
             return HttpResponseRedirect(reverse('reports'))
+        elif report_format == 'HTML':
+            return render(request,
+                          template,
+                          {'product_type': None,
+                           'product': product,
+                           'engagement': None,
+                           'test': None,
+                           'endpoint': None,
+                           'endpoints': endpoints.qs,
+                           'findings': None,
+                           'include_finding_notes': include_finding_notes,
+                           'include_finding_images': include_finding_images,
+                           'include_executive_summary': include_executive_summary,
+                           'include_table_of_contents': include_table_of_contents,
+                           'user': request.user,
+                           'title': 'Generate Report',
+                           })
         else:
             raise Http404()
 
@@ -592,7 +609,7 @@ def generate_report(request, obj):
                                                 test__finding__in=findings.qs).distinct()
         tests = Test.objects.filter(engagement__product__prod_type=product_type,
                                     finding__in=findings.qs).distinct()
-        if findings:
+        if len(findings.qs) > 0:
             start_date = timezone.make_aware(datetime.combine(findings.qs.last().date, datetime.min.time()))
         else:
             start_date = timezone.now()

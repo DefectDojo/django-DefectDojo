@@ -100,7 +100,7 @@
                     {% include "dojo/paging_snippet.html" with page=products page_size=True %}
                 </div>
             {% else %}
-                <h5> No engagements found </h5>
+            <div id="no_engagements"><h5 class="text-center"> No engagements found </h5></div>
             {% endif %}
         </div>
     </div>
@@ -134,7 +134,7 @@
             var fileDated = 'Engagements_List_' + date;
             var buttonCommon = {
                 exportOptions: {
-                    columns: ':not(:eq(8))',
+                    columns: ':not(:eq(7))',
                     stripHtml: true,
                     stripNewlines: true,
                     trim: true,
@@ -146,56 +146,32 @@
 
             // Mapping of table columns to objects for proper cleanup and data formatting
             var dojoTable = $('#engagements').DataTable({
-                "columns": [
-                    { "data": "product" , render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
-                    }},
-                    { "data": "product_type" , render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
-                    }},
-                    { "data": "eng_name" , render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
-                    }},
-                    { "data": "status", render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
-                    } },
-                    { "data": "target_start", render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
-                    }},
-                    { "data": "lead", render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
-                    }},
-                    { "data": "tests" , render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
-                    }},
-                    {% if user.is_staff %}
-                        { "data": "action", render: function (data, type, row) {
-                                return type === 'export' ?  "" :  data;
-                        }},
-                    {% endif %}
-                ],
-                "columnDefs": [
-                    { "orderable": false, "targets": [0] }
+                columnDefs: [
+                    { 
+                        "orderable": false,
+                        "targets": [0]
+                    },
                 ],
                 dom: 'Bfrtip',
                 paging: false,
                 buttons: [
+                    {
+                        extend: 'colvis',
+                        columns: ':not(.noVis)'
+                    },
                     $.extend( true, {}, buttonCommon, {
-                        extend: 'colvis'
+                        extend: 'copy'
                     }),
                     $.extend( true, {}, buttonCommon, {
-                        extend: 'copyHtml5'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'excelHtml5',
+                        extend: 'excel',
                         autoFilter: true,
                         sheetName: 'Exported data',
                     }),
                     $.extend( true, {}, buttonCommon, {
-                        extend: 'csvHtml5'
+                        extend: 'csv'
                     }),
                     $.extend( true, {}, buttonCommon, {
-                        extend: 'pdfHtml5',
+                        extend: 'pdf',
                         orientation: 'landscape',
                         pageSize: 'LETTER'
                     }),

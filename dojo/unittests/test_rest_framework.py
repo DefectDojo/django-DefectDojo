@@ -1,14 +1,17 @@
 from dojo.models import Product, Engagement, Test, Finding, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     User, ScanSettings, Scan, Stub_Finding, Endpoint, JIRA_PKey, JIRA_Conf, \
-    Finding_Template
+    Finding_Template, Note_Type, App_Analysis, Endpoint_Status, \
+    Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product
 
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraConfigurationsViewSet, \
     JiraIssuesViewSet, JiraViewSet, ProductViewSet, ScanSettingsViewSet, \
     ScansViewSet, StubFindingsViewSet, TestsViewSet, \
     ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
-    UsersViewSet, ImportScanView
+    UsersViewSet, ImportScanView, NoteTypeViewSet, AppAnalysisViewSet, \
+    EndpointStatusViewSet, SonarqubeIssueViewSet, SonarqubeIssueTransitionViewSet, \
+    SonarqubeProductViewSet
 
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
@@ -48,6 +51,15 @@ class BaseClass():
                 response = self.client.post(self.url, self.payload)
 
             response = self.client.get(self.url, format='json')
+            # print("RESPONSE[0]:", response.data['results'])
+            # print("RESPONSE[0]:", response.data['results'][0])
+            # print("RESPONSE[0]:", response.data['results'][0]['id'])
+            # finding = Finding.objects.get(id=response.data['results'][0]['id'])
+            # print("RESPONSE.age:", response.data['results'][0]['age'])
+            # print("finding.age:", finding.age)
+
+            # print("RESPONSE.sla_days_remaining:", response.data['results'][0]['sla_days_remaining'])
+            # print("finding.sla_days_remaining:", finding.sla_days_remaining())
             self.assertEqual(200, response.status_code)
 
         @skipIfNotSubclass('CreateModelMixin')
@@ -82,6 +94,48 @@ class BaseClass():
             response = self.client.put(
                 relative_url, self.payload)
             self.assertEqual(200, response.status_code)
+
+
+class AppAnalysisTest(BaseClass.RESTEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = App_Analysis
+        self.viewname = 'app_analysis'
+        self.viewset = AppAnalysisViewSet
+        self.payload = {
+            'product': 1,
+            'name': 'Tomcat',
+            'user': 1,
+            'confidence': 100,
+            'version': '8.5.1',
+            'icon': '',
+            'website': '',
+            'website_found': '',
+            'created': '2018-08-16T16:58:23.908Z'
+        }
+        self.update_fields = {'version': '9.0'}
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class EndpointStatusTest(BaseClass.RESTEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Endpoint_Status
+        self.viewname = 'endpoint_status'
+        self.viewset = EndpointStatusViewSet
+        self.payload = {
+            'endpoint': 2,
+            'finding': 2,
+            'mitigated': False,
+            'false_positive': False,
+            'risk_accepted': False,
+            'out_of_scope': False,
+            "date": "2017-01-12T00:00",
+        }
+        self.update_fields = {'mitigated': True}
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
 class EndpointTest(BaseClass.RESTEndpointTest):
@@ -144,7 +198,7 @@ class FindingsTest(BaseClass.RESTEndpointTest):
             "thread_id": 1,
             "found_by": [],
             "title": "DUMMY FINDING",
-            "date": "2017-12-31",
+            "date": "2020-05-20",
             "cwe": 1,
             "severity": "HIGH",
             "description": "TEST finding",
@@ -211,7 +265,8 @@ class JiraConfigurationsTest(BaseClass.RESTEndpointTest):
             "medium_mapping_severity": "LOW",
             "high_mapping_severity": "LOW",
             "critical_mapping_severity": "LOW",
-            "finding_text": ""
+            "finding_text": "",
+            "global_jira_sla_notification": False
         }
         self.update_fields = {'epic_name_id': 1}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
@@ -251,6 +306,55 @@ class JiraTest(BaseClass.RESTEndpointTest):
             "conf": 2,
         }
         self.update_fields = {'conf': 3}
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class SonarqubeIssueTest(BaseClass.RESTEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Sonarqube_Issue
+        self.viewname = 'sonarqube_issue'
+        self.viewset = SonarqubeIssueViewSet
+        self.payload = {
+            "key": "AREwS5n5TxsFUNm31CxP",
+            "status": "OPEN",
+            "type": "VULNERABILITY"
+        }
+        self.update_fields = {'key': 'AREwS5n5TxsFUNm31CxP'}
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class SonarqubeIssuesTransitionTest(BaseClass.RESTEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Sonarqube_Issue_Transition
+        self.viewname = 'sonarqube_issue_transition'
+        self.viewset = SonarqubeIssuesTransitionTest
+        self.payload = {
+            "sonarqube_issue": 1,
+            "finding_status": "Active, Verified",
+            "sonarqube_status": "OPEN",
+            "transitions": "confirm"
+        }
+        self.update_fields = {'sonarqube_status': 'CLOSED'}
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class SonarqubeProductTest(BaseClass.RESTEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Sonarqube_Product
+        self.viewname = 'sonarqube_product'
+        self.viewset = JiraViewSet
+        self.payload = {
+            "product": 2,
+            "sonarqube_project_key": "dojo_sonar_key",
+            "sonarqube_tool_config": 3
+        }
+        self.update_fields = {'sonarqube_tool_config': 2}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -403,6 +507,24 @@ class ToolTypesTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+class NoteTypesTest(BaseClass.RESTEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Note_Type
+        self.viewname = 'note_type'
+        self.viewset = NoteTypeViewSet
+        self.payload = {
+            "name": "Test Note",
+            "description": "not that much",
+            "is_single": False,
+            "is_active": True,
+            "is_mandatory": False
+        }
+        self.update_fields = {'description': 'changed description'}
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
 class UsersTest(BaseClass.RESTEndpointTest):
     fixtures = ['dojo_testdata.json']
 
@@ -489,7 +611,8 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
             "file": open('tests/zap_sample.xml'),
             "engagement": 1,
             "lead": 2,
-            "tags": ["'ci/cd, api"]
+            "tags": ["'ci/cd, api"],
+            "version": "1.0.0",
         }
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
@@ -514,6 +637,7 @@ class ReimportScanTest(APITestCase):
                 "scan_type": 'ZAP Scan',
                 "file": open('tests/zap_sample.xml'),
                 "test": 3,
+                "version": "1.0.1",
             })
         self.assertEqual(length, Test.objects.all().count())
         self.assertEqual(201, response.status_code)

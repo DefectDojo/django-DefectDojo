@@ -556,11 +556,11 @@ def new_cred_finding(request, fid):
             cred_lookup = Cred_Mapping.objects.filter(
                 cred_id=cred_user.cred_id, finding=finding.id)
 
-            if cred_lookup:
-                print("Cred lookup valid")
+            # if cred_lookup:
+            #     print("Cred lookup valid")
 
-            if cred_user:
-                print("Cred user")
+            # if cred_user:
+            #     print("Cred user")
 
             message = "Credential already associated."
             status_tag = 'alert-danger'
@@ -703,7 +703,7 @@ def view_selenium(request, ttid):
 
     mimetypes.init()
     cred = Cred_Mapping.objects.get(pk=ttid)
-    print(cred.cred_id.selenium_script)
+    # print(cred.cred_id.selenium_script)
     # mimetype, encoding = mimetypes.guess_type(cred.cred_id.selenium_script)
     response = StreamingHttpResponse(
         FileIterWrapper(open(cred.cred_id.selenium_script)))

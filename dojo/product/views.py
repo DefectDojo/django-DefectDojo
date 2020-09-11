@@ -1,6 +1,7 @@
 # #  product
 import calendar as tcalendar
 import logging
+import base64
 from collections import OrderedDict
 from datetime import datetime, date, timedelta
 from math import ceil
@@ -17,22 +18,23 @@ from django.db.models import Sum, Count, Q, Max
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
 from dojo.templatetags.display_tags import get_level
-from dojo.filters import ProductFilter, ProductFindingFilter, EngagementFilter
+from dojo.filters import ProductFilter, EngagementFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAPKeyForm, JIRAFindingForm, AdHocFindingForm, \
                        EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm, ProductNotificationsForm, \
-                       GITHUB_Product_Form, GITHUBFindingForm
+                       GITHUB_Product_Form, GITHUBFindingForm, App_AnalysisTypeForm, JIRAEngagementForm
 from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, GITHUB_PKey, Finding_Template, \
                         Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, \
-                        Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications
-from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, Product_Tab, get_punchcard_data
+                        Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, Dojo_User, BurpRawRequestResponse
+from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, Product_Tab, get_punchcard_data, add_epic
 from dojo.notifications.helper import create_notification
 from custom_field.models import CustomFieldValue, CustomField
-from dojo.tasks import add_epic_task, add_external_issue_task
+from dojo.tasks import add_epic_task, add_external_issue_task, add_external_issue
 from tagging.models import Tag
 from tagging.utils import get_tag_list
 from django.db.models import Prefetch
 from django.db.models.query import QuerySet
 from github import Github
+from dojo.finding.views import finding_link_jira, finding_unlink_jira
 
 logger = logging.getLogger(__name__)
 
@@ -53,8 +55,7 @@ def product(request):
     # perform all stuff for filtering and pagination first, before annotation/prefetching
     # otherwise the paginator will perform all the annotations/prefetching already only to count the total number of records
     # see https://code.djangoproject.com/ticket/23771 and https://code.djangoproject.com/ticket/25375
-    name_words = [product.name for product in prods
-                    for word in product.name.split() if len(word) > 2]
+    name_words = prods.values_list('name', flat=True)
 
     prod_filter = ProductFilter(request.GET, queryset=prods, user=request.user)
     prod_list = get_page_items(request, prod_filter.qs, 25)
@@ -92,6 +93,8 @@ def prefetch_for_product(prods):
                 finding__mitigated__isnull=True)
         prefetched_prods = prefetched_prods.prefetch_related(Prefetch('endpoint_set', queryset=active_endpoint_query, to_attr='active_endpoints'))
         prefetched_prods = prefetched_prods.prefetch_related('tagged_items__tag')
+    else:
+        logger.debug('unable to prefetch because query was already executed')
 
     return prefetched_prods
 
@@ -107,12 +110,7 @@ def view_product(request, pid):
     prod = get_object_or_404(prod_query, id=pid)
     auth = request.user.is_staff or request.user in prod.authorized_users.all()
 
-    # instance = Notificationws.objects.filter(user=request.user).filter(product=prod).first()
-    # print(vars(instance))
-
     personal_notifications_form = ProductNotificationsForm(instance=Notifications.objects.filter(user=request.user).filter(product=prod).first())
-
-    print(vars(personal_notifications_form))
 
     if not auth:
         # will render 403
@@ -241,7 +239,7 @@ def view_product_metrics(request, pid):
                                            duplicate=False,
                                            out_of_scope=False,
                                            active=True,
-                                           mitigated__isnull=True)
+                                           is_Mitigated=False)
 
     inactive_findings = Finding.objects.filter(test__engagement__product=prod,
                                            date__range=[start_date, end_date],
@@ -249,28 +247,30 @@ def view_product_metrics(request, pid):
                                            duplicate=False,
                                            out_of_scope=False,
                                            active=False,
-                                           mitigated__isnull=True)
+                                           is_Mitigated=False)
 
     closed_findings = Finding.objects.filter(test__engagement__product=prod,
                                              date__range=[start_date, end_date],
                                              false_p=False,
-                                             verified=False,
                                              duplicate=False,
                                              out_of_scope=False,
                                              active=False,
-                                             mitigated__isnull=False)
+                                             is_Mitigated=True)
 
     false_positive_findings = Finding.objects.filter(test__engagement__product=prod,
                                              date__range=[start_date, end_date],
                                              false_p=True,
-                                             verified=False,
                                              duplicate=False,
                                              out_of_scope=False)
 
     out_of_scope_findings = Finding.objects.filter(test__engagement__product=prod,
                                              date__range=[start_date, end_date],
+                                             false_p=False,
                                              duplicate=False,
                                              out_of_scope=True)
+
+    all_findings = Finding.objects.filter(test__engagement__product=prod,
+                                             date__range=[start_date, end_date])
 
     open_vulnerabilities = Finding.objects.filter(
         test__engagement__product=prod,
@@ -400,6 +400,7 @@ def view_product_metrics(request, pid):
                    'out_of_scope_findings': out_of_scope_findings,
                    'accepted_findings': accepted_findings,
                    'new_findings': new_verified_findings,
+                   'all_findings': all_findings,
                    'open_vulnerabilities': open_vulnerabilities,
                    'all_vulnerabilities': all_vulnerabilities,
                    'start_date': start_date,
@@ -472,6 +473,9 @@ def prefetch_for_view_engagements(engs):
         prefetched_engs = prefetched_engs.annotate(count_findings_open=Count('test__finding__id', filter=Q(test__finding__active=True)))
         prefetched_engs = prefetched_engs.annotate(count_findings_duplicate=Count('test__finding__id', filter=Q(test__finding__duplicate=True)))
         prefetched_engs = prefetched_engs.prefetch_related('tagged_items__tag')
+    else:
+        logger.debug('unable to prefetch because query was already executed')
+
     return prefetched_engs
 
 
@@ -523,26 +527,26 @@ def new_product(request):
             if get_system_setting('enable_github'):
                 if gform.is_valid():
                     github_pkey = gform.save(commit=False)
-                    if github_pkey.conf is not None:
+                    if github_pkey.git_conf is not None and github_pkey.git_project:
                         github_pkey.product = product
                         github_pkey.save()
                         messages.add_message(request,
                                                 messages.SUCCESS,
-                                                'Github information added successfully.',
+                                                'GitHub information added successfully.',
                                                 extra_tags='alert-success')
-                    # Create appropriate labels in the repo
-                    logger.info('Create label in repo: ' + github_pkey.project_key)
-                    try:
-                        g = Github(github_pkey.conf.api_key)
-                        repo = g.get_repo(github_pkey.project_key)
-                        repo.create_label(name="security", color="FF0000", description="This label is automatically applied to all issues created by defectDojo")
-                        repo.create_label(name="security / info", color="00FEFC", description="This label is automatically applied to all issues created by defectDojo")
-                        repo.create_label(name="security / low", color="B7FE00", description="This label is automatically applied to all issues created by defectDojo")
-                        repo.create_label(name="security / medium", color="FEFE00", description="This label is automatically applied to all issues created by defectDojo")
-                        repo.create_label(name="security / high", color="FE9A00", description="This label is automatically applied to all issues created by defectDojo")
-                        repo.create_label(name="security / critical", color="FE2200", description="This label is automatically applied to all issues created by defectDojo")
-                    except:
-                        logger.info('Labels cannot be created - they may already exists')
+                        # Create appropriate labels in the repo
+                        logger.info('Create label in repo: ' + github_pkey.git_project)
+                        try:
+                            g = Github(github_pkey.git_conf.api_key)
+                            repo = g.get_repo(github_pkey.git_project)
+                            repo.create_label(name="security", color="FF0000", description="This label is automatically applied to all issues created by DefectDojo")
+                            repo.create_label(name="security / info", color="00FEFC", description="This label is automatically applied to all issues created by DefectDojo")
+                            repo.create_label(name="security / low", color="B7FE00", description="This label is automatically applied to all issues created by DefectDojo")
+                            repo.create_label(name="security / medium", color="FEFE00", description="This label is automatically applied to all issues created by DefectDojo")
+                            repo.create_label(name="security / high", color="FE9A00", description="This label is automatically applied to all issues created by DefectDojo")
+                            repo.create_label(name="security / critical", color="FE2200", description="This label is automatically applied to all issues created by DefectDojo")
+                        except:
+                            logger.info('Labels cannot be created - they may already exists')
 
             # SonarQube API Configuration
             sonarqube_form = Sonarqube_ProductForm(request.POST)
@@ -728,34 +732,18 @@ def delete_product(request, pid):
                    })
 
 
-def all_product_findings(request, pid):
-    p = get_object_or_404(Product, id=pid)
-    auth = request.user.is_staff or request.user in p.authorized_users.all()
-    if not auth:
-        # will render 403
-        raise PermissionDenied
-    result = ProductFindingFilter(
-        request.GET,
-        queryset=Finding.objects.filter(test__engagement__product=p,
-                                        active=True))
-    page = get_page_items(request, result.qs, 25)
-
-    add_breadcrumb(title="Open findings", top_level=False, request=request)
-
-    return render(request,
-                  "dojo/all_product_findings.html",
-                  {"findings": page,
-                   "product": p,
-                   "filtered": result,
-                   "user": request.user,
-                   })
-
-
 @user_passes_test(lambda u: u.is_staff)
 def new_eng_for_app(request, pid, cicd=False):
     jform = None
     prod = Product.objects.get(id=pid)
+    use_jira = get_system_setting('enable_jira') and prod.jira_pkey is not None
+
     if request.method == 'POST':
+
+        # for key, value in request.POST.items():
+        #     print(f'Key: {key}')
+        #     print(f'Value: {value}')
+
         form = EngForm(request.POST, cicd=cicd)
         if form.is_valid():
             new_eng = form.save(commit=False)
@@ -778,14 +766,17 @@ def new_eng_for_app(request, pid, cicd=False):
             tags = request.POST.getlist('tags')
             t = ", ".join('"{0}"'.format(w) for w in tags)
             new_eng.tags = t
-            if get_system_setting('enable_jira'):
-                # Test to make sure there is a Jira project associated the product
-                try:
-                    jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=False)
-                    if jform.is_valid():
-                        add_epic_task.delay(new_eng, jform.cleaned_data.get('push_to_jira'))
-                except JIRA_PKey.DoesNotExist:
-                    pass
+            if 'jiraform-push_to_jira' in request.POST:
+                jform = JIRAEngagementForm(request.POST, prefix='jiraform')
+
+            if form.is_valid() and (jform is None or jform.is_valid()):
+                if 'jiraform-push_to_jira' in request.POST:
+                    if request.user.usercontactinfo.block_execution:
+                        logger.debug('calling add_epic')
+                        add_epic(new_eng, jform.cleaned_data.get("push_to_jira"))
+                    else:
+                        logger.debug('calling add_epic_task')
+                        add_epic_task.delay(new_eng, jform.cleaned_data.get("push_to_jira"))
 
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -802,15 +793,8 @@ def new_eng_for_app(request, pid, cicd=False):
                 return HttpResponseRedirect(reverse('view_engagement', args=(new_eng.id,)))
     else:
         form = EngForm(initial={'lead': request.user, 'target_start': timezone.now().date(), 'target_end': timezone.now().date() + timedelta(days=7), 'product': prod.id}, cicd=cicd, product=prod.id)
-        if get_system_setting('enable_jira'):
-            if JIRA_PKey.objects.filter(product=prod).count() != 0:
-                # Enabled must be false in this case, because this Push-to-jira is more about
-                # epics then findings.
-                jform = JIRAFindingForm(prefix='jiraform', enabled=False)
-                # Feels like we should probably inform the user that this particular checkbox
-                # is more about epics and engagements than findings and issues.
-                jform.fields['push_to_jira'].help_text = "Checking this will add an EPIC for this engagement."
-                jform.fields['push_to_jira'].label = "Create EPIC"
+        if use_jira:
+            jform = JIRAEngagementForm(prefix='jiraform')
 
     product_tab = Product_Tab(pid, title="New Engagement", tab="engagements")
     return render(request, 'dojo/new_eng.html',
@@ -818,6 +802,26 @@ def new_eng_for_app(request, pid, cicd=False):
                    'product_tab': product_tab,
                    'jform': jform
                    })
+
+
+@user_passes_test(lambda u: u.is_staff)
+def new_tech_for_prod(request, pid):
+    prod = Product.objects.get(id=pid)
+    if request.method == 'POST':
+        form = App_AnalysisTypeForm(request.POST)
+        if form.is_valid():
+            tech = form.save(commit=False)
+            tech.product_id = pid
+            tech.save()
+            messages.add_message(request,
+                                messages.SUCCESS,
+                                'Technology added successfully.',
+                                extra_tags='alert-success')
+            return HttpResponseRedirect(reverse('view_product', args=(pid,)))
+
+    form = App_AnalysisTypeForm()
+    return render(request, 'dojo/new_tech.html',
+                {'form': form, 'pid': pid})
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -865,8 +869,11 @@ def edit_meta_data(request, pid):
                 if value:
                     cfv.value = value
                     cfv.save()
-                else:
-                    cfv.delete()
+            if key.startswith('delete_'):
+                cfv_id = int(key.split('_')[2])
+                cfv = get_object_or_404(DojoMeta, id=cfv_id)
+                cfv.delete()
+
         messages.add_message(request,
                              messages.SUCCESS,
                              'Metadata edited successfully.',
@@ -903,20 +910,14 @@ def ad_hoc_finding(request, pid):
                     target_start=timezone.now(), target_end=timezone.now())
         test.save()
     form_error = False
-    enabled = False
+    push_all_jira_issues = False
     jform = None
-    form = AdHocFindingForm(initial={'date': timezone.now().date()})
-    if get_system_setting('enable_jira') and \
-            test.engagement.product.jira_pkey_set.first() is not None:
-        enabled = test.engagement.product.jira_pkey_set.first().push_all_issues
-        jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
-    if get_system_setting('enable_github'):
-        if GITHUB_PKey.objects.filter(product=test.engagement.product).count() != 0:
-            gform = GITHUBFindingForm(enabled=enabled, prefix='githubform')
-    else:
-        gform = None
+    gform = None
+    form = AdHocFindingForm(initial={'date': timezone.now().date()}, req_resp=None)
+    use_jira = get_system_setting('enable_jira') and test.engagement.product.jira_pkey is not None
+
     if request.method == 'POST':
-        form = AdHocFindingForm(request.POST)
+        form = AdHocFindingForm(request.POST, req_resp=None)
         if (form['active'].value() is False or form['false_p'].value()) and form['duplicate'].value() is False:
             closing_disabled = Note_Type.objects.filter(is_mandatory=True, is_active=True).count()
             if closing_disabled != 0:
@@ -932,7 +933,10 @@ def ad_hoc_finding(request, pid):
                                      messages.ERROR,
                                      'Can not set a finding as inactive or false positive without adding all mandatory notes',
                                      extra_tags='alert-danger')
-        if form.is_valid():
+        if use_jira:
+            jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_pkey=test.engagement.product.jira_pkey)
+
+        if form.is_valid() and (jform is None or jform.is_valid()):
             new_finding = form.save(commit=False)
             new_finding.test = test
             new_finding.reporter = request.user
@@ -947,29 +951,62 @@ def ad_hoc_finding(request, pid):
             new_finding.save()
             new_finding.endpoints.set(form.cleaned_data['endpoints'])
 
-            # Push to Jira?
+            # Push to jira?
             push_to_jira = False
-            if enabled:
-                push_to_jira = True
-            elif 'jiraform-push_to_jira' in request.POST:
-                jform = JIRAFindingForm(request.POST, prefix='jiraform',
-                                        enabled=enabled)
-                if jform.is_valid():
-                    push_to_jira = jform.cleaned_data.get('push_to_jira')
+            jira_message = None
+            if jform and jform.is_valid():
+                # Push to Jira?
+                logger.debug('jira form valid')
+                push_to_jira = push_all_jira_issues or jform.cleaned_data.get('push_to_jira')
 
-                messages.add_message(request,
-                                     messages.SUCCESS,
-                                     'Finding added successfully.',
-                                     extra_tags='alert-success')
+                # if the jira issue key was changed, update database
+                new_jira_issue_key = jform.cleaned_data.get('jira_issue')
+                if new_finding.has_jira_issue():
+                    jira_issue = new_finding.jira_issue
+
+                    # everything in DD around JIRA integration is based on the internal id of the issue in JIRA
+                    # instead of on the public jira issue key.
+                    # I have no idea why, but it means we have to retrieve the issue from JIRA to get the internal JIRA id.
+                    # we can assume the issue exist, which is already checked in the validation of the jform
+
+                    if not new_jira_issue_key:
+                        finding_unlink_jira(request, new_finding)
+                        jira_message = 'Link to JIRA issue removed successfully.'
+
+                    elif new_jira_issue_key != new_finding.jira_issue.jira_key:
+                        finding_unlink_jira(request, new_finding)
+                        finding_link_jira(request, new_finding, new_jira_issue_key)
+                        jira_message = 'Changed JIRA link successfully.'
+                else:
+                    logger.debug('finding has no jira issue yet')
+                    if new_jira_issue_key:
+                        logger.debug('finding has no jira issue yet, but jira issue specified in request. trying to link.')
+                        finding_link_jira(request, new_finding, new_jira_issue_key)
+                        jira_message = 'Linked a JIRA issue successfully.'
+
             if 'githubform-push_to_github' in request.POST:
-                gform = GITHUBFindingForm(request.POST, prefix='jiragithub', enabled=enabled)
+                gform = GITHUBFindingForm(request.POST, prefix='jiragithub', enabled=push_all_jira_issues)
                 if gform.is_valid():
-                    add_external_issue_task.delay(new_finding, 'github')
-                messages.add_message(request,
-                                     messages.SUCCESS,
-                                     'Finding added successfully to github.',
-                                     extra_tags='alert-success')
+                    if Dojo_User.wants_block_execution(request.user):
+                        add_external_issue(new_finding, 'github')
+                    else:
+                        add_external_issue_task.delay(new_finding, 'github')
+
             new_finding.save(push_to_jira=push_to_jira)
+
+            if 'request' in form.cleaned_data or 'response' in form.cleaned_data:
+                burp_rr = BurpRawRequestResponse(
+                    finding=new_finding,
+                    burpRequestBase64=base64.b64encode(form.cleaned_data['request'].encode()),
+                    burpResponseBase64=base64.b64encode(form.cleaned_data['response'].encode()),
+                )
+                burp_rr.clean()
+                burp_rr.save()
+
+            messages.add_message(request,
+                                    messages.SUCCESS,
+                                    'Finding added successfully.',
+                                    extra_tags='alert-success')
 
             if create_template:
                 templates = Finding_Template.objects.filter(title=new_finding.title)
@@ -1007,6 +1044,17 @@ def ad_hoc_finding(request, pid):
                                  messages.ERROR,
                                  'The form has errors, please correct them below.',
                                  extra_tags='alert-danger')
+    else:
+        if use_jira:
+            push_all_jira_issues = test.engagement.product.jira_pkey_set.first().push_all_issues
+            jform = JIRAFindingForm(push_all=push_all_jira_issues, prefix='jiraform', jira_pkey=test.engagement.product.jira_pkey)
+
+        if get_system_setting('enable_github'):
+            if GITHUB_PKey.objects.filter(product=test.engagement.product).count() != 0:
+                gform = GITHUBFindingForm(enabled=push_all_jira_issues, prefix='githubform')
+        else:
+            gform = None
+
     product_tab = Product_Tab(pid, title="Add Finding", tab="engagements")
     product_tab.setEngagement(eng)
     return render(request, 'dojo/ad_hoc_findings.html',
@@ -1114,15 +1162,14 @@ def delete_engagement_presets(request, pid, eid):
 
 
 def edit_notifications(request, pid):
-    print('editing them notifications')
     prod = get_object_or_404(Product, id=pid)
     if request.method == 'POST':
         product_notifications = Notifications.objects.filter(user=request.user).filter(product=prod).first()
         if not product_notifications:
             product_notifications = Notifications(user=request.user, product=prod)
-            print('no existing product notifications found')
+            logger.debug('no existing product notifications found')
         else:
-            print('existing product notifications found')
+            logger.debug('existing product notifications found')
 
         form = ProductNotificationsForm(request.POST, instance=product_notifications)
         # print(vars(form))

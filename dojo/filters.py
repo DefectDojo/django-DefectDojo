@@ -1,5 +1,6 @@
 __author__ = 'Jay Paz'
 import collections
+import logging
 from datetime import timedelta, datetime
 
 from auditlog.models import LogEntry
@@ -8,13 +9,17 @@ from django.utils import six
 from django.utils.translation import ugettext_lazy as _
 from django_filters import FilterSet, CharFilter, OrderingFilter, \
     ModelMultipleChoiceFilter, ModelChoiceFilter, MultipleChoiceFilter, \
-    BooleanFilter
+    BooleanFilter, NumberFilter
 from django_filters.filters import ChoiceFilter, _truncate, DateTimeFilter
 from pytz import timezone
 
 from dojo.models import Dojo_User, Product_Type, Finding, Product, Test_Type, \
-    Endpoint, Development_Environment, Finding_Template, Report, Note_Type
+    Endpoint, Development_Environment, Finding_Template, Report, Note_Type, \
+    Engagement_Survey, Question, TextQuestion, ChoiceQuestion
 from dojo.utils import get_system_setting
+from django.contrib.contenttypes.models import ContentType
+
+logger = logging.getLogger(__name__)
 
 local_tz = timezone(get_system_setting('time_zone'))
 
@@ -144,16 +149,16 @@ class ReportRiskAcceptanceFilter(ChoiceFilter):
     def any(self, qs, name):
         return qs.all()
 
-    def accpeted(self, qs, name):
+    def accepted(self, qs, name):
         return qs.filter(risk_acceptance__isnull=False)
 
-    def not_accpeted(self, qs, name):
+    def not_accepted(self, qs, name):
         return qs.filter(risk_acceptance__isnull=True)
 
     options = {
         '': (_('Either'), any),
-        1: (_('Yes'), accpeted),
-        2: (_('No'), not_accpeted),
+        1: (_('Yes'), accepted),
+        2: (_('No'), not_accepted),
     }
 
     def __init__(self, *args, **kwargs):
@@ -350,6 +355,9 @@ class OpenFindingFilter(DojoFilter):
     test__engagement__product = ModelMultipleChoiceFilter(
         queryset=Product.objects.all(),
         label="Product")
+    test__engagement__risk_acceptance = ReportRiskAcceptanceFilter(
+        label="Risk Accepted")
+
     if get_system_setting('enable_jira'):
         jira_issue = BooleanFilter(field_name='jira_issue',
                                    lookup_expr='isnull',
@@ -376,7 +384,7 @@ class OpenFindingFilter(DojoFilter):
                    'thread_id', 'notes', 'scanner_confidence', 'mitigated',
                    'numerical_severity', 'reporter', 'last_reviewed', 'line',
                    'duplicate_finding', 'hash_code', 'images',
-                   'line_number', 'reviewers', 'mitigated_by', 'sourcefile', 'jira_creation', 'jira_change']
+                   'line_number', 'reviewers', 'mitigated_by', 'sourcefile', 'jira_creation', 'jira_change', 'created']
 
     def __init__(self, *args, **kwargs):
         self.user = None
@@ -389,9 +397,9 @@ class OpenFindingFilter(DojoFilter):
         super(OpenFindingFilter, self).__init__(*args, **kwargs)
 
         cwe = dict()
-        cwe = dict([finding.cwe, finding.cwe]
-                   for finding in self.queryset.distinct()
-                   if type(finding.cwe) is int and finding.cwe is not None and finding.cwe > 0 and finding.cwe not in cwe)
+        cwe = dict([cwe, cwe]
+                   for cwe in self.queryset.values_list('cwe', flat=True).distinct()
+                   if type(cwe) is int and cwe is not None and cwe > 0)
         cwe = collections.OrderedDict(sorted(cwe.items()))
         self.form.fields['cwe'].choices = list(cwe.items())
         if self.user is not None and not self.user.is_staff:
@@ -406,7 +414,7 @@ class OpenFindingFilter(DojoFilter):
             del self.form.fields['test__engagement__product']
 
 
-class OpenFingingSuperFilter(OpenFindingFilter):
+class OpenFindingSuperFilter(OpenFindingFilter):
     reporter = ModelMultipleChoiceFilter(
         queryset=Dojo_User.objects.all())
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
@@ -431,6 +439,8 @@ class ClosedFindingFilter(DojoFilter):
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.all(),
         label="Product Type")
+    test__engagement__risk_acceptance = ReportRiskAcceptanceFilter(
+        label="Risk Accepted")
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -465,14 +475,14 @@ class ClosedFindingFilter(DojoFilter):
     def __init__(self, *args, **kwargs):
         super(ClosedFindingFilter, self).__init__(*args, **kwargs)
         cwe = dict()
-        cwe = dict([finding.cwe, finding.cwe]
-                   for finding in self.queryset.distinct()
-                   if type(finding.cwe) is int and finding.cwe is not None and finding.cwe > 0 and finding.cwe not in cwe)
+        cwe = dict([cwe, cwe]
+                   for cwe in self.queryset.values_list('cwe', flat=True).distinct()
+                   if type(cwe) is int and cwe is not None and cwe > 0)
         cwe = collections.OrderedDict(sorted(cwe.items()))
         self.form.fields['cwe'].choices = list(cwe.items())
 
 
-class ClosedFingingSuperFilter(ClosedFindingFilter):
+class ClosedFindingSuperFilter(ClosedFindingFilter):
     reporter = ModelMultipleChoiceFilter(
         queryset=Dojo_User.objects.all())
 
@@ -538,7 +548,7 @@ class AcceptedFindingFilter(DojoFilter):
         self.form.fields['cwe'].choices = list(cwe.items())
 
 
-class AcceptedFingingSuperFilter(AcceptedFindingFilter):
+class AcceptedFindingSuperFilter(AcceptedFindingFilter):
     test__engagement__risk_acceptance__reporter = \
         ModelMultipleChoiceFilter(
             queryset=Dojo_User.objects.all(),
@@ -556,6 +566,8 @@ class ProductFindingFilter(DojoFilter):
     severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     test__test_type = ModelMultipleChoiceFilter(
         queryset=Test_Type.objects.all())
+    test__engagement__risk_acceptance = ReportRiskAcceptanceFilter(
+        label="Risk Accepted")
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -595,6 +607,92 @@ class ProductFindingFilter(DojoFilter):
                    if type(finding.cwe) is int and finding.cwe is not None and finding.cwe > 0 and finding.cwe not in cwe)
         cwe = collections.OrderedDict(sorted(cwe.items()))
         self.form.fields['cwe'].choices = list(cwe.items())
+
+
+class SimilarFindingFilter(DojoFilter):
+    cve = CharFilter(lookup_expr='icontains')
+    cwe = NumberFilter()
+    title = CharFilter(lookup_expr='icontains')
+    duplicate = ReportBooleanFilter()
+    # sourcefile = CharFilter(lookup_expr='icontains')
+    file_path = CharFilter(lookup_expr='icontains')
+    mitigated = DateRangeFilter(label="Mitigated Date")
+    date = DateRangeFilter()
+    component_name = CharFilter(lookup_expr='icontains')
+    component_version = CharFilter(lookup_expr='icontains')
+    jira_issue__jira_key = CharFilter(lookup_expr='icontains')
+
+    test__test_type = ModelMultipleChoiceFilter(
+        queryset=Test_Type.objects.all())
+    test__engagement__product = ModelMultipleChoiceFilter(
+        queryset=Product.objects.all(),
+        label="Product")
+    test__engagement__product__prod_type = ModelMultipleChoiceFilter(
+        queryset=Product_Type.objects.all(),
+        label="Product Type")
+
+    if get_system_setting('enable_jira'):
+        jira_issue = BooleanFilter(field_name='jira_issue',
+                                   lookup_expr='isnull',
+                                   exclude=True,
+                                   label='JIRA issue')
+
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ('numerical_severity', 'numerical_severity'),
+            ('date', 'date'),
+            ('title', 'title'),
+            ('test__engagement__product__name',
+             'test__engagement__product__name'),
+        ),
+
+    )
+
+    class Meta:
+        model = Finding
+        fields = ['cwe', 'hash_code', 'unique_id_from_tool', 'line', 'id']
+
+    def __init__(self, data=None, *args, **kwargs):
+        self.user = None
+        if 'user' in kwargs:
+            self.user = kwargs.pop('user')
+
+        self.finding = None
+        if 'finding' in kwargs:
+            self.finding = kwargs.pop('finding')
+
+        logger.debug('DATA: %s', data)
+
+        # if filterset is bound, use initial values as defaults
+        if not data:
+            # get a mutable copy of the QueryDict
+            data = data.copy()
+
+            data['cve'] = self.finding.cve
+            data['cwe'] = self.finding.cwe
+            data['file_path'] = self.finding.file_path
+            data['line'] = self.finding.line
+            data['unique_id_from_tool'] = self.finding.unique_id_from_tool
+            data['test__test_type'] = self.finding.test.test_type
+            data['test__engagement__product'] = self.finding.test.engagement.product
+            data['test__engagement__product__prod_type'] = self.finding.test.engagement.product.prod_type
+
+            logger.debug('DATA2: %s', data)
+
+        super().__init__(data, *args, **kwargs)
+
+        if self.user is not None and not self.user.is_staff:
+            if self.form.fields.get('test__engagement__product'):
+                qs = Product.objects.filter(authorized_users__in=[self.user])
+                self.form.fields['test__engagement__product'].queryset = qs
+
+    def filter_queryset(self, *args, **kwargs):
+        queryset = super().filter_queryset(*args, **kwargs)
+        if not self.user.is_staff:
+            queryset = queryset.filter(test__engagement__product__authorized_users__in=[self.user])
+        queryset = queryset.exclude(pk=self.finding.pk)
+        return queryset
 
 
 class TemplateFindingFilter(DojoFilter):
@@ -734,7 +832,7 @@ class EndpointFilter(DojoFilter):
     path = CharFilter(lookup_expr='icontains')
     query = CharFilter(lookup_expr='icontains')
     fragment = CharFilter(lookup_expr='icontains')
-    remediated = CharFilter(lookup_expr='icontains')
+    mitigated = CharFilter(lookup_expr='icontains')
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -755,7 +853,7 @@ class EndpointFilter(DojoFilter):
 
     class Meta:
         model = Endpoint
-        exclude = ['remediated']
+        exclude = ['mitigated']
 
 
 class EndpointReportFilter(DojoFilter):
@@ -1019,3 +1117,59 @@ class NoteTypesFilter(DojoFilter):
         model = Note_Type
         exclude = []
         include = ('name', 'is_single', 'description')
+
+# ==============================
+# Defect Dojo Engaegment Surveys
+# ==============================
+
+
+class SurveyFilter(FilterSet):
+    name = CharFilter(lookup_expr='icontains')
+    description = CharFilter(lookup_expr='icontains')
+    active = BooleanFilter()
+
+    class Meta:
+        model = Engagement_Survey
+        exclude = ['questions']
+
+    survey_set = FilterSet
+
+
+class QuestionTypeFilter(ChoiceFilter):
+    def any(self, qs, name):
+        return qs.all()
+
+    def text_question(self, qs, name):
+        return qs.filter(polymorphic_ctype=ContentType.objects.get_for_model(TextQuestion))
+
+    def choice_question(self, qs, name):
+        return qs.filter(polymorphic_ctype=ContentType.objects.get_for_model(ChoiceQuestion))
+
+    options = {
+        '': (_('Any'), any),
+        1: (_('Text Question'), text_question),
+        2: (_('Choice Question'), choice_question),
+    }
+
+    def __init__(self, *args, **kwargs):
+        kwargs['choices'] = [
+            (key, value[0]) for key, value in six.iteritems(self.options)]
+        super(QuestionTypeFilter, self).__init__(*args, **kwargs)
+
+    def filter(self, qs, value):
+        try:
+            value = int(value)
+        except (ValueError, TypeError):
+            value = ''
+        return self.options[value][1](self, qs, self.options[value][0])
+
+
+class QuestionFilter(FilterSet):
+    text = CharFilter(lookup_expr='icontains')
+    type = QuestionTypeFilter()
+
+    class Meta:
+        model = Question
+        exclude = ['polymorphic_ctype', 'created', 'modified', 'order']
+
+    question_set = FilterSet

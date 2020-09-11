@@ -30,3 +30,8 @@ class UserHasScanPermission(permissions.BasePermission):
         return request.user in \
             obj.scan_settings.product.authorized_users.all() or \
             request.user.is_staff
+
+
+class IsSuperUser(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.user and request.user.is_superuser

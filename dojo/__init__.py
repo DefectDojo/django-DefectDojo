@@ -4,7 +4,6 @@
 # Django starts so that shared_task will use this app.
 from .celery import app as celery_app  # noqa
 
-__version__ = '1.5.4'
+__version__ = '1.8.0-dev'
 __url__ = 'https://github.com/DefectDojo/django-DefectDojo'
 __docs__ = 'http://defectdojo.readthedocs.io/'
-__demo__ = 'http://defectdojo.pythonanywhere.com/'

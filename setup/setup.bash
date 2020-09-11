@@ -31,6 +31,9 @@ LIB_PATH="$SETUP_BASE/scripts/common"
 . "$LIB_PATH/common-os.sh"       # Determine what OS the installer is running on
 . "$LIB_PATH/install-dojo.sh"    # Complete an install of Dojo based on previously run code
 
+# Print the EOL message
+print_eol_message
+
 # Read command-line arguments, if any and set/override config defaults as needed
 #   Function in ./scripts/common/cmd-args.sh
 read_cmd_args

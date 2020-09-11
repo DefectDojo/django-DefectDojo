@@ -31,6 +31,11 @@ class DependencyCheckParser(object):
 
         title = '{0} | {1}'.format(filename, name)
         cve = name[:28]
+        if cve and not cve.startswith('CVE'):
+            # for vulnerability sources which have a CVE, it is the start of the 'name'.
+            # for other sources, we have to set it to None
+            cve = None
+
         # Use CWE-1035 as fallback
         cwe = 1035  # Vulnerable Third Party Component
         if cwe_field:
@@ -45,13 +50,13 @@ class DependencyCheckParser(object):
             severity = self.get_field_value(cvssv2_node, 'severity').lower().capitalize()
         else:
             severity = self.get_field_value(vulnerability, 'severity').lower().capitalize()
-        print("severity: " + severity)
+        # print("severity: " + severity)
         if severity in SEVERITY:
             severity = severity
         else:
             tag = "Severity is inaccurate : " + str(severity)
             title += " | " + tag
-            print("Warning: Inaccurate severity detected. Setting it's severity to Medium level.\n" + "Title is :" + title)
+            logger.warn("Warning: Inaccurate severity detected. Setting it's severity to Medium level.\n" + "Title is :" + title)
             severity = "Medium"
 
         reference_detail = None

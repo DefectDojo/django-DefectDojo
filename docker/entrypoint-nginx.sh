@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 umask 0002
 if [ "${GENERATE_TLS_CERTIFICATE}" = true ]; then
@@ -32,7 +32,7 @@ else
   echo "Basic auth is off (HTTP_AUTH_PASSWORD not provided)"
 fi
 
-echo "uwsgi_pass ${DD_UWSGI_PASS};" > /run/uwsgi_pass
-echo "server ${DD_UWSGI_HOST}:${DD_UWSGI_PORT};" > /run/uwsgi_server
+echo "uwsgi_pass ${DD_UWSGI_PASS};" > /run/defectdojo/uwsgi_pass
+echo "server ${DD_UWSGI_HOST}:${DD_UWSGI_PORT};" > /run/defectdojo/uwsgi_server
 
 exec nginx -c $NGINX_CONFIG -g "daemon off;"

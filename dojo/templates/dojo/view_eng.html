@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load display_tags %}
 {% load humanize %}
+{% load survey_tags %}
 {% load static from staticfiles %}
 {% block add_styles %}
     .tooltip-inner {
@@ -76,7 +77,7 @@
                           </li>
                           {% if threat != 'none' %}
                           <li role="presentation">
-                                  <a href="{% url 'view_threatmodel' eng.id %}"><i class="fa fa-file-text-o"></i> Download Threat Model</a>
+                                  <a href="{% url 'view_threatmodel' eng.id %}" download><i class="fa fa-file-text-o"></i> Download Threat Model</a>
                           </li>
                             {% if user.is_staff %}
                             <li role="presentation">
@@ -114,7 +115,7 @@
                     <div class="panel-heading">
                         <div class="clearfix">
                             <h4 class="pull-left">
-                            Engagement Presets <small>{{ eng.preset.title|truncatechars:60 }}</small>
+                            Engagement Presets <small>{{ eng.preset.title|truncatechars_html:60 }}</small>
                             </h4>
                             <div class="dropdown pull-right">
                                 <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
@@ -245,7 +246,7 @@
                         <tbody>
                         {% for test in tests %}
                             <tr>
-                                <td><a href="{% url 'view_test' test.id %}">{{ test }}</a>
+                                <td><a title="{{ test.description }}" href="{% url 'view_test' test.id %}">{{ test }}</a>
                                   {% if test.tags %}
                                       <sup>
                                           {% for tag in test.tags %}
@@ -331,7 +332,7 @@
             <div class="panel-heading">
                 <h4> Risk Acceptance
                     {% if can_add_risk %}
-                        <a title="Add Risk Acceptance" class="pull-right btn btn-sm btn-primary"
+                        <a title="Add Risk Acceptance..." class="pull-right btn btn-sm btn-primary"
                            href="{% url 'upload_risk_acceptance$' eng.id %}"><span class="fa fa-plus"></span></a>
                         </a>
                     {% endif %}
@@ -339,12 +340,13 @@
             </div>
             {% if risks_accepted %}
                 <div class="table-responsive">
-                    <table id="open_findings"
+                    <table id="risk_acceptances"
                            class="tablesorter-bootstrap table table-condensed table-striped">
                         <thead>
                         <tr>
-                            <th>Reporter</th>
+                            <th>Owner</th>
                             <th>Date</th>
+                            <th>Name</th>
                             <th>Date Expires</th>
                             <th>Accepted by</th>
                             <th>Findings Accepted</th>
@@ -354,8 +356,9 @@
                         <tbody>
                         {% for risk in risks_accepted %}
                             <tr>
-                                <td>{{ risk.reporter }}</td>
+                                <td>{{ risk.owner }}</td>
                                 <td>{{ risk.created }}</td>
+                                <td>{{ risk.name }}</td>
                                 <td>{{ risk.expiration_date|default_if_none:"" }}</td>
                                 <td>{{ risk.accepted_by|default_if_none:"" }}</td>
                                 <td>{{ risk.accepted_findings.count }}</td>
@@ -363,7 +366,7 @@
                                 <td>
                                     <a class="btn btn-sm btn-primary" href="{% url 'view_risk' eng.id risk.id %}">
                                         View
-                                        Approval</a>
+                                        Acceptance</a>
                                 </td>
                             </tr>
                         {% endfor %}
@@ -381,84 +384,138 @@
     </div>
 
 </div>
-{% if eng.engagement_type == "Interactive" %}
-<div class="row">
-    <div id="checklist" class="col-md-12">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h4> Check List
-                  {% if user.is_staff %}
-                    {% if check %}
-                        <a title="Edit Checklist" class="btn btn-primary pull-right"
-                           href="{% url 'complete_checklist' eng.id %}">
-                            <span class="fa fa-edit"></span></a>
-                    {% else %}
-                        <a title="Complete Check List" class="btn btn-sm btn-primary pull-right"
-                           href="{% url 'complete_checklist' eng.id %}">
-                            <span class="fa fa-edit"></span></a></a>
-                    {% endif %}
-                    {% endif %}
-                </h4>
-            </div>
 
-            {% if check %}
-                <div class="table-responsive">
-                    <table class="tablesorter-bootstrap table table-condensed table-striped">
-                        <thead>
-                        <tr>
-                            <th>Session</th>
-                            <th>Encryption</th>
-                            <th>Configuration</th>
-                            <th>Authentication</th>
-                            <th>Authorization</th>
-                            <th>Data Input</th>
-                            <th>Sensitive Data</th>
-                            <th>Other</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                            <td><span
-                                    class="label label-{{ check.session_management|checklist_status }}">{{ check.session_management }}</span>
-                            </td>
-                            <td><span
-                                    class="label label-{{ check.encryption_crypto|checklist_status }}">{{ check.encryption_crypto }}</span>
-                            </td>
-                            <td><span
-                                    class="label label-{{ check.configuration_management|checklist_status }}">{{ check.configuration_management }}</span>
-                            </td>
-                            <td><span
-                                    class="label label-{{ check.authentication|checklist_status }}">{{ check.authentication }}</span>
-                            </td>
-                            <td><span
-                                    class="label label-{{ check.authorization_and_access_control|checklist_status }}">{{ check.authorization_and_access_control }}</span>
-                            </td>
-                            <td><span
-                                    class="label label-{{ check.data_input_sanitization_validation|checklist_status }}">{{ check.data_input_sanitization_validation }}</span>
-                            </td>
-                            <td><span
-                                    class="label label-{{ check.sensitive_data|checklist_status }}">{{ check.sensitive_data }}</span>
-                            </td>
-                            <td><span
-                                    class="label label-{{ check.other|checklist_status }}">{{ check.other }}</span>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            {% else %}
-                <div class="panel-body">
-                    <small class="text-muted"><em>Checklist has not been completed.</em></small>
-                </div>
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h4>Additional Features<span class="pull-right"><a data-toggle="collapse" href="#add_feat">
+      <i class="glyphicon glyphicon-chevron-down"></i></a></span></h4>
+  </div>
+  
+  <div id="add_feat" class="panel-body collapse">
+    
+    {% if eng.engagement_type == "Interactive" %}
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4> Check List<span class="pull-right"><a data-toggle="collapse" href="#add_feat_check_list">
+            <i class="glyphicon glyphicon-chevron-down"></i></a></span>
+            {% if user.is_staff %}
+              {% if check %}
+                  <a title="Edit Checklist" class="btn btn-primary pull-right"
+                    href="{% url 'complete_checklist' eng.id %}">
+                      <span class="fa fa-edit"></span></a>
+              {% else %}
+                  <a title="Complete Check List" class="btn btn-sm btn-primary pull-right"
+                    href="{% url 'complete_checklist' eng.id %}">
+                      <span class="fa fa-edit"></span></a></a>
+              {% endif %}
             {% endif %}
-
-
+            
+          </h4>
         </div>
+        <div id="add_feat_check_list" class="panel-body collapse">
+          {% if check %}
+            <div class="panel panel-default">
+              <div class="table-responsive">
+                <table class="tablesorter-bootstrap table table-condensed table-striped">
+                  <thead>
+                    <tr>
+                      <th>Session</th>
+                      <th>Encryption</th>
+                      <th>Configuration</th>
+                      <th>Authentication</th>
+                      <th>Authorization</th>
+                      <th>Data Input</th>
+                      <th>Sensitive Data</th>
+                      <th>Other</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><span
+                        class="label label-{{ check.session_management|checklist_status }}">{{ check.session_management }}</span>
+                      </td>
+                      <td><span
+                        class="label label-{{ check.encryption_crypto|checklist_status }}">{{ check.encryption_crypto }}</span>
+                      </td>
+                      <td><span
+                        class="label label-{{ check.configuration_management|checklist_status }}">{{ check.configuration_management }}</span>
+                      </td>
+                      <td><span
+                        class="label label-{{ check.authentication|checklist_status }}">{{ check.authentication }}</span>
+                      </td>
+                      <td><span
+                        class="label label-{{ check.authorization_and_access_control|checklist_status }}">{{ check.authorization_and_access_control }}</span>
+                      </td>
+                      <td><span
+                        class="label label-{{ check.data_input_sanitization_validation|checklist_status }}">{{ check.data_input_sanitization_validation }}</span>
+                      </td>
+                      <td><span
+                        class="label label-{{ check.sensitive_data|checklist_status }}">{{ check.sensitive_data }}</span>
+                      </td>
+                      <td><span
+                        class="label label-{{ check.other|checklist_status }}">{{ check.other }}</span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          {% else %}
+            <div class="panel panel-default">
+              <div class="panel-body">
+                <small class="text-muted"><em>Checklist has not been completed.</em></small>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+
+    <div class="panel panel-default">
+
+      <div class="panel-heading">
+        <h4>Questionnaires<span class="pull-right">
+          <a data-toggle="collapse" href="#add_feat_survey">
+            <i class="glyphicon glyphicon-chevron-down"></i></a></span>
+            {% add_surveys eng %}
+        </h4>
+      </div>
+
+      <div id="add_feat_survey" class="panel-body collapse">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="panel panel-default">
+              {% show_surveys eng users %}
+            </div>
+          </div>
+          <div class="modal fade" id="shareSurveyModal" tabindex="-1" role="dialog" aria-labelledby="shareSurveyModalLabel">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                          aria-hidden="true">&times;</span></button>
+                  <h4 class="modal-title" id="shareSurveyModalLabel">Share Questionnaire Link</h4>
+                </div>
+                <div class="modal-body">
+                  <p id="surveyURL"></p>
+                  <div class="alert alert-info" role="alert">
+                      <b>Note:</b> Only users that are authorized for {{ eng.product}} will be allowed to answer
+                      this questionnaire.
+                  </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
     </div>
 
-</div>
-{% endif %}
+  </div>
+</div> 
 
 <!-- Sidebar -->
 </div>
@@ -557,7 +614,7 @@
           {% if jissue and jconf %}
           <tr>
             <td><strong>Jira</strong></td>
-            <td><a href="{{ jconf.url }}/browse/{{ jissue.jira_key }}" target="_blank"><i class="fa fa-external-link"></i> Jira Epic</a></td>
+            <td><a href="{{ jconf.url }}/browse/{{ jissue.jira_key }}" target="_blank"><i class="fa fa-external-link"></i> Jira Epic ({{ jissue.jira_key }})</a></td>
           </tr>
           {% endif %}
           <tr>
@@ -592,7 +649,7 @@
             </tr>
             <tr>
               <td><strong>Commit Hash</strong></td>
-              <td>{{ eng.commit_hash|notspecified|truncatechars:13 }}</td>
+              <td>{{ eng.commit_hash|notspecified|truncatechars_html:13 }}</td>
             </tr>
             <tr>
               <td><strong>Branch/Tag</strong></td>
@@ -726,6 +783,7 @@
 
 </div>
 </div>
+
 <div class="protip">
     <i class="fa fa-lightbulb-o"></i> <strong>ProTip!</strong> Type <kbd>e</kbd> to edit this engagement. Type <kbd>i</kbd> to import scan results or <kbd>a</kbd> to add tests.
  </div>
@@ -747,9 +805,11 @@
                 window.location.assign('{% url 'import_scan_results' eng.id %}');
             });
 
-            $(document).ready(function(){
-              $('[data-toggle="tooltip"]').tooltip();
+            $("a[data-toggle='collapse']").on('click', function () {
+                var i = $($(this).find('i').get(0));
+                i.toggleClass('glyphicon-chevron-up').toggleClass('glyphicon-chevron-down');
             });
+
             //Ensures dropdown has proper zindex
             $('.table-responsive').on('show.bs.dropdown', function () {
               $('.table-responsive').css( "overflow", "inherit" );
@@ -780,7 +840,7 @@
             var http = location.protocol;
             var slashes = http.concat("//");
             var host = slashes.concat(window.location.host);
-            modal.find('p#surveyURL').text('Survey URL: ' + host + path)
+            modal.find('p#surveyURL').text('Questionnaire URL: ' + host + path)
             })
         });
     </script>

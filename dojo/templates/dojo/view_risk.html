@@ -18,7 +18,7 @@
         <div class="panel-heading tight">
             <div class="clearfix">
                 <h3 class="pull-left">
-                    Risk Exception <small>added by {{ risk_approval.reporter.get_full_name }}, Updated {{ risk_approval.updated|naturaltime|default_if_none:"" }}, Created {{ risk_approval.created|naturaltime|default_if_none:"" }}</small>
+                    Risk Acceptance <small>added by {{ risk_approval.reporter.get_full_name }}, Updated {{ risk_approval.updated|naturaltime|default_if_none:"" }}, Created {{ risk_approval.created|naturaltime|default_if_none:"" }}</small>
                 </h3>
                 <div class="dropdown pull-right">
                     <!--
@@ -33,11 +33,13 @@
     <div class="table-responsive">
         <table class="table-striped table table-condensed table-hover centered">
                 <tr>
+                    <th>Name</th>
                     <th>Expiration Date</th>
                     <th>Accepted By</th>
                     <th>Compensating Control</th>
                 </tr>
                 <tr>
+                    <td>{{ risk_approval.name }}</td>
                     <td>{{ risk_approval.expiration_date|default_if_none:"" }}</td>
                     <td>{{ risk_approval.accepted_by|default_if_none:"" }}</td>
                     <td>{{ risk_approval.compensating_control|default_if_none:"" }}</td>
@@ -68,7 +70,7 @@
                           </span>
                         </td>
                         <td><a href="{% url 'view_finding' finding.id %}"
-                               title="{{ finding.title }}">{{ finding.title|truncatechars:140 }}</a></td>
+                               title="{{ finding.title }}">{{ finding.title|truncatechars_html:140 }}</a></td>
                         <td>{{ finding.date }}</td>
                         <td>{{ finding.active }}</td>
 
@@ -96,26 +98,24 @@
         {% endif %}
     </div>
 
-    {% if show_add_findings_form %}
-        {% if authorized %}
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3>Accept Additional Findings</h3>
-                </div>
-                <br/>
-                <form method="post" class="form-horizontal">{% csrf_token %}
-                    <div class="show_add_findings_form">
-                        {% include "dojo/form_fields.html" with form=add_findings_form %}
-                    </div>
-                    <div class="panel-body">
-                        {% include "dojo/paging_snippet.html" with page=add_findings parm_name="apage" %}
-                    </div>
-                    <div class="panel-footer text-center">
-                        <input class="btn btn-primary" name="add_findings" type="submit" value="Add Selected Findings"/>
-                    </div>
-                </form>
+    {% if authorized %}
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3>Accept Additional Findings</h3>
             </div>
-        {% endif %}
+            <br/>
+            <form method="post" class="form-horizontal">{% csrf_token %}
+                <div class="show_add_findings_form">
+                    {% include "dojo/form_fields.html" with form=add_findings_form %}
+                </div>
+                <div class="panel-body">
+                    {% include "dojo/paging_snippet.html" with page=add_findings parm_name="apage" %}
+                </div>
+                <div class="panel-footer text-center">
+                    <input class="btn btn-primary" name="add_findings" type="submit" value="Add Selected Findings"/>
+                </div>
+            </form>
+        </div>
     {% endif %}
 
     <div class="panel panel-default table-responsive">

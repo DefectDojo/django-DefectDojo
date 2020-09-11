@@ -15,8 +15,8 @@
             <div class="clearfix">
                 <h4 class="pull-left to_highlight finding-title">
                     {{ endpoint.host_no_port }}
-                    {% if endpoint.remediated %}
-                        - Remediated
+                    {% if endpoint.mitigated %}
+                        - Mitigated
                     {% else %}
                         - Vulnerable
                     {% endif %}
@@ -141,7 +141,7 @@
 
     <div class="panel panel-default endpoints table-responsive">
         <div class="panel-heading">
-            {% if vulnerable and not endpoint.remediated %}
+            {% if vulnerable and not endpoint.mitigated %}
             <h4>Vulnerable Services</h4>
             {% else %}
             <h4>Endpoints Services</h4>
@@ -267,7 +267,6 @@
     <script src="{% static "flot-axis/jquery.flot.axislabels.js" %}"></script>
     <script type="text/javascript">
         $(function () {
-            $('[data-toggle="tooltip"]').tooltip();
             $(document).on('click', '.panel-heading button.clickable', function (e) {
                 var $this = $(this);
                 if (!$this.hasClass('panel-collapsed')) {

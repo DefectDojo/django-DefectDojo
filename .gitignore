@@ -76,6 +76,7 @@ dojo/uploads/risk/*
 dojo/uploads/reports/*
 dojo/scans/scan*
 dojo/uploads/threat/*
+dojo/fixtures/initial_surveys.json
 .idea
 *.sqlite
 *.db
@@ -93,7 +94,7 @@ Quarterly.txt
 components/*
 !components/package.json
 !components/yarn.lock
-dojo/static/*
+# dojo/static/*
 !dojo/static/dojo/*
 dojo/media
 /static
@@ -112,4 +113,11 @@ quick.bash
 # pipenv
 Pipfile
 Pipfile*
+
+
+#ignore locally added certs
+certs/
+
+# Helm dependencies
+helm/defectdojo/charts
 

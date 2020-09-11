@@ -69,7 +69,7 @@
         {% endif %}
     {% endwith %}
 
-    {% with endpoints=find.endpoints.all|get_remediated_endpoints %}
+    {% with endpoints=find.endpoints.all|get_mitigated_endpoints %}
         {% if endpoints %}
             <p><b>==== Systems Remediated: ====</b><br>
                 {% for endpoint in endpoints %}

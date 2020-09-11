@@ -16,4 +16,7 @@ exec uwsgi \
   --enable-threads \
   --processes 2 \
   --threads 2 \
-  --py-autoreload 1
+  --reload-mercy 1 \
+  --worker-reload-mercy 1 \
+  --py-autoreload 1 \
+  --buffer-size="${DD_UWSGI_BUFFER_SIZE:-4096}"

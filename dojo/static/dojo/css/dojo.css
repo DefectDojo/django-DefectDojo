@@ -838,6 +838,10 @@ h4.finding-title {
     cursor: pointer;
 }
 
+#test-pulldown .popover-content {
+    color: #000000;
+}
+
 span.endpoint_product {
     display: block;
     font-size: 14px;
@@ -1492,7 +1496,12 @@ div.tags .label {
 }
 
 .amber-color {
-  background: #ffc107
+  background: #ffc107;
+}
+
+.amber-color-with-padding {
+  background: #ffc107;
+  padding: .2em .6em .3em;
 }
 
 .tag-label:link {
@@ -1582,4 +1591,24 @@ mark{
 small {
   font-size:12px;
   font-weight:400;
+}
+
+.fa-minus-square, .fa-trash {
+    color: red;
+}
+
+.fa-plus-square, .fa-exchange, .fa-share-square {
+    color: green;
+}
+
+.fa-asterisk {
+    color: blue;
+}
+
+#jira i:hover {
+    cursor: pointer;
+}
+
+.no-bottom-margin {
+    margin-bottom: 0px;
 }

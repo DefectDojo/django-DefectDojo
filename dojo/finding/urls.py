@@ -9,13 +9,18 @@ urlpatterns = [
     url(r'^finding$', views.open_findings,
         name='findings'),
     url(r'^finding/bulk$', views.finding_bulk_update_all,
-        name='findings_bulk_all'),
+        name='finding_bulk_update_all'),
     url(r'^product/(?P<pid>\d+)/finding/bulk_product$', views.finding_bulk_update_all,
-        name='findings_bulk_all_product'),
+        name='finding_bulk_update_all_product'),
+    # url(r'^test/(?P<tid>\d+)/bulk', views.finding_bulk_update_all,
+    #     name='finding_bulk_update_all_test'),
     url(r'^finding/open$', views.open_findings,
         name='open_findings'),
     url(r'^product/(?P<pid>\d+)/finding/open$', views.open_findings,
         name='product_open_findings'),
+    # legacy url kept for old bookmarks etc
+    url(r'^product/(?P<pid>\d+)/findings$', views.open_findings,
+       name='view_product_findings_old'),
     url(r'^product/(?P<pid>\d+)/finding/verified$', views.verified_findings,
         name='product_verified_findings'),
     url(r'^product/(?P<pid>\d+)/finding/out_of_scope$', views.out_of_scope_findings,
@@ -44,6 +49,10 @@ urlpatterns = [
         views.edit_finding, name='edit_finding'),
     url(r'^finding/(?P<fid>\d+)/touch',
         views.touch_finding, name='touch_finding'),
+    url(r'^finding/(?P<fid>\d+)/simple_risk_accept',
+        views.simple_risk_accept, name='simple_risk_accept_finding'),
+    url(r'^finding/(?P<fid>\d+)/simple_risk_unaccept',
+        views.simple_risk_unaccept, name='simple_risk_unaccept_finding'),
     url(r'^finding/(?P<fid>\d+)/request_review',
         views.request_finding_review, name='request_finding_review'),
     url(r'^finding/(?P<fid>\d+)/review',
@@ -78,6 +87,8 @@ urlpatterns = [
         views.mark_finding_duplicate, name='mark_finding_duplicate'),
     url(r'^finding/(?P<duplicate_id>\d+)/duplicate/reset$',
         views.reset_finding_duplicate_status, name='reset_finding_duplicate_status'),
+    url(r'^finding/(?P<finding_id>\d+)/original/(?P<new_original_id>\d+)$',
+        views.set_finding_as_original, name='set_finding_as_original'),
 
     # stub findings
     url(r'^stub_finding/(?P<tid>\d+)/add$',
@@ -99,4 +110,9 @@ urlpatterns = [
         views.delete_template, name='delete_template'),
     url(r'^template/export$',
         views.export_templates_to_json, name='export_template'),
+
+    url(r'^finding/(?P<fid>\d+)/jira/unlink', views.unlink_jira, name='finding_unlink_jira'),
+    url(r'^finding/(?P<fid>\d+)/jira/push', views.push_to_jira, name='finding_push_to_jira'),
+    # url(r'^finding/(?P<fid>\d+)/jira/push', views.finding_link_to_jira, name='finding_link_to_jira'),
+
 ]

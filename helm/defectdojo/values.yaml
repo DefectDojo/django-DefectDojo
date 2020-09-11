@@ -11,7 +11,7 @@ createMysqlSecret: false
 # create postgresql secret in defectdojo chart, outside of postgresql chart
 createPostgresqlSecret: false
 ## Configuration value to select database type
-## Option to use "postgresql" or "mysql" database type, by default "postgresql" is chosen
+## Option to use "postgresql" or "mysql" database type, by default "mysql" is chosen
 ## Set the "enable" field to true of the database type you select (if you want to use internal database) and false of the one you don't select
 database: postgresql
 host: defectdojo.default.minikube.local
@@ -24,12 +24,18 @@ tag: latest
 
 admin:
   user: admin
+  password:
   firstName: Administrator
   lastName: User
   mail: admin@defectdojo.local
+  secretKey:
+  credentialAes256Key:
+  metricsHttpAuthPassword:
 
 monitoring:
   enabled: false
+
+annotations: {}
 
 # Components
 celery:
@@ -38,6 +44,7 @@ celery:
   beat:
     affinity: {}
     nodeSelector: {}
+    replicas: 1
     resources:
       requests:
         cpu: 100m
@@ -69,6 +76,9 @@ django:
     annotations:
       # Restricts the type of ingress controller that can interact with our chart (nginx, traefik, ...)
       #kubernetes.io/ingress.class: nginx
+      # Depending on the size and complexity of your scans, you might want to increase the default ingress timeouts if you see repeated 504 Gateway Timeouts
+      #nginx.ingress.kubernetes.io/proxy-read-timeout: "1800"
+      #nginx.ingress.kubernetes.io/proxy-send-timeout: "1800"
   nginx:
     tls:
       enabled: false
@@ -95,6 +105,7 @@ django:
 initializer:
   run: true
   keepSeconds: 60
+  affinity: {}
   nodeSelector: {}
   resources:
     requests:
@@ -107,20 +118,20 @@ initializer:
 mysql:
   enabled: false
   mysqlUser: defectdojo
+  mysqlPassword: ""
+  mysqlRootPassword: ""
   existingSecret: defectdojo-mysql-specific
   mysqlDatabase: defectdojo
   service:
-    port: 3306  
   # To use an external mySQL instance, set enabled to false and uncomment
   # the line below:
-  # mysqlServer: ""
-  # To use an external secret for the password for an external mySQL instance,
-  # set enabled to false and provide the name of the secret on the line below:
-  # mysqlPasswordSecret: ""  
+  mysqlServer: "127.0.0.1"
+
 
 postgresql:
   enabled: true
   postgresqlUsername: defectdojo
+  postgresqlPassword: ""
   postgresqlDatabase: defectdojo
   existingSecret: defectdojo-postgresql-specific
   persistence:
@@ -128,25 +139,54 @@ postgresql:
   replication:
     enabled: false
   service:
-    port: 5432  
   # To use an external PostgreSQL instance, set enabled to false and uncomment
   # the line below:
-  # postgresServer: ""
-  # To use an external secret for the password for PostgreSQL
-  # instance, set enabled to false and provide the name of the secret on the
-  # line below:
-  # existingSecret: ""    
+  postgresServer: "127.0.0.1"
+  master:
+    affinity: {}
+    nodeSelector: {}
+  slave:
+    affinity: {}
+    nodeSelector: {}
+
+# Google CloudSQL support in GKE via gce-proxy
+cloudsql:
+  # To use CloudSQL in GKE set 'enable: true'
+  enabled: false
+  image:
+    # set repo and image tag of gce-proxy
+    repository: gcr.io/cloudsql-docker/gce-proxy
+    tag: 1.17
+    pullPolicy: IfNotPresent
+  # set CloudSQL instance: 'project:zone:instancname'
+  instance: ""
 
 rabbitmq:
   enabled: true
   replicas: 1
   rabbitmq:
+    password: ""
+    erlangCookie: ""
     existingPasswordSecret: defectdojo-rabbitmq-specific
     existingErlangSecret: defectdojo-rabbitmq-specific
+    affinity: {}
+    nodeSelector: {}
 
 redis:
   enabled: false
   existingSecret: defectdojo-redis-specific
+  password: ""
   cluster:
     slaveCount: 1
 
+# To add extra variables not predefined by helm config it is possible to define in extraConfigs block, e.g. below:
+# NOTE  Do not store any kind of sensitive information inside of it
+# extraConfigs:
+#  DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED: 'true'
+#  DD_SOCIAL_AUTH_AUTH0_KEY: 'dev'
+#  DD_SOCIAL_AUTH_AUTH0_DOMAIN: 'xxxxx'
+
+# Extra secrets can be created inside of extraSecrets block:
+# NOTE  This is just an exmaple, do not store sensitive data in plain text form, better inject it during the deployment/upgrade by --set extraSecrets.secret=someSecret
+# extraSecrets:
+#  DD_SOCIAL_AUTH_AUTH0_SECRET: 'xxx'
