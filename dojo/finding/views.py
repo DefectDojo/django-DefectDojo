@@ -590,7 +590,15 @@ def delete_finding(request, fid):
 def edit_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     old_status = finding.status()
-    form = FindingForm(instance=finding, template=False)
+    burp_rr = BurpRawRequestResponse.objects.get(finding=finding)
+    if burp_rr:
+        req_resp = (
+            burp_rr.get_request(),
+            burp_rr.get_response()
+        )
+    else:
+        req_resp = None
+    form = FindingForm(instance=finding, template=False, req_resp=req_resp)
     form.initial['tags'] = [tag.name for tag in finding.tags]
     form_error = False
     jform = None
@@ -606,7 +614,7 @@ def edit_finding(request, fid):
     github_enabled = finding.has_github_issue()
 
     if request.method == 'POST':
-        form = FindingForm(request.POST, instance=finding, template=False)
+        form = FindingForm(request.POST, instance=finding, template=False, req_resp=None)
 
         if finding.active:
             if (form['active'].value() is False or form['false_p'].value()) and form['duplicate'].value() is False:
@@ -666,6 +674,13 @@ def edit_finding(request, fid):
             tags = request.POST.getlist('tags')
             t = ", ".join('"{0}"'.format(w) for w in tags)
             new_finding.tags = t
+
+            if 'request' in form.cleaned_data or 'response' in form.cleaned_data:
+                burp_rr = BurpRawRequestResponse.objects.get(finding=finding)
+                burp_rr.burpRequestBase64 = base64.b64encode(form.cleaned_data['request'].encode())
+                burp_rr.burpResponseBase64 = base64.b64encode(form.cleaned_data['response'].encode())
+                burp_rr.clean()
+                burp_rr.save()
 
             push_to_jira = False
             jira_message = None

@@ -1,6 +1,7 @@
 #!/bin/sh
-
 umask 0002
+
+id
 
 echo -n "Waiting for database to be reachable "
 until echo "select 1;" | python3 manage.py dbshell > /dev/null
