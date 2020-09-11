@@ -786,9 +786,8 @@ class FindingStatusFilter(ChoiceFilter):
             value = int(value)
         except (ValueError, TypeError):
             value = ''
-        return self.options[value][1](self, qs, self.field_name)    
+        return self.options[value][1](self, qs, self.field_name)
 
-# ?title=&date=&cwe=&cve=&impact=&steps_to_reproduce=&severity_justification=&test=&active=unknown&verified=unknown&false_p=unknown&duplicate=unknown&duplicate_finding=&out_of_scope=unknown&under_review=unknown&under_defect_review=unknown&is_Mitigated=unknown&mitigated=&mitigated_by=&reporter=&numerical_severity=&last_reviewed=&line_number=&sourcefilepath=&sourcefile=&param=&payload=&hash_code=&line=&file_path=&component_name=&component_version=&static_finding=unknown&dynamic_finding=unknown&created=&scanner_confidence=&sonarqube_issue=&unique_id_from_tool=&sast_source_object=&sast_sink_object=&sast_source_line=&sast_source_file_path=&nb_occurences=&start_date=01%2F01%2F2020&end_date=&status=
 
 class MetricsFindingFilter(FilterSet):
     start_date = DateFilter(field_name='date', label='Start Date', lookup_expr=('gt'))
