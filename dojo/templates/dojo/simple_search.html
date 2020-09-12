@@ -516,6 +516,7 @@
                         <thead>
                         <tr>
                             <th>ID</th>
+                            <th>Type</th>
                             <th>Title</th>
                             <th>Description</th>
                             <th>URL</th>
@@ -530,6 +531,9 @@
                                     <span>
                                         {{ result.object.id }}
                                     </span>
+                                    </td>
+                                    <td>
+                                        {{ result.object| class_name }}
                                     </td>
                                     <td>
                                         {{ result.title }}
