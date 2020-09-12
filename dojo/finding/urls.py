@@ -87,6 +87,8 @@ urlpatterns = [
         views.mark_finding_duplicate, name='mark_finding_duplicate'),
     url(r'^finding/(?P<duplicate_id>\d+)/duplicate/reset$',
         views.reset_finding_duplicate_status, name='reset_finding_duplicate_status'),
+    url(r'^finding/(?P<finding_id>\d+)/original/(?P<new_original_id>\d+)$',
+        views.set_finding_as_original, name='set_finding_as_original'),
 
     # stub findings
     url(r'^stub_finding/(?P<tid>\d+)/add$',
@@ -108,4 +110,9 @@ urlpatterns = [
         views.delete_template, name='delete_template'),
     url(r'^template/export$',
         views.export_templates_to_json, name='export_template'),
+
+    url(r'^finding/(?P<fid>\d+)/jira/unlink', views.unlink_jira, name='finding_unlink_jira'),
+    url(r'^finding/(?P<fid>\d+)/jira/push', views.push_to_jira, name='finding_push_to_jira'),
+    # url(r'^finding/(?P<fid>\d+)/jira/push', views.finding_link_to_jira, name='finding_link_to_jira'),
+
 ]

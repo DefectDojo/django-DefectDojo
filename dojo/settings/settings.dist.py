@@ -1,6 +1,7 @@
 # Django settings for DefectDojo
 import os
 from datetime import timedelta
+from celery.schedules import crontab
 
 import environ
 root = environ.Path(__file__) - 3  # Three folders back
@@ -79,6 +80,8 @@ env = environ.Env(
     DD_SOCIAL_AUTH_GOOGLE_OAUTH2_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_GOOGLE_OAUTH2_KEY=(str, ''),
     DD_SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET=(str, ''),
+    DD_SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS=(list, ['']),
+    DD_SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_EMAILS=(list, ['']),
     DD_SOCIAL_AUTH_OKTA_OAUTH2_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_OKTA_OAUTH2_KEY=(str, ''),
     DD_SOCIAL_AUTH_OKTA_OAUTH2_SECRET=(str, ''),
@@ -122,6 +125,11 @@ env = environ.Env(
     # Set to True if you want to allow authorized users to make changes to findings or delete them
     DD_AUTHORIZED_USERS_ALLOW_CHANGE=(bool, False),
     DD_AUTHORIZED_USERS_ALLOW_DELETE=(bool, False),
+    DD_SLA_NOTIFY_ACTIVE=(bool, False),
+    DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY=(bool, True),
+    DD_SLA_NOTIFY_WITH_JIRA_ONLY=(bool, False),
+    DD_SLA_NOTIFY_PRE_BREACH=(int, 3),
+    DD_SLA_NOTIFY_POST_BREACH=(int, 7),
 )
 
 
@@ -328,8 +336,8 @@ SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL = True
 GOOGLE_OAUTH_ENABLED = env('DD_SOCIAL_AUTH_GOOGLE_OAUTH2_ENABLED')
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = env('DD_SOCIAL_AUTH_GOOGLE_OAUTH2_KEY')
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = env('DD_SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET')
-SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS = ['']
-SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_EMAILS = ['']
+SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS = env('DD_SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS')
+SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_EMAILS = env('DD_SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_EMAILS')
 SOCIAL_AUTH_LOGIN_ERROR_URL = '/login'
 SOCIAL_AUTH_BACKEND_ERROR_URL = '/login'
 
@@ -361,9 +369,6 @@ SOCIAL_AUTH_TRAILING_SLASH = env('DD_SOCIAL_AUTH_TRAILING_SLASH')
 # https://github.com/fangli/django-saml2-auth
 SAML2_ENABLED = env('DD_SAML2_ENABLED')
 SAML2_AUTH = {
-    # Metadata is required, choose either remote url or local file path
-    'METADATA_AUTO_CONF_URL': env('DD_SAML2_METADATA_AUTO_CONF_URL'),
-    'METADATA_LOCAL_FILE_PATH': env('DD_SAML2_METADATA_LOCAL_FILE_PATH'),
     'ASSERTION_URL': env('DD_SAML2_ASSERTION_URL'),
     'ENTITY_ID': env('DD_SAML2_ENTITY_ID'),
     # Optional settings below
@@ -372,8 +377,25 @@ SAML2_AUTH = {
     'ATTRIBUTES_MAP': env('DD_SAML2_ATTRIBUTES_MAP'),
 }
 
+# Metadata is required, choose either remote url or local file path
+if 'DD_SAML2_METADATA_AUTO_CONF_URL' in os.environ or len(env('DD_SAML2_METADATA_AUTO_CONF_URL')) > 0:
+    SAML2_AUTH['METADATA_AUTO_CONF_URL'] = env('DD_SAML2_METADATA_AUTO_CONF_URL')
+else:
+    SAML2_AUTH['METADATA_LOCAL_FILE_PATH'] = env('DD_SAML2_METADATA_LOCAL_FILE_PATH')
+
+
 AUTHORIZED_USERS_ALLOW_CHANGE = env('DD_AUTHORIZED_USERS_ALLOW_CHANGE')
 AUTHORIZED_USERS_ALLOW_DELETE = env('DD_AUTHORIZED_USERS_ALLOW_DELETE')
+
+# Setting SLA_NOTIFY_ACTIVE and SLA_NOTIFY_ACTIVE_VERIFIED to False will disable the feature
+# If you import thousands of Active findings through your pipeline everyday,
+# and make the choice of enabling SLA notifications for non-verified findings,
+# be mindful of performance.
+SLA_NOTIFY_ACTIVE = env('DD_SLA_NOTIFY_ACTIVE')  # this will include 'verified' findings as well as non-verified.
+SLA_NOTIFY_ACTIVE_VERIFIED_ONLY = env('DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY')
+SLA_NOTIFY_WITH_JIRA_ONLY = env('DD_SLA_NOTIFY_WITH_JIRA_ONLY')  # Based on the 2 above, but only with a JIRA link
+SLA_NOTIFY_PRE_BREACH = env('DD_SLA_NOTIFY_PRE_BREACH')  # in days, notify between dayofbreach minus this number until dayofbreach
+SLA_NOTIFY_POST_BREACH = env('DD_SLA_NOTIFY_POST_BREACH')  # in days, skip notifications for findings that go past dayofbreach plus this number
 
 LOGIN_EXEMPT_URLS = (
     r'^%sstatic/' % URL_PREFIX,
@@ -625,6 +647,10 @@ CELERY_BEAT_SCHEDULE = {
     'update-findings-from-source-issues': {
         'task': 'dojo.tasks.async_update_findings_from_source_issues',
         'schedule': timedelta(hours=3),
+    },
+    'compute-sla-age-and-notify': {
+        'task': 'dojo.tasks.async_sla_compute_and_notify',
+        'schedule': crontab(hour=7, minute=30),
     }
 }
 
@@ -677,6 +703,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     # for backwards compatibility because someone decided to rename this scanner:
     'Symfony Security Check': ['title', 'cve'],
     'DSOP Scan': ['cve'],
+    'Trivy Scan': ['title', 'severity', 'cve', 'cwe'],
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
@@ -692,6 +719,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'ZAP Scan': False,
     'Qualys Scan': True,
     'DSOP Scan': True,
+    'Trivy Scan': True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -733,6 +761,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     # for backwards compatibility because someone decided to rename this scanner:
     'Symfony Security Check': DEDUPE_ALGO_HASH_CODE,
     'DSOP Scan': DEDUPE_ALGO_HASH_CODE,
+    'Trivy Scan': DEDUPE_ALGO_HASH_CODE,
 }
 
 DISABLE_FINDING_MERGE = env('DD_DISABLE_FINDING_MERGE')

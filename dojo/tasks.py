@@ -17,11 +17,11 @@ from dojo.celery import app
 from dojo.tools.tool_issue_updater import tool_issue_updater, update_findings_from_source_issues
 from dojo.utils import sync_false_history, calculate_grade
 from dojo.reports.widgets import report_widget_factory
-from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_issue, \
+from dojo.utils import add_comment, add_epic, add_jira_issue, update_epic, update_jira_issue, \
                        close_epic, sync_rules, fix_loop_duplicates, \
                        rename_whitesource_finding, update_external_issue, add_external_issue, \
-                       close_external_issue, reopen_external_issue
-from dojo.notifications.helper import create_notification, send_alert_notification, send_hipchat_notification, send_mail_notification, send_slack_notification
+                       close_external_issue, reopen_external_issue, sla_compute_and_notify
+from dojo.notifications.helper import create_notification, send_hipchat_notification, send_mail_notification, send_slack_notification
 import logging
 
 fmt = getattr(settings, 'LOG_FORMAT', None)
@@ -262,16 +262,16 @@ def reopen_external_issue_task(find, note, external_issue_provider):
     reopen_external_issue(find, note, external_issue_provider)
 
 
-@task(name='add_issue_task')
-def add_issue_task(find, push_to_jira):
+@task(name='add_jira_issue_task')
+def add_jira_issue_task(find, push_to_jira):
     logger.info("add issue task")
-    add_issue(find, push_to_jira)
+    add_jira_issue(find, push_to_jira)
 
 
-@task(name='update_issue_task')
-def update_issue_task(find, push_to_jira):
+@task(name='update_jira_issue_task')
+def update_jira_issue_task(find, push_to_jira):
     logger.info("update issue task")
-    update_issue(find, push_to_jira)
+    update_jira_issue(find, push_to_jira)
 
 
 @task(name='add_epic_task')
@@ -378,7 +378,10 @@ def send_hipchat_notification_task(*args, **kwargs):
     send_hipchat_notification(*args, **kwargs)
 
 
-@app.task(name='send_alert_notification')
-def send_alert_notification_task(*args, **kwargs):
-    logger.debug("send_alert_notification")
-    send_alert_notification(*args, **kwargs)
+@app.task(name='dojo.tasks.async_sla_compute_and_notify')
+def async_sla_compute_and_notify_task(*args, **kwargs):
+    logger.debug("Computing SLAs and notifying as needed")
+    try:
+        sla_compute_and_notify(*args, **kwargs)
+    except Exception as e:
+        logger.error("An unexpected error was thrown calling the SLA code: {}".format(e))

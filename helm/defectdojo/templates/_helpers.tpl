@@ -73,3 +73,6 @@ Create chart name and version as used by the chart label.
 {{- printf "%s" .Values.repositoryPrefix -}}/defectdojo-django
 {{- end -}}
 
+{{- define "initializer.jobname" -}}
+{{ .Release.Name }}-initializer-{{- printf "%s" now | date "2006-01-02-15-04" -}}
+{{- end -}}

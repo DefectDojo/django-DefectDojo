@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 def create_notification(event=None, *args, **kwargs):
+    from dojo.utils import get_system_setting
 
     if 'recipients' in kwargs:
         # mimic existing code so that when recipients is specified, no other system or personal notifications are sent.
@@ -27,10 +28,14 @@ def create_notification(event=None, *args, **kwargs):
         except Exception:
             system_notifications = Notifications()
 
-        admin_users = Dojo_User.objects.filter(is_staff=True)
-        for admin_user in admin_users:
-            system_notifications.user = admin_user
+        # Send to dedicated channel if defined, or send to all admin users
+        if get_system_setting('slack_channel') is not None:
             process_notifications(event, system_notifications, *args, **kwargs)
+        else:
+            admin_users = Dojo_User.objects.filter(is_staff=True)
+            for admin_user in admin_users:
+                system_notifications.user = admin_user
+                process_notifications(event, system_notifications, *args, **kwargs)
 
         # Personal but global notifications
         # only retrieve users which have at least one notification type enabled for this event type.
@@ -77,6 +82,7 @@ def create_notification_message(event, user, notification_type, *args, **kwargs)
     try:
         notification = render_to_string(template, kwargs)
     except Exception as e:
+        logger.debug("exception is {}".format(e))
         logger.debug('template not found or not implemented yet: %s', template)
         kwargs["description"] = create_description(event, *args, **kwargs)
         create_description(event, *args, **kwargs)
@@ -94,7 +100,7 @@ def process_notifications(event, notifications=None, *args, **kwargs):
 
     sync = 'initiator' in kwargs and hasattr(kwargs['initiator'], 'usercontactinfo') and kwargs['initiator'].usercontactinfo.block_execution
 
-    logger.debug('sync: %s %s', sync, notifications.user)
+    logger.debug('sync: %s %s', sync, vars(notifications))
     logger.debug('sending notifications ' + ('synchronously' if sync else 'asynchronously'))
     # logger.debug(vars(notifications))
 
@@ -102,7 +108,7 @@ def process_notifications(event, notifications=None, *args, **kwargs):
     hipchat_enabled = get_system_setting('enable_hipchat_notifications')
     mail_enabled = get_system_setting('enable_mail_notifications')
 
-    from dojo.tasks import send_slack_notification_task, send_alert_notification_task, send_hipchat_notification_task, send_mail_notification_task
+    from dojo.tasks import send_slack_notification_task, send_hipchat_notification_task, send_mail_notification_task
 
     if slack_enabled and 'slack' in getattr(notifications, event):
         if not sync:
@@ -117,16 +123,17 @@ def process_notifications(event, notifications=None, *args, **kwargs):
             send_hipchat_notification(event, notifications.user, *args, **kwargs)
 
     if mail_enabled and 'mail' in getattr(notifications, event):
+        # print(f' Args: {args}')
+        # print(f' Kwargs: {kwargs}')
+        # print(event)
+        # print(notifications.user)
         if not sync:
             send_mail_notification_task.delay(event, notifications.user, *args, **kwargs)
         else:
             send_mail_notification(event, notifications.user, *args, **kwargs)
 
     if 'alert' in getattr(notifications, event, None):
-        if not sync:
-            send_alert_notification_task.delay(event, notifications.user, *args, **kwargs)
-        else:
-            send_alert_notification(event, notifications.user, *args, **kwargs)
+        send_alert_notification(event, notifications.user, *args, **kwargs)
 
 
 def send_slack_notification(event, user=None, *args, **kwargs):
@@ -236,7 +243,7 @@ def send_mail_notification(event, user=None, *args, **kwargs):
 
 
 def send_alert_notification(event, user=None, *args, **kwargs):
-    print('sending alert notification')
+    logger.info('sending alert notification')
     try:
         icon = kwargs.get('icon', 'info-circle')
         alert = Alerts(
