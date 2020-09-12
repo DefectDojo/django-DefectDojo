@@ -191,6 +191,21 @@ class NoteSerializer(serializers.ModelSerializer):
 
     history = NoteHistorySerializer(read_only=True, many=True)
 
+    def update(self, instance, validated_data):
+        instance.entry = validated_data['entry']
+        instance.edited = True
+        instance.editor = self.context['request'].user
+        instance.edit_time = timezone.now()
+        history = NoteHistory(
+            data=instance.entry,
+            time=instance.edit_time,
+            current_editor=instance.editor
+        )
+        history.save()
+        instance.history.add(history)
+        instance.save()
+        return instance
+
     class Meta:
         model = Notes
         fields = '__all__'
