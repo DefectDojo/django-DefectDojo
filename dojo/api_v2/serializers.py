@@ -187,9 +187,9 @@ class NoteHistorySerializer(serializers.ModelSerializer):
 
 class NoteSerializer(serializers.ModelSerializer):
     author = UserSerializer(
-        many=False, read_only=False)
+        many=False, read_only=True)
     editor = UserSerializer(
-        read_only=False, many=False, allow_null=True)
+        read_only=True, many=False, allow_null=True)
 
     history = NoteHistorySerializer(read_only=True, many=True)
 
@@ -288,6 +288,7 @@ class RegulationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Regulation
         fields = '__all__'
+
 
 class ToolConfigurationSerializer(serializers.ModelSerializer):
     configuration_url = serializers.CharField(source='url')
