@@ -568,6 +568,13 @@
     },
     {
         "fields": {
+            "name": "Github Vulnerability Scan"
+        },
+        "model": "dojo.test_type",
+        "pk": 183
+    },
+    {
+        "fields": {
             "name": "Gitleaks Scan"
         },
         "model": "dojo.test_type",
@@ -624,7 +631,7 @@
     },
     {
         "fields": {
-            "name": "HuskyCi"
+            "name": "HuskyCI Report"
         },
         "model": "dojo.test_type",
         "pk": 182

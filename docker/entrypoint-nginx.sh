@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 umask 0002
 if [ "${GENERATE_TLS_CERTIFICATE}" = true ]; then

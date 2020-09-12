@@ -318,6 +318,10 @@ class Dojo_User(User):
     def __str__(self):
         return self.get_full_name()
 
+    @staticmethod
+    def wants_block_execution(user):
+        return hasattr(user, 'usercontactinfo') and user.usercontactinfo.block_execution
+
 
 class UserContactInfo(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -1040,6 +1044,19 @@ class Endpoint_Params(models.Model):
     method = models.CharField(max_length=20, blank=False, null=True, choices=method_type)
 
 
+class Endpoint_Status(models.Model):
+    date = models.DateTimeField(default=get_current_date)
+    last_modified = models.DateTimeField(null=True, editable=False, default=get_current_datetime)
+    mitigated = models.BooleanField(default=False, blank=True)
+    mitigated_time = models.DateTimeField(editable=False, null=True, blank=True)
+    mitigated_by = models.ForeignKey(User, editable=True, null=True, on_delete=models.CASCADE)
+    false_positive = models.BooleanField(default=False, blank=True)
+    out_of_scope = models.BooleanField(default=False, blank=True)
+    risk_accepted = models.BooleanField(default=False, blank=True)
+    endpoint = models.ForeignKey('Endpoint', null=True, blank=True, on_delete=models.CASCADE, related_name='status_endpoint')
+    finding = models.ForeignKey('Finding', null=True, blank=True, on_delete=models.CASCADE, related_name='status_finding')
+
+
 class Endpoint(models.Model):
     protocol = models.CharField(null=True, blank=True, max_length=10,
                                 help_text="The communication protocol such as 'http', 'ftp', etc.")
@@ -1059,9 +1076,9 @@ class Endpoint(models.Model):
                                 help_text="The fragment identifier which follows the hash mark. The hash mark should "
                                           "be omitted. For example 'section-13', 'paragraph-2'.")
     product = models.ForeignKey(Product, null=True, blank=True, on_delete=models.CASCADE)
-    endpoint_params = models.ManyToManyField(Endpoint_Params, blank=True,
-                                             editable=False)
-    remediated = models.BooleanField(default=False, blank=True)
+    endpoint_params = models.ManyToManyField(Endpoint_Params, blank=True, editable=False)
+    mitigated = models.BooleanField(default=False, blank=True)
+    endpoint_status = models.ManyToManyField(Endpoint_Status, blank=True, related_name='endpoint_endpoint_status')
 
     # used for prefetching tags because django-tagging doesn't support that out of the box
     tagged_items = GenericRelation(TaggedItem)
@@ -1343,6 +1360,7 @@ class Finding(models.Model):
     steps_to_reproduce = models.TextField(null=True, blank=True)
     severity_justification = models.TextField(null=True, blank=True)
     endpoints = models.ManyToManyField(Endpoint, blank=True)
+    endpoint_status = models.ManyToManyField(Endpoint_Status, blank=True, related_name='finding_endpoint_status')
     unsaved_endpoints = []
     unsaved_request = None
     unsaved_response = None
@@ -1449,6 +1467,10 @@ class Finding(models.Model):
     def is_authorized(self, user, perm_type):
         # print('finding.is_authorized')
         return user_is_authorized(user, perm_type, self)
+
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('view_finding', args=[str(self.id)])
 
     @classmethod
     def unaccepted_open_findings(cls):
@@ -1726,6 +1748,9 @@ class Finding(models.Model):
                 sla_calculation = sla_age - age
         return sla_calculation
 
+    def sla_deadline(self):
+        return self.date + relativedelta(days=self.sla_days_remaining())
+
     def github(self):
         try:
             return self.github_issue
@@ -1751,7 +1776,7 @@ class Finding(models.Model):
     # newer version that can work with prefetching
     def github_conf_new(self):
         try:
-            return self.test.engagement.product.github_pkey_set.all()[0].conf
+            return self.test.engagement.product.github_pkey_set.all()[0].git_conf
         except:
             return None
             pass
@@ -1876,7 +1901,7 @@ class Finding(models.Model):
             if system_settings.enable_deduplication:
                 from dojo.tasks import async_dedupe
                 try:
-                    if self.reporter.usercontactinfo.block_execution:
+                    if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
                         dedupe_signal.send(sender=self.__class__, new_finding=self)
                     else:
                         async_dedupe.delay(self, *args, **kwargs)
@@ -1889,7 +1914,7 @@ class Finding(models.Model):
             from dojo.tasks import async_false_history
             from dojo.utils import sync_false_history
             try:
-                if self.reporter.usercontactinfo.block_execution:
+                if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
                     sync_false_history(self, *args, **kwargs)
                 else:
                     async_false_history.delay(self, *args, **kwargs)
@@ -1907,10 +1932,17 @@ class Finding(models.Model):
         # Adding a snippet here for push to JIRA so that it's in one place
         if push_to_jira:
             from dojo.tasks import update_issue_task, add_issue_task
+            from dojo.utils import add_issue, update_issue
             if jira_issue_exists:
-                update_issue_task.delay(self, True)
+                if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
+                    update_issue(self, True)
+                else:
+                    update_issue_task.delay(self, True)
             else:
-                add_issue_task.delay(self, True)
+                if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
+                    add_issue(self, True)
+                else:
+                    add_issue_task.delay(self, True)
 
     def delete(self, *args, **kwargs):
         for find in self.original_finding.all():
