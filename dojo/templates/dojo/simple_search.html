@@ -71,7 +71,7 @@
             {% endif %}
             {% if generic %}            
                             <li role="presentation"><a href="#tabs-8" role="tab"
-                                           data-toggle="tab">All Results</a>
+                                           data-toggle="tab">All Results {{ generic|length }}</a>
                 </li>
             {% endif %}            
         </ul>
@@ -519,7 +519,7 @@
                             <th>Type</th>
                             <th>Title</th>
                             <th>Description</th>
-                            <th>URL</th>
+                            <th>Rank</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -542,7 +542,7 @@
                                         {{ result.content }}
                                     </td>
                                     <td>
-                                        {{ result.url }}
+                                        {{ result.watson_rank }}
                                     </td>
                                 </tr>
                             {% endif %}

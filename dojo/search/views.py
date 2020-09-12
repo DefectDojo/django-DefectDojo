@@ -39,9 +39,9 @@ def simple_search(request):
     terms = ''
     form = SimpleSearchForm()
 
+    original_clean_query = ""
     if request.method == 'GET' and "query" in request.GET:
         form = SimpleSearchForm(request.GET)
-        original_clean_query = ""
         if form.is_valid():
             cookie = True
             clean_query = form.cleaned_data['query']
@@ -165,7 +165,10 @@ def simple_search(request):
             if languages:
                 languages = languages.prefetch_related('object', 'object__product', 'object__product__tagged_items__tag')
 
-            generic = watson.search(clean_query)
+            generic = watson.search(original_clean_query)[:10].prefetch_related('object')
+
+            for result in generic:
+                logger.debug('generic result: %s', vars(result))
 
         else:
             form = SimpleSearchForm()

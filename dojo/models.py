@@ -3219,10 +3219,44 @@ admin.site.register(Notifications)
 
 # Watson
 watson.register(Product)
+
+# prod_manager = models.CharField(default=0, max_length=200, null=True, blank=True)  # unused
+# tech_contact = models.CharField(default=0, max_length=200, null=True, blank=True)  # unused
+# manager = models.CharField(default=0, max_length=200, null=True, blank=True)  # unused
+
+# product_manager = models.ForeignKey(Dojo_User, null=True, blank=True,
+#                                     related_name='product_manager', on_delete=models.CASCADE)
+# technical_contact = models.ForeignKey(Dojo_User, null=True, blank=True,
+#                                       related_name='technical_contact', on_delete=models.CASCADE)
+# team_manager = models.ForeignKey(Dojo_User, null=True, blank=True,
+#                                  related_name='team_manager', on_delete=models.CASCADE)
+
+# created = models.DateTimeField(editable=False, null=True, blank=True)
+# prod_type = models.ForeignKey(Product_Type, related_name='prod_type',
+#                               null=False, blank=False, on_delete=models.CASCADE)
+# updated = models.DateTimeField(editable=False, null=True, blank=True)
+# tid = models.IntegerField(default=0, editable=False)
+# authorized_users = models.ManyToManyField(User, blank=True)
+# prod_numeric_grade = models.IntegerField(null=True, blank=True)
+
+# # Metadata
+# business_criticality = models.CharField(max_length=9, choices=BUSINESS_CRITICALITY_CHOICES, blank=True, null=True)
+# platform = models.CharField(max_length=11, choices=PLATFORM_CHOICES, blank=True, null=True)
+# lifecycle = models.CharField(max_length=12, choices=LIFECYCLE_CHOICES, blank=True, null=True)
+# origin = models.CharField(max_length=19, choices=ORIGIN_CHOICES, blank=True, null=True)
+# user_records = models.PositiveIntegerField(blank=True, null=True, help_text=_('Estimate the number of user records within the application.'))
+# revenue = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True, help_text=_('Estimate the application\'s revenue.'))
+# external_audience = models.BooleanField(default=False, help_text=_('Specify if the application is used by people outside the organization.'))
+# internet_accessible = models.BooleanField(default=False, help_text=_('Specify if the application is accessible from the public internet.'))
+# regulations = models.ManyToManyField(Regulation, blank=True)
+
+# # used for prefetching tags because django-tagging doesn't support that out of the box
+# tagged_items = GenericRelation(TaggedItem)
+
 watson.register(Test)
 watson.register(Finding, fields=('id', 'title', 'cve', 'url', 'severity', 'description', 'mitigation', 'impact', 'steps_to_reproduce',
                                  'severity_justification', 'references', 'sourcefilepath', 'sourcefile', 'hash_code', 'file_path',
-                                 'component_name', 'component_version', 'unique_id_from_tool', ))
+                                 'component_name', 'component_version', 'unique_id_from_tool', 'test__engagement__product__name'))
 watson.register(Finding_Template)
 watson.register(Endpoint)
 watson.register(Engagement)
