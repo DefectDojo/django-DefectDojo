@@ -47,7 +47,7 @@ from dojo.notifications.helper import create_notification
 from dojo.tasks import add_jira_issue_task, update_jira_issue_task, update_external_issue_task, add_comment_task, \
     add_external_issue_task, close_external_issue_task, reopen_external_issue_task
 from django.template.defaultfilters import pluralize
-from django.db.models import Q, QuerySet, Prefetch, Count
+from django.db.models import Q, QuerySet, Prefetch
 
 logger = logging.getLogger(__name__)
 
@@ -194,6 +194,7 @@ django_filter=open_findings_filter):
             'tag_input': tags,
             'jira_config': jira_config,
         })
+
 
 def prefetch_for_findings(findings):
     prefetched_findings = findings
