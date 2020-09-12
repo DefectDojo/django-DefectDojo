@@ -247,6 +247,10 @@ class MetaSerializer(serializers.ModelSerializer):
                                                   required=False,
                                                   default=None,
                                                   allow_null=True)
+    finding = serializers.PrimaryKeyRelatedField(queryset=Finding.objects.all(),
+                                                  required=False,
+                                                  default=None,
+                                                  allow_null=True)
 
     def validate(self, data):
         DojoMeta(**data).clean()
@@ -593,6 +597,12 @@ class FindingImageSerializer(serializers.ModelSerializer):
         return base64.b64encode(obj.image.read())
 
 
+class FindingMetaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DojoMeta
+        fields = ('name', 'value')
+
+
 class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     images = FindingImageSerializer(many=True, read_only=True)
     tags = TagListSerializerField(required=False)
@@ -601,6 +611,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     push_to_jira = serializers.BooleanField(default=False)
     age = serializers.IntegerField(read_only=True)
     sla_days_remaining = serializers.IntegerField(read_only=True)
+    finding_meta = FindingMetaSerializer(read_only=True, many=True)
 
     class Meta:
         model = Finding
