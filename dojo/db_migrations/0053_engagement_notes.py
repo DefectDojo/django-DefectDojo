@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0045_slack_help_text'),
+        ('dojo', '0052_cvssv3_field'),
     ]
 
     operations = [
