@@ -1014,7 +1014,6 @@ def find_template_to_apply(request, fid):
     paged_templates = get_page_items(request, templates.qs, 25)
 
     title_words = get_words_for_field(templates.qs, 'title')
-    component_words = get_words_for_field(templates.qs, 'component_name')
 
     product_tab = Product_Tab(test.engagement.product.id, title="Apply Template to Finding", tab="findings")
     return render(
@@ -1023,7 +1022,6 @@ def find_template_to_apply(request, fid):
             'product_tab': product_tab,
             'filtered': templates,
             'title_words': title_words,
-            'component_words': component_words,
             'tid': test.id,
             'fid': fid,
             'add_from_template': False,
