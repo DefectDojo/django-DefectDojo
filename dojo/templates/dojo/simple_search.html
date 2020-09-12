@@ -528,18 +528,27 @@
                             {% if result.object.id %}
                                 <tr>
                                     <td>
-                                    <span>
-                                        {{ result.object.id }}
-                                    </span>
+                                    <a href="{{result.url}}" title="{{result.title}}">
+                                        <span>
+                                            {{ result.object.id }}
+                                        </span>
+                                    </a>
                                     </td>
                                     <td>
-                                        {{ result.object| class_name }}
+                                        <a href="{{result.url}}" title="{{result.title}}">
+                                            {{ result.object| class_name }}
+                                        </a>
                                     </td>
                                     <td>
-                                        {{ result.title }}
+                                        <a href="{{result.url}}" title="{{result.title}}">
+                                            {{ result.title }}
+                                        </a>
                                     </td>
                                     <td>
-                                        {{ result.content }}
+                                        {% comment %} {{ result.content }} {% endcomment %}
+                                        {{ result.object.description }}
+                                        {{ result.object.impact }}
+                                        {{ result.object.mitigation }}
                                     </td>
                                     <td>
                                         {{ result.watson_rank }}

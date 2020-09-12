@@ -165,7 +165,10 @@ def simple_search(request):
             if languages:
                 languages = languages.prefetch_related('object', 'object__product', 'object__product__tagged_items__tag')
 
-            generic = watson.search(original_clean_query)[:10].prefetch_related('object')
+            generic = watson.search(original_clean_query)[:50].prefetch_related('object')
+            # generic = watson.search("qander document 'CVE-2019-8331'")[:10].prefetch_related('object')
+            # generic = watson.search("'CVE-2019-8331'")[:10].prefetch_related('object')
+            # generic = watson.search(" 'ISEC-433'")[:10].prefetch_related('object')
 
             for result in generic:
                 logger.debug('generic result: %s', vars(result))
