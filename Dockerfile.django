@@ -5,7 +5,7 @@
 # Dockerfile.nginx to use the caching mechanism of Docker.
 
 # Ref: https://devguide.python.org/#branchstatus
-FROM python:3.6.11-slim-buster@sha256:9111ff37d96bdcd84bcac261951ac410ee276144eb8a02f06e5907ff4ff2ffea as build
+FROM python:3.6.12-slim-buster@sha256:09bb81730d8d3f1b208d9c5ba4be66747ef29323597bedab6404b884a016685d as build
 WORKDIR /app
 RUN \
   apt-get -y update && \
@@ -24,8 +24,11 @@ RUN \
 COPY requirements.txt ./
 RUN pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
 
-FROM python:3.6.11-slim-buster@sha256:9111ff37d96bdcd84bcac261951ac410ee276144eb8a02f06e5907ff4ff2ffea
+FROM python:3.6.12-slim-buster@sha256:09bb81730d8d3f1b208d9c5ba4be66747ef29323597bedab6404b884a016685d
 WORKDIR /app
+ARG uid=1001
+ARG appuser=defectdojo
+ENV appuser ${appuser}
 RUN \
   apt-get -y update && \
   # ugly fix to install postgresql-client without errors
@@ -64,6 +67,7 @@ COPY \
   docker/entrypoint-unit-tests.sh \
   docker/entrypoint-unit-tests-devDocker.sh \
   docker/wait-for-it.sh \
+  certs/* \
   /
 COPY wsgi.py manage.py tests/unit-tests.sh ./
 COPY dojo/ ./dojo/
@@ -74,11 +78,17 @@ COPY tests/ ./tests/
 RUN \
   mkdir -p dojo/migrations && \
   chmod g=u dojo/migrations && \
-  chmod g=u /var/run && \
   true
 USER root
-RUN chmod -R 0777 /app
-USER 1001
+RUN \
+    adduser --system --no-create-home --disabled-password --gecos '' \
+        --uid ${uid} ${appuser} && \
+    chown -R ${appuser} /app && \
+    chmod 0700 /app && \
+    chmod 0750 -R /app/* && \
+    mkdir /var/run/${appuser} && \
+    chown ${appuser} /var/run/${appuser}
+USER ${appuser}
 ENV \
   DD_ADMIN_USER=admin \
   DD_ADMIN_MAIL=admin@defectdojo.local \

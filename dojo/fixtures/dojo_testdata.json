@@ -1069,7 +1069,8 @@
       "critical_mapping_severity": "test severity",
       "high_mapping_severity": "test severity",
       "password": "user1",
-      "epic_name_id": 111
+      "epic_name_id": 111,
+      "global_jira_sla_notification": false
     }
   },
   {
@@ -1248,6 +1249,35 @@
       "ssh": "test string",
       "api_key": "",
       "description": "test configuration"
+    }
+  },
+  {
+    "pk": 1,
+    "model": "dojo.sonarqube_issue",
+    "fields": {
+      "key": "AREwS5n5TxsDNHm31CxP",
+      "status": "OPEN",
+      "type": "VULNERABILITY"
+    }
+  },
+  {
+    "pk": 1,
+    "model": "dojo.sonarqube_issue_transition",
+    "fields": {
+      "sonarqube_issue": 1,
+      "created": "2020-06-23T22:37:10.369Z",
+      "finding_status": "Active, Verified",
+      "sonarqube_status": "OPEN",
+      "transitions": "confirm"
+    }
+  },
+  {
+    "pk": 1,
+    "model": "dojo.sonarqube_product",
+    "fields": {
+      "product": 2,
+      "sonarqube_project_key": "dojo_sonar_key",
+      "sonarqube_tool_config": 3
     }
   },
   {

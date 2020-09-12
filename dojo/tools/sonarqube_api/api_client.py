@@ -47,6 +47,9 @@ class SonarQubeAPI:
                 'q': project_name,
                 'qualifiers': 'TRK'
             },
+            headers={
+                'User-Agent': 'DefectDojo'
+            },
         )
 
         if response.ok:
@@ -78,6 +81,9 @@ class SonarQubeAPI:
             url='{}/components/show'.format(self.sonar_api_url),
             params={
                 'component': project_key,
+            },
+            headers={
+                'User-Agent': 'DefectDojo'
             },
         )
 
@@ -111,6 +117,9 @@ class SonarQubeAPI:
             response = self.session.get(
                 url='{}/issues/search'.format(self.sonar_api_url),
                 params=request_filter,
+                headers={
+                    'User-Agent': 'DefectDojo'
+                },
             )
 
             if response.ok:
@@ -145,6 +154,9 @@ class SonarQubeAPI:
         response = self.session.get(
             url='{}/issues/search'.format(self.sonar_api_url),
             params=request_filter,
+            headers={
+                'User-Agent': 'DefectDojo'
+            },
         )
 
         if response.ok:
@@ -177,6 +189,9 @@ class SonarQubeAPI:
             response = self.session.get(
                 url='{}/rules/show'.format(self.sonar_api_url),
                 params={'key': rule_id},
+                headers={
+                    'User-Agent': 'DefectDojo'
+                },
             )
             if response.ok:
                 rule = response.json()['rule']
@@ -220,6 +235,9 @@ class SonarQubeAPI:
                 'issue': issue_key,
                 'transition': transition
             },
+            headers={
+                'User-Agent': 'DefectDojo'
+            },
         )
         if not response.ok:
             raise Exception(
@@ -241,6 +259,9 @@ class SonarQubeAPI:
             data={
                 'issue': issue_key,
                 'text': text
+            },
+            headers={
+                'User-Agent': 'DefectDojo'
             },
         )
         if not response.ok:

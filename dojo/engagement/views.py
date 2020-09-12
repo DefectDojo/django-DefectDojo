@@ -1,6 +1,5 @@
 #  engagements
 import logging
-import os
 from datetime import datetime
 import operator
 import base64
@@ -11,7 +10,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
 from django.urls import reverse
 from django.db.models import Q
-from django.http import HttpResponseRedirect, StreamingHttpResponse, Http404, HttpResponse
+from django.http import HttpResponseRedirect, StreamingHttpResponse, Http404, HttpResponse, FileResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.cache import cache_page
 from django.utils import timezone
@@ -24,7 +23,8 @@ from dojo.filters import EngagementFilter
 from dojo.forms import CheckForm, \
     UploadThreatForm, UploadRiskForm, NoteForm, \
     EngForm, TestForm, ReplaceRiskAcceptanceForm, AddFindingsRiskAcceptanceForm, DeleteEngagementForm, ImportScanForm, \
-    JIRAFindingForm, CredMappingForm, TypedNoteForm
+    CredMappingForm, JIRAEngagementForm, JIRAImportScanForm, TypedNoteForm
+
 from dojo.models import Finding, Product, Engagement, Test, \
     Check_List, Test_Type, Notes, \
     Risk_Acceptance, Development_Environment, BurpRawRequestResponse, Endpoint, \
@@ -32,7 +32,7 @@ from dojo.models import Finding, Product, Engagement, Test, \
 from dojo.tools import handles_active_verified_statuses
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
-    FileIterWrapper, get_cal_event, message, get_system_setting, Product_Tab, is_scan_file_too_large
+    FileIterWrapper, get_cal_event, message, get_system_setting, Product_Tab, is_scan_file_too_large, update_epic, add_epic
 from dojo.notifications.helper import create_notification
 from dojo.tasks import update_epic_task, add_epic_task
 from dojo.finding.views import find_available_notetypes
@@ -178,21 +178,32 @@ def edit_engagement(request, eid):
     if eng.engagement_type == "CI/CD":
         ci_cd_form = True
     jform = None
+    use_jira = get_system_setting('enable_jira') and eng.product.jira_pkey is not None
 
     if request.method == 'POST':
         form = EngForm(request.POST, instance=eng, cicd=ci_cd_form, product=eng.product.id)
         if 'jiraform-push_to_jira' in request.POST:
-            jform = JIRAFindingForm(
-                request.POST, prefix='jiraform', enabled=False)
+            jform = JIRAEngagementForm(
+                request.POST, prefix='jiraform', instance=eng)
 
         if (form.is_valid() and jform is None) or (form.is_valid() and jform and jform.is_valid()):
+            logger.debug('jform valid')
             if 'jiraform-push_to_jira' in request.POST:
+                logger.debug('push_to_jira true')
                 if JIRA_Issue.objects.filter(engagement=eng).exists():
-                    update_epic_task.delay(
-                        eng, jform.cleaned_data.get('push_to_jira'))
+                    if request.user.usercontactinfo.block_execution:
+                        update_epic(
+                            eng, jform.cleaned_data.get('push_to_jira'))
+                    else:
+                        update_epic_task.delay(
+                            eng, jform.cleaned_data.get('push_to_jira'))
+
                 else:
-                    add_epic_task.delay(eng,
-                                        jform.cleaned_data.get('push_to_jira'))
+                    if request.user.usercontactinfo.block_execution:
+                        add_epic(eng, jform.cleaned_data.get('push_to_jira'))
+                    else:
+                        add_epic_task.delay(eng, jform.cleaned_data.get('push_to_jira'))
+
             temp_form = form.save(commit=False)
             if (temp_form.status == "Cancelled" or temp_form.status == "Completed"):
                 temp_form.active = False
@@ -216,23 +227,9 @@ def edit_engagement(request, eid):
                     reverse('view_engagement', args=(eng.id, )))
     else:
         form = EngForm(initial={'product': eng.product.id}, instance=eng, cicd=ci_cd_form, product=eng.product.id)
-        try:
-            # jissue = JIRA_Issue.objects.get(engagement=eng)
-            enabled = True
-        except:
-            enabled = False
-            pass
 
-        if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(
-                product=eng.product).count() != 0:
-            # Enabled must be false in this case, because this Push-to-jira is more about
-            # epics then findings.
-            jform = JIRAFindingForm(prefix='jiraform', enabled=False)
-            # Feels like we should probably inform the user that this particular checkbox
-            # is more about epics and engagements than findings and issues.
-            jform.fields['push_to_jira'].help_text = \
-                "Checking this will add an EPIC or update an existing EPIC for this engagement."
-            jform.fields['push_to_jira'].label = "Create or update EPIC"
+        if use_jira:
+            jform = JIRAEngagementForm(prefix='jiraform', instance=eng)
         else:
             jform = None
 
@@ -529,20 +526,20 @@ def import_scan_results(request, eid=None, pid=None):
     form = ImportScanForm()
     cred_form = CredMappingForm()
     finding_count = 0
-    enabled = False
+    push_all_jira_issues = False
     jform = None
 
     if eid:
         engagement = get_object_or_404(Engagement, id=eid)
         cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(engagement=engagement).order_by('cred_id')
         if get_system_setting('enable_jira') and engagement.product.jira_pkey_set.first() is not None:
-            enabled = engagement.product.jira_pkey_set.first().push_all_issues
-            jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
+            push_all_jira_issues = engagement.product.jira_pkey_set.first().push_all_issues
+            jform = JIRAImportScanForm(push_all=push_all_jira_issues, prefix='jiraform')
     elif pid:
         product = get_object_or_404(Product, id=pid)
         if get_system_setting('enable_jira') and product.jira_pkey_set.first() is not None:
-            enabled = product.jira_pkey_set.first().push_all_issues
-            jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
+            push_all_jira_issues = product.jira_pkey_set.first().push_all_issues
+            jform = JIRAImportScanForm(push_all=push_all_jira_issues, prefix='jiraform')
 
     if request.method == "POST":
         form = ImportScanForm(request.POST, request.FILES)
@@ -628,17 +625,17 @@ def import_scan_results(request, eid=None, pid=None):
             try:
                 # Push to Jira?
                 push_to_jira = False
-                if enabled:
+                if push_all_jira_issues:
                     push_to_jira = True
                 elif 'jiraform-push_to_jira' in request.POST:
-                    jform = JIRAFindingForm(request.POST, prefix='jiraform',
-                                            enabled=enabled)
+                    jform = JIRAImportScanForm(request.POST, prefix='jiraform',
+                                            push_all=push_all_jira_issues)
                     if jform.is_valid():
                         push_to_jira = jform.cleaned_data.get('push_to_jira')
 
                 for item in parser.items:
-                    print("item blowup")
-                    print(item)
+                    # print("item blowup")
+                    # print(item)
                     sev = item.severity
                     if sev == 'Information' or sev == 'Informational':
                         sev = 'Info'
@@ -650,7 +647,10 @@ def import_scan_results(request, eid=None, pid=None):
 
                     item.test = t
                     if item.date == timezone.now().date():
-                        item.date = t.target_start
+                        # logger.warn('setting item.date to target_start')
+                        # logger.warn('type of target_start: %s', type(t.target_start))
+                        item.date = t.target_start.date()
+                        # logger.warn('type of item.date: %s', type(item.date))
 
                     item.reporter = request.user
                     item.last_reviewed = timezone.now()
@@ -1126,17 +1126,8 @@ def upload_threatmodel(request, eid):
 
 @user_passes_test(lambda u: u.is_staff)
 def view_threatmodel(request, eid):
-    import mimetypes
-
-    mimetypes.init()
     eng = get_object_or_404(Engagement, pk=eid)
-    mimetype, encoding = mimetypes.guess_type(eng.tmodel_path)
-    response = StreamingHttpResponse(FileIterWrapper(open(eng.tmodel_path)))
-    fileName, fileExtension = os.path.splitext(eng.tmodel_path)
-    response[
-        'Content-Disposition'] = 'attachment; filename=threatmodel' + fileExtension
-    response['Content-Type'] = mimetype
-
+    response = FileResponse(open(eng.tmodel_path, 'rb'))
     return response
 
 
