@@ -166,12 +166,7 @@
         <div class="panel-heading tight">
             <div class="clearfix">
                 <h4 class="has-filters"> Findings ({{findings_count}}) <small>{{ test.id|get_severity_count:"test" }}</small>
-                    <div class="dropdown pull-right">
-                        <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary">
-                            <i class="fa fa-filter"></i>
-                            <i class="caret"></i>
-                        </button>
-                    </div>
+                    <div class="dropdown pull-right"></div>
                     <div id="test-pulldown" class="dropdown pull-right">
                         <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                 data-toggle="dropdown" aria-expanded="true">
@@ -1075,4 +1070,5 @@
             });
         });
     </script>
+    {% include "dojo/filter_js_snippet.html" %}    
 {% endblock %}

@@ -591,24 +591,6 @@
               }
             });
 
-            var title_words = [
-                {% for word in title_words %}
-                    "{{word}}",
-                {% endfor %}
-            ];
-            $("#id_title").autocomplete({
-                source: title_words
-            });
-
-            var component_words = [
-                {% for word in component_words %}
-                    "{{word}}",
-                {% endfor %}
-            ];
-            $("#id_component_name").autocomplete({
-                source: component_words
-            });
-
             $( document ).on( "click", "button.delete-finding", function (e) {
                 return confirm('Are you sure you want to delete these findings?')
             });

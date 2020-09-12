@@ -2304,6 +2304,8 @@ def sla_compute_and_notify(*args, **kwargs):
 
 def get_words_for_field(queryset, fieldname):
     words = [
-        word for field_value in queryset.filter('%s__isnull=False' % fieldname).values_list(fieldname, flat=True).distinct() for word in (field_value.split() if field_value else []) if len(word) > 2
+        # word for component_name in queryset.filter(component_name__isnull=False).values_list(fieldname, flat=True).distinct() for word in (component_name.split() if component_name else []) if len(word) > 2
+        word for component_name in queryset.filter(**{'%s__isnull' % fieldname: False}).values_list(fieldname, flat=True).distinct() for word in (component_name.split() if component_name else []) if len(word) > 2
+
     ]
-    words = sorted(set(words))
+    return sorted(set(words))

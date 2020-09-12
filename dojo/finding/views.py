@@ -41,7 +41,7 @@ from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_
     add_comment, jira_get_resolution_id, jira_change_resolution_id, get_jira_connection, \
     get_system_setting, apply_cwe_to_template, Product_Tab, calculate_grade, log_jira_alert, \
     redirect_to_return_url_or_else, get_return_url, add_jira_issue, update_jira_issue, add_external_issue, update_external_issue, \
-    jira_get_issue
+    jira_get_issue, get_words_for_field
 from dojo.notifications.helper import create_notification
 
 from dojo.tasks import add_jira_issue_task, update_jira_issue_task, update_external_issue_task, add_comment_task, \
@@ -153,15 +153,8 @@ django_filter=open_findings_filter):
 
     findings_filter = django_filter(request, findings, request.user, pid)
 
-    title_words = [
-        word for title in findings_filter.qs.values_list('title', flat=True) for word in title.split() if len(word) > 2
-    ]
-    title_words = sorted(set(title_words))
-
-    component_words = [
-        word for component_name in findings_filter.qs.filter(component_name__isnull=False).values_list('component_name', flat=True).distinct() for word in (component_name.split() if component_name else []) if len(word) > 2
-    ]
-    component_words = sorted(set(component_words))
+    title_words = get_words_for_field(findings_filter.qs, 'title')
+    component_words = get_words_for_field(findings_filter.qs, 'component_name')
 
     paged_findings = get_page_items(request, prefetch_for_findings(findings_filter.qs), 25)
 
@@ -1020,12 +1013,9 @@ def find_template_to_apply(request, fid):
     templates = TemplateFindingFilter(request.GET, queryset=templates)
     paged_templates = get_page_items(request, templates.qs, 25)
 
-    title_words = [
-        word for finding in templates.qs for word in finding.title.split()
-        if len(word) > 2
-    ]
+    title_words = get_words_for_field(templates.qs, 'title')
+    component_words = get_words_for_field(templates.qs, 'component_name')
 
-    title_words = sorted(set(title_words))
     product_tab = Product_Tab(test.engagement.product.id, title="Apply Template to Finding", tab="findings")
     return render(
         request, 'dojo/templates.html', {
@@ -1033,6 +1023,7 @@ def find_template_to_apply(request, fid):
             'product_tab': product_tab,
             'filtered': templates,
             'title_words': title_words,
+            'component_words': component_words,
             'tid': test.id,
             'fid': fid,
             'add_from_template': False,
@@ -1313,18 +1304,17 @@ def templates(request):
     templates = Finding_Template.objects.all().order_by('cwe')
     templates = TemplateFindingFilter(request.GET, queryset=templates)
     paged_templates = get_page_items(request, templates.qs, 25)
-    title_words = [
-        word for finding in templates.qs for word in finding.title.split()
-        if len(word) > 2
-    ]
 
-    title_words = sorted(set(title_words))
+    title_words = get_words_for_field(templates.qs, 'title')
+    component_words = get_words_for_field(templates.qs, 'component_name')
+
     add_breadcrumb(title="Template Listing", top_level=True, request=request)
     return render(
         request, 'dojo/templates.html', {
             'templates': paged_templates,
             'filtered': templates,
             'title_words': title_words,
+            "component_words": component_words,
         })
 
 
