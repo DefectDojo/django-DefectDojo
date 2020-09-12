@@ -2300,3 +2300,10 @@ def sla_compute_and_notify(*args, **kwargs):
 
     except System_Settings.DoesNotExist:
         logger.info("Findings SLA is not enabled.")
+
+
+def get_words_for_field(queryset, fieldname):
+    words = [
+        word for field_value in queryset.filter('%s__isnull=False' % fieldname).values_list(fieldname, flat=True).distinct() for word in (field_value.split() if field_value else []) if len(word) > 2
+    ]
+    words = sorted(set(words))

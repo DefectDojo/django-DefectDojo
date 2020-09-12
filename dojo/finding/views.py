@@ -47,7 +47,7 @@ from dojo.notifications.helper import create_notification
 from dojo.tasks import add_jira_issue_task, update_jira_issue_task, update_external_issue_task, add_comment_task, \
     add_external_issue_task, close_external_issue_task, reopen_external_issue_task
 from django.template.defaultfilters import pluralize
-from django.db.models import Q, QuerySet, Prefetch
+from django.db.models import Q, QuerySet, Prefetch, Count
 
 logger = logging.getLogger(__name__)
 
@@ -158,6 +158,11 @@ django_filter=open_findings_filter):
     ]
     title_words = sorted(set(title_words))
 
+    component_words = [
+        word for component_name in findings_filter.qs.filter(component_name__isnull=False).values_list('component_name', flat=True).distinct() for word in (component_name.split() if component_name else []) if len(word) > 2
+    ]
+    component_words = sorted(set(component_words))
+
     paged_findings = get_page_items(request, prefetch_for_findings(findings_filter.qs), 25)
 
     # show custom breadcrumb if user has filtered by exactly 1 endpoint
@@ -183,12 +188,12 @@ django_filter=open_findings_filter):
             "findings": paged_findings,
             "filtered": findings_filter,
             "title_words": title_words,
+            "component_words": component_words,
             'custom_breadcrumb': custom_breadcrumb,
             'filter_name': filter_name,
             'tag_input': tags,
             'jira_config': jira_config,
         })
-
 
 def prefetch_for_findings(findings):
     prefetched_findings = findings
@@ -204,6 +209,7 @@ def prefetch_for_findings(findings):
         prefetched_findings = prefetched_findings.prefetch_related('tagged_items__tag')
         prefetched_findings = prefetched_findings.prefetch_related('endpoints')
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__authorized_users')
+
     else:
         logger.debug('unable to prefetch because query was already executed')
 

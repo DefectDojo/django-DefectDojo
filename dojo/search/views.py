@@ -165,6 +165,8 @@ def simple_search(request):
             if languages:
                 languages = languages.prefetch_related('object', 'object__product', 'object__product__tagged_items__tag')
 
+            generic = watson.search(clean_query)
+
         else:
             form = SimpleSearchForm()
         add_breadcrumb(title="Simple Search", top_level=True, request=request)
@@ -188,7 +190,8 @@ def simple_search(request):
         'name': 'Simple Search',
         'metric': False,
         'user': request.user,
-        'form': form})
+        'form': form,
+        'generic': generic})
 
     if cookie:
         response.set_cookie("highlight", value=clean_query,

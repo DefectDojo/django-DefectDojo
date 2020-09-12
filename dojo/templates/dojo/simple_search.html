@@ -69,6 +69,11 @@
                                            data-toggle="tab">Tagged Results</a>
                 </li>
             {% endif %}
+            {% if generic %}            
+                            <li role="presentation"><a href="#tabs-8" role="tab"
+                                           data-toggle="tab">All Results</a>
+                </li>
+            {% endif %}            
         </ul>
         <!-- Tab panes -->
         <div class="tab-content">
@@ -498,6 +503,45 @@
                                 </td>
                                 <td>Engagement</td>
                             </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+
+            {% if generic %}
+                <div role="tabpanel" class="table-responsive tab-pane fade {% if not products %}active in{% endif %}"
+                     id="tabs-8">
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Description</th>
+                            <th>URL</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for result in generic %}
+                            {% comment %} sometimes the index contains references to findings that no longer exist. even after rebuilding the index. {% endcomment %}
+                            {% if result.object.id %}
+                                <tr>
+                                    <td>
+                                    <span>
+                                        {{ result.object.id }}
+                                    </span>
+                                    </td>
+                                    <td>
+                                        {{ result.title }}
+                                    </td>
+                                    <td>
+                                        {{ result.content }}
+                                    </td>
+                                    <td>
+                                        {{ result.url }}
+                                    </td>
+                                </tr>
+                            {% endif %}
                         {% endfor %}
                         </tbody>
                     </table>
