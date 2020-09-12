@@ -427,6 +427,21 @@
   },
   {
     "pk": 1,
+    "model": "dojo.notes",
+    "fields": {
+      "note_type": null,
+      "entry": "test note",
+      "date": "2020-07-14T13:13:46.172Z",
+      "author": 2,
+      "private": false,
+      "edited": false,
+      "editor": null,
+      "edit_time": "2020-07-14T13:13:46.172Z",
+      "history": []
+    }
+  },
+  {
+    "pk": 1,
     "model": "dojo.engagement",
     "fields": {
       "product": 2,
@@ -515,7 +530,10 @@
       "name": "weekly engagement",
       "check_list": true,
       "target_start": "2018-04-03",
-      "api_test": true
+      "api_test": true,
+      "notes": [
+        1
+      ]
     }
   },
   {
@@ -609,7 +627,9 @@
       "engagement": 1,
       "environment": 1,
       "target_start": "2017-12-01T00:00:00Z",
-      "notes": [],
+      "notes": [
+        1
+      ],
       "percent_complete": 100,
       "actual_time": "00:30:00",
       "target_end": "2017-12-10T00:00:00Z"
@@ -913,7 +933,9 @@
       "review_requested_by": 2,
       "thread_id": 1,
       "url": "http://www.example.com",
-      "notes": [],
+      "notes": [
+        1
+      ],
       "dynamic_finding": false,
       "hash_code": "c89d25e445b088ba339908f68e15e3177b78d22f3039d1bfea51c4be251bf4e0",
       "is_template": false,
