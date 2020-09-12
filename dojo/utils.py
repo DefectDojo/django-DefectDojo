@@ -18,6 +18,7 @@ from django.core.paginator import Paginator
 from django.urls import get_resolver, reverse
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
 from django.template.defaultfilters import pluralize
+from django.template.loader import render_to_string
 from django.utils import timezone
 from jira import JIRA
 from jira.exceptions import JIRAError
@@ -1274,27 +1275,30 @@ def log_jira_message(text, finding):
         source='Jira')
 
 
-# Adds labels to a Jira issue
-def add_labels(find, issue):
+def get_labels(find):
     # Update Label with system setttings label
+    labels = []
     system_settings = System_Settings.objects.get()
-    labels = system_settings.jira_labels
-    if labels is None:
+    system_labels = system_settings.jira_labels
+    if system_labels is None:
         return
     else:
-        labels = labels.split()
-    if len(labels) > 0:
-        for label in labels:
-            issue.fields.labels.append(label)
+        system_labels = system_labels.split()
+    if len(system_labels) > 0:
+        for system_label in system_labels:
+            labels.append(system_label)
     # Update the label with the product name (underscore)
     prod_name = find.test.engagement.product.name.replace(" ", "_")
-    issue.fields.labels.append(prod_name)
-    issue.update(fields={"labels": issue.fields.labels})
+    labels.append(prod_name)
+    return labels
 
 
-def jira_long_description(find_description, find_id, jira_conf_finding_text):
-    return find_description + "\n\n*Dojo ID:* " + str(
-        find_id) + "\n\n" + jira_conf_finding_text
+def jira_description(find):
+    template = 'issue-trackers/jira-description.tpl'
+    kwargs = {}
+    kwargs['finding'] = find
+    kwargs['jira_conf'] = find.jira_conf_new()
+    return render_to_string(template, kwargs)
 
 
 def add_external_issue(find, external_issue_provider):
@@ -1357,43 +1361,61 @@ def add_issue(find, push_to_jira):
                 jira = JIRA(
                     server=jira_conf.url,
                     basic_auth=(jira_conf.username, jira_conf.password))
+
+                meta = None
+
+                fields = {
+                        'project': {
+                            'key': jpkey.project_key
+                        },
+                        'summary': find.title,
+                        'description': jira_description(find),
+                        'issuetype': {
+                            'name': jira_conf.default_issue_type
+                        },
+                        'priority': {
+                            'name': jira_conf.get_priority(find.severity)
+                        }
+                }
+
                 if jpkey.component:
-                    logger.debug('... with a component')
-                    new_issue = jira.create_issue(
-                        project=jpkey.project_key,
-                        summary=find.title,
-                        components=[
+                    fields['components'] = [
                             {
                                 'name': jpkey.component
                             },
-                        ],
-                        description=jira_long_description(
-                            find.long_desc(), find.id,
-                            jira_conf.finding_text),
-                        issuetype={'name': jira_conf.default_issue_type},
-                        priority={
-                            'name': jira_conf.get_priority(find.severity)
-                        })
-                else:
-                    logger.debug('... with no component')
-                    new_issue = jira.create_issue(
-                        project=jpkey.project_key,
-                        summary=find.title,
-                        description=jira_long_description(
-                            find.long_desc(), find.id,
-                            jira_conf.finding_text),
-                        issuetype={'name': jira_conf.default_issue_type},
-                        priority={
-                            'name': jira_conf.get_priority(find.severity)
-                        })
+                    ]
+
+                labels = get_labels(find)
+                if labels:
+                    fields['labels'] = labels
+
+                if System_Settings.objects.get().enable_finding_sla:
+                    # populate duedate field, but only if it's available for this project + issuetype
+                    # meta = jira.createmeta(projectKeys=jpkey.project_key, expand="fields")
+                    if not meta:
+                        meta = jira_meta(jira, jpkey)
+
+                    if 'duedate' in meta['projects'][0]['issuetypes'][0]['fields']:
+                        # jira wants YYYY-MM-DD
+                        duedate = find.sla_deadline().strftime('%Y-%m-%d')
+                        fields['duedate'] = duedate
+
+                if len(find.endpoints.all()) > 0:
+                    if not meta:
+                        meta = jira_meta(jira, jpkey)
+
+                    if 'environment' in meta['projects'][0]['issuetypes'][0]['fields']:
+                        environment = "\n".join([str(endpoint) for endpoint in find.endpoints.all()])
+                        fields['environment'] = environment
+
+                logger.debug('sending fields to JIRA: %s', fields)
+
+                new_issue = jira.create_issue(fields)
 
                 j_issue = JIRA_Issue(
                     jira_id=new_issue.id, jira_key=new_issue, finding=find)
                 j_issue.save()
                 issue = jira.issue(new_issue.id)
-
-                # Add labels (security & product)
-                add_labels(find, new_issue)
 
                 # Upload dojo finding screenshots to Jira
                 for pic in find.images.all():
@@ -1409,7 +1431,12 @@ def add_issue(find, push_to_jira):
                 logger.error(e.text, find)
                 log_jira_alert(e.text, find)
         else:
+            log_jira_alert("A Finding needs to be both Active and Verified to be pushed to JIRA.", find)
             logger.warning("A Finding needs to be both Active and Verified to be pushed to JIRA.", find)
+
+
+def jira_meta(jira, jpkey):
+    return jira.createmeta(projectKeys=jpkey.project_key, issuetypeNames=jpkey.conf.default_issue_type, expand="projects.issuetypes.fields")
 
 
 def jira_attachment(jira, issue, file, jira_filename=None):
@@ -1460,6 +1487,8 @@ def update_issue(find, push_to_jira):
                 basic_auth=(jira_conf.username, jira_conf.password))
             issue = jira.issue(j_issue.jira_id)
 
+            meta = None
+
             fields = {}
             # Only update the component if it didn't exist earlier in Jira, this is to avoid assigning multiple components to an item
             if issue.fields.components:
@@ -1475,15 +1504,28 @@ def update_issue(find, push_to_jira):
                 ]
                 fields = {"components": component}
 
+            labels = get_labels(find)
+            if labels:
+                fields['labels'] = labels
+
+            if len(find.endpoints.all()) > 0:
+                if not meta:
+                    meta = jira_meta(jira, jpkey)
+
+                if 'environment' in meta['projects'][0]['issuetypes'][0]['fields']:
+                    environment = "\n".join([str(endpoint) for endpoint in find.endpoints.all()])
+                    fields['environment'] = environment
+
             # Upload dojo finding screenshots to Jira
             for pic in find.images.all():
                 jira_attachment(jira, issue,
                                 settings.MEDIA_ROOT + pic.image_large.name)
 
+            logger.debug('sending fields to JIRA: %s', fields)
+
             issue.update(
                 summary=find.title,
-                description=jira_long_description(find.long_desc(), find.id,
-                                                  jira_conf.finding_text),
+                description=jira_description(find),
                 priority={'name': jira_conf.get_priority(find.severity)},
                 fields=fields)
             # print('\n\nSaving jira_change\n\n')
@@ -1491,7 +1533,7 @@ def update_issue(find, push_to_jira):
             # find.jira_change = timezone.now()
             # find.save()
             # Add labels(security & product)
-            add_labels(find, issue)
+
         except JIRAError as e:
             log_jira_alert(e.text, find)
 
@@ -1506,6 +1548,8 @@ def update_issue(find, push_to_jira):
                 url=req_url,
                 auth=HTTPBasicAuth(jira_conf.username, jira_conf.password),
                 json=json_data)
+            if r.status_code != 204:
+                logger.warn("JIRA transition failed with error: {}".format(r.text))
             find.jira_change = timezone.now()
             find.save()
         elif 'Active' in find.status() and 'Verified' in find.status():
@@ -1515,6 +1559,8 @@ def update_issue(find, push_to_jira):
                 url=req_url,
                 auth=HTTPBasicAuth(jira_conf.username, jira_conf.password),
                 json=json_data)
+            if r.status_code != 204:
+                logger.warn("JIRA transition failed with error: {}".format(r.text))
             find.jira_change = timezone.now()
             find.save()
 
@@ -1535,6 +1581,8 @@ def close_epic(eng, push_to_jira):
                 url=req_url,
                 auth=HTTPBasicAuth(jira_conf.username, jira_conf.password),
                 json=json_data)
+            if r.status_code != 204:
+                logger.warn("JIRA close epic failed with error: {}".format(r.text))
         except Exception as e:
             log_jira_generic_alert('Jira Engagement/Epic Close Error', str(e))
             pass
@@ -1985,7 +2033,15 @@ def get_full_url(relative_url):
         return settings.SITE_URL + relative_url
     else:
         logger.warn('SITE URL undefined in settings, full_url cannot be created')
-        return relative_url
+        return "settings.SITE_URL" + relative_url
+
+
+def get_site_url():
+    if settings.SITE_URL:
+        return settings.SITE_URL
+    else:
+        logger.warn('SITE URL undefined in settings, full_url cannot be created')
+        return "settings.SITE_URL"
 
 
 @receiver(post_save, sender=Dojo_User)
@@ -2016,11 +2072,11 @@ def merge_sets_safe(set1, set2):
 
 def get_return_url(request):
     return_url = request.POST.get('return_url', None)
-    print('return_url from POST: ', return_url)
+    # print('return_url from POST: ', return_url)
     if return_url is None or not return_url.strip():
         # for some reason using request.GET.get('return_url') never works
         return_url = request.GET['return_url'] if 'return_url' in request.GET else None
-        print('return_url from GET: ', return_url)
+        # print('return_url from GET: ', return_url)
 
     return return_url if return_url else None
 

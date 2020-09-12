@@ -102,15 +102,17 @@ def user_is_authorized(user, perm_type, obj):
 
     # at this point being in the authorized users lists means permission should be granted
     is_authorized = False
-    from dojo.models import Finding, Test, Engagement, Product
+    from dojo.models import Finding, Test, Engagement, Product, Endpoint
 
     if isinstance(obj, Finding):
         is_authorized = user in obj.test.engagement.product.authorized_users.all()
     if isinstance(obj, Test):
         is_authorized = user in obj.engagement.product.authorized_users.all()
     if isinstance(obj, Engagement):
-        is_authorized = user in obj.engagement.product.authorized_users.all()
+        is_authorized = user in obj.product.authorized_users.all()
     if isinstance(obj, Product):
-        is_authorized = user in obj.engagement.product.authorized_users.all()
+        is_authorized = user in obj.authorized_users.all()
+    if isinstance(obj, Endpoint):
+        is_authorized = user in obj.product.authorized_users.all()
 
     return is_authorized

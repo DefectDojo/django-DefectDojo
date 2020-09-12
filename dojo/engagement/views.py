@@ -28,7 +28,7 @@ from dojo.forms import CheckForm, \
 from dojo.models import Finding, Product, Engagement, Test, \
     Check_List, Test_Type, Notes, \
     Risk_Acceptance, Development_Environment, BurpRawRequestResponse, Endpoint, \
-    JIRA_PKey, JIRA_Issue, Cred_Mapping, Dojo_User, System_Settings, Note_Type
+    JIRA_PKey, JIRA_Issue, Cred_Mapping, Dojo_User, System_Settings, Note_Type, Endpoint_Status
 from dojo.tools import handles_active_verified_statuses
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
@@ -696,8 +696,13 @@ def import_scan_results(request, eid=None, pid=None):
                             query=endpoint.query,
                             fragment=endpoint.fragment,
                             product=t.engagement.product)
+                        eps, created = Endpoint_Status.objects.get_or_create(
+                            finding=item,
+                            endpoint=ep)
+                        ep.endpoint_status.add(eps)
 
                         item.endpoints.add(ep)
+                        item.endpoint_status.add(eps)
                     for endpoint in form.cleaned_data['endpoints']:
                         ep, created = Endpoint.objects.get_or_create(
                             protocol=endpoint.protocol,
@@ -706,8 +711,13 @@ def import_scan_results(request, eid=None, pid=None):
                             query=endpoint.query,
                             fragment=endpoint.fragment,
                             product=t.engagement.product)
+                        eps, created = Endpoint_Status.objects.get_or_create(
+                            finding=item,
+                            endpoint=ep)
+                        ep.endpoint_status.add(eps)
 
                         item.endpoints.add(ep)
+                        item.endpoint_status.add(eps)
 
                     item.save(false_history=True, push_to_jira=push_to_jira)
 

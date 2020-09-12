@@ -27,10 +27,10 @@ from dojo.forms import NoteForm, TestForm, FindingForm, \
     DeleteTestForm, AddFindingForm, TypedNoteForm, \
     ImportScanForm, ReImportScanForm, JIRAFindingForm
 from dojo.models import Finding, Test, Notes, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, \
-    Finding_Template, JIRA_PKey, Cred_Mapping, Dojo_User, System_Settings
+    Finding_Template, JIRA_PKey, Cred_Mapping, Dojo_User, System_Settings, Endpoint_Status
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting, \
-    Product_Tab, max_safe, is_scan_file_too_large
+    Product_Tab, max_safe, is_scan_file_too_large, add_issue
 from dojo.notifications.helper import create_notification
 from dojo.tasks import add_issue_task
 from dojo.finding.views import find_available_notetypes
@@ -458,7 +458,11 @@ def add_temp_finding(request, tid, fid):
             if 'jiraform-push_to_jira' in request.POST:
                 jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=True)
                 if jform.is_valid():
-                    add_issue_task.delay(new_finding, jform.cleaned_data.get('push_to_jira'))
+                    if request.user.usercontactinfo.block_execution:
+                        add_issue(new_finding, jform.cleaned_data.get('push_to_jira'))
+                    else:
+                        add_issue_task.delay(new_finding, jform.cleaned_data.get('push_to_jira'))
+
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Finding from template added successfully.',
@@ -666,6 +670,15 @@ def re_import_scan_results(request, tid):
                                 author=request.user)
                             note.save()
                             finding.notes.add(note)
+
+                            endpoint_status = finding.endpoint_status.all()
+                            for status in endpoint_status:
+                                status.mitigated_by = None
+                                status.mitigated_time = None
+                                status.mitigated = False
+                                status.last_modified = timezone.now()
+                                status.save()
+
                             reactivated_count += 1
                         new_items.append(finding.id)
                     else:
@@ -717,7 +730,13 @@ def re_import_scan_results(request, tid):
                                                                          query=endpoint.query,
                                                                          fragment=endpoint.fragment,
                                                                          product=test.engagement.product)
+                            eps, created = Endpoint_Status.objects.get_or_create(
+                                finding=finding,
+                                endpoint=ep)
+                            ep.endpoint_status.add(eps)
+
                             finding.endpoints.add(ep)
+                            finding.endpoint_status.add(eps)
                         for endpoint in form.cleaned_data['endpoints']:
                             ep, created = Endpoint.objects.get_or_create(protocol=endpoint.protocol,
                                                                          host=endpoint.host,
@@ -725,8 +744,13 @@ def re_import_scan_results(request, tid):
                                                                          query=endpoint.query,
                                                                          fragment=endpoint.fragment,
                                                                          product=test.engagement.product)
-                            finding.endpoints.add(ep)
+                            eps, created = Endpoint_Status.objects.get_or_create(
+                                finding=finding,
+                                endpoint=ep)
+                            ep.endpoint_status.add(eps)
 
+                            finding.endpoints.add(ep)
+                            finding.endpoint_status.add(eps)
                         if item.unsaved_tags is not None:
                             finding.tags = item.unsaved_tags
 
@@ -747,6 +771,13 @@ def re_import_scan_results(request, tid):
                         note.save()
                         finding.notes.add(note)
                         mitigated_count += 1
+
+                        for status in endpoint_status:
+                            status.mitigated_by = request.user
+                            status.mitigated_time = timezone.now()
+                            status.mitigated = True
+                            status.last_modified = timezone.now()
+                            status.save()
 
                 test.updated = max_safe([scan_date_time, test.updated])
                 test.engagement.updated = max_safe([scan_date_time, test.engagement.updated])
