@@ -8,14 +8,15 @@ from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg.utils import swagger_auto_schema, no_body
-
+import base64
 from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Finding, \
     User, ScanSettings, Scan, Stub_Finding, Finding_Template, Notes, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Endpoint, JIRA_PKey, JIRA_Conf, DojoMeta, Development_Environment, \
     Dojo_User, Note_Type, System_Settings, App_Analysis, Endpoint_Status, \
-    Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation
+    Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation, \
+    BurpRawRequestResponse
 
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import report_url_resolver
@@ -261,6 +262,43 @@ class FindingViewSet(mixins.ListModelMixin,
         tags = finding.tags
         serialized_tags = serializers.TagSerializer({"tags": tags})
         return Response(serialized_tags.data)
+
+    @swagger_auto_schema(
+        method='get',
+        responses={status.HTTP_200_OK: serializers.BurpRawRequestResponseSerializer}
+    )
+    @swagger_auto_schema(
+        method='post',
+        request_body=serializers.BurpRawRequestResponseSerializer,
+        responses={status.HTTP_200_OK: serializers.BurpRawRequestResponseSerializer}
+    )
+    @action(detail=True, methods=['get', 'post'])
+    def request_response(self, request, pk=None):
+        finding = get_object_or_404(Finding.objects, id=pk)
+
+        if request.method == 'POST':
+            burps = serializers.BurpRawRequestResponseSerializer(data=request.data, many=isinstance(request.data, list))
+            if burps.is_valid():
+                for pair in burps.validated_data['req_resp']:
+                    burp_rr = BurpRawRequestResponse(
+                                    finding=finding,
+                                    burpRequestBase64=base64.b64encode(pair["request"].encode("utf-8")),
+                                    burpResponseBase64=base64.b64encode(pair["response"].encode("utf-8")),
+                                )
+                    burp_rr.clean()
+                    burp_rr.save()
+            else:
+                return Response(burps.errors,
+                    status=status.HTTP_400_BAD_REQUEST)
+
+        burp_req_resp = BurpRawRequestResponse.objects.filter(finding=finding)
+        burp_list = []
+        for burp in burp_req_resp:
+            request = burp.get_request()
+            response = burp.get_response()
+            burp_list.append({'request': request, 'response': response})
+        serialized_burps = serializers.BurpRawRequestResponseSerializer({'req_resp': burp_list})
+        return Response(serialized_burps.data)
 
     @swagger_auto_schema(
         method='get',

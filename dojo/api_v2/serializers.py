@@ -146,6 +146,98 @@ class TaggitSerializer(serializers.Serializer):
         return (to_be_tagged, validated_data)
 
 
+class RequestResponseDict(list):
+    def __init__(self, *args, **kwargs):
+        pretty_print = kwargs.pop("pretty_print", True)
+        list.__init__(self, *args, **kwargs)
+        self.pretty_print = pretty_print
+
+    def __add__(self, rhs):
+        return RequestResponseDict(list.__add__(self, rhs))
+
+    def __getitem__(self, item):
+        result = list.__getitem__(self, item)
+        try:
+            return RequestResponseDict(result)
+        except TypeError:
+            return result
+
+    def __str__(self):
+        if self.pretty_print:
+            return json.dumps(
+                self, sort_keys=True, indent=4, separators=(',', ': '))
+        else:
+            return json.dumps(self)
+
+
+class RequestResponseSerializerField(serializers.ListSerializer):
+    child = serializers.CharField()
+    default_error_messages = {
+        'not_a_list': _(
+            'Expected a list of items but got type "{input_type}".'),
+        'invalid_json': _('Invalid json list. A tag list submitted in string'
+                        ' form must be valid json.'),
+        'not_a_dict': _('All list items must be of dict type with keys \'request\' and \'response\''),
+        'not_a_str': _('All values in the dict must be of string type.')
+    }
+    order_by = None
+
+    def __init__(self, **kwargs):
+        pretty_print = kwargs.pop("pretty_print", True)
+
+        style = kwargs.pop("style", {})
+        kwargs["style"] = {'base_template': 'textarea.html'}
+        kwargs["style"].update(style)
+
+        if "data" in kwargs:
+            data = kwargs["data"]
+
+            if isinstance(data, list):
+                kwargs["many"] = True
+
+        super(RequestResponseSerializerField, self).__init__(**kwargs)
+
+        self.pretty_print = pretty_print
+
+    def to_internal_value(self, data):
+        if isinstance(data, six.string_types):
+            if not data:
+                data = []
+            try:
+                data = json.loads(data)
+            except ValueError:
+                self.fail('invalid_json')
+
+        if not isinstance(data, list):
+            self.fail('not_a_list', input_type=type(data).__name__)
+        for s in data:
+            if not isinstance(s, dict):
+                self.fail('not_a_dict', input_type=type(s).__name__)
+
+            request = s.get('request', None)
+            response = s.get('response', None)
+
+            if not isinstance(request, str):
+                self.fail('not_a_str', input_type=type(request).__name__)
+            if not isinstance(response, str):
+                self.fail('not_a_str', input_type=type(request).__name__)
+
+            self.child.run_validation(request)
+            self.child.run_validation(response)
+        return data
+
+    def to_representation(self, value):
+        if not isinstance(value, RequestResponseDict):
+            if not isinstance(value, list):
+                # this will trigger when a queryset is found...
+                if self.order_by:
+                    burps = value.all().order_by(*self.order_by)
+                else:
+                    burps = value.all()
+                value = [{'request': burp.get_request(), 'response': burp.get_response()} for burp in burps]
+        return value
+
+
 class MetaSerializer(serializers.ModelSerializer):
     product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(),
                                                  required=False,
@@ -236,6 +328,7 @@ class RegulationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Regulation
         fields = '__all__'
+
 
 class ToolConfigurationSerializer(serializers.ModelSerializer):
     configuration_url = serializers.CharField(source='url')
@@ -441,6 +534,7 @@ class FindingImageSerializer(serializers.ModelSerializer):
 class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     images = FindingImageSerializer(many=True, read_only=True)
     tags = TagListSerializerField(required=False)
+    request_response = serializers.SerializerMethodField()
     accepted_risks = RiskAcceptanceSerializer(many=True, read_only=True, source='risk_acceptance_set')
     push_to_jira = serializers.BooleanField(default=False)
     age = serializers.IntegerField(read_only=True)
@@ -473,6 +567,16 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
         if field_name == 'notes':
             return NoteSerializer, {'many': True, 'read_only': True}
         return super().build_relational_field(field_name, relation_info)
+
+    def get_request_response(self, obj):
+        burp_req_resp = BurpRawRequestResponse.objects.filter(finding=obj)
+        burp_list = []
+        for burp in burp_req_resp:
+            request = burp.get_request()
+            response = burp.get_response()
+            burp_list.append({'request': request, 'response': response})
+        serialized_burps = BurpRawRequestResponseSerializer({'req_resp': burp_list})
+        return serialized_burps.data
 
 
 class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
@@ -1151,3 +1255,7 @@ class SystemSettingsSerializer(serializers.Serializer):
 
 class FindingNoteSerializer(serializers.Serializer):
     note_id = serializers.IntegerField()
+
+
+class BurpRawRequestResponseSerializer(serializers.Serializer):
+    req_resp = RequestResponseSerializerField(required=True)
