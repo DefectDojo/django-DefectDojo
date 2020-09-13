@@ -268,7 +268,6 @@ class FindingViewSet(mixins.ListModelMixin,
         serialized_burps = serializers.BurpRawRequestResponseSerializer({'req_resp': burp_list})
         return Response(serialized_burps.data)
 
-<<<<<<< HEAD
     @swagger_auto_schema(
         method='get',
         responses={status.HTTP_200_OK: serializers.TagSerializer}
@@ -278,8 +277,6 @@ class FindingViewSet(mixins.ListModelMixin,
         request_body=serializers.TagSerializer,
         responses={status.HTTP_200_OK: serializers.TagSerializer}
     )
-=======
->>>>>>> Fix Flake8
     @action(detail=True, methods=['get', 'post'])
     def tags(self, request, pk=None):
         finding = get_object_or_404(Finding.objects, id=pk)
