@@ -517,8 +517,12 @@
                         <tr>
                             <th>ID</th>
                             <th>Type</th>
+                            <th>Product</th>
+                            <th>Severity</th>
                             <th>Title</th>
+                            <th>CVE</th>
                             <th>Description</th>
+                            <th>JIRA</th>
                             <th>Rank</th>
                         </tr>
                         </thead>
@@ -541,14 +545,36 @@
                                     </td>
                                     <td>
                                         <a href="{{result.url}}" title="{{result.title}}">
+                                            {{ result.meta.test__engagement__product__name }}
+                                        </a>
+                                    </td>
+                                    <td class="centered">
+                                        <span class="label severity severity-{{ finding.meta.severity }}">
+                                            {{ result.meta.severity_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{{result.url}}" title="{{result.title}}">
                                             {{ result.title }}
                                         </a>
                                     </td>
                                     <td>
+                                        <a href="{{result.url}}" title="{{result.title}}">
+                                            {{ result.meta.cve }}
+                                        </a>
+                                    </td>
+                                    <td width="50%">
                                         {% comment %} {{ result.content }} {% endcomment %}
-                                        {{ result.object.description }}
-                                        {{ result.object.impact }}
-                                        {{ result.object.mitigation }}
+                                        <span>
+                                            <p>{{ result.object.description }}</p>
+                                            <p>{{ result.object.impact }}</p>
+                                            <p>{{ result.object.mitigation }}</p>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{{result.url}}" title="{{result.title}}">
+                                            {{ result.meta.jira_issue__jira_key }}
+                                        </a>
                                     </td>
                                     <td>
                                         {{ result.watson_rank }}

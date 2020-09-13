@@ -2015,6 +2015,13 @@ class Finding(models.Model):
         res = re.sub(r'\n\s*\n', '\n', res)
         return res
 
+    def latest_note(self):
+        if self.notes.all():
+            note = self.notes.all()[0]
+            return note.date.strftime("%Y-%m-%d %H:%M:%S") + ': ' + note.author.get_full_name() + ' : ' + note.entry
+
+        return ''
+
 
 Finding.endpoints.through.__unicode__ = lambda \
     x: "Endpoint: " + x.endpoint.host
@@ -2082,7 +2089,7 @@ class Finding_Template(models.Model):
 
     def get_absolute_url(self):
         from django.urls import reverse
-        return reverse('view_finding_template', args=[str(self.id)])
+        return reverse('edit_template', args=[str(self.id)])
 
 
 class Check_List(models.Model):
