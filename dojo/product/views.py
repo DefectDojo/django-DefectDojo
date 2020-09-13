@@ -25,6 +25,7 @@ from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm
 from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, GITHUB_PKey, Finding_Template, \
                         Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, \
                         Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, Dojo_User, BurpRawRequestResponse, Endpoint_Status
+
 from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, Product_Tab, get_punchcard_data, add_epic
 from dojo.notifications.helper import create_notification
 from custom_field.models import CustomFieldValue, CustomField
@@ -967,6 +968,38 @@ def ad_hoc_finding(request, pid):
                 endpoint.endpoint_status.add(eps)
                 new_finding.endpoint_status.add(eps)
 
+            for endpoint in new_finding.unsaved_endpoints:
+                ep, created = Endpoint.objects.get_or_create(
+                    protocol=endpoint.protocol,
+                    host=endpoint.host,
+                    path=endpoint.path,
+                    query=endpoint.query,
+                    fragment=endpoint.fragment,
+                    product=test.engagement.product)
+                eps, created = Endpoint_Status.objects.get_or_create(
+                    finding=new_finding,
+                    endpoint=ep)
+                ep.endpoint_status.add(eps)
+
+                new_finding.endpoints.add(ep)
+                new_finding.endpoint_status.add(eps)
+            for endpoint in form.cleaned_data['endpoints']:
+                ep, created = Endpoint.objects.get_or_create(
+                    protocol=endpoint.protocol,
+                    host=endpoint.host,
+                    path=endpoint.path,
+                    query=endpoint.query,
+                    fragment=endpoint.fragment,
+                    product=test.engagement.product)
+                eps, created = Endpoint_Status.objects.get_or_create(
+                    finding=new_finding,
+                    endpoint=ep)
+                ep.endpoint_status.add(eps)
+
+                new_finding.endpoints.add(ep)
+                new_finding.endpoint_status.add(eps)
+
+            new_finding.save()
             # Push to jira?
             push_to_jira = False
             jira_message = None
