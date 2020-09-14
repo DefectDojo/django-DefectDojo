@@ -73,16 +73,18 @@ class Regulation(models.Model):
     FINANCE_CATEGORY = 'finance'
     EDUCATION_CATEGORY = 'education'
     MEDICAL_CATEGORY = 'medical'
+    CORPORATE_CATEGORY = 'corporate'
     OTHER_CATEGORY = 'other'
     CATEGORY_CHOICES = (
         (PRIVACY_CATEGORY, _('Privacy')),
         (FINANCE_CATEGORY, _('Finance')),
         (EDUCATION_CATEGORY, _('Education')),
         (MEDICAL_CATEGORY, _('Medical')),
+        (CORPORATE_CATEGORY, _('Corporate')),
         (OTHER_CATEGORY, _('Other')),
     )
 
-    name = models.CharField(max_length=128, help_text=_('The name of the legislation.'))
+    name = models.CharField(max_length=128, unique=True, help_text=_('The name of the regulation.'))
     acronym = models.CharField(max_length=20, unique=True, help_text=_('A shortened representation of the name.'))
     category = models.CharField(max_length=9, choices=CATEGORY_CHOICES, help_text=_('The subject of the regulation.'))
     jurisdiction = models.CharField(max_length=64, help_text=_('The territory over which the regulation applies.'))
@@ -1372,6 +1374,8 @@ class Finding(models.Model):
                                message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'.")
     cve = models.CharField(validators=[cve_regex], max_length=28, null=True,
                            help_text="CVE or other vulnerability identifier")
+    cvssv3_regex = RegexValidator(regex=r'^AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]', message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'")
+    cvssv3 = models.TextField(validators=[cvssv3_regex], max_length=117, null=True)
     url = models.TextField(null=True, blank=True, editable=False)
     severity = models.CharField(max_length=200, help_text="The severity level of this flaw (Critical, High, Medium, Low, Informational)")
     description = models.TextField()
@@ -1819,6 +1823,7 @@ class Finding(models.Model):
         long_desc += '*' + self.title + '*\n\n'
         long_desc += '*Severity:* ' + str(self.severity) + '\n\n'
         long_desc += '*Cve:* ' + str(self.cve) + '\n\n'
+        long_desc += '*CVSSv3.0:* ' + str(self.cvssv3) + '\n\n'
         long_desc += '*Product/Engagement:* ' + self.test.engagement.product.name + ' / ' + self.test.engagement.name + '\n\n'
         if self.test.engagement.branch_tag:
             long_desc += '*Branch/Tag:* ' + self.test.engagement.branch_tag + '\n\n'
@@ -2030,6 +2035,8 @@ class Finding_Template(models.Model):
     cve_regex = RegexValidator(regex=r'^[A-Z]{1,10}(-\d+)+$',
                                message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'.")
     cve = models.CharField(validators=[cve_regex], max_length=28, null=True)
+    cvssv3_regex = RegexValidator(regex=r'^AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]', message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'")
+    cvssv3 = models.TextField(validators=[cvssv3_regex], max_length=117, null=True)
     severity = models.CharField(max_length=200, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     mitigation = models.TextField(null=True, blank=True)

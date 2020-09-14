@@ -15,11 +15,11 @@ from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Find
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Endpoint, JIRA_PKey, JIRA_Conf, DojoMeta, Development_Environment, \
     Dojo_User, Note_Type, System_Settings, App_Analysis, Endpoint_Status, \
-    Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product
+    Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation
 
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import report_url_resolver
-from dojo.filters import ReportFindingFilter, ReportAuthedFindingFilter
+from dojo.filters import ReportFindingFilter, ReportAuthedFindingFilter, ApiFindingFilter
 from dojo.risk_acceptance import api as ra_api
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
@@ -193,11 +193,7 @@ class FindingViewSet(mixins.ListModelMixin,
     serializer_class = serializers.FindingSerializer
     queryset = Finding.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'title', 'date', 'severity', 'description',
-                     'mitigated', 'is_Mitigated', 'endpoints', 'test', 'active', 'verified',
-                     'false_p', 'reporter', 'url', 'out_of_scope',
-                     'duplicate', 'test__engagement__product',
-                     'test__engagement', 'unique_id_from_tool')
+    filterset_class = ApiFindingFilter
 
     # Overriding mixins.UpdateModeMixin perform_update() method to grab push_to_jira
     # data and add that as a parameter to .save()
@@ -754,6 +750,18 @@ class ToolTypesViewSet(mixins.ListModelMixin,
                        viewsets.GenericViewSet):
     serializer_class = serializers.ToolTypeSerializer
     queryset = Tool_Type.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'name', 'description')
+
+
+class RegulationsViewSet(mixins.ListModelMixin,
+                         mixins.RetrieveModelMixin,
+                         mixins.CreateModelMixin,
+                         mixins.DestroyModelMixin,
+                         mixins.UpdateModelMixin,
+                         viewsets.GenericViewSet):
+    serializer_class = serializers.RegulationSerializer
+    queryset = Regulation.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'name', 'description')
 

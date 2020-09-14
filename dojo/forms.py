@@ -1,7 +1,6 @@
 import re
 from datetime import datetime, date
 from urllib.parse import urlsplit, urlunsplit
-
 import pickle
 from crispy_forms.bootstrap import InlineRadios, InlineCheckboxes
 from crispy_forms.helper import FormHelper
@@ -27,7 +26,7 @@ from dojo.models import Finding, Product_Type, Product, Note_Type, ScanSettings,
     Languages, Language_Type, App_Analysis, Objects, Benchmark_Product, Benchmark_Requirement, \
     Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta, Sonarqube_Product, \
     Engagement_Survey, Answered_Survey, TextAnswer, ChoiceAnswer, Choice, Question, TextQuestion, \
-    ChoiceQuestion, General_Survey
+    ChoiceQuestion, General_Survey, Regulation
 
 from dojo.tools import requires_file, SCAN_SONARQUBE_API
 from dojo.utils import jira_get_issue
@@ -869,6 +868,7 @@ class AddFindingForm(forms.ModelForm):
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     cwe = forms.IntegerField(required=False)
     cve = forms.CharField(max_length=28, required=False)
+    cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'cvsscalculator', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -877,11 +877,24 @@ class AddFindingForm(forms.ModelForm):
             'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
     mitigation = forms.CharField(widget=forms.Textarea)
     impact = forms.CharField(widget=forms.Textarea)
+    request = forms.CharField(widget=forms.Textarea, required=False)
+    response = forms.CharField(widget=forms.Textarea, required=False)
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
                                                widget=MultipleSelectWithPopPlusMinus(attrs={'size': '11'}))
     references = forms.CharField(widget=forms.Textarea, required=False)
     is_template = forms.BooleanField(label="Create Template?", required=False,
                                      help_text="A new finding template will be created from this finding.")
+
+    # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
+    field_order = ('title', 'date', 'cwe', 'cve', 'severity', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
+                   'severity_justification', 'endpoints', 'references', 'is_template', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope', 'simple_risk_accept', 'under_defect_review')
+
+    def __init__(self, *args, **kwargs):
+        req_resp = kwargs.pop('req_resp')
+        super(AddFindingForm, self).__init__(*args, **kwargs)
+        if req_resp:
+            self.fields['request'].initial = req_resp[0]
+            self.fields['response'].initial = req_resp[1]
 
     def clean(self):
         # self.fields['endpoints'].queryset = Endpoint.objects.all()
@@ -907,6 +920,7 @@ class AdHocFindingForm(forms.ModelForm):
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     cwe = forms.IntegerField(required=False)
     cve = forms.CharField(max_length=28, required=False)
+    cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'cvsscalculator', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -915,11 +929,24 @@ class AdHocFindingForm(forms.ModelForm):
             'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
     mitigation = forms.CharField(widget=forms.Textarea)
     impact = forms.CharField(widget=forms.Textarea)
+    request = forms.CharField(widget=forms.Textarea, required=False)
+    response = forms.CharField(widget=forms.Textarea, required=False)
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
                                                widget=MultipleSelectWithPopPlusMinus(attrs={'size': '11'}))
     references = forms.CharField(widget=forms.Textarea, required=False)
     is_template = forms.BooleanField(label="Create Template?", required=False,
                                      help_text="A new finding template will be created from this finding.")
+
+    # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
+    field_order = ('title', 'date', 'cwe', 'cve', 'severity', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
+                   'severity_justification', 'endpoints', 'references', 'is_template', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope', 'simple_risk_accept', 'under_defect_review')
+
+    def __init__(self, *args, **kwargs):
+        req_resp = kwargs.pop('req_resp')
+        super(AdHocFindingForm, self).__init__(*args, **kwargs)
+        if req_resp:
+            self.fields['request'].initial = req_resp[0]
+            self.fields['response'].initial = req_resp[1]
 
     def clean(self):
         # self.fields['endpoints'].queryset = Endpoint.objects.all()
@@ -934,7 +961,6 @@ class AdHocFindingForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        order = ('title', 'severity', 'endpoints', 'description', 'impact')
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
                    'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change', 'endpoint_status')
 
@@ -945,6 +971,7 @@ class PromoteFindingForm(forms.ModelForm):
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     cwe = forms.IntegerField(required=False)
     cve = forms.CharField(max_length=28, required=False)
+    cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'cvsscalculator', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -970,6 +997,7 @@ class FindingForm(forms.ModelForm):
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     cwe = forms.IntegerField(required=False)
     cve = forms.CharField(max_length=28, required=False)
+    cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'cvsscalculator', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -978,6 +1006,8 @@ class FindingForm(forms.ModelForm):
             'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
     mitigation = forms.CharField(widget=forms.Textarea)
     impact = forms.CharField(widget=forms.Textarea)
+    request = forms.CharField(widget=forms.Textarea, required=False)
+    response = forms.CharField(widget=forms.Textarea, required=False)
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
                                                widget=MultipleSelectWithPopPlusMinus(attrs={'size': '11'}))
     references = forms.CharField(widget=forms.Textarea, required=False)
@@ -991,7 +1021,7 @@ class FindingForm(forms.ModelForm):
     simple_risk_accept = forms.BooleanField(label="Accept Risk (simple)", required=False, help_text="Check to accept this risk and deactivate the finding. Uncheck to unaccept the risk. Use full risk acceptance from the dropdown menu if you need afvanced settings such as an expiry date.")
 
     # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
-    field_order = ('title', 'date', 'cwe', 'cve', 'severity', 'description', 'mitigation', 'impact', 'steps_to_reproduce',
+    field_order = ('title', 'date', 'cwe', 'cve', 'severity', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
                    'severity_justification', 'endpoints', 'references', 'is_template', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope', 'simple_risk_accept', 'under_defect_review')
 
     def __init__(self, *args, **kwargs):
@@ -1003,10 +1033,14 @@ class FindingForm(forms.ModelForm):
         else:
             tags = Tag.objects.usage_for_model(Finding)
 
+        req_resp = kwargs.pop('req_resp')
         t = [(tag.name, tag.name) for tag in tags]
         super(FindingForm, self).__init__(*args, **kwargs)
         self.fields['tags'].widget.choices = t
         self.fields['simple_risk_accept'].initial = True if self.instance.is_simple_risk_accepted else False
+        if req_resp:
+            self.fields['request'].initial = req_resp[0]
+            self.fields['response'].initial = req_resp[1]
 
         if self.instance.duplicate:
             self.fields['duplicate'].help_text = "Original finding that is being duplicated here (readonly). Use view finding page to manage duplicate relationships. Unchecking duplicate here will reset this findings duplicate status, but will trigger deduplication logic."
@@ -1059,6 +1093,7 @@ class ApplyFindingTemplateForm(forms.Form):
 
     cwe = forms.IntegerField(label="CWE", required=False)
     cve = forms.CharField(label="CVE", max_length=28, required=False)
+    cvssv3 = forms.CharField(label="CVSSv3", max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'btn btn-secondary dropdown-toggle', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
 
     severity = forms.ChoiceField(required=False, choices=SEVERITY_CHOICES, error_messages={'required': 'Select valid choice: In Progress, On Hold, Completed', 'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
 
@@ -1091,8 +1126,8 @@ class ApplyFindingTemplateForm(forms.Form):
         return cleaned_data
 
     class Meta:
-        fields = ['title', 'cwe', 'cve', 'severity', 'description', 'mitigation', 'impact', 'references', 'tags']
-        order = ('title', 'cwe', 'cve', 'severity', 'description', 'impact', 'is_Mitigated')
+        fields = ['title', 'cwe', 'cve', 'cvssv3', 'severity', 'description', 'mitigation', 'impact', 'references', 'tags']
+        order = ('title', 'cwe', 'cve', 'cvssv3', 'severity', 'description', 'impact', 'is_Mitigated')
 
 
 class FindingTemplateForm(forms.ModelForm):
@@ -1104,6 +1139,7 @@ class FindingTemplateForm(forms.ModelForm):
                                      "Choose from the list or add new tags.  Press TAB key to add.")
     cwe = forms.IntegerField(label="CWE", required=False)
     cve = forms.CharField(label="CVE", max_length=28, required=False)
+    cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'btn btn-secondary dropdown-toggle', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
     severity = forms.ChoiceField(
         required=False,
         choices=SEVERITY_CHOICES,
@@ -1111,7 +1147,7 @@ class FindingTemplateForm(forms.ModelForm):
             'required': 'Select valid choice: In Progress, On Hold, Completed',
             'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
 
-    field_order = ['title', 'cwe', 'cve', 'severity', 'description', 'mitigation', 'impact', 'references', 'tags', 'template_match', 'template_match_cwe', 'template_match_title', 'apply_to_findings']
+    field_order = ['title', 'cwe', 'cve', 'cvssv3', 'severity', 'description', 'mitigation', 'impact', 'references', 'tags', 'template_match', 'template_match_cwe', 'template_match_title', 'apply_to_findings']
 
     def __init__(self, *args, **kwargs):
         tags = Tag.objects.usage_for_model(Finding_Template)
@@ -1121,7 +1157,7 @@ class FindingTemplateForm(forms.ModelForm):
 
     class Meta:
         model = Finding_Template
-        order = ('title', 'cwe', 'cve', 'severity', 'description', 'impact')
+        order = ('title', 'cwe', 'cve', 'cvssv3', 'severity', 'description', 'impact')
         exclude = ('numerical_severity', 'is_Mitigated', 'last_used', 'endpoint_status')
 
 
@@ -1787,6 +1823,12 @@ class DeleteJIRAConfForm(forms.ModelForm):
 class ToolTypeForm(forms.ModelForm):
     class Meta:
         model = Tool_Type
+        exclude = ['product']
+
+
+class RegulationForm(forms.ModelForm):
+    class Meta:
+        model = Regulation
         exclude = ['product']
 
 

@@ -254,6 +254,11 @@
             {{ find.status }}
         </p>
         <br>
+        <p><b>==== CVSSv3: ====</b>
+            <br>
+            {{ find.cvssv3 }}
+        </p>
+        <br>
         <p><b>==== Severity: ====</b>
             <br>
 <span style="color:
@@ -276,7 +281,7 @@
         </p>
         <br>
 
-        {% with endpoints=find.endpoints.all|get_vulnerable_endpoints %}
+        {% with endpoints=find|get_vulnerable_endpoints %}
             {% if endpoints %}
                 <p><b>==== Systems Vulnerable: ====</b><br>
                     {% for endpoint in endpoints %}
@@ -287,7 +292,7 @@
             {% endif %}
         {% endwith %}
 
-        {% with endpoints=find.endpoints.all|get_remediated_endpoints %}
+        {% with endpoints=find|get_mitigated_endpoints %}
             {% if endpoints %}
                 <p><b>==== Systems Remediated: ====</b><br>
                     {% for endpoint in endpoints %}
@@ -440,7 +445,7 @@
                     {{ find.impact|linebreaksasciidocbr }}
                 </p>
                 <br>
-                {% with endpoints=find.endpoints.all|get_vulnerable_endpoints %}
+                {% with endpoints=find|get_vulnerable_endpoints %}
                     {% if endpoints %}
                         <p><b>==== Systems Vulnerable: ====</b><br>
                             {% for endpoint in endpoints %}
@@ -451,7 +456,7 @@
                     {% endif %}
                 {% endwith %}
 
-                {% with endpoints=find.endpoints.all|get_remediated_endpoints %}
+                {% with endpoints=find|get_mitigated_endpoints %}
                     {% if endpoints %}
                         <p><b>==== Systems Remediated: ====</b><br>
                             {% for endpoint in endpoints %}
@@ -544,17 +549,17 @@
                         }
 
                         level = parseInt(openLevel);
-                        
+
                         var anchor = titleText.trim().replace(/ /g, "_");
 
                         if(tags)
                         {
                             if (['Info', 'Low', 'Medium', 'High', 'Critical'].indexOf(titleText) >= 0) {
-                                toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
+                                toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
                                 "<span class=\"label severity severity-" + titleText + "\">" + titleText + "</span></a></li>";
                             }
                             else {
-                                toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
+                                toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
                                 titleText + "<sup>" + tags + "</sup></a></li>";
                             }
 
@@ -564,11 +569,11 @@
                         else
                         {
                             if (['Info', 'Low', 'Medium', 'High', 'Critical'].indexOf(titleText) >= 0) {
-                                toc += "<br><li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
+                                toc += "<br><li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
                                 "<span class=\"label severity severity-" + titleText + "\">" + titleText + "</span></a></li><br>";
                             }
                             else {
-                                toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
+                                toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
                                 titleText + "</a></li>";
                             }
 
@@ -580,7 +585,7 @@
                             + titleText + "<sup>" + tags + "</sup></h" + closeLevel + "></a>";
                     }
                 );
-                
+
             if (level) {
                 toc += (new Array(level + 1)).join("</ul>");
             }
@@ -612,9 +617,9 @@
                         level = parseInt(openLevel);
                         var anchor = titleText.trim().replace(/ /g, "_");
 
-                        toc += "<li><a style=\"font-size:" + (140 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
-                            titleText.replace(/=/g, "") + "</a></li>";                        
-                        
+                        toc += "<li><a style=\"font-size:" + (140 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
+                            titleText.replace(/=/g, "") + "</a></li>";
+
                         return "<a style=\"color:black;\" name=\"" + anchor + "\"><h" + openLevel + "" + id + ">"
                             + titleText + "</h" + closeLevel + "></a>";
                     }
@@ -638,14 +643,14 @@
                         level = parseInt(openLevel);
                         var anchor = titleText.trim().replace(/ /g, "_");
 
-                        toc += "<li><a style=\"font-size:" + (140 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
+                        toc += "<li><a style=\"font-size:" + (140 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
                         titleText.replace(/=/g, "") + "<sup>" + tags + "</sup></a></li>";
-                        
+
                         return "<a style=\"color:black;\" name=\"" + anchor + "\"><h" + openLevel + "" + id + ">"
                             + titleText + "<sup>" + tags + "</sup></h" + closeLevel + "></a>";
                     }
                 );
-                
+
             if (level) {
                 toc += (new Array(level + 1)).join("</ul>");
             }
@@ -655,4 +660,3 @@
 */
     </script>
 {% endblock %}
-
