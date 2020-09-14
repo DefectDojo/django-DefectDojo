@@ -200,7 +200,7 @@
                                         <i class="fa fa-bug fa-fw"></i>
                                         <span>Findings</span>
                                         <span class="glyphicon arrow"></span>
-				    </a>
+				                    </a>
                                     <ul class="nav nav-second-level">
                                         <li>
                                             <a href="{% url 'open_findings' %}">Open Findings</a>
@@ -219,6 +219,12 @@
                                         </li>
                                     </ul>
                                     <!-- /.nav-second-level -->
+                                </li>
+                                <li>
+				                    <a href="{% url 'components' %}" aria-expanded="false"  aria-label="Components">
+                                        <i class="fa fa-th-large fa-fw"></i>
+                                        <span>Components</span>
+                                    </a>
                                 </li>
                                 <li>
                                     <a href="{% url 'endpoints' %}" aria-expanded="false" aria-label="Endpoints">

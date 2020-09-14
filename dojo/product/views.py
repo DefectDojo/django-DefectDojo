@@ -188,7 +188,7 @@ def view_product_components(request, pid):
                     'prod': prod,
                     'product_tab': product_tab,
                     'result' : result,
-    })
+    })    
 
 def view_product_metrics(request, pid):
     prod = get_object_or_404(Product, id=pid)

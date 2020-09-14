@@ -1,17 +1,19 @@
 {% extends "base.html" %}
+{% load humanize %}
+{% load display_tags %}
+{% load static from staticfiles %}
 {% block content %}
-
-
 <div class="row">
     <div class="col-md-12">
         <div class="panel panel-default">
             <div class="panel-heading tight">
                 <div class="clearfix">
-                    <h3 class="pull-left">Components</h3>
+                    <h3 class="pull-left">All Components</h3>
                 </div>
             </div>
         </div>
         <div class="clearfix">
+            {% include "dojo/paging_snippet.html" with page=result page_size=True %}
         </div>
         <div class="panel panel-default table-responsive">
             <table id="components" class="tablesorter-bootstrap table table-condensed table-striped">
@@ -32,7 +34,7 @@
                         <td>
                             {% if result.active %}
                             <a
-                                href="{% url 'open_findings' %}?component_name={{ result.component_name }}&component_version={{result.component_version}}&test__engagement__product={{prod.id}}"><b>{{ result.active }}</b></a>
+                                href="{% url 'open_findings' %}?component_name={{ result.component_name }}&component_version={{result.component_version}}"><b>{{ result.active }}</b></a>
                             {% else %}
                             0
                             {% endif %}
@@ -40,7 +42,7 @@
                         <td>
                             {% if result.duplicate %}
                             <a
-                                href="{% url 'findings' %}?component_name={{ result.component_name }}&component_version={{result.component_version}}&test__engagement__product={{prod.id}}&duplicate=1"><b>{{ result.duplicate }}</b></a>
+                                href="{% url 'findings' %}?component_name={{ result.component_name }}&component_version={{result.component_version}}&duplicate=1"><b>{{ result.duplicate }}</b></a>
                             {% else %}
                             0
                             {% endif %}
@@ -48,7 +50,7 @@
                         <td>
                             {% if result.total %}
                             <a
-                                href="{% url 'findings' %}?component_name={{ result.component_name }}&component_version={{result.component_version}}&test__engagement__product={{prod.id}}"><b>{{ result.total }}</b></a>
+                                href="{% url 'findings' %}?component_name={{ result.component_name }}&component_version={{result.component_version}}"><b>{{ result.total }}</b></a>
                             {% else %}
                             0
                             {% endif %}
@@ -60,4 +62,23 @@
         </div>
     </div>
 </div>
+{% endblock %}
+{% block postscript %}
+<script>
+    $(document).ready( function () {
+    $('#components').DataTable(
+        {
+            "columns": [
+                    { "data": "Name" },
+                    { "data": "Version" },
+                    { "data": "Active" },
+                    { "data": "Duplicate" },
+                    { "data": "Total" },
+                    ],
+            paging: false,
+            
+        }
+    );
+} );
+</script>
 {% endblock %}

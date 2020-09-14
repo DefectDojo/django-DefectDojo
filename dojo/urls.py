@@ -63,6 +63,7 @@ from dojo.note_type.urls import urlpatterns as note_type_urls
 from dojo.google_sheet.urls import urlpatterns as google_sheets_urls
 from dojo.banner.urls import urlpatterns as banner_urls
 from dojo.survey.urls import urlpatterns as survey_urls
+from dojo.components.urls import urlpatterns as component_urls
 
 admin.autodiscover()
 
@@ -161,6 +162,7 @@ ur += notes_urls
 ur += note_type_urls
 ur += google_sheets_urls
 ur += banner_urls
+ur += component_urls
 
 swagger_urls = [
     url(r'^$', SwaggerView.as_view(), name='index'),
