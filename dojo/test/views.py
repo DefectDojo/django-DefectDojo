@@ -24,7 +24,7 @@ from tagging.models import Tag
 
 from dojo.filters import TemplateFindingFilter, OpenFindingFilter
 from dojo.forms import NoteForm, TestForm, FindingForm, \
-    DeleteTestForm, AddFindingForm, \
+    DeleteTestForm, AddFindingForm, TypedNoteForm, \
     ImportScanForm, ReImportScanForm, JIRAFindingForm, JIRAImportScanForm
 from dojo.models import Finding, Test, Notes, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, \
     Finding_Template, JIRA_PKey, Cred_Mapping, Dojo_User, System_Settings, Endpoint_Status
@@ -33,6 +33,7 @@ from dojo.utils import get_page_items, get_page_items_and_count, add_breadcrumb,
     Product_Tab, max_safe, is_scan_file_too_large, add_jira_issue
 from dojo.notifications.helper import create_notification
 from dojo.tasks import add_jira_issue_task
+from dojo.finding.views import find_available_notetypes
 from functools import reduce
 from dojo.finding.views import finding_link_jira, finding_unlink_jira
 
@@ -49,6 +50,9 @@ def view_test(request, tid):
         # will render 403
         raise PermissionDenied
     notes = test.notes.all()
+    note_type_activation = Note_Type.objects.filter(is_active=True).count()
+    if note_type_activation:
+        available_note_types = find_available_notetypes(notes)
     person = request.user.username
     findings = Finding.objects.filter(test=test).order_by('numerical_severity')
     findings = OpenFindingFilter(request.GET, queryset=findings)
@@ -57,14 +61,20 @@ def view_test(request, tid):
     creds = Cred_Mapping.objects.filter(engagement=test.engagement).select_related('cred_id').order_by('cred_id')
     system_settings = get_object_or_404(System_Settings, id=1)
     if request.method == 'POST' and request.user.is_staff:
-        form = NoteForm(request.POST)
+        if note_type_activation:
+            form = TypedNoteForm(request.POST, available_note_types=available_note_types)
+        else:
+            form = NoteForm(request.POST)
         if form.is_valid():
             new_note = form.save(commit=False)
             new_note.author = request.user
             new_note.date = timezone.now()
             new_note.save()
             test.notes.add(new_note)
-            form = NoteForm()
+            if note_type_activation:
+                form = TypedNoteForm(available_note_types=available_note_types)
+            else:
+                form = NoteForm()
             url = request.build_absolute_uri(reverse("view_test", args=(test.id,)))
             title = "Test: %s on %s" % (test.test_type.name, test.engagement.product.name)
             process_notifications(request, new_note, url, title)
@@ -73,7 +83,10 @@ def view_test(request, tid):
                                  'Note added successfully.',
                                  extra_tags='alert-success')
     else:
-        form = NoteForm()
+        if note_type_activation:
+            form = TypedNoteForm(available_note_types=available_note_types)
+        else:
+            form = NoteForm()
 
     paged_findings, total_findings_count = get_page_items_and_count(request, prefetch_for_findings(findings.qs), 25)
     paged_stub_findings = get_page_items(request, stub_findings, 25)

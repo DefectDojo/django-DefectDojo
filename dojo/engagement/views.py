@@ -21,19 +21,21 @@ from django.db import DEFAULT_DB_ALIAS
 from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.filters import EngagementFilter
 from dojo.forms import CheckForm, \
-    UploadThreatForm, UploadRiskForm, NoteForm, DoneForm, \
+    UploadThreatForm, UploadRiskForm, NoteForm, \
     EngForm, TestForm, ReplaceRiskAcceptanceForm, AddFindingsRiskAcceptanceForm, DeleteEngagementForm, ImportScanForm, \
-    CredMappingForm, JIRAEngagementForm, JIRAImportScanForm
+    CredMappingForm, JIRAEngagementForm, JIRAImportScanForm, TypedNoteForm
+
 from dojo.models import Finding, Product, Engagement, Test, \
     Check_List, Test_Type, Notes, \
     Risk_Acceptance, Development_Environment, BurpRawRequestResponse, Endpoint, \
-    JIRA_PKey, JIRA_Issue, Cred_Mapping, Dojo_User, System_Settings, Endpoint_Status
+    JIRA_PKey, JIRA_Issue, Cred_Mapping, Dojo_User, System_Settings, Note_Type, Endpoint_Status
 from dojo.tools import handles_active_verified_statuses
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, message, get_system_setting, Product_Tab, is_scan_file_too_large, update_epic, add_epic
 from dojo.notifications.helper import create_notification
 from dojo.tasks import update_epic_task, add_epic_task
+from dojo.finding.views import find_available_notetypes
 from functools import reduce
 from django.db.models.query import QuerySet
 
@@ -328,10 +330,39 @@ def view_engagement(request, eid):
     except:
         check = None
         pass
-    form = DoneForm()
+    notes = eng.notes.all()
+    note_type_activation = Note_Type.objects.filter(is_active=True).count()
+    if note_type_activation:
+        available_note_types = find_available_notetypes(notes)
     if request.method == 'POST' and request.user.is_staff:
         eng.progress = 'check_list'
         eng.save()
+
+        if note_type_activation:
+            form = TypedNoteForm(request.POST, available_note_types=available_note_types)
+        else:
+            form = NoteForm(request.POST)
+        if form.is_valid():
+            new_note = form.save(commit=False)
+            new_note.author = request.user
+            new_note.date = timezone.now()
+            new_note.save()
+            eng.notes.add(new_note)
+            if note_type_activation:
+                form = TypedNoteForm(available_note_types=available_note_types)
+            else:
+                form = NoteForm()
+            url = request.build_absolute_uri(reverse("view_engagement", args=(eng.id,)))
+            title = "Engagement: %s on %s" % (eng.name, eng.product.name)
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'Note added successfully.',
+                                 extra_tags='alert-success')
+    else:
+        if note_type_activation:
+            form = TypedNoteForm(available_note_types=available_note_types)
+        else:
+            form = NoteForm()
 
     creds = Cred_Mapping.objects.filter(
         product=eng.product).select_related('cred_id').order_by('cred_id')
@@ -391,6 +422,7 @@ def view_engagement(request, eid):
             'threat': eng.tmodel_path,
             'risk': eng.risk_path,
             'form': form,
+            'notes': notes,
             'risks_accepted': risks_accepted,
             'can_add_risk': eng_findings.count(),
             'jissue': jissue,
