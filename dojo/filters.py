@@ -9,7 +9,7 @@ from django.utils import six
 from django.utils.translation import ugettext_lazy as _
 from django_filters import FilterSet, CharFilter, OrderingFilter, \
     ModelMultipleChoiceFilter, ModelChoiceFilter, MultipleChoiceFilter, \
-    BooleanFilter, NumberFilter
+    BooleanFilter, NumberFilter, DateFilter
 from django_filters import rest_framework as filters
 from django_filters.filters import ChoiceFilter, _truncate, DateTimeFilter
 from pytz import timezone
@@ -252,6 +252,8 @@ class MetricsDateRangeFilter(ChoiceFilter):
         super(MetricsDateRangeFilter, self).__init__(*args, **kwargs)
 
     def filter(self, qs, value):
+        if value == 8:
+            return qs
         if get_earliest_finding() is not None:
             start_date = local_tz.localize(datetime.combine(
                 get_earliest_finding().date, datetime.min.time())
@@ -916,6 +918,8 @@ class FindingStatusFilter(ChoiceFilter):
 
 
 class MetricsFindingFilter(FilterSet):
+    start_date = DateFilter(field_name='date', label='Start Date', lookup_expr=('gt'))
+    end_date = DateFilter(field_name='date', label='End Date', lookup_expr=('lt'))
     date = MetricsDateRangeFilter()
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.all().order_by('name'),
@@ -924,6 +928,12 @@ class MetricsFindingFilter(FilterSet):
     status = FindingStatusFilter(label='Status')
 
     def __init__(self, *args, **kwargs):
+        if args[0]:
+            if args[0]['start_date'] != '' or args[0]['end_date'] != '':
+                args[0]._mutable = True
+                args[0]['date'] = 8
+                args[0]._mutable = False
+        # raise Exception()
         super(MetricsFindingFilter, self).__init__(*args, **kwargs)
         self.form.fields['severity'].choices = self.queryset.order_by(
             'numerical_severity'
