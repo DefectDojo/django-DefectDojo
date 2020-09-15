@@ -375,12 +375,12 @@
                     <span class="caret"></span></a>
                     <ul class="dropdown-menu">
                       <li><a href="{% url 'view_engagements' product_tab.product.id %}"><i class="fa fa-calendar"></i> View Engagements</a></li>
-                      {% if user.is_staff %}
+                      {% if user|is_authorized_for_staff:product_tab.product %}
                       <li><a href="{% url 'new_eng_for_prod' product_tab.product.id %}"><i class="fa fa-plus"></i> Add New Engagement</a></li>
                       {% endif %}
                       <li role="separator" class="divider"></li>
                       <li><a href="{% url 'view_engagements_cicd' product_tab.product.id %}"><i class="fa fa-calendar"></i> View CI/CD Engagements</a></li>
-                      {% if user.is_staff %}
+                      {% if user|is_authorized_for_staff:product_tab.product%}
                       <li><a href="{% url 'new_eng_for_prod_cicd' product_tab.product.id %}"><i class="fa fa-plus"></i> Add New CI/CD Engagement</a></li>
                       {% endif %}
                     </ul>
@@ -398,7 +398,7 @@
                       <li><a href="{% url 'product_accepted_findings' product_tab.product.id %}?test__engagement__product={{ product_tab.product.id }}"><i class="fa fa-check"></i> View Risk Accepted Findings</a></li>
                       <li><a href="{% url 'product_all_findings' product_tab.product.id %}?test__engagement__product={{ product_tab.product.id }}"><i class="fa fa-search"></i> View All Findings</a></li>
                       <li><a href="{% url 'product_closed_findings' product_tab.product.id %}?test__engagement__product={{ product_tab.product.id }}"><i class="fa fa-fire-extinguisher"></i>&nbsp;&nbsp;View Closed Findings </a></li>
-                      {% if user.is_staff %}
+                      {% if user|is_authorized_for_staff:product_tab.product %}
                       <li role="separator" class="divider"></li>
                       <li><a href="{% url 'ad_hoc_finding' product_tab.product.id %}"><i class="fa fa-plus"></i> Add New Finding</a></li>
                       <li><a href="{% url 'import_scan_results_prod' product_tab.product.id %}"><i class="fa fa-upload"></i> Import Scan Results</a></li>
@@ -415,7 +415,7 @@
                       <li><a href="{% url 'vulnerable_endpoints' %}?product={{ product_tab.product.id }}"><i class="fa fa-sitemap"></i> View Vulnerable Endpoints</a></li>
                       <li role="separator" class="divider"></li>
                       <li><a href="{% url 'product_endpoint_report' product_tab.product.id %}"><i class="fa fa-file-text-o"></i> Endpoint Report</a></li>
-                      {% if user.is_staff %}
+                      {% if user|is_authorized_for_staff:product_tab.product %}
                       <li role="separator" class="divider"></li>
                       <li><a href="{% url 'add_endpoint' product_tab.product.id %}"><i class="fa fa-plus"></i> Add New Endpoint</a></li>
                       {% endif %}
@@ -435,7 +435,7 @@
                     </ul>
                   </li>
                   {% endif %}
-                  {% if user.is_staff %}
+                  {% if user|is_authorized_for_staff:product_tab.product%}
                   <li role="presentation" class="dropdown{% if product_tab.tab == 'settings' %} active{% endif %}">
                     <a class="dropdown-toggle" data-toggle="dropdown" href=""><span class="fa fa-cogs" aria-hidden="true"></span>
                       <span class="hidden-xs"> Settings</span>
