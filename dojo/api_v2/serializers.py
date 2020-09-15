@@ -260,13 +260,9 @@ class EndpointStatusSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def create(self, validated_data):
-        print('\n\nValidated Data')
-        for k, v in validated_data.items():
-            print(k, ':', v)
-
         endpoint = validated_data['endpoint']
         finding = validated_data['finding']
-        status, created = Endpoint_Status.objects.get_or_create(
+        status = Endpoint_Status.objects.create(
             finding=finding,
             endpoint=endpoint
         )
@@ -277,7 +273,7 @@ class EndpointStatusSerializer(serializers.ModelSerializer):
         status.out_of_scope = validated_data.get('out_of_scope', False)
         status.risk_accepted = validated_data.get('risk_accepted', False)
         status.date = validated_data.get('date', timezone.now())
-
+        status.save()
         return status
 
 
