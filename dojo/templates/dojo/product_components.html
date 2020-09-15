@@ -12,6 +12,7 @@
             </div>
         </div>
         <div class="clearfix">
+            {% include "dojo/paging_snippet.html" with page=result page_size=True %}
         </div>
         <div class="panel panel-default table-responsive">
             <table id="components" class="tablesorter-bootstrap table table-condensed table-striped">
@@ -60,4 +61,23 @@
         </div>
     </div>
 </div>
+{% endblock %}
+{% block postscript %}
+<script>
+    $(document).ready( function () {
+    $('#components').DataTable(
+        {
+            "columns": [
+                    { "data": "Name" },
+                    { "data": "Version" },
+                    { "data": "Active" },
+                    { "data": "Duplicate" },
+                    { "data": "Total" },
+                    ],
+            paging: false,
+            
+        }
+    );
+} );
+</script>
 {% endblock %}

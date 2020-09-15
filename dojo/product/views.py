@@ -182,7 +182,8 @@ def view_product_components(request, pid):
     component_query = component_query.annotate(total=Count('id')).order_by('component_name','component_version')
     component_query = component_query.annotate(active=Count('id',filter=Q(active=True)))
     component_query = component_query.annotate(duplicate=(Count('id', filter=Q(duplicate=True))))
-    result = component_query
+
+    result = get_page_items(request, component_query, 25)
 
     return render(request, 'dojo/product_components.html', {
                     'prod': prod,
