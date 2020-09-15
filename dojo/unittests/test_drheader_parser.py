@@ -10,8 +10,7 @@ class TestDrHeaderJSONParser(TestCase):
         self.assertEqual(0, len(parser.items))
 
     def test_parse_file_has_many_finding_one_tool(self):
-        testfile = open(
-            "dojo/unittests/scans/drheader/scan.json")
+        testfile = open("dojo/unittests/scans/drheader/scan.json")
         parser = DrHeaderJSONParser(testfile, Test())
         testfile.close()
         self.assertEqual(6, len(parser.items))

@@ -15,7 +15,7 @@ class DrHeaderJSONParser(object):
 
     def __init__(self, filename, test):
         self.items = []
-        if filename==None:
+        if filename is None:
             return
         tree = filename.read()
         try:
