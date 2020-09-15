@@ -153,6 +153,46 @@ class EngagementViewSet(mixins.ListModelMixin,
         report = serializers.ReportGenerateSerializer(data)
         return Response(report.data)
 
+    @action(detail=True, methods=["get", "post", "patch"])
+    def notes(self, request, pk=None):
+        engagement = get_object_or_404(Engagement.objects, id=pk)
+        if request.method == 'POST':
+            new_note = serializers.AddNewNoteOptionSerializer(data=request.data)
+            if new_note.is_valid():
+                entry = new_note.validated_data['entry']
+                private = new_note.validated_data['private']
+                note_type = new_note.validated_data['note_type']
+            else:
+                return Response(new_note.errors,
+                    status=status.HTTP_400_BAD_REQUEST)
+
+            author = request.user
+            note = Notes(entry=entry, author=author, private=private, note_type=note_type)
+            note.save()
+            engagement.notes.add(note)
+
+            serialized_note = serializers.NoteSerializer({
+                "author": author, "entry": entry,
+                "private": private
+            })
+            result = serializers.EngagementToNotesSerializer({
+                "engagement_id": engagement, "notes": [serialized_note.data]
+            })
+            return Response(serialized_note.data,
+                status=status.HTTP_200_OK)
+        notes = engagement.notes.all()
+
+        serialized_notes = []
+        if notes:
+            serialized_notes = serializers.EngagementToNotesSerializer({
+                    "engagement_id": engagement, "notes": notes
+            })
+            return Response(serialized_notes.data,
+                    status=status.HTTP_200_OK)
+
+        return Response(serialized_notes,
+                status=status.HTTP_200_OK)
+
 
 class AppAnalysisViewSet(mixins.ListModelMixin,
                         mixins.RetrieveModelMixin,
@@ -705,6 +745,46 @@ class TestsViewSet(mixins.ListModelMixin,
         data = report_generate(request, test, options)
         report = serializers.ReportGenerateSerializer(data)
         return Response(report.data)
+
+    @action(detail=True, methods=["get", "post", "patch"])
+    def notes(self, request, pk=None):
+        test = get_object_or_404(Test.objects, id=pk)
+        if request.method == 'POST':
+            new_note = serializers.AddNewNoteOptionSerializer(data=request.data)
+            if new_note.is_valid():
+                entry = new_note.validated_data['entry']
+                private = new_note.validated_data['private']
+                note_type = new_note.validated_data['note_type']
+            else:
+                return Response(new_note.errors,
+                    status=status.HTTP_400_BAD_REQUEST)
+
+            author = request.user
+            note = Notes(entry=entry, author=author, private=private, note_type=note_type)
+            note.save()
+            test.notes.add(note)
+
+            serialized_note = serializers.NoteSerializer({
+                "author": author, "entry": entry,
+                "private": private
+            })
+            result = serializers.TestToNotesSerializer({
+                "test_id": test, "notes": [serialized_note.data]
+            })
+            return Response(serialized_note.data,
+                status=status.HTTP_200_OK)
+        notes = test.notes.all()
+
+        serialized_notes = []
+        if notes:
+            serialized_notes = serializers.TestToNotesSerializer({
+                    "test_id": test, "notes": notes
+            })
+            return Response(serialized_notes.data,
+                    status=status.HTTP_200_OK)
+
+        return Response(serialized_notes,
+                status=status.HTTP_200_OK)
 
 
 class TestTypesViewSet(mixins.ListModelMixin,

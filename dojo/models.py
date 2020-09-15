@@ -370,6 +370,38 @@ class Note_Type(models.Model):
         return self.name
 
 
+class NoteHistory(models.Model):
+    note_type = models.ForeignKey(Note_Type, null=True, blank=True, on_delete=models.CASCADE)
+    data = models.TextField()
+    time = models.DateTimeField(null=True, editable=False,
+                                default=get_current_datetime)
+    current_editor = models.ForeignKey(User, editable=False, null=True, on_delete=models.CASCADE)
+
+
+class Notes(models.Model):
+    note_type = models.ForeignKey(Note_Type, related_name='note_type', null=True, blank=True, on_delete=models.CASCADE)
+    entry = models.TextField()
+    date = models.DateTimeField(null=False, editable=False,
+                                default=get_current_datetime)
+    author = models.ForeignKey(User, related_name='editor_notes_set', editable=False, on_delete=models.CASCADE)
+    private = models.BooleanField(default=False)
+    edited = models.BooleanField(default=False)
+    editor = models.ForeignKey(User, related_name='author_notes_set', editable=False, null=True, on_delete=models.CASCADE)
+    edit_time = models.DateTimeField(null=True, editable=False,
+                                default=get_current_datetime)
+    history = models.ManyToManyField(NoteHistory, blank=True,
+                                   editable=False)
+
+    class Meta:
+        ordering = ['-date']
+
+    def __unicode__(self):
+        return self.entry
+
+    def __str__(self):
+        return self.entry
+
+
 class Product_Type(models.Model):
     name = models.CharField(max_length=255, unique=True)
     critical_product = models.BooleanField(default=False)
@@ -931,6 +963,7 @@ class Engagement(models.Model):
     api_test = models.BooleanField(default=True)
     pen_test = models.BooleanField(default=True)
     check_list = models.BooleanField(default=True)
+    notes = models.ManyToManyField(Notes, blank=True, editable=False)
     status = models.CharField(editable=True, max_length=2000, default='',
                               null=True,
                               choices=(('Not Started', 'Not Started'),
@@ -1212,38 +1245,6 @@ class Endpoint(models.Model):
             return host + ':80'
         else:
             return str(self)
-
-
-class NoteHistory(models.Model):
-    note_type = models.ForeignKey(Note_Type, null=True, blank=True, on_delete=models.CASCADE)
-    data = models.TextField()
-    time = models.DateTimeField(null=True, editable=False,
-                                default=get_current_datetime)
-    current_editor = models.ForeignKey(User, editable=False, null=True, on_delete=models.CASCADE)
-
-
-class Notes(models.Model):
-    note_type = models.ForeignKey(Note_Type, related_name='note_type', null=True, blank=True, on_delete=models.CASCADE)
-    entry = models.TextField()
-    date = models.DateTimeField(null=False, editable=False,
-                                default=get_current_datetime)
-    author = models.ForeignKey(User, related_name='editor_notes_set', editable=False, on_delete=models.CASCADE)
-    private = models.BooleanField(default=False)
-    edited = models.BooleanField(default=False)
-    editor = models.ForeignKey(User, related_name='author_notes_set', editable=False, null=True, on_delete=models.CASCADE)
-    edit_time = models.DateTimeField(null=True, editable=False,
-                                default=get_current_datetime)
-    history = models.ManyToManyField(NoteHistory, blank=True,
-                                   editable=False)
-
-    class Meta:
-        ordering = ['-date']
-
-    def __unicode__(self):
-        return self.entry
-
-    def __str__(self):
-        return self.entry
 
 
 class Development_Environment(models.Model):
