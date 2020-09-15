@@ -17,7 +17,7 @@ database: postgresql
 host: defectdojo.default.minikube.local
 imagePullPolicy: Always
 # Where to pull the defectDojo images from. Defaults to "defectdojo/*" repositories on hub.docker.com
-repositoryPrefix: defectdojo
+repositoryPrefix: cloudbees
 # When using a private registry, name of the secret that holds the registry secret (eg deploy token from gitlab-ci project)
 # Create secrets as: kubectl create secret docker-registry defectdojoregistrykey --docker-username=registry_username --docker-password=registry_password --docker-server='https://index.docker.io/v1/'
 # imagePullSecrets: defectdojoregistrykey
