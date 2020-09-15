@@ -26,4 +26,4 @@ class TestSemGrepJSONParser(TestCase):
         testfile = open("dojo/unittests/scans/semgrep/repeated_findings.json")
         parser = SemgrepJSONParser(testfile, Test())
         testfile.close()
-        self.assertEqual(1, len(parser.items))
+        self.assertEqual(2, len(parser.items))
