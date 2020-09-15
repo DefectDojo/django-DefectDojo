@@ -36,6 +36,8 @@ from dojo.tasks import add_jira_issue_task
 from dojo.finding.views import find_available_notetypes
 from functools import reduce
 from dojo.finding.views import finding_link_jira, finding_unlink_jira
+from dojo.user.helper import user_must_be_authorized
+
 
 logger = logging.getLogger(__name__)
 parse_logger = logging.getLogger('dojo')
@@ -174,6 +176,8 @@ def prefetch_for_findings(findings):
     return prefetched_findings
 
 
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Test, 'change', 'tid')
 def edit_test(request, tid):
     test = get_object_or_404(Test, pk=tid)
     form = TestForm(instance=test)
@@ -204,7 +208,8 @@ def edit_test(request, tid):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Test, 'delete', 'tid')
 def delete_test(request, tid):
     test = get_object_or_404(Test, pk=tid)
     eng = test.engagement
@@ -264,7 +269,8 @@ def test_calendar(request):
         'users': Dojo_User.objects.all()})
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Test, 'staff', 'tid')
 def test_ics(request, tid):
     test = get_object_or_404(Test, id=tid)
     start_date = datetime.combine(test.target_start, datetime.min.time())
@@ -284,7 +290,8 @@ def test_ics(request, tid):
     return response
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Test, 'staff', 'tid')
 def add_findings(request, tid):
     test = Test.objects.get(id=tid)
     form_error = False
@@ -598,7 +605,8 @@ def search(request, tid):
 
 
 # bulk update and delete are combined, so we can't have the nice user_must_be_authorized decorator (yet)
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Test, 'staff', 'tid')
 def re_import_scan_results(request, tid):
     additional_message = "When re-uploading a scan, any findings not found in original scan will be updated as " \
                          "mitigated.  The process attempts to identify the differences, however manual verification " \

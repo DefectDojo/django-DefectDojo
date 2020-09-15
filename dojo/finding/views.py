@@ -35,7 +35,7 @@ from dojo.forms import NoteForm, TypedNoteForm, CloseFindingForm, FindingForm, P
     DefectFindingForm, StubFindingForm, DeleteFindingForm, DeleteStubFindingForm, ApplyFindingTemplateForm, \
     FindingFormID, FindingBulkUpdateForm, MergeFindings
 from dojo.models import Finding, Notes, NoteHistory, Note_Type, \
-    BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, Risk_Acceptance, \
+    BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, Risk_Acceptance, Endpoint_Status, \
     FindingImageAccessToken, JIRA_Issue, JIRA_PKey, GITHUB_PKey, GITHUB_Issue, Dojo_User, Cred_Mapping, Test, Product, User, Engagement
 from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_notifications, \
     add_comment, jira_get_resolution_id, jira_change_resolution_id, get_jira_connection, \
@@ -417,7 +417,8 @@ def close_finding(request, fid):
     })
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Finding, 'staff', 'fid')
 def defect_finding_review(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     # in order to close a finding, we need to capture why it was closed
@@ -585,7 +586,6 @@ def delete_finding(request, fid):
 
 
 # @user_passes_test(lambda u: u.is_staff)
-# def edit_finding(request, finding):
 @user_must_be_authorized(Finding, 'change', 'fid')
 def edit_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
@@ -669,6 +669,12 @@ def edit_finding(request, fid):
             # always false now since this will be deprecated soon in favor of new Finding_Template model
             new_finding.is_template = False
             new_finding.endpoints.set(form.cleaned_data['endpoints'])
+            for endpoint in form.cleaned_data['endpoints']:
+                eps, created = Endpoint_Status.objects.get_or_create(
+                    finding=new_finding,
+                    endpoint=endpoint)
+                endpoint.endpoint_status.add(eps)
+                new_finding.endpoint_status.add(eps)
             new_finding.last_reviewed = timezone.now()
             new_finding.last_reviewed_by = request.user
             tags = request.POST.getlist('tags')
@@ -820,21 +826,24 @@ def touch_finding(request, fid):
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id, )))
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Finding, 'staff', 'fid')
 def simple_risk_accept(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     finding.simple_risk_accept()
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id, )))
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Finding, 'staff', 'fid')
 def simple_risk_unaccept(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     finding.simple_risk_unaccept()
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id, )))
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Finding, 'staff', 'fid')
 def request_finding_review(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     user = get_object_or_404(Dojo_User, id=request.user.id)
@@ -894,7 +903,8 @@ def request_finding_review(request, fid):
     })
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Finding, 'staff', 'fid')
 def clear_finding_review(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     user = get_object_or_404(Dojo_User, id=request.user.id)
@@ -1479,7 +1489,8 @@ def finding_from_template(request, tid):
     template = get_object_or_404(Finding_Template, id=tid)
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Finding, 'staff', 'fid')
 def manage_images(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     images_formset = FindingImageFormSet(queryset=finding.images.all())
@@ -1599,7 +1610,8 @@ def download_finding_pic(request, token):
     return response
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Product, 'staff', 'pid')
 def merge_finding_product(request, pid):
     product = get_object_or_404(Product, pk=pid)
     finding_to_update = request.GET.getlist('finding_to_update')
@@ -1750,6 +1762,8 @@ def merge_finding_product(request, pid):
 
 
 # bulk update and delete are combined, so we can't have the nice user_must_be_authorized decorator (yet)
+@user_passes_test(lambda u: u.is_staff)
+# @user_must_be_authorized(Product, 'staff', 'pid')
 def finding_bulk_update_all(request, pid=None):
     form = FindingBulkUpdateForm(request.POST)
     if request.method == "POST":
