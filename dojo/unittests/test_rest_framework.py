@@ -2,9 +2,8 @@ from dojo.models import Product, Engagement, Test, Finding, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     User, ScanSettings, Scan, Stub_Finding, Endpoint, JIRA_PKey, JIRA_Conf, \
     Finding_Template, Note_Type, App_Analysis, Endpoint_Status, \
-    Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, \
+    Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Notes, \
     BurpRawRequestResponse
-
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraConfigurationsViewSet, \
     JiraIssuesViewSet, JiraViewSet, ProductViewSet, ScanSettingsViewSet, \
@@ -12,7 +11,7 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
     UsersViewSet, ImportScanView, NoteTypeViewSet, AppAnalysisViewSet, \
     EndpointStatusViewSet, SonarqubeIssueViewSet, SonarqubeIssueTransitionViewSet, \
-    SonarqubeProductViewSet
+    SonarqubeProductViewSet, NotesViewSet
 from json import dumps
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
@@ -546,6 +545,23 @@ class NoteTypesTest(BaseClass.RESTEndpointTest):
             "is_mandatory": False
         }
         self.update_fields = {'description': 'changed description'}
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class NotesTest(BaseClass.RESTEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Notes
+        self.viewname = 'notes'
+        self.viewset = NotesViewSet
+        self.payload = {
+            "id": 1,
+            "entry": "updated_entry",
+            "author": '{"username": "admin"}',
+            "editor": '{"username": "user1"}'
+        }
+        self.update_fields = {'entry': 'changed entry'}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 

@@ -269,6 +269,48 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('id', 'username', 'first_name', 'last_name', 'email', 'last_login')
 
 
+class NoteHistorySerializer(serializers.ModelSerializer):
+    current_editor = UserSerializer(read_only=True)
+
+    class Meta:
+        model = NoteHistory
+        fields = '__all__'
+
+
+class NoteSerializer(serializers.ModelSerializer):
+    author = UserSerializer(
+        many=False, read_only=True)
+    editor = UserSerializer(
+        read_only=True, many=False, allow_null=True)
+
+    history = NoteHistorySerializer(read_only=True, many=True)
+
+    def update(self, instance, validated_data):
+        instance.entry = validated_data['entry']
+        instance.edited = True
+        instance.editor = self.context['request'].user
+        instance.edit_time = timezone.now()
+        history = NoteHistory(
+            data=instance.entry,
+            time=instance.edit_time,
+            current_editor=instance.editor
+        )
+        history.save()
+        instance.history.add(history)
+        instance.save()
+        return instance
+
+    class Meta:
+        model = Notes
+        fields = '__all__'
+
+
+class NoteTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Note_Type
+        fields = '__all__'
+
+
 class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
     findings_count = serializers.SerializerMethodField()
     findings_list = serializers.SerializerMethodField()
@@ -310,6 +352,16 @@ class EngagementSerializer(TaggitSerializer, serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     'Your target start date exceeds your target end date')
         return data
+
+    def build_relational_field(self, field_name, relation_info):
+        if field_name == 'notes':
+            return NoteSerializer, {'many': True, 'read_only': True}
+        return super().build_relational_field(field_name, relation_info)
+
+
+class EngagementToNotesSerializer(serializers.Serializer):
+    engagement_id = serializers.PrimaryKeyRelatedField(queryset=Engagement.objects.all(), many=False, allow_null=True)
+    notes = NoteSerializer(many=True)
 
 
 class AppAnalysisSerializer(serializers.ModelSerializer):
@@ -490,6 +542,11 @@ class TestSerializer(TaggitSerializer, serializers.ModelSerializer):
         model = Test
         fields = '__all__'
 
+    def build_relational_field(self, field_name, relation_info):
+        if field_name == 'notes':
+            return NoteSerializer, {'many': True, 'read_only': True}
+        return super().build_relational_field(field_name, relation_info)
+
 
 class TestCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
     engagement = serializers.PrimaryKeyRelatedField(
@@ -512,6 +569,11 @@ class TestTypeSerializer(TaggitSerializer, serializers.ModelSerializer):
     class Meta:
         model = Test_Type
         fields = '__all__'
+
+
+class TestToNotesSerializer(serializers.Serializer):
+    test_id = serializers.PrimaryKeyRelatedField(queryset=Test.objects.all(), many=False, allow_null=True)
+    notes = NoteSerializer(many=True)
 
 
 class RiskAcceptanceSerializer(serializers.ModelSerializer):
@@ -1140,33 +1202,6 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             raise serializers.ValidationError(
                 'The date cannot be in the future!')
         return value
-
-
-class NoteHistorySerializer(serializers.ModelSerializer):
-    current_editor = UserSerializer(read_only=True)
-
-    class Meta:
-        model = NoteHistory
-        fields = '__all__'
-
-
-class NoteSerializer(serializers.ModelSerializer):
-    author = UserSerializer(
-        many=False, read_only=False)
-    editor = UserSerializer(
-        read_only=False, many=False, allow_null=True, required=False)
-
-    history = NoteHistorySerializer(read_only=True, many=True)
-
-    class Meta:
-        model = Notes
-        fields = '__all__'
-
-
-class NoteTypeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Note_Type
-        fields = '__all__'
 
 
 class AddNewNoteOptionSerializer(serializers.ModelSerializer):
