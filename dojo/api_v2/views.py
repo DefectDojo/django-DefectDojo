@@ -555,7 +555,7 @@ class DojoMetaViewSet(mixins.ListModelMixin,
     serializer_class = serializers.MetaSerializer
     queryset = DojoMeta.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'product', 'endpoint', 'name')
+    filter_fields = ('id', 'product', 'endpoint', 'name', 'finding')
 
 
 class ProductViewSet(mixins.ListModelMixin,
