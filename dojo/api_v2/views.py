@@ -20,7 +20,7 @@ from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Find
 
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import report_url_resolver
-from dojo.filters import ReportFindingFilter, ReportAuthedFindingFilter, ApiFindingFilter
+from dojo.filters import ReportFindingFilter, ReportAuthedFindingFilter, ApiFindingFilter, ApiProductFilter
 from dojo.risk_acceptance import api as ra_api
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
@@ -571,7 +571,7 @@ class ProductViewSet(mixins.ListModelMixin,
     permission_classes = (permissions.UserHasProductPermission,
                           DjangoModelPermissions)
 
-    filter_fields = ('id', 'name', 'prod_type', 'created', 'authorized_users')
+    filterset_class = ApiProductFilter
 
     def get_queryset(self):
         if not self.request.user.is_staff:

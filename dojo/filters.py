@@ -13,7 +13,7 @@ from django_filters import FilterSet, CharFilter, OrderingFilter, \
 from django_filters import rest_framework as filters
 from django_filters.filters import ChoiceFilter, _truncate, DateTimeFilter
 from pytz import timezone
-
+from django.db.models import Q
 from dojo.models import Dojo_User, Product_Type, Finding, Product, Test_Type, \
     Endpoint, Development_Environment, Finding_Template, Report, Note_Type, \
     Engagement_Survey, Question, TextQuestion, ChoiceQuestion
@@ -350,6 +350,80 @@ class ProductFilter(DojoFilter):
         fields = ['name', 'prod_type', 'business_criticality', 'platform', 'lifecycle', 'origin', 'external_audience',
                   'internet_accessible', ]
         exclude = ['tags']
+
+
+class ApiProductFilter(DojoFilter):
+    # BooleanFilter
+    duplicate = BooleanFilter(field_name='duplicate')
+    external_audience = BooleanFilter(field_name='external_audience')
+    internet_accessible = BooleanFilter(field_name='internet_accessible')
+    # CharFilter
+    name = CharFilter(lookup_expr='icontains')
+    description = CharFilter(lookup_expr='icontains')
+    business_criticality = CharFilter(method=custom_filter, field_name='business_criticality')
+    platform = CharFilter(method=custom_filter, field_name='platform')
+    lifecycle = CharFilter(method=custom_filter, field_name='lifecycle')
+    origin = CharFilter(method=custom_filter, field_name='origin')
+    # NumberInFilter
+    id = NumberInFilter(field_name='id', lookup_expr='in')
+    product_manager = NumberInFilter(field_name='product_manager', lookup_expr='in')
+    technical_contact = NumberInFilter(field_name='technical_contact', lookup_expr='in')
+    team_manager = NumberInFilter(field_name='team_manager', lookup_expr='in')
+    prod_type = NumberInFilter(field_name='prod_type', lookup_expr='in')
+    tid = NumberInFilter(field_name='tid', lookup_expr='in')
+    authorized_users = NumberInFilter(field_name='authorized_users', lookup_expr='in')
+    prod_numeric_grade = NumberInFilter(field_name='prod_numeric_grade', lookup_expr='in')
+    user_records = NumberInFilter(field_name='user_records', lookup_expr='in')
+    regulations = NumberInFilter(field_name='regulations', lookup_expr='in')
+    active_finding_count = NumberInFilter(field_name='active_finding_count', lookup_expr='in')
+    # DateRangeFilter
+    created = DateRangeFilter()
+    updated = DateRangeFilter()
+    # NumberFilter
+    revenue = NumberFilter()
+
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ('id', 'id'),
+            ('tid', 'tid'),
+            ('name', 'name'),
+            ('created', 'created'),
+            ('prod_numeric_grade', 'prod_numeric_grade'),
+            ('business_criticality', 'business_criticality'),
+            ('platform', 'platform'),
+            ('lifecycle', 'lifecycle'),
+            ('origin', 'origin'),
+            ('revenue', 'revenue'),
+            ('external_audience', 'external_audience'),
+            ('internet_accessible', 'internet_accessible'),
+            ('product_manager', 'product_manager'),
+            ('product_manager__first_name', 'product_manager__first_name'),
+            ('product_manager__last_name', 'product_manager__last_name'),
+            ('technical_contact', 'technical_contact'),
+            ('technical_contact__first_name', 'technical_contact__first_name'),
+            ('technical_contact__last_name', 'technical_contact__last_name'),
+            ('team_manager', 'team_manager'),
+            ('team_manager__first_name', 'team_manager__first_name'),
+            ('team_manager__last_name', 'team_manager__last_name'),
+            ('prod_type', 'prod_type'),
+            ('prod_type__name', 'prod_type__name'),
+            ('updated', 'updated'),
+            ('user_records', 'user_records')
+        )
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.user = None
+        if 'user' in kwargs:
+            self.user = kwargs.pop('user')
+
+        super(ApiProductFilter, self).__init__(*args, **kwargs)
+
+        if self.user is not None and not self.user.is_staff:
+            self.form.fields[
+                'prod_type'].queryset = Product_Type.objects.filter(
+                prod_type__authorized_users__in=[self.user])
 
 
 class ApiFindingFilter(DojoFilter):
