@@ -125,6 +125,9 @@ env = environ.Env(
     # Set to True if you want to allow authorized users to make changes to findings or delete them
     DD_AUTHORIZED_USERS_ALLOW_CHANGE=(bool, False),
     DD_AUTHORIZED_USERS_ALLOW_DELETE=(bool, False),
+    # Set to True if you want to allow authorized users staff access only on specific products
+    # This will only apply to users with 'active' status
+    DD_AUTHORIZED_USERS_ALLOW_STAFF=(bool, False),
     DD_SLA_NOTIFY_ACTIVE=(bool, False),
     DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY=(bool, True),
     DD_SLA_NOTIFY_WITH_JIRA_ONLY=(bool, False),
@@ -386,6 +389,7 @@ else:
 
 AUTHORIZED_USERS_ALLOW_CHANGE = env('DD_AUTHORIZED_USERS_ALLOW_CHANGE')
 AUTHORIZED_USERS_ALLOW_DELETE = env('DD_AUTHORIZED_USERS_ALLOW_DELETE')
+AUTHORIZED_USERS_ALLOW_STAFF = env('DD_AUTHORIZED_USERS_ALLOW_STAFF')
 
 # Setting SLA_NOTIFY_ACTIVE and SLA_NOTIFY_ACTIVE_VERIFIED to False will disable the feature
 # If you import thousands of Active findings through your pipeline everyday,

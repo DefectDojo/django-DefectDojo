@@ -48,19 +48,19 @@
                         </button>
                         <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                             {% if user|is_authorized_for_change:finding %}
-                            <li role="presentation">
-                                <a href="{% url 'edit_finding' finding.id %}">
-                                    <i class="fa fa-pencil-square-o"></i> Edit Finding
-                                </a>
-                            </li>
+                                <li role="presentation">
+                                    <a href="{% url 'edit_finding' finding.id %}">
+                                        <i class="fa fa-pencil-square-o"></i> Edit Finding
+                                    </a>
+                                </li>
                             {% endif %}
-                            {% if user.is_staff %}
-                            <li role="presentation">
-                                <a href="{% url 'manage_images' finding.id %}">
-                                    <i class="fa fa-file-image-o"></i> Manage Images
-                                </a>
-                            </li>
-                            <li role="separator" class="divider"></li>
+                            {% if user|is_authorized_for_staff:finding %}
+                                <li role="presentation">
+                                    <a href="{% url 'manage_images' finding.id %}">
+                                        <i class="fa fa-file-image-o"></i> Manage Images
+                                    </a>
+                                </li>
+                                <li role="separator" class="divider"></li>
                                 {% if finding.under_review and dojo_user in finding.reviewers.all or dojo_user == finding.review_requested_by and finding.under_review %}
                                     <li role="presentation">
                                         <a href="{% url 'clear_finding_review' finding.id %}">
@@ -76,43 +76,42 @@
                                 {% endif %}
                             {% endif %}
                             {% if user|is_authorized_for_change:finding %}
-                            <li role="presentation">
-                                <a href="{% url 'touch_finding' finding.id %}">
-                                    <i class="fa fa-clock-o"></i> Touch Finding
-                                </a>
-                            </li>
+                                <li role="presentation">
+                                    <a href="{% url 'touch_finding' finding.id %}">
+                                        <i class="fa fa-clock-o"></i> Touch Finding
+                                    </a>
+                                </li>
                             {% endif %}                                                        
                             <li role="separator" class="divider"></li>
-                            {% if user.is_staff %}
-                            <li role="presentation">
-                                <a href="{% url 'mktemplate' finding.id %}">
-                                    <i class="fa fa-copy"></i> Make Finding a Template
-                                </a>
-                            </li>
-                              {% if cwe_template.cwe %}
-                              <li role="presentation">
-                                <a class="apply-cwe-finding" href="#">
-                                    <i class="fa fa-copy"></i> Apply CWE Template Remediation to Finding
-                                </a>
-                              </li>
-                            <form id="apply-cwe-finding-form" method="post" action="{% url 'apply_template_cwe' finding.id %}">
-                                {% csrf_token %}
-                                <input type="hidden" name="id" value="{{ finding.id }}"/>
-                            </form>
-                            {% else %}
-                            <li role="presentation">
-                              <a href="{% url 'add_template' %}">
-                              <i class="fa fa-copy"></i> Create a CWE Remediation Template
-                            </a>
-                            </li>
-                            {% endif %}
-                            <li role="presentation">
-                                <a href="{% url 'find_template_to_apply' finding.id %}">
-                                    <i class="fa fa-copy"></i> Apply Template to Finding
-                                </a>
-                            </li>
-                            <li role="separator" class="divider"></li>
-                            
+                            {% if user.is_staff%}
+                                <li role="presentation">
+                                    <a href="{% url 'mktemplate' finding.id %}">
+                                        <i class="fa fa-copy"></i> Make Finding a Template
+                                    </a>
+                                </li>
+                                {% if cwe_template.cwe %}
+                                    <li role="presentation">
+                                        <a class="apply-cwe-finding" href="#">
+                                            <i class="fa fa-copy"></i> Apply CWE Template Remediation to Finding
+                                        </a>
+                                    </li>
+                                    <form id="apply-cwe-finding-form" method="post" action="{% url 'apply_template_cwe' finding.id %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" label="apply_template" aria-label="apply_template" name="id" value="{{ finding.id }}"/>
+                                    </form>
+                                {% else %}
+                                    <li role="presentation">
+                                        <a href="{% url 'add_template' %}">
+                                            <i class="fa fa-copy"></i> Create a CWE Remediation Template
+                                        </a>
+                                    </li>
+                                {% endif %}
+                                <li role="presentation">
+                                    <a href="{% url 'find_template_to_apply' finding.id %}">
+                                        <i class="fa fa-copy"></i> Apply Template to Finding
+                                    </a>
+                                </li>
+                                <li role="separator" class="divider"></li>
                             {% endif %}
                             {% if user|is_authorized_for_change:finding %}
                                 {% if finding.mitigated %}
@@ -129,25 +128,25 @@
                                 </li>
                                 {% endif %}
                             {% endif %}                                  
-                            {% if user.is_staff %}
-                            {% if finding.risk_acceptance_set.exists %}
-                                <li role="presentation">
-                                <a href="{% url 'simple_risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
-                                    <i class="fa fa-exclamation-circle"></i> Unaccept Risk
-                                </a>
-                                </li>
-                            {% else %}
-                                <li role="presentation">
-                                    <a href="{% url 'simple_risk_accept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
-                                        <i class="fa fa-exclamation-circle"></i> Accept Risk (simple), or
+                            {% if user|is_authorized_for_change:finding %}
+                                {% if finding.risk_acceptance_set.exists %}
+                                    <li role="presentation">
+                                    <a href="{% url 'simple_risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
+                                        <i class="fa fa-exclamation-circle"></i> Unaccept Risk
                                     </a>
-                                </li>
-                                <li role="presentation">
-                                    <a href ="{% url 'upload_risk_acceptance$' finding.test.engagement.id%}">
-                                        <i class="fa fa-exclamation-circle"></i> Add Full Risk Acceptance...
-                                    </a>
-                                </li>
-                            {% endif %}
+                                    </li>
+                                {% else %}
+                                    <li role="presentation">
+                                        <a href="{% url 'simple_risk_accept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
+                                            <i class="fa fa-exclamation-circle"></i> Accept Risk (simple), or
+                                        </a>
+                                    </li>
+                                    <li role="presentation">
+                                        <a href ="{% url 'upload_risk_acceptance$' finding.test.engagement.id%}">
+                                            <i class="fa fa-exclamation-circle"></i> Add Full Risk Acceptance...
+                                        </a>
+                                    </li>
+                                {% endif %}
                             {% endif %}
                             <li role="presentation">
                                 <a href="{% url 'action_history' finding|content_type finding.id %}">
@@ -155,17 +154,17 @@
                                 </a>
                             </li>
                             {% if user|is_authorized_for_delete:finding %}
-                            <li role="separator" class="divider"></li>
-                            <li role="presentation">
-                                <a class="text-danger delete-finding" href="#">
-                                    <i class="fa fa-trash"></i> Delete Finding
-                                </a>
-                            </li>
-                            <form id="delete-finding-form" method="post" action="{% url 'delete_finding' finding.id %}">
-                                {% csrf_token %}
-                                <input type="hidden" name="id" value="{{ finding.id }}"/>
-                            </form>
-                            </li>
+                                <li role="separator" class="divider"></li>
+                                <li role="presentation">
+                                    <a class="text-danger delete-finding" href="#">
+                                        <i class="fa fa-trash"></i> Delete Finding
+                                    </a>
+                                </li>
+                                <form id="delete-finding-form" method="post" action="{% url 'delete_finding' finding.id %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" label="delete_finding" aria-label="delete_finding" name="id" value="{{ finding.id }}"/>
+                                </form>
+                                </li>
                             {% endif %}
                         </ul>
                     </div>
@@ -576,7 +575,7 @@
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" id="bulk_edit">
                     <li style="padding-left: 8px;">
-                        <form action="{% url 'endpoints_status_bulk' %}" method="post" id="bulk_change_form">
+                        <form action="{% url 'endpoints_status_bulk' finding.id %}" method="post" id="bulk_change_form">
                             {% csrf_token %}
                             <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />                                            
                             <label style="font-size: 80%; font-weight: normal; display: block">
@@ -600,7 +599,6 @@
                                 <span>Risk Accepted</span>
                             </label>
                             <br/>    
-                            <input type="hidden" value="{{ finding.id }}" label="finding_id" name="finding_id">                
                             <input type="submit" class="btn btn-sm btn-primary" label="Submit" name="Submit" value="Submit"/>
                         </form>
                     </li>

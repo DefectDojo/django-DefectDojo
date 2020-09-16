@@ -24,7 +24,7 @@ from tagging.models import Tag
 
 from dojo.filters import TemplateFindingFilter, OpenFindingFilter
 from dojo.forms import NoteForm, TestForm, FindingForm, \
-    DeleteTestForm, AddFindingForm, \
+    DeleteTestForm, AddFindingForm, TypedNoteForm, \
     ImportScanForm, ReImportScanForm, JIRAFindingForm, JIRAImportScanForm
 from dojo.models import Finding, Test, Notes, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, \
     Finding_Template, JIRA_PKey, Cred_Mapping, Dojo_User, System_Settings, Endpoint_Status
@@ -33,8 +33,11 @@ from dojo.utils import get_page_items, get_page_items_and_count, add_breadcrumb,
     Product_Tab, max_safe, is_scan_file_too_large, add_jira_issue
 from dojo.notifications.helper import create_notification
 from dojo.tasks import add_jira_issue_task
+from dojo.finding.views import find_available_notetypes
 from functools import reduce
 from dojo.finding.views import finding_link_jira, finding_unlink_jira
+from dojo.user.helper import user_must_be_authorized
+
 
 logger = logging.getLogger(__name__)
 parse_logger = logging.getLogger('dojo')
@@ -49,6 +52,9 @@ def view_test(request, tid):
         # will render 403
         raise PermissionDenied
     notes = test.notes.all()
+    note_type_activation = Note_Type.objects.filter(is_active=True).count()
+    if note_type_activation:
+        available_note_types = find_available_notetypes(notes)
     person = request.user.username
     findings = Finding.objects.filter(test=test).order_by('numerical_severity')
     findings = OpenFindingFilter(request.GET, queryset=findings)
@@ -57,14 +63,20 @@ def view_test(request, tid):
     creds = Cred_Mapping.objects.filter(engagement=test.engagement).select_related('cred_id').order_by('cred_id')
     system_settings = get_object_or_404(System_Settings, id=1)
     if request.method == 'POST' and request.user.is_staff:
-        form = NoteForm(request.POST)
+        if note_type_activation:
+            form = TypedNoteForm(request.POST, available_note_types=available_note_types)
+        else:
+            form = NoteForm(request.POST)
         if form.is_valid():
             new_note = form.save(commit=False)
             new_note.author = request.user
             new_note.date = timezone.now()
             new_note.save()
             test.notes.add(new_note)
-            form = NoteForm()
+            if note_type_activation:
+                form = TypedNoteForm(available_note_types=available_note_types)
+            else:
+                form = NoteForm()
             url = request.build_absolute_uri(reverse("view_test", args=(test.id,)))
             title = "Test: %s on %s" % (test.test_type.name, test.engagement.product.name)
             process_notifications(request, new_note, url, title)
@@ -73,7 +85,10 @@ def view_test(request, tid):
                                  'Note added successfully.',
                                  extra_tags='alert-success')
     else:
-        form = NoteForm()
+        if note_type_activation:
+            form = TypedNoteForm(available_note_types=available_note_types)
+        else:
+            form = NoteForm()
 
     paged_findings, total_findings_count = get_page_items_and_count(request, prefetch_for_findings(findings.qs), 25)
     paged_stub_findings = get_page_items(request, stub_findings, 25)
@@ -161,6 +176,8 @@ def prefetch_for_findings(findings):
     return prefetched_findings
 
 
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Test, 'change', 'tid')
 def edit_test(request, tid):
     test = get_object_or_404(Test, pk=tid)
     form = TestForm(instance=test)
@@ -191,7 +208,8 @@ def edit_test(request, tid):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Test, 'delete', 'tid')
 def delete_test(request, tid):
     test = get_object_or_404(Test, pk=tid)
     eng = test.engagement
@@ -251,7 +269,8 @@ def test_calendar(request):
         'users': Dojo_User.objects.all()})
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Test, 'staff', 'tid')
 def test_ics(request, tid):
     test = get_object_or_404(Test, id=tid)
     start_date = datetime.combine(test.target_start, datetime.min.time())
@@ -271,7 +290,8 @@ def test_ics(request, tid):
     return response
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Test, 'staff', 'tid')
 def add_findings(request, tid):
     test = Test.objects.get(id=tid)
     form_error = False
@@ -585,7 +605,8 @@ def search(request, tid):
 
 
 # bulk update and delete are combined, so we can't have the nice user_must_be_authorized decorator (yet)
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Test, 'staff', 'tid')
 def re_import_scan_results(request, tid):
     additional_message = "When re-uploading a scan, any findings not found in original scan will be updated as " \
                          "mitigated.  The process attempts to identify the differences, however manual verification " \
@@ -666,6 +687,10 @@ def re_import_scan_results(request, tid):
                         sev = 'Info'
                         item.severity = sev
 
+                    # existing findings may be from before we had component_name/version fields
+                    component_name = item.component_name if hasattr(item, 'component_name') else None
+                    component_version = item.component_version if hasattr(item, 'component_version') else None
+
                     # If it doesn't clear minimum severity, move on
                     if Finding.SEVERITIES[sev] > Finding.SEVERITIES[min_sev]:
                         continue
@@ -697,6 +722,11 @@ def re_import_scan_results(request, tid):
                             finding.mitigated_by = None
                             finding.active = True
                             finding.verified = verified
+
+                            # existing findings may be from before we had component_name/version fields
+                            finding.component_name = finding.component_name if finding.component_name else component_name
+                            finding.component_version = finding.component_version if finding.component_version else component_version
+
                             finding.save()
                             note = Notes(
                                 entry="Re-activated by %s re-upload." % scan_type,
@@ -713,6 +743,13 @@ def re_import_scan_results(request, tid):
                                 status.save()
 
                             reactivated_count += 1
+                        else:
+                            # existing findings may be from before we had component_name/version fields
+                            if not finding.component_name or not finding.component_version:
+                                finding.component_name = finding.component_name if finding.component_name else component_name
+                                finding.component_version = finding.component_version if finding.component_version else component_version
+                                finding.save(dedupe_option=False, push_to_jira=False)
+
                         new_items.append(finding.id)
                     else:
                         item.test = test
@@ -723,6 +760,7 @@ def re_import_scan_results(request, tid):
                         item.last_reviewed_by = request.user
                         item.verified = verified
                         item.active = active
+
                         # Save it
                         item.save(dedupe_option=False)
                         finding_added_count += 1
