@@ -528,15 +528,30 @@ class DojoMeta(models.Model):
                                  null=True,
                                  editable=False,
                                  related_name='endpoint_meta')
+    finding = models.ForeignKey('Finding',
+                                 on_delete=models.CASCADE,
+                                 null=True,
+                                 editable=False,
+                                 related_name='finding_meta')
 
     """
     Verify that this metadata entry belongs only to one object.
     """
     def clean(self):
-        if self.product_id is None and self.endpoint_id is None:
-            raise ValidationError('Metadata entries need either a product or an endpoint')
-        if self.product_id is not None and self.endpoint_id is not None:
-            raise ValidationError('Metadata entries may not have both a product and an endpoint')
+
+        ids = [self.product_id,
+               self.endpoint_id,
+               self.finding_id]
+        ids_count = 0
+
+        for id in ids:
+            if id is not None:
+                ids_count += 1
+
+        if ids_count == 0:
+            raise ValidationError('Metadata entries need either a product, an endpoint or a finding')
+        if ids_count > 1:
+            raise ValidationError('Metadata entries may not have more than one relation, either a product, an endpoint either or a finding')
 
     def __unicode__(self):
         return "%s: %s" % (self.name, self.value)
@@ -546,7 +561,8 @@ class DojoMeta(models.Model):
 
     class Meta:
         unique_together = (('product', 'name'),
-                           ('endpoint', 'name'))
+                           ('endpoint', 'name'),
+                           ('finding', 'name'))
 
 
 class Product(models.Model):
