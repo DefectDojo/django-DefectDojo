@@ -51,7 +51,7 @@ spec:
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         volumeMounts:
         - name: run
-          mountPath: /run
+          mountPath: /run/defectdojo
         envFrom:
         - configMapRef:
             name: {{ $fullName }}
@@ -95,7 +95,7 @@ spec:
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         volumeMounts:
         - name: run
-          mountPath: /run
+          mountPath: /run/defectdojo
         ports:
         - name: http
           protocol: TCP
