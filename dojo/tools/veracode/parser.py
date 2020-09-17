@@ -4,6 +4,7 @@ from datetime import datetime
 from dojo.models import Finding
 from hashlib import sha256
 
+
 class VeracodeXMLParser(object):
     ns = {'x': 'https://www.veracode.com/schema/reports/export/1.0'}
     vc_severity_mapping = {
