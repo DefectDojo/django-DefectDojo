@@ -29,13 +29,13 @@ from dojo.user.helper import user_must_be_authorized
 
 from dojo.filters import OpenFindingFilter, \
     OpenFindingSuperFilter, AcceptedFindingSuperFilter, \
-    ClosedFindingSuperFilter, TemplateFindingFilter
-from dojo.forms import NoteForm, FindingNoteForm, CloseFindingForm, FindingForm, PromoteFindingForm, FindingTemplateForm, \
+    ClosedFindingSuperFilter, TemplateFindingFilter, SimilarFindingFilter
+from dojo.forms import NoteForm, TypedNoteForm, CloseFindingForm, FindingForm, PromoteFindingForm, FindingTemplateForm, \
     DeleteFindingTemplateForm, FindingImageFormSet, JIRAFindingForm, GITHUBFindingForm, ReviewFindingForm, ClearFindingReviewForm, \
     DefectFindingForm, StubFindingForm, DeleteFindingForm, DeleteStubFindingForm, ApplyFindingTemplateForm, \
     FindingFormID, FindingBulkUpdateForm, MergeFindings
 from dojo.models import Finding, Notes, NoteHistory, Note_Type, \
-    BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, Risk_Acceptance, \
+    BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, Risk_Acceptance, Endpoint_Status, \
     FindingImageAccessToken, JIRA_Issue, JIRA_PKey, GITHUB_PKey, GITHUB_Issue, Dojo_User, Cred_Mapping, Test, Product, User, Engagement
 from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_notifications, \
     add_comment, jira_get_resolution_id, jira_change_resolution_id, get_jira_connection, \
@@ -249,7 +249,7 @@ def view_finding(request, fid):
         available_note_types = find_available_notetypes(notes)
     if request.method == 'POST':
         if note_type_activation:
-            form = FindingNoteForm(request.POST, available_note_types=available_note_types)
+            form = TypedNoteForm(request.POST, available_note_types=available_note_types)
         else:
             form = NoteForm(request.POST)
         if form.is_valid():
@@ -269,7 +269,7 @@ def view_finding(request, fid):
             if finding.has_jira_issue():
                 add_comment_task(finding, new_note)
             if note_type_activation:
-                form = FindingNoteForm(available_note_types=available_note_types)
+                form = TypedNoteForm(available_note_types=available_note_types)
             else:
                 form = NoteForm()
             url = request.build_absolute_uri(
@@ -285,7 +285,7 @@ def view_finding(request, fid):
                 reverse('view_finding', args=(finding.id, )))
     else:
         if note_type_activation:
-            form = FindingNoteForm(available_note_types=available_note_types)
+            form = TypedNoteForm(available_note_types=available_note_types)
         else:
             form = NoteForm()
 
@@ -297,6 +297,19 @@ def view_finding(request, fid):
         reqres = None
         burp_request = None
         burp_response = None
+
+    # add related actions for non-similar and non-duplicate cluster members
+    finding.related_actions = calculate_possible_related_actions_for_similar_finding(request, finding, finding)
+    if finding.duplicate_finding:
+        finding.duplicate_finding.related_actions = calculate_possible_related_actions_for_similar_finding(request, finding, finding.duplicate_finding)
+
+    # similar_findings = get_similar_findings(request, finding)
+    similar_findings_filter = SimilarFindingFilter(request.GET, queryset=Finding.objects.all(), user=request.user, finding=finding)
+    logger.debug('similar query: %s', similar_findings_filter.qs.query)
+    similar_findings = prefetch_for_findings(similar_findings_filter.qs[:10])
+    for similar_finding in similar_findings:
+        similar_finding.related_actions = calculate_possible_related_actions_for_similar_finding(request, finding, similar_finding)
+        # logger.debug('jira_conf_new: %s', similar_finding.jira_conf_new())
 
     product_tab = Product_Tab(finding.test.engagement.product.id, title="View Finding", tab="findings")
     lastPos = (len(findings)) - 1
@@ -318,7 +331,10 @@ def view_finding(request, fid):
             'findings_list': findings,
             'findings_list_lastElement': findings[lastPos],
             'prev_finding': prev_finding,
-            'next_finding': next_finding
+            'next_finding': next_finding,
+            'duplicate_cluster': duplicate_cluster(request, finding),
+            'similar_findings': similar_findings,
+            'similar_findings_filter': similar_findings_filter
         })
 
 
@@ -401,7 +417,8 @@ def close_finding(request, fid):
     })
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Finding, 'staff', 'fid')
 def defect_finding_review(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     # in order to close a finding, we need to capture why it was closed
@@ -569,12 +586,19 @@ def delete_finding(request, fid):
 
 
 # @user_passes_test(lambda u: u.is_staff)
-# def edit_finding(request, finding):
 @user_must_be_authorized(Finding, 'change', 'fid')
 def edit_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     old_status = finding.status()
-    form = FindingForm(instance=finding, template=False)
+    burp_rr = BurpRawRequestResponse.objects.get(finding=finding)
+    if burp_rr:
+        req_resp = (
+            burp_rr.get_request(),
+            burp_rr.get_response()
+        )
+    else:
+        req_resp = None
+    form = FindingForm(instance=finding, template=False, req_resp=req_resp)
     form.initial['tags'] = [tag.name for tag in finding.tags]
     form_error = False
     jform = None
@@ -590,7 +614,7 @@ def edit_finding(request, fid):
     github_enabled = finding.has_github_issue()
 
     if request.method == 'POST':
-        form = FindingForm(request.POST, instance=finding, template=False)
+        form = FindingForm(request.POST, instance=finding, template=False, req_resp=None)
 
         if finding.active:
             if (form['active'].value() is False or form['false_p'].value()) and form['duplicate'].value() is False:
@@ -631,20 +655,9 @@ def edit_finding(request, fid):
                 new_finding.false_p = False
                 new_finding.mitigated = None
                 new_finding.mitigated_by = None
-            if new_finding.duplicate:
-                new_finding.duplicate = True
-                new_finding.active = False
-                new_finding.verified = False
-                parent_find_string = request.POST.get('duplicate_choice', '')
-                if parent_find_string:
-                    parent_find = Finding.objects.get(id=int(parent_find_string.split(':')[0]))
-                    new_finding.duplicate_finding = parent_find
-                    parent_find.found_by.add(new_finding.test.test_type)
-            if not new_finding.duplicate and new_finding.duplicate_finding:
-                parent_find = new_finding.duplicate_finding
-                if parent_find.found_by is not new_finding.found_by:
-                    parent_find.original_finding.remove(new_finding)
-                parent_find.found_by.remove(new_finding.test.test_type)
+            if not new_finding.duplicate:
+                logger.debug('resetting duplicate status for %i', new_finding.id)
+                new_finding.duplicate = False
                 new_finding.duplicate_finding = None
 
             if form['simple_risk_accept'].value():
@@ -656,11 +669,24 @@ def edit_finding(request, fid):
             # always false now since this will be deprecated soon in favor of new Finding_Template model
             new_finding.is_template = False
             new_finding.endpoints.set(form.cleaned_data['endpoints'])
+            for endpoint in form.cleaned_data['endpoints']:
+                eps, created = Endpoint_Status.objects.get_or_create(
+                    finding=new_finding,
+                    endpoint=endpoint)
+                endpoint.endpoint_status.add(eps)
+                new_finding.endpoint_status.add(eps)
             new_finding.last_reviewed = timezone.now()
             new_finding.last_reviewed_by = request.user
             tags = request.POST.getlist('tags')
             t = ", ".join('"{0}"'.format(w) for w in tags)
             new_finding.tags = t
+
+            if 'request' in form.cleaned_data or 'response' in form.cleaned_data:
+                burp_rr = BurpRawRequestResponse.objects.get(finding=finding)
+                burp_rr.burpRequestBase64 = base64.b64encode(form.cleaned_data['request'].encode())
+                burp_rr.burpResponseBase64 = base64.b64encode(form.cleaned_data['response'].encode())
+                burp_rr.clean()
+                burp_rr.save()
 
             push_to_jira = False
             jira_message = None
@@ -775,15 +801,6 @@ def edit_finding(request, fid):
         form.fields['endpoints'].queryset = finding.endpoints.all()
     form.initial['tags'] = [tag.name for tag in finding.tags]
 
-    if finding.test.engagement.deduplication_on_engagement:
-        finding_dupes = Finding.objects.all().filter(
-            test__engagement=finding.test.engagement).filter(
-            title=finding.title).exclude(
-            id=finding.id)
-    else:
-        finding_dupes = Finding.objects.all().filter(
-            title=finding.title).exclude(
-            id=finding.id)
     product_tab = Product_Tab(finding.test.engagement.product.id, title="Edit Finding", tab="findings")
 
     return render(request, 'dojo/edit_finding.html', {
@@ -792,7 +809,6 @@ def edit_finding(request, fid):
         'finding': finding,
         'jform': jform,
         'gform': gform,
-        'dupes': finding_dupes,
         'return_url': get_return_url(request)
     })
 
@@ -810,21 +826,24 @@ def touch_finding(request, fid):
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id, )))
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Finding, 'staff', 'fid')
 def simple_risk_accept(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     finding.simple_risk_accept()
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id, )))
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Finding, 'staff', 'fid')
 def simple_risk_unaccept(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     finding.simple_risk_unaccept()
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id, )))
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Finding, 'staff', 'fid')
 def request_finding_review(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     user = get_object_or_404(Dojo_User, id=request.user.id)
@@ -884,7 +903,8 @@ def request_finding_review(request, fid):
     })
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Finding, 'staff', 'fid')
 def clear_finding_review(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     user = get_object_or_404(Dojo_User, id=request.user.id)
@@ -954,6 +974,7 @@ def mktemplate(request, fid):
             title=finding.title,
             cwe=finding.cwe,
             cve=finding.cve,
+            cvssv3=finding.cvssv3,
             severity=finding.severity,
             description=finding.description,
             mitigation=finding.mitigation,
@@ -1468,7 +1489,8 @@ def finding_from_template(request, tid):
     template = get_object_or_404(Finding_Template, id=tid)
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Finding, 'staff', 'fid')
 def manage_images(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     images_formset = FindingImageFormSet(queryset=finding.images.all())
@@ -1588,7 +1610,8 @@ def download_finding_pic(request, token):
     return response
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Product, 'staff', 'pid')
 def merge_finding_product(request, pid):
     product = get_object_or_404(Product, pk=pid)
     finding_to_update = request.GET.getlist('finding_to_update')
@@ -1739,6 +1762,8 @@ def merge_finding_product(request, pid):
 
 
 # bulk update and delete are combined, so we can't have the nice user_must_be_authorized decorator (yet)
+@user_passes_test(lambda u: u.is_staff)
+# @user_must_be_authorized(Product, 'staff', 'pid')
 def finding_bulk_update_all(request, pid=None):
     form = FindingBulkUpdateForm(request.POST)
     if request.method == "POST":
@@ -1900,7 +1925,7 @@ def get_missing_mandatory_notetypes(finding):
     return queryset
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Finding, 'change', 'original_id')
 @require_POST
 def mark_finding_duplicate(request, original_id, duplicate_id):
     original = get_object_or_404(Finding, id=original_id)
@@ -1913,43 +1938,106 @@ def mark_finding_duplicate(request, original_id, duplicate_id):
                 messages.ERROR,
                 'Marking finding as duplicate/original failed as they are not in the same engagement and deduplication_on_engagement is enabled for at least one of them',
                 extra_tags='alert-danger')
-            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+            return redirect_to_return_url_or_else(request, reverse('view_finding', args=(duplicate.id,)))
 
     duplicate.duplicate = True
     duplicate.active = False
     duplicate.verified = False
-    duplicate.duplicate_finding = original
+    # make sure we don't create circular or transitive duplicates
+    if original.duplicate:
+        duplicate.duplicate_finding = original.duplicate_finding
+    else:
+        duplicate.duplicate_finding = original
+
+    logger.debug('marking finding %i as duplicate of %i', duplicate.id, duplicate.duplicate_finding.id)
+
     duplicate.last_reviewed = timezone.now()
     duplicate.last_reviewed_by = request.user
-    duplicate.save()
+    duplicate.save(dedupe_option=False)
     original.found_by.add(duplicate.test.test_type)
-    original.save()
+    original.save(dedupe_option=False)
 
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(duplicate.id,)))
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Finding, 'change', 'duplicate_id')
 @require_POST
 def reset_finding_duplicate_status(request, duplicate_id):
     duplicate = get_object_or_404(Finding, id=duplicate_id)
+
+    if not duplicate.duplicate:
+        messages.add_message(
+            request,
+            messages.ERROR,
+            "Can't reset duplicate status of a finding that is not a duplicate",
+            extra_tags='alert-danger')
+        return redirect_to_return_url_or_else(request, reverse('view_finding', args=(duplicate_id,)))
+
+    logger.debug('resetting duplicate status of %i', duplicate.id)
     duplicate.duplicate = False
     duplicate.active = True
     if duplicate.duplicate_finding:
-        duplicate.duplicate_finding.original_finding.remove(duplicate)
+        # duplicate.duplicate_finding.original_finding.remove(duplicate)  # shouldn't be needed
         duplicate.duplicate_finding = None
     duplicate.last_reviewed = timezone.now()
     duplicate.last_reviewed_by = request.user
-    duplicate.save()
+    duplicate.save(dedupe_option=False)
 
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(duplicate.id,)))
 
 
-# @user_must_be_authorized(Finding, 'change', 'fid')
-# @require_POST
-# def push_to_jira(request, fid):
-#     finding = get_object_or_404(Finding, id=fid)
-#     count = Alerts.objects.filter(user_id=request.user).count()
-#     return JsonResponse({'count': count})
+@user_must_be_authorized(Finding, 'change', 'finding_id')
+@require_POST
+def set_finding_as_original(request, finding_id, new_original_id):
+    finding = get_object_or_404(Finding, id=finding_id)
+    new_original = get_object_or_404(Finding, id=new_original_id)
+
+    if new_original.test.engagement != new_original.test.engagement:
+        if new_original.test.engagement.deduplication_on_engagement or new_original.test.engagement.deduplication_on_engagement:
+            messages.add_message(
+                request,
+                messages.ERROR,
+                'Marking finding as duplicate/original failed as they are not in the same engagement and deduplication_on_engagement is enabled for at least one of them',
+                extra_tags='alert-danger')
+            return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding_id,)))
+
+    if finding.duplicate or finding.original_finding.all():
+        # existing cluster, so update all cluster members
+
+        if finding.duplicate and finding.duplicate_finding:
+            logger.debug('setting old original %i as duplicate of %i', finding.duplicate_finding.id, new_original.id)
+            finding.duplicate_finding.duplicate_finding = new_original
+            finding.duplicate_finding.duplicate = True
+            finding.duplicate_finding.save(dedupe_option=False)
+
+        for cluster_member in finding.duplicate_finding_set():
+            if cluster_member != new_original:
+                logger.debug('setting new original for %i to %i', cluster_member.id, new_original.id)
+                cluster_member.duplicate_finding = new_original
+                cluster_member.save(dedupe_option=False)
+
+        logger.debug('setting new original for old root %i to %i', finding.id, new_original.id)
+        finding.duplicate = True
+        finding.duplicate_finding = new_original
+        finding.save(dedupe_option=False)
+
+    else:
+        # creating a new cluster, so mark finding as duplicate
+        logger.debug('marking %i as duplicate of %i', finding.id, new_original.id)
+        finding.duplicate = True
+        finding.active = False
+        finding.duplicate_finding = new_original
+        finding.last_reviewed = timezone.now()
+        finding.last_reviewed_by = request.user
+        finding.save(dedupe_option=False)
+
+    logger.debug('marking new original %i as not duplicate', new_original.id)
+    new_original.duplicate = False
+    new_original.duplicate_finding = None
+    new_original.save(dedupe_option=False)
+
+    return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding_id,)))
+
 
 @user_must_be_authorized(Finding, 'change', 'fid')
 @require_POST
@@ -2110,3 +2198,100 @@ def finding_unlink_jira(request, finding):
     new_note.author = request.user
     new_note.save()
     finding.notes.add(new_note)
+
+
+def get_similar_findings(request, finding):
+    similar = Finding.objects.all()
+
+    if not request.user.is_staff:
+        similar = similar.filter(test__engagement__product__authorized_users__in=[request.user])
+
+    if finding.test.engagement.deduplication_on_engagement:
+        similar = similar.filter(test__engagement=finding.test.engagement)
+    else:
+        similar = similar.filter(test__engagement__product=finding.test.engagement.product)
+
+    if finding.cve:
+        similar = similar.filter(cve=finding.cve)
+    if finding.cwe:
+        similar = similar.filter(cwe=finding.cwe)
+    if finding.file_path:
+        similar = similar.filter(file_path=finding.file_path)
+    if finding.line:
+        similar = similar.filter(line=finding.line)
+    if finding.unique_id_from_tool:
+        similar = similar.filter(unique_id_from_tool=finding.unique_id_from_tool)
+
+    similar = similar.exclude(id__in=finding.duplicate_finding_set())
+    if finding.duplicate_finding:
+        similar = similar.exclude(id=finding.duplicate_finding.id)
+
+    identical = Finding.objects.all().filter(test__engagement__product=finding.test.engagement.product).filter(hash_code=finding.hash_code).exclude(pk=finding.pk)
+    identical = identical.exclude(id__in=finding.duplicate_finding_set())
+    if finding.duplicate_finding:
+        identical = identical.exclude(id=finding.duplicate_finding.id)
+
+    # TODO: remove this temp testing code Valentijn
+    temp = Finding.objects.all().filter(id__in=[49046, 51314, 59225, 59227, 59229, 59223])
+
+    result = (temp | similar.exclude(pk=finding.pk) | identical)[:10]
+    for similar_finding in result:
+        similar_finding.related_actions = calculate_possible_related_actions_for_similar_finding(request, finding, similar_finding)
+
+    return result
+
+
+# precalculate because we need related_actions to be set
+def duplicate_cluster(request, finding):
+    duplicate_cluster = finding.duplicate_finding_set()
+
+    duplicate_cluster = prefetch_for_findings(duplicate_cluster)
+
+    # populate actions for findings in duplicate cluster
+    for duplicate_member in duplicate_cluster:
+        duplicate_member.related_actions = calculate_possible_related_actions_for_similar_finding(request, finding, duplicate_member)
+        # logger.debug('dupe: jira_conf_new: %s', duplicate_member.jira_conf_new())
+
+    return duplicate_cluster
+
+
+# django doesn't allow much logic or even method calls with parameters in templates.
+# so we have to use a function in this view to calculate the possible actions on a similar (or duplicate) finding.
+# and we assign this dictionary to the finding so it can be accessed in the template.
+# these actions are always calculated in the context of the finding the user is viewing
+# because this determines which actions are possible
+def calculate_possible_related_actions_for_similar_finding(request, finding, similar_finding):
+    actions = []
+    # logger.debug('all: %s', [s.id for s in similar_finding.original_finding.all()])
+    if similar_finding.test.engagement != finding.test.engagement and (similar_finding.test.engagement.deduplication_on_engagement or finding.test.engagement.deduplication_on_engagement):
+        actions.append({'action': 'None', 'reason': 'This finding is in a different engagement and deduplication_inside_engagment is enabled here or in that finding'})
+    elif finding.duplicate_finding == similar_finding:
+        actions.append({'action': 'None', 'reason': 'This finding is the root of the cluster, use an action on another row, or the finding on top of the page to change the root of the cluser'})
+    elif similar_finding.original_finding.all():
+        actions.append({'action': 'None', 'reason': 'This finding is similar, but is already an original in a different cluster. Remove it from that cluster before you connect it to this cluster.'})
+    else:
+        if similar_finding.duplicate_finding:
+            # reset duplicate status is always possible
+            actions.append({'action': 'reset_finding_duplicate_status', 'reason': 'This will remove the finding from the cluster, effectively marking it no longer as duplicate. Will not trigger deduplication logic after saving.'})
+
+            # logger.debug(similar_finding.duplicate_finding)
+            # logger.debug(finding)
+            if similar_finding.duplicate_finding == finding or similar_finding.duplicate_finding == finding.duplicate_finding:
+                # duplicate inside the same cluster
+                actions.append({'action': 'set_finding_as_original', 'reason': 'Sets this finding as the Original for the whole cluster. The existing Original will be downgraded to become a member of the cluster and, together with the other members, will be marked as duplicate of the new Original.'})
+            else:
+                # duplicate inside different cluster
+                actions.append({'action': 'mark_finding_duplicate', 'reason': 'Will mark this finding as duplicate of the root finding in this cluster, effectively adding it to the cluster and removing it from the other cluster.'})
+        else:
+            # similar is not a duplicate yet
+            if finding.duplicate or finding.original_finding.all():
+                actions.append({'action': 'mark_finding_duplicate', 'reason': 'Will mark this finding as duplicate of the root finding in this cluster'})
+                actions.append({'action': 'set_finding_as_original', 'reason': 'Sets this finding as the Original for the whole cluster. The existing Original will be downgraded to become a member of the cluster and, together with the other members, will be marked as duplicate of the new Original.'})
+            else:
+                # similar_finding is not an original/root of a cluster as per earlier if clause
+                actions.append({'action': 'mark_finding_duplicate', 'reason': 'Will mark this finding as duplicate of the finding on this page.'})
+                actions.append({'action': 'set_finding_as_original', 'reason': 'Sets this finding as the Original marking the finding on this page as duplicate of this original.'})
+
+    # logger.debug('related_actions for %i: %s', similar_finding.id, {finding.id: actions})
+
+    return actions

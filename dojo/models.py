@@ -73,16 +73,18 @@ class Regulation(models.Model):
     FINANCE_CATEGORY = 'finance'
     EDUCATION_CATEGORY = 'education'
     MEDICAL_CATEGORY = 'medical'
+    CORPORATE_CATEGORY = 'corporate'
     OTHER_CATEGORY = 'other'
     CATEGORY_CHOICES = (
         (PRIVACY_CATEGORY, _('Privacy')),
         (FINANCE_CATEGORY, _('Finance')),
         (EDUCATION_CATEGORY, _('Education')),
         (MEDICAL_CATEGORY, _('Medical')),
+        (CORPORATE_CATEGORY, _('Corporate')),
         (OTHER_CATEGORY, _('Other')),
     )
 
-    name = models.CharField(max_length=128, help_text=_('The name of the legislation.'))
+    name = models.CharField(max_length=128, unique=True, help_text=_('The name of the regulation.'))
     acronym = models.CharField(max_length=20, unique=True, help_text=_('A shortened representation of the name.'))
     category = models.CharField(max_length=9, choices=CATEGORY_CHOICES, help_text=_('The subject of the regulation.'))
     jurisdiction = models.CharField(max_length=64, help_text=_('The territory over which the regulation applies.'))
@@ -368,6 +370,38 @@ class Note_Type(models.Model):
         return self.name
 
 
+class NoteHistory(models.Model):
+    note_type = models.ForeignKey(Note_Type, null=True, blank=True, on_delete=models.CASCADE)
+    data = models.TextField()
+    time = models.DateTimeField(null=True, editable=False,
+                                default=get_current_datetime)
+    current_editor = models.ForeignKey(User, editable=False, null=True, on_delete=models.CASCADE)
+
+
+class Notes(models.Model):
+    note_type = models.ForeignKey(Note_Type, related_name='note_type', null=True, blank=True, on_delete=models.CASCADE)
+    entry = models.TextField()
+    date = models.DateTimeField(null=False, editable=False,
+                                default=get_current_datetime)
+    author = models.ForeignKey(User, related_name='editor_notes_set', editable=False, on_delete=models.CASCADE)
+    private = models.BooleanField(default=False)
+    edited = models.BooleanField(default=False)
+    editor = models.ForeignKey(User, related_name='author_notes_set', editable=False, null=True, on_delete=models.CASCADE)
+    edit_time = models.DateTimeField(null=True, editable=False,
+                                default=get_current_datetime)
+    history = models.ManyToManyField(NoteHistory, blank=True,
+                                   editable=False)
+
+    class Meta:
+        ordering = ['-date']
+
+    def __unicode__(self):
+        return self.entry
+
+    def __str__(self):
+        return self.entry
+
+
 class Product_Type(models.Model):
     name = models.CharField(max_length=255, unique=True)
     critical_product = models.BooleanField(default=False)
@@ -494,15 +528,30 @@ class DojoMeta(models.Model):
                                  null=True,
                                  editable=False,
                                  related_name='endpoint_meta')
+    finding = models.ForeignKey('Finding',
+                                 on_delete=models.CASCADE,
+                                 null=True,
+                                 editable=False,
+                                 related_name='finding_meta')
 
     """
     Verify that this metadata entry belongs only to one object.
     """
     def clean(self):
-        if self.product_id is None and self.endpoint_id is None:
-            raise ValidationError('Metadata entries need either a product or an endpoint')
-        if self.product_id is not None and self.endpoint_id is not None:
-            raise ValidationError('Metadata entries may not have both a product and an endpoint')
+
+        ids = [self.product_id,
+               self.endpoint_id,
+               self.finding_id]
+        ids_count = 0
+
+        for id in ids:
+            if id is not None:
+                ids_count += 1
+
+        if ids_count == 0:
+            raise ValidationError('Metadata entries need either a product, an endpoint or a finding')
+        if ids_count > 1:
+            raise ValidationError('Metadata entries may not have more than one relation, either a product, an endpoint either or a finding')
 
     def __unicode__(self):
         return "%s: %s" % (self.name, self.value)
@@ -512,7 +561,8 @@ class DojoMeta(models.Model):
 
     class Meta:
         unique_together = (('product', 'name'),
-                           ('endpoint', 'name'))
+                           ('endpoint', 'name'),
+                           ('finding', 'name'))
 
 
 class Product(models.Model):
@@ -929,6 +979,7 @@ class Engagement(models.Model):
     api_test = models.BooleanField(default=True)
     pen_test = models.BooleanField(default=True)
     check_list = models.BooleanField(default=True)
+    notes = models.ManyToManyField(Notes, blank=True, editable=False)
     status = models.CharField(editable=True, max_length=2000, default='',
                               null=True,
                               choices=(('Not Started', 'Not Started'),
@@ -1212,38 +1263,6 @@ class Endpoint(models.Model):
             return str(self)
 
 
-class NoteHistory(models.Model):
-    note_type = models.ForeignKey(Note_Type, null=True, blank=True, on_delete=models.CASCADE)
-    data = models.TextField()
-    time = models.DateTimeField(null=True, editable=False,
-                                default=get_current_datetime)
-    current_editor = models.ForeignKey(User, editable=False, null=True, on_delete=models.CASCADE)
-
-
-class Notes(models.Model):
-    note_type = models.ForeignKey(Note_Type, related_name='note_type', null=True, blank=True, on_delete=models.CASCADE)
-    entry = models.TextField()
-    date = models.DateTimeField(null=False, editable=False,
-                                default=get_current_datetime)
-    author = models.ForeignKey(User, related_name='editor_notes_set', editable=False, on_delete=models.CASCADE)
-    private = models.BooleanField(default=False)
-    edited = models.BooleanField(default=False)
-    editor = models.ForeignKey(User, related_name='author_notes_set', editable=False, null=True, on_delete=models.CASCADE)
-    edit_time = models.DateTimeField(null=True, editable=False,
-                                default=get_current_datetime)
-    history = models.ManyToManyField(NoteHistory, blank=True,
-                                   editable=False)
-
-    class Meta:
-        ordering = ['-date']
-
-    def __unicode__(self):
-        return self.entry
-
-    def __str__(self):
-        return self.entry
-
-
 class Development_Environment(models.Model):
     name = models.CharField(max_length=200)
 
@@ -1372,6 +1391,8 @@ class Finding(models.Model):
                                message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'.")
     cve = models.CharField(validators=[cve_regex], max_length=28, null=True,
                            help_text="CVE or other vulnerability identifier")
+    cvssv3_regex = RegexValidator(regex=r'^AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]', message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'")
+    cvssv3 = models.TextField(validators=[cvssv3_regex], max_length=117, null=True)
     url = models.TextField(null=True, blank=True, editable=False)
     severity = models.CharField(max_length=200, help_text="The severity level of this flaw (Critical, High, Medium, Low, Informational)")
     description = models.TextField()
@@ -1542,30 +1563,6 @@ class Finding(models.Model):
 
         return False
 
-    @property
-    def similar_findings(self):
-        similar = Finding.objects.all()
-
-        if self.test.engagement.deduplication_on_engagement:
-            similar = similar.filter(test__engagement=self.test.engagement)
-        else:
-            similar = similar.filter(test__engagement__product=self.test.engagement.product)
-
-        if self.cve:
-            similar = similar.filter(cve=self.cve)
-        if self.cwe:
-            similar = similar.filter(cwe=self.cwe)
-        if self.file_path:
-            similar = similar.filter(file_path=self.file_path)
-        if self.line:
-            similar = similar.filter(line=self.line)
-        if self.unique_id_from_tool:
-            similar = similar.filter(unique_id_from_tool=self.unique_id_from_tool)
-
-        identical = Finding.objects.all().filter(test__engagement__product=self.test.engagement.product).filter(hash_code=self.hash_code).exclude(pk=self.pk)
-
-        return (similar.exclude(pk=self.pk) | identical)[:10]
-
     def compute_hash_code(self):
         if hasattr(settings, 'HASHCODE_FIELDS_PER_SCANNER') and hasattr(settings, 'HASHCODE_ALLOWS_NULL_CWE') and hasattr(settings, 'HASHCODE_ALLOWED_FIELDS'):
             # Default fields
@@ -1662,8 +1659,9 @@ class Finding(models.Model):
     def duplicate_finding_set(self):
         if self.duplicate:
             if self.duplicate_finding is not None:
-                return Finding.objects.get(
+                originals = Finding.objects.get(
                     id=self.duplicate_finding.id).original_finding.all().order_by('title')
+                return originals  # we need to add the duplicate_finding  here as well
             else:
                 return []
         else:
@@ -1842,6 +1840,7 @@ class Finding(models.Model):
         long_desc += '*' + self.title + '*\n\n'
         long_desc += '*Severity:* ' + str(self.severity) + '\n\n'
         long_desc += '*Cve:* ' + str(self.cve) + '\n\n'
+        long_desc += '*CVSSv3.0:* ' + str(self.cvssv3) + '\n\n'
         long_desc += '*Product/Engagement:* ' + self.test.engagement.product.name + ' / ' + self.test.engagement.name + '\n\n'
         if self.test.engagement.branch_tag:
             long_desc += '*Branch/Tag:* ' + self.test.engagement.branch_tag + '\n\n'
@@ -1865,6 +1864,7 @@ class Finding(models.Model):
         new_finding = False
 
         jira_issue_exists = JIRA_Issue.objects.filter(finding=self).exists()
+        push_to_jira = getattr(self, 'push_to_jira', push_to_jira)
 
         if self.pk is None:
             # We enter here during the first call from serializers.py
@@ -2052,6 +2052,8 @@ class Finding_Template(models.Model):
     cve_regex = RegexValidator(regex=r'^[A-Z]{1,10}(-\d+)+$',
                                message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'.")
     cve = models.CharField(validators=[cve_regex], max_length=28, null=True)
+    cvssv3_regex = RegexValidator(regex=r'^AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]', message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'")
+    cvssv3 = models.TextField(validators=[cvssv3_regex], max_length=117, null=True)
     severity = models.CharField(max_length=200, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     mitigation = models.TextField(null=True, blank=True)

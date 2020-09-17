@@ -51,10 +51,13 @@ spec:
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         volumeMounts:
         - name: run
-          mountPath: /run
+          mountPath: /run/defectdojo
         envFrom:
         - configMapRef:
             name: {{ $fullName }}
+        - secretRef:
+            name: {{ $fullName }}-extrasecrets
+            optional: true
         env:
         - name: DD_CELERY_BROKER_PASSWORD
           valueFrom:
@@ -92,7 +95,7 @@ spec:
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         volumeMounts:
         - name: run
-          mountPath: /run
+          mountPath: /run/defectdojo
         ports:
         - name: http
           protocol: TCP
