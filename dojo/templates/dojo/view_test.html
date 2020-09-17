@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load display_tags %}
+{% load get_endpoint_status %}
 {% load static from staticfiles %}
 {% load humanize %}
 {% block add_styles %}
@@ -476,10 +477,14 @@
                             {% else %}
                               {% if finding.endpoints.all %}
                                 <i class="fa dojo-sup fa-sitemap has-popover" data-html="true" data-trigger="hover" data-content="
-                                {% for endpoint in finding.endpoints.all %}
-                                  {{ endpoint }}<br/>
-                                {% endfor %}
-                                " data-placement="right" data-container="body" data-original-title="Endpoints" title=""></i>
+                                    {% for endpoint in finding.endpoints.all %}
+                                        {% if endpoint|endpoint_check_active:finding %}
+                                            &#10005; {{ endpoint }}<br/>
+                                        {% else %}
+                                            &#10003; {{ endpoint }}<br/>
+                                        {% endif %}
+                                    {% endfor %}
+                                " data-placement="right" data-container="body" data-original-title="Endpoints ({{finding.active_endpoint_count}} Active, {{finding.mitigated_endpoint_count}} Mitigated)" title=""></i>
                               {% endif %}
                             {% endif %}
                              {% if finding.notes.all %}

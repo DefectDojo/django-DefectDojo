@@ -12,7 +12,7 @@
                             {% if finding.file_path %}
                             <h6> Location </h6>
                             {%  else %}
-                            <h6>Vulnerable Endpoints / Systems</h6>
+                            <h6>Vulnerable Endpoints / Systems ({{ endpoints|length }})</h6>
                             {% endif %}
                         </div>
 
@@ -70,7 +70,7 @@
                             {% if finding.file_path %}
                             <h6> Location </h6>
                             {%  else %}
-                            <h6>Mitigated Endpoints / Systems</h6>
+                            <h6>Mitigated Endpoints / Systems ({{ endpoints|length }})</h6>
                             {% endif %}
                         </div>
 
@@ -125,7 +125,7 @@
                 <div class="col-md-12">
                     <div class="panel panel-default table-responsive">
                         <div class="panel-heading">
-                            <h4>Vulnerable Endpoints / Systems
+                            <h4>Vulnerable Endpoints / Systems ({{ endpoints|length }})
                                 <span class="pull-right"><a data-toggle="collapse" href="#vuln_endpoints"><i
                                         class="glyphicon glyphicon-chevron-up"></i></a></span>
                             </h4>
@@ -186,7 +186,7 @@
                 <div class="col-md-12">
                     <div class="panel panel-default table-responsive">
                         <div class="panel-heading">
-                            <h4>Mitigated Endpoints / Systems
+                            <h4>Mitigated Endpoints / Systems ({{ endpoints|length }})
                                 <span class="pull-right"><a data-toggle="collapse" href="#remd_endpoints"><i
                                         class="glyphicon glyphicon-chevron-up"></i></a></span>
                             </h4>

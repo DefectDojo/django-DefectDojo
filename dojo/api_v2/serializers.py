@@ -407,6 +407,23 @@ class EndpointStatusSerializer(serializers.ModelSerializer):
         model = Endpoint_Status
         fields = '__all__'
 
+    def create(self, validated_data):
+        endpoint = validated_data['endpoint']
+        finding = validated_data['finding']
+        status = Endpoint_Status.objects.create(
+            finding=finding,
+            endpoint=endpoint
+        )
+        endpoint.endpoint_status.add(status)
+        finding.endpoint_status.add(status)
+        status.mitigated = validated_data.get('mitigated', False)
+        status.false_positive = validated_data.get('false_positive', False)
+        status.out_of_scope = validated_data.get('out_of_scope', False)
+        status.risk_accepted = validated_data.get('risk_accepted', False)
+        status.date = validated_data.get('date', timezone.now())
+        status.save()
+        return status
+
 
 class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
