@@ -87,6 +87,8 @@ from dojo.tools.huskyci.parser import HuskyCIReportParser
 from dojo.tools.ccvs.parser import CCVSReportParser
 from dojo.tools.awssecurityhub.parser import AwsSecurityFindingFormatParser
 from dojo.tools.risk_recon.parser import RiskReconParser
+from dojo.tools.wfuzz.parser import wfuzzJSONParser
+
 
 
 __author__ = 'Jay Paz'

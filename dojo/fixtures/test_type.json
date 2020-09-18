@@ -649,5 +649,12 @@
         },
         "model": "dojo.test_type",
 		"pk": 184
+    },
+    {
+        "fields": {
+            "name": "Wfuzz JSON Importer"
+        },
+        "model": "dojo.test_type",
+        "pk": 185
     }
 ]
