@@ -2,10 +2,21 @@
 
 export DD_BASE_URL='http://localhost:8080/'
 
+
 # All available Unittest Scripts are activated below
 # If successful, A success message is printed and the script continues
 # If any script is unsuccessful a failure message is printed and the test script
 # Exits with status code of 1
+
+
+echo "Running Product type integration tests"
+if python3 tests/Regulations_unit_test.py ; then
+    echo "Success: Regulation integration tests passed"
+else
+    docker-compose logs uwsgi --tail=120
+    echo "Error: Regulation integration test failed."; exit 1
+fi
+
 
 echo "Running Product type integration tests"
 if python3 tests/Product_type_unit_test.py ; then

@@ -1,5 +1,7 @@
+{% extends "base.html" %}
 {% load navigation_tags %}
 {% load display_tags %}
+{% load get_endpoint_status %}
 {% load static from staticfiles %}
 {% block findings_list %}
     <div class="row">
@@ -12,14 +14,14 @@
                     </h3>
                 </div>
                 <div id="the-filters" class="panel-body collapse">
-                    {% include "dojo/filter_snippet.html" with form=filtered.form%}
+                    {% include "dojo/filter_snippet.html" with form=filtered.form %}
                 </div>
             </div>
             {% if findings %}
                 <div class="clearfix">
                     {% include "dojo/paging_snippet.html" with page=findings page_size=True %}
                 </div>
-            {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled %}
+            {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled%}
             <div class="hidden" style="padding-bottom: 5px;" id="bulk_edit_menu">
                 <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
                   <div class="btn-group mr-2" role="group" aria-label="Second group">
@@ -114,7 +116,7 @@
                       </a>
                     </button>
                     {% endif %}
-                    {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled %}
+                    {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled %}
                     <button type="button" class="btn btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom" title="Delete Findings">
                       <a class="white-color delete-bulk" href="#" alt="Delete Findings">
                         <i class="fa fa-trash"></i>
@@ -129,7 +131,7 @@
                            class="tablesorter-bootstrap table table-condensed table-striped table-hover">
                         <thead>
                         <tr>
-                          {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled %}
+                          {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled%}
                           <th class="hidden-sm centered" title="Select all visible findings.">
                               <div class="dropdown">
                                   <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
@@ -182,13 +184,13 @@
                         <tbody>
                         {% for finding in findings %}
                             <tr class="{% if finding.active %}active_finding{% else %}inactive_finding{% endif %}">
-                                {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled%}
-                                <td class="hidden-sm centered">
+                                {% if user|is_authorized_for_staff:finding %}
+                                  <td class="hidden-sm centered">
                                     <form action="#">
                                         <input type="checkbox" name="select_{{ finding.id }}" id="{{ finding.id }}"
                                                class="select_one {{ finding.severity }}"/>
                                     </form>
-                                </td>
+                                  </td>
                                 {% endif %}
                                 <td class="nowrap">
                                   <div class="align-top">
@@ -208,44 +210,44 @@
                                        </li>
                                        {% endif %}
                                        <li class="divider"></li>
-                                       {% if user.is_staff %}
-                                       <li role="presentation">
-                                           <a href="{% url 'manage_images' finding.id %}">
-                                               <i class="fa fa-file-image-o"></i> Manage Images
-                                           </a>
-                                       </li>
-                                       {% if finding.under_review and dojo_user in finding.reviewers.all or dojo_user == finding.review_requested_by and finding.under_review %}
-                                           <li role="presentation">
-                                               <a href="{% url 'clear_finding_review' finding.id %}">
-                                                   <i class="icon-user-check"></i> Clear Review
-                                               </a>
-                                           </li>
-                                       {% elif not finding.under_review %}
-                                           <li role="presentation">
-                                               <a href="{% url 'request_finding_review' finding.id %}">
-                                                   <i class="icon-user-check"></i> Request Peer Review
-                                               </a>
-                                           </li>
-                                       {% endif %}
+                                       {% if user|is_authorized_for_staff:finding %}
+                                          <li role="presentation">
+                                              <a href="{% url 'manage_images' finding.id %}">
+                                                  <i class="fa fa-file-image-o"></i> Manage Images
+                                              </a>
+                                          </li>
+                                          {% if finding.under_review and dojo_user in finding.reviewers.all or dojo_user == finding.review_requested_by and finding.under_review %}
+                                              <li role="presentation">
+                                                  <a href="{% url 'clear_finding_review' finding.id %}">
+                                                      <i class="icon-user-check"></i> Clear Review
+                                                  </a>
+                                              </li>
+                                          {% elif not finding.under_review %}
+                                              <li role="presentation">
+                                                  <a href="{% url 'request_finding_review' finding.id %}">
+                                                      <i class="icon-user-check"></i> Request Peer Review
+                                                  </a>
+                                              </li>
+                                          {% endif %}
                                        {% endif %}
                                        {% if user|is_authorized_for_change:finding %}                                       
-                                       <li role="presentation">
-                                           <a href="{% url 'touch_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
-                                               <i class="fa fa-clock-o"></i> Touch Finding
-                                           </a>
-                                       </li>
+                                          <li role="presentation">
+                                              <a href="{% url 'touch_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
+                                                  <i class="fa fa-clock-o"></i> Touch Finding
+                                              </a>
+                                          </li>
                                        {% endif %}                                       
                                        {% if user.is_staff %}                                       
-                                       <li role="presentation">
-                                           <a href="{% url 'mktemplate' finding.id %}">
-                                               <i class="fa fa-copy"></i> Make Finding a Template
-                                           </a>
-                                       </li>
-                                       <li role="presentation">
-                                           <a href="{% url 'find_template_to_apply' finding.id %}">
-                                               <i class="fa fa-copy"></i> Apply Template to Finding
-                                           </a>
-                                       </li>
+                                          <li role="presentation">
+                                              <a href="{% url 'mktemplate' finding.id %}">
+                                                  <i class="fa fa-copy"></i> Make Finding a Template
+                                              </a>
+                                          </li>
+                                          <li role="presentation">
+                                              <a href="{% url 'find_template_to_apply' finding.id %}">
+                                                  <i class="fa fa-copy"></i> Apply Template to Finding
+                                              </a>
+                                          </li>
                                        {% endif %}                                       
                                        {% if user|is_authorized_for_change:finding %}
                                         {% if finding.active %}
@@ -263,43 +265,42 @@
                                         {% endif %}
                                        {% endif %}                                       
                                        <li class="divider"></li>
-
-                                        {% if user.is_staff %}
-                                        {% if finding.risk_acceptance_set.exists %}
-                                            <li role="presentation">
-                                            <a href="{% url 'simple_risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
-                                                <i class="fa fa-exclamation-circle"></i> Unaccept Risk
-                                            </a>
-                                            </li>
-                                        {% else %}
-                                            <li role="presentation">
-                                                <a href="{% url 'simple_risk_accept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
-                                                    <i class="fa fa-exclamation-circle"></i> Accept Risk (simple), or
-                                                </a>
-                                            </li>
-                                            <li role="presentation">
-                                                <a href ="{% url 'upload_risk_acceptance$' finding.test.engagement.id%}">
-                                                    <i class="fa fa-exclamation-circle"></i> Add Full Risk Acceptance...
-                                                </a>
-                                            </li>
-                                        {% endif %}
+                                        {% if user|is_authorized_for_staff:finding %}
+                                          {% if finding.risk_acceptance_set.exists %}
+                                              <li role="presentation">
+                                              <a href="{% url 'simple_risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
+                                                  <i class="fa fa-exclamation-circle"></i> Unaccept Risk
+                                              </a>
+                                              </li>
+                                          {% else %}
+                                              <li role="presentation">
+                                                  <a href="{% url 'simple_risk_accept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
+                                                      <i class="fa fa-exclamation-circle"></i> Accept Risk (simple), or
+                                                  </a>
+                                              </li>
+                                              <li role="presentation">
+                                                  <a href ="{% url 'upload_risk_acceptance$' finding.test.engagement.id%}">
+                                                      <i class="fa fa-exclamation-circle"></i> Add Full Risk Acceptance...
+                                                  </a>
+                                              </li>
+                                          {% endif %}
                                         {% endif %}                                       <li role="presentation">
                                            <a href="{% url 'action_history' finding|content_type finding.id %}">
                                                <i class="fa fa-history"></i> View History
                                            </a>
                                        </li>
                                        {% if user|is_authorized_for_delete:finding %}
-                                       <li>
-                                         <form method="post" action="{% url 'delete_finding' finding.id %}"
-                                              style="display: inline" class="form-inline form" id="delete-finding-menu-{{ finding.id }}-form">
-                                            {% csrf_token %}
-                                            <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
-                                            <input type="hidden" name="id" value="{{ finding.id }}"/>
-                                         </form>
-                                         <a class="text-danger delete-finding" id="delete-finding-menu-{{ finding.id }}" href="#">
-                                           <i class="fa fa-trash"></i> Delete
-                                         </a>
-                                       </li>
+                                          <li>
+                                            <form method="post" action="{% url 'delete_finding' finding.id %}"
+                                                  style="display: inline" class="form-inline form" id="delete-finding-menu-{{ finding.id }}-form">
+                                                {% csrf_token %}
+                                                <input type="hidden" label="return_url" aria-label="return_url" name="return_url" value="{{ request.get_full_path }}" />
+                                                <input type="hidden" label="id" aria-label="id" name="id" value="{{ finding.id }}"/>
+                                            </form>
+                                            <a class="text-danger delete-finding" id="delete-finding-menu-{{ finding.id }}" href="#">
+                                              <i class="fa fa-trash"></i> Delete
+                                            </a>
+                                          </li>
                                        {% endif %}
                                       </ul>
                                     </div>
@@ -324,9 +325,13 @@
                                     {% if finding.endpoints.all %}
                                       <i class="fa fa-sitemap has-popover dojo-sup" data-html="true" data-trigger="hover" data-content="
                                       {% for endpoint in finding.endpoints.all %}
-                                        {{ endpoint }}<br/>
+                                        {% if endpoint|endpoint_check_active:finding %}
+                                          &#10005; {{ endpoint }}<br/>
+                                        {% else %}
+                                          &#10003; {{ endpoint }}<br/>
+                                        {% endif %}
                                       {% endfor %}
-                                      " data-placement="right" data-container="body" data-original-title="Endpoints" title=""></i>
+                                      " data-placement="right" data-container="body" data-original-title="Endpoints ({{finding.active_endpoint_count}} Active, {{finding.mitigated_endpoint_count}} Mitigated)" title=""></i>
                                     {% endif %}
                                   {% endif %}
                                   {% if finding.component_name %}
@@ -420,6 +425,8 @@
             {% endif %}
         </div>
     </div>
+
+
 {% endblock %}
 {% block postscript %}
     <script type="application/javascript" src="{% static "chosen/chosen.jquery.min.js" %}"></script>
@@ -446,7 +453,7 @@
                       $('.has-popover').popover({'trigger':'hover'});
                 },
                 "columns": [	
-                    {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled %}
+                    {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled %}
                     { "data": "checkbox" },
                     {% endif %}
                     { "data": "action" },
