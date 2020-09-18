@@ -1491,7 +1491,7 @@ class SimpleMetricsForm(forms.Form):
 
 
 class SimpleSearchForm(forms.Form):
-    query = forms.CharField()
+    query = forms.CharField(required=False)
 
 
 class DateRangeMetrics(forms.Form):

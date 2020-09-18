@@ -70,6 +70,13 @@ class DojoTests(BaseTestCase):
 
         self.assertTrue(self.is_success_message_present(text='Finding added successfully'))
 
+    def search(self):
+        # very basic search test to see if it doesn't 500
+        driver = self.login_page()
+        driver.find_element_by_id("simple_search").clear()
+        driver.find_element_by_id("simple_search").send_keys('finding')
+        driver.find_element_by_id("simple_search_submit").sendclick()
+
     def is_element_present(self, how, what):
         try:
             self.driver.find_element(by=how, value=what)
