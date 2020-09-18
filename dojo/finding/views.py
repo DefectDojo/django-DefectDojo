@@ -593,7 +593,7 @@ def delete_finding(request, fid):
 def edit_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     old_status = finding.status()
-    burp_rr = BurpRawRequestResponse.objects.get(finding=finding)
+    burp_rr = BurpRawRequestResponse.objects.filter(finding=finding).first()
     if burp_rr:
         req_resp = (
             burp_rr.get_request(),
