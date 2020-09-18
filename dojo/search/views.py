@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 # explicitly use our own regex pattern here as django-watson is sensitive so we want to control it here independently of models.py etc.
 cve_pattern = re.compile(r'(^CVE-(1999|2\d{3})-(0\d{2}[0-9]|[1-9]\d{3,}))$')
+# cve_pattern = re.compile(r'(CVE-(1999|2\d{3})-(0\d{2}[0-9]|[1-9]\d{3,}))')
 
 
 def simple_search(request):
@@ -50,15 +51,13 @@ def simple_search(request):
     max_results = 100
 
     # if request.method == 'GET' and "query" in request.GET:
-    logger.debug('0')
     if request.method == 'GET':
         form = SimpleSearchForm(request.GET)
         if form.is_valid():
-            logger.debug('1')
             # logger.debug('form vars: %s', vars(form))
             cookie = True
             clean_query = form.cleaned_data['query'] or ''
-            search_operator = ""
+            search_operator, operator = "", ""
             # Check for search operator like finding:, endpoint:, test: product:
             original_clean_query = clean_query
             # print('clean_query: ', clean_query)
@@ -66,6 +65,10 @@ def simple_search(request):
                 operator = clean_query.split(":")
                 search_operator = operator[0]
                 clean_query = operator[1].lstrip()
+
+            logger.debug('operator: %s', operator)
+            logger.debug('search_operator: %s', search_operator)
+            logger.debug('clean_query: %s', clean_query)
 
             # if the query contains hyphens, django-watson will escape these leading to problems.
             # for cve we make this workaround because we really want to be able to search for CVEs
@@ -75,9 +78,22 @@ def simple_search(request):
             # - https://github.com/DefectDojo/django-DefectDojo/issues/1092
             # - https://github.com/DefectDojo/django-DefectDojo/issues/2081
 
-            if bool(cve_pattern.match(clean_query)):
-                clean_query = '\'' + clean_query + '\''
-                # print('new clean_query: ', clean_query)
+            # it's not google grade parsing, but let's do some basic stuff right
+            query_parts = clean_query.split(" ")
+            new_parts = ""
+            for part in query_parts:
+                if bool(cve_pattern.match(part)):
+                    part = '\'' + part + '\''
+                    clean_query = '\'' + clean_query + '\''
+                    print('new part: ', part)
+                else:
+                    print('old part: ', part)
+
+                new_parts += (part + " ")
+
+            clean_query = new_parts.strip()
+
+            logger.debug('cve clean_query: [%s]', clean_query)
 
             search_tags = "tag" in search_operator or search_operator == ""
             search_findings = "finding" in search_operator or "cve" in search_operator or "id" in search_operator or search_operator == ""
@@ -111,9 +127,11 @@ def simple_search(request):
                 # findings = findings.prefetch_related('test', 'test__engagement', 'test__engagement__product',
                 #  'risk_acceptance_set', 'test__test_type', 'tagged_items__tag', 'test__engagement__product__tagged_items__tag')
 
-                findings = prefetch_for_findings(findings)
-                # some over the top tag displaying happening...
-                findings = findings.prefetch_related('test__engagement__product__tagged_items__tag')
+                # findings = prefetch_for_findings(findings)
+                # # some over the top tag displaying happening...
+                # findings = findings.prefetch_related('test__engagement__product__tagged_items__tag')
+                if False:
+                    print('1')
 
             if products:
                 products = products.prefetch_related('tagged_items__tag')
@@ -122,24 +140,24 @@ def simple_search(request):
                 engagements = engagements.prefetch_related('product', 'product__tagged_items__tag', 'tagged_items__tag')
 
             if tests:
-                tests = tests.prefetch_related('engagement', 'engagement__product', 'test_type', 'engagement__tagged_items__tag')
+                tests = tests.prefetch_related('engagement', 'engagement__product', 'test_type', 'tagged_items__tag', 'engagement__tagged_items__tag', 'engagement__product__tagged_items__tag')
 
             if endpoints:
                 # more prefetcing and/or rendering of counts needed. waiting for https://github.com/DefectDojo/django-DefectDojo/pull/2855
-                endpoints = endpoints.prefetch_related('product', 'tagged_items__tag')
+                endpoints = endpoints.prefetch_related('product', 'tagged_items__tag', 'product__tagged_items__tag')
 
             if languages:
                 languages = languages.prefetch_related('product', 'product__tagged_items__tag')
 
             tags = clean_query
-            logger.debug('11')
-            # search tags first to avoid errors due to slicing too early
+            # tags = ",".join(clean_query.split(" "))
             if search_tags:
+                # search tags first to avoid errors due to slicing too early
                 tagged_findings = TaggedItem.objects.get_by_model(findings, tags)[:100]
                 tagged_finding_templates = TaggedItem.objects.get_by_model(Finding_Template, tags)[:100]
                 tagged_tests = TaggedItem.objects.get_by_model(tests, tags)[:100]
                 tagged_engagements = TaggedItem.objects.get_by_model(engagements, tags)[:100]
-                tagged_products = TaggedItem.objects.get_by_model(products, tags)[:100]
+                tagged_products = TaggedItem.objects.get_union_by_model(products, tags)[:100]
                 tagged_endpoints = TaggedItem.objects.get_by_model(endpoints, tags)[:100]
             else:
                 tagged_findings = None
@@ -156,7 +174,14 @@ def simple_search(request):
                 findings = findings_filter.qs
 
                 if clean_query:
-                    findings = watson.filter(findings, clean_query)
+                    logger.debug('going watston with: %s', clean_query)
+                    watson_findings = watson.filter(findings_filter.qs, clean_query)
+                    findings = findings.filter(id__in=[watson.id for watson in watson_findings])
+
+                findings = prefetch_for_findings(findings)
+                # some over the top tag displaying happening...
+                findings = findings.prefetch_related('test__engagement__product__tagged_items__tag')
+
                 findings = findings[:max_results]
             else:
                 findings = None
@@ -230,9 +255,9 @@ def simple_search(request):
             # generic = watson.search("'CVE-2020-6754'")[:10].prefetch_related('object')
             # generic = watson.search(" 'ISEC-433'")[:10].prefetch_related('object')
 
-            for result in generic:
-                if False:
-                    logger.debug('generic result: %s', vars(result))
+            # for result in generic:
+            #     if False:
+            #         logger.debug('generic result: %s', vars(result))
 
         else:
             logger.debug('search form invalid')
@@ -241,7 +266,12 @@ def simple_search(request):
 
         add_breadcrumb(title="Simple Search", top_level=True, request=request)
 
-        activetab = 'findings' if findings else 'products' if products else 'engagements' if engagements else 'tests' if tests else 'endpoint' if endpoints else 'generic'
+        activetab = 'findings' if findings \
+            else 'products' if products \
+                else 'engagements' if engagements else \
+                    'tests' if tests else \
+                         'endpoint' if endpoints \
+                            else 'generic'
 
     response = render(request, 'dojo/simple_search.html', {
         'clean_query': original_clean_query,

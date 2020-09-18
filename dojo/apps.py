@@ -21,9 +21,9 @@ class DojoAppConfig(AppConfig):
         # charfields/textfields are the fields that watson indexes by default (but we have to repeat here if we add extra fields)
         # and watson likes to have tuples instead of lists
 
-        watson.register(self.get_model('Product'), fields=get_model_fields_with_extra(self.get_model('Product'), ('prod_type__name', )))
+        watson.register(self.get_model('Product'), fields=get_model_fields_with_extra(self.get_model('Product'), ('prod_type__name', )), store=('prod_type__name', ))
 
-        watson.register(self.get_model('Test'), fields=get_model_fields_with_extra(self.get_model('Test'), ('engagement__product__name', )))  # test_type__name?
+        watson.register(self.get_model('Test'), fields=get_model_fields_with_extra(self.get_model('Test'), ('engagement__product__name', )), store=('engagement__product__name', ))  # test_type__name?
 
         watson.register(self.get_model('Finding'), fields=get_model_fields_with_extra(self.get_model('Finding'), ('test__engagement__product__name', 'jira_issue__jira_key', )),
                         store=('cve', 'status', 'jira_issue__jira_key', 'test__engagement__product__name', 'severity', 'severity_display', 'latest_note'))
@@ -55,8 +55,8 @@ class DojoAppConfig(AppConfig):
         # sast_source_file_path = models.CharField(null=True, blank=True, max_length=4000, help_text="Source filepath of the attack vector")
 
         watson.register(self.get_model('Finding_Template'))
-        watson.register(self.get_model('Endpoint'))  # add product name also?
-        watson.register(self.get_model('Engagement'), fields=get_model_fields_with_extra(self.get_model('Engagement'), ('product__name', )))
+        watson.register(self.get_model('Endpoint'), store=('product__name', ))  # add product name also?
+        watson.register(self.get_model('Engagement'), fields=get_model_fields_with_extra(self.get_model('Engagement'), ('product__name', )), store=('product__name', ))
         watson.register(self.get_model('App_Analysis'))
 
         # YourModel = self.get_model("YourModel")

@@ -11,7 +11,7 @@
         <form role="search" method="get" action="{% url 'simple_search' %}">
             <div class="input-group">
                 <input id="custom_search_query" type="text" name="query" class="form-control"
-                        placeholder="Search..." value="{{clean_query|escapejs}}">
+                        placeholder="Search..." value="{{clean_query}}">
                 <span class="input-group-btn">
                     <button class="btn btn-primary" type="submit" aria-label="Search">
                         <i class="fa fa-search"></i>
@@ -469,11 +469,11 @@
                             {% if result.object.id %}
                                 <tr>
                                     <td>
-                                    <a href="{{result.url}}" title="{{result.title}}">
-                                        <span>
-                                            {{ result.object.id }}
-                                        </span>
-                                    </a>
+                                        <a href="{{result.url}}" title="{{result.title}}">
+                                            <span>
+                                                {{ result.object.id }}
+                                            </span>
+                                        </a>
                                     </td>
                                     <td>
                                         <a href="{{result.url}}" title="{{result.title}}">
@@ -482,14 +482,19 @@
                                     </td>
                                     <td>
                                         <a href="{{result.url}}" title="{{result.title}}">
-                                            {{ result.meta.test__engagement__product__name }}
+                                            {% comment %} a{{ result.meta.engagement__product__name }}b {% endcomment %}
+                                            {% firstof result.meta.test__engagement__product__name result.meta.engagement__product__name result.meta.product__name result.object.name %}
                                         </a>
                                     </td>
                                     <td class="centered">
                                         <a href="{{result.url}}" title="{{result.title}}">
-                                            <span class="label severity severity-{{ result.meta.severity }}">
-                                                {{ result.meta.severity_display }}
-                                            </span>
+                                            {% if result.meta.severity_display %}
+                                                <span class="label severity severity-{{ result.meta.severity }}">
+                                                    {{ result.meta.severity_display }}
+                                                </span>
+                                            {% else %}
+                                                None
+                                            {% endif %}
                                         </a>
                                     </td>
                                     <td>
@@ -497,10 +502,14 @@
                                             {{ result.title }}
                                         </a>
                                     </td>
-                                    <td>
-                                        <a href="{{result.url}}" title="{{result.title}}">
-                                            <span style="white-space: nowrap;">{{ result.meta.cve }}</span>
-                                        </a>
+                                    <td class="nowrap">
+                                        {% if result.meta.cve %}
+                                            <a target="_blank" href="{{ result.meta.cve|cve_url }}">
+                                                <i class="fa fa-external-link"></i> {{ result.meta.cve|default:"" }}
+                                            </a>                                            
+                                        {% else %}
+                                            None
+                                        {% endif %}                                            
                                     </td>
                                     <td width="50%">
                                         {% comment %} {{ result.content }} {% endcomment %}

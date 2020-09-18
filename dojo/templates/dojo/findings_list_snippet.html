@@ -1,4 +1,3 @@
-{% extends "base.html" %}
 {% load navigation_tags %}
 {% load display_tags %}
 {% load get_endpoint_status %}
@@ -154,9 +153,10 @@
                             </th>
                             {% endif %}
                             <th>Act.</th>
-                            <th class="nowrap, centered">{% dojo_sort request 'Severity' 'numerical_severity' 'asc' %}</th>
+                            <th class="nowrap centered">{% dojo_sort request 'Severity' 'numerical_severity' 'asc' %}</th>
                             <th class="nowrap">{% dojo_sort request 'Name' 'title' %}</th>
                             <th>CWE</th>
+                            <th>CVE</th>                            
                             {% if filter_name == 'Closed' %}
                             <th class="nowrap">{% dojo_sort request 'Closed Date' 'mitigated'%}</th>
                             {% else %}
@@ -352,15 +352,22 @@
                                   </sup>
                                 </td>
                                 <td class="nowrap">
-                                {% if finding.cwe > 0 %}
-                                  <a target="_blank" href="https://cwe.mitre.org/data/definitions/{{ finding.cwe }}.html">
-                                      <i class="fa fa-external-link"></i> {{ finding.cwe }}
-                                  </a>
-                                {% endif %}
-                                </td>
+                                  {% if finding.cwe > 0 %}
+                                    <a target="_blank" href="{{ finding.cwe|cwe_url }}">
+                                        <i class="fa fa-external-link"></i> {{ finding.cwe|default:"" }}
+                                    </a>
+                                  {% endif %}
+                                </td>                                
                                 {% if filter_name == 'Closed' %}
                                 <td class="nowrap">{{ finding.mitigated|date }}</td>
                                 {% else %}
+                                <td class="nowrap">
+                                  {% if finding.cve %}
+                                    <a target="_blank" href="{{ finding.cve|cve_url }}">
+                                        <i class="fa fa-external-link"></i> {{ finding.cve|default:"" }}
+                                    </a>
+                                  {% endif %}
+                                </td>     
                                 <td class="nowrap">{{ finding.date }}</td>
                                 {% endif %}
                                 <td>{{ finding.age }}</td>
@@ -462,6 +469,7 @@
                             return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;	
                     }},	
                     { "data": "cwe" },
+                    { "data": "cve" },
                     { "data": "found_date" },
                     { "data": "finding_age" },
                     {% if system_settings.enable_finding_sla %}	
@@ -713,8 +721,6 @@
                         $('body').highlight(terms[i]);
                     }
                 }
-
-                $('input#simple_search').val(terms);
             };
 
         });
