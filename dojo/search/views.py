@@ -93,6 +93,8 @@ def simple_search(request):
 
             clean_query = new_parts.strip()
 
+            # clean_query = '\'' + clean_query + '\''
+
             logger.debug('cve clean_query: [%s]', clean_query)
 
             search_tags = "tag" in search_operator or search_operator == ""
@@ -175,9 +177,10 @@ def simple_search(request):
 
                 if clean_query:
                     logger.debug('going watston with: %s', clean_query)
-                    watson_findings = watson.filter(findings_filter.qs, clean_query)
+                    watson_findings = watson.filter(findings_filter.qs, clean_query)[:100]
                     findings = findings.filter(id__in=[watson.id for watson in watson_findings])
 
+                # prefetch after watson to avoid inavlid query errors due to watson not understanding prefetching
                 findings = prefetch_for_findings(findings)
                 # some over the top tag displaying happening...
                 findings = findings.prefetch_related('test__engagement__product__tagged_items__tag')
@@ -270,8 +273,9 @@ def simple_search(request):
             else 'products' if products \
                 else 'engagements' if engagements else \
                     'tests' if tests else \
-                         'endpoint' if endpoints \
-                            else 'generic'
+                         'endpoint' if endpoints else \
+                            'generic' if generic else \
+                                'tagged'
 
     response = render(request, 'dojo/simple_search.html', {
         'clean_query': original_clean_query,

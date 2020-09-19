@@ -31,7 +31,7 @@
         <ul class="nav nav-tabs" role="tablist">
             {% if findings %}
                 <li role="presentation" {% if activetab == 'findings' %}class="active"{% endif %}>
-                    <a href="#tabs-1" role="tab" data-toggle="tab">Findings 2.0 ({{ findings|length }})</a>
+                    <a href="#tabs-1" role="tab" data-toggle="tab">Findings ({{ findings|length }})</a>
                 </li>
             {% endif %}
             {% if products %}
@@ -70,15 +70,15 @@
                 </li>
             {% endif %}
             {% if tagged_findings or tagged_finding_templates or tagged_products or tagged_tests or tagged_endpoints or tagged_engagements %}
-                <li role="presentation">
+                <li role="presentation" {% if activetab == 'tagged' %}class="active"{% endif %}>
                     <a href="#tabs-9" role="tab" data-toggle="tab">Tagged items
                         ({{ tagged_findings|length }}, {{ tagged_products|length }}, {{ tagged_engagements|length }}, {{ tagged_tests|length }}, {{ tagged_endpoints|length }}, 
                         {{ tagged_finding_templates|length }})
                     </a>
                 </li>
             {% endif %}
-            {% if generic %}            
-                <li role="presentation">
+            {% if generic %}
+                <li role="presentation" {% if activetab == 'generic' %}class="active"{% endif %}>
                     <a href="#tabs-10" role="tab" data-toggle="tab">Combined ({{ generic|length }})</a>
                 </li>
             {% endif %}            
@@ -352,7 +352,7 @@
             {% endif %}
             {% if tagged_findings or tagged_finding_templates or tagged_products or tagged_tests or tagged_endpoints or tagged_engagements %}
                 <div role="tabpanel"
-                     class="table-responsive tab-pane"
+                     class="table-responsive tab-pane {% if activetab == 'tagged' %}active{% endif %}"
                      id="tabs-9">
                     <table class="table table-bordered table-striped">
                         <thead>
