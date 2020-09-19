@@ -593,7 +593,7 @@ def delete_finding(request, fid):
 def edit_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     old_status = finding.status()
-    burp_rr = BurpRawRequestResponse.objects.get(finding=finding)
+    burp_rr = BurpRawRequestResponse.objects.filter(finding=finding).first()
     if burp_rr:
         req_resp = (
             burp_rr.get_request(),
@@ -685,11 +685,12 @@ def edit_finding(request, fid):
             new_finding.tags = t
 
             if 'request' in form.cleaned_data or 'response' in form.cleaned_data:
-                burp_rr = BurpRawRequestResponse.objects.get(finding=finding)
-                burp_rr.burpRequestBase64 = base64.b64encode(form.cleaned_data['request'].encode())
-                burp_rr.burpResponseBase64 = base64.b64encode(form.cleaned_data['response'].encode())
-                burp_rr.clean()
-                burp_rr.save()
+                burp_rr = BurpRawRequestResponse.objects.filter(finding=finding).first()
+                if burp_rr:
+                    burp_rr.burpRequestBase64 = base64.b64encode(form.cleaned_data['request'].encode())
+                    burp_rr.burpResponseBase64 = base64.b64encode(form.cleaned_data['response'].encode())
+                    burp_rr.clean()
+                    burp_rr.save()
 
             push_to_jira = False
             jira_message = None
