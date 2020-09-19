@@ -23,6 +23,27 @@
     </title>
     {% block add_css_before %}
     {% endblock %}
+
+    <!-- jQuery -->
+    <script src="{% static "jquery/dist/jquery.js" %}"></script>
+    <!--  jQuery UI -->
+    <script src="{% static "components-jqueryui/jquery-ui.min.js" %}"></script>
+    <!-- Bootstrap Core JavaScript -->
+    <script src="{% static "bootstrap/dist/js/bootstrap.min.js" %}"></script>
+
+    <!-- Metis Menu Plugin JavaScript -->
+    <script src="{% static "metismenu/dist/metisMenu.min.js" %}"></script>
+
+    <!-- Custom Theme JavaScript -->
+    <script src="{% static "startbootstrap-sb-admin-2/dist/js/sb-admin-2.js" %}"></script>
+    <!-- Calendar JavaScript -->
+    <script src="{% static "moment/min/moment.min.js" %}"></script>
+    <script src="{% static "fullcalendar/dist/fullcalendar.min.js" %}"></script>
+    <!-- jquery cookie -->
+    <script src="{% static "jquery.cookie/jquery.cookie.js" %}"></script>
+    <!-- DataTables Javascript -->
+    <script src="{% static "dojo/js/datatables.min.js" %}"></script>
+
     <!-- Bootstrap Core CSS -->
     <link href="{% static "bootstrap/dist/css/bootstrap.min.css" %}" rel="stylesheet">
 
@@ -74,12 +95,12 @@
               {% if request.user.is_authenticated %}
                 <li>
                     <div class="custom-search-form">
-                        <form role="search" method="get" action="{% url 'simple_search' %}">
+                        <form id="custom_search_form" role="search" method="get" action="{% url 'simple_search' %}">
                             <div class="input-group">
                                 <input id="simple_search" type="text" name="query" class="form-control"
-                                       placeholder="Search...">
+                                       placeholder="Search..." value="{{clean_query}}">
                                 <span class="input-group-btn">
-                                    <button class="btn btn-primary" type="submit" aria-label="Search">
+                                    <button id="simple_search_submit" class="btn btn-primary" type="submit" aria-label="Search">
                                         <i class="fa fa-search"></i>
                                     </button>
                                 </span>
@@ -584,25 +605,6 @@
 
 <!-- /#wrapper -->
 
-<!-- jQuery -->
-<script src="{% static "jquery/dist/jquery.js" %}"></script>
-<!--  jQuery UI -->
-<script src="{% static "components-jqueryui/jquery-ui.min.js" %}"></script>
-<!-- Bootstrap Core JavaScript -->
-<script src="{% static "bootstrap/dist/js/bootstrap.min.js" %}"></script>
-
-<!-- Metis Menu Plugin JavaScript -->
-<script src="{% static "metismenu/dist/metisMenu.min.js" %}"></script>
-
-<!-- Custom Theme JavaScript -->
-<script src="{% static "startbootstrap-sb-admin-2/dist/js/sb-admin-2.js" %}"></script>
-<!-- Calendar JavaScript -->
-<script src="{% static "moment/min/moment.min.js" %}"></script>
-<script src="{% static "fullcalendar/dist/fullcalendar.min.js" %}"></script>
-<!-- jquery cookie -->
-<script src="{% static "jquery.cookie/jquery.cookie.js" %}"></script>
-<!-- DataTables Javascript -->
-<script src="{% static "dojo/js/datatables.min.js" %}"></script>
 <!-- our JS -->
 <script src="{% static "dojo/js/index.js" %}"></script>
 
