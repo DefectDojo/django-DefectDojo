@@ -310,7 +310,7 @@
                                     </div>
                                 </th>
                             {% endif %}
-                            <th>Act.</th>
+                            <th></th>
                             <th class="centered">Severity</th>
                             <th>Name</th>
                             <th>CWE</th>
@@ -1016,6 +1016,7 @@
                 drawCallback: function(){
                     $('.has-popover').popover({'trigger':'hover'});
                 },
+                colReorder: true,
                 "columns": [
                     {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled %}                    
                     { "data": "dropdown" },

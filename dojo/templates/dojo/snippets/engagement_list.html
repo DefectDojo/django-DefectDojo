@@ -230,6 +230,7 @@
 
             // Mapping of table columns to objects for proper cleanup and data formatting
             var dojoTable = $('#{{status}}').DataTable({
+                colReorder: true,              
                 "columns": [
                     { "data": "action" },
                     { "data": "eng_name" },

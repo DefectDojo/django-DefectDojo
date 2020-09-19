@@ -152,7 +152,7 @@
                               </div>
                             </th>
                             {% endif %}
-                            <th>Act.</th>
+                            <th></th>
                             <th class="nowrap centered">{% dojo_sort request 'Severity' 'numerical_severity' 'asc' %}</th>
                             <th class="nowrap">{% dojo_sort request 'Name' 'title' %}</th>
                             <th>CWE</th>
@@ -192,7 +192,7 @@
                                     </form>
                                   </td>
                                 {% endif %}
-                                <td class="nowrap">
+                                <td>
                                   <div class="align-top">
                                     <div class="dropdown">
                                       <a href="#" class="dropdown-toggle pull-left" data-toggle="dropdown">&nbsp;<i class="fa fa-ellipsis-v"></i>&nbsp;</a>
@@ -459,6 +459,7 @@
                 drawCallback: function(){
                       $('.has-popover').popover({'trigger':'hover'});
                 },
+                colReorder: true,                
                 "columns": [	
                     {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled %}
                     { "data": "checkbox" },
