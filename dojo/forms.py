@@ -1003,11 +1003,12 @@ class FindingForm(forms.ModelForm):
         # Get tags from a finding
         else:
             tags = Tag.objects.usage_for_model(Finding)
-            self.fields['simple_risk_accept'].initial = True if hasattr(self, 'instance') and self.instance.is_simple_risk_accepted else False
 
         req_resp = kwargs.pop('req_resp')
         t = [(tag.name, tag.name) for tag in tags]
         super(FindingForm, self).__init__(*args, **kwargs)
+        print('instance: ', self.instance)
+        self.fields['simple_risk_accept'].initial = True if hasattr(self, 'instance') and self.instance.is_simple_risk_accepted else False
         self.fields['tags'].widget.choices = t
         if req_resp:
             self.fields['request'].initial = req_resp[0]

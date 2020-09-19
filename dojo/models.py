@@ -1539,11 +1539,15 @@ class Finding(models.Model):
 
     # gets or creates the simple risk acceptance instance connected to the engagement. only contains this finding if it is simple accepted
     def get_simple_risk_acceptance(self, create=True):
+        # check if has test, if not, return False to avoid errors on test being None later on. This can happen when creating a finding from a template
+        if not hasattr(self, 'test'):
+            return None
+
         if hasattr(self.test.engagement, 'simple_risk_acceptance') and len(self.test.engagement.simple_risk_acceptance) > 0:
             return self.test.engagement.simple_risk_acceptance[0]
 
         simple_risk_acceptance = self.test.engagement.risk_acceptance.filter(name=Finding.SIMPLE_RISK_ACCEPTANCE_NAME).prefetch_related('accepted_findings').first()
-        if simple_risk_acceptance is None:
+        if simple_risk_acceptance is None and create:
             simple_risk_acceptance = Risk_Acceptance.objects.create(
                     owner_id=1,
                     name=Finding.SIMPLE_RISK_ACCEPTANCE_NAME,
@@ -1576,6 +1580,7 @@ class Finding(models.Model):
 
     @property
     def is_simple_risk_accepted(self):
+
         if self.get_simple_risk_acceptance(create=False) is not None:
             return self.get_simple_risk_acceptance().accepted_findings.filter(id=self.id).exists()
             # print('exists: ', exists)

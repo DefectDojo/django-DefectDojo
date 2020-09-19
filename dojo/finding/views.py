@@ -1022,8 +1022,8 @@ def find_template_to_apply(request, fid):
     templates = TemplateFindingFilter(request.GET, queryset=templates)
     paged_templates = get_page_items(request, templates.qs, 25)
 
-    title_words = get_words_for_field(templates.qs, 'title')
-
+    # just query all templates as this weird ordering above otherwise breaks Django ORM
+    title_words = get_words_for_field(Finding_Template.objects.all(), 'title')
     product_tab = Product_Tab(test.engagement.product.id, title="Apply Template to Finding", tab="findings")
     return render(
         request, 'dojo/templates.html', {
@@ -1320,6 +1320,7 @@ def templates(request):
             'templates': paged_templates,
             'filtered': templates,
             'title_words': title_words,
+
         })
 
 

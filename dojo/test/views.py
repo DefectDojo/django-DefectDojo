@@ -599,14 +599,12 @@ def search(request, tid):
     paged_templates = get_page_items(request, templates.qs, 25)
 
     title_words = get_words_for_field(templates.qs, 'title')
-    component_words = get_words_for_field(templates.qs, 'component_name')
 
     add_breadcrumb(parent=test, title="Add From Template", top_level=False, request=request)
     return render(request, 'dojo/templates.html',
                   {'templates': paged_templates,
                    'filtered': templates,
                    'title_words': title_words,
-                   'component_words': component_words,
                    'tid': tid,
                    'add_from_template': True,
                    })
