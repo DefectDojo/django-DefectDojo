@@ -402,7 +402,8 @@ class ImportScanForm(forms.Form):
                          ("GitLab SAST Report", "GitLab SAST Report"),
                          ("HuskyCI Report", "HuskyCI Report"),
                          ("Risk Recon API Importer", "Risk Recon API Importer"),
-                         ("CCVS Report", "CCVS Report"))
+                         ("CCVS Report", "CCVS Report"),
+                         ("Checkov Scan", "Checkov Scan"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
     scan_date = forms.DateTimeField(
