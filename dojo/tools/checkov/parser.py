@@ -73,7 +73,9 @@ def get_item(vuln, test, check_type):
     if 'resource' in vuln:
         sast_object = vuln['resource']
 
-    severity = 'Info'
+    # Checkov doesn't define severities. Sine the findings are
+    # vulnerabilities, we set them to Medium
+    severity = 'Medium'
     numerical_severity = Finding.get_numerical_severity(severity)
 
     sourcefile = None
