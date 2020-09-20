@@ -1951,14 +1951,14 @@ class Finding(models.Model):
             from dojo.utils import add_jira_issue, update_jira_issue
             if jira_issue_exists:
                 if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
-                    update_jira_issue(self, True)
+                    update_jira_issue(self, True, get_celery_context())
                 else:
-                    update_jira_issue_task.delay(self, True)
+                    update_jira_issue_task.delay(self, True, get_celery_context())
             else:
                 if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
-                    add_jira_issue(self, True)
+                    add_jira_issue(self, True, get_celery_context())
                 else:
-                    add_jira_issue_task.delay(self, True)
+                    add_jira_issue_task.delay(self, True, get_celery_context())
 
     def delete(self, *args, **kwargs):
         for find in self.original_finding.all():
@@ -2447,7 +2447,7 @@ class Notifications(models.Model):
     test_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     scan_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True, help_text='Triggered whenever an (re-)import has been done that created/updated/closed findings.')
     report_created = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
-    jira_update = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
+    jira_update = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True, verbose_name="JIRA related problems", help_text="JIRA sync happens in the background, errors will be shown as notifications/alerts so make sure to subscribe")
     upcoming_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     stale_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     auto_close_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)

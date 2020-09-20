@@ -62,4 +62,4 @@ jsonlines==1.2.0  # requred by yarn audit parser
 django-saml2-auth==2.2.1
 cpe==1.2.1
 packageurl-python==0.9.1
-
+django-crum==0.7.7

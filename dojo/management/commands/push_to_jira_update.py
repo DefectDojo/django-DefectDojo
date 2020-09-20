@@ -22,5 +22,5 @@ class Command(BaseCommand):
 
         for finding in findings:
             print("Checking issue:" + str(finding.id))
-            update_jira_issue(finding, True)
+            update_jira_issue(finding, True, None)
             print("########\n")

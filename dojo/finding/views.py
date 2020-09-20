@@ -1877,14 +1877,14 @@ def finding_bulk_update_all(request, pid=None):
                         else:
                             if JIRA_Issue.objects.filter(finding=finding).exists():
                                 if request.user.usercontactinfo.block_execution:
-                                    update_jira_issue(finding, True)
+                                    update_jira_issue(finding, True, get_celery_context())
                                 else:
-                                    update_jira_issue_task.delay(finding, True)
+                                    update_jira_issue_task.delay(finding, True, get_celery_context())
                             else:
                                 if request.user.usercontactinfo.block_execution:
-                                    add_jira_issue(finding, True)
+                                    add_jira_issue(finding, True, get_celery_context())
                                 else:
-                                    add_jira_issue_task.delay(finding, True)
+                                    add_jira_issue_task.delay(finding, True, get_celery_context())
 
                 messages.add_message(request,
                                      messages.SUCCESS,
