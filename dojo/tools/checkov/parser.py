@@ -43,9 +43,6 @@ class CheckovParser(object):
 
 
 def get_item(vuln, test, check_type):
-
-    unique_id_from_tool = None
-
     title = ''
     if 'check_name' in vuln:
         title = vuln['check_name']
@@ -62,27 +59,21 @@ def get_item(vuln, test, check_type):
     if 'file_path' in vuln:
         file_path = vuln['file_path']
 
-    sast_source_line = None
-    line_sink = None
+    source_line = None
     if 'file_line_range' in vuln:
         lines = vuln['file_line_range']
-        sast_source_line = lines[0]
-        line_sink = lines[1]
+        source_line = lines[0]
 
-    sast_object = None
+    resource = None
     if 'resource' in vuln:
-        sast_object = vuln['resource']
+        resource = vuln['resource']
 
     # Checkov doesn't define severities. Sine the findings are
     # vulnerabilities, we set them to Medium
     severity = 'Medium'
     numerical_severity = Finding.get_numerical_severity(severity)
 
-    sourcefile = None
-    scanner_confidence = None
     mitigation = ''
-    cwe = None
-    cve = None
 
     references = ''
     if 'guideline' in vuln:
@@ -95,19 +86,11 @@ def get_item(vuln, test, check_type):
                       description=description,
                       severity=severity,
                       numerical_severity=numerical_severity,
-                      scanner_confidence=scanner_confidence,
                       mitigation=mitigation,
-                      unique_id_from_tool=unique_id_from_tool,
                       references=references,
                       file_path=file_path,
-                      sourcefile=sourcefile,
-                      line=line_sink,
-                      sast_source_object=sast_object,
-                      sast_sink_object=sast_object,
-                      sast_source_file_path=file_path,
-                      sast_source_line=sast_source_line,
-                      cwe=cwe,
-                      cve=cve,
+                      line=source_line,
+                      component_name=resource,
                       static_finding=True,
                       dynamic_finding=False)
 
