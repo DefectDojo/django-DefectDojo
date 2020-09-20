@@ -11,6 +11,7 @@ from dojo.utils import add_breadcrumb, get_words_for_field
 import re
 from dojo.finding.views import prefetch_for_findings
 from dojo.filters import OpenFindingFilter
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +49,7 @@ def simple_search(request):
     component_words = None
     paged_generic = None
 
-    max_results = 100
+    max_results = settings.SEARCH_MAX_RESULTS
 
     # if request.method == 'GET' and "query" in request.GET:
     if request.method == 'GET':
@@ -112,6 +113,7 @@ def simple_search(request):
             engagements = Engagement.objects.all()
             products = Product.objects.all()
             endpoints = Endpoint.objects.all()
+            finding_templates = Finding_Template.objects.all()
 
             if not request.user.is_staff:
                 findings = findings.filter(test__engagement__product__authorized_users__in=[request.user])
@@ -125,42 +127,16 @@ def simple_search(request):
             findings_filter = None
             title_words = None
             component_words = None
-            if findings:
-                # findings = findings.prefetch_related('test', 'test__engagement', 'test__engagement__product',
-                #  'risk_acceptance_set', 'test__test_type', 'tagged_items__tag', 'test__engagement__product__tagged_items__tag')
-
-                # findings = prefetch_for_findings(findings)
-                # # some over the top tag displaying happening...
-                # findings = findings.prefetch_related('test__engagement__product__tagged_items__tag')
-                if False:
-                    print('1')
-
-            if products:
-                products = products.prefetch_related('tagged_items__tag')
-
-            if engagements:
-                engagements = engagements.prefetch_related('product', 'product__tagged_items__tag', 'tagged_items__tag')
-
-            if tests:
-                tests = tests.prefetch_related('engagement', 'engagement__product', 'test_type', 'tagged_items__tag', 'engagement__tagged_items__tag', 'engagement__product__tagged_items__tag')
-
-            if endpoints:
-                # more prefetcing and/or rendering of counts needed. waiting for https://github.com/DefectDojo/django-DefectDojo/pull/2855
-                endpoints = endpoints.prefetch_related('product', 'tagged_items__tag', 'product__tagged_items__tag')
-
-            if languages:
-                languages = languages.prefetch_related('product', 'product__tagged_items__tag')
 
             tags = clean_query
-            # tags = ",".join(clean_query.split(" "))
+            # search tags first to avoid errors due to slicing too early
             if search_tags:
-                # search tags first to avoid errors due to slicing too early
-                tagged_findings = TaggedItem.objects.get_by_model(findings, tags)[:100]
-                tagged_finding_templates = TaggedItem.objects.get_by_model(Finding_Template, tags)[:100]
-                tagged_tests = TaggedItem.objects.get_by_model(tests, tags)[:100]
-                tagged_engagements = TaggedItem.objects.get_by_model(engagements, tags)[:100]
-                tagged_products = TaggedItem.objects.get_union_by_model(products, tags)[:100]
-                tagged_endpoints = TaggedItem.objects.get_by_model(endpoints, tags)[:100]
+                tagged_findings = TaggedItem.objects.get_by_model(findings, tags)[:max_results]
+                tagged_finding_templates = TaggedItem.objects.get_by_model(Finding_Template, tags)[:max_results]
+                tagged_tests = TaggedItem.objects.get_by_model(tests, tags)[:max_results]
+                tagged_engagements = TaggedItem.objects.get_by_model(engagements, tags)[:max_results]
+                tagged_products = TaggedItem.objects.get_union_by_model(products, tags)[:max_results]
+                tagged_endpoints = TaggedItem.objects.get_by_model(endpoints, tags)[:max_results]
             else:
                 tagged_findings = None
                 tagged_finding_templates = None
@@ -176,9 +152,9 @@ def simple_search(request):
                 findings = findings_filter.qs
 
                 if clean_query:
-                    logger.debug('going watston with: %s', clean_query)
-                    watson_findings = watson.filter(findings_filter.qs, clean_query)[:100]
-                    findings = findings.filter(id__in=[watson.id for watson in watson_findings])
+                    logger.debug('going watson with: %s', clean_query)
+                    watson_results = watson.filter(findings_filter.qs, clean_query)[:max_results]
+                    findings = findings.filter(id__in=[watson.id for watson in watson_results])
 
                 # prefetch after watson to avoid inavlid query errors due to watson not understanding prefetching
                 findings = prefetch_for_findings(findings)
@@ -205,37 +181,46 @@ def simple_search(request):
             #         logger.debug('findings result: %s', vars(result))
 
             if search_finding_templates:
-                finding_templates = watson.search(clean_query, models=(Finding_Template,))
+                watson_results = watson.filter(finding_templates, clean_query)
+                finding_templates = finding_templates.filter(id__in=[watson.id for watson in watson_results])
                 finding_templates = finding_templates[:max_results]
             else:
                 finding_templates = None
 
             if search_tests:
-                tests = watson.filter(tests, clean_query)
+                watson_results = watson.filter(tests, clean_query)
+                tests = tests.filter(id__in=[watson.id for watson in watson_results])
+                tests = tests.prefetch_related('engagement', 'engagement__product', 'test_type', 'tagged_items__tag', 'engagement__tagged_items__tag', 'engagement__product__tagged_items__tag')
                 tests = tests[:max_results]
             else:
                 tests = None
 
             if search_engagements:
-                engagements = watson.filter(engagements, clean_query)
+                watson_results = watson.filter(engagements, clean_query)
+                engagements = engagements.filter(id__in=[watson.id for watson in watson_results])
+                engagements = engagements.prefetch_related('product', 'product__tagged_items__tag', 'tagged_items__tag')
                 engagements = engagements[:max_results]
             else:
                 engagements = None
 
             if search_products:
-                products = watson.filter(products, clean_query)
+                watson_results = watson.filter(products, clean_query)
+                products = products.filter(id__in=[watson.id for watson in watson_results])
+                products = products.prefetch_related('tagged_items__tag')
                 products = products[:max_results]
             else:
                 products = None
 
             if search_endpoints:
                 endpoints = endpoints.filter(Q(host__icontains=clean_query) | Q(path__icontains=clean_query) | Q(fqdn__icontains=clean_query) | Q(protocol__icontains=clean_query))
+                endpoints = endpoints.prefetch_related('product', 'tagged_items__tag', 'product__tagged_items__tag')
                 endpoints = endpoints[:max_results]
             else:
                 endpoints = None
 
             if search_languages:
                 languages = Languages.objects.filter(language__language__icontains=clean_query)
+                languages = languages.prefetch_related('product', 'product__tagged_items__tag')
                 languages = languages[:max_results]
             else:
                 languages = None
