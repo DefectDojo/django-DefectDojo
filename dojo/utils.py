@@ -1390,9 +1390,6 @@ def add_jira_issue(find, push_to_jira):
                         'issuetype': {
                             'name': jira_conf.default_issue_type
                         },
-                        'priority': {
-                            'name': jira_conf.get_priority(find.severity)
-                        }
                 }
 
                 if jpkey.component:
@@ -1402,14 +1399,21 @@ def add_jira_issue(find, push_to_jira):
                             },
                     ]
 
+                # populate duedate field, but only if it's available for this project + issuetype
+                if not meta:
+                    meta = jira_meta(jira, jpkey)
+
+                if 'priority' in meta['projects'][0]['issuetypes'][0]['fields']:
+                    fields['priority'] = {
+                                            'name': jira_conf.get_priority(find.severity)
+                                        }
+
                 labels = get_labels(find)
                 if labels:
-                    fields['labels'] = labels
+                    if 'labels' in meta['projects'][0]['issuetypes'][0]['fields']:
+                        fields['labels'] = labels
 
                 if System_Settings.objects.get().enable_finding_sla:
-                    # populate duedate field, but only if it's available for this project + issuetype
-                    if not meta:
-                        meta = jira_meta(jira, jpkey)
 
                     if 'duedate' in meta['projects'][0]['issuetypes'][0]['fields']:
                         # jira wants YYYY-MM-DD
@@ -1450,7 +1454,7 @@ def add_jira_issue(find, push_to_jira):
                 # Upload dojo finding screenshots to Jira
                 for pic in find.images.all():
                     jira_attachment(
-                        jira, issue,
+                        find, jira, issue,
                         settings.MEDIA_ROOT + pic.image_large.name)
 
                     # if jpkey.enable_engagement_epic_mapping:
@@ -1469,7 +1473,7 @@ def jira_meta(jira, jpkey):
     return jira.createmeta(projectKeys=jpkey.project_key, issuetypeNames=jpkey.conf.default_issue_type, expand="projects.issuetypes.fields")
 
 
-def jira_attachment(jira, issue, file, jira_filename=None):
+def jira_attachment(finding, jira, issue, file, jira_filename=None):
     basename = file
     if jira_filename is None:
         basename = os.path.basename(file)
@@ -1487,7 +1491,7 @@ def jira_attachment(jira, issue, file, jira_filename=None):
                 with open(file, 'rb') as f:
                     jira.add_attachment(issue=issue, attachment=f)
         except JIRAError as e:
-            log_jira_alert("Attachment: " + e.text)
+            log_jira_alert("Attachment: " + e.text, finding)
 
 
 def jira_check_attachment(issue, source_file_name):
@@ -1536,21 +1540,22 @@ def update_jira_issue(find, push_to_jira):
                 ]
                 fields = {"components": component}
 
+            if not meta:
+                meta = jira_meta(jira, jpkey)
+
             labels = get_labels(find)
             if labels:
-                fields['labels'] = labels
+                if 'labels' in meta['projects'][0]['issuetypes'][0]['fields']:
+                    fields['labels'] = labels
 
             if len(find.endpoints.all()) > 0:
-                if not meta:
-                    meta = jira_meta(jira, jpkey)
-
                 if 'environment' in meta['projects'][0]['issuetypes'][0]['fields']:
                     environment = "\n".join([str(endpoint) for endpoint in find.endpoints.all()])
                     fields['environment'] = environment
 
             # Upload dojo finding screenshots to Jira
             for pic in find.images.all():
-                jira_attachment(jira, issue,
+                jira_attachment(find, jira, issue,
                                 settings.MEDIA_ROOT + pic.image_large.name)
 
             logger.debug('sending fields to JIRA: %s', fields)
