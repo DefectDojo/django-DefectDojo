@@ -6,6 +6,7 @@ from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string
 from django.db.models import Q, Count, Prefetch
 from django.urls import reverse
+from dojo.celery import app
 
 
 logger = logging.getLogger(__name__)
@@ -156,6 +157,7 @@ def process_notifications(event, notifications=None, *args, **kwargs):
         send_alert_notification(event, notifications.user, *args, **kwargs)
 
 
+@app.task(name='send_slack_notification')
 def send_slack_notification(event, user=None, *args, **kwargs):
     from dojo.utils import get_system_setting
 
@@ -212,6 +214,7 @@ def send_slack_notification(event, user=None, *args, **kwargs):
         log_alert(e, 'Slack Notification', title=kwargs['title'], description=str(e), url=kwargs['url'])
 
 
+@app.task(name='send_hipchat_notification')
 def send_hipchat_notification(event, user=None, *args, **kwargs):
     from dojo.utils import get_system_setting
     try:
@@ -234,6 +237,7 @@ def send_hipchat_notification(event, user=None, *args, **kwargs):
         pass
 
 
+@app.task(name='send_mail_notification')
 def send_mail_notification(event, user=None, *args, **kwargs):
     print('going to email finally')
     from dojo.utils import get_system_setting

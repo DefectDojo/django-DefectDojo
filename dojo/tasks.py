@@ -6,6 +6,7 @@ from django.core.files.base import ContentFile
 from django.urls import reverse
 from django.template.loader import render_to_string
 from django.utils.http import urlencode
+from dojo.celery import app
 from celery.utils.log import get_task_logger
 from celery.decorators import task
 from dojo.models import Product, Finding, Engagement, System_Settings
@@ -13,7 +14,6 @@ from django.utils import timezone
 from dojo.signals import dedupe_signal
 
 import pdfkit
-from dojo.celery import app
 from dojo.tools.tool_issue_updater import tool_issue_updater, update_findings_from_source_issues
 from dojo.utils import sync_false_history, calculate_grade
 from dojo.reports.widgets import report_widget_factory
@@ -21,7 +21,7 @@ from dojo.utils import add_comment, add_epic, add_jira_issue, update_epic, \
                        close_epic, sync_rules, fix_loop_duplicates, \
                        rename_whitesource_finding, update_external_issue, add_external_issue, \
                        close_external_issue, reopen_external_issue, sla_compute_and_notify
-from dojo.notifications.helper import create_notification, send_hipchat_notification, send_mail_notification, send_slack_notification
+from dojo.notifications.helper import create_notification
 import logging
 
 fmt = getattr(settings, 'LOG_FORMAT', None)
@@ -358,24 +358,6 @@ def async_dupe_delete(*args, **kwargs):
 @task(name='celery_status', ignore_result=False)
 def celery_status():
     return True
-
-
-@app.task(name='send_slack_notification')
-def send_slack_notification_task(*args, **kwargs):
-    logger.debug("send_slack_notification async")
-    send_slack_notification(*args, **kwargs)
-
-
-@app.task(name='send_mail_notification')
-def send_mail_notification_task(*args, **kwargs):
-    logger.debug("send_mail_notification async")
-    send_mail_notification(*args, **kwargs)
-
-
-@app.task(name='send_hipchat_notification')
-def send_hipchat_notification_task(*args, **kwargs):
-    logger.debug("send_hipchat_notification async")
-    send_hipchat_notification(*args, **kwargs)
 
 
 @app.task(name='dojo.tasks.async_sla_compute_and_notify')

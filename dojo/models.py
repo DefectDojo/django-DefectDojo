@@ -1947,7 +1947,7 @@ class Finding(models.Model):
         # Adding a snippet here for push to JIRA so that it's in one place
         if push_to_jira:
             logger.debug('pushing to jira from finding.save()')
-            from dojo.tasks import update_jira_issue_task, add_jira_issue_task
+            from dojo.tasks import add_jira_issue_task
             from dojo.utils import add_jira_issue, update_jira_issue
             if jira_issue_exists:
                 if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
