@@ -50,23 +50,11 @@ if [ -z "${TEST}" ]; then
   done
   echo
 
-  # Create Helm and wait for Tiller to become ready
-  helm init
-  echo -n "Waiting for Tiller "
-  until [[ "True" == "$(kubectl get pod \
-    --selector=name=tiller \
-    --namespace=kube-system \
-    -o 'jsonpath={.items[*].status.conditions[?(@.type=="Ready")].status}')" ]]
-  do
-    sleep 1
-    echo -n "."
-  done
-  echo
 
-  # Update Helm repository
-  helm repo update
+
 
   # Update Helm dependencies for DefectDojo
+  helm repo add stable https://kubernetes-charts.storage.googleapis.com/
   helm dependency update ./helm/defectdojo
 
   # Set Helm settings for the broker
@@ -180,7 +168,7 @@ if [ -z "${TEST}" ]; then
     items=`kubectl get pods -o name | grep slave | wc -l`
     echo "Number of replicas $items"
     if [[ $items < 1 ]]; then
-      return_value=1
+      exit 1
     fi
   travis_fold end defectdojo_tests_replication
   fi
@@ -193,7 +181,7 @@ if [ -z "${TEST}" ]; then
     sed "s/pod\///g") -c uwsgi printenv | grep testme | wc -l`
     echo "Number of items $items"
     if [[ $items < 2 ]]; then
-      return_value=1
+      exit 1
     fi
   travis_fold end defectdojo_tests_extravars
   fi
