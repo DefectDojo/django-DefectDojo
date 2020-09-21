@@ -113,9 +113,7 @@ def process_notifications(event, notifications=None, *args, **kwargs):
         logger.warn('no notifications!')
         return
 
-    sync = 'initiator' in kwargs and hasattr(kwargs['initiator'], 'usercontactinfo') and kwargs['initiator'].usercontactinfo.block_execution
-
-    # sync = True
+    sync = 'initiator' in kwargs and Dojo_User.wants_block_execution(kwargs['initiator'])
 
     # logger.debug('sync: %s %s', sync, vars(notifications))
     logger.debug('sending notification ' + ('synchronously' if sync else 'asynchronously'))

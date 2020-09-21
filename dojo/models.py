@@ -1866,6 +1866,7 @@ class Finding(models.Model):
         if not user:
             from dojo.utils import get_current_user
             user = get_current_user()
+            logger.debug('finding.save() getting current user: %s', user)
 
         jira_issue_exists = JIRA_Issue.objects.filter(finding=self).exists()
         push_to_jira = getattr(self, 'push_to_jira', push_to_jira)
