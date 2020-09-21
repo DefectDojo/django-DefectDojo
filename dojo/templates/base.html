@@ -630,6 +630,7 @@
 
         function htmlEscape(str) {
           return str
+            .replace(/\n/g, " ")
             .replace(/&/g, '&amp;')
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#39;')
@@ -643,12 +644,15 @@
                 $('.dropdown-alerts').empty();
                 $.each(data, function(i, elem) {
                   var titleField = elem.fields.title ? elem.fields.title : elem.fields.description;
-                  var desc = titleField.length < 50 ? titleField : jQuery.trim(titleField).substring(0,50).trim(this) + '...';
+                  var display_title = titleField.length < 50 ? titleField : jQuery.trim(titleField).substring(0,50).trim(this) + '...';
+                  var description = elem.fields.description
+                  var display_description = description ? description.length < 100 ? description : jQuery.trim(description).substring(0,100).trim(this) + '...': ''
                   var dropdown_alert = "alert-list" + i;
                   $('.dropdown-alerts').append('<li><div style="padding: 3px 20px;"><i class="fa fa-' + htmlEscape(elem.fields.icon) +
-                                                ' fa-fw"></i><a href="' + htmlEscape(elem.fields.url) + '" id=' + dropdown_alert + '></a><span class="pull-right text-muted small">' +
+                                                ' fa-fw"></i><a href="' + htmlEscape(elem.fields.url) + '" id=' + dropdown_alert + 
+                                                ' title="' + htmlEscape(display_description) + '"></a><span class="pull-right text-muted small">' +
                                                htmlEscape(elem.fields.source) + '</span></div></li><li class="divider"></li>');
-                  $("#" + dropdown_alert).text(desc);
+                  $("#" + dropdown_alert).text(display_title);
                 });
                 $('.dropdown-alerts').append('<li><a class="text-center" href="{% url "alerts" %}"><strong>See All Alerts </strong>' +
                                              '<i class="fa fa-angle-right"></i></a></li>');
