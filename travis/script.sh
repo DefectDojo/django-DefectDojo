@@ -127,8 +127,8 @@ if [ -z "${TEST}" ]; then
   esac
   # Install DefectDojo into Kubernetes and wait for it
   helm install \
+    defectdojo \
     ./helm/defectdojo \
-    --name=defectdojo \
     --set django.ingress.enabled=false \
     --set imagePullPolicy=Never \
     ${HELM_BROKER_SETTINGS} \
@@ -161,6 +161,7 @@ if [ -z "${TEST}" ]; then
   kubectl get pods
   travis_fold end minikube_install
 
+
   # Test if postgres has replication enabled
   if [[ "${REPLICATION}" == "enabled" ]]
   then
@@ -168,7 +169,8 @@ if [ -z "${TEST}" ]; then
     items=`kubectl get pods -o name | grep slave | wc -l`
     echo "Number of replicas $items"
     if [[ $items < 1 ]]; then
-      exit 1
+      echo "Wrong number of replicas"
+      return_value=1
     fi
   travis_fold end defectdojo_tests_replication
   fi
@@ -181,7 +183,8 @@ if [ -z "${TEST}" ]; then
     sed "s/pod\///g") -c uwsgi printenv | grep testme | wc -l`
     echo "Number of items $items"
     if [[ $items < 2 ]]; then
-      exit 1
+      echo "Missing extra variables"
+      return_value=1
     fi
   travis_fold end defectdojo_tests_extravars
   fi
@@ -200,8 +203,8 @@ if [ -z "${TEST}" ]; then
   kubectl get pods
 
   # Uninstall
-  echo "Deleting DefectDojo from Kubernetes"
-  helm delete defectdojo --purge
+  echo "Removing DefectDojo from Kubernetes"
+  helm uninstall defectdojo
   kubectl get pods
   travis_fold end defectdojo_tests
 
