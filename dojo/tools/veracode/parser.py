@@ -5,6 +5,10 @@ from dojo.models import Finding
 from hashlib import sha256
 
 
+'''
+This parser is written for Veracode Detailed XML reports, version 1.5.
+Version is annotated in the report, `detailedreport/@report_format_version`.
+'''
 class VeracodeXMLParser(object):
     ns = {'x': 'https://www.veracode.com/schema/reports/export/1.0'}
     vc_severity_mapping = {
@@ -16,8 +20,15 @@ class VeracodeXMLParser(object):
     }
 
     def __init__(self, filename, test):
+        if filename is None:
+            self.items = list()
+            return
+        try:
+            xml = etree.parse(filename)
+        except:
+            raise NamespaceErr('Cannot parse this report. Make sure to upload a proper Veracode Detailed XML report.')
+
         ns = self.ns
-        xml = etree.parse(filename)
         report_node = xml.xpath('/x:detailedreport', namespaces=self.ns)[0]
 
         if not report_node:
