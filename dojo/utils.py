@@ -36,7 +36,7 @@ import logging
 import itertools
 from django.contrib import messages
 from django.http import HttpResponseRedirect
-from crum import get_current_user
+import crum
 from celery.decorators import task
 
 logger = logging.getLogger(__name__)
@@ -2276,7 +2276,5 @@ def sla_compute_and_notify(*args, **kwargs):
         logger.info("Findings SLA is not enabled.")
 
 
-def get_celery_context(request):
-    context = {}
-    context['user'] = get_current_user()
-    return context
+def get_current_user():
+    return crum.get_current_user()

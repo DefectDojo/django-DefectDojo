@@ -1876,12 +1876,12 @@ def finding_bulk_update_all(request, pid=None):
                             log_jira_alert('Finding cannot be pushed to jira as there is no jira configuration for this product.', finding)
                         else:
                             if JIRA_Issue.objects.filter(finding=finding).exists():
-                                if request.user.usercontactinfo.block_execution:
+                                if Dojo_User.wants_block_execution(request.user):
                                     update_jira_issue(finding, True)
                                 else:
                                     update_jira_issue.delay(finding, True)
                             else:
-                                if request.user.usercontactinfo.block_execution:
+                                if Dojo_User.wants_block_execution(request.user):
                                     add_jira_issue(finding, True)
                                 else:
                                     add_jira_issue_task.delay(finding, True)
@@ -2113,20 +2113,20 @@ def push_to_jira(request, fid):
     try:
         if finding.jira():
             logger.info('trying to push %d:%s to JIRA to update JIRA issue', finding.id, finding.title)
-            if hasattr(request.user, 'usercontactinfo') and request.user.usercontactinfo.block_execution:
+            if Dojo_User.wants_block_execution(request.user):
                 update_jira_issue(finding, True)
                 message = 'Linked JIRA issue succesfully updated.'
             else:
                 update_jira_issue.delay(finding, True)
-                message = 'Linked JIRA issue succesfully updated, but check alerts for background errors.'
+                message = 'Action queued to update linked JIRA issue, check alerts for background errors.'
         else:
             logger.info('trying to push %d:%s to JIRA to create a new JIRA issue', finding.id, finding.title)
-            if hasattr(request.user, 'usercontactinfo') and request.user.usercontactinfo.block_execution:
+            if Dojo_User.wants_block_execution(request.user):
                 add_jira_issue(finding, True)
                 message = 'JIRA issue created succesfully'
             else:
                 add_jira_issue_task.delay(finding, True)
-                message = 'JIRA issue created succesfully, but check alerts for background errors'
+                message = 'Action queued to created linked JIRA issue, check alerts for background errors.'
 
         # it may look like succes here, but the add_jira_issue and update_jira_issue are swallowing exceptions
         # but cant't change too much now without having a test suite, so leave as is for now with the addition warning message to check alerts for background errors.
