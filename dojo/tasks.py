@@ -17,7 +17,7 @@ from dojo.celery import app
 from dojo.tools.tool_issue_updater import tool_issue_updater, update_findings_from_source_issues
 from dojo.utils import sync_false_history, calculate_grade
 from dojo.reports.widgets import report_widget_factory
-from dojo.utils import add_comment, add_epic, add_jira_issue, update_epic, update_jira_issue, \
+from dojo.utils import add_comment, add_epic, add_jira_issue, update_epic, \
                        close_epic, sync_rules, fix_loop_duplicates, \
                        rename_whitesource_finding, update_external_issue, add_external_issue, \
                        close_external_issue, reopen_external_issue, sla_compute_and_notify
@@ -268,10 +268,10 @@ def add_jira_issue_task(find, push_to_jira):
     add_jira_issue(find, push_to_jira)
 
 
-@task(name='update_jira_issue_task')
-def update_jira_issue_task(find, push_to_jira):
-    logger.info("update issue task")
-    update_jira_issue(find, push_to_jira)
+# @task(name='update_jira_issue_task')
+# def update_jira_issue_task(find, push_to_jira):
+#     logger.info("update issue task")
+#     update_jira_issue(find, push_to_jira)
 
 
 @task(name='add_epic_task')

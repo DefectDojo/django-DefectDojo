@@ -44,7 +44,7 @@ from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_
     jira_get_issue
 from dojo.notifications.helper import create_notification
 
-from dojo.tasks import add_jira_issue_task, update_jira_issue_task, update_external_issue_task, add_comment_task, \
+from dojo.tasks import add_jira_issue_task, update_external_issue_task, add_comment_task, \
     add_external_issue_task, close_external_issue_task, reopen_external_issue_task
 from django.template.defaultfilters import pluralize
 from django.db.models import Q, QuerySet, Prefetch, Count
@@ -1877,14 +1877,14 @@ def finding_bulk_update_all(request, pid=None):
                         else:
                             if JIRA_Issue.objects.filter(finding=finding).exists():
                                 if request.user.usercontactinfo.block_execution:
-                                    update_jira_issue(finding, True, get_celery_context())
+                                    update_jira_issue(finding, True)
                                 else:
-                                    update_jira_issue_task.delay(finding, True, get_celery_context())
+                                    update_jira_issue.delay(finding, True)
                             else:
                                 if request.user.usercontactinfo.block_execution:
-                                    add_jira_issue(finding, True, get_celery_context())
+                                    add_jira_issue(finding, True)
                                 else:
-                                    add_jira_issue_task.delay(finding, True, get_celery_context())
+                                    add_jira_issue_task.delay(finding, True)
 
                 messages.add_message(request,
                                      messages.SUCCESS,
@@ -2115,18 +2115,18 @@ def push_to_jira(request, fid):
             logger.info('trying to push %d:%s to JIRA to update JIRA issue', finding.id, finding.title)
             if hasattr(request.user, 'usercontactinfo') and request.user.usercontactinfo.block_execution:
                 update_jira_issue(finding, True)
-                message = 'Linked JIRA issue succesfully updated, but check alerts for background errors.'
+                message = 'Linked JIRA issue succesfully updated.'
             else:
-                update_jira_issue_task.delay(finding, True)
-                message = 'Update to linked JIRA issue queued succesfully.'
+                update_jira_issue.delay(finding, True)
+                message = 'Linked JIRA issue succesfully updated, but check alerts for background errors.'
         else:
             logger.info('trying to push %d:%s to JIRA to create a new JIRA issue', finding.id, finding.title)
             if hasattr(request.user, 'usercontactinfo') and request.user.usercontactinfo.block_execution:
                 add_jira_issue(finding, True)
-                message = 'JIRA issue created succesfully, but check alerts for background errors'
+                message = 'JIRA issue created succesfully'
             else:
                 add_jira_issue_task.delay(finding, True)
-                message = 'JIRA issue creation queued succesfully.'
+                message = 'JIRA issue created succesfully, but check alerts for background errors'
 
         # it may look like succes here, but the add_jira_issue and update_jira_issue are swallowing exceptions
         # but cant't change too much now without having a test suite, so leave as is for now with the addition warning message to check alerts for background errors.

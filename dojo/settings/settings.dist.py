@@ -593,7 +593,7 @@ DJANGO_MIDDLEWARE_CLASSES = [
     'dojo.middleware.LoginRequiredMiddleware',
     'social_django.middleware.SocialAuthExceptionMiddleware',
     'watson.middleware.SearchContextMiddleware',
-    'auditlog.middleware.AuditlogMiddleware'
+    'auditlog.middleware.AuditlogMiddleware',
     'crum.CurrentRequestUserMiddleware',
 ]
 

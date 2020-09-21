@@ -1951,14 +1951,14 @@ class Finding(models.Model):
             from dojo.utils import add_jira_issue, update_jira_issue
             if jira_issue_exists:
                 if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
-                    update_jira_issue(self, True, get_celery_context())
+                    update_jira_issue(self, True)
                 else:
-                    update_jira_issue_task.delay(self, True, get_celery_context())
+                    update_jira_issue_task.delay(self, True)
             else:
                 if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
-                    add_jira_issue(self, True, get_celery_context())
+                    add_jira_issue(self, True)
                 else:
-                    add_jira_issue_task.delay(self, True, get_celery_context())
+                    add_jira_issue_task.delay(self, True)
 
     def delete(self, *args, **kwargs):
         for find in self.original_finding.all():

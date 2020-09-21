@@ -37,7 +37,7 @@ import itertools
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 from crum import get_current_user
-
+from celery.decorators import task
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -1502,6 +1502,7 @@ def jira_check_attachment(issue, source_file_name):
     return file_exists
 
 
+@task(name='update_jira_issue_task')
 def update_jira_issue(find, push_to_jira):
     logger.info('trying to update a linked jira issue for %d:%s', find.id, find.title)
     prod = Product.objects.get(
