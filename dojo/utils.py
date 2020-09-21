@@ -1462,7 +1462,7 @@ def add_jira_issue(find, push_to_jira):
                     #      issue_list = [j_issue.jira_id,]
                     #      jira.add_jira_issues_to_epic(epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
             except JIRAError as e:
-                logger.error(e.text)
+                logger.exception(e)
                 log_jira_alert(e.text, find)
         else:
             log_jira_alert("A Finding needs to be both Active and Verified to be pushed to JIRA.", find)
@@ -1491,6 +1491,7 @@ def jira_attachment(finding, jira, issue, file, jira_filename=None):
                 with open(file, 'rb') as f:
                     jira.add_attachment(issue=issue, attachment=f)
         except JIRAError as e:
+            logger.exception(e)
             log_jira_alert("Attachment: " + e.text, finding)
 
 
@@ -1570,6 +1571,7 @@ def update_jira_issue(find, push_to_jira):
             find.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
 
         except JIRAError as e:
+            logger.exception(e)
             log_jira_alert(e.text, find)
 
         req_url = jira_conf.url + '/rest/api/latest/issue/' + \
@@ -1692,6 +1694,7 @@ def jira_get_issue(jpkey, issue_key):
         return issue
     except JIRAError as jira_error:
         logger.debug('error retrieving jira issue ' + issue_key + ' ' + str(jira_error))
+        logger.exception(jira_error)
         log_jira_generic_alert('error retrieving jira issue ' + issue_key, str(jira_error))
         return None
 

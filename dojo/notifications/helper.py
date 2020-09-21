@@ -139,11 +139,6 @@ def process_notifications(event, notifications=None, *args, **kwargs):
     logger.debug('mail_enabled: %s', mail_enabled)
     logger.debug('getattr(notifications, event): %s', getattr(notifications, event))
     if mail_enabled and 'mail' in getattr(notifications, event):
-        logger.debug('mailing!!')
-        # print(f' Args: {args}')
-        # print(f' Kwargs: {kwargs}')
-        # print(event)
-        # print(notifications.user)
         if not sync:
             send_mail_notification.delay(event, notifications.user, *args, **kwargs)
         else:
@@ -235,7 +230,6 @@ def send_hipchat_notification(event, user=None, *args, **kwargs):
 
 @app.task(name='send_mail_notification')
 def send_mail_notification(event, user=None, *args, **kwargs):
-    print('going to email finally')
     from dojo.utils import get_system_setting
 
     if user:
@@ -337,6 +331,5 @@ def log_alert(e, notification_type=None, *args, **kwargs):
             icon="exclamation-triangle",
             source=notification_type[:100] if notification_type else kwargs.get('source', 'unknown')[:100])
         # relative urls will fail validation
-        print('alert.description:', alert.description)
         alert.clean_fields(exclude=['url'])
         alert.save()
