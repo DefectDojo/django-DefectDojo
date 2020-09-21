@@ -102,11 +102,11 @@ def metrics(request, mtype):
     findings.qs  # this is needed to load details from filter since it is lazy
     active_findings.qs  # this is needed to load details from filter since it is lazy
 
-    start_date = findings.filters['date'].start_date
+    start_date = findings.qs.earliest('date').date
     start_date = datetime(start_date.year,
                           start_date.month, start_date.day,
                           tzinfo=timezone.get_current_timezone())
-    end_date = findings.filters['date'].end_date
+    end_date = findings.qs.latest('date').date
     end_date = datetime(end_date.year,
                         end_date.month, end_date.day,
                         tzinfo=timezone.get_current_timezone())

@@ -24,6 +24,6 @@ urlpatterns = [
         name='edit_endpoint_meta_data'),
     url(r'^endpoint/bulk$', views.endpoint_bulk_update_all,
         name='endpoints_bulk_all'),
-    url(r'^endpoint/bulk_status$', views.endpoint_status_bulk_update,
+    url(r'^endpoint/(?P<fid>\d+)/bulk_status$', views.endpoint_status_bulk_update,
         name='endpoints_status_bulk'),
 ]

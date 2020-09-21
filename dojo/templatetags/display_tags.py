@@ -9,6 +9,7 @@ from django.utils.text import normalize_newlines
 from django.urls import reverse
 from django.contrib.auth.models import User
 from dojo.utils import prepare_for_view, get_system_setting, get_full_url
+from dojo.user.helper import user_is_authorized
 from dojo.models import Check_List, FindingImageAccessToken, Finding, System_Settings, JIRA_PKey, Product
 import markdown
 from django.db.models import Sum, Case, When, IntegerField, Value
@@ -810,15 +811,21 @@ def status_classes(finding):
 
 
 @register.filter
-def is_authorized_for_change(user, finding):
+def is_authorized_for_change(user, obj):
     # print('filter: is_authorized_for_change')
-    return finding.is_authorized(user, 'change')
+    return user_is_authorized(user, 'change', obj)
 
 
 @register.filter
-def is_authorized_for_delete(user, finding):
+def is_authorized_for_delete(user, obj):
     # print('filter: is_authorized_for_delete')
-    return finding.is_authorized(user, 'delete')
+    return user_is_authorized(user, 'delete', obj)
+
+
+@register.filter
+def is_authorized_for_staff(user, obj):
+    # print('filter: is_authorized_for_staff')
+    return user_is_authorized(user, 'staff', obj)
 
 
 @register.filter

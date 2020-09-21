@@ -115,6 +115,9 @@ Pipfile
 Pipfile*
 
 
-# command used locally by devs
-dojo/management/commands/test_*
+#ignore locally added certs
+certs/
+
+# Helm dependencies
+helm/defectdojo/charts
 
