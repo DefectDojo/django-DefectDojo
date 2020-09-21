@@ -46,13 +46,21 @@ def create_notification(event=None, *args, **kwargs):
         if not product and 'test' in kwargs:
             product = kwargs['test'].engagement.product
 
+        if not product and 'finding' in kwargs:
+            product = kwargs['finding'].test.engagement.product
+
         # get users with either global notifications, or a product specific noditiciation
+        # and all admin/superuser, they will always be notified
         users = Dojo_User.objects.filter(is_active=True).prefetch_related(Prefetch(
             "notifications_set",
             queryset=Notifications.objects.filter(Q(product_id=product) | Q(product__isnull=True)),
             to_attr="applicable_notifications"
         )).annotate(applicable_notifications_count=Count('notifications__id', filter=Q(notifications__product_id=product) | Q(notifications__product__isnull=True)))\
             .filter((Q(applicable_notifications_count__gt=0) | Q(is_superuser=True) | Q(is_staff=True)))
+
+        # only send to authorized users or admin/superusers
+        if product:
+            users = users.filter(Q(id__in=product.authorized_users.all()) | Q(is_superuser=True) | Q(is_staff=True))
 
         for user in users:
             # send notifications to user after merging possible multiple notifications records (i.e. personal global + personal product)
@@ -106,7 +114,7 @@ def process_notifications(event, notifications=None, *args, **kwargs):
 
     sync = 'initiator' in kwargs and hasattr(kwargs['initiator'], 'usercontactinfo') and kwargs['initiator'].usercontactinfo.block_execution
 
-    sync = True
+    # sync = True
 
     # logger.debug('sync: %s %s', sync, vars(notifications))
     logger.debug('sending notification ' + ('synchronously' if sync else 'asynchronously'))

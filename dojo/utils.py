@@ -1273,7 +1273,8 @@ def log_jira_alert(error, finding):
         description='Finding: ' + str(finding.id if finding else 'unknown') + ', ' + error,
         url=reverse('view_finding', args=(finding.id, )) if finding else None,
         icon='bullseye',
-        source='JIRA update')
+        source='JIRA update',
+        finding=finding)
 
 
 # Displays an alert for Jira notifications
@@ -1284,7 +1285,7 @@ def log_jira_message(text, finding):
         description=text + " Finding: " + str(finding.id),
         url=reverse('view_finding', args=(finding.id, )),
         icon='bullseye',
-        source='JIRA')
+        source='JIRA', finding=finding)
 
 
 def get_labels(find):
