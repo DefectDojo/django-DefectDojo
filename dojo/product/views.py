@@ -778,7 +778,7 @@ def new_eng_for_app(request, pid, cicd=False):
 
             if form.is_valid() and (jform is None or jform.is_valid()):
                 if 'jiraform-push_to_jira' in request.POST:
-                    if request.user.usercontactinfo.block_execution:
+                    if Dojo_User.wants_block_execution(request.user):
                         logger.debug('calling add_epic')
                         add_epic(new_eng, jform.cleaned_data.get("push_to_jira"))
                     else:

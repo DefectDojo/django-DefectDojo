@@ -517,7 +517,7 @@ def add_temp_finding(request, tid, fid):
             if 'jiraform-push_to_jira' in request.POST:
                 jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_pkey=test.engagement.product.jira_pkey)
                 if jform.is_valid():
-                    if request.user.usercontactinfo.block_execution:
+                    if Dojo_User.wants_block_execution(request.user):
                         add_jira_issue(new_finding, jform.cleaned_data.get('push_to_jira'))
                     else:
                         add_jira_issue_task.delay(new_finding, jform.cleaned_data.get('push_to_jira'))
