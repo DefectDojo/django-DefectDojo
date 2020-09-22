@@ -9,6 +9,7 @@ from django.utils.text import normalize_newlines
 from django.urls import reverse
 from django.contrib.auth.models import User
 from dojo.utils import prepare_for_view, get_system_setting, get_full_url
+from dojo.user.helper import user_is_authorized
 from dojo.models import Check_List, FindingImageAccessToken, Finding, System_Settings, JIRA_PKey, Product
 import markdown
 from django.db.models import Sum, Case, When, IntegerField, Value
@@ -45,6 +46,18 @@ markdown_attrs = {
     "span": ["class"],  # used for code highlighting
     "pre": ["class"],  # used for code highlighting
     "div": ["class"],  # used for code highlighting
+}
+
+finding_related_action_classes_dict = {
+    'reset_finding_duplicate_status': 'fa fa-eraser',
+    'set_finding_as_original': 'fa fa-superpowers',
+    'mark_finding_duplicate': 'fa fa-copy'
+}
+
+finding_related_action_title_dict = {
+    'reset_finding_duplicate_status': 'Reset duplicate status',
+    'set_finding_as_original': 'Set as original',
+    'mark_finding_duplicate': 'Mark as duplicate'
 }
 
 
@@ -781,15 +794,21 @@ def finding_display_status(finding):
 
 
 @register.filter
-def is_authorized_for_change(user, finding):
+def is_authorized_for_change(user, obj):
     # print('filter: is_authorized_for_change')
-    return finding.is_authorized(user, 'change')
+    return user_is_authorized(user, 'change', obj)
 
 
 @register.filter
-def is_authorized_for_delete(user, finding):
+def is_authorized_for_delete(user, obj):
     # print('filter: is_authorized_for_delete')
-    return finding.is_authorized(user, 'delete')
+    return user_is_authorized(user, 'delete', obj)
+
+
+@register.filter
+def is_authorized_for_staff(user, obj):
+    # print('filter: is_authorized_for_staff')
+    return user_is_authorized(user, 'staff', obj)
 
 
 @register.filter
@@ -812,3 +831,33 @@ def jiraencode(value):
         return value
     # jira can't handle some characters inside [] tag for urls https://jira.atlassian.com/browse/CONFSERVER-4009
     return value.replace("|", "").replace("@", "")
+
+
+@register.filter
+def finding_extended_title(finding):
+    if not finding:
+        return ''
+    result = finding.title
+
+    if finding.cve:
+        result += ' (' + finding.cve + ')'
+
+    if finding.cwe:
+        result += ' (CWE-' + str(finding.cwe) + ')'
+
+    return result
+
+
+@register.filter
+def finding_duplicate_cluster_size(finding):
+    return len(finding.duplicate_finding_set()) + (1 if finding.duplicate_finding else 0)
+
+
+@register.filter
+def finding_related_action_classes(related_action):
+    return finding_related_action_classes_dict.get(related_action, '')
+
+
+@register.filter
+def finding_related_action_title(related_action):
+    return finding_related_action_title_dict.get(related_action, '')

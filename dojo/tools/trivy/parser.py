@@ -20,6 +20,7 @@ TRIVY_SEVERITIES = {
 
 DESCRIPTION_TEMPLATE = """{title}
 Target: {target}
+Type: {type}
 Fixed version: {fixed_version}
 
 {description_text}
@@ -59,6 +60,10 @@ class TrivyParser:
                 package_version = vuln.get('InstalledVersion', '')
                 references = '\n'.join(vuln.get('References', []))
                 mitigation = vuln.get('FixedVersion', '')
+                if len(vuln.get('CweIDs', [])) > 0:
+                    cwe = vuln['CweIDs'][0].split("-")[1]
+                else:
+                    cwe = 0
                 title = ' '.join([
                     vuln_id,
                     package_name,
@@ -67,6 +72,7 @@ class TrivyParser:
                 description = DESCRIPTION_TEMPLATE.format(
                     title=vuln.get('Title', ''),
                     target=target,
+                    type=target_data.get('Type', ''),
                     fixed_version=mitigation,
                     description_text=vuln.get('Description', ''),
                 )
@@ -75,9 +81,14 @@ class TrivyParser:
                         test=test,
                         title=title,
                         cve=vuln_id,
+                        cwe=cwe,
                         severity=severity,
                         references=references,
                         description=description,
                         mitigation=mitigation,
+                        component_name=package_name,
+                        component_version=package_version,
+                        static_finding=True,
+                        dynamic_finding=False,
                     )
                 )

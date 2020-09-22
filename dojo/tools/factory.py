@@ -87,6 +87,8 @@ from dojo.tools.huskyci.parser import HuskyCIReportParser
 from dojo.tools.ccvs.parser import CCVSReportParser
 from dojo.tools.awssecurityhub.parser import AwsSecurityFindingFormatParser
 from dojo.tools.semgrep.parser import SemgrepJSONParser
+from dojo.tools.risk_recon.parser import RiskReconParser
+
 
 
 
@@ -281,6 +283,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = AwsSecurityFindingFormatParser(file, test)
     elif scan_type == 'Semgrep JSON Report':
         parser = SemgrepJSONParser(file, test)
+    elif scan_type == 'Risk Recon API Importer':
+        parser = RiskReconParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 
