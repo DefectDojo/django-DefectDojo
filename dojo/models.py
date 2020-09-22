@@ -370,6 +370,38 @@ class Note_Type(models.Model):
         return self.name
 
 
+class NoteHistory(models.Model):
+    note_type = models.ForeignKey(Note_Type, null=True, blank=True, on_delete=models.CASCADE)
+    data = models.TextField()
+    time = models.DateTimeField(null=True, editable=False,
+                                default=get_current_datetime)
+    current_editor = models.ForeignKey(User, editable=False, null=True, on_delete=models.CASCADE)
+
+
+class Notes(models.Model):
+    note_type = models.ForeignKey(Note_Type, related_name='note_type', null=True, blank=True, on_delete=models.CASCADE)
+    entry = models.TextField()
+    date = models.DateTimeField(null=False, editable=False,
+                                default=get_current_datetime)
+    author = models.ForeignKey(User, related_name='editor_notes_set', editable=False, on_delete=models.CASCADE)
+    private = models.BooleanField(default=False)
+    edited = models.BooleanField(default=False)
+    editor = models.ForeignKey(User, related_name='author_notes_set', editable=False, null=True, on_delete=models.CASCADE)
+    edit_time = models.DateTimeField(null=True, editable=False,
+                                default=get_current_datetime)
+    history = models.ManyToManyField(NoteHistory, blank=True,
+                                   editable=False)
+
+    class Meta:
+        ordering = ['-date']
+
+    def __unicode__(self):
+        return self.entry
+
+    def __str__(self):
+        return self.entry
+
+
 class Product_Type(models.Model):
     name = models.CharField(max_length=255, unique=True)
     critical_product = models.BooleanField(default=False)
@@ -496,15 +528,30 @@ class DojoMeta(models.Model):
                                  null=True,
                                  editable=False,
                                  related_name='endpoint_meta')
+    finding = models.ForeignKey('Finding',
+                                 on_delete=models.CASCADE,
+                                 null=True,
+                                 editable=False,
+                                 related_name='finding_meta')
 
     """
     Verify that this metadata entry belongs only to one object.
     """
     def clean(self):
-        if self.product_id is None and self.endpoint_id is None:
-            raise ValidationError('Metadata entries need either a product or an endpoint')
-        if self.product_id is not None and self.endpoint_id is not None:
-            raise ValidationError('Metadata entries may not have both a product and an endpoint')
+
+        ids = [self.product_id,
+               self.endpoint_id,
+               self.finding_id]
+        ids_count = 0
+
+        for id in ids:
+            if id is not None:
+                ids_count += 1
+
+        if ids_count == 0:
+            raise ValidationError('Metadata entries need either a product, an endpoint or a finding')
+        if ids_count > 1:
+            raise ValidationError('Metadata entries may not have more than one relation, either a product, an endpoint either or a finding')
 
     def __unicode__(self):
         return "%s: %s" % (self.name, self.value)
@@ -514,7 +561,8 @@ class DojoMeta(models.Model):
 
     class Meta:
         unique_together = (('product', 'name'),
-                           ('endpoint', 'name'))
+                           ('endpoint', 'name'),
+                           ('finding', 'name'))
 
 
 class Product(models.Model):
@@ -931,6 +979,7 @@ class Engagement(models.Model):
     api_test = models.BooleanField(default=True)
     pen_test = models.BooleanField(default=True)
     check_list = models.BooleanField(default=True)
+    notes = models.ManyToManyField(Notes, blank=True, editable=False)
     status = models.CharField(editable=True, max_length=2000, default='',
                               null=True,
                               choices=(('Not Started', 'Not Started'),
@@ -1214,38 +1263,6 @@ class Endpoint(models.Model):
             return str(self)
 
 
-class NoteHistory(models.Model):
-    note_type = models.ForeignKey(Note_Type, null=True, blank=True, on_delete=models.CASCADE)
-    data = models.TextField()
-    time = models.DateTimeField(null=True, editable=False,
-                                default=get_current_datetime)
-    current_editor = models.ForeignKey(User, editable=False, null=True, on_delete=models.CASCADE)
-
-
-class Notes(models.Model):
-    note_type = models.ForeignKey(Note_Type, related_name='note_type', null=True, blank=True, on_delete=models.CASCADE)
-    entry = models.TextField()
-    date = models.DateTimeField(null=False, editable=False,
-                                default=get_current_datetime)
-    author = models.ForeignKey(User, related_name='editor_notes_set', editable=False, on_delete=models.CASCADE)
-    private = models.BooleanField(default=False)
-    edited = models.BooleanField(default=False)
-    editor = models.ForeignKey(User, related_name='author_notes_set', editable=False, null=True, on_delete=models.CASCADE)
-    edit_time = models.DateTimeField(null=True, editable=False,
-                                default=get_current_datetime)
-    history = models.ManyToManyField(NoteHistory, blank=True,
-                                   editable=False)
-
-    class Meta:
-        ordering = ['-date']
-
-    def __unicode__(self):
-        return self.entry
-
-    def __str__(self):
-        return self.entry
-
-
 class Development_Environment(models.Model):
     name = models.CharField(max_length=200)
 
@@ -1374,6 +1391,8 @@ class Finding(models.Model):
                                message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'.")
     cve = models.CharField(validators=[cve_regex], max_length=28, null=True,
                            help_text="CVE or other vulnerability identifier")
+    cvssv3_regex = RegexValidator(regex=r'^AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]', message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'")
+    cvssv3 = models.TextField(validators=[cvssv3_regex], max_length=117, null=True)
     url = models.TextField(null=True, blank=True, editable=False)
     severity = models.CharField(max_length=200, help_text="The severity level of this flaw (Critical, High, Medium, Low, Informational)")
     description = models.TextField()
@@ -1821,6 +1840,7 @@ class Finding(models.Model):
         long_desc += '*' + self.title + '*\n\n'
         long_desc += '*Severity:* ' + str(self.severity) + '\n\n'
         long_desc += '*Cve:* ' + str(self.cve) + '\n\n'
+        long_desc += '*CVSSv3.0:* ' + str(self.cvssv3) + '\n\n'
         long_desc += '*Product/Engagement:* ' + self.test.engagement.product.name + ' / ' + self.test.engagement.name + '\n\n'
         if self.test.engagement.branch_tag:
             long_desc += '*Branch/Tag:* ' + self.test.engagement.branch_tag + '\n\n'
@@ -1839,9 +1859,14 @@ class Finding(models.Model):
         return long_desc
 
     def save(self, dedupe_option=True, false_history=False, rules_option=True,
-             issue_updater_option=True, push_to_jira=False, *args, **kwargs):
+             issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):
         # Make changes to the finding before it's saved to add a CWE template
         new_finding = False
+
+        if not user:
+            from dojo.utils import get_current_user
+            user = get_current_user()
+            logger.debug('finding.save() getting current user: %s', user)
 
         jira_issue_exists = JIRA_Issue.objects.filter(finding=self).exists()
         push_to_jira = getattr(self, 'push_to_jira', push_to_jira)
@@ -1882,7 +1907,7 @@ class Finding(models.Model):
         if rules_option:
             from dojo.tasks import async_rules
             from dojo.utils import sync_rules
-            if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
+            if Dojo_User.wants_block_execution(user):
                 sync_rules(self, *args, **kwargs)
             else:
                 async_rules(self, *args, **kwargs)
@@ -1896,7 +1921,7 @@ class Finding(models.Model):
             if system_settings.enable_deduplication:
                 from dojo.tasks import async_dedupe
                 try:
-                    if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
+                    if Dojo_User.wants_block_execution(user):
                         dedupe_signal.send(sender=self.__class__, new_finding=self)
                     else:
                         async_dedupe.delay(self, *args, **kwargs)
@@ -1909,7 +1934,7 @@ class Finding(models.Model):
             from dojo.tasks import async_false_history
             from dojo.utils import sync_false_history
             try:
-                if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
+                if Dojo_User.wants_block_execution(user):
                     sync_false_history(self, *args, **kwargs)
                 else:
                     async_false_history.delay(self, *args, **kwargs)
@@ -1927,15 +1952,15 @@ class Finding(models.Model):
         # Adding a snippet here for push to JIRA so that it's in one place
         if push_to_jira:
             logger.debug('pushing to jira from finding.save()')
-            from dojo.tasks import update_jira_issue_task, add_jira_issue_task
+            from dojo.tasks import add_jira_issue_task
             from dojo.utils import add_jira_issue, update_jira_issue
             if jira_issue_exists:
-                if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
+                if Dojo_User.wants_block_execution(user):
                     update_jira_issue(self, True)
                 else:
-                    update_jira_issue_task.delay(self, True)
+                    update_jira_issue.delay(self, True)
             else:
-                if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
+                if Dojo_User.wants_block_execution(user):
                     add_jira_issue(self, True)
                 else:
                     add_jira_issue_task.delay(self, True)
@@ -2032,6 +2057,8 @@ class Finding_Template(models.Model):
     cve_regex = RegexValidator(regex=r'^[A-Z]{1,10}(-\d+)+$',
                                message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'.")
     cve = models.CharField(validators=[cve_regex], max_length=28, null=True)
+    cvssv3_regex = RegexValidator(regex=r'^AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]', message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'")
+    cvssv3 = models.TextField(validators=[cvssv3_regex], max_length=117, null=True)
     severity = models.CharField(max_length=200, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     mitigation = models.TextField(null=True, blank=True)
@@ -2425,7 +2452,7 @@ class Notifications(models.Model):
     test_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     scan_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True, help_text='Triggered whenever an (re-)import has been done that created/updated/closed findings.')
     report_created = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
-    jira_update = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
+    jira_update = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True, verbose_name="JIRA problems", help_text="JIRA sync happens in the background, errors will be shown as notifications/alerts so make sure to subscribe")
     upcoming_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     stale_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     auto_close_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
