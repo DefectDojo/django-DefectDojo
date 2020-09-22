@@ -193,7 +193,7 @@ def edit_engagement(request, eid):
             if 'jiraform-push_to_jira' in request.POST:
                 logger.debug('push_to_jira true')
                 if JIRA_Issue.objects.filter(engagement=eng).exists():
-                    if request.user.usercontactinfo.block_execution:
+                    if Dojo_User.wants_block_execution(request.user):
                         update_epic(
                             eng, jform.cleaned_data.get('push_to_jira'))
                     else:
@@ -201,7 +201,7 @@ def edit_engagement(request, eid):
                             eng, jform.cleaned_data.get('push_to_jira'))
 
                 else:
-                    if request.user.usercontactinfo.block_execution:
+                    if Dojo_User.wants_block_execution(request.user):
                         add_epic(eng, jform.cleaned_data.get('push_to_jira'))
                     else:
                         add_epic_task.delay(eng, jform.cleaned_data.get('push_to_jira'))
