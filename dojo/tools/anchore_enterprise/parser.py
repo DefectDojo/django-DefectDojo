@@ -1,10 +1,14 @@
 import json
+import logging
 import re
 from json.decoder import JSONDecodeError
 from datetime import datetime
 from dojo.models import Finding
 
 # pylint: disable=R0914,R1702
+
+
+logger = logging.getLogger(__name__)
 
 
 class AnchoreEnterprisePolicyCheckParser:
@@ -56,8 +60,9 @@ class AnchoreEnterprisePolicyCheckParser:
                                     self.items.append(find)
                             except (KeyError, IndexError) as err:
                                 raise Exception("Invalid format: {} key not found".format(err))
-        except AttributeError:
-            pass  # import empty policies without error (e.g. policies or images objects are not a dictionary)
+        except AttributeError as err:
+            # import empty policies without error (e.g. policies or images objects are not a dictionary)
+            logger.warning('Exception at %s', 'parsing anchore policy', exc_info=err)
 
 
 def map_gate_action_to_severity(gate):
