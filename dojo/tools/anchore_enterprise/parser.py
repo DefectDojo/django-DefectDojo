@@ -17,44 +17,47 @@ class AnchoreEnterprisePolicyCheckParser:
 
         find_date = datetime.now()
 
-        for checks in data:
-            for policies in checks.values():
-                for images in policies.values():
-                    for evaluation in images:
-                        self.items = list()
-                        try:
-                            results = evaluation['detail']['result']
-                            imageid = results['image_id']
-                            imageids = results['result']
-                            imagechecks = imageids[imageid]
-                            rows = imagechecks['result']['rows']
-                            for row in rows:
-                                repo, tag = row[1].split(':', 2)
-                                description = row[5]
-                                severity = map_gate_action_to_severity(row[6])
-                                policyid = row[8]
-                                policyname = policy_name(evaluation['detail']['policy']['policies'], policyid)
-                                gate = row[3]
-                                triggerid = row[2]
-                                cve = extract_cve(triggerid)
-                                title = policyname + ' - gate|' + gate + ' - trigger|' + triggerid
-                                find = Finding(
-                                    title=title,
-                                    test=test,
-                                    cve=cve,
-                                    description=description,
-                                    severity=severity,
-                                    numerical_severity=Finding.get_number_severity(severity),
-                                    references="Policy ID: {}\nTrigger ID: {}".format(policyid, triggerid),
-                                    file_path=search_filepath(description),
-                                    component_name=repo,
-                                    component_version=tag,
-                                    date=find_date,
-                                    static_finding=True,
-                                    dynamic_finding=False)
-                                self.items.append(find)
-                        except (KeyError, IndexError) as err:
-                            raise Exception("Invalid format: {} key not found".format(err))
+        try:
+            for checks in data:
+                for policies in checks.values():
+                    for images in policies.values():
+                        for evaluation in images:
+                            self.items = list()
+                            try:
+                                results = evaluation['detail']['result']
+                                imageid = results['image_id']
+                                imageids = results['result']
+                                imagechecks = imageids[imageid]
+                                rows = imagechecks['result']['rows']
+                                for row in rows:
+                                    repo, tag = row[1].split(':', 2)
+                                    description = row[5]
+                                    severity = map_gate_action_to_severity(row[6])
+                                    policyid = row[8]
+                                    policyname = policy_name(evaluation['detail']['policy']['policies'], policyid)
+                                    gate = row[3]
+                                    triggerid = row[2]
+                                    cve = extract_cve(triggerid)
+                                    title = policyname + ' - gate|' + gate + ' - trigger|' + triggerid
+                                    find = Finding(
+                                        title=title,
+                                        test=test,
+                                        cve=cve,
+                                        description=description,
+                                        severity=severity,
+                                        numerical_severity=Finding.get_number_severity(severity),
+                                        references="Policy ID: {}\nTrigger ID: {}".format(policyid, triggerid),
+                                        file_path=search_filepath(description),
+                                        component_name=repo,
+                                        component_version=tag,
+                                        date=find_date,
+                                        static_finding=True,
+                                        dynamic_finding=False)
+                                    self.items.append(find)
+                            except (KeyError, IndexError) as err:
+                                raise Exception("Invalid format: {} key not found".format(err))
+        except AttributeError:
+            pass  # import empty policies without error (e.g. policies or images objects are not a dictionary)
 
 
 def map_gate_action_to_severity(gate):
