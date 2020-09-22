@@ -6,7 +6,7 @@ env:
   global:
     - K8S_VERSION=v1.19.0
     - MINIKUBE_VERSION=v1.12.3
-    - HELM_VERSION=v2.16.10
+    - HELM_VERSION=v3.3.2
     - CHANGE_MINIKUBE_NONE_USER=true
   matrix:
     - TEST=flake8
