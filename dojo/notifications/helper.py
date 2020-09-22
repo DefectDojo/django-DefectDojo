@@ -61,12 +61,12 @@ def create_notification(event=None, *args, **kwargs):
         for user in users:
             # send notifications to user after merging possible multiple notifications records (i.e. personal global + personal product)
             # kwargs.update({'user': user})
-            if not product == None:
+            if product is not None:
                 if user in product.authorized_users.all():
                     process_notifications(event, Notifications.merge_notifications_list(user.applicable_notifications), *args, **kwargs)
-                elif user.is_staff == True:
+                elif user.is_staff is True:
                     process_notifications(event, Notifications.merge_notifications_list(user.applicable_notifications), *args, **kwargs)
-            elif user.is_staff == True:
+            elif user.is_staff is True:
                 process_notifications(event, Notifications.merge_notifications_list(user.applicable_notifications), *args, **kwargs)
 
 
