@@ -1884,9 +1884,14 @@ class Finding(models.Model):
         return long_desc
 
     def save(self, dedupe_option=True, false_history=False, rules_option=True,
-             issue_updater_option=True, push_to_jira=False, *args, **kwargs):
+             issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):
         # Make changes to the finding before it's saved to add a CWE template
         new_finding = False
+
+        if not user:
+            from dojo.utils import get_current_user
+            user = get_current_user()
+            logger.debug('finding.save() getting current user: %s', user)
 
         jira_issue_exists = JIRA_Issue.objects.filter(finding=self).exists()
         push_to_jira = getattr(self, 'push_to_jira', push_to_jira)
@@ -1927,7 +1932,7 @@ class Finding(models.Model):
         if rules_option:
             from dojo.tasks import async_rules
             from dojo.utils import sync_rules
-            if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
+            if Dojo_User.wants_block_execution(user):
                 sync_rules(self, *args, **kwargs)
             else:
                 async_rules(self, *args, **kwargs)
@@ -1941,7 +1946,7 @@ class Finding(models.Model):
             if system_settings.enable_deduplication:
                 from dojo.tasks import async_dedupe
                 try:
-                    if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
+                    if Dojo_User.wants_block_execution(user):
                         dedupe_signal.send(sender=self.__class__, new_finding=self)
                     else:
                         async_dedupe.delay(self, *args, **kwargs)
@@ -1954,7 +1959,7 @@ class Finding(models.Model):
             from dojo.tasks import async_false_history
             from dojo.utils import sync_false_history
             try:
-                if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
+                if Dojo_User.wants_block_execution(user):
                     sync_false_history(self, *args, **kwargs)
                 else:
                     async_false_history.delay(self, *args, **kwargs)
@@ -1972,15 +1977,15 @@ class Finding(models.Model):
         # Adding a snippet here for push to JIRA so that it's in one place
         if push_to_jira:
             logger.debug('pushing to jira from finding.save()')
-            from dojo.tasks import update_jira_issue_task, add_jira_issue_task
+            from dojo.tasks import add_jira_issue_task
             from dojo.utils import add_jira_issue, update_jira_issue
             if jira_issue_exists:
-                if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
+                if Dojo_User.wants_block_execution(user):
                     update_jira_issue(self, True)
                 else:
-                    update_jira_issue_task.delay(self, True)
+                    update_jira_issue.delay(self, True)
             else:
-                if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
+                if Dojo_User.wants_block_execution(user):
                     add_jira_issue(self, True)
                 else:
                     add_jira_issue_task.delay(self, True)
@@ -2483,7 +2488,7 @@ class Notifications(models.Model):
     test_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     scan_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True, help_text='Triggered whenever an (re-)import has been done that created/updated/closed findings.')
     report_created = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
-    jira_update = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
+    jira_update = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True, verbose_name="JIRA problems", help_text="JIRA sync happens in the background, errors will be shown as notifications/alerts so make sure to subscribe")
     upcoming_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     stale_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     auto_close_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)

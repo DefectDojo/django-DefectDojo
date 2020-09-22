@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<detailedreport xmlns:xsi="http&#x3a;&#x2f;&#x2f;www.w3.org&#x2f;2001&#x2f;XMLSchema-instance" xmlns="https&#x3a;&#x2f;&#x2f;www.veracode.com&#x2f;schema&#x2f;reports&#x2f;export&#x2f;1.0" xsi:schemaLocation="https&#x3a;&#x2f;&#x2f;www.veracode.com&#x2f;schema&#x2f;reports&#x2f;export&#x2f;1.0 https&#x3a;&#x2f;&#x2f;analysiscenter.veracode.com&#x2f;resource&#x2f;detailedreport.xsd" report_format_version="1.5" account_id="1234" app_name="myapp" app_id="1234" analysis_id="1234" static_analysis_unit_id="1234" sandbox_id="1234" first_build_submitted_date="2020-06-01 10&#x3a;02&#x3a;01 UTC" version="myapp-1234" build_id="1234" submitter="You" platform="Not Specified" assurance_level="1" business_criticality="1" generation_date="2020-06-01 10&#x3a;02&#x3a;01 UTC" veracode_level="VL1" total_flaws="2" flaws_not_mitigated="2" teams="" life_cycle_stage="Not Specified" planned_deployment_date="" last_update_time="2020-06-01 10&#x3a;02&#x3a;01 UTC" is_latest_build="true" policy_name="Veracode Recommended Very Low" policy_version="1" policy_compliance_status="Pass" policy_rules_status="Pass" grace_period_expired="false" scan_overdue="false" business_owner="" business_unit="Not Specified" tags="" legacy_scan_engine="false">
+    <static-analysis rating="B" score="70" submitted_date="2020-06-01 10&#x3a;02&#x3a;01 UTC" published_date="2020-06-01 10&#x3a;02&#x3a;01 UTC" version="myapp-1234" mitigated_rating="B" mitigated_score="70" analysis_size_bytes="1234" engine_version="1234">
+      <modules>
+         <module name="myapp-1234.jar" compiler="JAVAC_8" os="Java J2SE 8" architecture="JVM" loc="5" score="70" numflawssev0="0" numflawssev1="0" numflawssev2="0" numflawssev3="1" numflawssev4="0" numflawssev5="0"/>
+      </modules>
+   </static-analysis>
+   <severity level="5"/>
+   <severity level="4"/>
+   <severity level="3">
+      <category categoryid="123" categoryname="catname" pcirelated="true">
+         <desc>
+            <para text="Flaw description"/>
+         </desc>
+         <recommendations>
+            <para text="Problem text">
+               <bulletitem text="Bullet text"/>
+            </para>
+         </recommendations>
+         <cwe cweid="123" cwename="cwename" pcirelated="true" owasp="123" sans="123">
+            <description>
+               <text text="Description"/>
+            </description>
+            <staticflaws>
+               <flaw severity="3" categoryname="catname" count="1" issueid="1" module="myapp-1234.jar" type="badMethod" description="Description" note="" cweid="123" remediationeffort="1" exploitLevel="1" categoryid="123" pcirelated="true" date_first_occurrence="2020-06-01 10&#x3a;02&#x3a;01 UTC" remediation_status="Open" cia_impact="" grace_period_expires="" affects_policy_compliance="false" mitigation_status="proposed" mitigation_status_desc="Mitigation Proposed" sourcefile="MyApp.java" line="1" sourcefilepath="sourcefilepath" scope="scope" functionprototype="functionprototype" functionrelativelocation="1">
+                  <mitigations>
+                     <mitigation action="Reviewed - No Action Taken" description="description" user="You" date="2020-06-01 10&#x3a;02&#x3a;01 UTC"/>
+                  </mitigations>
+               </flaw>
+           </staticflaws>
+         </cwe>
+      </category>
+   </severity>
+   <severity level="2"/>
+   <severity level="1"/>
+   <severity level="0"/>
+   <flaw-status new="0" reopen="0" open="1" cannot-reproduce="0" fixed="0" total="1" not_mitigated="1" sev-1-change="0" sev-2-change="0" sev-3-change="0" sev-4-change="0" sev-5-change="0"/>
+   <customfields/>
+   <software_composition_analysis third_party_components="0" violate_policy="false" components_violated_policy="0">
+      <vulnerable_components/>
+   </software_composition_analysis>
+</detailedreport>

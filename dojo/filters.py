@@ -892,8 +892,6 @@ class SimilarFindingFilter(DojoFilter):
         if 'finding' in kwargs:
             self.finding = kwargs.pop('finding')
 
-        logger.debug('DATA: %s', data)
-
         # if filterset is bound, use initial values as defaults
         if not data:
             # get a mutable copy of the QueryDict
@@ -907,8 +905,6 @@ class SimilarFindingFilter(DojoFilter):
             data['test__test_type'] = self.finding.test.test_type
             data['test__engagement__product'] = self.finding.test.engagement.product
             data['test__engagement__product__prod_type'] = self.finding.test.engagement.product.prod_type
-
-            logger.debug('DATA2: %s', data)
 
         super().__init__(data, *args, **kwargs)
 
