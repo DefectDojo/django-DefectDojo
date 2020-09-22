@@ -8,7 +8,7 @@ curl -Lso minikube "https://storage.googleapis.com/minikube/releases/${MINIKUBE_
 chmod +x minikube
 sudo mv minikube /usr/local/bin/
 
-curl -L https://storage.googleapis.com/kubernetes-helm/helm-${HELM_VERSION}-linux-amd64.tar.gz | tar zx
+curl -L https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz | tar zx
 chmod +x linux-amd64/helm
 sudo mv linux-amd64/helm /usr/local/bin/
 rm -rf linux-amd64/
