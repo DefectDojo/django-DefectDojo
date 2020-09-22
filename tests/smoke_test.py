@@ -70,7 +70,7 @@ class DojoTests(BaseTestCase):
 
         self.assertTrue(self.is_success_message_present(text='Finding added successfully'))
 
-    def search(self):
+    def test_search(self):
         # very basic search test to see if it doesn't 500
         driver = self.login_page()
         driver.find_element_by_id("simple_search").clear()
