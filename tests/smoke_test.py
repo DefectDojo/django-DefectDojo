@@ -13,6 +13,7 @@ class DojoTests(BaseTestCase):
 
         self.assertTrue(self.is_text_present_on_page(text='Active Engagements'))
 
+    # not included in suite below for unknown reasons
     def test_create_product(self):
         driver = self.login_page()
         self.goto_product_overview(driver)
@@ -27,6 +28,7 @@ class DojoTests(BaseTestCase):
 
         self.assertTrue(self.is_success_message_present(text='Product added successfully'))
 
+    # not included in suite below for unknown reasons
     def test_engagement(self):
         driver = self.login_page()
         driver = self.driver
@@ -107,6 +109,7 @@ class DojoTests(BaseTestCase):
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(DojoTests('test_login'))
+    suite.addTest(DojoTests('test_search'))
     return suite
 
 
