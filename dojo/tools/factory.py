@@ -88,7 +88,7 @@ from dojo.tools.ccvs.parser import CCVSReportParser
 from dojo.tools.awssecurityhub.parser import AwsSecurityFindingFormatParser
 from dojo.tools.risk_recon.parser import RiskReconParser
 from dojo.tools.drheader.parser import DrHeaderJSONParser
-
+from dojo.tools.checkov.parser import CheckovParser
 
 
 __author__ = 'Jay Paz'
@@ -284,6 +284,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = RiskReconParser(file, test)
     elif scan_type == 'DrHeader JSON Importer':
         parser = DrHeaderJSONParser(file, test)
+    elif scan_type == 'Checkov Scan':
+        parser = CheckovParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 
