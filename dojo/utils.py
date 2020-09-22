@@ -2,7 +2,6 @@ import re
 import binascii
 import os
 import hashlib
-import json
 import io
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
@@ -37,8 +36,8 @@ import logging
 import itertools
 from django.contrib import messages
 from django.http import HttpResponseRedirect
-# import traceback
-
+import crum
+from celery.decorators import task
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -1261,19 +1260,21 @@ def log_jira_generic_alert(title, description):
         title=title,
         description=description,
         icon='bullseye',
-        source='Jira')
+        source='JIRA')
 
 
 # Logs the error to the alerts table, which appears in the notification toolbar
 def log_jira_alert(error, finding):
-    prod_name = finding.test.engagement.product.name
+    prod_name = finding.test.engagement.product.name if finding else 'unknown'
+
     create_notification(
         event='jira_update',
-        title='Jira update issue (' + truncate_with_dots(prod_name, 25) + ')',
-        description='Finding: ' + str(finding.id) + ', ' + error,
-        url=reverse('view_finding', args=(finding.id, )),
+        title='JIRA update issue' + '(' + truncate_with_dots(prod_name, 25) + ')',
+        description='Finding: ' + str(finding.id if finding else 'unknown') + ', ' + error,
+        url=reverse('view_finding', args=(finding.id, )) if finding else None,
         icon='bullseye',
-        source='Jira')
+        source='JIRA update',
+        finding=finding)
 
 
 # Displays an alert for Jira notifications
@@ -1284,7 +1285,7 @@ def log_jira_message(text, finding):
         description=text + " Finding: " + str(finding.id),
         url=reverse('view_finding', args=(finding.id, )),
         icon='bullseye',
-        source='Jira')
+        source='JIRA', finding=finding)
 
 
 def get_labels(find):
@@ -1366,8 +1367,8 @@ def add_jira_issue(find, push_to_jira):
 
         if 'Active' in find.status() and 'Verified' in find.status():
             if jira_minimum_threshold > Finding.get_number_severity(find.severity):
-                log_jira_alert('Finding below the minimum jira severity threshold.', find)
-                logger.warn("Finding {} is below the minimum jira severity threshold.".format(find.id))
+                log_jira_alert('Finding below the minimum JIRA severity threshold.', find)
+                logger.warn("Finding {} is below the minimum JIRA severity threshold.".format(find.id))
                 logger.warn("The JIRA issue will NOT be created.")
                 return
 
@@ -1389,9 +1390,6 @@ def add_jira_issue(find, push_to_jira):
                         'issuetype': {
                             'name': jira_conf.default_issue_type
                         },
-                        'priority': {
-                            'name': jira_conf.get_priority(find.severity)
-                        }
                 }
 
                 if jpkey.component:
@@ -1401,14 +1399,21 @@ def add_jira_issue(find, push_to_jira):
                             },
                     ]
 
+                # populate duedate field, but only if it's available for this project + issuetype
+                if not meta:
+                    meta = jira_meta(jira, jpkey)
+
+                if 'priority' in meta['projects'][0]['issuetypes'][0]['fields']:
+                    fields['priority'] = {
+                                            'name': jira_conf.get_priority(find.severity)
+                                        }
+
                 labels = get_labels(find)
                 if labels:
-                    fields['labels'] = labels
+                    if 'labels' in meta['projects'][0]['issuetypes'][0]['fields']:
+                        fields['labels'] = labels
 
                 if System_Settings.objects.get().enable_finding_sla:
-                    # populate duedate field, but only if it's available for this project + issuetype
-                    if not meta:
-                        meta = jira_meta(jira, jpkey)
 
                     if 'duedate' in meta['projects'][0]['issuetypes'][0]['fields']:
                         # jira wants YYYY-MM-DD
@@ -1449,7 +1454,7 @@ def add_jira_issue(find, push_to_jira):
                 # Upload dojo finding screenshots to Jira
                 for pic in find.images.all():
                     jira_attachment(
-                        jira, issue,
+                        find, jira, issue,
                         settings.MEDIA_ROOT + pic.image_large.name)
 
                     # if jpkey.enable_engagement_epic_mapping:
@@ -1457,7 +1462,7 @@ def add_jira_issue(find, push_to_jira):
                     #      issue_list = [j_issue.jira_id,]
                     #      jira.add_jira_issues_to_epic(epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
             except JIRAError as e:
-                logger.error(e.text)
+                logger.exception(e)
                 log_jira_alert(e.text, find)
         else:
             log_jira_alert("A Finding needs to be both Active and Verified to be pushed to JIRA.", find)
@@ -1468,7 +1473,7 @@ def jira_meta(jira, jpkey):
     return jira.createmeta(projectKeys=jpkey.project_key, issuetypeNames=jpkey.conf.default_issue_type, expand="projects.issuetypes.fields")
 
 
-def jira_attachment(jira, issue, file, jira_filename=None):
+def jira_attachment(finding, jira, issue, file, jira_filename=None):
     basename = file
     if jira_filename is None:
         basename = os.path.basename(file)
@@ -1486,7 +1491,8 @@ def jira_attachment(jira, issue, file, jira_filename=None):
                 with open(file, 'rb') as f:
                     jira.add_attachment(issue=issue, attachment=f)
         except JIRAError as e:
-            log_jira_alert("Attachment: " + e.text)
+            logger.exception(e)
+            log_jira_alert("Attachment: " + e.text, finding)
 
 
 def jira_check_attachment(issue, source_file_name):
@@ -1501,6 +1507,7 @@ def jira_check_attachment(issue, source_file_name):
     return file_exists
 
 
+@task(name='update_jira_issue_task')
 def update_jira_issue(find, push_to_jira):
     logger.info('trying to update a linked jira issue for %d:%s', find.id, find.title)
     prod = Product.objects.get(
@@ -1534,21 +1541,22 @@ def update_jira_issue(find, push_to_jira):
                 ]
                 fields = {"components": component}
 
+            if not meta:
+                meta = jira_meta(jira, jpkey)
+
             labels = get_labels(find)
             if labels:
-                fields['labels'] = labels
+                if 'labels' in meta['projects'][0]['issuetypes'][0]['fields']:
+                    fields['labels'] = labels
 
             if len(find.endpoints.all()) > 0:
-                if not meta:
-                    meta = jira_meta(jira, jpkey)
-
                 if 'environment' in meta['projects'][0]['issuetypes'][0]['fields']:
                     environment = "\n".join([str(endpoint) for endpoint in find.endpoints.all()])
                     fields['environment'] = environment
 
             # Upload dojo finding screenshots to Jira
             for pic in find.images.all():
-                jira_attachment(jira, issue,
+                jira_attachment(find, jira, issue,
                                 settings.MEDIA_ROOT + pic.image_large.name)
 
             logger.debug('sending fields to JIRA: %s', fields)
@@ -1563,6 +1571,7 @@ def update_jira_issue(find, push_to_jira):
             find.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
 
         except JIRAError as e:
+            logger.exception(e)
             log_jira_alert(e.text, find)
 
         req_url = jira_conf.url + '/rest/api/latest/issue/' + \
@@ -1685,6 +1694,7 @@ def jira_get_issue(jpkey, issue_key):
         return issue
     except JIRAError as jira_error:
         logger.debug('error retrieving jira issue ' + issue_key + ' ' + str(jira_error))
+        logger.exception(jira_error)
         log_jira_generic_alert('error retrieving jira issue ' + issue_key, str(jira_error))
         return None
 
@@ -1885,39 +1895,6 @@ def prepare_for_view(encrypted_value):
 def get_system_setting(setting):
     system_settings = System_Settings.objects.get()
     return getattr(system_settings, setting, None)
-
-
-def get_slack_user_id(user_email):
-    user_id = None
-
-    res = requests.request(
-        method='POST',
-        url='https://slack.com/api/users.list',
-        data={'token': get_system_setting('slack_token')})
-
-    users = json.loads(res.text)
-
-    slack_user_is_found = False
-    if users:
-        if 'error' in users:
-            logger.error("Slack is complaining. See error message below.")
-            logger.error(users)
-        else:
-            for member in users["members"]:
-                if "email" in member["profile"]:
-                    if user_email == member["profile"]["email"]:
-                        if "id" in member:
-                            user_id = member["id"]
-                            logger.debug("Slack user ID is {}".format(user_id))
-                            slack_user_is_found = True
-                            break
-                    else:
-                        logger.warn("A user with email {} could not be found in this Slack workspace.".format(user_email))
-
-            if not slack_user_is_found:
-                logger.warn("The Slack user was not found.")
-
-    return user_id
 
 
 def calculate_grade(product):
@@ -2300,3 +2277,7 @@ def sla_compute_and_notify(*args, **kwargs):
 
     except System_Settings.DoesNotExist:
         logger.info("Findings SLA is not enabled.")
+
+
+def get_current_user():
+    return crum.get_current_user()
