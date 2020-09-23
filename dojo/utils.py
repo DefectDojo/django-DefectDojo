@@ -2279,5 +2279,14 @@ def sla_compute_and_notify(*args, **kwargs):
         logger.info("Findings SLA is not enabled.")
 
 
+def get_words_for_field(queryset, fieldname):
+    words = [
+        # word for component_name in queryset.filter(component_name__isnull=False).values_list(fieldname, flat=True).distinct() for word in (component_name.split() if component_name else []) if len(word) > 2
+        word for component_name in queryset.filter(**{'%s__isnull' % fieldname: False}).values_list(fieldname, flat=True).distinct() for word in (component_name.split() if component_name else []) if len(word) > 2
+
+    ]
+    return sorted(set(words))
+
+
 def get_current_user():
     return crum.get_current_user()
