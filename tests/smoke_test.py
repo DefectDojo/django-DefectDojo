@@ -77,7 +77,7 @@ class DojoTests(BaseTestCase):
         driver = self.login_page()
         driver.find_element_by_id("simple_search").clear()
         driver.find_element_by_id("simple_search").send_keys('finding')
-        driver.find_element_by_id("simple_search_submit").sendclick()
+        driver.find_element_by_id("simple_search_submit").click()
 
     def is_element_present(self, how, what):
         try:
