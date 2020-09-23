@@ -1,8 +1,6 @@
 {% extends "base.html" %}
 {% load static from staticfiles %}
-{% block add_css %}
-    <link rel="stylesheet" href="{% static "bootstrap-chosen/bootstrap-chosen.css" %}">
-{% endblock %}
+
 {% block content %}
     <h3> {{ name }} {% if to_edit %}- {{ to_edit.username }}{% endif %}</h3>
     <div class="alert alert-info" role="alert">
@@ -37,8 +35,7 @@
 {% endblock %}
 {% block postscript %}
     {% if to_add or to_edit and not to_edit.is_staff %}
-        <script type="application/javascript" src="{% static "chosen-js/chosen.jquery.min.js" %}"></script>
-        <script type="application/javascript">
+            <script type="application/javascript">
             $(function () {
                 $('#id_authorized_products').chosen({'placeholder_text_multiple': 'Select some products...'});
             });

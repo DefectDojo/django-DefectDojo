@@ -1,8 +1,6 @@
 {% extends "base.html" %}
 {% load static from staticfiles %}
-{% block add_css %}
-    <link rel="stylesheet" href="{% static "bootstrap-chosen/bootstrap-chosen.css" %}">
-{% endblock %}
+
 {% block content %}
     <h3> Edit JIRA Configuration</h3>
     <form class="form-horizontal" method="post">{% csrf_token %}
@@ -15,5 +13,4 @@
     </form>
 {% endblock %}
 {% block postscript %}
-    <script type="application/javascript" src="{% static "chosen-js/chosen.jquery.min.js" %}"></script>
 {% endblock %}
