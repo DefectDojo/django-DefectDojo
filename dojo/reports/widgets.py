@@ -14,7 +14,7 @@ from django.utils.safestring import mark_safe
 from dojo.filters import EndpointFilter, ReportAuthedFindingFilter
 from dojo.forms import CustomReportOptionsForm
 from dojo.models import Endpoint, Finding
-from dojo.utils import get_page_items
+from dojo.utils import get_page_items, get_words_for_field
 
 """
 Widgets are content sections that can be included on reports.  The report builder will allow any number of widgets
@@ -274,11 +274,8 @@ class FindingList(Widget):
         self.multiple = 'true'
         self.extra_help = "You can use this form to filter findings and select only the ones to be included in the " \
                           "report."
-        title_words = [word
-                       for finding in self.findings.qs
-                       for word in finding.title.split() if len(word) > 2]
-
-        self.title_words = sorted(set(title_words))
+        self.title_words = get_words_for_field(self.findings.qs, 'title')
+        self.component_words = get_words_for_field(self.findings.qs, 'component_name')
 
         if self.request is not None:
             self.paged_findings = get_page_items(self.request, self.findings.qs, 25)
@@ -309,6 +306,7 @@ class FindingList(Widget):
                                 {"findings": self.paged_findings,
                                  "filtered": self.findings,
                                  "title_words": self.title_words,
+                                 "component_words": self.component_words,
                                  "request": self.request,
                                  "title": self.title,
                                  "extra_help": self.extra_help,

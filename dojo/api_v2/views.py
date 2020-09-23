@@ -889,7 +889,8 @@ class RegulationsViewSet(mixins.ListModelMixin,
     filter_fields = ('id', 'name', 'description')
 
 
-class UsersViewSet(mixins.ListModelMixin,
+class UsersViewSet(mixins.CreateModelMixin,
+                   mixins.ListModelMixin,
                    mixins.RetrieveModelMixin,
                    viewsets.GenericViewSet):
     serializer_class = serializers.UserSerializer

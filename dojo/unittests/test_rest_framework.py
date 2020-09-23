@@ -571,6 +571,13 @@ class UsersTest(BaseClass.RESTEndpointTest):
         self.endpoint_model = User
         self.viewname = 'user'
         self.viewset = UsersViewSet
+        self.payload = {
+            "username": "test_user",
+            "first_name": "test",
+            "last_name": "user",
+            "email": "example@email.com",
+            "is_active": True,
+        }
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 

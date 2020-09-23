@@ -5,7 +5,7 @@ import os
 import re
 from uuid import uuid4
 from django.conf import settings
-from watson import search as watson
+
 from auditlog.registry import auditlog
 from django.contrib import admin
 from django.contrib.auth import get_user_model
@@ -479,6 +479,10 @@ class Product_Type(models.Model):
                'url': reverse('edit_product_type', args=(self.id,))}]
         return bc
 
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('product_type', args=[str(self.id)])
+
 
 class Product_Line(models.Model):
     name = models.CharField(max_length=300)
@@ -807,6 +811,10 @@ class Product(models.Model):
         except:
             return None
 
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('view_product', args=[str(self.id)])
+
 
 class ScanSettings(models.Model):
     product = models.ForeignKey(Product, default=1, editable=False, on_delete=models.CASCADE)
@@ -1069,6 +1077,10 @@ class Engagement(models.Model):
         except JIRA_Issue.DoesNotExist:
             return False
 
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('view_engagement', args=[str(self.id)])
+
 
 class CWE(models.Model):
     url = models.CharField(max_length=1000)
@@ -1263,6 +1275,10 @@ class Endpoint(models.Model):
         else:
             return str(self)
 
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('view_endpoint', args=[str(self.id)])
+
 
 class Development_Environment(models.Model):
     name = models.CharField(max_length=200)
@@ -1334,6 +1350,10 @@ class Test(models.Model):
 
     def accept_risks(self, accepted_risks):
         self.engagement.risk_acceptance.add(*accepted_risks)
+
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('view_test', args=[str(self.id)])
 
 
 class VA(models.Model):
@@ -1520,11 +1540,15 @@ class Finding(models.Model):
 
     # gets or creates the simple risk acceptance instance connected to the engagement. only contains this finding if it is simple accepted
     def get_simple_risk_acceptance(self, create=True):
+        # check if has test, if not, return False to avoid errors on test being None later on. This can happen when creating a finding from a template
+        if not hasattr(self, 'test'):
+            return None
+
         if hasattr(self.test.engagement, 'simple_risk_acceptance') and len(self.test.engagement.simple_risk_acceptance) > 0:
             return self.test.engagement.simple_risk_acceptance[0]
 
         simple_risk_acceptance = self.test.engagement.risk_acceptance.filter(name=Finding.SIMPLE_RISK_ACCEPTANCE_NAME).prefetch_related('accepted_findings').first()
-        if simple_risk_acceptance is None:
+        if simple_risk_acceptance is None and create:
             simple_risk_acceptance = Risk_Acceptance.objects.create(
                     owner_id=1,
                     name=Finding.SIMPLE_RISK_ACCEPTANCE_NAME,
@@ -1557,6 +1581,7 @@ class Finding(models.Model):
 
     @property
     def is_simple_risk_accepted(self):
+
         if self.get_simple_risk_acceptance(create=False) is not None:
             return self.get_simple_risk_acceptance().accepted_findings.filter(id=self.id).exists()
             # print('exists: ', exists)
@@ -2026,6 +2051,13 @@ class Finding(models.Model):
         res = re.sub(r'\n\s*\n', '\n', res)
         return res
 
+    def latest_note(self):
+        if self.notes.all():
+            note = self.notes.all()[0]
+            return note.date.strftime("%Y-%m-%d %H:%M:%S") + ': ' + note.author.get_full_name() + ' : ' + note.entry
+
+        return ''
+
 
 Finding.endpoints.through.__unicode__ = lambda \
     x: "Endpoint: " + x.endpoint.host
@@ -2092,6 +2124,10 @@ class Finding_Template(models.Model):
         bc = [{'title': self.__unicode__(),
                'url': reverse('view_template', args=(self.id,))}]
         return bc
+
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('edit_template', args=[str(self.id)])
 
 
 class Check_List(models.Model):
@@ -3254,16 +3290,15 @@ admin.site.register(CWE)
 admin.site.register(Regulation)
 admin.site.register(Notifications)
 
-# Watson
-watson.register(Product)
-watson.register(Test)
-watson.register(Finding, fields=('id', 'title', 'cve', 'url', 'severity', 'description', 'mitigation', 'impact', 'steps_to_reproduce',
-                                 'severity_justification', 'references', 'sourcefilepath', 'sourcefile', 'hash_code', 'file_path',
-                                 'component_name', 'component_version', 'unique_id_from_tool', ))
-watson.register(Finding_Template)
-watson.register(Endpoint)
-watson.register(Engagement)
-watson.register(App_Analysis)
+# watson.register(Test)
+# watson.register(Finding, fields=('id', 'title', 'cve', 'url', 'severity', 'description', 'mitigation', 'impact', 'steps_to_reproduce',
+#                                 'severity_justification', 'references', 'sourcefilepath', 'sourcefile', 'hash_code', 'file_path',
+#                                 'component_name', 'component_version', 'unique_id_from_tool', 'test__engagement__product__name'))
+# watson.register(Finding_Template)
+# watson.register(Endpoint)
+# watson.register(Engagement)
+# watson.register(App_Analysis)
+
 
 # SonarQube Integration
 admin.site.register(Sonarqube_Issue)

@@ -46,7 +46,7 @@
                            class="tablesorter-bootstrap table table-condensed table-striped">
                         <thead>
                         <tr>
-                            <th>Act.</th> <!-- Action 3-dots hamburger menu button -->
+                            <th></th> <!-- Action 3-dots hamburger menu button -->
                             <th>{% dojo_sort request 'Product' 'name' 'asc' %}</th>
                             <th>Tags</th>
                             <th> Criticality</th>
@@ -325,6 +325,7 @@
                 drawCallback: function(){
                      $('.has-popover').popover({'trigger':'hover'});
                  },
+                 colReorder: true,
                  "columns": [
                     { "data": "action" },
                     { "data": "product" },

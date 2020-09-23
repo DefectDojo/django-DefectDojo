@@ -563,11 +563,17 @@ class OpenFindingFilter(DojoFilter):
         label="Risk Accepted")
 
     if get_system_setting('enable_jira'):
-        jira_issue = BooleanFilter(field_name='jira_issue',
+        has_jira_issue = BooleanFilter(field_name='jira_issue',
                                    lookup_expr='isnull',
                                    exclude=True,
-                                   label='JIRA issue')
+                                   label='has JIRA')
 
+    jira_issue__jira_key = CharFilter(field_name='jira_issue__jira_key', lookup_expr='icontains', label="JIRA issue")
+
+    has_notes = BooleanFilter(field_name='notes',
+                                lookup_expr='isnull',
+                                exclude=True,
+                                label='has notes')
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
@@ -645,6 +651,19 @@ class ClosedFindingFilter(DojoFilter):
         label="Product Type")
     test__engagement__risk_acceptance = ReportRiskAcceptanceFilter(
         label="Risk Accepted")
+
+    if get_system_setting('enable_jira'):
+        has_jira_issue = BooleanFilter(field_name='jira_issue',
+                                   lookup_expr='isnull',
+                                   exclude=True,
+                                   label='has JIRA')
+
+    jira_issue__jira_key = CharFilter(field_name='jira_issue__jira_key', lookup_expr='icontains', label="JIRA issue")
+
+    has_notes = BooleanFilter(field_name='notes',
+                                lookup_expr='isnull',
+                                exclude=True,
+                                label='has notes')
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -836,10 +855,17 @@ class SimilarFindingFilter(DojoFilter):
         label="Product Type")
 
     if get_system_setting('enable_jira'):
-        jira_issue = BooleanFilter(field_name='jira_issue',
+        has_jira_issue = BooleanFilter(field_name='jira_issue',
                                    lookup_expr='isnull',
                                    exclude=True,
-                                   label='JIRA issue')
+                                   label='has JIRA')
+
+    jira_issue__jira_key = CharFilter(field_name='jira_issue__jira_key', lookup_expr='icontains', label="JIRA issue")
+
+    has_notes = BooleanFilter(field_name='notes',
+                                lookup_expr='isnull',
+                                exclude=True,
+                                label='has notes')
 
     o = OrderingFilter(
         # tuple-mapping retains order
