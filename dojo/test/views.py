@@ -849,6 +849,7 @@ def re_import_scan_results(request, tid):
                         finding.notes.add(note)
                         mitigated_count += 1
 
+                        endpoint_status = finding.endpoint_status.all()
                         for status in endpoint_status:
                             status.mitigated_by = request.user
                             status.mitigated_time = timezone.now()
