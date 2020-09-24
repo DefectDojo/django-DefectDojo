@@ -121,6 +121,7 @@ mysql:
   mysqlPassword: ""
   mysqlRootPassword: ""
   existingSecret: defectdojo-mysql-specific
+  secretKey: mysql-password
   mysqlDatabase: defectdojo
   service:
   # To use an external mySQL instance, set enabled to false and uncomment
@@ -134,6 +135,7 @@ postgresql:
   postgresqlPassword: ""
   postgresqlDatabase: defectdojo
   existingSecret: defectdojo-postgresql-specific
+  secretKey: postgresql-password
   persistence:
     enabled: true
   replication:
@@ -175,6 +177,7 @@ rabbitmq:
 redis:
   enabled: false
   existingSecret: defectdojo-redis-specific
+  secretKey: redis-password
   password: ""
   cluster:
     slaveCount: 1
