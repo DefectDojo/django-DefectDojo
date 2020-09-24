@@ -76,6 +76,9 @@ class BaseTestCase(unittest.TestCase):
         driver.get(self.base_url + "product")
         self.wait_for_datatable_if_content("no_products", "products_wrapper")
 
+    def goto_component_overview(self, driver):
+        driver.get(self.base_url + "components")
+
     def goto_active_engagements_overview(self, driver):
         # return self.goto_engagements_internal(driver, 'engagement')
         # engagement overview doesn't seem to have the datatables yet modifying the DOM
