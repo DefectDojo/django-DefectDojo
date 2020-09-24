@@ -1807,7 +1807,7 @@ def encrypt(key, iv, plaintext):
     text = ""
     if plaintext and plaintext is not None:
         backend = default_backend()
-        cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
+        cipher = Cipher(algorithms.AES(key), modes.OFB(iv), backend=backend)
         encryptor = cipher.encryptor()
         plaintext = _pad_string(plaintext)
         encrypted_text = encryptor.update(plaintext) + encryptor.finalize()
@@ -1817,7 +1817,7 @@ def encrypt(key, iv, plaintext):
 
 def decrypt(key, iv, encrypted_text):
     backend = default_backend()
-    cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
+    cipher = Cipher(algorithms.AES(key), modes.OFB(iv), backend=backend)
     encrypted_text_bytes = binascii.a2b_hex(encrypted_text)
     decryptor = cipher.decryptor()
     decrypted_text = decryptor.update(encrypted_text_bytes) + decryptor.finalize()
@@ -2277,6 +2277,15 @@ def sla_compute_and_notify(*args, **kwargs):
 
     except System_Settings.DoesNotExist:
         logger.info("Findings SLA is not enabled.")
+
+
+def get_words_for_field(queryset, fieldname):
+    words = [
+        # word for component_name in queryset.filter(component_name__isnull=False).values_list(fieldname, flat=True).distinct() for word in (component_name.split() if component_name else []) if len(word) > 2
+        word for component_name in queryset.filter(**{'%s__isnull' % fieldname: False}).values_list(fieldname, flat=True).distinct() for word in (component_name.split() if component_name else []) if len(word) > 2
+
+    ]
+    return sorted(set(words))
 
 
 def get_current_user():
