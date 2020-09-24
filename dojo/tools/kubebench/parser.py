@@ -73,10 +73,10 @@ def get_results(tree, test, description):
 
 def get_item(vuln, test, description):
 
-    if ('status' in vuln) and (vuln['status'].upper() != 'FAIL') :
+    if ('status' in vuln) and (vuln['status'].upper() != 'FAIL'):
         return None
 
-    if not 'test_number' in vuln:
+    if 'test_number' not in vuln:
         return None
 
     unique_id_from_tool = vuln['test_number']
@@ -103,7 +103,6 @@ def get_item(vuln, test, description):
     mitigation = ''
     if 'remediation' in vuln:
         mitigation = vuln['remediation']
-
 
     finding = Finding(title=title,
                       test=test,
