@@ -3,20 +3,15 @@
 {% load get_endpoint_status %}
 
 {% if destination == "Report" %}
-    {% with endpoints=finding|get_vulnerable_endpoints %}
-        {% if endpoints %}
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="panel panel-info endpoints table-responsive">
-                        <div class="panel-heading">
-                            {% if finding.file_path %}
-                            <h6> Location </h6>
-                            {%  else %}
-                            <h6>Vulnerable Endpoints / Systems ({{ endpoints|length }})</h6>
-                            {% endif %}
-                        </div>
-
-                        {% if endpoints %}
+    {% if finding|has_endpoints %}
+        {% with endpoints=finding|get_vulnerable_endpoints %}
+            {% if endpoints %}
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="panel panel-info endpoints table-responsive">
+                            <div class="panel-heading">
+                                <h6>Vulnerable Endpoints / Systems ({{ endpoints|length }})</h6>
+                            </div>
                             <table id="vuln_endpoints" class="table-striped table ">
                                 <thead>
                                     <th>Endpoint</th>
@@ -35,46 +30,20 @@
                                     {% endfor %}
                                 </tbody>
                             </table>
-                        {% elif finding.file_path %}
-                            <table class="table-striped table table table-condensed table-hover finding-endpoints">
-                                <tr>
-                                    <th style="text-align: center;padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">
-                                        File Path
-                                    </th>
-                                    <th style="text-align: center;padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">
-                                        Line Number
-                                    </th>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">{{ finding.file_path }}</td>
-                                    <td style=" text-align:center; padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">{{ finding.line }}</td>
-                                </tr>
-                            </table>
-                        {% else %}
-                            <div id="vuln_endpoints" class="panel-body endpoint-panel table-responsive">
-                                No endpoints.
-                            </div>
-                        {% endif %}
+                        </div>
                     </div>
                 </div>
-            </div>
-        {% endif %}
-    {% endwith %}
+            {% endif %}
+        {% endwith %}
 
-    {% with endpoints=finding|get_mitigated_endpoints %}
-        {% if endpoints %}
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="panel panel-info endpoints table-responsive">
-                        <div class="panel-heading">
-                            {% if finding.file_path %}
-                            <h6> Location </h6>
-                            {%  else %}
-                            <h6>Mitigated Endpoints / Systems ({{ endpoints|length }})</h6>
-                            {% endif %}
-                        </div>
-
-                        {% if endpoints %}
+        {% with endpoints=finding|get_mitigated_endpoints %}
+            {% if endpoints %}
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="panel panel-info endpoints table-responsive">
+                            <div class="panel-heading">
+                                <h6>Mitigated Endpoints / Systems ({{ endpoints|length }})</h6>
+                            </div>
                             <table id="remd_endpoints" class="table-striped table table-hover">
                                 <thead>
                                     <th>Endpoint</th>
@@ -93,31 +62,37 @@
                                     {% endfor %}
                                 </tbody>
                             </table>
-                        {% elif finding.file_path %}
-                            <table class="table-striped table table table-condensed table-hover finding-endpoints">
-                                <tr>
-                                    <th style="text-align: center;padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">
-                                        File Path
-                                    </th>
-                                    <th style="text-align: center;padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">
-                                        Line Number
-                                    </th>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">{{ finding.file_path }}</td>
-                                    <td style=" text-align:center; padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">{{ finding.line }}</td>
-                                </tr>
-                            </table>
-                        {% else %}
-                            <div id="vuln_endpoints" class="panel-body endpoint-panel table-responsive">
-                                No endpoints.
-                            </div>
-                        {% endif %}
+                        </div>
                     </div>
                 </div>
+            {% endif %}
+        {% endwith %}
+    {% endif %}
+    {% if finding.file_path %}
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-info endpoints table-responsive">
+                    <div class="panel-heading">
+                        <h6> Location </h6>
+                    </div>
+                    <table class="table-striped table table table-condensed table-hover finding-endpoints">
+                        <tr>
+                            <th style="text-align: center;padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">
+                                File Path
+                            </th>
+                            <th style="text-align: center;padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">
+                                Line Number
+                            </th>
+                        </tr>
+                        <tr>
+                            <td style="padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">{{ finding.file_path }}</td>
+                            <td style=" text-align:center; padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">{{ finding.line }}</td>
+                        </tr>
+                    </table>
+                </div>
             </div>
-        {% endif %}
-    {% endwith %}
+        </div>
+    {% endif %}    
 {% else %}
     {% with endpoints=finding|get_vulnerable_endpoints %}
         {% if endpoints %}

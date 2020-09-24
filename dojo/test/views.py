@@ -30,7 +30,7 @@ from dojo.models import Finding, Test, Notes, Note_Type, BurpRawRequestResponse,
     Finding_Template, JIRA_PKey, Cred_Mapping, Dojo_User, System_Settings, Endpoint_Status
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting, \
-    Product_Tab, max_safe, is_scan_file_too_large, add_jira_issue
+    Product_Tab, max_safe, is_scan_file_too_large, add_jira_issue, get_words_for_field
 from dojo.notifications.helper import create_notification
 from dojo.tasks import add_jira_issue_task
 from dojo.finding.views import find_available_notetypes
@@ -90,6 +90,9 @@ def view_test(request, tid):
         else:
             form = NoteForm()
 
+    title_words = get_words_for_field(findings.qs, 'title')
+    component_words = get_words_for_field(findings.qs, 'component_name')
+
     paged_findings, total_findings_count = get_page_items_and_count(request, prefetch_for_findings(findings.qs), 25)
     paged_stub_findings = get_page_items(request, stub_findings, 25)
     show_re_upload = any(test.test_type.name in code for code in ImportScanForm.SCAN_TYPE_CHOICES)
@@ -142,6 +145,8 @@ def view_test(request, tid):
                    'filtered': findings,
                    'findings_count': total_findings_count,
                    'stub_findings': paged_stub_findings,
+                   'title_words': title_words,
+                   'component_words': component_words,
                    'form': form,
                    'notes': notes,
                    'person': person,
@@ -592,11 +597,9 @@ def search(request, tid):
     templates = Finding_Template.objects.all()
     templates = TemplateFindingFilter(request.GET, queryset=templates)
     paged_templates = get_page_items(request, templates.qs, 25)
-    title_words = [word
-                   for finding in templates.qs
-                   for word in finding.title.split() if len(word) > 2]
 
-    title_words = sorted(set(title_words))
+    title_words = get_words_for_field(templates.qs, 'title')
+
     add_breadcrumb(parent=test, title="Add From Template", top_level=False, request=request)
     return render(request, 'dojo/templates.html',
                   {'templates': paged_templates,
@@ -846,6 +849,7 @@ def re_import_scan_results(request, tid):
                         finding.notes.add(note)
                         mitigated_count += 1
 
+                        endpoint_status = finding.endpoint_status.all()
                         for status in endpoint_status:
                             status.mitigated_by = request.user
                             status.mitigated_time = timezone.now()

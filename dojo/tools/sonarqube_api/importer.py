@@ -134,6 +134,7 @@ class SonarQubeApiImporter(object):
         if search:
             raw_html = search.group(1)
         h = html2text.HTML2Text()
+        raw_html = raw_html.replace('<h2>', '<b>').replace('</h2>', '</b>')
         return h.handle(raw_html)
 
     @staticmethod
