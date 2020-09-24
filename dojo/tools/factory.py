@@ -91,7 +91,6 @@ from dojo.tools.drheader.parser import DrHeaderJSONParser
 from dojo.tools.checkov.parser import CheckovParser
 from dojo.tools.kubebench.parser import KubeBenchParser
 
-
 __author__ = 'Jay Paz'
 
 
