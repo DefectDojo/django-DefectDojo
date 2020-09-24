@@ -7,10 +7,14 @@
     <div class="col-md-12">
         <div class="panel panel-default">
             <div class="panel-heading tight">
-                <div class="clearfix">
-                    <h3 class="pull-left">All Components</h3>
-                </div>
+                <h3 class="has-filters">
+                    Components
+                    <div class="dropdown pull-right">
+                </h3>
             </div>
+        </div>
+        <div id="the-filters" class="panel-body collapse {% if request.META.QUERY_STRING %}in{% endif %}">
+            {% include "dojo/filter_snippet.html" with form=filter.form %}
         </div>
         <div class="clearfix">
             {% include "dojo/paging_snippet.html" with page=result page_size=True %}
@@ -60,25 +64,76 @@
                 </tbody>
             </table>
         </div>
+        <div class="clearfix">
+            {% include "dojo/paging_snippet.html" with page=result page_size=True %}
+        </div>
     </div>
 </div>
 {% endblock %}
 {% block postscript %}
 <script>
-    $(document).ready( function () {
-    $('#components').DataTable(
-        {
-            "columns": [
-                    { "data": "Name" },
+    // DataTables setup
+    $(document).ready(function() {
+        date =  new Date().toISOString().slice(0, 10);
+        var fileDated = 'Product_Components_' + date;
+        var buttonCommon = {
+            exportOptions: {
+                stripHtml: true,
+                stripNewlines: true,
+                trim: true,
+                orthogonal: 'export'
+            },
+            filename: fileDated,
+            title: 'Product Components'
+        };
+
+        // Mapping of table columns to objects for proper cleanup and data formatting
+        var dojoTable = $('#components').DataTable({
+            drawCallback: function(){
+                 $('.has-popover').popover({'trigger':'hover'});
+             },
+             "columns": [
+                    { "data": "Component_name" },
                     { "data": "Version" },
                     { "data": "Active" },
                     { "data": "Duplicate" },
                     { "data": "Total" },
-                    ],
+            ],
+            order: [],
+            columnDefs: [
+                { 
+                    "orderable": false,
+                },
+            ],
+            dom: 'Bfrtip',
             paging: false,
-            
-        }
-    );
-} );
+            buttons: [
+                {
+                    extend: 'colvis',
+                    columns: ':not(.noVis)'
+                },
+                $.extend( true, {}, buttonCommon, {
+                    extend: 'copy'
+                }),
+                $.extend( true, {}, buttonCommon, {
+                    extend: 'excel',
+                    autoFilter: true,
+                    sheetName: 'Exported data',
+                }),
+                $.extend( true, {}, buttonCommon, {
+                    extend: 'csv'
+                }),
+                $.extend( true, {}, buttonCommon, {
+                    extend: 'pdf',
+                    orientation: 'landscape',
+                    pageSize: 'LETTER'
+                }),
+                $.extend( true, {}, buttonCommon, {
+                    extend: 'print'
+                }),
+            ],
+        });
+    });
 </script>
+{% include "dojo/filter_js_snippet.html" %}
 {% endblock %}
