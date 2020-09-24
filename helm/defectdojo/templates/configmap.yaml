@@ -24,9 +24,9 @@ data:
   DD_DATABASE_PORT: '{{ if eq .Values.database "postgresql" }}{{ .Values.postgresql.service.port }}{{ end }}{{ if eq .Values.database "mysql" }}{{ .Values.mysql.service.port }}{{ end }}'
   DD_DATABASE_USER: {{ if eq .Values.database "postgresql" }}{{ .Values.postgresql.postgresqlUsername }}{{ end }}{{ if eq .Values.database "mysql" }}{{ .Values.mysql.mysqlUser }}{{ end }}
   DD_INITIALIZE: '{{ .Values.initializer.run }}'
-  DD_UWSGI_ENDPOINT: /run/uwsgi.sock
+  DD_UWSGI_ENDPOINT: /run/defectdojo/uwsgi.sock
   DD_UWSGI_HOST: localhost
-  DD_UWSGI_PASS: unix:///run/uwsgi.sock
+  DD_UWSGI_PASS: unix:///run/defectdojo/uwsgi.sock
   DD_DJANGO_METRICS_ENABLED: '{{ .Values.monitoring.enabled }}'
   NGINX_METRICS_ENABLED: '{{ .Values.monitoring.enabled }}'
   METRICS_HTTP_AUTH_USER: {{ .Values.monitoring.user | default "monitoring" }}

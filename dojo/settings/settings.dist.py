@@ -125,11 +125,17 @@ env = environ.Env(
     # Set to True if you want to allow authorized users to make changes to findings or delete them
     DD_AUTHORIZED_USERS_ALLOW_CHANGE=(bool, False),
     DD_AUTHORIZED_USERS_ALLOW_DELETE=(bool, False),
+    # Set to True if you want to allow authorized users staff access only on specific products
+    # This will only apply to users with 'active' status
+    DD_AUTHORIZED_USERS_ALLOW_STAFF=(bool, False),
     DD_SLA_NOTIFY_ACTIVE=(bool, False),
     DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY=(bool, True),
     DD_SLA_NOTIFY_WITH_JIRA_ONLY=(bool, False),
     DD_SLA_NOTIFY_PRE_BREACH=(int, 3),
     DD_SLA_NOTIFY_POST_BREACH=(int, 7),
+
+    # maximum number of result in search as search can be an expensive operation
+    DD_SEARCH_MAX_RESULTS=(int, 100)
 )
 
 
@@ -386,6 +392,7 @@ else:
 
 AUTHORIZED_USERS_ALLOW_CHANGE = env('DD_AUTHORIZED_USERS_ALLOW_CHANGE')
 AUTHORIZED_USERS_ALLOW_DELETE = env('DD_AUTHORIZED_USERS_ALLOW_DELETE')
+AUTHORIZED_USERS_ALLOW_STAFF = env('DD_AUTHORIZED_USERS_ALLOW_STAFF')
 
 # Setting SLA_NOTIFY_ACTIVE and SLA_NOTIFY_ACTIVE_VERIFIED to False will disable the feature
 # If you import thousands of Active findings through your pipeline everyday,
@@ -396,6 +403,8 @@ SLA_NOTIFY_ACTIVE_VERIFIED_ONLY = env('DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY')
 SLA_NOTIFY_WITH_JIRA_ONLY = env('DD_SLA_NOTIFY_WITH_JIRA_ONLY')  # Based on the 2 above, but only with a JIRA link
 SLA_NOTIFY_PRE_BREACH = env('DD_SLA_NOTIFY_PRE_BREACH')  # in days, notify between dayofbreach minus this number until dayofbreach
 SLA_NOTIFY_POST_BREACH = env('DD_SLA_NOTIFY_POST_BREACH')  # in days, skip notifications for findings that go past dayofbreach plus this number
+
+SEARCH_MAX_RESULTS = env('DD_SEARCH_MAX_RESULTS')
 
 LOGIN_EXEMPT_URLS = (
     r'^%sstatic/' % URL_PREFIX,
@@ -590,6 +599,7 @@ DJANGO_MIDDLEWARE_CLASSES = [
     'social_django.middleware.SocialAuthExceptionMiddleware',
     'watson.middleware.SearchContextMiddleware',
     'auditlog.middleware.AuditlogMiddleware',
+    'crum.CurrentRequestUserMiddleware',
 ]
 
 MIDDLEWARE = DJANGO_MIDDLEWARE_CLASSES

@@ -87,17 +87,22 @@ def user_is_authorized(user, perm_type, obj):
     # print('perm_type', perm_type)
     # print('obj: ', obj)
 
-    if perm_type not in ['view', 'change', 'delete']:
+    if perm_type not in ['view', 'change', 'delete', 'staff']:
         logger.error('permtype %s not supported', perm_type)
         raise ValueError('permtype ' + perm_type + ' not supported')
 
     if user.is_staff:
         return True
 
-    if perm_type == 'change' and not settings.AUTHORIZED_USERS_ALLOW_CHANGE:
+    authorized_staff = settings.AUTHORIZED_USERS_ALLOW_STAFF
+
+    if perm_type == 'staff' and not authorized_staff:
         return user.is_staff or user.is_superuser
 
-    if perm_type == 'delete' and not settings.AUTHORIZED_USERS_ALLOW_DELETE:
+    if perm_type == 'change' and not settings.AUTHORIZED_USERS_ALLOW_CHANGE and not authorized_staff:
+        return user.is_staff or user.is_superuser
+
+    if perm_type == 'delete' and not settings.AUTHORIZED_USERS_ALLOW_DELETE and not authorized_staff:
         return user.is_staff or user.is_superuser
 
     # at this point being in the authorized users lists means permission should be granted

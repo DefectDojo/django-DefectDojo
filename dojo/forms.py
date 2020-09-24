@@ -30,6 +30,7 @@ from dojo.models import Finding, Product_Type, Product, Note_Type, ScanSettings,
 
 from dojo.tools import requires_file, SCAN_SONARQUBE_API
 from dojo.utils import jira_get_issue
+from dojo.user.helper import user_is_authorized
 from django.urls import reverse
 import logging
 
@@ -401,6 +402,8 @@ class ImportScanForm(forms.Form):
                          ("GitLab SAST Report", "GitLab SAST Report"),
                          ("HuskyCI Report", "HuskyCI Report"),
                          ("Risk Recon API Importer", "Risk Recon API Importer"),
+                         ("DrHeader JSON Importer", "DrHeader JSON Importer"),
+                         ("Checkov Scan", "Checkov Scan"),
                          ("CCVS Report", "CCVS Report"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
@@ -702,7 +705,7 @@ class EngForm(forms.ModelForm):
     target_end = forms.DateField(widget=forms.TextInput(
         attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     lead = forms.ModelChoiceField(
-        queryset=User.objects.exclude(is_staff=False),
+        queryset=None,
         required=True, label="Testing Lead")
     test_strategy = forms.URLField(required=False, label="Test Strategy URL")
 
@@ -721,6 +724,11 @@ class EngForm(forms.ModelForm):
         self.fields['tags'].widget.choices = t
         if product:
             self.fields['preset'] = forms.ModelChoiceField(help_text="Settings and notes for performing this engagement.", required=False, queryset=Engagement_Presets.objects.filter(product=product))
+            prod = Product.objects.get(id=product)
+            staff_users = [user.id for user in User.objects.all() if user_is_authorized(user, 'staff', prod)]
+            self.fields['lead'].queryset = User.objects.filter(id__in=staff_users)
+        else:
+            self.fields['lead'].queryset = User.objects.exclude(is_staff=False)
         # Don't show CICD fields on a interactive engagement
         if cicd is False:
             del self.fields['build_id']
@@ -753,54 +761,6 @@ class EngForm(forms.ModelForm):
                    'product', 'threat_model', 'api_test', 'pen_test', 'check_list', 'engagement_type')
 
 
-class EngForm2(forms.ModelForm):
-    name = forms.CharField(max_length=300,
-                           required=False,
-                           help_text="Add a descriptive name to identify " +
-                                     "this engagement. Without a name the target " +
-                                     "start date will be used in listings.")
-    description = forms.CharField(widget=forms.Textarea(attrs={}),
-                                  required=False)
-    tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
-                           required=False,
-                           help_text="Add tags that help describe this engagement.  "
-                                     "Choose from the list or add new tags.  Press TAB key to add.")
-    product = forms.ModelChoiceField(queryset=Product.objects.all())
-    target_start = forms.DateField(widget=forms.TextInput(
-        attrs={'class': 'datepicker', 'autocomplete': 'off'}))
-    target_end = forms.DateField(widget=forms.TextInput(
-        attrs={'class': 'datepicker', 'autocomplete': 'off'}))
-    test_options = (('API', 'API Test'), ('Static', 'Static Check'),
-                    ('Pen', 'Pen Test'), ('Web App', 'Web Application Test'))
-    lead = forms.ModelChoiceField(
-        queryset=User.objects.exclude(is_staff=False),
-        required=True, label="Testing Lead")
-    test_strategy = forms.URLField(required=False, label="Test Strategy URL")
-
-    def __init__(self, *args, **kwargs):
-        tags = Tag.objects.usage_for_model(Engagement)
-        t = [(tag.name, tag.name) for tag in tags]
-        super(EngForm2, self).__init__(*args, **kwargs)
-        self.fields['tags'].widget.choices = t
-
-    def is_valid(self):
-        valid = super(EngForm2, self).is_valid()
-
-        # we're done now if not valid
-        if not valid:
-            return valid
-        if self.cleaned_data['target_start'] > self.cleaned_data['target_end']:
-            self.add_error('target_start', 'Your target start date exceeds your target end date')
-            self.add_error('target_end', 'Your target start date exceeds your target end date')
-            return False
-        return True
-
-    class Meta:
-        model = Engagement
-        exclude = ('first_contacted', 'version', 'eng_type', 'real_start',
-                   'real_end', 'requester', 'reason', 'updated', 'report_type')
-
-
 class DeleteEngagementForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
                             widget=forms.widgets.HiddenInput())
@@ -831,14 +791,27 @@ class TestForm(forms.ModelForm):
                            help_text="Add tags that help describe this test.  "
                                      "Choose from the list or add new tags.  Press TAB key to add.")
     lead = forms.ModelChoiceField(
-        queryset=User.objects.exclude(is_staff=False),
+        queryset=None,
         required=False, label="Testing Lead")
 
     def __init__(self, *args, **kwargs):
+        obj = None
+
+        if 'engagement' in kwargs:
+            obj = kwargs.pop('engagement')
+
+        if 'instance' in kwargs:
+            obj = kwargs.get('instance')
+
         tags = Tag.objects.usage_for_model(Test)
         t = [(tag.name, tag.name) for tag in tags]
         super(TestForm, self).__init__(*args, **kwargs)
         self.fields['tags'].widget.choices = t
+        if obj:
+            staff_users = [user.id for user in User.objects.all() if user_is_authorized(user, 'staff', obj)]
+        else:
+            staff_users = [user.id for user in User.objects.exclude(is_staff=False)]
+        self.fields['lead'].queryset = User.objects.filter(id__in=staff_users)
 
     class Meta:
         model = Test
@@ -1036,8 +1009,9 @@ class FindingForm(forms.ModelForm):
         req_resp = kwargs.pop('req_resp')
         t = [(tag.name, tag.name) for tag in tags]
         super(FindingForm, self).__init__(*args, **kwargs)
+        print('instance: ', self.instance)
+        self.fields['simple_risk_accept'].initial = True if hasattr(self, 'instance') and self.instance.is_simple_risk_accepted else False
         self.fields['tags'].widget.choices = t
-        self.fields['simple_risk_accept'].initial = True if self.instance.is_simple_risk_accepted else False
         if req_resp:
             self.fields['request'].initial = req_resp[0]
             self.fields['response'].initial = req_resp[1]
@@ -1414,11 +1388,11 @@ class NoteForm(forms.ModelForm):
         fields = ['entry', 'private']
 
 
-class FindingNoteForm(NoteForm):
+class TypedNoteForm(NoteForm):
 
     def __init__(self, *args, **kwargs):
         queryset = kwargs.pop('available_note_types')
-        super(FindingNoteForm, self).__init__(*args, **kwargs)
+        super(TypedNoteForm, self).__init__(*args, **kwargs)
         self.fields['note_type'] = forms.ModelChoiceField(queryset=queryset, label='Note Type', required=True)
 
     class Meta():
@@ -1532,7 +1506,7 @@ class SimpleMetricsForm(forms.Form):
 
 
 class SimpleSearchForm(forms.Form):
-    query = forms.CharField()
+    query = forms.CharField(required=False)
 
 
 class DateRangeMetrics(forms.Form):

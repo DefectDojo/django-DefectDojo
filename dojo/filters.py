@@ -9,10 +9,11 @@ from django.utils import six
 from django.utils.translation import ugettext_lazy as _
 from django_filters import FilterSet, CharFilter, OrderingFilter, \
     ModelMultipleChoiceFilter, ModelChoiceFilter, MultipleChoiceFilter, \
-    BooleanFilter, NumberFilter
+    BooleanFilter, NumberFilter, DateFilter
+from django_filters import rest_framework as filters
 from django_filters.filters import ChoiceFilter, _truncate, DateTimeFilter
 from pytz import timezone
-
+from django.db.models import Q
 from dojo.models import Dojo_User, Product_Type, Finding, Product, Test_Type, \
     Endpoint, Development_Environment, Finding_Template, Report, Note_Type, \
     Engagement_Survey, Question, TextQuestion, ChoiceQuestion
@@ -30,8 +31,18 @@ BOOLEAN_CHOICES = (('false', 'No'), ('true', 'Yes'),)
 EARLIEST_FINDING = None
 
 
+def custom_filter(queryset, name, value):
+    values = value.split(',')
+    filter = ('%s__in' % (name))
+    return queryset.filter(Q(**{filter: values}))
+
+
 def now():
     return local_tz.localize(datetime.today())
+
+
+class NumberInFilter(filters.BaseInFilter, filters.NumberFilter):
+    pass
 
 
 def get_earliest_finding():
@@ -241,6 +252,8 @@ class MetricsDateRangeFilter(ChoiceFilter):
         super(MetricsDateRangeFilter, self).__init__(*args, **kwargs)
 
     def filter(self, qs, value):
+        if value == 8:
+            return qs
         if get_earliest_finding() is not None:
             start_date = local_tz.localize(datetime.combine(
                 get_earliest_finding().date, datetime.min.time())
@@ -339,6 +352,197 @@ class ProductFilter(DojoFilter):
         exclude = ['tags']
 
 
+class ApiProductFilter(DojoFilter):
+    # BooleanFilter
+    duplicate = BooleanFilter(field_name='duplicate')
+    external_audience = BooleanFilter(field_name='external_audience')
+    internet_accessible = BooleanFilter(field_name='internet_accessible')
+    # CharFilter
+    name = CharFilter(lookup_expr='icontains')
+    description = CharFilter(lookup_expr='icontains')
+    business_criticality = CharFilter(method=custom_filter, field_name='business_criticality')
+    platform = CharFilter(method=custom_filter, field_name='platform')
+    lifecycle = CharFilter(method=custom_filter, field_name='lifecycle')
+    origin = CharFilter(method=custom_filter, field_name='origin')
+    # NumberInFilter
+    id = NumberInFilter(field_name='id', lookup_expr='in')
+    product_manager = NumberInFilter(field_name='product_manager', lookup_expr='in')
+    technical_contact = NumberInFilter(field_name='technical_contact', lookup_expr='in')
+    team_manager = NumberInFilter(field_name='team_manager', lookup_expr='in')
+    prod_type = NumberInFilter(field_name='prod_type', lookup_expr='in')
+    tid = NumberInFilter(field_name='tid', lookup_expr='in')
+    authorized_users = NumberInFilter(field_name='authorized_users', lookup_expr='in')
+    prod_numeric_grade = NumberInFilter(field_name='prod_numeric_grade', lookup_expr='in')
+    user_records = NumberInFilter(field_name='user_records', lookup_expr='in')
+    regulations = NumberInFilter(field_name='regulations', lookup_expr='in')
+    active_finding_count = NumberInFilter(field_name='active_finding_count', lookup_expr='in')
+    # DateRangeFilter
+    created = DateRangeFilter()
+    updated = DateRangeFilter()
+    # NumberFilter
+    revenue = NumberFilter()
+
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ('id', 'id'),
+            ('tid', 'tid'),
+            ('name', 'name'),
+            ('created', 'created'),
+            ('prod_numeric_grade', 'prod_numeric_grade'),
+            ('business_criticality', 'business_criticality'),
+            ('platform', 'platform'),
+            ('lifecycle', 'lifecycle'),
+            ('origin', 'origin'),
+            ('revenue', 'revenue'),
+            ('external_audience', 'external_audience'),
+            ('internet_accessible', 'internet_accessible'),
+            ('product_manager', 'product_manager'),
+            ('product_manager__first_name', 'product_manager__first_name'),
+            ('product_manager__last_name', 'product_manager__last_name'),
+            ('technical_contact', 'technical_contact'),
+            ('technical_contact__first_name', 'technical_contact__first_name'),
+            ('technical_contact__last_name', 'technical_contact__last_name'),
+            ('team_manager', 'team_manager'),
+            ('team_manager__first_name', 'team_manager__first_name'),
+            ('team_manager__last_name', 'team_manager__last_name'),
+            ('prod_type', 'prod_type'),
+            ('prod_type__name', 'prod_type__name'),
+            ('updated', 'updated'),
+            ('user_records', 'user_records')
+        )
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.user = None
+        if 'user' in kwargs:
+            self.user = kwargs.pop('user')
+
+        super(ApiProductFilter, self).__init__(*args, **kwargs)
+
+        if self.user is not None and not self.user.is_staff:
+            self.form.fields[
+                'prod_type'].queryset = Product_Type.objects.filter(
+                prod_type__authorized_users__in=[self.user])
+
+
+class ApiFindingFilter(DojoFilter):
+    # BooleanFilter
+    active = BooleanFilter(field_name='active')
+    duplicate = BooleanFilter(field_name='duplicate')
+    dynamic_finding = BooleanFilter(field_name='dynamic_finding')
+    false_p = BooleanFilter(field_name='false_p')
+    is_Mitigated = BooleanFilter(field_name='is_Mitigated')
+    out_of_scope = BooleanFilter(field_name='out_of_scope')
+    static_finding = BooleanFilter(field_name='static_finding')
+    under_defect_review = BooleanFilter(field_name='under_defect_review')
+    under_review = BooleanFilter(field_name='under_review')
+    verified = BooleanFilter(field_name='verified')
+    # CharFilter
+    component_version = CharFilter(lookup_expr='icontains')
+    component_name = CharFilter(lookup_expr='icontains')
+    cve = CharFilter(method=custom_filter, field_name='cve')
+    description = CharFilter(lookup_expr='icontains')
+    file_path = CharFilter(lookup_expr='icontains')
+    hash_code = CharFilter(lookup_expr='icontains')
+    impact = CharFilter(lookup_expr='icontains')
+    mitigation = CharFilter(lookup_expr='icontains')
+    numerical_severity = CharFilter(method=custom_filter, field_name='numerical_severity')
+    param = CharFilter(lookup_expr='icontains')
+    payload = CharFilter(lookup_expr='icontains')
+    references = CharFilter(lookup_expr='icontains')
+    severity = CharFilter(method=custom_filter, field_name='severity')
+    severity_justification = CharFilter(lookup_expr='icontains')
+    step_to_reproduce = CharFilter(lookup_expr='icontains')
+    sourcefile = CharFilter(lookup_expr='icontains')
+    sourcefilepath = CharFilter(lookup_expr='icontains')
+    unique_id_from_tool = CharFilter(lookup_expr='icontains')
+    title = CharFilter(lookup_expr='icontains')
+    # DateRangeFilter
+    created = DateRangeFilter()
+    date = DateRangeFilter()
+    jira_change = DateRangeFilter()
+    jira_creation = DateRangeFilter()
+    last_reviewed = DateRangeFilter()
+    mitigated = DateRangeFilter()
+    # NumberInFilter
+    cwe = NumberInFilter(field_name='cwe', lookup_expr='in')
+    defect_review_requested_by = NumberInFilter(field_name='defect_review_requested_by', lookup_expr='in')
+    endpoints = NumberInFilter(field_name='endpoints', lookup_expr='in')
+    found_by = NumberInFilter(field_name='found_by', lookup_expr='in')
+    id = NumberInFilter(field_name='id', lookup_expr='in')
+    last_reviewed_by = NumberInFilter(field_name='last_reviewed_by', lookup_expr='in')
+    mitigated_by = NumberInFilter(field_name='mitigated_by', lookup_expr='in')
+    nb_occurences = NumberInFilter(field_name='nb_occurences', lookup_expr='in')
+    reporter = NumberInFilter(field_name='reporter', lookup_expr='in')
+    scanner_confidence = NumberInFilter(field_name='scanner_confidence', lookup_expr='in')
+    review_requested_by = NumberInFilter(field_name='review_requested_by', lookup_expr='in')
+    reviewers = NumberInFilter(field_name='reviewers', lookup_expr='in')
+    sast_source_line = NumberInFilter(field_name='sast_source_line', lookup_expr='in')
+    sonarqube_issue = NumberInFilter(field_name='sonarqube_issue', lookup_expr='in')
+    test__engagement__product = NumberInFilter(field_name='test__engagement__product', lookup_expr='in')
+    test__test__type = NumberInFilter(field_name='test__engagement__product', lookup_expr='in')
+    # ReportRiskAcceptanceFilter
+    test__engagement__risk_acceptance = ReportRiskAcceptanceFilter()
+
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ('active', 'active'),
+            ('component_name', 'component_name'),
+            ('component_version', 'component_version'),
+            ('created', 'created'),
+            ('cve', 'cve'),
+            ('cwe', 'cwe'),
+            ('date', 'date'),
+            ('duplicate', 'duplicate'),
+            ('dynamic_finding', 'dynamic_finding'),
+            ('false_p', 'false_p'),
+            ('found_by', 'found_by'),
+            ('id', 'id'),
+            ('is_Mitigated', 'is_Mitigated'),
+            ('numerical_severity', 'numerical_severity'),
+            ('out_of_scope', 'out_of_scope'),
+            ('severity', 'severity'),
+            ('reviewers', 'reviewers'),
+            ('static_finding', 'static_finding'),
+            ('test__engagement__product__name', 'test__engagement__product__name'),
+            ('title', 'title'),
+            ('under_defect_review', 'under_defect_review'),
+            ('under_review', 'under_review'),
+            ('verified', 'verified'),
+        ),
+    )
+
+    class Meta:
+        model = Finding
+        exclude = ['url', 'is_template', 'thread_id', 'notes', 'images',
+                   'sourcefile', 'line']
+
+    def __init__(self, *args, **kwargs):
+        self.user = None
+        self.pid = None
+        if 'user' in kwargs:
+            self.user = kwargs.pop('user')
+
+        if 'pid' in kwargs:
+            self.pid = kwargs.pop('pid')
+        super(ApiFindingFilter, self).__init__(*args, **kwargs)
+
+        cwe = dict()
+        cwe = dict([cwe, cwe]
+                   for cwe in self.queryset.values_list('cwe', flat=True).distinct()
+                   if type(cwe) is int and cwe is not None and cwe > 0)
+        cwe = collections.OrderedDict(sorted(cwe.items()))
+        self.form.fields['cwe'].choices = list(cwe.items())
+        if self.user is not None and not self.user.is_staff:
+            if self.form.fields.get('test__engagement__product'):
+                qs = Product.objects.filter(authorized_users__in=[self.user])
+                self.form.fields['test__engagement__product'].queryset = qs
+            self.form.fields['endpoints'].queryset = Endpoint.objects.filter(
+                product__authorized_users__in=[self.user]).distinct()
+
+
 class OpenFindingFilter(DojoFilter):
     title = CharFilter(lookup_expr='icontains')
     duplicate = ReportBooleanFilter()
@@ -359,11 +563,17 @@ class OpenFindingFilter(DojoFilter):
         label="Risk Accepted")
 
     if get_system_setting('enable_jira'):
-        jira_issue = BooleanFilter(field_name='jira_issue',
+        has_jira_issue = BooleanFilter(field_name='jira_issue',
                                    lookup_expr='isnull',
                                    exclude=True,
-                                   label='JIRA issue')
+                                   label='has JIRA')
 
+    jira_issue__jira_key = CharFilter(field_name='jira_issue__jira_key', lookup_expr='icontains', label="JIRA issue")
+
+    has_notes = BooleanFilter(field_name='notes',
+                                lookup_expr='isnull',
+                                exclude=True,
+                                label='has notes')
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
@@ -441,6 +651,19 @@ class ClosedFindingFilter(DojoFilter):
         label="Product Type")
     test__engagement__risk_acceptance = ReportRiskAcceptanceFilter(
         label="Risk Accepted")
+
+    if get_system_setting('enable_jira'):
+        has_jira_issue = BooleanFilter(field_name='jira_issue',
+                                   lookup_expr='isnull',
+                                   exclude=True,
+                                   label='has JIRA')
+
+    jira_issue__jira_key = CharFilter(field_name='jira_issue__jira_key', lookup_expr='icontains', label="JIRA issue")
+
+    has_notes = BooleanFilter(field_name='notes',
+                                lookup_expr='isnull',
+                                exclude=True,
+                                label='has notes')
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -632,10 +855,17 @@ class SimilarFindingFilter(DojoFilter):
         label="Product Type")
 
     if get_system_setting('enable_jira'):
-        jira_issue = BooleanFilter(field_name='jira_issue',
+        has_jira_issue = BooleanFilter(field_name='jira_issue',
                                    lookup_expr='isnull',
                                    exclude=True,
-                                   label='JIRA issue')
+                                   label='has JIRA')
+
+    jira_issue__jira_key = CharFilter(field_name='jira_issue__jira_key', lookup_expr='icontains', label="JIRA issue")
+
+    has_notes = BooleanFilter(field_name='notes',
+                                lookup_expr='isnull',
+                                exclude=True,
+                                label='has notes')
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -662,8 +892,6 @@ class SimilarFindingFilter(DojoFilter):
         if 'finding' in kwargs:
             self.finding = kwargs.pop('finding')
 
-        logger.debug('DATA: %s', data)
-
         # if filterset is bound, use initial values as defaults
         if not data:
             # get a mutable copy of the QueryDict
@@ -677,8 +905,6 @@ class SimilarFindingFilter(DojoFilter):
             data['test__test_type'] = self.finding.test.test_type
             data['test__engagement__product'] = self.finding.test.engagement.product
             data['test__engagement__product__prod_type'] = self.finding.test.engagement.product.prod_type
-
-            logger.debug('DATA2: %s', data)
 
         super().__init__(data, *args, **kwargs)
 
@@ -788,6 +1014,8 @@ class FindingStatusFilter(ChoiceFilter):
 
 
 class MetricsFindingFilter(FilterSet):
+    start_date = DateFilter(field_name='date', label='Start Date', lookup_expr=('gt'))
+    end_date = DateFilter(field_name='date', label='End Date', lookup_expr=('lt'))
     date = MetricsDateRangeFilter()
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.all().order_by('name'),
@@ -796,6 +1024,12 @@ class MetricsFindingFilter(FilterSet):
     status = FindingStatusFilter(label='Status')
 
     def __init__(self, *args, **kwargs):
+        if args[0]:
+            if args[0]['start_date'] != '' or args[0]['end_date'] != '':
+                args[0]._mutable = True
+                args[0]['date'] = 8
+                args[0]._mutable = False
+        # raise Exception()
         super(MetricsFindingFilter, self).__init__(*args, **kwargs)
         self.form.fields['severity'].choices = self.queryset.order_by(
             'numerical_severity'

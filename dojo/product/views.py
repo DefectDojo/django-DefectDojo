@@ -24,7 +24,8 @@ from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm
                        GITHUB_Product_Form, GITHUBFindingForm, App_AnalysisTypeForm, JIRAEngagementForm
 from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, GITHUB_PKey, Finding_Template, \
                         Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, \
-                        Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, Dojo_User, BurpRawRequestResponse
+                        Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, Dojo_User, BurpRawRequestResponse, Endpoint_Status
+
 from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, Product_Tab, get_punchcard_data, add_epic
 from dojo.notifications.helper import create_notification
 from custom_field.models import CustomFieldValue, CustomField
@@ -35,6 +36,8 @@ from django.db.models import Prefetch
 from django.db.models.query import QuerySet
 from github import Github
 from dojo.finding.views import finding_link_jira, finding_unlink_jira
+from dojo.user.helper import user_must_be_authorized, user_is_authorized
+
 
 logger = logging.getLogger(__name__)
 
@@ -483,7 +486,6 @@ def view_engagements_cicd(request, pid):
     return view_engagements(request, pid, engagement_type="CI/CD")
 
 
-@user_passes_test(lambda u: u.is_staff)
 def import_scan_results_prod(request, pid=None):
     from dojo.engagement.views import import_scan_results
     return import_scan_results(request, pid=pid)
@@ -576,7 +578,8 @@ def new_product(request):
                    'sonarqube_form': Sonarqube_ProductForm()})
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Product, 'staff', 'pid')
 def edit_product(request, pid):
     prod = Product.objects.get(pk=pid)
     system_settings = System_Settings.objects.get()
@@ -696,7 +699,8 @@ def edit_product(request, pid):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Product, 'staff', 'pid')
 def delete_product(request, pid):
     product = get_object_or_404(Product, pk=pid)
     form = DeleteProductForm(instance=product)
@@ -732,10 +736,13 @@ def delete_product(request, pid):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
 def new_eng_for_app(request, pid, cicd=False):
     jform = None
     prod = Product.objects.get(id=pid)
+    if not user_is_authorized(request.user, 'staff', prod):
+        raise PermissionDenied
+
     use_jira = get_system_setting('enable_jira') and prod.jira_pkey is not None
 
     if request.method == 'POST':
@@ -744,7 +751,7 @@ def new_eng_for_app(request, pid, cicd=False):
         #     print(f'Key: {key}')
         #     print(f'Value: {value}')
 
-        form = EngForm(request.POST, cicd=cicd)
+        form = EngForm(request.POST, cicd=cicd, product=prod.id)
         if form.is_valid():
             new_eng = form.save(commit=False)
             if not new_eng.name:
@@ -771,7 +778,7 @@ def new_eng_for_app(request, pid, cicd=False):
 
             if form.is_valid() and (jform is None or jform.is_valid()):
                 if 'jiraform-push_to_jira' in request.POST:
-                    if request.user.usercontactinfo.block_execution:
+                    if Dojo_User.wants_block_execution(request.user):
                         logger.debug('calling add_epic')
                         add_epic(new_eng, jform.cleaned_data.get("push_to_jira"))
                     else:
@@ -804,7 +811,8 @@ def new_eng_for_app(request, pid, cicd=False):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Product, 'staff', 'pid')
 def new_tech_for_prod(request, pid):
     prod = Product.objects.get(id=pid)
     if request.method == 'POST':
@@ -824,12 +832,13 @@ def new_tech_for_prod(request, pid):
                 {'form': form, 'pid': pid})
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
 def new_eng_for_app_cicd(request, pid):
     return new_eng_for_app(request, pid, True)
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Product, 'staff', 'pid')
 def add_meta_data(request, pid):
     prod = Product.objects.get(id=pid)
     if request.method == 'POST':
@@ -857,7 +866,8 @@ def add_meta_data(request, pid):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Product, 'staff', 'pid')
 def edit_meta_data(request, pid):
     prod = Product.objects.get(id=pid)
     if request.method == 'POST':
@@ -888,7 +898,8 @@ def edit_meta_data(request, pid):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Product, 'staff', 'pid')
 def ad_hoc_finding(request, pid):
     prod = Product.objects.get(id=pid)
     test = None
@@ -950,7 +961,45 @@ def ad_hoc_finding(request, pid):
             new_finding.is_template = False
             new_finding.save()
             new_finding.endpoints.set(form.cleaned_data['endpoints'])
+            for endpoint in form.cleaned_data['endpoints']:
+                eps, created = Endpoint_Status.objects.get_or_create(
+                    finding=new_finding,
+                    endpoint=endpoint)
+                endpoint.endpoint_status.add(eps)
+                new_finding.endpoint_status.add(eps)
 
+            for endpoint in new_finding.unsaved_endpoints:
+                ep, created = Endpoint.objects.get_or_create(
+                    protocol=endpoint.protocol,
+                    host=endpoint.host,
+                    path=endpoint.path,
+                    query=endpoint.query,
+                    fragment=endpoint.fragment,
+                    product=test.engagement.product)
+                eps, created = Endpoint_Status.objects.get_or_create(
+                    finding=new_finding,
+                    endpoint=ep)
+                ep.endpoint_status.add(eps)
+
+                new_finding.endpoints.add(ep)
+                new_finding.endpoint_status.add(eps)
+            for endpoint in form.cleaned_data['endpoints']:
+                ep, created = Endpoint.objects.get_or_create(
+                    protocol=endpoint.protocol,
+                    host=endpoint.host,
+                    path=endpoint.path,
+                    query=endpoint.query,
+                    fragment=endpoint.fragment,
+                    product=test.engagement.product)
+                eps, created = Endpoint_Status.objects.get_or_create(
+                    finding=new_finding,
+                    endpoint=ep)
+                ep.endpoint_status.add(eps)
+
+                new_finding.endpoints.add(ep)
+                new_finding.endpoint_status.add(eps)
+
+            new_finding.save()
             # Push to jira?
             push_to_jira = False
             jira_message = None
@@ -1069,7 +1118,8 @@ def ad_hoc_finding(request, pid):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Product, 'staff', 'pid')
 def engagement_presets(request, pid):
     prod = get_object_or_404(Product, id=pid)
     presets = Engagement_Presets.objects.filter(product=prod).all()
@@ -1082,7 +1132,8 @@ def engagement_presets(request, pid):
                    'prod': prod})
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Product, 'staff', 'pid')
 def edit_engagement_presets(request, pid, eid):
     prod = get_object_or_404(Product, id=pid)
     preset = get_object_or_404(Engagement_Presets, id=eid)
@@ -1108,7 +1159,8 @@ def edit_engagement_presets(request, pid, eid):
                    'prod': prod})
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Product, 'staff', 'pid')
 def add_engagement_presets(request, pid):
     prod = get_object_or_404(Product, id=pid)
     if request.method == 'POST':
@@ -1131,7 +1183,8 @@ def add_engagement_presets(request, pid):
     return render(request, 'dojo/new_params.html', {'tform': tform, 'pid': pid, 'product_tab': product_tab})
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Product, 'staff', 'pid')
 def delete_engagement_presets(request, pid, eid):
     prod = get_object_or_404(Product, id=pid)
     preset = get_object_or_404(Engagement_Presets, id=eid)
