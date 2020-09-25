@@ -22,5 +22,8 @@ jobs:
       - name: Build the stack
         run: docker-compose up --build
 
-      - name: Logs
-        run: docker-compose logs -f
+      - name: PS
+        run: docker-compose ps
+
+      # - name: Logs
+      #   run: docker-compose logs -f
