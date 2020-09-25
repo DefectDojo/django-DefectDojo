@@ -837,10 +837,6 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
-        'root': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-        },
         'dojo': {
             'handlers': ['console'],
             'level': 'DEBUG',
