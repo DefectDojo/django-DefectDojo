@@ -9,7 +9,7 @@ root = environ.Path(__file__) - 3  # Three folders back
 env = environ.Env(
     # Set casting and default values
     DD_SITE_URL=(str, 'http://localhost:8080'),
-    DD_DEBUG=(bool, False),
+    DD_DEBUG=(bool, True),
     DD_DJANGO_METRICS_ENABLED=(bool, False),
     DD_LOGIN_REDIRECT_URL=(str, '/'),
     DD_DJANGO_ADMIN_ENABLED=(bool, False),
@@ -836,6 +836,10 @@ LOGGING = {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
             'propagate': True,
+        },
+        'root': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
         },
         'dojo': {
             'handlers': ['console'],

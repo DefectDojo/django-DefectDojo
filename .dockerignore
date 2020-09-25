@@ -1,4 +1,123 @@
-.git
-.gitignore
-*.md
-.env*
+# Docker container persistent data
+docker/data/
+docker/static/
+
+# docker-compose override symbolic link
+docker-compose.override.yml
+
+# VS Code
+.vscode/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# C extensions
+*.so
+
+# Distribution / packaging
+bin/
+build/
+develop-eggs/
+dist/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+.tox/
+.coverage
+.cache
+nosetests.xml
+coverage.xml
+
+# Translations
+*.mo
+
+# Mr Developer
+.mr.developer.cfg
+.project
+.pydevproject
+.settings
+
+# Rope
+.ropeproject
+
+# Django stuff:
+*.log
+*.pot
+**/settings.py
+
+# Vim swapfiles
+*.swp
+*.swo
+
+# Sphinx documentation
+docs/_build/
+
+#others
+.DS_Store
+*.crt
+*.csr
+*.key
+dojo/migrations
+dojo/static/img/threat/*
+dojo/uploads/risk/*
+dojo/uploads/reports/*
+dojo/scans/scan*
+dojo/uploads/threat/*
+dojo/fixtures/initial_surveys.json
+.idea
+*.sqlite
+*.db
+celerybeat.pid
+*.env*
+
+weekly.txt
+Monthly.txt
+Quarterly.txt
+
+# Vagrant
+.vagrant
+
+# yarn
+components/*
+!components/package.json
+!components/yarn.lock
+# dojo/static/*
+!dojo/static/dojo/*
+dojo/media
+/static
+/media
+
+# virtualenv
+.venv/
+venv/
+ENV/
+quick.bash
+*.tgz
+
+#visual studio code
+*.code-workspace
+
+# pipenv
+Pipfile
+Pipfile*
+
+
+#ignore locally added certs
+certs/
+
+# Helm dependencies
+helm/defectdojo/charts
+
