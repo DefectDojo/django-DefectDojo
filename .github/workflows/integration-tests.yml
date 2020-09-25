@@ -5,5 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Set integration-test mode
+        run: docker/setEnv.sh integration_tests
       - name: Build the stack
         run: docker-compose up -d
