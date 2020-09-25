@@ -25,8 +25,12 @@ jobs:
       - name: Run all the things
         run: docker-compose up -d
 
+      - name: Pipe
+        run: |
+
+
       # - name: PS
       #   run: docker-compose ps
 
-      - name: Logs
-        run: docker-compose logs -f integrationtest
+      # - name: Logs
+      #   run: docker-compose logs -f integrationtest
