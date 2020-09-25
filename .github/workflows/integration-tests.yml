@@ -20,7 +20,7 @@ jobs:
         continue-on-error: true
 
       - name: Build the stack
-        run: docker-compose up --build
+        run: docker-compose up --build -d
 
       # - name: PS
       #   run: docker-compose ps
