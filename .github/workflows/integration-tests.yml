@@ -22,7 +22,7 @@ jobs:
       - name: Build the stack
         run: docker-compose build
 
-      # phases startup so we can use the exit code from integrationtest container
+      # phased startup so we can use the exit code from integrationtest container
       - name: Stary MySQL
         run: docker-compose up -d 
 
