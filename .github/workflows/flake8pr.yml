@@ -6,3 +6,5 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: tayfun/flake8-your-pr@master
+        with:
+          secrets = ["${{ secrets.GITHUB_TOKEN }}"]
