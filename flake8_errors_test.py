@@ -1,4 +1,3 @@
-print("hallo")   
-     
-     print("hoi")
-     
+print("hallo")
+
+    print("hoi")
