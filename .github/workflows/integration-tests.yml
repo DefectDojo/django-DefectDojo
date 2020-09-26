@@ -43,9 +43,3 @@ jobs:
       - name: Shutdown
         if: always()
         run: docker-compose down
-
-      # - name: PS
-      #   run: docker-compose ps
-
-      # - name: Logs
-      #   run: docker-compose logs -f integrationtest
