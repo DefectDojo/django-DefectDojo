@@ -23,11 +23,7 @@ jobs:
         run: docker-compose build
 
       - name: Run all the things
-        run: docker-compose up -d
-
-      - name: Pipe
-        run: |
-
+        run: docker-compose up init && docker-compose up --exit-code-from integrationtest integrationtest
 
       # - name: PS
       #   run: docker-compose ps
