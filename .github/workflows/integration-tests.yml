@@ -36,6 +36,14 @@ jobs:
       - name: Integration tests
         run: docker-compose up --exit-code-from integrationtest integrationtest
 
+      - name: Logs
+        if: failure()
+        run: docker-compose logs --tail="2500"
+
+      - name: Shutdown
+        if: always()
+        run: docker-compose down
+
       # - name: PS
       #   run: docker-compose ps
 
