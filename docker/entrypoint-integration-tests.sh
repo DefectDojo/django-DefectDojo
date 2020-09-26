@@ -26,6 +26,15 @@ function success() {
     echo "Success: $1 test passed\n"
 }
 
+test="Finding integration tests"
+echo "Running: $test"
+if python3 tests/Finding_unit_test.py ; then
+    success $test
+else
+    fail $test
+fi
+
+
 test="Notes integration tests"
 echo "Running: $test"
 if python3 tests/Notes_unit_test.py ; then
