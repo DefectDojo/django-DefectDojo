@@ -1,0 +1,13 @@
+name: Flake8 your PR
+on: [pull_request]
+jobs:
+  flake8-your-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - uses: tayfun/flake8-your-pr@master
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"

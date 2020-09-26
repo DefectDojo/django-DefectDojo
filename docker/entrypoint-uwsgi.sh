@@ -2,6 +2,8 @@
 
 umask 0002
 
+cp dojo/settings/settings.dist.py dojo/settings/settings.py
+
 exec uwsgi \
   "--${DD_UWSGI_MODE}" "${DD_UWSGI_ENDPOINT}" \
   --protocol uwsgi \
