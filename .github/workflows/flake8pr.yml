@@ -9,6 +9,6 @@ jobs:
           fetch-depth: 2
 
       # - uses: tayfun/flake8-your-pr@master
-      - uses: luceda/flake8-your-pr@master
+      - uses: valentijnscholten/flake8-your-pr@master
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
