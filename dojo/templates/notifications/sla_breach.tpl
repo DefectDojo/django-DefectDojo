@@ -44,4 +44,22 @@ Defect Dojo</br>
 Title: {{finding.title}}
 Severity: {{finding.severity}}
 You can find details here: {{ url }}
+{% elif type == 'msteams' %}
+{% url 'view_finding' finding.id as finding_url %}
+    {
+        "@context": "https://schema.org/extensions",
+        "@type": "MessageCard",
+        "themeColor": "0072C6",
+        "title": "SLA breached",
+        "text": "SLA breach alert for finding {{ finding.title }}. Relative days count to SLA due date: {{sla_age}}.",
+        "potentialAction": [
+            {
+            "@type": "OpenUri",
+            "name": "View",
+            "targets": [
+                { "os": "default", "uri": "{{ finding_url|full_url }}" }
+                ]
+            }
+        ]
+    }
 {% endif %}

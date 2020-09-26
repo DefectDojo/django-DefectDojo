@@ -31,4 +31,22 @@ Defect Dojo</br>
 Title: {{test.title}}
 Type: {{ test.test_type }}
 You can find details here: {{ url }}
+{% elif type == 'msteams' %}
+{% url 'view_test' test.id as test_url %}
+    {
+        "@context": "https://schema.org/extensions",
+        "@type": "MessageCard",
+        "themeColor": "0072C6",
+        "title": "Test added",
+        "text": "New test added for engagement {{ engagement.name }}: {{ test }}.",
+        "potentialAction": [
+            {
+            "@type": "OpenUri",
+            "name": "View",
+            "targets": [
+                { "os": "default", "uri": "{{ test_url|full_url }}" }
+                ]
+            }
+        ]
+    }
 {% endif %}

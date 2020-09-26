@@ -19,4 +19,21 @@
 {{ note }}
 
 Full details of the note can be reviewed at {{ url }}
+{% elif type == 'msteams' %}
+    {
+        "@context": "https://schema.org/extensions",
+        "@type": "MessageCard",
+        "themeColor": "0072C6",
+        "title": "Engagement added",
+        "text": "User {{ user }} jotted a note on {{ section }}: {{ note }}",
+        "potentialAction": [
+            {
+            "@type": "OpenUri",
+            "name": "View",
+            "targets": [
+                { "os": "default", "uri": "{{ url|full_url }}" }
+                ]
+            }
+        ]
+    }
 {% endif %}

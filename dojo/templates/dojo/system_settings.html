@@ -52,7 +52,7 @@
         }
 
         $(function () {
-            $.each(['slack','hipchat','mail', 'grade'], function (index, value) {
+            $.each(['slack','msteams','mail', 'grade'], function (index, value) {
                 updatenotificationsgroup(value);
                 $('#id_enable_' + value + '_notifications').change(function() { updatenotificationsgroup(value)});
             });

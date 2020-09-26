@@ -13,4 +13,21 @@
     {{ description|safe }}{% if url is not None %}
 More information on this event can be found here: {{ url }}
     {% endif %}
+{% elif type == 'msteams' %}
+    {
+        "@context": "https://schema.org/extensions",
+        "@type": "MessageCard",
+        "themeColor": "0072C6",
+        "title": "Other event",
+        "text": "{{ description|safe }}",
+        "potentialAction": [
+            {
+            "@type": "OpenUri",
+            "name": "View",
+            "targets": [
+                { "os": "default", "uri": "{{ url }}" }
+                ]
+            }
+        ]
+    }
 {% endif %}

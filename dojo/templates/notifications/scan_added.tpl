@@ -79,4 +79,22 @@ You can manage your notification settings here: <a href="{{ notification_url|ful
 {{ test }} results have been uploaded.
 They can be viewed here: {{ url }}
 {% endif %}
+{% elif type == 'msteams' %}
+{% url 'view_test' test.id as test_url %}
+    {
+        "@context": "https://schema.org/extensions",
+        "@type": "MessageCard",
+        "themeColor": "0072C6",
+        "title": "Scan added",
+        "text": "New scan added for engagement {{ test.engagement.name }}: {{ test }}.",
+        "potentialAction": [
+            {
+            "@type": "OpenUri",
+            "name": "View",
+            "targets": [
+                { "os": "default", "uri": "{{ test_url|full_url }}" }
+                ]
+            }
+        ]
+    }
 {% endif %}

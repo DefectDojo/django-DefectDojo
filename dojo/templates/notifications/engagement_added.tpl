@@ -36,4 +36,21 @@ You can manage your notification settings here: <a href="{{ notification_url|ful
     The engagement "{{ engagement.name }}" has been created in the product "{{ engagement.product }}".
 {% elif type == 'slack' %}
     The engagement "{{ engagement.name }}" has been created in the product "{{ engagement.product }}". It can be viewed here: {{ url|full_url }}
+{% elif type == 'msteams' %}
+{
+  "@context": "https://schema.org/extensions",
+  "@type": "MessageCard",
+  "themeColor": "0072C6",
+  "title": "Engagement added",
+  "text": "The engagement {{ engagement.name }} has been created in the product {{ engagement.product }}.",
+  "potentialAction": [
+    {
+      "@type": "OpenUri",
+      "name": "View",
+      "targets": [
+        { "os": "default", "uri": "{{ url|full_url }}" }
+      ]
+    }
+  ]
+}
 {% endif %}
