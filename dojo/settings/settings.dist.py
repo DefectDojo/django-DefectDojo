@@ -583,7 +583,7 @@ INSTALLED_APPS = (
     'django_celery_results',
     'social_django',
     'drf_yasg',
-    'debug_toolbar',
+    # 'debug_toolbar',
     # 'cachalot'
 )
 
@@ -591,7 +591,7 @@ INSTALLED_APPS = (
 # MIDDLEWARE
 # ------------------------------------------------------------------------------
 DJANGO_MIDDLEWARE_CLASSES = [
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    # 'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.common.CommonMiddleware',
     'dojo.middleware.DojoSytemSettingsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
