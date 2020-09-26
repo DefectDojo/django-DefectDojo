@@ -4,7 +4,7 @@ from datetime import timedelta
 from celery.schedules import crontab
 
 import environ
-root = environ.Path(__file__) - 3  # Three folders back
+root = environ.Path(__file__) - 3  # Three folders back!
 
 env = environ.Env(
     # Set casting and default values
@@ -905,7 +905,7 @@ DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.request.RequestPanel',
     'debug_toolbar.panels.sql.SQLPanel',
     'debug_toolbar.panels.templates.TemplatesPanel',
-    'debug_toolbar.panels.staticfiles.StaticFilesPanel',
+    # 'debug_toolbar.panels.staticfiles.StaticFilesPanel',
     'debug_toolbar.panels.cache.CachePanel',
     'debug_toolbar.panels.signals.SignalsPanel',
     'debug_toolbar.panels.logging.LoggingPanel',
