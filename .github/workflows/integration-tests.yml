@@ -22,8 +22,19 @@ jobs:
       - name: Build the stack
         run: docker-compose build
 
-      - name: Run all the things
-        run: docker-compose up init && docker-compose up --exit-code-from integrationtest integrationtest
+      # phases startup so we can use the exit code from integrationtest container
+      - name: Stary MySQL
+        run: docker-compose up -d 
+
+      - name: Initialize
+        run: docker-compose up --exit-code-from initializer initializer
+
+      - name: Start Dojo
+        # implicity starts uwsgi and rabbitmq
+        run: docker-compose up -d nginx celerybeat celeryworker
+
+      - name: Integration tests
+        run: docker-compose up --exit-code-from integrationtest integrationtest
 
       # - name: PS
       #   run: docker-compose ps
