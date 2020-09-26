@@ -662,7 +662,7 @@ CELERY_BEAT_SCHEDULE = {
     'update-findings-from-source-issues': {
         'task': 'dojo.tasks.async_update_findings_from_source_issues',
         'schedule': timedelta(hours=3),
-#    },
+    },
 #    'compute-sla-age-and-notify': {
 #        'task': 'dojo.tasks.async_sla_compute_and_notify',
 #        'schedule': crontab(hour=7, minute=30),
