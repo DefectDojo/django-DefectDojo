@@ -110,7 +110,7 @@ class BaseTestCase(unittest.TestCase):
     def is_element_by_css_selector_present(self, selector, text=None):
         elems = self.driver.find_elements_by_css_selector(selector)
         if len(elems) == 0:
-            print('no elements! for: ' + selector)
+            print('no elements! for: "' + selector + '": ' + text)
             return False
 
         if text is None:
@@ -120,7 +120,7 @@ class BaseTestCase(unittest.TestCase):
         for elem in elems:
             print(elem.text)
             if text in elem.text:
-                print('contains! for: ' + text)
+                # print('contains! for: ' + text)
                 return True
 
         print('text mismatch! for: ' + text)
