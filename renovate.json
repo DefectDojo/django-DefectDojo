@@ -1,7 +1,0 @@
-{
-  "extends": [
-    "config:base"
-  ],
-  "dependencyDashboard": true,
-  "dependencyDashboardApproval": true
-}
