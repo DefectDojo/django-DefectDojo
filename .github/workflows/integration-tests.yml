@@ -31,6 +31,9 @@ jobs:
       - name: Initialize
         run: docker-compose up -d mysql initializer
 
+      - name: Initialize Logs
+        run: docker-compose logs -f initializer
+
       - name: Unit tests
         run: docker-compose up --exit-code-from unittests unittests
 
