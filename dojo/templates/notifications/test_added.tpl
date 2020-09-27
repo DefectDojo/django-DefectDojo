@@ -36,9 +36,29 @@ You can find details here: {{ url }}
     {
         "@context": "https://schema.org/extensions",
         "@type": "MessageCard",
-        "themeColor": "0072C6",
         "title": "Test added",
-        "text": "New test added for engagement {{ engagement.name }}: {{ test }}.",
+        "summary": "Test added",
+        "sections": [
+            {
+                "activityTitle": "DefectDojo",
+                "activityImage": "https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/master/dojo/static/dojo/img/chop.png",
+                "text": "A new test has been added.",
+                "facts": [
+                    {
+                        "name": "Product:",
+                        "value": "{{ engagement.product.name }}"
+                    },
+                    {
+                        "name": "Engagement:",
+                        "value": "{{ engagement.name }}"
+                    },
+                    {
+                        "name": "Test:",
+                        "value": "{{ test }}"
+                    }
+                ]
+            }
+        ],
         "potentialAction": [
             {
             "@type": "OpenUri",

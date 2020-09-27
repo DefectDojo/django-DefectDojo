@@ -84,9 +84,29 @@ They can be viewed here: {{ url }}
     {
         "@context": "https://schema.org/extensions",
         "@type": "MessageCard",
-        "themeColor": "0072C6",
         "title": "Scan added",
-        "text": "New scan added for engagement {{ test.engagement.name }}: {{ test }}.",
+        "summary": "Scan added",
+        "sections": [
+            {
+                "activityTitle": "DefectDojo",
+                "activityImage": "https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/master/dojo/static/dojo/img/chop.png",
+                "text": "A new scan has been added.",
+                "facts": [
+                    {
+                        "name": "Product:",
+                        "value": "{{ test.engagement.product.name }}"
+                    },
+                    {
+                        "name": "Engagement:",
+                        "value": "{{ test.engagement.name }}"
+                    },
+                    {
+                        "name": "Scan:",
+                        "value": "{{ test }}"
+                    }
+                ]
+            }
+        ],
         "potentialAction": [
             {
             "@type": "OpenUri",

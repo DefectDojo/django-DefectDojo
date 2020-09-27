@@ -13,9 +13,21 @@
     {
         "@context": "https://schema.org/extensions",
         "@type": "MessageCard",
-        "themeColor": "0072C6",
         "title": "Report created",
-        "text": "Your report "{{ report.name }}" is ready.",
+        "summary": "Report created",
+        "sections": [
+            {
+                "activityTitle": "DefectDojo",
+                "activityImage": "https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/master/dojo/static/dojo/img/chop.png",
+                "text": "Report is ready for download.",
+                "facts": [
+                    {
+                        "name": "Report:",
+                        "value": "report.name"
+                    }
+                ]
+            }
+        ],
         "potentialAction": [
             {
             "@type": "OpenUri",

@@ -17,9 +17,15 @@ More information on this event can be found here: {{ url }}
     {
         "@context": "https://schema.org/extensions",
         "@type": "MessageCard",
-        "themeColor": "0072C6",
-        "title": "Other event",
-        "text": "{{ description|safe }}",
+        "title": "Event",
+        "summary": "Event",
+        "sections": [
+            {
+                "activityTitle": "DefectDojo",
+                "activityImage": "https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/master/dojo/static/dojo/img/chop.png",
+                "text": "{% autoescape on %} {{ description }} {% endautoescape %}"
+            }
+        ],
         "potentialAction": [
             {
             "@type": "OpenUri",

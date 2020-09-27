@@ -49,9 +49,29 @@ You can find details here: {{ url }}
     {
         "@context": "https://schema.org/extensions",
         "@type": "MessageCard",
-        "themeColor": "0072C6",
         "title": "SLA breached",
-        "text": "SLA breach alert for finding {{ finding.title }}. Relative days count to SLA due date: {{sla_age}}.",
+        "summary": "SLA breached",
+        "sections": [
+            {
+                "activityTitle": "DefectDojo",
+                "activityImage": "https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/master/dojo/static/dojo/img/chop.png",
+                "text": "A SLA for a finding has been breached.",
+                "facts": [
+                    {
+                        "name": "Finding:",
+                        "value": "{{ finding.title }}"
+                    },
+                    {
+                        "name": "Severity:",
+                        "value": "{{ finding.severity }}"
+                    },
+                    {
+                        "name": "SLA age:",
+                        "value": "{{ sla_age }}"
+                    }
+                ]
+            }
+        ],
         "potentialAction": [
             {
             "@type": "OpenUri",
