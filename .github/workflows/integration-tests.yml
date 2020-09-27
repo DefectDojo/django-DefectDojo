@@ -1,6 +1,6 @@
 name: Integration tests
 # run on pull_request_target instead of just pull_request as we need write access to update the status check
-on: [pull_request_target]
+on: [push, pull_request_target]
 jobs:
   integration_test:
     runs-on: ubuntu-latest
@@ -20,21 +20,27 @@ jobs:
         # Ignore the failure of a step and avoid terminating the job.
         continue-on-error: true
 
-      - name: Build the stack
-        run: docker-compose build
+      - name: Build for unittests
+        run: docker-compose build unittests mysql initializer
 
       # phased startup so we can use the exit code from integrationtest container
-      - name: Stary MySQL
-        run: docker-compose up -d 
+      - name: Start MySQL
+        run: docker-compose up -d mysql initializer
 
-      - name: Initialize
-        run: docker-compose up --exit-code-from initializer initializer
+      - name: Unit tests
+        run: docker-compose up --exit-code-from unittests unittests
+
+      - name: Build the rest
+        if: succes()
+        run: docker-compose build
 
       - name: Start Dojo
         # implicity starts uwsgi and rabbitmq
+        if: succes()
         run: docker-compose up -d nginx celerybeat celeryworker
 
       - name: Integration tests
+        if: succes()
         run: docker-compose up --exit-code-from integrationtest integrationtest
 
       - name: Logs

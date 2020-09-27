@@ -21,6 +21,14 @@ services:
     environment:
       DD_DEBUG: 'True'
       DD_DATABASE_URL: ${DD_TEST_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/test_defectdojo}
+  unittests:
+    image: defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}    
+    entrypoint: ['/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/entrypoint-unit-tests.sh']
+    environment:
+      DD_DEBUG: 'True'
+      # DD_DATABASE_URL: ${DD_TEST_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/test_defectdojo}
+      DD_TEST_DATABASE_NAME: ${DD_TEST_DATABASE_NAME:-test_defectdojo}
+      DD_DATABASE_NAME: ${DD_TEST_DATABASE_NAME:-test_defectdojo}      
   celerybeat:
     environment:
       DD_DATABASE_URL: ${DD_TEST_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/test_defectdojo}
@@ -41,6 +49,6 @@ services:
     environment:
       MYSQL_DATABASE: ${DD_TEST_DATABASE_NAME:-test_defectdojo}
     volumes:
-       - defectdojo_data_unittest:/var/lib/mysql
+       - defectdojo_data_unittest:/var/lib/mysql      
 volumes:
   defectdojo_data_unittest: {}
