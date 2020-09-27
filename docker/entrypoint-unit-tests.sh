@@ -1,7 +1,7 @@
 #!/bin/sh
 # Run available unittests with a simple setup
 
-set +ex
+set -ex
 
 cd /app
 
