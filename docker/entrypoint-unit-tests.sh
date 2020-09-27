@@ -1,6 +1,8 @@
 #!/bin/sh
 # Run available unittests with a simple setup
 
+set +ex
+
 cd /app
 
 ./manage.py makemigrations --no-input --check --dry-run --verbosity 3 || {
