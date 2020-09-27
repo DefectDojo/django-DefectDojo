@@ -404,6 +404,7 @@ class ImportScanForm(forms.Form):
                          ("Risk Recon API Importer", "Risk Recon API Importer"),
                          ("DrHeader JSON Importer", "DrHeader JSON Importer"),
                          ("Checkov Scan", "Checkov Scan"),
+                         ("kube-bench Scan", "Kube-Bench Scan"),
                          ("CCVS Report", "CCVS Report"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])

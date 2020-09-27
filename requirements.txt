@@ -37,7 +37,7 @@ xlrd>=1.0.0
 pdfkit==0.6.1
 Pillow==7.2.0  # required by django-imagekit
 psycopg2-binary==2.8.6
-cryptography==3.1
+cryptography==3.1.1
 python-dateutil==2.8.1
 python-nmap==0.6.1
 pytz==2020.1
@@ -55,7 +55,7 @@ Python-jose==3.2.0
 gitpython>=2.1.13
 ptvsd>=4.2.7
 google-auth==1.21.2
-google-api-python-client==1.12.1
+google-api-python-client==1.12.2
 google-auth-oauthlib==0.4.1
 drf_yasg==1.17.1
 jsonlines==1.2.0  # requred by yarn audit parser
