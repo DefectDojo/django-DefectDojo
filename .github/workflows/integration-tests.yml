@@ -1,6 +1,6 @@
 name: Integration tests
 # run on pull_request_target instead of just pull_request as we need write access to update the status check
-on: [push, pull_request_target]
+on: [push, pull_request]
 jobs:
   integration_test:
     runs-on: ubuntu-latest
