@@ -6,7 +6,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      
+
+      - uses: fkirc/skip-duplicate-actions@master
+        with:
+          github_token: ${{ github.token }}
+
       - name: Set integration-test mode
         run: docker/setEnv.sh integration_tests
       
