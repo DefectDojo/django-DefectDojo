@@ -12,7 +12,7 @@ jobs:
       
       # Pull the latest image to build, and avoid caching pull-only images.
       # (docker pull is faster than caching in most cases.)
-      - run: docker-compose pull
+      - run: docker-compose pull mysql nginx rabbitmq
       # In this step, this action saves a list of existing images,
       # the cache is created without them in the post run.
       # It also restores the cache if it exists.
@@ -21,7 +21,7 @@ jobs:
         continue-on-error: true
 
       - name: Build for unittests
-        run: docker-compose build unittests mysql initializer
+        run: docker-compose build uwsgi unittests mysql initializer
 
       # phased startup so we can use the exit code from integrationtest container
       - name: Start MySQL
