@@ -2,7 +2,7 @@
 {% load event_tags %}
 {% load static from staticfiles %}
 {% block add_css %}
-    <link rel="stylesheet" href="{% static "chosen-bootstrap/chosen.bootstrap.min.css" %}">
+
     <link rel="stylesheet" href="{% static "easymde/dist/easymde.min.css" %}">
 {% endblock %}
 {% block add_styles %}
@@ -32,7 +32,6 @@
 {% block postscript %}
     
     <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
-    <script type="application/javascript" src="{% static "chosen/chosen.jquery.min.js" %}"></script>
    <script type="application/javascript" src="{% static "easymde/dist/easymde.min.js" %}"></script>
     <script type="text/javascript" src="{% static "admin/js/jquery.init.js" %}"></script>
     <script type="application/javascript">
