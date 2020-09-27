@@ -31,16 +31,16 @@ jobs:
         run: docker-compose up --exit-code-from unittests unittests
 
       - name: Build the rest
-        if: succes()
+        if: success()
         run: docker-compose build
 
       - name: Start Dojo
         # implicity starts uwsgi and rabbitmq
-        if: succes()
+        if: success()
         run: docker-compose up -d nginx celerybeat celeryworker
 
       - name: Integration tests
-        if: succes()
+        if: success()
         run: docker-compose up --exit-code-from integrationtest integrationtest
 
       - name: Logs
