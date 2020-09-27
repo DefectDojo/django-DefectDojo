@@ -24,7 +24,7 @@ jobs:
         run: docker-compose build uwsgi unittests mysql initializer
 
       # phased startup so we can use the exit code from integrationtest container
-      - name: Start MySQL
+      - name: Initialize
         run: docker-compose up -d mysql initializer
 
       - name: Unit tests
