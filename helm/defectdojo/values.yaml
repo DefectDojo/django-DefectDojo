@@ -44,6 +44,7 @@ celery:
   beat:
     affinity: {}
     nodeSelector: {}
+    replicas: 1
     resources:
       requests:
         cpu: 100m
@@ -65,6 +66,15 @@ celery:
         cpu: 2000m
         memory: 256Mi
     tolerations: []
+    app_settings:
+      pool_type: solo
+      # Performance improved celery worker config when needing to deal with a lot of findings (e.g deduplication ops)
+      # Comment out the "solo" line, and uncomment the following lines.
+      # pool_type: prefork
+      # autoscale_min: 2
+      # autoscale_max: 8
+      # concurrency: 8
+      # prefetch_multiplier: 128
 
 django:
   affinity: {}
@@ -100,6 +110,9 @@ django:
       limits:
         cpu: 2000m
         memory: 512Mi
+    app_settings:
+      processes: 2
+      threads: 2
 
 initializer:
   run: true
@@ -122,10 +135,10 @@ mysql:
   existingSecret: defectdojo-mysql-specific
   mysqlDatabase: defectdojo
   service:
-    port: 3306  
   # To use an external mySQL instance, set enabled to false and uncomment
   # the line below:
   mysqlServer: "127.0.0.1"
+
 
 postgresql:
   enabled: true
@@ -138,7 +151,6 @@ postgresql:
   replication:
     enabled: false
   service:
-    port: 5432  
   # To use an external PostgreSQL instance, set enabled to false and uncomment
   # the line below:
   postgresServer: "127.0.0.1"
@@ -178,3 +190,15 @@ redis:
   password: ""
   cluster:
     slaveCount: 1
+
+# To add extra variables not predefined by helm config it is possible to define in extraConfigs block, e.g. below:
+# NOTE  Do not store any kind of sensitive information inside of it
+# extraConfigs:
+#  DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED: 'true'
+#  DD_SOCIAL_AUTH_AUTH0_KEY: 'dev'
+#  DD_SOCIAL_AUTH_AUTH0_DOMAIN: 'xxxxx'
+
+# Extra secrets can be created inside of extraSecrets block:
+# NOTE  This is just an exmaple, do not store sensitive data in plain text form, better inject it during the deployment/upgrade by --set extraSecrets.secret=someSecret
+# extraSecrets:
+#  DD_SOCIAL_AUTH_AUTH0_SECRET: 'xxx'

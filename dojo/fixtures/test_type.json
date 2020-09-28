@@ -642,5 +642,20 @@
         },
         "model": "dojo.test_type",
 		"pk": 183
+    },
+    {
+        "fields": {
+            "name": "Risk Recon API Importer"
+        },
+        "model": "dojo.test_type",
+		"pk": 184
+    },
+    {
+        "fields": {
+            "name": "DrHeader JSON Importer"
+        },
+        "model": "dojo.test_type",
+        "pk": 185
     }
+
 ]

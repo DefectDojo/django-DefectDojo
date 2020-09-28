@@ -25,7 +25,7 @@ class AnchoreEngineScanParser(object):
             title = ''
             group = ''
             status = ''
-            cve = ''
+            cve = None
 
             title = item['vuln'] + ' - ' + item['package'] + '(' + item['package_type'] + ')'
 

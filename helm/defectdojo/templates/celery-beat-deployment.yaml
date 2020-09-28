@@ -10,7 +10,7 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "defectdojo.chart" . }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.celery.beat.replicas }}
   selector:
     matchLabels:
       defectdojo.org/component: celery
@@ -46,11 +46,18 @@ spec:
       - command:
         - /entrypoint-celery-beat.sh
         name: celery
+        securityContext:
+          # needed for celery to then drop privileges
+          allowPrivilegeEscalation: false
+          runAsUser: 0
         image: "{{ template "celery.repository" . }}:{{ .Values.tag }}"
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         envFrom:
         - configMapRef:
             name: {{ $fullName }}
+        - secretRef:
+            name: {{ $fullName }}-extrasecrets
+            optional: true
         env:
         - name: DD_CELERY_BROKER_PASSWORD
           valueFrom:

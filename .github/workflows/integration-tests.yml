@@ -1,0 +1,46 @@
+name: Integration tests
+# run on pull_request_target instead of just pull_request as we need write access to update the status check
+on: [pull_request_target]
+jobs:
+  integration_test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Set integration-test mode
+        run: docker/setEnv.sh integration_tests
+      
+      # Pull the latest image to build, and avoid caching pull-only images.
+      # (docker pull is faster than caching in most cases.)
+      - run: docker-compose pull
+      # In this step, this action saves a list of existing images,
+      # the cache is created without them in the post run.
+      # It also restores the cache if it exists.
+      - uses: satackey/action-docker-layer-caching@master
+        # Ignore the failure of a step and avoid terminating the job.
+        continue-on-error: true
+
+      - name: Build the stack
+        run: docker-compose build
+
+      # phased startup so we can use the exit code from integrationtest container
+      - name: Stary MySQL
+        run: docker-compose up -d 
+
+      - name: Initialize
+        run: docker-compose up --exit-code-from initializer initializer
+
+      - name: Start Dojo
+        # implicity starts uwsgi and rabbitmq
+        run: docker-compose up -d nginx celerybeat celeryworker
+
+      - name: Integration tests
+        run: docker-compose up --exit-code-from integrationtest integrationtest
+
+      - name: Logs
+        if: failure()
+        run: docker-compose logs --tail="2500" uwsgi
+
+      - name: Shutdown
+        if: always()
+        run: docker-compose down
