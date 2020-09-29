@@ -72,7 +72,7 @@ def create_notification(event=None, *args, **kwargs):
                 applicable_notifications.append(system_notifications)
 
             notifications_set = Notifications.merge_notifications_list(applicable_notifications)
-
+            notifications_set.user = user
             process_notifications(event, notifications_set, *args, **kwargs)
 
 
@@ -208,6 +208,7 @@ def send_slack_notification(event, user=None, *args, **kwargs):
 @app.task(name='send_msteams_notification')
 def send_msteams_notification(event, user=None, *args, **kwargs):
     from dojo.utils import get_system_setting
+
     try:
         # Microsoft Teams doesn't offer direct message functionality, so no MS Teams PM functionality here...
         if user is None:
