@@ -1,0 +1,35 @@
+{
+    "check_type": "terraform",
+    "results": {
+        "passed_checks": [
+          ],
+        "failed_checks": [
+            {
+                "check_id": "CKV_AZURE_42",
+                "check_name": "Ensure the key vault is recoverable",
+                "check_result": {
+                    "result": "FAILED"
+                },
+                "code_block": [
+                ],
+                "file_path": "file_path",
+                "file_line_range": [
+                    1,
+                    16
+                ],
+                "resource": "azurerm_key_vault.main",
+                "check_class": "checkov.terraform.checks.resource.azure.KeyvaultRecoveryEnabled",
+                "guideline": "https://docs.bridgecrew.io/docs/ensure-the-key-vault-is-recoverable"
+            }
+        ],
+        "skipped_checks": [],
+        "parsing_errors": []
+    },
+    "summary": {
+        "passed": 0,
+        "failed": 1,
+        "skipped": 0,
+        "parsing_errors": 0,
+        "checkov_version": "1.0.467"
+    }
+}

@@ -23,6 +23,7 @@ spec:
         app.kubernetes.io/name: {{ include "defectdojo.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
+      serviceAccountName: {{ $fullName }}
       {{- if .Values.imagePullSecrets }}
       imagePullSecrets:
       - name: {{ .Values.imagePullSecrets }}
@@ -31,40 +32,62 @@ spec:
       - name: run
         emptyDir: {}
       containers:
+      {{- if .Values.cloudsql.enabled  }}
+      - name: cloudsql-proxy
+        image: {{ .Values.cloudsql.image.repository }}:{{ .Values.cloudsql.image.tag }}
+        imagePullPolicy: {{ .Values.cloudsql.image.pullPolicy }}
+        securityContext:
+          runAsNonRoot: true
+        command: ["/cloud_sql_proxy"]
+        args:
+        {{- if eq .Values.database "postgresql" }}
+        - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.postgresql.service.port }}"
+        {{- else if eq .Values.database "mysql" }}
+        - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.mysql.service.port }}"
+        {{- end }}
+      {{- end }}
       - name: uwsgi
         image: '{{ template "django.uwsgi.repository" . }}:{{ .Values.tag }}'
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         volumeMounts:
         - name: run
-          mountPath: /run
+          mountPath: /run/defectdojo
         envFrom:
         - configMapRef:
             name: {{ $fullName }}
+        - secretRef:
+            name: {{ $fullName }}-extrasecrets
+            optional: true
         env:
         - name: DD_CELERY_BROKER_PASSWORD
           valueFrom:
             secretKeyRef:
-              # Use broker chart secret
-              # name: {{ $fullName }}-{{ .Values.celery.broker }}
-              # Use secret handled outside of the chart
               name: defectdojo-{{ .Values.celery.broker }}-specific
               key: {{ .Values.celery.broker }}-password
         - name: DD_DATABASE_PASSWORD
           valueFrom:
             secretKeyRef:
               {{- if eq .Values.database "postgresql" }}
-              # use postgresql chart secret
-              # name: {{- if .Values.postgresql.enabled }} {{ $fullName }}-{{ .Values.database }} {{- else }} {{ .Values.postgresql.existingSecret }} {{- end }}
-              # Use secret handled outside of the chart
-              name: {{- if .Values.postgresql.enabled }} defectdojo-postgresql-specific {{- else }} {{ .Values.postgresql.existingSecret }} {{- end }}
+              name: {{ .Values.postgresql.existingSecret }}
               key: postgresql-password
               {{- else if eq .Values.database "mysql" }}
-              # Use mysql chart secret
-              # name: {{- if .Values.mysql.enabled }} {{ $fullName }}-{{ .Values.database }} {{- else }} {{ .Values.mysql.mysqlPasswordSecret }} {{- end }}
-              # Use secret handled outside of the chart
-              name: {{- if .Values.mysql.enabled }} defectdojo-mysql-specific {{- else }} {{ .Values.mysql.mysqlPasswordSecret }} {{- end }}
+              name: {{ .Values.mysql.existingSecret }}
               key: mysql-password
-              {{- end }}   
+              {{- end }}
+        - name: DD_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ $fullName }}
+              key: DD_SECRET_KEY
+        - name: DD_CREDENTIAL_AES_256_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ $fullName }}
+              key: DD_CREDENTIAL_AES_256_KEY
+        - name: DD_SESSION_COOKIE_SECURE
+          value: {{- if or .Values.django.ingress.activateTLS .Values.django.nginx.tls.enabled }} "True" {{- else }} "False" {{- end }}
+        - name: DD_CSRF_COOKIE_SECURE
+          value: {{- if or .Values.django.ingress.activateTLS .Values.django.nginx.tls.enabled }} "True" {{- else }} "False" {{- end }}
         resources:
           {{- toYaml .Values.django.uwsgi.resources | nindent 10 }}
       - name: nginx
@@ -72,7 +95,7 @@ spec:
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         volumeMounts:
         - name: run
-          mountPath: /run
+          mountPath: /run/defectdojo
         ports:
         - name: http
           protocol: TCP

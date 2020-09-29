@@ -9,7 +9,6 @@
 
 import argparse
 import csv
-import re
 import logging
 import datetime
 from dojo.models import Finding, Endpoint
@@ -86,7 +85,7 @@ def report_writer(report_dic, output_filename):
         csvWriter = utfdictcsv.DictUnicodeWriter(outFile, REPORT_HEADERS, quoting=csv.QUOTE_ALL)
         csvWriter.writerow(CUSTOM_HEADERS)
         csvWriter.writerows(report_dic)
-    print("Successfully parsed.")
+    logger.debug("Successfully parsed.")
 
 ################################################################
 
@@ -229,7 +228,7 @@ def issue_r(raw_row, vuln):
 
 
 def qualys_parser(qualys_xml_file):
-    parser = etree.XMLParser(remove_blank_text=True, no_network=True, recover=True)
+    parser = etree.XMLParser(resolve_entities=False, remove_blank_text=True, no_network=True, recover=True)
     d = etree.parse(qualys_xml_file, parser)
     r = d.xpath('//ASSET_DATA_REPORT/HOST_LIST/HOST')
     master_list = []

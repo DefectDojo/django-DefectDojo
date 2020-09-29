@@ -2,13 +2,13 @@
 version: '3.7'
 services:
   nginx:
-    build: 
+    build:
       context: ./
       dockerfile: Dockerfile.nginx
     image: defectdojo/defectdojo-nginx:${NGINX_VERSION:-latest}
     depends_on:
       - uwsgi
-    environment: 
+    environment:
       NGINX_METRICS_ENABLED: ${NGINX_METRICS_ENABLED:-false}
     ports:
       - target: ${DD_PORT:-8080}
@@ -20,7 +20,7 @@ services:
         protocol: tcp
         mode: host
   uwsgi:
-    build: 
+    build:
       context: ./
       dockerfile: Dockerfile.django
     image: defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}
@@ -38,6 +38,8 @@ services:
       DD_CREDENTIAL_AES_256_KEY: ${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}
   celerybeat:
     image: defectdojo/defectdojo-django:latest
+    # needed to run as root, in order to drop privileges on celery. what's worst?
+    user: root
     depends_on:
       - mysql
       - rabbitmq
@@ -75,7 +77,7 @@ services:
       DD_SECRET_KEY: ${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}
       DD_CREDENTIAL_AES_256_KEY: ${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}
   mysql:
-    image: mysql:5.7.27@sha256:540488d8f0e04c1077d17934d1c1511fe417e2221dff508ce4621f5efe6131db
+    image: mysql:5.7.29@sha256:8044616c01e46c6bc826d205103a2b650a1679be2f34beab9bbf6c6f642df673
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
       DD_DATABASE_URL: ${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}
@@ -86,6 +88,6 @@ services:
     volumes:
        - defectdojo_data:/var/lib/mysql
   rabbitmq:
-    image: rabbitmq:3.7.17@sha256:12202c13c8e1d7f5688e733e04f3713cf25c4478dde62be691e0a1d2c9346d1c
+    image: rabbitmq:3.7.26@sha256:be00c655a6d4a1012358a3a51d57e2b33d926b181a65863a568adc103edfdb91
 volumes:
   defectdojo_data: {}

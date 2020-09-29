@@ -25,7 +25,8 @@ from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
 from dojo.reports.widgets import CoverPage, PageBreak, TableOfContents, WYSIWYGContent, FindingList, EndpointList, \
     CustomReportJsonForm, ReportOptions, report_widget_factory
 from dojo.tasks import async_pdf_report, async_custom_pdf_report
-from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, get_period_counts_legacy, Product_Tab
+from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, get_period_counts_legacy, Product_Tab, \
+    get_words_for_field
 
 logger = logging.getLogger(__name__)
 
@@ -139,11 +140,9 @@ def report_findings(request):
 
     findings = ReportAuthedFindingFilter(request.GET, queryset=findings, user=request.user)
 
-    title_words = [word
-                   for finding in findings.qs
-                   for word in finding.title.split() if len(word) > 2]
+    title_words = get_words_for_field(findings.qs, 'title')
+    component_words = get_words_for_field(findings.qs, 'component_name')
 
-    title_words = sorted(set(title_words))
     paged_findings = get_page_items(request, findings.qs.order_by('numerical_severity'), 25)
 
     product_type = None
@@ -157,6 +156,7 @@ def report_findings(request):
                   {"findings": paged_findings,
                    "filtered": findings,
                    "title_words": title_words,
+                    "component_words": component_words,
                    "title": "finding-list",
                    })
 
@@ -514,6 +514,23 @@ def product_endpoint_report(request, pid):
                                  'Your report is building.',
                                  extra_tags='alert-success')
             return HttpResponseRedirect(reverse('reports'))
+        elif report_format == 'HTML':
+            return render(request,
+                          template,
+                          {'product_type': None,
+                           'product': product,
+                           'engagement': None,
+                           'test': None,
+                           'endpoint': None,
+                           'endpoints': endpoints.qs,
+                           'findings': None,
+                           'include_finding_notes': include_finding_notes,
+                           'include_finding_images': include_finding_images,
+                           'include_executive_summary': include_executive_summary,
+                           'include_table_of_contents': include_table_of_contents,
+                           'user': request.user,
+                           'title': 'Generate Report',
+                           })
         else:
             raise Http404()
 
@@ -592,7 +609,7 @@ def generate_report(request, obj):
                                                 test__finding__in=findings.qs).distinct()
         tests = Test.objects.filter(engagement__product__prod_type=product_type,
                                     finding__in=findings.qs).distinct()
-        if findings:
+        if len(findings.qs) > 0:
             start_date = timezone.make_aware(datetime.combine(findings.qs.last().date, datetime.min.time()))
         else:
             start_date = timezone.now()

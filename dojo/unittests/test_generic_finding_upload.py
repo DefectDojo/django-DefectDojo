@@ -284,3 +284,31 @@ Code Line: Response.Write(output);","None Currently Available","Impact is curren
         file = TestFile("findings.csv", content)
         self.parser = GenericFindingUploadCsvParser(file, self.test, True, True)
         self.assertEqual(False, self.parser.items[0].duplicate)
+
+    def test_missing_columns_is_fine(self):
+        content = """Date,Title,Url,Severity,Description,References,Active,Verified"""
+        file = TestFile("findings.csv", content)
+        self.parser = GenericFindingUploadCsvParser(file, self.test, True, True)
+
+    def test_column_order_is_flexible(self):
+        content1 = """\
+Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active,Verified
+11/7/2015,Title,0,Url,Severity,Description,Mitigation,Impact,References,True,True
+"""
+        content2 = """\
+Verified,Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active
+True,11/7/2015,Title,0,Url,Severity,Description,Mitigation,Impact,References,True
+"""
+        file1 = TestFile("findings.csv", content1)
+        file2 = TestFile("findings.csv", content2)
+
+        parser1 = GenericFindingUploadCsvParser(file1, self.test, True, True)
+        parser2 = GenericFindingUploadCsvParser(file2, self.test, True, True)
+
+        finding1 = parser1.items[0]
+        finding2 = parser2.items[0]
+
+        fields1 = {k: v for k, v in finding1.__dict__.items() if k != '_state'}
+        fields2 = {k: v for k, v in finding2.__dict__.items() if k != '_state'}
+
+        self.assertEqual(fields1, fields2)

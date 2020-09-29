@@ -11,6 +11,7 @@ if [ "$CR" != 200 ]; then
     exit 1
 fi
 
+# Run available unittests with a simple setup
 # All available Integrationtest Scripts are activated below
 # If successsful, A successs message is printed and the script continues
 # If any script is unsuccesssful a failure message is printed and the test script
@@ -24,6 +25,22 @@ function fail() {
 function success() {
     echo "Success: $1 test passed\n"
 }
+
+test="Notes integration tests"
+echo "Running: $test"
+if python3 tests/Notes_unit_test.py ; then
+    success $test
+else
+    fail $test
+fi
+
+test="Regulation integration tests"
+echo "Running: $test"
+if python3 tests/Regulations_unit_test.py ; then
+    success $test
+else
+    fail $test
+fi
 
 test="Product type integration tests"
 echo "Running: $test"

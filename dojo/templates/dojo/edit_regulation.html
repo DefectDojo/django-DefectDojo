@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load static from staticfiles %}
+
+{% block content %}
+    <h3> Edit Regulation Configuration</h3>
+    <form class="form-horizontal" method="post">{% csrf_token %}
+        {% include "dojo/form_fields.html" with form=tform %}
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button class="btn btn-primary" type="submit" name="submit"  id="submit" value="Submit">Update</button>
+                <button class="btn btn-primary" type="submit" name="delete" id="delete" value="Delete">Delete</button>
+            </div>
+                </div>
+    </form>
+{% endblock %}
+{% block postscript %}
+{% endblock %}

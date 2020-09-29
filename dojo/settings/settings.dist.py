@@ -1,6 +1,7 @@
 # Django settings for DefectDojo
 import os
 from datetime import timedelta
+from celery.schedules import crontab
 
 import environ
 root = environ.Path(__file__) - 3  # Three folders back
@@ -79,6 +80,8 @@ env = environ.Env(
     DD_SOCIAL_AUTH_GOOGLE_OAUTH2_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_GOOGLE_OAUTH2_KEY=(str, ''),
     DD_SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET=(str, ''),
+    DD_SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS=(list, ['']),
+    DD_SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_EMAILS=(list, ['']),
     DD_SOCIAL_AUTH_OKTA_OAUTH2_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_OKTA_OAUTH2_KEY=(str, ''),
     DD_SOCIAL_AUTH_OKTA_OAUTH2_SECRET=(str, ''),
@@ -93,9 +96,46 @@ env = environ.Env(
     DD_SOCIAL_AUTH_GITLAB_SECRET=(str, ''),
     DD_SOCIAL_AUTH_GITLAB_API_URL=(str, 'https://gitlab.com'),
     DD_SOCIAL_AUTH_GITLAB_SCOPE=(list, ['api', 'read_user', 'openid', 'profile', 'email']),
+    DD_SAML2_ENABLED=(bool, False),
+    DD_SAML2_METADATA_AUTO_CONF_URL=(str, ''),
+    DD_SAML2_METADATA_LOCAL_FILE_PATH=(str, ''),
+    DD_SAML2_ASSERTION_URL=(str, ''),
+    DD_SAML2_ENTITY_ID=(str, ''),
+    DD_SAML2_DEFAULT_NEXT_URL=(str, '/dashboard'),
+    DD_SAML2_NEW_USER_PROFILE=(dict, {
+        # The default group name when a new user logs in
+        'USER_GROUPS': [],
+        # The default active status for new users
+        'ACTIVE_STATUS': True,
+        # The staff status for new users
+        'STAFF_STATUS': False,
+        # The superuser status for new users
+        'SUPERUSER_STATUS': False,
+    }),
+    DD_SAML2_ATTRIBUTES_MAP=(dict, {
+        # Change Email/UserName/FirstName/LastName to corresponding SAML2 userprofile attributes.
+        'email': 'Email',
+        'username': 'UserName',
+        'first_name': 'FirstName',
+        'last_name': 'LastName',
+    }),
     # merging findings doesn't always work well with dedupe and reimport etc.
     # disable it if you see any issues (and report them on github)
     DD_DISABLE_FINDING_MERGE=(bool, False),
+    # Set to True if you want to allow authorized users to make changes to findings or delete them
+    DD_AUTHORIZED_USERS_ALLOW_CHANGE=(bool, False),
+    DD_AUTHORIZED_USERS_ALLOW_DELETE=(bool, False),
+    # Set to True if you want to allow authorized users staff access only on specific products
+    # This will only apply to users with 'active' status
+    DD_AUTHORIZED_USERS_ALLOW_STAFF=(bool, False),
+    DD_SLA_NOTIFY_ACTIVE=(bool, False),
+    DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY=(bool, True),
+    DD_SLA_NOTIFY_WITH_JIRA_ONLY=(bool, False),
+    DD_SLA_NOTIFY_PRE_BREACH=(int, 3),
+    DD_SLA_NOTIFY_POST_BREACH=(int, 7),
+
+    # maximum number of result in search as search can be an expensive operation
+    DD_SEARCH_MAX_RESULTS=(int, 100)
 )
 
 
@@ -302,8 +342,8 @@ SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL = True
 GOOGLE_OAUTH_ENABLED = env('DD_SOCIAL_AUTH_GOOGLE_OAUTH2_ENABLED')
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = env('DD_SOCIAL_AUTH_GOOGLE_OAUTH2_KEY')
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = env('DD_SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET')
-SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS = ['']
-SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_EMAILS = ['']
+SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS = env('DD_SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS')
+SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_EMAILS = env('DD_SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_EMAILS')
 SOCIAL_AUTH_LOGIN_ERROR_URL = '/login'
 SOCIAL_AUTH_BACKEND_ERROR_URL = '/login'
 
@@ -331,6 +371,41 @@ SOCIAL_AUTH_AUTH0_DOMAIN = env('DD_SOCIAL_AUTH_AUTH0_DOMAIN')
 SOCIAL_AUTH_AUTH0_SCOPE = env('DD_SOCIAL_AUTH_AUTH0_SCOPE')
 SOCIAL_AUTH_TRAILING_SLASH = env('DD_SOCIAL_AUTH_TRAILING_SLASH')
 
+# For more configuration and customization options, see django-saml2-auth documentation
+# https://github.com/fangli/django-saml2-auth
+SAML2_ENABLED = env('DD_SAML2_ENABLED')
+SAML2_AUTH = {
+    'ASSERTION_URL': env('DD_SAML2_ASSERTION_URL'),
+    'ENTITY_ID': env('DD_SAML2_ENTITY_ID'),
+    # Optional settings below
+    'DEFAULT_NEXT_URL': env('DD_SAML2_DEFAULT_NEXT_URL'),
+    'NEW_USER_PROFILE': env('DD_SAML2_NEW_USER_PROFILE'),
+    'ATTRIBUTES_MAP': env('DD_SAML2_ATTRIBUTES_MAP'),
+}
+
+# Metadata is required, choose either remote url or local file path
+if 'DD_SAML2_METADATA_AUTO_CONF_URL' in os.environ or len(env('DD_SAML2_METADATA_AUTO_CONF_URL')) > 0:
+    SAML2_AUTH['METADATA_AUTO_CONF_URL'] = env('DD_SAML2_METADATA_AUTO_CONF_URL')
+else:
+    SAML2_AUTH['METADATA_LOCAL_FILE_PATH'] = env('DD_SAML2_METADATA_LOCAL_FILE_PATH')
+
+
+AUTHORIZED_USERS_ALLOW_CHANGE = env('DD_AUTHORIZED_USERS_ALLOW_CHANGE')
+AUTHORIZED_USERS_ALLOW_DELETE = env('DD_AUTHORIZED_USERS_ALLOW_DELETE')
+AUTHORIZED_USERS_ALLOW_STAFF = env('DD_AUTHORIZED_USERS_ALLOW_STAFF')
+
+# Setting SLA_NOTIFY_ACTIVE and SLA_NOTIFY_ACTIVE_VERIFIED to False will disable the feature
+# If you import thousands of Active findings through your pipeline everyday,
+# and make the choice of enabling SLA notifications for non-verified findings,
+# be mindful of performance.
+SLA_NOTIFY_ACTIVE = env('DD_SLA_NOTIFY_ACTIVE')  # this will include 'verified' findings as well as non-verified.
+SLA_NOTIFY_ACTIVE_VERIFIED_ONLY = env('DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY')
+SLA_NOTIFY_WITH_JIRA_ONLY = env('DD_SLA_NOTIFY_WITH_JIRA_ONLY')  # Based on the 2 above, but only with a JIRA link
+SLA_NOTIFY_PRE_BREACH = env('DD_SLA_NOTIFY_PRE_BREACH')  # in days, notify between dayofbreach minus this number until dayofbreach
+SLA_NOTIFY_POST_BREACH = env('DD_SLA_NOTIFY_POST_BREACH')  # in days, skip notifications for findings that go past dayofbreach plus this number
+
+SEARCH_MAX_RESULTS = env('DD_SEARCH_MAX_RESULTS')
+
 LOGIN_EXEMPT_URLS = (
     r'^%sstatic/' % URL_PREFIX,
     r'^%swebhook/' % URL_PREFIX,
@@ -339,6 +414,8 @@ LOGIN_EXEMPT_URLS = (
     r'^%sfinding/image/(?P<token>[^/]+)$' % URL_PREFIX,
     r'^%sapi/v2/' % URL_PREFIX,
     r'complete/',
+    r'saml2/login',
+    r'saml2/acs',
     r'empty_questionnaire/([\d]+)/answer'
 )
 
@@ -522,6 +599,7 @@ DJANGO_MIDDLEWARE_CLASSES = [
     'social_django.middleware.SocialAuthExceptionMiddleware',
     'watson.middleware.SearchContextMiddleware',
     'auditlog.middleware.AuditlogMiddleware',
+    'crum.CurrentRequestUserMiddleware',
 ]
 
 MIDDLEWARE = DJANGO_MIDDLEWARE_CLASSES
@@ -579,6 +657,10 @@ CELERY_BEAT_SCHEDULE = {
     'update-findings-from-source-issues': {
         'task': 'dojo.tasks.async_update_findings_from_source_issues',
         'schedule': timedelta(hours=3),
+    },
+    'compute-sla-age-and-notify': {
+        'task': 'dojo.tasks.async_sla_compute_and_notify',
+        'schedule': crontab(hour=7, minute=30),
     }
 }
 
@@ -619,6 +701,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Dependency Check Scan': ['cve', 'file_path'],
     # possible improvment: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
     'NPM Audit Scan': ['title', 'severity', 'file_path', 'cve', 'cwe'],
+    # possible improvment: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
+    'Yarn Audit Scan': ['title', 'severity', 'file_path', 'cve', 'cwe'],
     # possible improvment: in the scanner put the library name into file_path, then dedup on cve + file_path + severity
     'Whitesource Scan': ['title', 'severity', 'description'],
     'ZAP Scan': ['title', 'cwe', 'endpoints', 'severity'],
@@ -629,6 +713,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     # for backwards compatibility because someone decided to rename this scanner:
     'Symfony Security Check': ['title', 'cve'],
     'DSOP Scan': ['cve'],
+    'Trivy Scan': ['title', 'severity', 'cve', 'cwe'],
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
@@ -639,10 +724,12 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'SonarQube Scan': False,
     'Dependency Check Scan': True,
     'NPM Audit Scan': True,
+    'Yarn Audit Scan': True,
     'Whitesource Scan': True,
     'ZAP Scan': False,
     'Qualys Scan': True,
     'DSOP Scan': True,
+    'Trivy Scan': True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -674,6 +761,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'SonarQube Scan': DEDUPE_ALGO_HASH_CODE,
     'Dependency Check Scan': DEDUPE_ALGO_HASH_CODE,
     'NPM Audit Scan': DEDUPE_ALGO_HASH_CODE,
+    'Yarn Audit Scan': DEDUPE_ALGO_HASH_CODE,
     'Whitesource Scan': DEDUPE_ALGO_HASH_CODE,
     'ZAP Scan': DEDUPE_ALGO_HASH_CODE,
     'Qualys Scan': DEDUPE_ALGO_HASH_CODE,
@@ -683,6 +771,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     # for backwards compatibility because someone decided to rename this scanner:
     'Symfony Security Check': DEDUPE_ALGO_HASH_CODE,
     'DSOP Scan': DEDUPE_ALGO_HASH_CODE,
+    'Trivy Scan': DEDUPE_ALGO_HASH_CODE,
 }
 
 DISABLE_FINDING_MERGE = env('DD_DISABLE_FINDING_MERGE')
@@ -769,3 +858,6 @@ SILENCED_SYSTEM_CHECKS = ['mysql.E001']
 
 # Issue on benchmark : "The number of GET/POST parameters exceeded settings.DATA_UPLOAD_MAX_NUMBER_FIELD S"
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
+
+# Maximum size of a scan file in MB
+SCAN_FILE_MAX_SIZE = 100

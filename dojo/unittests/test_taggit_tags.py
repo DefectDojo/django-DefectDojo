@@ -9,7 +9,7 @@ class TaggitTests(TestCase):
         pass
 
     def test_tags_prefetching(self):
-        print('\nadding tags')
+        # print('\nadding tags')
         for product in Product.objects.all():
             product.tags = self.add_tags(product.tags, ['product_' + str(product.id)])
             product.save()

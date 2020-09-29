@@ -326,13 +326,9 @@ class GenericFindingUploadCsvParser(object):
 
                 column_number += 1
 
-            if self.active:
-                finding.active = ActiveColumnMappingStrategy.evaluate_bool_value(row[9])
-            else:
+            if not self.active:
                 finding.active = False
-            if self.verified:
-                finding.verified = VerifiedColumnMappingStrategy.evaluate_bool_value(row[10])
-            else:
+            if not self.verified:
                 finding.verified = False
             if finding is not None:
                 key = hashlib.md5((finding.severity + '|' + finding.title + '|' + finding.description).encode("utf-8")).hexdigest()

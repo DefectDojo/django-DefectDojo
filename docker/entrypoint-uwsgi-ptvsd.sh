@@ -17,4 +17,5 @@ exec uwsgi \
   --protocol uwsgi \
   --wsgi dojo.wsgi:application \
   --py-autoreload 1 \
-  --enable-threads --lazy-apps --honour-stdin
+  --enable-threads --lazy-apps --honour-stdin \
+  --buffer-size="${DD_UWSGI_BUFFER_SIZE:-4096}"

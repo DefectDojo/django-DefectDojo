@@ -16,16 +16,18 @@ from django.db import DEFAULT_DB_ALIAS
 from dojo.filters import EndpointFilter
 from dojo.forms import EditEndpointForm, \
     DeleteEndpointForm, AddEndpointForm, DojoMetaDataForm
-from dojo.models import Product, Endpoint, Finding, System_Settings, DojoMeta
+from dojo.models import Product, Endpoint, Finding, System_Settings, DojoMeta, Endpoint_Status
 from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, get_system_setting, Product_Tab, calculate_grade
 from dojo.notifications.helper import create_notification
+from dojo.user.helper import user_must_be_authorized
+
 
 logger = logging.getLogger(__name__)
 
 
 def vulnerable_endpoints(request):
     endpoints = Endpoint.objects.filter(finding__active=True, finding__verified=True, finding__false_p=False,
-                                        finding__duplicate=False, finding__out_of_scope=False, remediated=False).distinct()
+                                        finding__duplicate=False, finding__out_of_scope=False, mitigated=False).distinct()
 
     # are they authorized
     if request.user.is_staff:
@@ -181,7 +183,8 @@ def view_endpoint(request, eid):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Endpoint, 'change', 'eid')
 def edit_endpoint(request, eid):
     endpoint = get_object_or_404(Endpoint, id=eid)
 
@@ -211,7 +214,8 @@ def edit_endpoint(request, eid):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Endpoint, 'delete', 'eid')
 def delete_endpoint(request, eid):
     endpoint = get_object_or_404(Endpoint, pk=eid)
     product = endpoint.product
@@ -248,7 +252,8 @@ def delete_endpoint(request, eid):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Product, 'staff', 'pid')
 def add_endpoint(request, pid):
     product = get_object_or_404(Product, id=pid)
     template = 'dojo/add_endpoint.html'
@@ -312,7 +317,8 @@ def add_product_endpoint(request):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Endpoint, 'staff', 'eid')
 def add_meta_data(request, eid):
     endpoint = Endpoint.objects.get(id=eid)
     if request.method == 'POST':
@@ -340,7 +346,8 @@ def add_meta_data(request, eid):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Endpoint, 'change', 'eid')
 def edit_meta_data(request, eid):
     endpoint = Endpoint.objects.get(id=eid)
 
@@ -354,8 +361,11 @@ def edit_meta_data(request, eid):
                 if value:
                     cfv.value = value
                     cfv.save()
-                else:
-                    cfv.delete()
+            if key.startswith('delete_'):
+                cfv_id = int(key.split('_')[2])
+                cfv = get_object_or_404(DojoMeta, id=cfv_id)
+                cfv.delete()
+
         messages.add_message(request,
                              messages.SUCCESS,
                              'Metadata edited successfully.',
@@ -385,7 +395,7 @@ def endpoint_bulk_update_all(request, pid=None):
                 endpoints_to_update = request.POST.getlist('endpoints_to_update')
                 finds = Endpoint.objects.filter(id__in=endpoints_to_update).order_by("endpoint_meta__product__id")
                 for endpoint in finds:
-                    endpoint.remediated = not endpoint.remediated
+                    endpoint.mitigated = not endpoint.mitigated
                     endpoint.save()
                 messages.add_message(request,
                                      messages.SUCCESS,
@@ -398,3 +408,40 @@ def endpoint_bulk_update_all(request, pid=None):
                                      'Unable to process bulk update. Required fields were not selected.',
                                      extra_tags='alert-danger')
     return HttpResponseRedirect(reverse('endpoints', args=()))
+
+
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Finding, 'staff', 'fid')
+def endpoint_status_bulk_update(request, fid):
+    if request.method == "POST":
+        post = request.POST
+        endpoints_to_update = post.getlist('endpoints_to_update')
+        status_list = ['active', 'false_positive', 'mitigated', 'out_of_scope', 'risk_accepted']
+        enable = [item for item in status_list if item in list(post.keys())]
+
+        if endpoints_to_update and len(enable) > 0:
+            endpoints = Endpoint.objects.filter(id__in=endpoints_to_update).order_by("endpoint_meta__product__id")
+            for endpoint in endpoints:
+                endpoint_status = Endpoint_Status.objects.get(
+                    endpoint=endpoint,
+                    finding__id=fid)
+                for status in status_list:
+                    if status in enable:
+                        endpoint_status.__setattr__(status, True)
+                        if status == 'mitigated':
+                            endpoint_status.mitigated_by = request.user
+                            endpoint_status.mitigated_time = timezone.now()
+                    else:
+                        endpoint_status.__setattr__(status, False)
+                endpoint_status.last_modified = timezone.now()
+                endpoint_status.save()
+            messages.add_message(request,
+                                    messages.SUCCESS,
+                                    'Bulk edit of endpoints was successful. Check to make sure it is what you intended.',
+                                    extra_tags='alert-success')
+        else:
+            messages.add_message(request,
+                                    messages.ERROR,
+                                    'Unable to process bulk update. Required fields were not selected.',
+                                    extra_tags='alert-danger')
+    return HttpResponseRedirect(post['return_url'])
