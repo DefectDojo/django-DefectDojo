@@ -489,7 +489,7 @@
               {% show_surveys eng users %}
             </div>
           </div>
-          <div class="modal fade" id="shareSurveyModal" tabindex="-1" role="dialog" aria-labelledby="shareSurveyModalLabel">
+          <div class="modal fade" id="shareQuestionnaireModal" tabindex="-1" role="dialog" aria-labelledby="shareSurveyModalLabel">
             <div class="modal-dialog" role="document">
               <div class="modal-content">
                 <div class="modal-header">
@@ -498,7 +498,7 @@
                   <h4 class="modal-title" id="shareSurveyModalLabel">Share Questionnaire Link</h4>
                 </div>
                 <div class="modal-body">
-                  <p id="surveyURL"></p>
+                  <p id="questionnaireURL"></p>
                   <div class="alert alert-info" role="alert">
                       <b>Note:</b> Only users that are authorized for {{ eng.product}} will be allowed to answer
                       this questionnaire.
@@ -930,7 +930,7 @@
                 $('input#simple_search').val(terms);
             }
 
-            $('#shareSurveyModal').on('show.bs.modal', function (event) {
+            $('#shareQuestionnaireModal').on('show.bs.modal', function (event) {
             var button = $(event.relatedTarget) // Button that triggered the modal
             var path = button.data('whatever') // Extract info from data-* attributes
             // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
@@ -939,7 +939,7 @@
             var http = location.protocol;
             var slashes = http.concat("//");
             var host = slashes.concat(window.location.host);
-            modal.find('p#surveyURL').text('Questionnaire URL: ' + host + path)
+            modal.find('p#questionnaireURL').text('Questionnaire URL: ' + host + path)
             })
         });
     </script>
