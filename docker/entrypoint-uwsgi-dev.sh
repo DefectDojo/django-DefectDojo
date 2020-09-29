@@ -14,8 +14,9 @@ exec uwsgi \
   --protocol uwsgi \
   --wsgi dojo.wsgi:application \
   --enable-threads \
-  --processes 2 \
-  --threads 2 \
+  --processes ${DD_UWSGI_NUM_OF_PROCESSES:-2} \
+  --threads ${DD_UWSGI_NUM_OF_THREADS:-2} \
   --reload-mercy 1 \
   --worker-reload-mercy 1 \
-  --py-autoreload 1
+  --py-autoreload 1 \
+  --buffer-size="${DD_UWSGI_BUFFER_SIZE:-4096}"
