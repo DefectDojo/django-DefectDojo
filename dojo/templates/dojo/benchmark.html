@@ -2,9 +2,7 @@
 {% load static from staticfiles %}
 {% load event_tags %}
 {% load display_tags %}
-{% block add_css %}
-    <link rel="stylesheet" href="{% static "chosen-bootstrap/chosen.bootstrap.min.css" %}">
-{% endblock %}
+
 {% block content %}
       <div class="panel panel-default">
           <div class="panel-heading">
@@ -97,7 +95,6 @@
 </form>
 {% endblock %}
 {% block postscript %}
-    <script type="application/javascript" src="{% static "chosen/chosen.jquery.min.js" %}"></script>
     <script>
         function highlight_level(desired_level) {
             $( ".level2_select" ).removeClass("level2");

@@ -1,4 +1,7 @@
 from tagging.managers import TagDescriptor
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class PrefetchingTagDescriptor(object):
@@ -12,6 +15,6 @@ class PrefetchingTagDescriptor(object):
         return self.__old__get__(instance, owner)
 
     def patch():
-        print('patching TagDescriptor')
+        logger.debug('patching TagDescriptor')
         TagDescriptor.__old__get__ = TagDescriptor.__get__
         TagDescriptor.__get__ = PrefetchingTagDescriptor.get_with_prefetch
