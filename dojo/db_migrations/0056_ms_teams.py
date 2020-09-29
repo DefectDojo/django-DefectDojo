@@ -49,7 +49,7 @@ class Migration(migrations.Migration):
             name='code_review',
             field=multiselectfield.db.fields.MultiSelectField(blank=True, choices=[('slack', 'slack'), ('msteams', 'msteams'), ('mail', 'mail'), ('alert', 'alert')], default='alert', max_length=24),
         ),
-            migrations.AlterField(
+        migrations.AlterField(
             model_name='notifications',
             name='engagement_added',
             field=multiselectfield.db.fields.MultiSelectField(blank=True, choices=[('slack', 'slack'), ('msteams', 'msteams'), ('mail', 'mail'), ('alert', 'alert')], default='alert', max_length=24),
@@ -114,4 +114,4 @@ class Migration(migrations.Migration):
             name='user_mentioned',
             field=multiselectfield.db.fields.MultiSelectField(blank=True, choices=[('slack', 'slack'), ('msteams', 'msteams'), ('mail', 'mail'), ('alert', 'alert')], default='alert', max_length=24),
         ),
-]
+    ]
