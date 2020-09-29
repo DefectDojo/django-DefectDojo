@@ -480,7 +480,7 @@ def add_temp_finding(request, tid, fid):
         jform = None
 
     if request.method == 'POST':
-        form = FindingForm(request.POST, template=True)
+        form = FindingForm(request.POST, template=True, req_resp=None)
         if (form['active'].value() is False or form['false_p'].value()) and form['duplicate'].value() is False:
             closing_disabled = Note_Type.objects.filter(is_mandatory=True, is_active=True).count()
             if closing_disabled != 0:
@@ -562,7 +562,7 @@ def add_temp_finding(request, tid, fid):
                                  'The form has errors, please correct them below.',
                                  extra_tags='alert-danger')
     else:
-        form = FindingForm(template=True, initial={'active': False,
+        form = FindingForm(template=True, req_resp=None, initial={'active': False,
                                     'date': timezone.now().date(),
                                     'verified': False,
                                     'false_p': False,

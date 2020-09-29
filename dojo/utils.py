@@ -24,6 +24,7 @@ from jira.exceptions import JIRAError
 from django.dispatch import receiver
 from dojo.signals import dedupe_signal
 from django.db.models.signals import post_save
+from django.db.models.query import QuerySet
 import calendar as tcalendar
 from dojo.github import add_external_issue_github, update_external_issue_github, close_external_issue_github, reopen_external_issue_github
 from dojo.models import Finding, Engagement, Finding_Template, Product, JIRA_PKey, JIRA_Issue,\
@@ -661,7 +662,7 @@ def add_breadcrumb(parent=None,
     request.session['dojo_breadcrumbs'] = crumbs
 
 
-def get_punchcard_data(findings, start_date, weeks):
+def get_punchcard_data(objs, start_date, weeks, view='Finding'):
     # use try catch to make sure any teething bugs in the bunchcard don't break the dashboard
     try:
         # gather findings over past half year, make sure to start on a sunday
@@ -670,12 +671,16 @@ def get_punchcard_data(findings, start_date, weeks):
 
         # reminder: The first week of a year is the one that contains the year’s first Thursday
         # so we could have for 29/12/2019: week=1 and year=2019 :-D. So using week number from db is not practical
-
-        severities_by_day = findings.filter(created__date__gte=first_sunday).filter(created__date__lt=last_sunday) \
-                                    .values('created__date') \
-                                    .annotate(count=Count('id')) \
-                                    .order_by('created__date')
-
+        if view == 'Finding':
+            severities_by_day = objs.filter(created__date__gte=first_sunday).filter(created__date__lt=last_sunday) \
+                                        .values('created__date') \
+                                        .annotate(count=Count('id')) \
+                                        .order_by('created__date')
+        elif view == 'Endpoint':
+            severities_by_day = objs.filter(date__gte=first_sunday).filter(date__lt=last_sunday) \
+                                        .values('date') \
+                                        .annotate(count=Count('id')) \
+                                        .order_by('date')
         # return empty stuff if no findings to be statted
         if severities_by_day.count() <= 0:
             return None, None
@@ -704,7 +709,10 @@ def get_punchcard_data(findings, start_date, weeks):
         day_counts = [0, 0, 0, 0, 0, 0, 0]
 
         for day in severities_by_day:
-            created = day['created__date']
+            if view == 'Finding':
+                created = day['created__date']
+            elif view == 'Endpoint':
+                created = day['date']
             day_count = day['count']
 
             created = timezone.make_aware(datetime.combine(created, datetime.min.time()))
@@ -895,23 +903,42 @@ def get_period_counts(active_findings,
             new_date = start_date + relativedelta(weeks=x, weekday=MO(1))
             end_date = new_date + relativedelta(weeks=1, weekday=MO(1))
 
-        closed_in_range_count = findings_closed.filter(
-            mitigated__date__range=[new_date, end_date]).count()
+        try:
+            closed_in_range_count = findings_closed.filter(
+                mitigated__date__range=[new_date, end_date]).count()
+        except:
+            closed_in_range_count = findings_closed.filter(
+                mitigated_time__range=[new_date, end_date]).count()
 
         if accepted_findings:
-            risks_a = accepted_findings.filter(
-                risk_acceptance__created__date__range=[
-                    datetime(
-                        new_date.year,
-                        new_date.month,
-                        1,
-                        tzinfo=timezone.get_current_timezone()),
-                    datetime(
-                        new_date.year,
-                        new_date.month,
-                        monthrange(new_date.year, new_date.month)[1],
-                        tzinfo=timezone.get_current_timezone())
-                ])
+            try:
+                risks_a = accepted_findings.filter(
+                    risk_acceptance__created__date__range=[
+                        datetime(
+                            new_date.year,
+                            new_date.month,
+                            1,
+                            tzinfo=timezone.get_current_timezone()),
+                        datetime(
+                            new_date.year,
+                            new_date.month,
+                            monthrange(new_date.year, new_date.month)[1],
+                            tzinfo=timezone.get_current_timezone())
+                    ])
+            except:
+                risks_a = accepted_findings.filter(
+                    date__range=[
+                        datetime(
+                            new_date.year,
+                            new_date.month,
+                            1,
+                            tzinfo=timezone.get_current_timezone()),
+                        datetime(
+                            new_date.year,
+                            new_date.month,
+                            monthrange(new_date.year, new_date.month)[1],
+                            tzinfo=timezone.get_current_timezone())
+                    ])
         else:
             risks_a = None
 
@@ -920,26 +947,30 @@ def get_period_counts(active_findings,
         ]
         for finding in findings:
             try:
+                severity = finding.severity
+            except:
+                severity = finding.finding.severity
+            try:
                 if new_date <= datetime.combine(
                         finding.date, datetime.min.time()
                 ).replace(tzinfo=timezone.get_current_timezone()) <= end_date:
-                    if finding.severity == 'Critical':
+                    if severity == 'Critical':
                         crit_count += 1
-                    elif finding.severity == 'High':
+                    elif severity == 'High':
                         high_count += 1
-                    elif finding.severity == 'Medium':
+                    elif severity == 'Medium':
                         med_count += 1
-                    elif finding.severity == 'Low':
+                    elif severity == 'Low':
                         low_count += 1
             except:
                 if new_date <= finding.date <= end_date:
-                    if finding.severity == 'Critical':
+                    if severity == 'Critical':
                         crit_count += 1
-                    elif finding.severity == 'High':
+                    elif severity == 'High':
                         high_count += 1
-                    elif finding.severity == 'Medium':
+                    elif severity == 'Medium':
                         med_count += 1
-                    elif finding.severity == 'Low':
+                    elif severity == 'Low':
                         low_count += 1
                 pass
 
@@ -953,13 +984,17 @@ def get_period_counts(active_findings,
         ]
         if risks_a is not None:
             for finding in risks_a:
-                if finding.severity == 'Critical':
+                try:
+                    severity = finding.severity
+                except:
+                    severity = finding.finding.severity
+                if severity == 'Critical':
                     crit_count += 1
-                elif finding.severity == 'High':
+                elif severity == 'High':
                     high_count += 1
-                elif finding.severity == 'Medium':
+                elif severity == 'Medium':
                     med_count += 1
-                elif finding.severity == 'Low':
+                elif severity == 'Low':
                     low_count += 1
 
         total = crit_count + high_count + med_count + low_count
@@ -971,25 +1006,29 @@ def get_period_counts(active_findings,
         ]
         for finding in active_findings:
             try:
+                severity = finding.severity
+            except:
+                severity = finding.finding.severity
+            try:
                 if datetime.combine(finding.date, datetime.min.time()).replace(
                         tzinfo=timezone.get_current_timezone()) <= end_date:
-                    if finding.severity == 'Critical':
+                    if severity == 'Critical':
                         crit_count += 1
-                    elif finding.severity == 'High':
+                    elif severity == 'High':
                         high_count += 1
-                    elif finding.severity == 'Medium':
+                    elif severity == 'Medium':
                         med_count += 1
-                    elif finding.severity == 'Low':
+                    elif severity == 'Low':
                         low_count += 1
             except:
                 if finding.date <= end_date:
-                    if finding.severity == 'Critical':
+                    if severity == 'Critical':
                         crit_count += 1
-                    elif finding.severity == 'High':
+                    elif severity == 'High':
                         high_count += 1
-                    elif finding.severity == 'Medium':
+                    elif severity == 'Medium':
                         med_count += 1
-                    elif finding.severity == 'Low':
+                    elif severity == 'Low':
                         low_count += 1
                 pass
         total = crit_count + high_count + med_count + low_count
@@ -2143,6 +2182,10 @@ def is_scan_file_too_large(scan_file):
         if size > settings.SCAN_FILE_MAX_SIZE:
             return True
     return False
+
+
+def queryset_check(query):
+    return query if isinstance(query, QuerySet) else query.qs
 
 
 def sla_compute_and_notify(*args, **kwargs):
