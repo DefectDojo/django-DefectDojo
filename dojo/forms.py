@@ -1007,7 +1007,10 @@ class FindingForm(forms.ModelForm):
         else:
             tags = Tag.objects.usage_for_model(Finding)
 
-        req_resp = kwargs.pop('req_resp')
+        req_resp = None
+        if 'req_resp' in kwargs:
+            req_resp = kwargs.pop('req_resp')
+
         t = [(tag.name, tag.name) for tag in tags]
         super(FindingForm, self).__init__(*args, **kwargs)
         print('instance: ', self.instance)

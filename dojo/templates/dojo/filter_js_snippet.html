@@ -1,5 +1,5 @@
 {% load static from staticfiles %}
-<script type="application/javascript" src="{% static "chosen/chosen.jquery.min.js" %}"></script>
+<script type="application/javascript" src="{% static "chosen-js/chosen.jquery.min.js" %}"></script>
 <script type="application/javascript">
     $(function () {
         $(".{{ request.path|slugify }}-filters :input").not("button").addClass("form-control input-sm");

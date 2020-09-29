@@ -133,13 +133,14 @@ buffer-from@^1.0.0:
   resolved "https://registry.yarnpkg.com/buffer-from/-/buffer-from-1.1.1.tgz#32713bc028f75c02fdb710d7c7bcec1f2c6070ef"
   integrity sha512-MQcXEUbCKtEo7bhqEs6560Hyd4XaovZlO/k9V3hjVUF/zwW7KBVdSK4gIt/bzwS9MbR5qob+F5jusZsb0YQK2A==
 
-chosen-bootstrap@dbtek/chosen-bootstrap#~1.1.0:
+"chosen-bootstrap@https://github.com/dbtek/chosen-bootstrap":
   version "0.0.0"
-  resolved "https://codeload.github.com/dbtek/chosen-bootstrap/tar.gz/12dcd363d1482c54c740ed9fe0e92549d81e9176"
+  resolved "https://github.com/dbtek/chosen-bootstrap#12dcd363d1482c54c740ed9fe0e92549d81e9176"
 
-chosen@harvesthq/bower-chosen#~1.4.0:
-  version "0.0.0"
-  resolved "https://codeload.github.com/harvesthq/bower-chosen/tar.gz/d7eba35cf214d2416fabee25c5d4619542a23d8d"
+chosen-js@^1.8.7:
+  version "1.8.7"
+  resolved "https://registry.yarnpkg.com/chosen-js/-/chosen-js-1.8.7.tgz#9bfa5597f5081d602ff4ae904af9aef33265bb1d"
+  integrity sha512-eVdrZJ2U5ISdObkgsi0od5vIJdLwq1P1Xa/Vj/mgxkMZf14DlgobfB6nrlFi3kW4kkvKLsKk4NDqZj1MU1DCpw==
 
 clipboard@^2.0.6:
   version "2.0.6"
