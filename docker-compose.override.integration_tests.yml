@@ -23,7 +23,7 @@ services:
       DD_DATABASE_URL: ${DD_TEST_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/test_defectdojo}
   unittests:
     image: defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}    
-    entrypoint: ['/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/entrypoint-unit-tests.sh']
+    entrypoint: ['/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/entrypoint-unit-tests-devDocker.sh']
     environment:
       DD_DEBUG: 'True'
       # DD_DATABASE_URL: ${DD_TEST_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/test_defectdojo}
