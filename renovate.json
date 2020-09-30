@@ -9,5 +9,6 @@
     "packagePatterns": ["*"],
     "commitMessageExtra": "from {{currentVersion}} to {{#if isMajor}}v{{{newMajor}}}{{else}}{{#if isSingleVersion}}v{{{toVersion}}}{{else}}{{{newValue}}}{{/if}}{{/if}}",
     "commitMessageSuffix": "({{packageFile}})"
+    "labels": ["dependencies"]
   }]
 }
