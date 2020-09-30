@@ -3,6 +3,7 @@
     "config:base"
   ],
   "dependencyDashboardApproval": true,
+  "baseBranches": ["dev"],
   "ignorePaths": ["setup.py", "requirements.txt", "components/package.json", "components/package-lock.json", "dojo/components/yarn.lock", "dojo/components/package.json", "Dockerfile**"],
   "packageRules": [{
     "packagePatterns": ["*"],
