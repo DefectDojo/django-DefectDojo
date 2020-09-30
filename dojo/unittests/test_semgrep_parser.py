@@ -5,7 +5,6 @@ from dojo.models import Test
 
 class TestSemGrepJSONParser(TestCase):
 
-
     def test_no_findings(self):
         parser = SemgrepJSONParser(None, Test())
         self.assertEqual(0, len(parser.items))
@@ -27,3 +26,4 @@ class TestSemGrepJSONParser(TestCase):
         parser = SemgrepJSONParser(testfile, Test())
         testfile.close()
         self.assertEqual(2, len(parser.items))
+        
