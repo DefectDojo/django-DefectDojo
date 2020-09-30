@@ -406,7 +406,7 @@ def sync_rules(new_finding, *args, **kwargs):
     logger.debug('getting Rule objects')
     rules = Rule.objects.filter(applies_to='Finding', parent_rule=None)
     logger.debug('iterating Rule objects')
-    logger.debug('rules.query: %i', rules.query)
+    logger.debug('rules.query: %s', rules.query)
     logger.debug('rules.len: %i', len(rules))
     for rule in rules:
         logger.debug('rule %s', rule)
