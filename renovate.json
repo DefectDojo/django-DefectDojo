@@ -3,5 +3,5 @@
     "config:base"
   ],
   "dependencyDashboardApproval": true,
-  "ignorePaths": ["requirements.txt", "/components/package.json"]
+  "ignorePaths": ["setup.py", "requirements.txt", "components/package.json", "components/package-lock.json", "dojo/components/yarn.lock", "dojo/components/package.json", "Dockerfile**"]
 }
