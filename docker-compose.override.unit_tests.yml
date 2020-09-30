@@ -8,8 +8,8 @@ services:
     image: defectdojo/defectdojo-busybox:${NGINX_VERSION:-latest}
   uwsgi:
     entrypoint: ['/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/entrypoint-unit-tests-devDocker.sh']
-    volumes:
-      - '.:/app:z'
+    # volumes:
+    #   - '.:/app:z'
     environment:
       DD_DEBUG: 'True'
       DD_TEST_DATABASE_NAME: ${DD_TEST_DATABASE_NAME:-test_defectdojo}

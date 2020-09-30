@@ -44,12 +44,12 @@ class ScanImportOptionsTest(APITestCase):
         return set(Finding.objects.filter(test__engagement_id=1, **kwargs)
                    .order_by('id').values_list('id', flat=True))
 
-    def test_epmty_scan(self):
-        """
-        Import the ZAP scan without a test file.
-        """
-        test = self.import_zap_scan(upload_empty_scan=False)
-        self.assertFalse(len(self.get_all_finding_ids(active=True, test__test_type=test.test_type)) == 0)
+    # def test_epmty_scan(self):
+    #     """
+    #     Import the ZAP scan without a test file.
+    #     """
+    #     test = self.import_zap_scan(upload_empty_scan=False)
+    #     self.assertFalse(len(self.get_all_finding_ids(active=True, test__test_type=test.test_type)) == 0)
 
     def test_full_scan(self):
         """

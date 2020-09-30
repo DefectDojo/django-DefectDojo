@@ -403,8 +403,11 @@ def rename_whitesource_finding():
 
 
 def sync_rules(new_finding, *args, **kwargs):
+    logger.debug('getting Rule objects')
     rules = Rule.objects.filter(applies_to='Finding', parent_rule=None)
+    logger.debug('iterating Rule objects')
     for rule in rules:
+        logger.debug('rule %s', rule)
         child_val = True
         child_list = [val for val in rule.child_rules.all()]
         while (len(child_list) != 0):

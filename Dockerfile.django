@@ -74,6 +74,8 @@ COPY dojo/ ./dojo/
 # Legacy installs need the modified settings.py, do not remove!
 RUN \
   cp dojo/settings/settings.dist.py dojo/settings/settings.py
+RUN \
+  rm -rf dojo/settings/.env*
 COPY tests/ ./tests/
 RUN \
   mkdir -p dojo/migrations && \

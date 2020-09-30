@@ -842,11 +842,15 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
-        # 'django.db.backends': {
-        #     'level': 'DEBUG',
-        #     'handlers': ['console'],
-        #     'propagate': False,
-        # },
+        'django.db.backends': {
+            'level': 'DEBUG',
+            'handlers': ['console'],
+            'propagate': False,
+        },
+        'django': {
+            'level': 'DEBUG',
+            'handlers': ['console'],
+        },
         'root': {
             'handlers': ['console'],
             'level': 'DEBUG',

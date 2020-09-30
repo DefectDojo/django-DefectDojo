@@ -2,7 +2,7 @@
 # Run available unittests with a simple setup
 
 # Make sure to exit early on errors, for example if the settings file cannot be created.
-set -e
+# set -e
 echo "entrypoint unit tests dev docker"
 umask 0002
 
@@ -24,6 +24,8 @@ if [ ! -f ${TARGET_SETTINGS_FILE} ]; then
 else
   echo "settings.py already present, not creating a new one"
 fi
+
+cat dojo/settings/settings.py
 
 echo "checking migrations"
 python3 manage.py makemigrations dojo
