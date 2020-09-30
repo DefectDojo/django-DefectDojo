@@ -33,6 +33,8 @@ python3 manage.py makemigrations dojo
 echo "running migrations"
 python3 manage.py migrate
 
+export DJANGO_LOG_LEVEL=DEBUG
+
 echo "running unit tests"
 python3 manage.py test dojo.unittests.test_apiv2_scan_import_options --keepdb -v 2
 
