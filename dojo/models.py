@@ -1099,6 +1099,15 @@ class Endpoint_Status(models.Model):
     endpoint = models.ForeignKey('Endpoint', null=True, blank=True, on_delete=models.CASCADE, related_name='status_endpoint')
     finding = models.ForeignKey('Finding', null=True, blank=True, on_delete=models.CASCADE, related_name='status_finding')
 
+    @property
+    def age(self):
+        if self.mitigated:
+            diff = self.mitigated_time.date() - self.date.date()
+        else:
+            diff = get_current_date() - self.date.date()
+        days = diff.days
+        return days if days > 0 else 0
+
 
 class Endpoint(models.Model):
     protocol = models.CharField(null=True, blank=True, max_length=10,

@@ -58,7 +58,7 @@
         {{ find.impact|linebreaksasciidocbr }}
     </p>
     <br>
-    {% with endpoints=find.endpoints.all|get_vulnerable_endpoints %}
+    {% with endpoints=find|get_vulnerable_endpoints %}
         {% if endpoints %}
             <p><b>==== Systems Vulnerable: ====</b><br>
                 {% for endpoint in endpoints %}
@@ -69,7 +69,7 @@
         {% endif %}
     {% endwith %}
 
-    {% with endpoints=find.endpoints.all|get_mitigated_endpoints %}
+    {% with endpoints=find|get_mitigated_endpoints %}
         {% if endpoints %}
             <p><b>==== Systems Remediated: ====</b><br>
                 {% for endpoint in endpoints %}
