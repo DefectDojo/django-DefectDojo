@@ -29,10 +29,10 @@ jobs:
 
       # phased startup so we can use the exit code from integrationtest container
       - name: Initialize
-        run: docker-compose up -d mysql initializer
+        run: docker-compose up -d mysql # initializer
 
-      - name: Initialize Logs
-        run: docker-compose logs -f initializer
+      # - name: Initialize Logs
+      #   run: docker-compose logs -f initializer
 
       - name: Unit tests
         run: docker-compose up --exit-code-from unittests unittests

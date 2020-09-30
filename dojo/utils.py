@@ -433,6 +433,7 @@ def sync_rules(new_finding, *args, **kwargs):
                         set_attribute_rule(new_finding, rule, rule.text)
                         new_finding.save(dedupe_option=False,
                                          rules_option=False)
+    logger.debug('sync rules done')
 
 
 def set_attribute_rule(new_finding, rule, value):
