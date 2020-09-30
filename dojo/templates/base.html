@@ -156,7 +156,7 @@
                                 v2 Docs</a></li>
                             {{ block.super }}
                             {% if user.is_staff %}
-                                <li><a href="{% url 'survey' %}"> <i class="fa fa-hospital-o fa-fw"> </i> Questionnaires </a></li>
+                                <li><a href="{% url 'questionnaire' %}"> <i class="fa fa-hospital-o fa-fw"> </i> Questionnaires </a></li>
                             {% endif %}
                         {% endblock %}
                         {% if request.user.is_authenticated %}
@@ -328,7 +328,7 @@
                                     <a href="#"><i class="fa fa-hospital-o fa-fw"> </i> <span>Questionnaires</span><span
                                             class="glyphicon arrow"></span></a>
                                     <ul class="nav nav-second-level">
-                                        <li><a href="{% url 'survey' %}">All Questionnaires </a></li>
+                                        <li><a href="{% url 'questionnaire' %}">All Questionnaires </a></li>
                                         <li><a href="{% url 'questions' %}">All Questions </a></li>
 
                                     </ul>

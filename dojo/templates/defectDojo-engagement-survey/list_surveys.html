@@ -16,7 +16,7 @@
                         {% for survey in surveys %}
                             <tr>
                                 <td><a title="{{ survey.name }}"
-                                                      href="{% url 'edit_survey' survey.id %}">{{ survey.name }}</a>
+                                                      href="{% url 'edit_questionnaire' survey.id %}">{{ survey.name }}</a>
                                 </td>
                                 <td class="nowrap">{{ survey.questions.all|length }}</td>
                                 <td>{{ survey.active }}</td>
@@ -56,7 +56,7 @@
                                     <td>
                                         <div class="btn-group">
                                             <button type="button" class="btn btn-sm btn-primary" data-toggle="modal"
-                                                    data-target="#shareSurveyModal"
+                                                    data-target="#shareQuestionnaireModal"
                                                     data-whatever="/empty_questionnaire/{{ survey.id }}/answer">
                                                 <i class="fa fa-share-alt"></i> Share Questionnaire
                                             </button>
@@ -83,7 +83,7 @@
                     {% if request.user.is_staff %}
                         <div class="panel-heading">Actions</div>
                         <div class="panel-body centered">
-                            <a class="btn btn-sm btn-primary" href="{% url 'create_survey' %}">
+                            <a class="btn btn-sm btn-primary" href="{% url 'create_questionnaire' %}">
                                 Create Questionnaire
                             </a>
                         </div>
@@ -93,7 +93,7 @@
                         {{ filtered.form.as_p }}
                         <div class="centered">
                             <input type="submit" class="btn btn-primary inline top" label="submit" value="Apply"/><br/><br/>
-                            <a href="{% url 'survey' %}"> [Clear Filters] </a>
+                            <a href="{% url 'questionnaire' %}"> [Clear Filters] </a>
                         </div>
                     </form>
                 {% endif %}
@@ -101,16 +101,16 @@
         </div>
     </div>
 
-    <div class="modal fade" id="shareSurveyModal" tabindex="-1" role="dialog" aria-labelledby="shareSurveyModalLabel">
+    <div class="modal fade" id="shareQuestionnaireModal" tabindex="-1" role="dialog" aria-labelledby="shareQuestionnaireModalLabel">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                             aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="shareSurveyModalLabel">Share Questionnaire Link</h4>
+                    <h4 class="modal-title" id="shareQuestionnaireModalLabel">Share Questionnaire Link</h4>
                 </div>
                 <div class="modal-body">
-                    <p id="surveyURL"></p>
+                    <p id="questionnaireURL"></p>
                     <div class="alert alert-info" role="alert">
                         <b>Note:</b> Only users that are authorized for {{ eng.product}} will be allowed to answer
                         this questionnaire.
@@ -127,7 +127,7 @@
 
 {% block postscript %}
     <script type="application/javascript">
-        $('#shareSurveyModal').on('show.bs.modal', function (event) {
+        $('#shareQuestionnaireModal').on('show.bs.modal', function (event) {
             var button = $(event.relatedTarget) // Button that triggered the modal
             var path = button.data('whatever') // Extract info from data-* attributes
             // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
@@ -136,7 +136,7 @@
             var http = location.protocol;
             var slashes = http.concat("//");
             var host = slashes.concat(window.location.host);
-            modal.find('p#surveyURL').text('Questionnaire URL: ' + host + path)
+            modal.find('p#questionnaireURL').text('Questionnaire URL: ' + host + path)
         })
     </script>
 {% endblock %}
