@@ -4,10 +4,7 @@
   ],
   "dependencyDashboardApproval": true,
   "ignorePaths": ["setup.py", "requirements.txt", "components/package.json", "components/package-lock.json", "dojo/components/yarn.lock", "dojo/components/package.json", "Dockerfile**"],
-  "packageRules": [{
-    "packageNames": ["*"],
-    "commitMessageExtra": "from {{currentVersion}} to {{#if isMajor}}v{{{newMajor}}}{{else}}{{#if isSingleVersion}}v{{{toVersion}}}{{else}}{{{newValue}}}{{/if}}{{/if}}",
-    "commitMessageSuffix": "({{packageFile}})"
-  }],
+  "commitMessageExtra": "from {{currentVersion}} to {{#if isMajor}}v{{{newMajor}}}{{else}}{{#if isSingleVersion}}v{{{toVersion}}}{{else}}{{{newValue}}}{{/if}}{{/if}}",
+  "commitMessageSuffix": "({{packageFile}})",
   "recreateClosed": true
 }
