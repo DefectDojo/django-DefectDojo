@@ -3,6 +3,7 @@
 
 # Make sure to exit early on errors, for example if the settings file cannot be created.
 # set -e
+set -x
 echo "entrypoint unit tests dev docker"
 umask 0002
 
