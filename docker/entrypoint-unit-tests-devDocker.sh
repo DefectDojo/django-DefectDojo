@@ -34,7 +34,7 @@ echo "running migrations"
 python3 manage.py migrate
 
 echo "running unit tests"
-python3 manage.py test dojo.unittests dojo.unittests.test_apiv2_scan_import_options --keepdb -v 2
+python3 manage.py test dojo.unittests.test_apiv2_scan_import_options --keepdb -v 2
 
 echo "End of tests. Leaving the container up"
 tail -f /dev/null
