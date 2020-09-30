@@ -402,6 +402,9 @@ class ImportScanForm(forms.Form):
                          ("GitLab SAST Report", "GitLab SAST Report"),
                          ("HuskyCI Report", "HuskyCI Report"),
                          ("Risk Recon API Importer", "Risk Recon API Importer"),
+                         ("DrHeader JSON Importer", "DrHeader JSON Importer"),
+                         ("Checkov Scan", "Checkov Scan"),
+                         ("kube-bench Scan", "Kube-Bench Scan"),
                          ("CCVS Report", "CCVS Report"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
@@ -1004,11 +1007,15 @@ class FindingForm(forms.ModelForm):
         else:
             tags = Tag.objects.usage_for_model(Finding)
 
-        req_resp = kwargs.pop('req_resp')
+        req_resp = None
+        if 'req_resp' in kwargs:
+            req_resp = kwargs.pop('req_resp')
+
         t = [(tag.name, tag.name) for tag in tags]
         super(FindingForm, self).__init__(*args, **kwargs)
+        print('instance: ', self.instance)
+        self.fields['simple_risk_accept'].initial = True if hasattr(self, 'instance') and self.instance.is_simple_risk_accepted else False
         self.fields['tags'].widget.choices = t
-        self.fields['simple_risk_accept'].initial = True if self.instance.is_simple_risk_accepted else False
         if req_resp:
             self.fields['request'].initial = req_resp[0]
             self.fields['response'].initial = req_resp[1]
@@ -1503,7 +1510,7 @@ class SimpleMetricsForm(forms.Form):
 
 
 class SimpleSearchForm(forms.Form):
-    query = forms.CharField()
+    query = forms.CharField(required=False)
 
 
 class DateRangeMetrics(forms.Form):
@@ -2405,12 +2412,12 @@ class ChoiceQuestionForm(QuestionForm):
         choice_answer.save()
 
 
-class Add_Survey_Form(forms.ModelForm):
+class Add_Questionnaire_Form(forms.ModelForm):
     survey = forms.ModelChoiceField(
         queryset=Engagement_Survey.objects.all(),
         required=True,
         widget=forms.widgets.Select(),
-        help_text='Select the Survey to add.')
+        help_text='Select the Questionnaire to add.')
 
     class Meta:
         model = Answered_Survey
@@ -2421,12 +2428,12 @@ class Add_Survey_Form(forms.ModelForm):
                    'assignee')
 
 
-class AddGeneralSurveyForm(forms.ModelForm):
+class AddGeneralQuestionnaireForm(forms.ModelForm):
     survey = forms.ModelChoiceField(
         queryset=Engagement_Survey.objects.all(),
         required=True,
         widget=forms.widgets.Select(),
-        help_text='Select the Survey to add.')
+        help_text='Select the Questionnaire to add.')
     expiration = forms.DateField(widget=forms.TextInput(
         attrs={'class': 'datepicker', 'autocomplete': 'off'}))
 
@@ -2435,7 +2442,7 @@ class AddGeneralSurveyForm(forms.ModelForm):
         exclude = ('num_responses', 'generated')
 
 
-class Delete_Survey_Form(forms.ModelForm):
+class Delete_Questionnaire_Form(forms.ModelForm):
     id = forms.IntegerField(required=True,
                             widget=forms.widgets.HiddenInput())
 
@@ -2449,7 +2456,7 @@ class Delete_Survey_Form(forms.ModelForm):
                    'assignee')
 
 
-class DeleteGeneralSurveyForm(forms.ModelForm):
+class DeleteGeneralQuestionnaireForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
                             widget=forms.widgets.HiddenInput())
 
@@ -2473,17 +2480,17 @@ class Delete_Eng_Survey_Form(forms.ModelForm):
                    'active')
 
 
-class CreateSurveyForm(forms.ModelForm):
+class CreateQuestionnaireForm(forms.ModelForm):
     class Meta:
         model = Engagement_Survey
         exclude = ['questions']
 
 
-class EditSurveyQuestionsForm(forms.ModelForm):
+class EditQuestionnaireQuestionsForm(forms.ModelForm):
     questions = forms.ModelMultipleChoiceField(
         Question.objects.all(),
         required=True,
-        help_text="Select questions to include on this survey.  Field can be used to search available questions.",
+        help_text="Select questions to include on this questionnaire.  Field can be used to search available questions.",
         widget=MultipleSelectWithPop(attrs={'size': '11'}))
 
     class Meta:
@@ -2612,4 +2619,4 @@ class AddEngagementForm(forms.Form):
         queryset=Product.objects.all(),
         required=True,
         widget=forms.widgets.Select(),
-        help_text='Select which product to attach Engagment')
+        help_text='Select which product to attach Engagement')

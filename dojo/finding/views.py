@@ -41,10 +41,10 @@ from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_
     add_comment, jira_get_resolution_id, jira_change_resolution_id, get_jira_connection, \
     get_system_setting, apply_cwe_to_template, Product_Tab, calculate_grade, log_jira_alert, \
     redirect_to_return_url_or_else, get_return_url, add_jira_issue, update_jira_issue, add_external_issue, update_external_issue, \
-    jira_get_issue
+    jira_get_issue, get_words_for_field
 from dojo.notifications.helper import create_notification
 
-from dojo.tasks import add_jira_issue_task, update_jira_issue_task, update_external_issue_task, add_comment_task, \
+from dojo.tasks import add_jira_issue_task, update_external_issue_task, add_comment_task, \
     add_external_issue_task, close_external_issue_task, reopen_external_issue_task
 from django.template.defaultfilters import pluralize
 from django.db.models import Q, QuerySet, Prefetch, Count
@@ -57,7 +57,7 @@ OUT_OF_SCOPE_FINDINGS_QUERY = Q(active=False, out_of_scope=True)
 FALSE_POSITIVE_FINDINGS_QUERY = Q(active=False, duplicate=False, false_p=True)
 INACTIVE_FINDINGS_QUERY = Q(active=False, duplicate=False, is_Mitigated=False, false_p=False, out_of_scope=False)
 ACCEPTED_FINDINGS_QUERY = Q(risk_acceptance__isnull=False)
-CLOSED_FINDINGS_QUERY = Q(mitigated__isnull=False)
+CLOSED_FINDINGS_QUERY = Q(is_Mitigated=True)
 
 
 def open_findings_filter(request, queryset, user, pid):
@@ -153,10 +153,8 @@ django_filter=open_findings_filter):
 
     findings_filter = django_filter(request, findings, request.user, pid)
 
-    title_words = [
-        word for title in findings_filter.qs.values_list('title', flat=True) for word in title.split() if len(word) > 2
-    ]
-    title_words = sorted(set(title_words))
+    title_words = get_words_for_field(findings_filter.qs, 'title')
+    component_words = get_words_for_field(findings_filter.qs, 'component_name')
 
     paged_findings = get_page_items(request, prefetch_for_findings(findings_filter.qs), 25)
 
@@ -183,6 +181,7 @@ django_filter=open_findings_filter):
             "findings": paged_findings,
             "filtered": findings_filter,
             "title_words": title_words,
+            "component_words": component_words,
             'custom_breadcrumb': custom_breadcrumb,
             'filter_name': filter_name,
             'tag_input': tags,
@@ -207,6 +206,7 @@ def prefetch_for_findings(findings):
         prefetched_findings = prefetched_findings.annotate(active_endpoint_count=Count('endpoint_status__id', filter=Q(endpoint_status__mitigated=False)))
         prefetched_findings = prefetched_findings.annotate(mitigated_endpoint_count=Count('endpoint_status__id', filter=Q(endpoint_status__mitigated=True)))
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__authorized_users')
+        print('temp')
     else:
         logger.debug('unable to prefetch because query was already executed')
 
@@ -593,7 +593,7 @@ def delete_finding(request, fid):
 def edit_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     old_status = finding.status()
-    burp_rr = BurpRawRequestResponse.objects.get(finding=finding)
+    burp_rr = BurpRawRequestResponse.objects.filter(finding=finding).first()
     if burp_rr:
         req_resp = (
             burp_rr.get_request(),
@@ -685,11 +685,12 @@ def edit_finding(request, fid):
             new_finding.tags = t
 
             if 'request' in form.cleaned_data or 'response' in form.cleaned_data:
-                burp_rr = BurpRawRequestResponse.objects.get(finding=finding)
-                burp_rr.burpRequestBase64 = base64.b64encode(form.cleaned_data['request'].encode())
-                burp_rr.burpResponseBase64 = base64.b64encode(form.cleaned_data['response'].encode())
-                burp_rr.clean()
-                burp_rr.save()
+                burp_rr = BurpRawRequestResponse.objects.filter(finding=finding).first()
+                if burp_rr:
+                    burp_rr.burpRequestBase64 = base64.b64encode(form.cleaned_data['request'].encode())
+                    burp_rr.burpResponseBase64 = base64.b64encode(form.cleaned_data['response'].encode())
+                    burp_rr.clean()
+                    burp_rr.save()
 
             push_to_jira = False
             jira_message = None
@@ -1021,12 +1022,8 @@ def find_template_to_apply(request, fid):
     templates = TemplateFindingFilter(request.GET, queryset=templates)
     paged_templates = get_page_items(request, templates.qs, 25)
 
-    title_words = [
-        word for finding in templates.qs for word in finding.title.split()
-        if len(word) > 2
-    ]
-
-    title_words = sorted(set(title_words))
+    # just query all templates as this weird ordering above otherwise breaks Django ORM
+    title_words = get_words_for_field(Finding_Template.objects.all(), 'title')
     product_tab = Product_Tab(test.engagement.product.id, title="Apply Template to Finding", tab="findings")
     return render(
         request, 'dojo/templates.html', {
@@ -1314,18 +1311,16 @@ def templates(request):
     templates = Finding_Template.objects.all().order_by('cwe')
     templates = TemplateFindingFilter(request.GET, queryset=templates)
     paged_templates = get_page_items(request, templates.qs, 25)
-    title_words = [
-        word for finding in templates.qs for word in finding.title.split()
-        if len(word) > 2
-    ]
 
-    title_words = sorted(set(title_words))
+    title_words = get_words_for_field(templates.qs, 'title')
+
     add_breadcrumb(title="Template Listing", top_level=True, request=request)
     return render(
         request, 'dojo/templates.html', {
             'templates': paged_templates,
             'filtered': templates,
             'title_words': title_words,
+
         })
 
 
@@ -1875,12 +1870,12 @@ def finding_bulk_update_all(request, pid=None):
                             log_jira_alert('Finding cannot be pushed to jira as there is no jira configuration for this product.', finding)
                         else:
                             if JIRA_Issue.objects.filter(finding=finding).exists():
-                                if request.user.usercontactinfo.block_execution:
+                                if Dojo_User.wants_block_execution(request.user):
                                     update_jira_issue(finding, True)
                                 else:
-                                    update_jira_issue_task.delay(finding, True)
+                                    update_jira_issue.delay(finding, True)
                             else:
-                                if request.user.usercontactinfo.block_execution:
+                                if Dojo_User.wants_block_execution(request.user):
                                     add_jira_issue(finding, True)
                                 else:
                                     add_jira_issue_task.delay(finding, True)
@@ -2112,20 +2107,20 @@ def push_to_jira(request, fid):
     try:
         if finding.jira():
             logger.info('trying to push %d:%s to JIRA to update JIRA issue', finding.id, finding.title)
-            if hasattr(request.user, 'usercontactinfo') and request.user.usercontactinfo.block_execution:
+            if Dojo_User.wants_block_execution(request.user):
                 update_jira_issue(finding, True)
-                message = 'Linked JIRA issue succesfully updated, but check alerts for background errors.'
+                message = 'Linked JIRA issue succesfully updated.'
             else:
-                update_jira_issue_task.delay(finding, True)
-                message = 'Update to linked JIRA issue queued succesfully.'
+                update_jira_issue.delay(finding, True)
+                message = 'Action queued to update linked JIRA issue, check alerts for background errors.'
         else:
             logger.info('trying to push %d:%s to JIRA to create a new JIRA issue', finding.id, finding.title)
-            if hasattr(request.user, 'usercontactinfo') and request.user.usercontactinfo.block_execution:
+            if Dojo_User.wants_block_execution(request.user):
                 add_jira_issue(finding, True)
-                message = 'JIRA issue created succesfully, but check alerts for background errors'
+                message = 'JIRA issue created succesfully'
             else:
                 add_jira_issue_task.delay(finding, True)
-                message = 'JIRA issue creation queued succesfully.'
+                message = 'Action queued to created linked JIRA issue, check alerts for background errors.'
 
         # it may look like succes here, but the add_jira_issue and update_jira_issue are swallowing exceptions
         # but cant't change too much now without having a test suite, so leave as is for now with the addition warning message to check alerts for background errors.

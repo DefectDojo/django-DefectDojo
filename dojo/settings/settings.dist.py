@@ -133,6 +133,9 @@ env = environ.Env(
     DD_SLA_NOTIFY_WITH_JIRA_ONLY=(bool, False),
     DD_SLA_NOTIFY_PRE_BREACH=(int, 3),
     DD_SLA_NOTIFY_POST_BREACH=(int, 7),
+
+    # maximum number of result in search as search can be an expensive operation
+    DD_SEARCH_MAX_RESULTS=(int, 100)
 )
 
 
@@ -401,6 +404,8 @@ SLA_NOTIFY_WITH_JIRA_ONLY = env('DD_SLA_NOTIFY_WITH_JIRA_ONLY')  # Based on the 
 SLA_NOTIFY_PRE_BREACH = env('DD_SLA_NOTIFY_PRE_BREACH')  # in days, notify between dayofbreach minus this number until dayofbreach
 SLA_NOTIFY_POST_BREACH = env('DD_SLA_NOTIFY_POST_BREACH')  # in days, skip notifications for findings that go past dayofbreach plus this number
 
+SEARCH_MAX_RESULTS = env('DD_SEARCH_MAX_RESULTS')
+
 LOGIN_EXEMPT_URLS = (
     r'^%sstatic/' % URL_PREFIX,
     r'^%swebhook/' % URL_PREFIX,
@@ -594,6 +599,7 @@ DJANGO_MIDDLEWARE_CLASSES = [
     'social_django.middleware.SocialAuthExceptionMiddleware',
     'watson.middleware.SearchContextMiddleware',
     'auditlog.middleware.AuditlogMiddleware',
+    'crum.CurrentRequestUserMiddleware',
 ]
 
 MIDDLEWARE = DJANGO_MIDDLEWARE_CLASSES

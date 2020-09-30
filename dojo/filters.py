@@ -16,7 +16,7 @@ from pytz import timezone
 from django.db.models import Q
 from dojo.models import Dojo_User, Product_Type, Finding, Product, Test_Type, \
     Endpoint, Development_Environment, Finding_Template, Report, Note_Type, \
-    Engagement_Survey, Question, TextQuestion, ChoiceQuestion
+    Engagement_Survey, Question, TextQuestion, ChoiceQuestion, Endpoint_Status
 from dojo.utils import get_system_setting
 from django.contrib.contenttypes.models import ContentType
 
@@ -563,11 +563,17 @@ class OpenFindingFilter(DojoFilter):
         label="Risk Accepted")
 
     if get_system_setting('enable_jira'):
-        jira_issue = BooleanFilter(field_name='jira_issue',
+        has_jira_issue = BooleanFilter(field_name='jira_issue',
                                    lookup_expr='isnull',
                                    exclude=True,
-                                   label='JIRA issue')
+                                   label='has JIRA')
 
+    jira_issue__jira_key = CharFilter(field_name='jira_issue__jira_key', lookup_expr='icontains', label="JIRA issue")
+
+    has_notes = BooleanFilter(field_name='notes',
+                                lookup_expr='isnull',
+                                exclude=True,
+                                label='has notes')
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
@@ -645,6 +651,19 @@ class ClosedFindingFilter(DojoFilter):
         label="Product Type")
     test__engagement__risk_acceptance = ReportRiskAcceptanceFilter(
         label="Risk Accepted")
+
+    if get_system_setting('enable_jira'):
+        has_jira_issue = BooleanFilter(field_name='jira_issue',
+                                   lookup_expr='isnull',
+                                   exclude=True,
+                                   label='has JIRA')
+
+    jira_issue__jira_key = CharFilter(field_name='jira_issue__jira_key', lookup_expr='icontains', label="JIRA issue")
+
+    has_notes = BooleanFilter(field_name='notes',
+                                lookup_expr='isnull',
+                                exclude=True,
+                                label='has notes')
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -836,10 +855,17 @@ class SimilarFindingFilter(DojoFilter):
         label="Product Type")
 
     if get_system_setting('enable_jira'):
-        jira_issue = BooleanFilter(field_name='jira_issue',
+        has_jira_issue = BooleanFilter(field_name='jira_issue',
                                    lookup_expr='isnull',
                                    exclude=True,
-                                   label='JIRA issue')
+                                   label='has JIRA')
+
+    jira_issue__jira_key = CharFilter(field_name='jira_issue__jira_key', lookup_expr='icontains', label="JIRA issue")
+
+    has_notes = BooleanFilter(field_name='notes',
+                                lookup_expr='isnull',
+                                exclude=True,
+                                label='has notes')
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -866,8 +892,6 @@ class SimilarFindingFilter(DojoFilter):
         if 'finding' in kwargs:
             self.finding = kwargs.pop('finding')
 
-        logger.debug('DATA: %s', data)
-
         # if filterset is bound, use initial values as defaults
         if not data:
             # get a mutable copy of the QueryDict
@@ -881,8 +905,6 @@ class SimilarFindingFilter(DojoFilter):
             data['test__test_type'] = self.finding.test.test_type
             data['test__engagement__product'] = self.finding.test.engagement.product
             data['test__engagement__product__prod_type'] = self.finding.test.engagement.product.prod_type
-
-            logger.debug('DATA2: %s', data)
 
         super().__init__(data, *args, **kwargs)
 
@@ -1003,7 +1025,7 @@ class MetricsFindingFilter(FilterSet):
 
     def __init__(self, *args, **kwargs):
         if args[0]:
-            if args[0]['start_date'] != '' or args[0]['end_date'] != '':
+            if args[0].get('start_date', '') != '' or args[0].get('end_date', '') != '':
                 args[0]._mutable = True
                 args[0]['date'] = 8
                 args[0]._mutable = False
@@ -1034,6 +1056,32 @@ class MetricsFindingFilter(FilterSet):
                    'is_template',
                    'jira_creation',
                    'jira_change']
+
+
+class MetricsEndpointFilter(FilterSet):
+    start_date = DateFilter(field_name='date', label='Start Date', lookup_expr=('gt'))
+    end_date = DateFilter(field_name='date', label='End Date', lookup_expr=('lt'))
+    date = MetricsDateRangeFilter()
+    finding__test__engagement__product__prod_type = ModelMultipleChoiceFilter(
+        queryset=Product_Type.objects.all().order_by('name'),
+        label="Product Type")
+    finding__severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
+
+    def __init__(self, *args, **kwargs):
+        if args[0]:
+            if args[0].get('start_date', '') != '' or args[0].get('end_date', '') != '':
+                args[0]._mutable = True
+                args[0]['date'] = 8
+                args[0]._mutable = False
+        # raise Exception()
+        super(MetricsEndpointFilter, self).__init__(*args, **kwargs)
+        self.form.fields['finding__severity'].choices = self.queryset.order_by(
+            'finding__numerical_severity'
+        ).values_list('finding__severity', 'finding__severity').distinct()
+
+    class Meta:
+        model = Endpoint_Status
+        exclude = ['last_modified']
 
 
 class EndpointFilter(DojoFilter):
@@ -1335,7 +1383,7 @@ class NoteTypesFilter(DojoFilter):
 # ==============================
 
 
-class SurveyFilter(FilterSet):
+class QuestionnaireFilter(FilterSet):
     name = CharFilter(lookup_expr='icontains')
     description = CharFilter(lookup_expr='icontains')
     active = BooleanFilter()

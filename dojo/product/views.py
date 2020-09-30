@@ -32,7 +32,7 @@ from custom_field.models import CustomFieldValue, CustomField
 from dojo.tasks import add_epic_task, add_external_issue_task, add_external_issue
 from tagging.models import Tag
 from tagging.utils import get_tag_list
-from django.db.models import Prefetch
+from django.db.models import Prefetch, F
 from django.db.models.query import QuerySet
 from github import Github
 from dojo.finding.views import finding_link_jira, finding_unlink_jira
@@ -179,9 +179,114 @@ def view_product(request, pid):
                   'personal_notifications_form': personal_notifications_form})
 
 
+def identify_view(request):
+    get_data = request.GET
+    view = get_data.get('type', None)
+    if not view:
+        if get_data.get('finding__severity', None):
+            return 'Endpoint'
+        return 'Finding'
+    return view
+
+
+def finding_querys(prod, date, week):
+    filters = dict()
+
+    risk_acceptances = Risk_Acceptance.objects.filter(engagement__in=Engagement.objects.filter(product=prod))
+    filters['accepted'] = [finding for ra in risk_acceptances for finding in ra.accepted_findings.all()]
+
+    filters['verified'] = Finding.objects.filter(test__engagement__product=prod,
+                                               date__range=[date[0], date[1]],
+                                               false_p=False,
+                                               active=True,
+                                               verified=True,
+                                               duplicate=False,
+                                               out_of_scope=False).order_by("date")
+    filters['new_verified'] = Finding.objects.filter(test__engagement__product=prod,
+                                                   date__range=[week, date[1]],
+                                                   false_p=False,
+                                                   verified=True,
+                                                   active=True,
+                                                   duplicate=False,
+                                                   out_of_scope=False).order_by("date")
+    filters['open'] = Finding.objects.filter(test__engagement__product=prod,
+                                           date__range=[date[0], date[1]],
+                                           false_p=False,
+                                           duplicate=False,
+                                           out_of_scope=False,
+                                           active=True,
+                                           is_Mitigated=False)
+    filters['inactive'] = Finding.objects.filter(test__engagement__product=prod,
+                                           date__range=[date[0], date[1]],
+                                           false_p=False,
+                                           duplicate=False,
+                                           out_of_scope=False,
+                                           active=False,
+                                           is_Mitigated=False)
+    filters['closed'] = Finding.objects.filter(test__engagement__product=prod,
+                                             date__range=[date[0], date[1]],
+                                             false_p=False,
+                                             duplicate=False,
+                                             out_of_scope=False,
+                                             active=False,
+                                             is_Mitigated=True)
+    filters['false_positive'] = Finding.objects.filter(test__engagement__product=prod,
+                                             date__range=[date[0], date[1]],
+                                             false_p=True,
+                                             duplicate=False,
+                                             out_of_scope=False)
+    filters['out_of_scope'] = Finding.objects.filter(test__engagement__product=prod,
+                                             date__range=[date[0], date[1]],
+                                             false_p=False,
+                                             duplicate=False,
+                                             out_of_scope=True)
+    filters['all'] = Finding.objects.filter(test__engagement__product=prod,
+                                             date__range=[date[0], date[1]])
+
+    return filters
+
+
+def endpoint_querys(prod, date, week):
+    filters = dict()
+
+    filters['accepted'] = Endpoint_Status.objects.filter(finding__test__engagement__product=prod,
+                                               date__range=[date[0], date[1]],
+                                               risk_accepted=True).order_by("date").annotate(severity=F('finding__severity'))
+    filters['verified'] = Endpoint_Status.objects.filter(finding__test__engagement__product=prod,
+                                               date__range=[date[0], date[1]],
+                                               false_positive=False,
+                                               mitigated=True,
+                                               out_of_scope=False).order_by("date").annotate(severity=F('finding__severity'))
+    filters['new_verified'] = Endpoint_Status.objects.filter(finding__test__engagement__product=prod,
+                                               date__range=[week, date[1]],
+                                               false_positive=False,
+                                               mitigated=True,
+                                               out_of_scope=False).order_by("date").annotate(severity=F('finding__severity'))
+    filters['open'] = Endpoint_Status.objects.filter(finding__test__engagement__product=prod,
+                                           date__range=[date[0], date[1]],
+                                           mitigated=False).annotate(severity=F('finding__severity'))
+    filters['inactive'] = Endpoint_Status.objects.filter(finding__test__engagement__product=prod,
+                                           date__range=[date[0], date[1]],
+                                           mitigated=True).annotate(severity=F('finding__severity'))
+    filters['closed'] = Endpoint_Status.objects.filter(finding__test__engagement__product=prod,
+                                             date__range=[date[0], date[1]],
+                                             mitigated=True).annotate(severity=F('finding__severity'))
+    filters['false_positive'] = Endpoint_Status.objects.filter(finding__test__engagement__product=prod,
+                                             date__range=[date[0], date[1]],
+                                             false_positive=True).annotate(severity=F('finding__severity'))
+    filters['out_of_scope'] = Endpoint_Status.objects.filter(finding__test__engagement__product=prod,
+                                             date__range=[date[0], date[1]],
+                                             out_of_scope=True).annotate(severity=F('finding__severity'))
+    filters['all'] = Endpoint_Status.objects.filter(finding__test__engagement__product=prod,
+                                             date__range=[date[0], date[1]]).annotate(severity=F('finding__severity'))
+
+    return filters
+
+
 def view_product_metrics(request, pid):
     prod = get_object_or_404(Product, id=pid)
     engs = Engagement.objects.filter(product=prod, active=True)
+    view = identify_view(request)
 
     result = EngagementFilter(
         request.GET,
@@ -211,69 +316,15 @@ def view_product_metrics(request, pid):
         start_date = timezone.now()
 
     end_date = timezone.now()
+    week_date = end_date - timedelta(days=7)  # seven days and /newnewer are considered "new"
 
     tests = Test.objects.filter(engagement__product=prod).prefetch_related('finding_set')
 
-    risk_acceptances = Risk_Acceptance.objects.filter(engagement__in=Engagement.objects.filter(product=prod))
-
-    accepted_findings = [finding for ra in risk_acceptances
-                         for finding in ra.accepted_findings.all()]
-
-    verified_findings = Finding.objects.filter(test__engagement__product=prod,
-                                               date__range=[start_date, end_date],
-                                               false_p=False,
-                                               active=True,
-                                               verified=True,
-                                               duplicate=False,
-                                               out_of_scope=False).order_by("date")
-
-    week_date = end_date - timedelta(days=7)  # seven days and /newnewer are considered "new"
-    new_verified_findings = Finding.objects.filter(test__engagement__product=prod,
-                                                   date__range=[week_date, end_date],
-                                                   false_p=False,
-                                                   verified=True,
-                                                   active=True,
-                                                   duplicate=False,
-                                                   out_of_scope=False).order_by("date")
-
-    open_findings = Finding.objects.filter(test__engagement__product=prod,
-                                           date__range=[start_date, end_date],
-                                           false_p=False,
-                                           duplicate=False,
-                                           out_of_scope=False,
-                                           active=True,
-                                           is_Mitigated=False)
-
-    inactive_findings = Finding.objects.filter(test__engagement__product=prod,
-                                           date__range=[start_date, end_date],
-                                           false_p=False,
-                                           duplicate=False,
-                                           out_of_scope=False,
-                                           active=False,
-                                           is_Mitigated=False)
-
-    closed_findings = Finding.objects.filter(test__engagement__product=prod,
-                                             date__range=[start_date, end_date],
-                                             false_p=False,
-                                             duplicate=False,
-                                             out_of_scope=False,
-                                             active=False,
-                                             is_Mitigated=True)
-
-    false_positive_findings = Finding.objects.filter(test__engagement__product=prod,
-                                             date__range=[start_date, end_date],
-                                             false_p=True,
-                                             duplicate=False,
-                                             out_of_scope=False)
-
-    out_of_scope_findings = Finding.objects.filter(test__engagement__product=prod,
-                                             date__range=[start_date, end_date],
-                                             false_p=False,
-                                             duplicate=False,
-                                             out_of_scope=True)
-
-    all_findings = Finding.objects.filter(test__engagement__product=prod,
-                                             date__range=[start_date, end_date])
+    filters = dict()
+    if view == 'Finding':
+        filters = finding_querys(prod, (start_date, end_date), week_date)
+    elif view == 'Endpoint':
+        filters = endpoint_querys(prod, (start_date, end_date), week_date)
 
     open_vulnerabilities = Finding.objects.filter(
         test__engagement__product=prod,
@@ -305,7 +356,7 @@ def view_product_metrics(request, pid):
     if weeks_between <= 0:
         weeks_between += 2
 
-    punchcard, ticks = get_punchcard_data(open_findings, start_date, weeks_between)
+    punchcard, ticks = get_punchcard_data(filters.get('open', None), start_date, weeks_between, view)
 
     add_breadcrumb(parent=prod, top_level=False, request=request)
 
@@ -316,7 +367,7 @@ def view_product_metrics(request, pid):
     high_weekly = OrderedDict()
     medium_weekly = OrderedDict()
 
-    for v in open_findings:
+    for v in filters.get('open', None):
         iso_cal = v.date.isocalendar()
         x = iso_to_gregorian(iso_cal[0], iso_cal[1], 1)
         y = x.strftime("<span class='small'>%m/%d<br/>%Y</span>")
@@ -340,34 +391,43 @@ def view_product_metrics(request, pid):
                 open_close_weekly[x] = {'closed': 0, 'open': 1, 'accepted': 0}
             open_close_weekly[x]['week'] = y
 
+        if view == 'Finding':
+            severity = v.severity
+        elif view == 'Endpoint':
+            severity = v.finding.severity
+
         if x in severity_weekly:
-            if v.severity in severity_weekly[x]:
-                severity_weekly[x][v.severity] += 1
+            if severity in severity_weekly[x]:
+                severity_weekly[x][severity] += 1
             else:
-                severity_weekly[x][v.severity] = 1
+                severity_weekly[x][severity] = 1
         else:
             severity_weekly[x] = {'Critical': 0, 'High': 0,
                                   'Medium': 0, 'Low': 0, 'Info': 0}
-            severity_weekly[x][v.severity] = 1
+            severity_weekly[x][severity] = 1
             severity_weekly[x]['week'] = y
 
-        if v.severity == 'Critical':
+        if severity == 'Critical':
             if x in critical_weekly:
                 critical_weekly[x]['count'] += 1
             else:
                 critical_weekly[x] = {'count': 1, 'week': y}
-        elif v.severity == 'High':
+        elif severity == 'High':
             if x in high_weekly:
                 high_weekly[x]['count'] += 1
             else:
                 high_weekly[x] = {'count': 1, 'week': y}
-        elif v.severity == 'Medium':
+        elif severity == 'Medium':
             if x in medium_weekly:
                 medium_weekly[x]['count'] += 1
             else:
                 medium_weekly[x] = {'count': 1, 'week': y}
 
-    for a in accepted_findings:
+    for a in filters.get('accepted', None):
+        if view == 'Finding':
+            finding = a
+        elif view == 'Endpoint':
+            finding = v.finding
         iso_cal = a.date.isocalendar()
         x = iso_to_gregorian(iso_cal[0], iso_cal[1], 1)
         y = x.strftime("<span class='small'>%m/%d<br/>%Y</span>")
@@ -395,15 +455,16 @@ def view_product_metrics(request, pid):
                    'engs': engs,
                    'i_engs': i_engs_page,
                    'scan_sets': scan_sets,
-                   'verified_findings': verified_findings,
-                   'open_findings': open_findings,
-                   'inactive_findings': inactive_findings,
-                   'closed_findings': closed_findings,
-                   'false_positive_findings': false_positive_findings,
-                   'out_of_scope_findings': out_of_scope_findings,
-                   'accepted_findings': accepted_findings,
-                   'new_findings': new_verified_findings,
-                   'all_findings': all_findings,
+                   'view': view,
+                   'verified_objs': filters.get('verified', None),
+                   'open_objs': filters.get('open', None),
+                   'inactive_objs': filters.get('inactive', None),
+                   'closed_objs': filters.get('closed', None),
+                   'false_positive_objs': filters.get('false_positive', None),
+                   'out_of_scope_objs': filters.get('out_of_scope', None),
+                   'accepted_objs': filters.get('accepted', None),
+                   'new_objs': filters.get('new_verified', None),
+                   'all_objs': filters.get('all', None),
                    'open_vulnerabilities': open_vulnerabilities,
                    'all_vulnerabilities': all_vulnerabilities,
                    'start_date': start_date,
@@ -778,7 +839,7 @@ def new_eng_for_app(request, pid, cicd=False):
 
             if form.is_valid() and (jform is None or jform.is_valid()):
                 if 'jiraform-push_to_jira' in request.POST:
-                    if request.user.usercontactinfo.block_execution:
+                    if Dojo_User.wants_block_execution(request.user):
                         logger.debug('calling add_epic')
                         add_epic(new_eng, jform.cleaned_data.get("push_to_jira"))
                     else:

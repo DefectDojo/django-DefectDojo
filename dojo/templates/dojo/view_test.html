@@ -167,12 +167,7 @@
         <div class="panel-heading tight">
             <div class="clearfix">
                 <h4 class="has-filters"> Findings ({{findings_count}}) <small>{{ test.id|get_severity_count:"test" }}</small>
-                    <div class="dropdown pull-right">
-                        <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary">
-                            <i class="fa fa-filter"></i>
-                            <i class="caret"></i>
-                        </button>
-                    </div>
+                    <div class="dropdown pull-right"></div>
                     <div id="test-pulldown" class="dropdown pull-right">
                         <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                 data-toggle="dropdown" aria-expanded="true">
@@ -315,7 +310,7 @@
                                     </div>
                                 </th>
                             {% endif %}
-                            <th>Act.</th>
+                            <th></th>
                             <th class="centered">Severity</th>
                             <th>Name</th>
                             <th>CWE</th>
@@ -740,7 +735,6 @@
 {% block postscript %}
     <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
     <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
-    <script type="application/javascript" src="{% static "chosen/chosen.jquery.min.js" %}"></script>
     <script type="text/javascript">
         $(function () {
           $(".chosen-select").chosen({
@@ -1021,6 +1015,7 @@
                 drawCallback: function(){
                     $('.has-popover').popover({'trigger':'hover'});
                 },
+                colReorder: true,
                 "columns": [
                     {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled %}                    
                     { "data": "dropdown" },
@@ -1080,4 +1075,5 @@
             });
         });
     </script>
+    {% include "dojo/filter_js_snippet.html" %}    
 {% endblock %}
