@@ -87,7 +87,7 @@ def get_model_default_fields(model):
 def trace(frame, event, arg):
     if event == "call":
         filename = frame.f_code.co_filename
-        if "dojo" in filename or "django" in filename:
+        if "dojo" in filename or "django" in filename or True:
             lineno = frame.f_lineno
             # Here I'm printing the file and line number, 
             # but you can examine the frame, locals, etc too.
