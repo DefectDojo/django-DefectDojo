@@ -881,6 +881,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         new_findings = []
         skipped_hashcodes = []
         try:
+            logger.debug('apiv2 serializer processing findins in import')
             for item in parser.items:
                 sev = item.severity
                 if sev == 'Information' or sev == 'Informational':
@@ -943,8 +944,11 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         except SyntaxError:
             raise Exception('Parser SyntaxError')
 
+        logger.debug('apiv2 serializer done saving new findings')
+
         old_findings = []
         if close_old_findings:
+            logger.debug('apiv2 serializer closing old findings')
             # Close old active findings that are not reported by this scan.
             new_hash_codes = test.finding_set.values('hash_code')
 
@@ -998,6 +1002,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                                 finding_count=updated_count, test=test, engagement=test.engagement, product=test.engagement.product,
                                 url=reverse('view_test', args=(test.id,)))
 
+        logger.debug('apiv2 serializer import done')
         return test
 
     def validate(self, data):

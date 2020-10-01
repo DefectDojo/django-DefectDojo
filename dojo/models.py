@@ -2002,6 +2002,8 @@ class Finding(models.Model):
                     add_jira_issue(self, True)
                 else:
                     add_jira_issue_task.delay(self, True)
+        
+        logger.debug('finding save done')
 
     def delete(self, *args, **kwargs):
         for find in self.original_finding.all():
