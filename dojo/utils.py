@@ -1944,6 +1944,7 @@ def get_system_setting(setting):
 
 
 def calculate_grade(product):
+    logger.debug('calculating grade for %s', product)
     system_settings = System_Settings.objects.get()
     if system_settings.enable_product_grade:
         severity_values = Finding.objects.filter(

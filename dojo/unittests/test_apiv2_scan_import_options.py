@@ -3,7 +3,21 @@ from django.urls import reverse
 from dojo.models import Finding, Test, Test_Type
 from rest_framework.authtoken.models import Token
 from django.core.files.uploadedfile import SimpleUploadedFile
+import sys
+     
 
+
+def trace(frame, event, arg):
+    if event == "call":
+        filename = frame.f_code.co_filename
+        if filename.startswith('dojo'):
+            lineno = frame.f_lineno
+            # Here I'm printing the file and line number, 
+            # but you can examine the frame, locals, etc too.
+            print "%s @ %s" % (filename, lineno)
+        else:
+            print "no dojo call"
+    return trace
 
 class ScanImportOptionsTest(APITestCase):
     """
@@ -17,6 +31,9 @@ class ScanImportOptionsTest(APITestCase):
 """
 
     def setUp(self):
+        logger.info('setting up tracing')
+        sys.settrace(trace)
+        
         token = Token.objects.get(user__username='admin')
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
