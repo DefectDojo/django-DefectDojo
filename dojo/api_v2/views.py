@@ -256,10 +256,16 @@ class FindingViewSet(mixins.ListModelMixin,
 
     def get_queryset(self):
         if not self.request.user.is_staff:
-            return Finding.objects.filter(
+            findings = Finding.objects.filter(
                 reporter_id__in=[self.request.user])
         else:
-            return Finding.objects.all()
+            findings = Finding.objects.all()
+        return findings.prefetch_related('test',
+                                        'test__test_type',
+                                        'test__engagement',
+                                        'test__environment',
+                                        'test__engagement__product',
+                                        'test__engagement__product__prod_type')
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
