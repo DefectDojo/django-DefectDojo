@@ -1,7 +1,7 @@
 from django.apps import AppConfig
 from watson import search as watson
 from django.db import models
-
+import sys
 
 import logging
 logger = logging.getLogger(__name__)

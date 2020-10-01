@@ -3,7 +3,6 @@ from django.urls import reverse
 from dojo.models import Finding, Test, Test_Type
 from rest_framework.authtoken.models import Token
 from django.core.files.uploadedfile import SimpleUploadedFile
-import sys
 
 
 class ScanImportOptionsTest(APITestCase):
