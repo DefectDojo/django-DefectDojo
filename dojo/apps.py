@@ -62,6 +62,10 @@ class DojoAppConfig(AppConfig):
         # YourModel = self.get_model("YourModel")
         # watson.register(YourModel)
 
+        print('setting up tracing/trace')
+        # sys.settrace(trace)
+        sys.settrace(trace_calls)        
+
 
 def get_model_fields_with_extra(model, extra_fields=()):
     return get_model_fields(get_model_default_fields(model), extra_fields)
@@ -78,3 +82,41 @@ def get_model_default_fields(model):
         field.name for field in model._meta.fields if
         isinstance(field, (models.CharField, models.TextField))
     )
+
+
+def trace(frame, event, arg):
+    if event == "call":
+        filename = frame.f_code.co_filename
+        if "dojo" in filename:
+            lineno = frame.f_lineno
+            # Here I'm printing the file and line number, 
+            # but you can examine the frame, locals, etc too.
+            print("trace: %s @ %s" % (filename, lineno))
+    return trace
+
+def trace_lines(frame, event, arg):
+    if event != 'line':
+        return
+    co = frame.f_code
+    func_name = co.co_name
+    line_no = frame.f_lineno
+    filename = co.co_filename
+    print( '  %s line %s' % (func_name, line_no))
+
+def trace_calls(frame, event, arg):
+    if event != 'call':
+        return
+    filename = frame.f_code.co_filename
+    if "dojo" in filename:
+        co = frame.f_code
+        func_name = co.co_name
+        if func_name == 'write':
+            # Ignore write() calls from print statements
+            return
+        line_no = frame.f_lineno
+        filename = co.co_filename
+        print('Call to %s on line %s of %s' % (func_name, line_no, filename))
+        # if func_name in TRACE_INTO:
+        #     # Trace into this function
+        #     return trace_lines
+    return
