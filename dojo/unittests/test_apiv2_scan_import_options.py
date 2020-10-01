@@ -17,8 +17,6 @@ class ScanImportOptionsTest(APITestCase):
 """
 
     def setUp(self):
-        print('setting up trace')
-        
         token = Token.objects.get(user__username='admin')
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
