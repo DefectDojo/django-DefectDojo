@@ -9,14 +9,39 @@ import sys
 def trace(frame, event, arg):
     if event == "call":
         filename = frame.f_code.co_filename
-        if filename.startswith('app/dojo'):
+        if "dojo" in filename:
             lineno = frame.f_lineno
             # Here I'm printing the file and line number, 
             # but you can examine the frame, locals, etc too.
-            print("%s @ %s" % (filename, lineno))
-        else:
-            print("no dojo call")
+            print("trace: %s @ %s" % (filename, lineno))
     return trace
+
+def trace_lines(frame, event, arg):
+    if event != 'line':
+        return
+    co = frame.f_code
+    func_name = co.co_name
+    line_no = frame.f_lineno
+    filename = co.co_filename
+    print( '  %s line %s' % (func_name, line_no))
+
+def trace_calls(frame, event, arg):
+    if event != 'call':
+        return
+    filename = frame.f_code.co_filename
+    if "dojo" in filename:
+        co = frame.f_code
+        func_name = co.co_name
+        if func_name == 'write':
+            # Ignore write() calls from print statements
+            return
+        line_no = frame.f_lineno
+        filename = co.co_filename
+        print('Call to %s on line %s of %s' % (func_name, line_no, filename))
+        # if func_name in TRACE_INTO:
+        #     # Trace into this function
+        #     return trace_lines
+    return
 
 class ScanImportOptionsTest(APITestCase):
     """
@@ -30,8 +55,9 @@ class ScanImportOptionsTest(APITestCase):
 """
 
     def setUp(self):
-        print('setting up tracing')
-        sys.settrace(trace)
+        print('setting up trace')
+        # sys.settrace(trace)
+        sys.settrace(trace_calls)
         
         token = Token.objects.get(user__username='admin')
         self.client = APIClient()
