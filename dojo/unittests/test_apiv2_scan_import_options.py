@@ -10,13 +10,13 @@ import sys
 def trace(frame, event, arg):
     if event == "call":
         filename = frame.f_code.co_filename
-        if filename.startswith('dojo'):
+        if filename.startswith('app/dojo'):
             lineno = frame.f_lineno
             # Here I'm printing the file and line number, 
             # but you can examine the frame, locals, etc too.
-            print "%s @ %s" % (filename, lineno)
+            print("%s @ %s" % (filename, lineno))
         else:
-            print "no dojo call"
+            print("no dojo call")
     return trace
 
 class ScanImportOptionsTest(APITestCase):
