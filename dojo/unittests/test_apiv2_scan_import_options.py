@@ -4,7 +4,6 @@ from dojo.models import Finding, Test, Test_Type
 from rest_framework.authtoken.models import Token
 from django.core.files.uploadedfile import SimpleUploadedFile
 import sys
-     
 
 
 def trace(frame, event, arg):
@@ -31,7 +30,7 @@ class ScanImportOptionsTest(APITestCase):
 """
 
     def setUp(self):
-        logger.info('setting up tracing')
+        print('setting up tracing')
         sys.settrace(trace)
         
         token = Token.objects.get(user__username='admin')
