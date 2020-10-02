@@ -658,7 +658,6 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
         # not sure why we are returning a tag_object, but don't want to change too much now as we're just fixing a bug
         tag_object = self._save_tags(instance, to_be_tagged)
         return tag_object
-        pass
 
     def validate(self, data):
         if self.context['request'].method == 'PATCH':
@@ -741,7 +740,6 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         # not sure why we are returning a tag_object, but don't want to change too much now as we're just fixing a bug
         tag_object = self._save_tags(new_finding, to_be_tagged)
         return tag_object
-        pass
 
     def validate(self, data):
         if ((data['active'] or data['verified']) and data['duplicate']):
