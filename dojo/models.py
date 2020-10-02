@@ -1869,6 +1869,10 @@ class Finding(models.Model):
             return None
             pass
 
+    def get_push_all_to_jira(self):
+        if self.jira_pkey():
+            return self.jira_pkey().push_all_issues
+
     def long_desc(self):
         long_desc = ''
         long_desc += '*' + self.title + '*\n\n'
@@ -1903,8 +1907,7 @@ class Finding(models.Model):
             logger.debug('finding.save() getting current user: %s', user)
 
         jira_issue_exists = JIRA_Issue.objects.filter(finding=self).exists()
-        push_to_jira = getattr(self, 'push_to_jira', push_to_jira)
-
+        
         if self.pk is None:
             # We enter here during the first call from serializers.py
             logger.debug("Saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is None)")
@@ -2062,7 +2065,6 @@ class Finding(models.Model):
             return note.date.strftime("%Y-%m-%d %H:%M:%S") + ': ' + note.author.get_full_name() + ' : ' + note.entry
 
         return ''
-
 
 Finding.endpoints.through.__unicode__ = lambda \
     x: "Endpoint: " + x.endpoint.host
