@@ -1907,7 +1907,7 @@ class Finding(models.Model):
             logger.debug('finding.save() getting current user: %s', user)
 
         jira_issue_exists = JIRA_Issue.objects.filter(finding=self).exists()
-        
+
         if self.pk is None:
             # We enter here during the first call from serializers.py
             logger.debug("Saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is None)")
@@ -2065,6 +2065,7 @@ class Finding(models.Model):
             return note.date.strftime("%Y-%m-%d %H:%M:%S") + ': ' + note.author.get_full_name() + ' : ' + note.entry
 
         return ''
+
 
 Finding.endpoints.through.__unicode__ = lambda \
     x: "Endpoint: " + x.endpoint.host
