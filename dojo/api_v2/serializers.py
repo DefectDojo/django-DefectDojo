@@ -28,6 +28,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class TagList(list):
     def __init__(self, *args, **kwargs):
         pretty_print = kwargs.pop("pretty_print", True)
@@ -648,13 +649,13 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
         push_to_jira = validated_data.pop('push_to_jira') or instance.get_push_all_to_jira()
 
         instance = super(TaggitSerializer, self).update(instance, validated_data)
-        # No need to save the finding twice if we're not pushing to JIRA
+
+        # If we need to push to JIRA, an extra save call is needed.
+        # TODO try to combine create and save, but for now I'm just fixing a bug and don't want to change to much
         if push_to_jira:
             instance.save(push_to_jira=push_to_jira)
-        else:
-            instance.save()
-        
-        # not sure why we are returning a tag_object, but don't want to change too much now as we're just fixing a bug        #         
+
+        # not sure why we are returning a tag_object, but don't want to change too much now as we're just fixing a bug
         tag_object = self._save_tags(instance, to_be_tagged)
         return tag_object
         pass
@@ -736,8 +737,8 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         # TODO try to combine create and save, but for now I'm just fixing a bug and don't want to change to much
         if push_to_jira:
             new_finding.save(push_to_jira=push_to_jira)
-        
-        # not sure why we are returning a tag_object, but don't want to change too much now as we're just fixing a bug        #         
+
+        # not sure why we are returning a tag_object, but don't want to change too much now as we're just fixing a bug
         tag_object = self._save_tags(new_finding, to_be_tagged)
         return tag_object
         pass
