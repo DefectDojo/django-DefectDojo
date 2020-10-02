@@ -834,6 +834,7 @@ def view_engineer(request, eid):
 
     products = Product.objects.all()
     vulns = {}
+    # TODO use prefetch
     for product in products:
         f_count = 0
         engs = Engagement.objects.filter(product=product)

@@ -37,7 +37,7 @@ class DedupeTest(BaseTestCase):
                     dupe_count += 1
 
             if (dupe_count != expected_number_of_duplicates):
-                print("duplicate count mismatch, let's wait a bit for the celery dedupe task to finish and try again (5s)")
+                print("duplicate count mismatch, let's wait a bit for the celery dedupe task to finish and try again (15s)")
             else:
                 break
 

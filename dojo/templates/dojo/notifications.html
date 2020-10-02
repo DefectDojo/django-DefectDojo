@@ -25,13 +25,6 @@
                 <p class="amber-color-with-padding">These notification settings apply <u>globally</u> to all products that you have read access to and will be sent to you only.</p>
                 <p> If you want only notifications for certain products you should disable everything here and enable notifications on those products.</p>
             {% endif %}
-            {% for u in not_users %}
-                <p>{{ u.username }} {{ u.applicable_notifications_count }}</p>
-                {% for n in u.applicable_notifications %}
-                    <p>{{ n.id }} {{ n.product.id }}, {{ n.user }}, e:{{ n.engagement_added}}, t:{{ n.test_added}}, scan:{{ n.scan_added }} </p>
-                {% endfor %}
-                <p>{{ u.merged_notifications.scan_added }}</p>
-            {% endfor %}
             <table class="table table-hover col-sm-5">
                 <thead>
                     <tr>

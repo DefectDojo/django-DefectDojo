@@ -4,12 +4,12 @@ from datetime import timedelta
 from celery.schedules import crontab
 
 import environ
-root = environ.Path(__file__) - 3  # Three folders back
+root = environ.Path(__file__) - 3  # Three folders back!
 
 env = environ.Env(
     # Set casting and default values
     DD_SITE_URL=(str, 'http://localhost:8080'),
-    DD_DEBUG=(bool, False),
+    DD_DEBUG=(bool, True),
     DD_DJANGO_METRICS_ENABLED=(bool, False),
     DD_LOGIN_REDIRECT_URL=(str, '/'),
     DD_DJANGO_ADMIN_ENABLED=(bool, False),
@@ -121,9 +121,9 @@ env = environ.Env(
     }),
     # merging findings doesn't always work well with dedupe and reimport etc.
     # disable it if you see any issues (and report them on github)
-    DD_DISABLE_FINDING_MERGE=(bool, False),
-    # Set to True if you want to allow authorized users to make changes to findings or delete them
-    DD_AUTHORIZED_USERS_ALLOW_CHANGE=(bool, False),
+    DD_DISABLE_FINDING_MERGE=(bool, True),
+    # Set to True if you want to allow authorized users to make changes to findings or delete them    
+    DD_AUTHORIZED_USERS_ALLOW_CHANGE=(bool, True),
     DD_AUTHORIZED_USERS_ALLOW_DELETE=(bool, False),
     # Set to True if you want to allow authorized users staff access only on specific products
     # This will only apply to users with 'active' status
@@ -135,7 +135,8 @@ env = environ.Env(
     DD_SLA_NOTIFY_POST_BREACH=(int, 7),
 
     # maximum number of result in search as search can be an expensive operation
-    DD_SEARCH_MAX_RESULTS=(int, 100)
+    DD_SEARCH_MAX_RESULTS=(int, 100),
+    DD_MAX_AUTOCOMPLETE_WORDS=(int, 20000)
 )
 
 
@@ -375,6 +376,9 @@ SOCIAL_AUTH_TRAILING_SLASH = env('DD_SOCIAL_AUTH_TRAILING_SLASH')
 # https://github.com/fangli/django-saml2-auth
 SAML2_ENABLED = env('DD_SAML2_ENABLED')
 SAML2_AUTH = {
+    # Metadata is required, choose either remote url or local file path
+    'METADATA_AUTO_CONF_URL': env('DD_SAML2_METADATA_AUTO_CONF_URL'),
+    'METADATA_LOCAL_FILE_PATH': env('DD_SAML2_METADATA_LOCAL_FILE_PATH'),
     'ASSERTION_URL': env('DD_SAML2_ASSERTION_URL'),
     'ENTITY_ID': env('DD_SAML2_ENTITY_ID'),
     # Optional settings below
@@ -405,6 +409,7 @@ SLA_NOTIFY_PRE_BREACH = env('DD_SLA_NOTIFY_PRE_BREACH')  # in days, notify betwe
 SLA_NOTIFY_POST_BREACH = env('DD_SLA_NOTIFY_POST_BREACH')  # in days, skip notifications for findings that go past dayofbreach plus this number
 
 SEARCH_MAX_RESULTS = env('DD_SEARCH_MAX_RESULTS')
+MAX_AUTOCOMPLETE_WORDS = env('DD_MAX_AUTOCOMPLETE_WORDS')
 
 LOGIN_EXEMPT_URLS = (
     r'^%sstatic/' % URL_PREFIX,
@@ -580,13 +585,15 @@ INSTALLED_APPS = (
     'django_celery_results',
     'social_django',
     'drf_yasg',
+    'debug_toolbar',
+    # 'cachalot'
 )
 
 # ------------------------------------------------------------------------------
 # MIDDLEWARE
 # ------------------------------------------------------------------------------
 DJANGO_MIDDLEWARE_CLASSES = [
-    # 'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.common.CommonMiddleware',
     'dojo.middleware.DojoSytemSettingsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -599,7 +606,7 @@ DJANGO_MIDDLEWARE_CLASSES = [
     'social_django.middleware.SocialAuthExceptionMiddleware',
     'watson.middleware.SearchContextMiddleware',
     'auditlog.middleware.AuditlogMiddleware',
-    'crum.CurrentRequestUserMiddleware',
+    'crum.CurrentRequestUserMiddleware',    
 ]
 
 MIDDLEWARE = DJANGO_MIDDLEWARE_CLASSES
@@ -658,10 +665,10 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'dojo.tasks.async_update_findings_from_source_issues',
         'schedule': timedelta(hours=3),
     },
-    'compute-sla-age-and-notify': {
-        'task': 'dojo.tasks.async_sla_compute_and_notify',
-        'schedule': crontab(hour=7, minute=30),
-    }
+#    'compute-sla-age-and-notify': {
+#        'task': 'dojo.tasks.async_sla_compute_and_notify',
+#        'schedule': crontab(hour=7, minute=30),
+#    }
 }
 
 
@@ -774,6 +781,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Trivy Scan': DEDUPE_ALGO_HASH_CODE,
 }
 
+# merging findings doesn't always work well with dedupe and reimport etc.
+# disable it if you see any issues (and report them on github)
 DISABLE_FINDING_MERGE = env('DD_DISABLE_FINDING_MERGE')
 
 # ------------------------------------------------------------------------------
@@ -826,6 +835,7 @@ LOGGING = {
         },
         'console': {
             'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
         },
     },
     'loggers': {
@@ -834,17 +844,29 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
+        # 'django.db.backends': {
+        #     'level': 'DEBUG',
+        #     'handlers': ['console'],
+        #     'propagate': False,
+        # },
         'dojo': {
             'handlers': ['console'],
-            'level': 'INFO',
+            'level': 'DEBUG',
             'propagate': False,
         },
         'dojo.specific-loggers.deduplication': {
             'handlers': ['console'],
-            'level': 'INFO',
+            'level': 'DEBUG',
             'propagate': False,
         },
         'MARKDOWN': {
+            # The markdown library is too verbose in it's logging, reducing the verbosity in our logs.
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'titlecase': {
+            # The markdown library is too verbose in it's logging, reducing the verbosity in our logs.
             'handlers': ['console'],
             'level': 'WARNING',
             'propagate': False,
@@ -861,3 +883,35 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
 
 # Maximum size of a scan file in MB
 SCAN_FILE_MAX_SIZE = 100
+
+# django-tagging uses raw queries underneath breaking ORM query caching
+CACHALOT_UNCACHABLE_TABLES = frozenset(('django_migrations'))
+
+
+def show_toolbar(request):
+    return True
+
+
+DEBUG_TOOLBAR_CONFIG = {
+    "SHOW_TOOLBAR_CALLBACK": show_toolbar,
+    "INTERCEPT_REDIRECTS": False,
+    "SHOW_COLLAPSED": True,
+}
+
+DEBUG_TOOLBAR_PANELS = [
+    'ddt_request_history.panels.request_history.RequestHistoryPanel',  # Here it is
+    'debug_toolbar.panels.versions.VersionsPanel',
+    'debug_toolbar.panels.timer.TimerPanel',
+    'debug_toolbar.panels.settings.SettingsPanel',
+    'debug_toolbar.panels.headers.HeadersPanel',
+    'debug_toolbar.panels.request.RequestPanel',
+    'debug_toolbar.panels.sql.SQLPanel',
+    'debug_toolbar.panels.templates.TemplatesPanel',
+    # 'debug_toolbar.panels.staticfiles.StaticFilesPanel',
+    'debug_toolbar.panels.cache.CachePanel',
+    'debug_toolbar.panels.signals.SignalsPanel',
+    'debug_toolbar.panels.logging.LoggingPanel',
+    'debug_toolbar.panels.redirects.RedirectsPanel',
+    'debug_toolbar.panels.profiling.ProfilingPanel',
+    # 'cachalot.panels.CachalotPanel',
+]

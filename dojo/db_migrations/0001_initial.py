@@ -447,7 +447,7 @@ class Migration(migrations.Migration):
                 ('push_all_issues', models.BooleanField(default=False)),
                 ('enable_engagement_epic_mapping', models.BooleanField(default=False)),
                 ('push_notes', models.BooleanField(default=False)),
-                ('conf', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='dojo.JIRA_Conf', verbose_name='JIRA Configuration')),
+                ('conf', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='dojo.JIRA_Conf', verbose_name='JIRA Configuration', related_name='jira_product_conf')),
             ],
         ),
         migrations.CreateModel(
@@ -1016,7 +1016,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='jira_pkey',
             name='product',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='dojo.Product'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='dojo.Product', related_name='jira_product_conf'),
         ),
         migrations.AddField(
             model_name='ipscan',

@@ -608,7 +608,7 @@ class OpenFindingFilter(DojoFilter):
 
         cwe = dict()
         cwe = dict([cwe, cwe]
-                   for cwe in self.queryset.values_list('cwe', flat=True).distinct()
+                   for cwe in self.queryset.order_by().values_list('cwe', flat=True).distinct()
                    if type(cwe) is int and cwe is not None and cwe > 0)
         cwe = collections.OrderedDict(sorted(cwe.items()))
         self.form.fields['cwe'].choices = list(cwe.items())

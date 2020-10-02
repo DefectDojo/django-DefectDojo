@@ -19,7 +19,7 @@ def system_settings(request):
     system_settings_obj = System_Settings.objects.get(no_cache=True)
 
     # Celery needs to be set with the setting: CELERY_RESULT_BACKEND = 'db+sqlite:///dojo.celeryresults.sqlite'
-    if hasattr(settings, 'CELERY_RESULT_BACKEND'):
+    if hasattr(settings, 'CELERY_RESULT_BACKEND') and False:
         # Check the status of Celery by sending calling a celery task
         celery_bool = get_celery_worker_status()
 

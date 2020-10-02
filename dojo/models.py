@@ -977,6 +977,7 @@ class Engagement(models.Model):
     preset = models.ForeignKey(Engagement_Presets, null=True, blank=True, help_text="Settings and notes for performing this engagement.", on_delete=models.CASCADE)
     reason = models.CharField(max_length=2000, null=True, blank=True)
     report_type = models.ForeignKey(Report_Type, null=True, blank=True, on_delete=models.CASCADE)
+    # product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_engagement')
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     updated = models.DateTimeField(auto_now=True, null=True)
     created = models.DateTimeField(auto_now_add=True, null=True)
@@ -1532,6 +1533,7 @@ class Finding(models.Model):
             models.Index(fields=['unique_id_from_tool']),
             # models.Index(fields=['file_path']), # can't add index because the field has max length 4000.
             models.Index(fields=['line']),
+            models.Index(fields=['component_name']),
         ]
 
     def is_authorized(self, user, perm_type):
@@ -1783,6 +1785,9 @@ class Finding(models.Model):
             diff = get_current_date() - self.date
         days = diff.days
         return days if days > 0 else 0
+
+    def is_risk_accepted(self):
+        return self.risk_acceptance_set.exists()
 
     def sla_days_remaining(self):
         sla_calculation = None
@@ -2582,7 +2587,7 @@ class Tool_Product_History(models.Model):
 
 
 class Alerts(models.Model):
-    title = models.CharField(max_length=100, default='', null=False)
+    title = models.CharField(max_length=200, default='', null=False)
     description = models.CharField(max_length=2000, null=True)
     url = models.URLField(max_length=2000, null=True)
     source = models.CharField(max_length=100, default='Generic')
@@ -2592,6 +2597,10 @@ class Alerts(models.Model):
 
     class Meta:
         ordering = ['-created']
+
+    def save(self, *args, **kwargs):
+        self.title = self.title[:200]
+        super(Alerts, self).save(*args, **kwargs)
 
 
 class Cred_User(models.Model):

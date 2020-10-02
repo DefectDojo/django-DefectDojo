@@ -794,6 +794,23 @@ def finding_display_status(finding):
 
 
 @register.filter
+def status_classes(finding):
+    classes = []
+    if finding.active:
+        classes.append('active_finding')
+    else:
+        classes.append('inactive_finding')
+
+    if finding.is_Mitigated:
+        classes.append('mitigated_finding')
+
+    if finding.is_risk_accepted():
+        classes.append('risk_accepted_finding')
+
+    return ' '.join(classes)
+
+
+@register.filter
 def is_authorized_for_change(user, obj):
     # print('filter: is_authorized_for_change')
     return user_is_authorized(user, 'change', obj)

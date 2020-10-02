@@ -50,6 +50,7 @@ class TagList(list):
 
 
 class TagListSerializerField(serializers.ListField):
+    # print('TagListSerializerField')
     child = serializers.CharField()
     default_error_messages = {
         'not_a_list': _(
@@ -61,6 +62,7 @@ class TagListSerializerField(serializers.ListField):
     order_by = None
 
     def __init__(self, **kwargs):
+        # print('TagListSerializerField.init')
         pretty_print = kwargs.pop("pretty_print", True)
 
         style = kwargs.pop("style", {})
@@ -72,6 +74,7 @@ class TagListSerializerField(serializers.ListField):
         self.pretty_print = pretty_print
 
     def to_internal_value(self, data):
+        # print('TagListSerializerField.to_internal_value')
         if isinstance(data, six.string_types):
             if not data:
                 data = []
@@ -92,6 +95,10 @@ class TagListSerializerField(serializers.ListField):
         return data
 
     def to_representation(self, value):
+        # print('TagListSerializerField.to_representation')
+        # print('type(value):', type(value))
+        # print('value:', value)
+
         if not isinstance(value, TagList):
             if not isinstance(value, list):
                 # this will trigger when a queryset is found...

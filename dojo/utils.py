@@ -17,6 +17,7 @@ from django.core.paginator import Paginator
 from django.urls import get_resolver, reverse
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
 from django.template.defaultfilters import pluralize
+from django.http import HttpResponseRedirect
 from django.template.loader import render_to_string
 from django.utils import timezone
 from jira import JIRA
@@ -2092,14 +2093,14 @@ def apply_cwe_to_template(finding, override=False):
     return finding
 
 
+def max_safe(list):
+    return max(i for i in list if i is not None)
+
+
 def truncate_with_dots(the_string, max_length_including_dots):
     if not the_string:
         return the_string
     return (the_string[:max_length_including_dots - 3] + '...' if len(the_string) > max_length_including_dots else the_string)
-
-
-def max_safe(list):
-    return max(i for i in list if i is not None)
 
 
 def get_full_url(relative_url):
@@ -2164,6 +2165,20 @@ def redirect_to_return_url_or_else(request, or_else):
     else:
         messages.add_message(request, messages.ERROR, 'Unable to redirect anywhere.', extra_tags='alert-danger')
         return HttpResponseRedirect(request.get_full_path())
+
+
+def redirect(obj, suffix=None):
+
+    real_suffix = ''
+    if suffix:
+        real_suffix = suffix
+
+    if isinstance(obj, Engagement):
+        return HttpResponseRedirect(reverse('view_engagement', args=(obj.id,)) + real_suffix)
+    elif isinstance(obj, Product):
+        return HttpResponseRedirect(reverse('view_product', args=(obj.id,)) + real_suffix)
+    else:
+        raise NotImplementedError
 
 
 def file_size_mb(file_obj):
@@ -2323,10 +2338,9 @@ def sla_compute_and_notify(*args, **kwargs):
 
 
 def get_words_for_field(queryset, fieldname):
+    max_results = getattr(settings, 'MAX_AUTOCOMPLETE_WORDS', 20000)
     words = [
-        # word for component_name in queryset.filter(component_name__isnull=False).values_list(fieldname, flat=True).distinct() for word in (component_name.split() if component_name else []) if len(word) > 2
-        word for component_name in queryset.filter(**{'%s__isnull' % fieldname: False}).values_list(fieldname, flat=True).distinct() for word in (component_name.split() if component_name else []) if len(word) > 2
-
+        word for component_name in queryset.order_by().filter(**{'%s__isnull' % fieldname: False}).values_list(fieldname, flat=True).distinct()[:max_results] for word in (component_name.split() if component_name else []) if len(word) > 2
     ]
     return sorted(set(words))
 

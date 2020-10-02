@@ -631,12 +631,12 @@
 <script src="{% static "dojo/js/cvss_calculator.js" %}"></script>
 <script type="application/javascript">
     $(document).ready(function() {
-        $('.has-popover').popover({'trigger':'hover'});
+        $('.has-popover').popover({'trigger':'hover', 'html': 'true'});
         {% if request.user.is_authenticated %}
         $('.dropdown-toggle').click(function() { get_alerts(); });
         setInterval(function() {
-            update_alertcount();
-        }, 10000);
+           update_alertcount();
+        }, 300000);
         {% endif %}
         function update_alertcount() {
             $.get("{% url 'alertcount' %}", function (data) {

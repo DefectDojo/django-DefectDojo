@@ -62,6 +62,7 @@ from dojo.notes.urls import urlpatterns as notes_urls
 from dojo.note_type.urls import urlpatterns as note_type_urls
 from dojo.google_sheet.urls import urlpatterns as google_sheets_urls
 from dojo.banner.urls import urlpatterns as banner_urls
+from dojo.redirects.urls import urlpatterns as redirects_urls
 from dojo.survey.urls import urlpatterns as survey_urls
 from dojo.regulations.urls import urlpatterns as regulations
 
@@ -163,6 +164,7 @@ ur += notes_urls
 ur += note_type_urls
 ur += google_sheets_urls
 ur += banner_urls
+ur += redirects_urls
 ur += regulations
 
 swagger_urls = [
@@ -225,3 +227,7 @@ if hasattr(settings, 'DJANGO_ADMIN_ENABLED'):
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+#    urlpatterns += [url(r'^silk/', include('silk.urls', namespace='silk'))]
+
+import debug_toolbar
+urlpatterns += [url(r"^__debug__/", include(debug_toolbar.urls))]

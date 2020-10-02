@@ -26,7 +26,7 @@
                                 <td class="text-center"><i class="fa fa-{{ alert.icon }} fa-fw"></i></td>
                                 <td class="text-center">{{ alert.source }}</td>
                                 <td>{%if alert.url %}<a href="{{ alert.url }}">{% endif %}{{ alert.title }}{% if alert.url %}</a>{% endif %}</td>
-                                <td>{{ alert.description|linebreaks }}</td>
+                                <td>{%if alert.url %}<a href="{{ alert.url }}">{% endif %}{{ alert.description|linebreaks }}{% if alert.url %}</a>{% endif %}</td>
                                 <td>{{ alert.created }}</td>
                                 <td class="hidden-sm centered">
                                         <input type="checkbox" name="alert_select" value="{{ alert.id }}"

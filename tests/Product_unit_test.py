@@ -331,6 +331,7 @@ class ProductTest(BaseTestCase):
         driver.find_element_by_link_text("Delete").click()
         # "Click" the delete button to complete the transaction
         driver.find_element_by_css_selector("button.btn.btn-danger").click()
+
         # Query the site to determine if the product has been added
 
         # Assert ot the query to determine status of failure

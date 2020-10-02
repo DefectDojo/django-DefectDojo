@@ -574,6 +574,7 @@ class ProductViewSet(mixins.ListModelMixin,
     filterset_class = ApiProductFilter
 
     def get_queryset(self):
+        print('ProductViewSet.getqueryset')
         if not self.request.user.is_staff:
             return self.queryset.filter(
                 authorized_users__in=[self.request.user])
@@ -586,6 +587,7 @@ class ProductViewSet(mixins.ListModelMixin,
     )
     @action(detail=True, methods=['post'], permission_classes=[permissions.UserHasReportGeneratePermission])
     def generate_report(self, request, pk=None):
+        print('ProductViewSet.generate_report')
         product = get_object_or_404(Product.objects, id=pk)
 
         options = {}
@@ -746,11 +748,14 @@ class TestsViewSet(mixins.ListModelMixin,
         return Test
 
     def get_queryset(self):
+        qs = Test.objects.all()
+
         if not self.request.user.is_staff:
             return Test.objects.filter(
                 engagement__product__authorized_users__in=[self.request.user])
-        else:
-            return Test.objects.all()
+
+        #  serializer outputs also self.test_type.name, so prefetch that
+        return qs.select_related('test_type')
 
     def get_serializer_class(self):
         if self.request.method == 'POST':

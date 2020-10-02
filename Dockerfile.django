@@ -92,7 +92,7 @@ USER ${appuser}
 ENV \
   DD_ADMIN_USER=admin \
   DD_ADMIN_MAIL=admin@defectdojo.local \
-  DD_ADMIN_PASSWORD='' \
+  DD_ADMIN_PASSWORD='admin' \
   DD_ADMIN_FIRST_NAME=Administrator \
   DD_ADMIN_LAST_NAME=User \
   DD_ALLOWED_HOSTS="*" \

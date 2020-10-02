@@ -3,14 +3,17 @@ update_configs:
   - package_manager: "python"
     directory: "/"
     target_branch: "dev"
-    update_schedule: "live"
+    update_schedule: "weekly"
 
   - package_manager: "javascript"
     directory: "/components"
     target_branch: "dev"
-    update_schedule: "live"
+    update_schedule: "weekly"
 
   - package_manager: "docker"
     directory: "/"
     target_branch: "dev"
     update_schedule: "weekly"
+
+    default_labels:
+      - "dependencies"
