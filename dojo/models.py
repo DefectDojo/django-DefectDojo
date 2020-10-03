@@ -1418,7 +1418,7 @@ class Finding(models.Model):
     cwe = models.IntegerField(default=0, null=True, blank=True)
     cve_regex = RegexValidator(regex=r'^[A-Z]{1,10}(-\d+)+$',
                                message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'.")
-    cve = models.CharField(validators=[cve_regex], max_length=28, null=True,
+    cve = models.CharField(validators=[cve_regex], max_length=28, null=True, blank=False,
                            help_text="CVE or other vulnerability identifier")
     cvssv3_regex = RegexValidator(regex=r'^AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]', message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'")
     cvssv3 = models.TextField(validators=[cvssv3_regex], max_length=117, null=True)
@@ -2097,7 +2097,7 @@ class Finding_Template(models.Model):
     cwe = models.IntegerField(default=None, null=True, blank=True)
     cve_regex = RegexValidator(regex=r'^[A-Z]{1,10}(-\d+)+$',
                                message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'.")
-    cve = models.CharField(validators=[cve_regex], max_length=28, null=True)
+    cve = models.CharField(validators=[cve_regex], max_length=28, null=True, blank=False)
     cvssv3_regex = RegexValidator(regex=r'^AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]', message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'")
     cvssv3 = models.TextField(validators=[cvssv3_regex], max_length=117, null=True)
     severity = models.CharField(max_length=200, null=True, blank=True)
