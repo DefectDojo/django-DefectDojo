@@ -77,7 +77,7 @@ services:
       DD_SECRET_KEY: ${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}
       DD_CREDENTIAL_AES_256_KEY: ${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}
   mysql:
-    image: mysql:5.7.29@sha256:8044616c01e46c6bc826d205103a2b650a1679be2f34beab9bbf6c6f642df673
+    image: mysql:5.7.31@sha256:9e902247f80eca2e0fc4179f48a91afbe3b2a61122dd5e7575b5f0549aab97d0
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
       DD_DATABASE_URL: ${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}
