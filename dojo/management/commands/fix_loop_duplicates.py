@@ -1,4 +1,8 @@
 from django.core.management.base import BaseCommand
+from dojo.models import Finding
+import logging
+deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
+
 
 """
 Author: Marian Gawron
@@ -13,7 +17,6 @@ class Command(BaseCommand):
         fix_loop_duplicates()
 
 
-@task(name='fix_loop_task')
 def fix_loop_duplicates():
     candidates = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).all().order_by("-id")
     deduplicationLogger.info("Identified %d Findings with Loops" % len(candidates))
