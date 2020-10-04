@@ -38,8 +38,6 @@ services:
       DD_CREDENTIAL_AES_256_KEY: ${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}
   celerybeat:
     image: defectdojo/defectdojo-django:latest
-    # needed to run as root, in order to drop privileges on celery. what's worst?
-    user: root
     depends_on:
       - mysql
       - rabbitmq
