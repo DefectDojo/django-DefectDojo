@@ -1116,6 +1116,12 @@ class Endpoint_Status(models.Model):
         days = diff.days
         return days if days > 0 else 0
 
+    def __str__(self):
+        field_values = []
+        for field in self._meta.get_fields():
+            field_values.append(str(getattr(self, field.name, '')))
+        return ' '.join(field_values)
+
 
 class Endpoint(models.Model):
     protocol = models.CharField(null=True, blank=True, max_length=10,

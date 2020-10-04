@@ -1,14 +1,42 @@
-from dojo.models import User, Endpoint, Notes
+from dojo.models import User, Endpoint, Notes, Finding, Endpoint_Status
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase, APIClient
 import json
-from defusedxml import ElementTree
+# from unittest import skip
 import logging
 
 
 logger = logging.getLogger(__name__)
 
+
+# 0_zap_sample.xml: basic file with 4 out of 5 findings reported, zap4 absent
+# 1 active
+# 2 active
+# 3 active
+# 4 absent
+# 5 active
+
+# 1_zap_sample_0_and_new_absent: based on 0, but zap1 absent, zap4 reported
+# 1 absent
+# 2 active
+# 3 active
+# 4 active
+# 5 active
+
+# 2_zap_sample_0_and_new_endpoint: bases on 0: just adding an endpoint to zap1
+# 1 active, extra endpoint
+# 2 active
+# 3 active
+# 4 absent
+# 5 active
+
+# 3_zap_sampl_0_and_different_severities
+# 1 active
+# 2 active sev medium
+# 3 active
+# 4 absent
+# 5 active sev medium
 
 class DedupeTest(APITestCase):
     fixtures = ['dojo_testdata.json']
@@ -25,16 +53,10 @@ class DedupeTest(APITestCase):
         # self.url = reverse(self.viewname + '-list')
 
         self.scans_path = 'dojo/unittests/scans/zap/'
-        self.zap_sample1_filename = self.scans_path + 'zap_sample.xml'
-        self.zap_sample2_filename = self.scans_path + 'zap_sample_updated.xml'
-        self.zap_sample3_filename = self.scans_path + 'zap_sample_severity_endpoint_updated.xml'
-        self.zap_sample4_filename = self.scans_path + 'zap_sample_all_endpoints_updated.xml'
-        self.zap_sample1_xml = ElementTree.parse(open(self.zap_sample1_filename))
-        self.zap_sample2_xml = ElementTree.parse(open(self.zap_sample2_filename))
-        self.zap_sample1_count_above_threshold = 3
-        self.zap_sample2_count_above_threshold = 3
-        self.zap_sample3_count_above_threshold = 3
-        self.zap_sample4_count_above_threshold = 3
+        self.zap_sample0_filename = self.scans_path + '0_zap_sample.xml'
+        self.zap_sample1_filename = self.scans_path + '1_zap_sample_0_and_new_absent.xml'
+        self.zap_sample2_filename = self.scans_path + '2_zap_sample_0_and_new_endpoint.xml'
+        self.zap_sample3_filename = self.scans_path + '3_zap_sampl_0_and_different_severities.xml'
 
     def import_scan(self, payload):
         response = self.client.post(reverse('importscan-list'), payload)
@@ -66,25 +88,32 @@ class DedupeTest(APITestCase):
         # print('findings.content: ', response.content)
         return json.loads(response.content)
 
-    def log_finding_summary(self, findings_content_json):
+    def log_finding_summary(self, findings_content_json=None):
         # print('summary')
         # print(findings_content_json)
         # print(findings_content_json['count'])
 
         if not findings_content_json or findings_content_json['count'] == 0:
             logger.debug('no findings')
+        else:
+            for finding in findings_content_json['results']:
+                logger.debug(str(finding['id']) + ': ' + finding['title'][:5] + ':' + finding['severity'] + ': active: ' + str(finding['active']) + ': verified: ' + str(finding['verified']) +
+                        ': is_Mitigated: ' + str(finding['is_Mitigated']) + ": notes: " + str([n['id'] for n in finding['notes']]) +
+                        ": endpoints: " + str(finding['endpoints']))
 
-        for finding in findings_content_json['results']:
-            logger.debug(str(finding['id']) + ': active: ' + str(finding['active']) + ': verified: ' + str(finding['verified']) +
-                     ': is_Mitigated: ' + str(finding['is_Mitigated']) + ": notes: " + str([n['id'] for n in finding['notes']]) +
-                     ": endpoints: " + str(finding['endpoints']))
-
+        logger.debug('endpoints')
         for ep in Endpoint.objects.all():
             logger.debug(str(ep.id) + ': ' + str(ep))
-            # logger.debug(str(ep))
+
+        logger.debug('endpoint statuses')
+        for eps in Endpoint_Status.objects.all():
+            logger.debug(str(eps.id) + ': ' + str(eps))
 
     def assert_finding_count(self, count, findings_content_json):
         self.assertEqual(findings_content_json['count'], count)
+
+    def db_finding_count(self):
+        return Finding.objects.all().count()
 
     def db_endpoint_count(self):
         return Endpoint.objects.all().count()
@@ -92,69 +121,117 @@ class DedupeTest(APITestCase):
     def db_notes_count(self):
         return Notes.objects.all().count()
 
+    def import_scan_with_params(self, filename, minimum_severity='Low', active=True, verified=True):
+        return self.import_scan(
+            {
+                "scan_date": '2020-06-04',
+                "minimum_severity": minimum_severity,
+                "active": active,
+                "verified": verified,
+                "scan_type": 'ZAP Scan',
+                "file": open(filename),
+                "engagement": 1,
+                "version": "1.0.1",
+            })
+
+    def reimport_scan_with_params(self, test_id, filename, minimum_severity='Low', active=True, verified=True):
+        return self.reimport_scan(
+            {
+                "test": test_id,
+                "scan_date": '2020-06-04',
+                "minimum_severity": minimum_severity,
+                "active": active,
+                "verified": verified,
+                "scan_type": 'ZAP Scan',
+                "file": open(filename),
+                "engagement": 1,
+                "version": "1.0.1",
+            })
+
     # import zap scan, testing:
     # - import
-    # - severity threshold
     # - active/verifed = True
-    def import_zap_scan_original(self):
+    def test_zap_scan_base_active_verified(self):
         logger.debug('importing original zap xml report')
 
         endpoint_count_before = self.db_endpoint_count()
         notes_count_before = self.db_notes_count()
 
-        import1 = self.import_scan(
-            {
-                "scan_date": '2020-06-04',
-                "minimum_severity": 'Low',  # skip the 1 information finding
-                "active": True,
-                "verified": True,
-                "scan_type": 'ZAP Scan',
-                "file": open(self.zap_sample1_filename),
-                "engagement": 1,
-                "version": "1.0.1",
-            })
+        import0 = self.import_scan_with_params(self.zap_sample0_filename)
 
-        test_id = import1['test']
+        # 0_zap_sample.xml: basic file with 4 out of 5 findings reported, zap4 absent
+        # 1 active
+        # 2 active
+        # 3 active
+        # 4 absent
+        # 5 active
+
+        test_id = import0['test']
         findings = self.get_test_findings(test_id)
         self.log_finding_summary(findings)
 
         # imported count must match count in xml report
-        self.assert_finding_count(self.zap_sample1_count_above_threshold, findings)
+        self.assert_finding_count(4, findings)
 
-        # the zap scan contains 2 new endpoints
-        self.assertEqual(endpoint_count_before + 2, self.db_endpoint_count())
+        # the zap scan contains 3 endpoints (mainsite with pot + uris from findings)
+        self.assertEqual(endpoint_count_before + 3, self.db_endpoint_count())
 
         # no notes expected
         self.assertEqual(notes_count_before, self.db_notes_count())
 
         return test_id
 
-    # reimport zap scan, testing:
+    # import 0 and then reimport 0 again
     # - reimport, findings stay the same, stay active
-    # - severity threshold
-    # - active = True
-    # - verified = False (doesn't affect existing findings currently)
-    def reimport_zap_scan_original(self, test_id):
-        logger.debug('reimporting exact same original zap xml report again, verified=False')
+    # - active = True, verified = Trie
+    # - existing findings with verified is true should stay verified
+    def test_import_0_reimport_0_active_verified(self):
+        logger.debug('reimporting exact same original zap xml report again')
+
+        import0 = self.import_scan_with_params(self.zap_sample0_filename)
+
+        test_id = import0['test']
 
         endpoint_count_before = self.db_endpoint_count()
         notes_count_before = self.db_notes_count()
 
         # reimport exact same report
-        reimport1 = self.reimport_scan(
-            {
-                "test": test_id,
-                "scan_date": '2020-06-04',
-                "minimum_severity": 'Low',
-                "active": True,
-                "verified": False,
-                "scan_type": 'ZAP Scan',
-                "file": open(self.zap_sample1_filename),
-                "engagement": 1,
-                "version": "1.0.1",
-            })
+        reimport0 = self.reimport_scan_with_params(test_id, self.zap_sample0_filename)
 
-        test_id = reimport1['test']
+        test_id = reimport0['test']
+        self.assertEqual(test_id, test_id)
+
+        findings = self.get_test_findings(test_id)
+        self.log_finding_summary(findings)
+
+        # reimported count must match count in xml report
+        findings = self.get_test_findings(test_id)
+        self.assert_finding_count(4, findings)
+
+        # reimporting the exact same scan shouldn't modify the number of endpoints
+        self.assertEqual(endpoint_count_before, self.db_endpoint_count())
+
+        # reimporting the exact same scan shouldn't create any notes
+        self.assertEqual(notes_count_before, self.db_notes_count())
+
+    # import 0 and then reimport 0 again with verified is false
+    # - reimport, findings stay the same, stay active
+    # - active = True, verified = False
+    # - existing findings with verified is true should stay verified
+    def test_import_0_reimport_0_active_not_verified(self):
+        logger.debug('reimporting exact same original zap xml report again, verified=False')
+
+        import0 = self.import_scan_with_params(self.zap_sample0_filename)
+
+        test_id = import0['test']
+
+        endpoint_count_before = self.db_endpoint_count()
+        notes_count_before = self.db_notes_count()
+
+        # reimport exact same report
+        reimport0 = self.reimport_scan_with_params(test_id, self.zap_sample0_filename, verified=False)
+
+        test_id = reimport0['test']
         self.assertEqual(test_id, test_id)
 
         findings = self.get_test_findings(test_id)
@@ -163,7 +240,7 @@ class DedupeTest(APITestCase):
         # reimported count must match count in xml report
         # we set verified=False in this reimport, but currently DD does not update this flag, so it's still True from previous import
         findings = self.get_test_findings(test_id, verified=True)
-        self.assert_finding_count(self.zap_sample1_count_above_threshold, findings)
+        self.assert_finding_count(4, findings)
 
         # inversely, we should see no findings with verified=False
         findings = self.get_test_findings(test_id, verified=False)
@@ -175,25 +252,26 @@ class DedupeTest(APITestCase):
         # reimporting the exact same scan shouldn't create any notes
         self.assertEqual(notes_count_before, self.db_notes_count())
 
-    def reimport_zap_scan_updated(self, test_id):
-        logger.debug('reimporting updated zap xml report, 1 new finding and 1 no longer present, verified=True')
+    # import 0 and then reimport 1 with zap4 as extra finding, zap1 closed.
+    # - active findings count should be 4
+    # - total  findings count should be 5
+    # - verified is false, so zap4 should not be verified.
+    # - existing findings with verified is true should stay verified
+    def test_import_0_reimport_1_active_not_verified(self):
+        logger.debug('reimporting updated zap xml report, 1 new finding and 1 no longer present, verified=False')
 
+        import0 = self.import_scan_with_params(self.zap_sample0_filename)
+
+        test_id = import0['test']
+        findings = self.get_test_findings(test_id)
+        self.log_finding_summary(findings)
+
+        finding_count_before = self.db_finding_count()
         endpoint_count_before = self.db_endpoint_count()
         notes_count_before = self.db_notes_count()
 
         # reimport updated report
-        reimport1 = self.reimport_scan(
-            {
-                "test": test_id,
-                "scan_date": '2020-06-04',
-                "minimum_severity": 'Low',
-                "active": True,
-                "verified": True,
-                "scan_type": 'ZAP Scan',
-                "file": open(self.zap_sample2_filename),
-                "engagement": 1,
-                "version": "1.0.1",
-            })
+        reimport1 = self.reimport_scan_with_params(test_id, self.zap_sample1_filename, verified=False)
 
         test_id = reimport1['test']
         self.assertEqual(test_id, test_id)
@@ -202,91 +280,44 @@ class DedupeTest(APITestCase):
         findings = self.get_test_findings(test_id)
         self.log_finding_summary(findings)
 
-        # active findings must be equal to those in the report
-        findings = self.get_test_findings(test_id, active=True, verified=True)
-        self.assert_finding_count(self.zap_sample1_count_above_threshold, findings)
-
-        # the updated scan report has 1 new endpoint + 1 new note of the mitigated finding
-        self.assertEqual(endpoint_count_before + 1, self.db_endpoint_count())
-        self.assertEqual(notes_count_before + 1, self.db_notes_count())
-
-    # reimport original zap scan, after the updated scan has closed 1 finding
-    # - reimport, reactivating 1 finding (and mitigating another)
-    # - severity threshold
-    # - active = True
-    # - verified = False (doesn't affect existing findings currently)
-    def reimport_zap_scan_original_after_updated_after_original(self, test_id):
-        logger.debug('reimporting exact same original zap xml report again, verified=False')
-
-        endpoint_count_before = self.db_endpoint_count()
-        notes_count_before = self.db_notes_count()
-
-        # reimport exact same report
-        reimport1 = self.reimport_scan(
-            {
-                "test": test_id,
-                "scan_date": '2020-06-04',
-                "minimum_severity": 'Low',
-                "active": True,
-                "verified": False,
-                "scan_type": 'ZAP Scan',
-                "file": open(self.zap_sample1_filename),
-                "engagement": 1,
-                "version": "1.0.1",
-            })
-
-        test_id = reimport1['test']
-        self.assertEqual(test_id, test_id)
-
+        # active findings must be equal to those in both reports
         findings = self.get_test_findings(test_id)
-        self.log_finding_summary(findings)
-        self.assert_finding_count(4, findings)  # there are 4 unique findings, 2 are shared between the 2 reports, 1 is informational so below threshold
+        self.assert_finding_count(4 + 1, findings)
 
-        # reimported count must match count in xml report
-        # we set verified=False in this reimport, but currently DD does not update this flag, so it's still True from previous import
+        # verified findings must be equal to those in report 0
         findings = self.get_test_findings(test_id, verified=True)
-        # print('logging summary1')
-        self.log_finding_summary(findings)
-        # print('asserting1')
-        self.assert_finding_count(self.zap_sample1_count_above_threshold, findings)
+        self.assert_finding_count(4, findings)
 
-        # 1 finding still remains from the original import as not verified, because the verified flag is not updated by DD when reactivating a finding.
         findings = self.get_test_findings(test_id, verified=False)
-        # print('logging summary2')
-        self.log_finding_summary(findings)
-        # print('asserting2')
         self.assert_finding_count(1, findings)
 
-        # the updated scan report has 1 new endpoint, but his has already been added in the previous step
+        # the updated scan report has
+        # - 1 new finding
+        self.assertEqual(finding_count_before + 1, self.db_finding_count())
+        # existing BUG: when closing a finding, related endpoints / endpoint_status should be mitigated/removed
         self.assertEqual(endpoint_count_before, self.db_endpoint_count())
-        # previous step: note 1: 1 finding mitigated
-        # this step note 2 and 3: finding reactivated + finding mitigated, so 2 new notes in this step
-        self.assertEqual(notes_count_before + 2, self.db_notes_count())
+        # - 1 new note for zap1 being closed now
+        self.assertEqual(notes_count_before + 1, self.db_notes_count())
 
-    # test what happens if we import the same report, but with changed severities and an extra endpoint in the report and an extra endpoint parameter
-    # currently defect dojo sees them as different (new) findings.
-    # the reimport process does not use the hash code based deduplication (yet)
-    # this probably something that should change, but at least we have now captured current behaviour in a test
-    def reimport_zap_scan_updated_severity_and_new_endpoints(self, test_id):
-        logger.debug('reimporting original zap xml report, but with changed severities')
+    # import 0 and then reimport 1 with zap4 as extra finding, zap1 closed and then reimport 1 again
+    # - active findings count should be 4
+    # - total  findings count should be 5
+    # - zap1 active, zap4 inactive
+    def test_import_0_reimport_1_active_verified_reimport_0_active_verified(self):
+        logger.debug('reimporting updated zap xml report, 1 new finding and 1 no longer present, verified=True and then 0 again')
 
+        import0 = self.import_scan_with_params(self.zap_sample0_filename)
+
+        test_id = import0['test']
+        findings = self.get_test_findings(test_id)
+        self.log_finding_summary(findings)
+
+        finding_count_before = self.db_finding_count()
         endpoint_count_before = self.db_endpoint_count()
         notes_count_before = self.db_notes_count()
 
-        # reimport updated report
-        reimport1 = self.reimport_scan(
-            {
-                "test": test_id,
-                "scan_date": '2020-06-04',
-                "minimum_severity": 'Low',
-                "active": True,
-                "verified": True,
-                "scan_type": 'ZAP Scan',
-                "file": open(self.zap_sample3_filename),
-                "engagement": 1,
-                "version": "1.0.1",
-                "endpoint_to_add": 1,
-            })
+        reimport1 = self.reimport_scan_with_params(test_id, self.zap_sample1_filename)
+        reimport0 = self.reimport_scan_with_params(test_id, self.zap_sample0_filename)
 
         test_id = reimport1['test']
         self.assertEqual(test_id, test_id)
@@ -295,47 +326,133 @@ class DedupeTest(APITestCase):
         findings = self.get_test_findings(test_id)
         self.log_finding_summary(findings)
 
-        # total findings must be equal to those in the report, 3 active, 3 mitigated
+        # active findings must be equal to those in both reports
         findings = self.get_test_findings(test_id)
-        self.assert_finding_count(self.zap_sample1_count_above_threshold + self.zap_sample3_count_above_threshold, findings)
-        findings = self.get_test_findings(test_id, active=True)
-        self.assert_finding_count(self.zap_sample3_count_above_threshold, findings)
+        self.assert_finding_count(4 + 1, findings)
 
-        # check if the "endpoint_to_add" param worked
+        zap1_ok = False
+        zap4_ok = False
         for finding in findings['results']:
-            self.assertTrue(1 in finding['endpoints'])
+            if 'Zap1' in finding['title']:
+                self.assertTrue(finding['active'])
+                zap1_ok = True
+            if 'Zap4' in finding['title']:
+                self.assertFalse(finding['active'])
+                zap4_ok = True
 
-        findings = self.get_test_findings(test_id, active=False)
-        self.assert_finding_count(self.zap_sample1_count_above_threshold, findings)
+        self.assertTrue(zap1_ok)
+        self.assertTrue(zap4_ok)
 
-        # check if the "endpoint_to_add" param was NOT added to the previous existing findings
-        for finding in findings['results']:
-            self.assertFalse(1 in finding['endpoints'])
+        # verified findings must be equal to those in report 0
+        findings = self.get_test_findings(test_id, verified=True)
+        self.assert_finding_count(4 + 1, findings)
 
-        # the updated scan report with changed severities also has 1 new endpoint
+        findings = self.get_test_findings(test_id, verified=False)
+        self.assert_finding_count(0, findings)
+
+        # existing BUG: when closing a finding, related endpoints / endpoint_status should be mitigated/removed
+        self.assertEqual(endpoint_count_before, self.db_endpoint_count())
+        # zap1 was closed and then opened -> 2 notes
+        # zap4 was created and then closed -> only 1 note
+        self.assertEqual(notes_count_before + 2 + 1, self.db_notes_count())
+
+    # import 0 and then reimport 2 with an extra endpoint for zap1
+    # - extra endpoint should be present in db
+    # - reimport doesn't look at endpoints to match against existing findings
+    def test_import_0_reimport_2_extra_endpoint(self):
+        logger.debug('reimporting exact same original zap xml report again, with an extra endpoint for zap1')
+
+        import0 = self.import_scan_with_params(self.zap_sample0_filename)
+
+        test_id = import0['test']
+        findings = self.get_test_findings(test_id)
+        self.log_finding_summary(findings)
+
+        endpoint_count_before = self.db_endpoint_count()
+        notes_count_before = self.db_notes_count()
+        finding_count_before = self.db_finding_count()
+
+        reimport2 = self.reimport_scan_with_params(test_id, self.zap_sample2_filename)
+
+        test_id = reimport2['test']
+        self.assertEqual(test_id, test_id)
+
+        findings = self.get_test_findings(test_id)
+        self.log_finding_summary(findings)
+
+        # reimported count must match count in xml report
+        findings = self.get_test_findings(test_id)
+        self.assert_finding_count(4, findings)
+
+        # reimporting the exact same scan shouldn't modify the number of endpoints
         self.assertEqual(endpoint_count_before + 1, self.db_endpoint_count())
-        # 3 notes expected for the mitigated findings
-        self.assertEqual(notes_count_before + 3, self.db_notes_count())
 
-    def reimport_zap_scan_all_different_endpoints(self, test_id):
-        logger.debug('reimporting original zap xml report, but with completely different endpoints severities')
+        # reimporting the exact same scan shouldn't create any notes
+        self.assertEqual(notes_count_before, self.db_notes_count())
+        self.assertEqual(finding_count_before, self.db_finding_count())
 
+    # import 0 and then reimport 2 with an extra endpoint for zap1 and then 0 again to remove the extra endpoint again
+    # - extra endpoint should no long be present in db
+    # - reimport doesn't look at endpoints to match against existing findings
+    def test_import_0_reimport_2_extra_endpoint_reimport_0(self):
+        logger.debug('reimporting exact same original zap xml report again, with an extra endpoint for zap1')
+
+        # self.log_finding_summary()
+
+        import0 = self.import_scan_with_params(self.zap_sample0_filename)
+        test_id = import0['test']
+        findings = self.get_test_findings(test_id)
+        self.log_finding_summary(findings)
+
+        reimport2 = self.reimport_scan_with_params(test_id, self.zap_sample2_filename)
+
+        test_id = reimport2['test']
+        self.assertEqual(test_id, test_id)
+
+        findings = self.get_test_findings(test_id)
+        self.log_finding_summary(findings)
+
+        finding_count_before = self.db_finding_count()
+        endpoint_count_before = self.db_endpoint_count()
+        notes_count_before = self.db_notes_count()
+
+        reimport0 = self.reimport_scan_with_params(test_id, self.zap_sample0_filename)
+
+        test_id = reimport0['test']
+        self.assertEqual(test_id, test_id)
+
+        findings = self.get_test_findings(test_id)
+        self.log_finding_summary(findings)
+
+        # reimported count must match count in xml report
+        findings = self.get_test_findings(test_id)
+        self.assert_finding_count(4, findings)
+
+        # existing BUG: endpoint that is no longer in last scan should be removed or marked as mitigated
+        self.assertEqual(endpoint_count_before, self.db_endpoint_count())
+
+        # reimporting the exact same scan shouldn't create any notes
+        self.assertEqual(notes_count_before, self.db_notes_count())
+        self.assertEqual(finding_count_before, self.db_finding_count())
+
+    # import 0 and then reimport 3 with severities changed for zap1 and zap2
+    # - reimport will match on severity, so now should create 2 new findings
+    # - and close the 2 old findings because they have a different severity
+    def test_import_0_reimport_3_active_verified(self):
+        logger.debug('reimporting updated zap xml report, with different severities for zap2 and zap5')
+
+        import0 = self.import_scan_with_params(self.zap_sample0_filename)
+
+        test_id = import0['test']
+        findings = self.get_test_findings(test_id)
+        self.log_finding_summary(findings)
+
+        finding_count_before = self.db_finding_count()
         endpoint_count_before = self.db_endpoint_count()
         notes_count_before = self.db_notes_count()
 
         # reimport updated report
-        reimport1 = self.reimport_scan(
-            {
-                "test": test_id,
-                "scan_date": '2020-06-04',
-                "minimum_severity": 'Low',
-                "active": True,
-                "verified": True,
-                "scan_type": 'ZAP Scan',
-                "file": open(self.zap_sample4_filename),
-                "engagement": 1,
-                "version": "1.0.1",
-            })
+        reimport1 = self.reimport_scan_with_params(test_id, self.zap_sample3_filename)
 
         test_id = reimport1['test']
         self.assertEqual(test_id, test_id)
@@ -343,44 +460,43 @@ class DedupeTest(APITestCase):
         test = self.get_test(test_id)
         findings = self.get_test_findings(test_id)
         self.log_finding_summary(findings)
+        self.assert_finding_count(4 + 2, findings)
 
-        # no new findings expected as only the endpoints are different
-        findings = self.get_test_findings(test_id)
-        self.assert_finding_count(self.zap_sample4_count_above_threshold, findings)
+        zap2_ok = False
+        zap5_ok = False
+        for finding in findings['results']:
+            if 'Zap2' in finding['title']:
+                self.assertTrue(finding['active'] or finding['severity'] == 'Low')
+                self.assertTrue(not finding['active'] or finding['severity'] == 'Medium')
+                zap2_ok = True
+            if 'Zap5' in finding['title']:
+                self.assertTrue(finding['active'] or finding['severity'] == 'Low')
+                self.assertTrue(not finding['active'] or finding['severity'] == 'Medium')
+                zap5_ok = True
 
-        # the updated scan report has all endpoints changed. the previous endpoints are no longer present, but DD keeps them anyway.
-        # so there should be 2 new endpoints. 1 for the mainhost in zap report and 1 for the uri used in each finding
-        self.assertEqual(endpoint_count_before + 2, self.db_endpoint_count())
-        # no new notes expected
-        self.assertEqual(notes_count_before, self.db_notes_count())
+        self.assertTrue(zap2_ok)
+        self.assertTrue(zap5_ok)
 
-    def test_import(self):
-        test_id = self.import_zap_scan_original()
+        # verified findings must be equal to those in report 0
+        findings = self.get_test_findings(test_id, verified=True)
+        self.assert_finding_count(4 + 2, findings)
 
-    def test_import_reimport_same(self):
-        test_id = self.import_zap_scan_original()
-        self.reimport_zap_scan_original(test_id)
+        findings = self.get_test_findings(test_id, verified=False)
+        self.assert_finding_count(0, findings)
 
-    def test_import_reimport_different(self):
-        test_id = self.import_zap_scan_original()
-        self.reimport_zap_scan_updated(test_id)
-
-    def test_import_reimport_different_multiple(self):
-        test_id = self.import_zap_scan_original()
-        self.reimport_zap_scan_updated(test_id)
-        self.reimport_zap_scan_original_after_updated_after_original(test_id)
-
-    def test_import_reimport_different_severity_and_new_endpoints(self):
-        test_id = self.import_zap_scan_original()
-        self.reimport_zap_scan_updated_severity_and_new_endpoints(test_id)
-
-    def test_import_reimport_all_different_endpoints(self):
-        test_id = self.import_zap_scan_original()
-        self.reimport_zap_scan_all_different_endpoints(test_id)
+        # the updated scan report has
+        # - 2 new findings
+        self.assertEqual(finding_count_before + 2, self.db_finding_count())
+        # existing BUG: when closing a finding, related endpoints / endpoint_status should be mitigated/removed
+        self.assertEqual(endpoint_count_before, self.db_endpoint_count())
+        # - zap2 and zap5 closed
+        self.assertEqual(notes_count_before + 2, self.db_notes_count())
 
 
 # Observations:
-# - When reopening a mititgated finding, almost no fields are updated such as title, description, severity, impact, references, ....
+# - When reopening a mitigated finding, almost no fields are updated such as title, description, severity, impact, references, ....
 # - Basically fields (and req/resp) are only stored on the initial import, reimporting only changes the active/mitigated/verified flags + some dates + notes
 # - (Re)Import could provide some more statistics of imported findings (reimport: new, mitigated, reactivated, untouched, ...)
 # - Endpoints that are no longer present in the scan that is imported, are still retained by DD, which makes them look "active" in the product view
+# - Maybe test severity threshold?
+# - Not sure,but I doubt the Endpoint_Status objects are created at all during import/reimport? Or are those not needed?
