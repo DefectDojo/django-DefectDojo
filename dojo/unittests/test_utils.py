@@ -1,7 +1,9 @@
 from django.test import TestCase
 from dojo.utils import dojo_crypto_encrypt, prepare_for_view, set_duplicate
-from dojo.management.command.fix_loop_duplicate import fix_loop_duplicates
+from dojo.management.commands.fix_loop_duplicates import fix_loop_duplicates
 from dojo.models import Finding
+import logging
+deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 
 class TestUtils(TestCase):
