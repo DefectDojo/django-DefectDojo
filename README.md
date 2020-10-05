@@ -56,6 +56,13 @@ We've also created some example
 [workflows](https://defectdojo.readthedocs.io/en/latest/workflows.html) that
 should give you an idea of how to use DefectDojo for your own team.
 
+## REST APIs
+
+> ** Deprecation notice ** apiv1 is deprecated and EOS is on 12-31-2020. EOL is planned for 06-30-2021.
+> Please move on to apiv2 and raise issues for any unsupported operations.
+
+Defectdojo can be accessed through a Swagger REST API. Please see [the API documentation](https://defectdojo.readthedocs.io/en/latest/api-v2-docs.html) or the in-app Swagger documentation.
+
 ## Client APIs and wrappers
 This section presents different ways to programmatically interact with defectdojo APIs.
 
@@ -109,7 +116,7 @@ Project Moderators can help you with pull requests or feedback on dev ideas.
 * Jannik Jürgens
 * [Fred Blaise](https://www.linkedin.com/in/fredblaise/)
 * Saurabh kumar
-* Cody Maffucci 
+* Cody Maffucci
 * Pascal Trovatelli / [Sopra Steria](https://www.soprasteria.com/)
 
 ## Hall of Fame
