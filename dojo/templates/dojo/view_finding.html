@@ -48,19 +48,19 @@
                         </button>
                         <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                             {% if user|is_authorized_for_change:finding %}
-                            <li role="presentation">
-                                <a href="{% url 'edit_finding' finding.id %}">
-                                    <i class="fa fa-pencil-square-o"></i> Edit Finding
-                                </a>
-                            </li>
+                                <li role="presentation">
+                                    <a href="{% url 'edit_finding' finding.id %}">
+                                        <i class="fa fa-pencil-square-o"></i> Edit Finding
+                                    </a>
+                                </li>
                             {% endif %}
-                            {% if user.is_staff %}
-                            <li role="presentation">
-                                <a href="{% url 'manage_images' finding.id %}">
-                                    <i class="fa fa-file-image-o"></i> Manage Images
-                                </a>
-                            </li>
-                            <li role="separator" class="divider"></li>
+                            {% if user|is_authorized_for_staff:finding %}
+                                <li role="presentation">
+                                    <a href="{% url 'manage_images' finding.id %}">
+                                        <i class="fa fa-file-image-o"></i> Manage Images
+                                    </a>
+                                </li>
+                                <li role="separator" class="divider"></li>
                                 {% if finding.under_review and dojo_user in finding.reviewers.all or dojo_user == finding.review_requested_by and finding.under_review %}
                                     <li role="presentation">
                                         <a href="{% url 'clear_finding_review' finding.id %}">
@@ -76,43 +76,42 @@
                                 {% endif %}
                             {% endif %}
                             {% if user|is_authorized_for_change:finding %}
-                            <li role="presentation">
-                                <a href="{% url 'touch_finding' finding.id %}">
-                                    <i class="fa fa-clock-o"></i> Touch Finding
-                                </a>
-                            </li>
+                                <li role="presentation">
+                                    <a href="{% url 'touch_finding' finding.id %}">
+                                        <i class="fa fa-clock-o"></i> Touch Finding
+                                    </a>
+                                </li>
                             {% endif %}                                                        
                             <li role="separator" class="divider"></li>
-                            {% if user.is_staff %}
-                            <li role="presentation">
-                                <a href="{% url 'mktemplate' finding.id %}">
-                                    <i class="fa fa-copy"></i> Make Finding a Template
-                                </a>
-                            </li>
-                              {% if cwe_template.cwe %}
-                              <li role="presentation">
-                                <a class="apply-cwe-finding" href="#">
-                                    <i class="fa fa-copy"></i> Apply CWE Template Remediation to Finding
-                                </a>
-                              </li>
-                            <form id="apply-cwe-finding-form" method="post" action="{% url 'apply_template_cwe' finding.id %}">
-                                {% csrf_token %}
-                                <input type="hidden" name="id" value="{{ finding.id }}"/>
-                            </form>
-                            {% else %}
-                            <li role="presentation">
-                              <a href="{% url 'add_template' %}">
-                              <i class="fa fa-copy"></i> Create a CWE Remediation Template
-                            </a>
-                            </li>
-                            {% endif %}
-                            <li role="presentation">
-                                <a href="{% url 'find_template_to_apply' finding.id %}">
-                                    <i class="fa fa-copy"></i> Apply Template to Finding
-                                </a>
-                            </li>
-                            <li role="separator" class="divider"></li>
-                            
+                            {% if user.is_staff%}
+                                <li role="presentation">
+                                    <a href="{% url 'mktemplate' finding.id %}">
+                                        <i class="fa fa-copy"></i> Make Finding a Template
+                                    </a>
+                                </li>
+                                {% if cwe_template.cwe %}
+                                    <li role="presentation">
+                                        <a class="apply-cwe-finding" href="#">
+                                            <i class="fa fa-copy"></i> Apply CWE Template Remediation to Finding
+                                        </a>
+                                    </li>
+                                    <form id="apply-cwe-finding-form" method="post" action="{% url 'apply_template_cwe' finding.id %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" label="apply_template" aria-label="apply_template" name="id" value="{{ finding.id }}"/>
+                                    </form>
+                                {% else %}
+                                    <li role="presentation">
+                                        <a href="{% url 'add_template' %}">
+                                            <i class="fa fa-copy"></i> Create a CWE Remediation Template
+                                        </a>
+                                    </li>
+                                {% endif %}
+                                <li role="presentation">
+                                    <a href="{% url 'find_template_to_apply' finding.id %}">
+                                        <i class="fa fa-copy"></i> Apply Template to Finding
+                                    </a>
+                                </li>
+                                <li role="separator" class="divider"></li>
                             {% endif %}
                             {% if user|is_authorized_for_change:finding %}
                                 {% if finding.mitigated %}
@@ -129,25 +128,25 @@
                                 </li>
                                 {% endif %}
                             {% endif %}                                  
-                            {% if user.is_staff %}
-                            {% if finding.risk_acceptance_set.exists %}
-                                <li role="presentation">
-                                <a href="{% url 'simple_risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
-                                    <i class="fa fa-exclamation-circle"></i> Unaccept Risk
-                                </a>
-                                </li>
-                            {% else %}
-                                <li role="presentation">
-                                    <a href="{% url 'simple_risk_accept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
-                                        <i class="fa fa-exclamation-circle"></i> Accept Risk (simple), or
+                            {% if user|is_authorized_for_change:finding %}
+                                {% if finding.risk_acceptance_set.exists %}
+                                    <li role="presentation">
+                                    <a href="{% url 'simple_risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
+                                        <i class="fa fa-exclamation-circle"></i> Unaccept Risk
                                     </a>
-                                </li>
-                                <li role="presentation">
-                                    <a href ="{% url 'upload_risk_acceptance$' finding.test.engagement.id%}">
-                                        <i class="fa fa-exclamation-circle"></i> Add Full Risk Acceptance...
-                                    </a>
-                                </li>
-                            {% endif %}
+                                    </li>
+                                {% else %}
+                                    <li role="presentation">
+                                        <a href="{% url 'simple_risk_accept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
+                                            <i class="fa fa-exclamation-circle"></i> Accept Risk (simple), or
+                                        </a>
+                                    </li>
+                                    <li role="presentation">
+                                        <a href ="{% url 'upload_risk_acceptance$' finding.test.engagement.id%}">
+                                            <i class="fa fa-exclamation-circle"></i> Add Full Risk Acceptance...
+                                        </a>
+                                    </li>
+                                {% endif %}
                             {% endif %}
                             <li role="presentation">
                                 <a href="{% url 'action_history' finding|content_type finding.id %}">
@@ -155,17 +154,17 @@
                                 </a>
                             </li>
                             {% if user|is_authorized_for_delete:finding %}
-                            <li role="separator" class="divider"></li>
-                            <li role="presentation">
-                                <a class="text-danger delete-finding" href="#">
-                                    <i class="fa fa-trash"></i> Delete Finding
-                                </a>
-                            </li>
-                            <form id="delete-finding-form" method="post" action="{% url 'delete_finding' finding.id %}">
-                                {% csrf_token %}
-                                <input type="hidden" name="id" value="{{ finding.id }}"/>
-                            </form>
-                            </li>
+                                <li role="separator" class="divider"></li>
+                                <li role="presentation">
+                                    <a class="text-danger delete-finding" href="#">
+                                        <i class="fa fa-trash"></i> Delete Finding
+                                    </a>
+                                </li>
+                                <form id="delete-finding-form" method="post" action="{% url 'delete_finding' finding.id %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" label="delete_finding" aria-label="delete_finding" name="id" value="{{ finding.id }}"/>
+                                </form>
+                                </li>
                             {% endif %}
                         </ul>
                     </div>
@@ -212,8 +211,13 @@
                     {% if finding.risk_acceptance_set.all %}
                         <th>Risk Acceptance</th>
                     {% endif %}
-                    {% if finding.duplicate_finding_set %}
-                    <th>Parent</th>
+                    {% if finding.duplicate_finding %}
+                    <th>Original</th>
+                    {% endif %}
+                    {% if duplicate_cluster and not finding.duplicate %}
+                        <th title="Findings that are marked as duplicate of this finding">Duplicates</th>
+                    {% elif duplicate_cluster and finding.duplicate %}
+                        <th title="Findings that are also marked as duplicates of the same original finding">Duplicate Cluster</th>
                     {% endif %}
                     <th>Type</th>
                     <th>Date discovered</th>
@@ -245,23 +249,55 @@
                     {% if finding.scanner_confidence %}
                     <td> {{finding.get_scanner_confidence_text}}</td>
                     {% endif %}
-                    <td>{{ finding|finding_display_status|safe }}
-                    {% if finding.duplicate_finding_set %}
+                    <td>
+                        <div class="align-top">                    
+                            {% comment %}
+                            {% if finding.duplicate %}
+                                {% include "dojo/finding_related_actions.html" with similar_finding=finding finding_context=finding intro=finding|finding_display_status|safe %}
+                            {% else %}
+                                {{ finding|finding_display_status|safe }}
+                            {% endif %}
+                            {% endcomment %}
+                            {{ finding|finding_display_status|safe }}
+                        </div>
+                    </td>
+                    {% if finding.duplicate_finding %}
+                        <td>
+                            <div class="align-top">
+                                <div class="dropdown">
+                                    <a class="fa fa-bug" href="{% url 'view_finding' finding.duplicate_finding.id %}" title="{{ finding.duplicate_finding|finding_extended_title }}"/>
+
+                                    <a href="#" data-toggle="dropdown">&nbsp;<i class="fa fa-ellipsis-v"></i>&nbsp;</a>
+                                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+                                    <li>
+                                        <a class="" href="{% url 'view_finding' finding.duplicate_finding.id %}">
+                                        <i class="fa fa-bug" title="valentino"></i> {{ finding.duplicate_finding|finding_extended_title }}</i>
+                                        </a>
+                                    </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </td>
+                    {% endif %}
+                    {% if duplicate_cluster %}
                     <td>
                         <div class="align-top">
-                        <div class="dropdown">
-                          Duplicate List <a href="#" data-toggle="dropdown">&nbsp;<i class="fa fa-ellipsis-v"></i>&nbsp;</a>
-                          <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
-                          {% for duplicate in finding.duplicate_finding_set %}
-                              <li>
-                                <a class="" href="{% url 'view_finding' duplicate.id %}">
-                                  <i class="fa fa-bug"></i> {{ duplicate.title }}, <i>{{ duplicate.date }}</i>
-                                </a>
-                              </li>
-                          {%  endfor %}
-                            </ul>
-                          </div>
-                      </div>
+                            <div class="dropdown">
+                                {% for duplicate in duplicate_cluster %}
+                                    <a class="fa fa-bug" href="{% url 'view_finding' duplicate.id %}" title="{{ duplicate|finding_extended_title }}"/>
+                                {%  endfor %}                                                                
+                                <a href="#" data-toggle="dropdown">&nbsp;<i class="fa fa-ellipsis-v"></i>&nbsp;</a>
+                                <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+                                {% for duplicate in duplicate_cluster %}
+                                    <li>
+                                        <a class="" href="{% url 'view_finding' duplicate.id %}">
+                                        <i class="fa fa-bug"></i> {{ duplicate|finding_extended_title }}</i>
+                                        </a>
+                                    </li>
+                                {%  endfor %}
+                                </ul>
+                            </div>
+                        </div>
                     </td>
                     {% endif %}
                     {% if finding.risk_acceptance_set.all %}
@@ -437,18 +473,26 @@
                 </td>
                 {% endif %}
                 {% if finding.jira_conf_new or finding.jira_issue %}
-                    <td>
+                    <td id="jira">
                     {% if finding.jira_issue %}
                         <a href="{{ finding.jira_conf_new.url }}/browse/{{ finding.jira_issue.jira_key }}"
                         target="_blank" title="{{ finding.jira_conf_new.url }}/browse/{{ finding.jira_issue.jira_key }}">{{ finding.jira_issue.jira_key }}</a>
-                    {% endif %}                        
+                        <i id="unlink_jira" class="fa fa-trash" title="Unlink JIRA issue from this finding."></i>
+                        <i id="push_to_jira" class="fa fa-share-square" title="Push finding data to linked JIRA issue."></i>
+                    {% else %}
+                        None
+                        <i id="push_to_jira" class="fa fa-share-square" title="Create JIRA issue for this finding"></i>
+                        {% comment %} <a href="{% url 'finding_link_to_jira' finding.id %}" title="Link existing JIRA issue to finding.">
+                            <i class="fa fa-asterisk" title="Link existing JIRA issue to finding."></i>
+                        </a> {% endcomment %}
+                    {% endif %}
                     </td>
                 {% endif %}
                 {% if finding.github_conf_new or finding.github_issue %}
                     <td>
                     {% if finding.github_issue %}
                         <a href="{{ finding.github_issue.issue_url }}" target="_blank" title="{{ finding.github_issue.issue_url }}">#{{ finding.github_issue.issue_id }}</a>                            
-                    {% endif %}                        
+                    {% endif %}
                     </td>
                 {% endif %}
             </tr>
@@ -481,100 +525,45 @@
             </table>
         </div>
     {% endif %}
-    {% with findings=finding.similar_findings %}
-        {% if findings %}
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4>Similar Findings ({{ findings.count }}) <span class="pull-right"><a data-toggle="collapse" href="#similar_findings"><i class="glyphicon glyphicon-chevron-down"></i></a></span></h4>
-                </div>
-                <div id="similar_findings" class="panel-body collapse">
-                    <table class="table table-striped table-hover centered">
-                        <tr>
-                            <th>Title</th>
-                            <th>Status</th>
-                            <th>Date</th>
-                            <th>Test</th>
-                            <th>Engagement</th>
-                            {% if finding.cwe > 0 %}
-                            <th>CWE</th>
-                            {% endif %}
-                            <th>CVE</th>
-                            <th>File</th>
-                            <th>Deduplicate?</th>
-                        </tr>
-                        {% for similar in findings %}
-                            <tr>
-                                <td>
-                                    <a title="{{ similar.title }}" href="{% url 'view_finding' similar.id %}">{{ similar.title|truncatechars_html:80 }}</a>
-                                    {% if similar.tags %}
-                                    <small>
-                                        {% for tag in similar.tags %}
-                                            <a title="Search {{ tag }}" class="tag-label tag-color"
-                                               href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
-                                        {% endfor %}
-                                    </small>
-                                    {% endif %}
-                                </td>
-                                <td>{{ similar.status }}{% if similar.duplicate_finding_id %}, <a href="{% url 'view_finding' similar.duplicate_finding_id %}">Original</a> {% endif %}</td>
-                                <td>
-                                    {{ similar.date|date }}</br>
-                                    {% with similar.notes.count as note_count %}
-                                        ({{ note_count }} note{{ note_count|pluralize }})
-                                    {% endwith %}
-                                </td>
-                                <td><a href="{% url 'view_test' similar.test_id %}">{{ similar.test.test_type.name }}</a></td>
-                                <td><a href="{% url 'view_engagement' similar.test.engagement_id %}">{{ similar.test.engagement.name }}</a>
-                                {% if similar.test.engagement.version %}
-                                    <sup>
-                                          <a target="_blank" class="tag-label tag-version" data-toggle="tooltip" data-placement="bottom" title="Product Version: {{ similar.test.engagement.version }}">
-                                          {{ similar.test.engagement.version }}</a>
-                                    </sup>
-                                {% endif %}
-                                </td>
-                                {% if finding.cwe > 0 %}
-                                <td>
-                                    <a target="_blank" href="https://cwe.mitre.org/data/definitions/{{ finding.cwe }}.html">
-                                        <i class="fa fa-external-link"></i> {{ finding.cwe }}
-                                    </a>
-                                </td>
-                                {% endif %}
-                                <td>{{ similar.cve }}</td>
-                                <td title="{{similar.file_path}}{% if similar.line > 0 %} (Line {{ similar.line }}){% endif %}">
-                                    {{ similar.file_path|truncatechars_html:20 }}{% if similar.line > 0 %} (Line {{ similar.line }}){% endif %}
-                                    <i class="fa fa-copy fa-align-right copytoclipboard" title="copy full path to clipboard"
-                                    data-clipboard-text="{{similar.file_path}}{% if similar.line > 0 %} (Line {{ similar.line }}){% endif %}"></i></td>
-                                <td>
-                                    {% if similar.duplicate %}
-                                        <form method="post"
-                                              action="{% url 'reset_finding_duplicate_status' similar.id %}">
-                                            {% csrf_token %}
-                                            <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
-                                            <input type="submit" value="Reset duplicate status"/>
-                                        </form>
-                                    {% elif finding.original_finding.id != similar.id %}
-                                        <form method="post"
-                                              action="{% url 'mark_finding_duplicate' original_id=similar.id duplicate_id=finding.id %}">
-                                            {% csrf_token %}
-                                            <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
-                                            <input type="submit" value="Use as original"/>
-                                        </form>
-                                        <form method="post"
-                                              action="{% url 'mark_finding_duplicate' duplicate_id=similar.id original_id=finding.id %}">
-                                            {% csrf_token %}
-                                            <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
-                                            <input type="submit" value="Mark as duplicate"/>
-                                        </form>
-                                    {% else %}
-                                        <i>N/A</i>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </table>
-                </div>
+    
+    {% if finding.duplicate_finding_set %}
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>Duplicate Cluster ({{ finding|finding_duplicate_cluster_size }})<span class="pull-right"><a data-toggle="collapse" href="#duplicate_tree"><i class="glyphicon glyphicon-chevron-down"></i></a></span></h4>
             </div>
-        {% endif %}
-    {% endwith %}
+            <div id="duplicate_tree" class="panel-body collapse">
+                {% if finding.duplicate_finding %}
+                    {% include "dojo/finding_related_list.html" with finding_context=finding finding_first_related=finding.duplicate_finding finding_list=duplicate_cluster %}
+                {% else %}
+                    {% include "dojo/finding_related_list.html" with finding_context=finding finding_first_related=finding finding_list=duplicate_cluster %}
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="has-filters">Similar Findings ({{ similar_findings.count }}) 
+                    <span class="pull-right"><a data-toggle="collapse" href=".similar_findings"><i class="glyphicon glyphicon-chevron-down"></i></a></span>
+                    {% comment %} <span class="pull-right similar_findings collapse" aria-expanded="false"><button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary dropdown" aria-expanded="false"> <i class="fa fa-filter"></i> <i class="caret"></i> </button></span> {% endcomment %}
+                    <div class="similar_findings dropdown pull-right collapse"></div>
+                </h4>
+            </div>
+            <div id="the-filters" class="panel-body collapse">
+                {% include "dojo/filter_snippet.html" with form=similar_findings_filter.form %}
+            </div>
+            {% if similar_findings_filter %}            
+                <div id="similar_findings" class="panel-body similar_findings collapse">
+                    {% include "dojo/finding_related_list.html" with finding_context=finding finding_list=similar_findings %}
+                </div>
+            {% endif %}
+        </div>
+
+    {% comment %} Add a form to (ab)use to submit any actions related to similar/duplicates as POST requests {% endcomment %}
+    <form method="post" style="display: none" id="related_action">
+        {% csrf_token %}
+        <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
+    </form>
 
     <div class="hidden" style="padding-bottom: 5px;" id="bulk_edit_menu">
         <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
@@ -586,7 +575,7 @@
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" id="bulk_edit">
                     <li style="padding-left: 8px;">
-                        <form action="{% url 'endpoints_status_bulk' %}" method="post" id="bulk_change_form">
+                        <form action="{% url 'endpoints_status_bulk' finding.id %}" method="post" id="bulk_change_form">
                             {% csrf_token %}
                             <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />                                            
                             <label style="font-size: 80%; font-weight: normal; display: block">
@@ -610,7 +599,6 @@
                                 <span>Risk Accepted</span>
                             </label>
                             <br/>    
-                            <input type="hidden" value="{{ finding.id }}" label="finding_id" name="finding_id">                
                             <input type="submit" class="btn btn-sm btn-primary" label="Submit" name="Submit" value="Submit"/>
                         </form>
                     </li>
@@ -692,6 +680,17 @@
                 </div>
             </div>
         </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>CVSS 3.0<span class="pull-right"><a data-toggle="collapse" href="#vuln_cvss"><i
+                        class="glyphicon glyphicon-chevron-{% if finding.cvssv3 %}up{%else%}down{%endif%}"></i></a></span></h4>
+            </div>
+            <div id="vuln_cvss" class="panel-body collapse {% if finding.cvssv3 %}in{%endif%}">
+                <pre>{{ finding.cvssv3|markdown_render|default_if_none:"" }}</pre>
+            </div>
+        </div>
+
 
         <div class="panel panel-default">
             <div class="panel-heading">
@@ -942,7 +941,6 @@
                 var i = $($(this).find('i').get(0));
                 i.toggleClass('glyphicon-chevron-up').toggleClass('glyphicon-chevron-down');
             })
-            $('[data-toggle="tooltip"]').tooltip()
         });
 
         // keyboard shortcuts
@@ -1005,6 +1003,46 @@
             });
         });
 
+        function jira_action(elem, url) {
+            $(elem).removeClass().addClass('fa fa-spinner fa-spin')
+
+            $.ajax({
+                type: "post",
+                dataType:'json',
+                data: '',
+                context: this, 
+                url: url,
+                // The ``X-CSRFToken`` evidently can't be set in the
+                // ``headers`` option, so force it here.
+                // This method requires jQuery 1.5+.
+                beforeSend: function (jqXHR, settings) {
+                    // Pull the token out of the DOM.
+                    jqXHR.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
+                },
+                success: function (data, textStatus, jqXHR) {
+                    console.log(textStatus)
+                    console.log(data)
+                },
+                error: function (request, status, error) {
+                    console.log('error')
+                    console.log(request.responseText)
+                },
+                complete: function(e) {
+                    console.log('complete')
+                    console.log(this)                        
+                    location.reload()
+                }
+            });
+        }
+
+        $("#push_to_jira").on('click', function(e) {
+            jira_action(this,'{% url 'finding_push_to_jira' finding.id %}')
+        });
+
+        $("#unlink_jira").on('click', function(e) {
+            jira_action(this,'{% url 'finding_unlink_jira' finding.id %}')
+        });
+
         var checkbox_count = 0;
         function get_checkbox_values()
         {
@@ -1032,9 +1070,6 @@
         }
 
         $(function () {
-            $(document).ready(function(){
-              $('[data-toggle="tooltip"]').tooltip();
-            });
             check_checked_finding();
 
             // Keep the dropdown menu open for selecting severity status
@@ -1049,8 +1084,6 @@
             $('.table-responsive').on('hide.bs.dropdown', function () {
               $('.table-responsive').css( "overflow", "auto" );
             })
-
-            $('[data-toggle="tooltip"]').tooltip();
 
             $('#bulk_edit_menu #id_bulk_active').on("click", function (e){
                 var checked = this.checked;
@@ -1165,5 +1198,21 @@
         });
 
         var clipboard = new ClipboardJS('.copytoclipboard');
+
+        function submit_related_action(url) {
+            var related_action_form = $('#related_action')
+            {% comment %} alert(url) {% endcomment %}
+            related_action_form.attr('action', url)
+            related_action.submit()        
+        }
+
+        {% comment %} $('#show-filters').on('click', function () {
+            $(this).toggleClass("dropup");
+        })
+
+        $(".dojo-filter-set :input").not("button").addClass("form-control input-sm"); {% endcomment %}
+
     </script>
+
+    {% include "dojo/filter_js_snippet.html" %}
 {% endblock %}

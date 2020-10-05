@@ -1592,3 +1592,23 @@ small {
   font-size:12px;
   font-weight:400;
 }
+
+.fa-minus-square, .fa-trash {
+    color: red;
+}
+
+.fa-plus-square, .fa-exchange, .fa-share-square {
+    color: green;
+}
+
+.fa-asterisk {
+    color: blue;
+}
+
+#jira i:hover {
+    cursor: pointer;
+}
+
+.no-bottom-margin {
+    margin-bottom: 0px;
+}

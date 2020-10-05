@@ -4,9 +4,9 @@ services:
   - docker
 env:
   global:
-    - K8S_VERSION=v1.13.4
-    - MINIKUBE_VERSION=v0.35.0
-    - HELM_VERSION=v2.13.0
+    - K8S_VERSION=v1.19.0
+    - MINIKUBE_VERSION=v1.12.3
+    - HELM_VERSION=v3.3.2
     - CHANGE_MINIKUBE_NONE_USER=true
   matrix:
     - TEST=flake8
@@ -15,12 +15,14 @@ env:
     - BROKER=rabbitmq DATABASE=postgresql
     - BROKER=redis DATABASE=mysql
     - BROKER=redis DATABASE=postgresql
+    - BROKER=rabbitmq DATABASE=postgresql REPLICATION=enabled
+    - BROKER=rabbitmq DATABASE=postgresql EXTRAVAL=enabled
     - TEST=snyk
-matrix: 
+matrix:
   allow_failures:
     - env: TEST=snyk
 jobs:
-  include:  
+  include:
     - stage: deploy
       env: TEST=deploy
 before_install: ['./travis/before-install.sh']

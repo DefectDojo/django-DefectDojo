@@ -46,7 +46,7 @@
                            class="tablesorter-bootstrap table table-condensed table-striped">
                         <thead>
                         <tr>
-                            <th>Act.</th> <!-- Action 3-dots hamburger menu button -->
+                            <th></th> <!-- Action 3-dots hamburger menu button -->
                             <th>{% dojo_sort request 'Product' 'name' 'asc' %}</th>
                             <th>Tags</th>
                             <th> Criticality</th>
@@ -74,87 +74,95 @@
                                       <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
                                         <li role="presentation">
                                           <a class="" href="{% url 'view_product' prod.id %}">
-                                                                <i class="fa fa-list-alt"></i> View
-                                                            </a>
+                                              <i class="fa fa-list-alt"></i> View
+                                          </a>
                                         </li>
-                                       {% if user.is_staff %}
-                                       <li role="presentation">
-                                         <a class="" href="{% url 'edit_product' prod.id %}">
-                                                               <i class="fa fa-pencil-square-o"></i> Edit
-                                                           </a>
-                                       </li>
-                                       <li role="separator" class="divider"></li>
-                                       <li><a href="{% url 'view_engagements' prod.id %}"><i class="fa fa-calendar"></i> View Engagements</a></li>
-                                       <li role="separator" class="divider"></li>
-                                       <li><a href="{% url 'new_eng_for_prod' prod.id %}"><i class="fa fa-plus"></i> Add New Engagement</a></li>
-                                       <li role="separator" class="divider"></li>
-                                       <li><a href="{% url 'product_open_findings' prod.id %}?test__engagement__product={{ prod.id }}"><i class="fa fa-list-alt"></i> View Open Findings</a></li>
-                                       <li><a href="{% url 'product_open_findings' prod.id %}?test__engagement__product={{ prod.id }}&severity=Critical"><i class="fa fa-exclamation-triangle"></i> View Critical Findings</a></li>
-                                       <li><a href="{% url 'product_open_findings' prod.id %}?test__engagement__product={{ prod.id }}&date=1"><i class="fa fa-calendar"></i> View Last 7 Days Findings</a></li>
-                                       <li role="separator" class="divider"></li>
-                                       <li><a href="{% url 'ad_hoc_finding' prod.id %}"><i class="fa fa-plus"></i> Add New Finding</a></li>
-                                       <li role="separator" class="divider"></li>
-                                       <li role="separator" class="divider"></li>
-                                       <li><a href="{% url 'endpoints' %}?product={{ prod.id }}"><i class="fa fa-list-alt"></i> View Endpoints</a></li>
-                                       <li><a href="{% url 'vulnerable_endpoints' %}?product={{ prod.id }}"><i class="fa fa-sitemap"></i> View Vulnerable Endpoints</a></li>
-                                       <li role="separator" class="divider"></li>
-                                       <li><a href="{% url 'product_endpoint_report' prod.id %}"><i class="fa fa-file-text-o"></i> Endpoint Report</a></li>
-                                       <li role="separator" class="divider"></li>
-                                       <li><a href="{% url 'add_endpoint' prod.id %}"><i class="fa fa-plus"></i> Add New Endpoint</a></li>
-                                       <li role="separator" class="divider"></li>
-                                       <li role="separator" class="divider"></li>
-                                       <li role="presentation">
-                                         <a class="" href="{% url 'add_meta_data' prod.id %}">
-                                                               <i class="fa fa-list-alt"></i> Add Custom Fields
-                                                           </a>
-                                         </li>
-                                       <li role="presentation">
-                                         <a title="Edit Custom Fields"
-                                            href="{% url 'edit_meta_data' prod.id %}">
-                                             <i class="fa fa-pencil-square-o"></i> Edit Custom Fields
-                                         </a>
-                                       </li>
-                                       <li role="separator" class="divider"></li>
-                                       <li role="presentation">
-                                         <a class="" href="{% url 'new_object' prod.id %}">
-                                                               <i class="fa fa-list-alt"></i> Add Product Tracking Files
-                                                           </a>
-                                       </li>
-                                       <li role="presentation">
-                                         <a href="{% url 'view_objects' prod.id %}">
-                                                           <i class="fa fa-history"></i> View Product Tracking Files
-                                                       </a>
-                                       </li>
-                                       {% endif %}
-                                       <li role="separator" class="divider"></li>
-                                       <li role="presentation">
-                                         <a href="{% url 'product_report' prod.id %}">
-                                                           <i class="fa fa-file-text-o"></i> Product Report
-                                                       </a>
-                                       </li>
-                                       {% if system_settings.enable_benchmark and benchmark_type %}
-                                       <li role="separator" class="divider"></li>
-                                       {% for bt in benchmark_type %}
-                                       <li role="presentation">
-                                         <a title="{{ bt.name }}" href="{% url 'view_product_benchmark' prod.id bt.id %}">
-                                                           <span class="fa fa-list"></span> {{ bt.name }} {{ bt.version }}
-                                                       </a>
-                                       </li>
-                                       {% endfor %} {% endif %}
-                                       <li role="separator" class="divider"></li>
-                                       <li role="presentation">
-                                         <a href="{% url 'action_history' prod|content_type prod.id %}">
-                                                           <i class="fa fa-history"></i> View History
-                                                       </a>
-                                       </li>
-                                       {% if user.is_staff %}
-                                       <li role="separator" class="divider"></li>
-                                       <li role="presentation">
-                                         <a class="text-danger" href="{% url 'delete_product' prod.id %}">
-                                                               <i class="fa fa-trash"></i> Delete
-                                                           </a>
-                                       </li>
-                                       {% endif %}
+                                        {% if user|is_authorized_for_change:prod %}
+                                          <li role="presentation">
+                                            <a class="" href="{% url 'edit_product' prod.id %}">
+                                                <i class="fa fa-pencil-square-o"></i> Edit
+                                            </a>
+                                          </li>
+                                        {% endif %}
+                                        {% if user|is_authorized_for_staff:prod %}
+                                          <li role="separator" class="divider"></li>
+                                          <li><a href="{% url 'view_engagements' prod.id %}"><i class="fa fa-calendar"></i> View Engagements</a></li>
+                                          <li role="separator" class="divider"></li>
+                                          <li><a href="{% url 'new_eng_for_prod' prod.id %}"><i class="fa fa-plus"></i> Add New Engagement</a></li>
+                                          <li role="separator" class="divider"></li>
+                                          <li><a href="{% url 'product_open_findings' prod.id %}?test__engagement__product={{ prod.id }}"><i class="fa fa-list-alt"></i> View Open Findings</a></li>
+                                          <li><a href="{% url 'product_open_findings' prod.id %}?test__engagement__product={{ prod.id }}&severity=Critical"><i class="fa fa-exclamation-triangle"></i> View Critical Findings</a></li>
+                                          <li><a href="{% url 'product_open_findings' prod.id %}?test__engagement__product={{ prod.id }}&date=1"><i class="fa fa-calendar"></i> View Last 7 Days Findings</a></li>
+                                          <li role="separator" class="divider"></li>
+                                          <li><a href="{% url 'ad_hoc_finding' prod.id %}"><i class="fa fa-plus"></i> Add New Finding</a></li>
+                                          <li role="separator" class="divider"></li>
+                                          <li role="separator" class="divider"></li>
+                                          <li><a href="{% url 'endpoints' %}?product={{ prod.id }}"><i class="fa fa-list-alt"></i> View Endpoints</a></li>
+                                          <li><a href="{% url 'vulnerable_endpoints' %}?product={{ prod.id }}"><i class="fa fa-sitemap"></i> View Vulnerable Endpoints</a></li>
+                                          <li role="separator" class="divider"></li>
+                                          <li><a href="{% url 'product_endpoint_report' prod.id %}"><i class="fa fa-file-text-o"></i> Endpoint Report</a></li>
+                                          <li role="separator" class="divider"></li>
+                                          <li><a href="{% url 'add_endpoint' prod.id %}"><i class="fa fa-plus"></i> Add New Endpoint</a></li>
+                                          <li role="separator" class="divider"></li>
+                                          <li role="separator" class="divider"></li>
+                                          <li role="presentation">
+                                            <a class="" href="{% url 'add_meta_data' prod.id %}">
+                                                <i class="fa fa-list-alt"></i> Add Custom Fields
+                                            </a>
+                                          </li>
+                                        {% endif %}
+                                        {% if user|is_authorized_for_change:prod %}
+                                          <li role="presentation">
+                                            <a title="Edit Custom Fields" href="{% url 'edit_meta_data' prod.id %}">
+                                              <i class="fa fa-pencil-square-o"></i> Edit Custom Fields
+                                            </a>
+                                          </li>
+                                        {% endif %}
+                                        {% if user|is_authorized_for_staff:prod %}
+                                          <li role="separator" class="divider"></li>
+                                          <li role="presentation">
+                                            <a class="" href="{% url 'new_object' prod.id %}">
+                                              <i class="fa fa-list-alt"></i> Add Product Tracking Files
+                                            </a>
+                                          </li>
+                                          <li role="presentation">
+                                            <a href="{% url 'view_objects' prod.id %}">
+                                              <i class="fa fa-history"></i> View Product Tracking Files
+                                            </a>
+                                          </li>
+                                        {% endif %}
+                                        <li role="separator" class="divider"></li>
+                                        <li role="presentation">
+                                          <a href="{% url 'product_report' prod.id %}">
+                                            <i class="fa fa-file-text-o"></i> Product Report
+                                          </a>
+                                        </li>
+                                        {% if user|is_authorized_for_staff:prod %}
+                                          {% if system_settings.enable_benchmark and benchmark_type %}
+                                            <li role="separator" class="divider"></li>
+                                            {% for bt in benchmark_type %}
+                                              <li role="presentation">
+                                                <a title="{{ bt.name }}" href="{% url 'view_product_benchmark' prod.id bt.id %}">
+                                                  <span class="fa fa-list"></span> {{ bt.name }} {{ bt.version }}
+                                                </a>
+                                              </li>
+                                            {% endfor %}
+                                          {% endif %}
+                                        {% endif %}
+                                        <li role="separator" class="divider"></li>
+                                        <li role="presentation">
+                                          <a href="{% url 'action_history' prod|content_type prod.id %}">
+                                              <i class="fa fa-history"></i> View History
+                                          </a>
+                                        </li>
+                                        {% if user|is_authorized_for_delete:prod %}
+                                          <li role="separator" class="divider"></li>
+                                          <li role="presentation">
+                                            <a class="text-danger" href="{% url 'delete_product' prod.id %}">
+                                              <i class="fa fa-trash"></i> Delete
+                                            </a>
+                                          </li>
+                                        {% endif %}
                                       </ul>
                                     </div>
                                    </div>
@@ -317,6 +325,7 @@
                 drawCallback: function(){
                      $('.has-popover').popover({'trigger':'hover'});
                  },
+                 colReorder: true,
                  "columns": [
                     { "data": "action" },
                     { "data": "product" },

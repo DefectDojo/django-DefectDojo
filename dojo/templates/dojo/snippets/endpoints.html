@@ -3,20 +3,15 @@
 {% load get_endpoint_status %}
 
 {% if destination == "Report" %}
-    {% with endpoints=finding|get_vulnerable_endpoints %}
-        {% if endpoints %}
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="panel panel-info endpoints table-responsive">
-                        <div class="panel-heading">
-                            {% if finding.file_path %}
-                            <h6> Location </h6>
-                            {%  else %}
-                            <h6>Vulnerable Endpoints / Systems</h6>
-                            {% endif %}
-                        </div>
-
-                        {% if endpoints %}
+    {% if finding|has_endpoints %}
+        {% with endpoints=finding|get_vulnerable_endpoints %}
+            {% if endpoints %}
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="panel panel-info endpoints table-responsive">
+                            <div class="panel-heading">
+                                <h6>Vulnerable Endpoints / Systems ({{ endpoints|length }})</h6>
+                            </div>
                             <table id="vuln_endpoints" class="table-striped table ">
                                 <thead>
                                     <th>Endpoint</th>
@@ -35,46 +30,20 @@
                                     {% endfor %}
                                 </tbody>
                             </table>
-                        {% elif finding.file_path %}
-                            <table class="table-striped table table table-condensed table-hover finding-endpoints">
-                                <tr>
-                                    <th style="text-align: center;padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">
-                                        File Path
-                                    </th>
-                                    <th style="text-align: center;padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">
-                                        Line Number
-                                    </th>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">{{ finding.file_path }}</td>
-                                    <td style=" text-align:center; padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">{{ finding.line }}</td>
-                                </tr>
-                            </table>
-                        {% else %}
-                            <div id="vuln_endpoints" class="panel-body endpoint-panel table-responsive">
-                                No endpoints.
-                            </div>
-                        {% endif %}
+                        </div>
                     </div>
                 </div>
-            </div>
-        {% endif %}
-    {% endwith %}
+            {% endif %}
+        {% endwith %}
 
-    {% with endpoints=finding|get_mitigated_endpoints %}
-        {% if endpoints %}
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="panel panel-info endpoints table-responsive">
-                        <div class="panel-heading">
-                            {% if finding.file_path %}
-                            <h6> Location </h6>
-                            {%  else %}
-                            <h6>Mitigated Endpoints / Systems</h6>
-                            {% endif %}
-                        </div>
-
-                        {% if endpoints %}
+        {% with endpoints=finding|get_mitigated_endpoints %}
+            {% if endpoints %}
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="panel panel-info endpoints table-responsive">
+                            <div class="panel-heading">
+                                <h6>Mitigated Endpoints / Systems ({{ endpoints|length }})</h6>
+                            </div>
                             <table id="remd_endpoints" class="table-striped table table-hover">
                                 <thead>
                                     <th>Endpoint</th>
@@ -93,31 +62,37 @@
                                     {% endfor %}
                                 </tbody>
                             </table>
-                        {% elif finding.file_path %}
-                            <table class="table-striped table table table-condensed table-hover finding-endpoints">
-                                <tr>
-                                    <th style="text-align: center;padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">
-                                        File Path
-                                    </th>
-                                    <th style="text-align: center;padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">
-                                        Line Number
-                                    </th>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">{{ finding.file_path }}</td>
-                                    <td style=" text-align:center; padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">{{ finding.line }}</td>
-                                </tr>
-                            </table>
-                        {% else %}
-                            <div id="vuln_endpoints" class="panel-body endpoint-panel table-responsive">
-                                No endpoints.
-                            </div>
-                        {% endif %}
+                        </div>
                     </div>
                 </div>
+            {% endif %}
+        {% endwith %}
+    {% endif %}
+    {% if finding.file_path %}
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-info endpoints table-responsive">
+                    <div class="panel-heading">
+                        <h6> Location </h6>
+                    </div>
+                    <table class="table-striped table table table-condensed table-hover finding-endpoints">
+                        <tr>
+                            <th style="text-align: center;padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">
+                                File Path
+                            </th>
+                            <th style="text-align: center;padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">
+                                Line Number
+                            </th>
+                        </tr>
+                        <tr>
+                            <td style="padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">{{ finding.file_path }}</td>
+                            <td style=" text-align:center; padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">{{ finding.line }}</td>
+                        </tr>
+                    </table>
+                </div>
             </div>
-        {% endif %}
-    {% endwith %}
+        </div>
+    {% endif %}    
 {% else %}
     {% with endpoints=finding|get_vulnerable_endpoints %}
         {% if endpoints %}
@@ -125,7 +100,7 @@
                 <div class="col-md-12">
                     <div class="panel panel-default table-responsive">
                         <div class="panel-heading">
-                            <h4>Vulnerable Endpoints / Systems
+                            <h4>Vulnerable Endpoints / Systems ({{ endpoints|length }})
                                 <span class="pull-right"><a data-toggle="collapse" href="#vuln_endpoints"><i
                                         class="glyphicon glyphicon-chevron-up"></i></a></span>
                             </h4>
@@ -149,7 +124,7 @@
                             <tbody>
                                 {% for endpoint in endpoints %}
                                     <tr>
-                                        {% if user.is_staff %}
+                                        {% if user|is_authorized_for_change:endpoint %}
                                             <td class="hidden-sm">
                                                 <form action="#">
                                                     <input type="checkbox" label="select_vulnerable_{{ endpoint.id }}" name="select_vulnerable_{{ endpoint.id }}" id="{{ endpoint.id }}"
@@ -186,19 +161,21 @@
                 <div class="col-md-12">
                     <div class="panel panel-default table-responsive">
                         <div class="panel-heading">
-                            <h4>Mitigated Endpoints / Systems
+                            <h4>Mitigated Endpoints / Systems ({{ endpoints|length }})
                                 <span class="pull-right"><a data-toggle="collapse" href="#remd_endpoints"><i
                                         class="glyphicon glyphicon-chevron-up"></i></a></span>
                             </h4>
                         </div>
                         <table id="remd_endpoints" class="table-striped table table-hover">
                             <thead>
-                                <th class="hidden-sm" title="Select all mitigated endpoints." style="width: 10%;">
+                                {% if user|is_authorized_for_change:finding %}
+                                    <th class="hidden-sm" title="Select all mitigated endpoints." style="width: 10%;">
                                         <form class="inline-form" action="#">
                                             <input type="checkbox" label="select_all_mitigated" name="select_all_mitigated" id="select_all_mitigated"/>
                                         </form>
                                         <span>Select All</span>
                                     </th>
+                                {% endif %}
                                 <th>Endpoint</th>
                                 <th>Status</th>
                                 <th>Mitigation Time</th>
@@ -207,7 +184,7 @@
                             <tbody>
                                 {% for endpoint in endpoints %}
                                     <tr>
-                                        {% if user|is_authorized_for_change:finding %}
+                                        {% if user|is_authorized_for_change:endpoint %}
                                             <td class="hidden-sm">
                                                 <form action="#">
                                                     <input type="checkbox" label="select_mitigated_{{ endpoint.id }}" name="select_mitigated_{{ endpoint.id }}" id="{{ endpoint.id }}"
