@@ -635,10 +635,42 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     age = serializers.IntegerField(read_only=True)
     sla_days_remaining = serializers.IntegerField(read_only=True)
     finding_meta = FindingMetaSerializer(read_only=True, many=True)
+    related_fields = serializers.SerializerMethodField()
 
     class Meta:
         model = Finding
         fields = '__all__'
+
+    def get_related_fields(self, obj):
+        query_params = self.context['request'].query_params
+        if 'related_fields' in query_params:
+            related_fields = {
+                'product_type': {
+                    'id': obj.test.engagement.product.prod_type.id,
+                    'name': obj.test.engagement.product.prod_type.name
+                },
+                'product': {
+                    'id': obj.test.engagement.product.id,
+                    'name': obj.test.engagement.product.name
+                },
+                'engagement': {
+                    'id': obj.test.engagement.id,
+                    'name': obj.test.engagement.name
+                },
+                'test': {
+                    'id': obj.test.id,
+                    'title': obj.test.title
+                },
+                'test_type': {
+                    'id': obj.test.test_type.id,
+                    'name': obj.test.test_type.name
+                },
+                'environment': {
+                    'id': obj.test.environment.id,
+                    'name': obj.test.environment.name
+                }
+            }
+            return related_fields
 
     # Overriding this to push add Push to JIRA functionality
     def update(self, instance, validated_data):
