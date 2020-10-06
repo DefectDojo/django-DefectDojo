@@ -13,15 +13,6 @@ product and application information, schedule scans, triage vulnerabilities and
 push findings into defect trackers.
 Consolidate your findings into one source of truth with DefectDojo.
 
-## Demo
-
-Try out DefectDojo in our
-[testing environment](https://defectdojo.herokuapp.com/) with the following
-credentials.
-
-* admin / defectdojo@demo#appsec
-* product_manager / defectdojo@demo#product
-
 ## Quick Start
 
 ```sh
@@ -109,7 +100,7 @@ Project Moderators can help you with pull requests or feedback on dev ideas.
 * Jannik Jürgens
 * [Fred Blaise](https://www.linkedin.com/in/fredblaise/)
 * Saurabh kumar
-* Cody Maffucci 
+* Cody Maffucci
 * Pascal Trovatelli / [Sopra Steria](https://www.soprasteria.com/)
 
 ## Hall of Fame
