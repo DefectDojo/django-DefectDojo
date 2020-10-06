@@ -4,7 +4,7 @@ dependencies:
     repository: "@stable"
     condition: mysql.enabled
   - name: postgresql
-    version: 8.1.2
+    version: 8.6.4
     repository: "@stable"
     condition: postgresql.enabled
   - name: rabbitmq
