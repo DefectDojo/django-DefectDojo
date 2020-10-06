@@ -22,6 +22,8 @@ cd django-DefectDojo
 docker-compose build
 # running
 docker-compose up
+# obtain admin credentials
+docker-compose logs initializer | grep "Admin password:"
 ```
 
 Navigate to <http://localhost:8080>.
@@ -48,7 +50,7 @@ We've also created some example
 should give you an idea of how to use DefectDojo for your own team.
 
 ## Client APIs and wrappers
-This section presents different ways to programmatically interact with defectdojo APIs.
+This section presents different ways to programmatically interact with DefectDojo APIs.
 
 See [Wrappers](WRAPPERS.md)
 
