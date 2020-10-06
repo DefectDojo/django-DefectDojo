@@ -870,4 +870,3 @@ def product_findings(product):
 @register.filter
 def class_name(value):
     return value.__class__.__name__
-
