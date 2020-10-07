@@ -18,15 +18,15 @@ from django.db.models import Sum, Count, Q, Max
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
 from dojo.templatetags.display_tags import get_level
-from dojo.filters import ProductFilter, EngagementFilter
+from dojo.filters import ProductFilter, EngagementFilter, ProductMetricsEndpointFilter, ProductMetricsFindingFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAPKeyForm, JIRAFindingForm, AdHocFindingForm, \
                        EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm, ProductNotificationsForm, \
                        GITHUB_Product_Form, GITHUBFindingForm, App_AnalysisTypeForm, JIRAEngagementForm
 from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, GITHUB_PKey, Finding_Template, \
-                        Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, \
+                        Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint_Status, \
                         Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, Dojo_User, BurpRawRequestResponse, Endpoint_Status
 
-from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, Product_Tab, get_punchcard_data, add_epic
+from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, Product_Tab, get_punchcard_data, add_epic, queryset_check
 from dojo.notifications.helper import create_notification
 from custom_field.models import CustomFieldValue, CustomField
 from dojo.tasks import add_epic_task, add_external_issue_task, add_external_issue
@@ -183,102 +183,208 @@ def identify_view(request):
     get_data = request.GET
     view = get_data.get('type', None)
     if not view:
-        if get_data.get('finding__severity', None):
-            return 'Endpoint'
-        return 'Finding'
+        referer = request.META.get('HTTP_REFERER', None)
+        if referer:
+            return 'Endpoint' if referer.find('type=Endpoint') > -1 else 'Finding'
+        else:
+            if get_data.get('finding__severity', None):
+                return 'Endpoint'
+            return 'Finding'
     return view
 
 
-def finding_querys(prod, date, week):
+def finding_querys(request, prod):
     filters = dict()
+
+    findings_query = Finding.objects.filter(test__engagement__product=prod,
+                                      severity__in=('Critical', 'High', 'Medium', 'Low', 'Info')).prefetch_related(
+        'test__engagement',
+        'test__engagement__risk_acceptance',
+        'risk_acceptance_set',
+        'reporter').extra(
+        select={
+            'ra_count': 'SELECT COUNT(*) FROM dojo_risk_acceptance INNER JOIN '
+                        'dojo_risk_acceptance_accepted_findings ON '
+                        '( dojo_risk_acceptance.id = dojo_risk_acceptance_accepted_findings.risk_acceptance_id ) '
+                        'WHERE dojo_risk_acceptance_accepted_findings.finding_id = dojo_finding.id',
+        },
+    )
+
+    findings = ProductMetricsFindingFilter(request.GET, queryset=findings_query)
+    findings_qs = queryset_check(findings)
+    filters['form'] = findings.form
+
+    if not findings_qs and not findings_query:
+        findings = findings_query
+        findings_qs = queryset_check(findings)
+        messages.add_message(request,
+                                     messages.ERROR,
+                                     'All objects have been filtered away. Displaying all objects',
+                                     extra_tags='alert-danger')
+
+    try:
+        start_date = findings_qs.earliest('date').date
+        start_date = datetime(start_date.year,
+                            start_date.month, start_date.day,
+                            tzinfo=timezone.get_current_timezone())
+        end_date = findings_qs.latest('date').date
+        end_date = datetime(end_date.year,
+                            end_date.month, end_date.day,
+                            tzinfo=timezone.get_current_timezone())
+    except:
+        start_date = timezone.now()
+        end_date = timezone.now()
+    week = end_date - timedelta(days=7)  # seven days and /newnewer are considered "new"
 
     risk_acceptances = Risk_Acceptance.objects.filter(engagement__in=Engagement.objects.filter(product=prod))
     filters['accepted'] = [finding for ra in risk_acceptances for finding in ra.accepted_findings.all()]
 
-    filters['verified'] = Finding.objects.filter(test__engagement__product=prod,
-                                               date__range=[date[0], date[1]],
+    filters['verified'] = findings_qs.filter(date__range=[start_date, end_date],
                                                false_p=False,
                                                active=True,
                                                verified=True,
                                                duplicate=False,
                                                out_of_scope=False).order_by("date")
-    filters['new_verified'] = Finding.objects.filter(test__engagement__product=prod,
-                                                   date__range=[week, date[1]],
+    filters['new_verified'] = findings_qs.filter(date__range=[week, end_date],
                                                    false_p=False,
                                                    verified=True,
                                                    active=True,
                                                    duplicate=False,
                                                    out_of_scope=False).order_by("date")
-    filters['open'] = Finding.objects.filter(test__engagement__product=prod,
-                                           date__range=[date[0], date[1]],
+    filters['open'] = findings_qs.filter(date__range=[start_date, end_date],
                                            false_p=False,
                                            duplicate=False,
                                            out_of_scope=False,
                                            active=True,
                                            is_Mitigated=False)
-    filters['inactive'] = Finding.objects.filter(test__engagement__product=prod,
-                                           date__range=[date[0], date[1]],
+    filters['inactive'] = findings_qs.filter(date__range=[start_date, end_date],
                                            false_p=False,
                                            duplicate=False,
                                            out_of_scope=False,
                                            active=False,
                                            is_Mitigated=False)
-    filters['closed'] = Finding.objects.filter(test__engagement__product=prod,
-                                             date__range=[date[0], date[1]],
+    filters['closed'] = findings_qs.filter(date__range=[start_date, end_date],
                                              false_p=False,
                                              duplicate=False,
                                              out_of_scope=False,
                                              active=False,
                                              is_Mitigated=True)
-    filters['false_positive'] = Finding.objects.filter(test__engagement__product=prod,
-                                             date__range=[date[0], date[1]],
+    filters['false_positive'] = findings_qs.filter(date__range=[start_date, end_date],
                                              false_p=True,
                                              duplicate=False,
                                              out_of_scope=False)
-    filters['out_of_scope'] = Finding.objects.filter(test__engagement__product=prod,
-                                             date__range=[date[0], date[1]],
+    filters['out_of_scope'] = findings_qs.filter(date__range=[start_date, end_date],
                                              false_p=False,
                                              duplicate=False,
                                              out_of_scope=True)
-    filters['all'] = Finding.objects.filter(test__engagement__product=prod,
-                                             date__range=[date[0], date[1]])
+    filters['all'] = findings_qs
+    filters['open_vulns'] = findings_qs.filter(
+        false_p=False,
+        duplicate=False,
+        out_of_scope=False,
+        active=True,
+        mitigated__isnull=True,
+        cwe__isnull=False,
+    ).order_by('cwe').values(
+        'cwe'
+    ).annotate(
+        count=Count('cwe')
+    )
+
+    filters['all_vulns'] = findings_qs.filter(
+        duplicate=False,
+        cwe__isnull=False,
+    ).order_by('cwe').values(
+        'cwe'
+    ).annotate(
+        count=Count('cwe')
+    )
+
+    filters['start_date'] = start_date
+    filters['end_date'] = end_date
+    filters['week'] = week
 
     return filters
 
 
-def endpoint_querys(prod, date, week):
+def endpoint_querys(request, prod):
     filters = dict()
 
-    filters['accepted'] = Endpoint_Status.objects.filter(finding__test__engagement__product=prod,
-                                               date__range=[date[0], date[1]],
-                                               risk_accepted=True).order_by("date").annotate(severity=F('finding__severity'))
-    filters['verified'] = Endpoint_Status.objects.filter(finding__test__engagement__product=prod,
-                                               date__range=[date[0], date[1]],
+    endpoints_query = Endpoint_Status.objects.filter(finding__test__engagement__product=prod,
+                                      finding__severity__in=('Critical', 'High', 'Medium', 'Low', 'Info')).prefetch_related(
+        'finding__test__engagement',
+        'finding__test__engagement__risk_acceptance',
+        'finding__risk_acceptance_set',
+        'finding__reporter').annotate(severity=F('finding__severity'))
+    endpoints = ProductMetricsEndpointFilter(request.GET, queryset=endpoints_query)
+    endpoints_qs = queryset_check(endpoints)
+    filters['form'] = endpoints.form
+
+    if not endpoints_qs and not endpoints_query:
+        endpoints = endpoints_query
+        endpoints_qs = queryset_check(endpoints)
+        messages.add_message(request,
+                                     messages.ERROR,
+                                     'All objects have been filtered away. Displaying all objects',
+                                     extra_tags='alert-danger')
+    
+    try:
+        start_date = endpoints_qs.earliest('date').date
+        start_date = datetime(start_date.year,
+                            start_date.month, start_date.day,
+                            tzinfo=timezone.get_current_timezone())
+        end_date = endpoints_qs.latest('date').date
+        end_date = datetime(end_date.year,
+                            end_date.month, end_date.day,
+                            tzinfo=timezone.get_current_timezone())
+    except:
+        start_date = timezone.now()
+        end_date = timezone.now()
+    week = end_date - timedelta(days=7)  # seven days and /newnewer are considered "new"
+
+    filters['accepted'] = endpoints_qs.filter(date__range=[start_date, end_date],
+                                               risk_accepted=True).order_by("date")
+    filters['verified'] = endpoints_qs.filter(date__range=[start_date, end_date],
                                                false_positive=False,
                                                mitigated=True,
-                                               out_of_scope=False).order_by("date").annotate(severity=F('finding__severity'))
-    filters['new_verified'] = Endpoint_Status.objects.filter(finding__test__engagement__product=prod,
-                                               date__range=[week, date[1]],
+                                               out_of_scope=False).order_by("date")
+    filters['new_verified'] = endpoints_qs.filter(date__range=[week, end_date],
                                                false_positive=False,
                                                mitigated=True,
-                                               out_of_scope=False).order_by("date").annotate(severity=F('finding__severity'))
-    filters['open'] = Endpoint_Status.objects.filter(finding__test__engagement__product=prod,
-                                           date__range=[date[0], date[1]],
-                                           mitigated=False).annotate(severity=F('finding__severity'))
-    filters['inactive'] = Endpoint_Status.objects.filter(finding__test__engagement__product=prod,
-                                           date__range=[date[0], date[1]],
-                                           mitigated=True).annotate(severity=F('finding__severity'))
-    filters['closed'] = Endpoint_Status.objects.filter(finding__test__engagement__product=prod,
-                                             date__range=[date[0], date[1]],
-                                             mitigated=True).annotate(severity=F('finding__severity'))
-    filters['false_positive'] = Endpoint_Status.objects.filter(finding__test__engagement__product=prod,
-                                             date__range=[date[0], date[1]],
-                                             false_positive=True).annotate(severity=F('finding__severity'))
-    filters['out_of_scope'] = Endpoint_Status.objects.filter(finding__test__engagement__product=prod,
-                                             date__range=[date[0], date[1]],
-                                             out_of_scope=True).annotate(severity=F('finding__severity'))
-    filters['all'] = Endpoint_Status.objects.filter(finding__test__engagement__product=prod,
-                                             date__range=[date[0], date[1]]).annotate(severity=F('finding__severity'))
+                                               out_of_scope=False).order_by("date")
+    filters['open'] = endpoints_qs.filter(date__range=[start_date, end_date],
+                                           mitigated=False)
+    filters['inactive'] = endpoints_qs.filter(date__range=[start_date, end_date],
+                                           mitigated=True)
+    filters['closed'] = endpoints_qs.filter(date__range=[start_date, end_date],
+                                             mitigated=True)
+    filters['false_positive'] = endpoints_qs.filter(date__range=[start_date, end_date],
+                                             false_positive=True)
+    filters['out_of_scope'] = endpoints_qs.filter(date__range=[start_date, end_date],
+                                             out_of_scope=True)
+    filters['all'] = endpoints_qs
+    filters['open_vulns'] = endpoints_qs.filter(
+        false_positive=False,
+        out_of_scope=False,
+        mitigated=True,
+        finding__cwe__isnull=False,
+    ).order_by('finding__cwe').values(
+        'finding__cwe'
+    ).annotate(
+        count=Count('finding__cwe')
+    )
+
+    filters['all_vulns'] = endpoints_qs.filter(
+        finding__cwe__isnull=False,
+    ).order_by('finding__cwe').values(
+        'finding__cwe'
+    ).annotate(
+        count=Count('finding__cwe')
+    )
+
+    filters['start_date'] = start_date
+    filters['end_date'] = end_date
+    filters['week'] = week
 
     return filters
 
@@ -310,45 +416,20 @@ def view_product_metrics(request, pid):
         if len(cfv):
             product_metadata[cf.name] = cfv[0].value
 
-    try:
-        start_date = Finding.objects.filter(test__engagement__product=prod).order_by('date')[:1][0].date
-    except:
-        start_date = timezone.now()
+    filters = dict()
+    if view == 'Finding':
+        filters = finding_querys(request, prod)
+    elif view == 'Endpoint':
+        filters = endpoint_querys(request, prod)
 
-    end_date = timezone.now()
-    week_date = end_date - timedelta(days=7)  # seven days and /newnewer are considered "new"
+    start_date = filters['start_date']
+    end_date = filters['end_date']
+    week_date = filters['week']
 
     tests = Test.objects.filter(engagement__product=prod).prefetch_related('finding_set')
 
-    filters = dict()
-    if view == 'Finding':
-        filters = finding_querys(prod, (start_date, end_date), week_date)
-    elif view == 'Endpoint':
-        filters = endpoint_querys(prod, (start_date, end_date), week_date)
-
-    open_vulnerabilities = Finding.objects.filter(
-        test__engagement__product=prod,
-        false_p=False,
-        duplicate=False,
-        out_of_scope=False,
-        active=True,
-        mitigated__isnull=True,
-        cwe__isnull=False,
-    ).order_by('cwe').values(
-        'cwe'
-    ).annotate(
-        count=Count('cwe')
-    )
-
-    all_vulnerabilities = Finding.objects.filter(
-        test__engagement__product=prod,
-        duplicate=False,
-        cwe__isnull=False,
-    ).order_by('cwe').values(
-        'cwe'
-    ).annotate(
-        count=Count('cwe')
-    )
+    open_vulnerabilities = filters['open_vulns']
+    all_vulnerabilities = filters['all_vulns']
 
     start_date = timezone.make_aware(datetime.combine(start_date, datetime.min.time()))
     r = relativedelta(end_date, start_date)
@@ -445,7 +526,6 @@ def view_product_metrics(request, pid):
             test_data[t.test_type.name] += t.verified_finding_count()
         else:
             test_data[t.test_type.name] = t.verified_finding_count()
-
     product_tab = Product_Tab(pid, title="Product", tab="metrics")
     return render(request,
                   'dojo/product_metrics.html',
@@ -465,6 +545,8 @@ def view_product_metrics(request, pid):
                    'accepted_objs': filters.get('accepted', None),
                    'new_objs': filters.get('new_verified', None),
                    'all_objs': filters.get('all', None),
+                   'form': filters.get('form', None),
+                   'reset_link': reverse('view_product_metrics', args=(prod.id,)) + '?type=' + view,
                    'open_vulnerabilities': open_vulnerabilities,
                    'all_vulnerabilities': all_vulnerabilities,
                    'start_date': start_date,

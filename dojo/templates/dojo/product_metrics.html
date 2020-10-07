@@ -9,10 +9,9 @@
     <div class="panel panel-default">
         <div class="panel-heading tight">
             <div class="clearfix">
-              <h3 class="pull-left">
+              <h3 class="has-filters">
                   Metrics Overview
-              </h3>
-                <div class="dropdown pull-right">
+                <div class="dropdown pull-right ">
                     <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                             data-toggle="dropdown" label="view_selector" aria-label="view_selector" aria-expanded="true">
                         <span class="fa fa-bars"></span>
@@ -30,97 +29,15 @@
                             </a>
                         </li>
                     </ul>
-                
-                  <!--
-                    Legacy code?
-                    <div class="btn-group">
-                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
-                                data-toggle="dropdown" aria-expanded="true">
-                            <span class="fa fa-bars"></span>
-                            <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                            {% if user.is_staff %}
-                                <li role="presentation">
-                                    <a class="" href="{% url 'edit_product' prod.id %}">
-                                        <i class="fa fa-pencil-square-o"></i> Edit
-                                    </a>
-                                </li>
-                                <li role="separator" class="divider"></li>
-                                <li role="presentation">
-                                    <a class="" href="{% url 'ad_hoc_finding' prod.id %}">
-                                        <i class="fa fa-list-alt"></i> Add Finding
-                                    </a>
-                                </li>
-                                <li role="presentation">
-                                    <a class="" href="{% url 'add_meta_data' prod.id %}">
-                                        <i class="fa fa-list-alt"></i> Add Metadata
-                                    </a>
-                                </li>
-                                <li role="presentation">
-                                    <a class="" href="{% url 'new_object' prod.id %}">
-                                        <i class="fa fa-list-alt"></i> Add Product Tracking Files
-                                    </a>
-                                </li>
-                            <li role="separator" class="divider"></li>
-                            <li role="presentation">
-                                <a href="{% url 'endpoints' %}?product={{ prod.id }}">
-                                    <i class="fa fa-sitemap"></i> View Endpoints
-                                </a>
-                            </li>
-                            <li role="presentation">
-                                <a href="{% url 'product_open_findings' prod.id %}?test__engagement__product={{ prod.id }}">
-                                    <i class="fa fa-bug"></i> View Open Findings
-                                </a>
-                            </li>
-                            <li role="presentation">
-                                <a href="{% url 'view_objects' prod.id %}">
-                                    <i class="fa fa-history"></i> View Product Tracking Files
-                                </a>
-                            </li>
-                            {% endif %}
-                            <li role="separator" class="divider"></li>
-                            {% if prod.endpoint_count > 0 %}
-                                <li role="presentation">
-                                    <a href="{% url 'product_endpoint_report' prod.id %}">
-                                        <i class="fa fa-file-text-o"></i> Endpoint Report
-                                    </a>
-                                </li>
-                            {% endif %}
-                            <li role="presentation">
-                                <a href="{% url 'product_report' prod.id %}">
-                                    <i class="fa fa-file-text-o"></i> Product Report
-                                </a>
-                            </li>
-                            {% if system_settings.enable_benchmark and benchmark_type %}
-                            <li role="separator" class="divider"></li>
-                            {% for bt in benchmark_type %}
-                            <li role="presentation">
-                                <a title="{{ bt.name }}" href="{% url 'view_product_benchmark' prod.id bt.id %}">
-                                    <span class="fa fa-list"></span> {{ bt.name }} {{ bt.version }}
-                                </a>
-                            </li>
-                            {% endfor %}
-                            {% endif %}
-                            <li role="separator" class="divider"></li>
-                            <li role="presentation">
-                                <a href="{% url 'action_history' prod|content_type prod.id %}">
-                                    <i class="fa fa-history"></i> View History
-                                </a>
-                            </li>
-                            {% if user.is_staff %}
-                                <li role="separator" class="divider"></li>
-                                <li role="presentation">
-                                    <a class="text-danger" href="{% url 'delete_product' prod.id %}">
-                                        <i class="fa fa-trash"></i> Delete
-                                    </a>
-                                </li>
-                            {% endif %}
-                        </ul>
-                    </div>
-                  -->
                 </div>
+              </h3>
+                
+                
+                  
             </div>
+        </div>
+        <div id="the-filters" class="panel-body collapse">
+            {% include "dojo/filter_snippet.html" with form=form clear_link=reset_link %}
         </div>
         <div class="panel-body product-graphs-overview">
             <div class="col-md-3">
@@ -550,7 +467,7 @@
     <script src="{% static "flot/jquery.flot.resize.js" %}"></script>
     <script src="{% static "flot/jquery.flot.categories.js" %}"></script>
     <script src="{% static "flot-axis/jquery.flot.axislabels.js" %}"></script>
-
+    {% include "dojo/filter_js_snippet.html" %}
     {% if punchcard %}
         <script src="{% static "JUMFlot/javascripts/JUMFlot.min.js" %}"></script>
         <script src="{% static "JUMFlot/javascripts/jquery.flot.mouse.js" %}"></script>

@@ -979,7 +979,12 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                         query=endpoint.query,
                         fragment=endpoint.fragment,
                         product=test.engagement.product)
+                    eps, created = Endpoint_Status.objects.get_or_create(
+                            finding=item,
+                            endpoint=ep)
+                    ep.endpoint_status.add(eps)
 
+                    item.endpoint_status.add(eps)
                     item.endpoints.add(ep)
 
                 if endpoint_to_add:
