@@ -322,6 +322,7 @@ class Dojo_User(User):
 
     @staticmethod
     def wants_block_execution(user):
+        # this return False if there is no user, i.e. in celery processes, unittests, etc.
         return hasattr(user, 'usercontactinfo') and user.usercontactinfo.block_execution
 
 
