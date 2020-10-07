@@ -1,7 +1,6 @@
 from django.test import TestCase
 from dojo.utils import set_duplicate
-from dojo.management.commands.fix_loop_duplicates import fix_loop_duplicates
-from dojo.models import Finding, User, Product, Engagement, Test, Endpoint, Endpoint_Status
+from dojo.models import Finding, User, Product, Endpoint, Endpoint_Status
 from dojo.models import System_Settings
 import logging
 logger = logging.getLogger(__name__)
@@ -11,6 +10,7 @@ loglevel = logging.DEBUG
 logging.basicConfig(level=loglevel)
 
 # WIP
+
 
 class TestDuplicationLogic(TestCase):
     fixtures = ['dojo_testdata.json']
@@ -149,7 +149,6 @@ class TestDuplicationLogic(TestCase):
 
     def test_identical_except_endpoints_unique_id_or_hash_code(self):
         return
-
 
     def test_multiple_identical_dedupe_ordering(self):
         return
@@ -405,7 +404,7 @@ class TestDuplicationLogic(TestCase):
                 self.log_test(test)
 
     def log_engagement(self, eng):
-        logger.debug('engagment %i: %s', eng.id, eng.name)        
+        logger.debug('engagment %i: %s', eng.id, eng.name)
 
     def log_test(self, test):
         logger.debug('test %i: %s', test.id, test)
@@ -442,7 +441,3 @@ class TestDuplicationLogic(TestCase):
             self.log_test(test)
         if not product and not engagement and not test:
             self.log_all_products()
-
-        
-
-
