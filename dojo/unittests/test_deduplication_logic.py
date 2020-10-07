@@ -78,80 +78,80 @@ class TestDuplicationLogic(TestCase):
         self.assertEqual(self.finding_b.duplicate_finding_set().count(), 1)
         self.assertEqual(self.finding_b.duplicate_finding_set().first().id, self.finding_a.id)
 
-    def test_identical_legacy():
+    def test_identical_legacy(self):
         return
 
-    def test_identical_except_title_legacy():
+    def test_identical_except_title_legacy(self):
         return
 
-    def test_identical_except_description_legacy():
+    def test_identical_except_description_legacy(self):
         return
 
-    def test_identical_except_line_legacy():
+    def test_identical_except_line_legacy(self):
         return
 
-    def test_identical_except_filepath_legacy():
+    def test_identical_except_filepath_legacy(self):
         return
 
-    def test_identical_except_endpoints_legacy():
+    def test_identical_except_endpoints_legacy(self):
         return
 
-    def test_identical_hash_code():
+    def test_identical_hash_code(self):
         return
 
-    def test_identical_except_title_hash_code():
+    def test_identical_except_title_hash_code(self):
         return
 
-    def test_identical_except_description_legacy_hash_code():
+    def test_identical_except_description_legacy_hash_code(self):
         return
 
-    def test_identical_except_line_hash_code():
+    def test_identical_except_line_hash_code(self):
         return
 
-    def test_identical_except_filepath_hash_code():
+    def test_identical_except_filepath_hash_code(self):
         return
 
-    def test_identical_except_endpoints_legacy_hash_code():
+    def test_identical_except_endpoints_legacy_hash_code(self):
         return
 
-    def test_identical_unique_id():
+    def test_identical_unique_id(self):
         return
 
-    def test_identical_except_title_unique_id():
+    def test_identical_except_title_unique_id(self):
         return
 
-    def test_identical_except_description_unique_id():
+    def test_identical_except_description_unique_id(self):
         return
 
-    def test_identical_except_line_unique_id():
+    def test_identical_except_line_unique_id(self):
         return
 
-    def test_identical_except_filepath_unique_id():
+    def test_identical_except_filepath_unique_id(self):
         return
 
-    def test_identical_except_endpoints_unique_id():
+    def test_identical_except_endpoints_unique_id(self):
         return
 
-    def test_identical_unique_id_or_hash_code():
+    def test_identical_unique_id_or_hash_code(self):
         return
 
-    def test_identical_except_title_unique_id_or_hash_code():
+    def test_identical_except_title_unique_id_or_hash_code(self):
         return
 
-    def test_identical_except_description_unique_id_or_hash_code():
+    def test_identical_except_description_unique_id_or_hash_code(self):
         return
 
-    def test_identical_except_line_unique_id_or_hash_code():
+    def test_identical_except_line_unique_id_or_hash_code(self):
         return
 
-    def test_identical_except_filepath_unique_id_or_hash_code():
+    def test_identical_except_filepath_unique_id_or_hash_code(self):
         return
 
-    def test_identical_except_endpoints_unique_id_or_hash_code():
+    def test_identical_except_endpoints_unique_id_or_hash_code(self):
         return
 
 
-    def test_multiple_identical_dedupe_ordering():
+    def test_multiple_identical_dedupe_ordering(self):
         return
 
     # # A duplicate should not be considered to be an original for another finding
