@@ -330,10 +330,10 @@ duplexer2@~0.1.4:
   dependencies:
     readable-stream "^2.0.2"
 
-easymde@^2.12.0:
-  version "2.12.0"
-  resolved "https://registry.yarnpkg.com/easymde/-/easymde-2.12.0.tgz#c9930c1c2dfed0c912ad95960807ea21e2359c95"
-  integrity sha512-R899trkHlkp48GkLbeZ/01exmhSzVgKiHmzbQiAcMAzyqjyd6L110iv+csE+RnRLddJKIilPvJqInJ+E7ILrYg==
+easymde@^2.12.1:
+  version "2.12.1"
+  resolved "https://registry.yarnpkg.com/easymde/-/easymde-2.12.1.tgz#61180370cd9c19b8e7c0123b5768a152688a7aab"
+  integrity sha512-4cYP+tK/vU9/KuiUskKnF9EM+DTvBe77EKduEu+HDa+nfRVVphZM76gfz2BjrWv8vbTJLOFcwlJ/NJ6+SzMApQ==
   dependencies:
     codemirror "^5.58.1"
     codemirror-spell-checker "1.1.2"
