@@ -118,6 +118,9 @@ class DedupeTest(APITestCase):
     def db_endpoint_count(self):
         return Endpoint.objects.all().count()
 
+    def db_endpoint_status_count(self):
+        return Endpoint_Status.objects.all().count()
+
     def db_notes_count(self):
         return Notes.objects.all().count()
 
@@ -155,6 +158,7 @@ class DedupeTest(APITestCase):
         logger.debug('importing original zap xml report')
 
         endpoint_count_before = self.db_endpoint_count()
+        endpoint_status_count_before = self.db_endpoint_status_count()
         notes_count_before = self.db_notes_count()
 
         import0 = self.import_scan_with_params(self.zap_sample0_filename)
@@ -175,6 +179,8 @@ class DedupeTest(APITestCase):
 
         # the zap scan contains 3 endpoints (mainsite with pot + uris from findings)
         self.assertEqual(endpoint_count_before + 3, self.db_endpoint_count())
+        # existing BUG: endpoint_status objects are not created during import/reimport
+        self.assertEqual(endpoint_status_count_before, self.db_endpoint_status_count())
 
         # no notes expected
         self.assertEqual(notes_count_before, self.db_notes_count())
@@ -193,6 +199,7 @@ class DedupeTest(APITestCase):
         test_id = import0['test']
 
         endpoint_count_before = self.db_endpoint_count()
+        endpoint_status_count_before = self.db_endpoint_status_count()
         notes_count_before = self.db_notes_count()
 
         # reimport exact same report
@@ -210,6 +217,8 @@ class DedupeTest(APITestCase):
 
         # reimporting the exact same scan shouldn't modify the number of endpoints
         self.assertEqual(endpoint_count_before, self.db_endpoint_count())
+        # existing BUG: endpoint_status objects are not created during import/reimport
+        self.assertEqual(endpoint_status_count_before, self.db_endpoint_status_count())
 
         # reimporting the exact same scan shouldn't create any notes
         self.assertEqual(notes_count_before, self.db_notes_count())
@@ -226,6 +235,7 @@ class DedupeTest(APITestCase):
         test_id = import0['test']
 
         endpoint_count_before = self.db_endpoint_count()
+        endpoint_status_count_before = self.db_endpoint_status_count()
         notes_count_before = self.db_notes_count()
 
         # reimport exact same report
@@ -248,6 +258,8 @@ class DedupeTest(APITestCase):
 
         # reimporting the exact same scan shouldn't modify the number of endpoints
         self.assertEqual(endpoint_count_before, self.db_endpoint_count())
+        # existing BUG: endpoint_status objects are not created during import/reimport
+        self.assertEqual(endpoint_status_count_before, self.db_endpoint_status_count())
 
         # reimporting the exact same scan shouldn't create any notes
         self.assertEqual(notes_count_before, self.db_notes_count())
@@ -268,6 +280,7 @@ class DedupeTest(APITestCase):
 
         finding_count_before = self.db_finding_count()
         endpoint_count_before = self.db_endpoint_count()
+        endpoint_status_count_before = self.db_endpoint_status_count()
         notes_count_before = self.db_notes_count()
 
         # reimport updated report
@@ -296,6 +309,9 @@ class DedupeTest(APITestCase):
         self.assertEqual(finding_count_before + 1, self.db_finding_count())
         # existing BUG: when closing a finding, related endpoints / endpoint_status should be mitigated/removed
         self.assertEqual(endpoint_count_before, self.db_endpoint_count())
+        # existing BUG: endpoint_status objects are not created during import/reimport
+        self.assertEqual(endpoint_status_count_before, self.db_endpoint_status_count())
+
         # - 1 new note for zap1 being closed now
         self.assertEqual(notes_count_before + 1, self.db_notes_count())
 
@@ -314,6 +330,7 @@ class DedupeTest(APITestCase):
 
         finding_count_before = self.db_finding_count()
         endpoint_count_before = self.db_endpoint_count()
+        endpoint_status_count_before = self.db_endpoint_status_count()
         notes_count_before = self.db_notes_count()
 
         reimport1 = self.reimport_scan_with_params(test_id, self.zap_sample1_filename)
@@ -352,6 +369,9 @@ class DedupeTest(APITestCase):
 
         # existing BUG: when closing a finding, related endpoints / endpoint_status should be mitigated/removed
         self.assertEqual(endpoint_count_before, self.db_endpoint_count())
+        # existing BUG: endpoint_status objects are not created during import/reimport
+        self.assertEqual(endpoint_status_count_before, self.db_endpoint_status_count())
+
         # zap1 was closed and then opened -> 2 notes
         # zap4 was created and then closed -> only 1 note
         self.assertEqual(notes_count_before + 2 + 1, self.db_notes_count())
@@ -368,9 +388,10 @@ class DedupeTest(APITestCase):
         findings = self.get_test_findings(test_id)
         self.log_finding_summary(findings)
 
-        endpoint_count_before = self.db_endpoint_count()
-        notes_count_before = self.db_notes_count()
         finding_count_before = self.db_finding_count()
+        endpoint_count_before = self.db_endpoint_count()
+        endpoint_status_count_before = self.db_endpoint_status_count()
+        notes_count_before = self.db_notes_count()
 
         reimport2 = self.reimport_scan_with_params(test_id, self.zap_sample2_filename)
 
@@ -386,6 +407,8 @@ class DedupeTest(APITestCase):
 
         # reimporting the exact same scan shouldn't modify the number of endpoints
         self.assertEqual(endpoint_count_before + 1, self.db_endpoint_count())
+        # existing BUG: endpoint_status objects are not created during import/reimport
+        self.assertEqual(endpoint_status_count_before, self.db_endpoint_status_count())
 
         # reimporting the exact same scan shouldn't create any notes
         self.assertEqual(notes_count_before, self.db_notes_count())
@@ -414,6 +437,7 @@ class DedupeTest(APITestCase):
 
         finding_count_before = self.db_finding_count()
         endpoint_count_before = self.db_endpoint_count()
+        endpoint_status_count_before = self.db_endpoint_status_count()
         notes_count_before = self.db_notes_count()
 
         reimport0 = self.reimport_scan_with_params(test_id, self.zap_sample0_filename)
@@ -430,6 +454,8 @@ class DedupeTest(APITestCase):
 
         # existing BUG: endpoint that is no longer in last scan should be removed or marked as mitigated
         self.assertEqual(endpoint_count_before, self.db_endpoint_count())
+        # existing BUG: endpoint_status objects are not created during import/reimport
+        self.assertEqual(endpoint_status_count_before, self.db_endpoint_status_count())
 
         # reimporting the exact same scan shouldn't create any notes
         self.assertEqual(notes_count_before, self.db_notes_count())
@@ -449,6 +475,7 @@ class DedupeTest(APITestCase):
 
         finding_count_before = self.db_finding_count()
         endpoint_count_before = self.db_endpoint_count()
+        endpoint_status_count_before = self.db_endpoint_status_count()
         notes_count_before = self.db_notes_count()
 
         # reimport updated report
@@ -489,6 +516,8 @@ class DedupeTest(APITestCase):
         self.assertEqual(finding_count_before + 2, self.db_finding_count())
         # existing BUG: when closing a finding, related endpoints / endpoint_status should be mitigated/removed
         self.assertEqual(endpoint_count_before, self.db_endpoint_count())
+        # existing BUG: endpoint_status objects are not created during import/reimport
+        self.assertEqual(endpoint_status_count_before, self.db_endpoint_status_count())
         # - zap2 and zap5 closed
         self.assertEqual(notes_count_before + 2, self.db_notes_count())
 
