@@ -2,8 +2,8 @@ from dojo.models import Product, Engagement, Test, Finding, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     User, ScanSettings, Scan, Stub_Finding, Endpoint, JIRA_PKey, JIRA_Conf, \
     Finding_Template, Note_Type, App_Analysis, Endpoint_Status, \
-    Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product
-
+    Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Notes, \
+    BurpRawRequestResponse
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraConfigurationsViewSet, \
     JiraIssuesViewSet, JiraViewSet, ProductViewSet, ScanSettingsViewSet, \
@@ -11,8 +11,8 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
     UsersViewSet, ImportScanView, NoteTypeViewSet, AppAnalysisViewSet, \
     EndpointStatusViewSet, SonarqubeIssueViewSet, SonarqubeIssueTransitionViewSet, \
-    SonarqubeProductViewSet
-
+    SonarqubeProductViewSet, NotesViewSet
+from json import dumps
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase, APIClient
@@ -45,7 +45,6 @@ class BaseClass():
 
         @skipIfNotSubclass('ListModelMixin')
         def test_list(self):
-
             if hasattr(self.endpoint_model, 'tags') and self.payload:
                 # create a new instance first to make sure there's at least 1 instance with tags set by payload to trigger tag handling code
                 response = self.client.post(self.url, self.payload)
@@ -90,7 +89,10 @@ class BaseClass():
             response = self.client.patch(
                 relative_url, self.update_fields)
             for key, value in self.update_fields.items():
-                self.assertEqual(value, response.data[key])
+                # some exception as push_to_jira has been implemented strangely in the update methods in the api
+                if key != 'push_to_jira':
+                    self.assertEqual(value, response.data[key])
+            self.assertFalse('push_to_jira' in response.data)
             response = self.client.put(
                 relative_url, self.payload)
             self.assertEqual(200, response.status_code)
@@ -182,6 +184,29 @@ class EngagementTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+class FindingRequestResponseTest(APITestCase):
+    fixtures = ['dojo_testdata.json']
+
+    def setUp(self):
+        testuser = User.objects.get(username='admin')
+        token = Token.objects.get(user=testuser)
+        self.client = APIClient()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+
+    def test_request_response_post(self):
+        length = BurpRawRequestResponse.objects.count()
+        payload = {
+            "req_resp": [{"request": "POST", "response": "200"}]
+        }
+        response = self.client.post('/api/v2/findings/7/request_response/', dumps(payload), content_type='application/json')
+        self.assertEqual(200, response.status_code, response.data)
+        self.assertEqual(BurpRawRequestResponse.objects.count(), length + 1)
+
+    def test_request_response_get(self):
+        response = self.client.get('/api/v2/findings/7/request_response/', format='json')
+        self.assertEqual(200, response.status_code)
+
+
 class FindingsTest(BaseClass.RESTEndpointTest):
     fixtures = ['dojo_testdata.json']
 
@@ -221,7 +246,7 @@ class FindingsTest(BaseClass.RESTEndpointTest):
             "dynamic_finding": False,
             "endpoints": [1, 2],
             "images": []}
-        self.update_fields = {'active': True}
+        self.update_fields = {'active': True, "push_to_jira": "True"}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -525,6 +550,23 @@ class NoteTypesTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+class NotesTest(BaseClass.RESTEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Notes
+        self.viewname = 'notes'
+        self.viewset = NotesViewSet
+        self.payload = {
+            "id": 1,
+            "entry": "updated_entry",
+            "author": '{"username": "admin"}',
+            "editor": '{"username": "user1"}'
+        }
+        self.update_fields = {'entry': 'changed entry'}
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
 class UsersTest(BaseClass.RESTEndpointTest):
     fixtures = ['dojo_testdata.json']
 
@@ -532,6 +574,13 @@ class UsersTest(BaseClass.RESTEndpointTest):
         self.endpoint_model = User
         self.viewname = 'user'
         self.viewset = UsersViewSet
+        self.payload = {
+            "username": "test_user",
+            "first_name": "test",
+            "last_name": "user",
+            "email": "example@email.com",
+            "is_active": True,
+        }
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 

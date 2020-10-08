@@ -5,7 +5,7 @@ import os
 import re
 from uuid import uuid4
 from django.conf import settings
-from watson import search as watson
+
 from auditlog.registry import auditlog
 from django.contrib import admin
 from django.contrib.auth import get_user_model
@@ -73,16 +73,18 @@ class Regulation(models.Model):
     FINANCE_CATEGORY = 'finance'
     EDUCATION_CATEGORY = 'education'
     MEDICAL_CATEGORY = 'medical'
+    CORPORATE_CATEGORY = 'corporate'
     OTHER_CATEGORY = 'other'
     CATEGORY_CHOICES = (
         (PRIVACY_CATEGORY, _('Privacy')),
         (FINANCE_CATEGORY, _('Finance')),
         (EDUCATION_CATEGORY, _('Education')),
         (MEDICAL_CATEGORY, _('Medical')),
+        (CORPORATE_CATEGORY, _('Corporate')),
         (OTHER_CATEGORY, _('Other')),
     )
 
-    name = models.CharField(max_length=128, help_text=_('The name of the legislation.'))
+    name = models.CharField(max_length=128, unique=True, help_text=_('The name of the regulation.'))
     acronym = models.CharField(max_length=20, unique=True, help_text=_('A shortened representation of the name.'))
     category = models.CharField(max_length=9, choices=CATEGORY_CHOICES, help_text=_('The subject of the regulation.'))
     jurisdiction = models.CharField(max_length=64, help_text=_('The territory over which the regulation applies.'))
@@ -368,6 +370,38 @@ class Note_Type(models.Model):
         return self.name
 
 
+class NoteHistory(models.Model):
+    note_type = models.ForeignKey(Note_Type, null=True, blank=True, on_delete=models.CASCADE)
+    data = models.TextField()
+    time = models.DateTimeField(null=True, editable=False,
+                                default=get_current_datetime)
+    current_editor = models.ForeignKey(User, editable=False, null=True, on_delete=models.CASCADE)
+
+
+class Notes(models.Model):
+    note_type = models.ForeignKey(Note_Type, related_name='note_type', null=True, blank=True, on_delete=models.CASCADE)
+    entry = models.TextField()
+    date = models.DateTimeField(null=False, editable=False,
+                                default=get_current_datetime)
+    author = models.ForeignKey(User, related_name='editor_notes_set', editable=False, on_delete=models.CASCADE)
+    private = models.BooleanField(default=False)
+    edited = models.BooleanField(default=False)
+    editor = models.ForeignKey(User, related_name='author_notes_set', editable=False, null=True, on_delete=models.CASCADE)
+    edit_time = models.DateTimeField(null=True, editable=False,
+                                default=get_current_datetime)
+    history = models.ManyToManyField(NoteHistory, blank=True,
+                                   editable=False)
+
+    class Meta:
+        ordering = ['-date']
+
+    def __unicode__(self):
+        return self.entry
+
+    def __str__(self):
+        return self.entry
+
+
 class Product_Type(models.Model):
     name = models.CharField(max_length=255, unique=True)
     critical_product = models.BooleanField(default=False)
@@ -445,6 +479,10 @@ class Product_Type(models.Model):
                'url': reverse('edit_product_type', args=(self.id,))}]
         return bc
 
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('product_type', args=[str(self.id)])
+
 
 class Product_Line(models.Model):
     name = models.CharField(max_length=300)
@@ -494,15 +532,30 @@ class DojoMeta(models.Model):
                                  null=True,
                                  editable=False,
                                  related_name='endpoint_meta')
+    finding = models.ForeignKey('Finding',
+                                 on_delete=models.CASCADE,
+                                 null=True,
+                                 editable=False,
+                                 related_name='finding_meta')
 
     """
     Verify that this metadata entry belongs only to one object.
     """
     def clean(self):
-        if self.product_id is None and self.endpoint_id is None:
-            raise ValidationError('Metadata entries need either a product or an endpoint')
-        if self.product_id is not None and self.endpoint_id is not None:
-            raise ValidationError('Metadata entries may not have both a product and an endpoint')
+
+        ids = [self.product_id,
+               self.endpoint_id,
+               self.finding_id]
+        ids_count = 0
+
+        for id in ids:
+            if id is not None:
+                ids_count += 1
+
+        if ids_count == 0:
+            raise ValidationError('Metadata entries need either a product, an endpoint or a finding')
+        if ids_count > 1:
+            raise ValidationError('Metadata entries may not have more than one relation, either a product, an endpoint either or a finding')
 
     def __unicode__(self):
         return "%s: %s" % (self.name, self.value)
@@ -512,7 +565,8 @@ class DojoMeta(models.Model):
 
     class Meta:
         unique_together = (('product', 'name'),
-                           ('endpoint', 'name'))
+                           ('endpoint', 'name'),
+                           ('finding', 'name'))
 
 
 class Product(models.Model):
@@ -757,6 +811,10 @@ class Product(models.Model):
         except:
             return None
 
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('view_product', args=[str(self.id)])
+
 
 class ScanSettings(models.Model):
     product = models.ForeignKey(Product, default=1, editable=False, on_delete=models.CASCADE)
@@ -929,6 +987,7 @@ class Engagement(models.Model):
     api_test = models.BooleanField(default=True)
     pen_test = models.BooleanField(default=True)
     check_list = models.BooleanField(default=True)
+    notes = models.ManyToManyField(Notes, blank=True, editable=False)
     status = models.CharField(editable=True, max_length=2000, default='',
                               null=True,
                               choices=(('Not Started', 'Not Started'),
@@ -1017,6 +1076,10 @@ class Engagement(models.Model):
         except JIRA_Issue.DoesNotExist:
             return False
 
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('view_engagement', args=[str(self.id)])
+
 
 class CWE(models.Model):
     url = models.CharField(max_length=1000)
@@ -1043,6 +1106,15 @@ class Endpoint_Status(models.Model):
     risk_accepted = models.BooleanField(default=False, blank=True)
     endpoint = models.ForeignKey('Endpoint', null=True, blank=True, on_delete=models.CASCADE, related_name='status_endpoint')
     finding = models.ForeignKey('Finding', null=True, blank=True, on_delete=models.CASCADE, related_name='status_finding')
+
+    @property
+    def age(self):
+        if self.mitigated:
+            diff = self.mitigated_time.date() - self.date.date()
+        else:
+            diff = get_current_date() - self.date.date()
+        days = diff.days
+        return days if days > 0 else 0
 
 
 class Endpoint(models.Model):
@@ -1211,37 +1283,9 @@ class Endpoint(models.Model):
         else:
             return str(self)
 
-
-class NoteHistory(models.Model):
-    note_type = models.ForeignKey(Note_Type, null=True, blank=True, on_delete=models.CASCADE)
-    data = models.TextField()
-    time = models.DateTimeField(null=True, editable=False,
-                                default=get_current_datetime)
-    current_editor = models.ForeignKey(User, editable=False, null=True, on_delete=models.CASCADE)
-
-
-class Notes(models.Model):
-    note_type = models.ForeignKey(Note_Type, related_name='note_type', null=True, blank=True, on_delete=models.CASCADE)
-    entry = models.TextField()
-    date = models.DateTimeField(null=False, editable=False,
-                                default=get_current_datetime)
-    author = models.ForeignKey(User, related_name='editor_notes_set', editable=False, on_delete=models.CASCADE)
-    private = models.BooleanField(default=False)
-    edited = models.BooleanField(default=False)
-    editor = models.ForeignKey(User, related_name='author_notes_set', editable=False, null=True, on_delete=models.CASCADE)
-    edit_time = models.DateTimeField(null=True, editable=False,
-                                default=get_current_datetime)
-    history = models.ManyToManyField(NoteHistory, blank=True,
-                                   editable=False)
-
-    class Meta:
-        ordering = ['-date']
-
-    def __unicode__(self):
-        return self.entry
-
-    def __str__(self):
-        return self.entry
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('view_endpoint', args=[str(self.id)])
 
 
 class Development_Environment(models.Model):
@@ -1315,6 +1359,10 @@ class Test(models.Model):
     def accept_risks(self, accepted_risks):
         self.engagement.risk_acceptance.add(*accepted_risks)
 
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('view_test', args=[str(self.id)])
+
 
 class VA(models.Model):
     address = models.TextField(editable=False, default="none")
@@ -1370,8 +1418,10 @@ class Finding(models.Model):
     cwe = models.IntegerField(default=0, null=True, blank=True)
     cve_regex = RegexValidator(regex=r'^[A-Z]{1,10}(-\d+)+$',
                                message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'.")
-    cve = models.CharField(validators=[cve_regex], max_length=28, null=True,
+    cve = models.CharField(validators=[cve_regex], max_length=28, null=True, blank=False,
                            help_text="CVE or other vulnerability identifier")
+    cvssv3_regex = RegexValidator(regex=r'^AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]', message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'")
+    cvssv3 = models.TextField(validators=[cvssv3_regex], max_length=117, null=True)
     url = models.TextField(null=True, blank=True, editable=False)
     severity = models.CharField(max_length=200, help_text="The severity level of this flaw (Critical, High, Medium, Low, Informational)")
     description = models.TextField()
@@ -1482,6 +1532,7 @@ class Finding(models.Model):
             models.Index(fields=['unique_id_from_tool']),
             # models.Index(fields=['file_path']), # can't add index because the field has max length 4000.
             models.Index(fields=['line']),
+            models.Index(fields=['component_name']),
         ]
 
     def is_authorized(self, user, perm_type):
@@ -1498,11 +1549,15 @@ class Finding(models.Model):
 
     # gets or creates the simple risk acceptance instance connected to the engagement. only contains this finding if it is simple accepted
     def get_simple_risk_acceptance(self, create=True):
+        # check if has test, if not, return False to avoid errors on test being None later on. This can happen when creating a finding from a template
+        if not hasattr(self, 'test'):
+            return None
+
         if hasattr(self.test.engagement, 'simple_risk_acceptance') and len(self.test.engagement.simple_risk_acceptance) > 0:
             return self.test.engagement.simple_risk_acceptance[0]
 
         simple_risk_acceptance = self.test.engagement.risk_acceptance.filter(name=Finding.SIMPLE_RISK_ACCEPTANCE_NAME).prefetch_related('accepted_findings').first()
-        if simple_risk_acceptance is None:
+        if simple_risk_acceptance is None and create:
             simple_risk_acceptance = Risk_Acceptance.objects.create(
                     owner_id=1,
                     name=Finding.SIMPLE_RISK_ACCEPTANCE_NAME,
@@ -1535,6 +1590,7 @@ class Finding(models.Model):
 
     @property
     def is_simple_risk_accepted(self):
+
         if self.get_simple_risk_acceptance(create=False) is not None:
             return self.get_simple_risk_acceptance().accepted_findings.filter(id=self.id).exists()
             # print('exists: ', exists)
@@ -1814,11 +1870,16 @@ class Finding(models.Model):
             return None
             pass
 
+    def get_push_all_to_jira(self):
+        if self.jira_pkey():
+            return self.jira_pkey().push_all_issues
+
     def long_desc(self):
         long_desc = ''
         long_desc += '*' + self.title + '*\n\n'
         long_desc += '*Severity:* ' + str(self.severity) + '\n\n'
         long_desc += '*Cve:* ' + str(self.cve) + '\n\n'
+        long_desc += '*CVSSv3.0:* ' + str(self.cvssv3) + '\n\n'
         long_desc += '*Product/Engagement:* ' + self.test.engagement.product.name + ' / ' + self.test.engagement.name + '\n\n'
         if self.test.engagement.branch_tag:
             long_desc += '*Branch/Tag:* ' + self.test.engagement.branch_tag + '\n\n'
@@ -1837,12 +1898,16 @@ class Finding(models.Model):
         return long_desc
 
     def save(self, dedupe_option=True, false_history=False, rules_option=True,
-             issue_updater_option=True, push_to_jira=False, *args, **kwargs):
+             issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):
         # Make changes to the finding before it's saved to add a CWE template
         new_finding = False
 
+        if not user:
+            from dojo.utils import get_current_user
+            user = get_current_user()
+            logger.debug('finding.save() getting current user: %s', user)
+
         jira_issue_exists = JIRA_Issue.objects.filter(finding=self).exists()
-        push_to_jira = getattr(self, 'push_to_jira', push_to_jira)
 
         if self.pk is None:
             # We enter here during the first call from serializers.py
@@ -1880,7 +1945,7 @@ class Finding(models.Model):
         if rules_option:
             from dojo.tasks import async_rules
             from dojo.utils import sync_rules
-            if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
+            if Dojo_User.wants_block_execution(user):
                 sync_rules(self, *args, **kwargs)
             else:
                 async_rules(self, *args, **kwargs)
@@ -1894,7 +1959,7 @@ class Finding(models.Model):
             if system_settings.enable_deduplication:
                 from dojo.tasks import async_dedupe
                 try:
-                    if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
+                    if Dojo_User.wants_block_execution(user):
                         dedupe_signal.send(sender=self.__class__, new_finding=self)
                     else:
                         async_dedupe.delay(self, *args, **kwargs)
@@ -1907,7 +1972,7 @@ class Finding(models.Model):
             from dojo.tasks import async_false_history
             from dojo.utils import sync_false_history
             try:
-                if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
+                if Dojo_User.wants_block_execution(user):
                     sync_false_history(self, *args, **kwargs)
                 else:
                     async_false_history.delay(self, *args, **kwargs)
@@ -1925,15 +1990,15 @@ class Finding(models.Model):
         # Adding a snippet here for push to JIRA so that it's in one place
         if push_to_jira:
             logger.debug('pushing to jira from finding.save()')
-            from dojo.tasks import update_jira_issue_task, add_jira_issue_task
+            from dojo.tasks import add_jira_issue_task
             from dojo.utils import add_jira_issue, update_jira_issue
             if jira_issue_exists:
-                if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
+                if Dojo_User.wants_block_execution(user):
                     update_jira_issue(self, True)
                 else:
-                    update_jira_issue_task.delay(self, True)
+                    update_jira_issue.delay(self, True)
             else:
-                if hasattr(self.reporter, 'usercontactinfo') and self.reporter.usercontactinfo.block_execution:
+                if Dojo_User.wants_block_execution(user):
                     add_jira_issue(self, True)
                 else:
                     add_jira_issue_task.delay(self, True)
@@ -1995,6 +2060,13 @@ class Finding(models.Model):
         res = re.sub(r'\n\s*\n', '\n', res)
         return res
 
+    def latest_note(self):
+        if self.notes.all():
+            note = self.notes.all()[0]
+            return note.date.strftime("%Y-%m-%d %H:%M:%S") + ': ' + note.author.get_full_name() + ' : ' + note.entry
+
+        return ''
+
 
 Finding.endpoints.through.__unicode__ = lambda \
     x: "Endpoint: " + x.endpoint.host
@@ -2029,7 +2101,9 @@ class Finding_Template(models.Model):
     cwe = models.IntegerField(default=None, null=True, blank=True)
     cve_regex = RegexValidator(regex=r'^[A-Z]{1,10}(-\d+)+$',
                                message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'.")
-    cve = models.CharField(validators=[cve_regex], max_length=28, null=True)
+    cve = models.CharField(validators=[cve_regex], max_length=28, null=True, blank=False)
+    cvssv3_regex = RegexValidator(regex=r'^AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]', message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'")
+    cvssv3 = models.TextField(validators=[cvssv3_regex], max_length=117, null=True)
     severity = models.CharField(max_length=200, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     mitigation = models.TextField(null=True, blank=True)
@@ -2059,6 +2133,10 @@ class Finding_Template(models.Model):
         bc = [{'title': self.__unicode__(),
                'url': reverse('view_template', args=(self.id,))}]
         return bc
+
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('edit_template', args=[str(self.id)])
 
 
 class Check_List(models.Model):
@@ -2423,7 +2501,7 @@ class Notifications(models.Model):
     test_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     scan_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True, help_text='Triggered whenever an (re-)import has been done that created/updated/closed findings.')
     report_created = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
-    jira_update = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
+    jira_update = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True, verbose_name="JIRA problems", help_text="JIRA sync happens in the background, errors will be shown as notifications/alerts so make sure to subscribe")
     upcoming_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     stale_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     auto_close_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
@@ -3217,16 +3295,15 @@ admin.site.register(CWE)
 admin.site.register(Regulation)
 admin.site.register(Notifications)
 
-# Watson
-watson.register(Product)
-watson.register(Test)
-watson.register(Finding, fields=('id', 'title', 'cve', 'url', 'severity', 'description', 'mitigation', 'impact', 'steps_to_reproduce',
-                                 'severity_justification', 'references', 'sourcefilepath', 'sourcefile', 'hash_code', 'file_path',
-                                 'component_name', 'component_version', 'unique_id_from_tool', ))
-watson.register(Finding_Template)
-watson.register(Endpoint)
-watson.register(Engagement)
-watson.register(App_Analysis)
+# watson.register(Test)
+# watson.register(Finding, fields=('id', 'title', 'cve', 'url', 'severity', 'description', 'mitigation', 'impact', 'steps_to_reproduce',
+#                                 'severity_justification', 'references', 'sourcefilepath', 'sourcefile', 'hash_code', 'file_path',
+#                                 'component_name', 'component_version', 'unique_id_from_tool', 'test__engagement__product__name'))
+# watson.register(Finding_Template)
+# watson.register(Endpoint)
+# watson.register(Engagement)
+# watson.register(App_Analysis)
+
 
 # SonarQube Integration
 admin.site.register(Sonarqube_Issue)

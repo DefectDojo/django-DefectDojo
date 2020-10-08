@@ -2,7 +2,6 @@ import re
 import binascii
 import os
 import hashlib
-import json
 import io
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
@@ -25,11 +24,12 @@ from jira.exceptions import JIRAError
 from django.dispatch import receiver
 from dojo.signals import dedupe_signal
 from django.db.models.signals import post_save
+from django.db.models.query import QuerySet
 import calendar as tcalendar
 from dojo.github import add_external_issue_github, update_external_issue_github, close_external_issue_github, reopen_external_issue_github
 from dojo.models import Finding, Engagement, Finding_Template, Product, JIRA_PKey, JIRA_Issue,\
     Dojo_User, User, System_Settings, Notifications, Endpoint, Benchmark_Type, \
-    Language_Type, Languages, Rule, Test_Type, Notes
+    Language_Type, Languages, Rule, Notes
 from asteval import Interpreter
 from requests.auth import HTTPBasicAuth
 from dojo.notifications.helper import create_notification
@@ -37,8 +37,8 @@ import logging
 import itertools
 from django.contrib import messages
 from django.http import HttpResponseRedirect
-# import traceback
-
+import crum
+from celery.decorators import task
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -326,81 +326,6 @@ def set_duplicate_reopen(new_finding, existing_finding):
     existing_finding.save()
 
 
-def removeLoop(finding_id, counter):
-    # get latest status
-    finding = Finding.objects.get(id=finding_id)
-    real_original = finding.duplicate_finding
-
-    if not real_original or real_original is None:
-        return
-
-    if finding_id == real_original.id:
-        finding.duplicate_finding = None
-        super(Finding, finding).save()
-        return
-
-    # Only modify the findings if the original ID is lower to get the oldest finding as original
-    if (real_original.id > finding_id) and (real_original.duplicate_finding is not None):
-        tmp = finding_id
-        finding_id = real_original.id
-        real_original = Finding.objects.get(id=tmp)
-        finding = Finding.objects.get(id=finding_id)
-
-    if real_original in finding.original_finding.all():
-        # remove the original from the duplicate list if it is there
-        finding.original_finding.remove(real_original)
-        super(Finding, finding).save()
-    if counter <= 0:
-        # Maximum recursion depth as safety method to circumvent recursion here
-        return
-    for f in finding.original_finding.all():
-        # for all duplicates set the original as their original, get rid of self in between
-        f.duplicate_finding = real_original
-        super(Finding, f).save()
-        super(Finding, real_original).save()
-        removeLoop(f.id, counter - 1)
-
-
-def fix_loop_duplicates():
-    candidates = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).all().order_by("-id")
-    deduplicationLogger.info("Identified %d Findings with Loops" % len(candidates))
-    for find_id in candidates.values_list('id', flat=True):
-        removeLoop(find_id, 5)
-
-    new_originals = Finding.objects.filter(duplicate_finding__isnull=True, duplicate=True)
-    for f in new_originals:
-        deduplicationLogger.info("New Original: %d " % f.id)
-        f.duplicate = False
-        super(Finding, f).save()
-
-    loop_count = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).count()
-    deduplicationLogger.info("%d Finding found with Loops" % loop_count)
-
-
-def rename_whitesource_finding():
-    whitesource_id = Test_Type.objects.get(name="Whitesource Scan").id
-    findings = Finding.objects.filter(found_by=whitesource_id)
-    findings = findings.order_by('-pk')
-    logger.info("######## Updating Hashcodes - deduplication is done in background using django signals upon finding save ########")
-    for finding in findings:
-        logger.info("Updating Whitesource Finding with id: %d" % finding.id)
-        lib_name_begin = re.search('\\*\\*Library Filename\\*\\* : ', finding.description).span(0)[1]
-        lib_name_end = re.search('\\*\\*Library Description\\*\\*', finding.description).span(0)[0]
-        lib_name = finding.description[lib_name_begin:lib_name_end - 1]
-        if finding.cve is None:
-            finding.title = "CVE-None | " + lib_name
-        else:
-            finding.title = finding.cve + " | " + lib_name
-        if not finding.cwe:
-            logger.debug('Set cwe for finding %d to 1035 if not an cwe Number is set' % finding.id)
-            finding.cwe = 1035
-        finding.title = finding.title.rstrip()  # delete \n at the end of the title
-        from titlecase import titlecase
-        finding.title = titlecase(finding.title)
-        finding.hash_code = finding.compute_hash_code()
-        finding.save()
-
-
 def sync_rules(new_finding, *args, **kwargs):
     rules = Rule.objects.filter(applies_to='Finding', parent_rule=None)
     for rule in rules:
@@ -662,7 +587,7 @@ def add_breadcrumb(parent=None,
     request.session['dojo_breadcrumbs'] = crumbs
 
 
-def get_punchcard_data(findings, start_date, weeks):
+def get_punchcard_data(objs, start_date, weeks, view='Finding'):
     # use try catch to make sure any teething bugs in the bunchcard don't break the dashboard
     try:
         # gather findings over past half year, make sure to start on a sunday
@@ -671,12 +596,16 @@ def get_punchcard_data(findings, start_date, weeks):
 
         # reminder: The first week of a year is the one that contains the year’s first Thursday
         # so we could have for 29/12/2019: week=1 and year=2019 :-D. So using week number from db is not practical
-
-        severities_by_day = findings.filter(created__date__gte=first_sunday).filter(created__date__lt=last_sunday) \
-                                    .values('created__date') \
-                                    .annotate(count=Count('id')) \
-                                    .order_by('created__date')
-
+        if view == 'Finding':
+            severities_by_day = objs.filter(created__date__gte=first_sunday).filter(created__date__lt=last_sunday) \
+                                        .values('created__date') \
+                                        .annotate(count=Count('id')) \
+                                        .order_by('created__date')
+        elif view == 'Endpoint':
+            severities_by_day = objs.filter(date__gte=first_sunday).filter(date__lt=last_sunday) \
+                                        .values('date') \
+                                        .annotate(count=Count('id')) \
+                                        .order_by('date')
         # return empty stuff if no findings to be statted
         if severities_by_day.count() <= 0:
             return None, None
@@ -705,7 +634,10 @@ def get_punchcard_data(findings, start_date, weeks):
         day_counts = [0, 0, 0, 0, 0, 0, 0]
 
         for day in severities_by_day:
-            created = day['created__date']
+            if view == 'Finding':
+                created = day['created__date']
+            elif view == 'Endpoint':
+                created = day['date']
             day_count = day['count']
 
             created = timezone.make_aware(datetime.combine(created, datetime.min.time()))
@@ -896,23 +828,42 @@ def get_period_counts(active_findings,
             new_date = start_date + relativedelta(weeks=x, weekday=MO(1))
             end_date = new_date + relativedelta(weeks=1, weekday=MO(1))
 
-        closed_in_range_count = findings_closed.filter(
-            mitigated__date__range=[new_date, end_date]).count()
+        try:
+            closed_in_range_count = findings_closed.filter(
+                mitigated__date__range=[new_date, end_date]).count()
+        except:
+            closed_in_range_count = findings_closed.filter(
+                mitigated_time__range=[new_date, end_date]).count()
 
         if accepted_findings:
-            risks_a = accepted_findings.filter(
-                risk_acceptance__created__date__range=[
-                    datetime(
-                        new_date.year,
-                        new_date.month,
-                        1,
-                        tzinfo=timezone.get_current_timezone()),
-                    datetime(
-                        new_date.year,
-                        new_date.month,
-                        monthrange(new_date.year, new_date.month)[1],
-                        tzinfo=timezone.get_current_timezone())
-                ])
+            try:
+                risks_a = accepted_findings.filter(
+                    risk_acceptance__created__date__range=[
+                        datetime(
+                            new_date.year,
+                            new_date.month,
+                            1,
+                            tzinfo=timezone.get_current_timezone()),
+                        datetime(
+                            new_date.year,
+                            new_date.month,
+                            monthrange(new_date.year, new_date.month)[1],
+                            tzinfo=timezone.get_current_timezone())
+                    ])
+            except:
+                risks_a = accepted_findings.filter(
+                    date__range=[
+                        datetime(
+                            new_date.year,
+                            new_date.month,
+                            1,
+                            tzinfo=timezone.get_current_timezone()),
+                        datetime(
+                            new_date.year,
+                            new_date.month,
+                            monthrange(new_date.year, new_date.month)[1],
+                            tzinfo=timezone.get_current_timezone())
+                    ])
         else:
             risks_a = None
 
@@ -921,26 +872,30 @@ def get_period_counts(active_findings,
         ]
         for finding in findings:
             try:
+                severity = finding.severity
+            except:
+                severity = finding.finding.severity
+            try:
                 if new_date <= datetime.combine(
                         finding.date, datetime.min.time()
                 ).replace(tzinfo=timezone.get_current_timezone()) <= end_date:
-                    if finding.severity == 'Critical':
+                    if severity == 'Critical':
                         crit_count += 1
-                    elif finding.severity == 'High':
+                    elif severity == 'High':
                         high_count += 1
-                    elif finding.severity == 'Medium':
+                    elif severity == 'Medium':
                         med_count += 1
-                    elif finding.severity == 'Low':
+                    elif severity == 'Low':
                         low_count += 1
             except:
                 if new_date <= finding.date <= end_date:
-                    if finding.severity == 'Critical':
+                    if severity == 'Critical':
                         crit_count += 1
-                    elif finding.severity == 'High':
+                    elif severity == 'High':
                         high_count += 1
-                    elif finding.severity == 'Medium':
+                    elif severity == 'Medium':
                         med_count += 1
-                    elif finding.severity == 'Low':
+                    elif severity == 'Low':
                         low_count += 1
                 pass
 
@@ -954,13 +909,17 @@ def get_period_counts(active_findings,
         ]
         if risks_a is not None:
             for finding in risks_a:
-                if finding.severity == 'Critical':
+                try:
+                    severity = finding.severity
+                except:
+                    severity = finding.finding.severity
+                if severity == 'Critical':
                     crit_count += 1
-                elif finding.severity == 'High':
+                elif severity == 'High':
                     high_count += 1
-                elif finding.severity == 'Medium':
+                elif severity == 'Medium':
                     med_count += 1
-                elif finding.severity == 'Low':
+                elif severity == 'Low':
                     low_count += 1
 
         total = crit_count + high_count + med_count + low_count
@@ -972,25 +931,29 @@ def get_period_counts(active_findings,
         ]
         for finding in active_findings:
             try:
+                severity = finding.severity
+            except:
+                severity = finding.finding.severity
+            try:
                 if datetime.combine(finding.date, datetime.min.time()).replace(
                         tzinfo=timezone.get_current_timezone()) <= end_date:
-                    if finding.severity == 'Critical':
+                    if severity == 'Critical':
                         crit_count += 1
-                    elif finding.severity == 'High':
+                    elif severity == 'High':
                         high_count += 1
-                    elif finding.severity == 'Medium':
+                    elif severity == 'Medium':
                         med_count += 1
-                    elif finding.severity == 'Low':
+                    elif severity == 'Low':
                         low_count += 1
             except:
                 if finding.date <= end_date:
-                    if finding.severity == 'Critical':
+                    if severity == 'Critical':
                         crit_count += 1
-                    elif finding.severity == 'High':
+                    elif severity == 'High':
                         high_count += 1
-                    elif finding.severity == 'Medium':
+                    elif severity == 'Medium':
                         med_count += 1
-                    elif finding.severity == 'Low':
+                    elif severity == 'Low':
                         low_count += 1
                 pass
         total = crit_count + high_count + med_count + low_count
@@ -1261,19 +1224,21 @@ def log_jira_generic_alert(title, description):
         title=title,
         description=description,
         icon='bullseye',
-        source='Jira')
+        source='JIRA')
 
 
 # Logs the error to the alerts table, which appears in the notification toolbar
 def log_jira_alert(error, finding):
-    prod_name = finding.test.engagement.product.name
+    prod_name = finding.test.engagement.product.name if finding else 'unknown'
+
     create_notification(
         event='jira_update',
-        title='Jira update issue (' + truncate_with_dots(prod_name, 25) + ')',
-        description='Finding: ' + str(finding.id) + ', ' + error,
-        url=reverse('view_finding', args=(finding.id, )),
+        title='JIRA update issue' + '(' + truncate_with_dots(prod_name, 25) + ')',
+        description='Finding: ' + str(finding.id if finding else 'unknown') + ', ' + error,
+        url=reverse('view_finding', args=(finding.id, )) if finding else None,
         icon='bullseye',
-        source='Jira')
+        source='JIRA update',
+        finding=finding)
 
 
 # Displays an alert for Jira notifications
@@ -1284,7 +1249,7 @@ def log_jira_message(text, finding):
         description=text + " Finding: " + str(finding.id),
         url=reverse('view_finding', args=(finding.id, )),
         icon='bullseye',
-        source='Jira')
+        source='JIRA', finding=finding)
 
 
 def get_labels(find):
@@ -1366,8 +1331,8 @@ def add_jira_issue(find, push_to_jira):
 
         if 'Active' in find.status() and 'Verified' in find.status():
             if jira_minimum_threshold > Finding.get_number_severity(find.severity):
-                log_jira_alert('Finding below the minimum jira severity threshold.', find)
-                logger.warn("Finding {} is below the minimum jira severity threshold.".format(find.id))
+                log_jira_alert('Finding below the minimum JIRA severity threshold.', find)
+                logger.warn("Finding {} is below the minimum JIRA severity threshold.".format(find.id))
                 logger.warn("The JIRA issue will NOT be created.")
                 return
 
@@ -1389,9 +1354,6 @@ def add_jira_issue(find, push_to_jira):
                         'issuetype': {
                             'name': jira_conf.default_issue_type
                         },
-                        'priority': {
-                            'name': jira_conf.get_priority(find.severity)
-                        }
                 }
 
                 if jpkey.component:
@@ -1401,14 +1363,21 @@ def add_jira_issue(find, push_to_jira):
                             },
                     ]
 
+                # populate duedate field, but only if it's available for this project + issuetype
+                if not meta:
+                    meta = jira_meta(jira, jpkey)
+
+                if 'priority' in meta['projects'][0]['issuetypes'][0]['fields']:
+                    fields['priority'] = {
+                                            'name': jira_conf.get_priority(find.severity)
+                                        }
+
                 labels = get_labels(find)
                 if labels:
-                    fields['labels'] = labels
+                    if 'labels' in meta['projects'][0]['issuetypes'][0]['fields']:
+                        fields['labels'] = labels
 
                 if System_Settings.objects.get().enable_finding_sla:
-                    # populate duedate field, but only if it's available for this project + issuetype
-                    if not meta:
-                        meta = jira_meta(jira, jpkey)
 
                     if 'duedate' in meta['projects'][0]['issuetypes'][0]['fields']:
                         # jira wants YYYY-MM-DD
@@ -1449,7 +1418,7 @@ def add_jira_issue(find, push_to_jira):
                 # Upload dojo finding screenshots to Jira
                 for pic in find.images.all():
                     jira_attachment(
-                        jira, issue,
+                        find, jira, issue,
                         settings.MEDIA_ROOT + pic.image_large.name)
 
                     # if jpkey.enable_engagement_epic_mapping:
@@ -1457,7 +1426,7 @@ def add_jira_issue(find, push_to_jira):
                     #      issue_list = [j_issue.jira_id,]
                     #      jira.add_jira_issues_to_epic(epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
             except JIRAError as e:
-                logger.error(e.text)
+                logger.exception(e)
                 log_jira_alert(e.text, find)
         else:
             log_jira_alert("A Finding needs to be both Active and Verified to be pushed to JIRA.", find)
@@ -1468,7 +1437,7 @@ def jira_meta(jira, jpkey):
     return jira.createmeta(projectKeys=jpkey.project_key, issuetypeNames=jpkey.conf.default_issue_type, expand="projects.issuetypes.fields")
 
 
-def jira_attachment(jira, issue, file, jira_filename=None):
+def jira_attachment(finding, jira, issue, file, jira_filename=None):
     basename = file
     if jira_filename is None:
         basename = os.path.basename(file)
@@ -1486,7 +1455,8 @@ def jira_attachment(jira, issue, file, jira_filename=None):
                 with open(file, 'rb') as f:
                     jira.add_attachment(issue=issue, attachment=f)
         except JIRAError as e:
-            log_jira_alert("Attachment: " + e.text)
+            logger.exception(e)
+            log_jira_alert("Attachment: " + e.text, finding)
 
 
 def jira_check_attachment(issue, source_file_name):
@@ -1501,6 +1471,7 @@ def jira_check_attachment(issue, source_file_name):
     return file_exists
 
 
+@task(name='update_jira_issue_task')
 def update_jira_issue(find, push_to_jira):
     logger.info('trying to update a linked jira issue for %d:%s', find.id, find.title)
     prod = Product.objects.get(
@@ -1534,21 +1505,22 @@ def update_jira_issue(find, push_to_jira):
                 ]
                 fields = {"components": component}
 
+            if not meta:
+                meta = jira_meta(jira, jpkey)
+
             labels = get_labels(find)
             if labels:
-                fields['labels'] = labels
+                if 'labels' in meta['projects'][0]['issuetypes'][0]['fields']:
+                    fields['labels'] = labels
 
             if len(find.endpoints.all()) > 0:
-                if not meta:
-                    meta = jira_meta(jira, jpkey)
-
                 if 'environment' in meta['projects'][0]['issuetypes'][0]['fields']:
                     environment = "\n".join([str(endpoint) for endpoint in find.endpoints.all()])
                     fields['environment'] = environment
 
             # Upload dojo finding screenshots to Jira
             for pic in find.images.all():
-                jira_attachment(jira, issue,
+                jira_attachment(find, jira, issue,
                                 settings.MEDIA_ROOT + pic.image_large.name)
 
             logger.debug('sending fields to JIRA: %s', fields)
@@ -1563,6 +1535,7 @@ def update_jira_issue(find, push_to_jira):
             find.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
 
         except JIRAError as e:
+            logger.exception(e)
             log_jira_alert(e.text, find)
 
         req_url = jira_conf.url + '/rest/api/latest/issue/' + \
@@ -1685,6 +1658,7 @@ def jira_get_issue(jpkey, issue_key):
         return issue
     except JIRAError as jira_error:
         logger.debug('error retrieving jira issue ' + issue_key + ' ' + str(jira_error))
+        logger.exception(jira_error)
         log_jira_generic_alert('error retrieving jira issue ' + issue_key, str(jira_error))
         return None
 
@@ -1797,7 +1771,7 @@ def encrypt(key, iv, plaintext):
     text = ""
     if plaintext and plaintext is not None:
         backend = default_backend()
-        cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
+        cipher = Cipher(algorithms.AES(key), modes.OFB(iv), backend=backend)
         encryptor = cipher.encryptor()
         plaintext = _pad_string(plaintext)
         encrypted_text = encryptor.update(plaintext) + encryptor.finalize()
@@ -1807,7 +1781,7 @@ def encrypt(key, iv, plaintext):
 
 def decrypt(key, iv, encrypted_text):
     backend = default_backend()
-    cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
+    cipher = Cipher(algorithms.AES(key), modes.OFB(iv), backend=backend)
     encrypted_text_bytes = binascii.a2b_hex(encrypted_text)
     decryptor = cipher.decryptor()
     decrypted_text = decryptor.update(encrypted_text_bytes) + decryptor.finalize()
@@ -1885,39 +1859,6 @@ def prepare_for_view(encrypted_value):
 def get_system_setting(setting):
     system_settings = System_Settings.objects.get()
     return getattr(system_settings, setting, None)
-
-
-def get_slack_user_id(user_email):
-    user_id = None
-
-    res = requests.request(
-        method='POST',
-        url='https://slack.com/api/users.list',
-        data={'token': get_system_setting('slack_token')})
-
-    users = json.loads(res.text)
-
-    slack_user_is_found = False
-    if users:
-        if 'error' in users:
-            logger.error("Slack is complaining. See error message below.")
-            logger.error(users)
-        else:
-            for member in users["members"]:
-                if "email" in member["profile"]:
-                    if user_email == member["profile"]["email"]:
-                        if "id" in member:
-                            user_id = member["id"]
-                            logger.debug("Slack user ID is {}".format(user_id))
-                            slack_user_is_found = True
-                            break
-                    else:
-                        logger.warn("A user with email {} could not be found in this Slack workspace.".format(user_email))
-
-            if not slack_user_is_found:
-                logger.warn("The Slack user was not found.")
-
-    return user_id
 
 
 def calculate_grade(product):
@@ -2168,6 +2109,10 @@ def is_scan_file_too_large(scan_file):
     return False
 
 
+def queryset_check(query):
+    return query if isinstance(query, QuerySet) else query.qs
+
+
 def sla_compute_and_notify(*args, **kwargs):
     """
     The SLA computation and notification will be disabled if the user opts out
@@ -2300,3 +2245,15 @@ def sla_compute_and_notify(*args, **kwargs):
 
     except System_Settings.DoesNotExist:
         logger.info("Findings SLA is not enabled.")
+
+
+def get_words_for_field(queryset, fieldname):
+    max_results = getattr(settings, 'MAX_AUTOCOMPLETE_WORDS', 20000)
+    words = [
+        word for component_name in queryset.order_by().filter(**{'%s__isnull' % fieldname: False}).values_list(fieldname, flat=True).distinct()[:max_results] for word in (component_name.split() if component_name else []) if len(word) > 2
+    ]
+    return sorted(set(words))
+
+
+def get_current_user():
+    return crum.get_current_user()
