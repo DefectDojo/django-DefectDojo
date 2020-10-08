@@ -24,7 +24,7 @@ from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm
                        GITHUB_Product_Form, GITHUBFindingForm, App_AnalysisTypeForm, JIRAEngagementForm
 from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, GITHUB_PKey, Finding_Template, \
                         Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint_Status, \
-                        Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, Dojo_User, BurpRawRequestResponse, Endpoint_Status
+                        Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, Dojo_User, BurpRawRequestResponse
 
 from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, Product_Tab, get_punchcard_data, add_epic, queryset_check
 from dojo.notifications.helper import create_notification
@@ -327,7 +327,7 @@ def endpoint_querys(request, prod):
                                      messages.ERROR,
                                      'All objects have been filtered away. Displaying all objects',
                                      extra_tags='alert-danger')
-    
+
     try:
         start_date = endpoints_qs.earliest('date').date
         start_date = datetime(start_date.year,

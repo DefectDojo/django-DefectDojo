@@ -154,7 +154,6 @@ def finding_querys(prod_type, request):
                                      'All objects have been filtered away. Displaying all objects',
                                      extra_tags='alert-danger')
 
-    
     start_date = findings_qs.earliest('date').date
     start_date = datetime(start_date.year,
                         start_date.month, start_date.day,

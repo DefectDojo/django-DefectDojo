@@ -1138,7 +1138,6 @@ class ProductMetricsEndpointFilter(FilterSet):
         label="Engagement")
     finding__severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
 
-
     def __init__(self, *args, **kwargs):
         if args[0]:
             if args[0].get('start_date', '') != '' or args[0].get('end_date', '') != '':
