@@ -57,7 +57,7 @@ def get_item(vulnerability, test):
             cve = main_finding.get("reference")
         else:
             # if sonatype of else, will not match Finding model today
-            cve = ""
+            cve = None
 
         if main_finding['severity'] <= 3.9:
             severity = "Low"

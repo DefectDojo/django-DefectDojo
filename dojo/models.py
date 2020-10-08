@@ -1410,7 +1410,7 @@ class Finding(models.Model):
     cwe = models.IntegerField(default=0, null=True, blank=True)
     cve_regex = RegexValidator(regex=r'^[A-Z]{1,10}(-\d+)+$',
                                message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'.")
-    cve = models.CharField(validators=[cve_regex], max_length=28, null=True,
+    cve = models.CharField(validators=[cve_regex], max_length=28, null=True, blank=False,
                            help_text="CVE or other vulnerability identifier")
     cvssv3_regex = RegexValidator(regex=r'^AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]', message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'")
     cvssv3 = models.TextField(validators=[cvssv3_regex], max_length=117, null=True)
@@ -1524,6 +1524,7 @@ class Finding(models.Model):
             models.Index(fields=['unique_id_from_tool']),
             # models.Index(fields=['file_path']), # can't add index because the field has max length 4000.
             models.Index(fields=['line']),
+            models.Index(fields=['component_name']),
         ]
 
     def is_authorized(self, user, perm_type):
@@ -1861,6 +1862,10 @@ class Finding(models.Model):
             return None
             pass
 
+    def get_push_all_to_jira(self):
+        if self.jira_pkey():
+            return self.jira_pkey().push_all_issues
+
     def long_desc(self):
         long_desc = ''
         long_desc += '*' + self.title + '*\n\n'
@@ -1895,7 +1900,6 @@ class Finding(models.Model):
             logger.debug('finding.save() getting current user: %s', user)
 
         jira_issue_exists = JIRA_Issue.objects.filter(finding=self).exists()
-        push_to_jira = getattr(self, 'push_to_jira', push_to_jira)
 
         if self.pk is None:
             # We enter here during the first call from serializers.py
@@ -2089,7 +2093,7 @@ class Finding_Template(models.Model):
     cwe = models.IntegerField(default=None, null=True, blank=True)
     cve_regex = RegexValidator(regex=r'^[A-Z]{1,10}(-\d+)+$',
                                message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'.")
-    cve = models.CharField(validators=[cve_regex], max_length=28, null=True)
+    cve = models.CharField(validators=[cve_regex], max_length=28, null=True, blank=False)
     cvssv3_regex = RegexValidator(regex=r'^AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]', message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'")
     cvssv3 = models.TextField(validators=[cvssv3_regex], max_length=117, null=True)
     severity = models.CharField(max_length=200, null=True, blank=True)

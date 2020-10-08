@@ -239,16 +239,16 @@ class FindingViewSet(mixins.ListModelMixin,
     # Overriding mixins.UpdateModeMixin perform_update() method to grab push_to_jira
     # data and add that as a parameter to .save()
     def perform_update(self, serializer):
-        enabled = False
+        push_all = False
         push_to_jira = serializer.validated_data.get('push_to_jira')
         # IF JIRA is enabled and this product has a JIRA configuration
         if get_system_setting('enable_jira') and \
                 serializer.instance.test.engagement.product.jira_pkey_set.first() is not None:
             # Check if push_all_issues is set on this product
-            enabled = serializer.instance.test.engagement.product.jira_pkey_set.first().push_all_issues
+            push_all = serializer.instance.test.engagement.product.jira_pkey_set.first().push_all_issues
 
         # If push_all_issues is set:
-        if enabled:
+        if push_all:
             push_to_jira = True
 
         # add a check for the product having push all issues enabled right here.
@@ -256,10 +256,16 @@ class FindingViewSet(mixins.ListModelMixin,
 
     def get_queryset(self):
         if not self.request.user.is_staff:
-            return Finding.objects.filter(
+            findings = Finding.objects.filter(
                 reporter_id__in=[self.request.user])
         else:
-            return Finding.objects.all()
+            findings = Finding.objects.all()
+        return findings.prefetch_related('test',
+                                        'test__test_type',
+                                        'test__engagement',
+                                        'test__environment',
+                                        'test__engagement__product',
+                                        'test__engagement__product__prod_type')
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
