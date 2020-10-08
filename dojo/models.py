@@ -1366,6 +1366,18 @@ class Test(models.Model):
     def accept_risks(self, accepted_risks):
         self.engagement.risk_acceptance.add(*accepted_risks)
 
+    @property
+    def dedupe_algo(self):
+        deduplicationAlgorithm = settings.DEDUPE_ALGO_LEGACY
+        if hasattr(settings, 'DEDUPLICATION_ALGORITHM_PER_PARSER'):
+            scan_type = self.test_type.name
+
+            # Check for an override for this scan_type in the deduplication configuration
+            if (scan_type in settings.DEDUPLICATION_ALGORITHM_PER_PARSER):
+                deduplicationAlgorithm = settings.DEDUPLICATION_ALGORITHM_PER_PARSER[scan_type]
+
+        return deduplicationAlgorithm
+
     def get_absolute_url(self):
         from django.urls import reverse
         return reverse('view_test', args=[str(self.id)])

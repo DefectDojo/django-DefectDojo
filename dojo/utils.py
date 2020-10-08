@@ -89,13 +89,15 @@ def is_deduplication_on_engagement_mismatch(new_finding, to_duplicate_finding):
 @receiver(dedupe_signal, sender=Finding)
 def sync_dedupe(sender, *args, **kwargs):
     try:
-        enabled = System_Settings.objects.get().enable_deduplication
+        enabled = System_Settings.objects.get(no_cache=True).enable_deduplication
     except System_Settings.DoesNotExist:
+        logger.warning("system settings not found")
         enabled = False
     if enabled:
         new_finding = kwargs['new_finding']
         deduplicationLogger.debug('sync_dedupe for: ' + str(new_finding.id) +
                     ":" + str(new_finding.title))
+        # TODO use test.dedupe_algo and case statement
         if hasattr(settings, 'DEDUPLICATION_ALGORITHM_PER_PARSER'):
             scan_type = new_finding.test.test_type.name
             deduplicationLogger.debug('scan_type for this finding is :' + scan_type)
@@ -117,7 +119,7 @@ def sync_dedupe(sender, *args, **kwargs):
             deduplicationLogger.debug("no configuration per parser found; using legacy algorithm")
             deduplicate_legacy(new_finding)
     else:
-        deduplicationLogger.debug("skipping dedupe because it's disabled in system settings get()")
+        deduplicationLogger.debug("sync_dedupe: skipping dedupe because it's disabled in system settings get()")
 
 
 def deduplicate_legacy(new_finding):
@@ -167,9 +169,11 @@ def deduplicate_legacy(new_finding):
             list1 = [e.host_with_port for e in new_finding.endpoints.all()]
             list2 = [e.host_with_port for e in find.endpoints.all()]
             if all(x in list1 for x in list2):
+                deduplicationLogger.debug("%s: exact endpoint match", find.id)
                 flag_endpoints = True
         elif new_finding.static_finding and len(new_finding.file_path) > 0:
             if str(find.line) == str(new_finding.line) and find.file_path == new_finding.file_path:
+                deduplicationLogger.debug("%s: file_path and line match", find.id)
                 flag_line_path = True
             else:
                 deduplicationLogger.debug("no endpoints on one of the findings and file_path doesn't match")
@@ -294,7 +298,7 @@ def set_duplicate(new_finding, existing_finding):
         raise Exception("Existing finding is a duplicate")
     if existing_finding.id == new_finding.id:
         raise Exception("Can not add duplicate to itself")
-    deduplicationLogger.debug('New finding ' + str(new_finding.id) + ' is a duplicate of existing finding ' + str(existing_finding.id))
+    deduplicationLogger.debug('Setting new finding ' + str(new_finding.id) + ' as a duplicate of existing finding ' + str(existing_finding.id))
     if is_duplicate_reopen(new_finding, existing_finding):
         set_duplicate_reopen_(new_finding, existing_finding)
     new_finding.duplicate = True
