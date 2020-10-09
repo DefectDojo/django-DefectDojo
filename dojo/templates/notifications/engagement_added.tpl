@@ -30,7 +30,7 @@ You can manage your notification settings here: <a href="{{ notification_url|ful
 </p>
 {% endautoescape %}
 </body>
-<html>
+</html>
 
 {% elif type == 'alert' %}
     The engagement "{{ engagement.name }}" has been created in the product "{{ engagement.product }}".

@@ -69,7 +69,7 @@ You can manage your notification settings here: <a href="{{ notification_url|ful
 </p>
 {% endautoescape %}
 </body>
-<html>
+</html>
 {% elif type == 'alert' %}
 {{ description }}
 {% elif type == 'slack' %}

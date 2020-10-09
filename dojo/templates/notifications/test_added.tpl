@@ -23,7 +23,7 @@ Defect Dojo</br>
 <p>
 {% endautoescape %}
 </body>
-<html>
+</html>
 {% elif type == 'alert' %}
     New test added for engagement {{ engagement.product }}: {{ test.test_type }}.
 {% elif type == 'slack' %}
