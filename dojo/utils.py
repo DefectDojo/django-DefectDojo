@@ -2282,10 +2282,9 @@ def sla_compute_and_notify(*args, **kwargs):
 
 
 def get_words_for_field(queryset, fieldname):
+    max_results = getattr(settings, 'MAX_AUTOCOMPLETE_WORDS', 20000)
     words = [
-        # word for component_name in queryset.filter(component_name__isnull=False).values_list(fieldname, flat=True).distinct() for word in (component_name.split() if component_name else []) if len(word) > 2
-        word for component_name in queryset.filter(**{'%s__isnull' % fieldname: False}).values_list(fieldname, flat=True).distinct() for word in (component_name.split() if component_name else []) if len(word) > 2
-
+        word for component_name in queryset.order_by().filter(**{'%s__isnull' % fieldname: False}).values_list(fieldname, flat=True).distinct()[:max_results] for word in (component_name.split() if component_name else []) if len(word) > 2
     ]
     return sorted(set(words))
 

@@ -46,10 +46,6 @@ spec:
       - command:
         - /entrypoint-celery-beat.sh
         name: celery
-        securityContext:
-          # needed for celery to then drop privileges
-          allowPrivilegeEscalation: false
-          runAsUser: 0
         image: "{{ template "celery.repository" . }}:{{ .Values.tag }}"
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         envFrom:
