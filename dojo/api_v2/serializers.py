@@ -1233,9 +1233,19 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                             query=endpoint.query,
                             fragment=endpoint.fragment,
                             product=test.engagement.product)
+                        eps, created = Endpoint_Status.objects.get_or_create(
+                            finding=finding,
+                            endpoint=ep)
+                        ep.endpoint_status.add(eps)
                         finding.endpoints.add(ep)
+                        finding.endpoint_status.add(eps)
                     if endpoint_to_add:
+                        eps, created = Endpoint_Status.objects.get_or_create(
+                            finding=finding,
+                            endpoint=endpoint_to_add)
                         finding.endpoints.add(endpoint_to_add)
+                        epoing_to_add.endpoint_status.add(eps)
+                        finding.endpoint_status.add(eps)
                     if item.unsaved_tags:
                         finding.tags = item.unsaved_tags
 
