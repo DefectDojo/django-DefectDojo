@@ -304,7 +304,7 @@ class FindingTest(BaseTestCase):
     def test_list_components(self):
         driver = self.login_page()
         self.goto_component_overview(driver)
-        #self.assertTrue(self.is_element_by_css_selector_present("table"))
+        self.assertTrue(self.is_element_by_css_selector_present("table"))
 
 def add_finding_tests_to_suite(suite, jira=False, github=False, block_execution=False):
     if jira:

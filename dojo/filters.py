@@ -287,7 +287,8 @@ class ProductComponentFilter(DojoFilter):
             'total': 'Total',
         }
     )
-    
+
+
 class ComponentFilter(ProductComponentFilter):
     test__engagement__product = ModelMultipleChoiceFilter(
         queryset=Product.objects.all(),
