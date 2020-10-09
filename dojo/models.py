@@ -1620,6 +1620,7 @@ class Finding(models.Model):
         if hasattr(settings, 'HASHCODE_FIELDS_PER_SCANNER') and hasattr(settings, 'HASHCODE_ALLOWS_NULL_CWE') and hasattr(settings, 'HASHCODE_ALLOWED_FIELDS'):
             # Default fields
             if self.dynamic_finding:
+                logger.debug('dynamig finding, so including endpoints in hash_code computation as default')
                 hashcodeFields = ['title', 'cwe', 'line', 'file_path', 'description', 'endpoints']
             else:
                 hashcodeFields = ['title', 'cwe', 'line', 'file_path', 'description']
@@ -1673,6 +1674,7 @@ class Finding(models.Model):
     def compute_hash_code_legacy(self):
         fields_to_hash = self.title + str(self.cwe) + str(self.line) + str(self.file_path) + self.description
         if self.dynamic_finding:
+            logger.debug('dynamig finding, so including endpoints in hash_code computation for legacy algo')
             fields_to_hash = fields_to_hash + self.get_endpoints()
         deduplicationLogger.debug("compute_hash_code_legacy - fields_to_hash = " + fields_to_hash)
         return self.hash_fields(fields_to_hash)

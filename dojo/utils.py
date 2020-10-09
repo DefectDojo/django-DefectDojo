@@ -88,6 +88,7 @@ def is_deduplication_on_engagement_mismatch(new_finding, to_duplicate_finding):
 
 @receiver(dedupe_signal, sender=Finding)
 def sync_dedupe(sender, *args, **kwargs):
+    logger.debug('in sync_dedupe')
     try:
         enabled = System_Settings.objects.get(no_cache=True).enable_deduplication
     except System_Settings.DoesNotExist:
@@ -115,6 +116,7 @@ def sync_dedupe(sender, *args, **kwargs):
                 deduplicate_uid_or_hash_code(new_finding)
             else:
                 deduplicate_legacy(new_finding)
+                logger.debug('done legacy')
         else:
             deduplicationLogger.debug("no configuration per parser found; using legacy algorithm")
             deduplicate_legacy(new_finding)
@@ -153,6 +155,7 @@ def deduplicate_legacy(new_finding):
 
     # total_findings = total_findings.order_by('date')
     for find in total_findings:
+        logger.debug('bla0')
         flag_endpoints = False
         flag_line_path = False
         flag_hash = False
@@ -160,30 +163,55 @@ def deduplicate_legacy(new_finding):
             deduplicationLogger.debug(
                 'deduplication_on_engagement_mismatch, skipping dedupe.')
             continue
+
+        logger.debug('bla00')
         # ---------------------------------------------------------
         # 2) If existing and new findings have endpoints: compare them all
         #    Else look at line+file_path
         #    (if new finding is not static, do not deduplicate)
         # ---------------------------------------------------------
+
+        logger.debug(find.endpoints.count())
+        logger.debug('bla001')
+        logger.debug(new_finding.endpoints.count())
+        logger.debug('bla002')
+        logger.debug(new_finding.static_finding)
+        logger.debug('bla003')
+        # logger.debug(len(new_finding.file_path))
+        logger.debug('bla004')
+
         if find.endpoints.count() != 0 and new_finding.endpoints.count() != 0:
+            logger.debug('comparing endpoints')
             list1 = [e.host_with_port for e in new_finding.endpoints.all()]
             list2 = [e.host_with_port for e in find.endpoints.all()]
+            # logger.debug('list1: %s', list1)
+            # logger.debug('list2: %s', list2)
+
             if all(x in list1 for x in list2):
-                deduplicationLogger.debug("%s: exact endpoint match", find.id)
+                deduplicationLogger.debug("%s: existing endpoints are present in new finding", find.id)
                 flag_endpoints = True
-        elif new_finding.static_finding and len(new_finding.file_path) > 0:
+        elif new_finding.static_finding and new_finding.file_path and len(new_finding.file_path) > 0:
+            logger.debug('bla00000')
             if str(find.line) == str(new_finding.line) and find.file_path == new_finding.file_path:
                 deduplicationLogger.debug("%s: file_path and line match", find.id)
                 flag_line_path = True
             else:
                 deduplicationLogger.debug("no endpoints on one of the findings and file_path doesn't match; Deduplication will not occur")
         else:
+            logger.debug('bla02120')
             deduplicationLogger.debug("no endpoints on one of the findings and the new finding is either dynamic or doesn't have a file_path; Deduplication will not occur")
+
         if find.hash_code == new_finding.hash_code:
             flag_hash = True
-        deduplicationLogger.debug(
-            'deduplication flags for new finding ' + str(new_finding.id) + ' and existing finding ' + str(find.id) +
-            ' flag_endpoints: ' + str(flag_endpoints) + ' flag_line_path:' + str(flag_line_path) + ' flag_hash:' + str(flag_hash))
+
+        logger.debug('bla1')
+
+        # deduplicationLogger.debug(
+        #     'deduplication flags for new finding (' + ('dynamic' if new_finding.dynamic_finding else 'static') + ') ' + str(new_finding.id) + ' and existing finding ' + str(find.id) +
+        #     ' flag_endpoints: ' + str(flag_endpoints) + ' flag_line_path:' + str(flag_line_path) + ' flag_hash:' + str(flag_hash))
+
+        logger.debug('bla2')
+
         # ---------------------------------------------------------
         # 3) Findings are duplicate if (cond1 is true) and they have the same:
         #    hash
@@ -197,6 +225,8 @@ def deduplicate_legacy(new_finding):
                 continue
 
             break
+
+        logger.debug('bla4')
 
 
 def deduplicate_unique_id_from_tool(new_finding):
