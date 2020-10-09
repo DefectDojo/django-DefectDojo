@@ -5,7 +5,7 @@ import multiselectfield.db.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0055_notifications_jira_update_verbose_name'),
+        ('dojo', '0056_index_component_name'),
     ]
 
     operations = [
