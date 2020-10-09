@@ -158,20 +158,13 @@ class System_Settings(models.Model):
                                              'https://api.slack.com/tokens')
     slack_username = models.CharField(max_length=100, default='', blank=True,
                      help_text='Optional. Will take your bot name otherwise.')
-    enable_hipchat_notifications = \
+    enable_msteams_notifications = \
         models.BooleanField(default=False,
-                            verbose_name='Enable HipChat notifications',
+                            verbose_name='Enable Microsoft Teams notifications',
                             blank=False)
-    hipchat_site = models.CharField(max_length=100, default='', blank=True,
-                                    help_text='The full fqdn of your '
-                                              'hipchat site, e.g. '
-                                              '"yoursite.hipchat.com"')
-    hipchat_channel = models.CharField(max_length=100, default='', blank=True)
-    hipchat_token = \
-        models.CharField(max_length=100, default='', blank=True,
-                         help_text='Token required for interacting with '
-                                   'HipChat. Get one at '
-                                   'https://patriktest.hipchat.com/addons/')
+    msteams_url = models.CharField(max_length=400, default='', blank=True,
+                                    help_text='The full URL of the '
+                                              'incoming webhook')
     enable_mail_notifications = models.BooleanField(default=False, blank=False)
     mail_notifications_from = models.CharField(max_length=200,
                                                default='from@example.com',
@@ -343,7 +336,6 @@ class UserContactInfo(models.Model):
     github_username = models.CharField(blank=True, null=True, max_length=150)
     slack_username = models.CharField(blank=True, null=True, max_length=150, help_text="Email address associated with your slack account", verbose_name="Slack Email Address")
     slack_user_id = models.CharField(blank=True, null=True, max_length=25)
-    hipchat_username = models.CharField(blank=True, null=True, max_length=150)
     block_execution = models.BooleanField(default=False, help_text="Instead of async deduping a finding the findings will be deduped synchronously and will 'block' the user until completion.")
 
 
@@ -2490,7 +2482,7 @@ class JIRA_PKey(models.Model):
 
 
 NOTIFICATION_CHOICES = (
-    ("slack", "slack"), ("hipchat", "hipchat"), ("mail", "mail"),
+    ("slack", "slack"), ("msteams", "msteams"), ("mail", "mail"),
     ("alert", "alert")
 )
 
