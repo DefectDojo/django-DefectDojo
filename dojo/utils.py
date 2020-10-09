@@ -176,7 +176,7 @@ def deduplicate_legacy(new_finding):
                 deduplicationLogger.debug("%s: file_path and line match", find.id)
                 flag_line_path = True
             else:
-                deduplicationLogger.debug("no endpoints on one of the findings and file_path doesn't match")
+                deduplicationLogger.debug("no endpoints on one of the findings and file_path doesn't match; Deduplication will not occur")
         else:
             deduplicationLogger.debug("no endpoints on one of the findings and the new finding is either dynamic or doesn't have a file_path; Deduplication will not occur")
         if find.hash_code == new_finding.hash_code:
