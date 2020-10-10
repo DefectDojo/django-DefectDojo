@@ -13,6 +13,14 @@ logging.basicConfig(level=loglevel)
 # - cross scanner deduplication is still flaky as if some scanners don't provide severity, but another doesn, the hashcode will be different so no deduplication happens.
 #   so I couldn't create any good tests
 # - hash_code is only calculated once and never changed. should we add a feature to run dedupe when somebody modifies a finding? bulk edit action to trigger dedupe?
+# - deduplication is using the default ordering for findings, so most of the time this means a new finding will be marked as duplicate of the most recent existing finding
+#   that matches the criteria. I thinkg it would be better to consider the oldest existing findings first? Otherwise we have the chance that an old finding becomes
+#   marked as duplicate of a newer one at some point.
+# - legacy: if file_path and line or both empty and there are no endpoints, no dedupe will happen. Is this desirable or a BUG?
+# - DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE should:
+#   - try to match on uniquer_id first before falling back to hash_Code. Currently it just takes the first finding it can find
+#     that mathces either the hash_code or unique id.
+#   - If the unique_id does NOT match, the finding is still considered for dedupe if the hash_code matches. We may need to forbid as the unique_id should be leading for the same test_type
 
 # false positive history observations:
 # - doesn't respect dedupe_on_engagement
@@ -210,10 +218,6 @@ class TestDuplicationLogic(TestCase):
         finding_new.file_path = '/dev/null'
 
         finding_22 = Finding.objects.get(id=22)
-        logger.debug('finding_new.file_path: %s', finding_new.file_path)
-        logger.debug('finding_new.line: %i', finding_new.line)
-        logger.debug('finding_22.file_path: %s', finding_22.file_path)
-        logger.debug('finding_22.line: %i', finding_22.line)
 
         finding_new.save(dedupe_option=True)
 
