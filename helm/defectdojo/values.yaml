@@ -66,6 +66,15 @@ celery:
         cpu: 2000m
         memory: 256Mi
     tolerations: []
+    app_settings:
+      pool_type: solo
+      # Performance improved celery worker config when needing to deal with a lot of findings (e.g deduplication ops)
+      # Comment out the "solo" line, and uncomment the following lines.
+      # pool_type: prefork
+      # autoscale_min: 2
+      # autoscale_max: 8
+      # concurrency: 8
+      # prefetch_multiplier: 128
 
 django:
   affinity: {}
@@ -101,6 +110,9 @@ django:
       limits:
         cpu: 2000m
         memory: 512Mi
+    app_settings:
+      processes: 2
+      threads: 2
 
 initializer:
   run: true

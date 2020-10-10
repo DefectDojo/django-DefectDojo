@@ -24,11 +24,12 @@ from jira.exceptions import JIRAError
 from django.dispatch import receiver
 from dojo.signals import dedupe_signal
 from django.db.models.signals import post_save
+from django.db.models.query import QuerySet
 import calendar as tcalendar
 from dojo.github import add_external_issue_github, update_external_issue_github, close_external_issue_github, reopen_external_issue_github
 from dojo.models import Finding, Engagement, Finding_Template, Product, JIRA_PKey, JIRA_Issue,\
     Dojo_User, User, System_Settings, Notifications, Endpoint, Benchmark_Type, \
-    Language_Type, Languages, Rule, Test_Type, Notes
+    Language_Type, Languages, Rule, Notes
 from asteval import Interpreter
 from requests.auth import HTTPBasicAuth
 from dojo.notifications.helper import create_notification
@@ -325,81 +326,6 @@ def set_duplicate_reopen(new_finding, existing_finding):
     existing_finding.save()
 
 
-def removeLoop(finding_id, counter):
-    # get latest status
-    finding = Finding.objects.get(id=finding_id)
-    real_original = finding.duplicate_finding
-
-    if not real_original or real_original is None:
-        return
-
-    if finding_id == real_original.id:
-        finding.duplicate_finding = None
-        super(Finding, finding).save()
-        return
-
-    # Only modify the findings if the original ID is lower to get the oldest finding as original
-    if (real_original.id > finding_id) and (real_original.duplicate_finding is not None):
-        tmp = finding_id
-        finding_id = real_original.id
-        real_original = Finding.objects.get(id=tmp)
-        finding = Finding.objects.get(id=finding_id)
-
-    if real_original in finding.original_finding.all():
-        # remove the original from the duplicate list if it is there
-        finding.original_finding.remove(real_original)
-        super(Finding, finding).save()
-    if counter <= 0:
-        # Maximum recursion depth as safety method to circumvent recursion here
-        return
-    for f in finding.original_finding.all():
-        # for all duplicates set the original as their original, get rid of self in between
-        f.duplicate_finding = real_original
-        super(Finding, f).save()
-        super(Finding, real_original).save()
-        removeLoop(f.id, counter - 1)
-
-
-def fix_loop_duplicates():
-    candidates = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).all().order_by("-id")
-    deduplicationLogger.info("Identified %d Findings with Loops" % len(candidates))
-    for find_id in candidates.values_list('id', flat=True):
-        removeLoop(find_id, 5)
-
-    new_originals = Finding.objects.filter(duplicate_finding__isnull=True, duplicate=True)
-    for f in new_originals:
-        deduplicationLogger.info("New Original: %d " % f.id)
-        f.duplicate = False
-        super(Finding, f).save()
-
-    loop_count = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).count()
-    deduplicationLogger.info("%d Finding found with Loops" % loop_count)
-
-
-def rename_whitesource_finding():
-    whitesource_id = Test_Type.objects.get(name="Whitesource Scan").id
-    findings = Finding.objects.filter(found_by=whitesource_id)
-    findings = findings.order_by('-pk')
-    logger.info("######## Updating Hashcodes - deduplication is done in background using django signals upon finding save ########")
-    for finding in findings:
-        logger.info("Updating Whitesource Finding with id: %d" % finding.id)
-        lib_name_begin = re.search('\\*\\*Library Filename\\*\\* : ', finding.description).span(0)[1]
-        lib_name_end = re.search('\\*\\*Library Description\\*\\*', finding.description).span(0)[0]
-        lib_name = finding.description[lib_name_begin:lib_name_end - 1]
-        if finding.cve is None:
-            finding.title = "CVE-None | " + lib_name
-        else:
-            finding.title = finding.cve + " | " + lib_name
-        if not finding.cwe:
-            logger.debug('Set cwe for finding %d to 1035 if not an cwe Number is set' % finding.id)
-            finding.cwe = 1035
-        finding.title = finding.title.rstrip()  # delete \n at the end of the title
-        from titlecase import titlecase
-        finding.title = titlecase(finding.title)
-        finding.hash_code = finding.compute_hash_code()
-        finding.save()
-
-
 def sync_rules(new_finding, *args, **kwargs):
     rules = Rule.objects.filter(applies_to='Finding', parent_rule=None)
     for rule in rules:
@@ -661,7 +587,7 @@ def add_breadcrumb(parent=None,
     request.session['dojo_breadcrumbs'] = crumbs
 
 
-def get_punchcard_data(findings, start_date, weeks):
+def get_punchcard_data(objs, start_date, weeks, view='Finding'):
     # use try catch to make sure any teething bugs in the bunchcard don't break the dashboard
     try:
         # gather findings over past half year, make sure to start on a sunday
@@ -670,12 +596,16 @@ def get_punchcard_data(findings, start_date, weeks):
 
         # reminder: The first week of a year is the one that contains the year’s first Thursday
         # so we could have for 29/12/2019: week=1 and year=2019 :-D. So using week number from db is not practical
-
-        severities_by_day = findings.filter(created__date__gte=first_sunday).filter(created__date__lt=last_sunday) \
-                                    .values('created__date') \
-                                    .annotate(count=Count('id')) \
-                                    .order_by('created__date')
-
+        if view == 'Finding':
+            severities_by_day = objs.filter(created__date__gte=first_sunday).filter(created__date__lt=last_sunday) \
+                                        .values('created__date') \
+                                        .annotate(count=Count('id')) \
+                                        .order_by('created__date')
+        elif view == 'Endpoint':
+            severities_by_day = objs.filter(date__gte=first_sunday).filter(date__lt=last_sunday) \
+                                        .values('date') \
+                                        .annotate(count=Count('id')) \
+                                        .order_by('date')
         # return empty stuff if no findings to be statted
         if severities_by_day.count() <= 0:
             return None, None
@@ -704,7 +634,10 @@ def get_punchcard_data(findings, start_date, weeks):
         day_counts = [0, 0, 0, 0, 0, 0, 0]
 
         for day in severities_by_day:
-            created = day['created__date']
+            if view == 'Finding':
+                created = day['created__date']
+            elif view == 'Endpoint':
+                created = day['date']
             day_count = day['count']
 
             created = timezone.make_aware(datetime.combine(created, datetime.min.time()))
@@ -895,23 +828,42 @@ def get_period_counts(active_findings,
             new_date = start_date + relativedelta(weeks=x, weekday=MO(1))
             end_date = new_date + relativedelta(weeks=1, weekday=MO(1))
 
-        closed_in_range_count = findings_closed.filter(
-            mitigated__date__range=[new_date, end_date]).count()
+        try:
+            closed_in_range_count = findings_closed.filter(
+                mitigated__date__range=[new_date, end_date]).count()
+        except:
+            closed_in_range_count = findings_closed.filter(
+                mitigated_time__range=[new_date, end_date]).count()
 
         if accepted_findings:
-            risks_a = accepted_findings.filter(
-                risk_acceptance__created__date__range=[
-                    datetime(
-                        new_date.year,
-                        new_date.month,
-                        1,
-                        tzinfo=timezone.get_current_timezone()),
-                    datetime(
-                        new_date.year,
-                        new_date.month,
-                        monthrange(new_date.year, new_date.month)[1],
-                        tzinfo=timezone.get_current_timezone())
-                ])
+            try:
+                risks_a = accepted_findings.filter(
+                    risk_acceptance__created__date__range=[
+                        datetime(
+                            new_date.year,
+                            new_date.month,
+                            1,
+                            tzinfo=timezone.get_current_timezone()),
+                        datetime(
+                            new_date.year,
+                            new_date.month,
+                            monthrange(new_date.year, new_date.month)[1],
+                            tzinfo=timezone.get_current_timezone())
+                    ])
+            except:
+                risks_a = accepted_findings.filter(
+                    date__range=[
+                        datetime(
+                            new_date.year,
+                            new_date.month,
+                            1,
+                            tzinfo=timezone.get_current_timezone()),
+                        datetime(
+                            new_date.year,
+                            new_date.month,
+                            monthrange(new_date.year, new_date.month)[1],
+                            tzinfo=timezone.get_current_timezone())
+                    ])
         else:
             risks_a = None
 
@@ -920,26 +872,30 @@ def get_period_counts(active_findings,
         ]
         for finding in findings:
             try:
+                severity = finding.severity
+            except:
+                severity = finding.finding.severity
+            try:
                 if new_date <= datetime.combine(
                         finding.date, datetime.min.time()
                 ).replace(tzinfo=timezone.get_current_timezone()) <= end_date:
-                    if finding.severity == 'Critical':
+                    if severity == 'Critical':
                         crit_count += 1
-                    elif finding.severity == 'High':
+                    elif severity == 'High':
                         high_count += 1
-                    elif finding.severity == 'Medium':
+                    elif severity == 'Medium':
                         med_count += 1
-                    elif finding.severity == 'Low':
+                    elif severity == 'Low':
                         low_count += 1
             except:
                 if new_date <= finding.date <= end_date:
-                    if finding.severity == 'Critical':
+                    if severity == 'Critical':
                         crit_count += 1
-                    elif finding.severity == 'High':
+                    elif severity == 'High':
                         high_count += 1
-                    elif finding.severity == 'Medium':
+                    elif severity == 'Medium':
                         med_count += 1
-                    elif finding.severity == 'Low':
+                    elif severity == 'Low':
                         low_count += 1
                 pass
 
@@ -953,13 +909,17 @@ def get_period_counts(active_findings,
         ]
         if risks_a is not None:
             for finding in risks_a:
-                if finding.severity == 'Critical':
+                try:
+                    severity = finding.severity
+                except:
+                    severity = finding.finding.severity
+                if severity == 'Critical':
                     crit_count += 1
-                elif finding.severity == 'High':
+                elif severity == 'High':
                     high_count += 1
-                elif finding.severity == 'Medium':
+                elif severity == 'Medium':
                     med_count += 1
-                elif finding.severity == 'Low':
+                elif severity == 'Low':
                     low_count += 1
 
         total = crit_count + high_count + med_count + low_count
@@ -971,25 +931,29 @@ def get_period_counts(active_findings,
         ]
         for finding in active_findings:
             try:
+                severity = finding.severity
+            except:
+                severity = finding.finding.severity
+            try:
                 if datetime.combine(finding.date, datetime.min.time()).replace(
                         tzinfo=timezone.get_current_timezone()) <= end_date:
-                    if finding.severity == 'Critical':
+                    if severity == 'Critical':
                         crit_count += 1
-                    elif finding.severity == 'High':
+                    elif severity == 'High':
                         high_count += 1
-                    elif finding.severity == 'Medium':
+                    elif severity == 'Medium':
                         med_count += 1
-                    elif finding.severity == 'Low':
+                    elif severity == 'Low':
                         low_count += 1
             except:
                 if finding.date <= end_date:
-                    if finding.severity == 'Critical':
+                    if severity == 'Critical':
                         crit_count += 1
-                    elif finding.severity == 'High':
+                    elif severity == 'High':
                         high_count += 1
-                    elif finding.severity == 'Medium':
+                    elif severity == 'Medium':
                         med_count += 1
-                    elif finding.severity == 'Low':
+                    elif severity == 'Low':
                         low_count += 1
                 pass
         total = crit_count + high_count + med_count + low_count
@@ -2145,6 +2109,10 @@ def is_scan_file_too_large(scan_file):
     return False
 
 
+def queryset_check(query):
+    return query if isinstance(query, QuerySet) else query.qs
+
+
 def sla_compute_and_notify(*args, **kwargs):
     """
     The SLA computation and notification will be disabled if the user opts out
@@ -2280,10 +2248,9 @@ def sla_compute_and_notify(*args, **kwargs):
 
 
 def get_words_for_field(queryset, fieldname):
+    max_results = getattr(settings, 'MAX_AUTOCOMPLETE_WORDS', 20000)
     words = [
-        # word for component_name in queryset.filter(component_name__isnull=False).values_list(fieldname, flat=True).distinct() for word in (component_name.split() if component_name else []) if len(word) > 2
-        word for component_name in queryset.filter(**{'%s__isnull' % fieldname: False}).values_list(fieldname, flat=True).distinct() for word in (component_name.split() if component_name else []) if len(word) > 2
-
+        word for component_name in queryset.order_by().filter(**{'%s__isnull' % fieldname: False}).values_list(fieldname, flat=True).distinct()[:max_results] for word in (component_name.split() if component_name else []) if len(word) > 2
     ]
     return sorted(set(words))
 

@@ -135,7 +135,8 @@ env = environ.Env(
     DD_SLA_NOTIFY_POST_BREACH=(int, 7),
 
     # maximum number of result in search as search can be an expensive operation
-    DD_SEARCH_MAX_RESULTS=(int, 100)
+    DD_SEARCH_MAX_RESULTS=(int, 100),
+    DD_MAX_AUTOCOMPLETE_WORDS=(int, 20000)
 )
 
 
@@ -405,6 +406,7 @@ SLA_NOTIFY_PRE_BREACH = env('DD_SLA_NOTIFY_PRE_BREACH')  # in days, notify betwe
 SLA_NOTIFY_POST_BREACH = env('DD_SLA_NOTIFY_POST_BREACH')  # in days, skip notifications for findings that go past dayofbreach plus this number
 
 SEARCH_MAX_RESULTS = env('DD_SEARCH_MAX_RESULTS')
+MAX_AUTOCOMPLETE_WORDS = env('DD_MAX_AUTOCOMPLETE_WORDS')
 
 LOGIN_EXEMPT_URLS = (
     r'^%sstatic/' % URL_PREFIX,
@@ -768,10 +770,12 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'PHP Symfony Security Check': DEDUPE_ALGO_HASH_CODE,
     'Clair Scan': DEDUPE_ALGO_HASH_CODE,
     'Clair Klar Scan': DEDUPE_ALGO_HASH_CODE,
+    'Veracode Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     # for backwards compatibility because someone decided to rename this scanner:
     'Symfony Security Check': DEDUPE_ALGO_HASH_CODE,
     'DSOP Scan': DEDUPE_ALGO_HASH_CODE,
     'Trivy Scan': DEDUPE_ALGO_HASH_CODE,
+    'HackerOne Cases': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
 }
 
 DISABLE_FINDING_MERGE = env('DD_DISABLE_FINDING_MERGE')

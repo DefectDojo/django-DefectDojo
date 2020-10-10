@@ -18,8 +18,8 @@ from dojo.tools.tool_issue_updater import tool_issue_updater, update_findings_fr
 from dojo.utils import sync_false_history, calculate_grade
 from dojo.reports.widgets import report_widget_factory
 from dojo.utils import add_comment, add_epic, add_jira_issue, update_epic, \
-                       close_epic, sync_rules, fix_loop_duplicates, \
-                       rename_whitesource_finding, update_external_issue, add_external_issue, \
+                       close_epic, sync_rules, \
+                       update_external_issue, add_external_issue, \
                        close_external_issue, reopen_external_issue, sla_compute_and_notify
 from dojo.notifications.helper import create_notification
 import logging
@@ -224,18 +224,6 @@ def async_custom_pdf_report(self,
             temp.close()
 
     return True
-
-
-@task(name='fix_loop_task')
-def fix_loop_task(*args, **kwargs):
-    logger.info("Executing Loop Duplicate Fix Job")
-    fix_loop_duplicates()
-
-
-@task(name='rename_whitesource_finding_task')
-def rename_whitesource_finding_task(*args, **kwargs):
-    logger.info("Executing Whitesource renaming and rehashing started.")
-    rename_whitesource_finding()
 
 
 @task(name='add_external_issue_task')

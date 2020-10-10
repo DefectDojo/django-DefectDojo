@@ -158,20 +158,13 @@ class System_Settings(models.Model):
                                              'https://api.slack.com/tokens')
     slack_username = models.CharField(max_length=100, default='', blank=True,
                      help_text='Optional. Will take your bot name otherwise.')
-    enable_hipchat_notifications = \
+    enable_msteams_notifications = \
         models.BooleanField(default=False,
-                            verbose_name='Enable HipChat notifications',
+                            verbose_name='Enable Microsoft Teams notifications',
                             blank=False)
-    hipchat_site = models.CharField(max_length=100, default='', blank=True,
-                                    help_text='The full fqdn of your '
-                                              'hipchat site, e.g. '
-                                              '"yoursite.hipchat.com"')
-    hipchat_channel = models.CharField(max_length=100, default='', blank=True)
-    hipchat_token = \
-        models.CharField(max_length=100, default='', blank=True,
-                         help_text='Token required for interacting with '
-                                   'HipChat. Get one at '
-                                   'https://patriktest.hipchat.com/addons/')
+    msteams_url = models.CharField(max_length=400, default='', blank=True,
+                                    help_text='The full URL of the '
+                                              'incoming webhook')
     enable_mail_notifications = models.BooleanField(default=False, blank=False)
     mail_notifications_from = models.CharField(max_length=200,
                                                default='from@example.com',
@@ -343,7 +336,6 @@ class UserContactInfo(models.Model):
     github_username = models.CharField(blank=True, null=True, max_length=150)
     slack_username = models.CharField(blank=True, null=True, max_length=150, help_text="Email address associated with your slack account", verbose_name="Slack Email Address")
     slack_user_id = models.CharField(blank=True, null=True, max_length=25)
-    hipchat_username = models.CharField(blank=True, null=True, max_length=150)
     block_execution = models.BooleanField(default=False, help_text="Instead of async deduping a finding the findings will be deduped synchronously and will 'block' the user until completion.")
 
 
@@ -1107,6 +1099,15 @@ class Endpoint_Status(models.Model):
     endpoint = models.ForeignKey('Endpoint', null=True, blank=True, on_delete=models.CASCADE, related_name='status_endpoint')
     finding = models.ForeignKey('Finding', null=True, blank=True, on_delete=models.CASCADE, related_name='status_finding')
 
+    @property
+    def age(self):
+        if self.mitigated:
+            diff = self.mitigated_time.date() - self.date.date()
+        else:
+            diff = get_current_date() - self.date.date()
+        days = diff.days
+        return days if days > 0 else 0
+
 
 class Endpoint(models.Model):
     protocol = models.CharField(null=True, blank=True, max_length=10,
@@ -1409,7 +1410,7 @@ class Finding(models.Model):
     cwe = models.IntegerField(default=0, null=True, blank=True)
     cve_regex = RegexValidator(regex=r'^[A-Z]{1,10}(-\d+)+$',
                                message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'.")
-    cve = models.CharField(validators=[cve_regex], max_length=28, null=True,
+    cve = models.CharField(validators=[cve_regex], max_length=28, null=True, blank=False,
                            help_text="CVE or other vulnerability identifier")
     cvssv3_regex = RegexValidator(regex=r'^AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]', message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'")
     cvssv3 = models.TextField(validators=[cvssv3_regex], max_length=117, null=True)
@@ -1523,6 +1524,7 @@ class Finding(models.Model):
             models.Index(fields=['unique_id_from_tool']),
             # models.Index(fields=['file_path']), # can't add index because the field has max length 4000.
             models.Index(fields=['line']),
+            models.Index(fields=['component_name']),
         ]
 
     def is_authorized(self, user, perm_type):
@@ -1860,6 +1862,10 @@ class Finding(models.Model):
             return None
             pass
 
+    def get_push_all_to_jira(self):
+        if self.jira_pkey():
+            return self.jira_pkey().push_all_issues
+
     def long_desc(self):
         long_desc = ''
         long_desc += '*' + self.title + '*\n\n'
@@ -1894,7 +1900,6 @@ class Finding(models.Model):
             logger.debug('finding.save() getting current user: %s', user)
 
         jira_issue_exists = JIRA_Issue.objects.filter(finding=self).exists()
-        push_to_jira = getattr(self, 'push_to_jira', push_to_jira)
 
         if self.pk is None:
             # We enter here during the first call from serializers.py
@@ -2088,7 +2093,7 @@ class Finding_Template(models.Model):
     cwe = models.IntegerField(default=None, null=True, blank=True)
     cve_regex = RegexValidator(regex=r'^[A-Z]{1,10}(-\d+)+$',
                                message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'.")
-    cve = models.CharField(validators=[cve_regex], max_length=28, null=True)
+    cve = models.CharField(validators=[cve_regex], max_length=28, null=True, blank=False)
     cvssv3_regex = RegexValidator(regex=r'^AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]', message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'")
     cvssv3 = models.TextField(validators=[cvssv3_regex], max_length=117, null=True)
     severity = models.CharField(max_length=200, null=True, blank=True)
@@ -2477,7 +2482,7 @@ class JIRA_PKey(models.Model):
 
 
 NOTIFICATION_CHOICES = (
-    ("slack", "slack"), ("hipchat", "hipchat"), ("mail", "mail"),
+    ("slack", "slack"), ("msteams", "msteams"), ("mail", "mail"),
     ("alert", "alert")
 )
 

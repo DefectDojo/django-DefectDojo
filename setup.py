@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name='DefectDojo',
-    version='1.8.0-dev',
+    version='1.9.0-dev',
     author='Greg Anderson',
     description="Tool for managing vulnerability engagements",
     install_requires=[
@@ -12,7 +12,7 @@ setup(
         'Django==2.2.16',
         'django-auditlog==0.4.7',
         'django-custom-field',
-        'django-filter==2.3.0',
+        'django-filter==2.4.0',
         'django-imagekit',
         'django-multiselectfield',
         'django-polymorphic==3.0.0',
@@ -58,7 +58,7 @@ setup(
         'pbr',
         'django-slack',
         'asteval',
-        'Markdown==3.2.2',
+        'Markdown==3.3',
         'pandas>=0.22.0',
         'django-dbbackup>=3.2.0',
         'whitenoise==4.1.4',
