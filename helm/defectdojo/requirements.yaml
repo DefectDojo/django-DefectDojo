@@ -8,7 +8,7 @@ dependencies:
     repository: "@stable"
     condition: postgresql.enabled
   - name: rabbitmq
-    version: 6.16.0
+    version: 6.18.2
     repository: "@stable"
     condition: rabbitmq.enabled
   - name: redis
