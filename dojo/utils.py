@@ -88,7 +88,6 @@ def is_deduplication_on_engagement_mismatch(new_finding, to_duplicate_finding):
 
 @receiver(dedupe_signal, sender=Finding)
 def sync_dedupe(sender, *args, **kwargs):
-    logger.debug('in sync_dedupe')
     try:
         enabled = System_Settings.objects.get(no_cache=True).enable_deduplication
     except System_Settings.DoesNotExist:
@@ -155,7 +154,6 @@ def deduplicate_legacy(new_finding):
 
     # total_findings = total_findings.order_by('date')
     for find in total_findings:
-        logger.debug('bla0')
         flag_endpoints = False
         flag_line_path = False
         flag_hash = False
@@ -164,28 +162,16 @@ def deduplicate_legacy(new_finding):
                 'deduplication_on_engagement_mismatch, skipping dedupe.')
             continue
 
-        logger.debug('bla00')
         # ---------------------------------------------------------
         # 2) If existing and new findings have endpoints: compare them all
         #    Else look at line+file_path
         #    (if new finding is not static, do not deduplicate)
         # ---------------------------------------------------------
 
-        logger.debug(find.endpoints.count())
-        logger.debug('bla001')
-        logger.debug(new_finding.endpoints.count())
-        logger.debug('bla002')
-        logger.debug(new_finding.static_finding)
-        logger.debug('bla003')
-        # logger.debug(len(new_finding.file_path))
-        logger.debug('bla004')
-
         if find.endpoints.count() != 0 and new_finding.endpoints.count() != 0:
             logger.debug('comparing endpoints')
             list1 = [e.host_with_port for e in new_finding.endpoints.all()]
             list2 = [e.host_with_port for e in find.endpoints.all()]
-            # logger.debug('list1: %s', list1)
-            # logger.debug('list2: %s', list2)
 
             if all(x in list1 for x in list2):
                 deduplicationLogger.debug("%s: existing endpoints are present in new finding", find.id)
@@ -204,13 +190,9 @@ def deduplicate_legacy(new_finding):
         if find.hash_code == new_finding.hash_code:
             flag_hash = True
 
-        logger.debug('bla1')
-
-        # deduplicationLogger.debug(
-        #     'deduplication flags for new finding (' + ('dynamic' if new_finding.dynamic_finding else 'static') + ') ' + str(new_finding.id) + ' and existing finding ' + str(find.id) +
-        #     ' flag_endpoints: ' + str(flag_endpoints) + ' flag_line_path:' + str(flag_line_path) + ' flag_hash:' + str(flag_hash))
-
-        logger.debug('bla2')
+        deduplicationLogger.debug(
+            'deduplication flags for new finding (' + ('dynamic' if new_finding.dynamic_finding else 'static') + ') ' + str(new_finding.id) + ' and existing finding ' + str(find.id) +
+            ' flag_endpoints: ' + str(flag_endpoints) + ' flag_line_path:' + str(flag_line_path) + ' flag_hash:' + str(flag_hash))
 
         # ---------------------------------------------------------
         # 3) Findings are duplicate if (cond1 is true) and they have the same:
@@ -226,8 +208,6 @@ def deduplicate_legacy(new_finding):
 
             break
 
-        logger.debug('bla4')
-
 
 def deduplicate_unique_id_from_tool(new_finding):
     if new_finding.test.engagement.deduplication_on_engagement:
@@ -237,7 +217,6 @@ def deduplicate_unique_id_from_tool(new_finding):
                 id=new_finding.id).exclude(
                     unique_id_from_tool=None).exclude(
                         duplicate=True)
-        deduplicationLogger.debug(existing_findings.query)
     else:
         existing_findings = Finding.objects.filter(
             test__engagement__product=new_finding.test.engagement.product,
