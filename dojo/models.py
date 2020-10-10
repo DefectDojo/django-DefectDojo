@@ -1992,6 +1992,8 @@ class Finding(models.Model):
             except:
                 async_false_history.delay(self, *args, **kwargs)
                 pass
+        else:
+            deduplicationLogger.debug("skipping false positive history because it's disabled in system settings or false_history param is False")
 
         # Title Casing
         from titlecase import titlecase

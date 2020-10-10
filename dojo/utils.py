@@ -50,7 +50,9 @@ Helper functions for DefectDojo
 
 
 def sync_false_history(new_finding, *args, **kwargs):
+    logger.debug('%s: sync false positive history', new_finding.id)
     if new_finding.endpoints.count() == 0:
+        # if no endpoints on new finding, then look at cwe + test_type + hash_code. or title + test_type + hash_code
         eng_findings_cwe = Finding.objects.filter(
             test__engagement__product=new_finding.test.engagement.product,
             cwe=new_finding.cwe,
@@ -63,6 +65,7 @@ def sync_false_history(new_finding, *args, **kwargs):
             false_p=True, hash_code=new_finding.hash_code).exclude(id=new_finding.id)
         total_findings = eng_findings_cwe | eng_findings_title
     else:
+        # if endpoints on new finding, then look at ONLY cwe + test_type. or title + test_type (hash_code doesn't matter!)
         eng_findings_cwe = Finding.objects.filter(
             test__engagement__product=new_finding.test.engagement.product,
             cwe=new_finding.cwe,
@@ -73,7 +76,17 @@ def sync_false_history(new_finding, *args, **kwargs):
             title=new_finding.title,
             test__test_type=new_finding.test.test_type,
             false_p=True).exclude(id=new_finding.id).exclude(endpoints=None)
+
+    deduplicationLogger.debug("cwe   query: %s", eng_findings_cwe.query)
+    deduplicationLogger.debug("title query: %s", eng_findings_title.query)
+
     total_findings = eng_findings_cwe | eng_findings_title
+
+    deduplicationLogger.debug("False positive history: Found " +
+        str(len(eng_findings_cwe)) + " findings with same cwe, " +
+        str(len(eng_findings_title)) + " findings with same title: " +
+        str(len(total_findings)) + " findings with either same title or same cwe")
+
     if total_findings.count() > 0:
         new_finding.false_p = True
         new_finding.active = False

@@ -9,12 +9,15 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 loglevel = logging.DEBUG
 logging.basicConfig(level=loglevel)
 
-# WIP
-
 # things to consider:
 # - cross scanner deduplication is still flaky as if some scanners don't provide severity, but another doesn, the hashcode will be different so no deduplication happens.
 #   so I couldn't create any good tests
 # - hash_code is only calculated once and never changed. should we add a feature to run dedupe when somebody modifies a finding? bulk edit action to trigger dedupe?
+
+# false positive history observations:
+# - doesn't respect dedupe_on_engagement
+# - if endpoints are mismatching, it falls back to comparing just the title + test_type or cwe + test_type. this leads to false positive false positives (pung intended)
+# - I think this feature should be resdesigned and use the dedupe algo to find "identical/similar findings" to copy false_p status from
 
 # test data summary
 # product 1: Python How-to
@@ -129,14 +132,13 @@ class TestDuplicationLogic(TestCase):
 
     def setUp(self):
         logger.debug('enabling deduplication')
-        system_settings = System_Settings.objects.get()
-        system_settings.enable_deduplication = True
-        system_settings.save()
+        self.enable_dedupe()
 
         self.log_summary()
 
     def tearDown(self):
-        # return
+        # some test disable dedupe, always reenable
+        self.enable_dedupe()
         self.log_summary()
         # self.log_summary(test=33)
         # self.log_summary(product=2)
@@ -896,6 +898,252 @@ class TestDuplicationLogic(TestCase):
         # different uid. and different endpoints, but hash will not be affected by endpoints because dynamic_finding is set to False
         self.assert_finding(finding_new, not_pk=224, duplicate=True, duplicate_finding_id=224, hash_code=finding_224.hash_code)
 
+    # sync false positive history tests
+
+    def test_false_positive_history_with_dedupe_no_endpoints_identical(self):
+        self.enable_false_positive_history()
+        finding_22 = Finding.objects.get(id=22)
+        finding_22.false_p = True
+        finding_22.save(dedupe_option=False)
+        # create a copy of 22
+        finding_new, finding_22 = self.copy_and_reset_finding(id=22)
+        finding_new.false_p = False
+        finding_new.save()
+
+        # dedupe is enabled, hash_code matches, so new finding marked as duplicate AND copies false positive True from original
+        # feature or BUG? finding already marked as duplicate, should it als be marked as false positive?
+        # should we do the same for out_of_scope? risk accepted?
+        # should this be part of the dedupe process? or seperate as in false_p history?
+        self.assert_finding(finding_new, not_pk=22, duplicate=True, duplicate_finding_id=finding_22.id, hash_code=finding_22.hash_code)
+        self.assertEquals(finding_new.false_p, True)
+
+    def test_false_positive_history_with_dedupe_no_endpoints_title_matches_but_not_hash_code(self):
+        self.enable_false_positive_history()
+        finding_22 = Finding.objects.get(id=22)
+        finding_22.false_p = True
+        finding_22.save(dedupe_option=False)
+
+        # create a copy of 22
+        finding_new, finding_22 = self.copy_and_reset_finding(id=22)
+        finding_new.cwe = 432
+        finding_new.false_p = False
+        finding_new.save()
+
+        # dedupe is enabled, hash_code doesn't matches, so new finding not marked as duplicate and also not recognized by false positive history
+        self.assert_finding(finding_new, not_pk=22, duplicate=False, not_hash_code=finding_22.hash_code)
+        self.assertEquals(finding_new.false_p, False)
+
+    def test_false_positive_history_with_dedupe_no_endpoints_cwe_matches_but_not_hash_code(self):
+        self.enable_false_positive_history()
+        finding_22 = Finding.objects.get(id=22)
+        finding_22.false_p = True
+        finding_22.save(dedupe_option=False)
+
+        # create a copy of 22
+        finding_new, finding_22 = self.copy_and_reset_finding(id=22)
+        finding_new.title = 'same same but different'
+        finding_new.false_p = False
+        finding_new.save()
+
+        # dedupe is enabled, hash_code doesn't matches, so new finding not marked as duplicate and also not recognized by false positive history
+        self.assert_finding(finding_new, not_pk=22, duplicate=False, not_hash_code=finding_22.hash_code)
+        self.assertEquals(finding_new.false_p, False)
+
+    def test_false_positive_history_without_dedupe_no_endpoints_identical(self):
+        self.enable_dedupe(enable=False)
+        self.enable_false_positive_history()
+        finding_22 = Finding.objects.get(id=22)
+        finding_22.false_p = True
+        finding_22.save(dedupe_option=False)
+
+        # create a copy of 22
+        finding_new, finding_22 = self.copy_and_reset_finding(id=22)
+        finding_new.false_p = False
+        finding_new.save()
+
+        # dedupe is disabled, hash_code matches, so marked as false positive
+        self.assert_finding(finding_new, not_pk=22, duplicate=False, hash_code=finding_22.hash_code)
+        self.assertEquals(finding_new.false_p, True)
+
+    def test_false_positive_history_without_dedupe_no_endpoints_title_matches_but_not_hash_code(self):
+        self.enable_dedupe(enable=False)
+        self.enable_false_positive_history()
+        finding_22 = Finding.objects.get(id=22)
+        finding_22.false_p = True
+
+        # create a copy of 22
+        finding_new, finding_22 = self.copy_and_reset_finding(id=22)
+        finding_new.cwe = 432
+        finding_new.false_p = False
+        finding_new.save()
+
+        # dedupe is disabled, hash_code doesn't matches, so not marked as false positive
+        self.assert_finding(finding_new, not_pk=22, duplicate=False, not_hash_code=finding_22.hash_code)
+        self.assertEquals(finding_new.false_p, False)
+
+    def test_false_positive_history_without_dedupe_no_endpoints_cwe_matches_but_not_hash_code(self):
+        self.enable_dedupe(enable=False)
+        self.enable_false_positive_history()
+        finding_22 = Finding.objects.get(id=22)
+        finding_22.false_p = True
+
+        # create a copy of 22
+        finding_new, finding_22 = self.copy_and_reset_finding(id=22)
+        finding_new.title = 'same same but different'
+        finding_new.false_p = False
+        finding_new.save()
+
+        # dedupe is enabled, hash_code doesn't matches, so new finding not marked as duplicate and also not recognized by false positive history
+        self.assert_finding(finding_new, not_pk=22, duplicate=False, not_hash_code=finding_22.hash_code)
+        self.assertEquals(finding_new.false_p, False)
+
+    #  false positive history with endpoints
+
+    def test_false_positive_history_with_dedupe_with_endpoints_identical(self):
+        self.enable_false_positive_history()
+        finding_22 = Finding.objects.get(id=22)
+        finding_22.false_p = True
+        ep1 = Endpoint(product=finding_22.test.engagement.product, finding=finding_22, host="myhostxxx.com", protocol="https")
+        ep1.save()
+        finding_22.endpoints.add(ep1)
+        finding_22.save(dedupe_option=False)
+        # create a copy of 22
+        finding_new, finding_22 = self.copy_and_reset_finding(id=22)
+        finding_new.false_p = False
+        finding_new.save(dedupe_option=False)
+        ep1 = Endpoint(product=finding_new.test.engagement.product, finding=finding_new, host="myhost.com", protocol="https")
+        ep1.save()
+        finding_new.endpoints.add(ep1)
+        finding_new.save(false_history=True)
+
+        # dedupe is enabled, hash_code mismatche due to endpoints, so new finding not marked as duplicate AND copies false positive True from original even with mismatching endpoints
+        # feature or BUG? false positive status is copied when dedupe says it's not a dupe and endpoints are mismatching
+        self.assert_finding(finding_new, not_pk=22, duplicate=False, hash_code=finding_22.hash_code)
+        self.assertEquals(finding_new.false_p, True)
+
+    def test_false_positive_history_with_dedupe_with_endpoints_title_matches_but_not_hash_code(self):
+        self.enable_false_positive_history()
+        finding_22 = Finding.objects.get(id=22)
+        finding_22.false_p = True
+        ep1 = Endpoint(product=finding_22.test.engagement.product, finding=finding_22, host="myhostxxx.com", protocol="https")
+        ep1.save()
+        finding_22.endpoints.add(ep1)
+        finding_22.save(dedupe_option=False)
+
+        # create a copy of 22
+        finding_new, finding_22 = self.copy_and_reset_finding(id=22)
+        finding_new.false_p = False
+        finding_new.save(dedupe_option=False)
+        ep1 = Endpoint(product=finding_new.test.engagement.product, finding=finding_new, host="myhost.com", protocol="https")
+        ep1.save()
+        finding_new.endpoints.add(ep1)
+        finding_new.cwe = 432
+        finding_new.save(false_history=True)
+
+        # dedupe is enabled, hash_code doesn't matches, so new finding not marked as duplicate but it IS recognized by false positive history because of the title matching
+        # feature or BUG? false positive status is copied when dedupe says it's not a dupe and endpoints are mismatching
+        self.assert_finding(finding_new, not_pk=22, duplicate=False, not_hash_code=finding_22.hash_code)
+        self.assertEquals(finding_new.false_p, True)
+
+    def test_false_positive_history_with_dedupe_with_endpoints_cwe_matches_but_not_hash_code(self):
+        self.enable_false_positive_history()
+        finding_22 = Finding.objects.get(id=22)
+        ep1 = Endpoint(product=finding_22.test.engagement.product, finding=finding_22, host="myhostxxx.com", protocol="https")
+        ep1.save()
+        finding_22.endpoints.add(ep1)
+        finding_22.false_p = True
+        finding_22.cwe = 123  # testdate has no CWE
+        finding_22.save(dedupe_option=False)
+
+        # create a copy of 22
+        finding_new, finding_22 = self.copy_and_reset_finding(id=22)
+        finding_new.save(dedupe_option=False)
+        ep1 = Endpoint(product=finding_new.test.engagement.product, finding=finding_new, host="myhost.com", protocol="https")
+        ep1.save()
+        finding_new.endpoints.add(ep1)
+        finding_new.title = 'same same but different'
+        finding_new.false_p = False
+        finding_new.save(false_history=True)
+
+        # dedupe is enabled, hash_code doesn't matches, so new finding not marked as duplicate but it IS recognized by false positive history because of the cwe matching
+        # feature or BUG? false positive status is copied when dedupe says it's not a dupe and endpoints are mismatching
+        self.assert_finding(finding_new, not_pk=22, duplicate=False, not_hash_code=finding_22.hash_code)
+        self.assertEquals(finding_new.false_p, True)
+
+    def test_false_positive_history_without_dedupe_with_endpoints_identical(self):
+        self.enable_dedupe(enable=False)
+        self.enable_false_positive_history()
+        finding_22 = Finding.objects.get(id=22)
+        ep1 = Endpoint(product=finding_22.test.engagement.product, finding=finding_22, host="myhostxxx.com", protocol="https")
+        ep1.save()
+        finding_22.endpoints.add(ep1)
+        finding_22.false_p = True
+        finding_22.save(dedupe_option=False)
+
+        # create a copy of 22
+        finding_new, finding_22 = self.copy_and_reset_finding(id=22)
+        finding_new.save(dedupe_option=False)
+        ep1 = Endpoint(product=finding_new.test.engagement.product, finding=finding_new, host="myhost.com", protocol="https")
+        ep1.save()
+        finding_new.endpoints.add(ep1)
+        finding_new.false_p = False
+        finding_new.save(false_history=True)
+
+        # dedupe is disabled, hash_code matches, so marked as false positive
+        self.assert_finding(finding_new, not_pk=22, duplicate=False, hash_code=finding_22.hash_code)
+        self.assertEquals(finding_new.false_p, True)
+
+    def test_false_positive_history_without_dedupe_with_endpoints_title_matches_but_not_hash_code(self):
+        self.enable_dedupe(enable=False)
+        self.enable_false_positive_history()
+        finding_22 = Finding.objects.get(id=22)
+        ep1 = Endpoint(product=finding_22.test.engagement.product, finding=finding_22, host="myhostxxx.com", protocol="https")
+        ep1.save()
+        finding_22.endpoints.add(ep1)
+        finding_22.false_p = True
+        finding_22.save(dedupe_option=False)
+
+        # create a copy of 22
+        finding_new, finding_22 = self.copy_and_reset_finding(id=22)
+        finding_new.save(dedupe_option=False)
+        ep1 = Endpoint(product=finding_new.test.engagement.product, finding=finding_new, host="myhost.com", protocol="https")
+        ep1.save()
+        finding_new.endpoints.add(ep1)
+        finding_new.cwe = 432
+        finding_new.false_p = False
+        finding_new.save(false_history=True)
+
+        # dedupe is disabled, hash_code doesn't matches, but it IS recognized by false positive history because of the title matching
+        # feature or BUG? false positive status is copied when dedupe says it's not a dupe and endpoints are mismatching
+        self.assert_finding(finding_new, not_pk=22, duplicate=False, not_hash_code=finding_22.hash_code)
+        self.assertEquals(finding_new.false_p, True)
+
+    def test_false_positive_history_without_dedupe_with_endpoints_cwe_matches_but_not_hash_code(self):
+        self.enable_dedupe(enable=False)
+        self.enable_false_positive_history()
+        finding_22 = Finding.objects.get(id=22)
+        ep1 = Endpoint(product=finding_22.test.engagement.product, finding=finding_22, host="myhostxxx.com", protocol="https")
+        ep1.save()
+        finding_22.endpoints.add(ep1)
+        finding_22.cwe = 123  # test data has now CWE here
+        finding_22.false_p = True
+        finding_22.save(dedupe_option=False)
+
+        # create a copy of 22
+        finding_new, finding_22 = self.copy_and_reset_finding(id=22)
+        finding_new.save(dedupe_option=False)
+        ep1 = Endpoint(product=finding_new.test.engagement.product, finding=finding_new, host="myhost.com", protocol="https")
+        ep1.save()
+        finding_new.endpoints.add(ep1)
+        finding_new.title = 'same same but different'
+        finding_new.false_p = False
+        finding_new.save(false_history=True)
+
+        # dedupe is disabled, hash_code doesn't matches, so new finding not marked as duplicate but it IS recognized by false positive history because of the cwe matching
+        # feature or BUG? false positive status is copied when dedupe says it's not a dupe and endpoints are mismatching
+        self.assert_finding(finding_new, not_pk=22, duplicate=False, not_hash_code=finding_22.hash_code)
+        self.assertEquals(finding_new.false_p, True)
+
     # # some extra tests
 
     # # hash_code currently is only created on finding creation and after that never changed. feature or BUG?
@@ -964,6 +1212,27 @@ class TestDuplicationLogic(TestCase):
         finding_new.save(dedupe_option=True)
         self.assertEqual(finding_new.title, 'The Quick Brown Fox Jumps Over the Lazy Dog')
 
+    def test_hash_code_without_dedupe(self):
+        # if dedupe is disabled, hash_code should still be calculated
+        self.enable_dedupe(enable=False)
+        finding_new, finding_124 = self.copy_and_reset_finding(id=124)
+        finding_new.save(dedupe_option=False)
+
+        # save skips hash_code generation if dedupe_option==False
+        self.assertFalse(finding_new.hash_code)
+
+        finding_new.save(dedupe_option=True)
+
+        self.assertTrue(finding_new.hash_code)
+
+        finding_new, finding_124 = self.copy_and_reset_finding(id=124)
+        finding_new.save()
+
+        # by default hash_code should be generated
+        self.assertTrue(finding_new.hash_code)
+
+    # # utility methods
+
     def log_product(self, product):
         if isinstance(product, int):
             product = Product.objects.get(pk=product)
@@ -1000,9 +1269,9 @@ class TestDuplicationLogic(TestCase):
                 logger.debug('\t\t\t{:4.4}'.format(str(finding.id)) + ': "' + '{:20.20}'.format(finding.title) + '": ' + '{:5.5}'.format(finding.severity) + ': act: ' + '{:5.5}'.format(str(finding.active)) +
                         ': ver: ' + '{:5.5}'.format(str(finding.verified)) + ': mit: ' + '{:5.5}'.format(str(finding.is_Mitigated)) +
                         ': dup: ' + '{:5.5}'.format(str(finding.duplicate)) + ': dup_id: ' +
-                        ('{:4.4}'.format(str(finding.duplicate_finding.id)) if finding.duplicate_finding else 'None') + ': hash_code: ' + finding.hash_code +
+                        ('{:4.4}'.format(str(finding.duplicate_finding.id)) if finding.duplicate_finding else 'None') + ': hash_code: ' + str(finding.hash_code) +
                         ': eps: ' + str(finding.endpoints.count()) + ": notes: " + str([n.id for n in finding.notes.all()]) +
-                        ': uid: ' + '{:5.5}'.format(str(finding.unique_id_from_tool))
+                        ': uid: ' + '{:5.5}'.format(str(finding.unique_id_from_tool)) + (' fp' if finding.false_p else '')
                         )
 
         logger.debug('\t\tendpoints')
@@ -1099,3 +1368,13 @@ class TestDuplicationLogic(TestCase):
         test_new.engagement = eng_new
         test_new.save()
         return test_new, eng_new
+
+    def enable_dedupe(self, enable=True):
+        system_settings = System_Settings.objects.get()
+        system_settings.enable_deduplication = enable
+        system_settings.save()
+
+    def enable_false_positive_history(self, enable=True):
+        system_settings = System_Settings.objects.get()
+        system_settings.false_positive_history = enable
+        system_settings.save()
