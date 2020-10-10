@@ -169,7 +169,6 @@ def deduplicate_legacy(new_finding):
         # ---------------------------------------------------------
 
         if find.endpoints.count() != 0 and new_finding.endpoints.count() != 0:
-            logger.debug('comparing endpoints')
             list1 = [e.host_with_port for e in new_finding.endpoints.all()]
             list2 = [e.host_with_port for e in find.endpoints.all()]
 
@@ -177,14 +176,12 @@ def deduplicate_legacy(new_finding):
                 deduplicationLogger.debug("%s: existing endpoints are present in new finding", find.id)
                 flag_endpoints = True
         elif new_finding.static_finding and new_finding.file_path and len(new_finding.file_path) > 0:
-            logger.debug('bla00000')
             if str(find.line) == str(new_finding.line) and find.file_path == new_finding.file_path:
                 deduplicationLogger.debug("%s: file_path and line match", find.id)
                 flag_line_path = True
             else:
                 deduplicationLogger.debug("no endpoints on one of the findings and file_path doesn't match; Deduplication will not occur")
         else:
-            logger.debug('bla02120')
             deduplicationLogger.debug("no endpoints on one of the findings and the new finding is either dynamic or doesn't have a file_path; Deduplication will not occur")
 
         if find.hash_code == new_finding.hash_code:
