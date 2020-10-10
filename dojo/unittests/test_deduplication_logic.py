@@ -31,12 +31,12 @@ logging.basicConfig(level=loglevel)
 #       engagement 1: 1st Quarter Engagement
 #               test 3: ZAP Scan (algo=hash_code, dynamic=True)
 #               findings:
-#                       2   : "High Impact Test Fin": High : act: True : ver: True : mit: False: dup: False: dup_id: None: hash_code: 8cba854f0b70f8a25064952402fbe30c728c0017b83c245d786366956044e0bf: eps: 0: notes: []
-#                       3   : "High Impact Test Fin": High : act: True : ver: True : mit: False: dup: True : dup_id: 2   : hash_code: 8cba854f0b70f8a25064952402fbe30c728c0017b83c245d786366956044e0bf: eps: 0: notes: []
-#                       4   : "High Impact Test Fin": High : act: True : ver: True : mit: False: dup: True : dup_id: 2   : hash_code: 8cba854f0b70f8a25064952402fbe30c728c0017b83c245d786366956044e0bf: eps: 0: notes: []
-#                       5   : "High Impact Test Fin": High : act: True : ver: True : mit: False: dup: True : dup_id: 2   : hash_code: 8cba854f0b70f8a25064952402fbe30c728c0017b83c245d786366956044e0bf: eps: 0: notes: []
-#                       6   : "High Impact Test Fin": High : act: True : ver: True : mit: False: dup: True : dup_id: 2   : hash_code: 8cba854f0b70f8a25064952402fbe30c728c0017b83c245d786366956044e0bf: eps: 0: notes: []
-#                       7   : "DUMMY FINDING       ": High : act: False: ver: False: mit: False: dup: False: dup_id: None: hash_code: c89d25e445b088ba339908f68e15e3177b78d22f3039d1bfea51c4be251bf4e0: eps: 0: notes: [1]
+#                       2   : "High Impact Test Fin": High : act: True : ver: True : mit: False: dup: False: dup_id: None: hash_code: 8cba854f0b70f8a25064952402fbe30c728c0017b83c245d786366956044e0bf: eps: 0: notes: []: uid: None
+#                       3   : "High Impact Test Fin": High : act: True : ver: True : mit: False: dup: True : dup_id: 2   : hash_code: 8cba854f0b70f8a25064952402fbe30c728c0017b83c245d786366956044e0bf: eps: 0: notes: []: uid: None
+#                       4   : "High Impact Test Fin": High : act: True : ver: True : mit: False: dup: True : dup_id: 2   : hash_code: 8cba854f0b70f8a25064952402fbe30c728c0017b83c245d786366956044e0bf: eps: 0: notes: []: uid: None
+#                       5   : "High Impact Test Fin": High : act: True : ver: True : mit: False: dup: True : dup_id: 2   : hash_code: 8cba854f0b70f8a25064952402fbe30c728c0017b83c245d786366956044e0bf: eps: 0: notes: []: uid: None
+#                       6   : "High Impact Test Fin": High : act: True : ver: True : mit: False: dup: True : dup_id: 2   : hash_code: 8cba854f0b70f8a25064952402fbe30c728c0017b83c245d786366956044e0bf: eps: 0: notes: []: uid: None
+#                       7   : "DUMMY FINDING       ": High : act: False: ver: False: mit: False: dup: False: dup_id: None: hash_code: c89d25e445b088ba339908f68e15e3177b78d22f3039d1bfea51c4be251bf4e0: eps: 0: notes: [1]: uid: None
 #               endpoints
 #                       2: ftp://localhost/
 #                       1: http://127.0.0.1/endpoint/420/edit/
@@ -60,12 +60,23 @@ logging.basicConfig(level=loglevel)
 #                       3: ssh:127.0.1
 #               endpoint statuses
 #                       1: dojo.Endpoint.None dojo.Finding.None 1 2020-07-01 00:00:00+00:00 2020-07-01 17:45:39.791907+00:00 False None None False False False ftp://localhost/ High Impact Test Finding
+#       engagement 5: April monthly engagement
+#               test 55: Checkmarx Scan detailed (algo=unique_id_from_tool, dynamic=False)
+#               findings:
+#                       124 : "Low Impact Test Find": Low  : act: True : ver: True : mit: False: dup: False: dup_id: None: hash_code: 5f272ec29b29d56ca08eba26435bdb225ae4956812c10fce872a6143b73474ba: eps: 0: notes: []: uid: 12345
+#                       125 : "Low Impact Test Find": Low  : act: True : ver: True : mit: False: dup: True : dup_id: None: hash_code: 5f272ec29b29d56ca08eba26435bdb225ae4956812c10fce872a6143b73474ba: eps: 0: notes: []: uid: 12345
+#               endpoints
+#                       2: ftp://localhost/
+#                       1: http://127.0.0.1/endpoint/420/edit/
+#                       3: ssh:127.0.1
+#               endpoint statuses
+#                       1: dojo.Endpoint.None dojo.Finding.None 1 2020-07-01 00:00:00+00:00 2020-07-01 17:45:39.791907+00:00 False None None False False False ftp://localhost/ High Impact Test Finding
 #       engagement 3: weekly engagement
 #               test 33: Generic Findings Import (algo=legacy, dynamic=False)
 #               findings:
-#                       22  : "Low Impact Test Find": Low  : act: True : ver: True : mit: False: dup: False: dup_id: None: hash_code: 5f272ec29b29d56ca08eba26435bdb225ae4956812c10fce872a6143b73474ba: eps: 0: notes: []
-#                       23  : "Low Impact Test Find": Low  : act: True : ver: True : mit: False: dup: True : dup_id: 22  : hash_code: 5f272ec29b29d56ca08eba26435bdb225ae4956812c10fce872a6143b73474ba: eps: 0: notes: []
-#                       24  : "Low Impact Test Find": Low  : act: True : ver: True : mit: False: dup: True : dup_id: 22  : hash_code: 5f272ec29b29d56ca08eba26435bdb225ae4956812c10fce872a6143b73474ba: eps: 0: notes: []
+#                       22  : "Low Impact Test Find": Low  : act: True : ver: True : mit: False: dup: False: dup_id: None: hash_code: 5f272ec29b29d56ca08eba26435bdb225ae4956812c10fce872a6143b73474ba: eps: 0: notes: []: uid: None
+#                       23  : "Low Impact Test Find": Low  : act: True : ver: True : mit: False: dup: True : dup_id: 22  : hash_code: 5f272ec29b29d56ca08eba26435bdb225ae4956812c10fce872a6143b73474ba: eps: 0: notes: []: uid: None
+#                       24  : "Low Impact Test Find": Low  : act: True : ver: True : mit: False: dup: True : dup_id: 22  : hash_code: 5f272ec29b29d56ca08eba26435bdb225ae4956812c10fce872a6143b73474ba: eps: 0: notes: []: uid: None
 #               endpoints
 #                       2: ftp://localhost/
 #                       1: http://127.0.0.1/endpoint/420/edit/
@@ -97,8 +108,8 @@ class TestDuplicationLogic(TestCase):
 
         self.log_summary()
 
-    # def tearDown(self):
-        # self.log_summary()
+    def tearDown(self):
+        self.log_summary()
         # self.log_summary(test=33)
         # self.log_summary(product=2)
 
@@ -528,20 +539,148 @@ class TestDuplicationLogic(TestCase):
         # expect: not marked as duplicate, hash_code affected by endpoints
         self.assert_finding(finding_new3, not_pk=finding_new.pk, duplicate=False, not_hash_code=finding_4.hash_code)
 
-    # def test_identical_unique_id(self):
-    #     return
+    # # unique_id algo uses id from tool. hash_code is still calculated, according to legacy field config Checkmarx detailed scan
 
-    # def test_identical_ordering_unique_id(self):
-    #     return
+    def test_identical_unique_id(self):
+        # create identical copy
+        finding_new, finding_124 = self.copy_and_reset_finding(id=124)
+        finding_new.save()
 
-    # def test_title_description_line_filepath_different_unique_id(self):
-    #     return
+        # expect duplicate
+        self.assert_finding(finding_new, not_pk=124, duplicate=True, duplicate_finding_id=124, hash_code=finding_124.hash_code)
+        return
 
-    # def test_dedupe_inside_engagement_unique_id(self):
-    #     return
+    def test_different_unique_id_unique_id(self):
+        # create identical copy
+        finding_new, finding_124 = self.copy_and_reset_finding(id=124)
+        finding_new.unique_id_from_tool = '9999'
+        finding_new.save()
 
-    # def test_dedupe_not_inside_engagement_unique_id(self):
-    #     return
+        # expect not duplicate, but same hash_code
+        self.assert_finding(finding_new, not_pk=124, duplicate=False, hash_code=finding_124.hash_code)
+        return
+
+    def test_identical_ordering_unique_id(self):
+        # create identical copy
+        finding_new, finding_125 = self.copy_and_reset_finding(id=125)
+        finding_new.save()
+
+        # expect duplicate, but of 124 as that is first in the list, but it's newer then 125. feature or BUG?
+        self.assert_finding(finding_new, not_pk=124, duplicate=True, duplicate_finding_id=124, hash_code=finding_125.hash_code)
+        return
+
+    def test_title_description_line_filepath_different_unique_id(self):
+        # create identical copy, change some fields
+        finding_new, finding_124 = self.copy_and_reset_finding(id=124)
+        finding_new.title = 'another title'
+        finding_new.cve = 'CVE-2020-12345'
+        finding_new.cwe = '456'
+        finding_new.description = 'useless finding'
+        finding_new.save()
+
+        # expect duplicate as we only match on unique id, hash_code also different
+        self.assert_finding(finding_new, not_pk=124, duplicate=True, duplicate_finding_id=124, not_hash_code=finding_124.hash_code)
+        return
+
+    def test_title_description_line_filepath_different_and_id_different_unique_id(self):
+        # create identical copy, change some fields
+        finding_new, finding_124 = self.copy_and_reset_finding(id=124)
+        finding_new.title = 'another title'
+        finding_new.cve = 'CVE-2020-12345'
+        finding_new.cwe = '456'
+        finding_new.description = 'useless finding'
+        finding_new.unique_id_from_tool = '9999'
+        finding_new.save()
+
+        # expect not duplicate as we match on unique id, hash_code also different because fields changed
+        self.assert_finding(finding_new, not_pk=124, duplicate=False, not_hash_code=finding_124.hash_code)
+        return
+
+    def test_dedupe_not_inside_engagement_unique_id(self):
+        # create identical copy
+        finding_new, finding_124 = self.copy_and_reset_finding(id=124)
+
+        # first setup some finding with same unique_id in different engagement, but same test_type
+        finding_22 = Finding.objects.get(id=22)
+
+        finding_22.test.test_type = finding_124.test.test_type
+        finding_22.test.save()
+
+        finding_22.unique_id_from_tool = '888'
+        finding_22.save(dedupe_option=False)
+
+        finding_new.unique_id_from_tool = '888'
+        finding_new.save()
+
+        # expect not duplicate as dedupe_inside_engagement is True
+        self.assert_finding(finding_new, not_pk=124, duplicate=False, hash_code=finding_124.hash_code)
+        return
+
+    def test_dedupe_inside_engagement_unique_id(self):
+        # create identical copy
+        finding_new, finding_124 = self.copy_and_reset_finding(id=124)
+
+        # first setup some finding with same unique_id in same engagement, but different test (same test_type)
+        finding_new.test = Test.objects.get(id=66)
+        finding_new.save()
+
+        # expect duplicate as dedupe_inside_engagement is True and the other test is in the same engagement
+        self.assert_finding(finding_new, not_pk=124, duplicate=True, duplicate_finding_id=124, hash_code=finding_124.hash_code)
+        return
+
+    def test_dedupe_inside_engagement_unique_id2(self):
+        # create identical copy
+        finding_new, finding_124 = self.copy_and_reset_finding(id=124)
+
+        # first setup some finding with same unique_id in different engagement, but same test_type
+        self.set_dedupe_inside_engagement(False)
+        finding_22 = Finding.objects.get(id=22)
+
+        finding_22.test.test_type = finding_124.test.test_type
+        finding_22.test.save()
+
+        finding_22.unique_id_from_tool = '888'
+        finding_22.save(dedupe_option=False)
+
+        finding_new.unique_id_from_tool = '888'
+        finding_new.save()
+
+        # expect duplicate as dedupe_inside_engagement is false
+        self.assert_finding(finding_new, not_pk=124, duplicate=True, duplicate_finding_id=finding_22.id, hash_code=finding_124.hash_code)
+        return
+
+    def test_dedupe_same_id_different_test_type_unique_id(self):
+        # create identical copy
+        finding_new, finding_124 = self.copy_and_reset_finding(id=124)
+
+        # first setup some finding from a different test_Type, but with the same unique_id_from_tool
+        finding_22 = Finding.objects.get(id=22)
+        finding_22.unique_id_from_tool = '888'
+        finding_new.unique_id_from_tool = '888'
+        # and we need to look in another engagement this time for finding_22
+        self.set_dedupe_inside_engagement(False)
+        finding_22.save(dedupe_option=False)
+        finding_new.save()
+
+        # expect not duplicate as the mathcing finding is from another test_type, hash_code is the same as original
+        self.assert_finding(finding_new, not_pk=124, duplicate=False, hash_code=finding_124.hash_code)
+        return
+
+    def test_identical_different_endpoints_unique_id(self):
+        # create identical copy
+        finding_new, finding_124 = self.copy_and_reset_finding(id=124)
+
+        finding_new.save(dedupe_option=False)
+        ep1 = Endpoint(product=finding_new.test.engagement.product, finding=finding_new, host="myhost.com", protocol="https")
+        ep1.save()
+        finding_new.endpoints.add(ep1)
+        finding_new.save()
+
+        # expect duplicate, as endpoints shouldn't affect dedupe and hash_code due to unique_id
+        self.assert_finding(finding_new, not_pk=124, duplicate=True, duplicate_finding_id=124, hash_code=finding_124.hash_code)
+        return
+
+    # # algo unique_id_or_hash_code Veracode scan
 
     # def test_identical_unique_id_or_hash_code(self):
     #     return
@@ -571,7 +710,7 @@ class TestDuplicationLogic(TestCase):
 
     # # some extra tests
 
-    # hash_code currently is only created on finding creation and after that never changed. feature or BUG?
+    # # hash_code currently is only created on finding creation and after that never changed. feature or BUG?
     def test_hash_code_onetime(self):
         finding_new, finding_2 = self.copy_and_reset_finding(id=2)
         self.assertEqual(finding_new.hash_code, None)
@@ -652,7 +791,7 @@ class TestDuplicationLogic(TestCase):
         if isinstance(eng, int):
             eng = Engagement.objects.get(pk=eng)
 
-        logger.debug('\t' + 'engagement %i: %s', eng.id, eng.name)
+        logger.debug('\t' + 'engagement %i: %s (dedupe_inside: %s)', eng.id, eng.name, eng.deduplication_on_engagement)
 
     def log_test(self, test):
         if isinstance(test, int):
@@ -675,7 +814,9 @@ class TestDuplicationLogic(TestCase):
                         ': ver: ' + '{:5.5}'.format(str(finding.verified)) + ': mit: ' + '{:5.5}'.format(str(finding.is_Mitigated)) +
                         ': dup: ' + '{:5.5}'.format(str(finding.duplicate)) + ': dup_id: ' +
                         ('{:4.4}'.format(str(finding.duplicate_finding.id)) if finding.duplicate_finding else 'None') + ': hash_code: ' + finding.hash_code +
-                        ': eps: ' + str(finding.endpoints.count()) + ": notes: " + str([n.id for n in finding.notes.all()]))
+                        ': eps: ' + str(finding.endpoints.count()) + ": notes: " + str([n.id for n in finding.notes.all()]) +
+                        ': uid: ' + '{:5.5}'.format(str(finding.unique_id_from_tool))
+                        )
 
         logger.debug('\t\tendpoints')
         for ep in Endpoint.objects.all():

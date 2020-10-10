@@ -237,6 +237,7 @@ def deduplicate_unique_id_from_tool(new_finding):
                 id=new_finding.id).exclude(
                     unique_id_from_tool=None).exclude(
                         duplicate=True)
+        deduplicationLogger.debug(existing_findings.query)
     else:
         existing_findings = Finding.objects.filter(
             test__engagement__product=new_finding.test.engagement.product,
@@ -246,6 +247,7 @@ def deduplicate_unique_id_from_tool(new_finding):
                 id=new_finding.id).exclude(
                     unique_id_from_tool=None).exclude(
                         duplicate=True)
+
     deduplicationLogger.debug("Found " +
         str(len(existing_findings)) + " findings with same unique_id_from_tool")
     for find in existing_findings:
@@ -276,6 +278,7 @@ def deduplicate_hash_code(new_finding):
                 id=new_finding.id).exclude(
                     hash_code=None).exclude(
                         duplicate=True)
+
     deduplicationLogger.debug("Found " +
         str(len(existing_findings)) + " findings with same hash_code")
     for find in existing_findings:
