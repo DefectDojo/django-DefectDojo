@@ -436,7 +436,7 @@ class DedupeTest(APITestCase):
 
         # existing BUG: when closing a finding, related endpoints / endpoint_status should be mitigated/removed
         # but currently they are not created at import, so they also cannot be mitigated after closing
-        self.assertEqual(endpoint_count_before, self.db_endpoint_count())
+        self.assertEqual(endpoint_count_before + 1, self.db_endpoint_count())
         self.assertEqual(0, self.db_endpoint_status_count(mitigated=True))
         # self.assertEqual(endpoint_status_count_before + 1, self.db_endpoint_status_count(mitigated=False))
         # self.assertEqual(0, self.db_endpoint_status_count(mitigated=True))
