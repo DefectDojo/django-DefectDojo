@@ -1,13 +1,66 @@
 import json
 from dojo.models import Endpoint, Finding
 
-WEAK_PROTOCOLS = [
-    "ssl_2_0_cipher_suites",
-    "ssl_3_0_cipher_suites",
-    "tls_1_0_cipher_suites",
-    "tls_1_1_cipher_suites"
+# Recommended cipher suites according to German BSI as of 2020
+TLS12_RECOMMENDED_CIPHERS = [
+    'TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256',
+    'TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384',
+    'TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256',
+    'TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384',
+    'TLS_ECDHE_ECDSA_WITH_AES_128_CCM',
+    'TLS_ECDHE_ECDSA_WITH_AES_256_CCM',
+    'TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256',
+    'TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384',
+    'TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256',
+    'TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384',
+    'TLS_DHE_DSS_WITH_AES_128_CBC_SHA256',
+    'TLS_DHE_DSS_WITH_AES_256_CBC_',
+    'TLS_DHE_DSS_WITH_AES_128_GCM_SHA256',
+    'TLS_DHE_DSS_WITH_AES_256_GCM_SHA384',
+    'TLS_DHE_RSA_WITH_AES_128_CBC_SHA256',
+    'TLS_DHE_RSA_WITH_AES_256_CBC_SHA256',
+    'TLS_DHE_RSA_WITH_AES_128_GCM_SHA256',
+    'TLS_DHE_RSA_WITH_AES_256_GCM_SHA384',
+    'TLS_DHE_RSA_WITH_AES_128_CCM',
+    'TLS_DHE_RSA_WITH_AES_256_CCM',
+    'TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256',
+    'TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384',
+    'TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256',
+    'TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384',
+    'TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256',
+    'TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384',
+    'TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256',
+    'TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384',
+    'TLS_DH_DSS_WITH_AES_128_CBC_SHA256',
+    'TLS_DH_DSS_WITH_AES_256_CBC_SHA256',
+    'TLS_DH_DSS_WITH_AES_128_GCM_SHA256',
+    'TLS_DH_DSS_WITH_AES_256_GCM_SHA384',
+    'TLS_DH_RSA_WITH_AES_128_CBC_SHA256',
+    'TLS_DH_RSA_WITH_AES_256_CBC_SHA256',
+    'TLS_DH_RSA_WITH_AES_128_GCM_SHA256',
+    'TLS_DH_RSA_WITH_AES_256_GCM_SHA384',
+    'TLS_ECDHE_PSK_WITH_AES_128_CBC_SHA256',
+    'TLS_ECDHE_PSK_WITH_AES_256_CBC_SHA384',
+    'TLS_ECDHE_PSK_WITH_AES_128_GCM_SHA256',
+    'TLS_ECDHE_PSK_WITH_AES_256_GCM_SHA384',
+    'TLS_ECDHE_PSK_WITH_AES_128_CCM_SHA256',
+    'TLS_DHE_PSK_WITH_AES_128_CBC_SHA256',
+    'TLS_DHE_PSK_WITH_AES_256_CBC_SHA384',
+    'TLS_DHE_PSK_WITH_AES_128_GCM_SHA256',
+    'TLS_DHE_PSK_WITH_AES_256_GCM_SHA384',
+    'TLS_DHE_PSK_WITH_AES_128_CCM',
+    'TLS_DHE_PSK_WITH_AES_256_CCM',
+    'TLS_RSA_PSK_WITH_AES_128_CBC_SHA256',
+    'TLS_RSA_PSK_WITH_AES_256_CBC_SHA384',
+    'TLS_RSA_PSK_WITH_AES_128_GCM_SHA256',
+    'TLS_RSA_PSK_WITH_AES_256_GCM_SHA384'
 ]
 
+TLS13_RECOMMENDED_CIPHERS = [
+    'TLS_AES_128_GCM_SHA256',
+    'TLS_AES_256_GCM_SHA384',
+    'TLS_AES_128_CCM_SHA256'
+]
 
 class SSLyzeJSONParser(object):
 
@@ -47,19 +100,25 @@ class SSLyzeJSONParser(object):
                 item = get_ccs(scr_node, test, endpoint)
                 if item:
                     items.append(item)
-                item = get_secure_renegotiation(scr_node, test, endpoint)
+                item = get_renegotiation(scr_node, test, endpoint)
+                if item:
+                    items.extend(item)
+                item = get_weak_protocol('ssl_2_0_cipher_suites', 'SSL 2.0', scr_node, test, endpoint)
                 if item:
                     items.append(item)
-                item = get_ssl2(scr_node, test, endpoint)
+                item = get_weak_protocol('ssl_3_0_cipher_suites', 'SSL 3.0', scr_node, test, endpoint)
                 if item:
                     items.append(item)
-                item = get_ssl3(scr_node, test, endpoint)
+                item = get_weak_protocol('tls_1_0_cipher_suites', 'TLS 1.0', scr_node, test, endpoint)
                 if item:
                     items.append(item)
-                item = get_tls10(scr_node, test, endpoint)
+                item = get_weak_protocol('tls_1_1_cipher_suites', 'TLS 1.1', scr_node, test, endpoint)
                 if item:
                     items.append(item)
-                item = get_tls11(scr_node, test, endpoint)
+                item = get_strong_protocol('tls_1_2_cipher_suites', 'TLS 1.2', TLS12_RECOMMENDED_CIPHERS, scr_node, test, endpoint)
+                if item:
+                    items.append(item)
+                item = get_strong_protocol('tls_1_3_cipher_suites', 'TLS 1.3', TLS13_RECOMMENDED_CIPHERS, scr_node, test, endpoint)
                 if item:
                     items.append(item)
 
@@ -76,7 +135,7 @@ def get_heartbleed(node, test, endpoint):
             title = get_url(endpoint) + ' - Heartbleed'
             description = get_url(endpoint) + ' is vulnerable to heartbleed'
             cve = 'CVE-2014-0160'
-            return get_finding(title, description, cve, test, endpoint)
+            return get_finding(title, description, cve, None, test, endpoint)
     return None
 
 def get_ccs(node, test, endpoint):
@@ -89,58 +148,60 @@ def get_ccs(node, test, endpoint):
             title = get_url(endpoint) + ' - CCS injection'
             description = get_url(endpoint) + ' is vulnerable to OpenSSL CCS injection'
             cve = 'CVE-2014-0224'
-            return get_finding(title, description, cve, test, endpoint)
+            return get_finding(title, description, cve, None, test, endpoint)
     return None
 
-def get_secure_renegotiation(node, test, endpoint):
+def get_renegotiation(node, test, endpoint):
     if 'session_renegotiation' in node:
         sr_node = node['session_renegotiation']
+        items = list()
+        vulnerable = False       
+        if 'accepts_client_renegotiation' in sr_node:
+            vulnerable = sr_node['accepts_client_renegotiation']
+        if vulnerable:
+            title = get_url(endpoint) + ' - Accepts client renegotiation'
+            description = get_url(endpoint) + ' accepts client renegotiation'
+            items.append(get_finding(title, description, None, None, test, endpoint))
         vulnerable = False
         if 'supports_secure_renegotiation' in sr_node:
             vulnerable = not sr_node['supports_secure_renegotiation']
         if vulnerable:
             title = get_url(endpoint) + ' - Secure session renegotiation'
             description = get_url(endpoint) + ' does not support secure session renegotiation'
-            return get_finding(title, description, None, test, endpoint)
+            items.append(get_finding(title, description, None, None, test, endpoint))
+        if len(items) > 0:
+            return items
     return None
 
-def get_ssl2(node, test, endpoint):
-    if 'ssl_2_0_cipher_suites' in node:
-        ssl2_node = node['ssl_2_0_cipher_suites']
-        if 'accepted_cipher_suites' in ssl2_node and len(ssl2_node['accepted_cipher_suites']) > 0:
-            title = get_url(endpoint) + ' - SSL 2.0'
-            description = get_url(endpoint) + ' accepts SSL 2.0 connections'
-            return get_finding(title, description, None, test, endpoint)
+def get_weak_protocol(cipher, text, node, test, endpoint):
+    if cipher in node:
+        weak_node = node[cipher]
+        if 'accepted_cipher_suites' in weak_node and len(weak_node['accepted_cipher_suites']) > 0:
+            title = get_url(endpoint) + ' - ' + text
+            description = get_url(endpoint) + ' accepts ' + text + ' connections'
+            references = 'German BSI recommendations: https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/Publications/TechGuidelines/TG02102/BSI-TR-02102-2.pdf?__blob=publicationFile&v=10'
+            return get_finding(title, description, None, references, test, endpoint)
     return None
 
-def get_ssl3(node, test, endpoint):
-    if 'ssl_3_0_cipher_suites' in node:
-        ssl3_node = node['ssl_3_0_cipher_suites']
-        if 'accepted_cipher_suites' in ssl3_node and len(ssl3_node['accepted_cipher_suites']) > 0:
-            title = get_url(endpoint) + ' - SSL 3.0'
-            description = get_url(endpoint) + ' accepts SSL 3.0 connections'
-            return get_finding(title, description, None, test, endpoint)
+def get_strong_protocol(cipher, text, suites, node, test, endpoint):
+    if cipher in node:
+        strong_node = node[cipher]
+        unrecommended_cipher_found = False
+        if 'accepted_cipher_suites' in strong_node and len(strong_node['accepted_cipher_suites']) > 0:
+            title = get_url(endpoint) + ' - Unrecommended cipher suites for ' + text
+            description = get_url(endpoint) + ' accepts unrecommended cipher suites for ' + text + ':'
+            references = 'German BSI recommendations: https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/Publications/TechGuidelines/TG02102/BSI-TR-02102-2.pdf?__blob=publicationFile&v=10'
+            for cipher_node in strong_node['accepted_cipher_suites']:
+                if 'cipher_suite' in cipher_node:
+                    cs_node = cipher_node['cipher_suite']
+                    if 'name' in cs_node and not cs_node['name'] in suites:
+                        unrecommended_cipher_found = True
+                        description = description + '\n- ' + cs_node['name']
+            if unrecommended_cipher_found:
+                return get_finding(title, description, None, references, test, endpoint)
     return None
 
-def get_tls10(node, test, endpoint):
-    if 'tls_1_0_cipher_suites' in node:
-        tls10_node = node['tls_1_0_cipher_suites']
-        if 'accepted_cipher_suites' in tls10_node and len(tls10_node['accepted_cipher_suites']) > 0:
-            title = get_url(endpoint) + ' - TLS 1.0'
-            description = get_url(endpoint) + ' accepts TLS 1.0 connections'
-            return get_finding(title, description, None, test, endpoint)
-    return None
-
-def get_tls11(node, test, endpoint):
-    if 'tls_1_1_cipher_suites' in node:
-        tls11_node = node['tls_1_1_cipher_suites']
-        if 'accepted_cipher_suites' in tls11_node and len(tls11_node['accepted_cipher_suites']) > 0:
-            title = get_url(endpoint) + ' - TLS 1.1'
-            description = get_url(endpoint) + ' accepts TLS 1.1 connections'
-            return get_finding(title, description, None, test, endpoint)
-    return None
-
-def get_finding(title, description, cve, test, endpoint):
+def get_finding(title, description, cve, references, test, endpoint):
     severity = 'Medium'
     finding = Finding(
         title=title,
@@ -151,6 +212,7 @@ def get_finding(title, description, cve, test, endpoint):
         description=description,
         severity=severity,
         numerical_severity=Finding.get_numerical_severity(severity),
+        references=references,
         dynamic_finding=False,
         static_finding=True)
     if endpoint is not None:
