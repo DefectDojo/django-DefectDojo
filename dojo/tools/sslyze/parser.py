@@ -62,6 +62,9 @@ TLS13_RECOMMENDED_CIPHERS = [
     'TLS_AES_128_CCM_SHA256'
 ]
 
+REFERENCES = 'German BSI recommendations: https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/Publications/TechGuidelines/TG02102/BSI-TR-02102-2.pdf?__blob=publicationFile&v=10'
+
+
 class SSLyzeJSONParser(object):
 
     def __init__(self, json_output, test):
@@ -102,7 +105,7 @@ class SSLyzeJSONParser(object):
                     items.append(item)
                 item = get_renegotiation(scr_node, test, endpoint)
                 if item:
-                    items.extend(item)
+                    items.append(item)
                 item = get_weak_protocol('ssl_2_0_cipher_suites', 'SSL 2.0', scr_node, test, endpoint)
                 if item:
                     items.append(item)
@@ -121,6 +124,9 @@ class SSLyzeJSONParser(object):
                 item = get_strong_protocol('tls_1_3_cipher_suites', 'TLS 1.3', TLS13_RECOMMENDED_CIPHERS, scr_node, test, endpoint)
                 if item:
                     items.append(item)
+                item = get_certificate_information(scr_node, test, endpoint)
+                if item:
+                    items.append(item)
 
         return list(items)
 
@@ -132,7 +138,7 @@ def get_heartbleed(node, test, endpoint):
         if 'is_vulnerable_to_heartbleed' in hb_node:
             vulnerable = hb_node['is_vulnerable_to_heartbleed']
         if vulnerable:
-            title = get_url(endpoint) + ' - Heartbleed'
+            title = 'Heartbleed'
             description = get_url(endpoint) + ' is vulnerable to heartbleed'
             cve = 'CVE-2014-0160'
             return get_finding(title, description, cve, None, test, endpoint)
@@ -145,7 +151,7 @@ def get_ccs(node, test, endpoint):
         if 'is_vulnerable_to_ccs_injection' in ccs_node:
             vulnerable = ccs_node['is_vulnerable_to_ccs_injection']
         if vulnerable:
-            title = get_url(endpoint) + ' - CCS injection'
+            title = 'CCS injection'
             description = get_url(endpoint) + ' is vulnerable to OpenSSL CCS injection'
             cve = 'CVE-2014-0224'
             return get_finding(title, description, cve, None, test, endpoint)
@@ -154,33 +160,28 @@ def get_ccs(node, test, endpoint):
 def get_renegotiation(node, test, endpoint):
     if 'session_renegotiation' in node:
         sr_node = node['session_renegotiation']
-        items = list()
         vulnerable = False       
-        if 'accepts_client_renegotiation' in sr_node:
-            vulnerable = sr_node['accepts_client_renegotiation']
+        title = 'Session renegotiation'
+        description = get_url(endpoint) + ' has problems with session renegotiation:'
+        vulnerable_cr = 'accepts_client_renegotiation' in sr_node and sr_node['accepts_client_renegotiation']
+        if vulnerable_cr:
+            vulnerable = True
+            description += '\n - Client renegotiation is accepted'
+        vulnerable_sr = 'supports_secure_renegotiation' in sr_node and not sr_node['supports_secure_renegotiation']
+        if vulnerable_sr:
+            vulnerable = True
+            description += '\n - Secure session renegotiation is not supported'
         if vulnerable:
-            title = get_url(endpoint) + ' - Accepts client renegotiation'
-            description = get_url(endpoint) + ' accepts client renegotiation'
-            items.append(get_finding(title, description, None, None, test, endpoint))
-        vulnerable = False
-        if 'supports_secure_renegotiation' in sr_node:
-            vulnerable = not sr_node['supports_secure_renegotiation']
-        if vulnerable:
-            title = get_url(endpoint) + ' - Secure session renegotiation'
-            description = get_url(endpoint) + ' does not support secure session renegotiation'
-            items.append(get_finding(title, description, None, None, test, endpoint))
-        if len(items) > 0:
-            return items
+            return get_finding(title, description, None, None, test, endpoint)
     return None
 
 def get_weak_protocol(cipher, text, node, test, endpoint):
     if cipher in node:
         weak_node = node[cipher]
         if 'accepted_cipher_suites' in weak_node and len(weak_node['accepted_cipher_suites']) > 0:
-            title = get_url(endpoint) + ' - ' + text
+            title = text + ' not recommended'
             description = get_url(endpoint) + ' accepts ' + text + ' connections'
-            references = 'German BSI recommendations: https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/Publications/TechGuidelines/TG02102/BSI-TR-02102-2.pdf?__blob=publicationFile&v=10'
-            return get_finding(title, description, None, references, test, endpoint)
+            return get_finding(title, description, None, REFERENCES, test, endpoint)
     return None
 
 def get_strong_protocol(cipher, text, suites, node, test, endpoint):
@@ -188,20 +189,52 @@ def get_strong_protocol(cipher, text, suites, node, test, endpoint):
         strong_node = node[cipher]
         unrecommended_cipher_found = False
         if 'accepted_cipher_suites' in strong_node and len(strong_node['accepted_cipher_suites']) > 0:
-            title = get_url(endpoint) + ' - Unrecommended cipher suites for ' + text
+            title = 'Unrecommended cipher suites for ' + text
             description = get_url(endpoint) + ' accepts unrecommended cipher suites for ' + text + ':'
-            references = 'German BSI recommendations: https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/Publications/TechGuidelines/TG02102/BSI-TR-02102-2.pdf?__blob=publicationFile&v=10'
             for cipher_node in strong_node['accepted_cipher_suites']:
                 if 'cipher_suite' in cipher_node:
                     cs_node = cipher_node['cipher_suite']
                     if 'name' in cs_node and not cs_node['name'] in suites:
                         unrecommended_cipher_found = True
-                        description = description + '\n- ' + cs_node['name']
+                        description = description + '\n - ' + cs_node['name']
             if unrecommended_cipher_found:
-                return get_finding(title, description, None, references, test, endpoint)
+                return get_finding(title, description, None, REFERENCES, test, endpoint)
+    return None
+
+def get_certificate_information(node, test, endpoint):
+    if 'certificate_info' in node:
+        ci_node = node['certificate_info']
+        if 'certificate_deployments' in ci_node:
+            for cd_node in ci_node['certificate_deployments']:
+                title = 'Problems in certificate deployments'
+                description = get_url(endpoint) + ' has problems in certificate deployments:'
+                vulnerable = False
+                if 'leaf_certificate_subject_matches_hostname' in cd_node:
+                    if not cd_node['leaf_certificate_subject_matches_hostname']:
+                        vulnerable = True
+                        description += '\n - Certificate subject does not match hostname'
+                for pvr_node in cd_node['path_validation_results']:
+                    if 'openssl_error_string' in pvr_node and pvr_node['openssl_error_string'] is not None:
+                        vulnerable = True
+                        name = None
+                        version = None
+                        if 'trust_store' in pvr_node:
+                            ts_node = pvr_node['trust_store']
+                            if 'name' in ts_node:
+                                name = ts_node['name']
+                            if 'version' in ts_node:
+                                version = ts_node['version']
+                        description += '\n - ' + pvr_node['openssl_error_string']
+                        if name is not None:
+                            description += ' for trust store ' + name
+                        if version is not None:
+                            description += ', version ' + version
+                if vulnerable:
+                    return get_finding(title, description, None, None, test, endpoint)
     return None
 
 def get_finding(title, description, cve, references, test, endpoint):
+    title += ' (' + get_url(endpoint) + ')'
     severity = 'Medium'
     finding = Finding(
         title=title,
