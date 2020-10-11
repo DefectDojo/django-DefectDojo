@@ -144,6 +144,7 @@ def get_heartbleed(node, test, endpoint):
             return get_finding(title, description, cve, None, test, endpoint)
     return None
 
+
 def get_ccs(node, test, endpoint):
     if 'openssl_ccs_injection' in node:
         ccs_node = node['openssl_ccs_injection']
@@ -157,10 +158,11 @@ def get_ccs(node, test, endpoint):
             return get_finding(title, description, cve, None, test, endpoint)
     return None
 
+
 def get_renegotiation(node, test, endpoint):
     if 'session_renegotiation' in node:
         sr_node = node['session_renegotiation']
-        vulnerable = False       
+        vulnerable = False
         title = 'Session renegotiation'
         description = get_url(endpoint) + ' has problems with session renegotiation:'
         vulnerable_cr = 'accepts_client_renegotiation' in sr_node and sr_node['accepts_client_renegotiation']
@@ -175,6 +177,7 @@ def get_renegotiation(node, test, endpoint):
             return get_finding(title, description, None, None, test, endpoint)
     return None
 
+
 def get_weak_protocol(cipher, text, node, test, endpoint):
     if cipher in node:
         weak_node = node[cipher]
@@ -183,6 +186,7 @@ def get_weak_protocol(cipher, text, node, test, endpoint):
             description = get_url(endpoint) + ' accepts ' + text + ' connections'
             return get_finding(title, description, None, REFERENCES, test, endpoint)
     return None
+
 
 def get_strong_protocol(cipher, text, suites, node, test, endpoint):
     if cipher in node:
@@ -200,6 +204,7 @@ def get_strong_protocol(cipher, text, suites, node, test, endpoint):
             if unrecommended_cipher_found:
                 return get_finding(title, description, None, REFERENCES, test, endpoint)
     return None
+
 
 def get_certificate_information(node, test, endpoint):
     if 'certificate_info' in node:
@@ -233,6 +238,7 @@ def get_certificate_information(node, test, endpoint):
                     return get_finding(title, description, None, None, test, endpoint)
     return None
 
+
 def get_finding(title, description, cve, references, test, endpoint):
     title += ' (' + get_url(endpoint) + ')'
     severity = 'Medium'
@@ -253,6 +259,7 @@ def get_finding(title, description, cve, references, test, endpoint):
         finding.unsaved_endpoints.append(endpoint)
     return finding
 
+
 def get_url(endpoint):
     url = 'unkown host'
     if endpoint is not None:
@@ -261,6 +268,7 @@ def get_url(endpoint):
         if endpoint.port is not None:
             url = url + ':' + str(endpoint.port)
     return url
+
 
 def get_endpoint(node):
     hostname = None
