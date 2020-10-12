@@ -26,24 +26,25 @@
                           <span class="caret"></span>
                       </button>
                       <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                          {% if user.is_staff %}
-                          <li role="presentation">
-                              <a class="" href="{% url 'edit_engagement' eng.id %}">
-                                  <i class="fa fa-pencil-square-o"></i> Edit Engagement
-                              </a>
-                          </li>
-
-                          <li role="presentation">
-                              {% if eng.active %}
-                                  <a class="" href="{% url 'close_engagement' eng.id %}">
-                                      <i class="fa fa-close"></i> Close Engagement
+                          {% if user|is_authorized_for_change:eng %}
+                              <li role="presentation">
+                                  <a class="" href="{% url 'edit_engagement' eng.id %}">
+                                      <i class="fa fa-pencil-square-o"></i> Edit Engagement
                                   </a>
-                              {% else %}
-                                  <a class="" href="{% url 'reopen_engagement' eng.id %}">
-                                      <i class="fa fa-undo"></i> Reopen Engagement
-                                  </a>
-                              {% endif %}
-                          </li>
+                              </li>
+                          {% endif %}
+                          {% if user|is_authorized_for_staff:eng %}
+                            <li role="presentation">
+                                {% if eng.active %}
+                                    <a class="" href="{% url 'close_engagement' eng.id %}">
+                                        <i class="fa fa-close"></i> Close Engagement
+                                    </a>
+                                {% else %}
+                                    <a class="" href="{% url 'reopen_engagement' eng.id %}">
+                                        <i class="fa fa-undo"></i> Reopen Engagement
+                                    </a>
+                                {% endif %}
+                            </li>
                           {% endif %}
                           <li role="presentation">
                               <a href="{% url 'engagement_report' eng.id %}?title=&active=1&verified=1&false_p=2&duplicate=2">
@@ -65,37 +66,37 @@
                                   <i class="fa fa-history"></i> View History
                               </a>
                           </li>
-                          {% if user.is_staff %}
-                          <li role="separator" class="divider"></li>
-                          <li role="presentation">
-                              {% if eng.test_strategy %}
-                                  <a target="_blank" href="{{ eng.test_strategy }}"><i class="fa fa-file-text-o"></i> View Test
-                                      Strategy </a>
+                          {% if user|is_authorized_for_staff:eng %}
+                              <li role="separator" class="divider"></li>
+                              <li role="presentation">
+                                  {% if eng.test_strategy %}
+                                      <a target="_blank" href="{{ eng.test_strategy }}"><i class="fa fa-file-text-o"></i> View Test
+                                          Strategy </a>
+                                  {% else %}
+                                      <a href="{% url 'edit_engagement' eng.id %}"><i class="fa fa-file-text-o"></i> Add a Test Strategy</a>
+                                  {% endif %}
+                              </li>
+                              {% if threat != 'none' %}
+                                  <li role="presentation">
+                                          <a href="{% url 'view_threatmodel' eng.id %}"><i class="fa fa-file-text-o"></i> Download Threat Model</a>
+                                  </li>
+                                  <li role="presentation">
+                                          <a href="{% url 'upload_threatmodel' eng.id %}"><i class="fa fa-file-text-o"></i> Upload Threat Model</a>
+                                  </li>
                               {% else %}
-                                  <a href="{% url 'edit_engagement' eng.id %}"><i class="fa fa-file-text-o"></i> Add a Test Strategy</a>
+                                  <li role="presentation">
+                                      <a href="{% url 'upload_threatmodel' eng.id %}"><i class="fa fa-file-text-o"></i> Upload Threat Model</a>
+                                  </li>
                               {% endif %}
-                          </li>
-                          {% if threat != 'none' %}
-                          <li role="presentation">
-                                  <a href="{% url 'view_threatmodel' eng.id %}"><i class="fa fa-file-text-o"></i> Download Threat Model</a>
-                          </li>
-                            {% if user.is_staff %}
-                            <li role="presentation">
-                                    <a href="{% url 'upload_threatmodel' eng.id %}"><i class="fa fa-file-text-o"></i> Upload Threat Model</a>
-                            </li>
-                            {% endif %}
-                          {% else %}
-                          <li role="presentation">
-                              <a href="{% url 'upload_threatmodel' eng.id %}"><i class="fa fa-file-text-o"></i> Upload Threat Model</a>
-                          </li>
-                         {% endif %}
-                           <li role="separator" class="divider"></li>
-                          <li role="presentation">
-                              <a class="text-danger" href="{% url 'delete_engagement' eng.id %}">
-                                  <i class="fa fa-trash-o"></i> Delete Engagement
-                              </a>
-                          </li>
-                        {% endif %}
+                          {% endif %}
+                          {% if user|is_authorized_for_delete:eng %}
+                              <li role="separator" class="divider"></li>
+                              <li role="presentation">
+                                  <a class="text-danger" href="{% url 'delete_engagement' eng.id %}">
+                                      <i class="fa fa-trash-o"></i> Delete Engagement
+                                  </a>
+                              </li>
+                          {% endif %}
                       </ul>
                   </div>
               </div>
@@ -195,7 +196,7 @@
                     <h4 class="pull-left">
                         Tests ({{tests.count}}) <small>{{ eng.id|get_severity_count:"engagement" }}</small>
                     </h4>
-                    {% if user.is_staff %}
+                    {% if user|is_authorized_for_delete:eng%}
                     <div class="dropdown pull-right">
                         <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                 data-toggle="dropdown" aria-expanded="true">
@@ -387,7 +388,7 @@
 
 <div class="panel panel-default">
   <div class="panel-heading">
-    <h4>Additional Features<span class="pull-right"><a data-toggle="collapse" href="#add_feat">
+    <h4>Additional Features<span class="pull-right"><a name="collapsible" data-toggle="collapse" href="#add_feat">
       <i class="glyphicon glyphicon-chevron-down"></i></a></span></h4>
   </div>
   
@@ -396,9 +397,9 @@
     {% if eng.engagement_type == "Interactive" %}
       <div class="panel panel-default">
         <div class="panel-heading">
-          <h4> Check List<span class="pull-right"><a data-toggle="collapse" href="#add_feat_check_list">
+          <h4> Check List<span class="pull-right"><a name="collapsible" data-toggle="collapse" href="#add_feat_check_list">
             <i class="glyphicon glyphicon-chevron-down"></i></a></span>
-            {% if user.is_staff %}
+            {% if user|is_authorized_for_delete:eng %}
               {% if check %}
                   <a title="Edit Checklist" class="btn btn-primary pull-right"
                     href="{% url 'complete_checklist' eng.id %}">
@@ -475,7 +476,7 @@
 
       <div class="panel-heading">
         <h4>Questionnaires<span class="pull-right">
-          <a data-toggle="collapse" href="#add_feat_survey">
+          <a name="collapsible" data-toggle="collapse" href="#add_feat_survey">
             <i class="glyphicon glyphicon-chevron-down"></i></a></span>
             {% add_surveys eng %}
         </h4>
@@ -488,7 +489,7 @@
               {% show_surveys eng users %}
             </div>
           </div>
-          <div class="modal fade" id="shareSurveyModal" tabindex="-1" role="dialog" aria-labelledby="shareSurveyModalLabel">
+          <div class="modal fade" id="shareQuestionnaireModal" tabindex="-1" role="dialog" aria-labelledby="shareSurveyModalLabel">
             <div class="modal-dialog" role="document">
               <div class="modal-content">
                 <div class="modal-header">
@@ -497,7 +498,7 @@
                   <h4 class="modal-title" id="shareSurveyModalLabel">Share Questionnaire Link</h4>
                 </div>
                 <div class="modal-body">
-                  <p id="surveyURL"></p>
+                  <p id="questionnaireURL"></p>
                   <div class="alert alert-info" role="alert">
                       <b>Note:</b> Only users that are authorized for {{ eng.product}} will be allowed to answer
                       this questionnaire.
@@ -512,6 +513,104 @@
         </div>
       </div>
 
+    </div>
+
+    <div class="panel panel-default">
+
+      <div class="panel-heading">
+        <h4>Notes<span class="pull-right">
+          <a name="collapsible" data-toggle="collapse" href="#add_feat_notes">
+            <i class="glyphicon glyphicon-chevron-down"></i></a></span>
+        </h4>
+      </div>
+      
+      <div id="add_feat_notes" class="panel-body collapse">
+        <form class="form-horizontal" action="" method="post">{% csrf_token %}
+          {% include "dojo/form_fields.html" with form=form %}
+          <div class="form-group">
+              <div class="col-sm-offset-2 col-sm-10">
+                  <input class="btn btn-primary" type="submit" id="add_note" label="Add Notes" value="Add Note"/>
+              </div>
+          </div>
+        </form>
+
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h4>Note Log<span class="pull-right">
+              <a data-toggle="collapse" href="#add_feat_note_log">
+                <i class="glyphicon glyphicon-chevron-{% if notes %}up{%else%}down{%endif%}"></i></a></span>
+            </h4>
+          </div>
+          <div id="add_feat_note_log" class="panel-body collapse {% if notes %}in{%endif%}">
+            {% for note in notes %}
+              <div>
+                <div class="panel panel-default">
+                  <div class="panel-comments">
+                      {% if user.username == note.author.username and user.is_staff or user.is_superuser %}
+                      <div class="pull-right">
+                        <form method="post" action="{% url 'delete_note' note.id 'engagement' eng.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" aria-label="id" name="id" value="{{note.id}}" id="id_id" />
+                            <button type="submit" aria-label="Delete Note" class="btn-delete">
+                              <i class="fa fa-trash"></i>
+                            </button>
+                        </form>
+                      </div>
+                      {% endif %}
+                      {% if user.username == note.author.username or user.is_staff %}
+                        <div class="pull-right">
+                          <form method="get" action="{% url 'edit_note' note.id 'engagement' eng.id %}">
+                              {% csrf_token %}
+                              <input type="hidden" aria-label="id" name="id" value="{{note.id}}" id="id_id" />
+                              <button type="submit" aria-label="Edit Note" class="btn-edit">
+                                <i class="fa fa-edit"></i>
+                              </button>
+                          </form>
+                        </div>
+                      {% endif %}
+                      {% if user.is_staff %}
+                        <div class="pull-right">
+                          <form method="get" action="{% url 'note_history' note.id 'engagement' eng.id %}">
+                              {% csrf_token %}
+                              <input type="hidden" aria-label="id" name="id" value="{{note.id}}" id="id_id" />
+                              <button type="submit" aria-label="history" class="btn-history">
+                                <i class="fa fa-history"></i>
+                              </button>
+                          </form>
+                        </div>
+                      {% endif %}
+                      
+                      <div class="row-sm-2">
+                        <strong>{{ note.author.username }}</strong>
+                        <span class="text-muted">commented {{ note.date }}</span>
+                      </div>
+                      {% if note.edited %}
+                        <div class="row-sm-2">
+                          <strong>{{ note.editor.username }}</strong>
+                          <span class="text-muted">edited {{ note.edit_time }}</span>
+                        </div>
+                      {% endif %}
+                      {% if note.private %}
+                        <div class="row-sm-2">
+                          <span class="text-muted">(will not appear in report)</span>
+                        </div>
+                      {% endif %} 
+                  </div>
+                  <div class="panel-body">
+                    {% if note.note_type != None %}
+                      <strong>Note type : {{ note.note_type }}</strong>
+                      <br><br>
+                    {% endif %}
+                    {{ note|linebreaks }}
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+        
+      </div>
+      
     </div>
 
   </div>
@@ -614,7 +713,7 @@
           {% if jissue and jconf %}
           <tr>
             <td><strong>Jira</strong></td>
-            <td><a href="{{ jconf.url }}/browse/{{ jissue.jira_key }}" target="_blank"><i class="fa fa-external-link"></i> Jira Epic</a></td>
+            <td><a href="{{ jconf.url }}/browse/{{ jissue.jira_key }}" target="_blank"><i class="fa fa-external-link"></i> Jira Epic ({{ jissue.jira_key }})</a></td>
           </tr>
           {% endif %}
           <tr>
@@ -810,9 +909,6 @@
                 i.toggleClass('glyphicon-chevron-up').toggleClass('glyphicon-chevron-down');
             });
 
-            $(document).ready(function(){
-              $('[data-toggle="tooltip"]').tooltip();
-            });
             //Ensures dropdown has proper zindex
             $('.table-responsive').on('show.bs.dropdown', function () {
               $('.table-responsive').css( "overflow", "inherit" );
@@ -834,7 +930,7 @@
                 $('input#simple_search').val(terms);
             }
 
-            $('#shareSurveyModal').on('show.bs.modal', function (event) {
+            $('#shareQuestionnaireModal').on('show.bs.modal', function (event) {
             var button = $(event.relatedTarget) // Button that triggered the modal
             var path = button.data('whatever') // Extract info from data-* attributes
             // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
@@ -843,7 +939,7 @@
             var http = location.protocol;
             var slashes = http.concat("//");
             var host = slashes.concat(window.location.host);
-            modal.find('p#surveyURL').text('Questionnaire URL: ' + host + path)
+            modal.find('p#questionnaireURL').text('Questionnaire URL: ' + host + path)
             })
         });
     </script>

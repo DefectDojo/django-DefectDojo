@@ -31,41 +31,45 @@
                         <button class="btn btn-primary clickable panel-collapsed">
                             <span><i class="fa fa-bar-chart"></i></span>
                         </button>
-                        {% if user.is_staff %}
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
                                 <span class="fa fa-bars"></span>
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                                <li role="presentation">
-                                    <a href="{% url 'edit_endpoint' endpoint.id %}">
-                                        <i class="fa fa-pencil-square-o"></i> Edit Endpoint
-                                    </a>
-                                </li>
-                                <li role="presentation">
-                                    <a href="{% url 'add_endpoint_meta_data' endpoint.id %}">
-                                        <i class="fa fa-list-alt"></i> Add Metadata
-                                    </a>
-                                </li>
-                                <li role="presentation">
-                                    <a href="{% url 'endpoint_report' endpoint.id %}">
-                                        <i class="fa fa-file-text-o"></i> Report
-                                    </a>
-                                </li>
-                                <li role="presentation">
-                                    <a href="{% url 'action_history' endpoint|content_type endpoint.id %}">
-                                        <i class="fa fa-history"></i> View History
-                                    </a>
-                                </li>
-                                <li role="separator" class="divider"></li>
-                                <li role="presentation" class="text-danger">
-                                    <a class="text-danger" href="{% url 'delete_endpoint' endpoint.id %}">
-                                        <i class="fa fa-trash-o"></i> Delete Endpoint
-                                    </a>
-                                </li>
+                                {% if user|is_authorized_for_change:endpoint %}
+                                    <li role="presentation">
+                                        <a href="{% url 'edit_endpoint' endpoint.id %}">
+                                            <i class="fa fa-pencil-square-o"></i> Edit Endpoint
+                                        </a>
+                                    </li>
+                                {% endif %}
+                                {% if user|is_authorized_for_staff:endpoint %}
+                                    <li role="presentation">
+                                        <a href="{% url 'add_endpoint_meta_data' endpoint.id %}">
+                                            <i class="fa fa-list-alt"></i> Add Metadata
+                                        </a>
+                                    </li>
+                                    <li role="presentation">
+                                        <a href="{% url 'endpoint_report' endpoint.id %}">
+                                            <i class="fa fa-file-text-o"></i> Report
+                                        </a>
+                                    </li>
+                                    <li role="presentation">
+                                        <a href="{% url 'action_history' endpoint|content_type endpoint.id %}">
+                                            <i class="fa fa-history"></i> View History
+                                        </a>
+                                    </li>
+                                {% endif %}
+                                {% if user|is_authorized_for_delete:endpoint %}
+                                    <li role="separator" class="divider"></li>
+                                    <li role="presentation" class="text-danger">
+                                        <a class="text-danger" href="{% url 'delete_endpoint' endpoint.id %}">
+                                            <i class="fa fa-trash-o"></i> Delete Endpoint
+                                        </a>
+                                    </li>
+                                {% endif %}
                             </ul>
-                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -267,7 +271,6 @@
     <script src="{% static "flot-axis/jquery.flot.axislabels.js" %}"></script>
     <script type="text/javascript">
         $(function () {
-            $('[data-toggle="tooltip"]').tooltip();
             $(document).on('click', '.panel-heading button.clickable', function (e) {
                 var $this = $(this);
                 if (!$this.hasClass('panel-collapsed')) {

@@ -2,7 +2,7 @@
 {% load event_tags %}
 {% load static from staticfiles %}
 {% block add_css %}
-    <link rel="stylesheet" href="{% static "chosen-bootstrap/chosen.bootstrap.min.css" %}">
+
     <link rel="stylesheet" href="{% static "easymde/dist/easymde.min.css" %}">
 {% endblock %}
 {% block add_styles %}
@@ -25,6 +25,21 @@
                 {% if jform %}
                     <h4> JIRA </h4>
                     <h4>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label" for="id_jira_issue">JIRA URL
+                            <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="JIRA URL connected to this findings product or engagement" data-placement="right" data-container="body" data-original-title="" title="">
+                            </i>
+                        </label>
+                        <div class="col-sm-10 form-control-static">
+                            {% if product_tab.product.jira_conf %}
+                                <a href="{{ product_tab.product.jira_conf.url }}/browse/{{ product_tab.product.jira_pkey.project_key }}"
+                                target="_blank"> {{ product_tab.product.jira_conf.url }}/browse/{{ product_tab.product.jira_pkey.project_key }} </a>
+                            {% else %}
+                            None
+                            {% endif %}
+                        </div>
+                    </div>
+
                     {% include "dojo/form_fields.html" with form=jform %}
                 {% endif %}
                 <div class="form-group">
@@ -41,6 +56,20 @@
                 {% if jform %}
                     <h4> JIRA </h4>
                     <hr>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label" for="id_jira_issue">JIRA URL
+                            <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="JIRA URL connected to this findings product or engagement" data-placement="right" data-container="body" data-original-title="" title="">
+                            </i>
+                        </label>
+                        <div class="col-sm-10 form-control-static">
+                            {% if product_tab.product.jira_conf %}
+                                <a href="{{ product_tab.product.jira_conf.url }}/browse/{{ product_tab.product.jira_pkey.project_key }}"
+                                target="_blank"> {{ product_tab.product.jira_conf.url }}/browse/{{ product_tab.product.jira_pkey.project_key }} </a>
+                            {% else %}
+                            None
+                            {% endif %}
+                        </div>
+                    </div>
                     {% include "dojo/form_fields.html" with form=jform %}
                 {% endif %}
                 <div class="form-group">
@@ -55,7 +84,6 @@
 {% endblock %}
 {% block postscript %}
     <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
-    <script type="application/javascript" src="{% static "chosen/chosen.jquery.min.js" %}"></script>
     <script type="application/javascript" src="{% static "easymde/dist/easymde.min.js" %}"></script>
     <script type="text/javascript" src="{% static "admin/js/jquery.init.js" %}"></script>
     <script type="application/javascript" src="{% static "admin/js/admin/RelatedObjectLookups.js" %}"></script>

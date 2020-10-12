@@ -142,30 +142,6 @@ def delete_alerts(request):
                     {'alerts': alerts})
 
 
-def migrate_alerts(request):
-    alerts = Alerts.objects.filter(user_id=request.user)
-    dojo_types = ['engagement', 'test', 'product', 'finding']
-
-    if request.method == 'POST':
-        for alert in alerts:
-            url = alert.url
-            split_url = url.split('/')
-            item = set(dojo_types).intersection(split_url)
-            new_url = url[url.index(next(iter(item))) - 1:]
-            alert.url = new_url
-            alert.save()
-
-        messages.add_message(request,
-                                        messages.SUCCESS,
-                                        'Alerts migrated.',
-                                        extra_tags='alert-success')
-        return HttpResponseRedirect('alerts')
-
-    return render(request,
-                    'dojo/migrate_alerts.html',
-                    {'alerts': alerts})
-
-
 @login_required
 def alerts_json(request, limit=None):
     limit = request.GET.get('limit')

@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand
 from pytz import timezone
 
 from dojo.models import Finding
-from dojo.utils import update_issue, get_system_setting
+from dojo.utils import update_jira_issue, get_system_setting
 
 locale = timezone(get_system_setting('time_zone'))
 
@@ -22,5 +22,5 @@ class Command(BaseCommand):
 
         for finding in findings:
             print("Checking issue:" + str(finding.id))
-            update_issue(finding, True)
+            update_jira_issue(finding, True)
             print("########\n")

@@ -68,7 +68,10 @@ class SonarQubeApiImporter(object):
                     continue
 
                 type = issue['type']
-                title = issue['message']
+                if len(issue['message']) > 511:
+                    title = issue['message'][0:507] + "..."
+                else:
+                    title = issue['message']
                 component_key = issue['component']
                 line = issue.get('line')
                 rule_id = issue['rule']
@@ -131,6 +134,7 @@ class SonarQubeApiImporter(object):
         if search:
             raw_html = search.group(1)
         h = html2text.HTML2Text()
+        raw_html = raw_html.replace('<h2>', '<b>').replace('</h2>', '</b>')
         return h.handle(raw_html)
 
     @staticmethod
