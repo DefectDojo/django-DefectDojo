@@ -3,6 +3,11 @@ from dojo.models import Endpoint_Status
 register = template.Library()
 
 
+@register.filter(name='has_endpoints')
+def has_endpoints(finding):
+    return True if finding.endpoints.all() else False
+
+
 @register.filter(name='get_vulnerable_endpoints')
 def get_vulnerable_endpoints(finding):
     status_list = finding.endpoint_status.all().filter(mitigated=False)
@@ -51,3 +56,9 @@ def endpoint_mitigator(endpoint, finding):
 def endpoint_mitigated_time(endpoint, finding):
     status = Endpoint_Status.objects.get(endpoint=endpoint, finding=finding)
     return status.mitigated_time
+
+
+@register.filter
+def endpoint_check_active(endpoint, finding):
+    status = Endpoint_Status.objects.get(endpoint=endpoint, finding=finding)
+    return not status.mitigated

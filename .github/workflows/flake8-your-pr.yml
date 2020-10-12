@@ -1,0 +1,15 @@
+name: Flake8 your PR
+# run on pull_request_target instead of just pull_request as we need write access to update the status check
+on: [pull_request_target]
+jobs:
+  flake8-your-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
+
+      # - uses: tayfun/flake8-your-pr@master
+      - uses: valentijnscholten/flake8-your-pr@master
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"

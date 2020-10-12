@@ -1,8 +1,6 @@
 {% extends 'base.html' %}
 {% load static from staticfiles %}
-{% block add_css %}
-    <link rel="stylesheet" href="{% static "chosen-bootstrap/chosen.bootstrap.min.css" %}">
-{% endblock %}
+
 {% block content %}
     <form method="GET" id="calfilter" action="/calendar">
         <div class="container-fluid chosen-container side-by-side">
@@ -33,7 +31,6 @@
     <br/><br/>
 {% endblock %}
 {% block postscript %}
-    <script type="application/javascript" src="{% static "chosen/chosen.jquery.min.js" %}"></script>
     <script>
           $(function () {
             $('#caltype').change(function() { $('#calfilter').attr('action', '/calendar/' + $(this).val()); });
