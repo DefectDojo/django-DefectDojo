@@ -93,7 +93,7 @@ def webhook(request):
         if parsed.get('webhookEvent') == 'comment_created':
             comment_text = parsed['comment']['body']
             commentor = parsed['comment']['updateAuthor']['displayName']
-            jid = parsed['comment']['self'].split('/')[7]
+            jid = parsed['issue']['id']
             jissue = JIRA_Issue.objects.get(jira_id=jid)
             jira = JIRA_Conf.objects.values_list('username', flat=True)
             for jira_userid in jira:
