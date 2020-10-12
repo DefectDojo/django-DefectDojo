@@ -683,10 +683,8 @@
         "slack_channel": "",
         "slack_token": "",
         "slack_username": "",
-        "enable_hipchat_notifications": false,
-        "hipchat_site": "",
-        "hipchat_channel": "",
-        "hipchat_token": "",
+        "enable_msteams_notifications": false,
+        "msteams_url": "",
         "enable_mail_notifications": false,
         "mail_notifications_from": "from@example.com",
         "mail_notifications_to": "",
@@ -728,7 +726,6 @@
         "github_username": null,
         "slack_username": null,
         "slack_user_id": null,
-        "hipchat_username": null,
         "block_execution": false
     }
 },
@@ -746,7 +743,6 @@
         "github_username": null,
         "slack_username": null,
         "slack_user_id": null,
-        "hipchat_username": null,
         "block_execution": false
     }
 },
@@ -764,7 +760,6 @@
         "github_username": null,
         "slack_username": null,
         "slack_user_id": null,
-        "hipchat_username": null,
         "block_execution": false
     }
 },
@@ -24284,7 +24279,8 @@
         "medium_mapping_severity": "test severity",
         "high_mapping_severity": "test severity",
         "critical_mapping_severity": "test severity",
-        "finding_text": ""
+        "finding_text": "",
+        "global_jira_sla_notification": false
     }
 },
 {

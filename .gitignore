@@ -76,6 +76,7 @@ dojo/uploads/risk/*
 dojo/uploads/reports/*
 dojo/scans/scan*
 dojo/uploads/threat/*
+dojo/fixtures/initial_surveys.json
 .idea
 *.sqlite
 *.db
@@ -112,4 +113,12 @@ quick.bash
 # pipenv
 Pipfile
 Pipfile*
+
+
+#ignore locally added certs
+docker/certs/*
+!docker/certs/readme.txt
+
+# Helm dependencies
+helm/defectdojo/charts
 

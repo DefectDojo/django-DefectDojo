@@ -7,13 +7,13 @@ from dojo.utils import log_jira_message, get_jira_connection
 
 """
 Author: Aaron Weaver
-This script will locate open, active findings and update them in Jira. 
-Useful if you need to make bulk changes with Jira:
+This script will locate open, active findings and update them in JIRA.
+Useful if you need to make bulk changes with JIRA:
 """
 
 
 class Command(BaseCommand):
-    help = 'No input commands for Jira bulk update.'
+    help = 'No input commands for JIRA bulk update.'
 
     def handle(self, *args, **options):
 

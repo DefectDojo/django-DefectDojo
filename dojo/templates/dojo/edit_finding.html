@@ -3,7 +3,7 @@
 {% load display_tags %}
 {% load static from staticfiles %}
 {% block add_css %}
-    <link rel="stylesheet" href="{% static "chosen-bootstrap/chosen.bootstrap.min.css" %}">
+
     <link rel="stylesheet" href="{% static "easymde/dist/easymde.min.css" %}">
 {% endblock %}
 {% block add_styles %}
@@ -44,39 +44,48 @@
                 <input type="hidden" name="return_url" value="{{ return_url }}" />            
             {% endif %}
             {% include "dojo/form_fields.html" with form=form %}
-            <div class="form-group hidden">
-                {% if dupes %}
-                    <label class="col-sm-2 control-label" for="dupe_choice">Parent Duplicate</label>
-                    <div class="col-sm-10">
-                        <select class="form-control" name=duplicate_choice id="dupe_choice">
-                            {% for dupe in dupes %}
-                                <option>{{ dupe.id }}: {{ dupe.title }},
-                                        {{ dupe.test.engagement.product.name }}/
-                                        {{ dupe.test.engagement.name }}/
-                                        {% if dupe.test.title %}
-                                            {{dupe.test.title}}
-                                        {% else %}
-                                            {{dupe.test.test_type}}
-                                        {% endif %}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
+            <span id="original_finding" class="small">
+                {% if finding.duplicate_finding %}
+                    [original:
+                    <a href="{% url 'view_finding' finding.duplicate_finding.id %}">{{ finding.duplicate_finding.id }} : {{ finding.duplicate_finding.title }}</a>/
+                    <a href="{% url 'view_product' finding.duplicate_finding.test.engagement.product.id %}">{{ finding.duplicate_finding.test.engagement.product.name }}</a>/
+                    <a href="{% url 'view_engagement' finding.duplicate_finding.test.engagement.id %}">{{ finding.duplicate_finding.test.engagement.name }}</a>
+                    {% if finding.duplicate_finding.test.title %}
+                        {{finding.duplicate_finding.test.title}}
+                    {% else %}
+                        {{finding.duplicate_finding.test.test_type}}
+                    {% endif %}
+                    {% if finding.duplicate_finding.cve %}
+                        <a href="{{finding.duplicate_finding.cve|cve_url}}">({{finding.duplicate_finding.cve}})</a>
+                    {% endif %}                        
+                    {% if finding.duplicate_finding.cwe > 0 %}
+                        <a href="{{finding.duplicate_finding.cwe|cwe_url}}">(CWE-{{finding.duplicate_finding.cwe}})</a>
+                    {% endif %}
+                    {% if finding.duplicate_finding.jira_issue %}
+                        <a href="{{ finding.duplicate_finding.jira_conf_new.url }}/browse/{{ finding.duplicate_finding.jira_issue.jira_key }}"
+                        target="_blank" title="{{ finding.duplicate_finding.jira_conf_new.url }}/browse/{{ finding.duplicate_finding.jira_issue.jira_key }}">{{ finding.duplicate_finding.jira_issue.jira_key }}</a>
+                    {% endif %}
+                    ]
                 {% endif %}
-            </div>
+            </span>
 
             {% if jform %}
                 <h4> JIRA </h4>
                 <hr>
                 <div class="form-group">
-                    <label class="col-sm-2 control-label" for="id_jira_issue">JIRA issue
-                        <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="JIRA issue connected to this finding" data-placement="right" data-container="body" data-original-title="" title="">
+                    <label class="col-sm-2 control-label" for="id_jira_issue">JIRA URL
+                        <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="JIRA URL connected to this findings product or engagement" data-placement="right" data-container="body" data-original-title="" title="">
                         </i>
                     </label>
                     <div class="col-sm-10 form-control-static">
-                        {% if finding.jira_issue and finding.jira_conf_new %}
-                            <a href="{{ finding.jira_conf_new.url }}/browse/{{ finding.jira_issue.jira_key }}"
-                            target="_blank"> {{ finding.jira_conf_new.url }}/browse/{{ finding.jira_issue.jira_key }} </a>
+                        {% if finding.jira_conf_new %}
+                            {% if finding.jira_issue %}
+                                <a href="{{ finding.jira_conf_new.url }}/browse/{{ finding.jira_issue.jira_key }}"
+                                target="_blank"> {{ finding.jira_conf_new.url }}/browse/{{ finding.jira_issue.jira_key }} </a>
+                            {% else %}
+                                <a href="{{ finding.jira_conf_new.url }}/browse/{{ finding.jira_pkey.project_key }}"
+                                target="_blank"> {{ finding.jira_conf_new.url }}/browse/{{ finding.jira_pkey.project_key }} </a>
+                            {% endif %}
                         {% else %}
                         None
                         {% endif %}
@@ -113,7 +122,6 @@
 {% endblock %}
 {% block postscript %}
     <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
-    <script type="application/javascript" src="{% static "chosen/chosen.jquery.min.js" %}"></script>
     <script type="application/javascript" src="{% static "easymde/dist/easymde.min.js" %}"></script>
     <script type="text/javascript" src="{% static "admin/js/jquery.init.js" %}"></script>
     <script type="application/javascript" src="{% static "admin/js/admin/RelatedObjectLookups.js" %}"></script>
@@ -176,33 +184,16 @@
             });
         });
 
-
-        {% if dupes %}
+        {% comment %} crazy legacy stuff to force the original finding to be displayede at the right place {% endcomment %}
         window.onload = function() {
-            var menu = document.getElementById("dupe_choice").parentElement.parentElement
-            var dupe_box = document.getElementById("id_duplicate").parentElement.parentElement.parentElement.parentElement
+            var original_finding = document.getElementById("original_finding")
+            var duplicate_checkbox = document.getElementById("id_duplicate").parentElement.parentElement
             if ($("#id_duplicate").prop("checked")) {
-                dupe_box.insertAdjacentElement("afterend", menu)
-                menu.setAttribute("class", "form-group");
-            }
-            else {
-                menu.setAttribute("class", "form-group hidden");
+                $("#id_duplicate").parent().parent().append(original_finding)
+            } else {
+                $("#id_duplicate").click(function(){ alert('findings can only be marked as duplicates from the view finding screen'); return false; });
             }
         };
-        
-        $("#id_duplicate").change(function () {
-            var menu = document.getElementById("dupe_choice").parentElement.parentElement
-            var dupe_box = document.getElementById("id_duplicate").parentElement.parentElement.parentElement.parentElement
-            if ($(this).prop("checked")) {
-                dupe_box.insertAdjacentElement("afterend", menu)
-                menu.setAttribute("class", "form-group");
-            }
-            else {
-                menu.setAttribute("class", "form-group hidden");
-            }
-            
-        });
-        {% endif %}
 
         $("#add_finding").submit(function () {
             var isFormValid = true;

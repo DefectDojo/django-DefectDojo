@@ -1,6 +1,7 @@
 #!/bin/sh
-
 umask 0002
+
+id
 
 echo -n "Waiting for database to be reachable "
 until echo "select 1;" | python3 manage.py dbshell > /dev/null
@@ -10,7 +11,7 @@ do
 done
 echo
 
-C_FORCE_ROOT=true exec celery \
+exec celery beat \
   --app=dojo \
-  beat \
-  --pidfile=/run/celery-beat.pid
+  --pidfile=/var/run/defectdojo/celery-beat.pid \
+  --schedule=/var/run/defectdojo/celerybeat-schedule

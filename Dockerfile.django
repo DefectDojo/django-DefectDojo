@@ -5,7 +5,7 @@
 # Dockerfile.nginx to use the caching mechanism of Docker.
 
 # Ref: https://devguide.python.org/#branchstatus
-FROM python:3.6.11-slim-buster@sha256:9111ff37d96bdcd84bcac261951ac410ee276144eb8a02f06e5907ff4ff2ffea as build
+FROM python:3.6.12-slim-buster@sha256:e5259113df5a7c4dae16ad37c2ca53b1cf722e051cfd5f624e7b76aa72389e0c as build
 WORKDIR /app
 RUN \
   apt-get -y update && \
@@ -24,8 +24,11 @@ RUN \
 COPY requirements.txt ./
 RUN pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
 
-FROM python:3.6.11-slim-buster@sha256:9111ff37d96bdcd84bcac261951ac410ee276144eb8a02f06e5907ff4ff2ffea
+FROM python:3.6.12-slim-buster@sha256:e5259113df5a7c4dae16ad37c2ca53b1cf722e051cfd5f624e7b76aa72389e0c
 WORKDIR /app
+ARG uid=1001
+ARG appuser=defectdojo
+ENV appuser ${appuser}
 RUN \
   apt-get -y update && \
   # ugly fix to install postgresql-client without errors
@@ -64,6 +67,7 @@ COPY \
   docker/entrypoint-unit-tests.sh \
   docker/entrypoint-unit-tests-devDocker.sh \
   docker/wait-for-it.sh \
+  docker/certs/* \
   /
 COPY wsgi.py manage.py tests/unit-tests.sh ./
 COPY dojo/ ./dojo/
@@ -72,13 +76,20 @@ RUN \
   cp dojo/settings/settings.dist.py dojo/settings/settings.py
 COPY tests/ ./tests/
 RUN \
+  rm -f /readme.txt && \
   mkdir -p dojo/migrations && \
   chmod g=u dojo/migrations && \
-  chmod g=u /var/run && \
   true
 USER root
-RUN chmod -R 0777 /app
-USER 1001
+RUN \
+    adduser --system --no-create-home --disabled-password --gecos '' \
+        --uid ${uid} ${appuser} && \
+    chown -R ${appuser} /app && \
+    chmod 0700 /app && \
+    chmod 0750 -R /app/* && \
+    mkdir /var/run/${appuser} && \
+    chown ${appuser} /var/run/${appuser}
+USER ${appuser}
 ENV \
   DD_ADMIN_USER=admin \
   DD_ADMIN_MAIL=admin@defectdojo.local \
@@ -94,6 +105,14 @@ ENV \
   DD_CELERY_BROKER_PORT="5672" \
   DD_CELERY_BROKER_PATH="//" \
   DD_CELERY_LOG_LEVEL="INFO" \
+  DD_CELERY_WORKER_POOL_TYPE="solo" \
+  # Enable prefork and options below to ramp-up celeryworker performance. Presets should work fine for a machine with 8GB of RAM, while still leaving room.
+  # See https://docs.celeryproject.org/en/stable/userguide/workers.html#id12 for more details
+  # DD_CELERY_WORKER_POOL_TYPE="prefork" \
+  # DD_CELERY_WORKER_AUTOSCALE_MIN="2" \
+  # DD_CELERY_WORKER_AUTOSCALE_MAX="8" \
+  # DD_CELERY_WORKER_CONCURRENCY="8" \
+  # DD_CELERY_WORKER_PREFETCH_MULTIPLIER="128" \
   DD_DATABASE_ENGINE="django.db.backends.mysql" \
   DD_DATABASE_HOST="mysql" \
   DD_DATABASE_NAME="defectdojo" \
@@ -103,6 +122,8 @@ ENV \
   DD_INITIALIZE=true \
   DD_UWSGI_MODE="socket" \
   DD_UWSGI_ENDPOINT="0.0.0.0:3031" \
+  DD_UWSGI_NUM_OF_PROCESSES="2" \
+  DD_UWSGI_NUM_OF_THREADS="2" \
   DD_DJANGO_ADMIN_ENABLED="True" \
   DD_TRACK_MIGRATIONS="True" \
   DD_DJANGO_METRICS_ENABLED="False"

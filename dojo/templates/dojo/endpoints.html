@@ -149,9 +149,6 @@
           }
         }
         $(function () {
-            $(document).ready(function(){
-              $('[data-toggle="tooltip"]').tooltip();
-            });
             check_checked_endpoint();
 
             $('#id_status').on('click', function (e) {
@@ -170,8 +167,6 @@
                   $( form_element ).submit();
               }
             });
-
-            $('[data-toggle="tooltip"]').tooltip();
 
             $('input[type="checkbox"]').change(function () {
               checkbox_count = 0;

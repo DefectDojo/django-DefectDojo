@@ -157,14 +157,6 @@
 {% block postscript %}
     <script>
         $(function () {
-            var availableTags = [
-                {% for word in title_words %}
-                    "{{word}}",
-                {% endfor %}
-            ];
-            $("#id_title").autocomplete({
-                source: availableTags
-            });
             $('button.template-delete').on('click', function (e) {
                 return confirm('Are you sure you want to delete this template?')
             });

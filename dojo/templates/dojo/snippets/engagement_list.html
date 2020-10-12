@@ -4,7 +4,7 @@
     <div class="panel panel-default table-responsive">
         <div class="panel-heading">
             <h4> {% if status == "open" %}Active{% elif status == "paused" %}Paused {% else %}Closed{% endif %} {% if type == "CI/CD" %}CI/CD{% endif %} Engagements ({{ count }})
-              {% if user.is_staff %}
+              {% if user|is_authorized_for_staff:prod %}
                 {% if type == "CI/CD" %}
                 <a title="Add New Engagement" class="pull-right btn btn-sm btn-primary" href="{% url 'new_eng_for_prod_cicd' prod.id %}"><span
                       class="fa fa-plus"></span> </a>
@@ -211,7 +211,6 @@
     </div>
 </div>
 {% block postscript %}
-<script src="/static/jquery/dist/jquery.js"></script>
 <script>
         // DataTables setup
         $(document).ready(function() {
@@ -231,6 +230,7 @@
 
             // Mapping of table columns to objects for proper cleanup and data formatting
             var dojoTable = $('#{{status}}').DataTable({
+                colReorder: true,              
                 "columns": [
                     { "data": "action" },
                     { "data": "eng_name" },

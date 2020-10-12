@@ -26,23 +26,22 @@ build_containers() {
 
 return_value=0
 if [ -z "${TEST}" ]; then
-  build_containers
-
   # Start Minikube
   travis_fold start minikube_install
-  sudo minikube start \
-    --vm-driver=none \
+  minikube start \
+    --driver=docker \
     --kubernetes-version="${K8S_VERSION}"
-
+  eval $(minikube docker-env)
+  build_containers
   # Configure Kubernetes context and test it
-  sudo minikube update-context
-  sudo kubectl cluster-info
+  minikube update-context
+  kubectl cluster-info
 
   # Enable Nginx ingress add-on and wait for it
-  sudo minikube addons enable ingress
+  minikube addons enable ingress
   echo -n "Waiting for Nginx ingress controller "
-  until [[ "True" == "$(sudo kubectl get pod \
-    --selector=app.kubernetes.io/name=nginx-ingress-controller \
+  until [[ "True" == "$(kubectl get pod \
+    --selector=app.kubernetes.io/component=controller,app.kubernetes.io/name=ingress-nginx \
     --namespace=kube-system \
     -o 'jsonpath={.items[*].status.conditions[?(@.type=="Ready")].status}')" ]]
   do
@@ -51,27 +50,15 @@ if [ -z "${TEST}" ]; then
   done
   echo
 
-  # Create Helm and wait for Tiller to become ready
-  sudo helm init
-  echo -n "Waiting for Tiller "
-  until [[ "True" == "$(sudo kubectl get pod \
-    --selector=name=tiller \
-    --namespace=kube-system \
-    -o 'jsonpath={.items[*].status.conditions[?(@.type=="Ready")].status}')" ]]
-  do
-    sleep 1
-    echo -n "."
-  done
-  echo
 
-  # Update Helm repository
-  sudo helm repo update
+
 
   # Update Helm dependencies for DefectDojo
-  sudo helm dependency update ./helm/defectdojo
+  helm repo add stable https://kubernetes-charts.storage.googleapis.com/
+  helm dependency update ./helm/defectdojo
 
   # Set Helm settings for the broker
-  case "${BROKER}" in 
+  case "${BROKER}" in
     rabbitmq)
       HELM_BROKER_SETTINGS=" \
         --set redis.enabled=false \
@@ -118,14 +105,35 @@ if [ -z "${TEST}" ]; then
       ;;
   esac
 
+  case "${REPLICATION}" in
+    enabled)
+    HELM_DATABASE_SETTINGS=" \
+      --set database=postgresql \
+      --set postgresql.enabled=true \
+      --set mysql.enabled=false \
+      --set createPostgresqlSecret=true \
+      --set postgresql.replication.enabled=true \
+    "
+    ;;
+  esac
+  # Test does it propagates extra vars and secrets
+  case "${EXTRAVAL}" in
+    enabled)
+    HELM_CONFIG_SECRET_SETTINGS=" \
+      --set extraConfigs.DD_EXAMPLE_CONFIG=testme \
+      --set extraSecrets.DD_EXAMPLE_SECRET=testme \
+    "
+    ;;
+  esac
   # Install DefectDojo into Kubernetes and wait for it
-  sudo helm install \
+  helm install \
+    defectdojo \
     ./helm/defectdojo \
-    --name=defectdojo \
     --set django.ingress.enabled=false \
     --set imagePullPolicy=Never \
     ${HELM_BROKER_SETTINGS} \
     ${HELM_DATABASE_SETTINGS} \
+    ${HELM_CONFIG_SECRET_SETTINGS} \
     --set createSecret=true
 
 
@@ -133,7 +141,7 @@ if [ -z "${TEST}" ]; then
   i=0
   # Timeout value so that the wait doesn't timeout the travis build (faster fail)
   TIMEOUT=20
-  until [[ "True" == "$(sudo kubectl get pod \
+  until [[ "True" == "$(kubectl get pod \
       --selector=defectdojo.org/component=django \
       -o 'jsonpath={.items[*].status.conditions[?(@.type=="Ready")].status}')" \
       || ${i} -gt ${TIMEOUT} ]]
@@ -147,29 +155,57 @@ if [ -z "${TEST}" ]; then
   fi
   echo
   echo "UWSGI logs"
-  sudo kubectl logs --selector=defectdojo.org/component=django -c uwsgi
+  kubectl logs --selector=defectdojo.org/component=django -c uwsgi
   echo
   echo "DefectDojo is up and running."
-  sudo kubectl get pods
+  kubectl get pods
   travis_fold end minikube_install
+
+
+  # Test if postgres has replication enabled
+  if [[ "${REPLICATION}" == "enabled" ]]
+  then
+    travis_fold start defectdojo_tests_replication
+    items=`kubectl get pods -o name | grep slave | wc -l`
+    echo "Number of replicas $items"
+    if [[ $items < 1 ]]; then
+      echo "Wrong number of replicas"
+      return_value=1
+    fi
+  travis_fold end defectdojo_tests_replication
+  fi
+
+  # Test extra config and secret by looking 2 enviroment values testme
+  if [[ "${EXTRAVAL}" == "enabled" ]]
+  then
+    travis_fold start defectdojo_tests_extravars
+    items=`kubectl exec -i $(kubectl get pods -o name | grep django | \
+    sed "s/pod\///g") -c uwsgi printenv | grep testme | wc -l`
+    echo "Number of items $items"
+    if [[ $items < 2 ]]; then
+      echo "Missing extra variables"
+      return_value=1
+    fi
+  travis_fold end defectdojo_tests_extravars
+  fi
 
   # Run all tests
   travis_fold start defectdojo_tests
   echo "Running tests."
-  sudo helm test defectdojo
+  helm test defectdojo
   # Check exit status
   return_value=${?}
   echo
   echo "Unit test results"
-  sudo kubectl logs defectdojo-unit-tests
+  kubectl logs defectdojo-unit-tests
   echo
   echo "Pods"
-  sudo kubectl get pods
+  kubectl get pods
 
   # Uninstall
-  echo "Deleting DefectDojo from Kubernetes"
-  sudo helm delete defectdojo --purge
-  sudo kubectl get pods
+  echo "Removing DefectDojo from Kubernetes"
+  helm uninstall defectdojo
+  kubectl get pods
   travis_fold end defectdojo_tests
 
   exit ${return_value}
@@ -183,7 +219,7 @@ echo "Running test ${TEST}"
           echo "Running Flake8 tests on dev branch aka pull requests"
           # We need to checkout dev for flake8-diff to work properly
           git checkout dev
-          sudo pip3 install pep8 flake8==3.7.9 flake8-diff
+          sudo pip3 install pep8 flake8 flake8-diff
           flake8-diff
       else
           echo "Skipping because not on dev branch"

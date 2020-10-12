@@ -367,7 +367,7 @@
       "references": "[Issue #167](https://github.com/broofa/node-mime/issues/167)",
       "access": "public",
       "severity": "moderate",
-      "cwe": "CWE-400",
+      "cwe": "CWE-",
       "metadata": {
         "module_type": "Multi.Library",
         "exploitability": 4,
