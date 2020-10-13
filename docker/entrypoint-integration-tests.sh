@@ -98,7 +98,7 @@ else
     fail $test
 fi
 
-test=echo "User integration tests"
+test="User integration tests"
 echo "Running: $test"
 if python3 tests/User_unit_test.py ; then
     success $test
