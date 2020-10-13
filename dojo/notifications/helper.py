@@ -20,7 +20,7 @@ def create_notification(event=None, *args, **kwargs):
             # kwargs.update({'user': recipient_notifications.user})
             process_notifications(event, recipient_notifications, *args, **kwargs)
     else:
-        logger.debug('creating system notifications')
+        logger.debug('creating system notifications for event: %s', event)
         # send system notifications to all admin users
 
         # System notifications
@@ -35,7 +35,7 @@ def create_notification(event=None, *args, **kwargs):
         # All admins will also receive system notifications, but as part of the person global notifications section below
         # This time user is set, so will trigger email to personal email, to personal slack channel (mention), etc.
         # only retrieve users which have at least one notification type enabled for this event type.
-        logger.debug('creating personal notifications')
+        logger.debug('creating personal notifications for event: %s', event)
 
         product = None
         if 'product' in kwargs:

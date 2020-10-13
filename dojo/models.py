@@ -315,6 +315,7 @@ class Dojo_User(User):
 
     @staticmethod
     def wants_block_execution(user):
+        # this return False if there is no user, i.e. in celery processes, unittests, etc.
         return hasattr(user, 'usercontactinfo') and user.usercontactinfo.block_execution
 
 
@@ -1108,6 +1109,12 @@ class Endpoint_Status(models.Model):
         days = diff.days
         return days if days > 0 else 0
 
+    def __str__(self):
+        field_values = []
+        for field in self._meta.get_fields():
+            field_values.append(str(getattr(self, field.name, '')))
+        return ' '.join(field_values)
+
 
 class Endpoint(models.Model):
     protocol = models.CharField(null=True, blank=True, max_length=10,
@@ -1350,6 +1357,18 @@ class Test(models.Model):
 
     def accept_risks(self, accepted_risks):
         self.engagement.risk_acceptance.add(*accepted_risks)
+
+    @property
+    def dedupe_algo(self):
+        deduplicationAlgorithm = settings.DEDUPE_ALGO_LEGACY
+        if hasattr(settings, 'DEDUPLICATION_ALGORITHM_PER_PARSER'):
+            scan_type = self.test_type.name
+
+            # Check for an override for this scan_type in the deduplication configuration
+            if (scan_type in settings.DEDUPLICATION_ALGORITHM_PER_PARSER):
+                deduplicationAlgorithm = settings.DEDUPLICATION_ALGORITHM_PER_PARSER[scan_type]
+
+        return deduplicationAlgorithm
 
     def get_absolute_url(self):
         from django.urls import reverse
@@ -1594,6 +1613,7 @@ class Finding(models.Model):
         if hasattr(settings, 'HASHCODE_FIELDS_PER_SCANNER') and hasattr(settings, 'HASHCODE_ALLOWS_NULL_CWE') and hasattr(settings, 'HASHCODE_ALLOWED_FIELDS'):
             # Default fields
             if self.dynamic_finding:
+                deduplicationLogger.debug('dynamig finding, so including endpoints in hash_code computation as default')
                 hashcodeFields = ['title', 'cwe', 'line', 'file_path', 'description', 'endpoints']
             else:
                 hashcodeFields = ['title', 'cwe', 'line', 'file_path', 'description']
@@ -1647,6 +1667,7 @@ class Finding(models.Model):
     def compute_hash_code_legacy(self):
         fields_to_hash = self.title + str(self.cwe) + str(self.line) + str(self.file_path) + self.description
         if self.dynamic_finding:
+            deduplicationLogger.debug('dynamig finding, so including endpoints in hash_code computation for legacy algo')
             fields_to_hash = fields_to_hash + self.get_endpoints()
         deduplicationLogger.debug("compute_hash_code_legacy - fields_to_hash = " + fields_to_hash)
         return self.hash_fields(fields_to_hash)
@@ -1971,6 +1992,8 @@ class Finding(models.Model):
             except:
                 async_false_history.delay(self, *args, **kwargs)
                 pass
+        else:
+            deduplicationLogger.debug("skipping false positive history because it's disabled in system settings or false_history param is False")
 
         # Title Casing
         from titlecase import titlecase
