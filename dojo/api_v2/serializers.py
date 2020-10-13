@@ -1225,6 +1225,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                         burp_rr.clean()
                         burp_rr.save()
 
+                # for existing findings: make sure endpoints are present or created
                 if finding:
                     finding_count += 1
                     for endpoint in item.unsaved_endpoints:
