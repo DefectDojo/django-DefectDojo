@@ -256,7 +256,7 @@ class FindingViewSet(mixins.ListModelMixin,
 
     def get_queryset(self):
         if not self.request.user.is_staff:
-            return Finding.objects.filter(
+            findings = Finding.objects.filter(
                 test__engagement__product__authorized_users__in=[self.request.user])
         else:
             findings = Finding.objects.all()
