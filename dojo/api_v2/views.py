@@ -257,7 +257,7 @@ class FindingViewSet(mixins.ListModelMixin,
     def get_queryset(self):
         if not self.request.user.is_staff:
             findings = Finding.objects.filter(
-                reporter_id__in=[self.request.user])
+                test__engagement__product__authorized_users__in=[self.request.user])
         else:
             findings = Finding.objects.all()
         return findings.prefetch_related('test',
@@ -712,7 +712,7 @@ class StubFindingsViewSet(mixins.ListModelMixin,
     def get_queryset(self):
         if not self.request.user.is_staff:
             return Finding.objects.filter(
-                reporter_id__in=[self.request.user])
+                test__engagement__product__authorized_users__in=[self.request.user])
         else:
             return Finding.objects.all()
 
