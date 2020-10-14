@@ -27,6 +27,17 @@ class EnvironmentTest(BaseTestCase):
 
         self.assertTrue(self.is_success_message_present(text='Environment added successfully.'))
 
+    def test_create_environment_negative(self):
+        driver = self.login_page()
+        driver.get(self.base_url + "dev_env")
+        driver.find_element_by_id("dropdownMenu1").click()
+        driver.find_element_by_link_text("New Environment").click()
+        driver.find_element_by_id("id_name").clear()
+        driver.find_element_by_id("id_name").send_keys("environment test")
+        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+
+        self.assertTrue(self.is_error_help_present(text='Development_ environment with this Name already exists.'))
+
     def test_edit_environment(self):
         driver = self.login_page()
         driver.get(self.base_url + "dev_env")
@@ -49,6 +60,7 @@ class EnvironmentTest(BaseTestCase):
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(EnvironmentTest('test_create_environment'))
+    suite.addTest(EnvironmentTest('test_create_environment_negative'))
     suite.addTest(EnvironmentTest('test_edit_environment'))
     suite.addTest(EnvironmentTest('test_delete_environment'))
     return suite

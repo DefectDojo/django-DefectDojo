@@ -131,6 +131,9 @@ class BaseTestCase(unittest.TestCase):
     def is_error_message_present(self, text=None):
         return self.is_element_by_css_selector_present('.alert-danger', text=text)
 
+    def is_error_help_present(self, text=None):
+        return self.is_element_by_css_selector_present('.help-block', text=text)
+
     def is_text_present_on_page(self, text):
         # DEBUG: couldn't find:  Product type added successfully. path:  //*[contains(text(),'Product type added successfully.')]
         # can't get this xpath to work
