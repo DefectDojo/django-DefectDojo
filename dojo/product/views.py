@@ -182,15 +182,18 @@ def view_product(request, pid):
 def identify_view(request):
     get_data = request.GET
     view = get_data.get('type', None)
-    if not view:
-        referer = request.META.get('HTTP_REFERER', None)
-        if referer:
-            return 'Endpoint' if referer.find('type=Endpoint') > -1 else 'Finding'
-        else:
-            if get_data.get('finding__severity', None):
-                return 'Endpoint'
-            return 'Finding'
-    return view
+    if view:
+        return view
+    else:
+        if get_data.get('finding__severity', None):
+            return 'Endpoint'
+        elif get_data.get('false_positive', None):
+            return 'Endpoint'
+    referer = request.META.get('HTTP_REFERER', None)
+    if not referer:
+        if referer.find('type=Endpoint') > -1:
+            return 'Endpoint'
+    return 'Finding'
 
 
 def finding_querys(request, prod):
