@@ -874,13 +874,6 @@ def new_eng_for_app(request, pid, cicd=False):
 
 # @user_passes_test(lambda u: u.is_staff)
 @user_must_be_authorized(Product, 'staff', 'pid')
-def new_eng_for_app_cicd(request, pid):
-    # we have to use pid=pid here as new_eng_for_app expects kwargs, because that is how django calls the function based on urls.py named groups
-    return new_eng_for_app(request, pid=pid, cicd=True)
-
-
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Product, 'staff', 'pid')
 def new_tech_for_prod(request, pid):
     prod = Product.objects.get(id=pid)
     if request.method == 'POST':
@@ -898,6 +891,13 @@ def new_tech_for_prod(request, pid):
     form = App_AnalysisTypeForm()
     return render(request, 'dojo/new_tech.html',
                 {'form': form, 'pid': pid})
+
+
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Product, 'staff', 'pid')
+def new_eng_for_app_cicd(request, pid):
+    # we have to use pid=pid here as new_eng_for_app expects kwargs, because that is how django calls the function based on urls.py named groups
+    return new_eng_for_app(request, pid=pid, cicd=True)
 
 
 # @user_passes_test(lambda u: u.is_staff)
