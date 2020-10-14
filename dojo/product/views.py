@@ -797,6 +797,12 @@ def delete_product(request, pid):
                    })
 
 
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Product, 'staff', 'pid')
+def new_eng_for_app_cicd(request, pid):
+    return new_eng_for_app(request, pid, True)
+
+
 @user_must_be_authorized(Product, 'staff', 0)  # use arg 0 as using pid causes issues, I think due to cicd being there
 def new_eng_for_app(request, pid, cicd=False):
     jform = None
@@ -891,12 +897,6 @@ def new_tech_for_prod(request, pid):
     form = App_AnalysisTypeForm()
     return render(request, 'dojo/new_tech.html',
                 {'form': form, 'pid': pid})
-
-
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Product, 'staff', 'pid')
-def new_eng_for_app_cicd(request, pid):
-    return new_eng_for_app(request, pid, True)
 
 
 # @user_passes_test(lambda u: u.is_staff)
