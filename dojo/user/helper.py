@@ -50,8 +50,8 @@ def user_must_be_authorized(model, perm_type, arg, lookup="pk", view_func=None):
 
     @functools.wraps(view_func)
     def _wrapped(request, *args, **kwargs):
-        # print(f' Args: {args}')
-        # print(f' Kwargs: {kwargs}')
+        print(f' Args: {args}')
+        print(f' Kwargs: {kwargs}')
 
         # Fetch object from database
         if isinstance(arg, int):

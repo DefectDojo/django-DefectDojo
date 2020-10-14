@@ -797,7 +797,7 @@ def delete_product(request, pid):
                    })
 
 
-@user_must_be_authorized(Product, 'staff', 'pid')
+@user_must_be_authorized(Product, 'staff', 0)  # use arg 0 as using pid causes issues, I think due to cicd being there
 def new_eng_for_app(request, pid, cicd=False):
     jform = None
     prod = Product.objects.get(id=pid)
