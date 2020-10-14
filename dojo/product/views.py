@@ -797,7 +797,7 @@ def delete_product(request, pid):
                    })
 
 
-# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Product, 'staff', 'pid')
 def new_eng_for_app(request, pid, cicd=False):
     jform = None
     prod = Product.objects.get(id=pid)
@@ -812,7 +812,7 @@ def new_eng_for_app(request, pid, cicd=False):
         #     print(f'Key: {key}')
         #     print(f'Value: {value}')
 
-        form = EngForm(request.POST, cicd=cicd, product=prod.id)
+        form = EngForm(request.POST, cicd=cicd, product=prod.id, user=request.user)
         if form.is_valid():
             new_eng = form.save(commit=False)
             if not new_eng.name:
@@ -860,7 +860,7 @@ def new_eng_for_app(request, pid, cicd=False):
             else:
                 return HttpResponseRedirect(reverse('view_engagement', args=(new_eng.id,)))
     else:
-        form = EngForm(initial={'lead': request.user, 'target_start': timezone.now().date(), 'target_end': timezone.now().date() + timedelta(days=7), 'product': prod.id}, cicd=cicd, product=prod.id)
+        form = EngForm(initial={'lead': request.user, 'target_start': timezone.now().date(), 'target_end': timezone.now().date() + timedelta(days=7), 'product': prod.id}, cicd=cicd, product=prod.id, user=request.user)
         if use_jira:
             jform = JIRAEngagementForm(prefix='jiraform')
 
@@ -894,6 +894,7 @@ def new_tech_for_prod(request, pid):
 
 
 # @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Product, 'staff', 'pid')
 def new_eng_for_app_cicd(request, pid):
     return new_eng_for_app(request, pid, True)
 

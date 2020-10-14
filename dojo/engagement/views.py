@@ -140,7 +140,7 @@ def prefetch_for_products_with_engagments(products_with_engagements):
 @user_passes_test(lambda u: u.is_staff)
 def new_engagement(request):
     if request.method == 'POST':
-        form = EngForm(request.POST)
+        form = EngForm(request.POST, user=request.user)
         if form.is_valid():
             new_eng = form.save()
             new_eng.lead = request.user
@@ -165,7 +165,7 @@ def new_engagement(request):
                 return HttpResponseRedirect(
                     reverse('view_engagement', args=(new_eng.id, )))
     else:
-        form = EngForm(initial={'date': timezone.now().date()})
+        form = EngForm(initial={'date': timezone.now().date()}, user=request.user)
     add_breadcrumb(title="New Engagement", top_level=False, request=request)
     return render(request, 'dojo/new_eng.html', {
         'form': form,
@@ -183,7 +183,7 @@ def edit_engagement(request, eid):
     use_jira = get_system_setting('enable_jira') and eng.product.jira_pkey is not None
 
     if request.method == 'POST':
-        form = EngForm(request.POST, instance=eng, cicd=ci_cd_form, product=eng.product.id)
+        form = EngForm(request.POST, instance=eng, cicd=ci_cd_form, product=eng.product.id, user=request.user)
         if 'jiraform-push_to_jira' in request.POST:
             jform = JIRAEngagementForm(
                 request.POST, prefix='jiraform', instance=eng)
@@ -228,7 +228,7 @@ def edit_engagement(request, eid):
                 return HttpResponseRedirect(
                     reverse('view_engagement', args=(eng.id, )))
     else:
-        form = EngForm(initial={'product': eng.product.id}, instance=eng, cicd=ci_cd_form, product=eng.product.id)
+        form = EngForm(initial={'product': eng.product.id}, instance=eng, cicd=ci_cd_form, product=eng.product.id, user=request.user)
 
         if use_jira:
             jform = JIRAEngagementForm(prefix='jiraform', instance=eng)
