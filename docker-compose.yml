@@ -10,13 +10,15 @@ services:
       - uwsgi
     environment:
       NGINX_METRICS_ENABLED: ${NGINX_METRICS_ENABLED:-false}
+      DD_PORT: ${DD_PORT:-8080}
+      DD_TLS_PORT: ${DD_TLS_PORT:-8443}
     ports:
       - target: ${DD_PORT:-8080}
         published: ${DD_PORT:-8080}
         protocol: tcp
         mode: host
-      - target: ${DD_PORT:-8443}
-        published: ${DD_PORT:-8443}
+      - target: ${DD_TLS_PORT:-8443}
+        published: ${DD_TLS_PORT:-8443}
         protocol: tcp
         mode: host
   uwsgi:

@@ -14,8 +14,11 @@ fi
 
 if [ "${USE_TLS}" = true ]; then
   NGINX_CONFIG="/etc/nginx/nginx_TLS.conf"
+  sed -i "s/listen 8080/listen ${DD_PORT}/" $NGINX_CONFIG
+  sed -i "s/listen 8443 ssl/listen ${DD_TLS_PORT} ssl/" $NGINX_CONFIG
 else
   NGINX_CONFIG="/etc/nginx/nginx.conf"
+  sed -i "s/listen 8080/listen ${DD_PORT}/" $NGINX_CONFIG
 fi
 
 if [ "${NGINX_METRICS_ENABLED}" = true ]; then
