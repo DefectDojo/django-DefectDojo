@@ -61,7 +61,7 @@ def create_notification(event=None, *args, **kwargs):
 
         # only send to authorized users or admin/superusers
         if product:
-            qs = (product.authorized_users.all() | product.prod_type.authorized_users.all()).distinct()
+            qs = (product.authorized_users.all() | product.prod_type.authorized_users.all())
             users = users.filter(Q(id__in=qs) | Q(is_superuser=True) | Q(is_staff=True))
 
         for user in users:

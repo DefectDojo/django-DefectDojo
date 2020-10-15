@@ -17,14 +17,14 @@ class UserHasReportGeneratePermission(permissions.BasePermission):
     """
     def has_object_permission(self, request, view, obj):
         return request.user in \
-            (obj.product.authorized_users.all() | obj.product.prod_type_authorized_users.all()) or \
+            (obj.product.authorized_users.all() | obj.product.prod_type.authorized_users.all()) or \
             request.user.is_staff
 
 
 class UserHasScanSettingsPermission(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         return request.user in \
-            (obj.product.authorized_users.all() | obj.product.prod_type_authorized_users.all()) or \
+            (obj.product.authorized_users.all() | obj.product.prod_type.authorized_users.all()) or \
             request.user.is_staff
 
 
