@@ -157,14 +157,18 @@ def finding_querys(prod_type, request):
                                      'All objects have been filtered away. Displaying all objects',
                                      extra_tags='alert-danger')
 
-    start_date = findings_qs.earliest('date').date
-    start_date = datetime(start_date.year,
-                        start_date.month, start_date.day,
-                        tzinfo=timezone.get_current_timezone())
-    end_date = findings_qs.latest('date').date
-    end_date = datetime(end_date.year,
-                        end_date.month, end_date.day,
-                        tzinfo=timezone.get_current_timezone())
+    try:
+        start_date = findings_qs.earliest('date').date
+        start_date = datetime(start_date.year,
+                            start_date.month, start_date.day,
+                            tzinfo=timezone.get_current_timezone())
+        end_date = findings_qs.latest('date').date
+        end_date = datetime(end_date.year,
+                            end_date.month, end_date.day,
+                            tzinfo=timezone.get_current_timezone())
+    except:
+        start_date = timezone.now()
+        end_date = timezone.now()
 
     if len(prod_type) > 0:
         findings_closed = Finding.objects.filter(mitigated__date__range=[start_date, end_date],
@@ -260,14 +264,18 @@ def endpoint_querys(prod_type, request):
                                      'All objects have been filtered away. Displaying all objects',
                                      extra_tags='alert-danger')
 
-    start_date = endpoints_qs.earliest('date').date
-    start_date = datetime(start_date.year,
-                        start_date.month, start_date.day,
-                        tzinfo=timezone.get_current_timezone())
-    end_date = endpoints_qs.latest('date').date
-    end_date = datetime(end_date.year,
-                        end_date.month, end_date.day,
-                        tzinfo=timezone.get_current_timezone())
+    try:
+        start_date = endpoints_qs.earliest('date').date
+        start_date = datetime(start_date.year,
+                            start_date.month, start_date.day,
+                            tzinfo=timezone.get_current_timezone())
+        end_date = endpoints_qs.latest('date').date
+        end_date = datetime(end_date.year,
+                            end_date.month, end_date.day,
+                            tzinfo=timezone.get_current_timezone())
+    except:
+        start_date = timezone.now()
+        end_date = timezone.now()
 
     if len(prod_type) > 0:
         endpoints_closed = Endpoint_Status.objects.filter(mitigated_time__range=[start_date, end_date],
