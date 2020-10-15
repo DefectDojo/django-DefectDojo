@@ -43,14 +43,11 @@ logger = logging.getLogger(__name__)
 parse_logger = logging.getLogger('dojo')
 
 
+@user_must_be_authorized(Test, 'view', 'tid')
 def view_test(request, tid):
     test = get_object_or_404(Test, pk=tid)
     prod = test.engagement.product
-    auth = request.user.is_staff or request.user in prod.authorized_users.all()
     tags = Tag.objects.usage_for_model(Finding)
-    if not auth:
-        # will render 403
-        raise PermissionDenied
     notes = test.notes.all()
     note_type_activation = Note_Type.objects.filter(is_active=True).count()
     if note_type_activation:
@@ -178,6 +175,7 @@ def prefetch_for_findings(findings):
         prefetched_findings = prefetched_findings.annotate(active_endpoint_count=Count('endpoint_status__id', filter=Q(endpoint_status__mitigated=False)))
         prefetched_findings = prefetched_findings.annotate(mitigated_endpoint_count=Count('endpoint_status__id', filter=Q(endpoint_status__mitigated=True)))
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__authorized_users')
+        prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__prod_type__authorized_users')
     else:
         logger.debug('unable to prefetch because query was already executed')
 

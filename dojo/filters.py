@@ -343,7 +343,7 @@ class ProductFilter(DojoFilter):
         if self.user is not None and not self.user.is_staff:
             self.form.fields[
                 'prod_type'].queryset = Product_Type.objects.filter(
-                prod_type__authorized_users__in=[self.user])
+                authorized_users__in=[self.user])
 
     class Meta:
         model = Product
@@ -423,7 +423,7 @@ class ApiProductFilter(DojoFilter):
         if self.user is not None and not self.user.is_staff:
             self.form.fields[
                 'prod_type'].queryset = Product_Type.objects.filter(
-                prod_type__authorized_users__in=[self.user])
+                authorized_users__in=[self.user])
 
 
 class ApiFindingFilter(DojoFilter):
@@ -912,11 +912,14 @@ class SimilarFindingFilter(DojoFilter):
             if self.form.fields.get('test__engagement__product'):
                 qs = Product.objects.filter(authorized_users__in=[self.user])
                 self.form.fields['test__engagement__product'].queryset = qs
+            if self.form.fields.get('test__engagement__product__prod_type'):
+                qs = Product_Type.objects.filter(authorized_users__in=[self.user])
+                self.form.fields['test__engagement__product__prod_type'].queryset = qs
 
     def filter_queryset(self, *args, **kwargs):
         queryset = super().filter_queryset(*args, **kwargs)
         if not self.user.is_staff:
-            queryset = queryset.filter(test__engagement__product__authorized_users__in=[self.user])
+            queryset = queryset.filter(test__engagement__product__authorized_users__in=[self.user]) | queryset.filter(test__engagement__product__prod_type__authorized_users__in=[self.user])
         queryset = queryset.exclude(pk=self.finding.pk)
         return queryset
 
@@ -1175,6 +1178,9 @@ class ReportAuthedFindingFilter(DojoFilter):
             self.form.fields[
                 'test__engagement__product'].queryset = Product.objects.filter(
                 authorized_users__in=[self.user])
+            self.form.fields[
+                'test__engagement__product__prod_type'].queryset = Product_Type.objects.filter(
+                authorized_users__in=[self.user])
 
     @property
     def qs(self):
@@ -1183,7 +1189,8 @@ class ReportAuthedFindingFilter(DojoFilter):
             return parent
         else:
             return parent.filter(
-                test__engagement__product__authorized_users__in=[self.user])
+                test__engagement__product__authorized_users__in=[self.user]
+            ) | parent.filter(test__engagement__product__prod_type__authorized_users__in=[self.user])
 
     class Meta:
         model = Finding
@@ -1197,6 +1204,12 @@ class UserFilter(DojoFilter):
     first_name = CharFilter(lookup_expr='icontains')
     last_name = CharFilter(lookup_expr='icontains')
     username = CharFilter(lookup_expr='icontains')
+    product_type = ModelMultipleChoiceFilter(
+        queryset=Product_Type.objects.all(),
+        label="Authorized Product Type")
+    product = ModelMultipleChoiceFilter(
+        queryset=Product.objects.all(),
+        label="Authorized Product")
 
     o = OrderingFilter(
         # tuple-mapping retains order

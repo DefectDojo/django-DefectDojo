@@ -3,6 +3,7 @@ import logging
 from django.core.exceptions import PermissionDenied
 import functools
 from django.shortcuts import get_object_or_404
+from dojo.models import Finding, Test, Engagement, Product, Endpoint, Scan, ScanSettings
 
 logger = logging.getLogger(__name__)
 
@@ -81,6 +82,33 @@ def user_must_be_authorized(model, perm_type, arg, lookup="pk", view_func=None):
     return _wrapped
 
 
+def check_auth_users_list(user, obj):
+    is_authorized = False
+    if isinstance(obj, Finding):
+        is_authorized = user in obj.test.engagement.product.authorized_users.all()
+        is_authorized = user in obj.test.engagement.product.prod_type.authorized_users.all() or is_authorized
+    if isinstance(obj, Test):
+        is_authorized = user in obj.engagement.product.authorized_users.all()
+        is_authorized = user in obj.engagement.product.prod_type.authorized_users.all() or is_authorized
+    if isinstance(obj, Engagement):
+        is_authorized = user in obj.product.authorized_users.all()
+        is_authorized = user in obj.product.prod_type.authorized_users.all() or is_authorized
+    if isinstance(obj, Product):
+        is_authorized = user in obj.authorized_users.all()
+        is_authorized = user in obj.prod_type.authorized_users.all() or is_authorized
+    if isinstance(obj, Endpoint):
+        is_authorized = user in obj.product.authorized_users.all()
+        is_authorized = user in obj.product.prod_type.authorized_users.all() or is_authorized
+    if isinstance(obj, Scan):
+        is_authorized = user in obj.scan_settings.product.authorized_users.all()
+        is_authorized = user in obj.scan_settings.product.prod_type.authorized_users.all() or is_authorized
+    if isinstance(obj, ScanSettings):
+        is_authorized = user in obj.product.authorized_users.all()
+        is_authorized = user in obj.product.prod_type.authorized_users.all() or is_authorized
+
+    return is_authorized
+
+
 def user_is_authorized(user, perm_type, obj):
     # print('help.user_is_authorized')
     # print('user: ', user)
@@ -106,18 +134,4 @@ def user_is_authorized(user, perm_type, obj):
         return user.is_staff or user.is_superuser
 
     # at this point being in the authorized users lists means permission should be granted
-    is_authorized = False
-    from dojo.models import Finding, Test, Engagement, Product, Endpoint
-
-    if isinstance(obj, Finding):
-        is_authorized = user in obj.test.engagement.product.authorized_users.all()
-    if isinstance(obj, Test):
-        is_authorized = user in obj.engagement.product.authorized_users.all()
-    if isinstance(obj, Engagement):
-        is_authorized = user in obj.product.authorized_users.all()
-    if isinstance(obj, Product):
-        is_authorized = user in obj.authorized_users.all()
-    if isinstance(obj, Endpoint):
-        is_authorized = user in obj.product.authorized_users.all()
-
-    return is_authorized
+    return check_auth_users_list(user, obj)

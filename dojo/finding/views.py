@@ -25,7 +25,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 from tagging.models import Tag
 from itertools import chain
-from dojo.user.helper import user_must_be_authorized
+from dojo.user.helper import user_must_be_authorized, check_auth_users_list
 
 from dojo.filters import OpenFindingFilter, \
     OpenFindingSuperFilter, AcceptedFindingSuperFilter, \
@@ -148,8 +148,13 @@ django_filter=open_findings_filter):
         add_breadcrumb(title="Findings", top_level=not len(request.GET), request=request)
 
     if not request.user.is_staff:
-        findings = findings.filter(
-            test__engagement__product__authorized_users__in=[request.user])
+        findings = Finding.objects.filter(
+            test__engagement__product__authorized_users__in=[request.user]
+        )
+        findings = findings | Finding.objects.filter(
+            test__engagement__product__prod_type__authorized_users__in=[request.user]
+        )
+        findings = findings.distinct()
 
     findings_filter = django_filter(request, findings, request.user, pid)
 
@@ -206,13 +211,14 @@ def prefetch_for_findings(findings):
         prefetched_findings = prefetched_findings.annotate(active_endpoint_count=Count('endpoint_status__id', filter=Q(endpoint_status__mitigated=False)))
         prefetched_findings = prefetched_findings.annotate(mitigated_endpoint_count=Count('endpoint_status__id', filter=Q(endpoint_status__mitigated=True)))
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__authorized_users')
-        print('temp')
+        prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__prod_type__authorized_users')
     else:
         logger.debug('unable to prefetch because query was already executed')
 
     return prefetched_findings
 
 
+@user_must_be_authorized(Finding, 'view', 'fid')
 def view_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     findings = Finding.objects.filter(test=finding.test).order_by('numerical_severity')
@@ -240,8 +246,7 @@ def view_finding(request, fid):
         pass
 
     dojo_user = get_object_or_404(Dojo_User, id=user.id)
-    if user.is_staff or user in finding.test.engagement.product.authorized_users.all(
-    ):
+    if user.is_staff or check_auth_users_list(user, finding):
         pass  # user is authorized for this product
     else:
         raise PermissionDenied
@@ -1774,8 +1779,13 @@ def finding_bulk_update_all(request, pid=None):
                 if not settings.AUTHORIZED_USERS_ALLOW_DELETE:
                     raise PermissionDenied()
 
-                finds = finds.filter(
-                    test__engagement__product__authorized_users__in=[request.user])
+                qs = finds.filter(
+                    test__engagement__product__authorized_users__in=[request.user]
+                )
+                qs = qs | finds.filter(
+                    test__engagement__product__prod_type__authorized_users__in=[request.user]
+                )
+                finds = qs.distinct()
 
             product_calc = list(Product.objects.filter(engagement__test__finding__id__in=finding_to_update).distinct())
             finds.delete()
@@ -1793,8 +1803,13 @@ def finding_bulk_update_all(request, pid=None):
                     if not settings.AUTHORIZED_USERS_ALLOW_CHANGE:
                         raise PermissionDenied()
 
-                    finds = finds.filter(
-                        test__engagement__product__authorized_users__in=[request.user])
+                    qs = finds.filter(
+                        test__engagement__product__authorized_users__in=[request.user]
+                    )
+                    qs = qs | finds.filter(
+                        test__engagement__product__prod_type__authorized_users__in=[request.user]
+                    )
+                    finds = qs.distinct()
 
                 finds = prefetch_for_findings(finds)
                 finds = finds.prefetch_related(Prefetch('test__engagement__risk_acceptance', queryset=q_simple_risk_acceptance, to_attr='simple_risk_acceptance'))
@@ -2202,7 +2217,13 @@ def get_similar_findings(request, finding):
     similar = Finding.objects.all()
 
     if not request.user.is_staff:
-        similar = similar.filter(test__engagement__product__authorized_users__in=[request.user])
+        qs = similar.filter(
+            test__engagement__product__authorized_users__in=[request.user]
+        )
+        qs = qs | similar.filter(
+            test__engagement__product__prod_type__authorized_users__in=[request.user]
+        )
+        similar = qs.distinct()
 
     if finding.test.engagement.deduplication_on_engagement:
         similar = similar.filter(test__engagement=finding.test.engagement)

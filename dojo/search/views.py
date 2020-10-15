@@ -116,11 +116,11 @@ def simple_search(request):
             finding_templates = Finding_Template.objects.all()
 
             if not request.user.is_staff:
-                findings = findings.filter(test__engagement__product__authorized_users__in=[request.user])
-                tests = tests.filter(engagement__product__authorized_users__in=[request.user])
-                engagements = engagements.filter(product__authorized_users__in=[request.user])
-                products = products.filter(authorized_users__in=[request.user])
-                endpoints = endpoints.filter(product__authorized_users__in=[request.user])
+                findings = findings.filter(test__engagement__product__authorized_users__in=[request.user]) | findings.filter(test__engagement__product__prod_type__authorized_users__in=[request.user])
+                tests = tests.filter(engagement__product__authorized_users__in=[request.user]) | tests.filter(engagement__product__prod_type__authorized_users__in=[request.user])
+                engagements = engagements.filter(product__authorized_users__in=[request.user]) | engagements.filter(product__prod_type__authorized_users__in=[request.user])
+                products = products.filter(authorized_users__in=[request.user]) | products.filter(prod_type__authorized_users__in=[request.user])
+                endpoints = endpoints.filter(product__authorized_users__in=[request.user]) | endpoints.filter(product__prod_type__authorized_users__in=[request.user])
 
             # TODO better get findings in their own query and match on id. that would allow filtering on additional fields such cve, prod_id, etc.
 

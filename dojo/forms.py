@@ -150,9 +150,19 @@ class MonthYearWidget(Widget):
 
 
 class Product_TypeForm(forms.ModelForm):
+    authorized_users = forms.ModelMultipleChoiceField(
+        queryset=None,
+        required=False, label="Authorized Users")
+
+    def __init__(self, *args, **kwargs):
+        non_staff = Dojo_User.objects.exclude(is_staff=True) \
+            .exclude(is_active=False).order_by('first_name', 'last_name')
+        super(Product_TypeForm, self).__init__(*args, **kwargs)
+        self.fields['authorized_users'].queryset = non_staff
+
     class Meta:
         model = Product_Type
-        fields = ['name', 'critical_product', 'key_product']
+        fields = ['name', 'authorized_users', 'critical_product', 'key_product']
 
 
 class Delete_Product_TypeForm(forms.ModelForm):
@@ -1568,6 +1578,9 @@ class AddDojoUserForm(forms.ModelForm):
     authorized_products = forms.ModelMultipleChoiceField(
         queryset=Product.objects.all(), required=False,
         help_text='Select the products this user should have access to.')
+    authorized_product_types = forms.ModelMultipleChoiceField(
+        queryset=Product_Type.objects.all(), required=False,
+        help_text='Select the product types this user should have access to.')
 
     class Meta:
         model = Dojo_User

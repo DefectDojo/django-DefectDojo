@@ -27,6 +27,7 @@ from dojo.reports.widgets import CoverPage, PageBreak, TableOfContents, WYSIWYGC
 from dojo.tasks import async_pdf_report, async_custom_pdf_report
 from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, get_period_counts_legacy, Product_Tab, \
     get_words_for_field
+from dojo.user.helper import user_must_be_authorized, check_auth_users_list
 
 logger = logging.getLogger(__name__)
 
@@ -333,12 +334,9 @@ def product_type_report(request, ptid):
     return generate_report(request, product_type)
 
 
+@user_must_be_authorized(Product, 'view', 'pid')
 def product_report(request, pid):
     product = get_object_or_404(Product, id=pid)
-    if request.user.is_staff or request.user in product.authorized_users.all():
-        pass  # user is authorized for this product
-    else:
-        raise PermissionDenied
     return generate_report(request, product)
 
 
@@ -346,7 +344,13 @@ def product_findings_report(request):
     if request.user.is_staff:
         findings = Finding.objects.filter().distinct()
     else:
-        findings = Finding.objects.filter(test__engagement__product__authorized_users__in=[request.user]).distinct()
+        qs = Finding.objects.filter(
+            test__engagement__product__authorized_users__in=[request.user]
+        )
+        qs = qs | Finding.objects.filter(
+            test__engagement__product__prod_type__authorized_users__in=[request.user]
+        )
+        findings = qs.distinct()
 
     return generate_report(request, findings)
 
@@ -363,16 +367,13 @@ def test_report(request, tid):
     return generate_report(request, test)
 
 
+@user_must_be_authorized(Endpoint, 'view', 'eid')
 def endpoint_report(request, eid):
     endpoint = get_object_or_404(Endpoint, id=eid)
-    if request.user.is_staff or request.user in endpoint.product.authorized_users.all():
-        pass  # user is authorized for this product
-    else:
-        raise PermissionDenied
-
     return generate_report(request, endpoint)
 
 
+@user_must_be_authorized(Product, 'view', 'pid')
 def product_endpoint_report(request, pid):
     user = Dojo_User.objects.get(id=request.user.id)
     product = get_object_or_404(Product, id=pid)
@@ -387,12 +388,6 @@ def product_endpoint_report(request, pid):
     ids = get_endpoint_ids(endpoints)
 
     endpoints = Endpoint.objects.filter(id__in=ids)
-
-    if request.user.is_staff or request.user in product.authorized_users.all():
-        pass  # user is authorized for this product
-    else:
-        raise PermissionDenied
-
     endpoints = EndpointReportFilter(request.GET, queryset=endpoints)
 
     paged_endpoints = get_page_items(request, endpoints.qs, 25)
@@ -566,12 +561,12 @@ def generate_report(request, obj):
         user.get_full_name(), (timezone.now().strftime("%m/%d/%Y %I:%M%p %Z")))
 
     if type(obj).__name__ == "Product":
-        if request.user.is_staff or request.user in obj.authorized_users.all():
+        if request.user.is_staff or check_auth_users_list(request.user, obj) in qs:
             pass  # user is authorized for this product
         else:
             raise PermissionDenied
     elif type(obj).__name__ == "Endpoint":
-        if request.user.is_staff or request.user in obj.product.authorized_users.all():
+        if request.user.is_staff or check_auth_users_list(request.user, obj):
             pass  # user is authorized for this product
         else:
             raise PermissionDenied

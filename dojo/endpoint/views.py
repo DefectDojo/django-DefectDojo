@@ -33,9 +33,14 @@ def vulnerable_endpoints(request):
     if request.user.is_staff:
         pass
     else:
-        products = Product.objects.filter(authorized_users__in=[request.user])
-        if products.exists():
-            endpoints = endpoints.filter(product__in=products.all())
+        qs = Endpoint.objects.filter(
+            product__authorized_users__in=[request.user]
+        )
+        qs = qs | Endpoint.objects.filter(
+            product__prod_type__authorized_users__in=[request.user]
+        )
+        if qs:
+            endpoints = qs.distinct()
         else:
             raise PermissionDenied
 
@@ -73,9 +78,14 @@ def all_endpoints(request):
     if request.user.is_staff:
         pass
     else:
-        products = Product.objects.filter(authorized_users__in=[request.user])
-        if products.exists():
-            endpoints = endpoints.filter(product__in=products.all())
+        qs = Endpoint.objects.filter(
+            product__authorized_users__in=[request.user]
+        )
+        qs = qs | Endpoint.objects.filter(
+            product__prod_type__authorized_users__in=[request.user]
+        )
+        if qs:
+            endpoints = qs.distinct()
         else:
             raise PermissionDenied
 
@@ -127,16 +137,12 @@ def get_endpoint_ids(endpoints):
     return ids
 
 
+@user_must_be_authorized(Endpoint, 'view', 'eid')
 def view_endpoint(request, eid):
     endpoint = get_object_or_404(Endpoint, id=eid)
     host = endpoint.host_no_port
     endpoints = Endpoint.objects.filter(host__regex="^" + host + ":?",
                                         product=endpoint.product).distinct()
-
-    if (request.user in endpoint.product.authorized_users.all()) or request.user.is_staff:
-        pass
-    else:
-        raise PermissionDenied
 
     endpoint_metadata = dict(endpoint.endpoint_meta.values_list('name', 'value'))
 
