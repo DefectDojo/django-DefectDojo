@@ -413,18 +413,6 @@ class ApiProductFilter(DojoFilter):
         )
     )
 
-    def __init__(self, *args, **kwargs):
-        self.user = None
-        if 'user' in kwargs:
-            self.user = kwargs.pop('user')
-
-        super(ApiProductFilter, self).__init__(*args, **kwargs)
-
-        if self.user is not None and not self.user.is_staff:
-            self.form.fields[
-                'prod_type'].queryset = Product_Type.objects.filter(
-                authorized_users__in=[self.user])
-
 
 class ApiFindingFilter(DojoFilter):
     # BooleanFilter
@@ -480,8 +468,9 @@ class ApiFindingFilter(DojoFilter):
     reviewers = NumberInFilter(field_name='reviewers', lookup_expr='in')
     sast_source_line = NumberInFilter(field_name='sast_source_line', lookup_expr='in')
     sonarqube_issue = NumberInFilter(field_name='sonarqube_issue', lookup_expr='in')
+    test__test_type = NumberInFilter(field_name='test__test_type', lookup_expr='in')
+    test__engagement = NumberInFilter(field_name='test__engagement', lookup_expr='in')
     test__engagement__product = NumberInFilter(field_name='test__engagement__product', lookup_expr='in')
-    test__test__type = NumberInFilter(field_name='test__engagement__product', lookup_expr='in')
     # ReportRiskAcceptanceFilter
     test__engagement__risk_acceptance = ReportRiskAcceptanceFilter()
 
@@ -518,29 +507,6 @@ class ApiFindingFilter(DojoFilter):
         model = Finding
         exclude = ['url', 'is_template', 'thread_id', 'notes', 'images',
                    'sourcefile', 'line']
-
-    def __init__(self, *args, **kwargs):
-        self.user = None
-        self.pid = None
-        if 'user' in kwargs:
-            self.user = kwargs.pop('user')
-
-        if 'pid' in kwargs:
-            self.pid = kwargs.pop('pid')
-        super(ApiFindingFilter, self).__init__(*args, **kwargs)
-
-        cwe = dict()
-        cwe = dict([cwe, cwe]
-                   for cwe in self.queryset.values_list('cwe', flat=True).distinct()
-                   if type(cwe) is int and cwe is not None and cwe > 0)
-        cwe = collections.OrderedDict(sorted(cwe.items()))
-        self.form.fields['cwe'].choices = list(cwe.items())
-        if self.user is not None and not self.user.is_staff:
-            if self.form.fields.get('test__engagement__product'):
-                qs = Product.objects.filter(authorized_users__in=[self.user])
-                self.form.fields['test__engagement__product'].queryset = qs
-            self.form.fields['endpoints'].queryset = Endpoint.objects.filter(
-                product__authorized_users__in=[self.user]).distinct()
 
 
 class OpenFindingFilter(DojoFilter):
