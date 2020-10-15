@@ -668,6 +668,9 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
                 'environment': {
                     'id': obj.test.environment.id,
                     'name': obj.test.environment.name
+                },
+                'branch': {
+                    'name' : obj.test.engagement.branch_tag
                 }
             }
             return related_fields
