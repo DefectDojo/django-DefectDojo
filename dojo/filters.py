@@ -267,6 +267,36 @@ class MetricsDateRangeFilter(ChoiceFilter):
         return self.options[value][1](self, qs, self.field_name)
 
 
+class ProductComponentFilter(DojoFilter):
+    component_name = CharFilter(lookup_expr='icontains', label="Module Name")
+    component_version = CharFilter(lookup_expr='icontains', label="Module Version")
+
+    o = OrderingFilter(
+        fields=(
+            ('component_name', 'component_name'),
+            ('component_version', 'component_version'),
+            ('active', 'active'),
+            ('duplicate', 'duplicate'),
+            ('total', 'total'),
+        ),
+        field_labels={
+            'component_name': 'Component Name',
+            'component_version': 'Component Version',
+            'active': 'Active',
+            'duplicate': 'Duplicate',
+            'total': 'Total',
+        }
+    )
+
+
+class ComponentFilter(ProductComponentFilter):
+    test__engagement__product = ModelMultipleChoiceFilter(
+        queryset=Product.objects.all(),
+        label="Product Type")
+    test__engagement__product__prod_type = ModelMultipleChoiceFilter(
+        queryset=Product_Type.objects.all().order_by('name'),
+        label="Product Type")
+
 class EngagementFilter(DojoFilter):
     engagement__lead = ModelChoiceFilter(
         queryset=User.objects.filter(
