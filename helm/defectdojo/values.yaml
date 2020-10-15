@@ -77,6 +77,8 @@ celery:
       # prefetch_multiplier: 128
 
 django:
+  annotations:
+    ad.datadoghq.com/defectdojo-django.logs: '[{"source":"uwsgi","service":"defectdojo"}]'
   affinity: {}
   ingress:
     enabled: true
@@ -191,9 +193,13 @@ redis:
   cluster:
     slaveCount: 1
 
+datadog:
+  enabled: true
+
 # To add extra variables not predefined by helm config it is possible to define in extraConfigs block, e.g. below:
 # NOTE  Do not store any kind of sensitive information inside of it
-# extraConfigs:
+extraConfigs:
+  DD_TAGS: 'fblaise-defectdojo-minikube'
 #  DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED: 'true'
 #  DD_SOCIAL_AUTH_AUTH0_KEY: 'dev'
 #  DD_SOCIAL_AUTH_AUTH0_DOMAIN: 'xxxxx'
