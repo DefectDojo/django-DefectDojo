@@ -1424,101 +1424,288 @@ class Finding(models.Model):
 
     SIMPLE_RISK_ACCEPTANCE_NAME = 'Simple Builtin Risk Acceptance'
 
-    title = models.CharField(max_length=511)
-    date = models.DateField(default=get_current_date)
-    cwe = models.IntegerField(default=0, null=True, blank=True)
+    title = models.CharField(max_length=511,
+                             verbose_name="Title",
+                             help_text="A short description of the flaw.")
+    date = models.DateField(default=get_current_date,
+                            verbose_name="Date",
+                            help_text="The date the flaw was discovered.")
+    cwe = models.IntegerField(default=0, null=True, blank=True,
+                              verbose_name="CWE",
+                              help_text="The CWE number associated with this flaw.")
     cve_regex = RegexValidator(regex=r'^[A-Z]{1,10}(-\d+)+$',
                                message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'.")
-    cve = models.CharField(validators=[cve_regex], max_length=28, null=True, blank=False,
-                           help_text="CVE or other vulnerability identifier")
+    cve = models.CharField(validators=[cve_regex],
+                           max_length=28,
+                           null=True,
+                           blank=False,
+                           verbose_name="CVE",
+                           help_text="The Common Vulnerabilities and Exposures (CVE) associated with this flaw.")
     cvssv3_regex = RegexValidator(regex=r'^AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]', message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'")
-    cvssv3 = models.TextField(validators=[cvssv3_regex], max_length=117, null=True)
-    url = models.TextField(null=True, blank=True, editable=False)
-    severity = models.CharField(max_length=200, help_text="The severity level of this flaw (Critical, High, Medium, Low, Informational)")
-    description = models.TextField()
-    mitigation = models.TextField()
-    impact = models.TextField()
-    steps_to_reproduce = models.TextField(null=True, blank=True)
-    severity_justification = models.TextField(null=True, blank=True)
-    endpoints = models.ManyToManyField(Endpoint, blank=True)
-    endpoint_status = models.ManyToManyField(Endpoint_Status, blank=True, related_name='finding_endpoint_status')
+    cvssv3 = models.TextField(validators=[cvssv3_regex],
+                              max_length=117,
+                              null=True,
+                              verbose_name="CVSSv3",
+                              help_text="Common Vulnerability Scoring System version 3 (CVSSv3) score associated with this flaw.")
+    url = models.TextField(null=True,
+                           blank=True,
+                           editable=False,
+                           verbose_name="URL",
+                           help_text="External reference that provides more information about this flaw.")
+    severity = models.CharField(max_length=200,
+                                verbose_name="Severity",
+                                help_text="The severity level of this flaw (Critical, High, Medium, Low, Informational).")
+    description = models.TextField(verbose_name="Description",
+                                   help_text="Longer more descriptive information about the flaw.")
+    mitigation = models.TextField(verbose_name="Mitigation",
+                                  help_text="Text describing how to best fix the flaw.")
+    impact = models.TextField(verbose_name="Impact",
+                              help_text="Text describing the impact this flaw has on systems, products, enterprise, etc.")
+    steps_to_reproduce = models.TextField(null=True,
+                                          blank=True,
+                                          verbose_name="Steps to Reproduce",
+                                          help_text="Text describing the steps that must be followed in order to reproduce the flaw / bug.")
+    severity_justification = models.TextField(null=True,
+                                              blank=True,
+                                              verbose_name="Severity Justification",
+                                              help_text="Text describing why a certain severity was associated with this flaw.")
+    endpoints = models.ManyToManyField(Endpoint,
+                                       blank=True,
+                                       verbose_name="Endpoints",
+                                       help_text="The hosts within the product that are susceptible to this flaw.")
+    endpoint_status = models.ManyToManyField(Endpoint_Status,
+                                             blank=True,
+                                             related_name="finding_endpoint_status",
+                                             verbose_name="Endpoint Status",
+                                             help_text="The status of the endpoint associated with this flaw (Vulnerable, Mitigated, ...).")
     unsaved_endpoints = []
     unsaved_request = None
     unsaved_response = None
     unsaved_tags = None
-    references = models.TextField(null=True, blank=True, db_column="refs")
-    test = models.ForeignKey(Test, editable=False, on_delete=models.CASCADE)
+    references = models.TextField(null=True,
+                                  blank=True,
+                                  db_column="refs",
+                                  verbose_name="References",
+                                  help_text="The external documentation available for this flaw.")
+    test = models.ForeignKey(Test,
+                             editable=False,
+                             on_delete=models.CASCADE,
+                             verbose_name="Test",
+                             help_text="The test that is associated with this flaw.")
     # TODO: Will be deprecated soon
-    is_template = models.BooleanField(default=False)
-    active = models.BooleanField(default=True)
-    verified = models.BooleanField(default=True)
-    false_p = models.BooleanField(default=False, verbose_name="False Positive")
-    duplicate = models.BooleanField(default=False)
-    duplicate_finding = models.ForeignKey('self', editable=False, null=True,
+    is_template = models.BooleanField(default=False,
+                                      verbose_name="Is Template",
+                                      help_text="Denotes if this finding is a template and can be reused.")
+    active = models.BooleanField(default=True,
+                                 verbose_name="Active",
+                                 help_text="Denotes if this flaw is active or not.")
+    verified = models.BooleanField(default=True,
+                                   verbose_name="Verified",
+                                   help_text="Denotes if this flaw has been manually verified by the tester.")
+    false_p = models.BooleanField(default=False,
+                                  verbose_name="False Positive",
+                                  help_text="Denotes if this flaw has been deemed a false positive by the tester.")
+    duplicate = models.BooleanField(default=False,
+                                    verbose_name="Duplicate",
+                                    help_text="Denotes if this flaw is a duplicate of other flaws reported.")
+    duplicate_finding = models.ForeignKey('self',
+                                          editable=False,
+                                          null=True,
                                           related_name='original_finding',
-                                          blank=True, on_delete=models.CASCADE)
-    out_of_scope = models.BooleanField(default=False)
-    under_review = models.BooleanField(default=False)
-    review_requested_by = models.ForeignKey(Dojo_User, null=True, blank=True,
-                                            related_name='review_requested_by', on_delete=models.CASCADE)
-    reviewers = models.ManyToManyField(User, blank=True)
+                                          blank=True, on_delete=models.CASCADE,
+                                          verbose_name="Duplicate Finding",
+                                          help_text="Link to the original finding if this finding is a duplicate.")
+    out_of_scope = models.BooleanField(default=False,
+                                       verbose_name="Out Of Scope",
+                                       help_text="Denotes if this flaw falls outside the scope of the test and/or engagement.")
+    under_review = models.BooleanField(default=False,
+                                       verbose_name="Under Review",
+                                       help_text="Denotes is this flaw is currently being reviewed.")
+    review_requested_by = models.ForeignKey(Dojo_User,
+                                            null=True,
+                                            blank=True,
+                                            related_name='review_requested_by',
+                                            on_delete=models.CASCADE,
+                                            verbose_name="Review Requested By",
+                                            help_text="Documents who requested a review for this finding.")
+    reviewers = models.ManyToManyField(User,
+                                       blank=True,
+                                       verbose_name="Reviewers",
+                                       help_text="Documents who reviewed the flaw.")
 
     # Defect Tracking Review
-    under_defect_review = models.BooleanField(default=False)
-    defect_review_requested_by = models.ForeignKey(Dojo_User, null=True, blank=True,
-                                                   related_name='defect_review_requested_by', on_delete=models.CASCADE)
-    is_Mitigated = models.BooleanField(default=False)
-    thread_id = models.IntegerField(default=0, editable=False)
-    mitigated = models.DateTimeField(editable=False, null=True, blank=True)
-    mitigated_by = models.ForeignKey(User, null=True, editable=False,
-                                     related_name="mitigated_by", on_delete=models.CASCADE)
-    reporter = models.ForeignKey(User, editable=False, default=1, related_name='reporter', on_delete=models.CASCADE)
-    notes = models.ManyToManyField(Notes, blank=True,
-                                   editable=False)
-    numerical_severity = models.CharField(max_length=4)
-    last_reviewed = models.DateTimeField(null=True, editable=False)
-    last_reviewed_by = models.ForeignKey(User, null=True, editable=False,
-                                         related_name='last_reviewed_by', on_delete=models.CASCADE)
-    images = models.ManyToManyField('FindingImage', blank=True)
+    under_defect_review = models.BooleanField(default=False,
+                                              verbose_name="Under Defect Review",
+                                              help_text="Denotes if this finding is under defect review.")
+    defect_review_requested_by = models.ForeignKey(Dojo_User,
+                                                   null=True,
+                                                   blank=True,
+                                                   related_name='defect_review_requested_by',
+                                                   on_delete=models.CASCADE,
+                                                   verbose_name="Defect Review Requested By",
+                                                   help_text="Documents who requested a defect review for this flaw.")
+    is_Mitigated = models.BooleanField(default=False,
+                                       verbose_name="Is Mitigated",
+                                       help_text="Denotes if this flaw has been fixed.")
+    thread_id = models.IntegerField(default=0,
+                                    editable=False,
+                                    verbose_name="Thread ID")
+    mitigated = models.DateTimeField(editable=False,
+                                     null=True,
+                                     blank=True,
+                                     verbose_name="Mitigated",
+                                     help_text="Denotes if this flaw has been fixed by storing the date it was fixed.")
+    mitigated_by = models.ForeignKey(User,
+                                     null=True,
+                                     editable=False,
+                                     related_name="mitigated_by",
+                                     on_delete=models.CASCADE,
+                                     verbose_name="Mitigated By",
+                                     help_text="Documents who has marked this flaw as fixed.")
+    reporter = models.ForeignKey(User,
+                                 editable=False,
+                                 default=1,
+                                 related_name='reporter',
+                                 on_delete=models.CASCADE,
+                                 verbose_name="Reporter",
+                                 help_text="Documents who reported the flaw.")
+    notes = models.ManyToManyField(Notes,
+                                   blank=True,
+                                   editable=False,
+                                   verbose_name="Notes",
+                                   help_text="Stores information pertinent to the flaw or the mitigation.")
+    numerical_severity = models.CharField(max_length=4,
+                                          verbose_name="Numerical Severity",
+                                          help_text="The numerical representation of the severity (S0, S1, S2, S3, S4).")
+    last_reviewed = models.DateTimeField(null=True,
+                                         editable=False,
+                                         verbose_name="Last Reviewed",
+                                         help_text="Provides the date the flaw was last 'touched' by a tester.")
+    last_reviewed_by = models.ForeignKey(User,
+                                         null=True,
+                                         editable=False,
+                                         related_name='last_reviewed_by',
+                                         on_delete=models.CASCADE,
+                                         verbose_name="Last Reviewed By",
+                                         help_text="Provides the person who last reviewed the flaw.")
+    images = models.ManyToManyField('FindingImage',
+                                    blank=True,
+                                    verbose_name="Images",
+                                    help_text="Image(s) / Screenshot(s) related to the flaw.")
 
-    line_number = models.CharField(null=True, blank=True, max_length=200,
+    line_number = models.CharField(null=True,
+                                   blank=True,
+                                   max_length=200,
+                                   verbose_name="Line Number",
+                                   help_text="Deprecated will be removed, use line",
                                    editable=False)  # Deprecated will be removed, use line
-    sourcefilepath = models.TextField(null=True, blank=True, editable=False)  # Not used? to remove
-    sourcefile = models.TextField(null=True, blank=True, editable=False)
-    param = models.TextField(null=True, blank=True, editable=False)
-    payload = models.TextField(null=True, blank=True, editable=False)
-    hash_code = models.CharField(null=True, blank=True, editable=False, max_length=64)
-
-    line = models.IntegerField(null=True, blank=True,
+    sourcefilepath = models.TextField(null=True,
+                                      blank=True,
+                                      editable=False,
+                                      verbose_name="Source File Path",
+                                      help_text="Filepath of the source code file in which the flaw is located.")  # Not used? to remove
+    sourcefile = models.TextField(null=True,
+                                  blank=True,
+                                  editable=False,
+                                  verbose_name="Source File",
+                                  help_text="Name of the source code file in which the flaw is located.")
+    param = models.TextField(null=True,
+                             blank=True,
+                             editable=False,
+                             verbose_name="Parameter",
+                             help_text="Parameter used to trigger the issue (DAST).")
+    payload = models.TextField(null=True,
+                               blank=True,
+                               editable=False,
+                               verbose_name="Payload",
+                               help_text="Payload used to attack the service / application and trigger the bug / problem.")
+    hash_code = models.CharField(null=True,
+                                 blank=True,
+                                 editable=False,
+                                 max_length=64,
+                                 verbose_name="Hash Code",
+                                 help_text="A hash over a configurable set of fields that is used for findings deduplication.")
+    line = models.IntegerField(null=True,
+                               blank=True,
                                verbose_name="Line number",
-                               help_text="Line number. For SAST, when source (start of the attack vector) and sink (end of the attack vector) information are available, put sink information here")
-    file_path = models.CharField(
-        null=True,
-        blank=True,
-        max_length=4000,
-        help_text="File name with path. For SAST, when source (start of the attack vector) and sink (end of the attack vector) information are available, put sink information here")
-    component_name = models.CharField(null=True, blank=True, max_length=200,
-                                     help_text="Name of the component containing the finding. ")
-    component_version = models.CharField(null=True, blank=True, max_length=100,
-                                        help_text="Version of the component.")
-    found_by = models.ManyToManyField(Test_Type, editable=False)
-    static_finding = models.BooleanField(default=False)
-    dynamic_finding = models.BooleanField(default=True)
-    created = models.DateTimeField(auto_now_add=True, null=True)
-    jira_creation = models.DateTimeField(editable=True, null=True)
-    jira_change = models.DateTimeField(editable=True, null=True)
-    scanner_confidence = models.IntegerField(null=True, blank=True, default=None, editable=False, help_text="Confidence level of vulnerability which is supplied by the scannner.")
-    sonarqube_issue = models.ForeignKey(Sonarqube_Issue, null=True, blank=True, help_text="SonarQube issue", on_delete=models.CASCADE)
-    unique_id_from_tool = models.CharField(null=True, blank=True, max_length=500, help_text="Vulnerability technical id from the source tool. Allows to track unique vulnerabilities")
-    sast_source_object = models.CharField(null=True, blank=True, max_length=500, help_text="Source object (variable, function...) of the attack vector")
-    sast_sink_object = models.CharField(null=True, blank=True, max_length=500, help_text="Sink object (variable, function...) of the attack vector")
-    sast_source_line = models.IntegerField(null=True, blank=True,
-                               verbose_name="Line number",
-                               help_text="Source line number of the attack vector")
-    sast_source_file_path = models.CharField(null=True, blank=True, max_length=4000, help_text="Source filepath of the attack vector")
-    nb_occurences = models.IntegerField(null=True, blank=True,
-                               verbose_name="Number of occurences",
-                               help_text="Number of occurences in the source tool when several vulnerabilites were found and aggregated by the scanner")
+                               help_text="Source line number of the attack vector.")
+    file_path = models.CharField(null=True,
+                                 blank=True,
+                                 max_length=4000,
+                                 verbose_name="File path",
+                                 help_text="Identified file(s) containing the flaw.")
+    component_name = models.CharField(null=True,
+                                      blank=True,
+                                      max_length=200,
+                                      verbose_name="Component name",
+                                      help_text="Name of the affected component (library name, part of a system, ...).")
+    component_version = models.CharField(null=True,
+                                         blank=True,
+                                         max_length=100,
+                                         verbose_name="Component version",
+                                         help_text="Version of the affected component.")
+    found_by = models.ManyToManyField(Test_Type,
+                                      editable=False,
+                                      verbose_name="Found by",
+                                      help_text="The name of the scanner that identified the flaw.")
+    static_finding = models.BooleanField(default=False,
+                                         verbose_name="Static finding (SAST)",
+                                         help_text="Flaw has been detected from a Static Application Security Testing tool (SAST).")
+    dynamic_finding = models.BooleanField(default=True,
+                                          verbose_name="Dynamic finding (DAST)",
+                                          help_text="Flaw has been detected from a Dynamic Application Security Testing tool (DAST).")
+    created = models.DateTimeField(auto_now_add=True,
+                                   null=True,
+                                   verbose_name="Created",
+                                   help_text="The date the finding was created inside DefectDojo.")
+    jira_creation = models.DateTimeField(editable=True,
+                                         null=True,
+                                         verbose_name="Jira creation",
+                                         help_text="The date a Jira issue was created from this finding.")
+    jira_change = models.DateTimeField(editable=True,
+                                       null=True,
+                                       verbose_name="Jira change",
+                                       help_text="The date the linked Jira issue was last modified.")
+    scanner_confidence = models.IntegerField(null=True,
+                                             blank=True,
+                                             default=None,
+                                             editable=False,
+                                             verbose_name="Scanner confidence",
+                                             help_text="Confidence level of vulnerability which is supplied by the scanner.")
+    sonarqube_issue = models.ForeignKey(Sonarqube_Issue,
+                                        null=True,
+                                        blank=True,
+                                        help_text="The SonarQube issue associated with this finding.",
+                                        verbose_name="SonarQube issue",
+                                        on_delete=models.CASCADE)
+    unique_id_from_tool = models.CharField(null=True,
+                                           blank=True,
+                                           max_length=500,
+                                           verbose_name="Unique ID from tool",
+                                           help_text="Vulnerability technical id from the source tool. Allows to track unique vulnerabilities.")
+    sast_source_object = models.CharField(null=True,
+                                          blank=True,
+                                          max_length=500,
+                                          verbose_name="SAST Source Object",
+                                          help_text="Source object (variable, function...) of the attack vector.")
+    sast_sink_object = models.CharField(null=True,
+                                        blank=True,
+                                        max_length=500,
+                                        verbose_name="SAST Sink Object",
+                                        help_text="Sink object (variable, function...) of the attack vector.")
+    sast_source_line = models.IntegerField(null=True,
+                                           blank=True,
+                                           verbose_name="SAST Source Line number",
+                                           help_text="Source line number of the attack vector.")
+    sast_source_file_path = models.CharField(null=True,
+                                             blank=True,
+                                             max_length=4000,
+                                             verbose_name="SAST Source File Path",
+                                             help_text="Source file path of the attack vector.")
+    nb_occurences = models.IntegerField(null=True,
+                                        blank=True,
+                                        verbose_name="Number of occurences",
+                                        help_text="Number of occurences in the source tool when several vulnerabilites were found and aggregated by the scanner.")
 
     # used for prefetching tags because django-tagging doesn't support that out of the box
     tagged_items = GenericRelation(TaggedItem)
