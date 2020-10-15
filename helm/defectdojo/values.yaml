@@ -54,7 +54,7 @@ celery:
         memory: 256Mi
     tolerations: []
   annotations:
-    ad.datadoghq.com/defectdojo-celery-beat.logs: '[{"source":"celery-beat","service":"defectdojo"}]'
+    ad.datadoghq.com/celery.logs: '[{"source":"celery","service":"defectdojo"}]'
   worker:
     affinity: {}
     logLevel: DEBUG
@@ -69,7 +69,7 @@ celery:
         memory: 256Mi
     tolerations: []
     annotations:
-      ad.datadoghq.com/defectdojo-celery-worker.logs: '[{"source":"celery-worker","service":"defectdojo"}]'
+      ad.datadoghq.com/celery.logs: '[{"source":"celery","service":"defectdojo"}]'
     app_settings:
       pool_type: solo
       # Performance improved celery worker config when needing to deal with a lot of findings (e.g deduplication ops)
@@ -82,7 +82,8 @@ celery:
 
 django:
   annotations:
-    ad.datadoghq.com/defectdojo-django.logs: '[{"source":"uwsgi","service":"defectdojo"}]'
+    ad.datadoghq.com/uwsgi.logs: '[{"source":"uwsgi","service":"defectdojo"}]'
+    ad.datadoghq.com/nginx.logs: '[{"source":"nginx","service":"defectdojo"}]'
   affinity: {}
   ingress:
     enabled: true
@@ -190,7 +191,7 @@ rabbitmq:
     affinity: {}
     nodeSelector: {}
   annotations:
-    ad.datadoghq.com/defectdojo-rabbitmq.logs: '[{"source":"rabbitmq","service":"defectdojo"}]'
+    ad.datadoghq.com/rabbitmq.logs: '[{"source":"rabbitmq","service":"defectdojo"}]'
 
 redis:
   enabled: false
@@ -199,8 +200,9 @@ redis:
   cluster:
     slaveCount: 1
   annotations:
-    ad.datadoghq.com/defectdojo-redis.logs: '[{"source":"redis","service":"defectdojo"}]'
+    ad.datadoghq.com/redis.logs: '[{"source":"redis","service":"defectdojo"}]'
 
+# some issues with minikube: https://github.com/DataDog/datadog-agent/issues/4752
 datadog:
   enabled: false
 
