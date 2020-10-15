@@ -62,7 +62,7 @@ TLS13_RECOMMENDED_CIPHERS = [
     'TLS_AES_128_CCM_SHA256'
 ]
 
-REFERENCES = 'German BSI recommendations: https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/Publications/TechGuidelines/TG02102/BSI-TR-02102-2.pdf?__blob=publicationFile&v=10'
+REFERENCES = 'TLS recommendations of German BSI: https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/Publications/TechGuidelines/TG02102/BSI-TR-02102-2.pdf?__blob=publicationFile&v=10'
 
 
 class SSLyzeJSONParser(object):
@@ -200,7 +200,7 @@ def get_strong_protocol(cipher, text, suites, node, test, endpoint):
                     cs_node = cipher_node['cipher_suite']
                     if 'name' in cs_node and not cs_node['name'] in suites:
                         unrecommended_cipher_found = True
-                        description = description + '\n - ' + cs_node['name']
+                        description += '\n - ' + cs_node['name']
             if unrecommended_cipher_found:
                 return get_finding(title, description, None, REFERENCES, test, endpoint)
     return None
@@ -280,7 +280,6 @@ def get_endpoint(node):
                 hostname = sl_node['hostname']
             if 'port' in sl_node:
                 port = sl_node['port']
-
     if hostname is not None:
         return Endpoint(
             host=hostname,
