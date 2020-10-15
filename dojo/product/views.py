@@ -18,7 +18,7 @@ from django.db.models import Sum, Count, Q, Max
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
 from dojo.templatetags.display_tags import get_level
-from dojo.filters import ProductFilter, EngagementFilter
+from dojo.filters import ProductFilter, EngagementFilter, ProductComponentFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAPKeyForm, JIRAFindingForm, AdHocFindingForm, \
                        EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm, ProductNotificationsForm, \
                        GITHUB_Product_Form, GITHUBFindingForm, App_AnalysisTypeForm, JIRAEngagementForm
@@ -178,6 +178,25 @@ def view_product(request, pid):
                   'authorized': auth,
                   'personal_notifications_form': personal_notifications_form})
 
+
+def view_product_components(request, pid):
+    prod = get_object_or_404(Product, id=pid)
+    product_tab = Product_Tab(pid, title="Product", tab="components")
+
+    component_query = Finding.objects.filter(test__engagement__product__id=pid).values("component_name", "component_version").exclude(component_name__isnull=True)
+    component_query = component_query.annotate(total=Count('id')).order_by('component_name', 'component_version')
+    component_query = component_query.annotate(active=Count('id', filter=Q(active=True)))
+    component_query = component_query.annotate(duplicate=(Count('id', filter=Q(duplicate=True))))
+
+    comp_filter = ProductComponentFilter(request.GET, queryset=component_query)
+    result = get_page_items(request, comp_filter.qs, 25)
+
+    return render(request, 'dojo/product_components.html', {
+                    'prod': prod,
+                    'filter': comp_filter,
+                    'product_tab': product_tab,
+                    'result': result,
+    })
 
 def identify_view(request):
     get_data = request.GET
