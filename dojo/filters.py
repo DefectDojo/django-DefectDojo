@@ -919,7 +919,7 @@ class SimilarFindingFilter(DojoFilter):
     def filter_queryset(self, *args, **kwargs):
         queryset = super().filter_queryset(*args, **kwargs)
         if not self.user.is_staff:
-            queryset = queryset.filter(test__engagement__product__authorized_users__in=[self.user]) | queryset.filter(test__engagement__product__prod_type__authorized_users__in=[self.user])
+            queryset = queryset.filter(Q(test__engagement__product__authorized_users__in=[self.user]) | Q(test__engagement__product__prod_type__authorized_users__in=[self.user]))
         queryset = queryset.exclude(pk=self.finding.pk)
         return queryset
 
@@ -1189,8 +1189,9 @@ class ReportAuthedFindingFilter(DojoFilter):
             return parent
         else:
             return parent.filter(
-                test__engagement__product__authorized_users__in=[self.user]
-            ) | parent.filter(test__engagement__product__prod_type__authorized_users__in=[self.user])
+                Q(test__engagement__product__authorized_users__in=[self.user]) |
+                Q(test__engagement__product__prod_type__authorized_users__in=[self.user])
+            )
 
     class Meta:
         model = Finding

@@ -53,14 +53,10 @@ def product(request):
     prods = Product.objects.all()
 
     if not request.user.is_staff:
-        qs = prods.filter(
-            authorized_users__in=[request.user]
+        prods = prods.filter(
+            Q(authorized_users__in=[request.user]) |
+            Q(prod_type__authorized_users__in=[request.user])
         )
-        qs = qs | prods.filter(
-            prod_type__authorized_users__in=[request.user]
-        )
-        if qs:
-            prods = qs.distinct()
 
     # perform all stuff for filtering and pagination first, before annotation/prefetching
     # otherwise the paginator will perform all the annotations/prefetching already only to count the total number of records

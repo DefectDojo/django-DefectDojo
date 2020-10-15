@@ -344,13 +344,10 @@ def product_findings_report(request):
     if request.user.is_staff:
         findings = Finding.objects.filter().distinct()
     else:
-        qs = Finding.objects.filter(
-            test__engagement__product__authorized_users__in=[request.user]
+        findings = Finding.objects.filter(
+            Q(test__engagement__product__authorized_users__in=[request.user]) |
+            Q(test__engagement__product__prod_type__authorized_users__in=[request.user])
         )
-        qs = qs | Finding.objects.filter(
-            test__engagement__product__prod_type__authorized_users__in=[request.user]
-        )
-        findings = qs.distinct()
 
     return generate_report(request, findings)
 

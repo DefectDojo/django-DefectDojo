@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('dojo', '0058_document_finding_mode'),
+        ('dojo', '0058_document_finding_model'),
     ]
 
     operations = [

@@ -149,12 +149,9 @@ django_filter=open_findings_filter):
 
     if not request.user.is_staff:
         findings = Finding.objects.filter(
-            test__engagement__product__authorized_users__in=[request.user]
+            Q(test__engagement__product__authorized_users__in=[request.user]) |
+            Q(test__engagement__product__prod_type__authorized_users__in=[request.user])
         )
-        findings = findings | Finding.objects.filter(
-            test__engagement__product__prod_type__authorized_users__in=[request.user]
-        )
-        findings = findings.distinct()
 
     findings_filter = django_filter(request, findings, request.user, pid)
 
@@ -1779,13 +1776,10 @@ def finding_bulk_update_all(request, pid=None):
                 if not settings.AUTHORIZED_USERS_ALLOW_DELETE:
                     raise PermissionDenied()
 
-                qs = finds.filter(
-                    test__engagement__product__authorized_users__in=[request.user]
+                finds = finds.filter(
+                    Q(test__engagement__product__authorized_users__in=[request.user]) |
+                    Q(test__engagement__product__prod_type__authorized_users__in=[request.user])
                 )
-                qs = qs | finds.filter(
-                    test__engagement__product__prod_type__authorized_users__in=[request.user]
-                )
-                finds = qs.distinct()
 
             product_calc = list(Product.objects.filter(engagement__test__finding__id__in=finding_to_update).distinct())
             finds.delete()
@@ -1803,13 +1797,10 @@ def finding_bulk_update_all(request, pid=None):
                     if not settings.AUTHORIZED_USERS_ALLOW_CHANGE:
                         raise PermissionDenied()
 
-                    qs = finds.filter(
-                        test__engagement__product__authorized_users__in=[request.user]
+                    finds = finds.filter(
+                        Q(test__engagement__product__authorized_users__in=[request.user]) |
+                        Q(test__engagement__product__prod_type__authorized_users__in=[request.user])
                     )
-                    qs = qs | finds.filter(
-                        test__engagement__product__prod_type__authorized_users__in=[request.user]
-                    )
-                    finds = qs.distinct()
 
                 finds = prefetch_for_findings(finds)
                 finds = finds.prefetch_related(Prefetch('test__engagement__risk_acceptance', queryset=q_simple_risk_acceptance, to_attr='simple_risk_acceptance'))
@@ -2217,13 +2208,10 @@ def get_similar_findings(request, finding):
     similar = Finding.objects.all()
 
     if not request.user.is_staff:
-        qs = similar.filter(
-            test__engagement__product__authorized_users__in=[request.user]
+        similar = similar.filter(
+            Q(test__engagement__product__authorized_users__in=[request.user]) |
+            Q(test__engagement__product__prod_type__authorized_users__in=[request.user])
         )
-        qs = qs | similar.filter(
-            test__engagement__product__prod_type__authorized_users__in=[request.user]
-        )
-        similar = qs.distinct()
 
     if finding.test.engagement.deduplication_on_engagement:
         similar = similar.filter(test__engagement=finding.test.engagement)

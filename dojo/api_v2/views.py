@@ -43,13 +43,10 @@ class EndPointViewSet(mixins.ListModelMixin,
 
     def get_queryset(self):
         if not self.request.user.is_staff:
-            qs = Endpoint.objects.filter(
-                product__authorized_users__in=[self.request.user]
+            return Endpoint.objects.filter(
+                Q(product__authorized_users__in=[self.request.user]) |
+                Q(product__prod_type__authorized_users__in=[self.request.user])
             )
-            qs = qs | Endpoint.objects.filter(
-                product__prod_type__authorized_users__in=[self.request.user]
-            )
-            return qs.distinct()
         else:
             return Endpoint.objects.all()
 
@@ -112,13 +109,10 @@ class EngagementViewSet(mixins.ListModelMixin,
 
     def get_queryset(self):
         if not self.request.user.is_staff:
-            qs = Engagement.objects.filter(
-                product__authorized_users__in=[self.request.user]
+            return Engagement.objects.filter(
+                Q(product__authorized_users__in=[self.request.user]) |
+                Q(product__prod_type__authorized_users__in=[self.request.user])
             )
-            qs = qs | Engagement.objects.filter(
-                product__prod_type__authorized_users__in=[self.request.user]
-            )
-            return qs.distinct()
         else:
             return Engagement.objects.all()
 
@@ -266,13 +260,10 @@ class FindingViewSet(mixins.ListModelMixin,
 
     def get_queryset(self):
         if not self.request.user.is_staff:
-            qs = Finding.objects.filter(
-                test__engagement__product__authorized_users__in=[self.request.user]
+            findings = Finding.objects.filter(
+                Q(test__engagement__product__authorized_users__in=[self.request.user]) |
+                Q(test__engagement__product__prod_type__authorized_users__in=[self.request.user])
             )
-            qs = qs | Finding.objects.filter(
-                test__engagement__product__prod_type__authorized_users__in=[self.request.user]
-            )
-            findings = qs.distinct()
         else:
             findings = Finding.objects.all()
         return findings.prefetch_related('test',
@@ -596,13 +587,10 @@ class ProductViewSet(mixins.ListModelMixin,
 
     def get_queryset(self):
         if not self.request.user.is_staff:
-            qs = self.queryset.objects.filter(
-                authorized_users__in=[self.request.user]
+            return self.queryset.objects.filter(
+                Q(authorized_users__in=[self.request.user]) |
+                Q(prod_type__authorized_users__in=[self.request.user])
             )
-            qs = qs | self.queryset.objects.filter(
-                prod_type__authorized_users__in=[self.request.user]
-            )
-            return qs.distinct()
         else:
             return self.queryset
 
@@ -694,13 +682,10 @@ class ScanSettingsViewSet(mixins.ListModelMixin,
 
     def get_queryset(self):
         if not self.request.user.is_staff:
-            qs = ScanSettings.objects.filter(
-                product__authorized_users__in=[self.request.user]
+            return ScanSettings.objects.filter(
+                Q(product__authorized_users__in=[self.request.user]) |
+                Q(product__prod_type__authorized_users__in=[self.request.user])
             )
-            qs = qs | ScanSettings.objects.filter(
-                product__prod_type__authorized_users__in=[self.request.user]
-            )
-            return qs.distinct()
         else:
             return ScanSettings.objects.all()
 
@@ -718,13 +703,10 @@ class ScansViewSet(mixins.ListModelMixin,
 
     def get_queryset(self):
         if not self.request.user.is_staff:
-            qs = Scan.objects.filter(
-                scan_settings__product__authorized_users__in=[self.request.user]
+            return Scan.objects.filter(
+                Q(scan_settings__product__authorized_users__in=[self.request.user]) |
+                Q(scan_settings__product__prod_type__authorized_users__in=[self.request.user])
             )
-            qs = qs | Scan.objects.filter(
-                scan_settings__product__prod_type__authorized_users__in=[self.request.user]
-            )
-            return qs.distinct()
         else:
             return Scan.objects.all()
 
@@ -741,13 +723,10 @@ class StubFindingsViewSet(mixins.ListModelMixin,
 
     def get_queryset(self):
         if not self.request.user.is_staff:
-            qs = Finding.objects.filter(
-                test__engagement__product__authorized_users__in=[self.request.user]
+            return Finding.objects.filter(
+                Q(test__engagement__product__authorized_users__in=[self.request.user]) |
+                Q(test__engagement__product__prod_type__authorized_users__in=[self.request.user])
             )
-            qs = qs | Finding.objects.filter(
-                test__engagement__product__prod_type__authorized_users__in=[self.request.user]
-            )
-            return qs.distinct()
         else:
             return Finding.objects.all()
 

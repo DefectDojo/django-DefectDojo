@@ -33,15 +33,11 @@ def vulnerable_endpoints(request):
     if request.user.is_staff:
         pass
     else:
-        qs = Endpoint.objects.filter(
-            product__authorized_users__in=[request.user]
+        endpoints = Endpoint.objects.filter(
+            Q(product__authorized_users__in=[request.user]) |
+            Q(product__prod_type__authorized_users__in=[request.user])
         )
-        qs = qs | Endpoint.objects.filter(
-            product__prod_type__authorized_users__in=[request.user]
-        )
-        if qs:
-            endpoints = qs.distinct()
-        else:
+        if not endpoints:
             raise PermissionDenied
 
     product = None
@@ -78,15 +74,11 @@ def all_endpoints(request):
     if request.user.is_staff:
         pass
     else:
-        qs = Endpoint.objects.filter(
-            product__authorized_users__in=[request.user]
+        endpoints = Endpoint.objects.filter(
+            Q(product__authorized_users__in=[request.user]) |
+            Q(product__prod_type__authorized_users__in=[request.user])
         )
-        qs = qs | Endpoint.objects.filter(
-            product__prod_type__authorized_users__in=[request.user]
-        )
-        if qs:
-            endpoints = qs.distinct()
-        else:
+        if not endpoints:
             raise PermissionDenied
 
     product = None
