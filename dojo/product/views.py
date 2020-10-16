@@ -36,7 +36,7 @@ from django.db.models import Prefetch, F
 from django.db.models.query import QuerySet
 from github import Github
 from dojo.finding.views import finding_link_jira, finding_unlink_jira
-from dojo.user.helper import user_must_be_authorized, user_is_authorized
+from dojo.user.helper import user_must_be_authorized, user_is_authorized, check_auth_users_list
 
 
 logger = logging.getLogger(__name__)
@@ -53,7 +53,10 @@ def product(request):
     prods = Product.objects.all()
 
     if not request.user.is_staff:
-        prods = prods.filter(authorized_users__in=[request.user])
+        prods = prods.filter(
+            Q(authorized_users__in=[request.user]) |
+            Q(prod_type__authorized_users__in=[request.user])
+        )
 
     # perform all stuff for filtering and pagination first, before annotation/prefetching
     # otherwise the paginator will perform all the annotations/prefetching already only to count the total number of records
@@ -108,16 +111,11 @@ def iso_to_gregorian(iso_year, iso_week, iso_day):
     return start + timedelta(weeks=iso_week - 1, days=iso_day - 1)
 
 
+@user_must_be_authorized(Product, 'view', 'pid')
 def view_product(request, pid):
     prod_query = Product.objects.all().select_related('product_manager', 'technical_contact', 'team_manager').prefetch_related('authorized_users')
     prod = get_object_or_404(prod_query, id=pid)
-    auth = request.user.is_staff or request.user in prod.authorized_users.all()
-
     personal_notifications_form = ProductNotificationsForm(instance=Notifications.objects.filter(user=request.user).filter(product=prod).first())
-
-    if not auth:
-        # will render 403
-        raise PermissionDenied
     langSummary = Languages.objects.filter(product=prod).aggregate(Sum('files'), Sum('code'), Count('files'))
     languages = Languages.objects.filter(product=prod).order_by('-code')
     app_analysis = App_Analysis.objects.filter(product=prod).order_by('name')
@@ -175,7 +173,6 @@ def view_product(request, pid):
                   'system_settings': system_settings,
                   'benchmarks_percents': benchAndPercent,
                   'benchmarks': benchmarks,
-                  'authorized': auth,
                   'personal_notifications_form': personal_notifications_form})
 
 
@@ -302,6 +299,7 @@ def endpoint_querys(prod, date, week):
     return filters
 
 
+@user_must_be_authorized(Product, 'view', 'pid')
 def view_product_metrics(request, pid):
     prod = get_object_or_404(Product, id=pid)
     engs = Engagement.objects.filter(product=prod, active=True)
@@ -314,12 +312,6 @@ def view_product_metrics(request, pid):
     i_engs_page = get_page_items(request, result.qs, 10)
 
     scan_sets = ScanSettings.objects.filter(product=prod)
-    auth = request.user.is_staff or request.user in prod.authorized_users.all()
-
-    if not auth:
-        # will render 403
-        raise PermissionDenied
-
     ct = ContentType.objects.get_for_model(prod)
     product_cf = CustomField.objects.filter(content_type=ct)
     product_metadata = {}
@@ -495,13 +487,12 @@ def view_product_metrics(request, pid):
                    'high_weekly': high_weekly,
                    'medium_weekly': medium_weekly,
                    'test_data': test_data,
-                   'user': request.user,
-                   'authorized': auth})
+                   'user': request.user})
 
 
 def view_engagements(request, pid, engagement_type="Interactive"):
     prod = get_object_or_404(Product, id=pid)
-    auth = request.user.is_staff or request.user in prod.authorized_users.all()
+    auth = request.user.is_staff or check_auth_users_list(request.user, prod)
     if not auth:
         raise PermissionDenied
 
