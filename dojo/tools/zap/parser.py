@@ -63,7 +63,7 @@ class ZapXmlParser(object):
         items = list()
         for node in tree.findall('site'):
             site = Site(node)
-            main_host = Endpoint(host=site.ip + site.port if site.port is not None else "")
+            main_host = Endpoint(host=site.name + (":" + site.port) if site.port is not None else "")
             for item in site.items:
                 severity = item.riskdesc.split(' ', 1)[0]
                 references = ''
@@ -134,8 +134,9 @@ def get_attrib_from_subnode(xml_node, subnode_xpath_expr, attrib_name):
 class Site(object):
     def __init__(self, item_node):
         self.node = item_node
+        self.name = self.node.get('name')
         self.host = self.node.get('host')
-        self.ip = self.resolve(self.host)
+        self.name = self.node.get('name')
         self.port = self.node.get('port')
         self.items = []
         for alert in self.node.findall('alerts/alertitem'):
@@ -191,8 +192,8 @@ class Item(object):
         description_detail = "\n"
         for instance in item_node.findall('instances/instance'):
             for node in instance.getiterator():
-                print('tag: ' + node.tag)
-                print('text:' + escape(node.text))
+                # print('tag: ' + node.tag)
+                # print('text:' + escape(node.text))
                 if node.tag == "uri":
                     if node.text != "":
                         description_detail += "URL: " + node.text

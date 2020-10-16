@@ -29,7 +29,7 @@ import calendar as tcalendar
 from dojo.github import add_external_issue_github, update_external_issue_github, close_external_issue_github, reopen_external_issue_github
 from dojo.models import Finding, Engagement, Finding_Template, Product, JIRA_PKey, JIRA_Issue,\
     Dojo_User, User, System_Settings, Notifications, Endpoint, Benchmark_Type, \
-    Language_Type, Languages, Rule, Test_Type, Notes
+    Language_Type, Languages, Rule, Notes
 from asteval import Interpreter
 from requests.auth import HTTPBasicAuth
 from dojo.notifications.helper import create_notification
@@ -50,7 +50,9 @@ Helper functions for DefectDojo
 
 
 def sync_false_history(new_finding, *args, **kwargs):
+    logger.debug('%s: sync false positive history', new_finding.id)
     if new_finding.endpoints.count() == 0:
+        # if no endpoints on new finding, then look at cwe + test_type + hash_code. or title + test_type + hash_code
         eng_findings_cwe = Finding.objects.filter(
             test__engagement__product=new_finding.test.engagement.product,
             cwe=new_finding.cwe,
@@ -63,6 +65,7 @@ def sync_false_history(new_finding, *args, **kwargs):
             false_p=True, hash_code=new_finding.hash_code).exclude(id=new_finding.id)
         total_findings = eng_findings_cwe | eng_findings_title
     else:
+        # if endpoints on new finding, then look at ONLY cwe + test_type. or title + test_type (hash_code doesn't matter!)
         eng_findings_cwe = Finding.objects.filter(
             test__engagement__product=new_finding.test.engagement.product,
             cwe=new_finding.cwe,
@@ -73,7 +76,17 @@ def sync_false_history(new_finding, *args, **kwargs):
             title=new_finding.title,
             test__test_type=new_finding.test.test_type,
             false_p=True).exclude(id=new_finding.id).exclude(endpoints=None)
+
+    deduplicationLogger.debug("cwe   query: %s", eng_findings_cwe.query)
+    deduplicationLogger.debug("title query: %s", eng_findings_title.query)
+
     total_findings = eng_findings_cwe | eng_findings_title
+
+    deduplicationLogger.debug("False positive history: Found " +
+        str(len(eng_findings_cwe)) + " findings with same cwe, " +
+        str(len(eng_findings_title)) + " findings with same title: " +
+        str(len(total_findings)) + " findings with either same title or same cwe")
+
     if total_findings.count() > 0:
         new_finding.false_p = True
         new_finding.active = False
@@ -89,13 +102,15 @@ def is_deduplication_on_engagement_mismatch(new_finding, to_duplicate_finding):
 @receiver(dedupe_signal, sender=Finding)
 def sync_dedupe(sender, *args, **kwargs):
     try:
-        enabled = System_Settings.objects.get().enable_deduplication
+        enabled = System_Settings.objects.get(no_cache=True).enable_deduplication
     except System_Settings.DoesNotExist:
+        logger.warning("system settings not found")
         enabled = False
     if enabled:
         new_finding = kwargs['new_finding']
         deduplicationLogger.debug('sync_dedupe for: ' + str(new_finding.id) +
                     ":" + str(new_finding.title))
+        # TODO use test.dedupe_algo and case statement
         if hasattr(settings, 'DEDUPLICATION_ALGORITHM_PER_PARSER'):
             scan_type = new_finding.test.test_type.name
             deduplicationLogger.debug('scan_type for this finding is :' + scan_type)
@@ -113,11 +128,12 @@ def sync_dedupe(sender, *args, **kwargs):
                 deduplicate_uid_or_hash_code(new_finding)
             else:
                 deduplicate_legacy(new_finding)
+                logger.debug('done legacy')
         else:
             deduplicationLogger.debug("no configuration per parser found; using legacy algorithm")
             deduplicate_legacy(new_finding)
     else:
-        deduplicationLogger.debug("skipping dedupe because it's disabled in system settings get()")
+        deduplicationLogger.debug("sync_dedupe: skipping dedupe because it's disabled in system settings get()")
 
 
 def deduplicate_legacy(new_finding):
@@ -158,28 +174,36 @@ def deduplicate_legacy(new_finding):
             deduplicationLogger.debug(
                 'deduplication_on_engagement_mismatch, skipping dedupe.')
             continue
+
         # ---------------------------------------------------------
         # 2) If existing and new findings have endpoints: compare them all
         #    Else look at line+file_path
         #    (if new finding is not static, do not deduplicate)
         # ---------------------------------------------------------
+
         if find.endpoints.count() != 0 and new_finding.endpoints.count() != 0:
             list1 = [e.host_with_port for e in new_finding.endpoints.all()]
             list2 = [e.host_with_port for e in find.endpoints.all()]
+
             if all(x in list1 for x in list2):
+                deduplicationLogger.debug("%s: existing endpoints are present in new finding", find.id)
                 flag_endpoints = True
-        elif new_finding.static_finding and len(new_finding.file_path) > 0:
+        elif new_finding.static_finding and new_finding.file_path and len(new_finding.file_path) > 0:
             if str(find.line) == str(new_finding.line) and find.file_path == new_finding.file_path:
+                deduplicationLogger.debug("%s: file_path and line match", find.id)
                 flag_line_path = True
             else:
-                deduplicationLogger.debug("no endpoints on one of the findings and file_path doesn't match")
+                deduplicationLogger.debug("no endpoints on one of the findings and file_path doesn't match; Deduplication will not occur")
         else:
             deduplicationLogger.debug("no endpoints on one of the findings and the new finding is either dynamic or doesn't have a file_path; Deduplication will not occur")
+
         if find.hash_code == new_finding.hash_code:
             flag_hash = True
+
         deduplicationLogger.debug(
-            'deduplication flags for new finding ' + str(new_finding.id) + ' and existing finding ' + str(find.id) +
+            'deduplication flags for new finding (' + ('dynamic' if new_finding.dynamic_finding else 'static') + ') ' + str(new_finding.id) + ' and existing finding ' + str(find.id) +
             ' flag_endpoints: ' + str(flag_endpoints) + ' flag_line_path:' + str(flag_line_path) + ' flag_hash:' + str(flag_hash))
+
         # ---------------------------------------------------------
         # 3) Findings are duplicate if (cond1 is true) and they have the same:
         #    hash
@@ -212,6 +236,7 @@ def deduplicate_unique_id_from_tool(new_finding):
                 id=new_finding.id).exclude(
                     unique_id_from_tool=None).exclude(
                         duplicate=True)
+
     deduplicationLogger.debug("Found " +
         str(len(existing_findings)) + " findings with same unique_id_from_tool")
     for find in existing_findings:
@@ -242,6 +267,7 @@ def deduplicate_hash_code(new_finding):
                 id=new_finding.id).exclude(
                     hash_code=None).exclude(
                         duplicate=True)
+
     deduplicationLogger.debug("Found " +
         str(len(existing_findings)) + " findings with same hash_code")
     for find in existing_findings:
@@ -294,7 +320,7 @@ def set_duplicate(new_finding, existing_finding):
         raise Exception("Existing finding is a duplicate")
     if existing_finding.id == new_finding.id:
         raise Exception("Can not add duplicate to itself")
-    deduplicationLogger.debug('New finding ' + str(new_finding.id) + ' is a duplicate of existing finding ' + str(existing_finding.id))
+    deduplicationLogger.debug('Setting new finding ' + str(new_finding.id) + ' as a duplicate of existing finding ' + str(existing_finding.id))
     if is_duplicate_reopen(new_finding, existing_finding):
         set_duplicate_reopen_(new_finding, existing_finding)
     new_finding.duplicate = True
@@ -324,81 +350,6 @@ def set_duplicate_reopen(new_finding, existing_finding):
     existing_finding.notes.create(author=existing_finding.reporter,
                                     entry="This finding has been automatically re-openend as it was found in recent scans.")
     existing_finding.save()
-
-
-def removeLoop(finding_id, counter):
-    # get latest status
-    finding = Finding.objects.get(id=finding_id)
-    real_original = finding.duplicate_finding
-
-    if not real_original or real_original is None:
-        return
-
-    if finding_id == real_original.id:
-        finding.duplicate_finding = None
-        super(Finding, finding).save()
-        return
-
-    # Only modify the findings if the original ID is lower to get the oldest finding as original
-    if (real_original.id > finding_id) and (real_original.duplicate_finding is not None):
-        tmp = finding_id
-        finding_id = real_original.id
-        real_original = Finding.objects.get(id=tmp)
-        finding = Finding.objects.get(id=finding_id)
-
-    if real_original in finding.original_finding.all():
-        # remove the original from the duplicate list if it is there
-        finding.original_finding.remove(real_original)
-        super(Finding, finding).save()
-    if counter <= 0:
-        # Maximum recursion depth as safety method to circumvent recursion here
-        return
-    for f in finding.original_finding.all():
-        # for all duplicates set the original as their original, get rid of self in between
-        f.duplicate_finding = real_original
-        super(Finding, f).save()
-        super(Finding, real_original).save()
-        removeLoop(f.id, counter - 1)
-
-
-def fix_loop_duplicates():
-    candidates = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).all().order_by("-id")
-    deduplicationLogger.info("Identified %d Findings with Loops" % len(candidates))
-    for find_id in candidates.values_list('id', flat=True):
-        removeLoop(find_id, 5)
-
-    new_originals = Finding.objects.filter(duplicate_finding__isnull=True, duplicate=True)
-    for f in new_originals:
-        deduplicationLogger.info("New Original: %d " % f.id)
-        f.duplicate = False
-        super(Finding, f).save()
-
-    loop_count = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).count()
-    deduplicationLogger.info("%d Finding found with Loops" % loop_count)
-
-
-def rename_whitesource_finding():
-    whitesource_id = Test_Type.objects.get(name="Whitesource Scan").id
-    findings = Finding.objects.filter(found_by=whitesource_id)
-    findings = findings.order_by('-pk')
-    logger.info("######## Updating Hashcodes - deduplication is done in background using django signals upon finding save ########")
-    for finding in findings:
-        logger.info("Updating Whitesource Finding with id: %d" % finding.id)
-        lib_name_begin = re.search('\\*\\*Library Filename\\*\\* : ', finding.description).span(0)[1]
-        lib_name_end = re.search('\\*\\*Library Description\\*\\*', finding.description).span(0)[0]
-        lib_name = finding.description[lib_name_begin:lib_name_end - 1]
-        if finding.cve is None:
-            finding.title = "CVE-None | " + lib_name
-        else:
-            finding.title = finding.cve + " | " + lib_name
-        if not finding.cwe:
-            logger.debug('Set cwe for finding %d to 1035 if not an cwe Number is set' % finding.id)
-            finding.cwe = 1035
-        finding.title = finding.title.rstrip()  # delete \n at the end of the title
-        from titlecase import titlecase
-        finding.title = titlecase(finding.title)
-        finding.hash_code = finding.compute_hash_code()
-        finding.save()
 
 
 def sync_rules(new_finding, *args, **kwargs):

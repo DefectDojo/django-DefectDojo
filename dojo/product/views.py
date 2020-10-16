@@ -18,7 +18,7 @@ from django.db.models import Sum, Count, Q, Max
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
 from dojo.templatetags.display_tags import get_level
-from dojo.filters import ProductFilter, EngagementFilter, ProductMetricsEndpointFilter, ProductMetricsFindingFilter
+from dojo.filters import ProductFilter, EngagementFilter, ProductMetricsEndpointFilter, ProductMetricsFindingFilter, ProductComponentFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAPKeyForm, JIRAFindingForm, AdHocFindingForm, \
                        EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm, ProductNotificationsForm, \
                        GITHUB_Product_Form, GITHUBFindingForm, App_AnalysisTypeForm, JIRAEngagementForm
@@ -178,6 +178,25 @@ def view_product(request, pid):
                   'authorized': auth,
                   'personal_notifications_form': personal_notifications_form})
 
+
+def view_product_components(request, pid):
+    prod = get_object_or_404(Product, id=pid)
+    product_tab = Product_Tab(pid, title="Product", tab="components")
+
+    component_query = Finding.objects.filter(test__engagement__product__id=pid).values("component_name", "component_version").exclude(component_name__isnull=True)
+    component_query = component_query.annotate(total=Count('id')).order_by('component_name', 'component_version')
+    component_query = component_query.annotate(active=Count('id', filter=Q(active=True)))
+    component_query = component_query.annotate(duplicate=(Count('id', filter=Q(duplicate=True))))
+
+    comp_filter = ProductComponentFilter(request.GET, queryset=component_query)
+    result = get_page_items(request, comp_filter.qs, 25)
+
+    return render(request, 'dojo/product_components.html', {
+                    'prod': prod,
+                    'filter': comp_filter,
+                    'product_tab': product_tab,
+                    'result': result,
+    })
 
 def identify_view(request):
     get_data = request.GET
@@ -882,7 +901,7 @@ def delete_product(request, pid):
                    })
 
 
-# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Product, 'staff', 'pid')  # use arg 0 as using pid causes issues, I think due to cicd being there
 def new_eng_for_app(request, pid, cicd=False):
     jform = None
     prod = Product.objects.get(id=pid)
@@ -897,7 +916,7 @@ def new_eng_for_app(request, pid, cicd=False):
         #     print(f'Key: {key}')
         #     print(f'Value: {value}')
 
-        form = EngForm(request.POST, cicd=cicd, product=prod.id)
+        form = EngForm(request.POST, cicd=cicd, product=prod.id, user=request.user)
         if form.is_valid():
             new_eng = form.save(commit=False)
             if not new_eng.name:
@@ -945,7 +964,7 @@ def new_eng_for_app(request, pid, cicd=False):
             else:
                 return HttpResponseRedirect(reverse('view_engagement', args=(new_eng.id,)))
     else:
-        form = EngForm(initial={'lead': request.user, 'target_start': timezone.now().date(), 'target_end': timezone.now().date() + timedelta(days=7), 'product': prod.id}, cicd=cicd, product=prod.id)
+        form = EngForm(initial={'lead': request.user, 'target_start': timezone.now().date(), 'target_end': timezone.now().date() + timedelta(days=7), 'product': prod.id}, cicd=cicd, product=prod.id, user=request.user)
         if use_jira:
             jform = JIRAEngagementForm(prefix='jiraform')
 
@@ -979,8 +998,10 @@ def new_tech_for_prod(request, pid):
 
 
 # @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Product, 'staff', 'pid')
 def new_eng_for_app_cicd(request, pid):
-    return new_eng_for_app(request, pid, True)
+    # we have to use pid=pid here as new_eng_for_app expects kwargs, because that is how django calls the function based on urls.py named groups
+    return new_eng_for_app(request, pid=pid, cicd=True)
 
 
 # @user_passes_test(lambda u: u.is_staff)

@@ -20,7 +20,7 @@ def create_notification(event=None, *args, **kwargs):
             # kwargs.update({'user': recipient_notifications.user})
             process_notifications(event, recipient_notifications, *args, **kwargs)
     else:
-        logger.debug('creating system notifications')
+        logger.debug('creating system notifications for event: %s', event)
         # send system notifications to all admin users
 
         # System notifications
@@ -35,7 +35,7 @@ def create_notification(event=None, *args, **kwargs):
         # All admins will also receive system notifications, but as part of the person global notifications section below
         # This time user is set, so will trigger email to personal email, to personal slack channel (mention), etc.
         # only retrieve users which have at least one notification type enabled for this event type.
-        logger.debug('creating personal notifications')
+        logger.debug('creating personal notifications for event: %s', event)
 
         product = None
         if 'product' in kwargs:
@@ -72,7 +72,7 @@ def create_notification(event=None, *args, **kwargs):
                 applicable_notifications.append(system_notifications)
 
             notifications_set = Notifications.merge_notifications_list(applicable_notifications)
-
+            notifications_set.user = user
             process_notifications(event, notifications_set, *args, **kwargs)
 
 
@@ -121,7 +121,7 @@ def process_notifications(event, notifications=None, *args, **kwargs):
     logger.debug('notifications: %s', vars(notifications))
 
     slack_enabled = get_system_setting('enable_slack_notifications')
-    hipchat_enabled = get_system_setting('enable_hipchat_notifications')
+    msteams_enabled = get_system_setting('enable_msteams_notifications')
     mail_enabled = get_system_setting('enable_mail_notifications')
 
     if slack_enabled and 'slack' in getattr(notifications, event):
@@ -130,11 +130,11 @@ def process_notifications(event, notifications=None, *args, **kwargs):
         else:
             send_slack_notification(event, notifications.user, *args, **kwargs)
 
-    if hipchat_enabled and 'hipchat' in getattr(notifications, event):
+    if msteams_enabled and 'msteams' in getattr(notifications, event):
         if not sync:
-            send_hipchat_notification.delay(event, notifications.user, *args, **kwargs)
+            send_msteams_notification.delay(event, notifications.user, *args, **kwargs)
         else:
-            send_hipchat_notification(event, notifications.user, *args, **kwargs)
+            send_msteams_notification(event, notifications.user, *args, **kwargs)
 
     logger.debug('mail_enabled: %s', mail_enabled)
     logger.debug('getattr(notifications, event): %s', getattr(notifications, event))
@@ -205,26 +205,28 @@ def send_slack_notification(event, user=None, *args, **kwargs):
         log_alert(e, 'Slack Notification', title=kwargs['title'], description=str(e), url=kwargs['url'])
 
 
-@app.task(name='send_hipchat_notification')
-def send_hipchat_notification(event, user=None, *args, **kwargs):
+@app.task(name='send_msteams_notification')
+def send_msteams_notification(event, user=None, *args, **kwargs):
     from dojo.utils import get_system_setting
+
     try:
-        # HipChat doesn't seem to offer direct message functionality, so no HipChat PM functionality here...
-        if not user:
-            # We use same template for HipChat as for slack
-            res = requests.request(
-                method='POST',
-                url='https://%s/v2/room/%s/notification?auth_token=%s' %
-                (get_system_setting('hipchat_site'),
-                get_system_setting('hipchat_channel'),
-                get_system_setting('hipchat_token')),
-                data={
-                    'message': create_notification_message(event, 'slack', *args, **kwargs),
-                    'message_format': 'text'
-                })
+        # Microsoft Teams doesn't offer direct message functionality, so no MS Teams PM functionality here...
+        if user is None:
+            if get_system_setting('msteams_url') is not None:
+                res = requests.request(
+                    method='POST',
+                    url=get_system_setting('msteams_url'),
+                    data=create_notification_message(event, None, 'msteams', *args, **kwargs))
+                if res.status_code != 200:
+                    logger.error("Error when sending message to Microsoft Teams")
+                    logger.error(res.status_code)
+                    logger.error(res.text)
+                    raise RuntimeError('Error posting message to Microsoft Teams: ' + res.text)
+            else:
+                logger.info('Webhook URL for Microsoft Teams not configured: skipping system notification')
     except Exception as e:
         logger.exception(e)
-        log_alert(e, "HipChat Notification", title=kwargs['title'], description=str(e), url=kwargs['url'])
+        log_alert(e, "Microsoft Teams Notification", title=kwargs['title'], description=str(e), url=kwargs['url'])
         pass
 
 

@@ -69,7 +69,7 @@ You can manage your notification settings here: <a href="{{ notification_url|ful
 </p>
 {% endautoescape %}
 </body>
-<html>
+</html>
 {% elif type == 'alert' %}
 {{ description }}
 {% elif type == 'slack' %}
@@ -79,4 +79,42 @@ You can manage your notification settings here: <a href="{{ notification_url|ful
 {{ test }} results have been uploaded.
 They can be viewed here: {{ url }}
 {% endif %}
+{% elif type == 'msteams' %}
+{% url 'view_test' test.id as test_url %}
+    {
+        "@context": "https://schema.org/extensions",
+        "@type": "MessageCard",
+        "title": "Scan added",
+        "summary": "Scan added",
+        "sections": [
+            {
+                "activityTitle": "DefectDojo",
+                "activityImage": "https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/master/dojo/static/dojo/img/chop.png",
+                "text": "A new scan has been added.",
+                "facts": [
+                    {
+                        "name": "Product:",
+                        "value": "{{ test.engagement.product.name }}"
+                    },
+                    {
+                        "name": "Engagement:",
+                        "value": "{{ test.engagement.name }}"
+                    },
+                    {
+                        "name": "Scan:",
+                        "value": "{{ test }}"
+                    }
+                ]
+            }
+        ],
+        "potentialAction": [
+            {
+            "@type": "OpenUri",
+            "name": "View",
+            "targets": [
+                { "os": "default", "uri": "{{ test_url|full_url }}" }
+                ]
+            }
+        ]
+    }
 {% endif %}
