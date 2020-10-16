@@ -1,4 +1,4 @@
-apiVersion: v1
+apiVersion: v2
 appVersion: "1.7.1"
 description: A Helm chart for Kubernetes to installs DefectDojo
 name: defectdojo
