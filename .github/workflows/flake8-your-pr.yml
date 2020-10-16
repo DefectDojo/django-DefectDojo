@@ -12,6 +12,7 @@ jobs:
         # the base commit (branch) of the PR
         # more info https://github.community/t/github-actions-are-severely-limited-on-prs/18179/16
         # remaining issue: this checks out the base commit of the dev branch, which can be lagging behind HEAD of dev
+        # maybe we could use the 'before' and 'after' shas that are in the github event json
         with:
           fetch-depth: 0
           ref: ${{github.event.pull_request.head.ref}}
