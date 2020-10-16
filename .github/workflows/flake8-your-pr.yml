@@ -13,8 +13,8 @@ jobs:
         # more info https://github.community/t/github-actions-are-severely-limited-on-prs/18179/16
         with:
           fetch-depth: 0
-          ref: ${{github.event.pull_request.head.ref}}
-          repository: ${{github.event.pull_request.head.repo.full_name}}
+          ref: ${{github.event.pull_request.merge_commit}}
+          # repository: ${{github.event.pull_request.head.repo.full_name}}
 
       # - uses: tayfun/flake8-your-pr@master
       - uses: valentijnscholten/flake8-your-pr@master
