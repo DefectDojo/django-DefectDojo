@@ -12,7 +12,9 @@ jobs:
         # there's some extra option in there to checkout the PRs branch from the forked REPO, which might work
         # and make the diff working again. let's try at some point.
         with:
-          fetch-depth: 2
+          fetch-depth: 0
+          ref: ${{github.event.pull_request.head.ref}}
+          repository: ${{github.event.pull_request.head.repo.full_name}}
 
       # - uses: tayfun/flake8-your-pr@master
       - uses: valentijnscholten/flake8-your-pr@master
