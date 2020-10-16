@@ -319,7 +319,7 @@ def endpoint_querys(prod_type, request):
     return filters
 
 
-# @cache_page(60 * 5)  # cache for 5 minutes
+@cache_page(60 * 5)  # cache for 5 minutes
 def metrics(request, mtype):
     template = 'dojo/metrics.html'
     show_pt_filter = True

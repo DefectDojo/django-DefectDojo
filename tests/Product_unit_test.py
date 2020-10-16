@@ -78,8 +78,6 @@ class ProductTest(BaseTestCase):
         driver.find_element_by_id("product_component_view").click()
         self.assertTrue(self.is_element_by_css_selector_present("table"))
 
-
-
     # For product consistency sake, We won't be editting the product title
     # instead We can edit the product description
     @on_exception_html_source_logger

@@ -11,7 +11,7 @@ from google.oauth2 import service_account
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
-from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.exceptions import ValidationError
 from django.urls import reverse
 from django.db.models import Q, QuerySet, Count
 from django.http import HttpResponseRedirect, Http404, HttpResponse
@@ -43,14 +43,11 @@ logger = logging.getLogger(__name__)
 parse_logger = logging.getLogger('dojo')
 
 
+@user_must_be_authorized(Test, 'view', 'tid')
 def view_test(request, tid):
     test = get_object_or_404(Test, pk=tid)
     prod = test.engagement.product
-    auth = request.user.is_staff or request.user in prod.authorized_users.all()
     tags = Tag.objects.usage_for_model(Finding)
-    if not auth:
-        # will render 403
-        raise PermissionDenied
     notes = test.notes.all()
     note_type_activation = Note_Type.objects.filter(is_active=True).count()
     if note_type_activation:
@@ -178,6 +175,7 @@ def prefetch_for_findings(findings):
         prefetched_findings = prefetched_findings.annotate(active_endpoint_count=Count('endpoint_status__id', filter=Q(endpoint_status__mitigated=False)))
         prefetched_findings = prefetched_findings.annotate(mitigated_endpoint_count=Count('endpoint_status__id', filter=Q(endpoint_status__mitigated=True)))
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__authorized_users')
+        prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__prod_type__authorized_users')
     else:
         logger.debug('unable to prefetch because query was already executed')
 
@@ -357,6 +355,7 @@ def add_findings(request, tid):
             if new_finding.false_p or new_finding.active is False:
                 new_finding.mitigated = timezone.now()
                 new_finding.mitigated_by = request.user
+                new_finding.is_Mitigated = True
             create_template = new_finding.is_template
             # always false now since this will be deprecated soon in favor of new Finding_Template model
             new_finding.is_template = False
@@ -508,6 +507,7 @@ def add_temp_finding(request, tid, fid):
             if new_finding.false_p or new_finding.active is False:
                 new_finding.mitigated = timezone.now()
                 new_finding.mitigated_by = request.user
+                new_finding.is_Mitigated = True
 
             create_template = new_finding.is_template
             # is template always False now in favor of new model Finding_Template
