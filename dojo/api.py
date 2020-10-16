@@ -21,7 +21,8 @@ from dojo.models import Product, Engagement, Test, Finding, \
     Finding_Template, Test_Type, Development_Environment, \
     BurpRawRequestResponse, Endpoint, Notes, JIRA_PKey, JIRA_Conf, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
-    Languages, Language_Type, App_Analysis, Product_Type, Note_Type
+    Languages, Language_Type, App_Analysis, Product_Type, Note_Type, \
+    Endpoint_Status
 from dojo.forms import ProductForm, EngForm, TestForm, \
     ScanSettingsForm, FindingForm, StubFindingForm, FindingTemplateForm, \
     ImportScanForm, SEVERITY_CHOICES, JIRAForm, JIRA_PKeyForm, EditEndpointForm, \
@@ -1558,7 +1559,11 @@ class ImportScanResource(MultipartResource, Resource):
                                                                  query=endpoint.query,
                                                                  fragment=endpoint.fragment,
                                                                  product=t.engagement.product)
+                    eps, created = Endpoint_Status.objects.get_or_create(finding=item,
+                                                                         endpoint=ep)
 
+                    ep.endpoint_status.add(eps)
+                    item.endpoint_status.add(eps)
                     item.endpoints.add(ep)
                 item.save()
 
@@ -1781,6 +1786,11 @@ class ReImportScanResource(MultipartResource, Resource):
                                                                      query=endpoint.query,
                                                                      fragment=endpoint.fragment,
                                                                      product=test.engagement.product)
+                        eps, created = Endpoint_Status.objects.get_or_create(finding=find,
+                                                                             endpoint=ep)
+
+                        ep.endpoint_status.add(eps)
+                        find.endpoint_status.add(eps)
                         find.endpoints.add(ep)
 
                     if item.unsaved_tags is not None:
