@@ -53,8 +53,7 @@ celery:
         cpu: 2000m
         memory: 256Mi
     tolerations: []
-  annotations:
-    ad.datadoghq.com/celery.logs: '[{"source":"celery","service":"defectdojo"}]'
+  annotations: {}
   worker:
     affinity: {}
     logLevel: DEBUG
@@ -68,8 +67,7 @@ celery:
         cpu: 2000m
         memory: 256Mi
     tolerations: []
-    annotations:
-      ad.datadoghq.com/celery.logs: '[{"source":"celery","service":"defectdojo"}]'
+    annotations: {}
     app_settings:
       pool_type: solo
       # Performance improved celery worker config when needing to deal with a lot of findings (e.g deduplication ops)
@@ -81,9 +79,7 @@ celery:
       # prefetch_multiplier: 128
 
 django:
-  annotations:
-    ad.datadoghq.com/uwsgi.logs: '[{"source":"uwsgi","service":"defectdojo"}]'
-    ad.datadoghq.com/nginx.logs: '[{"source":"nginx","service":"defectdojo"}]'
+  annotations: {}
   affinity: {}
   ingress:
     enabled: true
@@ -190,8 +186,7 @@ rabbitmq:
     existingErlangSecret: defectdojo-rabbitmq-specific
     affinity: {}
     nodeSelector: {}
-  annotations:
-    ad.datadoghq.com/rabbitmq.logs: '[{"source":"rabbitmq","service":"defectdojo"}]'
+  annotations: {}
 
 redis:
   enabled: false
@@ -199,12 +194,8 @@ redis:
   password: ""
   cluster:
     slaveCount: 1
-  annotations:
-    ad.datadoghq.com/redis.logs: '[{"source":"redis","service":"defectdojo"}]'
+  annotations: {}
 
-# some issues with minikube: https://github.com/DataDog/datadog-agent/issues/4752
-datadog:
-  enabled: false
 
 # To add extra variables not predefined by helm config it is possible to define in extraConfigs block, e.g. below:
 # NOTE  Do not store any kind of sensitive information inside of it
