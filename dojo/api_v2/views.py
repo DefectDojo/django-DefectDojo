@@ -567,6 +567,7 @@ class DojoMetaViewSet(mixins.ListModelMixin,
 class ProductViewSet(mixins.ListModelMixin,
                      mixins.RetrieveModelMixin,
                      mixins.CreateModelMixin,
+                     mixins.DestroyModelMixin,
                      mixins.UpdateModelMixin,
                      viewsets.GenericViewSet):
     serializer_class = serializers.ProductSerializer
@@ -726,6 +727,7 @@ class StubFindingsViewSet(mixins.ListModelMixin,
 class DevelopmentEnvironmentViewSet(mixins.ListModelMixin,
                                     mixins.RetrieveModelMixin,
                                     mixins.CreateModelMixin,
+                                    mixins.DestroyModelMixin,
                                     mixins.UpdateModelMixin,
                                     viewsets.GenericViewSet):
     serializer_class = serializers.DevelopmentEnvironmentSerializer
