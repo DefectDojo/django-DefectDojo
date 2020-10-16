@@ -587,7 +587,7 @@ class ProductViewSet(mixins.ListModelMixin,
 
     def get_queryset(self):
         if not self.request.user.is_staff:
-            return self.queryset.objects.filter(
+            return self.queryset.filter(
                 Q(authorized_users__in=[self.request.user]) |
                 Q(prod_type__authorized_users__in=[self.request.user])
             )
