@@ -640,7 +640,7 @@ def generate_report(request, obj):
                    'include_table_of_contents': include_table_of_contents,
                    'user': user,
                    'team_name': settings.TEAM_NAME,
-                   'title': 'Generate Report',
+                   'title': report_title,
                    'host': report_url_resolver(request),
                    'user_id': request.user.id}
 
@@ -671,7 +671,7 @@ def generate_report(request, obj):
                    'include_table_of_contents': include_table_of_contents,
                    'user': user,
                    'team_name': settings.TEAM_NAME,
-                   'title': 'Generate Report',
+                   'title': report_title,
                    'endpoints': endpoints,
                    'host': report_url_resolver(request),
                    'user_id': request.user.id}
@@ -703,7 +703,7 @@ def generate_report(request, obj):
                    'include_table_of_contents': include_table_of_contents,
                    'user': user,
                    'team_name': settings.TEAM_NAME,
-                   'title': 'Generate Report',
+                   'title': report_title,
                    'host': report_url_resolver(request),
                    'user_id': request.user.id,
                    'endpoints': endpoints}
@@ -729,7 +729,7 @@ def generate_report(request, obj):
                    'include_table_of_contents': include_table_of_contents,
                    'user': user,
                    'team_name': settings.TEAM_NAME,
-                   'title': 'Generate Report',
+                   'title': report_title,
                    'host': report_url_resolver(request),
                    'user_id': request.user.id}
 
@@ -760,7 +760,7 @@ def generate_report(request, obj):
                    'include_table_of_contents': include_table_of_contents,
                    'user': user,
                    'team_name': get_system_setting('team_name'),
-                   'title': 'Generate Report',
+                   'title': report_title,
                    'host': report_url_resolver(request),
                    'user_id': request.user.id}
     elif type(obj).__name__ == "QuerySet":
@@ -784,7 +784,7 @@ def generate_report(request, obj):
                    'include_table_of_contents': include_table_of_contents,
                    'user': user,
                    'team_name': settings.TEAM_NAME,
-                   'title': 'Generate Report',
+                   'title': report_title,
                    'host': report_url_resolver(request),
                    'user_id': request.user.id}
     else:
@@ -809,9 +809,10 @@ def generate_report(request, obj):
                            'include_table_of_contents': include_table_of_contents,
                            'user': user,
                            'team_name': settings.TEAM_NAME,
-                           'title': 'Generate Report',
+                           'title': report_title,
                            'user_id': request.user.id,
                            'host': report_url_resolver(request),
+                           'context': context,
                            })
 
         elif report_format == 'PDF':
@@ -862,9 +863,10 @@ def generate_report(request, obj):
                            'include_table_of_contents': include_table_of_contents,
                            'user': user,
                            'team_name': settings.TEAM_NAME,
-                           'title': 'Generate Report',
+                           'title': report_title,
                            'user_id': request.user.id,
                            'host': "",
+                           'context': context,
                            })
 
         else:
@@ -893,4 +895,5 @@ def generate_report(request, obj):
                    'findings': findings,
                    'paged_findings': paged_findings,
                    'report_form': report_form,
+                   'context': context,
                    })
