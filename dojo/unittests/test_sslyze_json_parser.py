@@ -1,5 +1,5 @@
 from django.test import TestCase
-from dojo.tools.sslyze.parser import SSLyzeJSONParser
+from dojo.tools.sslyze.parser_json import SSLyzeJSONParser
 from dojo.models import Test
 
 

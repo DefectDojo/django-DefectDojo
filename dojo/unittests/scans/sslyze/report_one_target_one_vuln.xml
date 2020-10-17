@@ -1,0 +1,653 @@
+<?xml version="1.0" encoding="utf-8"?>
+<document SSLyzeVersion="2.0.6" SSLyzeWeb="https://github.com/nabla-c0d3/sslyze" title="SSLyze Scan Results">
+  <results totalScanTime="5.49874472618103">
+    <target host="www.target.com" ip="0.0.0.0" port="443" tlsWrappedProtocol="https">
+      <certinfo title="Certificate Information">
+        <receivedCertificateChain containsAnchorCertificate="False" hasMustStapleExtension="False" includedSctsCount="0" isChainOrderValid="True" suppliedServerNameIndication="www.target.com">
+          <certificate hpkpSha256Pin="" sha1Fingerprint="">
+            <asPEM>-----BEGIN CERTIFICATE-----
+-----END CERTIFICATE-----
+</asPEM>
+            <subject>countryName=BE, stateOrProvinceName=target land, localityName=target city, organizationalUnitName=security team, organizationName=The Target, commonName=*.target.com</subject>
+            <issuer>countryName=BE, organizationName=GlobalSign nv-sa, commonName=GlobalSign Organization Validation CA - G2</issuer>
+            <serialNumber>8745201481615688855367879658975895085186106</serialNumber>
+            <notBefore>2014-08-04 12:37:21</notBefore>
+            <notAfter>2017-08-04 12:37:21</notAfter>
+            <signatureAlgorithm>sha1</signatureAlgorithm>
+            <publicKey algorithm="RSA" exponent="65537" size="2048"/>
+            <subjectAlternativeName>
+              <DNS>*.target.com</DNS>
+              <DNS>target.com</DNS>
+            </subjectAlternativeName>
+          </certificate>
+          <certificate hpkpSha256Pin="" sha1Fingerprint="">
+            <asPEM>-----BEGIN CERTIFICATE-----
+-----END CERTIFICATE-----
+</asPEM>
+            <subject>countryName=BE, organizationName=GlobalSign nv-sa, commonName=GlobalSign Organization Validation CA - G2</subject>
+            <issuer>countryName=BE, organizationName=GlobalSign nv-sa, organizationalUnitName=Root CA, commonName=GlobalSign Root CA</issuer>
+            <serialNumber>4831236848459815426840985</serialNumber>
+            <notBefore>2011-04-22 10:00:00</notBefore>
+            <notAfter>2022-04-22 10:00:00</notAfter>
+            <signatureAlgorithm>sha1</signatureAlgorithm>
+            <publicKey algorithm="RSA" exponent="65537" size="2048"/>
+          </certificate>
+        </receivedCertificateChain>
+        <certificateValidation>
+          <hostnameValidation certificateMatchesServerHostname="True" serverHostname="www.target.com"/>
+          <pathValidation trustStoreVersion="9.0.0_r9" usingTrustStore="Android" validationResult="certificate has expired"/>
+          <pathValidation trustStoreVersion="12, macOS 10.14, watchOS 5, and tvOS 12" usingTrustStore="iOS" validationResult="certificate has expired"/>
+          <pathValidation trustStoreVersion="jdk-11.0.2" usingTrustStore="Java" validationResult="certificate has expired"/>
+          <pathValidation trustStoreVersion="12, macOS 10.14, watchOS 5, and tvOS 12" usingTrustStore="macOS" validationResult="certificate has expired"/>
+          <pathValidation trustStoreVersion="2018-11-22" usingTrustStore="Mozilla" validationResult="certificate has expired"/>
+          <pathValidation trustStoreVersion="jdk-11.0.2" usingTrustStore="OPENJDK" validationResult="certificate has expired"/>
+          <pathValidation trustStoreVersion="2018-12-08" usingTrustStore="Windows" validationResult="certificate has expired"/>
+        </certificateValidation>
+        <ocspStapling isSupported="False"/>
+      </certinfo>
+      <compression title="Deflate Compression">
+        <compressionMethod isSupported="False" type="DEFLATE"/>
+      </compression>
+      <fallback title="Downgrade Attacks">
+        <tlsFallbackScsv isSupported="True"/>
+      </fallback>
+      <heartbleed title="OpenSSL Heartbleed">
+        <openSslHeartbleed isVulnerable="False"/>
+      </heartbleed>
+      <openssl_ccs title="OpenSSL CCS Injection">
+        <openSslCcsInjection isVulnerable="False"/>
+      </openssl_ccs>
+      <reneg title="Session Renegotiation">
+        <sessionRenegotiation canBeClientInitiated="False" isSecure="True"/>
+      </reneg>
+      <resum title="TLS 1.2 Session Resumption Support">
+        <sessionResumptionWithSessionIDs errors="0" failedAttempts="0" isSupported="True" successfulAttempts="5" totalAttempts="5"/>
+        <sessionResumptionWithTLSTickets isSupported="True"/>
+      </resum>
+      <robot title="ROBOT Attack">
+        <robotAttack resultEnum="NOT_VULNERABLE_NO_ORACLE"/>
+      </robot>
+      <sslv2 isProtocolSupported="False" title="SSLV2 Cipher Suites">
+        <preferredCipherSuite/>
+        <acceptedCipherSuites/>
+        <rejectedCipherSuites>
+          <cipherSuite anonymous="False" connectionStatus="TCP / Unexpected EOF" name="SSL_CK_RC4_128_WITH_MD5"/>
+          <cipherSuite anonymous="False" connectionStatus="TCP / Unexpected EOF" name="SSL_CK_RC4_128_EXPORT40_WITH_MD5"/>
+          <cipherSuite anonymous="False" connectionStatus="TCP / Unexpected EOF" name="SSL_CK_RC2_128_CBC_WITH_MD5"/>
+          <cipherSuite anonymous="False" connectionStatus="TCP / Unexpected EOF" name="SSL_CK_RC2_128_CBC_EXPORT40_WITH_MD5"/>
+          <cipherSuite anonymous="False" connectionStatus="TCP / Unexpected EOF" name="SSL_CK_IDEA_128_CBC_WITH_MD5"/>
+          <cipherSuite anonymous="False" connectionStatus="TCP / Unexpected EOF" name="SSL_CK_DES_64_CBC_WITH_MD5"/>
+          <cipherSuite anonymous="False" connectionStatus="TCP / Unexpected EOF" name="SSL_CK_DES_192_EDE3_CBC_WITH_MD5"/>
+        </rejectedCipherSuites>
+        <errors/>
+      </sslv2>
+      <sslv3 isProtocolSupported="False" title="SSLV3 Cipher Suites">
+        <preferredCipherSuite/>
+        <acceptedCipherSuites/>
+        <rejectedCipherSuites>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_RSA_WITH_SEED_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_RSA_WITH_RC4_128_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_RSA_WITH_RC4_128_MD5"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_RSA_WITH_NULL_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_RSA_WITH_NULL_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_RSA_WITH_NULL_MD5"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_RSA_WITH_IDEA_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_RSA_WITH_DES_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_RSA_WITH_CAMELLIA_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_RSA_WITH_CAMELLIA_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_RSA_WITH_AES_256_GCM_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_RSA_WITH_AES_256_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_RSA_WITH_AES_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_RSA_WITH_AES_128_GCM_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_RSA_WITH_AES_128_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_RSA_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_RSA_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_RSA_EXPORT_WITH_RC4_40_MD5"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_RSA_EXPORT_WITH_RC2_CBC_40_MD5"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_RSA_EXPORT_WITH_DES40_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDH_anon_WITH_RC4_128_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDH_anon_WITH_NULL_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDH_anon_WITH_AES_256_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDH_anon_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDH_anon_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDH_RSA_WITH_RC4_128_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDH_RSA_WITH_NULL_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDH_RSA_WITH_AES_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDH_RSA_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDH_ECDSA_WITH_RC4_128_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDH_ECDSA_WITH_NULL_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDHE_RSA_WITH_RC4_128_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDHE_RSA_WITH_NULL_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDHE_ECDSA_WITH_RC4_128_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDHE_ECDSA_WITH_NULL_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_anon_WITH_SEED_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_anon_WITH_RC4_128_MD5"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_anon_WITH_DES_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_anon_WITH_CAMELLIA_256_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_anon_WITH_CAMELLIA_128_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / No ciphers available" name="TLS_DH_anon_WITH_AES_256_GCM_SHA384"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / No ciphers available" name="TLS_DH_anon_WITH_AES_256_CBC_SHA256"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_anon_WITH_AES_256_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / No ciphers available" name="TLS_DH_anon_WITH_AES_128_GCM_SHA256"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / No ciphers available" name="TLS_DH_anon_WITH_AES_128_CBC_SHA256"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_anon_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_anon_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_anon_EXPORT_WITH_RC4_40_MD5"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_anon_EXPORT_WITH_DES40_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_RSA_WITH_SEED_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_RSA_WITH_DES_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_RSA_WITH_CAMELLIA_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_RSA_WITH_CAMELLIA_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DH_RSA_WITH_AES_256_GCM_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DH_RSA_WITH_AES_256_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_RSA_WITH_AES_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DH_RSA_WITH_AES_128_GCM_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DH_RSA_WITH_AES_128_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_RSA_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_DSS_WITH_SEED_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_DSS_WITH_DES_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_DSS_WITH_CAMELLIA_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_DSS_WITH_CAMELLIA_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DH_DSS_WITH_AES_256_GCM_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DH_DSS_WITH_AES_256_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_DSS_WITH_AES_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DH_DSS_WITH_AES_128_GCM_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DH_DSS_WITH_AES_128_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_DSS_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_RSA_WITH_SEED_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_RSA_WITH_DES_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DHE_RSA_WITH_AES_256_GCM_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DHE_RSA_WITH_AES_256_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_RSA_WITH_AES_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DHE_RSA_WITH_AES_128_GCM_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DHE_RSA_WITH_AES_128_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_RSA_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_DSS_WITH_SEED_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_DSS_WITH_DES_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_DSS_WITH_CAMELLIA_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_DSS_WITH_CAMELLIA_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DHE_DSS_WITH_AES_256_GCM_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DHE_DSS_WITH_AES_256_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_DSS_WITH_AES_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DHE_DSS_WITH_AES_128_GCM_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DHE_DSS_WITH_AES_128_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_DSS_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA"/>
+        </rejectedCipherSuites>
+        <errors/>
+      </sslv3>
+      <tlsv1 isProtocolSupported="False" title="TLSV1 Cipher Suites">
+        <preferredCipherSuite/>
+        <acceptedCipherSuites/>
+        <rejectedCipherSuites>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_RSA_WITH_SEED_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_RSA_WITH_RC4_128_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_RSA_WITH_RC4_128_MD5"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_RSA_WITH_NULL_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_RSA_WITH_NULL_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_RSA_WITH_NULL_MD5"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_RSA_WITH_IDEA_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_RSA_WITH_DES_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_RSA_WITH_CAMELLIA_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_RSA_WITH_CAMELLIA_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_RSA_WITH_AES_256_GCM_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_RSA_WITH_AES_256_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_RSA_WITH_AES_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_RSA_WITH_AES_128_GCM_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_RSA_WITH_AES_128_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_RSA_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_RSA_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_RSA_EXPORT_WITH_RC4_40_MD5"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_RSA_EXPORT_WITH_RC2_CBC_40_MD5"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_RSA_EXPORT_WITH_DES40_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDH_anon_WITH_RC4_128_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDH_anon_WITH_NULL_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDH_anon_WITH_AES_256_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDH_anon_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDH_anon_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDH_RSA_WITH_RC4_128_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDH_RSA_WITH_NULL_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDH_RSA_WITH_AES_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDH_RSA_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDH_ECDSA_WITH_RC4_128_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDH_ECDSA_WITH_NULL_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDHE_RSA_WITH_RC4_128_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDHE_RSA_WITH_NULL_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDHE_ECDSA_WITH_RC4_128_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDHE_ECDSA_WITH_NULL_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_anon_WITH_SEED_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_anon_WITH_RC4_128_MD5"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_anon_WITH_DES_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_anon_WITH_CAMELLIA_256_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_anon_WITH_CAMELLIA_128_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / No ciphers available" name="TLS_DH_anon_WITH_AES_256_GCM_SHA384"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / No ciphers available" name="TLS_DH_anon_WITH_AES_256_CBC_SHA256"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_anon_WITH_AES_256_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / No ciphers available" name="TLS_DH_anon_WITH_AES_128_GCM_SHA256"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / No ciphers available" name="TLS_DH_anon_WITH_AES_128_CBC_SHA256"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_anon_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_anon_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_anon_EXPORT_WITH_RC4_40_MD5"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_anon_EXPORT_WITH_DES40_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_RSA_WITH_SEED_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_RSA_WITH_DES_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_RSA_WITH_CAMELLIA_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_RSA_WITH_CAMELLIA_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DH_RSA_WITH_AES_256_GCM_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DH_RSA_WITH_AES_256_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_RSA_WITH_AES_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DH_RSA_WITH_AES_128_GCM_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DH_RSA_WITH_AES_128_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_RSA_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_DSS_WITH_SEED_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_DSS_WITH_DES_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_DSS_WITH_CAMELLIA_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_DSS_WITH_CAMELLIA_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DH_DSS_WITH_AES_256_GCM_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DH_DSS_WITH_AES_256_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_DSS_WITH_AES_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DH_DSS_WITH_AES_128_GCM_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DH_DSS_WITH_AES_128_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_DSS_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DHE_RSA_WITH_SEED_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DHE_RSA_WITH_DES_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DHE_RSA_WITH_AES_256_GCM_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DHE_RSA_WITH_AES_256_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DHE_RSA_WITH_AES_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DHE_RSA_WITH_AES_128_GCM_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DHE_RSA_WITH_AES_128_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DHE_RSA_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DHE_DSS_WITH_SEED_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DHE_DSS_WITH_DES_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DHE_DSS_WITH_CAMELLIA_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DHE_DSS_WITH_CAMELLIA_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DHE_DSS_WITH_AES_256_GCM_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DHE_DSS_WITH_AES_256_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DHE_DSS_WITH_AES_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DHE_DSS_WITH_AES_128_GCM_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DHE_DSS_WITH_AES_128_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DHE_DSS_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA"/>
+        </rejectedCipherSuites>
+        <errors/>
+      </tlsv1>
+      <tlsv1_1 isProtocolSupported="False" title="TLSV1_1 Cipher Suites">
+        <preferredCipherSuite/>
+        <acceptedCipherSuites/>
+        <rejectedCipherSuites>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_RSA_WITH_SEED_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_RSA_WITH_RC4_128_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_RSA_WITH_RC4_128_MD5"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_RSA_WITH_NULL_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_RSA_WITH_NULL_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_RSA_WITH_NULL_MD5"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_RSA_WITH_IDEA_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_RSA_WITH_DES_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_RSA_WITH_CAMELLIA_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_RSA_WITH_CAMELLIA_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_RSA_WITH_AES_256_GCM_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_RSA_WITH_AES_256_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_RSA_WITH_AES_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_RSA_WITH_AES_128_GCM_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_RSA_WITH_AES_128_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_RSA_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_RSA_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_RSA_EXPORT_WITH_RC4_40_MD5"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_RSA_EXPORT_WITH_RC2_CBC_40_MD5"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_RSA_EXPORT_WITH_DES40_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDH_anon_WITH_RC4_128_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDH_anon_WITH_NULL_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDH_anon_WITH_AES_256_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDH_anon_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDH_anon_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDH_RSA_WITH_RC4_128_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDH_RSA_WITH_NULL_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDH_RSA_WITH_AES_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDH_RSA_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDH_ECDSA_WITH_RC4_128_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDH_ECDSA_WITH_NULL_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDHE_RSA_WITH_RC4_128_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDHE_RSA_WITH_NULL_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDHE_ECDSA_WITH_RC4_128_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDHE_ECDSA_WITH_NULL_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_anon_WITH_SEED_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_anon_WITH_RC4_128_MD5"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_anon_WITH_DES_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_anon_WITH_CAMELLIA_256_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_anon_WITH_CAMELLIA_128_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / No ciphers available" name="TLS_DH_anon_WITH_AES_256_GCM_SHA384"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / No ciphers available" name="TLS_DH_anon_WITH_AES_256_CBC_SHA256"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_anon_WITH_AES_256_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / No ciphers available" name="TLS_DH_anon_WITH_AES_128_GCM_SHA256"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / No ciphers available" name="TLS_DH_anon_WITH_AES_128_CBC_SHA256"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_anon_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_anon_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_anon_EXPORT_WITH_RC4_40_MD5"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_anon_EXPORT_WITH_DES40_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_RSA_WITH_SEED_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_RSA_WITH_DES_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_RSA_WITH_CAMELLIA_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_RSA_WITH_CAMELLIA_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DH_RSA_WITH_AES_256_GCM_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DH_RSA_WITH_AES_256_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_RSA_WITH_AES_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DH_RSA_WITH_AES_128_GCM_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DH_RSA_WITH_AES_128_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_RSA_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_DSS_WITH_SEED_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_DSS_WITH_DES_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_DSS_WITH_CAMELLIA_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_DSS_WITH_CAMELLIA_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DH_DSS_WITH_AES_256_GCM_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DH_DSS_WITH_AES_256_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_DSS_WITH_AES_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DH_DSS_WITH_AES_128_GCM_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DH_DSS_WITH_AES_128_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_DSS_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DHE_RSA_WITH_SEED_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DHE_RSA_WITH_DES_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DHE_RSA_WITH_AES_256_GCM_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DHE_RSA_WITH_AES_256_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DHE_RSA_WITH_AES_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DHE_RSA_WITH_AES_128_GCM_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DHE_RSA_WITH_AES_128_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DHE_RSA_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DHE_DSS_WITH_SEED_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DHE_DSS_WITH_DES_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DHE_DSS_WITH_CAMELLIA_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DHE_DSS_WITH_CAMELLIA_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DHE_DSS_WITH_AES_256_GCM_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DHE_DSS_WITH_AES_256_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DHE_DSS_WITH_AES_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DHE_DSS_WITH_AES_128_GCM_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / No ciphers available" name="TLS_DHE_DSS_WITH_AES_128_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DHE_DSS_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: protocol version " name="TLS_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA"/>
+        </rejectedCipherSuites>
+        <errors/>
+      </tlsv1_1>
+      <tlsv1_2 isProtocolSupported="True" title="TLSV1_2 Cipher Suites">
+        <preferredCipherSuite>
+          <cipherSuite anonymous="False" connectionStatus="HTTP 200 OK" keySize="256" name="TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"/>
+        </preferredCipherSuite>
+        <acceptedCipherSuites>
+          <cipherSuite anonymous="False" connectionStatus="HTTP 200 OK" keySize="256" name="TLS_RSA_WITH_AES_256_GCM_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="HTTP 200 OK" keySize="256" name="TLS_RSA_WITH_AES_256_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="HTTP 200 OK" keySize="256" name="TLS_RSA_WITH_AES_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="HTTP 200 OK" keySize="256" name="TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="HTTP 200 OK" keySize="256" name="TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="HTTP 200 OK" keySize="256" name="TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="HTTP 200 OK" keySize="256" name="TLS_DHE_RSA_WITH_AES_256_GCM_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="HTTP 200 OK" keySize="256" name="TLS_DHE_RSA_WITH_AES_256_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="HTTP 200 OK" keySize="256" name="TLS_DHE_RSA_WITH_AES_256_CBC_SHA"/>
+        </acceptedCipherSuites>
+        <rejectedCipherSuites>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_RSA_WITH_SEED_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_RSA_WITH_RC4_128_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_RSA_WITH_RC4_128_MD5"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_RSA_WITH_NULL_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_RSA_WITH_NULL_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_RSA_WITH_NULL_MD5"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_RSA_WITH_IDEA_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_RSA_WITH_DES_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_RSA_WITH_CAMELLIA_256_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_RSA_WITH_CAMELLIA_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_RSA_WITH_CAMELLIA_128_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_RSA_WITH_CAMELLIA_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_RSA_WITH_AES_128_GCM_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_RSA_WITH_AES_128_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_RSA_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_RSA_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_RSA_EXPORT_WITH_RC4_40_MD5"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_RSA_EXPORT_WITH_RC2_CBC_40_MD5"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_RSA_EXPORT_WITH_DES40_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDH_anon_WITH_RC4_128_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDH_anon_WITH_NULL_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDH_anon_WITH_AES_256_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDH_anon_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDH_anon_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDH_RSA_WITH_RC4_128_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDH_RSA_WITH_NULL_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDH_RSA_WITH_AES_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDH_RSA_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDH_ECDSA_WITH_RC4_128_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDH_ECDSA_WITH_NULL_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDHE_RSA_WITH_RC4_128_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDHE_RSA_WITH_NULL_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDHE_RSA_WITH_CAMELLIA_256_CBC_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDHE_RSA_WITH_CAMELLIA_128_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDHE_ECDSA_WITH_RC4_128_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDHE_ECDSA_WITH_NULL_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDHE_ECDSA_WITH_CAMELLIA_256_CBC_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDHE_ECDSA_WITH_CAMELLIA_128_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_anon_WITH_SEED_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_anon_WITH_RC4_128_MD5"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_anon_WITH_DES_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / No ciphers available" name="TLS_DH_anon_WITH_CAMELLIA_256_CBC_SHA256"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_anon_WITH_CAMELLIA_256_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / No ciphers available" name="TLS_DH_anon_WITH_CAMELLIA_128_CBC_SHA256"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_anon_WITH_CAMELLIA_128_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_anon_WITH_AES_256_GCM_SHA384"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_anon_WITH_AES_256_CBC_SHA256"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_anon_WITH_AES_256_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_anon_WITH_AES_128_GCM_SHA256"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_anon_WITH_AES_128_CBC_SHA256"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_anon_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_anon_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_anon_EXPORT_WITH_RC4_40_MD5"/>
+          <cipherSuite anonymous="True" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_anon_EXPORT_WITH_DES40_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_RSA_WITH_SEED_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_RSA_WITH_DES_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_RSA_WITH_CAMELLIA_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_RSA_WITH_CAMELLIA_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_RSA_WITH_AES_256_GCM_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_RSA_WITH_AES_256_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_RSA_WITH_AES_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_RSA_WITH_AES_128_GCM_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_RSA_WITH_AES_128_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_RSA_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_DSS_WITH_SEED_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_DSS_WITH_DES_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_DSS_WITH_CAMELLIA_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_DSS_WITH_CAMELLIA_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_DSS_WITH_AES_256_GCM_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_DSS_WITH_AES_256_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_DSS_WITH_AES_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_DSS_WITH_AES_128_GCM_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_DSS_WITH_AES_128_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_DSS_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_RSA_WITH_SEED_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_RSA_WITH_DES_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_RSA_WITH_AES_256_CCM"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_RSA_WITH_AES_128_GCM_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_RSA_WITH_AES_128_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_RSA_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_DSS_WITH_SEED_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_DSS_WITH_DES_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_DSS_WITH_CAMELLIA_256_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_DSS_WITH_CAMELLIA_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_DSS_WITH_CAMELLIA_128_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_DSS_WITH_CAMELLIA_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_DSS_WITH_AES_256_GCM_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_DSS_WITH_AES_256_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_DSS_WITH_AES_256_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_DSS_WITH_AES_128_GCM_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_DSS_WITH_AES_128_CBC_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_DSS_WITH_AES_128_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="RSA_WITH_AES_256_CCM_8"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="RSA_WITH_AES_256_CCM"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="RSA_WITH_AES_128_CCM_8"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="RSA_WITH_AES_128_CCM"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="ECDHE_ECDSA_WITH_AES_256_CCM_8"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="ECDHE_ECDSA_WITH_AES_256_CCM"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="ECDHE_ECDSA_WITH_AES_128_CCM_8"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="ECDHE_ECDSA_WITH_AES_128_CCM"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="ECDHE-ECDSA-ARIA256-GCM-SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="ECDHE-ECDSA-ARIA128-GCM-SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="ECDHE-ARIA256-GCM-SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="ECDHE-ARIA128-GCM-SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="DHE_RSA_WITH_AES_256_CCM_8"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="DHE_RSA_WITH_AES_128_CCM_8"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="DHE_RSA_WITH_AES_128_CCM"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="DHE-RSA-ARIA256-GCM-SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="DHE-RSA-ARIA128-GCM-SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="DHE-DSS-ARIA256-GCM-SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="DHE-DSS-ARIA128-GCM-SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="ARIA256-GCM-SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="ARIA128-GCM-SHA256"/>
+        </rejectedCipherSuites>
+        <errors/>
+      </tlsv1_2>
+      <tlsv1_3 isProtocolSupported="False" title="TLSV1_3 Cipher Suites">
+        <preferredCipherSuite/>
+        <acceptedCipherSuites/>
+        <rejectedCipherSuites>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_CHACHA20_POLY1305_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_AES_256_GCM_SHA384"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_AES_128_GCM_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_AES_128_CCM_SHA256"/>
+          <cipherSuite anonymous="False" connectionStatus="TLS / Alert: handshake failure" name="TLS_AES_128_CCM_8_SHA256"/>
+        </rejectedCipherSuites>
+        <errors/>
+      </tlsv1_3>
+    </target>
+  </results>
+  <invalidTargets/>
+</document>
