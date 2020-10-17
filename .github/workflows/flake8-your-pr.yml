@@ -15,8 +15,7 @@ jobs:
         # maybe we could use the 'before' and 'after' shas that are in the github event json
         with:
           fetch-depth: 0
-          ref: ${{github.event.pull_request.head.ref}}
-          repository: ${{github.event.pull_request.head.repo.full_name}}
+          ref: refs/pull/${{ github.event.pull_request.number }}/merge
 
       # - uses: tayfun/flake8-your-pr@master
       - uses: valentijnscholten/flake8-your-pr@master
