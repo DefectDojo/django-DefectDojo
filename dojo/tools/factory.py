@@ -241,7 +241,7 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = SslscanXMLParser(file, test)
     elif scan_type == 'JFrog Xray Scan':
         parser = XrayJSONParser(file, test)
-    elif scan_type == 'SSLyze 2 Scan (XML)':
+    elif scan_type == 'Sslyze Scan':
         parser = SSLyzeXMLParser(file, test)
     elif scan_type == 'SSLyze 3 Scan (JSON)':
         parser = SSLyzeJSONParser(file, test)

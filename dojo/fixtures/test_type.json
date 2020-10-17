@@ -463,7 +463,7 @@
     },
     {
         "fields": {
-            "name": "SSLyze 2 Scan (XML)"
+            "name": "Sslyze Scan"
         },
         "model": "dojo.test_type",
         "pk": 159
