@@ -195,6 +195,7 @@ def view_product_components(request, pid):
                     'result': result,
     })
 
+
 def identify_view(request):
     get_data = request.GET
     view = get_data.get('type', None)
