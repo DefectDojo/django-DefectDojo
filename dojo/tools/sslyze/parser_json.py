@@ -62,7 +62,8 @@ TLS13_RECOMMENDED_CIPHERS = [
     'TLS_AES_128_CCM_SHA256'
 ]
 
-REFERENCES = 'TLS recommendations of German BSI: https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/Publications/TechGuidelines/TG02102/BSI-TR-02102-2.pdf?__blob=publicationFile&v=10'
+BSI_LINK = 'https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/Publications/TechGuidelines/TG02102/BSI-TR-02102-2.pdf?__blob=publicationFile&v=10'
+REFERENCES = 'TLS recommendations of German BSI: [' + BSI_LINK + '](' + BSI_LINK + ')'
 
 
 class SSLyzeJSONParser(object):
