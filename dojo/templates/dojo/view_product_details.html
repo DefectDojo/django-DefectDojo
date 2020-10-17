@@ -303,6 +303,7 @@
           <tr>
             <td><strong>Authorized Users</strong></td>
             <td>
+
               {% if prod.authorized_users.all %}
                 {% if prod.authorized_users.all.count > 1 %}
                   {% for au in prod.authorized_users.all %}
@@ -310,6 +311,14 @@
                   {% endfor %}
                 {% else %}
                   {{ prod.authorized_users.all.0 }}
+                {% endif %}
+              {% elif prod.prod_type.authorized_users.all %}
+                {% if prod.prod_type.authorized_users.all.count > 1 %}
+                  {% for au in prod.prod_type.authorized_users.all %}
+                     {{au}}{%if not forloop.last%},{%endif%}
+                  {% endfor %}
+                {% else %}
+                  {{ prod.prod_type.authorized_users.all.0 }}
                 {% endif %}
               {% else %}
                 {{ prod.authorized_users.all|notspecified }}

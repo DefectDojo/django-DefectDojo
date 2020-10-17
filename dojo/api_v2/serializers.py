@@ -347,6 +347,9 @@ class ProductTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product_Type
         fields = '__all__'
+        extra_kwargs = {
+            'authorized_users': {'queryset': User.objects.exclude(is_staff=True).exclude(is_active=False)}
+        }
 
 
 class EngagementSerializer(TaggitSerializer, serializers.ModelSerializer):
