@@ -252,6 +252,16 @@ def count_findings_test_duplicate(test):
     duplicate_findings = Finding.objects.filter(test=test, duplicate=True).count()
     return duplicate_findings
 
+@register.filter(name='count_findings_test_mitigated')
+def count_findings_test_mitigated(test):
+    mitigated_findings = Finding.objects.filter(test=test, is_Mitigated=True).count()
+    return mitigated_findings
+
+@register.filter(name='count_findings_test_active_verified')
+def count_findings_test_active_verified(test):
+    active_verified_findings = Finding.objects.filter(test=test, active=True, verified=True).count()
+    return active_verified_findings
+
 
 @register.filter(name='paginator')
 def paginator(page):
