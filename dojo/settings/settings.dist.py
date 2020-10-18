@@ -849,6 +849,13 @@ LOGGING = {
             'propagate': False,
         },
         'MARKDOWN': {
+            # The markdown library is too verbose in it's logging, reducing the verbosity in our logs.
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'titlecase': {
+            # The markdown library is too verbose in it's logging, reducing the verbosity in our logs.
             'handlers': ['console'],
             'level': 'WARNING',
             'propagate': False,
