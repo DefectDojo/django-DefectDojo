@@ -656,6 +656,13 @@
         },
         "model": "dojo.test_type",
         "pk": 185
+    },
+    {
+        "fields": {
+            "name": "SSLyze 3 Scan (JSON)"
+        },
+        "model": "dojo.test_type",
+        "pk": 186
     }
 
 ]
