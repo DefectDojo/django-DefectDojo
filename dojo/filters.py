@@ -16,7 +16,7 @@ from pytz import timezone
 from django.db.models import Q
 from dojo.models import Dojo_User, Product_Type, Finding, Product, Test_Type, \
     Endpoint, Development_Environment, Finding_Template, Report, Note_Type, \
-    Engagement_Survey, Question, TextQuestion, ChoiceQuestion, Endpoint_Status
+    Engagement_Survey, Question, TextQuestion, ChoiceQuestion, Endpoint_Status, Engagement
 from dojo.utils import get_system_setting
 from django.contrib.contenttypes.models import ContentType
 
@@ -1019,6 +1019,7 @@ class MetricsFindingFilter(FilterSet):
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.all().order_by('name'),
         label="Product Type")
+    test__engagement__version = CharFilter(lookup_expr='icontains', label="Engagement Version")
     severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     status = FindingStatusFilter(label='Status')
 
@@ -1028,7 +1029,6 @@ class MetricsFindingFilter(FilterSet):
                 args[0]._mutable = True
                 args[0]['date'] = 8
                 args[0]._mutable = False
-        # raise Exception()
         super(MetricsFindingFilter, self).__init__(*args, **kwargs)
         self.form.fields['severity'].choices = self.queryset.order_by(
             'numerical_severity'
@@ -1064,6 +1064,7 @@ class MetricsEndpointFilter(FilterSet):
     finding__test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.all().order_by('name'),
         label="Product Type")
+    finding__test__engagement__version = CharFilter(lookup_expr='icontains', label="Engagement Version")
     finding__severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
 
     def __init__(self, *args, **kwargs):
@@ -1072,8 +1073,78 @@ class MetricsEndpointFilter(FilterSet):
                 args[0]._mutable = True
                 args[0]['date'] = 8
                 args[0]._mutable = False
-        # raise Exception()
         super(MetricsEndpointFilter, self).__init__(*args, **kwargs)
+        self.form.fields['finding__severity'].choices = self.queryset.order_by(
+            'finding__numerical_severity'
+        ).values_list('finding__severity', 'finding__severity').distinct()
+
+    class Meta:
+        model = Endpoint_Status
+        exclude = ['last_modified']
+
+
+class ProductMetricsFindingFilter(FilterSet):
+    start_date = DateFilter(field_name='date', label='Start Date', lookup_expr=('gt'))
+    end_date = DateFilter(field_name='date', label='End Date', lookup_expr=('lt'))
+    date = MetricsDateRangeFilter()
+    test__engagement = ModelMultipleChoiceFilter(
+        queryset=Engagement.objects.all().order_by('name'),
+        label="Engagement")
+    test__engagement__version = CharFilter(lookup_expr='icontains', label="Engagement Version")
+    severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
+    status = FindingStatusFilter(label='Status')
+
+    def __init__(self, *args, **kwargs):
+        if args[0]:
+            if args[0].get('start_date', '') != '' or args[0].get('end_date', '') != '':
+                args[0]._mutable = True
+                args[0]['date'] = 8
+                args[0]._mutable = False
+        super(ProductMetricsFindingFilter, self).__init__(*args, **kwargs)
+        self.form.fields['severity'].choices = self.queryset.order_by(
+            'numerical_severity'
+        ).values_list('severity', 'severity').distinct()
+
+    class Meta:
+        model = Finding
+        exclude = ['url',
+                   'description',
+                   'mitigation',
+                   'unsaved_endpoints',
+                   'unsaved_request',
+                   'unsaved_response',
+                   'unsaved_tags',
+                   'references',
+                   'review_requested_by',
+                   'reviewers',
+                   'defect_review_requested_by',
+                   'thread_id',
+                   'notes',
+                   'last_reviewed_by',
+                   'images',
+                   'endpoints',
+                   'is_template',
+                   'jira_creation',
+                   'jira_change']
+
+
+class ProductMetricsEndpointFilter(FilterSet):
+    start_date = DateFilter(field_name='date', label='Start Date', lookup_expr=('gt'))
+    end_date = DateFilter(field_name='date', label='End Date', lookup_expr=('lt'))
+    date = MetricsDateRangeFilter()
+    finding__test__engagement = ModelMultipleChoiceFilter(
+        queryset=Engagement.objects.all().order_by('name'),
+        label="Engagement")
+    finding__test__engagement__version = CharFilter(lookup_expr='icontains', label="Engagement Version")
+    finding__severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
+
+    def __init__(self, *args, **kwargs):
+        if args[0]:
+            if args[0].get('start_date', '') != '' or args[0].get('end_date', '') != '':
+                args[0]._mutable = True
+                args[0]['date'] = 8
+                args[0]._mutable = False
+        super(ProductMetricsEndpointFilter, self).__init__(*args, **kwargs)
         self.form.fields['finding__severity'].choices = self.queryset.order_by(
             'finding__numerical_severity'
         ).values_list('finding__severity', 'finding__severity').distinct()

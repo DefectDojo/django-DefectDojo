@@ -95,11 +95,18 @@ def severity_count(queryset, method, expression):
 def identify_view(request):
     get_data = request.GET
     view = get_data.get('type', None)
-    if not view:
+    if view:
+        return view
+    else:
         if get_data.get('finding__severity', None):
             return 'Endpoint'
-        return 'Finding'
-    return view
+        elif get_data.get('false_positive', None):
+            return 'Endpoint'
+    referer = request.META.get('HTTP_REFERER', None)
+    if not referer:
+        if referer.find('type=Endpoint') > -1:
+            return 'Endpoint'
+    return 'Finding'
 
 
 def finding_querys(prod_type, request):
@@ -140,7 +147,7 @@ def finding_querys(prod_type, request):
     findings_qs = queryset_check(findings)
     active_findings_qs = queryset_check(active_findings)
 
-    if not findings_qs:
+    if not findings_qs and not findings_query:
         findings = findings_query
         active_findings = active_findings_query
         findings_qs = findings if isinstance(findings, QuerySet) else findings.qs
@@ -150,14 +157,18 @@ def finding_querys(prod_type, request):
                                      'All objects have been filtered away. Displaying all objects',
                                      extra_tags='alert-danger')
 
-    start_date = findings_qs.earliest('date').date
-    start_date = datetime(start_date.year,
-                        start_date.month, start_date.day,
-                        tzinfo=timezone.get_current_timezone())
-    end_date = findings_qs.latest('date').date
-    end_date = datetime(end_date.year,
-                        end_date.month, end_date.day,
-                        tzinfo=timezone.get_current_timezone())
+    try:
+        start_date = findings_qs.earliest('date').date
+        start_date = datetime(start_date.year,
+                            start_date.month, start_date.day,
+                            tzinfo=timezone.get_current_timezone())
+        end_date = findings_qs.latest('date').date
+        end_date = datetime(end_date.year,
+                            end_date.month, end_date.day,
+                            tzinfo=timezone.get_current_timezone())
+    except:
+        start_date = timezone.now()
+        end_date = timezone.now()
 
     if len(prod_type) > 0:
         findings_closed = Finding.objects.filter(mitigated__date__range=[start_date, end_date],
@@ -253,14 +264,18 @@ def endpoint_querys(prod_type, request):
                                      'All objects have been filtered away. Displaying all objects',
                                      extra_tags='alert-danger')
 
-    start_date = endpoints_qs.earliest('date').date
-    start_date = datetime(start_date.year,
-                        start_date.month, start_date.day,
-                        tzinfo=timezone.get_current_timezone())
-    end_date = endpoints_qs.latest('date').date
-    end_date = datetime(end_date.year,
-                        end_date.month, end_date.day,
-                        tzinfo=timezone.get_current_timezone())
+    try:
+        start_date = endpoints_qs.earliest('date').date
+        start_date = datetime(start_date.year,
+                            start_date.month, start_date.day,
+                            tzinfo=timezone.get_current_timezone())
+        end_date = endpoints_qs.latest('date').date
+        end_date = datetime(end_date.year,
+                            end_date.month, end_date.day,
+                            tzinfo=timezone.get_current_timezone())
+    except:
+        start_date = timezone.now()
+        end_date = timezone.now()
 
     if len(prod_type) > 0:
         endpoints_closed = Endpoint_Status.objects.filter(mitigated_time__range=[start_date, end_date],
