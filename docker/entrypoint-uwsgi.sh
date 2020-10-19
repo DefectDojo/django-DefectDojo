@@ -9,4 +9,5 @@ exec uwsgi \
   --processes ${DD_UWSGI_NUM_OF_PROCESSES:-2} \
   --threads ${DD_UWSGI_NUM_OF_THREADS:-2} \
   --wsgi dojo.wsgi:application \
-  --buffer-size="${DD_UWSGI_BUFFER_SIZE:-4096}"
+  --buffer-size="${DD_UWSGI_BUFFER_SIZE:-4096}" \
+  --http 0.0.0.0:8081 --http-to ${DD_UWSGI_ENDPOINT}
