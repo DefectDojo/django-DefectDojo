@@ -136,7 +136,8 @@ env = environ.Env(
 
     # maximum number of result in search as search can be an expensive operation
     DD_SEARCH_MAX_RESULTS=(int, 100),
-    DD_MAX_AUTOCOMPLETE_WORDS=(int, 20000)
+    DD_MAX_AUTOCOMPLETE_WORDS=(int, 20000),
+    DD_JIRA_SSL_VERIFY=(bool, True)
 )
 
 
@@ -796,6 +797,8 @@ JIRA_ISSUE_TYPE_CHOICES_CONFIG = (
     ('Bug', 'Bug'),
     ('Security', 'Security')
 )
+
+JIRA_SSL_VERIFY = env('DD_JIRA_SSL_VERIFY')
 
 
 # ------------------------------------------------------------------------------
