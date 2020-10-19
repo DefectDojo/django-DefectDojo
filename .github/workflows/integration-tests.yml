@@ -14,7 +14,7 @@ jobs:
         # we checkout merge_commit here as this contains all new code from dev also. we don't need to compare against base_commit
         with:
           fetch-depth: 0
-          ref: ${{github.event.pull_request.merge_commit}}
+          ref: refs/pull/${{ github.event.pull_request.number }}/merge
           # repository: ${{github.event.pull_request.head.repo.full_name}}
       
       - name: Set integration-test mode
