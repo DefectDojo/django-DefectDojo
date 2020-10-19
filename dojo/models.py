@@ -177,7 +177,7 @@ class System_Settings(models.Model):
                                       'places, whereas if turned off '
                                       'Critical, High, Medium, etc will '
                                       'be displayed.')
-    false_positive_history = models.BooleanField(default=False, help_text="DefectDojo will automatically mark the finding as a false positive if the finding has been previously marked as a false positive.")
+    false_positive_history = models.BooleanField(default=False, help_text="DefectDojo will automatically mark the finding as a false positive if the finding has been previously marked as a false positive. Not needed when using deduplication, advised to not combine these two.")
 
     url_prefix = models.CharField(max_length=300, default='', blank=True, help_text="URL prefix if DefectDojo is installed in it's own virtual subdirectory.")
     team_name = models.CharField(max_length=100, default='', blank=True)
@@ -1731,6 +1731,8 @@ class Finding(models.Model):
             # models.Index(fields=['file_path']), # can't add index because the field has max length 4000.
             models.Index(fields=['line']),
             models.Index(fields=['component_name']),
+            models.Index(fields=['duplicate']),
+            models.Index(fields=['is_Mitigated']),
         ]
 
     def get_absolute_url(self):
