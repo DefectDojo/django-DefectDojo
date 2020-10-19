@@ -379,6 +379,7 @@ def close_finding(request, fid):
                 now = timezone.now()
                 finding.mitigated = now
                 finding.mitigated_by = request.user
+                finding.is_Mitigated = True
                 finding.last_reviewed = finding.mitigated
                 finding.last_reviewed_by = request.user
                 finding.endpoints.clear()
@@ -445,6 +446,7 @@ def defect_finding_review(request, fid):
                 finding.active = False
                 finding.mitigated = now
                 finding.mitigated_by = request.user
+                finding.is_Mitigated = True
                 finding.last_reviewed = finding.mitigated
                 finding.last_reviewed_by = request.user
                 finding.endpoints.clear()
@@ -503,6 +505,7 @@ def reopen_finding(request, fid):
     finding.active = True
     finding.mitigated = None
     finding.mitigated_by = request.user
+    finding.is_Mitigated = False
     finding.last_reviewed = finding.mitigated
     finding.last_reviewed_by = request.user
     try:
@@ -656,10 +659,12 @@ def edit_finding(request, fid):
             if new_finding.false_p or new_finding.active is False:
                 new_finding.mitigated = timezone.now()
                 new_finding.mitigated_by = request.user
+                new_finding.is_Mitigated = True
             if new_finding.active is True:
                 new_finding.false_p = False
                 new_finding.mitigated = None
                 new_finding.mitigated_by = None
+                new_finding.is_Mitigated = False
             if not new_finding.duplicate:
                 logger.debug('resetting duplicate status for %i', new_finding.id)
                 new_finding.duplicate = False
@@ -869,6 +874,7 @@ def request_finding_review(request, fid):
             finding.notes.add(new_note)
             finding.active = False
             finding.verified = False
+            finding.is_Mitigated = False
             finding.under_review = True
             finding.review_requested_by = user
             finding.last_reviewed = now

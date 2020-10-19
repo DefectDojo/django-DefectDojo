@@ -70,6 +70,7 @@ def webhook(request):
                             now = timezone.now()
                             finding.active = False
                             finding.mitigated = now
+                            finding.is_Mitigated = True
                             finding.endpoints.clear()
                             finding.false_p = False
                             finding.remove_from_any_risk_acceptance()

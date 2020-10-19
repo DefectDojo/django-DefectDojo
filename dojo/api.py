@@ -1802,6 +1802,7 @@ class ReImportScanResource(MultipartResource, Resource):
                 finding = Finding.objects.get(id=finding_id)
                 finding.mitigated = datetime.combine(scan_date, timezone.now().time())
                 finding.mitigated_by = bundle.request.user
+                finding.is_Mitigated = True
                 finding.active = False
                 finding.save()
                 note = Notes(entry="Mitigated by %s re-upload." % scan_type,

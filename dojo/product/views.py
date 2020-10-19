@@ -195,6 +195,7 @@ def view_product_components(request, pid):
                     'result': result,
     })
 
+
 def identify_view(request):
     get_data = request.GET
     view = get_data.get('type', None)
@@ -1029,6 +1030,7 @@ def ad_hoc_finding(request, pid):
             if new_finding.false_p or new_finding.active is False:
                 new_finding.mitigated = timezone.now()
                 new_finding.mitigated_by = request.user
+                new_finding.is_Mitigated = True
             create_template = new_finding.is_template
             # always false now since this will be deprecated soon in favor of new Finding_Template model
             new_finding.is_template = False
