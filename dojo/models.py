@@ -2270,7 +2270,7 @@ class Finding(models.Model):
         if self.file_path is None:
             return None
         if self.test.engagement.source_code_management_uri is None:
-            return file_path
+            return self.file_path
         return create_link(self.test.engagement.source_code_management_uri + '/' + self.file_path, self.file_path)
 
     def get_references_with_links(self):
