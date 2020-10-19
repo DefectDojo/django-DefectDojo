@@ -60,6 +60,11 @@ class TestFindingModel(TestCase):
         finding.references = 'URL1: https://www.example.com URL2: https://info.example.com'
         self.assertEqual('URL1: <a href=\"https://www.example.com\" target=\"_blank\" title=\"https://www.example.com\">https://www.example.com</a> URL2: <a href=\"https://info.example.com\" target=\"_blank\" title=\"https://info.example.com\">https://info.example.com</a>', finding.get_references_with_links())
 
+    def test_get_references_with_links_linebreak(self):
+        finding = Finding()
+        finding.references = 'https://www.example.com\nhttps://info.example.com'
+        self.assertEqual('<a href=\"https://www.example.com\" target=\"_blank\" title=\"https://www.example.com\">https://www.example.com</a>\n<a href=\"https://info.example.com\" target=\"_blank\" title=\"https://info.example.com\">https://info.example.com</a>', finding.get_references_with_links())
+
     def test_get_references_with_links_markdown(self):
         finding = Finding()
         finding.references = 'URL: [https://www.example.com](https://www.example.com)'
