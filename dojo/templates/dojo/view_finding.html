@@ -365,7 +365,7 @@
                 <tr>
                     <td>
                         <span>
-                           {{ finding.sast_source_file_path }}
+                            {{ finding.get_file_path_with_link|safe }}
                         </span>
                     </td>
                     <td>
@@ -391,7 +391,7 @@
                 <tr>
                     <td>
                         <span>
-                           {{ finding.file_path }}
+                            {{ finding.get_file_path_with_link|safe }}
                         </span>
                     </td>
                     <td>
@@ -438,7 +438,8 @@
             <tr>
                 {% if finding.file_path %}
                 <td>
-                    <span>{{ finding.file_path }} 
+                    <span>
+                        {{ finding.get_file_path_with_link|safe }}
                         <i class="fa fa-copy fa-align-right copytoclipboard" title="copy to clipboard"
                         data-clipboard-text="{{finding.file_path}}"></i>
                     </span>
@@ -770,7 +771,7 @@
                         class="glyphicon glyphicon-chevron-{% if finding.references %}up{%else%}down{%endif%}"></i></a></span></h4>
             </div>
             <div id="vuln_refs" class="panel-body collapse {% if finding.references %}in{%endif%}">
-                <pre>{{ finding.references|markdown_render|default_if_none:"" }}</pre>
+                <pre>{{ finding.get_references_with_links|markdown_render|default_if_none:"" }}</pre>
             </div>
         </div>
 

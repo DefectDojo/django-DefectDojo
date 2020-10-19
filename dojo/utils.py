@@ -2283,3 +2283,13 @@ def get_words_for_field(queryset, fieldname):
 
 def get_current_user():
     return crum.get_current_user()
+
+def create_link(url, title):
+    link = '<a href=\"'
+    link += url
+    link += '\" target=\"_blank\" title=\"'
+    link += title
+    link += '\">'
+    link += title
+    link += '</a>'
+    return link
