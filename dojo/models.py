@@ -2267,6 +2267,14 @@ class Finding(models.Model):
 
         return ''
 
+    def get_sast_source_file_path_with_link(self):
+        from dojo.utils import create_link
+        if self.sast_source_file_path is None:
+            return None
+        if self.test.engagement.source_code_management_uri is None:
+            return self.sast_source_file_path
+        return create_link(self.test.engagement.source_code_management_uri + '/' + self.sast_source_file_path, self.sast_source_file_path)
+
     def get_file_path_with_link(self):
         from dojo.utils import create_link
         if self.file_path is None:

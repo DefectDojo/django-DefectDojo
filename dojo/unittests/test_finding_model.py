@@ -3,6 +3,29 @@ from dojo.models import Finding, Test, Engagement
 
 class TestFindingModel(TestCase):
 
+    def test_get_sast_source_file_path_with_link_no_file_path(self):
+        finding = Finding()
+        self.assertEqual(None, finding.get_sast_source_file_path_with_link())
+    
+    def test_get_sast_source_file_path_with_link_no_source_code_management_uri(self):
+        test = Test()
+        engagement = Engagement()
+        test.engagement = engagement
+        finding = Finding()
+        finding.test = test
+        finding.sast_source_file_path = 'SastSourceFilePath'
+        self.assertEqual('SastSourceFilePath', finding.get_sast_source_file_path_with_link())
+
+    def test_get_sast_source_file_path_with_link_and_source_code_management_uri(self):
+        test = Test()
+        engagement = Engagement()
+        test.engagement = engagement
+        finding = Finding()
+        finding.test = test
+        finding.sast_source_file_path = 'SastSourceFilePath'
+        engagement.source_code_management_uri = 'URL'
+        self.assertEqual('<a href=\"URL/SastSourceFilePath\" target=\"_blank\" title=\"SastSourceFilePath\">SastSourceFilePath</a>', finding.get_sast_source_file_path_with_link())
+
     def test_get_file_path_with_link_no_file_path(self):
         finding = Finding()
         self.assertEqual(None, finding.get_file_path_with_link())
