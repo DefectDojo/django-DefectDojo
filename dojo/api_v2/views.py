@@ -7,7 +7,9 @@ from rest_framework.permissions import DjangoModelPermissions
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser
 from django_filters.rest_framework import DjangoFilterBackend
+from django.utils.decorators import method_decorator
 from drf_yasg.utils import swagger_auto_schema, no_body
+from drf_yasg import openapi
 import base64
 from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Finding, \
@@ -563,7 +565,20 @@ class DojoMetaViewSet(mixins.ListModelMixin,
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'product', 'endpoint', 'name', 'finding')
 
+def _product_expand_decorator():
+    return swagger_auto_schema(
+    responses={status.HTTP_200_OK: serializers.ProductSerializer},
+    manual_parameters=[
+        openapi.Parameter(
+            name="expand", 
+            in_=openapi.IN_QUERY, 
+            description="Fields to expand based on their relation", 
+            type=openapi.TYPE_ARRAY, 
+            items=openapi.Items(openapi.TYPE_STRING))
+    ])
 
+@method_decorator(name="list", decorator=_product_expand_decorator())
+@method_decorator(name="retrieve", decorator=_product_expand_decorator())
 class ProductViewSet(mixins.ListModelMixin,
                      mixins.RetrieveModelMixin,
                      mixins.CreateModelMixin,
