@@ -101,6 +101,7 @@ env = environ.Env(
     DD_SAML2_METADATA_LOCAL_FILE_PATH=(str, ''),
     DD_SAML2_ASSERTION_URL=(str, ''),
     DD_SAML2_ENTITY_ID=(str, ''),
+    DD_SAML2_LOGOUT_URL=(str, ''),
     DD_SAML2_DEFAULT_NEXT_URL=(str, '/dashboard'),
     DD_SAML2_NEW_USER_PROFILE=(dict, {
         # The default group name when a new user logs in
@@ -376,6 +377,7 @@ SOCIAL_AUTH_TRAILING_SLASH = env('DD_SOCIAL_AUTH_TRAILING_SLASH')
 # For more configuration and customization options, see django-saml2-auth documentation
 # https://github.com/fangli/django-saml2-auth
 SAML2_ENABLED = env('DD_SAML2_ENABLED')
+SAML2_LOGOUT_URL = env('DD_SAML2_LOGOUT_URL')
 SAML2_AUTH = {
     'ASSERTION_URL': env('DD_SAML2_ASSERTION_URL'),
     'ENTITY_ID': env('DD_SAML2_ENTITY_ID'),
