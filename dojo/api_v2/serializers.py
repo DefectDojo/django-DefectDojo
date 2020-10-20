@@ -320,6 +320,15 @@ class NoteTypeSerializer(serializers.ModelSerializer):
         model = Note_Type
         fields = '__all__'
 
+class ProductTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product_Type
+        fields = '__all__'
+
+class RegulationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Regulation
+        fields = '__all__'
 
 class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
     findings_count = serializers.SerializerMethodField()
@@ -327,6 +336,15 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     tags = TagListSerializerField(required=False)
     product_meta = ProductMetaSerializer(read_only=True, many=True)
+
+    _expansion_serializers = {
+        "technical_contact": UserSerializer(read_only=True),
+        "product_manager": UserSerializer(read_only=True),
+        "team_manager": UserSerializer(read_only=True),
+        "prod_type": ProductTypeSerializer(read_only=True),
+        "authorized_users": UserSerializer(read_only=True, many=True),
+        "regulations": RegulationSerializer(read_only=True, many=True)
+    }
 
     class Meta:
         model = Product
@@ -336,17 +354,27 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
             'authorized_users': {'queryset': User.objects.exclude(is_staff=True).exclude(is_active=False)}
         }
 
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+        params = self.context["request"].GET
+
+        if not "expand" in params:
+            return rep
+
+        fields = params["expand"].split(",")
+        for field in fields:
+            if field in rep and not rep[field] is None:
+                if field in self._expansion_serializers:
+                    rep.pop(field)
+                    rep[field] = self._expansion_serializers[field].to_representation(getattr(instance, field))
+
+        return rep
+
     def get_findings_count(self, obj):
         return obj.findings_count
 
     def get_findings_list(self, obj):
         return obj.open_findings_list()
-
-
-class ProductTypeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Product_Type
-        fields = '__all__'
 
 
 class EngagementSerializer(TaggitSerializer, serializers.ModelSerializer):
@@ -383,12 +411,6 @@ class AppAnalysisSerializer(serializers.ModelSerializer):
 class ToolTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tool_Type
-        fields = '__all__'
-
-
-class RegulationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Regulation
         fields = '__all__'
 
 
