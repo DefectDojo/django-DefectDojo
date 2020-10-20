@@ -160,6 +160,9 @@
                             {% endif %}
                         {% endblock %}
                         {% if request.user.is_authenticated %}
+                            {% if SAML2_LOGOUT_URL != '' %}
+                                <li><a href="{{ SAML2_LOGOUT_URL }}"><i class="fa fa-sign-out fa-fw"></i>SAML Logout</a></li>
+                            {% endif %}
                             <li><a href="{% url 'logout' %}"><i class="fa fa-sign-out fa-fw"></i> Logout</a></li>
                         {% endif %}
                     </ul>
