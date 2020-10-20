@@ -1,12 +1,13 @@
 from django.test import TestCase
 from dojo.models import Finding, Test, Engagement
 
+
 class TestFindingModel(TestCase):
 
     def test_get_sast_source_file_path_with_link_no_file_path(self):
         finding = Finding()
         self.assertEqual(None, finding.get_sast_source_file_path_with_link())
-    
+
     def test_get_sast_source_file_path_with_link_no_source_code_management_uri(self):
         test = Test()
         engagement = Engagement()
@@ -29,7 +30,7 @@ class TestFindingModel(TestCase):
     def test_get_file_path_with_link_no_file_path(self):
         finding = Finding()
         self.assertEqual(None, finding.get_file_path_with_link())
-    
+
     def test_get_file_path_with_link_no_source_code_management_uri(self):
         test = Test()
         engagement = Engagement()
