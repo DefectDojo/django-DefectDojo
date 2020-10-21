@@ -39,10 +39,10 @@ spec:
             secretKeyRef:
               {{- if eq .Values.database "postgresql" }}
               name: {{ .Values.postgresql.existingSecret }}
-              key: postgresql-password
+              key: {{ .Values.postgresql.secretKey }}
               {{- else if eq .Values.database "mysql" }}
               name: {{ .Values.mysql.existingSecret }}
-              key: mysql-password
+              key: {{ .Values.mysql.secretKey }}
               {{- end }}
               key: {{ if eq .Values.database "postgresql" }}{{ .Values.database }}-password{{ end }}{{ if eq .Values.database "mysql" }}{{ .Values.database }}-root-password{{ end }}
         - name: DD_DEBUG

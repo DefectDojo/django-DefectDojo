@@ -38,7 +38,7 @@ class IbmAppScanDASTXMLParser(object):
                     name = issue_data['name']
                     # advisory = issue_data['advisory']
 
-                    cve = ""
+                    cve = None
                     if "cve" in issue_data:
                         cve = issue_data['cve']
 

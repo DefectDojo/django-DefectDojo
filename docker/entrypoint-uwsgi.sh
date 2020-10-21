@@ -1,5 +1,14 @@
 #!/bin/sh
 
+# Allow for bind-mount setting.py overrides
+FILE=/settings/settings.py
+if test -f "$FILE"; then
+    echo "============================================================"
+    echo "     Overriding DefectDojo's settings.py with $FILE."
+    echo "============================================================"
+    cp "$FILE" /app/dojo/settings/settings.py
+fi
+
 umask 0002
 
 exec uwsgi \

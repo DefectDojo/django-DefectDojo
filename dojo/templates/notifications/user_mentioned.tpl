@@ -19,4 +19,41 @@
 {{ note }}
 
 Full details of the note can be reviewed at {{ url }}
+{% elif type == 'msteams' %}
+    {
+        "@context": "https://schema.org/extensions",
+        "@type": "MessageCard",
+        "title": "User mentioned",
+        "summary": "User mentioned",
+        "sections": [
+            {
+                "activityTitle": "DefectDojo",
+                "activityImage": "https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/master/dojo/static/dojo/img/chop.png",
+                "text": "A user has been mentioned.",
+                "facts": [
+                    {
+                        "name": "User:",
+                        "value": "{{ user }}"
+                    },
+                    {
+                        "name": "Section:",
+                        "value": "{{ section }}"
+                    },
+                    {
+                        "name": "note:",
+                        "value": "{{ note }}"
+                    }
+                ]
+            }
+        ],
+        "potentialAction": [
+            {
+            "@type": "OpenUri",
+            "name": "View",
+            "targets": [
+                { "os": "default", "uri": "{{ url }}" }
+                ]
+            }
+        ]
+    }
 {% endif %}

@@ -160,6 +160,9 @@
                             {% endif %}
                         {% endblock %}
                         {% if request.user.is_authenticated %}
+                            {% if SAML2_LOGOUT_URL != '' %}
+                                <li><a href="{{ SAML2_LOGOUT_URL }}"><i class="fa fa-sign-out fa-fw"></i>SAML Logout</a></li>
+                            {% endif %}
                             <li><a href="{% url 'logout' %}"><i class="fa fa-sign-out fa-fw"></i> Logout</a></li>
                         {% endif %}
                     </ul>
@@ -238,7 +241,7 @@
                                         <i class="fa fa-bug fa-fw"></i>
                                         <span>Findings</span>
                                         <span class="glyphicon arrow"></span>
-				    </a>
+				                    </a>
                                     <ul class="nav nav-second-level">
                                         <li>
                                             <a href="{% url 'open_findings' %}">Open Findings</a>
@@ -257,6 +260,12 @@
                                         </li>
                                     </ul>
                                     <!-- /.nav-second-level -->
+                                </li>
+                                <li>
+				                    <a href="{% url 'components' %}" id="product_component_view" aria-expanded="false"  aria-label="Components">
+                                        <i class="fa fa-th-large fa-fw"></i>
+                                        <span>Components</span>
+                                    </a>
                                 </li>
                                 <li>
                                     <a href="{% url 'endpoints' %}" aria-expanded="false" aria-label="Endpoints">
@@ -405,6 +414,7 @@
                 </h3>
                 <ul class="nav nav-tabs horizontal-bar in">
                   <li role="presentation"{% if product_tab.tab == 'overview' %} class="active"{% endif %}><a href="{% url 'view_product' product_tab.product.id %}"><span class="fa fa-globe" aria-hidden="true"></span><span class="hidden-xs"> Overview</span></a></li>
+                  <li role="presentation"{% if product_tab.tab == 'components' %} class="active"{% endif %}><a href="{% url 'view_product_components' product_tab.product.id %}"><span class="fa fa-th-large" aria-hidden="true"></span><span class="hidden-xs"> Components</span></a></li>
                   <li role="presentation"{% if product_tab.tab == 'metrics' %} class="active"{% endif %}><a href="{% url 'view_product_metrics' product_tab.product.id %}"><span class="fa fa-bar-chart" aria-hidden="true"></span><span class="hidden-xs"> Metrics</span></a></li>
                   <!-- Engagements Tab -->
                   <li role="presentation" class="dropdown{% if product_tab.tab == 'engagements' %} active active-color{% endif %}">

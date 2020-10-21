@@ -301,6 +301,10 @@ class FindingTest(BaseTestCase):
         self.assertTrue(self.is_success_message_present(text='Finding deleted successfully'))
         # check that user was redirect back to url where it came from based on return_url
 
+    def test_list_components(self):
+        driver = self.login_page()
+        self.goto_component_overview(driver)
+        self.assertTrue(self.is_element_by_css_selector_present("table"))
 
 def add_finding_tests_to_suite(suite, jira=False, github=False, block_execution=False):
     if jira:
@@ -319,6 +323,7 @@ def add_finding_tests_to_suite(suite, jira=False, github=False, block_execution=
     suite.addTest(FindingTest('test_list_findings_closed'))
     suite.addTest(FindingTest('test_list_findings_accepted'))
     suite.addTest(FindingTest('test_list_findings_open'))
+    suite.addTest(FindingTest('test_list_components'))
     suite.addTest(FindingTest('test_edit_finding'))
     suite.addTest(FindingTest('test_add_image'))
     suite.addTest(FindingTest('test_delete_image'))
