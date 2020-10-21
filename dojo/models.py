@@ -89,7 +89,8 @@ class Regulation(models.Model):
     jurisdiction = models.CharField(max_length=64, help_text=_('The territory over which the regulation applies.'))
     description = models.TextField(blank=True, help_text=_('Information about the regulation\'s purpose.'))
     reference = models.URLField(blank=True, help_text=_('An external URL for more information.'))
-
+    valentijn = models.URLField(blank=True, help_text=_('An external URL for more information.'))
+    
     class Meta:
         ordering = ['name']
 
