@@ -8,7 +8,7 @@ on:
   push:
     branches:
       - master
-      - develop
+      - dev
   
 jobs:
   flake8-your-pr:
