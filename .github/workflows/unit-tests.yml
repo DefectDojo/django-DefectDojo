@@ -1,4 +1,4 @@
-name: Integration tests
+name: Unit tests
 # run on pull_request_target instead of just pull_request as we need write access to update the status check
 on: [pull_request_target]
 jobs:
