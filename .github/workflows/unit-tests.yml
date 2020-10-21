@@ -8,7 +8,7 @@ on:
   push:
     branches:
       - master
-      - develop
+      - dev
 
 jobs:
   integration_test:
