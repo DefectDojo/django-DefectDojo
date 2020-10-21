@@ -821,6 +821,9 @@ LOGGING = {
         'simple': {
             'format': '%(levelname)s %(funcName)s %(lineno)d %(message)s'
         },
+        'json': {
+            '()': 'json_log_formatter.JSONFormatter',
+        },
     },
     'filters': {
         'require_debug_false': {
@@ -839,6 +842,11 @@ LOGGING = {
         'console': {
             'class': 'logging.StreamHandler',
         },
+        'json_console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'json'
+        },
     },
     'loggers': {
         'django.request': {
@@ -847,11 +855,15 @@ LOGGING = {
             'propagate': True,
         },
         'dojo': {
+            # specify 'json_console' to get jsonify logs (or both at once)
+            # 'handlers': ['json_console'],
             'handlers': ['console'],
             'level': 'INFO',
             'propagate': False,
         },
         'dojo.specific-loggers.deduplication': {
+            # specify 'json_console' to get jsonify logs (or both at once)
+            # 'handlers': ['json_console'],
             'handlers': ['console'],
             'level': 'INFO',
             'propagate': False,
