@@ -960,8 +960,8 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     for req_resp in item.unsaved_req_resp:
                         burp_rr = BurpRawRequestResponse(
                             finding=item,
-                            burpRequestBase64=req_resp["req"],
-                            burpResponseBase64=req_resp["resp"])
+                            burpRequestBase64=base64.b64encode(req_resp["req"].encode("utf-8")),
+                            burpResponseBase64=base64.b64encode(req_resp["resp"].encode("utf-8")))
                         burp_rr.clean()
                         burp_rr.save()
 
@@ -969,8 +969,8 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                         item.unsaved_response is not None):
                     burp_rr = BurpRawRequestResponse(
                         finding=item,
-                        burpRequestBase64=item.unsaved_request,
-                        burpResponseBase64=item.unsaved_response)
+                        burpRequestBase64=base64.b64encode(item.unsaved_request.encode()),
+                        burpResponseBase64=base64.b64encode(item.unsaved_response.encode()))
                     burp_rr.clean()
                     burp_rr.save()
 
@@ -1215,16 +1215,16 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                         for req_resp in item.unsaved_req_resp:
                             burp_rr = BurpRawRequestResponse(
                                 finding=finding,
-                                burpRequestBase64=req_resp['req'],
-                                burpResponseBase64=req_resp['resp'])
+                                burpRequestBase64=base64.b64encode(req_resp["req"].encode("utf-8")),
+                                burpResponseBase64=base64.b64encode(req_resp["resp"].encode("utf-8")))
                             burp_rr.clean()
                             burp_rr.save()
 
                     if item.unsaved_request and item.unsaved_response:
                         burp_rr = BurpRawRequestResponse(
                             finding=finding,
-                            burpRequestBase64=item.unsaved_request,
-                            burpResponseBase64=item.unsaved_response)
+                            burpRequestBase64=base64.b64encode(item.unsaved_request.encode()),
+                            burpResponseBase64=base64.b64encode(item.unsaved_response.encode()))
                         burp_rr.clean()
                         burp_rr.save()
 
