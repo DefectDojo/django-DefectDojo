@@ -46,10 +46,6 @@ spec:
       - command:
         - /entrypoint-celery-beat.sh
         name: celery
-        securityContext:
-          # needed for celery to then drop privileges
-          allowPrivilegeEscalation: false
-          runAsUser: 0
         image: "{{ template "celery.repository" . }}:{{ .Values.tag }}"
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         envFrom:
@@ -69,10 +65,10 @@ spec:
             secretKeyRef:
               {{- if eq .Values.database "postgresql" }}
               name: {{ .Values.postgresql.existingSecret }}
-              key: postgresql-password
+              key: {{ .Values.postgresql.secretKey }}
               {{- else if eq .Values.database "mysql" }}
               name: {{ .Values.mysql.existingSecret }}
-              key: mysql-password
+              key: {{ .Values.mysql.secretKey }}
               {{- end }}
         - name: DD_SECRET_KEY
           valueFrom:

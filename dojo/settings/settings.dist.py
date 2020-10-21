@@ -101,6 +101,7 @@ env = environ.Env(
     DD_SAML2_METADATA_LOCAL_FILE_PATH=(str, ''),
     DD_SAML2_ASSERTION_URL=(str, ''),
     DD_SAML2_ENTITY_ID=(str, ''),
+    DD_SAML2_LOGOUT_URL=(str, ''),
     DD_SAML2_DEFAULT_NEXT_URL=(str, '/dashboard'),
     DD_SAML2_NEW_USER_PROFILE=(dict, {
         # The default group name when a new user logs in
@@ -135,7 +136,9 @@ env = environ.Env(
     DD_SLA_NOTIFY_POST_BREACH=(int, 7),
 
     # maximum number of result in search as search can be an expensive operation
-    DD_SEARCH_MAX_RESULTS=(int, 100)
+    DD_SEARCH_MAX_RESULTS=(int, 100),
+    DD_MAX_AUTOCOMPLETE_WORDS=(int, 20000),
+    DD_JIRA_SSL_VERIFY=(bool, True)
 )
 
 
@@ -374,6 +377,7 @@ SOCIAL_AUTH_TRAILING_SLASH = env('DD_SOCIAL_AUTH_TRAILING_SLASH')
 # For more configuration and customization options, see django-saml2-auth documentation
 # https://github.com/fangli/django-saml2-auth
 SAML2_ENABLED = env('DD_SAML2_ENABLED')
+SAML2_LOGOUT_URL = env('DD_SAML2_LOGOUT_URL')
 SAML2_AUTH = {
     'ASSERTION_URL': env('DD_SAML2_ASSERTION_URL'),
     'ENTITY_ID': env('DD_SAML2_ENTITY_ID'),
@@ -405,6 +409,7 @@ SLA_NOTIFY_PRE_BREACH = env('DD_SLA_NOTIFY_PRE_BREACH')  # in days, notify betwe
 SLA_NOTIFY_POST_BREACH = env('DD_SLA_NOTIFY_POST_BREACH')  # in days, skip notifications for findings that go past dayofbreach plus this number
 
 SEARCH_MAX_RESULTS = env('DD_SEARCH_MAX_RESULTS')
+MAX_AUTOCOMPLETE_WORDS = env('DD_MAX_AUTOCOMPLETE_WORDS')
 
 LOGIN_EXEMPT_URLS = (
     r'^%sstatic/' % URL_PREFIX,
@@ -499,6 +504,7 @@ DJANGO_ADMIN_ENABLED = env('DD_DJANGO_ADMIN_ENABLED')
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ),
@@ -520,6 +526,9 @@ SWAGGER_SETTINGS = {
             'name': 'Authorization'
         }
     },
+    'DOC_EXPANSION': "none",
+    'JSON_EDITOR': True,
+    'SHOW_REQUEST_HEADERS': True,
 }
 
 # ------------------------------------------------------------------------------
@@ -586,7 +595,6 @@ INSTALLED_APPS = (
 # MIDDLEWARE
 # ------------------------------------------------------------------------------
 DJANGO_MIDDLEWARE_CLASSES = [
-    # 'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.common.CommonMiddleware',
     'dojo.middleware.DojoSytemSettingsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -768,10 +776,12 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'PHP Symfony Security Check': DEDUPE_ALGO_HASH_CODE,
     'Clair Scan': DEDUPE_ALGO_HASH_CODE,
     'Clair Klar Scan': DEDUPE_ALGO_HASH_CODE,
+    'Veracode Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     # for backwards compatibility because someone decided to rename this scanner:
     'Symfony Security Check': DEDUPE_ALGO_HASH_CODE,
     'DSOP Scan': DEDUPE_ALGO_HASH_CODE,
     'Trivy Scan': DEDUPE_ALGO_HASH_CODE,
+    'HackerOne Cases': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
 }
 
 DISABLE_FINDING_MERGE = env('DD_DISABLE_FINDING_MERGE')
@@ -788,6 +798,8 @@ JIRA_ISSUE_TYPE_CHOICES_CONFIG = (
     ('Bug', 'Bug'),
     ('Security', 'Security')
 )
+
+JIRA_SSL_VERIFY = env('DD_JIRA_SSL_VERIFY')
 
 
 # ------------------------------------------------------------------------------
@@ -845,6 +857,13 @@ LOGGING = {
             'propagate': False,
         },
         'MARKDOWN': {
+            # The markdown library is too verbose in it's logging, reducing the verbosity in our logs.
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'titlecase': {
+            # The markdown library is too verbose in it's logging, reducing the verbosity in our logs.
             'handlers': ['console'],
             'level': 'WARNING',
             'propagate': False,

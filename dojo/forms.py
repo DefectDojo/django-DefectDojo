@@ -150,9 +150,19 @@ class MonthYearWidget(Widget):
 
 
 class Product_TypeForm(forms.ModelForm):
+    authorized_users = forms.ModelMultipleChoiceField(
+        queryset=None,
+        required=False, label="Authorized Users")
+
+    def __init__(self, *args, **kwargs):
+        non_staff = Dojo_User.objects.exclude(is_staff=True) \
+            .exclude(is_active=False).order_by('first_name', 'last_name')
+        super(Product_TypeForm, self).__init__(*args, **kwargs)
+        self.fields['authorized_users'].queryset = non_staff
+
     class Meta:
         model = Product_Type
-        fields = ['name', 'critical_product', 'key_product']
+        fields = ['name', 'authorized_users', 'critical_product', 'key_product']
 
 
 class Delete_Product_TypeForm(forms.ModelForm):
@@ -381,6 +391,7 @@ class ImportScanForm(forms.Form):
                          ("Sslscan", "Sslscan"),
                          ("JFrog Xray Scan", "JFrog Xray Scan"),
                          ("Sslyze Scan", "Sslyze Scan"),
+                         ("SSLyze 3 Scan (JSON)", "SSLyze 3 Scan (JSON)"),
                          ("Testssl Scan", "Testssl Scan"),
                          ("Hadolint Dockerfile check", "Hadolint Dockerfile check"),
                          ("Aqua Scan", "Aqua Scan"),
@@ -719,6 +730,10 @@ class EngForm(forms.ModelForm):
         if 'product' in kwargs:
             product = kwargs.pop('product')
 
+        self.user = None
+        if 'user' in kwargs:
+            self.user = kwargs.pop('user')
+
         tags = Tag.objects.usage_for_model(Engagement)
         t = [(tag.name, tag.name) for tag in tags]
         super(EngForm, self).__init__(*args, **kwargs)
@@ -730,6 +745,10 @@ class EngForm(forms.ModelForm):
             self.fields['lead'].queryset = User.objects.filter(id__in=staff_users)
         else:
             self.fields['lead'].queryset = User.objects.exclude(is_staff=False)
+
+        if self.user is not None and not self.user.is_staff and not self.user.is_superuser:
+            self.fields['product'].queryset = Product.objects.all().filter(authorized_users__in=[self.user])
+
         # Don't show CICD fields on a interactive engagement
         if cicd is False:
             del self.fields['build_id']
@@ -970,7 +989,7 @@ class FindingForm(forms.ModelForm):
     date = forms.DateField(required=True,
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     cwe = forms.IntegerField(required=False)
-    cve = forms.CharField(max_length=28, required=False)
+    cve = forms.CharField(max_length=28, required=False, strip=False)
     cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'cvsscalculator', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
@@ -1027,6 +1046,8 @@ class FindingForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super(FindingForm, self).clean()
+
+        cleaned_data['cve'] = None if cleaned_data['cve'] == '' else cleaned_data['cve']
         if (cleaned_data['active'] or cleaned_data['verified']) and cleaned_data['duplicate']:
             raise forms.ValidationError('Duplicate findings cannot be'
                                         ' verified or active')
@@ -1566,6 +1587,9 @@ class AddDojoUserForm(forms.ModelForm):
     authorized_products = forms.ModelMultipleChoiceField(
         queryset=Product.objects.all(), required=False,
         help_text='Select the products this user should have access to.')
+    authorized_product_types = forms.ModelMultipleChoiceField(
+        queryset=Product_Type.objects.all(), required=False,
+        help_text='Select the product types this user should have access to.')
 
     class Meta:
         model = Dojo_User
