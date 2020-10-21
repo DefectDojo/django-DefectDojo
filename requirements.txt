@@ -63,3 +63,4 @@ django-saml2-auth==2.2.1
 cpe==1.2.1
 packageurl-python==0.9.3
 django-crum==0.7.7
+JSON-log-formatter==0.3.0
