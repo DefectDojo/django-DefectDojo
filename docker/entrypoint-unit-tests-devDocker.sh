@@ -1,6 +1,10 @@
 #!/bin/sh
-# Run available unittests with a simple setup
-umask 0002
+# Run available unittests with a setup for local dev:
+# - Make migrations and apply any needed changes
+# - Leave container up after running tests to allow debugging, rerunning tests, etc.
+set -x
+set -e
+set -v
 
 cd /app
 # Unset the database URL so that we can force the DD_TEST_DATABASE_NAME (see django "DATABASES" configuration in settings.dist.py)
