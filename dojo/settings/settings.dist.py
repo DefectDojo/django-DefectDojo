@@ -138,7 +138,10 @@ env = environ.Env(
     # maximum number of result in search as search can be an expensive operation
     DD_SEARCH_MAX_RESULTS=(int, 100),
     DD_MAX_AUTOCOMPLETE_WORDS=(int, 20000),
-    DD_JIRA_SSL_VERIFY=(bool, True)
+    DD_JIRA_SSL_VERIFY=(bool, True),
+
+    # if you want to keep logging to the console but in json format, change this here to 'json_console'
+    DD_LOGGING_FORMAT=(str, 'console')
 )
 
 
@@ -800,14 +803,12 @@ JIRA_ISSUE_TYPE_CHOICES_CONFIG = (
 )
 
 JIRA_SSL_VERIFY = env('DD_JIRA_SSL_VERIFY')
+LOGGING_FORMAT = env('DD_LOGGING_FORMAT')
 
 
 # ------------------------------------------------------------------------------
 # LOGGING
 # ------------------------------------------------------------------------------
-# A sample logging configuration. The only tangible logging
-# performed by this configuration is to send an email to
-# the site admins on every HTTP 500 error when DEBUG=False.
 # See http://docs.djangoproject.com/en/dev/topics/logging for
 # more details on how to customize your logging configuration.
 LOGGING = {
@@ -843,7 +844,6 @@ LOGGING = {
             'class': 'logging.StreamHandler',
         },
         'json_console': {
-            'level': 'INFO',
             'class': 'logging.StreamHandler',
             'formatter': 'json'
         },
@@ -852,31 +852,39 @@ LOGGING = {
         'django.request': {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
-            'propagate': True,
+            'propagate': False,
+        },
+        'django.security': {
+            'handlers': [r'%s' % LOGGING_FORMAT],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'celery': {
+            'handlers': [r'%s' % LOGGING_FORMAT],
+            'level': 'INFO',
+            'propagate': False,
+            # does not seem to work?
+            # 'worker_hijack_root_logger': False,
         },
         'dojo': {
-            # specify 'json_console' to get jsonify logs (or both at once)
-            # 'handlers': ['json_console'],
-            'handlers': ['console'],
+            'handlers': [r'%s' % LOGGING_FORMAT],
             'level': 'INFO',
             'propagate': False,
         },
         'dojo.specific-loggers.deduplication': {
-            # specify 'json_console' to get jsonify logs (or both at once)
-            # 'handlers': ['json_console'],
-            'handlers': ['console'],
+            'handlers': [r'%s' % LOGGING_FORMAT],
             'level': 'INFO',
             'propagate': False,
         },
         'MARKDOWN': {
             # The markdown library is too verbose in it's logging, reducing the verbosity in our logs.
-            'handlers': ['console'],
+            'handlers': [r'%s' % LOGGING_FORMAT],
             'level': 'WARNING',
             'propagate': False,
         },
         'titlecase': {
             # The markdown library is too verbose in it's logging, reducing the verbosity in our logs.
-            'handlers': ['console'],
+            'handlers': [r'%s' % LOGGING_FORMAT],
             'level': 'WARNING',
             'propagate': False,
         },

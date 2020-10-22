@@ -1,6 +1,6 @@
-
 import os
 from celery import Celery
+from celery.signals import setup_logging
 from django.conf import settings
 
 # set the default Django settings module for the 'celery' program.
@@ -11,6 +11,12 @@ app = Celery('dojo')
 # Using a string here means the worker will not have to
 # pickle the object when using Windows.
 app.config_from_object('django.conf:settings', namespace='CELERY')
+
+
+@setup_logging.connect
+def config_loggers(*args, **kwags):
+    from logging.config import dictConfig
+    dictConfig(settings.LOGGING)
 
 app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 
