@@ -588,7 +588,7 @@ INSTALLED_APPS = (
     # 'axes'
     'django_celery_results',
     'social_django',
-    'drf_yasg',
+    'drf_yasg2',
 )
 
 # ------------------------------------------------------------------------------

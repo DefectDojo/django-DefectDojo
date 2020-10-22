@@ -7,7 +7,7 @@ from rest_framework import serializers, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
-from drf_yasg.utils import swagger_auto_schema
+from drf_yasg2.utils import swagger_auto_schema
 
 from dojo.api_v2.serializers import RiskAcceptanceSerializer
 from dojo.models import Engagement, Risk_Acceptance, User
