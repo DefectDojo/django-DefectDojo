@@ -150,9 +150,19 @@ class MonthYearWidget(Widget):
 
 
 class Product_TypeForm(forms.ModelForm):
+    authorized_users = forms.ModelMultipleChoiceField(
+        queryset=None,
+        required=False, label="Authorized Users")
+
+    def __init__(self, *args, **kwargs):
+        non_staff = Dojo_User.objects.exclude(is_staff=True) \
+            .exclude(is_active=False).order_by('first_name', 'last_name')
+        super(Product_TypeForm, self).__init__(*args, **kwargs)
+        self.fields['authorized_users'].queryset = non_staff
+
     class Meta:
         model = Product_Type
-        fields = ['name', 'critical_product', 'key_product']
+        fields = ['name', 'authorized_users', 'critical_product', 'key_product']
 
 
 class Delete_Product_TypeForm(forms.ModelForm):
@@ -381,6 +391,7 @@ class ImportScanForm(forms.Form):
                          ("Sslscan", "Sslscan"),
                          ("JFrog Xray Scan", "JFrog Xray Scan"),
                          ("Sslyze Scan", "Sslyze Scan"),
+                         ("SSLyze 3 Scan (JSON)", "SSLyze 3 Scan (JSON)"),
                          ("Testssl Scan", "Testssl Scan"),
                          ("Hadolint Dockerfile check", "Hadolint Dockerfile check"),
                          ("Aqua Scan", "Aqua Scan"),
@@ -403,6 +414,9 @@ class ImportScanForm(forms.Form):
                          ("HuskyCI Report", "HuskyCI Report"),
                          ("Semgrep JSON Report", "Semgrep JSON Report"),
                          ("Risk Recon API Importer", "Risk Recon API Importer"),
+                         ("DrHeader JSON Importer", "DrHeader JSON Importer"),
+                         ("Checkov Scan", "Checkov Scan"),
+                         ("kube-bench Scan", "Kube-Bench Scan"),
                          ("CCVS Report", "CCVS Report"))
 
 
@@ -718,6 +732,10 @@ class EngForm(forms.ModelForm):
         if 'product' in kwargs:
             product = kwargs.pop('product')
 
+        self.user = None
+        if 'user' in kwargs:
+            self.user = kwargs.pop('user')
+
         tags = Tag.objects.usage_for_model(Engagement)
         t = [(tag.name, tag.name) for tag in tags]
         super(EngForm, self).__init__(*args, **kwargs)
@@ -729,6 +747,10 @@ class EngForm(forms.ModelForm):
             self.fields['lead'].queryset = User.objects.filter(id__in=staff_users)
         else:
             self.fields['lead'].queryset = User.objects.exclude(is_staff=False)
+
+        if self.user is not None and not self.user.is_staff and not self.user.is_superuser:
+            self.fields['product'].queryset = Product.objects.all().filter(authorized_users__in=[self.user])
+
         # Don't show CICD fields on a interactive engagement
         if cicd is False:
             del self.fields['build_id']
@@ -969,7 +991,7 @@ class FindingForm(forms.ModelForm):
     date = forms.DateField(required=True,
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     cwe = forms.IntegerField(required=False)
-    cve = forms.CharField(max_length=28, required=False)
+    cve = forms.CharField(max_length=28, required=False, strip=False)
     cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'cvsscalculator', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
@@ -1006,11 +1028,15 @@ class FindingForm(forms.ModelForm):
         else:
             tags = Tag.objects.usage_for_model(Finding)
 
-        req_resp = kwargs.pop('req_resp')
+        req_resp = None
+        if 'req_resp' in kwargs:
+            req_resp = kwargs.pop('req_resp')
+
         t = [(tag.name, tag.name) for tag in tags]
         super(FindingForm, self).__init__(*args, **kwargs)
+        print('instance: ', self.instance)
+        self.fields['simple_risk_accept'].initial = True if hasattr(self, 'instance') and self.instance.is_simple_risk_accepted else False
         self.fields['tags'].widget.choices = t
-        self.fields['simple_risk_accept'].initial = True if self.instance.is_simple_risk_accepted else False
         if req_resp:
             self.fields['request'].initial = req_resp[0]
             self.fields['response'].initial = req_resp[1]
@@ -1022,6 +1048,8 @@ class FindingForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super(FindingForm, self).clean()
+
+        cleaned_data['cve'] = None if cleaned_data['cve'] == '' else cleaned_data['cve']
         if (cleaned_data['active'] or cleaned_data['verified']) and cleaned_data['duplicate']:
             raise forms.ValidationError('Duplicate findings cannot be'
                                         ' verified or active')
@@ -1505,7 +1533,7 @@ class SimpleMetricsForm(forms.Form):
 
 
 class SimpleSearchForm(forms.Form):
-    query = forms.CharField()
+    query = forms.CharField(required=False)
 
 
 class DateRangeMetrics(forms.Form):
@@ -1561,6 +1589,9 @@ class AddDojoUserForm(forms.ModelForm):
     authorized_products = forms.ModelMultipleChoiceField(
         queryset=Product.objects.all(), required=False,
         help_text='Select the products this user should have access to.')
+    authorized_product_types = forms.ModelMultipleChoiceField(
+        queryset=Product_Type.objects.all(), required=False,
+        help_text='Select the product types this user should have access to.')
 
     class Meta:
         model = Dojo_User
@@ -2407,12 +2438,12 @@ class ChoiceQuestionForm(QuestionForm):
         choice_answer.save()
 
 
-class Add_Survey_Form(forms.ModelForm):
+class Add_Questionnaire_Form(forms.ModelForm):
     survey = forms.ModelChoiceField(
         queryset=Engagement_Survey.objects.all(),
         required=True,
         widget=forms.widgets.Select(),
-        help_text='Select the Survey to add.')
+        help_text='Select the Questionnaire to add.')
 
     class Meta:
         model = Answered_Survey
@@ -2423,12 +2454,12 @@ class Add_Survey_Form(forms.ModelForm):
                    'assignee')
 
 
-class AddGeneralSurveyForm(forms.ModelForm):
+class AddGeneralQuestionnaireForm(forms.ModelForm):
     survey = forms.ModelChoiceField(
         queryset=Engagement_Survey.objects.all(),
         required=True,
         widget=forms.widgets.Select(),
-        help_text='Select the Survey to add.')
+        help_text='Select the Questionnaire to add.')
     expiration = forms.DateField(widget=forms.TextInput(
         attrs={'class': 'datepicker', 'autocomplete': 'off'}))
 
@@ -2437,7 +2468,7 @@ class AddGeneralSurveyForm(forms.ModelForm):
         exclude = ('num_responses', 'generated')
 
 
-class Delete_Survey_Form(forms.ModelForm):
+class Delete_Questionnaire_Form(forms.ModelForm):
     id = forms.IntegerField(required=True,
                             widget=forms.widgets.HiddenInput())
 
@@ -2451,7 +2482,7 @@ class Delete_Survey_Form(forms.ModelForm):
                    'assignee')
 
 
-class DeleteGeneralSurveyForm(forms.ModelForm):
+class DeleteGeneralQuestionnaireForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
                             widget=forms.widgets.HiddenInput())
 
@@ -2475,17 +2506,17 @@ class Delete_Eng_Survey_Form(forms.ModelForm):
                    'active')
 
 
-class CreateSurveyForm(forms.ModelForm):
+class CreateQuestionnaireForm(forms.ModelForm):
     class Meta:
         model = Engagement_Survey
         exclude = ['questions']
 
 
-class EditSurveyQuestionsForm(forms.ModelForm):
+class EditQuestionnaireQuestionsForm(forms.ModelForm):
     questions = forms.ModelMultipleChoiceField(
         Question.objects.all(),
         required=True,
-        help_text="Select questions to include on this survey.  Field can be used to search available questions.",
+        help_text="Select questions to include on this questionnaire.  Field can be used to search available questions.",
         widget=MultipleSelectWithPop(attrs={'size': '11'}))
 
     class Meta:
@@ -2614,4 +2645,4 @@ class AddEngagementForm(forms.Form):
         queryset=Product.objects.all(),
         required=True,
         widget=forms.widgets.Select(),
-        help_text='Select which product to attach Engagment')
+        help_text='Select which product to attach Engagement')

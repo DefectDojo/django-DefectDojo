@@ -73,7 +73,7 @@ def get_item(vulnerability, test):
                 cwe = ''.join(vulnerability['identifiers']['CWE']).split("-")[1]
     else:
         # If no identifiers, set to defaults
-        cve = ""
+        cve = None
         cwe = 1035
 
     # Following the CVSS Scoring per https://nvd.nist.gov/vuln-metrics/cvss

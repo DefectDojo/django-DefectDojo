@@ -23,6 +23,10 @@ import datetime
 import six
 from django.utils.translation import ugettext_lazy as _
 import json
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 class TagList(list):
@@ -268,9 +272,11 @@ class ProductMetaSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    last_login = serializers.DateTimeField(read_only=True)
+
     class Meta:
         model = User
-        fields = ('id', 'username', 'first_name', 'last_name', 'email', 'last_login')
+        fields = ('id', 'username', 'first_name', 'last_name', 'email', 'last_login', 'is_active', 'is_staff')
 
 
 class NoteHistorySerializer(serializers.ModelSerializer):
@@ -341,6 +347,9 @@ class ProductTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product_Type
         fields = '__all__'
+        extra_kwargs = {
+            'authorized_users': {'queryset': User.objects.exclude(is_staff=True).exclude(is_active=False)}
+        }
 
 
 class EngagementSerializer(TaggitSerializer, serializers.ModelSerializer):
@@ -629,10 +638,61 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     age = serializers.IntegerField(read_only=True)
     sla_days_remaining = serializers.IntegerField(read_only=True)
     finding_meta = FindingMetaSerializer(read_only=True, many=True)
+    related_fields = serializers.SerializerMethodField()
 
     class Meta:
         model = Finding
         fields = '__all__'
+
+    def get_related_fields(self, obj):
+        query_params = self.context['request'].query_params
+        if 'related_fields' in query_params:
+            related_fields = {
+                'product_type': {
+                    'id': obj.test.engagement.product.prod_type.id,
+                    'name': obj.test.engagement.product.prod_type.name
+                },
+                'product': {
+                    'id': obj.test.engagement.product.id,
+                    'name': obj.test.engagement.product.name
+                },
+                'engagement': {
+                    'id': obj.test.engagement.id,
+                    'name': obj.test.engagement.name
+                },
+                'test': {
+                    'id': obj.test.id,
+                    'title': obj.test.title
+                },
+                'test_type': {
+                    'id': obj.test.test_type.id,
+                    'name': obj.test.test_type.name
+                },
+                'environment': {
+                    'id': obj.test.environment.id,
+                    'name': obj.test.environment.name
+                }
+            }
+            return related_fields
+
+    # Overriding this to push add Push to JIRA functionality
+    def update(self, instance, validated_data):
+        # remove tags from validated data and store them seperately
+        to_be_tagged, validated_data = self._pop_tags(validated_data)
+
+        # pop push_to_jira so it won't get send to the model as a field
+        push_to_jira = validated_data.pop('push_to_jira') or instance.get_push_all_to_jira()
+
+        instance = super(TaggitSerializer, self).update(instance, validated_data)
+
+        # If we need to push to JIRA, an extra save call is needed.
+        # TODO try to combine create and save, but for now I'm just fixing a bug and don't want to change to much
+        if push_to_jira:
+            instance.save(push_to_jira=push_to_jira)
+
+        # not sure why we are returning a tag_object, but don't want to change too much now as we're just fixing a bug
+        tag_object = self._save_tags(instance, to_be_tagged)
+        return tag_object
 
     def validate(self, data):
         if self.context['request'].method == 'PATCH':
@@ -696,22 +756,25 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     # Overriding this to push add Push to JIRA functionality
     def create(self, validated_data):
+        # remove tags from validated data and store them seperately
         to_be_tagged, validated_data = self._pop_tags(validated_data)
+
+        # pop push_to_jira so it won't get send to the model as a field
         push_to_jira = validated_data.pop('push_to_jira')
-        # Somewhere in the below line finding.save() is called, but I'm not sure how to get
-        # push_to_jira to it.
-        tag_object = super(TaggitSerializer, self).create(validated_data)
 
-        has_jira_config = tag_object.test.engagement.product.jira_pkey_set.first() is not None
-        if not push_to_jira and has_jira_config:
-            push_to_jira = tag_object.test.engagement.product.jira_pkey_set.first().push_all_issues
+        # first save, so we have an instance to get push_all_to_jira from
+        new_finding = super(TaggitSerializer, self).create(validated_data)
 
-        # No need to save the finding twice if we're not pushing to JIRA
+        push_to_jira = push_to_jira or new_finding.get_push_all_to_jira()
+
+        # If we need to push to JIRA, an extra save call is needed.
+        # TODO try to combine create and save, but for now I'm just fixing a bug and don't want to change to much
         if push_to_jira:
-            # Saving again with push_to_jira context
-            tag_object.save(push_to_jira=push_to_jira)
-        return self._save_tags(tag_object, to_be_tagged)
-        pass
+            new_finding.save(push_to_jira=push_to_jira)
+
+        # not sure why we are returning a tag_object, but don't want to change too much now as we're just fixing a bug
+        tag_object = self._save_tags(new_finding, to_be_tagged)
+        return tag_object
 
     def validate(self, data):
         if ((data['active'] or data['verified']) and data['duplicate']):
@@ -897,8 +960,8 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     for req_resp in item.unsaved_req_resp:
                         burp_rr = BurpRawRequestResponse(
                             finding=item,
-                            burpRequestBase64=req_resp["req"],
-                            burpResponseBase64=req_resp["resp"])
+                            burpRequestBase64=base64.b64encode(req_resp["req"].encode("utf-8")),
+                            burpResponseBase64=base64.b64encode(req_resp["resp"].encode("utf-8")))
                         burp_rr.clean()
                         burp_rr.save()
 
@@ -906,8 +969,8 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                         item.unsaved_response is not None):
                     burp_rr = BurpRawRequestResponse(
                         finding=item,
-                        burpRequestBase64=item.unsaved_request,
-                        burpResponseBase64=item.unsaved_response)
+                        burpRequestBase64=base64.b64encode(item.unsaved_request.encode()),
+                        burpResponseBase64=base64.b64encode(item.unsaved_response.encode()))
                     burp_rr.clean()
                     burp_rr.save()
 
@@ -919,12 +982,19 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                         query=endpoint.query,
                         fragment=endpoint.fragment,
                         product=test.engagement.product)
-
+                    eps, created = Endpoint_Status.objects.get_or_create(
+                            finding=item,
+                            endpoint=ep)
+                    ep.endpoint_status.add(eps)
+                    item.endpoint_status.add(eps)
                     item.endpoints.add(ep)
-
                 if endpoint_to_add:
                     item.endpoints.add(endpoint_to_add)
-
+                    eps, created = Endpoint_Status.objects.get_or_create(
+                            finding=item,
+                            endpoint=endpoint_to_add)
+                    ep.endpoint_status.add(eps)
+                    item.endpoint_status.add(eps)
                 if item.unsaved_tags is not None:
                     item.tags = item.unsaved_tags
 
@@ -1145,19 +1215,20 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                         for req_resp in item.unsaved_req_resp:
                             burp_rr = BurpRawRequestResponse(
                                 finding=finding,
-                                burpRequestBase64=req_resp['req'],
-                                burpResponseBase64=req_resp['resp'])
+                                burpRequestBase64=base64.b64encode(req_resp["req"].encode("utf-8")),
+                                burpResponseBase64=base64.b64encode(req_resp["resp"].encode("utf-8")))
                             burp_rr.clean()
                             burp_rr.save()
 
                     if item.unsaved_request and item.unsaved_response:
                         burp_rr = BurpRawRequestResponse(
                             finding=finding,
-                            burpRequestBase64=item.unsaved_request,
-                            burpResponseBase64=item.unsaved_response)
+                            burpRequestBase64=base64.b64encode(item.unsaved_request.encode()),
+                            burpResponseBase64=base64.b64encode(item.unsaved_response.encode()))
                         burp_rr.clean()
                         burp_rr.save()
 
+                # for existing findings: make sure endpoints are present or created
                 if finding:
                     finding_count += 1
                     for endpoint in item.unsaved_endpoints:
@@ -1168,9 +1239,19 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                             query=endpoint.query,
                             fragment=endpoint.fragment,
                             product=test.engagement.product)
+                        eps, created = Endpoint_Status.objects.get_or_create(
+                            finding=finding,
+                            endpoint=ep)
+                        ep.endpoint_status.add(eps)
                         finding.endpoints.add(ep)
+                        finding.endpoint_status.add(eps)
                     if endpoint_to_add:
+                        eps, created = Endpoint_Status.objects.get_or_create(
+                            finding=finding,
+                            endpoint=endpoint_to_add)
                         finding.endpoints.add(endpoint_to_add)
+                        endpoint_to_add.endpoint_status.add(eps)
+                        finding.endpoint_status.add(eps)
                     if item.unsaved_tags:
                         finding.tags = item.unsaved_tags
 

@@ -13,7 +13,7 @@ jobs:
       UML_FILES: ".puml"
     steps:
       - name: Checkout Source
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
       - name: Get changed UML files
         id: getfile
         run: |
@@ -30,7 +30,7 @@ jobs:
         with:
           args: -v -tpng ${{ steps.getfile.outputs.files }}
       - name: Push Local Changes
-        uses: stefanzweifel/git-auto-commit-action@v4.1.2
+        uses: stefanzweifel/git-auto-commit-action@v4.7.1
         with:
           commit_user_name: "PlantUML_bot"
           commit_user_email: "noreply@defectdojo.org"

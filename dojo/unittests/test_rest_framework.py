@@ -45,7 +45,6 @@ class BaseClass():
 
         @skipIfNotSubclass('ListModelMixin')
         def test_list(self):
-
             if hasattr(self.endpoint_model, 'tags') and self.payload:
                 # create a new instance first to make sure there's at least 1 instance with tags set by payload to trigger tag handling code
                 response = self.client.post(self.url, self.payload)
@@ -90,7 +89,10 @@ class BaseClass():
             response = self.client.patch(
                 relative_url, self.update_fields)
             for key, value in self.update_fields.items():
-                self.assertEqual(value, response.data[key])
+                # some exception as push_to_jira has been implemented strangely in the update methods in the api
+                if key != 'push_to_jira':
+                    self.assertEqual(value, response.data[key])
+            self.assertFalse('push_to_jira' in response.data)
             response = self.client.put(
                 relative_url, self.payload)
             self.assertEqual(200, response.status_code)
@@ -244,7 +246,7 @@ class FindingsTest(BaseClass.RESTEndpointTest):
             "dynamic_finding": False,
             "endpoints": [1, 2],
             "images": []}
-        self.update_fields = {'active': True}
+        self.update_fields = {'active': True, "push_to_jira": "True"}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -572,6 +574,13 @@ class UsersTest(BaseClass.RESTEndpointTest):
         self.endpoint_model = User
         self.viewname = 'user'
         self.viewset = UsersViewSet
+        self.payload = {
+            "username": "test_user",
+            "first_name": "test",
+            "last_name": "user",
+            "email": "example@email.com",
+            "is_active": True,
+        }
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 

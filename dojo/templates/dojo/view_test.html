@@ -167,12 +167,7 @@
         <div class="panel-heading tight">
             <div class="clearfix">
                 <h4 class="has-filters"> Findings ({{findings_count}}) <small>{{ test.id|get_severity_count:"test" }}</small>
-                    <div class="dropdown pull-right">
-                        <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary">
-                            <i class="fa fa-filter"></i>
-                            <i class="caret"></i>
-                        </button>
-                    </div>
+                    <div class="dropdown pull-right"></div>
                     <div id="test-pulldown" class="dropdown pull-right">
                         <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                 data-toggle="dropdown" aria-expanded="true">
@@ -315,7 +310,7 @@
                                     </div>
                                 </th>
                             {% endif %}
-                            <th>Act.</th>
+                            <th></th>
                             <th class="centered">Severity</th>
                             <th>Name</th>
                             <th>CWE</th>
@@ -740,8 +735,88 @@
 {% block postscript %}
     <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
     <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
-    <script type="application/javascript" src="{% static "chosen/chosen.jquery.min.js" %}"></script>
     <script type="text/javascript">
+        // DataTables setup
+        $(document).ready(function(){
+            date =  new Date().toISOString().slice(0, 10);
+            var fileDated = 'Findings_List_' + date;
+            var buttonCommon = {
+                exportOptions: {
+                    columns: ':not(:eq(8))',
+                    stripHtml: true,
+                    stripNewlines: true,
+                    trim: true,
+                    orthogonal: 'export'
+                },
+                filename: fileDated,
+                title: 'Findings List'
+            };
+
+            // Mapping of table columns to objects for proper cleanup and data formatting
+            var dojoTable = $('#test_findings').DataTable({
+                drawCallback: function(){
+                    $('.has-popover').popover({'trigger':'hover'});
+                },
+                colReorder: true,
+                "columns": [
+                    {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled %}                    
+                    { "data": "dropdown" },
+                    {% endif %}
+                    { "data": "action" },
+                    { "data": "severity" },
+                    { "data": "name" },
+                    { "data": "cwe" },
+                    { "data": "date" },
+                    { "data": "age" },
+                    {% if system_settings.enable_finding_sla %}
+                        { "data": "sla" },
+                    {% endif %}
+                    { "data": "reporter" },
+                    { "data": "status" },
+                    {% if system_settings.enable_jira %}
+                        {% if jira_config and product_tab or not product_tab %}
+                            { "data": "jira" },
+                            { "data": "jira_age" },
+                            { "data": "jira_change" },
+                        {% endif %}
+                    {% endif %}
+                ],
+                columnDefs: [
+                    { 
+                        "orderable": false,
+                        "targets": [0]
+                    },
+                ],
+                dom: 'Bfrtip',
+                paging: false,
+                buttons: [
+                    {
+                        extend: 'colvis',
+                        columns: ':not(.noVis)'
+                    },
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'copy'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'excel',
+                        autoFilter: true,
+                        sheetName: 'Exported data',
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'csv'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'pdf',
+                        orientation: 'landscape',
+                        pageSize: 'LETTER'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'print'
+                    }),
+                ],
+            });
+        });
+
         $(function () {
           $(".chosen-select").chosen({
             'placeholder_text_multiple': 'Select or add some tags...',
@@ -811,36 +886,36 @@
               $('.table-responsive').css( "overflow", "auto" );
             })
             $('input[type="checkbox"]').change(function () {
-              checkbox_count = 0;
-              finding = $(this).attr("name");
-              if (finding.indexOf("select_") >= 0)
-              {
-                var checkbox_values = $("input[type=checkbox][name^='select_']");
-                for (var i = 0; i < checkbox_values.length; i++) {
-                  if ($(checkbox_values[i]).prop("checked")) {
-                    checkbox_count++;
-                  }
-                }
-
-                if ($(this).prop("checked")) {
-                  $('div#bulk_edit_menu').removeClass('hidden');
-                } else {
-                  checkbox_count--;
+                checkbox_count = 0;
+                finding = $(this).attr("name");
+                if (finding.indexOf("select_") >= 0)
+                {
                   var checkbox_values = $("input[type=checkbox][name^='select_']");
-                  var checked = false;
-
                   for (var i = 0; i < checkbox_values.length; i++) {
                     if ($(checkbox_values[i]).prop("checked")) {
-                      checked = true;
+                      checkbox_count++;
                     }
                   }
-                  if (checked == false) {
-                    $('div#bulk_edit_menu').addClass('hidden');
+  
+                  if ($(this).prop("checked")) {
+                    $('div#bulk_edit_menu').removeClass('hidden');
+                  } else {
+                    checkbox_count--;
+                    var checkbox_values = $("input[type=checkbox][name^='select_']");
+                    var checked = false;
+  
+                    for (var i = 0; i < checkbox_values.length; i++) {
+                      if ($(checkbox_values[i]).prop("checked")) {
+                        checked = true;
+                      }
+                    }
+                    if (checked == false) {
+                      $('div#bulk_edit_menu').addClass('hidden');
+                    }
                   }
+  
                 }
-
-              }
-            });
+              });
             $('a.merge').on('click', function (e) {
               if (checkbox_count > 1)
               {
@@ -1000,84 +1075,6 @@
 
         });
 
-        // DataTables setup
-        $(document).ready(function(){
-            date =  new Date().toISOString().slice(0, 10);
-            var fileDated = 'Findings_List_' + date;
-            var buttonCommon = {
-                exportOptions: {
-                    columns: ':not(:eq(8))',
-                    stripHtml: true,
-                    stripNewlines: true,
-                    trim: true,
-                    orthogonal: 'export'
-                },
-                filename: fileDated,
-                title: 'Findings List'
-            };
-
-            // Mapping of table columns to objects for proper cleanup and data formatting
-            var dojoTable = $('#test_findings').DataTable({
-                drawCallback: function(){
-                    $('.has-popover').popover({'trigger':'hover'});
-                },
-                "columns": [
-                    {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled %}                    
-                    { "data": "dropdown" },
-                    {% endif %}
-                    { "data": "action" },
-                    { "data": "severity" },
-                    { "data": "name" },
-                    { "data": "cwe" },
-                    { "data": "date" },
-                    { "data": "age" },
-                    {% if system_settings.enable_finding_sla %}
-                        { "data": "sla" },
-                    {% endif %}
-                    { "data": "reporter" },
-                    { "data": "status" },
-                    {% if system_settings.enable_jira %}
-                        {% if jira_config and product_tab or not product_tab %}
-                            { "data": "jira" },
-                            { "data": "jira_age" },
-                            { "data": "jira_change" },
-                        {% endif %}
-                    {% endif %}
-                ],
-                columnDefs: [
-                    { 
-                        "orderable": false,
-                        "targets": [0]
-                    },
-                ],
-                dom: 'Bfrtip',
-                paging: false,
-                buttons: [
-                    {
-                        extend: 'colvis',
-                        columns: ':not(.noVis)'
-                    },
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'copy'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'excel',
-                        autoFilter: true,
-                        sheetName: 'Exported data',
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'csv'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'pdf',
-                        orientation: 'landscape',
-                        pageSize: 'LETTER'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'print'
-                    }),
-                ],
-            });
-        });
     </script>
+    {% include "dojo/filter_js_snippet.html" %}    
 {% endblock %}

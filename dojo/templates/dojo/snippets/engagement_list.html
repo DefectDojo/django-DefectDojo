@@ -211,7 +211,6 @@
     </div>
 </div>
 {% block postscript %}
-<script src="/static/jquery/dist/jquery.js"></script>
 <script>
         // DataTables setup
         $(document).ready(function() {
@@ -231,6 +230,7 @@
 
             // Mapping of table columns to objects for proper cleanup and data formatting
             var dojoTable = $('#{{status}}').DataTable({
+                colReorder: true,              
                 "columns": [
                     { "data": "action" },
                     { "data": "eng_name" },

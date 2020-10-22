@@ -11,7 +11,7 @@ from google.oauth2 import service_account
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
-from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.exceptions import ValidationError
 from django.urls import reverse
 from django.db.models import Q, QuerySet, Count
 from django.http import HttpResponseRedirect, Http404, HttpResponse
@@ -30,7 +30,7 @@ from dojo.models import Finding, Test, Notes, Note_Type, BurpRawRequestResponse,
     Finding_Template, JIRA_PKey, Cred_Mapping, Dojo_User, System_Settings, Endpoint_Status
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting, \
-    Product_Tab, max_safe, is_scan_file_too_large, add_jira_issue
+    Product_Tab, max_safe, is_scan_file_too_large, add_jira_issue, get_words_for_field
 from dojo.notifications.helper import create_notification
 from dojo.tasks import add_jira_issue_task
 from dojo.finding.views import find_available_notetypes
@@ -43,14 +43,11 @@ logger = logging.getLogger(__name__)
 parse_logger = logging.getLogger('dojo')
 
 
+@user_must_be_authorized(Test, 'view', 'tid')
 def view_test(request, tid):
     test = get_object_or_404(Test, pk=tid)
     prod = test.engagement.product
-    auth = request.user.is_staff or request.user in prod.authorized_users.all()
     tags = Tag.objects.usage_for_model(Finding)
-    if not auth:
-        # will render 403
-        raise PermissionDenied
     notes = test.notes.all()
     note_type_activation = Note_Type.objects.filter(is_active=True).count()
     if note_type_activation:
@@ -89,6 +86,9 @@ def view_test(request, tid):
             form = TypedNoteForm(available_note_types=available_note_types)
         else:
             form = NoteForm()
+
+    title_words = get_words_for_field(findings.qs, 'title')
+    component_words = get_words_for_field(findings.qs, 'component_name')
 
     paged_findings, total_findings_count = get_page_items_and_count(request, prefetch_for_findings(findings.qs), 25)
     paged_stub_findings = get_page_items(request, stub_findings, 25)
@@ -142,6 +142,8 @@ def view_test(request, tid):
                    'filtered': findings,
                    'findings_count': total_findings_count,
                    'stub_findings': paged_stub_findings,
+                   'title_words': title_words,
+                   'component_words': component_words,
                    'form': form,
                    'notes': notes,
                    'person': person,
@@ -173,6 +175,7 @@ def prefetch_for_findings(findings):
         prefetched_findings = prefetched_findings.annotate(active_endpoint_count=Count('endpoint_status__id', filter=Q(endpoint_status__mitigated=False)))
         prefetched_findings = prefetched_findings.annotate(mitigated_endpoint_count=Count('endpoint_status__id', filter=Q(endpoint_status__mitigated=True)))
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__authorized_users')
+        prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__prod_type__authorized_users')
     else:
         logger.debug('unable to prefetch because query was already executed')
 
@@ -352,6 +355,7 @@ def add_findings(request, tid):
             if new_finding.false_p or new_finding.active is False:
                 new_finding.mitigated = timezone.now()
                 new_finding.mitigated_by = request.user
+                new_finding.is_Mitigated = True
             create_template = new_finding.is_template
             # always false now since this will be deprecated soon in favor of new Finding_Template model
             new_finding.is_template = False
@@ -475,7 +479,7 @@ def add_temp_finding(request, tid, fid):
         jform = None
 
     if request.method == 'POST':
-        form = FindingForm(request.POST, template=True)
+        form = FindingForm(request.POST, template=True, req_resp=None)
         if (form['active'].value() is False or form['false_p'].value()) and form['duplicate'].value() is False:
             closing_disabled = Note_Type.objects.filter(is_mandatory=True, is_active=True).count()
             if closing_disabled != 0:
@@ -503,6 +507,7 @@ def add_temp_finding(request, tid, fid):
             if new_finding.false_p or new_finding.active is False:
                 new_finding.mitigated = timezone.now()
                 new_finding.mitigated_by = request.user
+                new_finding.is_Mitigated = True
 
             create_template = new_finding.is_template
             # is template always False now in favor of new model Finding_Template
@@ -517,7 +522,7 @@ def add_temp_finding(request, tid, fid):
             if 'jiraform-push_to_jira' in request.POST:
                 jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_pkey=test.engagement.product.jira_pkey)
                 if jform.is_valid():
-                    if request.user.usercontactinfo.block_execution:
+                    if Dojo_User.wants_block_execution(request.user):
                         add_jira_issue(new_finding, jform.cleaned_data.get('push_to_jira'))
                     else:
                         add_jira_issue_task.delay(new_finding, jform.cleaned_data.get('push_to_jira'))
@@ -557,7 +562,7 @@ def add_temp_finding(request, tid, fid):
                                  'The form has errors, please correct them below.',
                                  extra_tags='alert-danger')
     else:
-        form = FindingForm(template=True, initial={'active': False,
+        form = FindingForm(template=True, req_resp=None, initial={'active': False,
                                     'date': timezone.now().date(),
                                     'verified': False,
                                     'false_p': False,
@@ -592,11 +597,9 @@ def search(request, tid):
     templates = Finding_Template.objects.all()
     templates = TemplateFindingFilter(request.GET, queryset=templates)
     paged_templates = get_page_items(request, templates.qs, 25)
-    title_words = [word
-                   for finding in templates.qs
-                   for word in finding.title.split() if len(word) > 2]
 
-    title_words = sorted(set(title_words))
+    title_words = get_words_for_field(templates.qs, 'title')
+
     add_breadcrumb(parent=test, title="Add From Template", top_level=False, request=request)
     return render(request, 'dojo/templates.html',
                   {'templates': paged_templates,
@@ -846,6 +849,7 @@ def re_import_scan_results(request, tid):
                         finding.notes.add(note)
                         mitigated_count += 1
 
+                        endpoint_status = finding.endpoint_status.all()
                         for status in endpoint_status:
                             status.mitigated_by = request.user
                             status.mitigated_time = timezone.now()

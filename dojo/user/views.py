@@ -15,7 +15,7 @@ from tastypie.models import ApiKey
 
 from dojo.filters import UserFilter
 from dojo.forms import DojoUserForm, AddDojoUserForm, DeleteUserForm, APIKeyForm, UserContactInfoForm
-from dojo.models import Product, Dojo_User, Alerts
+from dojo.models import Product, Product_Type, Dojo_User, Alerts
 from dojo.utils import get_page_items, add_breadcrumb
 
 logger = logging.getLogger(__name__)
@@ -142,30 +142,6 @@ def delete_alerts(request):
                     {'alerts': alerts})
 
 
-def migrate_alerts(request):
-    alerts = Alerts.objects.filter(user_id=request.user)
-    dojo_types = ['engagement', 'test', 'product', 'finding']
-
-    if request.method == 'POST':
-        for alert in alerts:
-            url = alert.url
-            split_url = url.split('/')
-            item = set(dojo_types).intersection(split_url)
-            new_url = url[url.index(next(iter(item))) - 1:]
-            alert.url = new_url
-            alert.save()
-
-        messages.add_message(request,
-                                        messages.SUCCESS,
-                                        'Alerts migrated.',
-                                        extra_tags='alert-success')
-        return HttpResponseRedirect('alerts')
-
-    return render(request,
-                    'dojo/migrate_alerts.html',
-                    {'alerts': alerts})
-
-
 @login_required
 def alerts_json(request, limit=None):
     limit = request.GET.get('limit')
@@ -282,6 +258,10 @@ def add_user(request):
                 for p in form.cleaned_data['authorized_products']:
                     p.authorized_users.add(user)
                     p.save()
+            if 'authorized_product_types' in form.cleaned_data and len(form.cleaned_data['authorized_product_types']) > 0:
+                for pt in form.cleaned_data['authorized_product_types']:
+                    pt.authorized_users.add(user)
+                    pt.save()
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'User added successfully, you may edit if necessary.',
@@ -304,7 +284,11 @@ def add_user(request):
 def edit_user(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     authed_products = Product.objects.filter(authorized_users__in=[user])
-    form = AddDojoUserForm(instance=user, initial={'authorized_products': authed_products})
+    authed_product_types = Product_Type.objects.filter(authorized_users__in=[user])
+    form = AddDojoUserForm(instance=user, initial={
+        'authorized_products': authed_products,
+        'authorized_product_types': authed_product_types
+    })
     if not request.user.is_superuser:
         form.fields['is_staff'].widget.attrs['disabled'] = True
         form.fields['is_superuser'].widget.attrs['disabled'] = True
@@ -318,9 +302,6 @@ def edit_user(request, uid):
         contact_form = UserContactInfoForm(instance=user_contact)
 
     if request.method == 'POST':
-        for init_auth_prods in authed_products:
-            init_auth_prods.authorized_users.remove(user)
-            init_auth_prods.save()
         form = AddDojoUserForm(request.POST, instance=user)
         if user_contact is None:
             contact_form = UserContactInfoForm(request.POST)
@@ -333,6 +314,10 @@ def edit_user(request, uid):
                 for p in form.cleaned_data['authorized_products']:
                     p.authorized_users.add(user)
                     p.save()
+            if 'authorized_product_types' in form.cleaned_data and len(form.cleaned_data['authorized_product_types']) > 0:
+                for pt in form.cleaned_data['authorized_product_types']:
+                    pt.authorized_users.add(user)
+                    pt.save()
             contact = contact_form.save(commit=False)
             contact.user = user
             contact.save()
