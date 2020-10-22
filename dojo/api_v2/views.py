@@ -8,8 +8,8 @@ from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser
 from django_filters.rest_framework import DjangoFilterBackend
 from django.utils.decorators import method_decorator
-from drf_yasg.utils import swagger_auto_schema, no_body
-from drf_yasg import openapi
+from drf_yasg2 import openapi
+from drf_yasg2.utils import swagger_auto_schema, no_body
 import base64
 from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Finding, \

@@ -1,6 +1,15 @@
 name: Integration tests
-# run on pull_request_target instead of just pull_request as we need write access to update the status check
-on: [pull_request_target]
+# pull requests: 
+#      run on pull_request_target instead of just pull_request as we need write access to update the status check
+# dev, master:
+#      run on every push, which is when something gets merged also
+on: 
+  pull_request_target:
+  push:
+    branches:
+      - master
+      - dev
+
 jobs:
   integration_test:
     runs-on: ubuntu-latest
