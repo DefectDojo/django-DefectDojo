@@ -580,7 +580,9 @@ def _product_expand_decorator():
             in_=openapi.IN_QUERY, 
             description="Fields to expand based on their relation", 
             type=openapi.TYPE_ARRAY, 
-            items=openapi.Items(openapi.TYPE_STRING))
+            items=openapi.Items(
+                type=openapi.TYPE_STRING,
+                enum=list(serializers.ProductSerializer._expansion_serializers.keys())))
     ])
 
 @method_decorator(name="list", decorator=_product_expand_decorator())
