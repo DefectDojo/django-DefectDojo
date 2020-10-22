@@ -571,19 +571,21 @@ class DojoMetaViewSet(mixins.ListModelMixin,
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'product', 'endpoint', 'name', 'finding')
 
+
 def _product_expand_decorator():
     return swagger_auto_schema(
-    responses={status.HTTP_200_OK: serializers.ProductSerializer},
-    manual_parameters=[
-        openapi.Parameter(
-            name="expand", 
-            in_=openapi.IN_QUERY, 
-            description="Fields to expand based on their relation", 
-            type=openapi.TYPE_ARRAY, 
-            items=openapi.Items(
-                type=openapi.TYPE_STRING,
-                enum=list(serializers.ProductSerializer._expansion_serializers.keys())))
-    ])
+        responses={status.HTTP_200_OK: serializers.ProductSerializer},
+        manual_parameters=[
+            openapi.Parameter(
+                name="expand",
+                in_=openapi.IN_QUERY,
+                description="Fields to expand based on their relation",
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(
+                    type=openapi.TYPE_STRING,
+                    enum=list(serializers.ProductSerializer._expansion_serializers.keys())))
+        ])
+
 
 @method_decorator(name="list", decorator=_product_expand_decorator())
 @method_decorator(name="retrieve", decorator=_product_expand_decorator())

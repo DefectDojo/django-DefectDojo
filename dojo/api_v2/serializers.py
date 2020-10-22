@@ -320,15 +320,18 @@ class NoteTypeSerializer(serializers.ModelSerializer):
         model = Note_Type
         fields = '__all__'
 
+
 class ProductTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product_Type
         fields = '__all__'
 
+
 class RegulationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Regulation
         fields = '__all__'
+
 
 class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
     findings_count = serializers.SerializerMethodField()
@@ -358,7 +361,7 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
         rep = super().to_representation(instance)
         params = self.context["request"].GET
 
-        if not "expand" in params:
+        if "expand" not in params:
             return rep
 
         fields = params["expand"].split(",")
