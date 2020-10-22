@@ -42,6 +42,7 @@ celery:
   broker: rabbitmq
   logLevel: DEBUG
   beat:
+    annotations: {}
     affinity: {}
     nodeSelector: {}
     replicas: 1
@@ -54,6 +55,7 @@ celery:
         memory: 256Mi
     tolerations: []
   worker:
+    annotations: {}
     affinity: {}
     logLevel: DEBUG
     nodeSelector: {}
@@ -77,6 +79,7 @@ celery:
       # prefetch_multiplier: 128
 
 django:
+  annotations: {}
   affinity: {}
   ingress:
     enabled: true
