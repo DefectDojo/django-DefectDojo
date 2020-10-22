@@ -1,5 +1,9 @@
-from selenium.webdriver.support.ui import Select
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import Select, WebDriverWait
+from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import TimeoutException
+
 import unittest
 import sys
 import os
@@ -114,6 +118,12 @@ class FindingTest(BaseTestCase):
         # select Reviewer
         # Let's make the first user in the list a reviewer
         # set select element style from 'none' to 'inline'
+
+        try:
+            WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'id_reviewers_chosen')))
+        except TimeoutException:
+            self.fail('Timed out waiting for reviewer dropdown to initialize ')
+
         driver.execute_script("document.getElementsByName('reviewers')[0].style.display = 'inline'")
         # select the first option tag
         element = driver.find_element_by_xpath("//select[@name='reviewers']")
@@ -306,6 +316,7 @@ class FindingTest(BaseTestCase):
         self.goto_component_overview(driver)
         self.assertTrue(self.is_element_by_css_selector_present("table"))
 
+
 def add_finding_tests_to_suite(suite, jira=False, github=False, block_execution=False):
     if jira:
         suite.addTest(FindingTest('enable_jira'))
@@ -331,12 +342,7 @@ def add_finding_tests_to_suite(suite, jira=False, github=False, block_execution=
     suite.addTest(FindingTest('test_clear_review_from_finding'))
     suite.addTest(FindingTest('test_close_finding'))
     suite.addTest(FindingTest('test_make_finding_a_template'))
-
-    if not jira:
-        # existing problem with jira enabled, this results in a 404 from something bootstrap.min.js is trying to load, disabling for now
-        # see https://github.com/DefectDojo/django-DefectDojo/issues/2371
-        suite.addTest(FindingTest('test_apply_template_to_a_finding'))
-
+    suite.addTest(FindingTest('test_apply_template_to_a_finding'))
     suite.addTest(FindingTest('test_import_scan_result'))
     suite.addTest(FindingTest('test_delete_finding'))
     suite.addTest(FindingTest('test_delete_finding_template'))
@@ -346,7 +352,7 @@ def add_finding_tests_to_suite(suite, jira=False, github=False, block_execution=
 
 def suite():
     suite = unittest.TestSuite()
-    add_finding_tests_to_suite(suite, jira=False, github=False, block_execution=False)
+    # add_finding_tests_to_suite(suite, jira=False, github=False, block_execution=False)
     add_finding_tests_to_suite(suite, jira=True, github=True, block_execution=True)
     return suite
 
