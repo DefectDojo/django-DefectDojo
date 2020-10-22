@@ -211,9 +211,6 @@ USE_TZ = env('DD_USE_TZ')
 
 TEST_RUNNER = env('DD_TEST_RUNNER')
 
-# grabs the celery log level from environment
-CELERY_LOG_LEVEL = env('DD_CELERY_LOG_LEVEL')
-
 # ------------------------------------------------------------------------------
 # DATABASE
 # ------------------------------------------------------------------------------
@@ -864,7 +861,7 @@ LOGGING = {
         },
         'celery': {
             'handlers': [r'%s' % LOGGING_FORMAT],
-            'level': r'%s' % CELERY_LOG_LEVEL,
+            'level': 'INFO',
             'propagate': False,
             # does not seem to work?
             # 'worker_hijack_root_logger': False,
