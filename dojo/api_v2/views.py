@@ -236,6 +236,18 @@ class FindingViewSet(mixins.ListModelMixin,
                      ra_api.AcceptedFindingsMixin,
                      viewsets.GenericViewSet):
     serializer_class = serializers.FindingSerializer
+    queryset = Finding.objects.all().prefetch_related('endpoints',
+                                                    'reviewers',
+                                                    'images',
+                                                    'found_by',
+                                                    'notes',
+                                                    'risk_acceptance_set',
+                                                    'test',
+                                                    'test__test_type',
+                                                    'test__engagement',
+                                                    'test__environment',
+                                                    'test__engagement__product',
+                                                    'test__engagement__product__prod_type')
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ApiFindingFilter
 
