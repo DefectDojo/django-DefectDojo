@@ -65,6 +65,13 @@ EOD
   python3 manage.py loaddata regulation
   python3 manage.py import_surveys
   python3 manage.py loaddata initial_surveys
+
+  # If there is extra fixtures, load them
+  for i in $(ls dojo/fixtures/extra_*.json 2>/dev/null) ; do
+    echo "Loading $i"
+    python3 manage.py loaddata ${i%.*}
+  done
+
   python3 manage.py installwatson
   exec python3 manage.py buildwatson
 fi
