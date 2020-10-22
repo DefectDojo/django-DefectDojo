@@ -352,7 +352,7 @@ def add_finding_tests_to_suite(suite, jira=False, github=False, block_execution=
 
 def suite():
     suite = unittest.TestSuite()
-    # add_finding_tests_to_suite(suite, jira=False, github=False, block_execution=False)
+    add_finding_tests_to_suite(suite, jira=False, github=False, block_execution=False)
     add_finding_tests_to_suite(suite, jira=True, github=True, block_execution=True)
     return suite
 
