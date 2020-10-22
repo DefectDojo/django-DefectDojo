@@ -403,6 +403,61 @@ class ProductTest(BaseClass.RESTEndpointTest):
         self.update_fields = {'prod_type': 2}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
+    def test_no_expansion(self):
+        current_objects = self.client.get(self.url, format='json').data
+        product = current_objects['results'][0]
+        relative_url = self.url + '%s/' % product['id']
+        response = self.client.get(relative_url)
+        self.assertEqual(response.data["product_manager"], product['product_manager'])
+        self.assertEqual(response.data["technical_contact"], product['technical_contact'])
+        self.assertEqual(response.data["team_manager"], product['team_manager'])
+        self.assertEqual(response.data["authorized_users"], product['authorized_users'])
+        self.assertEqual(response.data["prod_type"], product['prod_type'])
+
+    def test_bad_expansion(self):
+        current_objects = self.client.get(self.url, format='json').data
+        product = current_objects['results'][0]
+        relative_url = self.url + '%s/?expand=bad_field' % product['id']
+        response = self.client.get(relative_url)
+        self.assertEqual(response.data["product_manager"], product['product_manager'])
+        self.assertEqual(response.data["technical_contact"], product['technical_contact'])
+        self.assertEqual(response.data["team_manager"], product['team_manager'])
+        self.assertEqual(response.data["authorized_users"], product['authorized_users'])
+        self.assertEqual(response.data["prod_type"], product['prod_type'])
+
+    def test_simple_field_good_expansion(self):
+        current_objects = self.client.get(self.url, format='json').data
+        product = current_objects['results'][0]
+
+        product_manager = self.client.get("/api/v2/users/%s/" % product['product_manager'], format='json').data
+        technical_contact = self.client.get("/api/v2/users/%s/" % product['technical_contact'], format='json').data
+        team_manager = self.client.get("/api/v2/users/%s/" % product['team_manager'], format='json').data
+        prod_type = self.client.get("/api/v2/product_types/%s/" % product['prod_type'], format='json').data
+        
+        relative_url = self.url + '%s/?expand=product_manager,technical_contact,team_manager,prod_type' % product['id']
+        response = self.client.get(relative_url)
+
+        self.assertEqual(response.data["product_manager"], product_manager)
+        self.assertEqual(response.data["technical_contact"], technical_contact)
+        self.assertEqual(response.data["team_manager"], team_manager)
+        self.assertEqual(response.data["authorized_users"], product['authorized_users'])
+        self.assertEqual(response.data["prod_type"], prod_type)
+        self.assertEqual(response.data["regulations"], product["regulations"])
+
+    def test_complex_field_good_expansion(self):
+        current_objects = self.client.get(self.url, format='json').data
+        product = current_objects['results'][0]
+        relative_url = self.url + '%s/?expand=authorized_users' % product['id']
+        response = self.client.get(relative_url)
+
+        all_users = self.client.get('/api/v2/users/').data['results']
+        authorized_users = [user for user in all_users if user['id'] in product['authorized_users']]
+
+        self.assertEqual(response.data["product_manager"], product['product_manager'])
+        self.assertEqual(response.data["technical_contact"], product['technical_contact'])
+        self.assertEqual(response.data["team_manager"], product['team_manager'])
+        self.assertEqual(response.data["prod_type"], product['prod_type'])
+        self.assertListEqual(response.data['authorized_users'], authorized_users)
 
 class ScanSettingsTest(BaseClass.RESTEndpointTest):
     fixtures = ['dojo_testdata.json']
