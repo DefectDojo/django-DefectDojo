@@ -80,6 +80,8 @@ RUN \
   cp dojo/settings/settings.dist.py dojo/settings/settings.py
 COPY tests/ ./tests/
 RUN \
+  rm -f /readme.txt && \
+  rm -f dojo/fixtures/readme.txt && \
   mkdir -p dojo/migrations && \
   chmod g=u dojo/migrations && \
   true
