@@ -55,6 +55,32 @@
                 $('#id_enable_' + value + '_notifications').change(function() { updatenotificationsgroup(value)});
             });
         });
+        
+        $(function () {
+            var jira_url = $('<span>JIRA Webhook url: <a id="jira_url" href="#">#</a></span>')
+            $(jira_url).css('padding-left', '5px')
+
+            var generate_secret = $('<i class="fa fa-refresh has-popover" data-trigger="hover" data-content="Click to generate a new secret" data-placement="right" data-container="body" data-original-title="" title=""></i>')
+            $('#id_jira_webhook_secret').css('display', 'inline-block');
+            $('#id_jira_webhook_secret').width('25%')            
+            $('#id_jira_webhook_secret').after(generate_secret);
+            $(generate_secret).css('padding-left', '5px')
+            $(generate_secret).popover()
+            $(generate_secret).after(jira_url)
+            $(generate_secret).click(function () {
+                $('#id_jira_webhook_secret').val(generateGUID())
+                jira_secret_changed()
+            });
+
+            $('#id_jira_webhook_secret').keyup(jira_secret_changed)
+            jira_secret_changed()            
+        });
+       
+        function jira_secret_changed() {
+            $(jira_url).attr('href', '/jira/webhook/' +  $('#id_jira_webhook_secret').val())
+            $(jira_url).text(absolutePath($(jira_url).attr('href')))
+        }
+
 
     </script>
 {% endblock %}
