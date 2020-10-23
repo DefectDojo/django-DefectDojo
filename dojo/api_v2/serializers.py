@@ -646,7 +646,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     def get_related_fields(self, obj):
         query_params = self.context['request'].query_params
-        if 'related_fields' in query_params:
+        if 'related_fields' in query_params and query_params['related_fields'] == 'true':
             related_fields = {
                 'product_type': {
                     'id': obj.test.engagement.product.prod_type.id,
