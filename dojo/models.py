@@ -131,7 +131,7 @@ class System_Settings(models.Model):
                                       verbose_name='Enable JIRA web hook. Please note: It is strongly recommended to use a secret and / or whitelist the Jira server using a proxy such as Nginx.',
                                       blank=False)
     # will be set to random / uuid by initializer, so allow blank/null
-    jira_webhook_secret = models.CharField(max_length=36, blank=False, null=True, verbose_name='JIRA Webhook secret',
+    jira_webhook_secret = models.CharField(max_length=36, blank=False, null=True, verbose_name='JIRA Webhook URL',
                                            help_text='Secret needed in URL for incoming JIRA Webhook, i.e. https://dojo.com/jira/webhook/hjjhll-234hj2134-21kh123/')
 
     jira_choices = (('Critical', 'Critical'),
