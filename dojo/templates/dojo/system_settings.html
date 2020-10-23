@@ -39,6 +39,9 @@
     </form>
     </div>
 {% endblock %}
+{comment}
+Django forms are very rigid so without crispy-forms we're forced to use javascript to add some flavour...
+{endcomment}
 {% block postscript %}
     <script>
         function updatenotificationsgroup(group) {
@@ -55,10 +58,11 @@
                 $('#id_enable_' + value + '_notifications').change(function() { updatenotificationsgroup(value)});
             });
         });
-        
+
         $(function () {
-            var jira_url = $('<span>JIRA Webhook url: <a id="jira_url" href="#">#</a></span>')
-            $(jira_url).css('padding-left', '5px')
+            var jira_url = $('<span>'+ absolutePath('/jira/webhook/') + '</span>')
+            $(jira_url).css('padding-right', '1px')
+            $('#id_jira_webhook_secret').before(jira_url);
 
             var generate_secret = $('<i class="fa fa-refresh has-popover" data-trigger="hover" data-content="Click to generate a new secret" data-placement="right" data-container="body" data-original-title="" title=""></i>')
             $('#id_jira_webhook_secret').css('display', 'inline-block');
@@ -66,21 +70,11 @@
             $('#id_jira_webhook_secret').after(generate_secret);
             $(generate_secret).css('padding-left', '5px')
             $(generate_secret).popover()
-            $(generate_secret).after(jira_url)
+
             $(generate_secret).click(function () {
                 $('#id_jira_webhook_secret').val(generateGUID())
-                jira_secret_changed()
             });
-
-            $('#id_jira_webhook_secret').keyup(jira_secret_changed)
-            jira_secret_changed()            
         });
-       
-        function jira_secret_changed() {
-            $(jira_url).attr('href', '/jira/webhook/' +  $('#id_jira_webhook_secret').val())
-            $(jira_url).text(absolutePath($(jira_url).attr('href')))
-        }
-
 
     </script>
 {% endblock %}
