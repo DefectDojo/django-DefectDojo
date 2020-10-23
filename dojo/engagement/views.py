@@ -9,7 +9,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
 from django.urls import reverse
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.http import HttpResponseRedirect, StreamingHttpResponse, Http404, HttpResponse, FileResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.cache import cache_page
@@ -298,7 +298,16 @@ def delete_engagement(request, eid):
 @user_must_be_authorized(Engagement, 'view', 'eid')
 def view_engagement(request, eid):
     eng = get_object_or_404(Engagement, id=eid)
-    tests = Test.objects.filter(engagement=eng).prefetch_related('tagged_items__tag', 'test_type').order_by('test_type__name', '-updated')
+    tests = (
+        Test.objects.filter(engagement=eng)
+            .prefetch_related('tagged_items__tag', 'test_type')
+            .annotate(count_findings_test_all=Count('finding__id'))
+            .annotate(count_findings_test_active_verified=Count('finding__id', filter=Q(finding__active=True)))
+            .annotate(count_findings_test_mitigated=Count('finding__id', filter=Q(finding__is_Mitigated=True)))
+            .annotate(count_findings_test_dups=Count('finding__id', filter=Q(finding__duplicate=True)))
+            .order_by('test_type__name', '-updated')
+    )
+
     prod = eng.product
     risks_accepted = eng.risk_acceptance.all().select_related('owner')
     preset_test_type = None
