@@ -128,7 +128,7 @@ class System_Settings(models.Model):
                                       verbose_name='Enable JIRA integration',
                                       blank=False)
     enable_jira_web_hook = models.BooleanField(default=False,
-                                      verbose_name='Enable JIRA web hook. Please note: It is strongly recommended to use a secret and / or whitelist the Jira server using a proxy such as Nginx.',
+                                      verbose_name='Enable JIRA web hook. Please note: It is strongly recommended to IP whitelist the JIRA server using a proxy such as Nginx.',
                                       blank=False)
     # will be set to random / uuid by initializer, so allow blank/null
     jira_webhook_secret = models.CharField(max_length=36, blank=False, null=True, verbose_name='JIRA Webhook URL',
