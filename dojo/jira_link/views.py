@@ -28,19 +28,21 @@ logger = logging.getLogger(__name__)
 @csrf_exempt
 def webhook(request, secret=None):
     print('secret: ' + str(secret))
-    # Webhook shouldn't be active if jira isn't enabled
     if not get_system_setting('enable_jira'):
         logger.debug('ignoring incoming webhook as JIRA is disabled.')
         raise PermissionDenied('JIRA disable')
     elif not get_system_setting('enable_jira_web_hook'):
         logger.debug('ignoring incoming webhook as JIRA Webhook is disabled.')
         raise PermissionDenied('JIRA Webhook disabled')
-    elif not get_system_setting('jira_webhook_secret'):
-        logger.debug('ignoring incoming webhook as JIRA Webhook secret is empty.')
-        raise PermissionDenied('JIRA Webhook secret cannot be empty')
-    elif secret != get_system_setting('jira_webhook_secret'):
-        logger.warning('invalid secret provided to JIRA Webhook')
-        raise PermissionDenied('invalid secret provided to JIRA Webhook')
+    elif not get_system_setting('disable_jira_webhook_secret'):
+        if not get_system_setting('jira_webhook_secret'):
+            logger.warning('ignoring incoming webhook as JIRA Webhook secret is empty in Defect Dojo system settings.')
+            raise PermissionDenied('JIRA Webhook secret cannot be empty')
+        if secret != get_system_setting('jira_webhook_secret'):
+            logger.warning('invalid secret provided to JIRA Webhook')
+            raise PermissionDenied('invalid or no secret provided to JIRA Webhook')
+
+    # if webhook secret is disabled in system_settings, we ignore the incoming secret, even if it doesn't match
 
     if request.method == 'POST':
         parsed = json.loads(request.body.decode('utf-8'))
