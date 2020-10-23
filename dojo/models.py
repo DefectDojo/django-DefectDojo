@@ -124,15 +124,24 @@ class System_Settings(models.Model):
                                               "issue reaches the maximum "
                                               "number of duplicates, the "
                                               "oldest will be deleted.")
+
     enable_jira = models.BooleanField(default=False,
                                       verbose_name='Enable JIRA integration',
                                       blank=False)
+
     enable_jira_web_hook = models.BooleanField(default=False,
-                                      verbose_name='Enable JIRA web hook. Please note: It is strongly recommended to IP whitelist the JIRA server using a proxy such as Nginx.',
+                                      verbose_name='Enable JIRA web hook',
+                                      help_text='Please note: It is strongly recommended to use a secret below and / or IP whitelist the JIRA server using a proxy such as Nginx.',
                                       blank=False)
-    # will be set to random / uuid by initializer, so allow blank/null
+
+    disable_jira_webhook_secret = models.BooleanField(default=False,
+                                      verbose_name='Disable web hook secret',
+                                      help_text='Allows incoming requests without a secret (discouraged legacy behaviour)',
+                                      blank=False)
+
+    # will be set to random / uuid by initializer so null needs to be True
     jira_webhook_secret = models.CharField(max_length=64, blank=False, null=True, verbose_name='JIRA Webhook URL',
-                                           help_text='Secret needed in URL for incoming JIRA Webhook, i.e. https://dojo.com/jira/webhook/hjjhll-234hj2134-21kh123/')
+                                           help_text='Secret needed in URL for incoming JIRA Webhook')
 
     jira_choices = (('Critical', 'Critical'),
                     ('High', 'High'),
