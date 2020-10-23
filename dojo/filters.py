@@ -297,6 +297,7 @@ class ComponentFilter(ProductComponentFilter):
         queryset=Product_Type.objects.all().order_by('name'),
         label="Product Type")
 
+
 class EngagementFilter(DojoFilter):
     engagement__lead = ModelChoiceFilter(
         queryset=User.objects.filter(
