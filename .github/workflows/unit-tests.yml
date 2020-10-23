@@ -33,7 +33,6 @@ jobs:
         if: github.event_name != 'pull_request' && github.event_name != 'pull_request_target'
         uses: actions/checkout@v2
 
-
       - name: Set unit-test mode
         run: docker/setEnv.sh unit_tests_cicd
       
