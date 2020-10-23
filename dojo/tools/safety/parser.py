@@ -5,12 +5,13 @@ from dojo.models import Finding
 
 logger = logging.getLogger(__name__)
 
+
 class SafetyParser(object):
     def __init__(self, json_output, test):
 
         # Grab Safety DB for CVE lookup
         url = "https://raw.githubusercontent.com/pyupio/safety-db/master/data/insecure_full.json"
-        try: 
+        try:
             response = urllib.request.urlopen(url)
             safety_db = json.loads(response.read().decode('utf-8'))
         except urllib.error.URLError as e:
