@@ -82,6 +82,7 @@ dojo/fixtures/initial_surveys.json
 *.db
 celerybeat.pid
 *.env*
+dojo/uwsgi.ini
 
 weekly.txt
 Monthly.txt
@@ -122,3 +123,5 @@ docker/certs/*
 # Helm dependencies
 helm/defectdojo/charts
 
+# pre-commit
+.pre-commit-config.yaml
