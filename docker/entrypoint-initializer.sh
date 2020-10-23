@@ -67,7 +67,7 @@ EOD
   python3 manage.py loaddata initial_surveys
 
   # If there is extra fixtures, load them
-  for i in $(ls dojo/fixtures/extra_*.json 2>/dev/null) ; do
+  for i in $(ls dojo/fixtures/extra_*.json | sort -n 2>/dev/null) ; do
     echo "Loading $i"
     python3 manage.py loaddata ${i%.*}
   done

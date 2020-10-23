@@ -2,3 +2,5 @@
 .gitignore
 *.md
 .env*
+docker/certs/readme.txt
+docker/extra_fixtures/readme.txt
