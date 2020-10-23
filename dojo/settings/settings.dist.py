@@ -803,14 +803,13 @@ JIRA_ISSUE_TYPE_CHOICES_CONFIG = (
 )
 
 JIRA_SSL_VERIFY = env('DD_JIRA_SSL_VERIFY')
-LOGGING_FORMAT = env('DD_LOGGING_FORMAT')
-
 
 # ------------------------------------------------------------------------------
 # LOGGING
 # ------------------------------------------------------------------------------
 # See http://docs.djangoproject.com/en/dev/topics/logging for
 # more details on how to customize your logging configuration.
+LOGGING_FORMAT = env('DD_LOGGING_FORMAT')
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
