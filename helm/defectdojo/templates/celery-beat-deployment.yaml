@@ -4,7 +4,7 @@ kind: Deployment
 metadata:
   name: {{ $fullName }}-celery-beat
   labels:
-    defectdojo.org/component: celery
+    defectdojo.org/component: celery-beat
     app.kubernetes.io/name: {{ include "defectdojo.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
