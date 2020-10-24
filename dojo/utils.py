@@ -3,6 +3,7 @@ import binascii
 import os
 import hashlib
 import io
+import bleach
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 from calendar import monthrange
@@ -2296,4 +2297,4 @@ def create_link(url, title):
     link += '\">'
     link += title
     link += '</a>'
-    return link
+    return bleach.clean(link, tags = ['a'], attributes = {'a': ['href', 'target', 'title']})

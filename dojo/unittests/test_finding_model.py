@@ -50,6 +50,16 @@ class TestFindingModel(TestCase):
         engagement.source_code_management_uri = 'URL'
         self.assertEqual('<a href=\"URL/FilePath\" target=\"_blank\" title=\"FilePath\">FilePath</a>', finding.get_file_path_with_link())
 
+    def test_get_file_path_with_xss_attack(self):
+        test = Test()
+        engagement = Engagement()
+        test.engagement = engagement
+        finding = Finding()
+        finding.test = test
+        finding.file_path = '<SCRIPT SRC=http://xss.rocks/xss.js></SCRIPT>'
+        engagement.source_code_management_uri = '<IMG SRC=javascript:alert(\'XSS\')>'
+        self.assertEqual('<a href="&lt;IMG SRC=javascript:alert(\'XSS\')>/&lt;SCRIPT SRC=http://xss.rocks/xss.js>&lt;/SCRIPT>" target="_blank" title="&lt;SCRIPT SRC=http://xss.rocks/xss.js>&lt;/SCRIPT>">&lt;SCRIPT SRC=http://xss.rocks/xss.js&gt;&lt;/SCRIPT&gt;</a>', finding.get_file_path_with_link())
+
     def test_get_references_with_links_no_references(self):
         finding = Finding()
         self.assertEqual(None, finding.get_references_with_links())
@@ -77,7 +87,7 @@ class TestFindingModel(TestCase):
     def test_get_references_with_links_complicated_url_with_parameter(self):
         finding = Finding()
         finding.references = 'URL:https://www.example.com/path?param1=abc&_param2=xyz'
-        self.assertEqual('URL:<a href=\"https://www.example.com/path?param1=abc&_param2=xyz\" target=\"_blank\" title=\"https://www.example.com/path?param1=abc&_param2=xyz\">https://www.example.com/path?param1=abc&_param2=xyz</a>', finding.get_references_with_links())
+        self.assertEqual('URL:<a href=\"https://www.example.com/path?param1=abc&amp;_param2=xyz\" target=\"_blank\" title=\"https://www.example.com/path?param1=abc&amp;_param2=xyz\">https://www.example.com/path?param1=abc&amp;_param2=xyz</a>', finding.get_references_with_links())
 
     def test_get_references_with_links_two_urls(self):
         finding = Finding()
