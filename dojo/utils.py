@@ -2297,4 +2297,4 @@ def create_link(url, title):
     link += '\">'
     link += title
     link += '</a>'
-    return bleach.clean(link, tags = ['a'], attributes = {'a': ['href', 'target', 'title']})
+    return bleach.clean(link, tags=['a'], attributes={'a': ['href', 'target', 'title']})
