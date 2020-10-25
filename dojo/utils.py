@@ -38,7 +38,7 @@ from django.contrib import messages
 from django.http import HttpResponseRedirect
 import crum
 from celery.decorators import task
-from dojo.decorators import dojo_async_task
+from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -355,6 +355,15 @@ def set_duplicate_reopen(new_finding, existing_finding):
     existing_finding.notes.create(author=existing_finding.reporter,
                                     entry="This finding has been automatically re-openend as it was found in recent scans.")
     existing_finding.save()
+
+
+@dojo_model_to_id
+@dojo_async_task
+@task
+@dojo_model_from_id
+def test_valentijn(new_finding):
+    logger.debug('test_valentijn:')
+    logger.debug(new_finding)
 
 
 @dojo_async_task

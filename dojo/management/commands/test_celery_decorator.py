@@ -5,6 +5,7 @@ from dojo.models import Finding
 # from dojo.utils import get_system_setting, do_dedupe_finding, dojo_async_task
 from celery import task
 from functools import wraps
+from dojo.utils import test_valentijn
 
 
 class Command(BaseCommand):
@@ -13,7 +14,10 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         finding = Finding.objects.all().first()
 
-        finding.save(dedupe_option=True)
+        # test2(Finding, 100)
+        # finding.save(dedupe_option=True)
+        # test_valentijn(finding)
+        test_valentijn(1)
 
         # print('sync')
         # my_test_task(finding)
@@ -39,6 +43,11 @@ class Command(BaseCommand):
         #
         # so the inside decorator only executes inside the celery task
         # the outside decorator only outside
+
+
+def test2(clazz, id):
+    model = clazz.objects.get(id=id)
+    print(model)
 
 
 def my_decorator_outside(func):
