@@ -26,6 +26,7 @@ from django.views.decorators.http import require_POST
 from tagging.models import Tag
 from itertools import chain
 from dojo.user.helper import user_must_be_authorized, check_auth_users_list
+from dojo.utils import close_external_issue, reopen_external_issue
 
 from dojo.filters import OpenFindingFilter, \
     OpenFindingSuperFilter, AcceptedFindingSuperFilter, \
@@ -356,7 +357,7 @@ def close_finding(request, fid):
     if request.method == 'POST':
         form = CloseFindingForm(request.POST, missing_note_types=missing_note_types)
 
-        close_external_issue_task.delay(finding, 'Closed by defectdojo', 'github')
+        close_external_issue(finding, 'Closed by defectdojo', 'github')
 
         if form.is_valid():
             now = timezone.now()
@@ -515,7 +516,7 @@ def reopen_finding(request, fid):
     except JIRA_PKey.DoesNotExist:
         finding.save()
 
-    reopen_external_issue_task.delay(finding, 're-opened by defectdojo', 'github')
+    reopen_external_issue(finding, 're-opened by defectdojo', 'github')
 
     messages.add_message(
         request,
