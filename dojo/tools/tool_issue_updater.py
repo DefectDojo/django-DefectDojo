@@ -12,6 +12,8 @@ def is_tool_issue_updater_needed(finding, *args, **kwargs):
     return test_type.name == SCAN_SONARQUBE_API
 
 
+@dojo_async_task
+@task
 def tool_issue_updater(finding, *args, **kwargs):
 
     test_type = finding.test.test_type
@@ -21,6 +23,8 @@ def tool_issue_updater(finding, *args, **kwargs):
         SonarQubeApiUpdater().update_sonarqube_finding(finding)
 
 
+@dojo_async_task
+@task
 def update_findings_from_source_issues():
     from dojo.tools.sonarqube_api.updater_from_source import SonarQubeApiUpdaterFromSource
 

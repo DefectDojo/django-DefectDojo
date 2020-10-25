@@ -44,8 +44,6 @@ from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_
     jira_get_issue, get_words_for_field
 from dojo.notifications.helper import create_notification
 
-from dojo.tasks import add_jira_issue_task, update_external_issue_task, add_comment_task, \
-    add_external_issue_task, close_external_issue_task, reopen_external_issue_task
 from django.template.defaultfilters import pluralize
 from django.db.models import Q, QuerySet, Prefetch, Count
 
@@ -733,15 +731,9 @@ def edit_finding(request, fid):
                     request.POST, prefix='githubform', enabled=github_enabled)
                 if gform.is_valid():
                     if GITHUB_Issue.objects.filter(finding=new_finding).exists():
-                        if Dojo_User.wants_block_execution(request.user):
-                            update_external_issue(new_finding, old_status, 'github')
-                        else:
-                            update_external_issue_task.delay(new_finding, old_status, 'github')
+                        update_external_issue(new_finding, old_status, 'github')
                     else:
-                        if Dojo_User.wants_block_execution(request.user):
-                            add_external_issue(new_finding, 'github')
-                        else:
-                            add_external_issue_task.delay(new_finding, 'github')
+                        add_external_issue(new_finding, 'github')
 
             new_finding.save(push_to_jira=push_to_jira)
 
@@ -1261,10 +1253,7 @@ def promote_to_finding(request, fid):
                     enabled=GITHUB_PKey.objects.get(
                         product=test.engagement.product).push_all_issues)
                 if gform.is_valid():
-                    if Dojo_User.wants_block_execution(request.user):
-                        add_external_issue(new_finding, 'github')
-                    else:
-                        add_external_issue_task.delay(new_finding, 'github')
+                    add_external_issue(new_finding, 'github')
 
             messages.add_message(
                 request,
@@ -1839,15 +1828,9 @@ def finding_bulk_update_all(request, pid=None):
                         old_status = finding.status()
                         if form.cleaned_data['push_to_github']:
                             if GITHUB_Issue.objects.filter(finding=finding).exists():
-                                if Dojo_User.wants_block_execution(request.user):
-                                    update_external_issue(finding, old_status, 'github')
-                                else:
-                                    update_external_issue_task.delay(finding, old_status, 'github')
+                                update_external_issue(finding, old_status, 'github')
                             else:
-                                if Dojo_User.wants_block_execution(request.user):
-                                    add_external_issue(finding, 'github')
-                                else:
-                                    add_external_issue_task.delay(finding, 'github')
+                                add_external_issue(finding, 'github')
 
                 if form.cleaned_data['tags']:
                     for finding in finds:
@@ -1882,15 +1865,9 @@ def finding_bulk_update_all(request, pid=None):
                             log_jira_alert('Finding cannot be pushed to jira as there is no jira configuration for this product.', finding)
                         else:
                             if JIRA_Issue.objects.filter(finding=finding).exists():
-                                if Dojo_User.wants_block_execution(request.user):
-                                    update_jira_issue(finding, True)
-                                else:
-                                    update_jira_issue.delay(finding, True)
+                                update_jira_issue(finding, True)
                             else:
-                                if Dojo_User.wants_block_execution(request.user):
-                                    add_jira_issue(finding, True)
-                                else:
-                                    add_jira_issue_task.delay(finding, True)
+                                add_jira_issue(finding, True)
 
                 messages.add_message(request,
                                      messages.SUCCESS,
@@ -2119,20 +2096,12 @@ def push_to_jira(request, fid):
     try:
         if finding.jira():
             logger.info('trying to push %d:%s to JIRA to update JIRA issue', finding.id, finding.title)
-            if Dojo_User.wants_block_execution(request.user):
-                update_jira_issue(finding, True)
-                message = 'Linked JIRA issue succesfully updated.'
-            else:
-                update_jira_issue.delay(finding, True)
-                message = 'Action queued to update linked JIRA issue, check alerts for background errors.'
+            update_jira_issue(finding, True)
+            message = 'Action queued to update linked JIRA issue, check alerts for background errors.'
         else:
             logger.info('trying to push %d:%s to JIRA to create a new JIRA issue', finding.id, finding.title)
-            if Dojo_User.wants_block_execution(request.user):
-                add_jira_issue(finding, True)
-                message = 'JIRA issue created succesfully'
-            else:
-                add_jira_issue_task.delay(finding, True)
-                message = 'Action queued to created linked JIRA issue, check alerts for background errors.'
+            add_jira_issue(finding, True)
+            message = 'Action queued to created linked JIRA issue, check alerts for background errors.'
 
         # it may look like succes here, but the add_jira_issue and update_jira_issue are swallowing exceptions
         # but cant't change too much now without having a test suite, so leave as is for now with the addition warning message to check alerts for background errors.

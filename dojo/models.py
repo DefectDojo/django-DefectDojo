@@ -26,7 +26,6 @@ from tagging.registry import register as tag_register
 from multiselectfield import MultiSelectField
 from django import forms
 from django.utils.translation import gettext as _
-from dojo.signals import dedupe_signal
 from dojo.tag.prefetching_tag_descriptor import PrefetchingTagDescriptor
 from django.contrib.contenttypes.fields import GenericRelation
 from tagging.models import TaggedItem
@@ -2141,42 +2140,27 @@ class Finding(models.Model):
         self.found_by.add(self.test.test_type)
 
         if rules_option:
-            from dojo.tasks import async_rules
-            from dojo.utils import sync_rules
-            if Dojo_User.wants_block_execution(user):
-                sync_rules(self, *args, **kwargs)
-            else:
-                async_rules(self, *args, **kwargs)
+            from dojo.utils import do_apply_rules
+            do_apply_rules(self, *args, **kwargs)
+
         from dojo.utils import calculate_grade
         calculate_grade(self.test.engagement.product)
+
         # Assign the numerical severity for correct sorting order
         self.numerical_severity = Finding.get_numerical_severity(self.severity)
         super(Finding, self).save()
         system_settings = System_Settings.objects.get()
+
         if dedupe_option and self.hash_code is not None:
             if system_settings.enable_deduplication:
-                from dojo.tasks import async_dedupe
-                try:
-                    if Dojo_User.wants_block_execution(user):
-                        dedupe_signal.send(sender=self.__class__, new_finding=self)
-                    else:
-                        async_dedupe.delay(self, *args, **kwargs)
-                except:
-                    async_dedupe.delay(self, *args, **kwargs)
-                    pass
+                from dojo.utils import do_dedupe_finding
+                do_dedupe_finding(self, *args, **kwargs)
             else:
                 deduplicationLogger.debug("skipping dedupe because it's disabled in system settings")
+
         if system_settings.false_positive_history and false_history:
-            from dojo.tasks import async_false_history
-            from dojo.utils import sync_false_history
-            try:
-                if Dojo_User.wants_block_execution(user):
-                    sync_false_history(self, *args, **kwargs)
-                else:
-                    async_false_history.delay(self, *args, **kwargs)
-            except:
-                async_false_history.delay(self, *args, **kwargs)
-                pass
+            from dojo.utils import do_false_positive_history
+            do_false_positive_history(self, *args, **kwargs)
         else:
             deduplicationLogger.debug("skipping false positive history because it's disabled in system settings or false_history param is False")
 
@@ -2190,18 +2174,11 @@ class Finding(models.Model):
         # Adding a snippet here for push to JIRA so that it's in one place
         if push_to_jira:
             logger.debug('pushing to jira from finding.save()')
-            from dojo.tasks import add_jira_issue_task
             from dojo.utils import add_jira_issue, update_jira_issue
             if jira_issue_exists:
-                if Dojo_User.wants_block_execution(user):
-                    update_jira_issue(self, True)
-                else:
-                    update_jira_issue.delay(self, True)
+                update_jira_issue(self, True)
             else:
-                if Dojo_User.wants_block_execution(user):
-                    add_jira_issue(self, True)
-                else:
-                    add_jira_issue_task.delay(self, True)
+                add_jira_issue(self, True)
 
     def delete(self, *args, **kwargs):
         for find in self.original_finding.all():
