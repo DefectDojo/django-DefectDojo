@@ -1,4 +1,6 @@
 from dojo.tools import SCAN_SONARQUBE_API
+from celery.decorators import task
+from dojo.decorators import dojo_async_task
 
 
 def async_tool_issue_update(finding, *args, **kwargs):
