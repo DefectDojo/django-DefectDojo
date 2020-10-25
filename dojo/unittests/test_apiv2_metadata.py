@@ -26,7 +26,7 @@ class MetadataTest(APITestCase):
         return self.client.post(reverse('metadata-list'), kwargs, format='json')
 
     def test_docs(self):
-        r = self.client.get(reverse('metadata-api_v2_schema'))
+        r = self.client.get(reverse('api_v2_schema'))
         self.assertEqual(r.status_code, 200)
 
     def test_query_metadata(self):
