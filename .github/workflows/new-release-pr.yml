@@ -1,0 +1,67 @@
+name: Prepare release PR
+
+env:
+  GIT_USERNAME: "DefectDojo release bot"
+  GIT_EMAIL: "dojo-release-bot@users.noreply.github.com"
+on:
+  workflow_dispatch:
+    inputs:
+      # the actual branch that can be chosen on the UI is made irrelevant by further steps
+      # because someone will forget one day to change it.
+      release_number:
+        description: 'Release version (x.y.z format)'
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout dev branch
+        uses: actions/checkout@v2
+        with:
+          ref: dev
+      - name: Create release branch
+        run: |
+          echo "NEW_BRANCH=release/${{ github.event.inputs.release_number }}" >> $GITHUB_ENV
+      - name: Configure git
+        run: |
+          git config --global user.name "${{ env.GIT_USERNAME }}"
+          git config --global user.email "${{ env.GIT_EMAIL }}"
+      - name: Push branch
+        run: git push origin HEAD:${NEW_BRANCH}
+      - name: Checkout release branch
+        uses: actions/checkout@v2
+        with:
+          ref: release/${{ github.event.inputs.release_number }}
+      - name: Update version numbers in key files
+        run: |
+          # sed -ri "s/'([0-9]+(\.[0-9]+)*)'/'${{ github.event.inputs.release_number }}'/" dojo/__init__.py
+          sed -ri "s/__version__ = '.*'/__version__ = '${{ github.event.inputs.release_number }}'/" dojo/__init__.py
+          sed -ri "s/version='.*'/version='${{ github.event.inputs.release_number }}'/" setup.py
+          sed -ri "s/appVersion: \"([0-9]+(\.[0-9]+)*)\"/appVersion: \"${{ github.event.inputs.release_number }}\"/" helm/defectdojo/Chart.yaml
+      - name: Check numbers
+        run: |
+          grep version dojo/__init__.py
+          grep version setup.py
+          grep appVersion helm/defectdojo/Chart.yaml
+      - name: Push version changes
+        uses: stefanzweifel/git-auto-commit-action@v4.1.2
+        with:
+          commit_user_name: "${{ env.GIT_USERNAME }}"
+          commit_user_email: "${{ env.GIT_EMAIL }}"
+          commit_author: "${{ env.GIT_USERNAME }} <${{ env.GIT_EMAIL }}>"
+          commit_message: "Update versions in application files"
+          branch: ${{ github.head_ref }}
+      - name: Create Pull Request
+        uses: actions/github-script@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.pulls.create({
+              owner: 'madchap',
+              repo: 'django-DefectDojo',
+              title: 'Release PR - ${{ env.NEW_BRANCH }}',
+              body: `Release triggered by \`${ process.env.GITHUB_ACTOR }\``,
+              head: '${{ env.NEW_BRANCH }}',
+              base: 'master'
+            })
