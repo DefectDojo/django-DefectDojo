@@ -4,6 +4,9 @@
 {% block content %}
     <h2> {{ name }}</h2>
     <hr/>
+    <div class="alert alert-danger">
+        <p><b>APIv1 will be deprecated after 31 december 2020 and will be removed from Defect Dojo by June 2021.</b></p>
+    </div>    
     <p>Your current API key is <code>{{ key.key }}</code></p>
     <p>Your current API Authorization Header value is <code>ApiKey {{ user.username }}:{{ key.key }}</code></p>
     <p>Has your key been exposed? Are you ready for a new one?</p>
