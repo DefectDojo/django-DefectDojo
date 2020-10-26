@@ -37,7 +37,7 @@ xlrd>=1.0.0
 pdfkit==0.6.1
 Pillow==8.0.1  # required by django-imagekit
 psycopg2-binary==2.8.6
-cryptography==3.1.1
+cryptography==3.2
 python-dateutil==2.8.1
 python-nmap==0.6.1
 pytz==2020.1
