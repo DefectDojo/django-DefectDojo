@@ -39,7 +39,7 @@ class SafetyParser(object):
                        'installed': str(l[2]),
                        'description': str(l[3]),
                        'id': str(l[4])}
-                for l in json_obj}
+                for l in json_obj}  # noqa: E741
         return tree
 
     def get_items(self, tree, test, safety_db):
