@@ -42,13 +42,17 @@ jobs:
           commit_author: "${{ env.GIT_USERNAME }} <${{ env.GIT_EMAIL }}>"
           commit_message: "Update versions in application files"
           branch: ${{ github.head_ref }}
+      - id: set-repo-org
+        run: echo ::set-output name=repoorg::${GITHUB_REPOSITORY%%/*}
       - name: Create Pull Request
+        env:
+          REPO_ORG: ${{ steps.set-repo-org.outputs.repoorg }}
         uses: actions/github-script@v3
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             github.pulls.create({
-              owner: 'madchap',
+              owner: ${{ env.REPO_ORG }}
               repo: 'django-DefectDojo',
               title: 'Post-release PR - master back to dev',
               body: `Release triggered by \`${ process.env.GITHUB_ACTOR }\``,
