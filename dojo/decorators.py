@@ -1,6 +1,7 @@
 from functools import wraps
 from dojo.models import Finding
 from django.db import models
+from django.conf import settings
 import logging
 
 
@@ -28,15 +29,13 @@ def dojo_async_task(func):
 def dojo_model_to_id(_func=None, *, parameter=0):
     # logger.debug('dec_args:' + str(dec_args))
     # logger.debug('dec_kwargs:' + str(dec_kwargs))
-    logger.debug('_func:%s', _func)
+    # logger.debug('_func:%s', _func)
 
     def dojo_model_from_id_internal(func, *args, **kwargs):
         @wraps(func)
         def __wrapper__(*args, **kwargs):
-            # logger.debug('args:' + str(args))
-            # logger.debug('kwargs:' + str(kwargs))
-
-            # parameter = dec_kwargs.get('parameter', 0)
+            if not settings.CELERY_PASS_MODEL_BY_ID:
+                return func(*args, **kwargs)
 
             model_or_id = get_parameter_froms_args_kwargs(args, kwargs, parameter)
 
@@ -63,15 +62,15 @@ def dojo_model_to_id(_func=None, *, parameter=0):
 def dojo_model_from_id(_func=None, *, model=Finding, parameter=0):
     # logger.debug('dec_args:' + str(dec_args))
     # logger.debug('dec_kwargs:' + str(dec_kwargs))
-    logger.debug('_func:%s', _func)
-    logger.debug('model: %s', model)
+    # logger.debug('_func:%s', _func)
+    # logger.debug('model: %s', model)
 
     def dojo_model_from_id_internal(func, *args, **kwargs):
-        # logger.debug('args:' + str(args))
-        # logger.debug('kwargs:' + str(kwargs))
-
         @wraps(func)
         def __wrapper__(*args, **kwargs):
+            if not settings.CELERY_PASS_MODEL_BY_ID:
+                return func(*args, **kwargs)
+
             logger.debug('args:' + str(args))
             logger.debug('kwargs:' + str(kwargs))
 
