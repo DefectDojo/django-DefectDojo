@@ -67,7 +67,7 @@ COPY \
   docker/entrypoint-unit-tests.sh \
   docker/entrypoint-unit-tests-devDocker.sh \
   docker/wait-for-it.sh \
-  certs/* \
+  docker/certs/* \
   /
 COPY wsgi.py manage.py tests/unit-tests.sh ./
 COPY dojo/ ./dojo/
@@ -76,6 +76,7 @@ RUN \
   cp dojo/settings/settings.dist.py dojo/settings/settings.py
 COPY tests/ ./tests/
 RUN \
+  rm -f /readme.txt && \
   mkdir -p dojo/migrations && \
   chmod g=u dojo/migrations && \
   true

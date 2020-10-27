@@ -54,10 +54,10 @@ spec:
             secretKeyRef:
               {{- if eq .Values.database "postgresql" }}
               name: {{ .Values.postgresql.existingSecret }}
-              key: postgresql-password
+              key: {{ .Values.postgresql.secretKey }}
               {{- else if eq .Values.database "mysql" }}
               name: {{ .Values.mysql.existingSecret }}
-              key: mysql-password
+              key: {{ .Values.mysql.secretKey }}
               {{- end }}
         resources:
           {{- toYaml .Values.initializer.resources | nindent 10 }}

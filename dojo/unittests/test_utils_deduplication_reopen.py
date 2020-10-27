@@ -1,6 +1,7 @@
 from django.test import TestCase
 import datetime
-from dojo.utils import set_duplicate, fix_loop_duplicates
+from dojo.utils import set_duplicate
+from dojo.management.commands.fix_loop_duplicates import fix_loop_duplicates
 from dojo.models import Finding
 
 

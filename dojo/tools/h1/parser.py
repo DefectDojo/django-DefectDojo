@@ -80,6 +80,7 @@ class HackerOneJSONParser(object):
                 # Build and return Finding model
                 finding = Finding(
                     title=title,
+                    unique_id_from_tool=dupe_key,
                     date=date,
                     test=test,
                     active=active,

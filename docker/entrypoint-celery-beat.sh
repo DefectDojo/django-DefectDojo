@@ -14,5 +14,4 @@ echo
 exec celery beat \
   --app=dojo \
   --pidfile=/var/run/defectdojo/celery-beat.pid \
-  --schedule=/var/run/defectdojo/celerybeat-schedule \
-  --uid=${appuser}
+  --schedule=/var/run/defectdojo/celerybeat-schedule
