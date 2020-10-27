@@ -6,6 +6,7 @@ from celery.schedules import crontab
 import environ
 root = environ.Path(__file__) - 3  # Three folders back
 
+# reference: https://pypi.org/project/django-environ/
 env = environ.Env(
     # Set casting and default values
     DD_SITE_URL=(str, 'http://localhost:8080'),
@@ -58,6 +59,7 @@ env = environ.Env(
     DD_CELERY_RESULT_EXPIRES=(int, 86400),
     DD_CELERY_BEAT_SCHEDULE_FILENAME=(str, root('dojo.celery.beat.db')),
     DD_CELERY_TASK_SERIALIZER=(str, 'pickle'),
+    DD_FOOTER_VERSION=(str, ''),
     DD_FORCE_LOWERCASE_TAGS=(bool, True),
     DD_MAX_TAG_LENGTH=(int, 25),
     DD_DATABASE_ENGINE=(str, 'django.db.backends.mysql'),
@@ -483,6 +485,9 @@ PORT_SCAN_SOURCE_IP = env('DD_PORT_SCAN_EXTERNAL_UNIT_EMAIL_LIST')
 
 # Used in a few places to prefix page headings and in email salutations
 TEAM_NAME = env('DD_TEAM_NAME')
+
+# Used to configure a custom version in the footer of the base.html template.
+FOOTER_VERSION = env('DD_FOOTER_VERSION')
 
 # Django-tagging settings
 FORCE_LOWERCASE_TAGS = env('DD_FORCE_LOWERCASE_TAGS')
