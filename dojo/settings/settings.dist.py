@@ -138,7 +138,6 @@ env = environ.Env(
     # maximum number of result in search as search can be an expensive operation
     DD_SEARCH_MAX_RESULTS=(int, 100),
     DD_MAX_AUTOCOMPLETE_WORDS=(int, 20000),
-    DD_JIRA_SSL_VERIFY=(bool, True),
 
     # if you want to keep logging to the console but in json format, change this here to 'json_console'
     DD_LOGGING_FORMAT=(str, 'console')
@@ -801,8 +800,6 @@ JIRA_ISSUE_TYPE_CHOICES_CONFIG = (
     ('Bug', 'Bug'),
     ('Security', 'Security')
 )
-
-JIRA_SSL_VERIFY = env('DD_JIRA_SSL_VERIFY')
 
 # ------------------------------------------------------------------------------
 # LOGGING

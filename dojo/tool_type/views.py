@@ -59,9 +59,7 @@ def edit_tool_type(request, ttid):
 @user_passes_test(lambda u: u.is_staff)
 def delete_issue(request, find):
     j_issue = JIRA_Issue.objects.get(finding=find)
-    jira = JIRA(server=Tool_Type.url,
-                basic_auth=(Tool_Type.username, Tool_Type.password),
-                verify=settings.JIRA_SSL_VERIFY)
+    jira = JIRA(server=Tool_Type.url, basic_auth=(Tool_Type.username, Tool_Type.password))
     issue = jira.issue(j_issue.jira_id)
     issue.delete()
 
