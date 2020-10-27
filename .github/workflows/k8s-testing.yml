@@ -95,7 +95,7 @@ jobs:
           retention-days: 1
 
   setting_minikube_cluster:
-    name: DD Minikube-Kubernetes Deployment
+    name: Minikube-Kubernetes Deployment
     runs-on: ubuntu-latest
     needs: build_image
     strategy:
@@ -131,7 +131,7 @@ jobs:
         run: minikube status
       - name: Load images from artifacts
         uses: actions/download-artifact@v2
-      - name: Load images into docker
+      - name: Load docker images
         run: |-
              eval $(minikube docker-env)
              docker load -i nginx/nginx_img
