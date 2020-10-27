@@ -1,4 +1,4 @@
-name: DD k8s deployment
+name: k8s deployment
 on:
   pull_request_target:
   push:
