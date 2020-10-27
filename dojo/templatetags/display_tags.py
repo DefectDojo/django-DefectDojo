@@ -125,7 +125,10 @@ def linebreaksasciidocbr(value, autoescape=None):
 @register.simple_tag
 def dojo_version():
     from dojo import __version__
-    return 'v. ' + __version__
+    version = __version__
+    if settings.FOOTER_VERSION:
+        version = settings.FOOTER_VERSION
+    return "v. {}".format(version)
 
 
 @register.simple_tag
