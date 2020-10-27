@@ -51,7 +51,7 @@ jobs:
           commit_user_email: "${{ env.GIT_EMAIL }}"
           commit_author: "${{ env.GIT_USERNAME }} <${{ env.GIT_EMAIL }}>"
           commit_message: "Update versions in application files"
-          branch: ${{ github.head_ref }}
+          branch: release/${{ github.event.inputs.release_number }}
       - id: set-repo-org
         run: echo ::set-output name=repoorg::${GITHUB_REPOSITORY%%/*}
       - name: Create Pull Request
