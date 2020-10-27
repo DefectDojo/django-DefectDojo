@@ -6,8 +6,6 @@ env:
 on:
   workflow_dispatch:
     inputs:
-      # the actual branch that can be chosen on the UI is made irrelevant by further steps
-      # because someone will forget one day to change it.
       release_number:
         description: 'Future dev release version (x.y.z format). Will automatically be x.y.z-dev'
         required: true
@@ -19,16 +17,16 @@ jobs:
       - name: Checkout dev branch
         uses: actions/checkout@v2
         with:
-          ref: master
+          ref: dev
       - name: Configure git
         run: |
           git config --global user.name "${{ env.GIT_USERNAME }}"
           git config --global user.email "${{ env.GIT_EMAIL }}"
       - name: Update version numbers in key files
         run: |
-          sed -ri "s/__version__ = '.*'/__version__ = '${{ github.event.inputs.release_number }}'/" dojo/__init__.py
-          sed -ri "s/version='.*'/version='${{ github.event.inputs.release_number }}'/" setup.py
-          sed -ri "s/appVersion: \"([0-9]+(\.[0-9]+)*)\"/appVersion: \"${{ github.event.inputs.release_number }}\"/" helm/defectdojo/Chart.yaml
+          sed -ri "s/__version__ = '.*'/__version__ = '${{ github.event.inputs.release_number }}-dev'/" dojo/__init__.py
+          sed -ri "s/version='.*'/version='${{ github.event.inputs.release_number }}-dev'/" setup.py
+          sed -ri "s/appVersion: \"([0-9]+(\.[0-9]+)*)\"/appVersion: \"${{ github.event.inputs.release_number }}-dev\"/" helm/defectdojo/Chart.yaml
       - name: Check numbers
         run: |
           grep version dojo/__init__.py
