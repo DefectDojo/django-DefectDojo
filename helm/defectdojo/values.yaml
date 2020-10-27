@@ -196,6 +196,9 @@ redis:
   password: ""
   cluster:
     slaveCount: 1
+  # To use an external Redis instance, set enabled to false and uncomment
+  # the line below:
+  # redisServer: myrediscluster
 
 # To add extra variables not predefined by helm config it is possible to define in extraConfigs block, e.g. below:
 # NOTE  Do not store any kind of sensitive information inside of it
