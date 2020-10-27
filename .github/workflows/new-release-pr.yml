@@ -62,7 +62,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             github.pulls.create({
-              owner: ${{ env.REPO_ORG }},
+              owner: '${{ env.REPO_ORG }}',
               repo: 'django-DefectDojo',
               title: 'Release PR - ${{ env.NEW_BRANCH }}',
               body: `Release triggered by \`${ process.env.GITHUB_ACTOR }\``,
