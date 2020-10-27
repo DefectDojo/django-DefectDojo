@@ -116,7 +116,8 @@ Pipfile*
 
 
 #ignore locally added certs
-certs/
+docker/certs/*
+!docker/certs/readme.txt
 
 # Helm dependencies
 helm/defectdojo/charts

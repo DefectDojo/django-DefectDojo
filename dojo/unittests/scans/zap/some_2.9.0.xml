@@ -1,5 +1,5 @@
 <?xml version="1.0"?><OWASPZAPReport version="2.9.0" generated="Tue, 12 May 2020 20:57:30">
-<site name="https://justasite.nl" host="justasite.nl" port="443" ssl="true"><alerts><alertitem>
+<site name="https://mainsite.com" host="mainsite.com" port="443" ssl="true"><alerts><alertitem>
   <pluginid>10011</pluginid>
   <alert>Cookie Without Secure Flag</alert>
   <name>Cookie Without Secure Flag</name>
@@ -9,19 +9,19 @@
   <desc>&lt;p&gt;A cookie has been set without the secure flag, which means that the cookie can be accessed via unencrypted connections.&lt;/p&gt;</desc>
   <instances>
   <instance>
-  <uri>https://justasite.nl</uri>
+  <uri>https://mainsite.com</uri>
   <method>GET</method>
   <param>opvc</param>
   <evidence>Set-Cookie: opvc</evidence>
   </instance>
   <instance>
-  <uri>https://justasite.nl</uri>
+  <uri>https://mainsite.com</uri>
   <method>GET</method>
   <param>dmid</param>
   <evidence>Set-Cookie: dmid</evidence>
   </instance>
   <instance>
-  <uri>https://justasite.nl</uri>
+  <uri>https://mainsite.com</uri>
   <method>GET</method>
   <param>sitevisitscookie</param>
   <evidence>Set-Cookie: sitevisitscookie</evidence>
@@ -44,25 +44,25 @@
   <desc>&lt;p&gt;A cookie has been set without the SameSite attribute, which means that the cookie can be sent as a result of a &apos;cross-site&apos; request. The SameSite attribute is an effective counter measure to cross-site request forgery, cross-site script inclusion, and timing attacks.&lt;/p&gt;</desc>
   <instances>
   <instance>
-  <uri>https://justasite.nl</uri>
+  <uri>https://mainsite.com</uri>
   <method>GET</method>
   <param>sitevisitscookie</param>
   <evidence>Set-Cookie: sitevisitscookie</evidence>
   </instance>
   <instance>
-  <uri>https://justasite.nl</uri>
+  <uri>https://mainsite.com</uri>
   <method>GET</method>
   <param>dmid</param>
   <evidence>Set-Cookie: dmid</evidence>
   </instance>
   <instance>
-  <uri>https://justasite.nl</uri>
+  <uri>https://mainsite.com</uri>
   <method>GET</method>
   <param>JSESSIONID</param>
   <evidence>Set-Cookie: JSESSIONID</evidence>
   </instance>
   <instance>
-  <uri>https://justasite.nl</uri>
+  <uri>https://mainsite.com</uri>
   <method>GET</method>
   <param>opvc</param>
   <evidence>Set-Cookie: opvc</evidence>
@@ -85,7 +85,7 @@
   <desc>&lt;p&gt;The following directives either allow wildcard sources (or ancestors), are not defined, or are overly broadly defined: &lt;/p&gt;&lt;p&gt;script-src, script-src-elem, script-src-attr, style-src, style-src-elem, style-src-attr, img-src, connect-src, frame-src, font-src, media-src, object-src, manifest-src, worker-src, prefetch-src&lt;/p&gt;</desc>
   <instances>
   <instance>
-  <uri>https://justasite.nl</uri>
+  <uri>https://mainsite.com</uri>
   <method>GET</method>
   <param>Content-Security-Policy</param>
   <evidence>frame-ancestors &apos;self&apos;;</evidence>
@@ -108,19 +108,19 @@
   <desc>&lt;p&gt;A cookie has been set without the HttpOnly flag, which means that the cookie can be accessed by JavaScript. If a malicious script can be run on this page then the cookie will be accessible and can be transmitted to another site. If this is a session cookie then session hijacking may be possible.&lt;/p&gt;</desc>
   <instances>
   <instance>
-  <uri>https://justasite.nl</uri>
+  <uri>https://mainsite.com</uri>
   <method>GET</method>
   <param>opvc</param>
   <evidence>Set-Cookie: opvc</evidence>
   </instance>
   <instance>
-  <uri>https://justasite.nl</uri>
+  <uri>https://mainsite.com</uri>
   <method>GET</method>
   <param>dmid</param>
   <evidence>Set-Cookie: dmid</evidence>
   </instance>
   <instance>
-  <uri>https://justasite.nl</uri>
+  <uri>https://mainsite.com</uri>
   <method>GET</method>
   <param>sitevisitscookie</param>
   <evidence>Set-Cookie: sitevisitscookie</evidence>
@@ -143,22 +143,22 @@
   <desc>&lt;p&gt;A timestamp was disclosed by the application/web server - Unix&lt;/p&gt;</desc>
   <instances>
   <instance>
-  <uri>https://justasite.nl</uri>
+  <uri>https://mainsite.com</uri>
   <method>GET</method>
   <evidence>265151019</evidence>
   </instance>
   <instance>
-  <uri>https://justasite.nl</uri>
+  <uri>https://mainsite.com</uri>
   <method>GET</method>
   <evidence>398525181</evidence>
   </instance>
   <instance>
-  <uri>https://justasite.nl</uri>
+  <uri>https://mainsite.com</uri>
   <method>GET</method>
   <evidence>153792000</evidence>
   </instance>
   <instance>
-  <uri>https://justasite.nl</uri>
+  <uri>https://mainsite.com</uri>
   <method>GET</method>
   <evidence>1028274645</evidence>
   </instance>
@@ -181,7 +181,7 @@
   <desc>&lt;p&gt;The page includes one or more script files from a third-party domain.&lt;/p&gt;</desc>
   <instances>
   <instance>
-  <uri>https://justasite.nl</uri>
+  <uri>https://mainsite.com</uri>
   <method>GET</method>
   <param>https://consent.cookiebot.com/uc.js</param>
   <evidence>&lt;script id=&quot;Cookiebot&quot; src=&quot;https://consent.cookiebot.com/uc.js&quot; data-cbid=&quot;4079ecf4-44a4-4dca-b14c-fa341fdbefd4&quot; type=&quot;text/javascript&quot; defer&gt;&lt;/script&gt;</evidence>
@@ -204,7 +204,7 @@
   <desc>&lt;p&gt;The cache-control and pragma HTTP header have not been set properly or are missing allowing the browser and proxies to cache content.&lt;/p&gt;</desc>
   <instances>
   <instance>
-  <uri>https://justasite.nl</uri>
+  <uri>https://mainsite.com</uri>
   <method>GET</method>
   <param>Cache-Control</param>
   </instance>

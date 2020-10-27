@@ -653,7 +653,7 @@ def get_severity_count(id, table):
                      output_field=IntegerField())),
         )
     elif table == "engagement":
-        counts = Finding.objects.filter(test__engagement=id, active=True, verified=False, duplicate=False). \
+        counts = Finding.objects.filter(test__engagement=id, active=True, duplicate=False). \
             prefetch_related('test__engagement__product').aggregate(
             total=Sum(
                 Case(When(severity__in=('Critical', 'High', 'Medium', 'Low'),
@@ -861,6 +861,10 @@ def finding_related_action_classes(related_action):
 @register.filter
 def finding_related_action_title(related_action):
     return finding_related_action_title_dict.get(related_action, '')
+
+
+def product_findings(product):
+    return Finding.objects.filter(test__engagement__product=product)
 
 
 @register.filter
