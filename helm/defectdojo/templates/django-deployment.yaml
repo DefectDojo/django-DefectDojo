@@ -100,11 +100,11 @@ spec:
             httpHeaders:
             - name: Host
               value: {{ .Values.host }}
-          failureThreshold: {{ .Values.django.uwsgi.livenessProbe.failureThreshold | default 6 }}
-          initialDelaySeconds: {{ .Values.django.uwsgi.livenessProbe.initialDelaySeconds | default 120 }}
-          periodSeconds: {{ .Values.django.uwsgi.livenessProbe.periodSeconds | default 10 }}
-          successThreshold: {{ .Values.django.uwsgi.livenessProbe.successThreshold | default 1 }}
-          timeoutSeconds: {{ .Values.django.uwsgi.livenessProbe.timeoutSeconds | default 5 }}
+          failureThreshold: {{ .Values.django.uwsgi.livenessProbe.failureThreshold }}
+          initialDelaySeconds: {{ .Values.django.uwsgi.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.django.uwsgi.livenessProbe.periodSeconds }}
+          successThreshold: {{ .Values.django.uwsgi.livenessProbe.successThreshold }}
+          timeoutSeconds: {{ .Values.django.uwsgi.livenessProbe.timeoutSeconds }}
         {{- end }}
         resources:
           {{- toYaml .Values.django.uwsgi.resources | nindent 10 }}
@@ -155,11 +155,11 @@ spec:
             httpHeaders:
             - name: Host
               value: {{ .Values.host }}
-          failureThreshold: {{ .Values.django.uwsgi.livenessProbe.failureThreshold | default 6 }}
-          initialDelaySeconds: {{ .Values.django.uwsgi.livenessProbe.initialDelaySeconds | default 120 }}
-          periodSeconds: {{ .Values.django.uwsgi.livenessProbe.periodSeconds | default 10 }}
-          successThreshold: {{ .Values.django.uwsgi.livenessProbe.successThreshold | default 1 }}
-          timeoutSeconds: {{ .Values.django.uwsgi.livenessProbe.timeoutSeconds | default 5 }}
+          failureThreshold: {{ .Values.django.uwsgi.livenessProbe.failureThreshold }}
+          initialDelaySeconds: {{ .Values.django.uwsgi.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.django.uwsgi.livenessProbe.periodSeconds }}
+          successThreshold: {{ .Values.django.uwsgi.livenessProbe.successThreshold }}
+          timeoutSeconds: {{ .Values.django.uwsgi.livenessProbe.timeoutSeconds }}
         {{- end }}
         resources:
           {{- toYaml .Values.django.nginx.resources | nindent 10 }}
