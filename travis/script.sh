@@ -211,61 +211,61 @@ if [ -z "${TEST}" ]; then
   exit ${return_value}
 else
 echo "Running test ${TEST}"
-  case "${TEST}" in
-    flake8)
-      echo "${TRAVIS_BRANCH}"
-      if [[ "${TRAVIS_BRANCH}" == "dev" ]]
-      then
-          echo "Running Flake8 tests on dev branch aka pull requests"
-          # We need to checkout dev for flake8-diff to work properly
-          git checkout dev
-          sudo pip3 install pep8 flake8 flake8-diff
-          flake8-diff
-      else
-          echo "Skipping because not on dev branch"
-      fi
-      ;;
-    docker_integration_tests)
-      echo "Validating docker compose"
-      # change user id withn Docker container to user id of travis user
-      sed -i -e "s/USER\ 1001/USER\ `id -u`/g" ./Dockerfile.django
-      cp ./dojo/settings/settings.dist.py ./dojo/settings/settings.py
-      # incase of failure and you need to debug
-      # change the 'release' mode to 'dev' mode in order to activate debug=True
-      # make sure you remember to change back to 'release' before making a PR
-      source ./docker/setEnv.sh release
-      docker-compose build
+  # case "${TEST}" in
+  #   flake8)
+  #     echo "${TRAVIS_BRANCH}"
+  #     if [[ "${TRAVIS_BRANCH}" == "dev" ]]
+  #     then
+  #         echo "Running Flake8 tests on dev branch aka pull requests"
+  #         # We need to checkout dev for flake8-diff to work properly
+  #         git checkout dev
+  #         sudo pip3 install pep8 flake8 flake8-diff
+  #         flake8-diff
+  #     else
+  #         echo "Skipping because not on dev branch"
+  #     fi
+  #     ;;
+  #   docker_integration_tests)
+  #     echo "Validating docker compose"
+  #     # change user id withn Docker container to user id of travis user
+  #     sed -i -e "s/USER\ 1001/USER\ `id -u`/g" ./Dockerfile.django
+  #     cp ./dojo/settings/settings.dist.py ./dojo/settings/settings.py
+  #     # incase of failure and you need to debug
+  #     # change the 'release' mode to 'dev' mode in order to activate debug=True
+  #     # make sure you remember to change back to 'release' before making a PR
+  #     source ./docker/setEnv.sh release
+  #     docker-compose build
 
-      docker-compose up -d
-      echo "Waiting for services to start"
-      # Wait for services to become available
-      sleep 80
-      echo "Testing DefectDojo Service"
-      curl -s -o "/dev/null" http://localhost:8080 -m 120
-      CR=$(curl -s -m 10 -I http://localhost:8080/login?next= | egrep "^HTTP" | cut  -d' ' -f2)
-      if [ "$CR" != 200 ]; then
-        echo "ERROR: cannot display login screen; got HTTP code $CR"
-        docker-compose logs  --tail="all" uwsgi
-        exit 1
-      fi
-      echo "Docker compose container status"
-      docker-compose -f docker-compose.yml ps
+  #     docker-compose up -d
+  #     echo "Waiting for services to start"
+  #     # Wait for services to become available
+  #     sleep 80
+  #     echo "Testing DefectDojo Service"
+  #     curl -s -o "/dev/null" http://localhost:8080 -m 120
+  #     CR=$(curl -s -m 10 -I http://localhost:8080/login?next= | egrep "^HTTP" | cut  -d' ' -f2)
+  #     if [ "$CR" != 200 ]; then
+  #       echo "ERROR: cannot display login screen; got HTTP code $CR"
+  #       docker-compose logs  --tail="all" uwsgi
+  #       exit 1
+  #     fi
+  #     echo "Docker compose container status"
+  #     docker-compose -f docker-compose.yml ps
 
-      echo "run integration_test scripts"
-      source ./travis/integration_test-script.sh
-      ;;
-    snyk)
-      echo "Snyk security testing on containers"
-      build_containers
-      snyk monitor --docker defectdojo/defectdojo-django:latest
-      snyk monitor --docker defectdojo/defectdojo-nginx:latest
-      ;;
-    deploy)
-      echo "Deploy and container push"
-      build_containers
-      source ./travis/deploy.sh
-      deploy_demo
-      docker_hub
-      ;;
-  esac
+  #     echo "run integration_test scripts"
+  #     source ./travis/integration_test-script.sh
+  #     ;;
+  #   snyk)
+  #     echo "Snyk security testing on containers"
+  #     build_containers
+  #     snyk monitor --docker defectdojo/defectdojo-django:latest
+  #     snyk monitor --docker defectdojo/defectdojo-nginx:latest
+  #     ;;
+  #   deploy)
+  #     echo "Deploy and container push"
+  #     build_containers
+  #     source ./travis/deploy.sh
+  #     deploy_demo
+  #     docker_hub
+  #     ;;
+  # esac
 fi
