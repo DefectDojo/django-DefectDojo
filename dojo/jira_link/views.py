@@ -29,7 +29,6 @@ logger = logging.getLogger(__name__)
 @csrf_exempt
 @require_POST
 def webhook(request, secret=None):
-    print('secret: ' + str(secret))
     if not get_system_setting('enable_jira'):
         logger.debug('ignoring incoming webhook as JIRA is disabled.')
         raise PermissionDenied('JIRA disable')
