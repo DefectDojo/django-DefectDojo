@@ -129,7 +129,7 @@ def express_new_jira(request):
                 try:
                     jira = JIRA(server=jira_server,
                         basic_auth=(jira_username, jira_password),
-                        verify=settings.JIRA_SSL_VERIFY)
+                        options={"verify": settings.JIRA_SSL_VERIFY})
                 except Exception:
                     messages.add_message(request,
                                      messages.ERROR,
@@ -211,7 +211,7 @@ def new_jira(request):
                 # Instantiate JIRA instance for validating url, username and password
                 JIRA(server=jira_server,
                      basic_auth=(jira_username, jira_password),
-                     verify=settings.JIRA_SSL_VERIFY)
+                     options={"verify": settings.JIRA_SSL_VERIFY})
 
                 new_j = jform.save(commit=False)
                 new_j.url = jira_server
@@ -259,7 +259,7 @@ def edit_jira(request, jid):
                 # Instantiate JIRA instance for validating url, username and password
                 JIRA(server=jira_server,
                     basic_auth=(jira_username, jira_password),
-                    verify=settings.JIRA_SSL_VERIFY)
+                    options={"verify": settings.JIRA_SSL_VERIFY})
 
                 new_j = jform.save(commit=False)
                 new_j.url = jira_server
@@ -301,7 +301,7 @@ def delete_issue(request, find):
     jira = JIRA(server=jira_conf.url,
                 basic_auth=(jira_conf.username,
                             jira_conf.password),
-                verify=settings.JIRA_SSL_VERIFY)
+                options={"verify": settings.JIRA_SSL_VERIFY})
     issue = jira.issue(j_issue.jira_id)
     issue.delete()
 

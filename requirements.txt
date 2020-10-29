@@ -30,14 +30,14 @@ humanize==3.1.0
 jira==2.0.0
 PyGithub==1.53
 lxml==4.6.1
-Markdown==3.3.2
+Markdown==3.3.3
 mysqlclient==2.0.1
 pandas>=0.25
 xlrd>=1.0.0
 pdfkit==0.6.1
 Pillow==8.0.1  # required by django-imagekit
 psycopg2-binary==2.8.6
-cryptography==3.1.1
+cryptography==3.2
 python-dateutil==2.8.1
 python-nmap==0.6.1
 pytz==2020.1
