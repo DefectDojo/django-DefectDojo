@@ -44,6 +44,11 @@ jobs:
       matrix:
         component: [django, nginx]
     steps:
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Checkout
         if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'
         uses: actions/checkout@v2
@@ -95,7 +100,7 @@ jobs:
           retention-days: 1
 
   setting_minikube_cluster:
-    name: Minikube-Kubernetes Deployment
+    name: Kubernetes Deployment
     runs-on: ubuntu-latest
     needs: build_image
     strategy:
@@ -103,6 +108,11 @@ jobs:
         databases: [pgsql,mysql]
         brokers: [redis,rabbit]
     steps:
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Checkout
         if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'
         uses: actions/checkout@v2
