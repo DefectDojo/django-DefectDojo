@@ -21,11 +21,13 @@ from dojo.forms import JIRAForm, DeleteJIRAConfForm, ExpressJIRAForm
 from dojo.models import User, JIRA_Conf, JIRA_Issue, Notes, Risk_Acceptance
 from dojo.utils import add_breadcrumb, get_system_setting
 from dojo.notifications.helper import create_notification
+from django.views.decorators.http import require_POST
 
 logger = logging.getLogger(__name__)
 
 
 @csrf_exempt
+@require_POST
 def webhook(request, secret=None):
     print('secret: ' + str(secret))
     if not get_system_setting('enable_jira'):
