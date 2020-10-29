@@ -17,6 +17,7 @@ RUN \
     postgresql-client \
     xmlsec1 \
     git \
+    uuid-runtime \
     && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists && \
@@ -43,6 +44,7 @@ RUN \
     libmariadb3 \
     xmlsec1 \
     git \
+    uuid-runtime \    
     # only required for the dbshell (used by the initializer job)
     postgresql-client \
     curl \
