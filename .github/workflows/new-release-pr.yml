@@ -50,7 +50,7 @@ jobs:
           grep version setup.py
           grep appVersion helm/defectdojo/Chart.yaml
       - name: Push version changes
-        uses: stefanzweifel/git-auto-commit-action@v4.1.2
+        uses: stefanzweifel/git-auto-commit-action@v4.7.2
         with:
           commit_user_name: "${{ env.GIT_USERNAME }}"
           commit_user_email: "${{ env.GIT_EMAIL }}"
