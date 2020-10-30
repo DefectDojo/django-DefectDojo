@@ -180,7 +180,7 @@ if os.path.isfile(root('dojo/settings/.env.prod')) or 'DD_ENV_PATH' in os.enviro
 
 # False if not in os.environ
 DEBUG = env('DD_DEBUG')
-TEMPLATE_DEBUG  = env('DD_TEMPLATE_DEBUG')
+TEMPLATE_DEBUG = env('DD_TEMPLATE_DEBUG')
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/2.0/ref/settings/#allowed-hosts
