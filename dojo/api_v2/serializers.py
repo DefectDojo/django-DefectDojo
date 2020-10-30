@@ -24,6 +24,7 @@ import six
 from django.utils.translation import ugettext_lazy as _
 import json
 import logging
+from dojo.templatetags.display_tags import finding_display_status
 
 
 logger = logging.getLogger(__name__)
@@ -669,9 +670,8 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
                     'id': obj.test.environment.id,
                     'name': obj.test.environment.name
                 },
-                'branch': {
-                    'name': obj.test.engagement.branch_tag
-                }
+                'branch': obj.test.engagement.branch_tag,
+                'display_status': finding_display_status(obj)
             }
             return related_fields
 
