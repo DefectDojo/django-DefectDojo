@@ -61,7 +61,7 @@ RUN \
   cd components && \
   yarn && \
   cd .. && \
-  python3 manage.py collectstatic --noinput && \
+  env DD_SECRET_KEY='.' python3 manage.py collectstatic --noinput && \
   true
 
 FROM nginx:1.19.3-alpine@sha256:a411d06ab4f5347ac9652357ac35600555aeff0b910326cc7adc36d471e0b36f
