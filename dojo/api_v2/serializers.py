@@ -674,7 +674,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
                     'id': obj.test.environment.id,
                     'name': obj.test.environment.name
                 },
-                'display_status': finding_display_status(obj)
+                'display_status': obj.status()
             }
             return related_fields
 
