@@ -2,6 +2,8 @@
 # this file will be included by settings.py *after* loading settings.dist.py
 # from components.base import INSTALLED_APPS
 
+from django.conf.urls import include, url
+
 INSTALLED_APPS += (
     'debug_toolbar',
 )
@@ -47,3 +49,6 @@ DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.profiling.ProfilingPanel',
     # 'cachalot.panels.CachalotPanel',
 ]
+
+import debug_toolbar
+EXTRA_URL_PATTERNS = [url(r"^__debug__/", include(debug_toolbar.urls))]
