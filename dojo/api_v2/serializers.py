@@ -24,7 +24,6 @@ import six
 from django.utils.translation import ugettext_lazy as _
 import json
 import logging
-from dojo.templatetags.display_tags import finding_display_status
 
 
 logger = logging.getLogger(__name__)
