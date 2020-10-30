@@ -841,6 +841,7 @@ LOGGING = {
         },
         'console': {
             'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
         },
         'json_console': {
             'class': 'logging.StreamHandler',
