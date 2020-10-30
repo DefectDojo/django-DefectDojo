@@ -49,6 +49,7 @@ or
 docker-compose build nginx
 ```
 
+> **_NOTE:_**  It's possible to add extra fixtures in folder "/docker/extra_fixtures".
 
 ## Run with Docker compose in release mode
 To run the application based on previously built image (or based on dockerhub images if none was locally built), run: 
