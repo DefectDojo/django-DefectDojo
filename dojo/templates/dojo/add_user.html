@@ -35,15 +35,17 @@
 {% endblock %}
 {% block postscript %}
     {% if to_add or to_edit and not to_edit.is_staff %}
-            <script type="application/javascript">
+        <script type="application/javascript">
             $(function () {
                 $('#id_authorized_products').chosen({'placeholder_text_multiple': 'Select some products...'});
+                $('#id_authorized_product_types').chosen({'placeholder_text_multiple': 'Select some product types...'});
             });
         </script>
     {% else %}
         <script type="application/javascript">
             $(function () {
                 $('#id_authorized_products').parents(".form-group").remove();
+                $('#id_authorized_product_types').parents(".form-group").remove();
             });
         </script>
     {% endif %}

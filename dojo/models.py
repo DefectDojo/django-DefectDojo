@@ -31,7 +31,6 @@ from dojo.tag.prefetching_tag_descriptor import PrefetchingTagDescriptor
 from django.contrib.contenttypes.fields import GenericRelation
 from tagging.models import TaggedItem
 from dateutil.relativedelta import relativedelta
-from dojo.user.helper import user_is_authorized
 
 fmt = getattr(settings, 'LOG_FORMAT', None)
 lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
@@ -125,12 +124,25 @@ class System_Settings(models.Model):
                                               "issue reaches the maximum "
                                               "number of duplicates, the "
                                               "oldest will be deleted.")
+
     enable_jira = models.BooleanField(default=False,
                                       verbose_name='Enable JIRA integration',
                                       blank=False)
+
     enable_jira_web_hook = models.BooleanField(default=False,
-                                      verbose_name='Enable JIRA web hook. Please note: It is strongly recommended to whitelist the Jira server using a proxy such as Nginx.',
+                                      verbose_name='Enable JIRA web hook',
+                                      help_text='Please note: It is strongly recommended to use a secret below and / or IP whitelist the JIRA server using a proxy such as Nginx.',
                                       blank=False)
+
+    disable_jira_webhook_secret = models.BooleanField(default=False,
+                                      verbose_name='Disable web hook secret',
+                                      help_text='Allows incoming requests without a secret (discouraged legacy behaviour)',
+                                      blank=False)
+
+    # will be set to random / uuid by initializer so null needs to be True
+    jira_webhook_secret = models.CharField(max_length=64, blank=False, null=True, verbose_name='JIRA Webhook URL',
+                                           help_text='Secret needed in URL for incoming JIRA Webhook')
+
     jira_choices = (('Critical', 'Critical'),
                     ('High', 'High'),
                     ('Medium', 'Medium'),
@@ -178,7 +190,7 @@ class System_Settings(models.Model):
                                       'places, whereas if turned off '
                                       'Critical, High, Medium, etc will '
                                       'be displayed.')
-    false_positive_history = models.BooleanField(default=False, help_text="DefectDojo will automatically mark the finding as a false positive if the finding has been previously marked as a false positive.")
+    false_positive_history = models.BooleanField(default=False, help_text="DefectDojo will automatically mark the finding as a false positive if the finding has been previously marked as a false positive. Not needed when using deduplication, advised to not combine these two.")
 
     url_prefix = models.CharField(max_length=300, default='', blank=True, help_text="URL prefix if DefectDojo is installed in it's own virtual subdirectory.")
     team_name = models.CharField(max_length=100, default='', blank=True)
@@ -401,6 +413,7 @@ class Product_Type(models.Model):
     key_product = models.BooleanField(default=False)
     updated = models.DateTimeField(auto_now=True, null=True)
     created = models.DateTimeField(auto_now_add=True, null=True)
+    authorized_users = models.ManyToManyField(User, blank=True)
 
     @cached_property
     def critical_present(self):
@@ -1731,11 +1744,9 @@ class Finding(models.Model):
             # models.Index(fields=['file_path']), # can't add index because the field has max length 4000.
             models.Index(fields=['line']),
             models.Index(fields=['component_name']),
+            models.Index(fields=['duplicate']),
+            models.Index(fields=['is_Mitigated']),
         ]
-
-    def is_authorized(self, user, perm_type):
-        # print('finding.is_authorized')
-        return user_is_authorized(user, perm_type, self)
 
     def get_absolute_url(self):
         from django.urls import reverse

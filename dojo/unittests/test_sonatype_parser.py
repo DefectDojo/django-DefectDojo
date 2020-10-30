@@ -15,3 +15,9 @@ class TestSonatypeJSONParser(TestCase):
         parser = SonatypeJSONParser(testfile, Test())
         testfile.close()
         self.assertEqual(3, len(parser.items))
+
+    def test_parse_file_with_long_file_path(self):
+        testfile = open("dojo/unittests/scans/sonatype/long_file_path.json")
+        parser = SonatypeJSONParser(testfile, Test())
+        testfile.close()
+        self.assertEqual(2, len(parser.items))

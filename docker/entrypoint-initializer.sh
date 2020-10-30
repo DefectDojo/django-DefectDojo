@@ -1,5 +1,4 @@
 #!/bin/sh
-
 umask 0002
 
 if [ "${DD_INITIALIZE}" = false ]
@@ -38,6 +37,12 @@ then
   echo "Admin password: ${DD_ADMIN_PASSWORD}"
 fi
 
+if [ -z "${DD_JIRA_WEBHOOK_SECRET}" ]
+then
+  export DD_JIRA_WEBHOOK_SECRET="$(uuidgen)"
+  echo "JIRA Webhook Secret: ${DD_JIRA_WEBHOOK_SECRET}"
+fi
+
 if [ -z "${ADMIN_EXISTS}" ]
 then
 cat <<EOD | python manage.py shell
@@ -53,6 +58,8 @@ User.objects.create_superuser(
 EOD
 
   python3 manage.py loaddata system_settings
+  echo "UPDATE dojo_system_settings SET jira_webhook_secret='$DD_JIRA_WEBHOOK_SECRET'" | python manage.py dbshell
+
   python3 manage.py loaddata initial_banner_conf
   python3 manage.py loaddata product_type
   python3 manage.py loaddata test_type

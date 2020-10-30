@@ -57,12 +57,12 @@ def sync_false_history(new_finding, *args, **kwargs):
             test__engagement__product=new_finding.test.engagement.product,
             cwe=new_finding.cwe,
             test__test_type=new_finding.test.test_type,
-            false_p=True, hash_code=new_finding.hash_code).exclude(id=new_finding.id).exclude(cwe=None)
+            false_p=True, hash_code=new_finding.hash_code).exclude(id=new_finding.id).exclude(cwe=None).values('id')
         eng_findings_title = Finding.objects.filter(
             test__engagement__product=new_finding.test.engagement.product,
             title=new_finding.title,
             test__test_type=new_finding.test.test_type,
-            false_p=True, hash_code=new_finding.hash_code).exclude(id=new_finding.id)
+            false_p=True, hash_code=new_finding.hash_code).exclude(id=new_finding.id).values('id')
         total_findings = eng_findings_cwe | eng_findings_title
     else:
         # if endpoints on new finding, then look at ONLY cwe + test_type. or title + test_type (hash_code doesn't matter!)
@@ -70,17 +70,20 @@ def sync_false_history(new_finding, *args, **kwargs):
             test__engagement__product=new_finding.test.engagement.product,
             cwe=new_finding.cwe,
             test__test_type=new_finding.test.test_type,
-            false_p=True).exclude(id=new_finding.id).exclude(cwe=None).exclude(endpoints=None)
+            false_p=True).exclude(id=new_finding.id).exclude(cwe=None).exclude(endpoints=None).values('id')
         eng_findings_title = Finding.objects.filter(
             test__engagement__product=new_finding.test.engagement.product,
             title=new_finding.title,
             test__test_type=new_finding.test.test_type,
-            false_p=True).exclude(id=new_finding.id).exclude(endpoints=None)
+            false_p=True).exclude(id=new_finding.id).exclude(endpoints=None).values('id')
+
+    total_findings = eng_findings_cwe | eng_findings_title
 
     deduplicationLogger.debug("cwe   query: %s", eng_findings_cwe.query)
     deduplicationLogger.debug("title query: %s", eng_findings_title.query)
 
-    total_findings = eng_findings_cwe | eng_findings_title
+    # TODO this code retrieves all matching findings + data. in 3 queries. just to check if there is a non-zero amount of matching findings.
+    # if we keep false positive history like this, this can be rewritten into 1 query that performs these counts.
 
     deduplicationLogger.debug("False positive history: Found " +
         str(len(eng_findings_cwe)) + " findings with same cwe, " +
@@ -147,19 +150,19 @@ def deduplicate_legacy(new_finding):
     if new_finding.test.engagement.deduplication_on_engagement:
         eng_findings_cwe = Finding.objects.filter(
             test__engagement=new_finding.test.engagement,
-            cwe=new_finding.cwe).exclude(id=new_finding.id).exclude(cwe=0).exclude(duplicate=True)
+            cwe=new_finding.cwe).exclude(id=new_finding.id).exclude(cwe=0).exclude(duplicate=True).values('id')
         eng_findings_title = Finding.objects.filter(
             test__engagement=new_finding.test.engagement,
-            title=new_finding.title).exclude(id=new_finding.id).exclude(duplicate=True)
+            title=new_finding.title).exclude(id=new_finding.id).exclude(duplicate=True).values('id')
     else:
         eng_findings_cwe = Finding.objects.filter(
             test__engagement__product=new_finding.test.engagement.product,
-            cwe=new_finding.cwe).exclude(id=new_finding.id).exclude(cwe=0).exclude(duplicate=True)
+            cwe=new_finding.cwe).exclude(id=new_finding.id).exclude(cwe=0).exclude(duplicate=True).values('id')
         eng_findings_title = Finding.objects.filter(
             test__engagement__product=new_finding.test.engagement.product,
-            title=new_finding.title).exclude(id=new_finding.id).exclude(duplicate=True)
+            title=new_finding.title).exclude(id=new_finding.id).exclude(duplicate=True).values('id')
 
-    total_findings = eng_findings_cwe | eng_findings_title
+    total_findings = Finding.objects.filter(Q(id__in=eng_findings_cwe) | Q(id__in=eng_findings_title)).prefetch_related('endpoints', 'test', 'test__engagement', 'found_by', 'original_finding', 'test__test_type')
     deduplicationLogger.debug("Found " +
         str(len(eng_findings_cwe)) + " findings with same cwe, " +
         str(len(eng_findings_title)) + " findings with same title: " +
@@ -1219,7 +1222,8 @@ def get_jira_connection(finding):
         if jira_conf is not None:
             jira = JIRA(
                 server=jira_conf.url,
-                basic_auth=(jira_conf.username, jira_conf.password))
+                basic_auth=(jira_conf.username, jira_conf.password),
+                options={"verify": settings.JIRA_SSL_VERIFY})
     except JIRA_PKey.DoesNotExist:
         pass
     return jira
@@ -1367,7 +1371,8 @@ def add_jira_issue(find, push_to_jira):
                 JIRAError.log_to_tempfile = False
                 jira = JIRA(
                     server=jira_conf.url,
-                    basic_auth=(jira_conf.username, jira_conf.password))
+                    basic_auth=(jira_conf.username, jira_conf.password),
+                    options={"verify": settings.JIRA_SSL_VERIFY})
 
                 meta = None
 
@@ -1511,7 +1516,8 @@ def update_jira_issue(find, push_to_jira):
             JIRAError.log_to_tempfile = False
             jira = JIRA(
                 server=jira_conf.url,
-                basic_auth=(jira_conf.username, jira_conf.password))
+                basic_auth=(jira_conf.username, jira_conf.password),
+                options={"verify": settings.JIRA_SSL_VERIFY})
             issue = jira.issue(j_issue.jira_id)
 
             meta = None
@@ -1624,7 +1630,8 @@ def update_epic(eng, push_to_jira):
         try:
             jira = JIRA(
                 server=jira_conf.url,
-                basic_auth=(jira_conf.username, jira_conf.password))
+                basic_auth=(jira_conf.username, jira_conf.password),
+                options={"verify": settings.JIRA_SSL_VERIFY})
             j_issue = JIRA_Issue.objects.get(engagement=eng)
             issue = jira.issue(j_issue.jira_id)
             issue.update(summary=eng.name, description=eng.name)
@@ -1654,7 +1661,8 @@ def add_epic(eng, push_to_jira):
         try:
             jira = JIRA(
                 server=jira_conf.url,
-                basic_auth=(jira_conf.username, jira_conf.password))
+                basic_auth=(jira_conf.username, jira_conf.password),
+                options={"verify": settings.JIRA_SSL_VERIFY})
             new_issue = jira.create_issue(fields=issue_dict)
             j_issue = JIRA_Issue(
                 jira_id=new_issue.id,
@@ -1678,7 +1686,8 @@ def jira_get_issue(jpkey, issue_key):
     try:
         jira = JIRA(
             server=jira_conf.url,
-            basic_auth=(jira_conf.username, jira_conf.password))
+            basic_auth=(jira_conf.username, jira_conf.password),
+            options={"verify": settings.JIRA_SSL_VERIFY})
         issue = jira.issue(issue_key)
         # print(vars(issue))
         return issue
@@ -1703,7 +1712,8 @@ def add_comment(find, note, force_push=False):
                 try:
                     jira = JIRA(
                         server=jira_conf.url,
-                        basic_auth=(jira_conf.username, jira_conf.password))
+                        basic_auth=(jira_conf.username, jira_conf.password),
+                        options={"verify": settings.JIRA_SSL_VERIFY})
                     j_issue = JIRA_Issue.objects.get(finding=find)
                     jira.add_comment(
                         j_issue.jira_id,
@@ -1719,7 +1729,8 @@ def add_simple_jira_comment(jira_conf, jira_issue, comment):
     try:
         jira = JIRA(
             server=jira_conf.url,
-            basic_auth=(jira_conf.username, jira_conf.password)
+            basic_auth=(jira_conf.username, jira_conf.password),
+            options={"verify": settings.JIRA_SSL_VERIFY}
         )
         jira.add_comment(
             jira_issue.jira_id, comment

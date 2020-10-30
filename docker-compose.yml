@@ -11,12 +11,12 @@ services:
     environment:
       NGINX_METRICS_ENABLED: ${NGINX_METRICS_ENABLED:-false}
     ports:
-      - target: ${DD_PORT:-8080}
+      - target: 8080
         published: ${DD_PORT:-8080}
         protocol: tcp
         mode: host
-      - target: ${DD_PORT:-8443}
-        published: ${DD_PORT:-8443}
+      - target: 8443
+        published: ${DD_TLS_PORT:-8443}
         protocol: tcp
         mode: host
   uwsgi:
@@ -75,7 +75,7 @@ services:
       DD_SECRET_KEY: ${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}
       DD_CREDENTIAL_AES_256_KEY: ${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}
   mysql:
-    image: mysql:5.7.31@sha256:9e902247f80eca2e0fc4179f48a91afbe3b2a61122dd5e7575b5f0549aab97d0
+    image: mysql:5.7.32@sha256:ce6815027949d0b48e3097a94fa3ec062866a78868d50c7900c697c13574599f
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
       DD_DATABASE_URL: ${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}

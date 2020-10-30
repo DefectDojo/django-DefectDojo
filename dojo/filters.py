@@ -16,7 +16,7 @@ from pytz import timezone
 from django.db.models import Q
 from dojo.models import Dojo_User, Product_Type, Finding, Product, Test_Type, \
     Endpoint, Development_Environment, Finding_Template, Report, Note_Type, \
-    Engagement_Survey, Question, TextQuestion, ChoiceQuestion, Endpoint_Status
+    Engagement_Survey, Question, TextQuestion, ChoiceQuestion, Endpoint_Status, Engagement
 from dojo.utils import get_system_setting
 from django.contrib.contenttypes.models import ContentType
 
@@ -373,7 +373,7 @@ class ProductFilter(DojoFilter):
         if self.user is not None and not self.user.is_staff:
             self.form.fields[
                 'prod_type'].queryset = Product_Type.objects.filter(
-                prod_type__authorized_users__in=[self.user])
+                authorized_users__in=[self.user])
 
     class Meta:
         model = Product
@@ -908,11 +908,14 @@ class SimilarFindingFilter(DojoFilter):
             if self.form.fields.get('test__engagement__product'):
                 qs = Product.objects.filter(authorized_users__in=[self.user])
                 self.form.fields['test__engagement__product'].queryset = qs
+            if self.form.fields.get('test__engagement__product__prod_type'):
+                qs = Product_Type.objects.filter(authorized_users__in=[self.user])
+                self.form.fields['test__engagement__product__prod_type'].queryset = qs
 
     def filter_queryset(self, *args, **kwargs):
         queryset = super().filter_queryset(*args, **kwargs)
         if not self.user.is_staff:
-            queryset = queryset.filter(test__engagement__product__authorized_users__in=[self.user])
+            queryset = queryset.filter(Q(test__engagement__product__authorized_users__in=[self.user]) | Q(test__engagement__product__prod_type__authorized_users__in=[self.user]))
         queryset = queryset.exclude(pk=self.finding.pk)
         return queryset
 
@@ -1016,6 +1019,7 @@ class MetricsFindingFilter(FilterSet):
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.all().order_by('name'),
         label="Product Type")
+    test__engagement__version = CharFilter(lookup_expr='icontains', label="Engagement Version")
     severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     status = FindingStatusFilter(label='Status')
 
@@ -1025,7 +1029,6 @@ class MetricsFindingFilter(FilterSet):
                 args[0]._mutable = True
                 args[0]['date'] = 8
                 args[0]._mutable = False
-        # raise Exception()
         super(MetricsFindingFilter, self).__init__(*args, **kwargs)
         self.form.fields['severity'].choices = self.queryset.order_by(
             'numerical_severity'
@@ -1061,6 +1064,7 @@ class MetricsEndpointFilter(FilterSet):
     finding__test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.all().order_by('name'),
         label="Product Type")
+    finding__test__engagement__version = CharFilter(lookup_expr='icontains', label="Engagement Version")
     finding__severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
 
     def __init__(self, *args, **kwargs):
@@ -1069,8 +1073,78 @@ class MetricsEndpointFilter(FilterSet):
                 args[0]._mutable = True
                 args[0]['date'] = 8
                 args[0]._mutable = False
-        # raise Exception()
         super(MetricsEndpointFilter, self).__init__(*args, **kwargs)
+        self.form.fields['finding__severity'].choices = self.queryset.order_by(
+            'finding__numerical_severity'
+        ).values_list('finding__severity', 'finding__severity').distinct()
+
+    class Meta:
+        model = Endpoint_Status
+        exclude = ['last_modified']
+
+
+class ProductMetricsFindingFilter(FilterSet):
+    start_date = DateFilter(field_name='date', label='Start Date', lookup_expr=('gt'))
+    end_date = DateFilter(field_name='date', label='End Date', lookup_expr=('lt'))
+    date = MetricsDateRangeFilter()
+    test__engagement = ModelMultipleChoiceFilter(
+        queryset=Engagement.objects.all().order_by('name'),
+        label="Engagement")
+    test__engagement__version = CharFilter(lookup_expr='icontains', label="Engagement Version")
+    severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
+    status = FindingStatusFilter(label='Status')
+
+    def __init__(self, *args, **kwargs):
+        if args[0]:
+            if args[0].get('start_date', '') != '' or args[0].get('end_date', '') != '':
+                args[0]._mutable = True
+                args[0]['date'] = 8
+                args[0]._mutable = False
+        super(ProductMetricsFindingFilter, self).__init__(*args, **kwargs)
+        self.form.fields['severity'].choices = self.queryset.order_by(
+            'numerical_severity'
+        ).values_list('severity', 'severity').distinct()
+
+    class Meta:
+        model = Finding
+        exclude = ['url',
+                   'description',
+                   'mitigation',
+                   'unsaved_endpoints',
+                   'unsaved_request',
+                   'unsaved_response',
+                   'unsaved_tags',
+                   'references',
+                   'review_requested_by',
+                   'reviewers',
+                   'defect_review_requested_by',
+                   'thread_id',
+                   'notes',
+                   'last_reviewed_by',
+                   'images',
+                   'endpoints',
+                   'is_template',
+                   'jira_creation',
+                   'jira_change']
+
+
+class ProductMetricsEndpointFilter(FilterSet):
+    start_date = DateFilter(field_name='date', label='Start Date', lookup_expr=('gt'))
+    end_date = DateFilter(field_name='date', label='End Date', lookup_expr=('lt'))
+    date = MetricsDateRangeFilter()
+    finding__test__engagement = ModelMultipleChoiceFilter(
+        queryset=Engagement.objects.all().order_by('name'),
+        label="Engagement")
+    finding__test__engagement__version = CharFilter(lookup_expr='icontains', label="Engagement Version")
+    finding__severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
+
+    def __init__(self, *args, **kwargs):
+        if args[0]:
+            if args[0].get('start_date', '') != '' or args[0].get('end_date', '') != '':
+                args[0]._mutable = True
+                args[0]['date'] = 8
+                args[0]._mutable = False
+        super(ProductMetricsEndpointFilter, self).__init__(*args, **kwargs)
         self.form.fields['finding__severity'].choices = self.queryset.order_by(
             'finding__numerical_severity'
         ).values_list('finding__severity', 'finding__severity').distinct()
@@ -1171,6 +1245,9 @@ class ReportAuthedFindingFilter(DojoFilter):
             self.form.fields[
                 'test__engagement__product'].queryset = Product.objects.filter(
                 authorized_users__in=[self.user])
+            self.form.fields[
+                'test__engagement__product__prod_type'].queryset = Product_Type.objects.filter(
+                authorized_users__in=[self.user])
 
     @property
     def qs(self):
@@ -1179,7 +1256,9 @@ class ReportAuthedFindingFilter(DojoFilter):
             return parent
         else:
             return parent.filter(
-                test__engagement__product__authorized_users__in=[self.user])
+                Q(test__engagement__product__authorized_users__in=[self.user]) |
+                Q(test__engagement__product__prod_type__authorized_users__in=[self.user])
+            )
 
     class Meta:
         model = Finding
@@ -1193,6 +1272,12 @@ class UserFilter(DojoFilter):
     first_name = CharFilter(lookup_expr='icontains')
     last_name = CharFilter(lookup_expr='icontains')
     username = CharFilter(lookup_expr='icontains')
+    product_type = ModelMultipleChoiceFilter(
+        queryset=Product_Type.objects.all(),
+        label="Authorized Product Type")
+    product = ModelMultipleChoiceFilter(
+        queryset=Product.objects.all(),
+        label="Authorized Product")
 
     o = OrderingFilter(
         # tuple-mapping retains order

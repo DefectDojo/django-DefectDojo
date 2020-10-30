@@ -17,6 +17,7 @@ RUN \
     postgresql-client \
     xmlsec1 \
     git \
+    uuid-runtime \
     && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists && \
@@ -43,8 +44,10 @@ RUN \
     libmariadb3 \
     xmlsec1 \
     git \
+    uuid-runtime \    
     # only required for the dbshell (used by the initializer job)
     postgresql-client \
+    curl \
     && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists && \
@@ -80,6 +83,8 @@ RUN \
   mkdir -p dojo/migrations && \
   chmod g=u dojo/migrations && \
   true
+# Fallback for safety parser, if installation does't allow internet connectivity
+RUN curl -sS -o dojo/tools/safety/insecure_full.json https://raw.githubusercontent.com/pyupio/safety-db/master/data/insecure_full.json
 USER root
 RUN \
     adduser --system --no-create-home --disabled-password --gecos '' \

@@ -348,6 +348,9 @@ class ProductTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product_Type
         fields = '__all__'
+        extra_kwargs = {
+            'authorized_users': {'queryset': User.objects.exclude(is_staff=True).exclude(is_active=False)}
+        }
 
 
 class EngagementSerializer(TaggitSerializer, serializers.ModelSerializer):
@@ -644,7 +647,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     def get_related_fields(self, obj):
         query_params = self.context['request'].query_params
-        if 'related_fields' in query_params:
+        if 'related_fields' in query_params and query_params['related_fields'] == 'true':
             related_fields = {
                 'product_type': {
                     'id': obj.test.engagement.product.prod_type.id,
@@ -960,8 +963,8 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     for req_resp in item.unsaved_req_resp:
                         burp_rr = BurpRawRequestResponse(
                             finding=item,
-                            burpRequestBase64=req_resp["req"],
-                            burpResponseBase64=req_resp["resp"])
+                            burpRequestBase64=base64.b64encode(req_resp["req"].encode("utf-8")),
+                            burpResponseBase64=base64.b64encode(req_resp["resp"].encode("utf-8")))
                         burp_rr.clean()
                         burp_rr.save()
 
@@ -969,8 +972,8 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                         item.unsaved_response is not None):
                     burp_rr = BurpRawRequestResponse(
                         finding=item,
-                        burpRequestBase64=item.unsaved_request,
-                        burpResponseBase64=item.unsaved_response)
+                        burpRequestBase64=base64.b64encode(item.unsaved_request.encode()),
+                        burpResponseBase64=base64.b64encode(item.unsaved_response.encode()))
                     burp_rr.clean()
                     burp_rr.save()
 
@@ -1215,16 +1218,16 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                         for req_resp in item.unsaved_req_resp:
                             burp_rr = BurpRawRequestResponse(
                                 finding=finding,
-                                burpRequestBase64=req_resp['req'],
-                                burpResponseBase64=req_resp['resp'])
+                                burpRequestBase64=base64.b64encode(req_resp["req"].encode("utf-8")),
+                                burpResponseBase64=base64.b64encode(req_resp["resp"].encode("utf-8")))
                             burp_rr.clean()
                             burp_rr.save()
 
                     if item.unsaved_request and item.unsaved_response:
                         burp_rr = BurpRawRequestResponse(
                             finding=finding,
-                            burpRequestBase64=item.unsaved_request,
-                            burpResponseBase64=item.unsaved_response)
+                            burpRequestBase64=base64.b64encode(item.unsaved_request.encode()),
+                            burpResponseBase64=base64.b64encode(item.unsaved_response.encode()))
                         burp_rr.clean()
                         burp_rr.save()
 
