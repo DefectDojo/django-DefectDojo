@@ -78,9 +78,6 @@ COPY dojo/ ./dojo/
 # Add extra fixtures to docker image which are loaded by the initializer
 COPY docker/extra_fixtures/* /app/dojo/fixtures/
 
-# Legacy installs need the modified settings.py, do not remove!
-# RUN \
-#   cp dojo/settings/settings.dist.py dojo/settings/settings.py
 COPY tests/ ./tests/
 RUN \
   # Remove placeholder copied from docker/certs

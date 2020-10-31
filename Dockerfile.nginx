@@ -55,8 +55,7 @@ RUN pip3 install \
 COPY components/ ./components/
 COPY manage.py ./
 COPY dojo/ ./dojo/
-# RUN \
-#   cp dojo/settings/settings.dist.py dojo/settings/settings.py
+
 RUN \
   cd components && \
   yarn && \
