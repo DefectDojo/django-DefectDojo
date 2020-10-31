@@ -1,4 +1,5 @@
-A local_settings.py file can be placed here to override/extend the settings bundled with Defect Dojo
+A local_settings.py file can be placed here to override/extend the settings bundled with Defect Dojo.
+This folders is ignore by git and docker.
 
 If a file if placed here, it will be copied on startup to dojo/setting/local_settings.py.
 
