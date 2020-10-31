@@ -122,6 +122,9 @@ docker/certs/*
 #ignore locally added extra fixtures
 docker/extra_fixtures/*
 !docker/extra_fixtures/readme.txt
+docker/extra_settings/*
+!docker/extra_settings/readme.MD
+
 
 # Helm dependencies
 helm/defectdojo/charts
