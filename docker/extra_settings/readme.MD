@@ -2,7 +2,7 @@ A local_settings.py file can be placed here to override/extend the settings bund
 
 If a file if placed here, it will be copied on startup to dojo/setting/local_settings.py.
 
-For an example, see dojo/settings/template-local_settings
+For an example, see [template-local_settings](../dojo/settings/template-local_settings)
 
 Please note this copy action could fail if you have mounted the full dojo/ folder, but that is owned by a different user/group.
 That's why this copy action only happens in docker-compose release mode, and not in dev/ptvsd/unit_tests/integration_tests modes.

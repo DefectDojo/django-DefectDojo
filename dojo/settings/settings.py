@@ -1,6 +1,7 @@
 from split_settings.tools import optional, include
 
-# Defetc Dojo uses 3 settings files to get you going
+# Defect Dojo uses 3 settings files to get you going:
+#
 # - settings.dist.py:
 #       The main settings are all stored here, it also reads from the environment variables (see contents of settings.dist.py).
 # - "env file, i.e. .env.prod" (not stored in git)
@@ -10,6 +11,10 @@ from split_settings.tools import optional, include
 #       A file stored locally / on the server containing more complex customizations such as adding MIDDLEWARE or INSTALLED_APP entries.
 #       This file is processed *after* settings.dist.py is processed, so you can modify settings delivered by Defect Dojo out of the box.
 #       Example in template-local_settings
+#
+#
+# in docker-compose release mode, files in docker/extra_settings will be copied into dojo/settings/ on startup
+
 
 include(
     'settings.dist.py',
