@@ -9,5 +9,6 @@ That's why this copy action only happens in docker-compose release mode, and not
 
 For advanced usage you can also place a settings.dist.py or settings.py file. These will also be copied on startup to dojo/settings.
 
+The files in this `docker/extra_settings` folder are *not* used by the nginx container, as this container needs the settings at build time.
 
 
