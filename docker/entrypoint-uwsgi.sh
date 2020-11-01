@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Allow for bind-mount setting.py overrides
-FILE=/docker/extra_settings/settings.dist.py
+FILE=/app/docker/extra_settings/settings.dist.py
 if test -f "$FILE"; then
     echo "============================================================"
     echo "     Overriding DefectDojo's settings.dist.py with $FILE."
@@ -10,7 +10,7 @@ if test -f "$FILE"; then
 fi
 
 # Allow for bind-mount setting.py overrides
-FILE=/docker/extra_settings/settings.py
+FILE=/app/docker/extra_settings/settings.py
 if test -f "$FILE"; then
     echo "============================================================"
     echo "     Overriding DefectDojo's settings.py with $FILE."
@@ -19,7 +19,7 @@ if test -f "$FILE"; then
 fi
 
 # Allow for bind-mount setting.py overrides
-FILE=/docker/extra_settings/local_settings.py
+FILE=/app/docker/extra_settings/local_settings.py
 if test -f "$FILE"; then
     echo "============================================================"
     echo "     Overriding DefectDojo's local_settings.py with $FILE."
