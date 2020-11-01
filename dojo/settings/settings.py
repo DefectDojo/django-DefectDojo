@@ -1,5 +1,8 @@
 from split_settings.tools import optional, include
 
+# New in 1.10.0: A settings.py file providedby Defect Dojo. See below for explenation.
+# If you have previously added your own settings.py file, a temporary quickfix is to rename that to local_settings.py
+
 # Defect Dojo uses 3 settings files to get you going:
 #
 # - settings.dist.py:
