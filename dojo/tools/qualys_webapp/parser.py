@@ -144,7 +144,12 @@ def get_vulnerabilities(vulnerabilities, is_info=False, is_app_report=False):
             raw_finding_date = vuln.findtext('FIRST_TIME_DETECTED')
         else:
             raw_finding_date = vuln.findtext('DETECTION_DATE')
-        finding_date = datetime.strptime(raw_finding_date, "%d %b %Y %I:%M%p %Z")
+
+        # Qualys uses a non-standard date format.
+        if raw_finding_date.endswith("GMT"):
+            finding_date = datetime.strptime(raw_finding_date, "%d %b %Y %I:%M%p GMT")
+        else:
+            finding_date = datetime.strptime(raw_finding_date, "%d %b %Y %I:%M%p GMT%z")
 
         finding = findings.get(qid, None)
         findings[qid] = attach_extras(urls, req_resps[0], req_resps[1], finding, finding_date, qid)
