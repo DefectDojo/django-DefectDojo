@@ -38,8 +38,7 @@ class SemgrepJSONResult:
             self.title = metadata.get("cwe").partition(':')[2]
 
         self.cwe = metadata.get("cwe").partition(':')[0].partition('-')[2]
-        self.owasp = metadata.get('owasp')
-
+        
         # Convert Semgrep severity to defectDojo Severity
         semSeverity = extra.get('severity')
 
@@ -49,7 +48,7 @@ class SemgrepJSONResult:
         if semSeverity == "ERROR":
             self.severity = "High"
 
-        self.references = metadata.get('message')
+        self.references = metadata.get('message') + metadata.get('owasp')
         self.source_rule_url = metadata.get('source-rule-url')
 
         if not metavars:
