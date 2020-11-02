@@ -34,7 +34,6 @@ from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, message, get_system_setting, Product_Tab, is_scan_file_too_large, update_epic, add_epic
 from dojo.notifications.helper import create_notification
-from dojo.tasks import update_epic_task, add_epic_task
 from dojo.finding.views import find_available_notetypes
 from functools import reduce
 from django.db.models.query import QuerySet
@@ -193,18 +192,11 @@ def edit_engagement(request, eid):
             if 'jiraform-push_to_jira' in request.POST:
                 logger.debug('push_to_jira true')
                 if JIRA_Issue.objects.filter(engagement=eng).exists():
-                    if Dojo_User.wants_block_execution(request.user):
-                        update_epic(
-                            eng, jform.cleaned_data.get('push_to_jira'))
-                    else:
-                        update_epic_task.delay(
-                            eng, jform.cleaned_data.get('push_to_jira'))
+                    update_epic(
+                        eng, jform.cleaned_data.get('push_to_jira'))
 
                 else:
-                    if Dojo_User.wants_block_execution(request.user):
-                        add_epic(eng, jform.cleaned_data.get('push_to_jira'))
-                    else:
-                        add_epic_task.delay(eng, jform.cleaned_data.get('push_to_jira'))
+                    add_epic(eng, jform.cleaned_data.get('push_to_jira'))
 
             temp_form = form.save(commit=False)
             if (temp_form.status == "Cancelled" or temp_form.status == "Completed"):

@@ -22,10 +22,10 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         findings = Finding.objects.all()
-        logger.info("######## Updating Hashcodes (deduplication is done in background using django signals upon finding save ########")
-        deduplicationLogger.info("######## Updating Hashcodes (deduplication is done in background using django signals upon finding save ########")
+        logger.info("######## Updating Hashcodes (deduplication is done in the background  upon finding save ########")
+        deduplicationLogger.info("######## Updating Hashcodes (deduplication is done in the background  upon finding save ########")
         for finding in findings:
             finding.hash_code = finding.compute_hash_code()
             finding.save()
-        logger.info("######## Done Updating Hashcodes (deduplication is done in background using django signals upon finding save ########")
-        deduplicationLogger.info("######## Done Updating Hashcodes (deduplication is done in background using django signals upon finding save ########")
+        logger.info("######## Done Updating Hashcodes (deduplication is done in the background upon finding save ########")
+        deduplicationLogger.info("######## Done Updating Hashcodes (deduplication is done in the background upon finding save ########")
