@@ -652,7 +652,7 @@
     },
     {
         "fields": {
-            "name": DrHeader JSON Importer"
+            "name": "DrHeader JSON Importer"
         },
         "model": "dojo.test_type",
         "pk": 185
