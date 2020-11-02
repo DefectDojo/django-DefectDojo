@@ -537,7 +537,7 @@ class ApiFindingFilter(DojoFilter):
     class Meta:
         model = Finding
         exclude = ['url', 'is_template', 'thread_id', 'notes', 'images',
-                   'sourcefile', 'line']
+                   'sourcefile', 'line', 'endpoint_status']
 
 
 class OpenFindingFilter(DojoFilter):
@@ -590,7 +590,7 @@ class OpenFindingFilter(DojoFilter):
                    'endpoint', 'references', 'test', 'is_template',
                    'thread_id', 'notes', 'scanner_confidence', 'mitigated',
                    'numerical_severity', 'reporter', 'last_reviewed', 'line',
-                   'duplicate_finding', 'hash_code', 'images',
+                   'duplicate_finding', 'hash_code', 'images', 'endpoint_status',
                    'line_number', 'reviewers', 'mitigated_by', 'sourcefile', 'jira_creation', 'jira_change', 'created']
 
     def __init__(self, *args, **kwargs):
@@ -688,7 +688,7 @@ class ClosedFindingFilter(DojoFilter):
                    'endpoint', 'references', 'test', 'is_template',
                    'active', 'verified', 'out_of_scope', 'false_p',
                    'duplicate', 'thread_id', 'date', 'notes',
-                   'numerical_severity', 'reporter', 'endpoints',
+                   'numerical_severity', 'reporter', 'endpoints', 'endpoint_status',
                    'last_reviewed', 'review_requested_by', 'defect_review_requested_by',
                    'last_reviewed_by', 'created', 'jira_creation', 'jira_change']
 
@@ -755,7 +755,7 @@ class AcceptedFindingFilter(DojoFilter):
                    'endpoint', 'references', 'test', 'is_template',
                    'active', 'verified', 'out_of_scope', 'false_p',
                    'duplicate', 'thread_id', 'mitigated', 'notes',
-                   'numerical_severity', 'reporter', 'endpoints',
+                   'numerical_severity', 'reporter', 'endpoints', 'endpoint_status',
                    'last_reviewed', 'o', 'jira_creation', 'jira_change']
 
     def __init__(self, *args, **kwargs):
@@ -816,7 +816,7 @@ class ProductFindingFilter(DojoFilter):
                    'endpoint', 'references', 'test', 'is_template',
                    'active', 'verified', 'out_of_scope', 'false_p',
                    'duplicate_finding', 'thread_id', 'mitigated', 'notes',
-                   'numerical_severity', 'reporter', 'endpoints',
+                   'numerical_severity', 'reporter', 'endpoints', 'endpoint_status',
                    'last_reviewed', 'jira_creation', 'jira_change']
 
     def __init__(self, *args, **kwargs):
@@ -1053,6 +1053,7 @@ class MetricsFindingFilter(FilterSet):
                    'last_reviewed_by',
                    'images',
                    'endpoints',
+                   'endpoint_status',
                    'is_template',
                    'jira_creation',
                    'jira_change']
@@ -1124,6 +1125,7 @@ class ProductMetricsFindingFilter(FilterSet):
                    'last_reviewed_by',
                    'images',
                    'endpoints',
+                   'endpoint_status',
                    'is_template',
                    'jira_creation',
                    'jira_change']
@@ -1216,7 +1218,7 @@ class ReportFindingFilter(DojoFilter):
         model = Finding
         exclude = ['date', 'cwe', 'url', 'description', 'mitigation', 'impact',
                    'endpoint', 'references', 'test', 'is_template',
-                   'thread_id', 'notes', 'endpoints',
+                   'thread_id', 'notes', 'endpoints', 'endpoint_status',
                    'numerical_severity', 'reporter', 'last_reviewed', 'images', 'jira_creation', 'jira_change']
 
 
@@ -1265,7 +1267,7 @@ class ReportAuthedFindingFilter(DojoFilter):
         model = Finding
         exclude = ['date', 'cwe', 'url', 'description', 'mitigation', 'impact',
                    'endpoint', 'references', 'test', 'is_template',
-                   'thread_id', 'notes', 'endpoints',
+                   'thread_id', 'notes', 'endpoints', 'endpoint_status',
                    'numerical_severity', 'reporter', 'last_reviewed', 'jira_creation', 'jira_change']
 
 
