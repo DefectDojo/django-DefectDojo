@@ -419,7 +419,6 @@ class ImportScanForm(forms.Form):
                          ("kube-bench Scan", "Kube-Bench Scan"),
                          ("CCVS Report", "CCVS Report"))
 
-
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
     scan_date = forms.DateTimeField(
         required=True,
