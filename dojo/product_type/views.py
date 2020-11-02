@@ -87,11 +87,13 @@ def add_product_type(request):
 @user_passes_test(lambda u: u.is_staff)
 def edit_product_type(request, ptid):
     pt = get_object_or_404(Product_Type, pk=ptid)
-    pt_form = Product_TypeForm(instance=pt)
+    authed_users = pt.authorized_users.all()
+    pt_form = Product_TypeForm(instance=pt, initial={'authorized_users': authed_users})
     delete_pt_form = Delete_Product_TypeForm(instance=pt)
     if request.method == "POST" and request.POST.get('edit_product_type'):
         pt_form = Product_TypeForm(request.POST, instance=pt)
         if pt_form.is_valid():
+            pt.authorized_users.set(pt_form.cleaned_data['authorized_users'])
             pt = pt_form.save()
             messages.add_message(
                 request,
