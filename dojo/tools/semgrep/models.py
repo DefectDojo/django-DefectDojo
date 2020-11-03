@@ -37,7 +37,7 @@ class SemgrepJSONResult:
         if metadata.get("cwe").partition(':')[2]:
             self.title = metadata.get("cwe").partition(':')[2]
 
-        self.cwe = metadata.get("cwe").partition(':')[0].partition('-')[2]        
+        self.cwe = metadata.get("cwe").partition(':')[0].partition('-')[2]
         # Convert Semgrep severity to defectDojo Severity
         semSeverity = extra.get('severity')
 
