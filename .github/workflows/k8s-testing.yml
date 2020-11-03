@@ -108,11 +108,11 @@ jobs:
         databases: [pgsql,mysql]
         brokers: [redis,rabbit]
     steps:
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+#      - name: Login to DockerHub
+#        uses: docker/login-action@v1
+#        with:
+#          username: ${{ secrets.DOCKERHUB_USERNAME }}
+#          password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Checkout
         if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'
         uses: actions/checkout@v2
@@ -158,6 +158,10 @@ jobs:
               echo ::set-output name=mysql:: "${{ env.HELM_MYSQL_DATABASE_SETTINGS }}"
               echo ::set-output name=redis:: "${{ env.HELM_REDIS_BROKER_SETTINGS }}"
               echo ::set-output name=rabbit:: "${{ env.HELM_RABBIT_BROKER_SETTINGS }}"
+      - name: Create image pull Secrets
+        run: |-
+              kubectl create secret docker-registry defectdojoregistrykey --docker-username=${{ secrets.DOCKERHUB_USERNAME }} --docker-password=${{ secrets.DOCKERHUB_TOKEN }}
+              kubectl get secrets
       - name: Deploying Djano application with ${{ matrix.databases }} ${{ matrix.brokers }}
         run: |-
              helm install \
@@ -167,7 +171,8 @@ jobs:
                --set imagePullPolicy=Never \
                ${{ steps.set.outputs[matrix.databases] }} \
                ${{ steps.set.outputs[matrix.brokers] }} \
-               --set createSecret=true
+               --set createSecret=true \
+               --set imagePullSecrets=defectdojoregistrykey
       - name: Check deployment status
         run: |-
              kubectl get pods
