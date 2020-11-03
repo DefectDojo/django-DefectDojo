@@ -1,4 +1,5 @@
 import base64
+import datetime
 import hashlib
 import logging
 import os
@@ -291,6 +292,15 @@ class SystemSettingsFormAdmin(forms.ModelForm):
 class System_SettingsAdmin(admin.ModelAdmin):
     form = SystemSettingsFormAdmin
     fields = ('product_grade',)
+
+
+class DefaultDate(datetime.date):
+    is_default_date = True
+
+
+def get_default_date():
+    today = timezone.now().date()
+    return DefaultDate(today.year, today.month, today.day)
 
 
 def get_current_date():
@@ -1439,7 +1449,7 @@ class Finding(models.Model):
     title = models.CharField(max_length=511,
                              verbose_name="Title",
                              help_text="A short description of the flaw.")
-    date = models.DateField(default=get_current_date,
+    date = models.DateField(default=get_default_date,
                             verbose_name="Date",
                             help_text="The date the flaw was discovered.")
     cwe = models.IntegerField(default=0, null=True, blank=True,
