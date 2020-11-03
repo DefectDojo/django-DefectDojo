@@ -10,8 +10,7 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     ScansViewSet, StubFindingsViewSet, TestsViewSet, \
     ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
     UsersViewSet, ImportScanView, NoteTypeViewSet, AppAnalysisViewSet, \
-    EndpointStatusViewSet, SonarqubeIssueViewSet, SonarqubeIssueTransitionViewSet, \
-    SonarqubeProductViewSet, NotesViewSet
+    EndpointStatusViewSet, SonarqubeIssueViewSet, NotesViewSet
 from json import dumps
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
