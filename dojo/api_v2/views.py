@@ -30,6 +30,8 @@ from datetime import datetime
 from dojo.utils import get_period_counts_legacy, get_system_setting
 from dojo.api_v2 import serializers, permissions
 from django.db.models import Count, Q
+from .prefetch.mixins import PrefetchListMixin, PrefetchRetrieveMixin
+from .prefetch.decorator import prefetch_decorator
 
 
 class EndPointViewSet(mixins.ListModelMixin,
@@ -242,10 +244,11 @@ def _finding_related_fields_decorator():
         ])
 
 
+@prefetch_decorator(["list", "read"], serializers.FindingSerializer)
 @method_decorator(name="list", decorator=_finding_related_fields_decorator())
 @method_decorator(name="retrieve", decorator=_finding_related_fields_decorator())
-class FindingViewSet(mixins.ListModelMixin,
-                     mixins.RetrieveModelMixin,
+class FindingViewSet(PrefetchListMixin,
+                     PrefetchRetrieveMixin,
                      mixins.UpdateModelMixin,
                      mixins.DestroyModelMixin,
                      mixins.CreateModelMixin,
@@ -603,8 +606,9 @@ class DojoMetaViewSet(mixins.ListModelMixin,
     filter_fields = ('id', 'product', 'endpoint', 'name', 'finding')
 
 
-class ProductViewSet(mixins.ListModelMixin,
-                     mixins.RetrieveModelMixin,
+@prefetch_decorator(["read", "list"], serializers.ProductSerializer)
+class ProductViewSet(PrefetchListMixin,
+                     PrefetchRetrieveMixin,
                      mixins.CreateModelMixin,
                      mixins.DestroyModelMixin,
                      mixins.UpdateModelMixin,
