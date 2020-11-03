@@ -185,7 +185,10 @@ jobs:
              kubectl wait  --for=condition=ready  pod --timeout=500s --selector=defectdojo.org/component=celery
              echo "Pods up and ready to rumbole"
              kubectl get pods
-             OUT=$(docker run --rm curlimages/curl:7.73.0 -m 20  -I --header "Host: ${{env.DD_HOSTNAME}}" http://`kubectl get service defectdojo-django -o json | jq -r '.spec'.clusterIP`/login?next=/)
+             OUT=$(kubectl run --generator=run-pod/v1  curl --quiet=true --image=curlimages/curl:7.73.0 \
+                --overrides='{ "apiVersion": "v1", "spec": { "imagePullSecrets": [{"name": "defectdojoregistrykey"}] } }' \
+                --restart=Never -it --rm -- -m 20 -I --header "Host: $DD_HOSTNAME" http://`kubectl get service defectdojo-django -o json \
+               |  jq -r '.spec.clusterIP'`/login?next=/)
              CR=`echo $OUT | egrep "^HTTP" | cut -d' ' -f2`
              echo $CR
              if [[ $CR -ne 200 ]]; then
