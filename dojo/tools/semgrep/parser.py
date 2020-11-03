@@ -27,7 +27,7 @@ class SemgrepJSONParser(object):
                     mitigation='N/A',
                     file_path=item['path'],
                     cwe=f.cwe,
-                    line=f.start,                
+                    line=f.start,
                     url='N/A',
                     impact='N/A',
                     static_finding=True,
