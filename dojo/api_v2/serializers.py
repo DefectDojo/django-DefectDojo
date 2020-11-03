@@ -649,7 +649,7 @@ class FindingEngagementSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Engagement
-        fields = ["id", "name", "product"]
+        fields = ["id", "name", "product", "branch_tag"]
 
 
 class FindingEnvironmentSerializer(serializers.ModelSerializer):
@@ -674,6 +674,15 @@ class FindingTestSerializer(serializers.ModelSerializer):
         fields = ["id", "title", "test_type", "engagement", "environment"]
 
 
+class FindingRelatedFieldsSerializer(serializers.Serializer):
+    test = FindingTestSerializer(required=False)
+    status = serializers.SerializerMethodField(required=False)
+
+    @swagger_serializer_method(serializers.ListField(serializers.CharField()))
+    def get_status(self, obj):
+        return obj.status()
+
+
 class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     images = FindingImageSerializer(many=True, read_only=True)
     tags = TagListSerializerField(required=False)
@@ -689,11 +698,11 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
         model = Finding
         fields = '__all__'
 
-    @swagger_serializer_method(FindingTestSerializer)
+    @swagger_serializer_method(FindingRelatedFieldsSerializer)
     def get_related_fields(self, obj):
         query_params = self.context['request'].query_params
-        if 'related_fields' in query_params:
-            return FindingTestSerializer(required=False).to_representation(obj.test)
+        if query_params.get('related_fields', 'false') == 'true':
+            return FindingRelatedFieldsSerializer(required=False).to_representation(obj)
         else:
             return None
 
