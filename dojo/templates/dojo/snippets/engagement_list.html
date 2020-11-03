@@ -4,7 +4,7 @@
     <div class="panel panel-default table-responsive">
         <div class="panel-heading">
             <h4> {% if status == "open" %}Active{% elif status == "paused" %}Paused {% else %}Closed{% endif %} {% if type == "CI/CD" %}CI/CD{% endif %} Engagements ({{ count }})
-              {% if user.is_staff %}
+              {% if user|is_authorized_for_staff:prod %}
                 {% if type == "CI/CD" %}
                 <a title="Add New Engagement" class="pull-right btn btn-sm btn-primary" href="{% url 'new_eng_for_prod_cicd' prod.id %}"><span
                       class="fa fa-plus"></span> </a>
@@ -15,19 +15,23 @@
               {% endif %}
               </h4>
         </div>
+        <div class="clearfix">
+            {% include "dojo/paging_snippet.html" with page=engs parm_name=parm_name page_size=True %}
+        </div>
         {% if engs %}
-            <table class="tablesorter-bootstrap table table-condensed table-striped table-hover">
+            <table id={{ status }} class="tablesorter-bootstrap table table-condensed table-striped table-hover">
                 <thead>
                 <tr>
-                    <th>Name</th>
                     <th></th>
+                    <th>Name</th>
                     <th>Lead</th>
                     <th>Date</th>
                     <th>Length</th>
                     <th>Tests</th>
                     <th>Open</th>
+                    <th>Mitigated</th>
                     <th>All</th>
-                    <th>Duplicate</th>
+                    <th>Duplicates</th>
                     <th>Updated</th>
                     {% if status == "paused" or status == "closed" %}
                       <th>Status</th>
@@ -37,23 +41,6 @@
                 <tbody>
                 {% for eng in engs %}
                     <tr>
-                    <td style="width: 250px;">
-                    <a href="{% url 'view_engagement' eng.id %}" data-toggle="tooltip" data-placement="bottom" title="{{ eng.name|default:"N/A" }}">
-                    {{ eng.name|truncatechars:35|default:"N/A" }}</a>
-                    {% if eng.version %}
-                        <sup>
-                              <a target="_blank" class="tag-label tag-version" data-toggle="tooltip" data-placement="bottom" title="Product Version: {{ eng.version }}">
-                              {{ eng.version }}</a>
-                        </sup>
-                    {% endif %}
-                    {% if eng.tags %}
-                        <sup>
-                            {% for tag in eng.tags %}
-                            <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
-                            {% endfor %}
-                        </sup>
-                    {% endif %}
-                    </td>
                     <td class="nowrap">
                       <div class="align-top">
                         <div class="dropdown">
@@ -98,6 +85,11 @@
                               </a>
                             </li>
                             <li role="presentation">
+                              <a href="{% url 'engagment_closed_findings' eng.id %}?is_Mitigated=2&test__engagement={{ eng.id }}">
+                                <i class="fa fa-file-text-o"></i> View Mitigated Findings
+                              </a>
+                            </li>
+                            <li role="presentation">
                               <a href="{% url 'engagment_all_findings' eng.id %}?test__engagement={{ eng.id }}">
                                   <i class="fa fa-file-text-o"></i> View All Findings
                               </a>
@@ -117,6 +109,23 @@
                            </ul>
                          </li>
                      </ul>
+                    </td>
+                    <td style="width: 250px;">
+                    <a href="{% url 'view_engagement' eng.id %}" data-toggle="tooltip" data-placement="bottom" title="{{ eng.name|default:"N/A" }}">
+                    {{ eng.name|truncatechars_html:35|default:"N/A" }}</a>
+                    {% if eng.version %}
+                        <sup>
+                              <a target="_blank" class="tag-label tag-version" data-toggle="tooltip" data-placement="bottom" title="Product Version: {{ eng.version }}">
+                              {{ eng.version }}</a>
+                        </sup>
+                    {% endif %}
+                    {% if eng.tags %}
+                        <sup>
+                            {% for tag in eng.tags %}
+                            <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                            {% endfor %}
+                        </sup>
+                    {% endif %}
                     </td>
                     <td style="width: 150px;">
                       {% if eng.lead.get_full_name and eng.lead.get_full_name.strip %}
@@ -176,6 +185,7 @@
                       </div>
                     </td>
                     <td>{{ eng.count_findings_open }}</td>
+                    <td>{{ eng.count_findings_close }}</td>
                     <td>{{ eng.count_findings_all }}</td>
                     <td>{{ eng.count_findings_duplicate }}</td>
                     <td><a target="_blank" data-toggle="tooltip" data-placement="bottom" title="{{ eng.updated|default_if_none:"" }}">
@@ -207,3 +217,78 @@
         {% include "dojo/paging_snippet.html" with page=engs parm_name=parm_name page_size=True %}
     </div>
 </div>
+{% block postscript %}
+<script>
+        // DataTables setup
+        $(document).ready(function() {
+            var date =  new Date().toISOString().slice(0, 10);
+            var fileDated = 'Engagements_List_' + date;
+            var buttonCommon = {
+                exportOptions: {
+                    columns: ':not(:eq(8))',
+                    stripHtml: true,
+                    stripNewlines: true,
+                    trim: true,
+                    orthogonal: 'export'
+                },
+                filename: fileDated,
+                title: 'Engagements List'
+            };
+
+            // Mapping of table columns to objects for proper cleanup and data formatting
+            var dojoTable = $('#{{status}}').DataTable({
+                colReorder: true,
+                "columns": [
+                    { "data": "action" },
+                    { "data": "eng_name" },
+                    { "data": "lead" },
+                    { "data": "date" },
+                    { "data": "length" },
+                    { "data": "tests" },
+                    { "data": "open" },
+                    { "data": "mitigated" },
+                    { "data": "all" },
+                    { "data": "dups" },
+                    { "data": "updated" },
+                    {% if status == "paused" or status == "closed" %}
+                      { "data": "updated" },
+                    {% endif %}
+                ],
+                columnDefs: [
+                    {
+                        "orderable": false,
+                        "targets": [0]
+                    },
+                ],
+                dom: 'Bfrtip',
+                paging: false,
+                buttons: [
+                    {
+                        extend: 'colvis',
+                        columns: ':not(.noVis)'
+                    },
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'copy'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'excel',
+                        autoFilter: true,
+                        sheetName: 'Exported data',
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'csv'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'pdf',
+                        orientation: 'landscape',
+                        pageSize: 'LETTER'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'print'
+                    }),
+                ],
+            });
+        });
+    </script>
+    {% endblock %}
+    {% include "dojo/filter_js_snippet.html" %}

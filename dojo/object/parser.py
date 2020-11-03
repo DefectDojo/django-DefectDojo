@@ -5,7 +5,7 @@ import json
 from django.urls import reverse
 from django.utils import timezone
 
-from dojo.utils import create_notification
+from dojo.notifications.helper import create_notification
 from dojo.forms import Tag
 from dojo.models import Test, Test_Type, Development_Environment, Objects_Engagement, \
                         Objects, Objects_Review
@@ -58,7 +58,7 @@ def import_object_eng(request, engagement, json_data):
     review_status = Objects_Review.objects.get(pk=review_status_id)
 
     for file in data:
-        print(file["path"])
+        # print(file["path"])
         # Save the file if the object isn't in object table
         file_type, found_object = find_item(file["path"], object_queryset)
 

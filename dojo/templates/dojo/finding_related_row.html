@@ -1,0 +1,74 @@
+{% load navigation_tags %}
+{% load display_tags %}
+{% load static from staticfiles %}
+<tr>
+    {% if similar_finding.duplicate_finding == finding_context %}
+        <td title="The finding on the top of this page is the original for this related finding">Duplicate{% if finding_context == similar_finding %}(this){% endif %}</td>
+    {% elif finding_context.duplicate_finding == similar_finding %}
+        <td title="The finding on the top of this page is a duplicate of this so called original finding">Original{% if finding_context == similar_finding %} (this){% endif %}</td>
+    {% elif similar_finding.duplicate and similar_finding.duplicate_finding == finding_context.duplicate_finding %}
+        <td title="This finding is a duplicate of the same original above">Duplicate{% if finding_context == similar_finding %}(this){% endif %}</td>
+    {% else %}
+        <td title="This finding shares fields values with the finding on this page because of which it looks similar">Similar</td>
+    {% endif %}
+    <td class="centered" data-order="{% severity_number_value finding.severity %}">
+        <span class="label severity severity-{{ finding.severity }}">
+            {{ finding.severity_display }}
+        </span>
+    </td>
+    <td>
+        <a title="{{ similar_finding.title }}" href="{% url 'view_finding' similar_finding.id %}">{{ similar_finding.title|truncatechars_html:80 }}</a>
+        {% if similar_finding.tags %}
+        <small>
+            {% for tag in similar_finding.tags %}
+                <a title="Search {{ tag }}" class="tag-label tag-color"
+                    href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+            {% endfor %}
+        </small>
+        {% endif %}
+        {% with similar_finding.notes.count as note_count %}
+            ({{ note_count }} note{{ note_count|pluralize }})
+        {% endwith %}
+    </td>
+    <td class="nowrap">{{ finding.date|date }}</td>
+    <td>{{ similar_finding|finding_display_status|safe }}</td>                                
+    <td><a href="{% url 'view_test' similar_finding.test_id %}">{{ similar_finding.test.test_type.name }}</a></td>
+    <td><a href="{% url 'view_engagement' similar_finding.test.engagement_id %}">{{ similar_finding.test.engagement.name }}</a>
+    {% if similar_finding.test.engagement.version %}
+        <sup>
+                <a target="_blank" class="tag-label tag-version" data-toggle="tooltip" data-placement="bottom" title="Product Version: {{ similar_finding.test.engagement.version }}">
+                {{ similar_finding.test.engagement.version }}</a>
+        </sup>
+    {% endif %}
+    </td>
+    <td><a href="{% url 'view_product' similar_finding.test.engagement.product.id %}">{{ similar_finding.test.engagement.product.name }}</a>
+    <td>
+        {% if similar_finding.cwe > 0 %}
+        <a target="_blank" href="{{ similar_finding.cwe|cwe_url }}">
+            <i class="fa fa-external-link"></i> {{ similar_finding.cwe }}
+        </a>
+        {% endif %}
+    </td>
+    <td>{{ similar_finding.cve }}</td>
+    {% if similar_finding.file_path %}
+        <td title="{{similar_finding.file_path}}{% if similar_finding.line > 0 %} (Line {{ similar_finding.line }}){% endif %}">
+            {{ similar_finding.file_path|truncatechars_html:20 }}{% if similar_finding.line > 0 %} (Line {{ similar_finding.line }}){% endif %}
+            <i class="fa fa-copy fa-align-right copytoclipboard" title="copy full path to clipboard"
+            data-clipboard-text="{{similar_finding.file_path}}{% if similar_finding.line > 0 %} (Line {{ similar_finding.line }}){% endif %}"></i></td>
+    {% else %}
+        <td></td>
+    {% endif%}
+
+    {% if system_settings.enable_jira %} 
+        <td>
+            {% if similar_finding.jira_issue %}
+                <a href="{{ similar_finding.jira_conf_new.url }}/browse/{{ similar_finding.jira_issue.jira_key }}"
+                target="_blank" title="{{ similar_finding.jira_conf_new.url }}/browse/{{ similar_finding.jira_issue.jira_key }}">{{ similar_finding.jira_issue.jira_key }}</a>
+            {% endif %}
+        </td>
+    {% endif %}
+
+    <td>
+        {% include "dojo/finding_related_actions.html" with similar_finding=similar_finding finding_context=finding %}
+    </td>
+</tr>

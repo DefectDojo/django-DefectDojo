@@ -26,6 +26,25 @@
         <div class="col-md-12">
             <h2>{{ name }} For {{ start_date.date }} - {{ end_date.date }}
                 <a class="btn close pull-right" href="{% url 'metrics' %}" aria-hidden="true">&times;</a>
+                <div class="dropdown pull-right">
+                    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
+                            data-toggle="dropdown" label="view_selector" aria-label="view_selector" aria-expanded="true">
+                        <span class="fa fa-bars"></span>
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                        <li role="presentation">
+                            <a href="{% url 'metrics' %}?view=dashboard&type=Finding">
+                                <i class="fa fa-file-text-o"></i> Measures Findings
+                            </a>
+                        </li>
+                        <li role="presentation">
+                            <a href="{% url 'metrics' %}?view=dashboard&type=Endpoint">
+                                <i class="fa fa-file-text-o"></i> Measure Affected Endpoints
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </h2>
         </div>
     </div>
@@ -46,7 +65,7 @@
         <div class="col-md-6">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    Accepted Bug Count by Month
+                    Risk Accepted Bug Count by Month
                 </div>
                 <!-- /.panel-heading -->
                 <div class="panel-body">
@@ -72,7 +91,7 @@
         <div class="col-md-12 section-start">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    Accepted Bug Count by Week
+                    Risk Accepted Bug Count by Week
                 </div>
                 <!-- /.panel-heading -->
                 <div class="panel-body">
@@ -115,7 +134,7 @@
         <div class="col-md-4">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    Total Findings Accepted In Period By Severity
+                    Total Findings Risk Accepted In Period By Severity
                 </div>
                 <!-- /.panel-heading -->
                 <div class="panel-body">

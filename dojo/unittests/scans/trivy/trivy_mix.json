@@ -1,6 +1,7 @@
 [
   {
     "Target": "php-app/composer.lock",
+    "Type": "composer",
     "Vulnerabilities": [
       {
         "PkgName": "simplito/elliptic-php"
@@ -9,6 +10,7 @@
   },
   {
     "Target": "node-app/package-lock.json",
+    "Type": "npm",
     "Vulnerabilities": [
       {
         "VulnerabilityID": "CVE-2018-16487",
@@ -18,6 +20,9 @@
         "Title": "lodash: Prototype pollution in utilities function",
         "Description": "A prototype pollution vulnerability was found in lodash <4.17.11 where the functions merge, mergeWith, and defaultsDeep can be tricked into adding or modifying properties of Object.prototype.",
         "Severity": "HIGH",
+        "CweIDs": [
+          "CWE-190"
+        ],
         "References": [
           "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-16487"
         ]
@@ -26,6 +31,7 @@
   },
   {
     "Target": "trivy-ci-test (alpine 3.7.1)",
+    "Type": "alpine",
     "Vulnerabilities": [
       {
         "VulnerabilityID": "CVE-2018-16840",
@@ -92,14 +98,17 @@
   },
   {
     "Target": "python-app/Pipfile.lock",
+    "Type": "pip",
     "Vulnerabilities": null
   },
   {
     "Target": "ruby-app/Gemfile.lock",
+    "Type": "rubygems",
     "Vulnerabilities": null
   },
   {
     "Target": "rust-app/Cargo.lock",
+    "Type": "cargo",
     "Vulnerabilities": null
   }
 ]

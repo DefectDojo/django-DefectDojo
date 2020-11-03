@@ -2,25 +2,25 @@
 version: '3.7'
 services:
   nginx:
-    build: 
+    build:
       context: ./
       dockerfile: Dockerfile.nginx
     image: defectdojo/defectdojo-nginx:${NGINX_VERSION:-latest}
     depends_on:
       - uwsgi
-    environment: 
+    environment:
       NGINX_METRICS_ENABLED: ${NGINX_METRICS_ENABLED:-false}
     ports:
-      - target: ${DD_PORT:-8080}
+      - target: 8080
         published: ${DD_PORT:-8080}
         protocol: tcp
         mode: host
-      - target: ${DD_PORT:-8443}
-        published: ${DD_PORT:-8443}
+      - target: 8443
+        published: ${DD_TLS_PORT:-8443}
         protocol: tcp
         mode: host
   uwsgi:
-    build: 
+    build:
       context: ./
       dockerfile: Dockerfile.django
     image: defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}
@@ -75,7 +75,7 @@ services:
       DD_SECRET_KEY: ${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}
       DD_CREDENTIAL_AES_256_KEY: ${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}
   mysql:
-    image: mysql:5.7.27@sha256:540488d8f0e04c1077d17934d1c1511fe417e2221dff508ce4621f5efe6131db
+    image: mysql:5.7.32@sha256:ce6815027949d0b48e3097a94fa3ec062866a78868d50c7900c697c13574599f
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
       DD_DATABASE_URL: ${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}
@@ -86,6 +86,6 @@ services:
     volumes:
        - defectdojo_data:/var/lib/mysql
   rabbitmq:
-    image: rabbitmq:3.7.17@sha256:12202c13c8e1d7f5688e733e04f3713cf25c4478dde62be691e0a1d2c9346d1c
+    image: rabbitmq:3.8.9@sha256:30a52abe6009eea97c89dcd72b9dcf9c2a26563beb4b4d948d595c0415fc8680
 volumes:
   defectdojo_data: {}

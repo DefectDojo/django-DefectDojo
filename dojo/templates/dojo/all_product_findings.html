@@ -43,7 +43,7 @@
                         {% for finding in findings %}
                             <tr>
                                 <td><a title="{{ finding.title }}"
-                                       href="{% url 'view_finding' finding.id %}">{{ finding.title|truncatechars:60 }}</a>
+                                       href="{% url 'view_finding' finding.id %}">{{ finding.title|truncatechars_html:60 }}</a>
                                        <sup>
                                            {% for tag in finding.tags %}
                                            <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>

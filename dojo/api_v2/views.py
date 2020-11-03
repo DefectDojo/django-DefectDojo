@@ -7,16 +7,22 @@ from rest_framework.permissions import DjangoModelPermissions
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser
 from django_filters.rest_framework import DjangoFilterBackend
-
+from django.utils.decorators import method_decorator
+from drf_yasg2 import openapi
+from drf_yasg2.utils import swagger_auto_schema, no_body
+import base64
 from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Finding, \
     User, ScanSettings, Scan, Stub_Finding, Finding_Template, Notes, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
-    Endpoint, JIRA_PKey, JIRA_Conf, DojoMeta, Development_Environment, Dojo_User
+    Endpoint, JIRA_PKey, JIRA_Conf, DojoMeta, Development_Environment, \
+    Dojo_User, Note_Type, System_Settings, App_Analysis, Endpoint_Status, \
+    Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation, \
+    BurpRawRequestResponse
 
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import report_url_resolver
-from dojo.filters import ReportFindingFilter, ReportAuthedFindingFilter
+from dojo.filters import ReportFindingFilter, ReportAuthedFindingFilter, ApiFindingFilter, ApiProductFilter
 from dojo.risk_acceptance import api as ra_api
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
@@ -40,10 +46,16 @@ class EndPointViewSet(mixins.ListModelMixin,
     def get_queryset(self):
         if not self.request.user.is_staff:
             return Endpoint.objects.filter(
-                product__authorized_users__in=[self.request.user])
+                Q(product__authorized_users__in=[self.request.user]) |
+                Q(product__prod_type__authorized_users__in=[self.request.user])
+            )
         else:
             return Endpoint.objects.all()
 
+    @swagger_auto_schema(
+        request_body=serializers.ReportGenerateOptionSerializer,
+        responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
+    )
     @action(detail=True, methods=['post'], permission_classes=[permissions.UserHasReportGeneratePermission])
     def generate_report(self, request, pk=None):
         endpoint = get_object_or_404(Endpoint.objects, id=pk)
@@ -63,6 +75,19 @@ class EndPointViewSet(mixins.ListModelMixin,
         data = report_generate(request, endpoint, options)
         report = serializers.ReportGenerateSerializer(data)
         return Response(report.data)
+
+
+class EndpointStatusViewSet(mixins.ListModelMixin,
+                      mixins.RetrieveModelMixin,
+                      mixins.UpdateModelMixin,
+                      mixins.DestroyModelMixin,
+                      mixins.CreateModelMixin,
+                      viewsets.GenericViewSet):
+    serializer_class = serializers.EndpointStatusSerializer
+    queryset = Endpoint_Status.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('mitigated', 'false_positive', 'out_of_scope',
+                     'risk_accepted', 'mitigated_by', 'finding', 'endpoint')
 
 
 class EngagementViewSet(mixins.ListModelMixin,
@@ -87,22 +112,34 @@ class EngagementViewSet(mixins.ListModelMixin,
     def get_queryset(self):
         if not self.request.user.is_staff:
             return Engagement.objects.filter(
-                product__authorized_users__in=[self.request.user])
+                Q(product__authorized_users__in=[self.request.user]) |
+                Q(product__prod_type__authorized_users__in=[self.request.user])
+            )
         else:
             return Engagement.objects.all()
 
+    @swagger_auto_schema(
+        request_body=no_body, responses={status.HTTP_200_OK: ""}
+    )
     @action(detail=True, methods=["post"])
     def close(self, request, pk=None):
         eng = get_object_or_404(Engagement.objects, id=pk)
         close_engagement(eng)
         return HttpResponse()
 
+    @swagger_auto_schema(
+        request_body=no_body, responses={status.HTTP_200_OK: ""}
+    )
     @action(detail=True, methods=["post"])
     def reopen(self, request, pk=None):
         eng = get_object_or_404(Engagement.objects, id=pk)
         reopen_engagement(eng)
         return HttpResponse()
 
+    @swagger_auto_schema(
+        request_body=serializers.ReportGenerateOptionSerializer,
+        responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
+    )
     @action(detail=True, methods=['post'], permission_classes=[permissions.UserHasReportGeneratePermission])
     def generate_report(self, request, pk=None):
         engagement = get_object_or_404(Engagement.objects, id=pk)
@@ -122,6 +159,56 @@ class EngagementViewSet(mixins.ListModelMixin,
         data = report_generate(request, engagement, options)
         report = serializers.ReportGenerateSerializer(data)
         return Response(report.data)
+
+    @action(detail=True, methods=["get", "post", "patch"])
+    def notes(self, request, pk=None):
+        engagement = get_object_or_404(Engagement.objects, id=pk)
+        if request.method == 'POST':
+            new_note = serializers.AddNewNoteOptionSerializer(data=request.data)
+            if new_note.is_valid():
+                entry = new_note.validated_data['entry']
+                private = new_note.validated_data['private']
+                note_type = new_note.validated_data['note_type']
+            else:
+                return Response(new_note.errors,
+                    status=status.HTTP_400_BAD_REQUEST)
+
+            author = request.user
+            note = Notes(entry=entry, author=author, private=private, note_type=note_type)
+            note.save()
+            engagement.notes.add(note)
+
+            serialized_note = serializers.NoteSerializer({
+                "author": author, "entry": entry,
+                "private": private
+            })
+            result = serializers.EngagementToNotesSerializer({
+                "engagement_id": engagement, "notes": [serialized_note.data]
+            })
+            return Response(serialized_note.data,
+                status=status.HTTP_200_OK)
+        notes = engagement.notes.all()
+
+        serialized_notes = []
+        if notes:
+            serialized_notes = serializers.EngagementToNotesSerializer({
+                    "engagement_id": engagement, "notes": notes
+            })
+            return Response(serialized_notes.data,
+                    status=status.HTTP_200_OK)
+
+        return Response(serialized_notes,
+                status=status.HTTP_200_OK)
+
+
+class AppAnalysisViewSet(mixins.ListModelMixin,
+                        mixins.RetrieveModelMixin,
+                        mixins.UpdateModelMixin,
+                        mixins.DestroyModelMixin,
+                        mixins.CreateModelMixin,
+                        viewsets.GenericViewSet):
+    serializer_class = serializers.AppAnalysisSerializer
+    queryset = App_Analysis.objects.all()
 
 
 class FindingTemplatesViewSet(mixins.ListModelMixin,
@@ -143,6 +230,20 @@ class FindingTemplatesViewSet(mixins.ListModelMixin,
     #         return Finding_Template.objects.all()
 
 
+def _finding_related_fields_decorator():
+    return swagger_auto_schema(
+        responses={status.HTTP_200_OK: serializers.FindingSerializer},
+        manual_parameters=[
+            openapi.Parameter(
+                name="related_fields",
+                in_=openapi.IN_QUERY,
+                description="Expand finding external relations (engagement, environment, product, product_type, test, test_type)",
+                type=openapi.TYPE_BOOLEAN)
+        ])
+
+
+@method_decorator(name="list", decorator=_finding_related_fields_decorator())
+@method_decorator(name="retrieve", decorator=_finding_related_fields_decorator())
 class FindingViewSet(mixins.ListModelMixin,
                      mixins.RetrieveModelMixin,
                      mixins.UpdateModelMixin,
@@ -151,27 +252,34 @@ class FindingViewSet(mixins.ListModelMixin,
                      ra_api.AcceptedFindingsMixin,
                      viewsets.GenericViewSet):
     serializer_class = serializers.FindingSerializer
-    queryset = Finding.objects.all()
+    queryset = Finding.objects.all().prefetch_related('endpoints',
+                                                    'reviewers',
+                                                    'images',
+                                                    'found_by',
+                                                    'notes',
+                                                    'risk_acceptance_set',
+                                                    'test',
+                                                    'test__test_type',
+                                                    'test__engagement',
+                                                    'test__environment',
+                                                    'test__engagement__product',
+                                                    'test__engagement__product__prod_type')
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'title', 'date', 'severity', 'description',
-                     'mitigated', 'endpoints', 'test', 'active', 'verified',
-                     'false_p', 'reporter', 'url', 'out_of_scope',
-                     'duplicate', 'test__engagement__product',
-                     'test__engagement')
+    filterset_class = ApiFindingFilter
 
     # Overriding mixins.UpdateModeMixin perform_update() method to grab push_to_jira
     # data and add that as a parameter to .save()
     def perform_update(self, serializer):
-        enabled = False
+        push_all = False
         push_to_jira = serializer.validated_data.get('push_to_jira')
         # IF JIRA is enabled and this product has a JIRA configuration
-        if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(
-                product=serializer.instance.test.engagement.product) != 0:
+        if get_system_setting('enable_jira') and \
+                serializer.instance.test.engagement.product.jira_pkey_set.first() is not None:
             # Check if push_all_issues is set on this product
-            enabled = serializer.instance.test.engagement.product.jira_pkey_set.first().push_all_issues
+            push_all = serializer.instance.test.engagement.product.jira_pkey_set.first().push_all_issues
 
         # If push_all_issues is set:
-        if enabled:
+        if push_all:
             push_to_jira = True
 
         # add a check for the product having push all issues enabled right here.
@@ -179,10 +287,24 @@ class FindingViewSet(mixins.ListModelMixin,
 
     def get_queryset(self):
         if not self.request.user.is_staff:
-            return Finding.objects.filter(
-                reporter_id__in=[self.request.user])
+            findings = Finding.objects.filter(
+                Q(test__engagement__product__authorized_users__in=[self.request.user]) |
+                Q(test__engagement__product__prod_type__authorized_users__in=[self.request.user])
+            )
         else:
-            return Finding.objects.all()
+            findings = Finding.objects.all()
+        return findings.prefetch_related('endpoints',
+                                        'reviewers',
+                                        'images',
+                                        'found_by',
+                                        'notes',
+                                        'risk_acceptance_set',
+                                        'test',
+                                        'test__test_type',
+                                        'test__engagement',
+                                        'test__environment',
+                                        'test__engagement__product',
+                                        'test__engagement__product__prod_type')
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
@@ -190,6 +312,15 @@ class FindingViewSet(mixins.ListModelMixin,
         else:
             return serializers.FindingSerializer
 
+    @swagger_auto_schema(
+        method='get',
+        responses={status.HTTP_200_OK: serializers.TagSerializer}
+    )
+    @swagger_auto_schema(
+        method='post',
+        request_body=serializers.TagSerializer,
+        responses={status.HTTP_200_OK: serializers.TagSerializer}
+    )
     @action(detail=True, methods=['get', 'post'])
     def tags(self, request, pk=None):
         finding = get_object_or_404(Finding.objects, id=pk)
@@ -213,6 +344,52 @@ class FindingViewSet(mixins.ListModelMixin,
         serialized_tags = serializers.TagSerializer({"tags": tags})
         return Response(serialized_tags.data)
 
+    @swagger_auto_schema(
+        method='get',
+        responses={status.HTTP_200_OK: serializers.BurpRawRequestResponseSerializer}
+    )
+    @swagger_auto_schema(
+        method='post',
+        request_body=serializers.BurpRawRequestResponseSerializer,
+        responses={status.HTTP_200_OK: serializers.BurpRawRequestResponseSerializer}
+    )
+    @action(detail=True, methods=['get', 'post'])
+    def request_response(self, request, pk=None):
+        finding = get_object_or_404(Finding.objects, id=pk)
+
+        if request.method == 'POST':
+            burps = serializers.BurpRawRequestResponseSerializer(data=request.data, many=isinstance(request.data, list))
+            if burps.is_valid():
+                for pair in burps.validated_data['req_resp']:
+                    burp_rr = BurpRawRequestResponse(
+                                    finding=finding,
+                                    burpRequestBase64=base64.b64encode(pair["request"].encode("utf-8")),
+                                    burpResponseBase64=base64.b64encode(pair["response"].encode("utf-8")),
+                                )
+                    burp_rr.clean()
+                    burp_rr.save()
+            else:
+                return Response(burps.errors,
+                    status=status.HTTP_400_BAD_REQUEST)
+
+        burp_req_resp = BurpRawRequestResponse.objects.filter(finding=finding)
+        burp_list = []
+        for burp in burp_req_resp:
+            request = burp.get_request()
+            response = burp.get_response()
+            burp_list.append({'request': request, 'response': response})
+        serialized_burps = serializers.BurpRawRequestResponseSerializer({'req_resp': burp_list})
+        return Response(serialized_burps.data)
+
+    @swagger_auto_schema(
+        method='get',
+        responses={status.HTTP_200_OK: serializers.FindingToNotesSerializer}
+    )
+    @swagger_auto_schema(
+        methods=['post', 'patch'],
+        request_body=serializers.AddNewNoteOptionSerializer,
+        responses={status.HTTP_200_OK: serializers.NoteSerializer}
+    )
     @action(detail=True, methods=["get", "post", "patch"])
     def notes(self, request, pk=None):
         finding = get_object_or_404(Finding.objects, id=pk)
@@ -230,6 +407,9 @@ class FindingViewSet(mixins.ListModelMixin,
             note = Notes(entry=entry, author=author, private=private, note_type=note_type)
             note.save()
             finding.notes.add(note)
+
+            if finding.has_jira_issue():
+                add_comment_task(finding, note)
 
             serialized_note = serializers.NoteSerializer({
                 "author": author, "entry": entry,
@@ -253,6 +433,10 @@ class FindingViewSet(mixins.ListModelMixin,
         return Response(serialized_notes,
                 status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(
+        request_body=serializers.FindingNoteSerializer,
+        responses={status.HTTP_200_OK: ""}
+    )
     @action(detail=True, methods=["patch"])
     def remove_note(self, request, pk=None):
         """Remove Note From Finding Note"""
@@ -276,6 +460,11 @@ class FindingViewSet(mixins.ListModelMixin,
         return Response({"Success": "Selected Note has been Removed successfully"},
             status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(
+        responses={status.HTTP_200_OK: ""},
+        methods=['put', 'patch'],
+        request_body=serializers.TagSerializer
+    )
     @action(detail=True, methods=["put", "patch"])
     def remove_tags(self, request, pk=None):
         """ Remove Tag(s) from finding list of tags """
@@ -302,6 +491,10 @@ class FindingViewSet(mixins.ListModelMixin,
             return Response(delete_tags.errors,
                 status=status.HTTP_400_BAD_REQUEST)
 
+    @swagger_auto_schema(
+        request_body=serializers.ReportGenerateOptionSerializer,
+        responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
+    )
     @action(detail=False, methods=['post'])
     def generate_report(self, request):
         findings = Finding.objects.all()
@@ -360,6 +553,44 @@ class JiraViewSet(mixins.ListModelMixin,
                      'push_notes')
 
 
+class SonarqubeIssueViewSet(mixins.ListModelMixin,
+                                mixins.RetrieveModelMixin,
+                                mixins.DestroyModelMixin,
+                                mixins.UpdateModelMixin,
+                                mixins.CreateModelMixin,
+                                viewsets.GenericViewSet):
+    serializer_class = serializers.SonarqubeIssueSerializer
+    queryset = Sonarqube_Issue.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'key', 'status', 'type')
+
+
+class SonarqubeIssueTransitionViewSet(mixins.ListModelMixin,
+                        mixins.RetrieveModelMixin,
+                        mixins.DestroyModelMixin,
+                        mixins.CreateModelMixin,
+                        mixins.UpdateModelMixin,
+                        viewsets.GenericViewSet):
+    serializer_class = serializers.SonarqubeIssueTransitionSerializer
+    queryset = Sonarqube_Issue_Transition.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'sonarqube_issue', 'finding_status',
+                     'sonarqube_status', 'transitions')
+
+
+class SonarqubeProductViewSet(mixins.ListModelMixin,
+                  mixins.RetrieveModelMixin,
+                  mixins.DestroyModelMixin,
+                  mixins.UpdateModelMixin,
+                  mixins.CreateModelMixin,
+                  viewsets.GenericViewSet):
+    serializer_class = serializers.SonarqubeProductSerializer
+    queryset = Sonarqube_Product.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'product', 'sonarqube_project_key',
+                     'sonarqube_tool_config')
+
+
 class DojoMetaViewSet(mixins.ListModelMixin,
                      mixins.RetrieveModelMixin,
                      mixins.DestroyModelMixin,
@@ -369,12 +600,13 @@ class DojoMetaViewSet(mixins.ListModelMixin,
     serializer_class = serializers.MetaSerializer
     queryset = DojoMeta.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'product', 'endpoint', 'name')
+    filter_fields = ('id', 'product', 'endpoint', 'name', 'finding')
 
 
 class ProductViewSet(mixins.ListModelMixin,
                      mixins.RetrieveModelMixin,
                      mixins.CreateModelMixin,
+                     mixins.DestroyModelMixin,
                      mixins.UpdateModelMixin,
                      viewsets.GenericViewSet):
     serializer_class = serializers.ProductSerializer
@@ -385,15 +617,21 @@ class ProductViewSet(mixins.ListModelMixin,
     permission_classes = (permissions.UserHasProductPermission,
                           DjangoModelPermissions)
 
-    filter_fields = ('id', 'name', 'prod_type', 'created', 'authorized_users')
+    filterset_class = ApiProductFilter
 
     def get_queryset(self):
         if not self.request.user.is_staff:
             return self.queryset.filter(
-                authorized_users__in=[self.request.user])
+                Q(authorized_users__in=[self.request.user]) |
+                Q(prod_type__authorized_users__in=[self.request.user])
+            )
         else:
             return self.queryset
 
+    @swagger_auto_schema(
+        request_body=serializers.ReportGenerateOptionSerializer,
+        responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
+    )
     @action(detail=True, methods=['post'], permission_classes=[permissions.UserHasReportGeneratePermission])
     def generate_report(self, request, pk=None):
         product = get_object_or_404(Product.objects, id=pk)
@@ -432,6 +670,10 @@ class ProductTypeViewSet(mixins.ListModelMixin,
         else:
             return Product_Type.objects.all()
 
+    @swagger_auto_schema(
+        request_body=serializers.ReportGenerateOptionSerializer,
+        responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
+    )
     @action(detail=True, methods=['post'], permission_classes=[permissions.UserHasReportGeneratePermission])
     def generate_report(self, request, pk=None):
         product_type = get_object_or_404(Product_Type.objects, id=pk)
@@ -475,7 +717,9 @@ class ScanSettingsViewSet(mixins.ListModelMixin,
     def get_queryset(self):
         if not self.request.user.is_staff:
             return ScanSettings.objects.filter(
-                product__authorized_users__in=[self.request.user])
+                Q(product__authorized_users__in=[self.request.user]) |
+                Q(product__prod_type__authorized_users__in=[self.request.user])
+            )
         else:
             return ScanSettings.objects.all()
 
@@ -494,7 +738,9 @@ class ScansViewSet(mixins.ListModelMixin,
     def get_queryset(self):
         if not self.request.user.is_staff:
             return Scan.objects.filter(
-                scan_settings__product__authorized_users__in=[self.request.user])
+                Q(scan_settings__product__authorized_users__in=[self.request.user]) |
+                Q(scan_settings__product__prod_type__authorized_users__in=[self.request.user])
+            )
         else:
             return Scan.objects.all()
 
@@ -512,7 +758,9 @@ class StubFindingsViewSet(mixins.ListModelMixin,
     def get_queryset(self):
         if not self.request.user.is_staff:
             return Finding.objects.filter(
-                reporter_id__in=[self.request.user])
+                Q(test__engagement__product__authorized_users__in=[self.request.user]) |
+                Q(test__engagement__product__prod_type__authorized_users__in=[self.request.user])
+            )
         else:
             return Finding.objects.all()
 
@@ -526,6 +774,7 @@ class StubFindingsViewSet(mixins.ListModelMixin,
 class DevelopmentEnvironmentViewSet(mixins.ListModelMixin,
                                     mixins.RetrieveModelMixin,
                                     mixins.CreateModelMixin,
+                                    mixins.DestroyModelMixin,
                                     mixins.UpdateModelMixin,
                                     viewsets.GenericViewSet):
     serializer_class = serializers.DevelopmentEnvironmentSerializer
@@ -566,6 +815,10 @@ class TestsViewSet(mixins.ListModelMixin,
         else:
             return serializers.TestSerializer
 
+    @swagger_auto_schema(
+        request_body=serializers.ReportGenerateOptionSerializer,
+        responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
+    )
     @action(detail=True, methods=['post'], permission_classes=[permissions.UserHasReportGeneratePermission])
     def generate_report(self, request, pk=None):
         test = get_object_or_404(Test.objects, id=pk)
@@ -585,6 +838,46 @@ class TestsViewSet(mixins.ListModelMixin,
         data = report_generate(request, test, options)
         report = serializers.ReportGenerateSerializer(data)
         return Response(report.data)
+
+    @action(detail=True, methods=["get", "post", "patch"])
+    def notes(self, request, pk=None):
+        test = get_object_or_404(Test.objects, id=pk)
+        if request.method == 'POST':
+            new_note = serializers.AddNewNoteOptionSerializer(data=request.data)
+            if new_note.is_valid():
+                entry = new_note.validated_data['entry']
+                private = new_note.validated_data['private']
+                note_type = new_note.validated_data['note_type']
+            else:
+                return Response(new_note.errors,
+                    status=status.HTTP_400_BAD_REQUEST)
+
+            author = request.user
+            note = Notes(entry=entry, author=author, private=private, note_type=note_type)
+            note.save()
+            test.notes.add(note)
+
+            serialized_note = serializers.NoteSerializer({
+                "author": author, "entry": entry,
+                "private": private
+            })
+            result = serializers.TestToNotesSerializer({
+                "test_id": test, "notes": [serialized_note.data]
+            })
+            return Response(serialized_note.data,
+                status=status.HTTP_200_OK)
+        notes = test.notes.all()
+
+        serialized_notes = []
+        if notes:
+            serialized_notes = serializers.TestToNotesSerializer({
+                    "test_id": test, "notes": notes
+            })
+            return Response(serialized_notes.data,
+                    status=status.HTTP_200_OK)
+
+        return Response(serialized_notes,
+                status=status.HTTP_200_OK)
 
 
 class TestTypesViewSet(mixins.ListModelMixin,
@@ -634,7 +927,20 @@ class ToolTypesViewSet(mixins.ListModelMixin,
     filter_fields = ('id', 'name', 'description')
 
 
-class UsersViewSet(mixins.ListModelMixin,
+class RegulationsViewSet(mixins.ListModelMixin,
+                         mixins.RetrieveModelMixin,
+                         mixins.CreateModelMixin,
+                         mixins.DestroyModelMixin,
+                         mixins.UpdateModelMixin,
+                         viewsets.GenericViewSet):
+    serializer_class = serializers.RegulationSerializer
+    queryset = Regulation.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'name', 'description')
+
+
+class UsersViewSet(mixins.CreateModelMixin,
+                   mixins.ListModelMixin,
                    mixins.RetrieveModelMixin,
                    viewsets.GenericViewSet):
     serializer_class = serializers.UserSerializer
@@ -651,17 +957,17 @@ class ImportScanView(mixins.CreateModelMixin,
 
     def perform_create(self, serializer):
         # Override CreateModeMixin to pass in push_to_jira if needed.
-        enabled = False
+        push_all_jira_issues = False
         push_to_jira = serializer.validated_data.get('push_to_jira')
         # IF JIRA is enabled and this product has a JIRA configuration
         engagement = serializer.validated_data['engagement']
         jira_config = engagement.product.jira_pkey_set.first() is not None
         if get_system_setting('enable_jira') and jira_config:
             # Check if push_all_issues is set on this product
-            enabled = engagement.product.jira_pkey_set.first().push_all_issues
+            push_all_jira_issues = engagement.product.jira_pkey_set.first().push_all_issues
 
         # If push_all_issues is set:
-        if enabled:
+        if push_all_jira_issues:
             push_to_jira = True
         serializer.save(push_to_jira=push_to_jira)
 
@@ -674,19 +980,31 @@ class ReImportScanView(mixins.CreateModelMixin,
 
     def perform_create(self, serializer):
         # Override CreateModeMixin to pass in push_to_jira if needed.
-        enabled = False
+        push_all_jira_issues = False
         push_to_jira = serializer.validated_data.get('push_to_jira')
         test = serializer.validated_data['test']
         jira_config = test.engagement.product.jira_pkey_set.first() is not None
         # IF JIRA is enabled and this product has a JIRA configuration
         if get_system_setting('enable_jira') and jira_config:
             # Check if push_all_issues is set on this product
-            enabled = test.engagement.product.jira_pkey_set.first().push_all_issues
+            push_all_jira_issues = test.engagement.product.jira_pkey_set.first().push_all_issues
 
         # If push_all_issues is set:
-        if enabled:
+        if push_all_jira_issues:
             push_to_jira = True
         serializer.save(push_to_jira=push_to_jira)
+
+
+class NoteTypeViewSet(mixins.ListModelMixin,
+                       mixins.RetrieveModelMixin,
+                       mixins.DestroyModelMixin,
+                       mixins.CreateModelMixin,
+                       mixins.UpdateModelMixin,
+                       viewsets.GenericViewSet):
+    serializer_class = serializers.NoteTypeSerializer
+    queryset = Note_Type.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'name', 'description', 'is_single', 'is_active', 'is_mandatory')
 
 
 class NotesViewSet(mixins.ListModelMixin,
@@ -753,7 +1071,7 @@ def report_generate(request, obj, options):
                                                 test__finding__in=findings.qs).distinct()
         tests = Test.objects.filter(engagement__product__prod_type=product_type,
                                     finding__in=findings.qs).distinct()
-        if findings:
+        if len(findings.qs) > 0:
             start_date = timezone.make_aware(datetime.combine(findings.qs.last().date, datetime.min.time()))
         else:
             start_date = timezone.now()
@@ -1017,3 +1335,12 @@ def report_generate(request, obj, options):
         result['executive_summary'] = executive_summary
 
     return result
+
+
+class SystemSettingsViewSet(mixins.ListModelMixin,
+                    mixins.UpdateModelMixin,
+                    viewsets.GenericViewSet):
+    """ Basic control over System Settings. Use 'id' 1 for PUT, PATCH operations """
+    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
+    serializer_class = serializers.SystemSettingsSerializer
+    queryset = System_Settings.objects.all()

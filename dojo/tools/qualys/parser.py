@@ -9,30 +9,29 @@
 
 import argparse
 import csv
-import re
+import logging
 import datetime
 from dojo.models import Finding, Endpoint
+
+logger = logging.getLogger(__name__)
 ################################################################
 
 # Non-standard libraries
 try:
     from lxml import etree
 except ImportError:
-    print("Missing lxml library. Please install using PIP. https://pypi.python.org/pypi/lxml/3.4.2")
-    exit()
+    logger.debug("Missing lxml library. Please install using PIP. https://pypi.python.org/pypi/lxml/3.4.2")
 
 try:
     import html2text
 except ImportError:
-    print("Missing html2text library. Please install using PIP. https://pypi.python.org/pypi/html2text/2015.2.18")
-    exit()
+    logger.debug("Missing html2text library. Please install using PIP. https://pypi.python.org/pypi/html2text/2015.2.18")
 
 # Custom libraries
 try:
     from . import utfdictcsv
 except ImportError:
-    print("Missing dict to csv converter custom library. utfdictcsv.py should be in the same path as this file.")
-    exit()
+    logger.debug("Missing dict to csv converter custom library. utfdictcsv.py should be in the same path as this file.")
 
 ################################################################
 
@@ -86,7 +85,7 @@ def report_writer(report_dic, output_filename):
         csvWriter = utfdictcsv.DictUnicodeWriter(outFile, REPORT_HEADERS, quoting=csv.QUOTE_ALL)
         csvWriter.writerow(CUSTOM_HEADERS)
         csvWriter.writerows(report_dic)
-    print("Successfully parsed.")
+    logger.debug("Successfully parsed.")
 
 ################################################################
 
@@ -229,7 +228,7 @@ def issue_r(raw_row, vuln):
 
 
 def qualys_parser(qualys_xml_file):
-    parser = etree.XMLParser(remove_blank_text=True, no_network=True, recover=True)
+    parser = etree.XMLParser(resolve_entities=False, remove_blank_text=True, no_network=True, recover=True)
     d = etree.parse(qualys_xml_file, parser)
     r = d.xpath('//ASSET_DATA_REPORT/HOST_LIST/HOST')
     master_list = []
