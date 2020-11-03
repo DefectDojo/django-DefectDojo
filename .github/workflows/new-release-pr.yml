@@ -40,17 +40,17 @@ jobs:
           ref: release/${{ github.event.inputs.release_number }}
       - name: Update version numbers in key files
         run: |
-          # sed -ri "s/'([0-9]+(\.[0-9]+)*)'/'${{ github.event.inputs.release_number }}'/" dojo/__init__.py
           sed -ri "s/__version__ = '.*'/__version__ = '${{ github.event.inputs.release_number }}'/" dojo/__init__.py
           sed -ri "s/version='.*'/version='${{ github.event.inputs.release_number }}'/" setup.py
-          sed -ri "s/appVersion: \"([0-9]+(\.[0-9]+)*)\"/appVersion: \"${{ github.event.inputs.release_number }}\"/" helm/defectdojo/Chart.yaml
+          sed -ri "s/appVersion: \".*\"/appVersion: \"${{ github.event.inputs.release_number }}\"/" helm/defectdojo/Chart.yaml
+          sed -ri "s/\"version\": \".*\"/\"version\": \"${{ github.event.inputs.release_number }}\"/" components/package.json
       - name: Check numbers
         run: |
           grep version dojo/__init__.py
           grep version setup.py
           grep appVersion helm/defectdojo/Chart.yaml
       - name: Push version changes
-        uses: stefanzweifel/git-auto-commit-action@v4.1.2
+        uses: stefanzweifel/git-auto-commit-action@v4.7.2
         with:
           commit_user_name: "${{ env.GIT_USERNAME }}"
           commit_user_email: "${{ env.GIT_EMAIL }}"

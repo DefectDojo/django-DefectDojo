@@ -93,6 +93,7 @@ def edit_product_type(request, ptid):
     if request.method == "POST" and request.POST.get('edit_product_type'):
         pt_form = Product_TypeForm(request.POST, instance=pt)
         if pt_form.is_valid():
+            pt.authorized_users.set(pt_form.cleaned_data['authorized_users'])
             pt = pt_form.save()
             pt.authorized_users.set(pt_form.cleaned_data['authorized_users'])
             messages.add_message(
