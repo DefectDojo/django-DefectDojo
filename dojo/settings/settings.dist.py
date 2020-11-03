@@ -6,10 +6,12 @@ from celery.schedules import crontab
 import environ
 root = environ.Path(__file__) - 3  # Three folders back
 
+# reference: https://pypi.org/project/django-environ/
 env = environ.Env(
     # Set casting and default values
     DD_SITE_URL=(str, 'http://localhost:8080'),
     DD_DEBUG=(bool, False),
+    DD_TEMPLATE_DEBUG=(bool, False),
     DD_DJANGO_METRICS_ENABLED=(bool, False),
     DD_LOGIN_REDIRECT_URL=(str, '/'),
     DD_DJANGO_ADMIN_ENABLED=(bool, False),
@@ -58,6 +60,7 @@ env = environ.Env(
     DD_CELERY_RESULT_EXPIRES=(int, 86400),
     DD_CELERY_BEAT_SCHEDULE_FILENAME=(str, root('dojo.celery.beat.db')),
     DD_CELERY_TASK_SERIALIZER=(str, 'pickle'),
+    DD_FOOTER_VERSION=(str, ''),
     DD_FORCE_LOWERCASE_TAGS=(bool, True),
     DD_MAX_TAG_LENGTH=(int, 25),
     DD_DATABASE_ENGINE=(str, 'django.db.backends.mysql'),
@@ -177,6 +180,7 @@ if os.path.isfile(root('dojo/settings/.env.prod')) or 'DD_ENV_PATH' in os.enviro
 
 # False if not in os.environ
 DEBUG = env('DD_DEBUG')
+TEMPLATE_DEBUG = env('DD_TEMPLATE_DEBUG')
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/2.0/ref/settings/#allowed-hosts
@@ -416,7 +420,10 @@ MAX_AUTOCOMPLETE_WORDS = env('DD_MAX_AUTOCOMPLETE_WORDS')
 
 LOGIN_EXEMPT_URLS = (
     r'^%sstatic/' % URL_PREFIX,
+    r'^%swebhook/([\w-]+)$' % URL_PREFIX,
     r'^%swebhook/' % URL_PREFIX,
+    r'^%sjira/webhook/([\w-]+)$' % URL_PREFIX,
+    r'^%sjira/webhook/' % URL_PREFIX,
     r'^%sapi/v1/' % URL_PREFIX,
     r'^%sreports/cover$' % URL_PREFIX,
     r'^%sfinding/image/(?P<token>[^/]+)$' % URL_PREFIX,
@@ -483,6 +490,9 @@ PORT_SCAN_SOURCE_IP = env('DD_PORT_SCAN_EXTERNAL_UNIT_EMAIL_LIST')
 
 # Used in a few places to prefix page headings and in email salutations
 TEAM_NAME = env('DD_TEAM_NAME')
+
+# Used to configure a custom version in the footer of the base.html template.
+FOOTER_VERSION = env('DD_FOOTER_VERSION')
 
 # Django-tagging settings
 FORCE_LOWERCASE_TAGS = env('DD_FORCE_LOWERCASE_TAGS')
