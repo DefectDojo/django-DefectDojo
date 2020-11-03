@@ -674,15 +674,6 @@ class FindingTestSerializer(serializers.ModelSerializer):
         fields = ["id", "title", "test_type", "engagement", "environment"]
 
 
-class FindingRelatedFieldsSerializer(serializers.Serializer):
-    test = FindingTestSerializer(required=False)
-    status = serializers.SerializerMethodField(required=False)
-
-    @swagger_serializer_method(serializers.ListField(serializers.CharField()))
-    def get_status(self, obj):
-        return obj.status()
-
-
 class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     images = FindingImageSerializer(many=True, read_only=True)
     tags = TagListSerializerField(required=False)
@@ -693,18 +684,23 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     sla_days_remaining = serializers.IntegerField(read_only=True)
     finding_meta = FindingMetaSerializer(read_only=True, many=True)
     related_fields = serializers.SerializerMethodField()
+    display_status = serializers.SerializerMethodField()
 
     class Meta:
         model = Finding
         fields = '__all__'
 
-    @swagger_serializer_method(FindingRelatedFieldsSerializer)
+    @swagger_serializer_method(FindingTestSerializer)
     def get_related_fields(self, obj):
         query_params = self.context['request'].query_params
         if query_params.get('related_fields', 'false') == 'true':
-            return FindingRelatedFieldsSerializer(required=False).to_representation(obj)
+            return FindingTestSerializer(required=False).to_representation(obj.test)
         else:
             return None
+
+    @swagger_serializer_method(serializers.ListField(serializers.CharField()))
+    def get_display_status(self, obj):
+        return obj.status()
 
     # Overriding this to push add Push to JIRA functionality
     def update(self, instance, validated_data):
