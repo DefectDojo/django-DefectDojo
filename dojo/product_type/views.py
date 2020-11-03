@@ -95,7 +95,6 @@ def edit_product_type(request, ptid):
         if pt_form.is_valid():
             pt.authorized_users.set(pt_form.cleaned_data['authorized_users'])
             pt = pt_form.save()
-            pt.authorized_users.set(pt_form.cleaned_data['authorized_users'])
             messages.add_message(
                 request,
                 messages.SUCCESS,
