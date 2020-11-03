@@ -47,7 +47,7 @@ class SemgrepJSONResult:
         if semSeverity == "ERROR":
             self.severity = "High"
 
-        self.references = metadata.get('message') + metadata.get('owasp')
+        self.references = str(metadata.get('message')) + str(metadata.get('owasp'))
         self.source_rule_url = metadata.get('source-rule-url')
 
         if not metavars:
