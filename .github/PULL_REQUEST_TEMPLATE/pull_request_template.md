@@ -1,19 +1,22 @@
-This template is for your information. Please clear everything when submitting your pull request.
+**Descriptions**
 
-**Note: DefectDojo is now on Python3.6 and Django 2.2.x.**
+Describe the feature / bug fix implemented by this PR
 
-**Please submit your pull requests to :**
+**Test results**
 
-**- evolutions: dev branch**
+Ideally you extend the test suite in `tests/` and `dojo/unittests` to cover the changed in this PR.
+Alternatively, describe what you have and haven't tested.
 
-**- bugfix: latest "release/x.y.z" branch**
+**Documentation**
 
-**- hotfixes: master branch**
+Please update any documentation when needed (in the .MD files in this repo, as well as the [documentation repo]( https://github.com/DefectDojo/Documentation))
 
-If in doubt you can use dev branch, it will just roll-out later. 
+**Checklist**
 
-When submitting a pull request, please make sure you have completed the following checklist:
+This checklist is for your information.
 
+- [ ] Features/Changes/Bugfixes should be submitted against the `dev` branch by default
+- [ ] Hotfixes should be submitted against master (urgent bugfixes requiring a hotfix release)
 - [ ] Give a meaningful name to your PR, as it may end up being used in the release notes.
 - [ ] Your code is flake8 compliant.
 - [ ] Your code is python 3.6 compliant (specific python >3.6 syntax is currently not accepted).
@@ -21,6 +24,10 @@ When submitting a pull request, please make sure you have completed the followin
 - [ ] Model changes must include the necessary migrations in the dojo/db_migrations folder.
 - [ ] Add applicable tests to the unit tests.
 - [ ] Add the proper label to categorize your PR.
+
+**Extra information**
+
+Please clear everything below when submitting your pull request, it's here purely for your information.
 
 
 Moderators: Labels currently accepted for PRs:
