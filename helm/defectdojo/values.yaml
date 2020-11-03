@@ -106,6 +106,14 @@ django:
   replicas: 1
   tolerations: []
   uwsgi:
+    livenessProbe:
+      # Enable liveness checks on uwsgi container. Those values are use on nginx readiness checks as well.
+      enabled: true
+      failureThreshold: 6
+      initialDelaySeconds: 120
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 5
     resources:
       requests:
         cpu: 100m
