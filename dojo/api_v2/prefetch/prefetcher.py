@@ -3,7 +3,8 @@ from . import utils
 import inspect
 import sys
 
-
+# Package containing the available serializers. In the future we could extand this to a list
+# of packages. We use this to avoid going through the whole symbol table.
 SERIALIZER_DEFS_MODULE = "dojo.api_v2.serializers"
 
 
