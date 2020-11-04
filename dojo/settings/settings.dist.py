@@ -144,7 +144,7 @@ env = environ.Env(
     DD_JIRA_SSL_VERIFY=(bool, True),
 
     # if you want to keep logging to the console but in json format, change this here to 'json_console'
-    DD_LOGGING_FORMAT=(str, 'console')
+    DD_LOGGING_HANDLER=(str, 'console')
 )
 
 
@@ -685,7 +685,6 @@ CELERY_BEAT_SCHEDULE = {
     }
 }
 
-
 # ------------------------------------
 # Monitoring Metrics
 # ------------------------------------
@@ -819,7 +818,7 @@ JIRA_SSL_VERIFY = env('DD_JIRA_SSL_VERIFY')
 # ------------------------------------------------------------------------------
 # See http://docs.djangoproject.com/en/dev/topics/logging for
 # more details on how to customize your logging configuration.
-LOGGING_FORMAT = env('DD_LOGGING_FORMAT')
+LOGGING_HANDLER = env('DD_LOGGING_HANDLER')
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -864,36 +863,36 @@ LOGGING = {
             'propagate': True,
         },
         'django.security': {
-            'handlers': [r'%s' % LOGGING_FORMAT],
+            'handlers': [r'%s' % LOGGING_HANDLER],
             'level': 'INFO',
             'propagate': False,
         },
         'celery': {
-            'handlers': [r'%s' % LOGGING_FORMAT],
+            'handlers': [r'%s' % LOGGING_HANDLER],
             'level': 'INFO',
             'propagate': False,
             # does not seem to work?
             # 'worker_hijack_root_logger': False,
         },
         'dojo': {
-            'handlers': [r'%s' % LOGGING_FORMAT],
+            'handlers': [r'%s' % LOGGING_HANDLER],
             'level': 'INFO',
             'propagate': False,
         },
         'dojo.specific-loggers.deduplication': {
-            'handlers': [r'%s' % LOGGING_FORMAT],
+            'handlers': [r'%s' % LOGGING_HANDLER],
             'level': 'INFO',
             'propagate': False,
         },
         'MARKDOWN': {
             # The markdown library is too verbose in it's logging, reducing the verbosity in our logs.
-            'handlers': [r'%s' % LOGGING_FORMAT],
+            'handlers': [r'%s' % LOGGING_HANDLER],
             'level': 'WARNING',
             'propagate': False,
         },
         'titlecase': {
             # The markdown library is too verbose in it's logging, reducing the verbosity in our logs.
-            'handlers': [r'%s' % LOGGING_FORMAT],
+            'handlers': [r'%s' % LOGGING_HANDLER],
             'level': 'WARNING',
             'propagate': False,
         },
