@@ -9,99 +9,35 @@
     <div class="panel panel-default">
         <div class="panel-heading tight">
             <div class="clearfix">
-              <h3 class="pull-left">
+              <h3 class="has-filters">
                   Metrics Overview
-              </h3>
-                <div class="dropdown pull-right">
-                  <!--
-                    <div class="btn-group">
-                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
-                                data-toggle="dropdown" aria-expanded="true">
-                            <span class="fa fa-bars"></span>
-                            <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                            {% if user.is_staff %}
-                                <li role="presentation">
-                                    <a class="" href="{% url 'edit_product' prod.id %}">
-                                        <i class="fa fa-pencil-square-o"></i> Edit
-                                    </a>
-                                </li>
-                                <li role="separator" class="divider"></li>
-                                <li role="presentation">
-                                    <a class="" href="{% url 'ad_hoc_finding' prod.id %}">
-                                        <i class="fa fa-list-alt"></i> Add Finding
-                                    </a>
-                                </li>
-                                <li role="presentation">
-                                    <a class="" href="{% url 'add_meta_data' prod.id %}">
-                                        <i class="fa fa-list-alt"></i> Add Metadata
-                                    </a>
-                                </li>
-                                <li role="presentation">
-                                    <a class="" href="{% url 'new_object' prod.id %}">
-                                        <i class="fa fa-list-alt"></i> Add Product Tracking Files
-                                    </a>
-                                </li>
-                            <li role="separator" class="divider"></li>
-                            <li role="presentation">
-                                <a href="{% url 'endpoints' %}?product={{ prod.id }}">
-                                    <i class="fa fa-sitemap"></i> View Endpoints
-                                </a>
-                            </li>
-                            <li role="presentation">
-                                <a href="{% url 'product_open_findings' prod.id %}?test__engagement__product={{ prod.id }}">
-                                    <i class="fa fa-bug"></i> View Open Findings
-                                </a>
-                            </li>
-                            <li role="presentation">
-                                <a href="{% url 'view_objects' prod.id %}">
-                                    <i class="fa fa-history"></i> View Product Tracking Files
-                                </a>
-                            </li>
-                            {% endif %}
-                            <li role="separator" class="divider"></li>
-                            {% if prod.endpoint_count > 0 %}
-                                <li role="presentation">
-                                    <a href="{% url 'product_endpoint_report' prod.id %}">
-                                        <i class="fa fa-file-text-o"></i> Endpoint Report
-                                    </a>
-                                </li>
-                            {% endif %}
-                            <li role="presentation">
-                                <a href="{% url 'product_report' prod.id %}">
-                                    <i class="fa fa-file-text-o"></i> Product Report
-                                </a>
-                            </li>
-                            {% if system_settings.enable_benchmark and benchmark_type %}
-                            <li role="separator" class="divider"></li>
-                            {% for bt in benchmark_type %}
-                            <li role="presentation">
-                                <a title="{{ bt.name }}" href="{% url 'view_product_benchmark' prod.id bt.id %}">
-                                    <span class="fa fa-list"></span> {{ bt.name }} {{ bt.version }}
-                                </a>
-                            </li>
-                            {% endfor %}
-                            {% endif %}
-                            <li role="separator" class="divider"></li>
-                            <li role="presentation">
-                                <a href="{% url 'action_history' prod|content_type prod.id %}">
-                                    <i class="fa fa-history"></i> View History
-                                </a>
-                            </li>
-                            {% if user.is_staff %}
-                                <li role="separator" class="divider"></li>
-                                <li role="presentation">
-                                    <a class="text-danger" href="{% url 'delete_product' prod.id %}">
-                                        <i class="fa fa-trash"></i> Delete
-                                    </a>
-                                </li>
-                            {% endif %}
-                        </ul>
-                    </div>
-                  -->
+                <div class="dropdown pull-right ">
+                    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
+                            data-toggle="dropdown" label="view_selector" aria-label="view_selector" aria-expanded="true">
+                        <span class="fa fa-bars"></span>
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                        <li role="presentation">
+                            <a href="{% url 'view_product_metrics' prod.id %}?type=Finding">
+                                <i class="fa fa-file-text-o"></i> Measure Findings
+                            </a>
+                        </li>
+                        <li role="presentation">
+                            <a href="{% url 'view_product_metrics' prod.id %}?type=Endpoint">
+                                <i class="fa fa-file-text-o"></i> Measure Affected Endpoints
+                            </a>
+                        </li>
+                    </ul>
                 </div>
+              </h3>
+                
+                
+                  
             </div>
+        </div>
+        <div id="the-filters" class="panel-body collapse">
+            {% include "dojo/filter_snippet.html" with form=form clear_link=reset_link %}
         </div>
         <div class="panel-body product-graphs-overview">
             <div class="col-md-3">
@@ -112,11 +48,11 @@
                                 <i class="fa fa-crosshairs fa-2x"></i>
 
                                 <div class="pull-right inline-block text-right">
-                                    <span class=" fa-2x">{{ verified_findings|length }}</span>
+                                    <span class=" fa-2x">{{ verified_objs|length }}</span>
                                     <span><a
                                             href="{% url 'product_verified_findings' prod.id %}?test__engagement__product={{ prod.id }}"
                                             title="Findings that are open/active and verified">Verified
-                                        Finding{{ verified_findings|length|pluralize }} <i
+                                        {{ view }}{{ verified_objs|length|pluralize }} <i
                                                 class="fa fa-arrow-circle-right"></i></a>
                                     </span>
                                 </div>
@@ -124,7 +60,7 @@
                         </div>
                     </div>
                     <div class="panel-body">
-                        <div id="verified_findings" class="graph"></div>
+                        <div id="verified_objs" class="graph"></div>
                     </div>
                     <div class="panel-footer">
                         <i title="Since {{ start_date }}."
@@ -141,10 +77,10 @@
                                 <i class="fa fa-bug fa-2x"></i>
 
                                 <div class="pull-right inline-block text-right">
-                                    <span class=" fa-2x">{{ open_findings|length }}</span>
+                                    <span class=" fa-2x">{{ open_objs|length }}</span>
                                     <span><a href="{% url 'product_open_findings' prod.id %}?test__engagement__product={{ prod.id }}"
                                         title="Findings that are open/active, but not (yet) verified">Open
-                                        Finding{{ open_findings|length|pluralize }} <i
+                                        {{ view }}{{ open_objs|length|pluralize }} <i
                                                 class="fa fa-arrow-circle-right"></i></a>
                                     </span>
                                 </div>
@@ -152,7 +88,7 @@
                         </div>
                     </div>
                     <div class="panel-body">
-                        <div id="open_findings" class="graph"></div>
+                        <div id="open_objs" class="graph"></div>
                     </div>
                     <div class="panel-footer">
                         <i title="Opened since {{ start_date }}"
@@ -169,18 +105,18 @@
                                 <i class="fa fa-check fa-2x"></i>
 
                                 <div class="pull-right text-right">
-                                    <span class="fa-2x">{{ accepted_findings|length }}</span>
+                                    <span class="fa-2x">{{ accepted_objs|length }}</span>
                                     <span><a
                                             href="{% url 'accepted_findings' %}?test__engagement__product={{ prod.id }}"
                                             title="Findings that have been accepted in a risk acceptance.">Risk Accepted
-                                    Findings <i class="fa fa-arrow-circle-right"></i></a>
+                                    {{ view }}s <i class="fa fa-arrow-circle-right"></i></a>
                                 </span>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="panel-body">
-                        <div id="accepted_findings" class="graph"></div>
+                        <div id="accepted_objs" class="graph"></div>
                     </div>
                     <div class="panel-footer">
                         <i title="Accepted since {{ start_date }}"
@@ -197,10 +133,10 @@
                                 <i class="fa fa-fire-extinguisher fa-2x"></i>
 
                                 <div class="text-right pull-right">
-                                    <span class="fa-2x">{{ closed_findings|length }}</span>
+                                    <span class="fa-2x">{{ closed_objs|length }}</span>
                                     <span><a href="{% url 'closed_findings' %}?test__engagement__product={{ prod.id }}"
                                              title="Findings that are closed and mitigated.">Closed
-                                        Finding{{ closed_findings|length|pluralize }} <i
+                                        {{ view }}{{ closed_objs|length|pluralize }} <i
                                                 class="fa fa-arrow-circle-right"></i></a>
                                     </span>
                                 </div>
@@ -208,7 +144,7 @@
                         </div>
                     </div>
                     <div class="panel-body">
-                        <div id="closed_findings" class="graph"></div>
+                        <div id="closed_objs" class="graph"></div>
                     </div>
                     <div class="panel-footer">
                         <i title="Closed since {{ start_date }}"
@@ -225,10 +161,10 @@
                                 <i class="fa fa-fire-extinguisher fa-2x"></i>
 
                                 <div class="text-right pull-right">
-                                    <span class="fa-2x">{{ false_positive_findings|length }}</span>
+                                    <span class="fa-2x">{{ false_positive_objs|length }}</span>
                                     <span><a href="{% url 'product_false_positive_findings' prod.id %}?test__engagement__product={{ prod.id }}"
                                              title="Findings that are marked as false postive.">False-postive
-                                        Finding{{ false_positive_findings|length|pluralize }} <i
+                                        {{ view }}{{ false_positive_objs|length|pluralize }} <i
                                                 class="fa fa-arrow-circle-right"></i></a>
                                     </span>
                                 </div>
@@ -236,7 +172,7 @@
                         </div>
                     </div>
                     <div class="panel-body">
-                        <div id="false_positive_findings" class="graph"></div>
+                        <div id="false_positive_objs" class="graph"></div>
                     </div>
                     <div class="panel-footer">
                         <i title="Flagged since {{ start_date }}"
@@ -253,11 +189,11 @@
                                 <i class="fa fa-fire-extinguisher fa-2x"></i>
 
                                 <div class="pull-right inline-block text-right">
-                                    <span class=" fa-2x">{{ out_of_scope_findings|length }}</span>
+                                    <span class=" fa-2x">{{ out_of_scope_objs|length }}</span>
                                     <span><a
                                             href="{% url 'product_out_of_scope_findings' prod.id %}?test__engagement__product={{ prod.id }}"
                                             title="Findings that are marked as out of scope.">Out Of Scope
-                                        Finding{{ out_of_scope_findings|length|pluralize }} <i
+                                        {{ view }}{{ out_of_scope_objs|length|pluralize }} <i
                                                 class="fa fa-arrow-circle-right"></i></a>
                                     </span>
                                 </div>
@@ -265,7 +201,7 @@
                         </div>
                     </div>
                     <div class="panel-body">
-                        <div id="out_of_scope_findings" class="graph"></div>
+                        <div id="out_of_scope_objs" class="graph"></div>
                     </div>
                     <div class="panel-footer">
                         <i title="Since {{ start_date }}."
@@ -282,10 +218,10 @@
                                 <i class="fa fa-bullseye fa-2x"></i>
 
                                 <div class="text-right pull-right">
-                                    <span class="fa-2x">{{ all_findings|length }}</span>
+                                    <span class="fa-2x">{{ all_objs|length }}</span>
                                     <span><a href="{% url 'product_false_positive_findings' prod.id %}?test__engagement__product={{ prod.id }}"
                                             title="All findings.">Total 
-                                        Finding{{ all_findings|length|pluralize }} <i
+                                        {{ view }}{{ all_objs|length|pluralize }} <i
                                                 class="fa fa-arrow-circle-right"></i></a>
                                     </span>
                                 </div>
@@ -293,7 +229,7 @@
                         </div>
                     </div>
                     <div class="panel-body">
-                        <div id="all_findings" class="graph"></div>
+                        <div id="all_objs" class="graph"></div>
                     </div>
                     <div class="panel-footer">
                         <i title="Since {{ start_date }}"
@@ -310,10 +246,10 @@
                                 <i class="fa fa-bug fa-2x"></i>
 
                                 <div class="pull-right inline-block text-right">
-                                    <span class=" fa-2x">{{ inactive_findings|length }}</span>
+                                    <span class=" fa-2x">{{ inactive_objs|length }}</span>
                                     <span><a href="{% url 'product_inactive_findings' prod.id %}?test__engagement__product={{ prod.id }}"
                                              title="Findings that are not active but not mitigated for some reason">Inactive
-                                        Finding{{ inactive_findings|length|pluralize }} <i
+                                        {{ view }}{{ inactive_objs|length|pluralize }} <i
                                                 class="fa fa-arrow-circle-right"></i></a>
                                     </span>
                                 </div>
@@ -321,7 +257,7 @@
                         </div>
                     </div>
                     <div class="panel-body">
-                        <div id="inactive_findings" class="graph"></div>
+                        <div id="inactive_objs" class="graph"></div>
                     </div>
                     <div class="panel-footer">
                         <i title="Ingested since {{ start_date }}"
@@ -448,8 +384,8 @@
                     <div class="panel-footer">
                         <i title="Weeks are only displayed if findings are available."
                            class="text-info fa fa-info-circle"></i>
-                        <small>Finding age of {{ open_findings|length|apnumber }} open
-                            finding{{ open_findings|length|pluralize }}</small>
+                        <small>Finding age of {{ open_objs|length|apnumber }} open
+                            finding{{ open_objs|length|pluralize }}</small>
                     </div>
                 </div>
             </div>
@@ -531,7 +467,7 @@
     <script src="{% static "flot/jquery.flot.resize.js" %}"></script>
     <script src="{% static "flot/jquery.flot.categories.js" %}"></script>
     <script src="{% static "flot-axis/jquery.flot.axislabels.js" %}"></script>
-
+    {% include "dojo/filter_js_snippet.html" %}
     {% if punchcard %}
         <script src="{% static "JUMFlot/javascripts/JUMFlot.min.js" %}"></script>
         <script src="{% static "JUMFlot/javascripts/jquery.flot.mouse.js" %}"></script>
@@ -567,15 +503,15 @@
                 }
             });
 
-            accepted_findings();
-            verified_findings();
-            inactive_findings();
-            open_findings();
-            closed_findings();
-            false_positive_findings();
-            out_of_scope_findings();
-            all_findings();
-            new_findings();
+            accepted_objs();
+            verified_objs();
+            inactive_objs();
+            open_objs();
+            closed_objs();
+            false_positive_objs();
+            out_of_scope_objs();
+            all_objs();
+            new_objs();
             open_close_weekly();
             severity_weekly();
             severity_counts_weekly();
@@ -587,7 +523,7 @@
             $("#meta_accordion").accordion();
         });
 
-        function accepted_findings() {
+        function accepted_objs() {
             var critical = 0;
             var high = 0;
             var medium = 0;
@@ -597,7 +533,7 @@
                 [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
             ];
 
-            {% for f in accepted_findings %}
+            {% for f in accepted_objs %}
                 {% if f.severity == 'Critical' %}
                     critical += 1;
                 {% elif f.severity == 'High' %}
@@ -690,7 +626,7 @@
                 }
             ];
 
-            $.plot("#accepted_findings", data, {
+            $.plot("#accepted_objs", data, {
                 series: {
                     stack: true,
                     bars: {
@@ -720,7 +656,7 @@
         ;
 
 
-        function inactive_findings() {
+        function inactive_objs() {
             var critical = 0;
             var high = 0;
             var medium = 0;
@@ -730,7 +666,7 @@
                 [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
             ];
 
-            {% for f in inactive_findings %}
+            {% for f in inactive_objs %}
                 {% if f.severity == 'Critical' %}
                     critical += 1;
                 {% elif f.severity == 'High' %}
@@ -823,7 +759,7 @@
                 }
             ];
 
-            $.plot("#inactive_findings", data, {
+            $.plot("#inactive_objs", data, {
                 series: {
                     stack: true,
                     bars: {
@@ -852,7 +788,7 @@
         }
         ;
 
-        function open_findings() {
+        function open_objs() {
             var critical = 0;
             var high = 0;
             var medium = 0;
@@ -862,7 +798,7 @@
                 [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
             ];
 
-            {% for f in open_findings %}
+            {% for f in open_objs %}
                 {% if f.severity == 'Critical' %}
                     critical += 1;
                 {% elif f.severity == 'High' %}
@@ -955,7 +891,7 @@
                 }
             ];
 
-            $.plot("#open_findings", data, {
+            $.plot("#open_objs", data, {
                 series: {
                     stack: true,
                     bars: {
@@ -984,7 +920,7 @@
         }
         ;
 
-        function false_positive_findings() {
+        function false_positive_objs() {
             var critical = 0;
             var high = 0;
             var medium = 0;
@@ -994,7 +930,7 @@
                 [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
             ];
 
-            {% for f in false_positive_findings %}
+            {% for f in false_positive_objs %}
                 {% if f.severity == 'Critical' %}
                     critical += 1;
                 {% elif f.severity == 'High' %}
@@ -1087,7 +1023,7 @@
                 }
             ];
 
-            $.plot("#false_positive_findings", data, {
+            $.plot("#false_positive_objs", data, {
                 series: {
                     stack: true,
                     bars: {
@@ -1116,7 +1052,7 @@
         }
         ;
 
-        function verified_findings() {
+        function verified_objs() {
             var critical = 0;
             var high = 0;
             var medium = 0;
@@ -1126,7 +1062,7 @@
                 [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
             ];
 
-            {% for f in verified_findings %}
+            {% for f in verified_objs %}
                 {% if f.severity == 'Critical' %}
                     critical += 1;
                 {% elif f.severity == 'High' %}
@@ -1219,7 +1155,7 @@
                 }
             ];
 
-            $.plot("#verified_findings", data, {
+            $.plot("#verified_objs", data, {
                 series: {
                     stack: true,
                     bars: {
@@ -1247,7 +1183,7 @@
         }
         ;
 
-        function out_of_scope_findings() {
+        function out_of_scope_objs() {
             var critical = 0;
             var high = 0;
             var medium = 0;
@@ -1257,7 +1193,7 @@
                 [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
             ];
 
-            {% for f in out_of_scope_findings %}
+            {% for f in out_of_scope_objs %}
                 {% if f.severity == 'Critical' %}
                     critical += 1;
                 {% elif f.severity == 'High' %}
@@ -1350,7 +1286,7 @@
                 }
             ];
 
-            $.plot("#out_of_scope_findings", data, {
+            $.plot("#out_of_scope_objs", data, {
                 series: {
                     stack: true,
                     bars: {
@@ -1378,7 +1314,7 @@
         }
         ;
 
-        function all_findings() {
+        function all_objs() {
             var critical = 0;
             var high = 0;
             var medium = 0;
@@ -1388,7 +1324,7 @@
                 [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
             ];
 
-            {% for f in all_findings %}
+            {% for f in all_objs %}
                 {% if f.severity == 'Critical' %}
                     critical += 1;
                 {% elif f.severity == 'High' %}
@@ -1481,7 +1417,7 @@
                 }
             ];
 
-            $.plot("#all_findings", data, {
+            $.plot("#all_objs", data, {
                 series: {
                     stack: true,
                     bars: {
@@ -1510,7 +1446,7 @@
         }
         ;
 
-        function closed_findings() {
+        function closed_objs() {
             var critical = 0;
             var high = 0;
             var medium = 0;
@@ -1520,7 +1456,7 @@
                 [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
             ];
 
-            {% for f in closed_findings %}
+            {% for f in closed_objs %}
                 {% if f.severity == 'Critical' %}
                     critical += 1;
                 {% elif f.severity == 'High' %}
@@ -1613,7 +1549,7 @@
                 }
             ];
 
-            $.plot("#closed_findings", data, {
+            $.plot("#closed_objs", data, {
                 series: {
                     stack: true,
                     bars: {
@@ -1641,7 +1577,7 @@
             });
         }
         ;
-        function new_findings() {
+        function new_objs() {
             var critical = 0;
             var high = 0;
             var medium = 0;
@@ -1651,7 +1587,7 @@
                 [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
             ];
 
-            {% for f in new_findings %}
+            {% for f in new_objs %}
                 {% if f.severity == 'Critical' %}
                     critical += 1;
                 {% elif f.severity == 'High' %}
@@ -1744,7 +1680,7 @@
                 }
             ];
 
-            $.plot("#new_findings", data, {
+            $.plot("#new_objs", data, {
                 series: {
                     stack: true,
                     bars: {
@@ -2046,7 +1982,7 @@
             var data = {};
             var data_1 = []
             var ticks = []
-            {% for f in open_findings %}
+            {% for f in open_objs %}
                 if (data[{{ f.age }}]) {
                     data[{{ f.age }}] += 1
                 }

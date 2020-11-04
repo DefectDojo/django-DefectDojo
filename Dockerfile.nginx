@@ -3,7 +3,7 @@
 # The code for the build image should be idendical with the code in
 # Dockerfile.django to use the caching mechanism of Docker.
 
-FROM python:3.6.11-slim-buster@sha256:9111ff37d96bdcd84bcac261951ac410ee276144eb8a02f06e5907ff4ff2ffea as build
+FROM python:3.6.12-slim-buster@sha256:e5259113df5a7c4dae16ad37c2ca53b1cf722e051cfd5f624e7b76aa72389e0c as build
 WORKDIR /app
 RUN \
   apt-get -y update && \
@@ -55,8 +55,7 @@ RUN pip3 install \
 COPY components/ ./components/
 COPY manage.py ./
 COPY dojo/ ./dojo/
-RUN \
-  cp dojo/settings/settings.dist.py dojo/settings/settings.py
+
 RUN \
   cd components && \
   yarn && \
@@ -64,14 +63,17 @@ RUN \
   python3 manage.py collectstatic --noinput && \
   true
 
-FROM nginx:1.19.1-alpine@sha256:966f134cf5ddeb12a56ede0f40fff754c0c0a749182295125f01a83957391d84
+FROM nginx:1.19.3-alpine@sha256:a411d06ab4f5347ac9652357ac35600555aeff0b910326cc7adc36d471e0b36f
+ARG uid=1001
+ARG appuser=defectdojo
 COPY --from=collectstatic /app/static/ /usr/share/nginx/html/static/
 COPY wsgi_params nginx/nginx.conf nginx/nginx_TLS.conf /etc/nginx/
 COPY docker/entrypoint-nginx.sh /
 RUN \
   apk add --no-cache openssl && \
   chmod -R g=u /var/cache/nginx && \
-  chmod -R g=u /var/run && \
+  mkdir /var/run/defectdojo && \
+  chmod -R g=u /var/run/defectdojo && \
   mkdir -p /etc/nginx/ssl && \
   chmod -R g=u /etc/nginx && \
   true
@@ -84,6 +86,6 @@ ENV \
   NGINX_METRICS_ENABLED="false" \
   METRICS_HTTP_AUTH_USER="" \
   METRICS_HTTP_AUTH_PASSWORD=""
-USER 1001
+USER ${uid}
 EXPOSE 8080
 ENTRYPOINT ["/entrypoint-nginx.sh"]

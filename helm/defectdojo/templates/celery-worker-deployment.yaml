@@ -22,12 +22,31 @@ spec:
         defectdojo.org/component: celery
         app.kubernetes.io/name: {{ include "defectdojo.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
+      annotations:
+      {{- with .Values.celery.worker.annotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
     spec:
+      serviceAccountName: {{ $fullName }}
       {{- if .Values.imagePullSecrets }}
       imagePullSecrets:
       - name: {{ .Values.imagePullSecrets }}
       {{- end }}
       containers:
+      {{- if .Values.cloudsql.enabled  }}
+      - name: cloudsql-proxy
+        image: {{ .Values.cloudsql.image.repository }}:{{ .Values.cloudsql.image.tag }}
+        imagePullPolicy: {{ .Values.cloudsql.image.pullPolicy }}
+        securityContext:
+          runAsNonRoot: true
+        command: ["/cloud_sql_proxy"]
+        args:
+        {{- if eq .Values.database "postgresql" }}
+        - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.postgresql.service.port }}"
+        {{- else if eq .Values.database "mysql" }}
+        - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.mysql.service.port }}"
+        {{- end }}
+      {{- end }}
       - name: celery
         image: "{{ template "celery.repository" . }}:{{ .Values.tag }}"
         imagePullPolicy: {{ .Values.imagePullPolicy }}
@@ -35,30 +54,24 @@ spec:
         envFrom:
         - configMapRef:
             name: {{ $fullName }}
+        - secretRef:
+            name: {{ $fullName }}-extrasecrets
+            optional: true
         env:
         - name: DD_CELERY_BROKER_PASSWORD
           valueFrom:
             secretKeyRef:
-              # Use broker chart secret
-              # name: {{ $fullName }}-{{ .Values.celery.broker }}
-              # Use secret handled outside of the chart
               name: defectdojo-{{ .Values.celery.broker }}-specific
               key: {{ .Values.celery.broker }}-password
         - name: DD_DATABASE_PASSWORD
           valueFrom:
             secretKeyRef:
               {{- if eq .Values.database "postgresql" }}
-              # use postgresql chart secret
-              # name: {{- if .Values.postgresql.enabled }} {{ $fullName }}-{{ .Values.database }} {{- else }} {{ .Values.postgresql.existingSecret }} {{- end }}
-              # Use secret handled outside of the chart
-              name: {{- if .Values.postgresql.enabled }} defectdojo-postgresql-specific {{- else }} {{ .Values.postgresql.existingSecret }} {{- end }}
-              key: postgresql-password
+              name: {{ .Values.postgresql.existingSecret }}
+              key: {{ .Values.postgresql.secretKey }}
               {{- else if eq .Values.database "mysql" }}
-              # Use mysql chart secret
-              # name: {{- if .Values.mysql.enabled }} {{ $fullName }}-{{ .Values.database }} {{- else }} {{ .Values.mysql.mysqlPasswordSecret }} {{- end }}
-              # Use secret handled outside of the chart
-              name: {{- if .Values.mysql.enabled }} defectdojo-mysql-specific {{- else }} {{ .Values.mysql.mysqlPasswordSecret }} {{- end }}
-              key: mysql-password
+              name: {{ .Values.mysql.existingSecret }}
+              key: {{ .Values.mysql.secretKey }}
               {{- end }}
         - name: DD_SECRET_KEY
           valueFrom:

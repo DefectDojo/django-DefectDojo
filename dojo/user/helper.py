@@ -3,6 +3,7 @@ import logging
 from django.core.exceptions import PermissionDenied
 import functools
 from django.shortcuts import get_object_or_404
+from dojo.models import Finding, Test, Engagement, Product, Endpoint, Scan, ScanSettings
 
 logger = logging.getLogger(__name__)
 
@@ -50,9 +51,6 @@ def user_must_be_authorized(model, perm_type, arg, lookup="pk", view_func=None):
 
     @functools.wraps(view_func)
     def _wrapped(request, *args, **kwargs):
-        # print(f' Args: {args}')
-        # print(f' Kwargs: {kwargs}')
-
         # Fetch object from database
         if isinstance(arg, int):
             # Lookup value came as a positional argument
@@ -73,12 +71,39 @@ def user_must_be_authorized(model, perm_type, arg, lookup="pk", view_func=None):
             logger.warn('User %s is not authorized to %s for %s', request.user, perm_type, obj)
             raise PermissionDenied()
 
-        print('user is authorized for: ', obj)
+        # print('user is authorized for: ', obj)
         # Django doesn't seem to easily support just passing on the original positional parameters
         # so we resort to explicitly putting lookup_value here (which is for example the 'fid' parameter)
         return view_func(request, lookup_value, *args, **kwargs)
 
     return _wrapped
+
+
+def check_auth_users_list(user, obj):
+    is_authorized = False
+    if isinstance(obj, Finding):
+        is_authorized = user in obj.test.engagement.product.authorized_users.all()
+        is_authorized = user in obj.test.engagement.product.prod_type.authorized_users.all() or is_authorized
+    if isinstance(obj, Test):
+        is_authorized = user in obj.engagement.product.authorized_users.all()
+        is_authorized = user in obj.engagement.product.prod_type.authorized_users.all() or is_authorized
+    if isinstance(obj, Engagement):
+        is_authorized = user in obj.product.authorized_users.all()
+        is_authorized = user in obj.product.prod_type.authorized_users.all() or is_authorized
+    if isinstance(obj, Product):
+        is_authorized = user in obj.authorized_users.all()
+        is_authorized = user in obj.prod_type.authorized_users.all() or is_authorized
+    if isinstance(obj, Endpoint):
+        is_authorized = user in obj.product.authorized_users.all()
+        is_authorized = user in obj.product.prod_type.authorized_users.all() or is_authorized
+    if isinstance(obj, Scan):
+        is_authorized = user in obj.scan_settings.product.authorized_users.all()
+        is_authorized = user in obj.scan_settings.product.prod_type.authorized_users.all() or is_authorized
+    if isinstance(obj, ScanSettings):
+        is_authorized = user in obj.product.authorized_users.all()
+        is_authorized = user in obj.product.prod_type.authorized_users.all() or is_authorized
+
+    return is_authorized
 
 
 def user_is_authorized(user, perm_type, obj):
@@ -87,32 +112,23 @@ def user_is_authorized(user, perm_type, obj):
     # print('perm_type', perm_type)
     # print('obj: ', obj)
 
-    if perm_type not in ['view', 'change', 'delete']:
+    if perm_type not in ['view', 'change', 'delete', 'staff']:
         logger.error('permtype %s not supported', perm_type)
         raise ValueError('permtype ' + perm_type + ' not supported')
 
     if user.is_staff:
         return True
 
-    if perm_type == 'change' and not settings.AUTHORIZED_USERS_ALLOW_CHANGE:
+    authorized_staff = settings.AUTHORIZED_USERS_ALLOW_STAFF
+
+    if perm_type == 'staff' and not authorized_staff:
         return user.is_staff or user.is_superuser
 
-    if perm_type == 'delete' and not settings.AUTHORIZED_USERS_ALLOW_DELETE:
+    if perm_type == 'change' and not settings.AUTHORIZED_USERS_ALLOW_CHANGE and not authorized_staff:
+        return user.is_staff or user.is_superuser
+
+    if perm_type == 'delete' and not settings.AUTHORIZED_USERS_ALLOW_DELETE and not authorized_staff:
         return user.is_staff or user.is_superuser
 
     # at this point being in the authorized users lists means permission should be granted
-    is_authorized = False
-    from dojo.models import Finding, Test, Engagement, Product, Endpoint
-
-    if isinstance(obj, Finding):
-        is_authorized = user in obj.test.engagement.product.authorized_users.all()
-    if isinstance(obj, Test):
-        is_authorized = user in obj.engagement.product.authorized_users.all()
-    if isinstance(obj, Engagement):
-        is_authorized = user in obj.product.authorized_users.all()
-    if isinstance(obj, Product):
-        is_authorized = user in obj.authorized_users.all()
-    if isinstance(obj, Endpoint):
-        is_authorized = user in obj.product.authorized_users.all()
-
-    return is_authorized
+    return check_auth_users_list(user, obj)

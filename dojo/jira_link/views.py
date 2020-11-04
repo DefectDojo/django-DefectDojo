@@ -21,17 +21,29 @@ from dojo.forms import JIRAForm, DeleteJIRAConfForm, ExpressJIRAForm
 from dojo.models import User, JIRA_Conf, JIRA_Issue, Notes, Risk_Acceptance
 from dojo.utils import add_breadcrumb, get_system_setting
 from dojo.notifications.helper import create_notification
+from django.views.decorators.http import require_POST
 
 logger = logging.getLogger(__name__)
 
 
 @csrf_exempt
-def webhook(request):
-    # Webhook shouldn't be active if jira isn't enabled
+@require_POST
+def webhook(request, secret=None):
     if not get_system_setting('enable_jira'):
-        raise PermissionDenied
+        logger.debug('ignoring incoming webhook as JIRA is disabled.')
+        raise PermissionDenied('JIRA disable')
     elif not get_system_setting('enable_jira_web_hook'):
-        raise PermissionDenied
+        logger.debug('ignoring incoming webhook as JIRA Webhook is disabled.')
+        raise PermissionDenied('JIRA Webhook disabled')
+    elif not get_system_setting('disable_jira_webhook_secret'):
+        if not get_system_setting('jira_webhook_secret'):
+            logger.warning('ignoring incoming webhook as JIRA Webhook secret is empty in Defect Dojo system settings.')
+            raise PermissionDenied('JIRA Webhook secret cannot be empty')
+        if secret != get_system_setting('jira_webhook_secret'):
+            logger.warning('invalid secret provided to JIRA Webhook')
+            raise PermissionDenied('invalid or no secret provided to JIRA Webhook')
+
+    # if webhook secret is disabled in system_settings, we ignore the incoming secret, even if it doesn't match
 
     if request.method == 'POST':
         parsed = json.loads(request.body.decode('utf-8'))
@@ -70,6 +82,7 @@ def webhook(request):
                             now = timezone.now()
                             finding.active = False
                             finding.mitigated = now
+                            finding.is_Mitigated = True
                             finding.endpoints.clear()
                             finding.false_p = False
                             finding.remove_from_any_risk_acceptance()
@@ -95,6 +108,11 @@ def webhook(request):
             commentor = parsed['comment']['updateAuthor']['displayName']
             jid = parsed['comment']['self'].split('/')[7]
             jissue = JIRA_Issue.objects.get(jira_id=jid)
+            jira = JIRA_Conf.objects.values_list('username', flat=True)
+            for jira_userid in jira:
+                if jira_userid.lower() in commentor.lower():
+                    return HttpResponse('')
+                    break
             finding = jissue.finding
             new_note = Notes()
             new_note.entry = '(%s): %s' % (commentor, comment_text)
@@ -103,6 +121,7 @@ def webhook(request):
             finding.notes.add(new_note)
             finding.jira_change = timezone.now()
             finding.save()
+            create_notification(event='other', title='JIRA Update - %s' % (jissue.finding), url=reverse("view_finding", args=(jissue.id,)), icon='check')
 
         if parsed.get('webhookEvent') not in ['comment_created', 'jira:issue_updated']:
             logger.info('Unrecognized JIRA webhook event received: {}'.format(parsed.get('webhookEvent')))
@@ -121,7 +140,8 @@ def express_new_jira(request):
                 # Instantiate JIRA instance for validating url, username and password
                 try:
                     jira = JIRA(server=jira_server,
-                         basic_auth=(jira_username, jira_password))
+                        basic_auth=(jira_username, jira_password),
+                        options={"verify": settings.JIRA_SSL_VERIFY})
                 except Exception:
                     messages.add_message(request,
                                      messages.ERROR,
@@ -202,7 +222,8 @@ def new_jira(request):
 
                 # Instantiate JIRA instance for validating url, username and password
                 JIRA(server=jira_server,
-                     basic_auth=(jira_username, jira_password))
+                     basic_auth=(jira_username, jira_password),
+                     options={"verify": settings.JIRA_SSL_VERIFY})
 
                 new_j = jform.save(commit=False)
                 new_j.url = jira_server
@@ -249,7 +270,8 @@ def edit_jira(request, jid):
 
                 # Instantiate JIRA instance for validating url, username and password
                 JIRA(server=jira_server,
-                    basic_auth=(jira_username, jira_password))
+                    basic_auth=(jira_username, jira_password),
+                    options={"verify": settings.JIRA_SSL_VERIFY})
 
                 new_j = jform.save(commit=False)
                 new_j.url = jira_server
@@ -290,7 +312,8 @@ def delete_issue(request, find):
     jira_conf = find.jira_conf()
     jira = JIRA(server=jira_conf.url,
                 basic_auth=(jira_conf.username,
-                            jira_conf.password))
+                            jira_conf.password),
+                options={"verify": settings.JIRA_SSL_VERIFY})
     issue = jira.issue(j_issue.jira_id)
     issue.delete()
 

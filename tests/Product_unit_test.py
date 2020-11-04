@@ -69,6 +69,15 @@ class ProductTest(BaseTestCase):
         self.goto_product_overview(driver)
         # list products which will make sure there are no javascript errors such as before in https://github.com/DefectDojo/django-DefectDojo/issues/2050
 
+    @on_exception_html_source_logger
+    def test_list_components(self):
+        driver = self.login_page()
+        self.goto_product_overview(driver)
+        driver.find_element_by_link_text("QA Test").click()
+        driver.find_element_by_link_text("Components").click()
+        driver.find_element_by_id("product_component_view").click()
+        self.assertTrue(self.is_element_by_css_selector_present("table"))
+
     # For product consistency sake, We won't be editting the product title
     # instead We can edit the product description
     @on_exception_html_source_logger
@@ -374,6 +383,7 @@ def add_product_tests_to_suite(suite):
     suite.addTest(ProductTest('test_add_product_tracking_files'))
     suite.addTest(ProductTest('test_edit_product_tracking_files'))
     suite.addTest(ProductTest('test_list_products'))
+    suite.addTest(ProductTest('test_list_components'))
     suite.addTest(ProductTest('test_product_notifications_change'))
     suite.addTest(ProductTest('test_delete_product'))
     return suite

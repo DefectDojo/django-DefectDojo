@@ -23,6 +23,42 @@
     </title>
     {% block add_css_before %}
     {% endblock %}
+
+    <!-- jQuery -->
+    <script src="{% static "jquery/dist/jquery.js" %}"></script>
+    <!--  jQuery UI -->
+    <script src="{% static "components-jqueryui/jquery-ui.min.js" %}"></script>
+    <!-- Bootstrap Core JavaScript -->
+    <script src="{% static "bootstrap/dist/js/bootstrap.min.js" %}"></script>
+
+    <!-- Metis Menu Plugin JavaScript -->
+    <script src="{% static "metismenu/dist/metisMenu.min.js" %}"></script>
+
+    <script src="{% static "chosen-js/chosen.jquery.min.js" %}"></script>
+
+    <!-- Custom Theme JavaScript -->
+    <script src="{% static "startbootstrap-sb-admin-2/dist/js/sb-admin-2.js" %}"></script>
+    <!-- Calendar JavaScript -->
+    <script src="{% static "moment/min/moment.min.js" %}"></script>
+    <script src="{% static "fullcalendar/dist/fullcalendar.min.js" %}"></script>
+    <!-- jquery cookie -->
+    <script src="{% static "jquery.cookie/jquery.cookie.js" %}"></script>
+    <!-- DataTables Javascript -->
+    <script src="{% static "datatables.net/js/jquery.dataTables.min.js" %}"></script>
+    <script src="{% static "datatables.net-dt/js/dataTables.dataTables.min.js" %}"></script>
+    <script src="{% static "datatables.net-bs/js/dataTables.bootstrap.min.js" %}"></script>
+    <script src="{% static "datatables.net-buttons/js/dataTables.buttons.min.js" %}"></script>
+    <script src="{% static "datatables.net-buttons/js/buttons.html5.min.js" %}"></script>
+    <script src="{% static "datatables.net-buttons/js/buttons.colVis.min.js" %}"></script>
+    <script src="{% static "datatables.net-buttons/js/buttons.print.min.js" %}"></script>
+    <script src="{% static "datatables.net-buttons-bs/js/buttons.bootstrap.min.js" %}"></script>
+    <script src="{% static "datatables.net-colreorder/js/dataTables.colReorder.min.js" %}"></script>
+
+    <script src="{% static "pdfmake/build/pdfmake.min.js" %}"></script>
+    <script src="{% static "pdfmake/build/vfs_fonts.js" %}"></script>
+
+    <script src="{% static "jszip/dist/jszip.min.js" %}"></script>
+
     <!-- Bootstrap Core CSS -->
     <link href="{% static "bootstrap/dist/css/bootstrap.min.css" %}" rel="stylesheet">
 
@@ -42,8 +78,10 @@
     <link rel="stylesheet" href="{% static "chosen-bootstrap/chosen.bootstrap.min.css" %}">
     <link rel="stylesheet" href="{% static "fullcalendar/dist/fullcalendar.min.css" %}">
     <link rel="stylesheet" href="{% static "dojo/css/dojo.css" %}">
-    <link rel="stylesheet" href="{% static "dojo/css/datatables.min.css" %}">
-
+    <link rel="stylesheet" href="{% static "datatables.net-dt/css/jquery.dataTables.min.css" %}">
+    {% comment %} <link rel="stylesheet" href="{% static "datatables.net-buttons-dt/css/buttons.dataTables.min.css" %}"> {% endcomment %}
+    <link rel="stylesheet" href="{% static "datatables.net-bs/css/dataTables.bootstrap.min.css" %}">
+    <link rel="stylesheet" href="{% static "datatables.net-buttons-bs/css/buttons.bootstrap.min.css" %}">
 
     <style>
         {% block add_styles %}
@@ -74,12 +112,12 @@
               {% if request.user.is_authenticated %}
                 <li>
                     <div class="custom-search-form">
-                        <form role="search" method="get" action="{% url 'simple_search' %}">
+                        <form id="custom_search_form" role="search" method="get" action="{% url 'simple_search' %}">
                             <div class="input-group">
                                 <input id="simple_search" type="text" name="query" class="form-control"
-                                       placeholder="Search...">
+                                       placeholder="Search..." value="{{clean_query}}">
                                 <span class="input-group-btn">
-                                    <button class="btn btn-primary" type="submit" aria-label="Search">
+                                    <button id="simple_search_submit" class="btn btn-primary" type="submit" aria-label="Search">
                                         <i class="fa fa-search"></i>
                                     </button>
                                 </span>
@@ -118,10 +156,13 @@
                                 v2 Docs</a></li>
                             {{ block.super }}
                             {% if user.is_staff %}
-                                <li><a href="{% url 'survey' %}"> <i class="fa fa-hospital-o fa-fw"> </i> Questionnaires </a></li>
+                                <li><a href="{% url 'questionnaire' %}"> <i class="fa fa-hospital-o fa-fw"> </i> Questionnaires </a></li>
                             {% endif %}
                         {% endblock %}
                         {% if request.user.is_authenticated %}
+                            {% if SAML2_LOGOUT_URL != '' %}
+                                <li><a href="{{ SAML2_LOGOUT_URL }}"><i class="fa fa-sign-out fa-fw"></i>SAML Logout</a></li>
+                            {% endif %}
                             <li><a href="{% url 'logout' %}"><i class="fa fa-sign-out fa-fw"></i> Logout</a></li>
                         {% endif %}
                     </ul>
@@ -200,7 +241,7 @@
                                         <i class="fa fa-bug fa-fw"></i>
                                         <span>Findings</span>
                                         <span class="glyphicon arrow"></span>
-				    </a>
+				                    </a>
                                     <ul class="nav nav-second-level">
                                         <li>
                                             <a href="{% url 'open_findings' %}">Open Findings</a>
@@ -219,6 +260,12 @@
                                         </li>
                                     </ul>
                                     <!-- /.nav-second-level -->
+                                </li>
+                                <li>
+				                    <a href="{% url 'components' %}" id="product_component_view" aria-expanded="false"  aria-label="Components">
+                                        <i class="fa fa-th-large fa-fw"></i>
+                                        <span>Components</span>
+                                    </a>
                                 </li>
                                 <li>
                                     <a href="{% url 'endpoints' %}" aria-expanded="false" aria-label="Endpoints">
@@ -290,7 +337,7 @@
                                     <a href="#"><i class="fa fa-hospital-o fa-fw"> </i> <span>Questionnaires</span><span
                                             class="glyphicon arrow"></span></a>
                                     <ul class="nav nav-second-level">
-                                        <li><a href="{% url 'survey' %}">All Questionnaires </a></li>
+                                        <li><a href="{% url 'questionnaire' %}">All Questionnaires </a></li>
                                         <li><a href="{% url 'questions' %}">All Questions </a></li>
 
                                     </ul>
@@ -314,6 +361,7 @@
                                         <li><a href="{% url 'tool_config' %}">Tool Configuration </a></li>
                                         <li><a href="{% url 'tool_type' %}">Tool Type </a></li>
                                         <li><a href="{% url 'rules' %}">Rules Framework </a></li>
+                                        <li><a href="{% url 'regulations' %}">Regulations </a></li>
                                         <li><a href="{% url 'system_settings' %}">System Settings </a></li>
                                         <li><a href="{% url 'note_type' %}">Note Types </a></li>
                                         <li><a href="{% url 'configure_google_sheets' %}">Google Sheets Sync</a></li>
@@ -366,6 +414,7 @@
                 </h3>
                 <ul class="nav nav-tabs horizontal-bar in">
                   <li role="presentation"{% if product_tab.tab == 'overview' %} class="active"{% endif %}><a href="{% url 'view_product' product_tab.product.id %}"><span class="fa fa-globe" aria-hidden="true"></span><span class="hidden-xs"> Overview</span></a></li>
+                  <li role="presentation"{% if product_tab.tab == 'components' %} class="active"{% endif %}><a href="{% url 'view_product_components' product_tab.product.id %}"><span class="fa fa-th-large" aria-hidden="true"></span><span class="hidden-xs"> Components</span></a></li>
                   <li role="presentation"{% if product_tab.tab == 'metrics' %} class="active"{% endif %}><a href="{% url 'view_product_metrics' product_tab.product.id %}"><span class="fa fa-bar-chart" aria-hidden="true"></span><span class="hidden-xs"> Metrics</span></a></li>
                   <!-- Engagements Tab -->
                   <li role="presentation" class="dropdown{% if product_tab.tab == 'engagements' %} active active-color{% endif %}">
@@ -374,12 +423,12 @@
                     <span class="caret"></span></a>
                     <ul class="dropdown-menu">
                       <li><a href="{% url 'view_engagements' product_tab.product.id %}"><i class="fa fa-calendar"></i> View Engagements</a></li>
-                      {% if user.is_staff %}
+                      {% if user|is_authorized_for_staff:product_tab.product %}
                       <li><a href="{% url 'new_eng_for_prod' product_tab.product.id %}"><i class="fa fa-plus"></i> Add New Engagement</a></li>
                       {% endif %}
                       <li role="separator" class="divider"></li>
                       <li><a href="{% url 'view_engagements_cicd' product_tab.product.id %}"><i class="fa fa-calendar"></i> View CI/CD Engagements</a></li>
-                      {% if user.is_staff %}
+                      {% if user|is_authorized_for_staff:product_tab.product%}
                       <li><a href="{% url 'new_eng_for_prod_cicd' product_tab.product.id %}"><i class="fa fa-plus"></i> Add New CI/CD Engagement</a></li>
                       {% endif %}
                     </ul>
@@ -397,7 +446,7 @@
                       <li><a href="{% url 'product_accepted_findings' product_tab.product.id %}?test__engagement__product={{ product_tab.product.id }}"><i class="fa fa-check"></i> View Risk Accepted Findings</a></li>
                       <li><a href="{% url 'product_all_findings' product_tab.product.id %}?test__engagement__product={{ product_tab.product.id }}"><i class="fa fa-search"></i> View All Findings</a></li>
                       <li><a href="{% url 'product_closed_findings' product_tab.product.id %}?test__engagement__product={{ product_tab.product.id }}"><i class="fa fa-fire-extinguisher"></i>&nbsp;&nbsp;View Closed Findings </a></li>
-                      {% if user.is_staff %}
+                      {% if user|is_authorized_for_staff:product_tab.product %}
                       <li role="separator" class="divider"></li>
                       <li><a href="{% url 'ad_hoc_finding' product_tab.product.id %}"><i class="fa fa-plus"></i> Add New Finding</a></li>
                       <li><a href="{% url 'import_scan_results_prod' product_tab.product.id %}"><i class="fa fa-upload"></i> Import Scan Results</a></li>
@@ -414,7 +463,7 @@
                       <li><a href="{% url 'vulnerable_endpoints' %}?product={{ product_tab.product.id }}"><i class="fa fa-sitemap"></i> View Vulnerable Endpoints</a></li>
                       <li role="separator" class="divider"></li>
                       <li><a href="{% url 'product_endpoint_report' product_tab.product.id %}"><i class="fa fa-file-text-o"></i> Endpoint Report</a></li>
-                      {% if user.is_staff %}
+                      {% if user|is_authorized_for_staff:product_tab.product %}
                       <li role="separator" class="divider"></li>
                       <li><a href="{% url 'add_endpoint' product_tab.product.id %}"><i class="fa fa-plus"></i> Add New Endpoint</a></li>
                       {% endif %}
@@ -434,7 +483,7 @@
                     </ul>
                   </li>
                   {% endif %}
-                  {% if user.is_staff %}
+                  {% if user|is_authorized_for_staff:product_tab.product%}
                   <li role="presentation" class="dropdown{% if product_tab.tab == 'settings' %} active{% endif %}">
                     <a class="dropdown-toggle" data-toggle="dropdown" href=""><span class="fa fa-cogs" aria-hidden="true"></span>
                       <span class="hidden-xs"> Settings</span>
@@ -583,27 +632,13 @@
 
 <!-- /#wrapper -->
 
-<!-- jQuery -->
-<script src="{% static "jquery/dist/jquery.js" %}"></script>
-<!--  jQuery UI -->
-<script src="{% static "components-jqueryui/jquery-ui.min.js" %}"></script>
-<!-- Bootstrap Core JavaScript -->
-<script src="{% static "bootstrap/dist/js/bootstrap.min.js" %}"></script>
-
-<!-- Metis Menu Plugin JavaScript -->
-<script src="{% static "metismenu/dist/metisMenu.min.js" %}"></script>
-
-<!-- Custom Theme JavaScript -->
-<script src="{% static "startbootstrap-sb-admin-2/dist/js/sb-admin-2.js" %}"></script>
-<!-- Calendar JavaScript -->
-<script src="{% static "moment/min/moment.min.js" %}"></script>
-<script src="{% static "fullcalendar/dist/fullcalendar.min.js" %}"></script>
-<!-- jquery cookie -->
-<script src="{% static "jquery.cookie/jquery.cookie.js" %}"></script>
-<!-- DataTables Javascript -->
-<script src="{% static "dojo/js/datatables.min.js" %}"></script>
 <!-- our JS -->
 <script src="{% static "dojo/js/index.js" %}"></script>
+
+<!-- our CVSS stuff -->
+<script src="{% static "dojo/js/cvsscalc30_helptext.js" %}"></script>
+<script src="{% static "dojo/js/cvsscalc30.js" %}"></script>
+<script src="{% static "dojo/js/cvss_calculator.js" %}"></script>
 <script type="application/javascript">
     $(document).ready(function() {
         $('.has-popover').popover({'trigger':'hover'});
@@ -624,6 +659,7 @@
 
         function htmlEscape(str) {
           return str
+            .replace(/\n/g, " ")
             .replace(/&/g, '&amp;')
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#39;')
@@ -637,12 +673,15 @@
                 $('.dropdown-alerts').empty();
                 $.each(data, function(i, elem) {
                   var titleField = elem.fields.title ? elem.fields.title : elem.fields.description;
-                  var desc = titleField.length < 50 ? titleField : jQuery.trim(titleField).substring(0,50).trim(this) + '...';
+                  var display_title = titleField.length < 50 ? titleField : jQuery.trim(titleField).substring(0,50).trim(this) + '...';
+                  var description = elem.fields.description
+                  var display_description = description ? description.length < 100 ? description : jQuery.trim(description).substring(0,100).trim(this) + '...': ''
                   var dropdown_alert = "alert-list" + i;
                   $('.dropdown-alerts').append('<li><div style="padding: 3px 20px;"><i class="fa fa-' + htmlEscape(elem.fields.icon) +
-                                                ' fa-fw"></i><a href="' + htmlEscape(elem.fields.url) + '" id=' + dropdown_alert + '></a><span class="pull-right text-muted small">' +
+                                                ' fa-fw"></i><a href="' + htmlEscape(elem.fields.url) + '" id=' + dropdown_alert + 
+                                                ' title="' + htmlEscape(display_description) + '"></a><span class="pull-right text-muted small">' +
                                                htmlEscape(elem.fields.source) + '</span></div></li><li class="divider"></li>');
-                  $("#" + dropdown_alert).text(desc);
+                  $("#" + dropdown_alert).text(display_title);
                 });
                 $('.dropdown-alerts').append('<li><a class="text-center" href="{% url "alerts" %}"><strong>See All Alerts </strong>' +
                                              '<i class="fa fa-angle-right"></i></a></li>');
@@ -650,6 +689,18 @@
                                            '<i class="fa fa-angle-right"></i></a></li>');
             });
         }
+
+        $("#id_jiraform-jira_issue").on('paste', function(e) {
+            var clipboardData = e.clipboardData || e.originalEvent.clipboardData || window.clipboardData;
+            var pastedData = clipboardData.getData('text');
+
+            $this = $(this)
+            // if someone entered/pasted a full URL, we strip evertyhing until last '/'
+            setTimeout(function (elem) {
+                $this.val($this.val().substring($this.val().lastIndexOf("/") + 1));
+            }, 100);
+        });
+
     });
 </script>
 

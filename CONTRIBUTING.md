@@ -16,15 +16,21 @@ Here are a few things to keep in mind when making changes to DefectDojo.
 
 Please use [these test scripts](./tests) to test your changes. These are the exact scripts we run in our [Travis Build](https://travis-ci.org/OWASP/django-DefectDojo).
 
-For changes that require additional settings, settings.dist.py is the file you want to change. Settings.py is created by setup.bash from settings.dist.py
+For changes that require additional settings, settings.dist.py is the file you want to change. This file is loaded by the default settings.py.
 
 ## Python3 version
 For compatibility reasons, the code in dev branch should be python3.5 compliant.
 
 ## Logging
-Logging is configured in `settings.dist.py`.
+Logging is configured in `settings.dist.py` and can be tuned using a `local_settings.py`, see [template for local_settings.py](dojo/settings/template-local_settings)
+Specific logger can be added. For example to activate logs related to the deduplication, change the level from DEBUG to INFO in `local_settings.py`:
 
-Specific logger can be added. For example to activate logs related to the deduplication, change the level from DEBUG to INFO in:
+
+```
+LOGGING['loggers']['dojo.specific-loggers.deduplication']['level'] = 'DEBUG'
+```
+
+Or you can modify `settings.dist.py` directly, but this adds the risk of having conflicts when `settings.dist.py` gets updated upstream. 
 
 ```
           'dojo.specific-loggers.deduplication': {

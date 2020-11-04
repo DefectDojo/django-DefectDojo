@@ -48,6 +48,14 @@ function mark_failed_celery() {
     celery_failures=true
 }
 
+test="Running Product type integration tests"
+echo "Running: $test"
+if python3 tests/Regulations_unit_test.py ; then
+    success $test
+else
+    fail $test
+fi
+
 test="Product type integration tests"
 echo "Running: $test"
 if python3 tests/Product_type_unit_test.py ; then
@@ -59,6 +67,14 @@ fi
 test="Product integration tests"
 echo "Running: $test"
 if python3 tests/Product_unit_test.py ; then 
+    success $test
+else
+    fail $test
+fi
+
+test="Notes integration tests"
+echo "Running: $test"
+if python3 tests/Notes_unit_test.py ; then
     success $test
 else
     fail $test

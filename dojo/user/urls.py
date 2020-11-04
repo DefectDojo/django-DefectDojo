@@ -14,7 +14,6 @@ urlpatterns = [
     url(r'^alerts/json$', views.alerts_json, name='alerts_json'),
     url(r'^alerts/count$', views.alertcount, name='alertcount'),
     url(r'^delete_alerts$', views.delete_alerts, name='delete_alerts'),
-    url(r'^migrate_alerts$', views.migrate_alerts, name='migrate_alerts'),
     url(r'^profile$', views.view_profile, name='view_profile'),
     url(r'^change_password$', views.change_password,
         name='change_password'),

@@ -1,8 +1,6 @@
 {% extends "base.html" %}
 {% load static from staticfiles %}
-{% block add_css %}
-    <link rel="stylesheet" href="{% static "chosen-bootstrap/chosen.bootstrap.min.css" %}">
-{% endblock %}
+
 {% block add_styles %}
 .chosen-container {
     width: 70% !important;
@@ -17,6 +15,21 @@
     {%  if jform %}
         <h4> JIRA </h4>
         <hr>
+		<div class="form-group">
+			<label class="col-sm-2 control-label" for="id_jira_issue">JIRA URL
+				<i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="JIRA URL connected to this product or engagment" data-placement="right" data-container="body" data-original-title="" title="">
+				</i>
+			</label>
+			<div class="col-sm-10 form-control-static">
+				{% if product_tab.product.jira_conf %}
+					<a href="{{ product_tab.product.jira_conf.url }}/browse/{{ product_tab.product.jira_pkey.project_key }}"
+					target="_blank"> {{ product_tab.product.jira_conf.url }}/browse/{{ product_tab.product.jira_pkey.project_key }} </a>
+				{% else %}
+				None
+				{% endif %}
+			</div>
+		</div>
+
         {% include "dojo/form_fields.html" with form=jform %}
     {% endif %}
 	<div class="form-group">
@@ -35,6 +48,7 @@
 	<li><b>Anchore-Engine</b> - Anchore-CLI JSON vulnerability report format.</li>
 	<li><b>Anchore Enterprise Policy Check</b> - Anchore-CLI JSON policy check report format.</li>
 	<li><b>Aqua Scan</b> - Aqua scan JSON report format.</li>
+	<li><b>AWS Security Hub</b> - AWS Security Hub exports in JSON format.</li>
 	<li><b>AWS Scout2 Scanner</b> - JS file in scout2-report/inc-awsconfig/aws_config.js.</li>
 	<li><b>AWS Prowler Scanner</b> - Prowler file can be imported as a CSV file (-M csv).</li>
 	<li><b>Arachni Scanner</b> - Arachni JSON report format.</li>
@@ -50,6 +64,7 @@
 	<li><b>Burp Enterprise Scam</b> - Import Burp Enterprise Edition findings in HTML format</li>
 	<li><b>Brakeman Scan</b> - Import Brakeman Scanner findings in JSON format.</li>
 	<li><b>CCVS Report</b> - Import CCVS Report vulnerabilities in JSON format.</li>
+	<li><b>Checkov Scan</b> - Import JSON reports of Infrastructure as Code vulnerabilities.</li>
 	<li><b>Clair Scan</b> - Import JSON reports of Docker image vulnerabilities.</li>
 	<li><b>Clair Klar Scan</b> -  Import JSON reports of Docker image vulnerabilities from clair klar client.</li>
 	<li><b>Contrast Scanner</b> - CSV Report</b></li>
@@ -62,6 +77,7 @@
 	<li><b>DawnScanner</b> - Dawnscanner (-j) output file can be imported in JSON format.</li>
 	<li><b>Dependency Check</b> - OWASP Dependency Check output can be imported in Xml format.</li>
 	<li><b>Dependency Track</b> - The Finding Packaging Format (FPF) from OWASP Dependency Track can be imported in JSON format. See <a href="https://docs.dependencytrack.org/integrations/file-formats/">here</a> for more info on this JSON format.</li>
+    <li><b>DrHeader JSON Importer</b> - Import result of DrHeader JSON output.</li>
     <li><b>DSOP Scan</b> - Import XLSX findings from DSOP vulnerability scan pipelines.</li>
 	<li><b>Fortify</b> - Import Findings from XML file format.</li>
 
@@ -76,6 +92,7 @@
 	<li><b>HuskyCI Report</b> - Import HuskyCI Report vulnerabilities in JSON format.</li>
 	<li><b>JFrogXray Scan </b> - Import Xray findings in JSON format.</li>
 	<li><b>Kiuwan Scanner</b> - Import Kiuwan Scan in CSV format. Export as CSV Results on Kiuwan.</li>
+	<li><b>kube-bench Scan</b> - Import JSON reports of Kubernetes CIS benchmark scans.</li>
 	<li><b>Microfocus Webinspect Scanner</b> - Import XML report</li>
 	<li><b>MobSF Scanner </b> - Export a JSON file using the API, api/v1/report_json.</li>
 	<li><b>Mozilla Observatory Scanner</b> - Import JSON report.</li>
@@ -96,6 +113,7 @@
 	<li><b>Qualys Infrastructure Scan (WebGUI XML)</b> - Qualys WebGUI output files can be imported in XML format.</li>
 	<li><b>Qualys Webapp Scan</b> - Qualys WebScan output files can be imported in XML format.</li>
 	<li><b>Retire.js</b> - Retire.js JavaScript scan (--js) output file can be imported in JSON format.</li>
+	<li><b>Risk Recon API Importer</b> - Risk Recon ApI will be accessed to gather finding information. Report format <a href="https://defectdojo.readthedocs.io/en/latest/integrations.html#risk-recon-api-importer">here</a>.</li>
 	<li><b>Safety Scan</b> - Safety scan (--json) output file can be imported in JSON format.</li>
 	<li><b>SKF Scan</b> - Output of SKF Sprint summary export.</li>
 	<li><b>Snyk</b> - Snyk output file (snyk test --json > snyk.json) can be imported in JSON format.</li>
@@ -106,7 +124,8 @@
 	<li><b>SpotBugs</b> - XML report of textui cli.</li>
 	<li><b>SSL Labs</b> - JSON Output of ssllabs-scan cli.</li>
 	<li><b>Sslscan</b> - Import XML output of sslscan report.</li>
-	<li><b>Sslyze Scanner</b> - XML Report of Sslyze-scan</li>
+	<li><b>Sslyze Scan</b> - Import XML report of SSLyze version 2 scan.</li>
+	<li><b>SSLyze 3 Scan (JSON)</b> - Import JSON report of SSLyze version 3 scan.</li>
 	<li><b>Testssl Scanner</b> - Import CSV output of testssl scan report.</li>
 	<li><b>Trivy Scan</b> - Import trivy JSON scan report.</li>
 	<li><b>Trufflehog</b> - JSON Output of Trufflehog.</li>
@@ -131,7 +150,6 @@
     </div>
 {% endblock %}
 {% block postscript %}
-	<script type="application/javascript" src="{% static "chosen/chosen.jquery.min.js" %}"></script>
 	<script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
 	<script type="application/javascript" src="{% static "easymde/dist/easymde.min.js" %}"></script>
 	<script type="text/javascript" src="{% static "admin/js/jquery.init.js" %}"></script>
