@@ -40,11 +40,12 @@ def attach_extras(endpoints, requests, responses, finding, date, qid):
         finding = Finding()
         finding.unsaved_req_resp = list()
         finding.unsaved_endpoints = list()
-        finding.date = date
+        if date is not None:
+            finding.date = date
         finding.vuln_id_from_tool = str(qid)
     else:
         # Finding already exists
-        if finding.date > date:
+        if date is not None and finding.date > date:
             finding.date = date
 
     for endpoint in endpoints:
@@ -146,10 +147,13 @@ def get_vulnerabilities(vulnerabilities, is_info=False, is_app_report=False):
             raw_finding_date = vuln.findtext('DETECTION_DATE')
 
         # Qualys uses a non-standard date format.
-        if raw_finding_date.endswith("GMT"):
-            finding_date = datetime.strptime(raw_finding_date, "%d %b %Y %I:%M%p GMT")
+        if raw_finding_date is not None:
+            if raw_finding_date.endswith("GMT"):
+                finding_date = datetime.strptime(raw_finding_date, "%d %b %Y %I:%M%p GMT")
+            else:
+                finding_date = datetime.strptime(raw_finding_date, "%d %b %Y %I:%M%p GMT%z")
         else:
-            finding_date = datetime.strptime(raw_finding_date, "%d %b %Y %I:%M%p GMT%z")
+            finding_date = None
 
         finding = findings.get(qid, None)
         findings[qid] = attach_extras(urls, req_resps[0], req_resps[1], finding, finding_date, qid)
