@@ -21,6 +21,7 @@ from dojo.forms import JIRAForm, DeleteJIRAConfForm, ExpressJIRAForm
 from dojo.models import User, JIRA_Conf, JIRA_Issue, Notes, Risk_Acceptance
 from dojo.utils import add_breadcrumb, get_system_setting
 from dojo.notifications.helper import create_notification
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
