@@ -17,17 +17,17 @@ class SemgrepJSONParser(object):
 
             for item in results:
                 title = item['check_id']
-                f = SemgrepJSONResult(item['extra'], item['path'], item['start'], item['end'])
+                semgrep_result = SemgrepJSONResult(item['extra'], item['path'], item['start'], item['end'])
 
                 findingItem = Finding(
-                    title=f.title,
-                    severity=f.severity,
-                    numerical_severity=Finding.get_numerical_severity(f.severity),
-                    description=f.message,
+                    title=semgrep_result.title,
+                    severity=semgrep_result.severity,
+                    numerical_severity=Finding.get_numerical_severity(semgrep_result.severity),
+                    description=semgrep_result.message,
                     mitigation='N/A',
                     file_path=item['path'],
-                    cwe=f.cwe,
-                    line=f.start,
+                    cwe=semgrep_result.cwe,
+                    line=semgrep_result.start,
                     url='N/A',
                     impact='N/A',
                     static_finding=True,
