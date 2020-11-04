@@ -41,7 +41,7 @@ def attach_extras(endpoints, requests, responses, finding, date, qid):
         finding.unsaved_req_resp = list()
         finding.unsaved_endpoints = list()
         finding.date = date
-        finding.unique_id_from_tool = str(qid)
+        finding.vuln_id_from_tool = str(qid)
     else:
         # Finding already exists
         if finding.date > date:

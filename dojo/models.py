@@ -1695,6 +1695,11 @@ class Finding(models.Model):
                                            max_length=500,
                                            verbose_name="Unique ID from tool",
                                            help_text="Vulnerability technical id from the source tool. Allows to track unique vulnerabilities.")
+    vuln_id_from_tool = models.CharField(null=True,
+                                         blank=True,
+                                         max_length=500,
+                                         verbose_name="Vulnerability ID from tool",
+                                         help_text="Non-unique technical id from the source tool associated with the vulnerability type.")
     sast_source_object = models.CharField(null=True,
                                           blank=True,
                                           max_length=500,
