@@ -103,7 +103,7 @@ def create_notification_message(event, user, notification_type, *args, **kwargs)
             kwargs["description"] = create_description(event, *args, **kwargs)
             notification_message = render_to_string('notifications/other.tpl', kwargs)
 
-    return notification_message
+    return notification_message if notification_message else ''
 
 
 def process_notifications(event, notifications=None, *args, **kwargs):
@@ -272,7 +272,7 @@ def send_alert_notification(event, user=None, *args, **kwargs):
         alert = Alerts(
             user_id=user,
             title=kwargs.get('title')[:100],
-            description=create_notification_message(event, user, 'alert', *args, **kwargs),
+            description=create_notification_message(event, user, 'alert', *args, **kwargs)[:2000],
             url=kwargs.get('url', reverse('alerts')),
             icon=icon[:25],
             source=Notifications._meta.get_field(event).verbose_name.title()[:100]
