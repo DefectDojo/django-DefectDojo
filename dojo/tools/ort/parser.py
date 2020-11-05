@@ -128,7 +128,7 @@ def get_item(model, test):
     desc = f"""root projects: {', '.join(model.projects)}
 source  : {model.rule_violation['license_source']}
 license : {model.license_id}
-package : {model.pkg['id']} 
+package : {model.pkg['id']}
 message : {model.rule_violation['message']}
 how to fix : {model.rule_violation['how_to_fix']}"""
 
