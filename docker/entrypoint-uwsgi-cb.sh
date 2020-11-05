@@ -28,7 +28,7 @@ if [ "${DD_LOGGING_FORMAT}" = "json_console" ]; then
     cat >> $UWSGI_INIFILE <<'EOF'
 ; logging as json does not offer full tokenization for requests, everything will be in message.
 logger = stdio
-log-encoder = json {"timestamp":${strftime:%%Y-%%m-%%d %%H:%%M:%%S%%z}, "source": "uwsgi", "message":"${msg}"}
+log-encoder = json {"timestamp":"${strftime:%%Y-%%m-%%d %%H:%%M:%%S%%z}", "source": "uwsgi", "message":"${msg}"}
 log-encoder = nl
 EOF
 fi
