@@ -4,6 +4,7 @@ import hashlib
 from collections import namedtuple
 from dojo.models import Finding
 
+
 # Oss Review Toolkit Parser
 class OrtParser(object):
     def __init__(self, json_output, test):
