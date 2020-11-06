@@ -3,6 +3,7 @@ import binascii
 import os
 import hashlib
 import io
+import json
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 from calendar import monthrange
@@ -1465,7 +1466,9 @@ def add_jira_issue(find, push_to_jira):
 
 
 def jira_meta(jira, jpkey):
-    return jira.createmeta(projectKeys=jpkey.project_key, issuetypeNames=jpkey.conf.default_issue_type, expand="projects.issuetypes.fields")
+    meta = jira.createmeta(projectKeys=jpkey.project_key, issuetypeNames=jpkey.conf.default_issue_type, expand="projects.issuetypes.fields")
+    logger.debug("jira_meta: %s", json.dumps(meta, indent=4))
+    return meta
 
 
 def jira_attachment(finding, jira, issue, file, jira_filename=None):
