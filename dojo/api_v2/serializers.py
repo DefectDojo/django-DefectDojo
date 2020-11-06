@@ -347,6 +347,9 @@ class ProductTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product_Type
         fields = '__all__'
+        extra_kwargs = {
+            'authorized_users': {'queryset': User.objects.exclude(is_staff=True).exclude(is_active=False)}
+        }
 
 
 class EngagementSerializer(TaggitSerializer, serializers.ModelSerializer):
@@ -635,10 +638,44 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     age = serializers.IntegerField(read_only=True)
     sla_days_remaining = serializers.IntegerField(read_only=True)
     finding_meta = FindingMetaSerializer(read_only=True, many=True)
+    related_fields = serializers.SerializerMethodField()
 
     class Meta:
         model = Finding
         fields = '__all__'
+
+    def get_related_fields(self, obj):
+        query_params = self.context['request'].query_params
+        if 'related_fields' in query_params and query_params['related_fields'] == 'true':
+            related_fields = {
+                'product_type': {
+                    'id': obj.test.engagement.product.prod_type.id,
+                    'name': obj.test.engagement.product.prod_type.name
+                },
+                'product': {
+                    'id': obj.test.engagement.product.id,
+                    'name': obj.test.engagement.product.name
+                },
+                'engagement': {
+                    'id': obj.test.engagement.id,
+                    'name': obj.test.engagement.name,
+                    'branch': obj.test.engagement.branch_tag
+                },
+                'test': {
+                    'id': obj.test.id,
+                    'title': obj.test.title
+                },
+                'test_type': {
+                    'id': obj.test.test_type.id,
+                    'name': obj.test.test_type.name
+                },
+                'environment': {
+                    'id': obj.test.environment.id,
+                    'name': obj.test.environment.name
+                },
+                'display_status': obj.status()
+            }
+            return related_fields
 
     # Overriding this to push add Push to JIRA functionality
     def update(self, instance, validated_data):
@@ -925,8 +962,8 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     for req_resp in item.unsaved_req_resp:
                         burp_rr = BurpRawRequestResponse(
                             finding=item,
-                            burpRequestBase64=req_resp["req"],
-                            burpResponseBase64=req_resp["resp"])
+                            burpRequestBase64=base64.b64encode(req_resp["req"].encode("utf-8")),
+                            burpResponseBase64=base64.b64encode(req_resp["resp"].encode("utf-8")))
                         burp_rr.clean()
                         burp_rr.save()
 
@@ -934,8 +971,8 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                         item.unsaved_response is not None):
                     burp_rr = BurpRawRequestResponse(
                         finding=item,
-                        burpRequestBase64=item.unsaved_request,
-                        burpResponseBase64=item.unsaved_response)
+                        burpRequestBase64=base64.b64encode(item.unsaved_request.encode()),
+                        burpResponseBase64=base64.b64encode(item.unsaved_response.encode()))
                     burp_rr.clean()
                     burp_rr.save()
 
@@ -947,12 +984,19 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                         query=endpoint.query,
                         fragment=endpoint.fragment,
                         product=test.engagement.product)
-
+                    eps, created = Endpoint_Status.objects.get_or_create(
+                            finding=item,
+                            endpoint=ep)
+                    ep.endpoint_status.add(eps)
+                    item.endpoint_status.add(eps)
                     item.endpoints.add(ep)
-
                 if endpoint_to_add:
                     item.endpoints.add(endpoint_to_add)
-
+                    eps, created = Endpoint_Status.objects.get_or_create(
+                            finding=item,
+                            endpoint=endpoint_to_add)
+                    ep.endpoint_status.add(eps)
+                    item.endpoint_status.add(eps)
                 if item.unsaved_tags is not None:
                     item.tags = item.unsaved_tags
 
@@ -1173,19 +1217,20 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                         for req_resp in item.unsaved_req_resp:
                             burp_rr = BurpRawRequestResponse(
                                 finding=finding,
-                                burpRequestBase64=req_resp['req'],
-                                burpResponseBase64=req_resp['resp'])
+                                burpRequestBase64=base64.b64encode(req_resp["req"].encode("utf-8")),
+                                burpResponseBase64=base64.b64encode(req_resp["resp"].encode("utf-8")))
                             burp_rr.clean()
                             burp_rr.save()
 
                     if item.unsaved_request and item.unsaved_response:
                         burp_rr = BurpRawRequestResponse(
                             finding=finding,
-                            burpRequestBase64=item.unsaved_request,
-                            burpResponseBase64=item.unsaved_response)
+                            burpRequestBase64=base64.b64encode(item.unsaved_request.encode()),
+                            burpResponseBase64=base64.b64encode(item.unsaved_response.encode()))
                         burp_rr.clean()
                         burp_rr.save()
 
+                # for existing findings: make sure endpoints are present or created
                 if finding:
                     finding_count += 1
                     for endpoint in item.unsaved_endpoints:
@@ -1196,9 +1241,19 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                             query=endpoint.query,
                             fragment=endpoint.fragment,
                             product=test.engagement.product)
+                        eps, created = Endpoint_Status.objects.get_or_create(
+                            finding=finding,
+                            endpoint=ep)
+                        ep.endpoint_status.add(eps)
                         finding.endpoints.add(ep)
+                        finding.endpoint_status.add(eps)
                     if endpoint_to_add:
+                        eps, created = Endpoint_Status.objects.get_or_create(
+                            finding=finding,
+                            endpoint=endpoint_to_add)
                         finding.endpoints.add(endpoint_to_add)
+                        endpoint_to_add.endpoint_status.add(eps)
+                        finding.endpoint_status.add(eps)
                     if item.unsaved_tags:
                         finding.tags = item.unsaved_tags
 

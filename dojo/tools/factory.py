@@ -64,7 +64,8 @@ from dojo.tools.microfocus_webinspect.parser import MicrofocusWebinspectXMLParse
 from dojo.tools.wpscan.parser import WpscanJSONParser
 from dojo.tools.sslscan.parser import SslscanXMLParser
 from dojo.tools.jfrogxray.parser import XrayJSONParser
-from dojo.tools.sslyze.parser import SslyzeXmlParser
+from dojo.tools.sslyze.parser_json import SSLyzeJSONParser
+from dojo.tools.sslyze.parser_xml import SSLyzeXMLParser
 from dojo.tools.testssl.parser import TestsslCSVParser
 from dojo.tools.hadolint.parser import HadolintParser
 from dojo.tools import SCAN_SONARQUBE_API
@@ -241,7 +242,9 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
     elif scan_type == 'JFrog Xray Scan':
         parser = XrayJSONParser(file, test)
     elif scan_type == 'Sslyze Scan':
-        parser = SslyzeXmlParser(file, test)
+        parser = SSLyzeXMLParser(file, test)
+    elif scan_type == 'SSLyze 3 Scan (JSON)':
+        parser = SSLyzeJSONParser(file, test)
     elif scan_type == 'Testssl Scan':
         parser = TestsslCSVParser(file, test)
     elif scan_type == 'Hadolint Dockerfile check':

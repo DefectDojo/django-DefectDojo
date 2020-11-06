@@ -11,7 +11,7 @@ from google.oauth2 import service_account
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
-from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.exceptions import ValidationError
 from django.urls import reverse
 from django.db.models import Q, QuerySet, Count
 from django.http import HttpResponseRedirect, Http404, HttpResponse
@@ -32,7 +32,6 @@ from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting, \
     Product_Tab, max_safe, is_scan_file_too_large, add_jira_issue, get_words_for_field
 from dojo.notifications.helper import create_notification
-from dojo.tasks import add_jira_issue_task
 from dojo.finding.views import find_available_notetypes
 from functools import reduce
 from dojo.finding.views import finding_link_jira, finding_unlink_jira
@@ -43,14 +42,11 @@ logger = logging.getLogger(__name__)
 parse_logger = logging.getLogger('dojo')
 
 
+@user_must_be_authorized(Test, 'view', 'tid')
 def view_test(request, tid):
     test = get_object_or_404(Test, pk=tid)
     prod = test.engagement.product
-    auth = request.user.is_staff or request.user in prod.authorized_users.all()
     tags = Tag.objects.usage_for_model(Finding)
-    if not auth:
-        # will render 403
-        raise PermissionDenied
     notes = test.notes.all()
     note_type_activation = Note_Type.objects.filter(is_active=True).count()
     if note_type_activation:
@@ -178,6 +174,7 @@ def prefetch_for_findings(findings):
         prefetched_findings = prefetched_findings.annotate(active_endpoint_count=Count('endpoint_status__id', filter=Q(endpoint_status__mitigated=False)))
         prefetched_findings = prefetched_findings.annotate(mitigated_endpoint_count=Count('endpoint_status__id', filter=Q(endpoint_status__mitigated=True)))
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__authorized_users')
+        prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__prod_type__authorized_users')
     else:
         logger.debug('unable to prefetch because query was already executed')
 
@@ -357,11 +354,19 @@ def add_findings(request, tid):
             if new_finding.false_p or new_finding.active is False:
                 new_finding.mitigated = timezone.now()
                 new_finding.mitigated_by = request.user
+                new_finding.is_Mitigated = True
             create_template = new_finding.is_template
             # always false now since this will be deprecated soon in favor of new Finding_Template model
             new_finding.is_template = False
             new_finding.save(dedupe_option=False, push_to_jira=False)
-            new_finding.endpoints.set(form.cleaned_data['endpoints'])
+            for ep in form.cleaned_data['endpoints']:
+                eps, created = Endpoint_Status.objects.get_or_create(
+                    finding=new_finding,
+                    endpoint=ep)
+                ep.endpoint_status.add(eps)
+
+                new_finding.endpoints.add(ep)
+                new_finding.endpoint_status.add(eps)
 
             # Push to jira?
             push_to_jira = False
@@ -508,13 +513,21 @@ def add_temp_finding(request, tid, fid):
             if new_finding.false_p or new_finding.active is False:
                 new_finding.mitigated = timezone.now()
                 new_finding.mitigated_by = request.user
+                new_finding.is_Mitigated = True
 
             create_template = new_finding.is_template
             # is template always False now in favor of new model Finding_Template
             # no further action needed here since this is already adding from template.
             new_finding.is_template = False
             new_finding.save(dedupe_option=False, false_history=False)
-            new_finding.endpoints.set(form.cleaned_data['endpoints'])
+            for ep in form.cleaned_data['endpoints']:
+                eps, created = Endpoint_Status.objects.get_or_create(
+                    finding=new_finding,
+                    endpoint=ep)
+                ep.endpoint_status.add(eps)
+
+                new_finding.endpoints.add(ep)
+                new_finding.endpoint_status.add(eps)
             new_finding.save(false_history=True)
             tags = request.POST.getlist('tags')
             t = ", ".join('"{0}"'.format(w) for w in tags)
@@ -522,10 +535,7 @@ def add_temp_finding(request, tid, fid):
             if 'jiraform-push_to_jira' in request.POST:
                 jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_pkey=test.engagement.product.jira_pkey)
                 if jform.is_valid():
-                    if Dojo_User.wants_block_execution(request.user):
-                        add_jira_issue(new_finding, jform.cleaned_data.get('push_to_jira'))
-                    else:
-                        add_jira_issue_task.delay(new_finding, jform.cleaned_data.get('push_to_jira'))
+                    add_jira_issue(new_finding, jform.cleaned_data.get('push_to_jira'))
 
             messages.add_message(request,
                                  messages.SUCCESS,

@@ -6,6 +6,7 @@ target_dir="${0%/*}/.."
 override_link='docker-compose.override.yml'
 override_file_dev='docker-compose.override.dev.yml'
 override_file_unit_tests='docker-compose.override.unit_tests.yml'
+override_file_unit_tests_cicd='docker-compose.override.unit_tests_cicd.yml'
 override_file_integration_tests='docker-compose.override.integration_tests.yml'
 override_file_ptvsd='docker-compose.override.ptvsd.yml'
 
@@ -88,6 +89,19 @@ function set_unit_tests {
     fi
 }
 
+function set_unit_tests_cicd {
+    get_current
+    if [ "${current_env}" != unit_tests_cicd ]
+    then
+        rm -f ${override_link}
+        ln -s ${override_file_unit_tests_cicd} ${override_link}
+        docker-compose down
+        echo "Now using 'unit_tests_cicd' configuration."
+    else
+        echo "Already using 'unit_tests_cicd' configuration."
+    fi
+}
+
 function set_integration_tests {
     get_current
     if [ "${current_env}" != integration_tests ]
@@ -117,7 +131,7 @@ function set_ptvsd {
 # Change directory to allow working with relative paths.
 cd ${target_dir}
 
-if [ ${#} -eq 1 ] && [[ 'dev unit_tests integration_tests release ptvsd' =~ "${1}" ]]
+if [ ${#} -eq 1 ] && [[ 'dev unit_tests unit_tests_cicd integration_tests release ptvsd' =~ "${1}" ]]
 then
     set_"${1}"
 else
