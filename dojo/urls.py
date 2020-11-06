@@ -227,3 +227,7 @@ if hasattr(settings, 'DJANGO_ADMIN_ENABLED'):
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# sometimes urlpatterns needed be added from local_settings.py to avoid having to modify core defect dojo files
+if hasattr(settings, 'EXTRA_URL_PATTERNS'):
+    urlpatterns += settings.EXTRA_URL_PATTERNS
