@@ -186,11 +186,12 @@ jobs:
              kubectl get pods
              OUT=$(kubectl run  curl --quiet=true --image=curlimages/curl:7.73.0 \
                 --overrides='{ "apiVersion": "v1", "spec": { "imagePullSecrets": [{"name": "defectdojoregistrykey"}] } }' \
-                --restart=Never -it --rm -- -m 20 -I --header "Host: $DD_HOSTNAME" http://`kubectl get service defectdojo-django -o json \
+                --restart=Never -i --rm -- -m 20 -s -I --header "Host: $DD_HOSTNAME" http://`kubectl get service defectdojo-django -o json \
                |  jq -r '.spec.clusterIP'`/login?next=/)
              CR=`echo $OUT | egrep "^HTTP" | cut -d' ' -f2`
              echo $CR
              if [[ $CR -ne 200 ]]; then
+                echo "Curl Output: $OUT"
                 echo `kubectl logs  -l defectdojo.org/component=django -c uwsgi`
                 echo "ERROR: cannot display login screen; got HTTP code $CR"
                 exit 1
