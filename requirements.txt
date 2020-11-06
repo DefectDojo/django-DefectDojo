@@ -65,3 +65,5 @@ packageurl-python==0.9.3
 django-crum==0.7.7
 JSON-log-formatter==0.3.0
 django-split-settings==1.0.1
+django-debug-toolbar==3.1.1
+django-debug-toolbar-request-history==0.1.3
