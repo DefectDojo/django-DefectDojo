@@ -27,6 +27,10 @@ local_tz = timezone(get_system_setting('time_zone'))
 SEVERITY_CHOICES = (('Info', 'Info'), ('Low', 'Low'), ('Medium', 'Medium'),
                     ('High', 'High'), ('Critical', 'Critical'))
 BOOLEAN_CHOICES = (('false', 'No'), ('true', 'Yes'),)
+ENGAGEMENT_STATUS_CHOICES = (('Not Started', 'Not Started'), ('Blocked', 'Blocked'),
+                             ('Cancelled', 'Cancelled'), ('Completed', 'Completed'),
+                             ('In Progress', 'In Progress'), ('On Hold', 'On Hold'),
+                             ('Waiting for Resource', 'Waiting for Resource'))
 
 EARLIEST_FINDING = None
 
@@ -307,7 +311,8 @@ class EngagementFilter(DojoFilter):
     prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.all().order_by('name'),
         label="Product Type")
-
+    engagement__status = MultipleChoiceFilter(choices=ENGAGEMENT_STATUS_CHOICES,
+                                              label="Status")
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
@@ -556,6 +561,9 @@ class OpenFindingFilter(DojoFilter):
     test__engagement__product = ModelMultipleChoiceFilter(
         queryset=Product.objects.all(),
         label="Product")
+    test__engagement = ModelMultipleChoiceFilter(
+        queryset=Engagement.objects.all(),
+        label="Engagement")
     test__engagement__risk_acceptance = ReportRiskAcceptanceFilter(
         label="Risk Accepted")
 
@@ -619,7 +627,9 @@ class OpenFindingFilter(DojoFilter):
         # Don't show the product filter on the product finding view
         if self.pid:
             del self.form.fields['test__engagement__product']
-
+            self.form.fields['test__engagement'].queryset = Engagement.objects.filter(
+                product_id=self.pid
+            ).all()
 
 class OpenFindingSuperFilter(OpenFindingFilter):
     reporter = ModelMultipleChoiceFilter(
@@ -643,6 +653,9 @@ class ClosedFindingFilter(DojoFilter):
     test__engagement__product = ModelMultipleChoiceFilter(
         queryset=Product.objects.all(),
         label="Product")
+    test__engagement = ModelMultipleChoiceFilter(
+        queryset=Engagement.objects.all(),
+        label="Engagement")
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.all(),
         label="Product Type")
@@ -693,6 +706,9 @@ class ClosedFindingFilter(DojoFilter):
                    'last_reviewed_by', 'created', 'jira_creation', 'jira_change']
 
     def __init__(self, *args, **kwargs):
+        self.pid = None
+        if 'pid' in kwargs:
+            self.pid = kwargs.pop('pid')
         super(ClosedFindingFilter, self).__init__(*args, **kwargs)
         cwe = dict()
         cwe = dict([cwe, cwe]
@@ -700,6 +716,11 @@ class ClosedFindingFilter(DojoFilter):
                    if type(cwe) is int and cwe is not None and cwe > 0)
         cwe = collections.OrderedDict(sorted(cwe.items()))
         self.form.fields['cwe'].choices = list(cwe.items())
+
+        if self.pid:
+            self.form.fields['test__engagement'].queryset = Engagement.objects.filter(
+                product_id=self.pid
+            ).all()
 
 
 class ClosedFindingSuperFilter(ClosedFindingFilter):
@@ -723,6 +744,9 @@ class AcceptedFindingFilter(DojoFilter):
     test__engagement__product = ModelMultipleChoiceFilter(
         queryset=Product.objects.all(),
         label="Product")
+    test__engagement = ModelMultipleChoiceFilter(
+        queryset=Engagement.objects.all(),
+        label="Engagement")
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.all(),
         label="Product Type")
@@ -759,6 +783,9 @@ class AcceptedFindingFilter(DojoFilter):
                    'last_reviewed', 'o', 'jira_creation', 'jira_change']
 
     def __init__(self, *args, **kwargs):
+        self.pid = None
+        if 'pid' in kwargs:
+            self.pid = kwargs.pop('pid')
         super(AcceptedFindingFilter, self).__init__(*args, **kwargs)
         cwe = dict()
         cwe = dict([finding.cwe, finding.cwe]
@@ -766,6 +793,11 @@ class AcceptedFindingFilter(DojoFilter):
                    if type(finding.cwe) is int and finding.cwe is not None and finding.cwe > 0 and finding.cwe not in cwe)
         cwe = collections.OrderedDict(sorted(cwe.items()))
         self.form.fields['cwe'].choices = list(cwe.items())
+
+        if self.pid:
+            self.form.fields['test__engagement'].queryset = Engagement.objects.filter(
+                product_id=self.pid
+            ).all()
 
 
 class AcceptedFindingSuperFilter(AcceptedFindingFilter):
@@ -1102,10 +1134,18 @@ class ProductMetricsFindingFilter(FilterSet):
                 args[0]._mutable = True
                 args[0]['date'] = 8
                 args[0]._mutable = False
+        self.pid = None
+        if 'pid' in kwargs:
+            self.pid = kwargs.pop('pid')
         super(ProductMetricsFindingFilter, self).__init__(*args, **kwargs)
         self.form.fields['severity'].choices = self.queryset.order_by(
             'numerical_severity'
         ).values_list('severity', 'severity').distinct()
+
+        if self.pid:
+            self.form.fields['test__engagement'].queryset = Engagement.objects.filter(
+                product_id=self.pid
+            ).all()
 
     class Meta:
         model = Finding
