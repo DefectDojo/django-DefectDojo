@@ -90,7 +90,7 @@ def url_shortner(value):
     if url.path:
         return_value = url.path
         if len(return_value) == 1:
-            return_value = value
+            return_value = str(value)
     if len(str(return_value)) > 50:
         return_value = "..." + return_value[50:]
 
