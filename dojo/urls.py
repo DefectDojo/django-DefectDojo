@@ -109,9 +109,11 @@ v2_api.register(r'engagements', EngagementViewSet)
 v2_api.register(r'development_environments', DevelopmentEnvironmentViewSet)
 v2_api.register(r'finding_templates', FindingTemplatesViewSet)
 v2_api.register(r'findings', FindingViewSet)
-v2_api.register(r'jira_configurations', JiraConfigurationsViewSet)
+v2_api.register(r'jira_configurations', JiraInstanceViewSet)  # backwards compatibility
+v2_api.register(r'jira_instances', JiraInstanceViewSet)
 v2_api.register(r'jira_finding_mappings', JiraIssuesViewSet)
-v2_api.register(r'jira_product_configurations', JiraViewSet)
+v2_api.register(r'jira_product_configurations', JiraProjectViewSet)  # backwards compatibility
+v2_api.register(r'jira_projects', JiraProjectViewSet)
 v2_api.register(r'products', ProductViewSet)
 v2_api.register(r'product_types', ProductTypeViewSet)
 v2_api.register(r'scan_settings', ScanSettingsViewSet)

@@ -2058,8 +2058,8 @@ class Finding(models.Model):
 
     def jira_conf(self):
         try:
-            jpkey = JIRA_PKey.objects.get(product=self.test.engagement.product)
-            jconf = jpkey.conf
+            jira_project = JIRA_Project.objects.get(product=self.test.engagement.product)
+            jconf = jira_project.jira_instance
         except:
             jconf = None
             pass
@@ -2559,14 +2559,12 @@ class GITHUB_PKey(models.Model):
         return self.product.name + " | " + self.git_project
 
 
-class JIRA_Conf(models.Model):
+class JIRA_Instance(models.Model):
     configuration_name = models.CharField(max_length=2000, help_text="Enter a name to give to this configuration", default='')
     url = models.URLField(max_length=2000, verbose_name="JIRA URL", help_text="For configuring Jira, view: https://defectdojo.readthedocs.io/en/latest/features.html#jira-integration")
-    #    product = models.ForeignKey(Product)
     username = models.CharField(max_length=2000)
     password = models.CharField(max_length=2000)
-    #    project_key = models.CharField(max_length=200,null=True, blank=True)
-    #    enabled = models.BooleanField(default=True)
+
     if hasattr(settings, 'JIRA_ISSUE_TYPE_CHOICES_CONFIG'):
         default_issue_type_choices = settings.JIRA_ISSUE_TYPE_CHOICES_CONFIG
     else:
@@ -2624,45 +2622,11 @@ class JIRA_Conf(models.Model):
             return 'N/A'
 
 
-class JIRA_Issue(models.Model):
-    jira_id = models.CharField(max_length=200)
-    jira_key = models.CharField(max_length=200)
-    finding = models.OneToOneField(Finding, null=True, blank=True, on_delete=models.CASCADE)
-    engagement = models.OneToOneField(Engagement, null=True, blank=True, on_delete=models.CASCADE)
-
-    def __unicode__(self):
-        text = ""
-        if self.finding:
-            text = self.finding.test.engagement.product.name + " | Finding: " + self.finding.title + ", ID: " + str(self.finding.id)
-        elif self.engagement:
-            text = self.engagement.product.name + " | Engagement: " + self.engagement.name + ", ID: " + str(self.engagement.id)
-        return text + " | Jira Key: " + str(self.jira_key)
-
-    def __str__(self):
-        text = ""
-        if self.finding:
-            text = self.finding.test.engagement.product.name + " | Finding: " + self.finding.title + ", ID: " + str(self.finding.id)
-        elif self.engagement:
-            text = self.engagement.product.name + " | Engagement: " + self.engagement.name + ", ID: " + str(self.engagement.id)
-        return text + " | Jira Key: " + str(self.jira_key)
-
-
-class JIRA_Clone(models.Model):
-    jira_id = models.CharField(max_length=200)
-    jira_clone_id = models.CharField(max_length=200)
-
-
-class JIRA_Details_Cache(models.Model):
-    jira_id = models.CharField(max_length=200)
-    jira_key = models.CharField(max_length=200)
-    jira_status = models.CharField(max_length=200)
-    jira_resolution = models.CharField(max_length=200)
-
-
-class JIRA_PKey(models.Model):
+class JIRA_Project(models.Model):
     project_key = models.CharField(max_length=200, blank=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    conf = models.ForeignKey(JIRA_Conf, verbose_name="JIRA Configuration",
+    engagement = models.ForeignKey(Product, on_delete=models.CASCADE)
+    jira_instance = models.ForeignKey(JIRA_Instance, verbose_name="JIRA Instance",
                              null=True, blank=True, on_delete=models.CASCADE)
     component = models.CharField(max_length=200, blank=True)
     push_all_issues = models.BooleanField(default=False, blank=True,
@@ -2672,11 +2636,51 @@ class JIRA_PKey(models.Model):
     push_notes = models.BooleanField(default=False, blank=True)
     product_jira_sla_notification = models.BooleanField(default=True, blank=False, verbose_name="Send SLA notifications as comment?")
 
+    @property
+    def conf(self):
+        return jira_instance
+
     def __unicode__(self):
-        return self.product.name + " | " + self.project_key
+        return self.product.name + " | " + self.jira_key
 
     def __str__(self):
-        return self.product.name + " | " + self.project_key
+        return self.product.name + " | " + self.jira_key
+
+
+class JIRA_Issue(models.Model):
+    jira_project = models.ForeignKey(JIRA_Project, on_delete=models.SET_NULL)  # just to be sure we don't delete JIRA_Issue if a jira_project is deleted
+    jira_id = models.CharField(max_length=200)
+    jira_key = models.CharField(max_length=200)
+    finding = models.OneToOneField(Finding, null=True, blank=True, on_delete=models.CASCADE)
+    engagement_epic = models.OneToOneField(Engagement, null=True, blank=True, on_delete=models.CASCADE)
+
+    jira_creation = models.DateTimeField(editable=True,
+                                         null=True,
+                                         verbose_name="Jira creation",
+                                         help_text="The date a Jira issue was created from this finding.")
+    jira_change = models.DateTimeField(editable=True,
+                                       null=True,
+                                       verbose_name="Jira change",
+                                       help_text="The date the linked Jira issue was last modified.")
+
+
+    def __unicode__(self):
+        text = ""
+        if self.finding:
+            text = self.finding.test.engagement.product.name + " | Finding: " + self.finding.title + ", ID: " + str(self.finding.id)
+        elif self.engagement:
+            text = self.engagement.product.name + " | Engagement: " + self.engagement.name + ", ID: " + str(self.engagement.id)
+        return text + " | Jira Key: " + str(self.jira_key)
+
+    def __str__(self):
+        text = ""
+        if self.finding:
+            text = self.finding.test.engagement.product.name + " | Finding: " + self.finding.title + ", ID: " + str(self.finding.id)
+        elif self.engagement:
+            text = self.engagement.product.name + " | Engagement: " + self.engagement.name + ", ID: " + str(self.engagement.id)
+        return text + " | Jira Key: " + str(self.jira_key)
+
+
 
 
 NOTIFICATION_CHOICES = (
@@ -3471,8 +3475,8 @@ admin.site.register(ScanSettings)
 admin.site.register(IPScan)
 admin.site.register(Alerts)
 admin.site.register(JIRA_Issue)
-admin.site.register(JIRA_Conf)
-admin.site.register(JIRA_PKey)
+admin.site.register(JIRA_Instance)
+admin.site.register(JIRA_Project)
 admin.site.register(GITHUB_Conf)
 admin.site.register(GITHUB_PKey)
 admin.site.register(Tool_Configuration)

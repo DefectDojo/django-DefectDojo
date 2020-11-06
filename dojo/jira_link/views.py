@@ -17,11 +17,12 @@ from jira import JIRA
 import requests
 
 # Local application/library imports
-from dojo.forms import JIRAForm, DeleteJIRAConfForm, ExpressJIRAForm
-from dojo.models import User, JIRA_Conf, JIRA_Issue, Notes, Risk_Acceptance
+from dojo.forms import JIRAForm, DeleteJIRAInstanceForm, ExpressJIRAForm
+from dojo.models import User, JIRA_Instance, JIRA_Issue, Notes, Risk_Acceptance
 from dojo.utils import add_breadcrumb, get_system_setting
 from dojo.notifications.helper import create_notification
 from django.views.decorators.http import require_POST
+import jira_helper
 
 logger = logging.getLogger(__name__)
 
@@ -52,14 +53,14 @@ def webhook(request, secret=None):
             jissue = get_object_or_404(JIRA_Issue, jira_id=jid)
             if jissue.finding is not None:
                 finding = jissue.finding
-                jira_conf = finding.jira_conf()
+                jira_instance = jira_helper.get_jira_instance(finding)
                 resolved = True
                 resolution = parsed['issue']['fields']['resolution']
                 if resolution is None:
                     resolved = False
                 if finding.active == resolved:
                     if finding.active:
-                        if jira_conf and resolution['name'] in jira_conf.accepted_resolutions:
+                        if jira_instance and resolution['name'] in jira_instance.accepted_resolutions:
                             finding.active = False
                             finding.mitigated = None
                             finding.is_Mitigated = False
@@ -70,7 +71,7 @@ def webhook(request, secret=None):
                                 accepted_by=assignee_name,
                                 reporter=finding.reporter,
                             ).accepted_findings.set([finding])
-                        elif jira_conf and resolution['name'] in jira_conf.false_positive_resolutions:
+                        elif jira_instance and resolution['name'] in jira_instance.false_positive_resolutions:
                             finding.active = False
                             finding.verified = False
                             finding.mitigated = None
@@ -108,8 +109,8 @@ def webhook(request, secret=None):
             commentor = parsed['comment']['updateAuthor']['displayName']
             jid = parsed['comment']['self'].split('/')[7]
             jissue = JIRA_Issue.objects.get(jira_id=jid)
-            jira = JIRA_Conf.objects.values_list('username', flat=True)
-            for jira_userid in jira:
+            jira_usernames = JIRA_Instance.objects.values_list('username', flat=True)
+            for jira_userid in jira_usernames:
                 if jira_userid.lower() in commentor.lower():
                     return HttpResponse('')
                     break
@@ -131,7 +132,7 @@ def webhook(request, secret=None):
 @user_passes_test(lambda u: u.is_staff)
 def express_new_jira(request):
     if request.method == 'POST':
-        jform = ExpressJIRAForm(request.POST, instance=JIRA_Conf())
+        jform = ExpressJIRAForm(request.POST, instance=JIRA_Instance())
         if jform.is_valid():
             try:
                 jira_server = jform.cleaned_data.get('url').rstrip('/')
@@ -167,7 +168,7 @@ def express_new_jira(request):
                         epic_name = int(node['clauseNames'][0][3:-1])
                         break
 
-                jira_conf = JIRA_Conf(username=jira_username,
+                jira_instance = JIRA_Instance(username=jira_username,
                                         password=jira_password,
                                         url=jira_server,
                                         configuration_name=jform.cleaned_data.get('configuration_name'),
@@ -181,7 +182,7 @@ def express_new_jira(request):
                                         close_status_key=close_key,
                                         finding_text='',
                                         default_issue_type=jform.cleaned_data.get('default_issue_type'))
-                jira_conf.save()
+                jira_instance.save()
                 messages.add_message(request,
                                      messages.SUCCESS,
                                      'JIRA Configuration Successfully Created.',
@@ -213,7 +214,7 @@ def new_jira(request):
     if request.method == 'POST':
         if '_Express' in request.POST:
             return HttpResponseRedirect(reverse('express_jira', ))
-        jform = JIRAForm(request.POST, instance=JIRA_Conf())
+        jform = JIRAForm(request.POST, instance=JIRA_Instance())
         if jform.is_valid():
             try:
                 jira_server = jform.cleaned_data.get('url').rstrip('/')
@@ -253,7 +254,7 @@ def new_jira(request):
 
 @user_passes_test(lambda u: u.is_staff)
 def edit_jira(request, jid):
-    jira = JIRA_Conf.objects.get(pk=jid)
+    jira = JIRA_Instance.objects.get(pk=jid)
     jira_password_from_db = jira.password
     if request.method == 'POST':
         jform = JIRAForm(request.POST, instance=jira)
@@ -306,38 +307,38 @@ def edit_jira(request, jid):
                   })
 
 
-@user_passes_test(lambda u: u.is_staff)
-def delete_issue(request, find):
-    j_issue = JIRA_Issue.objects.get(finding=find)
-    jira_conf = find.jira_conf()
-    jira = JIRA(server=jira_conf.url,
-                basic_auth=(jira_conf.username,
-                            jira_conf.password),
-                options={"verify": settings.JIRA_SSL_VERIFY})
-    issue = jira.issue(j_issue.jira_id)
-    issue.delete()
+# @user_passes_test(lambda u: u.is_staff)
+# def delete_issue(request, find):
+#     j_issue = JIRA_Issue.objects.get(finding=find)
+#     jira_instance = find.jira_instance()
+#     jira = JIRA(server=jira_instance.url,
+#                 basic_auth=(jira_instance.username,
+#                             jira_instance.password),
+#                 options={"verify": settings.JIRA_SSL_VERIFY})
+#     issue = jira.issue(j_issue.jira_id)
+#     issue.delete()
 
 
 @user_passes_test(lambda u: u.is_staff)
 def jira(request):
-    confs = JIRA_Conf.objects.all()
+    jira_instances = JIRA_Instances.objects.all()
     add_breadcrumb(title="JIRA List", top_level=not len(request.GET), request=request)
     return render(request,
                   'dojo/jira.html',
-                  {'confs': confs,
+                  {'jira_instances': jira_instances,
                    })
 
 
 @user_passes_test(lambda u: u.is_staff)
 def delete_jira(request, tid):
-    jira_instance = get_object_or_404(JIRA_Conf, pk=tid)
+    jira_instance = get_object_or_404(JIRA_Instance, pk=tid)
     # eng = test.engagement
     # TODO Make Form
-    form = DeleteJIRAConfForm(instance=jira_instance)
+    form = DeleteJIRAInstanceForm(instance=jira_instance)
 
     if request.method == 'POST':
         if 'id' in request.POST and str(jira_instance.id) == request.POST['id']:
-            form = DeleteJIRAConfForm(request.POST, instance=jira_instance)
+            form = DeleteJIRAInstanceForm(request.POST, instance=jira_instance)
             if form.is_valid():
                 jira_instance.delete()
                 messages.add_message(request,

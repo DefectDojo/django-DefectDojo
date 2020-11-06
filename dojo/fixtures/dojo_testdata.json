@@ -1639,7 +1639,7 @@
   },
   {
     "pk": 2,
-    "model": "dojo.jira_conf",
+    "model": "dojo.jira_instance",
     "fields": {
       "username": "user1",
       "default_issue_type": "Task",
@@ -1658,7 +1658,7 @@
   },
   {
     "pk": 3,
-    "model": "dojo.jira_conf",
+    "model": "dojo.jira_instance",
     "fields": {
       "username": "user2",
       "default_issue_type": "Task",
@@ -1676,7 +1676,7 @@
   },
   {
     "pk": 4,
-    "model": "dojo.jira_conf",
+    "model": "dojo.jira_instance",
     "fields": {
       "username": "user3",
       "default_issue_type": "Spike",
@@ -1714,40 +1714,40 @@
   },
   {
     "pk": 1,
-    "model": "dojo.jira_pkey",
+    "model": "dojo.jira_project",
     "fields": {
       "push_notes": false,
       "product": 1,
       "push_all_issues": false,
       "component": "",
       "enable_engagement_epic_mapping": true,
-      "conf": 2,
+      "jira_instance": 2,
       "project_key": "key1"
     }
   },
   {
     "pk": 2,
-    "model": "dojo.jira_pkey",
+    "model": "dojo.jira_project",
     "fields": {
       "push_notes": true,
       "product": 2,
       "push_all_issues": true,
       "component": "",
       "enable_engagement_epic_mapping": true,
-      "conf": 3,
+      "jira_instance": 3,
       "project_key": "key2"
     }
   },
   {
     "pk": 3,
-    "model": "dojo.jira_pkey",
+    "model": "dojo.jira_project",
     "fields": {
       "push_notes": false,
       "product": 3,
       "push_all_issues": false,
       "component": "",
       "enable_engagement_epic_mapping": false,
-      "conf": 4,
+      "jira_instance": 4,
       "project_key": "key3"
     }
   },

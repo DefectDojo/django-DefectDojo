@@ -2,8 +2,9 @@
 import logging
 
 from django.utils import timezone
-from dojo.models import JIRA_PKey
+from dojo.models import JIRA_Project
 from dojo.utils import get_system_setting, close_epic
+import dojo.jira_link.jira_helper as jira_helper
 
 logger = logging.getLogger(__name__)
 
@@ -14,10 +15,8 @@ def close_engagement(eng):
     eng.updated = timezone.now()
     eng.save()
 
-    if get_system_setting('enable_jira'):
-        jpkey_set = JIRA_PKey.objects.filter(product=eng.product)
-        if jpkey_set.count() >= 1:
-            close_epic(eng, True)
+    if jira_helper.get_jira_project(eng):
+        close_epic(eng, True)
 
 
 def reopen_engagement(eng):

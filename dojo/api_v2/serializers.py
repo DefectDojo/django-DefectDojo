@@ -2,7 +2,7 @@ from dojo.models import Product, Engagement, Test, Finding, \
     User, ScanSettings, IPScan, Scan, Stub_Finding, Risk_Acceptance, \
     Finding_Template, Test_Type, Development_Environment, NoteHistory, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
-    Product_Type, JIRA_Conf, Endpoint, BurpRawRequestResponse, JIRA_PKey, \
+    Product_Type, JIRA_Instance, Endpoint, BurpRawRequestResponse, JIRA_Project, \
     Notes, DojoMeta, FindingImage, Note_Type, App_Analysis, Endpoint_Status, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation
 
@@ -527,15 +527,15 @@ class JIRAIssueSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class JIRAConfSerializer(serializers.ModelSerializer):
+class JIRAInstanceSerializer(serializers.ModelSerializer):
     class Meta:
-        model = JIRA_Conf
+        model = JIRA_Instance
         fields = '__all__'
 
 
-class JIRASerializer(serializers.ModelSerializer):
+class JIRAProjectSerializer(serializers.ModelSerializer):
     class Meta:
-        model = JIRA_PKey
+        model = JIRA_Project
         fields = '__all__'
 
 
@@ -639,10 +639,25 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     sla_days_remaining = serializers.IntegerField(read_only=True)
     finding_meta = FindingMetaSerializer(read_only=True, many=True)
     related_fields = serializers.SerializerMethodField()
+    # for backwards compatibility
+    jira_creation = serializers.SerializerMethodField()
+    jira_updated = serializers.SerializerMethodField()
 
     class Meta:
         model = Finding
         fields = '__all__'
+
+    def get_jira_creation(self, obj):
+        if self.has_jira_issue:
+            return self.jira_issue.jira_creation
+
+        return None
+
+    def get_jira_updated(self, obj):
+        if self.has_jira_issue:
+            return self.jira_issue.jira_updated
+
+        return None
 
     def get_related_fields(self, obj):
         query_params = self.context['request'].query_params
@@ -683,6 +698,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
         to_be_tagged, validated_data = self._pop_tags(validated_data)
 
         # pop push_to_jira so it won't get send to the model as a field
+        # TODO: JIRA can we remove this get_push_all_to_jira, already checked in apiv2 viewset?
         push_to_jira = validated_data.pop('push_to_jira') or instance.get_push_all_to_jira()
 
         instance = super(TaggitSerializer, self).update(instance, validated_data)
@@ -767,6 +783,7 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         # first save, so we have an instance to get push_all_to_jira from
         new_finding = super(TaggitSerializer, self).create(validated_data)
 
+        # TODO: JIRA can we remove this get_push_all_to_jira, already checked in apiv2 viewset?
         push_to_jira = push_to_jira or new_finding.get_push_all_to_jira()
 
         # If we need to push to JIRA, an extra save call is needed.

@@ -10,7 +10,7 @@ from django.urls import reverse
 from django.contrib.auth.models import User
 from dojo.utils import prepare_for_view, get_system_setting, get_full_url
 from dojo.user.helper import user_is_authorized
-from dojo.models import Check_List, FindingImageAccessToken, Finding, System_Settings, JIRA_PKey, Product
+from dojo.models import Check_List, FindingImageAccessToken, Finding, System_Settings, JIRA_Project, Product
 import markdown
 from django.db.models import Sum, Case, When, IntegerField, Value
 from django.utils import timezone
@@ -224,13 +224,6 @@ def asvs_level(benchmark_score):
 
     return "ASVS " + str(benchmark_score.desired_level) + " " + level + " Pass: " + str(
         total_pass) + " Total:  " + total
-
-
-@register.filter(name='get_jira_conf')
-def get_jira_conf(product):
-    jira_conf = JIRA_PKey.objects.filter(product=product)
-
-    return jira_conf
 
 
 @register.filter(name='version_num')

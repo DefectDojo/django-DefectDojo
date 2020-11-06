@@ -171,7 +171,7 @@
                             <th>Status</th>
                             <th>Jira</th>
                             {% if system_settings.enable_jira %}
-                              {% if jira_config and product_tab or not product_tab %}
+                              {% if jira_project and product_tab or not product_tab %}
                                 <th>JIRA Age</th>
                                 <th>JIRA Change</th>
                               {% endif %}
@@ -397,7 +397,7 @@
                                   {% endif %}
                                 </td>
                                 {% if system_settings.enable_jira %}
-                                  {% if jira_config and product_tab or not product_tab %}
+                                  {% if jira_project and product_tab or not product_tab %}
                                       <td class="nowrap">
                                         {% if finding.jira_creation %}
                                           {{ finding.jira_creation|timesince }} 
@@ -481,7 +481,7 @@
                     { "data": "status" },
                     { "data": "jira_id" },
                     {% if system_settings.enable_jira %}	
-                      {% if jira_config and product_tab or not product_tab %}                    	
+                      {% if jira_project and product_tab or not product_tab %}                    	
                         { "data": "jira_age" },
                         { "data": "jira_change" },
                       {% endif %}                          	

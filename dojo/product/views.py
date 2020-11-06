@@ -19,10 +19,10 @@ from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
 from dojo.templatetags.display_tags import get_level
 from dojo.filters import ProductFilter, EngagementFilter, ProductMetricsEndpointFilter, ProductMetricsFindingFilter, ProductComponentFilter
-from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAPKeyForm, JIRAFindingForm, AdHocFindingForm, \
+from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAProjectForm, JIRAFindingForm, AdHocFindingForm, \
                        EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm, ProductNotificationsForm, \
                        GITHUB_Product_Form, GITHUBFindingForm, App_AnalysisTypeForm, JIRAEngagementForm
-from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, GITHUB_PKey, Finding_Template, \
+from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_Project, GITHUB_PKey, Finding_Template, \
                         Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint_Status, \
                         Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, BurpRawRequestResponse
 
@@ -36,7 +36,7 @@ from django.db.models.query import QuerySet
 from github import Github
 from dojo.finding.views import finding_link_jira, finding_unlink_jira
 from dojo.user.helper import user_must_be_authorized, user_is_authorized, check_auth_users_list
-
+import dojo.jira_link.jira_helper as jira_helper
 
 logger = logging.getLogger(__name__)
 
@@ -91,7 +91,7 @@ def prefetch_for_product(prods):
         prefetched_prods = prefetched_prods.annotate(closed_engagement_count=Count('engagement__id', filter=Q(engagement__active=False)))
         prefetched_prods = prefetched_prods.annotate(last_engagement_date=Max('engagement__target_start'))
         prefetched_prods = prefetched_prods.annotate(active_finding_count=Count('engagement__test__finding__id', filter=Q(engagement__test__finding__active=True)))
-        prefetched_prods = prefetched_prods.prefetch_related(Prefetch('jira_pkey_set', queryset=JIRA_PKey.objects.all().select_related('conf'), to_attr='jira_confs'))
+        prefetched_prods = prefetched_prods.prefetch_related(Prefetch('jira_project_set', queryset=JIRA_Project.objects.all().select_related('conf'), to_attr='jira_projects'))
         prefetched_prods = prefetched_prods.prefetch_related(Prefetch('github_pkey_set', queryset=GITHUB_PKey.objects.all().select_related('git_conf'), to_attr='github_confs'))
         active_endpoint_query = Endpoint.objects.filter(
                 finding__active=True,
@@ -654,7 +654,7 @@ def new_product(request):
     if request.method == 'POST':
         form = ProductForm(request.POST, instance=Product())
         if get_system_setting('enable_jira'):
-            jform = JIRAPKeyForm(request.POST, instance=JIRA_PKey())
+            jform = JIRAProjectForm(request.POST, instance=JIRA_Project())
         else:
             jform = None
 
@@ -674,10 +674,10 @@ def new_product(request):
                                  extra_tags='alert-success')
             if get_system_setting('enable_jira'):
                 if jform.is_valid():
-                    jira_pkey = jform.save(commit=False)
-                    if jira_pkey.conf is not None:
-                        jira_pkey.product = product
-                        jira_pkey.save()
+                    jira_project = jform.save(commit=False)
+                    if jira_project.jira_instance is not None:
+                        jira_project.product = product
+                        jira_project.save()
                         messages.add_message(request,
                                                 messages.SUCCESS,
                                                 'JIRA information added successfully.',
@@ -719,7 +719,7 @@ def new_product(request):
     else:
         form = ProductForm()
         if get_system_setting('enable_jira'):
-            jform = JIRAPKeyForm()
+            jform = JIRAProjectForm()
         else:
             jform = None
         if get_system_setting('enable_github'):
@@ -741,17 +741,13 @@ def edit_product(request, pid):
     prod = Product.objects.get(pk=pid)
     system_settings = System_Settings.objects.get()
     jira_enabled = system_settings.enable_jira
-    jira_inst = None
     jform = None
     github_enabled = system_settings.enable_github
     github_inst = None
     gform = None
     sonarqube_form = None
-    try:
-        jira_inst = JIRA_PKey.objects.get(product=prod)
-    except:
-        jira_inst = None
-        pass
+    jira_project = jira_help.get_jira_project(prod)
+
     try:
         github_inst = GITHUB_PKey.objects.get(product=prod)
     except:
@@ -772,15 +768,15 @@ def edit_product(request, pid):
                                  'Product updated successfully.',
                                  extra_tags='alert-success')
 
-            if get_system_setting('enable_jira') and jira_inst:
-                jform = JIRAPKeyForm(request.POST, instance=jira_inst)
+            if get_system_setting('enable_jira') and jira_project:
+                jform = JIRAProjectForm(request.POST, instance=jira_project)
                 # need to handle delete
                 try:
                     jform.save()
                 except:
                     pass
             elif get_system_setting('enable_jira'):
-                jform = JIRAPKeyForm(request.POST)
+                jform = JIRAProjectForm(request.POST)
                 if jform.is_valid():
                     new_conf = jform.save(commit=False)
                     new_conf.product_id = pid
@@ -821,13 +817,8 @@ def edit_product(request, pid):
                            initial={'auth_users': prod.authorized_users.all(),
                                     'tags': get_tag_list(Tag.objects.get_for_object(prod))})
 
-        if jira_enabled and (jira_inst is not None):
-            if jira_inst is not None:
-                jform = JIRAPKeyForm(instance=jira_inst)
-            else:
-                jform = JIRAPKeyForm()
-        elif jira_enabled:
-            jform = JIRAPKeyForm()
+        if jira_enabled:
+            jform = JIRAProjectForm(instance=jira_project)
         else:
             jform = None
 
@@ -900,7 +891,7 @@ def new_eng_for_app(request, pid, cicd=False):
     if not user_is_authorized(request.user, 'staff', prod):
         raise PermissionDenied
 
-    use_jira = get_system_setting('enable_jira') and prod.jira_pkey is not None
+    use_jira = jira_helper.get_jira_project(prod) is not None
 
     if request.method == 'POST':
 
@@ -1079,7 +1070,7 @@ def ad_hoc_finding(request, pid):
     jform = None
     gform = None
     form = AdHocFindingForm(initial={'date': timezone.now().date()}, req_resp=None)
-    use_jira = get_system_setting('enable_jira') and test.engagement.product.jira_pkey is not None
+    use_jira = jira_helper.get_jira_project(test) is not None
 
     if request.method == 'POST':
         form = AdHocFindingForm(request.POST, req_resp=None)
@@ -1099,7 +1090,7 @@ def ad_hoc_finding(request, pid):
                                      'Can not set a finding as inactive or false positive without adding all mandatory notes',
                                      extra_tags='alert-danger')
         if use_jira:
-            jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_pkey=test.engagement.product.jira_pkey)
+            jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_project=tjira_helper.get_jira_project(test))
 
         if form.is_valid() and (jform is None or jform.is_valid()):
             new_finding = form.save(commit=False)
@@ -1247,8 +1238,7 @@ def ad_hoc_finding(request, pid):
                                  extra_tags='alert-danger')
     else:
         if use_jira:
-            push_all_jira_issues = test.engagement.product.jira_pkey_set.first().push_all_issues
-            jform = JIRAFindingForm(push_all=push_all_jira_issues, prefix='jiraform', jira_pkey=test.engagement.product.jira_pkey)
+            jform = JIRAFindingForm(push_all=jira_helper.is_push_all_issues(test), prefix='jiraform', jira_project=jira_helper.get_jira_project(test))
 
         if get_system_setting('enable_github'):
             if GITHUB_PKey.objects.filter(product=test.engagement.product).count() != 0:

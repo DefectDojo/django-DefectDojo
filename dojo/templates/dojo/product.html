@@ -205,15 +205,15 @@
                                 </td>
                                 {% if system_settings.enable_jira %}
                                 <td class="text-center">
-                                {% for jira_conf in prod.jira_confs %}
-                                  {% if jira_conf.conf is not None %}
-                                  <i class="fa fa-bug has-popover" title="<i class='fa fa-bug'></i> <b>Jira Configuration</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="bottom"
-                                    data-content="<b>Jira:</b> {{ jira_conf.conf }}<br/>
-                                    <b>Project Key:</b> {{ jira_conf.project_key }}<br/>
-                                    <b>Component:</b> {{ jira_conf.component }}<br/>
-                                    <b>Push All Issues:</b> {{ jira_conf.push_all_issues }}<br/>
-                                    <b>Engagement Epic Mapping:</b> {{ jira_conf.enable_engagement_epic_mapping }}<br/>
-                                    <b>Push Notes:</b> {{ jira_conf.push_notes }}">
+                                {% for jira_project in prod.jira_projects %}
+                                  {% if jira_project.jira_instance is not None %}
+                                  <i class="fa fa-bug has-popover" title="<i class='fa fa-bug'></i> <b>Jira Project Configuration</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="bottom"
+                                    data-content="<b>Jira:</b> {{ jira_project.jira_instance }}<br/>
+                                    <b>Project Key:</b> {{ jira_project.project_key }}<br/>
+                                    <b>Component:</b> {{ jira_project.component }}<br/>
+                                    <b>Push All Issues:</b> {{ jira_project.push_all_issues }}<br/>
+                                    <b>Engagement Epic Mapping:</b> {{ jira_project.enable_engagement_epic_mapping }}<br/>
+                                    <b>Push Notes:</b> {{ jira_project.push_notes }}">
                                   </i>
                                   {% endif %}
                                 {% endfor %}

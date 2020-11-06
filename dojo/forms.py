@@ -21,7 +21,7 @@ from tagging.models import Tag
 from dojo.models import Finding, Product_Type, Product, Note_Type, ScanSettings, VA, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
     Development_Environment, Dojo_User, Scan, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage, \
-    JIRA_Issue, JIRA_PKey, JIRA_Conf, GITHUB_Issue, GITHUB_PKey, GITHUB_Conf, UserContactInfo, Tool_Type, \
+    JIRA_Issue, JIRA_Project, JIRA_Instance, GITHUB_Issue, GITHUB_PKey, GITHUB_Conf, UserContactInfo, Tool_Type, \
     Tool_Configuration, Tool_Product_Settings, Cred_User, Cred_Mapping, System_Settings, Notifications, \
     Languages, Language_Type, App_Analysis, Objects, Benchmark_Product, Benchmark_Requirement, \
     Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta, Sonarqube_Product, \
@@ -1757,8 +1757,7 @@ class JIRAForm(forms.ModelForm):
             self.fields['password'].required = False
 
     class Meta:
-        model = JIRA_Conf
-        exclude = ['product']
+        model = JIRA_Instance
 
 
 class ExpressJIRAForm(forms.ModelForm):
@@ -1766,7 +1765,7 @@ class ExpressJIRAForm(forms.ModelForm):
     issue_key = forms.CharField(required=True, help_text='A valid issue ID is required to gather the necessary information.')
 
     class Meta:
-        model = JIRA_Conf
+        model = JIRA_Instance
         exclude = ['product', 'epic_name_id', 'open_status_key',
                     'close_status_key', 'info_mapping_severity',
                     'low_mapping_severity', 'medium_mapping_severity',
@@ -1789,10 +1788,10 @@ class DeleteBenchmarkForm(forms.ModelForm):
         exclude = ['product', 'benchmark_type', 'desired_level', 'current_level', 'asvs_level_1_benchmark', 'asvs_level_1_score', 'asvs_level_2_benchmark', 'asvs_level_2_score', 'asvs_level_3_benchmark', 'asvs_level_3_score', 'publish']
 
 
-class JIRA_PKeyForm(forms.ModelForm):
+class JIRA_ProjectForm(forms.ModelForm):
 
     class Meta:
-        model = JIRA_PKey
+        model = JIRA_Project
         exclude = ['product']
 
 
@@ -1813,12 +1812,12 @@ class Sonarqube_ProductForm(forms.ModelForm):
         exclude = ['product']
 
 
-class DeleteJIRAConfForm(forms.ModelForm):
+class DeleteJIRAInstanceForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
                             widget=forms.widgets.HiddenInput())
 
     class Meta:
-        model = JIRA_Conf
+        model = JIRA_Instance
         fields = ('id',)
 
 
@@ -2073,11 +2072,11 @@ class GITHUB_Product_Form(forms.ModelForm):
         exclude = ['product']
 
 
-class JIRAPKeyForm(forms.ModelForm):
-    conf = forms.ModelChoiceField(queryset=JIRA_Conf.objects.all(), label='JIRA Configuration', required=False)
+class JIRAProjectForm(forms.ModelForm):
+    jira_instance = forms.ModelChoiceField(queryset=JIRA_Instance.objects.all(), label='JIRA Instance', required=False)
 
     class Meta:
-        model = JIRA_PKey
+        model = JIRA_Project
         exclude = ['product']
 
 
@@ -2096,10 +2095,10 @@ class JIRAFindingForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.push_all = kwargs.pop('push_all', False)
         self.instance = kwargs.pop('instance', None)
-        self.jira_pkey = kwargs.pop('jira_pkey', None)
+        self.jira_project = kwargs.pop('jira_project', None)
 
-        if self.instance is None and self.jira_pkey is None:
-            raise ValueError('either and finding instance or jira_pkey is needed')
+        if self.instance is None and self.jira_project is None:
+            raise ValueError('either and finding instance or jira_project is needed')
 
         super(JIRAFindingForm, self).__init__(*args, **kwargs)
         self.fields['push_to_jira'] = forms.BooleanField()
@@ -2126,7 +2125,7 @@ class JIRAFindingForm(forms.Form):
         cleaned_data = super(JIRAFindingForm, self).clean()
         jira_issue_key_new = self.cleaned_data.get('jira_issue')
         finding = self.instance
-        jpkey = self.jira_pkey
+        jira_project = self.jira_project
         if jira_issue_key_new:
             if finding:
                 # in theory there can multiple jira instances that have similar projects
@@ -2145,12 +2144,12 @@ class JIRAFindingForm(forms.Form):
                 if not finding.has_jira_issue():
                     jira_issue_need_to_exist = True
 
-                jpkey = finding.jira_pkey()
+                jira_project = finding.JIRA_Project()
             else:
                 jira_issue_need_to_exist = True
 
             if jira_issue_need_to_exist:
-                jira_issue_new = jira_get_issue(jpkey, jira_issue_key_new)
+                jira_issue_new = jira_get_issue(jira_project, jira_issue_key_new)
                 if not jira_issue_new:
                     raise ValidationError('JIRA issue ' + jira_issue_key_new + ' does not exist or cannot be retrieved')
 

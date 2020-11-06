@@ -1,6 +1,6 @@
 from dojo.models import Product, Engagement, Test, Finding, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
-    User, ScanSettings, Scan, Stub_Finding, Endpoint, JIRA_PKey, JIRA_Conf, \
+    User, ScanSettings, Scan, Stub_Finding, Endpoint, JIRA_Project, JIRA_Instance, \
     Finding_Template, Note_Type, App_Analysis, Endpoint_Status, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Notes, \
     BurpRawRequestResponse
@@ -270,12 +270,12 @@ class FindingTemplatesTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class JiraConfigurationsTest(BaseClass.RESTEndpointTest):
+class JiraInstancesTest(BaseClass.RESTEndpointTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
-        self.endpoint_model = JIRA_Conf
-        self.viewname = 'jira_conf'
+        self.endpoint_model = JIRA_Instance
+        self.viewname = 'jira_instance'
         self.viewset = JiraConfigurationsViewSet
         self.payload = {
             "url": "http://www.example.com",
@@ -318,8 +318,8 @@ class JiraTest(BaseClass.RESTEndpointTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
-        self.endpoint_model = JIRA_PKey
-        self.viewname = 'jira_pkey'
+        self.endpoint_model = JIRA_Project
+        self.viewname = 'jira_project'
         self.viewset = JiraViewSet
         self.payload = {
             "project_key": "TEST KEY",

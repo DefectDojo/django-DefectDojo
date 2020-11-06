@@ -28,7 +28,7 @@ from dojo.forms import CheckForm, \
 from dojo.models import Finding, Product, Engagement, Test, \
     Check_List, Test_Type, Notes, \
     Risk_Acceptance, Development_Environment, BurpRawRequestResponse, Endpoint, \
-    JIRA_PKey, JIRA_Issue, Cred_Mapping, Dojo_User, System_Settings, Note_Type, Endpoint_Status
+    JIRA_Project, JIRA_Issue, Cred_Mapping, Dojo_User, System_Settings, Note_Type, Endpoint_Status
 from dojo.tools import handles_active_verified_statuses
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
@@ -38,6 +38,7 @@ from dojo.finding.views import find_available_notetypes
 from functools import reduce
 from django.db.models.query import QuerySet
 from dojo.user.helper import user_must_be_authorized, user_is_authorized, check_auth_users_list
+import dojo.jira_link.jira_helper as jira_helper
 
 
 logger = logging.getLogger(__name__)
@@ -179,7 +180,7 @@ def edit_engagement(request, eid):
     if eng.engagement_type == "CI/CD":
         ci_cd_form = True
     jform = None
-    use_jira = get_system_setting('enable_jira') and eng.product.jira_pkey is not None
+    use_jira = jira_helper.get_jira_project(engagement) is not None
 
     if request.method == 'POST':
         form = EngForm(request.POST, instance=eng, cicd=ci_cd_form, product=eng.product.id, user=request.user)
@@ -315,7 +316,7 @@ def view_engagement(request, eid):
         jissue = None
         pass
     try:
-        jconf = JIRA_PKey.objects.get(product=eng.product).conf
+        jconf = JIRA_Project.objects.get(product=eng.product).conf
     except:
         jconf = None
         pass
@@ -539,16 +540,14 @@ def import_scan_results(request, eid=None, pid=None):
         if not user_is_authorized(user, 'staff', engagement):
             raise PermissionDenied
         cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(engagement=engagement).order_by('cred_id')
-        if get_system_setting('enable_jira') and engagement.product.jira_pkey_set.first() is not None:
-            push_all_jira_issues = engagement.product.jira_pkey_set.first().push_all_issues
-            jform = JIRAImportScanForm(push_all=push_all_jira_issues, prefix='jiraform')
+        if jira_helper.get_jira_project(engagement):
+            jform = JIRAImportScanForm(push_all=jira_helper.is_push_all_issues(engagement), prefix='jiraform')
     elif pid:
         product = get_object_or_404(Product, id=pid)
         if not user_is_authorized(user, 'staff', product):
             raise PermissionDenied
-        if get_system_setting('enable_jira') and product.jira_pkey_set.first() is not None:
-            push_all_jira_issues = product.jira_pkey_set.first().push_all_issues
-            jform = JIRAImportScanForm(push_all=push_all_jira_issues, prefix='jiraform')
+        if jira_helper.get_jira_project(product):
+            jform = JIRAImportScanForm(push_all=jira_helper.is_push_all_issues(product), prefix='jiraform')
     elif not user.is_staff:
         raise PermissionDenied
 
