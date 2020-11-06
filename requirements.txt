@@ -22,7 +22,7 @@ git+https://github.com/DefectDojo/django-tastypie-swagger.git@c7c5629480dc20cadd
 django-tastypie==0.14.2
 django-watson==1.5.5
 django-prometheus==2.1.0
-Django==2.2.16
+Django==2.2.17
 djangorestframework==3.12.1
 gunicorn==20.0.4
 html2text==2020.1.16
@@ -37,10 +37,10 @@ xlrd>=1.0.0
 pdfkit==0.6.1
 Pillow==8.0.1  # required by django-imagekit
 psycopg2-binary==2.8.6
-cryptography==3.2
+cryptography==3.2.1
 python-dateutil==2.8.1
 python-nmap==0.6.1
-pytz==2020.1
+pytz==2020.4
 redis==3.5.3
 requests>=2.22.0
 sqlalchemy  # Required by Celery broker transport
@@ -54,13 +54,16 @@ social-auth-app-django==4.0.0
 Python-jose==3.2.0
 gitpython>=2.1.13
 ptvsd>=4.2.7
-google-auth==1.22.1
+google-auth==1.23.0
 google-api-python-client==1.12.5
-google-auth-oauthlib==0.4.1
-drf_yasg2==1.19.3
+google-auth-oauthlib==0.4.2
+drf_yasg2==1.19.4
 jsonlines==1.2.0  # requred by yarn audit parser
 django-saml2-auth==2.2.1
 cpe==1.2.1
 packageurl-python==0.9.3
 django-crum==0.7.7
 JSON-log-formatter==0.3.0
+django-split-settings==1.0.1
+django-debug-toolbar==3.1.1
+django-debug-toolbar-request-history==0.1.3
