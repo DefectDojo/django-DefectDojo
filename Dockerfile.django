@@ -17,6 +17,7 @@ RUN \
     postgresql-client \
     xmlsec1 \
     git \
+    uuid-runtime \
     && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists && \
@@ -43,8 +44,10 @@ RUN \
     libmariadb3 \
     xmlsec1 \
     git \
+    uuid-runtime \    
     # only required for the dbshell (used by the initializer job)
     postgresql-client \
+    curl \
     && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists && \
@@ -71,15 +74,21 @@ COPY \
   /
 COPY wsgi.py manage.py tests/unit-tests.sh ./
 COPY dojo/ ./dojo/
-# Legacy installs need the modified settings.py, do not remove!
-RUN \
-  cp dojo/settings/settings.dist.py dojo/settings/settings.py
+
+# Add extra fixtures to docker image which are loaded by the initializer
+COPY docker/extra_fixtures/* /app/dojo/fixtures/
+
 COPY tests/ ./tests/
 RUN \
-  rm -f /readme.txt && \
+  # Remove placeholder copied from docker/certs
+  rm -f /readme.txt && \ 
+  # Remove placeholder copied from docker/extra_fixtures
+  rm -f dojo/fixtures/readme.txt && \
   mkdir -p dojo/migrations && \
   chmod g=u dojo/migrations && \
   true
+# Fallback for safety parser, if installation does't allow internet connectivity
+RUN curl -sS -o dojo/tools/safety/insecure_full.json https://raw.githubusercontent.com/pyupio/safety-db/master/data/insecure_full.json
 USER root
 RUN \
     adduser --system --no-create-home --disabled-password --gecos '' \

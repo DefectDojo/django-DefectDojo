@@ -1,6 +1,9 @@
 import json
+import logging
 import urllib
 from dojo.models import Finding
+
+logger = logging.getLogger(__name__)
 
 
 class SafetyParser(object):
@@ -8,8 +11,15 @@ class SafetyParser(object):
 
         # Grab Safety DB for CVE lookup
         url = "https://raw.githubusercontent.com/pyupio/safety-db/master/data/insecure_full.json"
-        response = urllib.request.urlopen(url)
-        safety_db = json.loads(response.read().decode('utf-8'))
+        try:
+            response = urllib.request.urlopen(url)
+            safety_db = json.loads(response.read().decode('utf-8'))
+        except urllib.error.URLError as e:
+            logger.warn("Error Message: %s", e)
+            logger.warn("Could not resolve %s. Fallback is using the offline version from dojo/tools/safety/insecure_full.json.", url)
+            with open("dojo/tools/safety/insecure_full.json", "r") as f:
+                safety_db = json.load(f)
+            f.close()
 
         tree = self.parse_json(json_output)
 
@@ -29,7 +39,7 @@ class SafetyParser(object):
                        'installed': str(l[2]),
                        'description': str(l[3]),
                        'id': str(l[4])}
-                for l in json_obj}
+                for l in json_obj}  # noqa: E741
         return tree
 
     def get_items(self, tree, test, safety_db):
