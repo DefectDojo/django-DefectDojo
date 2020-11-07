@@ -1,4 +1,4 @@
-name: "Release: 1. create branch + PR"
+name: "Release: 3. pr for merging master into dev"
 
 env:
   GIT_USERNAME: "DefectDojo release bot"
@@ -8,11 +8,8 @@ on:
     inputs:
       # the actual branch that can be chosen on the UI is made irrelevant by further steps
       # because someone will forget one day to change it.
-      from_branch:
-        description: "Select branch to release from (feature release: 'dev', bugfix or hotfix release: 'release/x.y.z')"
-        required: true
-      release_number:
-        description: "Release version (x.y.z format)"
+      release_number_dev:
+        description: "Release version for dev branch (x.y.z-dev format)"
         required: true
 
 jobs:
@@ -24,35 +21,29 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Checkout from_branch branch
+      - name: Checkout master
         uses: actions/checkout@v2
         with:
-          ref: ${{ github.event.inputs.from_branch }}
-      - name: Create release branch
-        if: "!startsWith('${{ github.event.inputs.from_branch }}', 'release/')"
+          ref: master
+      - name: Create merge back branch
         run: |
-          echo "NEW_BRANCH=release/${{ github.event.inputs.release_number }}" >> $GITHUB_ENV
-      - name: Use existing release branch
-        if: startsWith('${{ github.event.inputs.from_branch }}', 'release/')
-        run: |
-          echo "NEW_BRANCH=${{ github.event.inputs.from_branch }}" >> $GITHUB_ENV
+          echo "NEW_BRANCH=master-into-dev/${{ github.event.inputs.release_number_dev }}" >> $GITHUB_ENV
       - name: Configure git
         run: |
           git config --global user.name "${{ env.GIT_USERNAME }}"
           git config --global user.email "${{ env.GIT_EMAIL }}"
-      - name: Push branch
-        if: "!startsWith('${{ github.event.inputs.from_branch }}', 'release/')"
+      - name: Push new branch
         run: git push origin HEAD:${NEW_BRANCH}
-      - name: Checkout release branch
+      - name: Checkout new branch
         uses: actions/checkout@v2
         with:
           ref: ${{ env.NEW_BRANCH }}
       - name: Update version numbers in key files
         run: |
-          sed -ri "s/__version__ = '.*'/__version__ = '${{ github.event.inputs.release_number }}'/" dojo/__init__.py
-          sed -ri "s/version='.*'/version='${{ github.event.inputs.release_number }}'/" setup.py
-          sed -ri "s/appVersion: \".*\"/appVersion: \"${{ github.event.inputs.release_number }}\"/" helm/defectdojo/Chart.yaml
-          sed -ri "s/\"version\": \".*\"/\"version\": \"${{ github.event.inputs.release_number }}\"/" components/package.json
+          sed -ri "s/__version__ = '.*'/__version__ = '${{ github.event.inputs.release_number_dev }}'/" dojo/__init__.py
+          sed -ri "s/version='.*'/version='${{ github.event.inputs.release_number_dev }}'/" setup.py
+          sed -ri "s/appVersion: \".*\"/appVersion: \"${{ github.event.inputs.release_number_dev }}\"/" helm/defectdojo/Chart.yaml
+          sed -ri "s/\"version\": \".*\"/\"version\": \"${{ github.event.inputs.release_number_dev }}\"/" components/package.json
       - name: Check numbers
         run: |
           grep version dojo/__init__.py
@@ -79,8 +70,8 @@ jobs:
             github.pulls.create({
               owner: '${{ env.REPO_ORG }}',
               repo: 'django-DefectDojo',
-              title: 'Release: Merge release into master from: ${{ env.NEW_BRANCH }}',
+              title: 'Release: Merge back master into dev from: ${{ env.NEW_BRANCH }}',
               body: `Release triggered by \`${ process.env.GITHUB_ACTOR }\``,
               head: '${{ env.NEW_BRANCH }}',
-              base: 'master'
+              base: 'dev'
             })
