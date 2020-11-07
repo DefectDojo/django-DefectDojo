@@ -4,10 +4,14 @@ from datetime import datetime
 from dojo.models import Finding
 
 
-'''
-This parser is written for Veracode Detailed XML reports, version 1.5.
-Version is annotated in the report, `detailedreport/@report_format_version`.
-'''
+def truncate_str(value: str, maxlen: int):
+    if len(value) > maxlen:
+        return value[:maxlen - 12] + " (truncated)"
+    return value
+
+
+# This parser is written for Veracode Detailed XML reports, version 1.5.
+# Version is annotated in the report, `detailedreport/@report_format_version`.
 class VeracodeXMLParser(object):
     ns = {'x': 'https://www.veracode.com/schema/reports/export/1.0'}
     vc_severity_mapping = {
@@ -129,9 +133,11 @@ class VeracodeXMLParser(object):
             # This happens if any mitigation (including 'Potential false positive')
             # was accepted in VC.
             _is_mitigated = True
-            _mitigated_date = datetime.strptime(
-                xml_node.xpath('string(.//x:mitigations/x:mitigation[last()]/@date)', namespaces=ns),
-                '%Y-%m-%d %H:%M:%S %Z')
+            raw_mitigated_date = xml_node.xpath('string(.//x:mitigations/x:mitigation[last()]/@date)', namespaces=ns)
+            if raw_mitigated_date:
+                _mitigated_date = datetime.strptime(raw_mitigated_date, '%Y-%m-%d %H:%M:%S %Z')
+            else:
+                _mitigated_date = None
         finding.is_Mitigated = _is_mitigated
         finding.mitigated = _mitigated_date
         finding.active = not _is_mitigated
@@ -158,7 +164,7 @@ class VeracodeXMLParser(object):
         finding.sast_source_file_path = finding.file_path
 
         _component = xml_node.xpath('string(@module)') + ': ' + xml_node.xpath('string(@scope)')
-        finding.component_name = _component if _component != ': ' else None
+        finding.component_name = truncate_str(_component, 200) if _component != ': ' else None
 
         _sast_source_obj = xml_node.xpath('string(@functionprototype)')
         finding.sast_source_object = _sast_source_obj if _sast_source_obj else None
