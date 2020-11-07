@@ -70,7 +70,7 @@ jobs:
             github.pulls.create({
               owner: '${{ env.REPO_ORG }}',
               repo: 'django-DefectDojo',
-              title: 'Release: Merge back master into dev from ${{ env.NEW_BRANCH }}',
+              title: 'Release: Merge back master into dev from: ${{ env.NEW_BRANCH }}',
               body: `Release triggered by \`${ process.env.GITHUB_ACTOR }\``,
               head: '${{ env.NEW_BRANCH }}',
               base: 'dev'
