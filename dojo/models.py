@@ -2594,10 +2594,12 @@ class JIRA_Project(models.Model):
         return jira_instance
 
     def __unicode__(self):
-        return self.product.name + " | " + self.jira_key
+        # TODO: JIRA: use product OR engagement
+        return self.product.name + " | " + self.project_key
 
     def __str__(self):
-        return self.product.name + " | " + self.jira_key
+        # TODO: JIRA: use product OR engagement
+        return self.product.name + " | " + self.project_key
 
 
 class JIRA_Issue(models.Model):

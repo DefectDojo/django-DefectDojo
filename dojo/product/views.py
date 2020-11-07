@@ -90,7 +90,7 @@ def prefetch_for_product(prods):
         prefetched_prods = prefetched_prods.annotate(closed_engagement_count=Count('engagement__id', filter=Q(engagement__active=False)))
         prefetched_prods = prefetched_prods.annotate(last_engagement_date=Max('engagement__target_start'))
         prefetched_prods = prefetched_prods.annotate(active_finding_count=Count('engagement__test__finding__id', filter=Q(engagement__test__finding__active=True)))
-        prefetched_prods = prefetched_prods.prefetch_related(Prefetch('jira_project_set', queryset=JIRA_Project.objects.all().select_related('conf'), to_attr='jira_projects'))
+        prefetched_prods = prefetched_prods.prefetch_related(Prefetch('jira_project_set', queryset=JIRA_Project.objects.all().select_related('jira_instance'), to_attr='jira_projects'))
         prefetched_prods = prefetched_prods.prefetch_related(Prefetch('github_pkey_set', queryset=GITHUB_PKey.objects.all().select_related('git_conf'), to_attr='github_confs'))
         active_endpoint_query = Endpoint.objects.filter(
                 finding__active=True,
@@ -745,7 +745,7 @@ def edit_product(request, pid):
     github_inst = None
     gform = None
     sonarqube_form = None
-    jira_project = jira_help.get_jira_project(prod)
+    jira_project = jira_helper.get_jira_project(prod)
 
     try:
         github_inst = GITHUB_PKey.objects.get(product=prod)
@@ -924,7 +924,7 @@ def new_eng_for_app(request, pid, cicd=False):
                 jform = JIRAEngagementForm(request.POST, prefix='jiraform')
 
             if form.is_valid() and (jform is None or jform.is_valid()):
-                if 'jiraform-push_to_jira' in request.POST and  jform.cleaned_data.get("push_to_jira"):
+                if 'jiraform-push_to_jira' in request.POST and jform.cleaned_data.get("push_to_jira"):
                     jira_helper.add_epic(new_eng)
 
             messages.add_message(request,

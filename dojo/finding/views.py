@@ -170,8 +170,6 @@ django_filter=open_findings_filter):
             filter_name = "Vulnerable Endpoints"
             custom_breadcrumb = OrderedDict([("Endpoints", reverse('vulnerable_endpoints')), (endpoint, reverse('view_endpoint', args=(endpoint.id, )))])
 
-    if jira_project:
-        jira_project = jira_project.conf_id
     if github_config:
         github_config = github_config.git_conf_id
 
@@ -609,7 +607,7 @@ def edit_finding(request, fid):
     jira_link_exists = False
     push_all_jira_issues = False
     gform = None
-    use_jira = jira_helper.get_jira_project() is not None
+    use_jira = jira_helper.get_jira_project(finding) is not None
 
     # for key, value in request.POST.items():
     #     print(f'Key: {key}')

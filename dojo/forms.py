@@ -2079,7 +2079,7 @@ class JIRAProjectForm(forms.ModelForm):
 
     class Meta:
         model = JIRA_Project
-        exclude = ['product']
+        exclude = ['product', 'engagement']
 
 
 class GITHUBFindingForm(forms.Form):
@@ -2146,7 +2146,6 @@ class JIRAFindingForm(forms.Form):
                 if not finding.has_jira_issue:
                     jira_issue_need_to_exist = True
 
-                jira_project = finding.JIRA_Project()
             else:
                 jira_issue_need_to_exist = True
 
