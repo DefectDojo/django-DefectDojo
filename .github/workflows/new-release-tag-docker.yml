@@ -1,4 +1,4 @@
-name: Tag, release, docker
+name: "Release: 2. tag, release, docker push"
 
 env:
   GIT_USERNAME: "DefectDojo release bot"
@@ -13,7 +13,7 @@ on:
         required: true
 
 jobs:
-  tag-and-release:
+  tag-release-push:
     runs-on: ubuntu-latest
     steps:
       - name: Login to DockerHub
