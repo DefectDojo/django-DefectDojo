@@ -13,7 +13,7 @@ on:
         required: true
 
 jobs:
-  tag-release-push:
+  tag-and-release:
     runs-on: ubuntu-latest
     steps:
       - name: Login to DockerHub
