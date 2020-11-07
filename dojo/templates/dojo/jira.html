@@ -6,7 +6,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading tight">
                     <h3 class="has-filters">
-                        Configuration List
+                        JIRA Instances
                         <div class="dropdown pull-right">
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
@@ -15,11 +15,16 @@
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu"
                                 aria-labelledby="dropdownMenu1">
-                                    <li role="presentation">
-                                        <a href="{% url 'add_jira' %}">
-                                            <i class="fa fa-plus"></i> Add Jira Configuration
-                                        </a>
-                                    </li>
+                                <li role="presentation">
+                                    <a href="{% url 'express_jira' %}">
+                                        <i class="fa fa-plus"></i> Add Jira Instance (Express)
+                                    </a>
+                                </li>
+                                <li role="presentation">
+                                    <a href="{% url 'add_jira' %}">
+                                        <i class="fa fa-plus"></i> Add Jira Instance
+                                    </a>
+                                </li>
                             </ul>
                         </div>
                     </h3>
@@ -76,7 +81,7 @@
                     {% include "dojo/paging_snippet.html" with page=jira_instances page_size=True %}
                 </div>
             {% else %}
-                <p class="text-center">No configurations found.</p>
+                <p class="text-center">No JIRA instances found.</p>
             {% endif %}
         </div>
     </div>

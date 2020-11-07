@@ -37,17 +37,16 @@ from dojo.forms import NoteForm, TypedNoteForm, CloseFindingForm, FindingForm, P
     FindingFormID, FindingBulkUpdateForm, MergeFindings
 from dojo.models import Finding, Notes, NoteHistory, Note_Type, \
     BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, Risk_Acceptance, Endpoint_Status, \
-    FindingImageAccessToken, JIRA_Issue, JIRA_Project, GITHUB_PKey, GITHUB_Issue, Dojo_User, Cred_Mapping, Test, Product, User, Engagement
+    FindingImageAccessToken, GITHUB_PKey, GITHUB_Issue, Dojo_User, Cred_Mapping, Test, Product, User, Engagement
 from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_notifications, \
-    add_comment, jira_get_resolution_id, jira_change_resolution_id, get_jira_connection, \
-    get_system_setting, apply_cwe_to_template, Product_Tab, calculate_grade, log_jira_alert, \
-    redirect_to_return_url_or_else, get_return_url, add_jira_issue, update_jira_issue, add_external_issue, update_external_issue, \
-    jira_get_issue, get_words_for_field
+    get_system_setting, apply_cwe_to_template, Product_Tab, calculate_grade, \
+    redirect_to_return_url_or_else, get_return_url, add_external_issue, update_external_issue, \
+    get_words_for_field
 from dojo.notifications.helper import create_notification
 
 from django.template.defaultfilters import pluralize
 from django.db.models import Q, QuerySet, Prefetch, Count
-import dojo.jira_link.jira_helper as jira_helper
+import dojo.jira_link.helper as jira_helper
 
 logger = logging.getLogger(__name__)
 
@@ -271,8 +270,8 @@ def view_finding(request, fid):
             finding.last_reviewed = new_note.date
             finding.last_reviewed_by = user
             finding.save()
-            if finding.has_jira_issue():
-                add_comment_task(finding, new_note)
+            if finding.has_jira_issue:
+                jira_helper.add_comment_task(finding, new_note)
             if note_type_activation:
                 form = TypedNoteForm(available_note_types=available_note_types)
             else:
@@ -448,30 +447,32 @@ def defect_finding_review(request, fid):
                 finding.last_reviewed_by = request.user
                 finding.endpoints.clear()
 
-            jira = get_jira_connection(finding)
-            if jira and JIRA_Issue.objects.filter(finding=finding).exists():
-                j_issue = JIRA_Issue.objects.get(finding=finding)
+            # TODO: JIRA: Code below should move to jira_helper. But I have no idea what it is doin so don't want move/break it
+
+            jira = jira_helper.get_jira_connection(finding)
+            if jira and finding.has_jira_issue:
+                j_issue = finding.jira_issue
                 issue = jira.issue(j_issue.jira_id)
 
                 if defect_choice == "Close Finding":
                     # If the issue id is closed jira will return Reopen Issue
-                    resolution_id = jira_get_resolution_id(jira, issue,
+                    resolution_id = jira_helper.jira_get_resolution_id(jira, issue,
                                                            "Reopen Issue")
                     if resolution_id is None:
-                        resolution_id = jira_get_resolution_id(
+                        resolution_id = jira_helper.jira_get_resolution_id(
                             jira, issue, "Resolve Issue")
-                        jira_change_resolution_id(jira, issue, resolution_id)
+                        jira_helper.jira_change_resolution_id(jira, issue, resolution_id)
                         new_note.entry = new_note.entry + "\nJira issue set to resolved."
                 else:
                     # Re-open finding with notes stating why re-open
-                    resolution_id = jira_get_resolution_id(jira, issue,
+                    resolution_id = jira_helper.jira_get_resolution_id(jira, issue,
                                                         "Resolve Issue")
                     if resolution_id is not None:
-                        jira_change_resolution_id(jira, issue, resolution_id)
+                        jira_helper.jira_change_resolution_id(jira, issue, resolution_id)
                         new_note.entry = new_note.entry + "\nJira issue re-opened."
 
             # Update Dojo and Jira with a notes
-            add_comment(finding, new_note, force_push=True)
+            jira_helper.add_comment(finding, new_note, force_push=True)
             finding.save()
 
             messages.add_message(
@@ -702,7 +703,7 @@ def edit_finding(request, fid):
 
                 # if the jira issue key was changed, update database
                 new_jira_issue_key = jform.cleaned_data.get('jira_issue')
-                if new_finding.has_jira_issue():
+                if new_finding.has_jira_issue:
                     jira_issue = new_finding.jira_issue
 
                     # everything in DD around JIRA integration is based on the internal id of the issue in JIRA
@@ -711,16 +712,16 @@ def edit_finding(request, fid):
                     # we can assume the issue exist, which is already checked in the validation of the jform
 
                     if not new_jira_issue_key:
-                        finding_unlink_jira(request, new_finding)
+                        jira_helper.finding_unlink_jira(request, new_finding)
                         jira_message = 'Link to JIRA issue removed successfully.'
 
                     elif new_jira_issue_key != new_finding.jira_issue.jira_key:
-                        finding_unlink_jira(request, new_finding)
-                        finding_link_jira(request, new_finding, new_jira_issue_key)
+                        jira_helper.finding_unlink_jira(request, new_finding)
+                        jira_helper.finding_link_jira(request, new_finding, new_jira_issue_key)
                         jira_message = 'Changed JIRA link successfully.'
                 else:
                     if new_jira_issue_key:
-                        finding_link_jira(request, new_finding, new_jira_issue_key)
+                        jira_helper.finding_link_jira(request, new_finding, new_jira_issue_key)
                         jira_message = 'Linked a JIRA issue successfully.'
 
             if 'githubform-push_to_github' in request.POST:
@@ -1214,7 +1215,7 @@ def promote_to_finding(request, fid):
 
                 # if the jira issue key was changed, update database
                 new_jira_issue_key = jform.cleaned_data.get('jira_issue')
-                if new_finding.has_jira_issue():
+                if new_finding.has_jira_issue:
                     jira_issue = new_finding.jira_issue
 
                     # everything in DD around JIRA integration is based on the internal id of the issue in JIRA
@@ -1223,18 +1224,18 @@ def promote_to_finding(request, fid):
                     # we can assume the issue exist, which is already checked in the validation of the jform
 
                     if not new_jira_issue_key:
-                        finding_unlink_jira(request, new_finding)
+                        jira_helper.finding_unlink_jira(request, new_finding)
                         jira_message = 'Link to JIRA issue removed successfully.'
 
                     elif new_jira_issue_key != new_finding.jira_issue.jira_key:
-                        finding_unlink_jira(request, new_finding)
-                        finding_link_jira(request, new_finding, new_jira_issue_key)
+                        jira_helper.finding_unlink_jira(request, new_finding)
+                        jira_helper.finding_link_jira(request, new_finding, new_jira_issue_key)
                         jira_message = 'Changed JIRA link successfully.'
                 else:
                     logger.debug('finding has no jira issue yet')
                     if new_jira_issue_key:
                         logger.debug('finding has no jira issue yet, but jira issue specified in request. trying to link.')
-                        finding_link_jira(request, new_finding, new_jira_issue_key)
+                        jira_helper.finding_link_jira(request, new_finding, new_jira_issue_key)
                         jira_message = 'Linked a JIRA issue successfully.'
 
             # Save it and push it to JIRA
@@ -1848,19 +1849,17 @@ def finding_bulk_update_all(request, pid=None):
 
                     # not sure yet if we want to support bulk unlink, so leave as commented out for now
                     # if form.cleaned_data['unlink_from_jira']:
-                    #     if finding.has_jira_issue():
-                    #         finding_unlink_jira(request, finding)
+                    #     if finding.has_jira_issue:
+                    #         jira_helper.finding_unlink_jira(request, finding)
 
                     # Because we never call finding.save() in a bulk update, we need to actually
                     # push the JIRA stuff here, rather than in finding.save()
                     if jira_helper.is_push_to_jira(self, form.cleaned_data['push_to_jira']):
                         if not jira_helper.get_jira_project(finding):
-                            log_jira_alert('Finding cannot be pushed to jira as there is no jira project configuration for this product.', finding)
+                            jira_helper.log_jira_alert('Finding cannot be pushed to jira as there is no jira project configuration for this product.', finding)
                         else:
-                            if finding.has_jira_issue():
-                                update_jira_issue(finding, True)
-                            else:
-                                add_jira_issue(finding, True)
+                            logger.debug('pushing to jira from finding.finding_bulk_update_all()')
+                            jira_helper.push_to_jira(self)
 
                 messages.add_message(request,
                                      messages.SUCCESS,
@@ -2024,9 +2023,9 @@ def set_finding_as_original(request, finding_id, new_original_id):
 def unlink_jira(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     logger.info('trying to unlink a linked jira issue from %d:%s', finding.id, finding.title)
-    if finding.jira():
+    if finding.has_jira_issue():
         try:
-            finding_unlink_jira(request, finding)
+            jira_helper.finding_unlink_jira(request, finding)
 
             messages.add_message(
                 request,
@@ -2052,57 +2051,23 @@ def unlink_jira(request, fid):
         return HttpResponse(status=400)
 
 
-# @user_must_be_authorized(Finding, 'change', 'fid')
-# def finding_unlink_jira(request, fid):
-#     finding = get_object_or_404(Finding, id=fid)
-#     logger.info('trying to unlink a linked jira issue from %d:%s', finding.id, finding.title)
-#     if finding.jira():
-#         try:
-#             # finding.jira_issue.delete()
-
-#             messages.add_message(
-#                 request,
-#                 messages.SUCCESS,
-#                 'Link to JIRA issue succesfully deleted',
-#                 extra_tags='alert-success')
-
-#         except:
-#             messages.add_message(
-#                 request,
-#                 messages.ERROR,
-#                 'Link to JIRA could not be deleted',
-#                 extra_tags='alert-danger')
-#     else:
-#         messages.add_message(
-#             request,
-#             messages.ERROR,
-#             'Link to JIRA not found',
-#             extra_tags='alert-danger')
-
-#     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id,)))
-
-
 @user_must_be_authorized(Finding, 'change', 'fid')
 @require_POST
 def push_to_jira(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     try:
-        if finding.jira():
-            logger.info('trying to push %d:%s to JIRA to update JIRA issue', finding.id, finding.title)
-            update_jira_issue(finding, True)
-            message = 'Action queued to update linked JIRA issue, check alerts for background errors.'
-        else:
-            logger.info('trying to push %d:%s to JIRA to create a new JIRA issue', finding.id, finding.title)
-            add_jira_issue(finding, True)
-            message = 'Action queued to created linked JIRA issue, check alerts for background errors.'
+        logger.info('trying to push %d:%s to JIRA to create or update JIRA issue', finding.id, finding.title)
+        logger.debug('pushing to jira from finding.push_to-jira()')
 
-        # it may look like succes here, but the add_jira_issue and update_jira_issue are swallowing exceptions
+        jira_helper.push_to_jira(self)
+
+        # it may look like succes here, but the push_to_jira are swallowing exceptions
         # but cant't change too much now without having a test suite, so leave as is for now with the addition warning message to check alerts for background errors.
 
         messages.add_message(
             request,
             messages.SUCCESS,
-            message,
+            message='Action queued to create or update linked JIRA issue, check alerts for background errors.',
             extra_tags='alert-success')
         return JsonResponse({'result': 'OK'})
     except:
@@ -2114,58 +2079,6 @@ def push_to_jira(request, fid):
             extra_tags='alert-danger')
         return HttpResponse(status=500)
     # return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id,)))
-
-
-# @user_must_be_authorized(Finding, 'change', 'fid')
-# def finding_link_to_jira(request, fid):
-#     finding = get_object_or_404(Finding, id=fid)
-#     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id,)))
-def finding_link_jira(request, finding, new_jira_issue_key):
-    logger.debug('linking existing jira issue %s for finding %i', new_jira_issue_key, finding.id)
-
-    existing_jira_issue = jira_helper.jira_get_issue(jira_helper.get_jira_project(finding), new_jira_issue_key)
-
-    if not existing_jira_issue:
-        raise ValueError('JIRA issue not found or cannot be retrieved: ' + new_jira_issue_key)
-
-    jira_issue = JIRA_Issue(
-        jira_id=existing_jira_issue.id,
-        jira_key=existing_jira_issue.key,
-        finding=finding)
-
-    jira_issue.jira_key = new_jira_issue_key
-    jira_issue.save()
-
-    # jira timestampe are in iso format: 'updated': '2020-07-17T09:49:51.447+0200'
-    # seems to be a pain to parse these in python < 3.7, so for now just record the curent time as
-    # as the timestamp the jira link was created / updated in DD
-    finding.jira_creation = timezone.now()
-    finding.jira_change = timezone.now()
-    finding.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
-
-    jira_issue_url = jira_helper.get_jira_issue_url(finding)
-
-    new_note = Notes()
-    new_note.entry = 'linked JIRA issue %s to finding' % (jira_issue_url)
-    new_note.author = request.user
-    new_note.save()
-    finding.notes.add(new_note)
-
-
-def finding_unlink_jira(request, finding):
-    logger.debug('removing linked jira issue %s for finding %i', finding.jira_issue.jira_key, finding.id)
-    finding.jira_issue.delete()
-    finding.jira_creation = None
-    finding.jira_change = None
-    finding.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
-
-    jira_issue_url = jira_helper.get_jira_issue_url(finding)
-
-    new_note = Notes()
-    new_note.entry = 'unlinked JIRA issue %s from finding' % (jira_issue_url)
-    new_note.author = request.user
-    new_note.save()
-    finding.notes.add(new_note)
 
 
 def get_similar_findings(request, finding):

@@ -29,9 +29,9 @@ from dojo.models import Finding, Product_Type, Product, Note_Type, ScanSettings,
     ChoiceQuestion, General_Survey, Regulation
 
 from dojo.tools import requires_file, SCAN_SONARQUBE_API
-from dojo.utils import jira_get_issue
 from dojo.user.helper import user_is_authorized
 from django.urls import reverse
+import dojo.jira_link.helper as jira_helper
 import logging
 
 logger = logging.getLogger(__name__)
@@ -1758,6 +1758,7 @@ class JIRAForm(forms.ModelForm):
 
     class Meta:
         model = JIRA_Instance
+        exclude = ['']
 
 
 class ExpressJIRAForm(forms.ModelForm):
@@ -2115,7 +2116,7 @@ class JIRAFindingForm(forms.Form):
             self.fields['push_to_jira'].disabled = True
 
         if self.instance:
-            if self.instance.has_jira_issue():
+            if self.instance.has_jira_issue:
                 self.initial['jira_issue'] = self.instance.jira_issue.jira_key
 
         self.fields['jira_issue'].widget = forms.TextInput(attrs={'placeholder': 'Leave empty and check push to jira to create a new JIRA issue'})
@@ -2137,11 +2138,11 @@ class JIRAFindingForm(forms.Form):
 
                 jira_issue_need_to_exist = False
                 # changing jira link on finding
-                if finding.has_jira_issue() and jira_issue_key_new != finding.jira_issue.jira_key:
+                if finding.has_jira_issue and jira_issue_key_new != finding.jira_issue.jira_key:
                     jira_issue_need_to_exist = True
 
                 # adding existing jira issue to finding without jira link
-                if not finding.has_jira_issue():
+                if not finding.has_jira_issue:
                     jira_issue_need_to_exist = True
 
                 jira_project = finding.JIRA_Project()
@@ -2149,7 +2150,7 @@ class JIRAFindingForm(forms.Form):
                 jira_issue_need_to_exist = True
 
             if jira_issue_need_to_exist:
-                jira_issue_new = jira_get_issue(jira_project, jira_issue_key_new)
+                jira_issue_new = jira_helper.jira_get_issue(jira_project, jira_issue_key_new)
                 if not jira_issue_new:
                     raise ValidationError('JIRA issue ' + jira_issue_key_new + ' does not exist or cannot be retrieved')
 
@@ -2194,7 +2195,7 @@ class JIRAEngagementForm(forms.Form):
         super(JIRAEngagementForm, self).__init__(*args, **kwargs)
 
         if self.instance:
-            if self.instance.has_jira_issue():
+            if self.instance.has_jira_issue:
                 self.fields['push_to_jira'].widget.attrs['checked'] = 'checked'
                 self.fields['push_to_jira'].label = 'Update JIRA Epic'
                 self.fields['push_to_jira'].help_text = 'Checking this will update the existing EPIC in JIRA.'

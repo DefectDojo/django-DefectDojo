@@ -2,14 +2,12 @@ import re
 import binascii
 import os
 import hashlib
-import io
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 from calendar import monthrange
 from datetime import date, datetime
 from math import pi, sqrt
 import vobject
-import requests
 from dateutil.relativedelta import relativedelta, MO, SU
 from django.conf import settings
 from django.core.mail import send_mail
@@ -17,20 +15,16 @@ from django.core.paginator import Paginator
 from django.urls import get_resolver, reverse
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
 from django.template.defaultfilters import pluralize
-from django.template.loader import render_to_string
 from django.utils import timezone
-from jira import JIRA
-from jira.exceptions import JIRAError
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from django.db.models.query import QuerySet
 import calendar as tcalendar
 from dojo.github import add_external_issue_github, update_external_issue_github, close_external_issue_github, reopen_external_issue_github
-from dojo.models import Finding, Engagement, Finding_Template, Product, JIRA_Project, JIRA_Issue,\
+from dojo.models import Finding, Engagement, Finding_Template, Product, \
     Dojo_User, User, System_Settings, Notifications, Endpoint, Benchmark_Type, \
-    Language_Type, Languages, Rule, Notes
+    Language_Type, Languages, Rule
 from asteval import Interpreter
-from requests.auth import HTTPBasicAuth
 from dojo.notifications.helper import create_notification
 import logging
 import itertools
@@ -1214,8 +1208,6 @@ def handle_uploaded_selenium(f, cred):
     cred.save()
 
 
-
-
 @dojo_async_task
 @task
 def add_external_issue(find, external_issue_provider):
@@ -1255,7 +1247,6 @@ def reopen_external_issue(find, note, external_issue_provider):
 
     if external_issue_provider == 'github':
         reopen_external_issue_github(find, note, prod, eng)
-
 
 
 def send_review_email(request, user, finding, users, new_note):
@@ -1677,6 +1668,8 @@ def sla_compute_and_notify(*args, **kwargs):
     Notifications are managed the usual way, so you'd have to opt-in.
     Exception is for JIRA issues, which would get a comment anyways.
     """
+    import dojo.jira_link.helper as jira_helper
+
     def _notify(finding, title):
         create_notification(
             event='sla_breach',
@@ -1687,7 +1680,7 @@ def sla_compute_and_notify(*args, **kwargs):
 
         if do_jira_sla_comment:
             logger.info("Creating JIRA comment to notify of SLA breach information.")
-            add_simple_jira_comment(jira_instance, jira_issue, title)
+            jira_helper.add_simple_jira_comment(jira_instance, jira_issue, title)
 
     # exit early on flags
     if not settings.SLA_NOTIFY_ACTIVE and not settings.SLA_NOTIFY_ACTIVE_VERIFIED_ONLY:
@@ -1750,7 +1743,7 @@ def sla_compute_and_notify(*args, **kwargs):
                     continue
 
                 do_jira_sla_comment = False
-                if finding.has_jira_issue():
+                if finding.has_jira_issue:
                     jira_count += 1
                     jira_instance = jira_helper.get_jira_instance(finding)
                     if jira_instance is not None:

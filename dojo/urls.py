@@ -23,8 +23,8 @@ from dojo.api import UserResource, ProductResource, EngagementResource, \
     BuildDetails, DevelopmentEnvironmentResource, ProductTypeResource, TestTypeResource, \
     Note_TypeResource
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
-    FindingTemplatesViewSet, FindingViewSet, JiraConfigurationsViewSet, \
-    JiraIssuesViewSet, JiraViewSet, ProductViewSet, ScanSettingsViewSet, \
+    FindingTemplatesViewSet, FindingViewSet, JiraInstanceViewSet, \
+    JiraIssuesViewSet, JiraProjectViewSet, ProductViewSet, ScanSettingsViewSet, \
     ScansViewSet, StubFindingsViewSet, TestsViewSet, TestTypesViewSet, \
     ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
     UsersViewSet, ImportScanView, ReImportScanView, ProductTypeViewSet, DojoMetaViewSet, \

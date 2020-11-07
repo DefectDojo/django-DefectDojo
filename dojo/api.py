@@ -796,7 +796,7 @@ class EndpointResource(BaseModelResource):
 
 
 """
-    /api/v1/JIRA_Instanceigurations/
+    /api/v1/JIRA_Issues/
     GET [/id/], DELETE [/id/]
     Expects: no params or JIRA_Project
     Returns jira configuration: ALL or by JIRA_Project
@@ -828,7 +828,7 @@ class JIRA_IssueResource(BaseModelResource):
 
 
 """
-    /api/v1/JIRA_Instanceigurations/
+    /api/v1/JIRA_Configurations/
     GET [/id/], DELETE [/id/]
     Expects: no params or JIRA_Project
     Returns jira configuration: ALL or by JIRA_Project
@@ -837,7 +837,7 @@ class JIRA_IssueResource(BaseModelResource):
 """
 
 
-class JIRA_InstanceResource(BaseModelResource):
+class JIRA_ConfResource(BaseModelResource):
 
     class Meta:
         resource_name = 'JIRA_Instanceigurations'
@@ -855,7 +855,7 @@ class JIRA_InstanceResource(BaseModelResource):
 
         @property
         def validation(self):
-            return ModelFormValidation(form_class=JIRAForm, resource=JIRA_InstanceResource)
+            return ModelFormValidation(form_class=JIRAForm, resource=JIRA_ConfResource)
 
 
 """
@@ -870,7 +870,7 @@ class JIRA_InstanceResource(BaseModelResource):
 class JiraResource(BaseModelResource):
     product = fields.ForeignKey(ProductResource, 'product',
                                 full=False, null=False)
-    conf = fields.ForeignKey(JIRA_InstanceResource, 'conf',
+    conf = fields.ForeignKey(JIRA_ConfResource, 'conf',
                                 full=False, null=True)
 
     class Meta:

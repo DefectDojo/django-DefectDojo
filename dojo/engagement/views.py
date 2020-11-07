@@ -32,13 +32,13 @@ from dojo.models import Finding, Product, Engagement, Test, \
 from dojo.tools import handles_active_verified_statuses
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
-    FileIterWrapper, get_cal_event, message, get_system_setting, Product_Tab, is_scan_file_too_large, update_epic, add_epic
+    FileIterWrapper, get_cal_event, message, get_system_setting, Product_Tab, is_scan_file_too_large
 from dojo.notifications.helper import create_notification
 from dojo.finding.views import find_available_notetypes
 from functools import reduce
 from django.db.models.query import QuerySet
 from dojo.user.helper import user_must_be_authorized, user_is_authorized, check_auth_users_list
-import dojo.jira_link.jira_helper as jira_helper
+import dojo.jira_link.helper as jira_helper
 
 
 logger = logging.getLogger(__name__)
@@ -190,14 +190,9 @@ def edit_engagement(request, eid):
 
         if (form.is_valid() and jform is None) or (form.is_valid() and jform and jform.is_valid()):
             logger.debug('jform valid')
-            if 'jiraform-push_to_jira' in request.POST:
+            if 'jiraform-push_to_jira' in request.POST and jform.cleaned_data.get('push_to_jira'):
                 logger.debug('push_to_jira true')
-                if JIRA_Issue.objects.filter(engagement=eng).exists():
-                    update_epic(
-                        eng, jform.cleaned_data.get('push_to_jira'))
-
-                else:
-                    add_epic(eng, jform.cleaned_data.get('push_to_jira'))
+                jira_helper.push_to_jira(eng)
 
             temp_form = form.save(commit=False)
             if (temp_form.status == "Cancelled" or temp_form.status == "Completed"):
@@ -310,20 +305,14 @@ def view_engagement(request, eid):
         network = eng.preset.network_locations.all()
     system_settings = System_Settings.objects.get()
 
-    try:
-        jissue = JIRA_Issue.objects.get(engagement=eng)
-    except:
-        jissue = None
-        pass
-    try:
-        jconf = JIRA_Project.objects.get(product=eng.product).conf
-    except:
-        jconf = None
-        pass
+    jissue = eng.jira_issue
+    jconf = jira_helper.get_jira_project(eng)
+
     exclude_findings = [
         finding.id for ra in eng.risk_acceptance.all()
         for finding in ra.accepted_findings.all()
     ]
+
     eng_findings = Finding.objects.filter(test__in=eng.test_set.all()) \
         .exclude(id__in=exclude_findings).order_by('title')
 

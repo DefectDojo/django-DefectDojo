@@ -30,13 +30,12 @@ from dojo.models import Finding, Test, Notes, Note_Type, BurpRawRequestResponse,
     Finding_Template, JIRA_Project, Cred_Mapping, Dojo_User, System_Settings, Endpoint_Status
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting, \
-    Product_Tab, max_safe, is_scan_file_too_large, add_jira_issue, get_words_for_field
+    Product_Tab, max_safe, is_scan_file_too_large, get_words_for_field
 from dojo.notifications.helper import create_notification
 from dojo.finding.views import find_available_notetypes
 from functools import reduce
-from dojo.finding.views import finding_link_jira, finding_unlink_jira
 from dojo.user.helper import user_must_be_authorized
-import dojo.jira_link.jira_helper as jira_helper
+import dojo.jira_link.helper as jira_helper
 
 
 logger = logging.getLogger(__name__)
@@ -376,7 +375,7 @@ def add_findings(request, tid):
 
                 # if the jira issue key was changed, update database
                 new_jira_issue_key = jform.cleaned_data.get('jira_issue')
-                if new_finding.has_jira_issue():
+                if new_finding.has_jira_issue:
                     jira_issue = new_finding.jira_issue
 
                     # everything in DD around JIRA integration is based on the internal id of the issue in JIRA
@@ -385,18 +384,18 @@ def add_findings(request, tid):
                     # we can assume the issue exist, which is already checked in the validation of the jform
 
                     if not new_jira_issue_key:
-                        finding_unlink_jira(request, new_finding)
+                        jira_helper.finding_unlink_jira(request, new_finding)
                         jira_message = 'Link to JIRA issue removed successfully.'
 
                     elif new_jira_issue_key != new_finding.jira_issue.jira_key:
-                        finding_unlink_jira(request, new_finding)
-                        finding_link_jira(request, new_finding, new_jira_issue_key)
+                        jira_helper.finding_unlink_jira(request, new_finding)
+                        jira_helper.finding_link_jira(request, new_finding, new_jira_issue_key)
                         jira_message = 'Changed JIRA link successfully.'
                 else:
                     logger.debug('finding has no jira issue yet')
                     if new_jira_issue_key:
                         logger.debug('finding has no jira issue yet, but jira issue specified in request. trying to link.')
-                        finding_link_jira(request, new_finding, new_jira_issue_key)
+                        jira_helper.finding_link_jira(request, new_finding, new_jira_issue_key)
                         jira_message = 'Linked a JIRA issue successfully.'
 
             new_finding.save(false_history=True, push_to_jira=push_to_jira)
@@ -532,7 +531,8 @@ def add_temp_finding(request, tid, fid):
             if 'jiraform-push_to_jira' in request.POST:
                 jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_project=jira_helper.get_jira_project(test))
                 if jform.is_valid():
-                    add_jira_issue(new_finding, jform.cleaned_data.get('push_to_jira'))
+                    if jform.cleaned_data.get('push_to_jira'):
+                        jira_helper.push_to_jira(new_finding)
 
             messages.add_message(request,
                                  messages.SUCCESS,

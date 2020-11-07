@@ -717,7 +717,7 @@
           {% if jissue and jconf %}
           <tr>
             <td><strong>Jira</strong></td>
-            <td><a href="{{ jconf.url }}/browse/{{ jissue.jira_key }}" target="_blank"><i class="fa fa-external-link"></i> Jira Epic ({{ jissue.jira_key }})</a></td>
+            <td><a href="{{ eng | jira_url }}" target="_blank"><i class="fa fa-external-link"></i> Jira Epic ({{ eng | jira_key }})</a></td>
           </tr>
           {% endif %}
           <tr>

@@ -58,7 +58,7 @@
                                 <td>{{ finding.age }}</td>
                                 {% if system_settings.enable_jira %}
                                 <td>
-                                <a href="{{finding.jira_conf.url}}/browse/{{finding.jira.jira_key}}" target="_blank"> {{finding.jira.jira_key}} </a>
+                                <a href="{{ finding|jira_url }} target="_blank"> {{ finding|jira_key }} </a>
                                 </td>
                                 {% endif %}
                             </tr>

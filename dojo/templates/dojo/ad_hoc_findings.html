@@ -26,9 +26,9 @@
                         </i>
                     </label>
                     <div class="col-sm-10 form-control-static">
-                        {% if product_tab.product.jira_conf %}
-                            <a href="{{ product_tab.product.jira_conf.url }}/browse/{{ product_tab.product.jira_pkey.project_key }}"
-                            target="_blank"> {{ product_tab.product.jira_conf.url }}/browse/{{ product_tab.product.jira_pkey.project_key }} </a>
+                        {% if product_tab.product.has_jira_configured %}
+                            <a href="{{ product_tab.product|jira_url }}"
+                            target="_blank"> {{ product_tab.product|jira_url }} </a>
                         {% else %}
                         None
                         {% endif %}

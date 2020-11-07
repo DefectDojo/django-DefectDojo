@@ -3,8 +3,8 @@ import logging
 
 from django.utils import timezone
 from dojo.models import JIRA_Project
-from dojo.utils import get_system_setting, close_epic
-import dojo.jira_link.jira_helper as jira_helper
+from dojo.utils import get_system_setting
+import dojo.jira_link.helper as jira_helper
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +16,7 @@ def close_engagement(eng):
     eng.save()
 
     if jira_helper.get_jira_project(eng):
-        close_epic(eng, True)
+        jira_helper.close_epic(eng, True)
 
 
 def reopen_engagement(eng):

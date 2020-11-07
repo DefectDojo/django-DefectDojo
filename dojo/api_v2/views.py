@@ -30,7 +30,7 @@ from datetime import datetime
 from dojo.utils import get_period_counts_legacy, get_system_setting
 from dojo.api_v2 import serializers, permissions
 from django.db.models import Count, Q
-import dojo.jira_link.jira_helper as jira_helper
+import dojo.jira_link.helper as jira_helper
 
 
 class EndPointViewSet(mixins.ListModelMixin,
@@ -396,8 +396,8 @@ class FindingViewSet(mixins.ListModelMixin,
             note.save()
             finding.notes.add(note)
 
-            if finding.has_jira_issue():
-                add_comment_task(finding, note)
+            if finding.has_jira_issue:
+                jira_helper.add_comment_task(finding, note)
 
             serialized_note = serializers.NoteSerializer({
                 "author": author, "entry": entry,

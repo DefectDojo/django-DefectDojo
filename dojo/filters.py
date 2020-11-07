@@ -480,8 +480,8 @@ class ApiFindingFilter(DojoFilter):
     # DateRangeFilter
     created = DateRangeFilter()
     date = DateRangeFilter()
-    jira_change = DateRangeFilter()
-    jira_creation = DateRangeFilter()
+    jira_creation = DateRangeFilter(field_name='jira_issue__jira_creation')
+    jira_change = DateRangeFilter(field_name='jira_issue__jira_change')
     last_reviewed = DateRangeFilter()
     mitigated = DateRangeFilter()
     # NumberInFilter

@@ -22,7 +22,7 @@ from dojo.models import User, JIRA_Instance, JIRA_Issue, Notes, Risk_Acceptance
 from dojo.utils import add_breadcrumb, get_system_setting
 from dojo.notifications.helper import create_notification
 from django.views.decorators.http import require_POST
-import jira_helper
+import dojo.jira_link.helper as jira_helper
 
 logger = logging.getLogger(__name__)
 
@@ -94,7 +94,9 @@ def webhook(request, secret=None):
                         finding.is_Mitigated = False
                         finding.false_p = False
                         finding.remove_from_any_risk_acceptance()
-                    finding.jira_change = timezone.now()
+
+                    finding.jira_issue.jira_change = timezone.now()
+                    finding.jira_issue.save()
                     finding.save()
             """
             if jissue.engagement is not None:
@@ -120,7 +122,8 @@ def webhook(request, secret=None):
             new_note.author, created = User.objects.get_or_create(username='JIRA')
             new_note.save()
             finding.notes.add(new_note)
-            finding.jira_change = timezone.now()
+            finding.jira_issue.jira_change = timezone.now()
+            finding.jira_issue.save()
             finding.save()
             create_notification(event='other', title='JIRA Update - %s' % (jissue.finding), url=reverse("view_finding", args=(jissue.id,)), icon='check')
 
@@ -212,8 +215,6 @@ def express_new_jira(request):
 @user_passes_test(lambda u: u.is_staff)
 def new_jira(request):
     if request.method == 'POST':
-        if '_Express' in request.POST:
-            return HttpResponseRedirect(reverse('express_jira', ))
         jform = JIRAForm(request.POST, instance=JIRA_Instance())
         if jform.is_valid():
             try:
@@ -307,21 +308,9 @@ def edit_jira(request, jid):
                   })
 
 
-# @user_passes_test(lambda u: u.is_staff)
-# def delete_issue(request, find):
-#     j_issue = JIRA_Issue.objects.get(finding=find)
-#     jira_instance = find.jira_instance()
-#     jira = JIRA(server=jira_instance.url,
-#                 basic_auth=(jira_instance.username,
-#                             jira_instance.password),
-#                 options={"verify": settings.JIRA_SSL_VERIFY})
-#     issue = jira.issue(j_issue.jira_id)
-#     issue.delete()
-
-
 @user_passes_test(lambda u: u.is_staff)
 def jira(request):
-    jira_instances = JIRA_Instances.objects.all()
+    jira_instances = JIRA_Instance.objects.all()
     add_breadcrumb(title="JIRA List", top_level=not len(request.GET), request=request)
     return render(request,
                   'dojo/jira.html',

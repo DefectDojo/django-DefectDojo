@@ -57,16 +57,6 @@ def edit_tool_type(request, ttid):
 
 
 @user_passes_test(lambda u: u.is_staff)
-def delete_issue(request, find):
-    j_issue = JIRA_Issue.objects.get(finding=find)
-    jira = JIRA(server=Tool_Type.url,
-                basic_auth=(Tool_Type.username, Tool_Type.password),
-                options={"verify": settings.JIRA_SSL_VERIFY})
-    issue = jira.issue(j_issue.jira_id)
-    issue.delete()
-
-
-@user_passes_test(lambda u: u.is_staff)
 def tool_type(request):
     confs = Tool_Type.objects.all().order_by('name')
     add_breadcrumb(title="Tool Type List", top_level=not len(request.GET), request=request)

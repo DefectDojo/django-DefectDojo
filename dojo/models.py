@@ -803,18 +803,9 @@ class Product(models.Model):
         return findings_list
 
     @property
-    def jira_pkey(self):
-        try:
-            return self.jira_pkey_set.all()[0]
-        except:
-            return None
-
-    @property
-    def jira_conf(self):
-        try:
-            return self.jira_pkey_set.all()[0].conf
-        except:
-            return None
+    def has_jira_configured(self):
+        import dojo.jira_link.helper as jira_helper
+        return jira_helper.has_jira_configured(self)
 
     def get_absolute_url(self):
         from django.urls import reverse
@@ -1074,12 +1065,10 @@ class Engagement(models.Model):
     def accept_risks(self, accepted_risks):
         self.risk_acceptance.add(*accepted_risks)
 
+    @property
     def has_jira_issue(self):
-        try:
-            issue = self.jira_issue
-            return True
-        except JIRA_Issue.DoesNotExist:
-            return False
+        import dojo.jira_link.helper as jira_helper
+        return jira_helper.has_jira_issue(self)
 
     def get_absolute_url(self):
         from django.urls import reverse
@@ -2043,46 +2032,15 @@ class Finding(models.Model):
             return None
             pass
 
-    def jira(self):
-        try:
-            return self.jira_issue
-        except JIRA_Issue.DoesNotExist:
-            return None
-
+    @property
     def has_jira_issue(self):
-        try:
-            issue = self.jira_issue
-            return True
-        except JIRA_Issue.DoesNotExist:
-            return False
+        import dojo.jira_link.helper as jira_helper
+        return jira_helper.has_jira_issue(self)
 
-    def jira_conf(self):
-        try:
-            jira_project = JIRA_Project.objects.get(product=self.test.engagement.product)
-            jconf = jira_project.jira_instance
-        except:
-            jconf = None
-            pass
-        return jconf
-
-    # newer version that can work with prefetching due to array index isntead of first.
-    def jira_conf_new(self):
-        try:
-            return self.test.engagement.product.jira_pkey_set.all()[0].conf
-        except:
-            return None
-
-    # newer version that can work with prefetching due to array index isntead of first.
-    def jira_pkey(self):
-        try:
-            return self.test.engagement.product.jira_pkey_set.all()[0]
-        except:
-            return None
-            pass
-
-    def get_push_all_to_jira(self):
-        if self.jira_pkey():
-            return self.jira_pkey().push_all_issues
+    @property
+    def has_jira_configured(self):
+        import dojo.jira_link.helper as jira_helper
+        return jira_helper.has_jira_configured(self)
 
     def long_desc(self):
         long_desc = ''
@@ -2116,8 +2074,6 @@ class Finding(models.Model):
             from dojo.utils import get_current_user
             user = get_current_user()
             logger.debug('finding.save() getting current user: %s', user)
-
-        jira_issue_exists = JIRA_Issue.objects.filter(finding=self).exists()
 
         if self.pk is None:
             # We enter here during the first call from serializers.py
@@ -2187,11 +2143,8 @@ class Finding(models.Model):
         # Adding a snippet here for push to JIRA so that it's in one place
         if push_to_jira:
             logger.debug('pushing to jira from finding.save()')
-            from dojo.utils import add_jira_issue, update_jira_issue
-            if jira_issue_exists:
-                update_jira_issue(self, True)
-            else:
-                add_jira_issue(self, True)
+            import dojo.jira_link.helper as jira_helper
+            jira_helper.push_to_jira(self)
 
     def delete(self, *args, **kwargs):
         for find in self.original_finding.all():
@@ -2624,8 +2577,8 @@ class JIRA_Instance(models.Model):
 
 class JIRA_Project(models.Model):
     project_key = models.CharField(max_length=200, blank=True)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    engagement = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True)
+    engagement = models.ForeignKey(Engagement, on_delete=models.CASCADE, null=True)
     jira_instance = models.ForeignKey(JIRA_Instance, verbose_name="JIRA Instance",
                              null=True, blank=True, on_delete=models.CASCADE)
     component = models.CharField(max_length=200, blank=True)
@@ -2648,11 +2601,11 @@ class JIRA_Project(models.Model):
 
 
 class JIRA_Issue(models.Model):
-    jira_project = models.ForeignKey(JIRA_Project, on_delete=models.SET_NULL)  # just to be sure we don't delete JIRA_Issue if a jira_project is deleted
+    jira_project = models.ForeignKey(JIRA_Project, on_delete=models.SET_NULL, null=True)  # just to be sure we don't delete JIRA_Issue if a jira_project is deleted
     jira_id = models.CharField(max_length=200)
     jira_key = models.CharField(max_length=200)
     finding = models.OneToOneField(Finding, null=True, blank=True, on_delete=models.CASCADE)
-    engagement_epic = models.OneToOneField(Engagement, null=True, blank=True, on_delete=models.CASCADE)
+    engagement = models.OneToOneField(Engagement, null=True, blank=True, on_delete=models.CASCADE)
 
     jira_creation = models.DateTimeField(editable=True,
                                          null=True,
@@ -2660,9 +2613,8 @@ class JIRA_Issue(models.Model):
                                          help_text="The date a Jira issue was created from this finding.")
     jira_change = models.DateTimeField(editable=True,
                                        null=True,
-                                       verbose_name="Jira change",
+                                       verbose_name="Jira last update",
                                        help_text="The date the linked Jira issue was last modified.")
-
 
     def __unicode__(self):
         text = ""
@@ -2679,8 +2631,6 @@ class JIRA_Issue(models.Model):
         elif self.engagement:
             text = self.engagement.product.name + " | Engagement: " + self.engagement.name + ", ID: " + str(self.engagement.id)
         return text + " | Jira Key: " + str(self.jira_key)
-
-
 
 
 NOTIFICATION_CHOICES = (

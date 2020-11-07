@@ -641,23 +641,17 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     related_fields = serializers.SerializerMethodField()
     # for backwards compatibility
     jira_creation = serializers.SerializerMethodField()
-    jira_updated = serializers.SerializerMethodField()
+    jira_change = serializers.SerializerMethodField()
 
     class Meta:
         model = Finding
         fields = '__all__'
 
     def get_jira_creation(self, obj):
-        if self.has_jira_issue:
-            return self.jira_issue.jira_creation
+        return jira_helper.get_jira_creation(self)
 
-        return None
-
-    def get_jira_updated(self, obj):
-        if self.has_jira_issue:
-            return self.jira_issue.jira_updated
-
-        return None
+    def get_jira_change(self, obj):
+        return jira_helper.get_jira_changed(self)
 
     def get_related_fields(self, obj):
         query_params = self.context['request'].query_params

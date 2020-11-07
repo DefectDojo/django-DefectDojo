@@ -21,7 +21,7 @@ from urllib.parse import urlparse
 import bleach
 import git
 from django.conf import settings
-
+import dojo.jira_link.helper as jira_helper
 
 register = template.Library()
 
@@ -825,6 +825,26 @@ def jiraencode(value):
         return value
     # jira can't handle some characters inside [] tag for urls https://jira.atlassian.com/browse/CONFSERVER-4009
     return value.replace("|", "").replace("@", "")
+
+
+@register.filter
+def jira_url(obj):
+    return jira_helper.get_jira_url(obj)
+
+
+@register.filter
+def jira_key(obj):
+    return jira_helper.get_jira_key(obj)
+
+
+@register.filter
+def jira_creation(obj):
+    return jira_helper.get_jira_creation(obj)
+
+
+@register.filter
+def jira_change(obj):
+    return jira_helper.get_jira_change(obj)
 
 
 @register.filter
