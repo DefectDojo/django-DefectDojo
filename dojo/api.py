@@ -828,7 +828,7 @@ class JIRA_IssueResource(BaseModelResource):
 
 
 """
-    /api/v1/JIRA_Configurations/
+    /api/v1/jira_configurations/
     GET [/id/], DELETE [/id/]
     Expects: no params or JIRA_Project
     Returns jira configuration: ALL or by JIRA_Project
@@ -840,7 +840,7 @@ class JIRA_IssueResource(BaseModelResource):
 class JIRA_ConfResource(BaseModelResource):
 
     class Meta:
-        resource_name = 'JIRA_Instanceigurations'
+        resource_name = 'JIRA_Configurations'
         list_allowed_methods = ['get', 'post', 'put', 'delete']
         detail_allowed_methods = ['get', 'post', 'put', 'delete']
         queryset = JIRA_Instance.objects.all()
