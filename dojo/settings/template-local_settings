@@ -1,6 +1,7 @@
 # local_settings.py
 # this file will be included by settings.py *after* loading settings.dist.py
-# from components.base import INSTALLED_APPS
+
+# this example configures the django debug toolbar and sets some loglevels to DEBUG
 
 from django.conf.urls import include, url
 
@@ -18,8 +19,6 @@ LOGGING['loggers']['root'] = {
         }
 LOGGING['loggers']['dojo']['level'] = 'DEBUG'
 LOGGING['loggers']['dojo.specific-loggers.deduplication']['level'] = 'DEBUG'
-
-CACHALOT_UNCACHABLE_TABLES = frozenset(('django_migrations'))
 
 
 def show_toolbar(request):
