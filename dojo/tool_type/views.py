@@ -10,7 +10,7 @@ from dojo.utils import add_breadcrumb
 from dojo.forms import ToolTypeForm
 from dojo.models import Tool_Type, JIRA_Issue
 from jira import JIRA
-
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 

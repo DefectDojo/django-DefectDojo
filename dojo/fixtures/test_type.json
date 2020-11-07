@@ -648,7 +648,7 @@
             "name": "Risk Recon API Importer"
         },
         "model": "dojo.test_type",
-		"pk": 184
+		     "pk": 184
     },
     {
         "fields": {
@@ -663,6 +663,13 @@
         },
         "model": "dojo.test_type",
         "pk": 186
+    },
+	{
+        "fields": {
+            "name": "Semgrep JSON Report"
+        },
+        "model": "dojo.test_type",
+        "pk": 187
     }
 
 ]
