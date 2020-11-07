@@ -41,7 +41,7 @@ annotations: {}
 # Components
 celery:
   broker: rabbitmq
-  logLevel: DEBUG
+  logLevel: INFO
   beat:
     annotations: {}
     affinity: {}
@@ -58,7 +58,7 @@ celery:
   worker:
     annotations: {}
     affinity: {}
-    logLevel: DEBUG
+    logLevel: INFO
     nodeSelector: {}
     replicas: 1
     resources:
