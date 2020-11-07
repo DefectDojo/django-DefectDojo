@@ -2578,7 +2578,7 @@ class JIRA_Instance(models.Model):
 class JIRA_Project(models.Model):
     project_key = models.CharField(max_length=200, blank=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True)
-    engagement = models.ForeignKey(Engagement, on_delete=models.CASCADE, null=True)
+    engagement = models.OneToOneField(Engagement, on_delete=models.CASCADE, null=True, blank=True,)
     jira_instance = models.ForeignKey(JIRA_Instance, verbose_name="JIRA Instance",
                              null=True, blank=True, on_delete=models.CASCADE)
     component = models.CharField(max_length=200, blank=True)

@@ -2021,7 +2021,7 @@ def set_finding_as_original(request, finding_id, new_original_id):
 def unlink_jira(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     logger.info('trying to unlink a linked jira issue from %d:%s', finding.id, finding.title)
-    if finding.has_jira_issue():
+    if finding.has_jira_issue:
         try:
             jira_helper.finding_unlink_jira(request, finding)
 
@@ -2057,7 +2057,7 @@ def push_to_jira(request, fid):
         logger.info('trying to push %d:%s to JIRA to create or update JIRA issue', finding.id, finding.title)
         logger.debug('pushing to jira from finding.push_to-jira()')
 
-        jira_helper.push_to_jira(self)
+        jira_helper.push_to_jira(finding)
 
         # it may look like succes here, but the push_to_jira are swallowing exceptions
         # but cant't change too much now without having a test suite, so leave as is for now with the addition warning message to check alerts for background errors.

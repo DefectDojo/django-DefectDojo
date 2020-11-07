@@ -772,8 +772,15 @@ def edit_product(request, pid):
                 # need to handle delete
                 try:
                     jform.save()
-                except:
+                except Exception as e:
+                    logger.exception(e)
+                    logger.info(jform.errors)
+                    messages.add_message(request,
+                                            messages.ERROR,
+                                            'JIRA Project config not updated due to errors.',
+                                            extra_tags='alert-danger')
                     pass
+
             elif get_system_setting('enable_jira'):
                 jform = JIRAProjectForm(request.POST)
                 if jform.is_valid():
@@ -784,6 +791,12 @@ def edit_product(request, pid):
                                             messages.SUCCESS,
                                             'JIRA information updated successfully.',
                                             extra_tags='alert-success')
+                else:
+                    logger.info(jform.errors)
+                    messages.add_message(request,
+                                            messages.ERROR,
+                                            'JIRA form not valid.',
+                                            extra_tags='alert-danger')
 
             if get_system_setting('enable_github') and github_inst:
                 gform = GITHUB_Product_Form(request.POST, instance=github_inst)
