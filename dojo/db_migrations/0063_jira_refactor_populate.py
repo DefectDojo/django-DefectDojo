@@ -39,15 +39,17 @@ class Migration(migrations.Migration):
             # try:
             if not jira_issue.jira_project and jira_issue.finding:
                 logger.info('populating jira_issue from finding: %s', jira_issue.jira_key)
-                # jira_project = jira_helper.get_jira_project(jira_issue.finding)
-                jira_project = jira_issue.finding.test.engagement.product.jira_project_set.all()[0]
+                # jira_project = jira_helper.get_jira_project(jira_issue.finding) #  jira_helper will use wrong Finding model version
+                jira_projects = jira_issue.finding.test.engagement.product.jira_project_set.all()
+                jira_project = jira_projects[0] if len(jira_projects) > 0 else None
+
                 logger.debug('jira_project: %s', jira_project)
                 jira_issue.jira_project = jira_project
                 jira_issue.save()
             elif not jira_issue.jira_project and jira_issue.engagement:
                 logger.debug('populating jira_issue from engagement: %s', jira_issue.jira_key)
-                # jira_project = jira_helper.get_jira_project(jira_issue.finding)
-                jira_project = jira_issue.engagement.product.jira_project_set.all()[0]
+                jira_projects = jira_issue.engagement.product.jira_project_set.all()
+                jira_project = jira_projects[0] if len(jira_projects) > 0 else None
                 logger.debug('jira_project: %s', jira_project)
                 jira_issue.jira_project = jira_project
                 jira_issue.save()

@@ -82,14 +82,16 @@ def get_jira_project(obj):
     if isinstance(obj, Engagement):
         # TODO refactor relationships, but now this would brake APIv1 (and v2?)
         engagement = obj
-        jira_project = engagement.product.jira_project_set.all()[0]  # first() doesn't work with prefetching
+        jira_projects = engagement.product.jira_project_set.all()  # first() doesn't work with prefetching
+        jira_project = jira_projects[0] if len(jira_projects) > 0 else None
         logger.debug('found jira_instance %s for %s', jira_project, engagement)
         return jira_project
 
     if isinstance(obj, Product):
         # TODO refactor relationships, but now this would brake APIv1 (and v2?)
         product = obj
-        jira_project = product.jira_project_set.all()[0]  # first() doesn't work with prefetching
+        jira_projects = product.jira_project_set.all()  # first() doesn't work with prefetching
+        jira_project = jira_projects[0] if len(jira_projects) > 0 else None
         logger.debug('found jira_instance %s for %s', jira_project, product)
         return jira_project
 
