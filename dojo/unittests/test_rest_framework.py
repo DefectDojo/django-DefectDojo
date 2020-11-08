@@ -6,7 +6,7 @@ from dojo.models import Product, Engagement, Test, Finding, \
     BurpRawRequestResponse
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraInstanceViewSet, \
-    JiraIssuesViewSet, JiraViewSet, ProductViewSet, ScanSettingsViewSet, \
+    JiraIssuesViewSet, JiraProjectViewSet, ProductViewSet, ScanSettingsViewSet, \
     ScansViewSet, StubFindingsViewSet, TestsViewSet, \
     ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
     UsersViewSet, ImportScanView, NoteTypeViewSet, AppAnalysisViewSet, \
@@ -313,13 +313,13 @@ class JiraIssuesTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class JiraTest(BaseClass.RESTEndpointTest):
+class JiraProjectTest(BaseClass.RESTEndpointTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = JIRA_Project
         self.viewname = 'jira_project'
-        self.viewset = JiraViewSet
+        self.viewset = JiraProjectViewSet
         self.payload = {
             "project_key": "TEST KEY",
             "component": "",
@@ -372,7 +372,7 @@ class SonarqubeProductTest(BaseClass.RESTEndpointTest):
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Sonarqube_Product
         self.viewname = 'sonarqube_product'
-        self.viewset = JiraViewSet
+        self.viewset = JiraProjectViewSet
         self.payload = {
             "product": 2,
             "sonarqube_project_key": "dojo_sonar_key",

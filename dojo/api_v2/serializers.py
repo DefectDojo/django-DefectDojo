@@ -700,7 +700,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     @swagger_serializer_method(serializers.ListField(serializers.DateTimeField()))
     def get_jira_change(self, obj):
-        return jira_helper.get_jira_changed(self)
+        return jira_helper.get_jira_change(self)
 
     @swagger_serializer_method(FindingTestSerializer)
     def get_related_fields(self, obj):
