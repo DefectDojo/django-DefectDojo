@@ -940,6 +940,7 @@ class RegulationsViewSet(mixins.ListModelMixin,
 
 
 class UsersViewSet(mixins.CreateModelMixin,
+                   mixins.UpdateModelMixin,
                    mixins.ListModelMixin,
                    mixins.RetrieveModelMixin,
                    viewsets.GenericViewSet):
