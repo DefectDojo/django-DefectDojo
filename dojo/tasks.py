@@ -19,10 +19,6 @@ from dojo.utils import sla_compute_and_notify
 from dojo.notifications.helper import create_notification
 
 
-fmt = getattr(settings, 'LOG_FORMAT', None)
-lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
-logging.basicConfig(format=fmt, level=lvl)
-
 logger = get_task_logger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
