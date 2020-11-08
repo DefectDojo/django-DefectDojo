@@ -327,9 +327,9 @@ class JiraProjectTest(BaseClass.RESTEndpointTest):
             "enable_engagement_epic_mapping": False,
             "push_notes": False,
             "product": 1,
-            "conf": 2,
+            "jira_instance": 2,
         }
-        self.update_fields = {'conf': 3}
+        self.update_fields = {'jira_instance': 3}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 

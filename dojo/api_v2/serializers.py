@@ -720,8 +720,8 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
         to_be_tagged, validated_data = self._pop_tags(validated_data)
 
         # pop push_to_jira so it won't get send to the model as a field
-        # TODO: JIRA can we remove this get_push_all_to_jira, already checked in apiv2 viewset?
-        push_to_jira = validated_data.pop('push_to_jira') or instance.get_push_all_to_jira()
+        # TODO: JIRA can we remove this is_push_all_issues, already checked in apiv2 viewset?
+        push_to_jira = validated_data.pop('push_to_jira') or jira_helper.is_push_all_issues(self)
 
         instance = super(TaggitSerializer, self).update(instance, validated_data)
 
@@ -805,8 +805,8 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         # first save, so we have an instance to get push_all_to_jira from
         new_finding = super(TaggitSerializer, self).create(validated_data)
 
-        # TODO: JIRA can we remove this get_push_all_to_jira, already checked in apiv2 viewset?
-        push_to_jira = push_to_jira or new_finding.get_push_all_to_jira()
+        # TODO: JIRA can we remove this is_push_all_issues, already checked in apiv2 viewset?
+        push_to_jira = push_to_jira or jira_helper.is_push_all_issues(self)
 
         # If we need to push to JIRA, an extra save call is needed.
         # TODO try to combine create and save, but for now I'm just fixing a bug and don't want to change to much
