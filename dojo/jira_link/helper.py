@@ -110,10 +110,16 @@ def get_jira_instance(instance):
 
 def get_jira_url(obj):
 
+    # jira_url can be called for a JIRA_Project, i.e. http://jira.com/browser/SEC
     if isinstance(obj, JIRA_Project):
         jira_project = obj
-        jira_url = jira_project.jira_instance.url + '/browse/' + jira_project.project_key
+        try:
+            if jira_project.jira_instance:
+                jira_url = jira_project.jira_instance.url + '/browse/' + jira_project.project_key
+        except JIRA_Instance.DoesNotExist:
+            return None
     else:
+        # or for a finding/engagement with a jira issue  http://jira.com/browser/SEC-123
         jira_project = get_jira_project(obj)
 
         if not jira_project:
