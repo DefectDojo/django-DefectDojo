@@ -770,7 +770,7 @@
                     { "data": "reporter" },
                     { "data": "status" },
                     {% if system_settings.enable_jira %}
-                        {% if jira_config and product_tab or not product_tab %}
+                        {% if jira_project and product_tab or not product_tab %}
                             { "data": "jira" },
                             { "data": "jira_age" },
                             { "data": "jira_change" },
