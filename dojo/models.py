@@ -1659,14 +1659,7 @@ class Finding(models.Model):
                                    null=True,
                                    verbose_name="Created",
                                    help_text="The date the finding was created inside DefectDojo.")
-    jira_creation = models.DateTimeField(editable=True,
-                                         null=True,
-                                         verbose_name="Jira creation",
-                                         help_text="The date a Jira issue was created from this finding.")
-    jira_change = models.DateTimeField(editable=True,
-                                       null=True,
-                                       verbose_name="Jira change",
-                                       help_text="The date the linked Jira issue was last modified.")
+
     scanner_confidence = models.IntegerField(null=True,
                                              blank=True,
                                              default=None,
