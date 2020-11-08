@@ -536,7 +536,7 @@ class JiraProjectViewSet(mixins.ListModelMixin,
     serializer_class = serializers.JIRAProjectSerializer
     queryset = JIRA_Project.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'conf', 'product', 'component', 'project_key',
+    filter_fields = ('id', 'jira_instance', 'product', 'component', 'project_key',
                      'push_all_issues', 'enable_engagement_epic_mapping',
                      'push_notes')
 
