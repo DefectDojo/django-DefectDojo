@@ -109,6 +109,7 @@ def get_jira_instance(instance):
 
 
 def get_jira_url(obj):
+    jira_url = None
 
     # jira_url can be called for a JIRA_Project, i.e. http://jira.com/browser/SEC
     if isinstance(obj, JIRA_Project):
@@ -125,7 +126,6 @@ def get_jira_url(obj):
         if not jira_project:
             return None
 
-        jira_url = ''
         if isinstance(obj, Finding) or isinstance(obj, Engagement):
             if obj.has_jira_issue:
                 jira_url = jira_project.jira_instance.url + '/browse/' + obj.jira_issue.jira_key
