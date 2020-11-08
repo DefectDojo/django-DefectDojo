@@ -1660,16 +1660,16 @@ class Finding(models.Model):
                                    verbose_name="Created",
                                    help_text="The date the finding was created inside DefectDojo.")
 
-    # deprecated, moved to jira_issue. left here as we don't want to delete data just yet
-    jira_creation = models.DateTimeField(editable=True,
-                                         null=True,
-                                         verbose_name="Jira creation",
-                                         help_text="The date a Jira issue was created from this finding.")
-    # deprecated, moved to jira_issue. left here as we don't want to delete data just yet
-    jira_change = models.DateTimeField(editable=True,
-                                       null=True,
-                                       verbose_name="Jira change",
-                                       help_text="The date the linked Jira issue was last modified.")
+    # # deprecated, moved to jira_issue. left here as we don't want to delete data just yet
+    # jira_creation = models.DateTimeField(editable=True,
+    #                                      null=True,
+    #                                      verbose_name="Jira creation",
+    #                                      help_text="The date a Jira issue was created from this finding.")
+    # # deprecated, moved to jira_issue. left here as we don't want to delete data just yet
+    # jira_change = models.DateTimeField(editable=True,
+    #                                    null=True,
+    #                                    verbose_name="Jira change",
+    #                                    help_text="The date the linked Jira issue was last modified.")
     scanner_confidence = models.IntegerField(null=True,
                                              blank=True,
                                              default=None,

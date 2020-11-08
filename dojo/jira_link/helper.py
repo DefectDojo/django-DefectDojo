@@ -8,7 +8,7 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from jira import JIRA
 from jira.exceptions import JIRAError
-from dojo.models import Finding, Test, Engagement, Product, JIRA_Issue,\
+from dojo.models import Finding, Test, Engagement, Product, JIRA_Issue, JIRA_Project, \
     System_Settings, Notes, JIRA_Instance
 from requests.auth import HTTPBasicAuth
 from dojo.notifications.helper import create_notification
@@ -109,22 +109,32 @@ def get_jira_instance(instance):
 
 
 def get_jira_url(obj):
-    jira_project = get_jira_project(obj)
 
-    if not jira_project:
-        return None
-
-    jira_url = ''
-    if isinstance(obj, Finding) or isinstance(obj, Engagement):
-        if obj.has_jira_issue:
-            jira_url = jira_project.jira_instance.url + '/browse/' + obj.jira_issue.jira_key
-        else:
-            # if there is no issue, we show the url to the jira project (which is attached to product)
-            return get_jira_url(finding.test.engagement.product)
-    elif isinstance(obj, Product):
+    if isinstance(obj, JIRA_Project):
+        jira_project = obj
         jira_url = jira_project.jira_instance.url + '/browse/' + jira_project.project_key
+    else:
+        jira_project = get_jira_project(obj)
 
-    # TODO: JIRA: Add url for engagement/product/instance
+        if not jira_project:
+            return None
+
+        jira_url = ''
+        if isinstance(obj, Finding) or isinstance(obj, Engagement):
+            if obj.has_jira_issue:
+                jira_url = jira_project.jira_instance.url + '/browse/' + obj.jira_issue.jira_key
+            else:
+                # if there is no issue, we show the url to the jira project (which is attached to product)
+                if isinstance(obj, Finding):
+                    return get_jira_url(obj.test.engagement.product)
+                else:
+                    # engagement
+                    return get_jira_url(jira_project)
+
+        elif isinstance(obj, Product):
+            return get_jira_url(jira_project)
+
+        # TODO: JIRA: Add url for engagement/product/instance
     return jira_url
 
 

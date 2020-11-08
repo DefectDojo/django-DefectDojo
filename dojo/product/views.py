@@ -1102,7 +1102,7 @@ def ad_hoc_finding(request, pid):
                                      'Can not set a finding as inactive or false positive without adding all mandatory notes',
                                      extra_tags='alert-danger')
         if use_jira:
-            jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_project=tjira_helper.get_jira_project(test))
+            jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_project=jira_helper.get_jira_project(test))
 
         if form.is_valid() and (jform is None or jform.is_valid()):
             new_finding = form.save(commit=False)
