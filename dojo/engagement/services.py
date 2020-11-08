@@ -2,8 +2,6 @@
 import logging
 
 from django.utils import timezone
-from dojo.models import JIRA_Project
-from dojo.utils import get_system_setting
 import dojo.jira_link.helper as jira_helper
 
 logger = logging.getLogger(__name__)

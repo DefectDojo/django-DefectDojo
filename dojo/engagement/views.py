@@ -28,11 +28,11 @@ from dojo.forms import CheckForm, \
 from dojo.models import Finding, Product, Engagement, Test, \
     Check_List, Test_Type, Notes, \
     Risk_Acceptance, Development_Environment, BurpRawRequestResponse, Endpoint, \
-    JIRA_Project, JIRA_Issue, Cred_Mapping, Dojo_User, System_Settings, Note_Type, Endpoint_Status
+    Cred_Mapping, Dojo_User, System_Settings, Note_Type, Endpoint_Status
 from dojo.tools import handles_active_verified_statuses
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
-    FileIterWrapper, get_cal_event, message, get_system_setting, Product_Tab, is_scan_file_too_large
+    FileIterWrapper, get_cal_event, message, Product_Tab, is_scan_file_too_large
 from dojo.notifications.helper import create_notification
 from dojo.finding.views import find_available_notetypes
 from functools import reduce
