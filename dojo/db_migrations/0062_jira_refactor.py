@@ -11,12 +11,12 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.DeleteModel(
-            name='JIRA_Clone',
-        ),
-        migrations.DeleteModel(
-            name='JIRA_Details_Cache',
-        ),
+        # migrations.DeleteModel(
+        #     name='JIRA_Clone',
+        # ),
+        # migrations.DeleteModel(
+        #     name='JIRA_Details_Cache',
+        # ),
         migrations.RenameModel(
             old_name='JIRA_PKey',
             new_name='JIRA_Project',
