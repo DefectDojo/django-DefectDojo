@@ -305,7 +305,7 @@ def view_engagement(request, eid):
         network = eng.preset.network_locations.all()
     system_settings = System_Settings.objects.get()
 
-    jissue = eng.jira_issue
+    jissue = jira_helper.get_jira_issue(eng)
     jconf = jira_helper.get_jira_project(eng)
 
     exclude_findings = [

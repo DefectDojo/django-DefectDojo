@@ -155,13 +155,15 @@ def get_jira_change(obj):
 
 
 def has_jira_issue(obj):
+    return get_jira_issue(obj) is not None
+
+
+def get_jira_issue(obj):
     if isinstance(obj, Finding) or isinstance(obj, Engagement):
         try:
-            return obj.jira_issue is not None
+            return obj.jira_issue
         except JIRA_Issue.DoesNotExist:
-            return False
-
-    return False
+            return None
 
 
 def has_jira_configured(obj):
@@ -400,7 +402,7 @@ def add_jira_issue(find):
                     settings.MEDIA_ROOT + pic.image_large.name)
 
                 # if jira_project.enable_engagement_epic_mapping:
-                #      epic = eng.jira_issue
+                #      epic = jira_helper.get_jira_issue(eng)
                 #      issue_list = [j_issue.jira_id,]
                 #      jira.add_jira_issues_to_epic(epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
         except JIRAError as e:
@@ -570,7 +572,7 @@ def close_epic(eng, push_to_jira):
     jira_instance = get_jira_instance(engagement)
     if jira_project.enable_engagement_epic_mapping and push_to_jira:
         try:
-            j_issue = eng.jira_issue
+            jissue = jira_helper.get_jira_issue(eng)
             req_url = jira_instance.url + '/rest/api/latest/issue/' + \
                 j_issue.jira_id + '/transitions'
             json_data = {'transition': {'id': jira_instance.close_status_key}}
@@ -598,7 +600,7 @@ def update_epic(eng):
     if jira_project.enable_engagement_epic_mapping:
         try:
             jira = get_jira_connection(jira_instance)
-            j_issue = eng.jira_issue
+            jissue = jira_helper.get_jira_issue(eng)
             issue = jira.issue(j_issue.jira_id)
             issue.update(summary=eng.name, description=eng.name)
         except Exception as e:
