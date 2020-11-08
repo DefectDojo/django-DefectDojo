@@ -27,7 +27,7 @@ from dojo.risk_acceptance import api as ra_api
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from datetime import datetime
-from dojo.utils import get_period_counts_legacy, get_system_setting
+from dojo.utils import get_period_counts_legacy
 from dojo.api_v2 import serializers, permissions
 from django.db.models import Count, Q
 import dojo.jira_link.helper as jira_helper
@@ -928,6 +928,7 @@ class RegulationsViewSet(mixins.ListModelMixin,
 
 
 class UsersViewSet(mixins.CreateModelMixin,
+                   mixins.UpdateModelMixin,
                    mixins.ListModelMixin,
                    mixins.RetrieveModelMixin,
                    viewsets.GenericViewSet):
@@ -955,7 +956,7 @@ class ReImportScanView(mixins.CreateModelMixin,
 
     def perform_create(self, serializer):
         # Override CreateModeMixin to pass in push_to_jira if needed.
-        serializer.save(push_to_jira=jira_helper.is_push_to_jira(self, serializer.validated_data.get('push_to_jira')))        
+        serializer.save(push_to_jira=jira_helper.is_push_to_jira(self, serializer.validated_data.get('push_to_jira')))
 
 
 class NoteTypeViewSet(mixins.ListModelMixin,
