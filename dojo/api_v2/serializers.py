@@ -24,6 +24,7 @@ import datetime
 import six
 from django.utils.translation import ugettext_lazy as _
 import json
+import dojo.jira_link.helper as jira_helper
 import logging
 
 
