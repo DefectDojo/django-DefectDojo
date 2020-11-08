@@ -4,7 +4,7 @@ dependencies:
     repository: "@stable"
     condition: mysql.enabled
   - name: postgresql
-    version: 9.4.1
+    version: 9.8.11
     repository: "@bitnami"
     condition: postgresql.enabled
   - name: rabbitmq
