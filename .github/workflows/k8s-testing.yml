@@ -207,3 +207,4 @@ jobs:
         run: |-
              helm test defectdojo --set imagePullSecrets=defectdojoregistrykey
              return_value=${?}
+             echo $return_value
