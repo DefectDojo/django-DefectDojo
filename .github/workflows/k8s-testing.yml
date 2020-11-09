@@ -205,6 +205,6 @@ jobs:
              echo "DD K8S successfully deployed"
       - name: Run Unit tests
         run: |-
-             helm test defectdojo 
+             helm test defectdojo
              return_value=${?}
-             echo $return_value
+             echo "Ret bal $return_value"
