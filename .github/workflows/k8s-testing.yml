@@ -182,11 +182,25 @@ jobs:
         run: |-
              echo "Waiting for init job..."
              kubectl wait  --for="condition=Complete" job --timeout=500s --selector=defectdojo.org/component=initializer
+             if [[ ${?} != 0 ]];do
+               echo "ERROR: Init job"
+               kubectl logs    --selector=defectdojo.org/component=initializer
+               exit 1
+             done
              echo "Waiting for celery pods..."
              kubectl wait  --for=condition=ready  pod --timeout=500s --selector=defectdojo.org/component=celery
+             if [[ ${?} != 0 ]];do
+               echo "ERROR: Celery "
+               kubectl logs    --selector=defectdojo.org/component=celery
+               exit 1
+             done
              echo "Waiting for django pod..."
              kubectl wait  --for=condition=ready  pod --timeout=500s --selector=defectdojo.org/component=django
-
+             if [[ ${?} != 0 ]];do
+               echo "ERROR: django "
+               kubectl logs  --selector=defectdojo.org/component=django -c uwsgi
+               exit 1
+             done
              echo "Pods up and ready to rumbole"
              kubectl get pods
              OUT=$(kubectl run  curl --quiet=true --image=curlimages/curl:7.73.0 \
@@ -203,8 +217,3 @@ jobs:
                 exit 1
              fi
              echo "DD K8S successfully deployed"
-      - name: Run Unit tests
-        run: |-
-             helm test defectdojo
-             return_value=${?}
-             echo "Ret bal $return_value"
