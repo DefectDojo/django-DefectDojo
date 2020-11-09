@@ -13,7 +13,6 @@ from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import PermissionDenied
-from jira import JIRA
 import requests
 
 # Local application/library imports
@@ -21,7 +20,6 @@ from dojo.forms import JIRAForm, DeleteJIRAInstanceForm, ExpressJIRAForm
 from dojo.models import User, JIRA_Instance, JIRA_Issue, Notes, Risk_Acceptance
 from dojo.utils import add_breadcrumb, get_system_setting
 from dojo.notifications.helper import create_notification
-from django.conf import settings
 from django.views.decorators.http import require_POST
 import dojo.jira_link.helper as jira_helper
 
@@ -142,17 +140,11 @@ def express_new_jira(request):
                 jira_server = jform.cleaned_data.get('url').rstrip('/')
                 jira_username = jform.cleaned_data.get('username')
                 jira_password = jform.cleaned_data.get('password')
-                # Instantiate JIRA instance for validating url, username and password
+
                 try:
-                    jira = JIRA(server=jira_server,
-                        basic_auth=(jira_username, jira_password),
-                        options={"verify": settings.JIRA_SSL_VERIFY})
+                    jira = jira_helper.get_jira_connection_raw(jira_server, jira_username, jira_password)
                 except Exception as e:
-                    logger.exception(e)
-                    messages.add_message(request,
-                                     messages.ERROR,
-                                     'Unable to authenticate. Please check the URL, username, and password.',
-                                     extra_tags='alert-danger')
+                    logger.exception(e)  # already logged in jira_helper
                     return render(request, 'dojo/express_new_jira.html',
                                             {'jform': jform})
                 # authentication successful
@@ -219,36 +211,26 @@ def new_jira(request):
     if request.method == 'POST':
         jform = JIRAForm(request.POST, instance=JIRA_Instance())
         if jform.is_valid():
-            try:
-                jira_server = jform.cleaned_data.get('url').rstrip('/')
-                jira_username = jform.cleaned_data.get('username')
-                jira_password = jform.cleaned_data.get('password')
+            jira_server = jform.cleaned_data.get('url').rstrip('/')
+            jira_username = jform.cleaned_data.get('username')
+            jira_password = jform.cleaned_data.get('password')
 
-                # Instantiate JIRA instance for validating url, username and password
-                JIRA(server=jira_server,
-                     basic_auth=(jira_username, jira_password),
-                     options={"verify": settings.JIRA_SSL_VERIFY})
+            jira = jira_helper.get_jira_connection_raw(jira_server, jira_username, jira_password)
 
-                new_j = jform.save(commit=False)
-                new_j.url = jira_server
-                new_j.save()
-                messages.add_message(request,
-                                     messages.SUCCESS,
-                                     'JIRA Configuration Successfully Created.',
-                                     extra_tags='alert-success')
-                create_notification(event='other',
-                                    title='New addition of JIRA: %s' % jform.cleaned_data.get('configuration_name'),
-                                    description='JIRA "%s" was added by %s' %
-                                                (jform.cleaned_data.get('configuration_name'), request.user),
-                                    url=request.build_absolute_uri(reverse('jira')),
-                                    )
-                return HttpResponseRedirect(reverse('jira', ))
-            except Exception as e:
-                logger.exception(e)
-                messages.add_message(request,
-                                     messages.ERROR,
-                                     'Unable to authenticate. Please check the URL, username, and password.',
-                                     extra_tags='alert-danger')
+            new_j = jform.save(commit=False)
+            new_j.url = jira_server
+            new_j.save()
+            messages.add_message(request,
+                                    messages.SUCCESS,
+                                    'JIRA Configuration Successfully Created.',
+                                    extra_tags='alert-success')
+            create_notification(event='other',
+                                title='New addition of JIRA: %s' % jform.cleaned_data.get('configuration_name'),
+                                description='JIRA "%s" was added by %s' %
+                                            (jform.cleaned_data.get('configuration_name'), request.user),
+                                url=request.build_absolute_uri(reverse('jira')),
+                                )
+            return HttpResponseRedirect(reverse('jira', ))
     else:
         jform = JIRAForm()
         add_breadcrumb(title="New Jira Configuration", top_level=False, request=request)
@@ -263,43 +245,34 @@ def edit_jira(request, jid):
     if request.method == 'POST':
         jform = JIRAForm(request.POST, instance=jira)
         if jform.is_valid():
-            try:
-                jira_server = jform.cleaned_data.get('url').rstrip('/')
-                jira_username = jform.cleaned_data.get('username')
+            jira_server = jform.cleaned_data.get('url').rstrip('/')
+            jira_username = jform.cleaned_data.get('username')
 
-                if jform.cleaned_data.get('password'):
-                    jira_password = jform.cleaned_data.get('password')
-                else:
-                    # on edit the password is optional
-                    jira_password = jira_password_from_db
-
-                # Instantiate JIRA instance for validating url, username and password
-                JIRA(server=jira_server,
-                    basic_auth=(jira_username, jira_password),
-                    options={"verify": settings.JIRA_SSL_VERIFY})
-
-                new_j = jform.save(commit=False)
-                new_j.url = jira_server
+            if jform.cleaned_data.get('password'):
+                jira_password = jform.cleaned_data.get('password')
+            else:
                 # on edit the password is optional
-                new_j.password = jira_password
-                new_j.save()
-                messages.add_message(request,
-                                     messages.SUCCESS,
-                                     'JIRA Configuration Successfully Saved.',
-                                     extra_tags='alert-success')
-                create_notification(event='other',
-                                    title='Edit of JIRA: %s' % jform.cleaned_data.get('configuration_name'),
-                                    description='JIRA "%s" was edited by %s' %
-                                                (jform.cleaned_data.get('configuration_name'), request.user),
-                                    url=request.build_absolute_uri(reverse('jira')),
-                                    )
-                return HttpResponseRedirect(reverse('jira', ))
-            except Exception as e:
-                logger.exception(e)
-                messages.add_message(request,
-                                     messages.ERROR,
-                                     'Unable to authenticate. Please check the URL, username, and password.',
-                                     extra_tags='alert-danger')
+                jira_password = jira_password_from_db
+
+            jira = jira_helper.get_jira_connection_raw(jira_server, jira_username, jira_password)
+
+            new_j = jform.save(commit=False)
+            new_j.url = jira_server
+            # on edit the password is optional
+            new_j.password = jira_password
+            new_j.save()
+            messages.add_message(request,
+                                    messages.SUCCESS,
+                                    'JIRA Configuration Successfully Saved.',
+                                    extra_tags='alert-success')
+            create_notification(event='other',
+                                title='Edit of JIRA: %s' % jform.cleaned_data.get('configuration_name'),
+                                description='JIRA "%s" was edited by %s' %
+                                            (jform.cleaned_data.get('configuration_name'), request.user),
+                                url=request.build_absolute_uri(reverse('jira')),
+                                )
+            return HttpResponseRedirect(reverse('jira', ))
+
     else:
         jform = JIRAForm(instance=jira)
         add_breadcrumb(title="Edit JIRA Configuration", top_level=False, request=request)

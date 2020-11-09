@@ -18,7 +18,6 @@ from dojo.decorators import dojo_async_task
 from dojo.utils import get_current_request, truncate_with_dots
 from django.urls import reverse
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -215,6 +214,44 @@ def has_jira_configured(obj):
     return get_jira_project(obj) is not None
 
 
+def get_jira_connection_raw(jira_server, jira_username, jira_password):
+    try:
+        jira = JIRA(server=jira_server,
+                basic_auth=(jira_username, jira_password),
+                options={"verify": settings.JIRA_SSL_VERIFY},
+                max_retries=0)
+
+        logger.debug('logged in to JIRA %s successfully', jira_instance)
+
+        return jira
+    except JIRAError as e:
+        logger.exception(e)
+
+        if e.status_code in [401, 403]:
+            log_jira_generic_alert('JIRA Authentication Error', e)
+        else:
+            log_jira_generic_alert('Unknown JIRA Connection Error', e)
+
+        messages.add_message(get_current_request(),
+                            messages.ERROR,
+                            'Unable to authenticate. Please check the URL, username, password, IP whitelist, Network connection. Details in alert on top right.',
+                            extra_tags='alert-danger')
+        raise e
+
+    except requests.exceptions.RequestException as re:
+        logger.exception(re)
+        log_jira_generic_alert('Unknown JIRA Connection Error', re)
+
+        messages.add_message(get_current_request(),
+                            messages.ERROR,
+                            'Unable to authenticate. Please check the URL, username, password, IP whitelist, Network connection. Details in alert on top right.',
+                            extra_tags='alert-danger')
+        raise re
+
+    # except RequestException as re:
+    #     logger.exception(re)
+
+
 # Gets a connection to a Jira server based on the finding
 def get_jira_connection(obj):
     jira = None
@@ -224,23 +261,7 @@ def get_jira_connection(obj):
         jira_instance = get_jira_instance(obj)
 
     if jira_instance is not None:
-        try:
-            jira = JIRA(
-                server=jira_instance.url,
-                basic_auth=(jira_instance.username, jira_instance.password),
-                options={"verify": settings.JIRA_SSL_VERIFY},
-                max_retries=0)
-
-            logger.debug('logged in to JIRA %s successfully', jira_instance)
-
-            return jira
-        except JIRAError as e:
-            logger.exception(e)
-            messages.add_message(get_current_request(),
-                                messages.ERROR,
-                                'Unable to authenticate. Please check the URL, username, password, IP whitelist, Network connection.',
-                                extra_tags='alert-danger')
-            raise e
+        return get_jira_connection_raw(jira_instance.url, jira_instance.username, jira_instance.password)
 
 
 def jira_get_resolution_id(jira, issue, status):
