@@ -147,7 +147,7 @@ jobs:
              docker load -i nginx/nginx_img
              docker load -i django/django_img
              docker images
-      - name: Configure HELM repos new
+      - name: Configure HELM repos
         run: |-
              helm repo add stable https://charts.helm.sh/stable
              helm dependency update ./helm/defectdojo
