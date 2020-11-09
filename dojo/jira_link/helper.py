@@ -64,12 +64,16 @@ def is_push_all_issues(instance):
         return jira_project.push_all_issues
 
 
-def get_jira_project(obj):
+# use_delegation=True means get jira_project config from product if engagement itself has none
+def get_jira_project(obj, use_delegation=True):
     if not is_jira_enabled():
         return None
 
     if obj is None:
         return None
+
+    if isinstance(obj, JIRA_Project):
+        return obj
 
     if isinstance(obj, Finding):
         finding = obj
@@ -80,19 +84,28 @@ def get_jira_project(obj):
         return get_jira_project(test.engagement)
 
     if isinstance(obj, Engagement):
-        # TODO refactor relationships, but now this would brake APIv1 (and v2?)
         engagement = obj
-        jira_projects = engagement.product.jira_project_set.all()  # first() doesn't work with prefetching
-        jira_project = jira_projects[0] if len(jira_projects) > 0 else None
-        logger.debug('found jira_instance %s for %s', jira_project, engagement)
-        return jira_project
+        jira_project = None
+        try:
+            jira_project = engagement.jira_project  # first() doesn't work with prefetching
+            logger.debug('found jira_project %s for %s', jira_project, engagement)
+            return jira_project
+        except JIRA_Project.DoesNotExist:
+            pass  # leave jira_project as None
+
+        if use_delegation:
+            logger.debug('delegating to product %s for %s', engagement.product, engagement)
+            return get_jira_project(engagement.product)
+        else:
+            logger.debug('not delegating to product %s for %s', engagement.product, engagement)
+            return None
 
     if isinstance(obj, Product):
         # TODO refactor relationships, but now this would brake APIv1 (and v2?)
         product = obj
         jira_projects = product.jira_project_set.all()  # first() doesn't work with prefetching
         jira_project = jira_projects[0] if len(jira_projects) > 0 else None
-        logger.debug('found jira_instance %s for %s', jira_project, product)
+        logger.debug('found jira_project %s for %s', jira_project, product)
         return jira_project
 
 
@@ -109,53 +122,67 @@ def get_jira_instance(instance):
 
 
 def get_jira_url(obj):
-    jira_url = None
+    logger.debug('getting jira url')
 
-    # jira_url can be called for a JIRA_Project, i.e. http://jira.com/browser/SEC
+    if hasattr(obj, 'has_jira_issue') and obj.has_jira_issue:
+        return get_jira_issue_url(obj)
+
     if isinstance(obj, JIRA_Project):
-        jira_project = obj
-        try:
-            if jira_project.jira_instance:
-                jira_url = jira_project.jira_instance.url + '/browse/' + jira_project.project_key
-        except JIRA_Instance.DoesNotExist:
-            return None
-    else:
-        # or for a finding/engagement with a jira issue  http://jira.com/browser/SEC-123
+        return get_jira_project_url(obj)
+
+    return get_jira_project_url(get_jira_project(obj))
+
+
+def get_jira_issue_url(obj):
+    logger.debug('getting jira issue url')
+    if obj.has_jira_issue:
         jira_project = get_jira_project(obj)
+        jira_instance = get_jira_instance(obj)
+        if jira_project and jira_instance:
+            # example http://jira.com/browser/SEC-123
+            return jira_project.jira_instance.url + '/browse/' + obj.jira_issue.jira_key
 
-        if not jira_project:
-            return None
+    return None
 
-        if isinstance(obj, Finding) or isinstance(obj, Engagement):
-            if obj.has_jira_issue:
-                jira_url = jira_project.jira_instance.url + '/browse/' + obj.jira_issue.jira_key
-            else:
-                # if there is no issue, we show the url to the jira project (which is attached to product)
-                if isinstance(obj, Finding):
-                    return get_jira_url(obj.test.engagement.product)
-                else:
-                    # engagement
-                    return get_jira_url(jira_project)
 
-        elif isinstance(obj, Product):
-            return get_jira_url(jira_project)
+def get_jira_project_url(obj):
+    # jira_url can be called for a JIRA_Project, i.e. http://jira.com/browser/SEC
+    logger.debug('getting jira project url')
+    if isinstance(obj, JIRA_Project):
+        logger.debug('getting jira project url2')
+        jira_project = obj
+        jira_instance = get_jira_instance(obj)
+        if jira_project and jira_instance:
+            logger.debug('getting jira project url3')
+            return jira_project.jira_instance.url + '/browse/' + jira_project.project_key
 
-        # TODO: JIRA: Add url for engagement/product/instance
-    return jira_url
+    return None
 
 
 def get_jira_key(obj):
+    if hasattr(obj, 'has_jira_issue') and obj.has_jira_issue:
+        return get_jira_issue_key(obj)
+
+    if isinstance(obj, JIRA_Project):
+        return get_jira_project_key(obj)
+
+    return get_jira_project_key(get_jira_project(obj))
+
+
+def get_jira_issue_key(obj):
+    if obj.has_jira_issue:
+        return obj.jira_issue.jira_key
+
+    return None
+
+
+def get_jira_project_key(obj):
     jira_project = get_jira_project(obj)
 
     if not get_jira_project:
         return None
 
-    jira_key = ''
-    if isinstance(obj, Finding) or isinstance(obj, Engagement):
-        if obj.has_jira_issue:
-            jira_key = obj.jira_issue.jira_key
-
-    return jira_key
+    return jira_project.project_key
 
 
 def get_jira_creation(obj):
@@ -207,7 +234,7 @@ def get_jira_connection(obj):
             logger.debug('logged in to JIRA %s successfully', jira_instance)
 
             return jira
-        except Exception as e:
+        except JIRAError as e:
             logger.exception(e)
             messages.add_message(get_current_request(),
                                 messages.ERROR,
@@ -600,15 +627,15 @@ def close_epic(eng, push_to_jira):
                 json=json_data)
             if r.status_code != 204:
                 logger.warn("JIRA close epic failed with error: {}".format(r.text))
-        except Exception as e:
+        except JIRAError as e:
+            logger.exception(e)
             log_jira_generic_alert('Jira Engagement/Epic Close Error', str(e))
             pass
 
 
 @dojo_async_task
 @task
-def update_epic(eng):
-    engagement = eng
+def update_epic(engagement):
 
     if not is_jira_configured_and_enabled(engagement):
         return False
@@ -618,19 +645,19 @@ def update_epic(eng):
     if jira_project.enable_engagement_epic_mapping:
         try:
             jira = get_jira_connection(jira_instance)
-            jissue = jira_helper.get_jira_issue(eng)
+            j_issue = get_jira_issue(engagement)
             issue = jira.issue(j_issue.jira_id)
-            issue.update(summary=eng.name, description=eng.name)
-        except Exception as e:
+            issue.update(summary=engagement.name, description=engagement.name)
+        except JIRAError as e:
+            logger.exception(e)
             log_jira_generic_alert('Jira Engagement/Epic Update Error', str(e))
             pass
 
 
 @dojo_async_task
 @task
-def add_epic(eng):
-    logger.info('trying to create a new jira EPIC for %d:%s', eng.id, eng.name)
-    engagement = eng
+def add_epic(engagement):
+    logger.info('trying to create a new jira EPIC for %d:%s', engagement.id, engagement.name)
 
     if not is_jira_configured_and_enabled(engagement):
         return False
@@ -651,13 +678,20 @@ def add_epic(eng):
         }
         try:
             jira = get_jira_connection(jira_instance)
+            logger.debug('add_epic: %s', issue_dict)
             new_issue = jira.create_issue(fields=issue_dict)
             j_issue = JIRA_Issue(
                 jira_id=new_issue.id,
                 jira_key=new_issue.key,
                 engagement=engagement)
             j_issue.save()
-        except Exception as e:
+        except JIRAError as e:
+            # should we try to parse the errors as JIRA is very strange in how it responds.
+            # for example a non existent project_key leads to "project key is required" which sounds like something is missing
+            # but it's just a non-existent project (or maybe a project for which the account has no create permission?)
+            #
+            # {"errorMessages":[],"errors":{"project":"project is required"}}
+            logger.exception(e)
             error = str(e)
             message = ""
             if "customfield" in error:
@@ -701,7 +735,7 @@ def add_comment(find, note, force_push=False):
                 jira.add_comment(
                     j_issue.jira_id,
                     '(%s): %s' % (note.author.get_full_name(), note.entry))
-            except Exception as e:
+            except JIRAError as e:
                 log_jira_generic_alert('Jira Add Comment Error', str(e))
                 pass
 

@@ -741,8 +741,7 @@ class EngForm(forms.ModelForm):
         self.fields['tags'].widget.choices = t
         if product:
             self.fields['preset'] = forms.ModelChoiceField(help_text="Settings and notes for performing this engagement.", required=False, queryset=Engagement_Presets.objects.filter(product=product))
-            prod = Product.objects.get(id=product)
-            staff_users = [user.id for user in User.objects.all() if user_is_authorized(user, 'staff', prod)]
+            staff_users = [user.id for user in User.objects.all() if user_is_authorized(user, 'staff', product)]
             self.fields['lead'].queryset = User.objects.filter(id__in=staff_users)
         else:
             self.fields['lead'].queryset = User.objects.exclude(is_staff=False)
@@ -1790,11 +1789,11 @@ class DeleteBenchmarkForm(forms.ModelForm):
         exclude = ['product', 'benchmark_type', 'desired_level', 'current_level', 'asvs_level_1_benchmark', 'asvs_level_1_score', 'asvs_level_2_benchmark', 'asvs_level_2_score', 'asvs_level_3_benchmark', 'asvs_level_3_score', 'publish']
 
 
-class JIRA_ProjectForm(forms.ModelForm):
+# class JIRA_ProjectForm(forms.ModelForm):
 
-    class Meta:
-        model = JIRA_Project
-        exclude = ['product']
+#     class Meta:
+#         model = JIRA_Project
+#         exclude = ['product']
 
 
 class Sonarqube_ProductForm(forms.ModelForm):
@@ -2080,6 +2079,21 @@ class JIRAProjectForm(forms.ModelForm):
     class Meta:
         model = JIRA_Project
         exclude = ['product', 'engagement']
+
+    def clean(self):
+        logger.debug('validating jira project form')
+        cleaned_data = super().clean()
+
+        project_key = self.cleaned_data.get('project_key')
+        jira_instance = self.cleaned_data.get('jira_instance')
+
+        if project_key and jira_instance:
+            return cleaned_data
+
+        if not project_key and not jira_instance:
+            return cleaned_data
+
+        raise ValidationError('JIRA Project needs a JIRA Instance and JIRA Project Key, or leave both empty')
 
 
 class GITHUBFindingForm(forms.Form):

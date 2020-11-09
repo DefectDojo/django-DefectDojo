@@ -828,6 +828,11 @@ def jiraencode(value):
 
 
 @register.filter
+def jira_project(obj):
+    return jira_helper.get_jira_project(obj)
+
+
+@register.filter
 def jira_url(obj):
     return jira_helper.get_jira_url(obj)
 

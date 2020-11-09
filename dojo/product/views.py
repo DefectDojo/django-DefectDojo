@@ -898,72 +898,102 @@ def delete_product(request, pid):
 
 @user_must_be_authorized(Product, 'staff', 'pid')  # use arg 0 as using pid causes issues, I think due to cicd being there
 def new_eng_for_app(request, pid, cicd=False):
+
     jform = None
-    prod = Product.objects.get(id=pid)
-    if not user_is_authorized(request.user, 'staff', prod):
+    product = Product.objects.get(id=pid)
+    jira_project = jira_helper.get_jira_project(product)
+    if not user_is_authorized(request.user, 'staff', product):
         raise PermissionDenied
 
-    use_jira = jira_helper.get_jira_project(prod) is not None
-
     if request.method == 'POST':
+        form = EngForm(request.POST, cicd=cicd, product=product, user=request.user)
+        jira_project_form = JIRAProjectForm(request.POST, prefix='jira-project-form')
+        jira_epic_form = JIRAEngagementForm(request.POST, prefix='jira-epic-form')
 
-        # for key, value in request.POST.items():
-        #     print(f'Key: {key}')
-        #     print(f'Value: {value}')
+        if (form.is_valid() and jira_project_form.is_valid() and jira_epic_form.is_valid()):
 
-        form = EngForm(request.POST, cicd=cicd, product=prod.id, user=request.user)
-        if form.is_valid():
-            new_eng = form.save(commit=False)
-            if not new_eng.name:
-                new_eng.name = str(new_eng.target_start)
-            new_eng.threat_model = False
-            new_eng.api_test = False
-            new_eng.pen_test = False
-            new_eng.check_list = False
-            new_eng.product_id = form.cleaned_data.get('product').id
-            if new_eng.threat_model:
-                new_eng.progress = 'threat_model'
+            # first create the new engagement
+            engagement = form.save(commit=False)
+            if not engagement.name:
+                engagement.name = str(engagement.target_start)
+            engagement.threat_model = False
+            engagement.api_test = False
+            engagement.pen_test = False
+            engagement.check_list = False
+            engagement.product = form.cleaned_data.get('product')
+            if engagement.threat_model:
+                engagement.progress = 'threat_model'
             else:
-                new_eng.progress = 'other'
+                engagement.progress = 'other'
             if cicd:
-                new_eng.engagement_type = 'CI/CD'
-                new_eng.status = "In Progress"
+                engagement.engagement_type = 'CI/CD'
+                engagement.status = "In Progress"
+            engagement.active = True
 
-            new_eng.save()
+            engagement.save()
+
             tags = request.POST.getlist('tags')
             t = ", ".join('"{0}"'.format(w) for w in tags)
-            new_eng.tags = t
-            if 'jiraform-push_to_jira' in request.POST:
-                jform = JIRAEngagementForm(request.POST, prefix='jiraform')
+            engagement.tags = t
 
-            if form.is_valid() and (jform is None or jform.is_valid()):
-                if 'jiraform-push_to_jira' in request.POST and jform.cleaned_data.get("push_to_jira"):
-                    jira_helper.add_epic(new_eng)
+            # save jira project config
+            jira_project = jira_project_form.save(commit=False)
+            jira_project.engagement = engagement
+            jira_project.save()
+
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                'JIRA Project config updated successfully.',
+                extra_tags='alert-success')
+
+            # push epic
+            if jira_epic_form.cleaned_data.get('push_to_jira'):
+                jira_helper.push_to_jira(engagement)
+                messages.add_message(
+                    request,
+                    messages.SUCCESS,
+                    'Push to JIRA for Epic queued succesfully, check alerts on the top right for errors',
+                    extra_tags='alert-success')
 
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Engagement added successfully.',
                                  extra_tags='alert-success')
 
-            create_notification(event='engagement_added', title=new_eng.name + " for " + prod.name, engagement=new_eng, url=reverse('view_engagement', args=(new_eng.id,)), objowner=new_eng.lead)
+            create_notification(event='engagement_added', title=engagement.name + " for " + product.name, engagement=engagement, url=reverse('view_engagement', args=(engagement.id,)), objowner=engagement.lead)
 
             if "_Add Tests" in request.POST:
-                return HttpResponseRedirect(reverse('add_tests', args=(new_eng.id,)))
+                return HttpResponseRedirect(reverse('add_tests', args=(engagement.id,)))
             elif "_Import Scan Results" in request.POST:
-                return HttpResponseRedirect(reverse('import_scan_results', args=(new_eng.id,)))
+                return HttpResponseRedirect(reverse('import_scan_results', args=(engagement.id,)))
             else:
-                return HttpResponseRedirect(reverse('view_engagement', args=(new_eng.id,)))
+                return HttpResponseRedirect(reverse('view_engagement', args=(engagement.id,)))
+        else:
+            # if forms invalid, page will just reload and show errors
+            if jira_project_form.errors or jira_epic_form.errors:
+                messages.add_message(
+                    request,
+                    messages.ERROR,
+                    'Errors in JIRA forms, see below',
+                    extra_tags='alert-danger')
     else:
-        form = EngForm(initial={'lead': request.user, 'target_start': timezone.now().date(), 'target_end': timezone.now().date() + timedelta(days=7), 'product': prod.id}, cicd=cicd, product=prod.id, user=request.user)
-        if use_jira:
-            jform = JIRAEngagementForm(prefix='jiraform')
+        form = EngForm(initial={'lead': request.user, 'target_start': timezone.now().date(), 'target_end': timezone.now().date() + timedelta(days=7), 'product': product}, cicd=cicd, product=product, user=request.user)
+        jira_project_form = None
+        jira_epic_form = None
+        if get_system_setting('enable_jira'):
+            logger.debug('showing jira-project-form')
+            jira_project_form = JIRAProjectForm(prefix='jira-project-form')
+            if jira_project:
+                logger.debug('showing jira-epic-form')
+                jira_epic_form = JIRAEngagementForm(prefix='jira-epic-form')
 
     product_tab = Product_Tab(pid, title="New Engagement", tab="engagements")
     return render(request, 'dojo/new_eng.html',
-                  {'form': form, 'pid': pid,
+                  {'form': form,
                    'product_tab': product_tab,
-                   'jform': jform
-                   })
+                   'jira_epic_form': jira_epic_form,
+                   'jira_project_form': jira_project_form})
 
 
 # @user_passes_test(lambda u: u.is_staff)

@@ -2581,7 +2581,7 @@ class JIRA_Instance(models.Model):
 class JIRA_Project(models.Model):
     project_key = models.CharField(max_length=200, blank=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True)
-    engagement = models.OneToOneField(Engagement, on_delete=models.CASCADE, null=True, blank=True,)
+    engagement = models.OneToOneField(Engagement, on_delete=models.CASCADE, null=True, blank=True)
     jira_instance = models.ForeignKey(JIRA_Instance, verbose_name="JIRA Instance",
                              null=True, blank=True, on_delete=models.CASCADE)
     component = models.CharField(max_length=200, blank=True)
@@ -2597,12 +2597,10 @@ class JIRA_Project(models.Model):
         return jira_instance
 
     def __unicode__(self):
-        # TODO: JIRA: use product OR engagement
-        return self.product.name + " | " + self.project_key
+        return self.project_key + '(%s)' % (str(self.jira_instance.configuration_name) if self.jira_instance else '')
 
     def __str__(self):
-        # TODO: JIRA: use product OR engagement
-        return self.product.name + " | " + self.project_key
+        return self.project_key + '(%s)' % (str(self.jira_instance.configuration_name) if self.jira_instance else '')
 
 
 class JIRA_Issue(models.Model):

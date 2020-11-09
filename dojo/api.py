@@ -26,7 +26,7 @@ from dojo.models import Product, Engagement, Test, Finding, \
     Endpoint_Status
 from dojo.forms import ProductForm, EngForm, TestForm, \
     ScanSettingsForm, FindingForm, StubFindingForm, FindingTemplateForm, \
-    ImportScanForm, SEVERITY_CHOICES, JIRAForm, JIRA_ProjectForm, EditEndpointForm, \
+    ImportScanForm, SEVERITY_CHOICES, JIRAForm, JIRAProjectForm, EditEndpointForm, \
     JIRA_IssueForm, ToolConfigForm, ToolProductSettingsForm, \
     ToolTypeForm, LanguagesTypeForm, Languages_TypeTypeForm, App_AnalysisTypeForm, \
     Development_EnvironmentForm, Product_TypeForm, Test_TypeForm, NoteTypeForm
@@ -897,7 +897,7 @@ class JiraResource(BaseModelResource):
 
         @property
         def validation(self):
-            return ModelFormValidation(form_class=JIRA_ProjectForm, resource=JiraResource)
+            return ModelFormValidation(form_class=JIRAProjectForm, resource=JiraResource)
 
 
 """
