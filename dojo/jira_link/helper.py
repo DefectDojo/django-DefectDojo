@@ -111,7 +111,7 @@ def get_jira_project(obj, use_delegation=True):
 
 def get_jira_instance(instance):
     if not is_jira_enabled():
-        return False
+        return None
 
     jira_project = get_jira_project(instance)
     if jira_project:
