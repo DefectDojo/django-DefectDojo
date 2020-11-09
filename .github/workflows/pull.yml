@@ -1,0 +1,12 @@
+version: "1"
+rules:
+  - base: master
+    upstream: wei:master    # change `wei` to the owner of upstream repo
+    mergeMethod: hardreset
+  - base: dev
+    upstream: django-DefectDojo:dev    # change `wei` to the owner of upstream repo
+    mergeMethod: rebase
+    reviewers:
+      - cloudbees/product-security-team
+    conflictReviewers:
+      - cloudbees/product-security-team
