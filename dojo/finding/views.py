@@ -1852,12 +1852,12 @@ def finding_bulk_update_all(request, pid=None):
 
                     # Because we never call finding.save() in a bulk update, we need to actually
                     # push the JIRA stuff here, rather than in finding.save()
-                    if jira_helper.is_push_to_jira(self, form.cleaned_data['push_to_jira']):
+                    if jira_helper.is_push_to_jira(finding, form.cleaned_data['push_to_jira']):
                         if not jira_helper.get_jira_project(finding):
                             jira_helper.log_jira_alert('Finding cannot be pushed to jira as there is no jira project configuration for this product.', finding)
                         else:
                             logger.debug('pushing to jira from finding.finding_bulk_update_all()')
-                            jira_helper.push_to_jira(self)
+                            jira_helper.push_to_jira(finding)
 
                 messages.add_message(request,
                                      messages.SUCCESS,
@@ -2032,11 +2032,12 @@ def unlink_jira(request, fid):
                 extra_tags='alert-success')
 
             return JsonResponse({'result': 'OK'})
-        except:
+        except Exception as e:
+            logger.exception(e)
             messages.add_message(
                 request,
                 messages.ERROR,
-                'Link to JIRA could not be deleted',
+                'Link to JIRA could not be deleted, see alerts for details',
                 extra_tags='alert-danger')
 
             return HttpResponse(status=500)
@@ -2057,18 +2058,24 @@ def push_to_jira(request, fid):
         logger.info('trying to push %d:%s to JIRA to create or update JIRA issue', finding.id, finding.title)
         logger.debug('pushing to jira from finding.push_to-jira()')
 
-        jira_helper.push_to_jira(finding)
-
         # it may look like succes here, but the push_to_jira are swallowing exceptions
         # but cant't change too much now without having a test suite, so leave as is for now with the addition warning message to check alerts for background errors.
+        if jira_helper.push_to_jira(finding):
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                message='Action queued to create or update linked JIRA issue, check alerts for background errors.',
+                extra_tags='alert-success')
+        else:
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                'Push to JIRA failed, check alerts on the top right for errors',
+                extra_tags='alert-danger')
 
-        messages.add_message(
-            request,
-            messages.SUCCESS,
-            message='Action queued to create or update linked JIRA issue, check alerts for background errors.',
-            extra_tags='alert-success')
         return JsonResponse({'result': 'OK'})
-    except:
+    except Exception as e:
+        logger.exception(e)
         logger.error('Error pushing to JIRA: ', exc_info=True)
         messages.add_message(
             request,

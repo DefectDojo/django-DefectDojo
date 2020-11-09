@@ -145,6 +145,7 @@ def edit_engagement(request, eid):
     is_ci_cd = engagement.engagement_type == "CI/CD"
     jira_epic_form = None
     jira_project = jira_helper.get_jira_project(engagement, use_delegation=False)
+    jira_error = False
 
     if request.method == 'POST':
         form = EngForm(request.POST, instance=engagement, cicd=is_ci_cd, product=engagement.product.id, user=request.user)
@@ -171,35 +172,47 @@ def edit_engagement(request, eid):
             jira_project = jira_project_form.save(commit=False)
             if jira_project.jira_instance and jira_project.project_key:
                 jira_project.engagement = engagement
-                jira_project.save()
+                if jira_helper.is_jira_project_valid(jira_project):
+                    jira_project.save()
 
-            # logger.debug('jira_project_form: %s', vars(jira_project_form))
-            messages.add_message(
-                request,
-                messages.SUCCESS,
-                'JIRA Project config updated successfully.',
-                extra_tags='alert-success')
+                    # logger.debug('jira_project_form: %s', vars(jira_project_form))
+                    messages.add_message(
+                        request,
+                        messages.SUCCESS,
+                        'JIRA Project config updated successfully.',
+                        extra_tags='alert-success')
+                else:
+                    jira_error = True
 
             # push epic
             if jira_epic_form.cleaned_data.get('push_to_jira'):
-                jira_helper.push_to_jira(engagement)
+                if jira_helper.push_to_jira(engagement):
+                    messages.add_message(
+                        request,
+                        messages.SUCCESS,
+                        'Push to JIRA for Epic queued succesfully, check alerts on the top right for errors',
+                        extra_tags='alert-success')
+                else:
+                    jira_error = True
+
+                    messages.add_message(
+                        request,
+                        messages.SUCCESS,
+                        'Push to JIRA for Epic failed, check alerts on the top right for errors',
+                        extra_tags='alert-danger')
+
+            if not jira_error:
                 messages.add_message(
                     request,
                     messages.SUCCESS,
-                    'Push to JIRA for Epic queued succesfully, check alerts on the top right for errors',
+                    'Engagement updated successfully.',
                     extra_tags='alert-success')
-
-            messages.add_message(
-                request,
-                messages.SUCCESS,
-                'Engagement updated successfully.',
-                extra_tags='alert-success')
-            if '_Add Tests' in request.POST:
-                return HttpResponseRedirect(
-                    reverse('add_tests', args=(engagement.id, )))
-            else:
-                return HttpResponseRedirect(
-                    reverse('view_engagement', args=(engagement.id, )))
+                if '_Add Tests' in request.POST:
+                    return HttpResponseRedirect(
+                        reverse('add_tests', args=(engagement.id, )))
+                else:
+                    return HttpResponseRedirect(
+                        reverse('view_engagement', args=(engagement.id, )))
 
         else:
             # if forms invalid, page will just reload and show errors

@@ -902,6 +902,7 @@ def new_eng_for_app(request, pid, cicd=False):
     jform = None
     product = Product.objects.get(id=pid)
     jira_project = jira_helper.get_jira_project(product)
+    jira_error = True
     if not user_is_authorized(request.user, 'staff', product):
         raise PermissionDenied
 
@@ -939,36 +940,42 @@ def new_eng_for_app(request, pid, cicd=False):
             # save jira project config
             jira_project = jira_project_form.save(commit=False)
             jira_project.engagement = engagement
-            jira_project.save()
+            if jira_helper.is_jira_project_valid(jira_project):
+                jira_project.save()
 
-            messages.add_message(
-                request,
-                messages.SUCCESS,
-                'JIRA Project config updated successfully.',
-                extra_tags='alert-success')
-
-            # push epic
-            if jira_epic_form.cleaned_data.get('push_to_jira'):
-                jira_helper.push_to_jira(engagement)
                 messages.add_message(
                     request,
                     messages.SUCCESS,
-                    'Push to JIRA for Epic queued succesfully, check alerts on the top right for errors',
+                    'JIRA Project config added successfully.',
                     extra_tags='alert-success')
+            else:
+                jire_error = True
 
-            messages.add_message(request,
-                                 messages.SUCCESS,
-                                 'Engagement added successfully.',
-                                 extra_tags='alert-success')
+            # push epic
+            if jira_epic_form.cleaned_data.get('push_to_jira'):
+                if jira_helper.push_to_jira(engagement):
+                    messages.add_message(
+                        request,
+                        messages.SUCCESS,
+                        'Push to JIRA for Epic queued succesfully, check alerts on the top right for errors',
+                        extra_tags='alert-success')
+                else:
+                    jira_error = True
 
             create_notification(event='engagement_added', title=engagement.name + " for " + product.name, engagement=engagement, url=reverse('view_engagement', args=(engagement.id,)), objowner=engagement.lead)
 
-            if "_Add Tests" in request.POST:
-                return HttpResponseRedirect(reverse('add_tests', args=(engagement.id,)))
-            elif "_Import Scan Results" in request.POST:
-                return HttpResponseRedirect(reverse('import_scan_results', args=(engagement.id,)))
-            else:
-                return HttpResponseRedirect(reverse('view_engagement', args=(engagement.id,)))
+            if not jira_error:
+                messages.add_message(request,
+                                    messages.SUCCESS,
+                                    'Engagement added successfully.',
+                                    extra_tags='alert-success')
+
+                if "_Add Tests" in request.POST:
+                    return HttpResponseRedirect(reverse('add_tests', args=(engagement.id,)))
+                elif "_Import Scan Results" in request.POST:
+                    return HttpResponseRedirect(reverse('import_scan_results', args=(engagement.id,)))
+                else:
+                    return HttpResponseRedirect(reverse('view_engagement', args=(engagement.id,)))
         else:
             # if forms invalid, page will just reload and show errors
             if jira_project_form.errors or jira_epic_form.errors:

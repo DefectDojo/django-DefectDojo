@@ -522,8 +522,11 @@
                         {% if system_settings.enable_jira %}
                             {% if jira_project and product_tab or not product_tab %}
                                 <td>
-                                    <a href="{{ finding | jira_url }}" target="_blank"> {{ finding | jira_key }} </a>
-                                </td>
+                                    {% if finding.has_jira_issue %}
+                                        <a href="{{ finding | jira_url }}" target="_blank" 
+                                            alt="Jira Bug - {{finding | jira_key}}" data-toggle="tooltip" data-placement="bottom" title="{{finding | jira_key}}"><i class="fa fa-bug fa-fw"></i></a>
+                                    {% endif %}
+                                    </td>
 
                                     <td class="nowrap">
                                         {{ finding | jira_creation | timesince }}

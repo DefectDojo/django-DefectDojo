@@ -2,6 +2,7 @@ import logging
 from dojo.utils import get_system_setting
 import os
 import io
+import json
 import requests
 from django.conf import settings
 from django.template.loader import render_to_string
@@ -123,8 +124,14 @@ def get_jira_instance(instance):
 def get_jira_url(obj):
     logger.debug('getting jira url')
 
+    # finding + engagement
     if hasattr(obj, 'has_jira_issue') and obj.has_jira_issue:
         return get_jira_issue_url(obj)
+    else:
+        # finding must only have url if there is a jira_issue
+        # engagement can continue to show url of jiraproject instead of jira issue
+        if isinstance(obj, Finding):
+            return None
 
     if isinstance(obj, JIRA_Project):
         return get_jira_project_url(obj)
@@ -221,7 +228,7 @@ def get_jira_connection_raw(jira_server, jira_username, jira_password):
                 options={"verify": settings.JIRA_SSL_VERIFY},
                 max_retries=0)
 
-        logger.debug('logged in to JIRA %s successfully', jira_instance)
+        logger.debug('logged in to JIRA ''%s'' successfully', jira_server)
 
         return jira
     except JIRAError as e:
@@ -339,7 +346,7 @@ def jira_description(find):
     template = 'issue-trackers/jira-description.tpl'
     kwargs = {}
     kwargs['finding'] = find
-    kwargs['jira_instance'] = find.jira_instance_new()
+    kwargs['jira_instance'] = get_jira_instance(find)
     return render_to_string(template, kwargs)
 
 
@@ -347,16 +354,16 @@ def push_to_jira(obj):
     if isinstance(obj, Finding):
         finding = obj
         if finding.has_jira_issue:
-            update_jira_issue(finding)
+            return update_jira_issue(finding)
         else:
-            add_jira_issue(finding)
+            return add_jira_issue(finding)
 
     elif isinstance(obj, Engagement):
         engagement = obj
         if engagement.has_jira_issue:
-            update_epic(engagement)
+            return update_epic(engagement)
         else:
-            add_epic(engagement)
+            return add_epic(engagement)
 
     else:
         logger.error('unsupported object passed to push_to_jira: %s %i %s', obj.__name__, obj.id, obj)
@@ -413,7 +420,7 @@ def add_jira_issue(find):
 
             # populate duedate field, but only if it's available for this project + issuetype
             if not meta:
-                meta = jira_meta(jira, jira_project)
+                meta = get_jira_meta(jira, jira_project)
 
             if 'priority' in meta['projects'][0]['issuetypes'][0]['fields']:
                 fields['priority'] = {
@@ -434,7 +441,7 @@ def add_jira_issue(find):
 
             if len(find.endpoints.all()) > 0:
                 if not meta:
-                    meta = jira_meta(jira, jira_project)
+                    meta = get_jira_meta(jira, jira_project)
 
                 if 'environment' in meta['projects'][0]['issuetypes'][0]['fields']:
                     environment = "\n".join([str(endpoint) for endpoint in find.endpoints.all()])
@@ -468,15 +475,19 @@ def add_jira_issue(find):
                     settings.MEDIA_ROOT + pic.image_large.name)
 
                 # if jira_project.enable_engagement_epic_mapping:
-                #      epic = jira_helper.get_jira_issue(eng)
+                #      epic = get_jira_issue(eng)
                 #      issue_list = [j_issue.jira_id,]
                 #      jira.add_jira_issues_to_epic(epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
+
+            return True
         except JIRAError as e:
             logger.exception(e)
             log_jira_alert(e.text, find)
+            return False
     else:
         log_jira_alert("A Finding needs to be both Active and Verified to be pushed to JIRA.", find)
         logger.warning("A Finding needs to be both Active and Verified to be pushed to JIRA: %s", find)
+        return False
 
 
 @dojo_async_task
@@ -493,7 +504,7 @@ def update_jira_issue(find):
     if not jira_project:
         logger.error("Finding {} cannot be pushed to JIRA as there is no JIRA configuration for this product.".format(find.id))
         log_jira_alert('Finding cannot be pushed to JIRA as there is no JIRA configuration for this product.', find)
-        return
+        return False
 
     j_issue = find.jira_issue
     try:
@@ -520,7 +531,7 @@ def update_jira_issue(find):
             fields = {"components": component}
 
         if not meta:
-            meta = jira_meta(jira, jira_project)
+            meta = get_jira_meta(jira, jira_project)
 
         labels = get_labels(find)
         if labels:
@@ -548,10 +559,12 @@ def update_jira_issue(find):
         find.jira_issue.jira_change = timezone.now()
         find.jira_issue.save()
         find.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
+        return True
 
     except JIRAError as e:
         logger.exception(e)
         log_jira_alert(e.text, find)
+        return False
 
     req_url = jira_instance.url + '/rest/api/latest/issue/' + \
         j_issue.jira_id + '/transitions'
@@ -583,10 +596,65 @@ def update_jira_issue(find):
         find.save()
 
 
-def jira_meta(jira, jpkey):
-    meta = jira.createmeta(projectKeys=jpkey.project_key, issuetypeNames=jpkey.conf.default_issue_type, expand="projects.issuetypes.fields")
-    logger.debug("jira_meta: %s", json.dumps(meta, indent=4))  # this is None safe
-    return meta
+# gets the metadata for the default issue type in this jira project
+def get_jira_meta(jira, jira_project):
+    meta = jira.createmeta(projectKeys=jira_project.project_key, issuetypeNames=jira_project.jira_instance.default_issue_type, expand="projects.issuetypes.fields")
+    logger.debug("get_jira_meta: %s", json.dumps(meta, indent=4))  # this is None safe
+    # meta['projects'][0]['issuetypes'][0]['fields']:
+
+    meta_data_error = False
+    if len(meta['projects']) == 0:
+        # non-existent project, or no permissions
+        # [09/Nov/2020 21:04:22] DEBUG [dojo.jira_link.helper:595] get_jira_meta: {
+        #     "expand": "projects",
+        #     "projects": []
+        # }
+        meta_data_error = True
+        message = 'unable to retrieve metadata from JIRA %s for project %s. Invalid project key or no permissions to this project?' % (jira_project.jira_instance, jira_project.project_key)
+
+    elif len(meta['projects'][0]['issuetypes']) == 0:
+        # default issue type doesn't exist in project
+        # [09/Nov/2020 21:09:03] DEBUG [dojo.jira_link.helper:595] get_jira_meta: {
+        #     "expand": "projects",
+        #     "projects": [
+        #         {
+        #             "expand": "issuetypes",
+        #             "self": "https://jira-uat.com/rest/api/2/project/1212",
+        #             "id": "1212",
+        #             "key": "ISO",
+        #             "name": "ISO ISMS",
+        #             "avatarUrls": {
+        #                 "48x48": "https://jira-uat.com/secure/projectavatar?pid=14431&avatarId=17200",
+        #                 "24x24": "https://jira-uat.com/secure/projectavatar?size=small&pid=14431&avatarId=17200",
+        #                 "16x16": "https://jira-uat.com/secure/projectavatar?size=xsmall&pid=14431&avatarId=17200",
+        #                 "32x32": "https://jira-uat.com/secure/projectavatar?size=medium&pid=14431&avatarId=17200"
+        #             },
+        #             "issuetypes": []
+        #         }
+        #     ]
+        # }
+        meta_data_error = True
+        message = 'unable to retrieve metadata from JIRA %s for issuetype %s in project %s. Invalid default issue type configured in Defect Dojo?' % (jira_project.jira_instance, jira_project.jira_instance.default_issue_type, jira_project.project_key)
+
+    if meta_data_error:
+        logger.warn(message)
+        logger.warn("get_jira_meta: %s", json.dumps(meta, indent=4))  # this is None safe
+
+        messages.add_message(get_current_request(),
+                            messages.ERROR,
+                            message,
+                            extra_tags='alert-danger')
+        raise JIRAError(text=message)
+    else:
+        return meta
+
+
+def is_jira_project_valid(jira_project):
+    try:
+        meta = get_jira_meta(get_jira_connection(jira_project), jira_project)
+        return True
+    except JIRAError as e:
+        return False
 
 
 def jira_attachment(finding, jira, issue, file, jira_filename=None):
@@ -607,9 +675,11 @@ def jira_attachment(finding, jira, issue, file, jira_filename=None):
                 # read and upload a file
                 with open(file, 'rb') as f:
                     jira.add_attachment(issue=issue, attachment=f)
+            return True
         except JIRAError as e:
             logger.exception(e)
             log_jira_alert("Attachment: " + e.text, finding)
+            return False
 
 
 def jira_check_attachment(issue, source_file_name):
@@ -638,7 +708,7 @@ def close_epic(eng, push_to_jira):
     jira_instance = get_jira_instance(engagement)
     if jira_project.enable_engagement_epic_mapping and push_to_jira:
         try:
-            jissue = jira_helper.get_jira_issue(eng)
+            jissue = get_jira_issue(eng)
             req_url = jira_instance.url + '/rest/api/latest/issue/' + \
                 j_issue.jira_id + '/transitions'
             json_data = {'transition': {'id': jira_instance.close_status_key}}
@@ -648,10 +718,12 @@ def close_epic(eng, push_to_jira):
                 json=json_data)
             if r.status_code != 204:
                 logger.warn("JIRA close epic failed with error: {}".format(r.text))
+                return False
+            return True
         except JIRAError as e:
             logger.exception(e)
             log_jira_generic_alert('Jira Engagement/Epic Close Error', str(e))
-            pass
+            return False
 
 
 @dojo_async_task
@@ -669,10 +741,11 @@ def update_epic(engagement):
             j_issue = get_jira_issue(engagement)
             issue = jira.issue(j_issue.jira_id)
             issue.update(summary=engagement.name, description=engagement.name)
+            return True
         except JIRAError as e:
             logger.exception(e)
             log_jira_generic_alert('Jira Engagement/Epic Update Error', str(e))
-            pass
+            return False
 
 
 @dojo_async_task
@@ -706,6 +779,7 @@ def add_epic(engagement):
                 jira_key=new_issue.key,
                 engagement=engagement)
             j_issue.save()
+            return True
         except JIRAError as e:
             # should we try to parse the errors as JIRA is very strange in how it responds.
             # for example a non existent project_key leads to "project key is required" which sounds like something is missing
@@ -721,7 +795,7 @@ def add_epic(engagement):
 
             log_jira_generic_alert('Jira Engagement/Epic Creation Error',
                                    message + error)
-            pass
+            return False
 
 
 def jira_get_issue(jira_project, issue_key):
@@ -756,9 +830,10 @@ def add_comment(find, note, force_push=False):
                 jira.add_comment(
                     j_issue.jira_id,
                     '(%s): %s' % (note.author.get_full_name(), note.entry))
+                return True
             except JIRAError as e:
                 log_jira_generic_alert('Jira Add Comment Error', str(e))
-                pass
+                return False
 
 
 def add_simple_jira_comment(jira_instance, jira_issue, comment):
@@ -768,14 +843,16 @@ def add_simple_jira_comment(jira_instance, jira_issue, comment):
         jira.add_comment(
             jira_issue.jira_id, comment
         )
+        return True
     except Exception as e:
         log_jira_generic_alert('Jira Add Comment Error', str(e))
+        return False
 
 
 def finding_link_jira(request, finding, new_jira_issue_key):
     logger.debug('linking existing jira issue %s for finding %i', new_jira_issue_key, finding.id)
 
-    existing_jira_issue = jira_helper.jira_get_issue(jira_helper.get_jira_project(finding), new_jira_issue_key)
+    existing_jira_issue = jira_get_issue(get_jira_project(finding), new_jira_issue_key)
 
     if not existing_jira_issue:
         raise ValueError('JIRA issue not found or cannot be retrieved: ' + new_jira_issue_key)
@@ -796,13 +873,14 @@ def finding_link_jira(request, finding, new_jira_issue_key):
 
     finding.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
 
-    jira_issue_url = jira_helper.get_jira_url(finding)
+    jira_issue_url = get_jira_url(finding)
 
     new_note = Notes()
     new_note.entry = 'linked JIRA issue %s to finding' % (jira_issue_url)
     new_note.author = request.user
     new_note.save()
     finding.notes.add(new_note)
+    return True
 
 
 def finding_unlink_jira(request, finding):
@@ -810,10 +888,11 @@ def finding_unlink_jira(request, finding):
     finding.jira_issue.delete()
     finding.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
 
-    jira_issue_url = jira_helper.get_jira_url(finding)
+    jira_issue_url = get_jira_url(finding)
 
     new_note = Notes()
     new_note.entry = 'unlinked JIRA issue %s from finding' % (jira_issue_url)
     new_note.author = request.user
     new_note.save()
     finding.notes.add(new_note)
+    return True
