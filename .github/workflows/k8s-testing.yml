@@ -205,6 +205,6 @@ jobs:
              echo "DD K8S successfully deployed"
       - name: Run Unit tests
         run: |-
-             helm test defectdojo --set imagePullSecrets=defectdojoregistrykey
+             helm test defectdojo 
              return_value=${?}
              echo $return_value
