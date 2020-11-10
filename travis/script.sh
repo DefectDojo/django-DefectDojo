@@ -50,18 +50,6 @@ if [ -z "${TEST}" ]; then
   done
   echo
 
-  # Create Helm and wait for Tiller to become ready
-  helm init
-  echo -n "Waiting for Tiller "
-  until [[ "True" == "$(kubectl get pod \
-    --selector=name=tiller \
-    --namespace=kube-system \
-    -o 'jsonpath={.items[*].status.conditions[?(@.type=="Ready")].status}')" ]]
-  do
-    sleep 1
-    echo -n "."
-  done
-  echo
 
   # add bitnami repo
   helm repo add bitnami https://charts.bitnami.com/bitnami
@@ -70,6 +58,7 @@ if [ -z "${TEST}" ]; then
   helm repo update
 
   # Update Helm dependencies for DefectDojo
+  helm repo add stable https://kubernetes-charts.storage.googleapis.com/
   helm dependency update ./helm/defectdojo
 
   # Set Helm settings for the broker
@@ -142,8 +131,8 @@ if [ -z "${TEST}" ]; then
   esac
   # Install DefectDojo into Kubernetes and wait for it
   helm install \
+    defectdojo \
     ./helm/defectdojo \
-    --name=defectdojo \
     --set django.ingress.enabled=false \
     --set imagePullPolicy=Never \
     ${HELM_BROKER_SETTINGS} \
@@ -176,6 +165,7 @@ if [ -z "${TEST}" ]; then
   kubectl get pods
   travis_fold end minikube_install
 
+
   # Test if postgres has replication enabled
   if [[ "${REPLICATION}" == "enabled" ]]
   then
@@ -183,6 +173,7 @@ if [ -z "${TEST}" ]; then
     items=`kubectl get pods -o name | grep slave | wc -l`
     echo "Number of replicas $items"
     if [[ $items < 1 ]]; then
+      echo "Wrong number of replicas"
       return_value=1
     fi
   travis_fold end defectdojo_tests_replication
@@ -196,6 +187,7 @@ if [ -z "${TEST}" ]; then
     sed "s/pod\///g") -c uwsgi printenv | grep testme | wc -l`
     echo "Number of items $items"
     if [[ $items < 2 ]]; then
+      echo "Missing extra variables"
       return_value=1
     fi
   travis_fold end defectdojo_tests_extravars
@@ -215,69 +207,69 @@ if [ -z "${TEST}" ]; then
   kubectl get pods
 
   # Uninstall
-  echo "Deleting DefectDojo from Kubernetes"
-  helm delete defectdojo --purge
+  echo "Removing DefectDojo from Kubernetes"
+  helm uninstall defectdojo
   kubectl get pods
   travis_fold end defectdojo_tests
 
   exit ${return_value}
 else
 echo "Running test ${TEST}"
-  case "${TEST}" in
-    flake8)
-      echo "${TRAVIS_BRANCH}"
-      if [[ "${TRAVIS_BRANCH}" == "dev" ]]
-      then
-          echo "Running Flake8 tests on dev branch aka pull requests"
-          # We need to checkout dev for flake8-diff to work properly
-          git checkout dev
-          sudo pip3 install pep8 flake8 flake8-diff
-          flake8-diff
-      else
-          echo "Skipping because not on dev branch"
-      fi
-      ;;
-    docker_integration_tests)
-      echo "Validating docker compose"
-      # change user id withn Docker container to user id of travis user
-      sed -i -e "s/USER\ 1001/USER\ `id -u`/g" ./Dockerfile.django
-      cp ./dojo/settings/settings.dist.py ./dojo/settings/settings.py
-      # incase of failure and you need to debug
-      # change the 'release' mode to 'dev' mode in order to activate debug=True
-      # make sure you remember to change back to 'release' before making a PR
-      source ./docker/setEnv.sh release
-      docker-compose build
+  # case "${TEST}" in
+  #   flake8)
+  #     echo "${TRAVIS_BRANCH}"
+  #     if [[ "${TRAVIS_BRANCH}" == "dev" ]]
+  #     then
+  #         echo "Running Flake8 tests on dev branch aka pull requests"
+  #         # We need to checkout dev for flake8-diff to work properly
+  #         git checkout dev
+  #         sudo pip3 install pep8 flake8 flake8-diff
+  #         flake8-diff
+  #     else
+  #         echo "Skipping because not on dev branch"
+  #     fi
+  #     ;;
+  #   docker_integration_tests)
+  #     echo "Validating docker compose"
+  #     # change user id withn Docker container to user id of travis user
+  #     sed -i -e "s/USER\ 1001/USER\ `id -u`/g" ./Dockerfile.django
+  #     cp ./dojo/settings/settings.dist.py ./dojo/settings/settings.py
+  #     # incase of failure and you need to debug
+  #     # change the 'release' mode to 'dev' mode in order to activate debug=True
+  #     # make sure you remember to change back to 'release' before making a PR
+  #     source ./docker/setEnv.sh release
+  #     docker-compose build
 
-      docker-compose up -d
-      echo "Waiting for services to start"
-      # Wait for services to become available
-      sleep 80
-      echo "Testing DefectDojo Service"
-      curl -s -o "/dev/null" http://localhost:8080 -m 120
-      CR=$(curl -s -m 10 -I http://localhost:8080/login?next= | egrep "^HTTP" | cut  -d' ' -f2)
-      if [ "$CR" != 200 ]; then
-        echo "ERROR: cannot display login screen; got HTTP code $CR"
-        docker-compose logs  --tail="all" uwsgi
-        exit 1
-      fi
-      echo "Docker compose container status"
-      docker-compose -f docker-compose.yml ps
+  #     docker-compose up -d
+  #     echo "Waiting for services to start"
+  #     # Wait for services to become available
+  #     sleep 80
+  #     echo "Testing DefectDojo Service"
+  #     curl -s -o "/dev/null" http://localhost:8080 -m 120
+  #     CR=$(curl -s -m 10 -I http://localhost:8080/login?next= | egrep "^HTTP" | cut  -d' ' -f2)
+  #     if [ "$CR" != 200 ]; then
+  #       echo "ERROR: cannot display login screen; got HTTP code $CR"
+  #       docker-compose logs  --tail="all" uwsgi
+  #       exit 1
+  #     fi
+  #     echo "Docker compose container status"
+  #     docker-compose -f docker-compose.yml ps
 
-      echo "run integration_test scripts"
-      source ./travis/integration_test-script.sh
-      ;;
-    snyk)
-      echo "Snyk security testing on containers"
-      build_containers
-      snyk monitor --docker defectdojo/defectdojo-django:latest
-      snyk monitor --docker defectdojo/defectdojo-nginx:latest
-      ;;
-    deploy)
-      echo "Deploy and container push"
-      build_containers
-      source ./travis/deploy.sh
-      deploy_demo
-      docker_hub
-      ;;
-  esac
+  #     echo "run integration_test scripts"
+  #     source ./travis/integration_test-script.sh
+  #     ;;
+  #   snyk)
+  #     echo "Snyk security testing on containers"
+  #     build_containers
+  #     snyk monitor --docker defectdojo/defectdojo-django:latest
+  #     snyk monitor --docker defectdojo/defectdojo-nginx:latest
+  #     ;;
+  #   deploy)
+  #     echo "Deploy and container push"
+  #     build_containers
+  #     source ./travis/deploy.sh
+  #     deploy_demo
+  #     docker_hub
+  #     ;;
+  # esac
 fi

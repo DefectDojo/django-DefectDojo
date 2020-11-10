@@ -9,6 +9,7 @@ from django.utils.text import normalize_newlines
 from django.urls import reverse
 from django.contrib.auth.models import User
 from dojo.utils import prepare_for_view, get_system_setting, get_full_url
+from dojo.user.helper import user_is_authorized
 from dojo.models import Check_List, FindingImageAccessToken, Finding, System_Settings, JIRA_PKey, Product
 import markdown
 from django.db.models import Sum, Case, When, IntegerField, Value
@@ -86,12 +87,10 @@ def url_shortner(value):
     return_value = str(value)
     url = urlparse(return_value)
 
-    if url.path:
+    if url.path and len(url.path) != 1:
         return_value = url.path
-        if len(return_value) == 1:
-            return_value = value
-    if len(str(return_value)) > 50:
-        return_value = "..." + return_value[50:]
+    if len(return_value) > 50:
+        return_value = "..." + return_value[-47:]
 
     return return_value
 
@@ -124,7 +123,10 @@ def linebreaksasciidocbr(value, autoescape=None):
 @register.simple_tag
 def dojo_version():
     from dojo import __version__
-    return 'v. ' + __version__
+    version = __version__
+    if settings.FOOTER_VERSION:
+        version = settings.FOOTER_VERSION
+    return "v. {}".format(version)
 
 
 @register.simple_tag
@@ -652,7 +654,7 @@ def get_severity_count(id, table):
                      output_field=IntegerField())),
         )
     elif table == "engagement":
-        counts = Finding.objects.filter(test__engagement=id, active=True, verified=False, duplicate=False). \
+        counts = Finding.objects.filter(test__engagement=id, active=True, duplicate=False). \
             prefetch_related('test__engagement__product').aggregate(
             total=Sum(
                 Case(When(severity__in=('Critical', 'High', 'Medium', 'Low'),
@@ -793,15 +795,21 @@ def finding_display_status(finding):
 
 
 @register.filter
-def is_authorized_for_change(user, finding):
+def is_authorized_for_change(user, obj):
     # print('filter: is_authorized_for_change')
-    return finding.is_authorized(user, 'change')
+    return user_is_authorized(user, 'change', obj)
 
 
 @register.filter
-def is_authorized_for_delete(user, finding):
+def is_authorized_for_delete(user, obj):
     # print('filter: is_authorized_for_delete')
-    return finding.is_authorized(user, 'delete')
+    return user_is_authorized(user, 'delete', obj)
+
+
+@register.filter
+def is_authorized_for_staff(user, obj):
+    # print('filter: is_authorized_for_staff')
+    return user_is_authorized(user, 'staff', obj)
 
 
 @register.filter
@@ -854,3 +862,12 @@ def finding_related_action_classes(related_action):
 @register.filter
 def finding_related_action_title(related_action):
     return finding_related_action_title_dict.get(related_action, '')
+
+
+def product_findings(product):
+    return Finding.objects.filter(test__engagement__product=product)
+
+
+@register.filter
+def class_name(value):
+    return value.__class__.__name__

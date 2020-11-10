@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='risk_acceptance',
             name='name',
-            field=models.CharField(default=None, max_length=100, help_text="Descriptive name which in the future may also be used to group risk acceptances together across engagements and products"),
+            field=models.CharField(default="Legacy acceptance", max_length=100, help_text="Descriptive name which in the future may also be used to group risk acceptances together across engagements and products"),
         ),
         migrations.RunPython(set_name_from_created_date),
         migrations.AlterField(

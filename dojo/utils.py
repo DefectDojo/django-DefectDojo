@@ -2,8 +2,8 @@ import re
 import binascii
 import os
 import hashlib
-import json
 import io
+import json
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 from calendar import monthrange
@@ -23,13 +23,13 @@ from django.utils import timezone
 from jira import JIRA
 from jira.exceptions import JIRAError
 from django.dispatch import receiver
-from dojo.signals import dedupe_signal
 from django.db.models.signals import post_save
+from django.db.models.query import QuerySet
 import calendar as tcalendar
 from dojo.github import add_external_issue_github, update_external_issue_github, close_external_issue_github, reopen_external_issue_github
 from dojo.models import Finding, Engagement, Finding_Template, Product, JIRA_PKey, JIRA_Issue,\
     Dojo_User, User, System_Settings, Notifications, Endpoint, Benchmark_Type, \
-    Language_Type, Languages, Rule, Test_Type, Notes
+    Language_Type, Languages, Rule, Notes
 from asteval import Interpreter
 from requests.auth import HTTPBasicAuth
 from dojo.notifications.helper import create_notification
@@ -37,8 +37,9 @@ import logging
 import itertools
 from django.contrib import messages
 from django.http import HttpResponseRedirect
-# import traceback
-
+import crum
+from celery.decorators import task
+from dojo.decorators import dojo_async_task
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -49,31 +50,49 @@ Helper functions for DefectDojo
 """
 
 
-def sync_false_history(new_finding, *args, **kwargs):
+@dojo_async_task
+@task
+def do_false_positive_history(new_finding, *args, **kwargs):
+    logger.debug('%s: sync false positive history', new_finding.id)
     if new_finding.endpoints.count() == 0:
+        # if no endpoints on new finding, then look at cwe + test_type + hash_code. or title + test_type + hash_code
         eng_findings_cwe = Finding.objects.filter(
             test__engagement__product=new_finding.test.engagement.product,
             cwe=new_finding.cwe,
             test__test_type=new_finding.test.test_type,
-            false_p=True, hash_code=new_finding.hash_code).exclude(id=new_finding.id).exclude(cwe=None)
+            false_p=True, hash_code=new_finding.hash_code).exclude(id=new_finding.id).exclude(cwe=None).values('id')
         eng_findings_title = Finding.objects.filter(
             test__engagement__product=new_finding.test.engagement.product,
             title=new_finding.title,
             test__test_type=new_finding.test.test_type,
-            false_p=True, hash_code=new_finding.hash_code).exclude(id=new_finding.id)
+            false_p=True, hash_code=new_finding.hash_code).exclude(id=new_finding.id).values('id')
         total_findings = eng_findings_cwe | eng_findings_title
     else:
+        # if endpoints on new finding, then look at ONLY cwe + test_type. or title + test_type (hash_code doesn't matter!)
         eng_findings_cwe = Finding.objects.filter(
             test__engagement__product=new_finding.test.engagement.product,
             cwe=new_finding.cwe,
             test__test_type=new_finding.test.test_type,
-            false_p=True).exclude(id=new_finding.id).exclude(cwe=None).exclude(endpoints=None)
+            false_p=True).exclude(id=new_finding.id).exclude(cwe=None).exclude(endpoints=None).values('id')
         eng_findings_title = Finding.objects.filter(
             test__engagement__product=new_finding.test.engagement.product,
             title=new_finding.title,
             test__test_type=new_finding.test.test_type,
-            false_p=True).exclude(id=new_finding.id).exclude(endpoints=None)
+            false_p=True).exclude(id=new_finding.id).exclude(endpoints=None).values('id')
+
     total_findings = eng_findings_cwe | eng_findings_title
+
+    deduplicationLogger.debug("cwe   query: %s", eng_findings_cwe.query)
+    deduplicationLogger.debug("title query: %s", eng_findings_title.query)
+
+    # TODO this code retrieves all matching findings + data. in 3 queries. just to check if there is a non-zero amount of matching findings.
+    # if we keep false positive history like this, this can be rewritten into 1 query that performs these counts.
+
+    deduplicationLogger.debug("False positive history: Found " +
+        str(len(eng_findings_cwe)) + " findings with same cwe, " +
+        str(len(eng_findings_title)) + " findings with same title: " +
+        str(len(total_findings)) + " findings with either same title or same cwe")
+
     if total_findings.count() > 0:
         new_finding.false_p = True
         new_finding.active = False
@@ -86,16 +105,18 @@ def is_deduplication_on_engagement_mismatch(new_finding, to_duplicate_finding):
     return not new_finding.test.engagement.deduplication_on_engagement and to_duplicate_finding.test.engagement.deduplication_on_engagement
 
 
-@receiver(dedupe_signal, sender=Finding)
-def sync_dedupe(sender, *args, **kwargs):
+@dojo_async_task
+@task
+def do_dedupe_finding(new_finding, *args, **kwargs):
     try:
-        enabled = System_Settings.objects.get().enable_deduplication
+        enabled = System_Settings.objects.get(no_cache=True).enable_deduplication
     except System_Settings.DoesNotExist:
+        logger.warning("system settings not found")
         enabled = False
     if enabled:
-        new_finding = kwargs['new_finding']
         deduplicationLogger.debug('sync_dedupe for: ' + str(new_finding.id) +
                     ":" + str(new_finding.title))
+        # TODO use test.dedupe_algo and case statement
         if hasattr(settings, 'DEDUPLICATION_ALGORITHM_PER_PARSER'):
             scan_type = new_finding.test.test_type.name
             deduplicationLogger.debug('scan_type for this finding is :' + scan_type)
@@ -113,11 +134,12 @@ def sync_dedupe(sender, *args, **kwargs):
                 deduplicate_uid_or_hash_code(new_finding)
             else:
                 deduplicate_legacy(new_finding)
+                logger.debug('done legacy')
         else:
             deduplicationLogger.debug("no configuration per parser found; using legacy algorithm")
             deduplicate_legacy(new_finding)
     else:
-        deduplicationLogger.debug("skipping dedupe because it's disabled in system settings get()")
+        deduplicationLogger.debug("sync_dedupe: skipping dedupe because it's disabled in system settings get()")
 
 
 def deduplicate_legacy(new_finding):
@@ -131,19 +153,19 @@ def deduplicate_legacy(new_finding):
     if new_finding.test.engagement.deduplication_on_engagement:
         eng_findings_cwe = Finding.objects.filter(
             test__engagement=new_finding.test.engagement,
-            cwe=new_finding.cwe).exclude(id=new_finding.id).exclude(cwe=0).exclude(duplicate=True)
+            cwe=new_finding.cwe).exclude(id=new_finding.id).exclude(cwe=0).exclude(duplicate=True).values('id')
         eng_findings_title = Finding.objects.filter(
             test__engagement=new_finding.test.engagement,
-            title=new_finding.title).exclude(id=new_finding.id).exclude(duplicate=True)
+            title=new_finding.title).exclude(id=new_finding.id).exclude(duplicate=True).values('id')
     else:
         eng_findings_cwe = Finding.objects.filter(
             test__engagement__product=new_finding.test.engagement.product,
-            cwe=new_finding.cwe).exclude(id=new_finding.id).exclude(cwe=0).exclude(duplicate=True)
+            cwe=new_finding.cwe).exclude(id=new_finding.id).exclude(cwe=0).exclude(duplicate=True).values('id')
         eng_findings_title = Finding.objects.filter(
             test__engagement__product=new_finding.test.engagement.product,
-            title=new_finding.title).exclude(id=new_finding.id).exclude(duplicate=True)
+            title=new_finding.title).exclude(id=new_finding.id).exclude(duplicate=True).values('id')
 
-    total_findings = eng_findings_cwe | eng_findings_title
+    total_findings = Finding.objects.filter(Q(id__in=eng_findings_cwe) | Q(id__in=eng_findings_title)).prefetch_related('endpoints', 'test', 'test__engagement', 'found_by', 'original_finding', 'test__test_type')
     deduplicationLogger.debug("Found " +
         str(len(eng_findings_cwe)) + " findings with same cwe, " +
         str(len(eng_findings_title)) + " findings with same title: " +
@@ -158,28 +180,36 @@ def deduplicate_legacy(new_finding):
             deduplicationLogger.debug(
                 'deduplication_on_engagement_mismatch, skipping dedupe.')
             continue
+
         # ---------------------------------------------------------
         # 2) If existing and new findings have endpoints: compare them all
         #    Else look at line+file_path
         #    (if new finding is not static, do not deduplicate)
         # ---------------------------------------------------------
+
         if find.endpoints.count() != 0 and new_finding.endpoints.count() != 0:
             list1 = [e.host_with_port for e in new_finding.endpoints.all()]
             list2 = [e.host_with_port for e in find.endpoints.all()]
+
             if all(x in list1 for x in list2):
+                deduplicationLogger.debug("%s: existing endpoints are present in new finding", find.id)
                 flag_endpoints = True
-        elif new_finding.static_finding and len(new_finding.file_path) > 0:
+        elif new_finding.static_finding and new_finding.file_path and len(new_finding.file_path) > 0:
             if str(find.line) == str(new_finding.line) and find.file_path == new_finding.file_path:
+                deduplicationLogger.debug("%s: file_path and line match", find.id)
                 flag_line_path = True
             else:
-                deduplicationLogger.debug("no endpoints on one of the findings and file_path doesn't match")
+                deduplicationLogger.debug("no endpoints on one of the findings and file_path doesn't match; Deduplication will not occur")
         else:
             deduplicationLogger.debug("no endpoints on one of the findings and the new finding is either dynamic or doesn't have a file_path; Deduplication will not occur")
+
         if find.hash_code == new_finding.hash_code:
             flag_hash = True
+
         deduplicationLogger.debug(
-            'deduplication flags for new finding ' + str(new_finding.id) + ' and existing finding ' + str(find.id) +
+            'deduplication flags for new finding (' + ('dynamic' if new_finding.dynamic_finding else 'static') + ') ' + str(new_finding.id) + ' and existing finding ' + str(find.id) +
             ' flag_endpoints: ' + str(flag_endpoints) + ' flag_line_path:' + str(flag_line_path) + ' flag_hash:' + str(flag_hash))
+
         # ---------------------------------------------------------
         # 3) Findings are duplicate if (cond1 is true) and they have the same:
         #    hash
@@ -212,6 +242,7 @@ def deduplicate_unique_id_from_tool(new_finding):
                 id=new_finding.id).exclude(
                     unique_id_from_tool=None).exclude(
                         duplicate=True)
+
     deduplicationLogger.debug("Found " +
         str(len(existing_findings)) + " findings with same unique_id_from_tool")
     for find in existing_findings:
@@ -242,6 +273,7 @@ def deduplicate_hash_code(new_finding):
                 id=new_finding.id).exclude(
                     hash_code=None).exclude(
                         duplicate=True)
+
     deduplicationLogger.debug("Found " +
         str(len(existing_findings)) + " findings with same hash_code")
     for find in existing_findings:
@@ -294,7 +326,7 @@ def set_duplicate(new_finding, existing_finding):
         raise Exception("Existing finding is a duplicate")
     if existing_finding.id == new_finding.id:
         raise Exception("Can not add duplicate to itself")
-    deduplicationLogger.debug('New finding ' + str(new_finding.id) + ' is a duplicate of existing finding ' + str(existing_finding.id))
+    deduplicationLogger.debug('Setting new finding ' + str(new_finding.id) + ' as a duplicate of existing finding ' + str(existing_finding.id))
     if is_duplicate_reopen(new_finding, existing_finding):
         set_duplicate_reopen_(new_finding, existing_finding)
     new_finding.duplicate = True
@@ -326,82 +358,9 @@ def set_duplicate_reopen(new_finding, existing_finding):
     existing_finding.save()
 
 
-def removeLoop(finding_id, counter):
-    # get latest status
-    finding = Finding.objects.get(id=finding_id)
-    real_original = finding.duplicate_finding
-
-    if not real_original or real_original is None:
-        return
-
-    if finding_id == real_original.id:
-        finding.duplicate_finding = None
-        super(Finding, finding).save()
-        return
-
-    # Only modify the findings if the original ID is lower to get the oldest finding as original
-    if (real_original.id > finding_id) and (real_original.duplicate_finding is not None):
-        tmp = finding_id
-        finding_id = real_original.id
-        real_original = Finding.objects.get(id=tmp)
-        finding = Finding.objects.get(id=finding_id)
-
-    if real_original in finding.original_finding.all():
-        # remove the original from the duplicate list if it is there
-        finding.original_finding.remove(real_original)
-        super(Finding, finding).save()
-    if counter <= 0:
-        # Maximum recursion depth as safety method to circumvent recursion here
-        return
-    for f in finding.original_finding.all():
-        # for all duplicates set the original as their original, get rid of self in between
-        f.duplicate_finding = real_original
-        super(Finding, f).save()
-        super(Finding, real_original).save()
-        removeLoop(f.id, counter - 1)
-
-
-def fix_loop_duplicates():
-    candidates = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).all().order_by("-id")
-    deduplicationLogger.info("Identified %d Findings with Loops" % len(candidates))
-    for find_id in candidates.values_list('id', flat=True):
-        removeLoop(find_id, 5)
-
-    new_originals = Finding.objects.filter(duplicate_finding__isnull=True, duplicate=True)
-    for f in new_originals:
-        deduplicationLogger.info("New Original: %d " % f.id)
-        f.duplicate = False
-        super(Finding, f).save()
-
-    loop_count = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).count()
-    deduplicationLogger.info("%d Finding found with Loops" % loop_count)
-
-
-def rename_whitesource_finding():
-    whitesource_id = Test_Type.objects.get(name="Whitesource Scan").id
-    findings = Finding.objects.filter(found_by=whitesource_id)
-    findings = findings.order_by('-pk')
-    logger.info("######## Updating Hashcodes - deduplication is done in background using django signals upon finding save ########")
-    for finding in findings:
-        logger.info("Updating Whitesource Finding with id: %d" % finding.id)
-        lib_name_begin = re.search('\\*\\*Library Filename\\*\\* : ', finding.description).span(0)[1]
-        lib_name_end = re.search('\\*\\*Library Description\\*\\*', finding.description).span(0)[0]
-        lib_name = finding.description[lib_name_begin:lib_name_end - 1]
-        if finding.cve is None:
-            finding.title = "CVE-None | " + lib_name
-        else:
-            finding.title = finding.cve + " | " + lib_name
-        if not finding.cwe:
-            logger.debug('Set cwe for finding %d to 1035 if not an cwe Number is set' % finding.id)
-            finding.cwe = 1035
-        finding.title = finding.title.rstrip()  # delete \n at the end of the title
-        from titlecase import titlecase
-        finding.title = titlecase(finding.title)
-        finding.hash_code = finding.compute_hash_code()
-        finding.save()
-
-
-def sync_rules(new_finding, *args, **kwargs):
+@dojo_async_task
+@task
+def do_apply_rules(new_finding, *args, **kwargs):
     rules = Rule.objects.filter(applies_to='Finding', parent_rule=None)
     for rule in rules:
         child_val = True
@@ -662,7 +621,7 @@ def add_breadcrumb(parent=None,
     request.session['dojo_breadcrumbs'] = crumbs
 
 
-def get_punchcard_data(findings, start_date, weeks):
+def get_punchcard_data(objs, start_date, weeks, view='Finding'):
     # use try catch to make sure any teething bugs in the bunchcard don't break the dashboard
     try:
         # gather findings over past half year, make sure to start on a sunday
@@ -671,12 +630,16 @@ def get_punchcard_data(findings, start_date, weeks):
 
         # reminder: The first week of a year is the one that contains the year’s first Thursday
         # so we could have for 29/12/2019: week=1 and year=2019 :-D. So using week number from db is not practical
-
-        severities_by_day = findings.filter(created__date__gte=first_sunday).filter(created__date__lt=last_sunday) \
-                                    .values('created__date') \
-                                    .annotate(count=Count('id')) \
-                                    .order_by('created__date')
-
+        if view == 'Finding':
+            severities_by_day = objs.filter(created__date__gte=first_sunday).filter(created__date__lt=last_sunday) \
+                                        .values('created__date') \
+                                        .annotate(count=Count('id')) \
+                                        .order_by('created__date')
+        elif view == 'Endpoint':
+            severities_by_day = objs.filter(date__gte=first_sunday).filter(date__lt=last_sunday) \
+                                        .values('date') \
+                                        .annotate(count=Count('id')) \
+                                        .order_by('date')
         # return empty stuff if no findings to be statted
         if severities_by_day.count() <= 0:
             return None, None
@@ -705,7 +668,10 @@ def get_punchcard_data(findings, start_date, weeks):
         day_counts = [0, 0, 0, 0, 0, 0, 0]
 
         for day in severities_by_day:
-            created = day['created__date']
+            if view == 'Finding':
+                created = day['created__date']
+            elif view == 'Endpoint':
+                created = day['date']
             day_count = day['count']
 
             created = timezone.make_aware(datetime.combine(created, datetime.min.time()))
@@ -896,23 +862,42 @@ def get_period_counts(active_findings,
             new_date = start_date + relativedelta(weeks=x, weekday=MO(1))
             end_date = new_date + relativedelta(weeks=1, weekday=MO(1))
 
-        closed_in_range_count = findings_closed.filter(
-            mitigated__date__range=[new_date, end_date]).count()
+        try:
+            closed_in_range_count = findings_closed.filter(
+                mitigated__date__range=[new_date, end_date]).count()
+        except:
+            closed_in_range_count = findings_closed.filter(
+                mitigated_time__range=[new_date, end_date]).count()
 
         if accepted_findings:
-            risks_a = accepted_findings.filter(
-                risk_acceptance__created__date__range=[
-                    datetime(
-                        new_date.year,
-                        new_date.month,
-                        1,
-                        tzinfo=timezone.get_current_timezone()),
-                    datetime(
-                        new_date.year,
-                        new_date.month,
-                        monthrange(new_date.year, new_date.month)[1],
-                        tzinfo=timezone.get_current_timezone())
-                ])
+            try:
+                risks_a = accepted_findings.filter(
+                    risk_acceptance__created__date__range=[
+                        datetime(
+                            new_date.year,
+                            new_date.month,
+                            1,
+                            tzinfo=timezone.get_current_timezone()),
+                        datetime(
+                            new_date.year,
+                            new_date.month,
+                            monthrange(new_date.year, new_date.month)[1],
+                            tzinfo=timezone.get_current_timezone())
+                    ])
+            except:
+                risks_a = accepted_findings.filter(
+                    date__range=[
+                        datetime(
+                            new_date.year,
+                            new_date.month,
+                            1,
+                            tzinfo=timezone.get_current_timezone()),
+                        datetime(
+                            new_date.year,
+                            new_date.month,
+                            monthrange(new_date.year, new_date.month)[1],
+                            tzinfo=timezone.get_current_timezone())
+                    ])
         else:
             risks_a = None
 
@@ -921,26 +906,30 @@ def get_period_counts(active_findings,
         ]
         for finding in findings:
             try:
+                severity = finding.severity
+            except:
+                severity = finding.finding.severity
+            try:
                 if new_date <= datetime.combine(
                         finding.date, datetime.min.time()
                 ).replace(tzinfo=timezone.get_current_timezone()) <= end_date:
-                    if finding.severity == 'Critical':
+                    if severity == 'Critical':
                         crit_count += 1
-                    elif finding.severity == 'High':
+                    elif severity == 'High':
                         high_count += 1
-                    elif finding.severity == 'Medium':
+                    elif severity == 'Medium':
                         med_count += 1
-                    elif finding.severity == 'Low':
+                    elif severity == 'Low':
                         low_count += 1
             except:
                 if new_date <= finding.date <= end_date:
-                    if finding.severity == 'Critical':
+                    if severity == 'Critical':
                         crit_count += 1
-                    elif finding.severity == 'High':
+                    elif severity == 'High':
                         high_count += 1
-                    elif finding.severity == 'Medium':
+                    elif severity == 'Medium':
                         med_count += 1
-                    elif finding.severity == 'Low':
+                    elif severity == 'Low':
                         low_count += 1
                 pass
 
@@ -954,13 +943,17 @@ def get_period_counts(active_findings,
         ]
         if risks_a is not None:
             for finding in risks_a:
-                if finding.severity == 'Critical':
+                try:
+                    severity = finding.severity
+                except:
+                    severity = finding.finding.severity
+                if severity == 'Critical':
                     crit_count += 1
-                elif finding.severity == 'High':
+                elif severity == 'High':
                     high_count += 1
-                elif finding.severity == 'Medium':
+                elif severity == 'Medium':
                     med_count += 1
-                elif finding.severity == 'Low':
+                elif severity == 'Low':
                     low_count += 1
 
         total = crit_count + high_count + med_count + low_count
@@ -972,25 +965,29 @@ def get_period_counts(active_findings,
         ]
         for finding in active_findings:
             try:
+                severity = finding.severity
+            except:
+                severity = finding.finding.severity
+            try:
                 if datetime.combine(finding.date, datetime.min.time()).replace(
                         tzinfo=timezone.get_current_timezone()) <= end_date:
-                    if finding.severity == 'Critical':
+                    if severity == 'Critical':
                         crit_count += 1
-                    elif finding.severity == 'High':
+                    elif severity == 'High':
                         high_count += 1
-                    elif finding.severity == 'Medium':
+                    elif severity == 'Medium':
                         med_count += 1
-                    elif finding.severity == 'Low':
+                    elif severity == 'Low':
                         low_count += 1
             except:
                 if finding.date <= end_date:
-                    if finding.severity == 'Critical':
+                    if severity == 'Critical':
                         crit_count += 1
-                    elif finding.severity == 'High':
+                    elif severity == 'High':
                         high_count += 1
-                    elif finding.severity == 'Medium':
+                    elif severity == 'Medium':
                         med_count += 1
-                    elif finding.severity == 'Low':
+                    elif severity == 'Low':
                         low_count += 1
                 pass
         total = crit_count + high_count + med_count + low_count
@@ -1230,7 +1227,8 @@ def get_jira_connection(finding):
         if jira_conf is not None:
             jira = JIRA(
                 server=jira_conf.url,
-                basic_auth=(jira_conf.username, jira_conf.password))
+                basic_auth=(jira_conf.username, jira_conf.password),
+                options={"verify": settings.JIRA_SSL_VERIFY})
     except JIRA_PKey.DoesNotExist:
         pass
     return jira
@@ -1261,19 +1259,21 @@ def log_jira_generic_alert(title, description):
         title=title,
         description=description,
         icon='bullseye',
-        source='Jira')
+        source='JIRA')
 
 
 # Logs the error to the alerts table, which appears in the notification toolbar
 def log_jira_alert(error, finding):
-    prod_name = finding.test.engagement.product.name
+    prod_name = finding.test.engagement.product.name if finding else 'unknown'
+
     create_notification(
         event='jira_update',
-        title='Jira update issue (' + truncate_with_dots(prod_name, 25) + ')',
-        description='Finding: ' + str(finding.id) + ', ' + error,
-        url=reverse('view_finding', args=(finding.id, )),
+        title='JIRA update issue' + '(' + truncate_with_dots(prod_name, 25) + ')',
+        description='Finding: ' + str(finding.id if finding else 'unknown') + ', ' + error,
+        url=reverse('view_finding', args=(finding.id, )) if finding else None,
         icon='bullseye',
-        source='Jira')
+        source='JIRA update',
+        finding=finding)
 
 
 # Displays an alert for Jira notifications
@@ -1284,7 +1284,7 @@ def log_jira_message(text, finding):
         description=text + " Finding: " + str(finding.id),
         url=reverse('view_finding', args=(finding.id, )),
         icon='bullseye',
-        source='Jira')
+        source='JIRA', finding=finding)
 
 
 def get_labels(find):
@@ -1313,6 +1313,8 @@ def jira_description(find):
     return render_to_string(template, kwargs)
 
 
+@dojo_async_task
+@task
 def add_external_issue(find, external_issue_provider):
     eng = Engagement.objects.get(test=find.test)
     prod = Product.objects.get(engagement=eng)
@@ -1322,6 +1324,8 @@ def add_external_issue(find, external_issue_provider):
         add_external_issue_github(find, prod, eng)
 
 
+@dojo_async_task
+@task
 def update_external_issue(find, old_status, external_issue_provider):
     prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
     eng = Engagement.objects.get(test=find.test)
@@ -1330,6 +1334,8 @@ def update_external_issue(find, old_status, external_issue_provider):
         update_external_issue_github(find, prod, eng)
 
 
+@dojo_async_task
+@task
 def close_external_issue(find, note, external_issue_provider):
     prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
     eng = Engagement.objects.get(test=find.test)
@@ -1338,6 +1344,8 @@ def close_external_issue(find, note, external_issue_provider):
         close_external_issue_github(find, note, prod, eng)
 
 
+@dojo_async_task
+@task
 def reopen_external_issue(find, note, external_issue_provider):
     prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
     eng = Engagement.objects.get(test=find.test)
@@ -1346,6 +1354,8 @@ def reopen_external_issue(find, note, external_issue_provider):
         reopen_external_issue_github(find, note, prod, eng)
 
 
+@dojo_async_task
+@task
 def add_jira_issue(find, push_to_jira):
     logger.info('trying to create a new jira issue for %d:%s', find.id, find.title)
 
@@ -1366,8 +1376,8 @@ def add_jira_issue(find, push_to_jira):
 
         if 'Active' in find.status() and 'Verified' in find.status():
             if jira_minimum_threshold > Finding.get_number_severity(find.severity):
-                log_jira_alert('Finding below the minimum jira severity threshold.', find)
-                logger.warn("Finding {} is below the minimum jira severity threshold.".format(find.id))
+                log_jira_alert('Finding below the minimum JIRA severity threshold.', find)
+                logger.warn("Finding {} is below the minimum JIRA severity threshold.".format(find.id))
                 logger.warn("The JIRA issue will NOT be created.")
                 return
 
@@ -1376,7 +1386,8 @@ def add_jira_issue(find, push_to_jira):
                 JIRAError.log_to_tempfile = False
                 jira = JIRA(
                     server=jira_conf.url,
-                    basic_auth=(jira_conf.username, jira_conf.password))
+                    basic_auth=(jira_conf.username, jira_conf.password),
+                    options={"verify": settings.JIRA_SSL_VERIFY})
 
                 meta = None
 
@@ -1389,9 +1400,6 @@ def add_jira_issue(find, push_to_jira):
                         'issuetype': {
                             'name': jira_conf.default_issue_type
                         },
-                        'priority': {
-                            'name': jira_conf.get_priority(find.severity)
-                        }
                 }
 
                 if jpkey.component:
@@ -1401,14 +1409,21 @@ def add_jira_issue(find, push_to_jira):
                             },
                     ]
 
+                # populate duedate field, but only if it's available for this project + issuetype
+                if not meta:
+                    meta = jira_meta(jira, jpkey)
+
+                if 'priority' in meta['projects'][0]['issuetypes'][0]['fields']:
+                    fields['priority'] = {
+                                            'name': jira_conf.get_priority(find.severity)
+                                        }
+
                 labels = get_labels(find)
                 if labels:
-                    fields['labels'] = labels
+                    if 'labels' in meta['projects'][0]['issuetypes'][0]['fields']:
+                        fields['labels'] = labels
 
                 if System_Settings.objects.get().enable_finding_sla:
-                    # populate duedate field, but only if it's available for this project + issuetype
-                    if not meta:
-                        meta = jira_meta(jira, jpkey)
 
                     if 'duedate' in meta['projects'][0]['issuetypes'][0]['fields']:
                         # jira wants YYYY-MM-DD
@@ -1449,7 +1464,7 @@ def add_jira_issue(find, push_to_jira):
                 # Upload dojo finding screenshots to Jira
                 for pic in find.images.all():
                     jira_attachment(
-                        jira, issue,
+                        find, jira, issue,
                         settings.MEDIA_ROOT + pic.image_large.name)
 
                     # if jpkey.enable_engagement_epic_mapping:
@@ -1457,7 +1472,7 @@ def add_jira_issue(find, push_to_jira):
                     #      issue_list = [j_issue.jira_id,]
                     #      jira.add_jira_issues_to_epic(epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
             except JIRAError as e:
-                logger.error(e.text)
+                logger.exception(e)
                 log_jira_alert(e.text, find)
         else:
             log_jira_alert("A Finding needs to be both Active and Verified to be pushed to JIRA.", find)
@@ -1465,10 +1480,12 @@ def add_jira_issue(find, push_to_jira):
 
 
 def jira_meta(jira, jpkey):
-    return jira.createmeta(projectKeys=jpkey.project_key, issuetypeNames=jpkey.conf.default_issue_type, expand="projects.issuetypes.fields")
+    meta = jira.createmeta(projectKeys=jpkey.project_key, issuetypeNames=jpkey.conf.default_issue_type, expand="projects.issuetypes.fields")
+    logger.debug("jira_meta: %s", json.dumps(meta, indent=4))  # this is None safe
+    return meta
 
 
-def jira_attachment(jira, issue, file, jira_filename=None):
+def jira_attachment(finding, jira, issue, file, jira_filename=None):
     basename = file
     if jira_filename is None:
         basename = os.path.basename(file)
@@ -1486,7 +1503,8 @@ def jira_attachment(jira, issue, file, jira_filename=None):
                 with open(file, 'rb') as f:
                     jira.add_attachment(issue=issue, attachment=f)
         except JIRAError as e:
-            log_jira_alert("Attachment: " + e.text)
+            logger.exception(e)
+            log_jira_alert("Attachment: " + e.text, finding)
 
 
 def jira_check_attachment(issue, source_file_name):
@@ -1501,6 +1519,8 @@ def jira_check_attachment(issue, source_file_name):
     return file_exists
 
 
+@dojo_async_task
+@task
 def update_jira_issue(find, push_to_jira):
     logger.info('trying to update a linked jira issue for %d:%s', find.id, find.title)
     prod = Product.objects.get(
@@ -1514,7 +1534,8 @@ def update_jira_issue(find, push_to_jira):
             JIRAError.log_to_tempfile = False
             jira = JIRA(
                 server=jira_conf.url,
-                basic_auth=(jira_conf.username, jira_conf.password))
+                basic_auth=(jira_conf.username, jira_conf.password),
+                options={"verify": settings.JIRA_SSL_VERIFY})
             issue = jira.issue(j_issue.jira_id)
 
             meta = None
@@ -1534,21 +1555,22 @@ def update_jira_issue(find, push_to_jira):
                 ]
                 fields = {"components": component}
 
+            if not meta:
+                meta = jira_meta(jira, jpkey)
+
             labels = get_labels(find)
             if labels:
-                fields['labels'] = labels
+                if 'labels' in meta['projects'][0]['issuetypes'][0]['fields']:
+                    fields['labels'] = labels
 
             if len(find.endpoints.all()) > 0:
-                if not meta:
-                    meta = jira_meta(jira, jpkey)
-
                 if 'environment' in meta['projects'][0]['issuetypes'][0]['fields']:
                     environment = "\n".join([str(endpoint) for endpoint in find.endpoints.all()])
                     fields['environment'] = environment
 
             # Upload dojo finding screenshots to Jira
             for pic in find.images.all():
-                jira_attachment(jira, issue,
+                jira_attachment(find, jira, issue,
                                 settings.MEDIA_ROOT + pic.image_large.name)
 
             logger.debug('sending fields to JIRA: %s', fields)
@@ -1563,6 +1585,7 @@ def update_jira_issue(find, push_to_jira):
             find.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
 
         except JIRAError as e:
+            logger.exception(e)
             log_jira_alert(e.text, find)
 
         req_url = jira_conf.url + '/rest/api/latest/issue/' + \
@@ -1593,6 +1616,8 @@ def update_jira_issue(find, push_to_jira):
             find.save()
 
 
+@dojo_async_task
+@task
 def close_epic(eng, push_to_jira):
     engagement = eng
     prod = Product.objects.get(engagement=engagement)
@@ -1616,6 +1641,8 @@ def close_epic(eng, push_to_jira):
             pass
 
 
+@dojo_async_task
+@task
 def update_epic(eng, push_to_jira):
     engagement = eng
     prod = Product.objects.get(engagement=engagement)
@@ -1625,7 +1652,8 @@ def update_epic(eng, push_to_jira):
         try:
             jira = JIRA(
                 server=jira_conf.url,
-                basic_auth=(jira_conf.username, jira_conf.password))
+                basic_auth=(jira_conf.username, jira_conf.password),
+                options={"verify": settings.JIRA_SSL_VERIFY})
             j_issue = JIRA_Issue.objects.get(engagement=eng)
             issue = jira.issue(j_issue.jira_id)
             issue.update(summary=eng.name, description=eng.name)
@@ -1634,6 +1662,8 @@ def update_epic(eng, push_to_jira):
             pass
 
 
+@dojo_async_task
+@task
 def add_epic(eng, push_to_jira):
     logger.info('trying to create a new jira EPIC for %d:%s', eng.id, eng.name)
     engagement = eng
@@ -1655,7 +1685,8 @@ def add_epic(eng, push_to_jira):
         try:
             jira = JIRA(
                 server=jira_conf.url,
-                basic_auth=(jira_conf.username, jira_conf.password))
+                basic_auth=(jira_conf.username, jira_conf.password),
+                options={"verify": settings.JIRA_SSL_VERIFY})
             new_issue = jira.create_issue(fields=issue_dict)
             j_issue = JIRA_Issue(
                 jira_id=new_issue.id,
@@ -1679,16 +1710,20 @@ def jira_get_issue(jpkey, issue_key):
     try:
         jira = JIRA(
             server=jira_conf.url,
-            basic_auth=(jira_conf.username, jira_conf.password))
+            basic_auth=(jira_conf.username, jira_conf.password),
+            options={"verify": settings.JIRA_SSL_VERIFY})
         issue = jira.issue(issue_key)
         # print(vars(issue))
         return issue
     except JIRAError as jira_error:
         logger.debug('error retrieving jira issue ' + issue_key + ' ' + str(jira_error))
+        logger.exception(jira_error)
         log_jira_generic_alert('error retrieving jira issue ' + issue_key, str(jira_error))
         return None
 
 
+@dojo_async_task
+@task
 def add_comment(find, note, force_push=False):
     logger.debug('trying to add a comment to a linked jira issue for: %d:%s', find.id, find.title)
     if not note.private:
@@ -1703,7 +1738,8 @@ def add_comment(find, note, force_push=False):
                 try:
                     jira = JIRA(
                         server=jira_conf.url,
-                        basic_auth=(jira_conf.username, jira_conf.password))
+                        basic_auth=(jira_conf.username, jira_conf.password),
+                        options={"verify": settings.JIRA_SSL_VERIFY})
                     j_issue = JIRA_Issue.objects.get(finding=find)
                     jira.add_comment(
                         j_issue.jira_id,
@@ -1719,7 +1755,8 @@ def add_simple_jira_comment(jira_conf, jira_issue, comment):
     try:
         jira = JIRA(
             server=jira_conf.url,
-            basic_auth=(jira_conf.username, jira_conf.password)
+            basic_auth=(jira_conf.username, jira_conf.password),
+            options={"verify": settings.JIRA_SSL_VERIFY}
         )
         jira.add_comment(
             jira_issue.jira_id, comment
@@ -1797,7 +1834,7 @@ def encrypt(key, iv, plaintext):
     text = ""
     if plaintext and plaintext is not None:
         backend = default_backend()
-        cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
+        cipher = Cipher(algorithms.AES(key), modes.OFB(iv), backend=backend)
         encryptor = cipher.encryptor()
         plaintext = _pad_string(plaintext)
         encrypted_text = encryptor.update(plaintext) + encryptor.finalize()
@@ -1807,7 +1844,7 @@ def encrypt(key, iv, plaintext):
 
 def decrypt(key, iv, encrypted_text):
     backend = default_backend()
-    cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
+    cipher = Cipher(algorithms.AES(key), modes.OFB(iv), backend=backend)
     encrypted_text_bytes = binascii.a2b_hex(encrypted_text)
     decryptor = cipher.decryptor()
     decrypted_text = decryptor.update(encrypted_text_bytes) + decryptor.finalize()
@@ -1885,39 +1922,6 @@ def prepare_for_view(encrypted_value):
 def get_system_setting(setting):
     system_settings = System_Settings.objects.get()
     return getattr(system_settings, setting, None)
-
-
-def get_slack_user_id(user_email):
-    user_id = None
-
-    res = requests.request(
-        method='POST',
-        url='https://slack.com/api/users.list',
-        data={'token': get_system_setting('slack_token')})
-
-    users = json.loads(res.text)
-
-    slack_user_is_found = False
-    if users:
-        if 'error' in users:
-            logger.error("Slack is complaining. See error message below.")
-            logger.error(users)
-        else:
-            for member in users["members"]:
-                if "email" in member["profile"]:
-                    if user_email == member["profile"]["email"]:
-                        if "id" in member:
-                            user_id = member["id"]
-                            logger.debug("Slack user ID is {}".format(user_id))
-                            slack_user_is_found = True
-                            break
-                    else:
-                        logger.warn("A user with email {} could not be found in this Slack workspace.".format(user_email))
-
-            if not slack_user_is_found:
-                logger.warn("The Slack user was not found.")
-
-    return user_id
 
 
 def calculate_grade(product):
@@ -2168,6 +2172,10 @@ def is_scan_file_too_large(scan_file):
     return False
 
 
+def queryset_check(query):
+    return query if isinstance(query, QuerySet) else query.qs
+
+
 def sla_compute_and_notify(*args, **kwargs):
     """
     The SLA computation and notification will be disabled if the user opts out
@@ -2300,3 +2308,15 @@ def sla_compute_and_notify(*args, **kwargs):
 
     except System_Settings.DoesNotExist:
         logger.info("Findings SLA is not enabled.")
+
+
+def get_words_for_field(queryset, fieldname):
+    max_results = getattr(settings, 'MAX_AUTOCOMPLETE_WORDS', 20000)
+    words = [
+        word for component_name in queryset.order_by().filter(**{'%s__isnull' % fieldname: False}).values_list(fieldname, flat=True).distinct()[:max_results] for word in (component_name.split() if component_name else []) if len(word) > 2
+    ]
+    return sorted(set(words))
+
+
+def get_current_user():
+    return crum.get_current_user()

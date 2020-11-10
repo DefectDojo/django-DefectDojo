@@ -56,7 +56,7 @@ coverage.xml
 # Django stuff:
 *.log
 *.pot
-**/settings.py
+**/local_settings.py
 
 # Vim swapfiles
 *.swp
@@ -116,7 +116,15 @@ Pipfile*
 
 
 #ignore locally added certs
-certs/
+docker/certs/*
+!docker/certs/readme.txt
+
+#ignore locally added extra fixtures
+docker/extra_fixtures/*
+!docker/extra_fixtures/readme.txt
+docker/extra_settings/*
+!docker/extra_settings/README.md
+
 
 # Helm dependencies
 helm/defectdojo/charts

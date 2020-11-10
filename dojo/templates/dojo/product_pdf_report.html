@@ -264,6 +264,9 @@
                     </div>
 
                     {% include "dojo/snippets/endpoints.html" with finding=finding destination="Report" %}
+                    
+                    <h6>CVSSv3</h6>
+                    <pre>{{ finding.cvssv3|markdown_render }}</pre>
 
                     <h6>Description</h6>
                     <pre>{{ finding.description|markdown_render }}</pre>
