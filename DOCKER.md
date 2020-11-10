@@ -69,7 +69,6 @@ In this setup, you need to rebuild django and/or nginx images after each code ch
 For development, use: 
 
 ```zsh
-cp dojo/settings/settings.dist.py dojo/settings/settings.py
 docker/setEnv.sh dev
 docker-compose build
 docker-compose up
@@ -95,9 +94,7 @@ To update changes in static resources, served by nginx, just refresh the browser
 
 *Notes about volume permissions*
 
-*The manual copy of settings.py is sometimes required once after cloning the repository, on linux hosts when the host files cannot be modified from within the django container. In that case that copy in entrypoint-uwsgi-dev.sh fails.* 
-
-*Another way to fix this is changing `USER 1001` in Dockerfile.django to match your user uid and then rebuild the images. Get your user id with* 
+*If you run into permission issues with the mounted volumes, a way to fix this is changing `USER 1001` in Dockerfile.django to match your user uid and then rebuild the images. Get your user id with* 
 
 ```
 id -u
@@ -110,7 +107,6 @@ If you want to be able to step in your code, you can activate ptvsd.Server.
 You can launch your local dev instance of DefectDojo as
 
 ```zsh
-cp dojo/settings/settings.dist.py dojo/settings/settings.py
 docker/setEnv.sh ptvsd
 docker-compose up
 ```
@@ -265,7 +261,6 @@ The integration-tests are under `tests`
 This will run all unit-tests and leave the uwsgi container up: 
 
 ```
-cp dojo/settings/settings.dist.py dojo/settings/settings.py
 docker/setEnv.sh unit_tests
 docker-compose up
 ```
@@ -296,7 +291,6 @@ python manage.py test dojo.unittests.test_dependency_check_parser.TestDependency
 This will run all integration-tests and leave the containers up: 
 
 ```
-cp dojo/settings/settings.dist.py dojo/settings/settings.py
 docker/setEnv.sh integration_tests
 docker-compose up
 ```
