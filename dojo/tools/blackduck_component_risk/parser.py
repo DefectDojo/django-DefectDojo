@@ -85,7 +85,7 @@ class BlackduckHubParser(object):
                                   references=references,
                                   static_finding=True,
                                   unique_id_from_tool=component_id)
-                 license_risk.append(finding)
+                license_risk.append(finding)
         self.items.extend(license_risk)
 
         # Security Risk
