@@ -150,6 +150,7 @@ jobs:
       - name: Configure HELM repos
         run: |-
              helm repo add stable https://charts.helm.sh/stable
+             helm repo add bitnami https://charts.bitnami.com/bitnami
              helm dependency update ./helm/defectdojo
       - name: Set confings into Outputs
         id: set
