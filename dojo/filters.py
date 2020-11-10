@@ -16,7 +16,8 @@ from pytz import timezone
 from django.db.models import Q
 from dojo.models import Dojo_User, Product_Type, Finding, Product, Test_Type, \
     Endpoint, Development_Environment, Finding_Template, Report, Note_Type, \
-    Engagement_Survey, Question, TextQuestion, ChoiceQuestion, Endpoint_Status, Engagement
+    Engagement_Survey, Question, TextQuestion, ChoiceQuestion, Endpoint_Status, Engagement, \
+    ENGAGEMENT_STATUS_CHOICES
 from dojo.utils import get_system_setting
 from django.contrib.contenttypes.models import ContentType
 
@@ -27,11 +28,6 @@ local_tz = timezone(get_system_setting('time_zone'))
 SEVERITY_CHOICES = (('Info', 'Info'), ('Low', 'Low'), ('Medium', 'Medium'),
                     ('High', 'High'), ('Critical', 'Critical'))
 BOOLEAN_CHOICES = (('false', 'No'), ('true', 'Yes'),)
-ENGAGEMENT_STATUS_CHOICES = (('Not Started', 'Not Started'), ('Blocked', 'Blocked'),
-                             ('Cancelled', 'Cancelled'), ('Completed', 'Completed'),
-                             ('In Progress', 'In Progress'), ('On Hold', 'On Hold'),
-                             ('Waiting for Resource', 'Waiting for Resource'))
-
 EARLIEST_FINDING = None
 
 

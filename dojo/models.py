@@ -964,6 +964,15 @@ class Engagement_Type(models.Model):
         return self.name
 
 
+ENGAGEMENT_STATUS_CHOICES = (('Not Started', 'Not Started'),
+                             ('Blocked', 'Blocked'),
+                             ('Cancelled', 'Cancelled'),
+                             ('Completed', 'Completed'),
+                             ('In Progress', 'In Progress'),
+                             ('On Hold', 'On Hold'),
+                             ('Waiting for Resource', 'Waiting for Resource'))
+
+
 class Engagement(models.Model):
     name = models.CharField(max_length=300, null=True, blank=True)
     description = models.CharField(max_length=2000, null=True, blank=True)
@@ -990,13 +999,7 @@ class Engagement(models.Model):
     notes = models.ManyToManyField(Notes, blank=True, editable=False)
     status = models.CharField(editable=True, max_length=2000, default='',
                               null=True,
-                              choices=(('Not Started', 'Not Started'),
-                                       ('Blocked', 'Blocked'),
-                                       ('Cancelled', 'Cancelled'),
-                                       ('Completed', 'Completed'),
-                                       ('In Progress', 'In Progress'),
-                                       ('On Hold', 'On Hold'),
-                                       ('Waiting for Resource', 'Waiting for Resource')))
+                              choices=ENGAGEMENT_STATUS_CHOICES)
     progress = models.CharField(max_length=100,
                                 default='threat_model', editable=False)
     tmodel_path = models.CharField(max_length=1000, default='none',
