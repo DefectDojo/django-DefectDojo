@@ -194,6 +194,7 @@ def prefetch_for_findings(findings):
         prefetched_findings = prefetched_findings.select_related('reporter')
         prefetched_findings = prefetched_findings.prefetch_related('jira_issue')
         prefetched_findings = prefetched_findings.prefetch_related('test__test_type')
+        prefetched_findings = prefetched_findings.prefetch_related('test__engagement__jira_project_set__jira_instance')
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__jira_project_set__jira_instance')
         prefetched_findings = prefetched_findings.prefetch_related('found_by')
         prefetched_findings = prefetched_findings.prefetch_related('risk_acceptance_set')
@@ -605,7 +606,7 @@ def edit_finding(request, fid):
     form_error = False
     jform = None
     jira_link_exists = False
-    push_all_jira_issues = False
+    push_all_jira_issues = jira_helper.is_push_all_issues(finding)
     gform = None
     use_jira = jira_helper.get_jira_project(finding) is not None
 
@@ -660,7 +661,6 @@ def edit_finding(request, fid):
                 new_finding.mitigated_by = None
                 new_finding.is_Mitigated = False
             if not new_finding.duplicate:
-                logger.debug('resetting duplicate status for %i', new_finding.id)
                 new_finding.duplicate = False
                 new_finding.duplicate_finding = None
 
@@ -697,7 +697,14 @@ def edit_finding(request, fid):
             jira_message = None
             if jform and jform.is_valid():
                 # Push to Jira?
+
+                logger.debug('jform.push_to_jira: %s', jform.cleaned_data.get('push_to_jira'))
+                # can't use helper as when push_all_jira_issues is True, the checkbox gets disabled and is always false
+                # push_to_jira = jira_helper.is_push_to_jira(new_finding, jform.cleaned_data.get('push_to_jira'))
                 push_to_jira = push_all_jira_issues or jform.cleaned_data.get('push_to_jira')
+
+                logger.debug('push_to_jira: %s', push_to_jira)
+                logger.debug('push_all_jira_issues: %s', push_all_jira_issues)
 
                 # if the jira issue key was changed, update database
                 new_jira_issue_key = jform.cleaned_data.get('jira_issue')
@@ -787,7 +794,7 @@ def edit_finding(request, fid):
             form_error = True
     else:
         if use_jira:
-            jform = JIRAFindingForm(push_all=jira_helper.is_push_all_issues(finding), prefix='jiraform', instance=finding)
+            jform = JIRAFindingForm(push_all=push_all_jira_issues, prefix='jiraform', instance=finding)
 
         if get_system_setting('enable_github'):
             if GITHUB_PKey.objects.filter(product=finding.test.engagement.product).exclude(git_conf_id=None):
@@ -1173,7 +1180,7 @@ def promote_to_finding(request, fid):
     test = finding.test
     form_error = False
     jira_available = False
-    push_all_jira_issues = False
+    push_all_jira_issues = jira_helper.is_push_all_issues(finding)
     jform = None
     use_jira = jira_helper.get_jira_project(finding) is not None
 
@@ -1852,7 +1859,10 @@ def finding_bulk_update_all(request, pid=None):
 
                     # Because we never call finding.save() in a bulk update, we need to actually
                     # push the JIRA stuff here, rather than in finding.save()
-                    if jira_helper.is_push_to_jira(finding, form.cleaned_data['push_to_jira']):
+
+                    # can't use helper as when push_all_jira_issues is True, the checkbox gets disabled and is always false
+                    # push_to_jira = jira_helper.is_push_to_jira(new_finding, form.cleaned_data.get('push_to_jira'))
+                    if jira_helper.is_push_all_issues(finding) or form.cleaned_data.get('push_to_jira'):
                         if not jira_helper.get_jira_project(finding):
                             jira_helper.log_jira_alert('Finding cannot be pushed to jira as there is no jira project configuration for this product.', finding)
                         else:

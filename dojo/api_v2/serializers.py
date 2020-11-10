@@ -696,11 +696,11 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     @swagger_serializer_method(serializers.ListField(serializers.DateTimeField()))
     def get_jira_creation(self, obj):
-        return jira_helper.get_jira_creation(self)
+        return jira_helper.get_jira_creation(obj)
 
     @swagger_serializer_method(serializers.ListField(serializers.DateTimeField()))
     def get_jira_change(self, obj):
-        return jira_helper.get_jira_change(self)
+        return jira_helper.get_jira_change(obj)
 
     @swagger_serializer_method(FindingTestSerializer)
     def get_related_fields(self, obj):
@@ -719,11 +719,11 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
         # remove tags from validated data and store them seperately
         to_be_tagged, validated_data = self._pop_tags(validated_data)
 
+        instance = super(TaggitSerializer, self).update(instance, validated_data)
+
         # pop push_to_jira so it won't get send to the model as a field
         # TODO: JIRA can we remove this is_push_all_issues, already checked in apiv2 viewset?
-        push_to_jira = validated_data.pop('push_to_jira') or jira_helper.is_push_all_issues(self)
-
-        instance = super(TaggitSerializer, self).update(instance, validated_data)
+        push_to_jira = validated_data.pop('push_to_jira') or jira_helper.is_push_all_issues(instance)
 
         # If we need to push to JIRA, an extra save call is needed.
         # TODO try to combine create and save, but for now I'm just fixing a bug and don't want to change to much
@@ -806,7 +806,7 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         new_finding = super(TaggitSerializer, self).create(validated_data)
 
         # TODO: JIRA can we remove this is_push_all_issues, already checked in apiv2 viewset?
-        push_to_jira = push_to_jira or jira_helper.is_push_all_issues(self)
+        push_to_jira = push_to_jira or jira_helper.is_push_all_issues(new_finding)
 
         # If we need to push to JIRA, an extra save call is needed.
         # TODO try to combine create and save, but for now I'm just fixing a bug and don't want to change to much

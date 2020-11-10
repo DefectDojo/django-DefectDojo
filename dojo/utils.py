@@ -1445,9 +1445,9 @@ def get_celery_worker_status():
     from .tasks import celery_status
     res = celery_status.apply_async()
 
-    # Wait 15 seconds for a response from Celery
+    # Wait 5 seconds for a response from Celery
     try:
-        return res.get(timeout=15)
+        return res.get(timeout=5)
     except:
         return False
 

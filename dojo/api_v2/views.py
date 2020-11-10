@@ -27,10 +27,14 @@ from dojo.risk_acceptance import api as ra_api
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from datetime import datetime
-from dojo.utils import get_period_counts_legacy
+from dojo.utils import get_period_counts_legacy, get_system_setting
 from dojo.api_v2 import serializers, permissions
 from django.db.models import Count, Q
 import dojo.jira_link.helper as jira_helper
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 class EndPointViewSet(mixins.ListModelMixin,
@@ -271,7 +275,14 @@ class FindingViewSet(mixins.ListModelMixin,
     # Overriding mixins.UpdateModeMixin perform_update() method to grab push_to_jira
     # data and add that as a parameter to .save()
     def perform_update(self, serializer):
-        serializer.save(push_to_jira=jira_helper.is_push_to_jira(self, serializer.validated_data.get('push_to_jira')))
+        # IF JIRA is enabled and this product has a JIRA configuration
+        push_to_jira = True
+        jira_project = jira_helper.get_jira_project(serializer.instance)
+        if get_system_setting('enable_jira') and jira_project:
+            push_all_jira_issues = jira_project.push_all_issues
+            push_to_jira = push_all_jira_issues or serializer.validated_data.pop('push_to_jira')
+
+        serializer.save(push_to_jira=push_to_jira)
 
     def get_queryset(self):
         if not self.request.user.is_staff:
@@ -945,7 +956,16 @@ class ImportScanView(mixins.CreateModelMixin,
     queryset = Test.objects.all()
 
     def perform_create(self, serializer):
-        serializer.save(push_to_jira=jira_helper.is_push_to_jira(self, serializer.validated_data.get('push_to_jira')))
+        engagement = serializer.validated_data['engagement']
+        jira_project = jira_helper.get_jira_project(engagement)
+
+        push_to_jira = False
+        if get_system_setting('enable_jira') and jira_project:
+            push_all_jira_issues = jira_project.push_all_issues
+            push_to_jira = push_all_jira_issues or serializer.validated_data.get('push_to_jira')
+
+        logger.debug('push_to_jira: %s', serializer.validated_data.get('push_to_jira'))
+        serializer.save(push_to_jira=push_to_jira)
 
 
 class ReImportScanView(mixins.CreateModelMixin,
@@ -955,8 +975,16 @@ class ReImportScanView(mixins.CreateModelMixin,
     queryset = Test.objects.all()
 
     def perform_create(self, serializer):
-        # Override CreateModeMixin to pass in push_to_jira if needed.
-        serializer.save(push_to_jira=jira_helper.is_push_to_jira(self, serializer.validated_data.get('push_to_jira')))
+        test = serializer.validated_data['test']
+        jira_project = jira_helper.get_jira_project(test)
+
+        push_to_jira = False
+        if get_system_setting('enable_jira') and jira_project:
+            push_all_jira_issues = jira_project.push_all_issues
+            push_to_jira = push_all_jira_issues or serializer.validated_data.get('push_to_jira')
+
+        logger.debug('push_to_jira: %s', serializer.validated_data.get('push_to_jira'))
+        serializer.save(push_to_jira=push_to_jira)
 
 
 class NoteTypeViewSet(mixins.ListModelMixin,

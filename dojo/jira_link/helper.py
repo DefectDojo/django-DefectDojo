@@ -199,9 +199,14 @@ def get_jira_creation(obj):
 
 
 def get_jira_change(obj):
+    # logger.debug('get_jira_change')
     if isinstance(obj, Finding) or isinstance(obj, Engagement):
+        # logger.debug('get_jira_change2')
         if obj.has_jira_issue:
+            # logger.debug('get_jira_change3')
             return obj.jira_issue.jira_change
+    else:
+        logger.debug('get_jira_change unsupported object type: %s', obj)
     return None
 
 
@@ -305,11 +310,11 @@ def log_jira_alert(error, finding):
 
     create_notification(
         event='jira_update',
-        title='JIRA update issue' + '(' + truncate_with_dots(prod_name, 25) + ')',
+        title='Error pushing to JIRA ' + '(' + truncate_with_dots(prod_name, 25) + ')',
         description='Finding: ' + str(finding.id if finding else 'unknown') + ', ' + error,
         url=reverse('view_finding', args=(finding.id, )) if finding else None,
         icon='bullseye',
-        source='JIRA update',
+        source='Push to JIRA',
         finding=finding)
 
 
@@ -317,7 +322,7 @@ def log_jira_alert(error, finding):
 def log_jira_message(text, finding):
     create_notification(
         event='jira_update',
-        title='Jira update message',
+        title='Pushing to JIRA: ',
         description=text + " Finding: " + str(finding.id),
         url=reverse('view_finding', args=(finding.id, )),
         icon='bullseye',
@@ -395,10 +400,10 @@ def add_jira_issue(find):
             return
 
         logger.debug('Trying to create a new JIRA issue for finding {}...'.format(find.id))
+        meta = None
         try:
             JIRAError.log_to_tempfile = False
             jira = get_jira_connection(jira_instance)
-            meta = None
 
             fields = {
                     'project': {
@@ -462,11 +467,12 @@ def add_jira_issue(find):
 
             jira_issue_url = get_jira_issue_url(find)
 
-            new_note = Notes()
-            new_note.entry = 'created JIRA issue %s for finding' % (jira_issue_url)
-            new_note.author, created = User.objects.get_or_create(username='JIRA')  # quick hack copied from webhook because we don't have request.user here
-            new_note.save()
-            find.notes.add(new_note)
+            # commented out as it creates too much noise and clutters the search for issue for which 'has_notes==True'
+            # new_note = Notes()
+            # new_note.entry = 'created JIRA issue %s for finding' % (jira_issue_url)
+            # new_note.author, created = User.objects.get_or_create(username='JIRA')  # quick hack copied from webhook because we don't have request.user here
+            # new_note.save()
+            # find.notes.add(new_note)
 
             # Upload dojo finding screenshots to Jira
             for pic in find.images.all():
@@ -482,6 +488,7 @@ def add_jira_issue(find):
             return True
         except JIRAError as e:
             logger.exception(e)
+            logger.error("jira_meta: %s", json.dumps(meta, indent=4))  # this is None safe
             log_jira_alert(e.text, find)
             return False
     else:
@@ -507,13 +514,12 @@ def update_jira_issue(find):
         return False
 
     j_issue = find.jira_issue
+    meta = None
     try:
         JIRAError.log_to_tempfile = False
         jira = get_jira_connection(jira_instance)
 
         issue = jira.issue(j_issue.jira_id)
-
-        meta = None
 
         fields = {}
         # Only update the component if it didn't exist earlier in Jira, this is to avoid assigning multiple components to an item
@@ -563,6 +569,7 @@ def update_jira_issue(find):
 
     except JIRAError as e:
         logger.exception(e)
+        logger.error("jira_meta: %s", json.dumps(meta, indent=4))  # this is None safe
         log_jira_alert(e.text, find)
         return False
 
@@ -599,7 +606,7 @@ def update_jira_issue(find):
 # gets the metadata for the default issue type in this jira project
 def get_jira_meta(jira, jira_project):
     meta = jira.createmeta(projectKeys=jira_project.project_key, issuetypeNames=jira_project.jira_instance.default_issue_type, expand="projects.issuetypes.fields")
-    logger.debug("get_jira_meta: %s", json.dumps(meta, indent=4))  # this is None safe
+    # logger.debug("get_jira_meta: %s", json.dumps(meta, indent=4))  # this is None safe
     # meta['projects'][0]['issuetypes'][0]['fields']:
 
     meta_data_error = False
@@ -654,6 +661,7 @@ def is_jira_project_valid(jira_project):
         meta = get_jira_meta(get_jira_connection(jira_project), jira_project)
         return True
     except JIRAError as e:
+        logger.debug('invalid JIRA Project Config, can''t retrieve metadata for: ''%s''', jira_project)
         return False
 
 

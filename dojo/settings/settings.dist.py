@@ -877,7 +877,7 @@ LOGGING = {
         },
         'dojo': {
             'handlers': [r'%s' % LOGGING_HANDLER],
-            'level': 'INFO',
+            'level': 'DEBUG',
             'propagate': False,
         },
         'dojo.specific-loggers.deduplication': {

@@ -170,19 +170,19 @@ def edit_engagement(request, eid):
 
             # save jira project config
             jira_project = jira_project_form.save(commit=False)
+            jira_project.engagement = engagement
+            # only check jira project if form is sufficiently populated
             if jira_project.jira_instance and jira_project.project_key:
-                jira_project.engagement = engagement
-                if jira_helper.is_jira_project_valid(jira_project):
+                jira_error = not jira_helper.is_jira_project_valid(jira_project)
+
+                if not jira_error:
                     jira_project.save()
 
-                    # logger.debug('jira_project_form: %s', vars(jira_project_form))
                     messages.add_message(
                         request,
                         messages.SUCCESS,
-                        'JIRA Project config updated successfully.',
+                        'JIRA Project config added successfully.',
                         extra_tags='alert-success')
-                else:
-                    jira_error = True
 
             # push epic
             if jira_epic_form.cleaned_data.get('push_to_jira'):
@@ -201,12 +201,13 @@ def edit_engagement(request, eid):
                         'Push to JIRA for Epic failed, check alerts on the top right for errors',
                         extra_tags='alert-danger')
 
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                'Engagement updated successfully.',
+                extra_tags='alert-success')
+
             if not jira_error:
-                messages.add_message(
-                    request,
-                    messages.SUCCESS,
-                    'Engagement updated successfully.',
-                    extra_tags='alert-success')
                 if '_Add Tests' in request.POST:
                     return HttpResponseRedirect(
                         reverse('add_tests', args=(engagement.id, )))
@@ -529,25 +530,26 @@ def import_scan_results(request, eid=None, pid=None):
     form = ImportScanForm()
     cred_form = CredMappingForm()
     finding_count = 0
-    push_all_jira_issues = False
     jform = None
     user = request.user
 
     if eid:
         engagement = get_object_or_404(Engagement, id=eid)
-        if not user_is_authorized(user, 'staff', engagement):
-            raise PermissionDenied
+        engagement_or_product = engagement
         cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(engagement=engagement).order_by('cred_id')
-        if jira_helper.get_jira_project(engagement):
-            jform = JIRAImportScanForm(push_all=jira_helper.is_push_all_issues(engagement), prefix='jiraform')
     elif pid:
         product = get_object_or_404(Product, id=pid)
-        if not user_is_authorized(user, 'staff', product):
-            raise PermissionDenied
-        if jira_helper.get_jira_project(product):
-            jform = JIRAImportScanForm(push_all=jira_helper.is_push_all_issues(product), prefix='jiraform')
+        engagement_or_product = product
     elif not user.is_staff:
         raise PermissionDenied
+
+    if not user_is_authorized(user, 'staff', engagement_or_product):
+        raise PermissionDenied
+
+    push_all_jira_issues = jira_helper.is_push_all_issues(engagement_or_product)
+
+    if jira_helper.get_jira_project(engagement_or_product):
+        jform = JIRAImportScanForm(push_all=push_all_jira_issues, prefix='jiraform')
 
     if request.method == "POST":
         form = ImportScanForm(request.POST, request.FILES)
@@ -555,7 +557,12 @@ def import_scan_results(request, eid=None, pid=None):
         cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(
             engagement=engagement).order_by('cred_id')
 
-        if form.is_valid():
+        if jira_helper.get_jira_project(engagement_or_product):
+            jform = JIRAImportScanForm(request.POST, push_all=push_all_jira_issues, prefix='jiraform')
+            logger.debug('jform valid: %s', jform.is_valid())
+            logger.debug('jform errors: %s', jform.errors)
+
+        if form.is_valid() and (jform is None or jform.is_valid()):
             # Allows for a test to be imported with an engagement created on the fly
             if engagement is None:
                 engagement = Engagement()
@@ -585,7 +592,7 @@ def import_scan_results(request, eid=None, pid=None):
                                      messages.ERROR,
                                      "Report file is too large. Maximum supported size is {} MB".format(settings.SCAN_FILE_MAX_SIZE),
                                      extra_tags='alert-danger')
-                return HttpResponseRedirect(reverse('import_scan_results', args=(eid,)))
+                return HttpResponseRedirect(reverse('import_scan_results', args=(engagement,)))
 
             tt, t_created = Test_Type.objects.get_or_create(name=scan_type)
             # will save in development environment
@@ -628,18 +635,12 @@ def import_scan_results(request, eid=None, pid=None):
                                      extra_tags='alert-danger')
                 parse_logger.exception(e)
                 parse_logger.error("Error in parser: {}".format(str(e)))
-                return HttpResponseRedirect(reverse('import_scan_results', args=(eid,)))
+                return HttpResponseRedirect(reverse('import_scan_results', args=(engagement.id,)))
 
             try:
-                # Push to Jira?
-                push_to_jira = False
-                if push_all_jira_issues:
-                    push_to_jira = True
-                elif 'jiraform-push_to_jira' in request.POST:
-                    jform = JIRAImportScanForm(request.POST, prefix='jiraform',
-                                            push_all=push_all_jira_issues)
-                    if jform.is_valid():
-                        push_to_jira = jform.cleaned_data.get('push_to_jira')
+                # can't use helper as when push_all_jira_issues is True, the checkbox gets disabled and is always false
+                # push_to_jira = jira_helper.is_push_to_jira(new_finding, jform.cleaned_data.get('push_to_jira'))
+                push_to_jira = push_all_jira_issues or jform.cleaned_data.get('push_to_jira')
 
                 for item in parser.items:
                     # print("item blowup")

@@ -902,7 +902,7 @@ def new_eng_for_app(request, pid, cicd=False):
     jform = None
     product = Product.objects.get(id=pid)
     jira_project = jira_helper.get_jira_project(product)
-    jira_error = True
+    jira_error = False
     if not user_is_authorized(request.user, 'staff', product):
         raise PermissionDenied
 
@@ -940,7 +940,11 @@ def new_eng_for_app(request, pid, cicd=False):
             # save jira project config
             jira_project = jira_project_form.save(commit=False)
             jira_project.engagement = engagement
-            if jira_helper.is_jira_project_valid(jira_project):
+            # only check jira project if form is sufficiently populated
+            if jira_project.jira_instance and jira_project.project_key:
+                jira_error = not jira_helper.is_jira_project_valid(jira_project)
+
+            if not jira_error:
                 jira_project.save()
 
                 messages.add_message(
@@ -948,8 +952,6 @@ def new_eng_for_app(request, pid, cicd=False):
                     messages.SUCCESS,
                     'JIRA Project config added successfully.',
                     extra_tags='alert-success')
-            else:
-                jire_error = True
 
             # push epic
             if jira_epic_form.cleaned_data.get('push_to_jira'):
@@ -964,18 +966,21 @@ def new_eng_for_app(request, pid, cicd=False):
 
             create_notification(event='engagement_added', title=engagement.name + " for " + product.name, engagement=engagement, url=reverse('view_engagement', args=(engagement.id,)), objowner=engagement.lead)
 
-            if not jira_error:
-                messages.add_message(request,
-                                    messages.SUCCESS,
-                                    'Engagement added successfully.',
-                                    extra_tags='alert-success')
+            messages.add_message(request,
+                                messages.SUCCESS,
+                                'Engagement added successfully.',
+                                extra_tags='alert-success')
 
+            if not jira_error:
                 if "_Add Tests" in request.POST:
                     return HttpResponseRedirect(reverse('add_tests', args=(engagement.id,)))
                 elif "_Import Scan Results" in request.POST:
                     return HttpResponseRedirect(reverse('import_scan_results', args=(engagement.id,)))
                 else:
                     return HttpResponseRedirect(reverse('view_engagement', args=(engagement.id,)))
+            else:
+                # engagement was saved, but JIRA errors, so goto edit_engagement
+                return HttpResponseRedirect(reverse('edit_engagement', args=(engagement.id, )))
         else:
             # if forms invalid, page will just reload and show errors
             if jira_project_form.errors or jira_epic_form.errors:
@@ -1115,7 +1120,7 @@ def ad_hoc_finding(request, pid):
                     target_start=timezone.now(), target_end=timezone.now())
         test.save()
     form_error = False
-    push_all_jira_issues = False
+    push_all_jira_issues = jira_helper.is_push_all_issues(test)
     jform = None
     gform = None
     form = AdHocFindingForm(initial={'date': timezone.now().date()}, req_resp=None)
