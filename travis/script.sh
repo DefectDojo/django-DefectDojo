@@ -51,6 +51,8 @@ if [ -z "${TEST}" ]; then
   echo
 
 
+
+
   # Update Helm dependencies for DefectDojo
   helm repo add stable https://kubernetes-charts.storage.googleapis.com/
   helm dependency update ./helm/defectdojo
