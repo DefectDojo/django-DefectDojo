@@ -949,8 +949,6 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     continue
 
                 item.test = test
-                if hasattr(item.date, "is_default_date"):
-                    item.date = test.target_start.date()
                 item.reporter = self.context['request'].user
                 item.last_reviewed = timezone.now()
                 item.last_reviewed_by = self.context['request'].user
@@ -1203,8 +1201,6 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 else:
                     # no existing finding found
                     item.test = test
-                    if hasattr(item.date, "is_default_date"):
-                        item.date = test.target_start.date()
                     item.reporter = self.context['request'].user
                     item.last_reviewed = timezone.now()
                     item.last_reviewed_by = self.context['request'].user

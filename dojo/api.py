@@ -1527,7 +1527,6 @@ class ImportScanResource(MultipartResource, Resource):
                     continue
 
                 item.test = t
-                item.date = t.target_start.date()
                 item.reporter = bundle.request.user
                 item.last_reviewed = timezone.now()
                 item.last_reviewed_by = bundle.request.user
@@ -1750,8 +1749,6 @@ class ReImportScanResource(MultipartResource, Resource):
                     new_items.append(find.id)
                 else:
                     item.test = test
-                    if hasattr(item.date, "is_default_date"):
-                        item.date = test.target_start.date()
                     item.reporter = bundle.request.user
                     item.last_reviewed = timezone.now()
                     item.last_reviewed_by = bundle.request.user

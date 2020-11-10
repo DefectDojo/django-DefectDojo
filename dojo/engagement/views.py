@@ -657,12 +657,6 @@ def import_scan_results(request, eid=None, pid=None):
                         continue
 
                     item.test = t
-                    if item.date == timezone.now().date():
-                        # logger.warn('setting item.date to target_start')
-                        # logger.warn('type of target_start: %s', type(t.target_start))
-                        item.date = t.target_start.date()
-                        # logger.warn('type of item.date: %s', type(item.date))
-
                     item.reporter = user
                     item.last_reviewed = timezone.now()
                     item.last_reviewed_by = user
