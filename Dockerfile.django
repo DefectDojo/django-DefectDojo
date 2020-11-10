@@ -44,7 +44,7 @@ RUN \
     libmariadb3 \
     xmlsec1 \
     git \
-    uuid-runtime \    
+    uuid-runtime \
     # only required for the dbshell (used by the initializer job)
     postgresql-client \
     curl \
@@ -65,6 +65,7 @@ COPY \
   docker/entrypoint-celery-worker.sh \
   docker/entrypoint-initializer.sh \
   docker/entrypoint-uwsgi.sh \
+  docker/entrypoint-uwsgi-cb.sh \
   docker/entrypoint-uwsgi-dev.sh \
   docker/entrypoint-uwsgi-ptvsd.sh \
   docker/entrypoint-unit-tests.sh \
@@ -81,7 +82,7 @@ COPY docker/extra_fixtures/* /app/dojo/fixtures/
 COPY tests/ ./tests/
 RUN \
   # Remove placeholder copied from docker/certs
-  rm -f /readme.txt && \ 
+  rm -f /readme.txt && \
   # Remove placeholder copied from docker/extra_fixtures
   rm -f dojo/fixtures/readme.txt && \
   mkdir -p dojo/migrations && \
