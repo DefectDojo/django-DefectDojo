@@ -8,9 +8,11 @@ __author__ = 'Apipia'
 
 class BlackduckCRImporter(object):
     """
-    Importer for blackduck. V2 is different in that it creates a Finding in defect dojo
-    for each vulnerable component version used in a project, and for each license that is
-    In Violation for the components. Security Risks and License Risks.
+    Importer for blackduck. V3 is different in that it creates a Finding in defect dojo
+    for each vulnerable component version used in a project, for each license that is
+    In Violation for the components, AND for each license that is marked with a 'License Risk'
+    that is anything other than 'OK' as a For Review Finding in defect dojo.
+    Security Risks and License Risks.
     Security Risks have the severity and impact of it's highest vulnerability the component has.
     """
     def parse_findings(self, report: Path) -> (dict, dict):

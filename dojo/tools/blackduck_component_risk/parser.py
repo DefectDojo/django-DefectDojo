@@ -65,6 +65,27 @@ class BlackduckHubParser(object):
                                   static_finding=True,
                                   unique_id_from_tool=component_id)
                 license_risk.append(finding)
+            else if component["License Risk"] != "OK":
+                # We have a license risk for review, but not directly "In Violation"
+                title = self.license_title(component)
+                description = self.license_description(component)
+                severity = component["License Risk"]
+                mitigation = self.license_mitigation(component)
+                impact = "N/A"
+                references = self.license_references(component)
+                finding = Finding(title=title,
+                                  test=test,
+                                  active=False,
+                                  verified=False,
+                                  description=description,
+                                  severity=severity,
+                                  numerical_severity=Finding.get_numerical_severity(severity),
+                                  mitigation=mitigation,
+                                  impact=impact,
+                                  references=references,
+                                  static_finding=True,
+                                  unique_id_from_tool=component_id)
+                 license_risk.append(finding)
         self.items.extend(license_risk)
 
         # Security Risk
@@ -113,18 +134,29 @@ class BlackduckHubParser(object):
         desc = "**License Name:** {}  \n".format(component["License names"])
         desc += "**License Families:** {}  \n".format(component["License families"])
         desc += "**License Usage:** {}  \n".format(component["Usage"])
+        desc += "**License Origin name:** {} \n".format(component["Origin name"])
+        desc += "**License Origin id:** {} \n".format(component["Origin id"])
+        desc += "**Match type:** {}\n".format(component["Match type"])
         return desc
 
-    def license_mitigation(self, component):
+    def license_mitigation(self, component, violation=True):
         """
         Uses Component name and Component version name to display the package.
         :param component: Dictionary containing all components.
+        :param violation: Boolean indicating if this is a violation or for review
         :return:
         """
-        mit = "Package has a license that is In Violation and should not be used: {}:{}.  ".format(
-            component["Component name"], component["Component version name"]
-        )
-        mit += "Please use another component with an acceptable license."
+        mit = ""
+        if violation:
+            mit = "Package has a license that is In Violation and should not be used: {}:{}.  ".format(
+                component["Component name"], component["Component version name"]
+            )
+            mit += "Please use another component with an acceptable license."
+        else:
+            mit = "Package has a potential license risk and should be reviewed: {}:{}. ".format(
+                component["Component name"], component["Component version name"]
+            )
+            mit += "A legal review may indicate that another component should be used with an acceptablle license."
         return mit
 
     def license_references(self, component):
