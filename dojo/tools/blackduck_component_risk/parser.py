@@ -65,7 +65,7 @@ class BlackduckHubParser(object):
                                   static_finding=True,
                                   unique_id_from_tool=component_id)
                 license_risk.append(finding)
-            else if component["License Risk"] != "OK":
+            elif component["License Risk"] != "OK":
                 # We have a license risk for review, but not directly "In Violation"
                 title = self.license_title(component)
                 description = self.license_description(component)
