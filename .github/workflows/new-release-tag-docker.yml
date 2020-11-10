@@ -1,4 +1,4 @@
-name: Tag, release, docker
+name: "Release: 2. tag, release, docker push"
 
 env:
   GIT_USERNAME: "DefectDojo release bot"
@@ -82,7 +82,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: defectdojo/defectdojo-${{ matrix.docker-image}}:${{ matrix.docker-tag }}
+          tags: ${{ env.REPO_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ matrix.docker-tag }}
           file: ./Dockerfile.${{ matrix.docker-image }}
           context: .
       - name: Image digest

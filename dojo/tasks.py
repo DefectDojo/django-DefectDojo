@@ -19,10 +19,6 @@ from dojo.utils import sla_compute_and_notify
 from dojo.notifications.helper import create_notification
 
 
-fmt = getattr(settings, 'LOG_FORMAT', None)
-lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
-logging.basicConfig(format=fmt, level=lvl)
-
 logger = get_task_logger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
@@ -257,6 +253,8 @@ def celery_status():
 def async_sla_compute_and_notify_task(*args, **kwargs):
     logger.debug("Computing SLAs and notifying as needed")
     try:
-        sla_compute_and_notify(*args, **kwargs)
+        system_settings = System_Settings.objects.get()
+        if system_settings.enable_finding_sla:
+            sla_compute_and_notify(*args, **kwargs)
     except Exception as e:
         logger.error("An unexpected error was thrown calling the SLA code: {}".format(e))

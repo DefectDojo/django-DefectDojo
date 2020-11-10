@@ -412,11 +412,13 @@ class ImportScanForm(forms.Form):
                          ("AWS Security Hub Scan", "AWS Security Hub Scan"),
                          ("GitLab SAST Report", "GitLab SAST Report"),
                          ("HuskyCI Report", "HuskyCI Report"),
+                         ("Semgrep JSON Report", "Semgrep JSON Report"),
                          ("Risk Recon API Importer", "Risk Recon API Importer"),
                          ("DrHeader JSON Importer", "DrHeader JSON Importer"),
                          ("Checkov Scan", "Checkov Scan"),
                          ("kube-bench Scan", "Kube-Bench Scan"),
-                         ("CCVS Report", "CCVS Report"))
+                         ("CCVS Report", "CCVS Report"),
+                         ("ORT evaluated model Importer", "ORT evaluated model Importer"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
     scan_date = forms.DateTimeField(
