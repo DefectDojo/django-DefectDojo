@@ -472,11 +472,11 @@
                             {% else %}
                               {% if finding.endpoints.all %}
                                 <i class="fa dojo-sup fa-sitemap has-popover" data-html="true" data-trigger="hover" data-content="
-                                    {% for endpoint in finding.endpoints.all %}
-                                        {% if endpoint|endpoint_check_active:finding %}
-                                            &#10005; {{ endpoint }}<br/>
+                                    {% for endpoint_status in finding.endpoint_status.all %}
+                                        {% if endpoint_status.mitigated %}
+                                            &#10003; {{ endpoint_status.endpoint }}<br/>
                                         {% else %}
-                                            &#10003; {{ endpoint }}<br/>
+                                            &#10005; {{ endpoint_status.endpoint }}<br/>
                                         {% endif %}
                                     {% endfor %}
                                 " data-placement="right" data-container="body" data-original-title="Endpoints ({{finding.active_endpoint_count}} Active, {{finding.mitigated_endpoint_count}} Mitigated)" title=""></i>
