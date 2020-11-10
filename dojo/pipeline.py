@@ -60,7 +60,7 @@ def modify_permissions(backend, uid, user=None, social=None, *args, **kwargs):
     if kwargs.get('is_new'):
         user.is_staff = False
         if settings.GITLAB_PROJECT_AUTO_IMPORT is True:
-            # Add engagement creation permission if auto_import is set
+            # Add engagement creation permission if auto_import  is set
             user.user_permissions.set([Permission.objects.get(codename='add_engagement', content_type=ContentType.objects.get_for_model(Engagement)), Permission.objects.get(codename='add_test', content_type=ContentType.objects.get_for_model(Test)), Permission.objects.get(codename='change_test', content_type=ContentType.objects.get_for_model(Test))])
 
 
