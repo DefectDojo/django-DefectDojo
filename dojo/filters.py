@@ -631,6 +631,7 @@ class OpenFindingFilter(DojoFilter):
                 product_id=self.pid
             ).all()
 
+
 class OpenFindingSuperFilter(OpenFindingFilter):
     reporter = ModelMultipleChoiceFilter(
         queryset=Dojo_User.objects.all())
