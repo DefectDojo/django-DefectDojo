@@ -65,12 +65,12 @@ class BlackduckHubParser(object):
                                   static_finding=True,
                                   unique_id_from_tool=component_id)
                 license_risk.append(finding)
-            elif component["License Risk"] != "OK":
+            elif "None" not in self.license_severity(component):
                 # We have a license risk for review, but not directly "In Violation"
-                title = self.license_title(component)
-                description = self.license_description(component)
-                severity = component["License Risk"]
-                mitigation = self.license_mitigation(component)
+                title = "Review " + self.license_title(component)
+                description = self.license_description(component) 
+                severity = self.license_severity(component) 
+                mitigation = self.license_mitigation(component,False)
                 impact = "N/A"
                 references = self.license_references(component)
                 finding = Finding(title=title,
@@ -156,7 +156,7 @@ class BlackduckHubParser(object):
             mit = "Package has a potential license risk and should be reviewed: {}:{}. ".format(
                 component["Component name"], component["Component version name"]
             )
-            mit += "A legal review may indicate that another component should be used with an acceptablle license."
+            mit += "A legal review may indicate that another component should be used with an acceptable license."
         return mit
 
     def license_references(self, component):
@@ -194,6 +194,19 @@ class BlackduckHubParser(object):
             desc += "**Description:** {}\n".format(vuln["Description"])
         return desc
 
+    def license_severity(self, component):
+        """
+        Iterates over all base_scores of each vulnerability and picks the max. A map is used to
+        map the all-caps format of the CSV with the case that Defect Dojo expects.
+        (Could use a .lower() or ignore_case during comparison)
+        :param vulns: Dictionary {component_version_identifier: [vulns]}
+        :return:
+        """
+        map = {"HIGH": "High", "MEDIUM": "Medium", "LOW": "Low", "INFO": "Info",
+               "CRITICAL": "Critical", "OK": "None"}
+        sev = map[component["License Risk"]]
+        return sev
+ 
     def security_severity(self, vulns):
         """
         Iterates over all base_scores of each vulnerability and picks the max. A map is used to
