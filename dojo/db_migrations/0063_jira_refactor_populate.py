@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0062_jira_refactor'),
+        ('dojo', '0063_jira_refactor'),
     ]
 
     def move_jira_creation_changed(apps, schema_editor):
