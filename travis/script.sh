@@ -5,10 +5,6 @@ travis_fold() {
   echo -en "travis_fold:${action}:${name}\r"
 }
 
-display_pod_logs() {
-    [[ ! -z "$1" ]] && kubectl logs --selector ${1}
-}
-
 build_containers() {
   # Build Docker images
   travis_fold start docker_image_build
@@ -163,7 +159,6 @@ if [ -z "${TEST}" ]; then
   echo
   echo "DefectDojo is up and running."
   kubectl get pods
-  display_pod_logs app=postgresql
   travis_fold end minikube_install
 
 
