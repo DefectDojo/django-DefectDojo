@@ -872,8 +872,8 @@ LOGGING = {
             'handlers': [r'%s' % LOGGING_HANDLER],
             'level': 'INFO',
             'propagate': False,
-            # does not seem to work?
-            # 'worker_hijack_root_logger': False,
+            # workaround some celery logging known issue
+            'worker_hijack_root_logger': False,
         },
         'dojo': {
             'handlers': [r'%s' % LOGGING_HANDLER],

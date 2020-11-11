@@ -72,24 +72,30 @@ Django forms are very rigid so without crispy-forms we're forced to use javascri
             $(generate_secret).css('padding-left', '5px')
             $(generate_secret).popover()
 
-            $(generate_secret).click(function () {
-                $('#id_jira_webhook_secret').val(generateGUID())
-            });
+            $(generate_secret).click(generate_new_secret)
 
             $('#id_disable_jira_webhook_secret').change(show_hide_jira_webhook_secret)
 
             show_hide_jira_webhook_secret()
         });
 
+        function generate_new_secret() {
+            $('#id_jira_webhook_secret').val(generateGUID())
+        }
+
         function show_hide_jira_webhook_secret() {
             if ($('#id_disable_jira_webhook_secret').is(':checked')) {
                 <!-- alert('checked') -->
                 $('#id_jira_webhook_secret').css('display', 'none');
                 $('#id_generate_secret').css('display', 'none');
+                if (!$('#id_jira_webhook_secret').val()){
+                    <!-- field is mandatory so generat a value even if using secret is disabled -->
+                    generate_new_secret()
+                }
             } else {
                 <!-- alert('not checked')                 -->
                 $('#id_jira_webhook_secret').css('display', 'inline-block');
-                $('#id_generate_secret').css('display', 'inline-block');                    
+                $('#id_generate_secret').css('display', 'inline-block');
             }
         }
 
