@@ -548,9 +548,6 @@ def import_scan_results(request, eid=None, pid=None):
 
     push_all_jira_issues = jira_helper.is_push_all_issues(engagement_or_product)
 
-    if jira_helper.get_jira_project(engagement_or_product):
-        jform = JIRAImportScanForm(push_all=push_all_jira_issues, prefix='jiraform')
-
     if request.method == "POST":
         form = ImportScanForm(request.POST, request.FILES)
         cred_form = CredMappingForm(request.POST)
@@ -770,10 +767,15 @@ def import_scan_results(request, eid=None, pid=None):
         prod_id = pid
         custom_breadcrumb = {"", ""}
         product_tab = Product_Tab(prod_id, title=title, tab="findings")
+
+    if jira_helper.get_jira_project(engagement_or_product):
+        jform = JIRAImportScanForm(push_all=push_all_jira_issues, prefix='jiraform')
+
     form.fields['endpoints'].queryset = Endpoint.objects.filter(product__id=product_tab.product.id)
     return render(request, 'dojo/import_scan_results.html', {
         'form': form,
         'product_tab': product_tab,
+        'engagement_or_product': engagement_or_product,
         'custom_breadcrumb': custom_breadcrumb,
         'title': title,
         'cred_form': cred_form,
