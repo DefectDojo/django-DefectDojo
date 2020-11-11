@@ -276,11 +276,10 @@ class FindingViewSet(mixins.ListModelMixin,
     # data and add that as a parameter to .save()
     def perform_update(self, serializer):
         # IF JIRA is enabled and this product has a JIRA configuration
-        push_to_jira = True
+        push_to_jira = serializer.validated_data.get('push_to_jira')
         jira_project = jira_helper.get_jira_project(serializer.instance)
         if get_system_setting('enable_jira') and jira_project:
-            push_all_jira_issues = jira_project.push_all_issues
-            push_to_jira = push_all_jira_issues or serializer.validated_data.pop('push_to_jira')
+            push_to_jira = push_to_jira or jira_project.push_all_issues
             serializer.save(push_to_jira=push_to_jira)
         else:
             serializer.save()
@@ -960,10 +959,9 @@ class ImportScanView(mixins.CreateModelMixin,
         engagement = serializer.validated_data['engagement']
         jira_project = jira_helper.get_jira_project(engagement)
 
-        push_to_jira = False
+        push_to_jira = serializer.validated_data.get('push_to_jira')
         if get_system_setting('enable_jira') and jira_project:
-            push_all_jira_issues = jira_project.push_all_issues
-            push_to_jira = push_all_jira_issues or serializer.validated_data.get('push_to_jira')
+            push_to_jira = push_all_jira_issues or jira_project.push_all_issues
 
         logger.debug('push_to_jira: %s', serializer.validated_data.get('push_to_jira'))
         serializer.save(push_to_jira=push_to_jira)
