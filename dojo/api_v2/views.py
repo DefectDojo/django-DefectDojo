@@ -281,8 +281,9 @@ class FindingViewSet(mixins.ListModelMixin,
         if get_system_setting('enable_jira') and jira_project:
             push_all_jira_issues = jira_project.push_all_issues
             push_to_jira = push_all_jira_issues or serializer.validated_data.pop('push_to_jira')
-
-        serializer.save(push_to_jira=push_to_jira)
+            serializer.save(push_to_jira=push_to_jira)
+        else:
+            serializer.save()
 
     def get_queryset(self):
         if not self.request.user.is_staff:
