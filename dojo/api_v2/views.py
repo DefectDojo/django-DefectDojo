@@ -280,9 +280,8 @@ class FindingViewSet(mixins.ListModelMixin,
         jira_project = jira_helper.get_jira_project(serializer.instance)
         if get_system_setting('enable_jira') and jira_project:
             push_to_jira = push_to_jira or jira_project.push_all_issues
-            serializer.save(push_to_jira=push_to_jira)
-        else:
-            serializer.save()
+
+        serializer.save(push_to_jira=push_to_jira)
 
     def get_queryset(self):
         if not self.request.user.is_staff:
@@ -961,7 +960,7 @@ class ImportScanView(mixins.CreateModelMixin,
 
         push_to_jira = serializer.validated_data.get('push_to_jira')
         if get_system_setting('enable_jira') and jira_project:
-            push_to_jira = push_all_jira_issues or jira_project.push_all_issues
+            push_to_jira = push_to_jira or jira_project.push_all_issues
 
         logger.debug('push_to_jira: %s', serializer.validated_data.get('push_to_jira'))
         serializer.save(push_to_jira=push_to_jira)
@@ -977,10 +976,9 @@ class ReImportScanView(mixins.CreateModelMixin,
         test = serializer.validated_data['test']
         jira_project = jira_helper.get_jira_project(test)
 
-        push_to_jira = False
+        push_to_jira = serializer.validated_data.get('push_to_jira')
         if get_system_setting('enable_jira') and jira_project:
-            push_all_jira_issues = jira_project.push_all_issues
-            push_to_jira = push_all_jira_issues or serializer.validated_data.get('push_to_jira')
+            push_to_jira = push_to_jira or jira_project.push_all_issues
 
         logger.debug('push_to_jira: %s', serializer.validated_data.get('push_to_jira'))
         serializer.save(push_to_jira=push_to_jira)
