@@ -64,7 +64,8 @@ from dojo.tools.microfocus_webinspect.parser import MicrofocusWebinspectXMLParse
 from dojo.tools.wpscan.parser import WpscanJSONParser
 from dojo.tools.sslscan.parser import SslscanXMLParser
 from dojo.tools.jfrogxray.parser import XrayJSONParser
-from dojo.tools.sslyze.parser import SslyzeXmlParser
+from dojo.tools.sslyze.parser_json import SSLyzeJSONParser
+from dojo.tools.sslyze.parser_xml import SSLyzeXMLParser
 from dojo.tools.testssl.parser import TestsslCSVParser
 from dojo.tools.hadolint.parser import HadolintParser
 from dojo.tools import SCAN_SONARQUBE_API
@@ -86,10 +87,13 @@ from dojo.tools.bugcrowd.parser import BugCrowdCSVParser
 from dojo.tools.huskyci.parser import HuskyCIReportParser
 from dojo.tools.ccvs.parser import CCVSReportParser
 from dojo.tools.awssecurityhub.parser import AwsSecurityFindingFormatParser
+from dojo.tools.semgrep.parser import SemgrepJSONParser
 from dojo.tools.risk_recon.parser import RiskReconParser
 from dojo.tools.drheader.parser import DrHeaderJSONParser
 from dojo.tools.checkov.parser import CheckovParser
 from dojo.tools.kubebench.parser import KubeBenchParser
+from dojo.tools.ort.parser import OrtParser
+
 
 __author__ = 'Jay Paz'
 
@@ -241,7 +245,9 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
     elif scan_type == 'JFrog Xray Scan':
         parser = XrayJSONParser(file, test)
     elif scan_type == 'Sslyze Scan':
-        parser = SslyzeXmlParser(file, test)
+        parser = SSLyzeXMLParser(file, test)
+    elif scan_type == 'SSLyze 3 Scan (JSON)':
+        parser = SSLyzeJSONParser(file, test)
     elif scan_type == 'Testssl Scan':
         parser = TestsslCSVParser(file, test)
     elif scan_type == 'Hadolint Dockerfile check':
@@ -280,6 +286,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = CCVSReportParser(file, test)
     elif scan_type == 'AWS Security Hub Scan':
         parser = AwsSecurityFindingFormatParser(file, test)
+    elif scan_type == 'Semgrep JSON Report':
+        parser = SemgrepJSONParser(file, test)
     elif scan_type == 'Risk Recon API Importer':
         parser = RiskReconParser(file, test)
     elif scan_type == 'DrHeader JSON Importer':
@@ -288,6 +296,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = CheckovParser(file, test)
     elif scan_type == 'kube-bench Scan':
         parser = KubeBenchParser(file, test)
+    elif scan_type == 'ORT evaluated model Importer':
+        parser = OrtParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 

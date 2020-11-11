@@ -19,6 +19,7 @@ imagePullPolicy: Always
 # Where to pull the defectDojo images from. Defaults to "defectdojo/*" repositories on hub.docker.com
 repositoryPrefix: defectdojo
 # When using a private registry, name of the secret that holds the registry secret (eg deploy token from gitlab-ci project)
+# Create secrets as: kubectl create secret docker-registry defectdojoregistrykey --docker-username=registry_username --docker-password=registry_password --docker-server='https://index.docker.io/v1/'
 # imagePullSecrets: defectdojoregistrykey
 tag: latest
 
@@ -40,8 +41,9 @@ annotations: {}
 # Components
 celery:
   broker: rabbitmq
-  logLevel: DEBUG
+  logLevel: INFO
   beat:
+    annotations: {}
     affinity: {}
     nodeSelector: {}
     replicas: 1
@@ -54,8 +56,9 @@ celery:
         memory: 256Mi
     tolerations: []
   worker:
+    annotations: {}
     affinity: {}
-    logLevel: DEBUG
+    logLevel: INFO
     nodeSelector: {}
     replicas: 1
     resources:
@@ -77,6 +80,7 @@ celery:
       # prefetch_multiplier: 128
 
 django:
+  annotations: {}
   affinity: {}
   ingress:
     enabled: true
@@ -103,6 +107,14 @@ django:
   replicas: 1
   tolerations: []
   uwsgi:
+    livenessProbe:
+      # Enable liveness checks on uwsgi container. Those values are use on nginx readiness checks as well.
+      enabled: true
+      failureThreshold: 6
+      initialDelaySeconds: 120
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 5
     resources:
       requests:
         cpu: 100m
@@ -133,6 +145,7 @@ mysql:
   mysqlPassword: ""
   mysqlRootPassword: ""
   existingSecret: defectdojo-mysql-specific
+  secretKey: mysql-password
   mysqlDatabase: defectdojo
   service:
   # To use an external mySQL instance, set enabled to false and uncomment
@@ -146,6 +159,7 @@ postgresql:
   postgresqlPassword: ""
   postgresqlDatabase: defectdojo
   existingSecret: defectdojo-postgresql-specific
+  secretKey: postgresql-password
   persistence:
     enabled: true
   replication:
@@ -187,9 +201,13 @@ rabbitmq:
 redis:
   enabled: false
   existingSecret: defectdojo-redis-specific
+  secretKey: redis-password
   password: ""
   cluster:
     slaveCount: 1
+  # To use an external Redis instance, set enabled to false and uncomment
+  # the line below:
+  # redisServer: myrediscluster
 
 # To add extra variables not predefined by helm config it is possible to define in extraConfigs block, e.g. below:
 # NOTE  Do not store any kind of sensitive information inside of it

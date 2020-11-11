@@ -20,7 +20,7 @@ def create_notification(event=None, *args, **kwargs):
             # kwargs.update({'user': recipient_notifications.user})
             process_notifications(event, recipient_notifications, *args, **kwargs)
     else:
-        logger.debug('creating system notifications')
+        logger.debug('creating system notifications for event: %s', event)
         # send system notifications to all admin users
 
         # System notifications
@@ -35,7 +35,7 @@ def create_notification(event=None, *args, **kwargs):
         # All admins will also receive system notifications, but as part of the person global notifications section below
         # This time user is set, so will trigger email to personal email, to personal slack channel (mention), etc.
         # only retrieve users which have at least one notification type enabled for this event type.
-        logger.debug('creating personal notifications')
+        logger.debug('creating personal notifications for event: %s', event)
 
         product = None
         if 'product' in kwargs:
@@ -61,7 +61,7 @@ def create_notification(event=None, *args, **kwargs):
 
         # only send to authorized users or admin/superusers
         if product:
-            users = users.filter(Q(id__in=product.authorized_users.all()) | Q(is_superuser=True) | Q(is_staff=True))
+            users = users.filter(Q(id__in=product.authorized_users.all()) | Q(id__in=product.prod_type.authorized_users.all()) | Q(is_superuser=True) | Q(is_staff=True))
 
         for user in users:
             # send notifications to user after merging possible multiple notifications records (i.e. personal global + personal product)
@@ -103,7 +103,7 @@ def create_notification_message(event, user, notification_type, *args, **kwargs)
             kwargs["description"] = create_description(event, *args, **kwargs)
             notification_message = render_to_string('notifications/other.tpl', kwargs)
 
-    return notification_message
+    return notification_message if notification_message else ''
 
 
 def process_notifications(event, notifications=None, *args, **kwargs):
@@ -272,7 +272,7 @@ def send_alert_notification(event, user=None, *args, **kwargs):
         alert = Alerts(
             user_id=user,
             title=kwargs.get('title')[:100],
-            description=create_notification_message(event, user, 'alert', *args, **kwargs),
+            description=create_notification_message(event, user, 'alert', *args, **kwargs)[:2000],
             url=kwargs.get('url', reverse('alerts')),
             icon=icon[:25],
             source=Notifications._meta.get_field(event).verbose_name.title()[:100]

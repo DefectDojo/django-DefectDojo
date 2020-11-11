@@ -55,8 +55,7 @@ RUN pip3 install \
 COPY components/ ./components/
 COPY manage.py ./
 COPY dojo/ ./dojo/
-RUN \
-  cp dojo/settings/settings.dist.py dojo/settings/settings.py
+
 RUN \
   cd components && \
   yarn && \
@@ -64,7 +63,7 @@ RUN \
   python3 manage.py collectstatic --noinput && \
   true
 
-FROM nginx:1.19.2-alpine@sha256:4635b632d2aaf8c37c8a1cf76a1f96d11b899f74caa2c6946ea56d0a5af02c0c
+FROM nginx:1.19.3-alpine@sha256:a411d06ab4f5347ac9652357ac35600555aeff0b910326cc7adc36d471e0b36f
 ARG uid=1001
 ARG appuser=defectdojo
 COPY --from=collectstatic /app/static/ /usr/share/nginx/html/static/

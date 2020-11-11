@@ -85,6 +85,7 @@ class SonarQubeApiUpdaterFromSource(object):
             finding.verified = True
             finding.false_p = False
             finding.mitigated = timezone.now()
+            finding.is_Mitigated = True
             finding.remove_from_any_risk_acceptance()
 
         elif sonarqube_status == 'WONTFIX':

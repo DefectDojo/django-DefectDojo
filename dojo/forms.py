@@ -150,9 +150,19 @@ class MonthYearWidget(Widget):
 
 
 class Product_TypeForm(forms.ModelForm):
+    authorized_users = forms.ModelMultipleChoiceField(
+        queryset=None,
+        required=False, label="Authorized Users")
+
+    def __init__(self, *args, **kwargs):
+        non_staff = Dojo_User.objects.exclude(is_staff=True) \
+            .exclude(is_active=False).order_by('first_name', 'last_name')
+        super(Product_TypeForm, self).__init__(*args, **kwargs)
+        self.fields['authorized_users'].queryset = non_staff
+
     class Meta:
         model = Product_Type
-        fields = ['name', 'critical_product', 'key_product']
+        fields = ['name', 'authorized_users', 'critical_product', 'key_product']
 
 
 class Delete_Product_TypeForm(forms.ModelForm):
@@ -381,6 +391,7 @@ class ImportScanForm(forms.Form):
                          ("Sslscan", "Sslscan"),
                          ("JFrog Xray Scan", "JFrog Xray Scan"),
                          ("Sslyze Scan", "Sslyze Scan"),
+                         ("SSLyze 3 Scan (JSON)", "SSLyze 3 Scan (JSON)"),
                          ("Testssl Scan", "Testssl Scan"),
                          ("Hadolint Dockerfile check", "Hadolint Dockerfile check"),
                          ("Aqua Scan", "Aqua Scan"),
@@ -401,11 +412,13 @@ class ImportScanForm(forms.Form):
                          ("AWS Security Hub Scan", "AWS Security Hub Scan"),
                          ("GitLab SAST Report", "GitLab SAST Report"),
                          ("HuskyCI Report", "HuskyCI Report"),
+                         ("Semgrep JSON Report", "Semgrep JSON Report"),
                          ("Risk Recon API Importer", "Risk Recon API Importer"),
                          ("DrHeader JSON Importer", "DrHeader JSON Importer"),
                          ("Checkov Scan", "Checkov Scan"),
                          ("kube-bench Scan", "Kube-Bench Scan"),
-                         ("CCVS Report", "CCVS Report"))
+                         ("CCVS Report", "CCVS Report"),
+                         ("ORT evaluated model Importer", "ORT evaluated model Importer"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
     scan_date = forms.DateTimeField(
@@ -719,6 +732,10 @@ class EngForm(forms.ModelForm):
         if 'product' in kwargs:
             product = kwargs.pop('product')
 
+        self.user = None
+        if 'user' in kwargs:
+            self.user = kwargs.pop('user')
+
         tags = Tag.objects.usage_for_model(Engagement)
         t = [(tag.name, tag.name) for tag in tags]
         super(EngForm, self).__init__(*args, **kwargs)
@@ -730,6 +747,10 @@ class EngForm(forms.ModelForm):
             self.fields['lead'].queryset = User.objects.filter(id__in=staff_users)
         else:
             self.fields['lead'].queryset = User.objects.exclude(is_staff=False)
+
+        if self.user is not None and not self.user.is_staff and not self.user.is_superuser:
+            self.fields['product'].queryset = Product.objects.all().filter(authorized_users__in=[self.user])
+
         # Don't show CICD fields on a interactive engagement
         if cicd is False:
             del self.fields['build_id']
@@ -1568,6 +1589,9 @@ class AddDojoUserForm(forms.ModelForm):
     authorized_products = forms.ModelMultipleChoiceField(
         queryset=Product.objects.all(), required=False,
         help_text='Select the products this user should have access to.')
+    authorized_product_types = forms.ModelMultipleChoiceField(
+        queryset=Product_Type.objects.all(), required=False,
+        help_text='Select the product types this user should have access to.')
 
     class Meta:
         model = Dojo_User

@@ -26,6 +26,7 @@ from dojo.forms import Add_Questionnaire_Form, Delete_Questionnaire_Form, Create
     CreateChoiceQuestionForm, EditTextQuestionForm, EditChoiceQuestionForm, AddChoicesForm, \
     AddEngagementForm, AddGeneralQuestionnaireForm, DeleteGeneralQuestionnaireForm
 from dojo.models import Answered_Survey, Engagement_Survey, Answer, TextQuestion, ChoiceQuestion, Choice, General_Survey, Question
+from dojo.user.helper import check_auth_users_list
 
 localtz = timezone('America/Chicago')
 
@@ -75,7 +76,7 @@ def answer_questionnaire(request, eid, sid):
     settings = System_Settings.objects.all()[0]
 
     if not settings.allow_anonymous_survey_repsonse:
-        auth = request.user.is_staff or request.user in prod.authorized_users.all()
+        auth = request.user.is_staff or check_auth_users_list(request.user, prod)
         if not auth:
             messages.add_message(request,
                                  messages.ERROR,
@@ -134,8 +135,7 @@ def assign_questionnaire(request, eid, sid):
     survey = get_object_or_404(Answered_Survey, id=sid)
     engagement = get_object_or_404(Engagement, id=eid)
     prod = engagement.product
-
-    auth = request.user.is_staff or request.user in prod.authorized_users.all()
+    auth = request.user.is_staff or check_auth_users_list(request.user, prod)
     if not auth:
         # will render 403
         raise PermissionDenied

@@ -7,8 +7,8 @@ from tastypie_swagger.views import SwaggerView, ResourcesView, SchemaView
 from rest_framework.routers import DefaultRouter
 from rest_framework.authtoken import views as tokenviews
 from rest_framework import permissions
-from drf_yasg.views import get_schema_view
-from drf_yasg import openapi
+from drf_yasg2.views import get_schema_view
+from drf_yasg2 import openapi
 from django.http import HttpResponse
 import django_saml2_auth.views
 
@@ -63,6 +63,7 @@ from dojo.note_type.urls import urlpatterns as note_type_urls
 from dojo.google_sheet.urls import urlpatterns as google_sheets_urls
 from dojo.banner.urls import urlpatterns as banner_urls
 from dojo.survey.urls import urlpatterns as survey_urls
+from dojo.components.urls import urlpatterns as component_urls
 from dojo.regulations.urls import urlpatterns as regulations
 
 admin.autodiscover()
@@ -163,6 +164,7 @@ ur += notes_urls
 ur += note_type_urls
 ur += google_sheets_urls
 ur += banner_urls
+ur += component_urls
 ur += regulations
 
 swagger_urls = [
@@ -225,3 +227,7 @@ if hasattr(settings, 'DJANGO_ADMIN_ENABLED'):
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# sometimes urlpatterns needed be added from local_settings.py to avoid having to modify core defect dojo files
+if hasattr(settings, 'EXTRA_URL_PATTERNS'):
+    urlpatterns += settings.EXTRA_URL_PATTERNS
