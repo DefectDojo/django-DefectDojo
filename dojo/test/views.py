@@ -766,8 +766,6 @@ def re_import_scan_results(request, tid):
                         new_items.append(finding.id)
                     else:
                         item.test = test
-                        if item.date == timezone.now().date():
-                            item.date = test.target_start.date()
                         item.reporter = request.user
                         item.last_reviewed = timezone.now()
                         item.last_reviewed_by = request.user

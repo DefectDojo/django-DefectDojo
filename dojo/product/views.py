@@ -228,7 +228,7 @@ def finding_querys(request, prod):
         },
     )
 
-    findings = ProductMetricsFindingFilter(request.GET, queryset=findings_query)
+    findings = ProductMetricsFindingFilter(request.GET, queryset=findings_query, pid=prod)
     findings_qs = queryset_check(findings)
     filters['form'] = findings.form
 

@@ -68,12 +68,12 @@ def open_findings_filter(request, queryset, user, pid):
 
 def accepted_findings_filter(request, queryset, user, pid):
     assert user.is_staff
-    return AcceptedFindingSuperFilter(request.GET, queryset=queryset)
+    return AcceptedFindingSuperFilter(request.GET, queryset=queryset, pid=pid)
 
 
 def closed_findings_filter(request, queryset, user, pid):
     assert user.is_staff
-    return ClosedFindingSuperFilter(request.GET, queryset=queryset)
+    return ClosedFindingSuperFilter(request.GET, queryset=queryset, pid=pid)
 
 
 def open_findings(request, pid=None, eid=None, view=None):

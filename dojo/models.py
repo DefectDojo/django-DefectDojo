@@ -955,6 +955,15 @@ class Engagement_Type(models.Model):
         return self.name
 
 
+ENGAGEMENT_STATUS_CHOICES = (('Not Started', 'Not Started'),
+                             ('Blocked', 'Blocked'),
+                             ('Cancelled', 'Cancelled'),
+                             ('Completed', 'Completed'),
+                             ('In Progress', 'In Progress'),
+                             ('On Hold', 'On Hold'),
+                             ('Waiting for Resource', 'Waiting for Resource'))
+
+
 class Engagement(models.Model):
     name = models.CharField(max_length=300, null=True, blank=True)
     description = models.CharField(max_length=2000, null=True, blank=True)
@@ -981,13 +990,7 @@ class Engagement(models.Model):
     notes = models.ManyToManyField(Notes, blank=True, editable=False)
     status = models.CharField(editable=True, max_length=2000, default='',
                               null=True,
-                              choices=(('Not Started', 'Not Started'),
-                                       ('Blocked', 'Blocked'),
-                                       ('Cancelled', 'Cancelled'),
-                                       ('Completed', 'Completed'),
-                                       ('In Progress', 'In Progress'),
-                                       ('On Hold', 'On Hold'),
-                                       ('Waiting for Resource', 'Waiting for Resource')))
+                              choices=ENGAGEMENT_STATUS_CHOICES)
     progress = models.CharField(max_length=100,
                                 default='threat_model', editable=False)
     tmodel_path = models.CharField(max_length=1000, default='none',
@@ -1682,6 +1685,11 @@ class Finding(models.Model):
                                            max_length=500,
                                            verbose_name="Unique ID from tool",
                                            help_text="Vulnerability technical id from the source tool. Allows to track unique vulnerabilities.")
+    vuln_id_from_tool = models.CharField(null=True,
+                                         blank=True,
+                                         max_length=500,
+                                         verbose_name="Vulnerability ID from tool",
+                                         help_text="Non-unique technical id from the source tool associated with the vulnerability type.")
     sast_source_object = models.CharField(null=True,
                                           blank=True,
                                           max_length=500,
