@@ -8,9 +8,9 @@ sudo -H pip3 install -U setuptools pip
 sudo pip3 --version
 
 # Install Snyk
-curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
-sudo apt-get install nodejs
-sudo npm install -g snyk
+# curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+# sudo apt-get install nodejs
+# sudo npm install -g snyk
 
 
 # Install Deployment

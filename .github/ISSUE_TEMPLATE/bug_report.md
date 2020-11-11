@@ -6,9 +6,10 @@ labels: bug
 assignees: ''
 
 ---
+Please enter as much information as possible, otherwise we can't provide support. If possible upgrade to the latest release or dev version and try again.
 
 **Bug description**
-A clear and concise description of what the bug is.
+A clear and concise description of what the bug is. For errors include at least the exact error message you are seeing (including traceback).
 
 **Steps to reproduce**
 Steps to reproduce the behavior:

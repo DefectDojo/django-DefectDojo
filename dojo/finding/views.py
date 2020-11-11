@@ -25,7 +25,8 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 from tagging.models import Tag
 from itertools import chain
-from dojo.user.helper import user_must_be_authorized
+from dojo.user.helper import user_must_be_authorized, check_auth_users_list
+from dojo.utils import close_external_issue, reopen_external_issue
 
 from dojo.filters import OpenFindingFilter, \
     OpenFindingSuperFilter, AcceptedFindingSuperFilter, \
@@ -44,8 +45,6 @@ from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_
     jira_get_issue, get_words_for_field
 from dojo.notifications.helper import create_notification
 
-from dojo.tasks import add_jira_issue_task, update_external_issue_task, add_comment_task, \
-    add_external_issue_task, close_external_issue_task, reopen_external_issue_task
 from django.template.defaultfilters import pluralize
 from django.db.models import Q, QuerySet, Prefetch, Count
 
@@ -148,8 +147,10 @@ django_filter=open_findings_filter):
         add_breadcrumb(title="Findings", top_level=not len(request.GET), request=request)
 
     if not request.user.is_staff:
-        findings = findings.filter(
-            test__engagement__product__authorized_users__in=[request.user])
+        findings = Finding.objects.filter(
+            Q(test__engagement__product__authorized_users__in=[request.user]) |
+            Q(test__engagement__product__prod_type__authorized_users__in=[request.user])
+        )
 
     findings_filter = django_filter(request, findings, request.user, pid)
 
@@ -206,13 +207,14 @@ def prefetch_for_findings(findings):
         prefetched_findings = prefetched_findings.annotate(active_endpoint_count=Count('endpoint_status__id', filter=Q(endpoint_status__mitigated=False)))
         prefetched_findings = prefetched_findings.annotate(mitigated_endpoint_count=Count('endpoint_status__id', filter=Q(endpoint_status__mitigated=True)))
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__authorized_users')
-        print('temp')
+        prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__prod_type__authorized_users')
     else:
         logger.debug('unable to prefetch because query was already executed')
 
     return prefetched_findings
 
 
+@user_must_be_authorized(Finding, 'view', 'fid')
 def view_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     findings = Finding.objects.filter(test=finding.test).order_by('numerical_severity')
@@ -240,8 +242,7 @@ def view_finding(request, fid):
         pass
 
     dojo_user = get_object_or_404(Dojo_User, id=user.id)
-    if user.is_staff or user in finding.test.engagement.product.authorized_users.all(
-    ):
+    if user.is_staff or check_auth_users_list(user, finding):
         pass  # user is authorized for this product
     else:
         raise PermissionDenied
@@ -356,7 +357,7 @@ def close_finding(request, fid):
     if request.method == 'POST':
         form = CloseFindingForm(request.POST, missing_note_types=missing_note_types)
 
-        close_external_issue_task.delay(finding, 'Closed by defectdojo', 'github')
+        close_external_issue(finding, 'Closed by defectdojo', 'github')
 
         if form.is_valid():
             now = timezone.now()
@@ -377,6 +378,7 @@ def close_finding(request, fid):
                 now = timezone.now()
                 finding.mitigated = now
                 finding.mitigated_by = request.user
+                finding.is_Mitigated = True
                 finding.last_reviewed = finding.mitigated
                 finding.last_reviewed_by = request.user
                 finding.endpoints.clear()
@@ -443,6 +445,7 @@ def defect_finding_review(request, fid):
                 finding.active = False
                 finding.mitigated = now
                 finding.mitigated_by = request.user
+                finding.is_Mitigated = True
                 finding.last_reviewed = finding.mitigated
                 finding.last_reviewed_by = request.user
                 finding.endpoints.clear()
@@ -501,6 +504,7 @@ def reopen_finding(request, fid):
     finding.active = True
     finding.mitigated = None
     finding.mitigated_by = request.user
+    finding.is_Mitigated = False
     finding.last_reviewed = finding.mitigated
     finding.last_reviewed_by = request.user
     try:
@@ -512,7 +516,7 @@ def reopen_finding(request, fid):
     except JIRA_PKey.DoesNotExist:
         finding.save()
 
-    reopen_external_issue_task.delay(finding, 're-opened by defectdojo', 'github')
+    reopen_external_issue(finding, 're-opened by defectdojo', 'github')
 
     messages.add_message(
         request,
@@ -654,10 +658,12 @@ def edit_finding(request, fid):
             if new_finding.false_p or new_finding.active is False:
                 new_finding.mitigated = timezone.now()
                 new_finding.mitigated_by = request.user
+                new_finding.is_Mitigated = True
             if new_finding.active is True:
                 new_finding.false_p = False
                 new_finding.mitigated = None
                 new_finding.mitigated_by = None
+                new_finding.is_Mitigated = False
             if not new_finding.duplicate:
                 logger.debug('resetting duplicate status for %i', new_finding.id)
                 new_finding.duplicate = False
@@ -726,15 +732,9 @@ def edit_finding(request, fid):
                     request.POST, prefix='githubform', enabled=github_enabled)
                 if gform.is_valid():
                     if GITHUB_Issue.objects.filter(finding=new_finding).exists():
-                        if Dojo_User.wants_block_execution(request.user):
-                            update_external_issue(new_finding, old_status, 'github')
-                        else:
-                            update_external_issue_task.delay(new_finding, old_status, 'github')
+                        update_external_issue(new_finding, old_status, 'github')
                     else:
-                        if Dojo_User.wants_block_execution(request.user):
-                            add_external_issue(new_finding, 'github')
-                        else:
-                            add_external_issue_task.delay(new_finding, 'github')
+                        add_external_issue(new_finding, 'github')
 
             new_finding.save(push_to_jira=push_to_jira)
 
@@ -867,6 +867,7 @@ def request_finding_review(request, fid):
             finding.notes.add(new_note)
             finding.active = False
             finding.verified = False
+            finding.is_Mitigated = False
             finding.under_review = True
             finding.review_requested_by = user
             finding.last_reviewed = now
@@ -1253,10 +1254,7 @@ def promote_to_finding(request, fid):
                     enabled=GITHUB_PKey.objects.get(
                         product=test.engagement.product).push_all_issues)
                 if gform.is_valid():
-                    if Dojo_User.wants_block_execution(request.user):
-                        add_external_issue(new_finding, 'github')
-                    else:
-                        add_external_issue_task.delay(new_finding, 'github')
+                    add_external_issue(new_finding, 'github')
 
             messages.add_message(
                 request,
@@ -1775,7 +1773,9 @@ def finding_bulk_update_all(request, pid=None):
                     raise PermissionDenied()
 
                 finds = finds.filter(
-                    test__engagement__product__authorized_users__in=[request.user])
+                    Q(test__engagement__product__authorized_users__in=[request.user]) |
+                    Q(test__engagement__product__prod_type__authorized_users__in=[request.user])
+                )
 
             product_calc = list(Product.objects.filter(engagement__test__finding__id__in=finding_to_update).distinct())
             finds.delete()
@@ -1794,7 +1794,9 @@ def finding_bulk_update_all(request, pid=None):
                         raise PermissionDenied()
 
                     finds = finds.filter(
-                        test__engagement__product__authorized_users__in=[request.user])
+                        Q(test__engagement__product__authorized_users__in=[request.user]) |
+                        Q(test__engagement__product__prod_type__authorized_users__in=[request.user])
+                    )
 
                 finds = prefetch_for_findings(finds)
                 finds = finds.prefetch_related(Prefetch('test__engagement__risk_acceptance', queryset=q_simple_risk_acceptance, to_attr='simple_risk_acceptance'))
@@ -1827,15 +1829,9 @@ def finding_bulk_update_all(request, pid=None):
                         old_status = finding.status()
                         if form.cleaned_data['push_to_github']:
                             if GITHUB_Issue.objects.filter(finding=finding).exists():
-                                if Dojo_User.wants_block_execution(request.user):
-                                    update_external_issue(finding, old_status, 'github')
-                                else:
-                                    update_external_issue_task.delay(finding, old_status, 'github')
+                                update_external_issue(finding, old_status, 'github')
                             else:
-                                if Dojo_User.wants_block_execution(request.user):
-                                    add_external_issue(finding, 'github')
-                                else:
-                                    add_external_issue_task.delay(finding, 'github')
+                                add_external_issue(finding, 'github')
 
                 if form.cleaned_data['tags']:
                     for finding in finds:
@@ -1870,15 +1866,9 @@ def finding_bulk_update_all(request, pid=None):
                             log_jira_alert('Finding cannot be pushed to jira as there is no jira configuration for this product.', finding)
                         else:
                             if JIRA_Issue.objects.filter(finding=finding).exists():
-                                if Dojo_User.wants_block_execution(request.user):
-                                    update_jira_issue(finding, True)
-                                else:
-                                    update_jira_issue.delay(finding, True)
+                                update_jira_issue(finding, True)
                             else:
-                                if Dojo_User.wants_block_execution(request.user):
-                                    add_jira_issue(finding, True)
-                                else:
-                                    add_jira_issue_task.delay(finding, True)
+                                add_jira_issue(finding, True)
 
                 messages.add_message(request,
                                      messages.SUCCESS,
@@ -2107,20 +2097,12 @@ def push_to_jira(request, fid):
     try:
         if finding.jira():
             logger.info('trying to push %d:%s to JIRA to update JIRA issue', finding.id, finding.title)
-            if Dojo_User.wants_block_execution(request.user):
-                update_jira_issue(finding, True)
-                message = 'Linked JIRA issue succesfully updated.'
-            else:
-                update_jira_issue.delay(finding, True)
-                message = 'Action queued to update linked JIRA issue, check alerts for background errors.'
+            update_jira_issue(finding, True)
+            message = 'Action queued to update linked JIRA issue, check alerts for background errors.'
         else:
             logger.info('trying to push %d:%s to JIRA to create a new JIRA issue', finding.id, finding.title)
-            if Dojo_User.wants_block_execution(request.user):
-                add_jira_issue(finding, True)
-                message = 'JIRA issue created succesfully'
-            else:
-                add_jira_issue_task.delay(finding, True)
-                message = 'Action queued to created linked JIRA issue, check alerts for background errors.'
+            add_jira_issue(finding, True)
+            message = 'Action queued to created linked JIRA issue, check alerts for background errors.'
 
         # it may look like succes here, but the add_jira_issue and update_jira_issue are swallowing exceptions
         # but cant't change too much now without having a test suite, so leave as is for now with the addition warning message to check alerts for background errors.
@@ -2202,7 +2184,10 @@ def get_similar_findings(request, finding):
     similar = Finding.objects.all()
 
     if not request.user.is_staff:
-        similar = similar.filter(test__engagement__product__authorized_users__in=[request.user])
+        similar = similar.filter(
+            Q(test__engagement__product__authorized_users__in=[request.user]) |
+            Q(test__engagement__product__prod_type__authorized_users__in=[request.user])
+        )
 
     if finding.test.engagement.deduplication_on_engagement:
         similar = similar.filter(test__engagement=finding.test.engagement)

@@ -136,6 +136,7 @@ class Site(object):
         self.node = item_node
         self.name = self.node.get('name')
         self.host = self.node.get('host')
+        self.name = self.node.get('name')
         self.port = self.node.get('port')
         self.items = []
         for alert in self.node.findall('alerts/alertitem'):
@@ -191,8 +192,8 @@ class Item(object):
         description_detail = "\n"
         for instance in item_node.findall('instances/instance'):
             for node in instance.getiterator():
-                print('tag: ' + node.tag)
-                print('text:' + escape(node.text))
+                # print('tag: ' + node.tag)
+                # print('text:' + escape(node.text))
                 if node.tag == "uri":
                     if node.text != "":
                         description_detail += "URL: " + node.text

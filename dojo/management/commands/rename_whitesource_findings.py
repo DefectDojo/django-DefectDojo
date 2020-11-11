@@ -22,7 +22,7 @@ def rename_whitesource_finding():
     whitesource_id = Test_Type.objects.get(name="Whitesource Scan").id
     findings = Finding.objects.filter(found_by=whitesource_id)
     findings = findings.order_by('-pk')
-    logger.info("######## Updating Hashcodes - deduplication is done in background using django signals upon finding save ########")
+    logger.info("######## Updating Hashcodes - deduplication is done in the background upon finding save ########")
     for finding in findings:
         logger.info("Updating Whitesource Finding with id: %d" % finding.id)
         lib_name_begin = re.search('\\*\\*Library Filename\\*\\* : ', finding.description).span(0)[1]

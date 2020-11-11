@@ -12,3 +12,10 @@
         </div>
     </form>
 {% endblock %}
+{% block postscript %}
+    <script type="application/javascript">
+        $(function () {
+            $('#id_authorized_users').chosen({'placeholder_text_multiple': 'Select some product types...'});
+        });
+    </script>
+{% endblock %}

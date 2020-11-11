@@ -13,6 +13,7 @@ from dojo.forms import ScanSettingsForm, DeleteIPScanForm, VaForm
 from dojo.management.commands.run_scan import run_on_deman_scan
 from dojo.models import Product, Scan, IPScan, ScanSettings
 from dojo.utils import add_breadcrumb
+from dojo.user.helper import user_must_be_authorized, check_auth_users_list
 
 logger = logging.getLogger(__name__)
 
@@ -22,14 +23,11 @@ status: completed in use
 """
 
 
+@user_must_be_authorized(Scan, 'view', 'sid')
 def view_scan(request, sid):
     scan = get_object_or_404(Scan, id=sid)
     prod = get_object_or_404(Product, id=scan.scan_settings.product.id)
     scan_settings_id = scan.scan_settings.id
-    if request.user.is_staff or request.user in prod.authorized_users.all():
-        pass  # user is authorized for this product
-    else:
-        raise PermissionDenied
 
     if request.method == "POST":
         form = DeleteIPScanForm(request.POST, instance=scan)
@@ -82,7 +80,7 @@ status: completed in use
 def view_scan_settings(request, pid, sid):
     scan_settings = get_object_or_404(ScanSettings, id=sid)
     user = request.user
-    if user.is_staff or user in scan_settings.product.authorized_users.all():
+    if user.is_staff or check_auth_users_list(user, scan_settings):
         pass
     else:
         raise PermissionDenied
@@ -139,7 +137,7 @@ def edit_scan_settings(request, pid, sid):
     old_scan = ScanSettings.objects.get(id=sid)
     pid = old_scan.product.id
     user = request.user
-    if user.is_staff or user in old_scan.product.authorized_users.all():
+    if user.is_staff or user in check_auth_users_list(user, scan_settings):
         pass
     else:
         raise PermissionDenied
@@ -192,6 +190,7 @@ Self-service port scanning tool found at the product level
 """
 
 
+@user_must_be_authorized(Product, 'view', 'pid')
 def gmap(request, pid):
     prod = get_object_or_404(Product, id=pid)
     if request.user.is_staff or request.user in prod.authorized_users.all():

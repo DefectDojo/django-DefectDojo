@@ -13,6 +13,7 @@ from django.utils.html import escape
 from django.utils import timezone
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
+from django.db.models import Q
 from dojo.filters import EndpointFilter
 from dojo.forms import EditEndpointForm, \
     DeleteEndpointForm, AddEndpointForm, DojoMetaDataForm
@@ -33,10 +34,11 @@ def vulnerable_endpoints(request):
     if request.user.is_staff:
         pass
     else:
-        products = Product.objects.filter(authorized_users__in=[request.user])
-        if products.exists():
-            endpoints = endpoints.filter(product__in=products.all())
-        else:
+        endpoints = Endpoint.objects.filter(
+            Q(product__authorized_users__in=[request.user]) |
+            Q(product__prod_type__authorized_users__in=[request.user])
+        )
+        if not endpoints:
             raise PermissionDenied
 
     product = None
@@ -73,10 +75,11 @@ def all_endpoints(request):
     if request.user.is_staff:
         pass
     else:
-        products = Product.objects.filter(authorized_users__in=[request.user])
-        if products.exists():
-            endpoints = endpoints.filter(product__in=products.all())
-        else:
+        endpoints = Endpoint.objects.filter(
+            Q(product__authorized_users__in=[request.user]) |
+            Q(product__prod_type__authorized_users__in=[request.user])
+        )
+        if not endpoints:
             raise PermissionDenied
 
     product = None
@@ -127,16 +130,12 @@ def get_endpoint_ids(endpoints):
     return ids
 
 
+@user_must_be_authorized(Endpoint, 'view', 'eid')
 def view_endpoint(request, eid):
     endpoint = get_object_or_404(Endpoint, id=eid)
     host = endpoint.host_no_port
     endpoints = Endpoint.objects.filter(host__regex="^" + host + ":?",
                                         product=endpoint.product).distinct()
-
-    if (request.user in endpoint.product.authorized_users.all()) or request.user.is_staff:
-        pass
-    else:
-        raise PermissionDenied
 
     endpoint_metadata = dict(endpoint.endpoint_meta.values_list('name', 'value'))
 

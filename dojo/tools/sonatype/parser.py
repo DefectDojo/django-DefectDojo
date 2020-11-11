@@ -106,7 +106,7 @@ def get_item(vulnerability, test):
         status = main_finding['status']
         score = main_finding.get('severity', "No CVSS score yet.")
         if 'pathnames' in vulnerability:
-            file_path = ' '.join(vulnerability['pathnames'])
+            file_path = ' '.join(vulnerability['pathnames'])[:1000]
         else:
             file_path = ''
 
