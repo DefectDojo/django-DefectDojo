@@ -136,41 +136,6 @@ def prefetch_for_products_with_engagments(products_with_engagements):
     return products_with_engagements
 
 
-@user_passes_test(lambda u: u.is_staff)
-def new_engagement(request):
-    if request.method == 'POST':
-        form = EngForm(request.POST, user=request.user)
-        if form.is_valid():
-            new_eng = form.save()
-            new_eng.lead = request.user
-            new_eng.threat_model = False
-            new_eng.api_test = False
-            new_eng.pen_test = False
-            new_eng.check_list = False
-            new_eng.product_id = form.cleaned_data.get('product').id
-            new_eng.save()
-            tags = request.POST.getlist('tags')
-            t = ", ".join('"{0}"'.format(w) for w in tags)
-            new_eng.tags = t
-            messages.add_message(
-                request,
-                messages.SUCCESS,
-                'Engagement added successfully.',
-                extra_tags='alert-success')
-            if "_Add Tests" in request.POST:
-                return HttpResponseRedirect(
-                    reverse('add_tests', args=(new_eng.id, )))
-            else:
-                return HttpResponseRedirect(
-                    reverse('view_engagement', args=(new_eng.id, )))
-    else:
-        form = EngForm(initial={'date': timezone.now().date()}, user=request.user)
-    add_breadcrumb(title="New Engagement", top_level=False, request=request)
-    return render(request, 'dojo/new_eng.html', {
-        'form': form,
-    })
-
-
 # @user_passes_test(lambda u: u.is_staff)
 @user_must_be_authorized(Engagement, 'change', 'eid')
 def edit_engagement(request, eid):
