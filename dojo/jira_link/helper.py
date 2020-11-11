@@ -488,7 +488,7 @@ def add_jira_issue(find):
             return True
         except JIRAError as e:
             logger.exception(e)
-            logger.error("jira_meta: %s", json.dumps(meta, indent=4))  # this is None safe
+            logger.error("jira_meta for project: %s and url: %s", jira_config.project_key, jira_config.jira_instance.url, json.dumps(meta, indent=4))  # this is None safe
             log_jira_alert(e.text, find)
             return False
     else:
@@ -569,7 +569,7 @@ def update_jira_issue(find):
 
     except JIRAError as e:
         logger.exception(e)
-        logger.error("jira_meta: %s", json.dumps(meta, indent=4))  # this is None safe
+        logger.error("jira_meta for project: %s and url: %s", jira_config.project_key, jira_config.jira_instance.url, json.dumps(meta, indent=4))  # this is None safe
         log_jira_alert(e.text, find)
         return False
 
