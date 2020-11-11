@@ -2081,6 +2081,22 @@ class JIRAProjectForm(forms.ModelForm):
         model = JIRA_Project
         exclude = ['product', 'engagement']
 
+    def __init__(self, *args, **kwargs):
+        # if the form is shown for an engagement, we set a placeholder text around inherited settings from product
+        self.target = kwargs.pop('target', 'product')
+        self.product = kwargs.pop('product', None)
+        super().__init__(*args, **kwargs)
+
+        logger.debug('self.target: %s, self.product: %s, self.instance: %s', self.target, self.product, self.instance)
+        if self.target == 'engagement':
+            if not self.product and self.instance and self.instance.engagement and self.instance.engagement.product:
+                self.product = self.instance.engagement.product
+            product_name = self.product.name if self.product else ''
+
+            self.fields['project_key'].widget = forms.TextInput(attrs={'placeholder': 'JIRA settings inherited from product ''%s''' % product_name})
+            self.fields['project_key'].help_text = 'JIRA settings are inherited from product ''%s'', unless configured differently here.' % product_name
+            self.fields['jira_instance'].help_text = 'JIRA settings are inherited from product ''%s'' , unless configured differently here.' % product_name
+
     def clean(self):
         logger.debug('validating jira project form')
         cleaned_data = super().clean()

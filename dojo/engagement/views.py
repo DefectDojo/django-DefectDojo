@@ -150,7 +150,7 @@ def edit_engagement(request, eid):
     if request.method == 'POST':
         form = EngForm(request.POST, instance=engagement, cicd=is_ci_cd, product=engagement.product.id, user=request.user)
 
-        jira_project_form = JIRAProjectForm(request.POST, prefix='jira-project-form', instance=jira_project)
+        jira_project_form = JIRAProjectForm(request.POST, prefix='jira-project-form', instance=jira_project, target='engagement')
         jira_epic_form = JIRAEngagementForm(request.POST, prefix='jira-epic-form', instance=engagement)
 
         if (form.is_valid() and jira_project_form.is_valid() and jira_epic_form.is_valid()):
@@ -230,7 +230,7 @@ def edit_engagement(request, eid):
         jira_project_form = None
         jira_epic_form = None
         if get_system_setting('enable_jira'):
-            jira_project_form = JIRAProjectForm(prefix='jira-project-form', instance=jira_project)
+            jira_project_form = JIRAProjectForm(prefix='jira-project-form', instance=jira_project, target='engagement', product=engagement.product)
             if jira_project:
                 logger.debug('showing jira-epic-form')
                 jira_epic_form = JIRAEngagementForm(prefix='jira-epic-form', instance=engagement)

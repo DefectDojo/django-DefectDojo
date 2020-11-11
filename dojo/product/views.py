@@ -770,18 +770,23 @@ def edit_product(request, pid):
             if get_system_setting('enable_jira') and jira_project:
                 jform = JIRAProjectForm(request.POST, instance=jira_project)
                 # need to handle delete
-                try:
-                    jform.save()
-                except Exception as e:
-                    logger.exception(e)
-                    logger.info(jform.errors)
-                    messages.add_message(request,
-                                            messages.ERROR,
-                                            'JIRA Project config not updated due to errors.',
-                                            extra_tags='alert-danger')
-                    pass
+                if jform.is_valid():
+                    try:
+                        jform.save()
 
-            elif get_system_setting('enable_jira'):
+                        messages.add_message(request,
+                                                messages.SUCCESS,
+                                                'JIRA information updated successfully.',
+                                                extra_tags='alert-success')
+                    except Exception as e:
+                        logger.exception(e)
+                        logger.info(jform.errors)
+                        messages.add_message(request,
+                                                messages.ERROR,
+                                                'JIRA Project config not updated due to errors.',
+                                                extra_tags='alert-danger')
+                        pass
+            elif get_system_setting('enable_jira'):  # new jira_config
                 jform = JIRAProjectForm(request.POST)
                 if jform.is_valid():
                     new_conf = jform.save(commit=False)
@@ -908,7 +913,7 @@ def new_eng_for_app(request, pid, cicd=False):
 
     if request.method == 'POST':
         form = EngForm(request.POST, cicd=cicd, product=product, user=request.user)
-        jira_project_form = JIRAProjectForm(request.POST, prefix='jira-project-form')
+        jira_project_form = JIRAProjectForm(request.POST, prefix='jira-project-form', target='engagement', product=product)
         jira_epic_form = JIRAEngagementForm(request.POST, prefix='jira-epic-form')
 
         if (form.is_valid() and jira_project_form.is_valid() and jira_epic_form.is_valid()):
@@ -995,7 +1000,7 @@ def new_eng_for_app(request, pid, cicd=False):
         jira_epic_form = None
         if get_system_setting('enable_jira'):
             logger.debug('showing jira-project-form')
-            jira_project_form = JIRAProjectForm(prefix='jira-project-form')
+            jira_project_form = JIRAProjectForm(prefix='jira-project-form', target='engagement', product=product)
             if jira_project:
                 logger.debug('showing jira-epic-form')
                 jira_epic_form = JIRAEngagementForm(prefix='jira-epic-form')

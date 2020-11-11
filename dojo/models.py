@@ -2574,11 +2574,11 @@ class JIRA_Instance(models.Model):
 
 
 class JIRA_Project(models.Model):
+    jira_instance = models.ForeignKey(JIRA_Instance, verbose_name="JIRA Instance",
+                             null=True, blank=True, on_delete=models.CASCADE)
     project_key = models.CharField(max_length=200, blank=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True)
     engagement = models.OneToOneField(Engagement, on_delete=models.CASCADE, null=True, blank=True)
-    jira_instance = models.ForeignKey(JIRA_Instance, verbose_name="JIRA Instance",
-                             null=True, blank=True, on_delete=models.CASCADE)
     component = models.CharField(max_length=200, blank=True)
     push_all_issues = models.BooleanField(default=False, blank=True,
          help_text="Automatically maintain parity with JIRA. Always create and update JIRA tickets for findings in this Product.")
