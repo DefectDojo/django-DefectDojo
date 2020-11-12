@@ -16,7 +16,8 @@ from pytz import timezone
 from django.db.models import Q
 from dojo.models import Dojo_User, Product_Type, Finding, Product, Test_Type, \
     Endpoint, Development_Environment, Finding_Template, Report, Note_Type, \
-    Engagement_Survey, Question, TextQuestion, ChoiceQuestion, Endpoint_Status
+    Engagement_Survey, Question, TextQuestion, ChoiceQuestion, Endpoint_Status, Engagement, \
+    ENGAGEMENT_STATUS_CHOICES
 from dojo.utils import get_system_setting
 from django.contrib.contenttypes.models import ContentType
 
@@ -27,7 +28,6 @@ local_tz = timezone(get_system_setting('time_zone'))
 SEVERITY_CHOICES = (('Info', 'Info'), ('Low', 'Low'), ('Medium', 'Medium'),
                     ('High', 'High'), ('Critical', 'Critical'))
 BOOLEAN_CHOICES = (('false', 'No'), ('true', 'Yes'),)
-
 EARLIEST_FINDING = None
 
 
@@ -297,6 +297,7 @@ class ComponentFilter(ProductComponentFilter):
         queryset=Product_Type.objects.all().order_by('name'),
         label="Product Type")
 
+
 class EngagementFilter(DojoFilter):
     engagement__lead = ModelChoiceFilter(
         queryset=User.objects.filter(
@@ -306,7 +307,8 @@ class EngagementFilter(DojoFilter):
     prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.all().order_by('name'),
         label="Product Type")
-
+    engagement__status = MultipleChoiceFilter(choices=ENGAGEMENT_STATUS_CHOICES,
+                                              label="Status")
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
@@ -536,7 +538,7 @@ class ApiFindingFilter(DojoFilter):
     class Meta:
         model = Finding
         exclude = ['url', 'is_template', 'thread_id', 'notes', 'images',
-                   'sourcefile', 'line']
+                   'sourcefile', 'line', 'endpoint_status']
 
 
 class OpenFindingFilter(DojoFilter):
@@ -555,6 +557,9 @@ class OpenFindingFilter(DojoFilter):
     test__engagement__product = ModelMultipleChoiceFilter(
         queryset=Product.objects.all(),
         label="Product")
+    test__engagement = ModelMultipleChoiceFilter(
+        queryset=Engagement.objects.all(),
+        label="Engagement")
     test__engagement__risk_acceptance = ReportRiskAcceptanceFilter(
         label="Risk Accepted")
 
@@ -589,7 +594,7 @@ class OpenFindingFilter(DojoFilter):
                    'endpoint', 'references', 'test', 'is_template',
                    'thread_id', 'notes', 'scanner_confidence', 'mitigated',
                    'numerical_severity', 'reporter', 'last_reviewed', 'line',
-                   'duplicate_finding', 'hash_code', 'images',
+                   'duplicate_finding', 'hash_code', 'images', 'endpoint_status',
                    'line_number', 'reviewers', 'mitigated_by', 'sourcefile', 'jira_creation', 'jira_change', 'created']
 
     def __init__(self, *args, **kwargs):
@@ -618,6 +623,9 @@ class OpenFindingFilter(DojoFilter):
         # Don't show the product filter on the product finding view
         if self.pid:
             del self.form.fields['test__engagement__product']
+            self.form.fields['test__engagement'].queryset = Engagement.objects.filter(
+                product_id=self.pid
+            ).all()
 
 
 class OpenFindingSuperFilter(OpenFindingFilter):
@@ -642,6 +650,9 @@ class ClosedFindingFilter(DojoFilter):
     test__engagement__product = ModelMultipleChoiceFilter(
         queryset=Product.objects.all(),
         label="Product")
+    test__engagement = ModelMultipleChoiceFilter(
+        queryset=Engagement.objects.all(),
+        label="Engagement")
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.all(),
         label="Product Type")
@@ -687,11 +698,14 @@ class ClosedFindingFilter(DojoFilter):
                    'endpoint', 'references', 'test', 'is_template',
                    'active', 'verified', 'out_of_scope', 'false_p',
                    'duplicate', 'thread_id', 'date', 'notes',
-                   'numerical_severity', 'reporter', 'endpoints',
+                   'numerical_severity', 'reporter', 'endpoints', 'endpoint_status',
                    'last_reviewed', 'review_requested_by', 'defect_review_requested_by',
                    'last_reviewed_by', 'created', 'jira_creation', 'jira_change']
 
     def __init__(self, *args, **kwargs):
+        self.pid = None
+        if 'pid' in kwargs:
+            self.pid = kwargs.pop('pid')
         super(ClosedFindingFilter, self).__init__(*args, **kwargs)
         cwe = dict()
         cwe = dict([cwe, cwe]
@@ -699,6 +713,11 @@ class ClosedFindingFilter(DojoFilter):
                    if type(cwe) is int and cwe is not None and cwe > 0)
         cwe = collections.OrderedDict(sorted(cwe.items()))
         self.form.fields['cwe'].choices = list(cwe.items())
+
+        if self.pid:
+            self.form.fields['test__engagement'].queryset = Engagement.objects.filter(
+                product_id=self.pid
+            ).all()
 
 
 class ClosedFindingSuperFilter(ClosedFindingFilter):
@@ -722,6 +741,9 @@ class AcceptedFindingFilter(DojoFilter):
     test__engagement__product = ModelMultipleChoiceFilter(
         queryset=Product.objects.all(),
         label="Product")
+    test__engagement = ModelMultipleChoiceFilter(
+        queryset=Engagement.objects.all(),
+        label="Engagement")
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.all(),
         label="Product Type")
@@ -754,10 +776,13 @@ class AcceptedFindingFilter(DojoFilter):
                    'endpoint', 'references', 'test', 'is_template',
                    'active', 'verified', 'out_of_scope', 'false_p',
                    'duplicate', 'thread_id', 'mitigated', 'notes',
-                   'numerical_severity', 'reporter', 'endpoints',
+                   'numerical_severity', 'reporter', 'endpoints', 'endpoint_status',
                    'last_reviewed', 'o', 'jira_creation', 'jira_change']
 
     def __init__(self, *args, **kwargs):
+        self.pid = None
+        if 'pid' in kwargs:
+            self.pid = kwargs.pop('pid')
         super(AcceptedFindingFilter, self).__init__(*args, **kwargs)
         cwe = dict()
         cwe = dict([finding.cwe, finding.cwe]
@@ -765,6 +790,11 @@ class AcceptedFindingFilter(DojoFilter):
                    if type(finding.cwe) is int and finding.cwe is not None and finding.cwe > 0 and finding.cwe not in cwe)
         cwe = collections.OrderedDict(sorted(cwe.items()))
         self.form.fields['cwe'].choices = list(cwe.items())
+
+        if self.pid:
+            self.form.fields['test__engagement'].queryset = Engagement.objects.filter(
+                product_id=self.pid
+            ).all()
 
 
 class AcceptedFindingSuperFilter(AcceptedFindingFilter):
@@ -815,7 +845,7 @@ class ProductFindingFilter(DojoFilter):
                    'endpoint', 'references', 'test', 'is_template',
                    'active', 'verified', 'out_of_scope', 'false_p',
                    'duplicate_finding', 'thread_id', 'mitigated', 'notes',
-                   'numerical_severity', 'reporter', 'endpoints',
+                   'numerical_severity', 'reporter', 'endpoints', 'endpoint_status',
                    'last_reviewed', 'jira_creation', 'jira_change']
 
     def __init__(self, *args, **kwargs):
@@ -1019,6 +1049,7 @@ class MetricsFindingFilter(FilterSet):
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.all().order_by('name'),
         label="Product Type")
+    test__engagement__version = CharFilter(lookup_expr='icontains', label="Engagement Version")
     severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     status = FindingStatusFilter(label='Status')
 
@@ -1028,7 +1059,6 @@ class MetricsFindingFilter(FilterSet):
                 args[0]._mutable = True
                 args[0]['date'] = 8
                 args[0]._mutable = False
-        # raise Exception()
         super(MetricsFindingFilter, self).__init__(*args, **kwargs)
         self.form.fields['severity'].choices = self.queryset.order_by(
             'numerical_severity'
@@ -1052,6 +1082,7 @@ class MetricsFindingFilter(FilterSet):
                    'last_reviewed_by',
                    'images',
                    'endpoints',
+                   'endpoint_status',
                    'is_template',
                    'jira_creation',
                    'jira_change']
@@ -1064,6 +1095,7 @@ class MetricsEndpointFilter(FilterSet):
     finding__test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.all().order_by('name'),
         label="Product Type")
+    finding__test__engagement__version = CharFilter(lookup_expr='icontains', label="Engagement Version")
     finding__severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
 
     def __init__(self, *args, **kwargs):
@@ -1072,8 +1104,87 @@ class MetricsEndpointFilter(FilterSet):
                 args[0]._mutable = True
                 args[0]['date'] = 8
                 args[0]._mutable = False
-        # raise Exception()
         super(MetricsEndpointFilter, self).__init__(*args, **kwargs)
+        self.form.fields['finding__severity'].choices = self.queryset.order_by(
+            'finding__numerical_severity'
+        ).values_list('finding__severity', 'finding__severity').distinct()
+
+    class Meta:
+        model = Endpoint_Status
+        exclude = ['last_modified']
+
+
+class ProductMetricsFindingFilter(FilterSet):
+    start_date = DateFilter(field_name='date', label='Start Date', lookup_expr=('gt'))
+    end_date = DateFilter(field_name='date', label='End Date', lookup_expr=('lt'))
+    date = MetricsDateRangeFilter()
+    test__engagement = ModelMultipleChoiceFilter(
+        queryset=Engagement.objects.all().order_by('name'),
+        label="Engagement")
+    test__engagement__version = CharFilter(lookup_expr='icontains', label="Engagement Version")
+    severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
+    status = FindingStatusFilter(label='Status')
+
+    def __init__(self, *args, **kwargs):
+        if args[0]:
+            if args[0].get('start_date', '') != '' or args[0].get('end_date', '') != '':
+                args[0]._mutable = True
+                args[0]['date'] = 8
+                args[0]._mutable = False
+        self.pid = None
+        if 'pid' in kwargs:
+            self.pid = kwargs.pop('pid')
+        super(ProductMetricsFindingFilter, self).__init__(*args, **kwargs)
+        self.form.fields['severity'].choices = self.queryset.order_by(
+            'numerical_severity'
+        ).values_list('severity', 'severity').distinct()
+
+        if self.pid:
+            self.form.fields['test__engagement'].queryset = Engagement.objects.filter(
+                product_id=self.pid
+            ).all()
+
+    class Meta:
+        model = Finding
+        exclude = ['url',
+                   'description',
+                   'mitigation',
+                   'unsaved_endpoints',
+                   'unsaved_request',
+                   'unsaved_response',
+                   'unsaved_tags',
+                   'references',
+                   'review_requested_by',
+                   'reviewers',
+                   'defect_review_requested_by',
+                   'thread_id',
+                   'notes',
+                   'last_reviewed_by',
+                   'images',
+                   'endpoints',
+                   'endpoint_status',
+                   'is_template',
+                   'jira_creation',
+                   'jira_change']
+
+
+class ProductMetricsEndpointFilter(FilterSet):
+    start_date = DateFilter(field_name='date', label='Start Date', lookup_expr=('gt'))
+    end_date = DateFilter(field_name='date', label='End Date', lookup_expr=('lt'))
+    date = MetricsDateRangeFilter()
+    finding__test__engagement = ModelMultipleChoiceFilter(
+        queryset=Engagement.objects.all().order_by('name'),
+        label="Engagement")
+    finding__test__engagement__version = CharFilter(lookup_expr='icontains', label="Engagement Version")
+    finding__severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
+
+    def __init__(self, *args, **kwargs):
+        if args[0]:
+            if args[0].get('start_date', '') != '' or args[0].get('end_date', '') != '':
+                args[0]._mutable = True
+                args[0]['date'] = 8
+                args[0]._mutable = False
+        super(ProductMetricsEndpointFilter, self).__init__(*args, **kwargs)
         self.form.fields['finding__severity'].choices = self.queryset.order_by(
             'finding__numerical_severity'
         ).values_list('finding__severity', 'finding__severity').distinct()
@@ -1144,7 +1255,7 @@ class ReportFindingFilter(DojoFilter):
         model = Finding
         exclude = ['date', 'cwe', 'url', 'description', 'mitigation', 'impact',
                    'endpoint', 'references', 'test', 'is_template',
-                   'thread_id', 'notes', 'endpoints',
+                   'thread_id', 'notes', 'endpoints', 'endpoint_status',
                    'numerical_severity', 'reporter', 'last_reviewed', 'images', 'jira_creation', 'jira_change']
 
 
@@ -1193,7 +1304,7 @@ class ReportAuthedFindingFilter(DojoFilter):
         model = Finding
         exclude = ['date', 'cwe', 'url', 'description', 'mitigation', 'impact',
                    'endpoint', 'references', 'test', 'is_template',
-                   'thread_id', 'notes', 'endpoints',
+                   'thread_id', 'notes', 'endpoints', 'endpoint_status',
                    'numerical_severity', 'reporter', 'last_reviewed', 'jira_creation', 'jira_change']
 
 

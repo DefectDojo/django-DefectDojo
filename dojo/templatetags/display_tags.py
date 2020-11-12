@@ -87,12 +87,10 @@ def url_shortner(value):
     return_value = str(value)
     url = urlparse(return_value)
 
-    if url.path:
+    if url.path and len(url.path) != 1:
         return_value = url.path
-        if len(return_value) == 1:
-            return_value = value
-    if len(str(return_value)) > 50:
-        return_value = "..." + return_value[50:]
+    if len(return_value) > 50:
+        return_value = "..." + return_value[-47:]
 
     return return_value
 
@@ -125,7 +123,10 @@ def linebreaksasciidocbr(value, autoescape=None):
 @register.simple_tag
 def dojo_version():
     from dojo import __version__
-    return 'v. ' + __version__
+    version = __version__
+    if settings.FOOTER_VERSION:
+        version = settings.FOOTER_VERSION
+    return "v. {}".format(version)
 
 
 @register.simple_tag
@@ -653,7 +654,7 @@ def get_severity_count(id, table):
                      output_field=IntegerField())),
         )
     elif table == "engagement":
-        counts = Finding.objects.filter(test__engagement=id, active=True, verified=False, duplicate=False). \
+        counts = Finding.objects.filter(test__engagement=id, active=True, duplicate=False). \
             prefetch_related('test__engagement__product').aggregate(
             total=Sum(
                 Case(When(severity__in=('Critical', 'High', 'Medium', 'Low'),

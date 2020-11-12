@@ -7,7 +7,9 @@ from rest_framework.permissions import DjangoModelPermissions
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_yasg.utils import swagger_auto_schema, no_body
+from django.utils.decorators import method_decorator
+from drf_yasg2 import openapi
+from drf_yasg2.utils import swagger_auto_schema, no_body
 import base64
 from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Finding, \
@@ -228,6 +230,20 @@ class FindingTemplatesViewSet(mixins.ListModelMixin,
     #         return Finding_Template.objects.all()
 
 
+def _finding_related_fields_decorator():
+    return swagger_auto_schema(
+        responses={status.HTTP_200_OK: serializers.FindingSerializer},
+        manual_parameters=[
+            openapi.Parameter(
+                name="related_fields",
+                in_=openapi.IN_QUERY,
+                description="Expand finding external relations (engagement, environment, product, product_type, test, test_type)",
+                type=openapi.TYPE_BOOLEAN)
+        ])
+
+
+@method_decorator(name="list", decorator=_finding_related_fields_decorator())
+@method_decorator(name="retrieve", decorator=_finding_related_fields_decorator())
 class FindingViewSet(mixins.ListModelMixin,
                      mixins.RetrieveModelMixin,
                      mixins.UpdateModelMixin,
@@ -236,7 +252,18 @@ class FindingViewSet(mixins.ListModelMixin,
                      ra_api.AcceptedFindingsMixin,
                      viewsets.GenericViewSet):
     serializer_class = serializers.FindingSerializer
-    queryset = Finding.objects.all()
+    queryset = Finding.objects.all().prefetch_related('endpoints',
+                                                    'reviewers',
+                                                    'images',
+                                                    'found_by',
+                                                    'notes',
+                                                    'risk_acceptance_set',
+                                                    'test',
+                                                    'test__test_type',
+                                                    'test__engagement',
+                                                    'test__environment',
+                                                    'test__engagement__product',
+                                                    'test__engagement__product__prod_type')
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ApiFindingFilter
 
@@ -266,7 +293,13 @@ class FindingViewSet(mixins.ListModelMixin,
             )
         else:
             findings = Finding.objects.all()
-        return findings.prefetch_related('test',
+        return findings.prefetch_related('endpoints',
+                                        'reviewers',
+                                        'images',
+                                        'found_by',
+                                        'notes',
+                                        'risk_acceptance_set',
+                                        'test',
                                         'test__test_type',
                                         'test__engagement',
                                         'test__environment',
@@ -907,6 +940,7 @@ class RegulationsViewSet(mixins.ListModelMixin,
 
 
 class UsersViewSet(mixins.CreateModelMixin,
+                   mixins.UpdateModelMixin,
                    mixins.ListModelMixin,
                    mixins.RetrieveModelMixin,
                    viewsets.GenericViewSet):

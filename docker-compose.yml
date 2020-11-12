@@ -11,12 +11,12 @@ services:
     environment:
       NGINX_METRICS_ENABLED: ${NGINX_METRICS_ENABLED:-false}
     ports:
-      - target: ${DD_PORT:-8080}
+      - target: 8080
         published: ${DD_PORT:-8080}
         protocol: tcp
         mode: host
-      - target: ${DD_PORT:-8443}
-        published: ${DD_PORT:-8443}
+      - target: 8443
+        published: ${DD_TLS_PORT:-8443}
         protocol: tcp
         mode: host
   uwsgi:
@@ -36,6 +36,10 @@ services:
       DD_CELERY_BROKER_PASSWORD: ${DD_CELERY_BROKER_USER:-guest}
       DD_SECRET_KEY: ${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}
       DD_CREDENTIAL_AES_256_KEY: ${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}
+    volumes:
+        - type: bind
+          source: ./docker/extra_settings
+          target: /app/docker/extra_settings
   celerybeat:
     image: defectdojo/defectdojo-django:latest
     depends_on:
@@ -74,8 +78,12 @@ services:
       DD_INITIALIZE: ${DD_INITIALIZE:-true}
       DD_SECRET_KEY: ${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}
       DD_CREDENTIAL_AES_256_KEY: ${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}
+    volumes:
+        - type: bind
+          source: ./docker/extra_settings
+          target: /app/docker/extra_settings      
   mysql:
-    image: mysql:5.7.31@sha256:3830eda172a0285aa9899c422f26d739cde0ad5445962fbb9a2a8b0df00a1a64
+    image: mysql:5.7.32@sha256:ce6815027949d0b48e3097a94fa3ec062866a78868d50c7900c697c13574599f
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
       DD_DATABASE_URL: ${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}
@@ -86,6 +94,6 @@ services:
     volumes:
        - defectdojo_data:/var/lib/mysql
   rabbitmq:
-    image: rabbitmq:3.8.9@sha256:30a52abe6009eea97c89dcd72b9dcf9c2a26563beb4b4d948d595c0415fc8680
+    image: rabbitmq:3.8.9@sha256:fc5666482d497b9c9de04924d69afa80701990b0d25eb7df5a29370a00a8632f
 volumes:
   defectdojo_data: {}

@@ -4,6 +4,7 @@ import os
 import hashlib
 import io
 import bleach
+import json
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 from calendar import monthrange
@@ -23,7 +24,6 @@ from django.utils import timezone
 from jira import JIRA
 from jira.exceptions import JIRAError
 from django.dispatch import receiver
-from dojo.signals import dedupe_signal
 from django.db.models.signals import post_save
 from django.db.models.query import QuerySet
 import calendar as tcalendar
@@ -40,6 +40,7 @@ from django.contrib import messages
 from django.http import HttpResponseRedirect
 import crum
 from celery.decorators import task
+from dojo.decorators import dojo_async_task
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -50,7 +51,9 @@ Helper functions for DefectDojo
 """
 
 
-def sync_false_history(new_finding, *args, **kwargs):
+@dojo_async_task
+@task
+def do_false_positive_history(new_finding, *args, **kwargs):
     logger.debug('%s: sync false positive history', new_finding.id)
     if new_finding.endpoints.count() == 0:
         # if no endpoints on new finding, then look at cwe + test_type + hash_code. or title + test_type + hash_code
@@ -103,15 +106,15 @@ def is_deduplication_on_engagement_mismatch(new_finding, to_duplicate_finding):
     return not new_finding.test.engagement.deduplication_on_engagement and to_duplicate_finding.test.engagement.deduplication_on_engagement
 
 
-@receiver(dedupe_signal, sender=Finding)
-def sync_dedupe(sender, *args, **kwargs):
+@dojo_async_task
+@task
+def do_dedupe_finding(new_finding, *args, **kwargs):
     try:
         enabled = System_Settings.objects.get(no_cache=True).enable_deduplication
     except System_Settings.DoesNotExist:
         logger.warning("system settings not found")
         enabled = False
     if enabled:
-        new_finding = kwargs['new_finding']
         deduplicationLogger.debug('sync_dedupe for: ' + str(new_finding.id) +
                     ":" + str(new_finding.title))
         # TODO use test.dedupe_algo and case statement
@@ -356,7 +359,9 @@ def set_duplicate_reopen(new_finding, existing_finding):
     existing_finding.save()
 
 
-def sync_rules(new_finding, *args, **kwargs):
+@dojo_async_task
+@task
+def do_apply_rules(new_finding, *args, **kwargs):
     rules = Rule.objects.filter(applies_to='Finding', parent_rule=None)
     for rule in rules:
         child_val = True
@@ -1223,7 +1228,8 @@ def get_jira_connection(finding):
         if jira_conf is not None:
             jira = JIRA(
                 server=jira_conf.url,
-                basic_auth=(jira_conf.username, jira_conf.password))
+                basic_auth=(jira_conf.username, jira_conf.password),
+                options={"verify": settings.JIRA_SSL_VERIFY})
     except JIRA_PKey.DoesNotExist:
         pass
     return jira
@@ -1308,6 +1314,8 @@ def jira_description(find):
     return render_to_string(template, kwargs)
 
 
+@dojo_async_task
+@task
 def add_external_issue(find, external_issue_provider):
     eng = Engagement.objects.get(test=find.test)
     prod = Product.objects.get(engagement=eng)
@@ -1317,6 +1325,8 @@ def add_external_issue(find, external_issue_provider):
         add_external_issue_github(find, prod, eng)
 
 
+@dojo_async_task
+@task
 def update_external_issue(find, old_status, external_issue_provider):
     prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
     eng = Engagement.objects.get(test=find.test)
@@ -1325,6 +1335,8 @@ def update_external_issue(find, old_status, external_issue_provider):
         update_external_issue_github(find, prod, eng)
 
 
+@dojo_async_task
+@task
 def close_external_issue(find, note, external_issue_provider):
     prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
     eng = Engagement.objects.get(test=find.test)
@@ -1333,6 +1345,8 @@ def close_external_issue(find, note, external_issue_provider):
         close_external_issue_github(find, note, prod, eng)
 
 
+@dojo_async_task
+@task
 def reopen_external_issue(find, note, external_issue_provider):
     prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
     eng = Engagement.objects.get(test=find.test)
@@ -1341,6 +1355,8 @@ def reopen_external_issue(find, note, external_issue_provider):
         reopen_external_issue_github(find, note, prod, eng)
 
 
+@dojo_async_task
+@task
 def add_jira_issue(find, push_to_jira):
     logger.info('trying to create a new jira issue for %d:%s', find.id, find.title)
 
@@ -1371,7 +1387,8 @@ def add_jira_issue(find, push_to_jira):
                 JIRAError.log_to_tempfile = False
                 jira = JIRA(
                     server=jira_conf.url,
-                    basic_auth=(jira_conf.username, jira_conf.password))
+                    basic_auth=(jira_conf.username, jira_conf.password),
+                    options={"verify": settings.JIRA_SSL_VERIFY})
 
                 meta = None
 
@@ -1464,7 +1481,9 @@ def add_jira_issue(find, push_to_jira):
 
 
 def jira_meta(jira, jpkey):
-    return jira.createmeta(projectKeys=jpkey.project_key, issuetypeNames=jpkey.conf.default_issue_type, expand="projects.issuetypes.fields")
+    meta = jira.createmeta(projectKeys=jpkey.project_key, issuetypeNames=jpkey.conf.default_issue_type, expand="projects.issuetypes.fields")
+    logger.debug("jira_meta: %s", json.dumps(meta, indent=4))  # this is None safe
+    return meta
 
 
 def jira_attachment(finding, jira, issue, file, jira_filename=None):
@@ -1501,7 +1520,8 @@ def jira_check_attachment(issue, source_file_name):
     return file_exists
 
 
-@task(name='update_jira_issue_task')
+@dojo_async_task
+@task
 def update_jira_issue(find, push_to_jira):
     logger.info('trying to update a linked jira issue for %d:%s', find.id, find.title)
     prod = Product.objects.get(
@@ -1515,7 +1535,8 @@ def update_jira_issue(find, push_to_jira):
             JIRAError.log_to_tempfile = False
             jira = JIRA(
                 server=jira_conf.url,
-                basic_auth=(jira_conf.username, jira_conf.password))
+                basic_auth=(jira_conf.username, jira_conf.password),
+                options={"verify": settings.JIRA_SSL_VERIFY})
             issue = jira.issue(j_issue.jira_id)
 
             meta = None
@@ -1596,6 +1617,8 @@ def update_jira_issue(find, push_to_jira):
             find.save()
 
 
+@dojo_async_task
+@task
 def close_epic(eng, push_to_jira):
     engagement = eng
     prod = Product.objects.get(engagement=engagement)
@@ -1619,6 +1642,8 @@ def close_epic(eng, push_to_jira):
             pass
 
 
+@dojo_async_task
+@task
 def update_epic(eng, push_to_jira):
     engagement = eng
     prod = Product.objects.get(engagement=engagement)
@@ -1628,7 +1653,8 @@ def update_epic(eng, push_to_jira):
         try:
             jira = JIRA(
                 server=jira_conf.url,
-                basic_auth=(jira_conf.username, jira_conf.password))
+                basic_auth=(jira_conf.username, jira_conf.password),
+                options={"verify": settings.JIRA_SSL_VERIFY})
             j_issue = JIRA_Issue.objects.get(engagement=eng)
             issue = jira.issue(j_issue.jira_id)
             issue.update(summary=eng.name, description=eng.name)
@@ -1637,6 +1663,8 @@ def update_epic(eng, push_to_jira):
             pass
 
 
+@dojo_async_task
+@task
 def add_epic(eng, push_to_jira):
     logger.info('trying to create a new jira EPIC for %d:%s', eng.id, eng.name)
     engagement = eng
@@ -1658,7 +1686,8 @@ def add_epic(eng, push_to_jira):
         try:
             jira = JIRA(
                 server=jira_conf.url,
-                basic_auth=(jira_conf.username, jira_conf.password))
+                basic_auth=(jira_conf.username, jira_conf.password),
+                options={"verify": settings.JIRA_SSL_VERIFY})
             new_issue = jira.create_issue(fields=issue_dict)
             j_issue = JIRA_Issue(
                 jira_id=new_issue.id,
@@ -1682,7 +1711,8 @@ def jira_get_issue(jpkey, issue_key):
     try:
         jira = JIRA(
             server=jira_conf.url,
-            basic_auth=(jira_conf.username, jira_conf.password))
+            basic_auth=(jira_conf.username, jira_conf.password),
+            options={"verify": settings.JIRA_SSL_VERIFY})
         issue = jira.issue(issue_key)
         # print(vars(issue))
         return issue
@@ -1693,6 +1723,8 @@ def jira_get_issue(jpkey, issue_key):
         return None
 
 
+@dojo_async_task
+@task
 def add_comment(find, note, force_push=False):
     logger.debug('trying to add a comment to a linked jira issue for: %d:%s', find.id, find.title)
     if not note.private:
@@ -1707,7 +1739,8 @@ def add_comment(find, note, force_push=False):
                 try:
                     jira = JIRA(
                         server=jira_conf.url,
-                        basic_auth=(jira_conf.username, jira_conf.password))
+                        basic_auth=(jira_conf.username, jira_conf.password),
+                        options={"verify": settings.JIRA_SSL_VERIFY})
                     j_issue = JIRA_Issue.objects.get(finding=find)
                     jira.add_comment(
                         j_issue.jira_id,
@@ -1723,7 +1756,8 @@ def add_simple_jira_comment(jira_conf, jira_issue, comment):
     try:
         jira = JIRA(
             server=jira_conf.url,
-            basic_auth=(jira_conf.username, jira_conf.password)
+            basic_auth=(jira_conf.username, jira_conf.password),
+            options={"verify": settings.JIRA_SSL_VERIFY}
         )
         jira.add_comment(
             jira_issue.jira_id, comment

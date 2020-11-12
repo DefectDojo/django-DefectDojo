@@ -6,10 +6,12 @@ from celery.schedules import crontab
 import environ
 root = environ.Path(__file__) - 3  # Three folders back
 
+# reference: https://pypi.org/project/django-environ/
 env = environ.Env(
     # Set casting and default values
     DD_SITE_URL=(str, 'http://localhost:8080'),
     DD_DEBUG=(bool, False),
+    DD_TEMPLATE_DEBUG=(bool, False),
     DD_DJANGO_METRICS_ENABLED=(bool, False),
     DD_LOGIN_REDIRECT_URL=(str, '/'),
     DD_DJANGO_ADMIN_ENABLED=(bool, False),
@@ -58,6 +60,7 @@ env = environ.Env(
     DD_CELERY_RESULT_EXPIRES=(int, 86400),
     DD_CELERY_BEAT_SCHEDULE_FILENAME=(str, root('dojo.celery.beat.db')),
     DD_CELERY_TASK_SERIALIZER=(str, 'pickle'),
+    DD_FOOTER_VERSION=(str, ''),
     DD_FORCE_LOWERCASE_TAGS=(bool, True),
     DD_MAX_TAG_LENGTH=(int, 25),
     DD_DATABASE_ENGINE=(str, 'django.db.backends.mysql'),
@@ -68,7 +71,7 @@ env = environ.Env(
     DD_DATABASE_PASSWORD=(str, 'defectdojo'),
     DD_DATABASE_PORT=(int, 3306),
     DD_DATABASE_USER=(str, 'defectdojo'),
-    DD_SECRET_KEY=(str, '.'),
+    DD_SECRET_KEY=(str, ''),
     DD_CREDENTIAL_AES_256_KEY=(str, '.'),
     DD_DATA_UPLOAD_MAX_MEMORY_SIZE=(int, 8388608),  # Max post size set to 8mb
     DD_SOCIAL_AUTH_TRAILING_SLASH=(bool, True),
@@ -101,6 +104,7 @@ env = environ.Env(
     DD_SAML2_METADATA_LOCAL_FILE_PATH=(str, ''),
     DD_SAML2_ASSERTION_URL=(str, ''),
     DD_SAML2_ENTITY_ID=(str, ''),
+    DD_SAML2_LOGOUT_URL=(str, ''),
     DD_SAML2_DEFAULT_NEXT_URL=(str, '/dashboard'),
     DD_SAML2_NEW_USER_PROFILE=(dict, {
         # The default group name when a new user logs in
@@ -136,7 +140,11 @@ env = environ.Env(
 
     # maximum number of result in search as search can be an expensive operation
     DD_SEARCH_MAX_RESULTS=(int, 100),
-    DD_MAX_AUTOCOMPLETE_WORDS=(int, 20000)
+    DD_MAX_AUTOCOMPLETE_WORDS=(int, 20000),
+    DD_JIRA_SSL_VERIFY=(bool, True),
+
+    # if you want to keep logging to the console but in json format, change this here to 'json_console'
+    DD_LOGGING_HANDLER=(str, 'console')
 )
 
 
@@ -172,6 +180,7 @@ if os.path.isfile(root('dojo/settings/.env.prod')) or 'DD_ENV_PATH' in os.enviro
 
 # False if not in os.environ
 DEBUG = env('DD_DEBUG')
+TEMPLATE_DEBUG = env('DD_TEMPLATE_DEBUG')
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/2.0/ref/settings/#allowed-hosts
@@ -375,6 +384,7 @@ SOCIAL_AUTH_TRAILING_SLASH = env('DD_SOCIAL_AUTH_TRAILING_SLASH')
 # For more configuration and customization options, see django-saml2-auth documentation
 # https://github.com/fangli/django-saml2-auth
 SAML2_ENABLED = env('DD_SAML2_ENABLED')
+SAML2_LOGOUT_URL = env('DD_SAML2_LOGOUT_URL')
 SAML2_AUTH = {
     'ASSERTION_URL': env('DD_SAML2_ASSERTION_URL'),
     'ENTITY_ID': env('DD_SAML2_ENTITY_ID'),
@@ -410,7 +420,10 @@ MAX_AUTOCOMPLETE_WORDS = env('DD_MAX_AUTOCOMPLETE_WORDS')
 
 LOGIN_EXEMPT_URLS = (
     r'^%sstatic/' % URL_PREFIX,
+    r'^%swebhook/([\w-]+)$' % URL_PREFIX,
     r'^%swebhook/' % URL_PREFIX,
+    r'^%sjira/webhook/([\w-]+)$' % URL_PREFIX,
+    r'^%sjira/webhook/' % URL_PREFIX,
     r'^%sapi/v1/' % URL_PREFIX,
     r'^%sreports/cover$' % URL_PREFIX,
     r'^%sfinding/image/(?P<token>[^/]+)$' % URL_PREFIX,
@@ -477,6 +490,9 @@ PORT_SCAN_SOURCE_IP = env('DD_PORT_SCAN_EXTERNAL_UNIT_EMAIL_LIST')
 
 # Used in a few places to prefix page headings and in email salutations
 TEAM_NAME = env('DD_TEAM_NAME')
+
+# Used to configure a custom version in the footer of the base.html template.
+FOOTER_VERSION = env('DD_FOOTER_VERSION')
 
 # Django-tagging settings
 FORCE_LOWERCASE_TAGS = env('DD_FORCE_LOWERCASE_TAGS')
@@ -585,14 +601,13 @@ INSTALLED_APPS = (
     # 'axes'
     'django_celery_results',
     'social_django',
-    'drf_yasg',
+    'drf_yasg2',
 )
 
 # ------------------------------------------------------------------------------
 # MIDDLEWARE
 # ------------------------------------------------------------------------------
 DJANGO_MIDDLEWARE_CLASSES = [
-    # 'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.common.CommonMiddleware',
     'dojo.middleware.DojoSytemSettingsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -669,7 +684,6 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': crontab(hour=7, minute=30),
     }
 }
-
 
 # ------------------------------------
 # Monitoring Metrics
@@ -797,15 +811,14 @@ JIRA_ISSUE_TYPE_CHOICES_CONFIG = (
     ('Security', 'Security')
 )
 
+JIRA_SSL_VERIFY = env('DD_JIRA_SSL_VERIFY')
 
 # ------------------------------------------------------------------------------
 # LOGGING
 # ------------------------------------------------------------------------------
-# A sample logging configuration. The only tangible logging
-# performed by this configuration is to send an email to
-# the site admins on every HTTP 500 error when DEBUG=False.
 # See http://docs.djangoproject.com/en/dev/topics/logging for
 # more details on how to customize your logging configuration.
+LOGGING_HANDLER = env('DD_LOGGING_HANDLER')
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -816,6 +829,9 @@ LOGGING = {
         },
         'simple': {
             'format': '%(levelname)s %(funcName)s %(lineno)d %(message)s'
+        },
+        'json': {
+            '()': 'json_log_formatter.JSONFormatter',
         },
     },
     'filters': {
@@ -834,6 +850,11 @@ LOGGING = {
         },
         'console': {
             'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
+        },
+        'json_console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'json'
         },
     },
     'loggers': {
@@ -842,25 +863,37 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
+        'django.security': {
+            'handlers': [r'%s' % LOGGING_HANDLER],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'celery': {
+            'handlers': [r'%s' % LOGGING_HANDLER],
+            'level': 'INFO',
+            'propagate': False,
+            # workaround some celery logging known issue
+            'worker_hijack_root_logger': False,
+        },
         'dojo': {
-            'handlers': ['console'],
+            'handlers': [r'%s' % LOGGING_HANDLER],
             'level': 'INFO',
             'propagate': False,
         },
         'dojo.specific-loggers.deduplication': {
-            'handlers': ['console'],
+            'handlers': [r'%s' % LOGGING_HANDLER],
             'level': 'INFO',
             'propagate': False,
         },
         'MARKDOWN': {
             # The markdown library is too verbose in it's logging, reducing the verbosity in our logs.
-            'handlers': ['console'],
+            'handlers': [r'%s' % LOGGING_HANDLER],
             'level': 'WARNING',
             'propagate': False,
         },
         'titlecase': {
             # The markdown library is too verbose in it's logging, reducing the verbosity in our logs.
-            'handlers': ['console'],
+            'handlers': [r'%s' % LOGGING_HANDLER],
             'level': 'WARNING',
             'propagate': False,
         },

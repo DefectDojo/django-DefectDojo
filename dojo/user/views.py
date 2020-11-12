@@ -310,6 +310,12 @@ def edit_user(request, uid):
 
         if form.is_valid() and contact_form.is_valid():
             form.save()
+            for init_auth_prods in authed_products:
+                init_auth_prods.authorized_users.remove(user)
+                init_auth_prods.save()
+            for init_auth_prod_types in authed_product_types:
+                init_auth_prod_types.authorized_users.remove(user)
+                init_auth_prod_types.save()
             if 'authorized_products' in form.cleaned_data and len(form.cleaned_data['authorized_products']) > 0:
                 for p in form.cleaned_data['authorized_products']:
                     p.authorized_users.add(user)
