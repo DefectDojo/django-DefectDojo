@@ -39,3 +39,11 @@ class TestNpmAuditParser(TestCase):
             testfile.close()
             self.assertTrue('npm audit report contains errors:' in str(context.exception))
             self.assertTrue('ENOAUDIT' in str(context.exception))
+
+    def test_npm_audit_parser_many_vuln_npm7(self):
+        with self.assertRaises(ValueError) as context:
+            testfile = open("dojo/unittests/scans/npm_audit_sample/many_vuln_npm7.json")
+            parser = NpmAuditParser(testfile, Test())
+            testfile.close()
+            self.assertTrue('npm7 with auditReportVersion 2 or higher not yet supported' in str(context.exception))
+            self.assertEqual(parser.items, None)

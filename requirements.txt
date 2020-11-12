@@ -45,7 +45,7 @@ redis==3.5.3
 requests>=2.22.0
 sqlalchemy  # Required by Celery broker transport
 supervisor==4.2.1
-urllib3==1.26.0
+urllib3==1.26.1
 uWSGI==2.0.19.1
 vobject==0.9.6.1
 whitenoise>=4.1.2
@@ -62,7 +62,7 @@ jsonlines==1.2.0  # requred by yarn audit parser
 django-saml2-auth==2.2.1
 cpe==1.2.1
 packageurl-python==0.9.3
-django-crum==0.7.8
+django-crum==0.7.9
 JSON-log-formatter==0.3.0
 django-split-settings==1.0.1
 django-debug-toolbar==3.1.1

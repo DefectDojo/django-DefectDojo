@@ -343,7 +343,7 @@
   <div class="panel-heading">
     {% url 'notifications' as notifications_url %}
     <h3 class="panel-title"><span class="fa fa-users fa-fw" aria-hidden="true"></span> Notifications
-      <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="These are your personal settings for this product, next to your <a href='{{notifications_url}}'>global notifications</a>." data-placement="right" data-container="body"></i>
+      <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="These are your personal settings for this product." data-placement="right" data-container="body"></i>
     </h3>
   </div>
   <form id="edit_notifications_form" class="form-horizontal" method="post" action="{% url 'edit_notifications' prod.id %}">{% csrf_token %}
