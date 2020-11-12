@@ -2260,6 +2260,34 @@ class Finding(models.Model):
 
         return ''
 
+    def get_sast_source_file_path_with_link(self):
+        from dojo.utils import create_link
+        if self.sast_source_file_path is None:
+            return None
+        if self.test.engagement.source_code_management_uri is None:
+            return self.sast_source_file_path
+        return create_link(self.test.engagement.source_code_management_uri + '/' + self.sast_source_file_path, self.sast_source_file_path)
+
+    def get_file_path_with_link(self):
+        from dojo.utils import create_link
+        if self.file_path is None:
+            return None
+        if self.test.engagement.source_code_management_uri is None:
+            return self.file_path
+        return create_link(self.test.engagement.source_code_management_uri + '/' + self.file_path, self.file_path)
+
+    def get_references_with_links(self):
+        import re
+        from dojo.utils import create_link
+        if self.references is None:
+            return None
+        matches = re.findall(r'([\(|\[]?(https?):((//)|(\\\\))+([\w\d:#@%/;$~_?\+-=\\\.&](#!)?)*[\)|\]]?)', self.references)
+        for match in matches:
+            # Check if match isn't already a markdown link
+            if not (match[0].startswith('[') or match[0].startswith('(')):
+                self.references = self.references.replace(match[0], create_link(match[0], match[0]), 1)
+        return self.references
+
 
 Finding.endpoints.through.__unicode__ = lambda \
     x: "Endpoint: " + x.endpoint.host
