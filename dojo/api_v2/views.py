@@ -605,8 +605,6 @@ class FindingViewSet(mixins.ListModelMixin,
             return self._add_metadata(request, pk)
         elif request.method == "PUT":
             return self._edit_metadata(request, pk)
-        elif request.method == "PATCH":
-            return self._edit_metadata(request, pk)
         elif request.method == "DELETE":
             return self._remove_metadata(request, pk)
 
