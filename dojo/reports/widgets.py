@@ -178,7 +178,9 @@ class CoverPage(Widget):
         self.help_text = "The cover page includes a page break after its content."
 
     def get_html(self):
-        return mark_safe('')
+        return render_to_string("dojo/custom_html_report_cover_page.html", {"heading": self.title,
+                                                                                "sub_heading": self.sub_heading,
+                                                                                "meta_info": self.meta_info})
 
     def get_asciidoc(self):
         return render_to_string("dojo/custom_asciidoc_report_cover_page.html", {"heading": self.title,
@@ -201,7 +203,8 @@ class TableOfContents(Widget):
         self.help_text = "The table of contents includes a page break after its content."
 
     def get_html(self):
-        return mark_safe('')
+        return render_to_string("dojo/custom_html_toc.html", {"title": self.title,
+                                                                  "depth": self.depth})
 
     def get_asciidoc(self):
         return render_to_string("dojo/custom_asciidoc_toc.html", {"title": self.title,
@@ -223,7 +226,7 @@ class WYSIWYGContent(Widget):
         self.multiple = 'true'
 
     def get_html(self):
-        html = render_to_string("dojo/custom_pdf_report_wysiwyg_content.html", {"title": self.title,
+        html = render_to_string("dojo/custom_html_report_wysiwyg_content.html", {"title": self.title,
                                                                                 "content": self.content})
         return mark_safe(html)
 
@@ -292,7 +295,7 @@ class FindingList(Widget):
         return mark_safe(asciidoc)
 
     def get_html(self):
-        html = render_to_string("dojo/custom_pdf_report_finding_list.html",
+        html = render_to_string("dojo/custom_html_report_finding_list.html",
                                 {"title": self.title,
                                  "findings": self.findings.qs,
                                  "include_finding_notes": self.finding_notes,
@@ -353,7 +356,7 @@ class EndpointList(Widget):
                           "report."
 
     def get_html(self):
-        html = render_to_string("dojo/custom_pdf_report_endpoint_list.html",
+        html = render_to_string("dojo/custom_html_report_endpoint_list.html",
                                 {"title": self.title,
                                  "endpoints": self.endpoints.qs,
                                  "include_finding_notes": self.finding_notes,
