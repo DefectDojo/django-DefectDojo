@@ -270,12 +270,12 @@ class FindingMetadataTest(BaseClass.RESTEndpointTest):
         self.current_findings = self.client.get(self.url, format='json').data["results"]
         finding = Finding.objects.get(id=self.current_findings[0]['id'])
 
-        self.base_url = f"%s%s/metadata/" % (self.url, self.current_findings[0]['id'])
+        self.base_url = f"{self.url}{self.current_findings[0]['id']}/metadata/"
         metadata = DojoMeta(finding=finding, name="test_meta", value="20")
         metadata.save()
 
     def test_create(self):
-        self.client.post(self.base_url, data={ "name":"test_meta2", "value":"40"})
+        self.client.post(self.base_url, data={"name": "test_meta2", "value": "40"})
         results = self.client.get(self.base_url).data
         for result in results:
             if result["name"] == "test_meta2" and result["value"] == "40":
@@ -284,7 +284,7 @@ class FindingMetadataTest(BaseClass.RESTEndpointTest):
         assert False, "Metadata was not created correctly"
 
     def test_create_duplicate(self):
-        result = self.client.post(self.base_url, data={ "name":"test_meta", "value":"40"})
+        result = self.client.post(self.base_url, data={"name": "test_meta", "value": "40"})
         assert result.status_code == status.HTTP_400_BAD_REQUEST, "Metadata creation did not failed on duplicate"
 
     def test_get(self):
@@ -296,7 +296,7 @@ class FindingMetadataTest(BaseClass.RESTEndpointTest):
         assert False, "Metadata was not created correctly"
 
     def test_update(self):
-        self.client.put(self.base_url + "?name=test_meta", data={ "name": "test_meta", "value":"40" })
+        self.client.put(self.base_url + "?name=test_meta", data={"name": "test_meta", "value": "40"})
         result = self.client.get(self.base_url).data[0]
         assert result["name"] == "test_meta" and result["value"] == "40", "Metadata not edited correctly"
 
