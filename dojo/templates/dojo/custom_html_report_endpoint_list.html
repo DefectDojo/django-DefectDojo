@@ -145,7 +145,7 @@
                 {% if finding.images.all.count > 0 %}
                 <h6>Images</h6>
                     {% for pic in finding.images.all %}
-                        <p><img src="{{ host }}{% pic_token pic 'original' %}" style="max-width: 85%"></p>
+                        <p><img src="{{ host }}{% pic_token pic 'original' %}" style="max-width: 85%" alt="Finding Image"></p>
                     {% endfor %}
                 {% endif %}
             {% endif %}
