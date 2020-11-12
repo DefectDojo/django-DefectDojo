@@ -27,7 +27,7 @@ http = 0.0.0.0:8081
 http-to = ${DD_UWSGI_ENDPOINT}
 EOF
 
-if [ "${DD_LOGGING_FORMAT}" = "json_console" ]; then
+if [ "${DD_LOGGING_HANDLER}" = "json_console" ]; then
     cat >> $UWSGI_INIFILE <<'EOF'
 ; logging as json does not offer full tokenization for requests, everything will be in message.
 logger = stdio
