@@ -3,6 +3,7 @@ import binascii
 import os
 import hashlib
 import io
+import bleach
 import json
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
@@ -2320,3 +2321,14 @@ def get_words_for_field(queryset, fieldname):
 
 def get_current_user():
     return crum.get_current_user()
+
+
+def create_link(url, title):
+    link = '<a href=\"'
+    link += url
+    link += '\" target=\"_blank\" title=\"'
+    link += title
+    link += '\">'
+    link += title
+    link += '</a>'
+    return bleach.clean(link, tags=['a'], attributes={'a': ['href', 'target', 'title']})
