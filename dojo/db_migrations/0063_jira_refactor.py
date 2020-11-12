@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0062_add_vuln_id_from_tool.py'),
+        ('dojo', '0062_add_vuln_id_from_tool'),
     ]
 
     operations = [
