@@ -580,7 +580,7 @@ class FindingViewSet(mixins.ListModelMixin,
         responses={status.HTTP_200_OK: ""},
         methods=['delete'],
         manual_parameters=[openapi.Parameter(
-            name="name", in_=openapi.IN_QUERY, required=True, type=openapi.TYPE_STRING, 
+            name="name", in_=openapi.IN_QUERY, required=True, type=openapi.TYPE_STRING,
             description="name of the metadata to retrieve. If name is empty, return all the \
                             metadata associated with the finding")]
     )
@@ -588,7 +588,7 @@ class FindingViewSet(mixins.ListModelMixin,
         responses={status.HTTP_200_OK: ""},
         methods=['put'],
         manual_parameters=[openapi.Parameter(
-            name="name", in_=openapi.IN_QUERY, required=True, type=openapi.TYPE_STRING, 
+            name="name", in_=openapi.IN_QUERY, required=True, type=openapi.TYPE_STRING,
             description="name of the metadata to edit")],
         request_body=serializers.FindingMetaSerializer
     )
@@ -609,7 +609,7 @@ class FindingViewSet(mixins.ListModelMixin,
             return self._edit_metadata(request, pk)
         elif request.method == "DELETE":
             return self._remove_metadata(request, pk)
-        
+
         return Response({"error", "unsupported method"}, status=status.HTTP_400_BAD_REQUEST)
 
 
