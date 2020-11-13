@@ -45,7 +45,7 @@ class BlackduckHubParser(object):
         # License Risk
         license_risk = []
         for component_id, component in components.items():
-            source = False
+            source = {} 
             # Find the sources.csv data for this component
             for id, src in sources.items():
                 if id in component_id:
@@ -143,8 +143,12 @@ class BlackduckHubParser(object):
         desc += "**License Origin name:** {} \n".format(component.get('Origin name'))
         desc += "**License Origin id:** {} \n".format(component.get('Origin id'))
         desc += "**Match type:** {}\n".format(component.get('Match type'))
-        desc += "**Path:** {}\n".format(source.get('Path'))
-        desc += "**Archive context:** {}\n".format(source.get('Archive context'))
+        try:
+            desc += "**Path:** {}\n".format(source.get('Path'))
+            desc += "**Archive context:** {}\n".format(source.get('Archive context'))
+        except KeyError:
+            desc += "**Path:** Unable to find path in source data."
+            desc += "**Archive context:** Unable to find archive context in source data."
         return desc
 
     def license_mitigation(self, component, violation=True):
