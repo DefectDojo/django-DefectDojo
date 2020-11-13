@@ -31,6 +31,7 @@ from django.contrib.contenttypes.fields import GenericRelation
 from tagging.models import TaggedItem
 from dateutil.relativedelta import relativedelta
 
+
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
@@ -2608,6 +2609,14 @@ class JIRA_Instance(models.Model):
         else:
             return 'N/A'
 
+# # declare form here as we can't import forms.py due to circular imports
+# class JIRAForm_Admin(forms.ModelForm):
+#     password = forms.CharField(widget=forms.PasswordInput, required=True)
+
+
+# class JIRA_Instance_Admin(admin.ModelAdmin):
+#     form = JIRAForm_Admin
+
 
 class JIRA_Project(models.Model):
     jira_instance = models.ForeignKey(JIRA_Instance, verbose_name="JIRA Instance",
@@ -3460,6 +3469,7 @@ admin.site.register(IPScan)
 admin.site.register(Alerts)
 admin.site.register(JIRA_Issue)
 admin.site.register(JIRA_Instance)
+# admin.site.register(JIRA_Instance, JIRA_Instance_Admin)
 admin.site.register(JIRA_Project)
 admin.site.register(GITHUB_Conf)
 admin.site.register(GITHUB_PKey)
