@@ -204,9 +204,12 @@ class BlackduckHubParser(object):
         """
         map = {"HIGH": "High", "MEDIUM": "Medium", "LOW": "Low", "INFO": "Info",
                "CRITICAL": "Critical", "OK": "None"}
-        if component["License Risk"]:
-            return map[component["License Risk"]]
-        return "None"
+        sev = "None"
+        try:
+            sev = map[component["License Risk"]]
+        except KeyError:
+            sev = "None"
+        return sev 
  
     def security_severity(self, vulns):
         """
