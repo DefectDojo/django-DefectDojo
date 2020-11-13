@@ -714,27 +714,25 @@
               {% endif %}
             </td>
           </tr>
-          {% with jira_project=eng|jira_project %}
-            {% if jissue and jconf %}
-            <tr>
-              <td><strong>Jira</strong></td>
-              <td><a href="{{ eng | jira_url }}" target="_blank"><i class="fa fa-external-link"></i> {{ eng | jira_key }}
-                <small>(epic)</small>
-              </a></td>
-            </tr>
-            {% elif jira_project %}
-            <tr>
-              <td><strong>JIRA</strong></td>
-              <td><a href="{{ eng | jira_url }}" target="_blank"><i class="fa fa-external-link"></i> {{ eng | jira_key }}
-              {% if jira_project.engagement is not eng %}
-                <small>(inherited)</small>
-              {% else %}
-                <small>(project)</small>              
-              {% endif %}
-              </a></td>
-            </tr>
+        {% if jissue and jira_project %}
+        <tr>
+            <td><strong>Jira</strong></td>
+            <td><a href="{{ eng | jira_url }}" target="_blank"><i class="fa fa-external-link"></i> {{ eng | jira_key }}
+            <small>(epic)</small>
+            </a></td>
+        </tr>
+        {% elif jira_project %}
+        <tr>
+            <td><strong>JIRA</strong></td>
+            <td><a href="{{ eng | jira_url }}" target="_blank"><i class="fa fa-external-link"></i> {{ eng | jira_key }}
+            {% if jira_project.engagement is not eng %}
+            <small>(inherited)</small>
+            {% else %}
+            <small>(project)</small>              
             {% endif %}
-          {% endwith %}
+            </a></td>
+        </tr>
+        {% endif %}
           <tr>
             <td><strong>Updated</strong></td>
             <td><a target="_blank" data-toggle="tooltip" data-placement="bottom" title="{{ eng.updated|default_if_none:"" }}">

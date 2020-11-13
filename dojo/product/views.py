@@ -90,7 +90,7 @@ def prefetch_for_product(prods):
         prefetched_prods = prefetched_prods.annotate(closed_engagement_count=Count('engagement__id', filter=Q(engagement__active=False)))
         prefetched_prods = prefetched_prods.annotate(last_engagement_date=Max('engagement__target_start'))
         prefetched_prods = prefetched_prods.annotate(active_finding_count=Count('engagement__test__finding__id', filter=Q(engagement__test__finding__active=True)))
-        prefetched_prods = prefetched_prods.prefetch_related(Prefetch('jira_project_set', queryset=JIRA_Project.objects.all().select_related('jira_instance'), to_attr='jira_projects'))
+        prefetched_prods = prefetched_prods.prefetch_related('jira_project_set__jira_instance')
         prefetched_prods = prefetched_prods.prefetch_related(Prefetch('github_pkey_set', queryset=GITHUB_PKey.objects.all().select_related('git_conf'), to_attr='github_confs'))
         active_endpoint_query = Endpoint.objects.filter(
                 finding__active=True,

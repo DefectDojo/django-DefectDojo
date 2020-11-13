@@ -133,5 +133,3 @@ def paginate(page, adjacent=2):
                      safe('Next')))
 
     return pages
-
-

@@ -132,7 +132,9 @@ def prefetch_for_products_with_engagments(products_with_engagements):
     if isinstance(products_with_engagements, QuerySet):  # old code can arrive here with prods being a list because the query was already executed
         return products_with_engagements.prefetch_related('tagged_items__tag',
             'engagement_set__tagged_items__tag',
-            'engagement_set__test_set__tagged_items__tag')
+            'engagement_set__test_set__tagged_items__tag',
+            'engagement_set__jira_project__jira_instance',
+            'jira_project_set__jira_instance')
 
     logger.debug('unable to prefetch because query was already executed')
     return products_with_engagements
@@ -144,7 +146,7 @@ def edit_engagement(request, eid):
     engagement = Engagement.objects.get(pk=eid)
     is_ci_cd = engagement.engagement_type == "CI/CD"
     jira_epic_form = None
-    jira_project = jira_helper.get_jira_project(engagement, use_delegation=False)
+    jira_project = jira_helper.get_jira_project(engagement, use_inheritance=False)
     jira_error = False
 
     if request.method == 'POST':
@@ -316,7 +318,7 @@ def view_engagement(request, eid):
     system_settings = System_Settings.objects.get()
 
     jissue = jira_helper.get_jira_issue(eng)
-    jconf = jira_helper.get_jira_project(eng)
+    jira_project = jira_helper.get_jira_project(eng)
 
     exclude_findings = [
         finding.id for ra in eng.risk_acceptance.all()
@@ -427,7 +429,7 @@ def view_engagement(request, eid):
             'risks_accepted': risks_accepted,
             'can_add_risk': eng_findings.count(),
             'jissue': jissue,
-            'jconf': jconf,
+            'jira_project': jira_project,
             'accepted_findings': accepted_findings,
             'start_date': start_date,
             'creds': creds,
