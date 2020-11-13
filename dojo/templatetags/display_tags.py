@@ -45,7 +45,7 @@ markdown_tags = [
 markdown_attrs = {
     "*": ["id"],
     "img": ["src", "alt", "title"],
-    "a": ["href", "alt", "title"],
+    "a": ["href", "alt", "target", "title"],
     "span": ["class"],  # used for code highlighting
     "pre": ["class"],  # used for code highlighting
     "div": ["class"],  # used for code highlighting
