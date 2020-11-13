@@ -531,6 +531,9 @@ class JIRAConfSerializer(serializers.ModelSerializer):
     class Meta:
         model = JIRA_Conf
         fields = '__all__'
+        extra_kwargs = {
+            'password': {'write_only': True},
+        }
 
 
 class JIRASerializer(serializers.ModelSerializer):
