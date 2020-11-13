@@ -92,7 +92,7 @@ class BlackduckCRImporter(object):
             # Using component_id:version_id for unique identifier of each component
             source[record.get("Component id") + ":" + record.get("Version id") + ":License"]\
                 = {x[0]: x[1] for x in record.items()}
-        return source 
+        return source
 
     def __get_components(self, csv_file) -> dict:
         """

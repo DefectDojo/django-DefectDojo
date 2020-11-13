@@ -53,7 +53,7 @@ class BlackduckHubParser(object):
             if component.get('Component policy status') == "In Violation":
                 # We have us a license risk:
                 title = self.license_title(component)
-                description = self.license_description(component,source)
+                description = self.license_description(component, source) 
                 severity = "High"
                 mitigation = self.license_mitigation(component)
                 impact = "N/A"
@@ -74,7 +74,7 @@ class BlackduckHubParser(object):
             elif "None" not in self.license_severity(component):
                 # We have a license risk for review, but not directly "In Violation"
                 title = "Review " + self.license_title(component)
-                description = self.license_description(component,source)
+                description = self.license_description(component, source)
                 severity = self.license_severity(component)
                 mitigation = self.license_mitigation(component, False)
                 impact = "N/A"
@@ -120,7 +120,6 @@ class BlackduckHubParser(object):
                               unique_id_from_tool=component_id)
             security_risk.append(finding)
         self.items.extend(security_risk)
-
 
     def license_title(self, component):
         """
