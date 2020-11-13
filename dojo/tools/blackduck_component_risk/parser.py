@@ -68,9 +68,9 @@ class BlackduckHubParser(object):
             elif "None" not in self.license_severity(component):
                 # We have a license risk for review, but not directly "In Violation"
                 title = "Review " + self.license_title(component)
-                description = self.license_description(component) 
+                description = self.license_description(component)
                 severity = self.license_severity(component)
-                mitigation = self.license_mitigation(component,False)
+                mitigation = self.license_mitigation(component, False)
                 impact = "N/A"
                 references = self.license_references(component)
                 finding = Finding(title=title,
@@ -209,8 +209,8 @@ class BlackduckHubParser(object):
             sev = map[component["License Risk"]]
         except KeyError:
             sev = "None"
-        return sev 
- 
+        return sev
+
     def security_severity(self, vulns):
         """
         Iterates over all base_scores of each vulnerability and picks the max. A map is used to
