@@ -521,6 +521,7 @@ class JiraInstanceViewSet(mixins.ListModelMixin,
                                 viewsets.GenericViewSet):
     serializer_class = serializers.JIRAInstanceSerializer
     queryset = JIRA_Instance.objects.all()
+
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'url')
 

@@ -64,8 +64,8 @@ def is_push_all_issues(instance):
         return jira_project.push_all_issues
 
 
-# use_delegation=True means get jira_project config from product if engagement itself has none
-def get_jira_project(obj, use_delegation=True):
+# use_inheritance=True means get jira_project config from product if engagement itself has none
+def get_jira_project(obj, use_inheritance=True):
     if not is_jira_enabled():
         return None
 
@@ -93,7 +93,7 @@ def get_jira_project(obj, use_delegation=True):
         except JIRA_Project.DoesNotExist:
             pass  # leave jira_project as None
 
-        if use_delegation:
+        if use_inheritance:
             logger.debug('delegating to product %s for %s', engagement.product, engagement)
             return get_jira_project(engagement.product)
         else:
