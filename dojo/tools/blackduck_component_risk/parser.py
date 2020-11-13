@@ -15,10 +15,10 @@ class BlackduckHubParser(object):
         :param filename: Input in Defect Dojo
         :param test:
         """
-        components, securities = self.import_data(filename)
-        self.ingest_findings(components, securities, test)
+        components, securities, sources = self.import_data(filename)
+        self.ingest_findings(components, securities, sources, test)
 
-    def import_data(self, filename) -> (dict, dict):
+    def import_data(self, filename) -> (dict, dict, dict):
         """
         Calls the Importer from dojo/tools/blackduck_component_risk/importer to
         parse through the zip file and export needed information from the
@@ -28,15 +28,16 @@ class BlackduckHubParser(object):
         """
         importer = import_helper.BlackduckCRImporter()
 
-        components, securities = importer.parse_findings(filename)
-        return components, securities
+        components, securities, sources = importer.parse_findings(filename)
+        return components, securities, sources
 
-    def ingest_findings(self, components, securities, test):
+    def ingest_findings(self, components, securities, sources, test):
         """
         Takes the components and securities from the importer that parsed the zip file, and
         iterates over them, creating findings.
         :param components: Dictionary containing all components from the components csv
         :param securities: Dictionary containing all security vulnerabilities for each component
+        :param sources: Dictionary containing all sources data from the sources csv
         :param test:
         :return:
         """
@@ -44,10 +45,14 @@ class BlackduckHubParser(object):
         # License Risk
         license_risk = []
         for component_id, component in components.items():
+            source = False
+            for id, src in sources.items():
+                if id in component_id:
+                    source = src
             if component.get('Component policy status') == "In Violation":
                 # We have us a license risk:
                 title = self.license_title(component)
-                description = self.license_description(component)
+                description = self.license_description(component,source)
                 severity = "High"
                 mitigation = self.license_mitigation(component)
                 impact = "N/A"
@@ -68,7 +73,7 @@ class BlackduckHubParser(object):
             elif "None" not in self.license_severity(component):
                 # We have a license risk for review, but not directly "In Violation"
                 title = "Review " + self.license_title(component)
-                description = self.license_description(component)
+                description = self.license_description(component,source)
                 severity = self.license_severity(component)
                 mitigation = self.license_mitigation(component, False)
                 impact = "N/A"
@@ -115,6 +120,7 @@ class BlackduckHubParser(object):
             security_risk.append(finding)
         self.items.extend(security_risk)
 
+
     def license_title(self, component):
         """
         Uses the Component name and Component version name. The Origin id is sometimes blank,
@@ -125,7 +131,7 @@ class BlackduckHubParser(object):
         return "License Risk: {}:{}".format(component.get('Component name'),
                                             component.get('Component version name'))
 
-    def license_description(self, component):
+    def license_description(self, component, source):
         """
         Pulls out all important information from the components CSV regarding the License in use.
         :param component: Dictionary containing all components.
@@ -137,6 +143,8 @@ class BlackduckHubParser(object):
         desc += "**License Origin name:** {} \n".format(component.get('Origin name'))
         desc += "**License Origin id:** {} \n".format(component.get('Origin id'))
         desc += "**Match type:** {}\n".format(component.get('Match type'))
+        desc += "**Path:** {}\n".format(source.get('Path'))
+        desc += "**Archive context:** {}\n".format(source.get('Archive context'))
         return desc
 
     def license_mitigation(self, component, violation=True):
