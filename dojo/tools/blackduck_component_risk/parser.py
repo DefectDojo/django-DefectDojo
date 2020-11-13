@@ -1,4 +1,4 @@
-# Author: apipia
+# Author: apipia, wheelsvt
 from dojo.models import Finding
 import dojo.tools.blackduck_component_risk.importer as import_helper
 
@@ -6,7 +6,7 @@ import dojo.tools.blackduck_component_risk.importer as import_helper
 class BlackduckHubParser(object):
     """
     Can import as exported from Blackduck:
-    - from a zip file containing a security.csv and components.csv
+    - from a zip file containing a security.csv, sources.csv and components.csv
     """
     def __init__(self, filename, test):
         """
@@ -22,7 +22,7 @@ class BlackduckHubParser(object):
         """
         Calls the Importer from dojo/tools/blackduck_component_risk/importer to
         parse through the zip file and export needed information from the
-        two relevant files (security and components).
+        three relevant files (security, source and components).
         :param filename: Name of the zipfile. Passed in via Defect Dojo
         :return: Returns a tuple of dictionaries, Components and Securities.
         """
@@ -46,6 +46,7 @@ class BlackduckHubParser(object):
         license_risk = []
         for component_id, component in components.items():
             source = False
+            # Find the sources.csv data for this component
             for id, src in sources.items():
                 if id in component_id:
                     source = src
