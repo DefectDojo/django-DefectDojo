@@ -53,7 +53,7 @@ class BlackduckHubParser(object):
             if component.get('Component policy status') == "In Violation":
                 # We have us a license risk:
                 title = self.license_title(component)
-                description = self.license_description(component, source) 
+                description = self.license_description(component, source)
                 severity = "High"
                 mitigation = self.license_mitigation(component)
                 impact = "N/A"
