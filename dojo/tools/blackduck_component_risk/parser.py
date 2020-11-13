@@ -69,7 +69,7 @@ class BlackduckHubParser(object):
                 # We have a license risk for review, but not directly "In Violation"
                 title = "Review " + self.license_title(component)
                 description = self.license_description(component) 
-                severity = self.license_severity(component) 
+                severity = self.license_severity(component)
                 mitigation = self.license_mitigation(component,False)
                 impact = "N/A"
                 references = self.license_references(component)
@@ -204,8 +204,9 @@ class BlackduckHubParser(object):
         """
         map = {"HIGH": "High", "MEDIUM": "Medium", "LOW": "Low", "INFO": "Info",
                "CRITICAL": "Critical", "OK": "None"}
-        sev = map[component["License Risk"]]
-        return sev
+        if component["License Risk"]:
+            return map[component["License Risk"]]
+        return "None"
  
     def security_severity(self, vulns):
         """
