@@ -918,6 +918,15 @@ class Tool_Configuration(models.Model):
         return self.name
 
 
+# declare form here as we can't import forms.py due to circular imports not even locally
+class ToolConfigForm_Admin(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput, required=True)
+
+
+class Tool_Configuration_Admin(admin.ModelAdmin):
+    form = ToolConfigForm_Admin
+
+
 class Network_Locations(models.Model):
     location = models.CharField(max_length=500, help_text="Location of network testing: Examples: VPN, Internet or Internal.")
 
@@ -2634,6 +2643,15 @@ class JIRA_Conf(models.Model):
             return 'N/A'
 
 
+# declare form here as we can't import forms.py due to circular imports not even locally
+class JIRAForm_Admin(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput, required=True)
+
+
+class JIRA_Conf_Admin(admin.ModelAdmin):
+    form = JIRAForm_Admin
+
+
 class JIRA_Issue(models.Model):
     jira_id = models.CharField(max_length=200)
     jira_key = models.CharField(max_length=200)
@@ -3481,11 +3499,11 @@ admin.site.register(ScanSettings)
 admin.site.register(IPScan)
 admin.site.register(Alerts)
 admin.site.register(JIRA_Issue)
-admin.site.register(JIRA_Conf)
+admin.site.register(JIRA_Conf, JIRA_Conf_Admin)
 admin.site.register(JIRA_PKey)
 admin.site.register(GITHUB_Conf)
 admin.site.register(GITHUB_PKey)
-admin.site.register(Tool_Configuration)
+admin.site.register(Tool_Configuration, Tool_Configuration_Admin)
 admin.site.register(Tool_Product_Settings)
 admin.site.register(Tool_Type)
 admin.site.register(Cred_User)
