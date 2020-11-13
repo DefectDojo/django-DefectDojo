@@ -45,7 +45,7 @@ class BlackduckHubParser(object):
         # License Risk
         license_risk = []
         for component_id, component in components.items():
-            source = {} 
+            source = {}
             # Find the sources.csv data for this component
             for id, src in sources.items():
                 if id in component_id:
