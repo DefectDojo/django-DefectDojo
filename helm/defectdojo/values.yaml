@@ -34,6 +34,10 @@ admin:
 
 monitoring:
   enabled: false
+  # Add the nginx prometheus exporter sidecar
+  prometheus:
+    enabled: false
+    image: nginx/nginx-prometheus-exporter:0.8.0
 
 annotations: {}
 

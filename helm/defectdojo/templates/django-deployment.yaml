@@ -26,6 +26,12 @@ spec:
       {{- with .Values.django.annotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if and .Values.monitoring.enabled .Values.monitoring.prometheus.enabled }}
+        prometheus.io/path: /metrics
+        prometheus.io/port: "9113"
+        prometheus.io/scheme: http
+        prometheus.io/scrape: "true"
+      {{- end }}
     spec:
       serviceAccountName: {{ $fullName }}
       {{- if .Values.imagePullSecrets }}
@@ -49,6 +55,25 @@ spec:
         {{- else if eq .Values.database "mysql" }}
         - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.mysql.service.port }}"
         {{- end }}
+      {{- end }}
+      {{- if and .Values.monitoring.enabled .Values.monitoring.prometheus.enabled }}
+      - name: metrics
+        image: nginx/nginx-prometheus-exporter:0.8.0
+        imagePullPolicy: IfNotPresent
+        command: [ '/usr/bin/exporter', '-nginx.scrape-uri', 'http://monitoring:$METRICS_HTTP_AUTH_PASSWORD@127.0.0.1:8080/nginx_status']
+        env:
+        - name: METRICS_HTTP_AUTH_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ template "defectdojo.fullname" . }}
+              key: METRICS_HTTP_AUTH_PASSWORD
+        livenessProbe:
+          httpGet:
+            path: /metrics
+            port: 9113
+          periodSeconds: 20
+          initialDelaySeconds: 15
+          timeoutSeconds: 5
       {{- end }}
       - name: uwsgi
         image: '{{ template "django.uwsgi.repository" . }}:{{ .Values.tag }}'
