@@ -58,15 +58,9 @@ spec:
       {{- end }}
       {{- if and .Values.monitoring.enabled .Values.monitoring.prometheus.enabled }}
       - name: metrics
-        image: nginx/nginx-prometheus-exporter:0.8.0
-        imagePullPolicy: IfNotPresent
-        command: [ '/usr/bin/exporter', '-nginx.scrape-uri', 'http://monitoring:$METRICS_HTTP_AUTH_PASSWORD@127.0.0.1:8080/nginx_status']
-        env:
-        - name: METRICS_HTTP_AUTH_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: {{ template "defectdojo.fullname" . }}
-              key: METRICS_HTTP_AUTH_PASSWORD
+        image: {{ .Values.monitoring.prometheus.image }}
+        imagePullPolicy: {{ .Values.monitoring.prometheus.imagePullPolicy }}
+        command: [ '/usr/bin/exporter', '-nginx.scrape-uri', 'http://127.0.0.1:8080/nginx_status']
         livenessProbe:
           httpGet:
             path: /metrics
