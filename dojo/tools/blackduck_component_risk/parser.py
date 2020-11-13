@@ -44,7 +44,7 @@ class BlackduckHubParser(object):
         # License Risk
         license_risk = []
         for component_id, component in components.items():
-            if component["Component policy status"] == "In Violation":
+            if component.get('Component policy status') == "In Violation":
                 # We have us a license risk:
                 title = self.license_title(component)
                 description = self.license_description(component)
@@ -122,8 +122,8 @@ class BlackduckHubParser(object):
         :param component: Dictionary containing all components.
         :return:
         """
-        return "License Risk: {}:{}".format(component["Component name"],
-                                            component["Component version name"])
+        return "License Risk: {}:{}".format(component.get('Component name'),
+                                            component.get('Component version name'))
 
     def license_description(self, component):
         """
@@ -131,12 +131,12 @@ class BlackduckHubParser(object):
         :param component: Dictionary containing all components.
         :return:
         """
-        desc = "**License Name:** {}  \n".format(component["License names"])
-        desc += "**License Families:** {}  \n".format(component["License families"])
-        desc += "**License Usage:** {}  \n".format(component["Usage"])
-        desc += "**License Origin name:** {} \n".format(component["Origin name"])
-        desc += "**License Origin id:** {} \n".format(component["Origin id"])
-        desc += "**Match type:** {}\n".format(component["Match type"])
+        desc = "**License Name:** {}  \n".format(component.get('License names'))
+        desc += "**License Families:** {}  \n".format(component.get('License families'))
+        desc += "**License Usage:** {}  \n".format(component.get('Usage'))
+        desc += "**License Origin name:** {} \n".format(component.get('Origin name'))
+        desc += "**License Origin id:** {} \n".format(component.get('Origin id'))
+        desc += "**Match type:** {}\n".format(component.get('Match type'))
         return desc
 
     def license_mitigation(self, component, violation=True):
@@ -149,18 +149,18 @@ class BlackduckHubParser(object):
         mit = ""
         if violation:
             mit = "Package has a license that is In Violation and should not be used: {}:{}.  ".format(
-                component["Component name"], component["Component version name"]
+                component.get('Component name'), component.get('Component version name')
             )
             mit += "Please use another component with an acceptable license."
         else:
             mit = "Package has a potential license risk and should be reviewed: {}:{}. ".format(
-                component["Component name"], component["Component version name"]
+                component.get('Component name'), component.get('Component version name')
             )
             mit += "A legal review may indicate that another component should be used with an acceptable license."
         return mit
 
     def license_references(self, component):
-        return "**Project:** {}\n".format(component["Project path"])
+        return "**Project:** {}\n".format(component.get('Project path'))
 
     def security_title(self, vulns):
         """
@@ -206,7 +206,7 @@ class BlackduckHubParser(object):
                "CRITICAL": "Critical", "OK": "None"}
         sev = "None"
         try:
-            sev = map[component["License Risk"]]
+            sev = map[component.get('License Risk')]
         except KeyError:
             sev = "None"
         return sev
