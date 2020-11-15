@@ -917,6 +917,40 @@ class Tool_Configuration(models.Model):
         return self.name
 
 
+# declare form here as we can't import forms.py due to circular imports not even locally
+class ToolConfigForm_Admin(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput, required=False)
+    api_key = forms.CharField(widget=forms.PasswordInput, required=False)
+    ssh = forms.CharField(widget=forms.PasswordInput, required=False)
+
+    # django doesn't seem to have an easy way to handle password fields as PasswordInput requires reentry of passwords
+    password_from_db = None
+    ssh_from_db = None
+    api_key_from_db = None
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance:
+            # keep password from db to use if the user entered no password
+            self.password_from_db = self.instance.password
+            self.ssh_from_db = self.instance.ssh
+            self.api_key = self.instance.api_key
+
+    def clean(self):
+        # self.fields['endpoints'].queryset = Endpoint.objects.all()
+        cleaned_data = super().clean()
+        if not cleaned_data['password'] and not cleaned_data['ssh'] and not cleaned_data['api_key']:
+            cleaned_data['password'] = self.password_from_db
+            cleaned_data['ssh'] = self.ssh_from_db
+            cleaned_data['api_key'] = self.api_key_from_db
+
+        return cleaned_data
+
+
+class Tool_Configuration_Admin(admin.ModelAdmin):
+    form = ToolConfigForm_Admin
+
+
 class Network_Locations(models.Model):
     location = models.CharField(max_length=500, help_text="Location of network testing: Examples: VPN, Internet or Internal.")
 
@@ -2609,13 +2643,32 @@ class JIRA_Instance(models.Model):
         else:
             return 'N/A'
 
-# # declare form here as we can't import forms.py due to circular imports
-# class JIRAForm_Admin(forms.ModelForm):
-#     password = forms.CharField(widget=forms.PasswordInput, required=True)
+
+# declare form here as we can't import forms.py due to circular imports not even locally
+class JIRAForm_Admin(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput, required=True)
+
+    # django doesn't seem to have an easy way to handle password fields as PasswordInput requires reentry of passwords
+    password_from_db = None
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance:
+            # keep password from db to use if the user entered no password
+            self.password_from_db = self.instance.password
+            self.fields['password'].required = False
+
+    def clean(self):
+        # self.fields['endpoints'].queryset = Endpoint.objects.all()
+        cleaned_data = super().clean()
+        if not cleaned_data['password']:
+            cleaned_data['password'] = self.password_from_db
+
+        return cleaned_data
 
 
-# class JIRA_Instance_Admin(admin.ModelAdmin):
-#     form = JIRAForm_Admin
+class JIRA_Instance_Admin(admin.ModelAdmin):
+    form = JIRAForm_Admin
 
 
 class JIRA_Project(models.Model):
@@ -2641,6 +2694,33 @@ class JIRA_Project(models.Model):
 
     def __str__(self):
         return self.project_key + '(%s)' % (str(self.jira_instance.url) if self.jira_instance else 'None')
+
+
+# declare form here as we can't import forms.py due to circular imports not even locally
+class JIRAForm_Admin(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput, required=True)
+
+    # django doesn't seem to have an easy way to handle password fields as PasswordInput requires reentry of passwords
+    password_from_db = None
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance:
+            # keep password from db to use if the user entered no password
+            self.password_from_db = self.instance.password
+            self.fields['password'].required = False
+
+    def clean(self):
+        # self.fields['endpoints'].queryset = Endpoint.objects.all()
+        cleaned_data = super().clean()
+        if not cleaned_data['password']:
+            cleaned_data['password'] = self.password_from_db
+
+        return cleaned_data
+
+
+class JIRA_Conf_Admin(admin.ModelAdmin):
+    form = JIRAForm_Admin
 
 
 class JIRA_Issue(models.Model):
@@ -3468,12 +3548,12 @@ admin.site.register(ScanSettings)
 admin.site.register(IPScan)
 admin.site.register(Alerts)
 admin.site.register(JIRA_Issue)
-admin.site.register(JIRA_Instance)
-# admin.site.register(JIRA_Instance, JIRA_Instance_Admin)
+admin.site.register(JIRA_Instance, JIRA_Instance_Admin)
 admin.site.register(JIRA_Project)
+admin.site.register(JIRA_PKey)
 admin.site.register(GITHUB_Conf)
 admin.site.register(GITHUB_PKey)
-admin.site.register(Tool_Configuration)
+admin.site.register(Tool_Configuration, Tool_Configuration_Admin)
 admin.site.register(Tool_Product_Settings)
 admin.site.register(Tool_Type)
 admin.site.register(Cred_User)

@@ -403,7 +403,11 @@ class ToolConfigurationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tool_Configuration
         fields = '__all__'
-        extra_kwargs = {'password': {'write_only': True}}
+        extra_kwargs = {
+            'password': {'write_only': True},
+            'ssh': {'write_only': True},
+            'api_key': {'write_only': True},
+        }
 
 
 class ToolProductSettingsSerializer(serializers.ModelSerializer):
@@ -535,7 +539,9 @@ class JIRAInstanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = JIRA_Instance
         fields = '__all__'
-        extra_kwargs = {'password': {'write_only': True}}
+        extra_kwargs = {
+            'password': {'write_only': True},
+        }
 
 
 class JIRAProjectSerializer(serializers.ModelSerializer):
