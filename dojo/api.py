@@ -111,6 +111,7 @@ class BaseModelResource(ModelResource):
                 res_field = fields.get(django_field.name, None)
                 if res_field:
                     res_field.blank = True
+
         return fields
 
 
@@ -493,6 +494,7 @@ class Tool_ConfigurationResource(BaseModelResource):
         }
         authentication = DojoApiKeyAuthentication()
         authorization = DjangoAuthorization()
+        excludes = ['password', 'ssh', 'api_key']
         serializer = Serializer(formats=['json'])
 
         @property
@@ -851,6 +853,7 @@ class JIRA_ConfResource(BaseModelResource):
         }
         authentication = DojoApiKeyAuthentication()
         authorization = DjangoAuthorization()
+        excludes = ['password']
         serializer = Serializer(formats=['json'])
 
         @property
