@@ -25,6 +25,10 @@ logger = logging.getLogger(__name__)
 
 # if you need some credentials for the Defect Dojo JIRA Cloud instance, contact one of the moderators
 
+# some senstive data is filtered out by the filter_headers config option below
+# as well as some custom callback functions to filter out cookies.
+# please check the recorded files on sensitive data before committing to git
+
 
 # filters headers doesn't seem to work for cookies, so use callbacks to filter cookies from being recorded
 # https://github.com/kevin1024/vcrpy/issues/569
