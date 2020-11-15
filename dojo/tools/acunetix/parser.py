@@ -3,7 +3,6 @@ from dojo.models import Finding
 import hashlib
 import logging
 import re
-import logging
 
 logger = logging.getLogger(__name__)
 
