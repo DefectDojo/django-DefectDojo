@@ -56,7 +56,7 @@ coverage.xml
 # Django stuff:
 *.log
 *.pot
-**/settings.py
+**/local_settings.py
 
 # Vim swapfiles
 *.swp
@@ -76,6 +76,7 @@ dojo/uploads/risk/*
 dojo/uploads/reports/*
 dojo/scans/scan*
 dojo/uploads/threat/*
+dojo/fixtures/initial_surveys.json
 .idea
 *.sqlite
 *.db
@@ -93,7 +94,7 @@ Quarterly.txt
 components/*
 !components/package.json
 !components/yarn.lock
-dojo/static/*
+# dojo/static/*
 !dojo/static/dojo/*
 dojo/media
 /static
@@ -112,4 +113,19 @@ quick.bash
 # pipenv
 Pipfile
 Pipfile*
+
+
+#ignore locally added certs
+docker/certs/*
+!docker/certs/readme.txt
+
+#ignore locally added extra fixtures
+docker/extra_fixtures/*
+!docker/extra_fixtures/readme.txt
+docker/extra_settings/*
+!docker/extra_settings/README.md
+
+
+# Helm dependencies
+helm/defectdojo/charts
 

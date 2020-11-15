@@ -1,0 +1,6 @@
+PROFILE,ACCOUNT_NUM,REGION,TITLE_ID,RESULT,SCORED,LEVEL,TITLE_TEXT,NOTES
+,012345678910,eu-central-1,1.1,FAIL,Scored,Level 1,[check11] Vuln A,Note
+,012345678910,eu-central-1,1.4,FAIL,Scored,Level 1,[check14] Vuln B,Note
+,012345678910,eu-central-1,1.4,INFO,Scored,Level 1,[check14] Info A,Note
+,012345678910,eu-central-1,1.14,FAIL,Scored,Level 2,[check114] Vuln C,Note
+,012345678910,eu-central-1,1.15,INFO,Not Scored,Level 1,[check115] Info B,Note

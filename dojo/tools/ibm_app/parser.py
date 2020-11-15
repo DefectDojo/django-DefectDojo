@@ -38,7 +38,7 @@ class IbmAppScanDASTXMLParser(object):
                     name = issue_data['name']
                     # advisory = issue_data['advisory']
 
-                    cve = ""
+                    cve = None
                     if "cve" in issue_data:
                         cve = issue_data['cve']
 
@@ -62,7 +62,7 @@ class IbmAppScanDASTXMLParser(object):
                             port = '80'
                         query = urlparse(url).query
 
-                    severity = item.find('severity').text
+                    severity = item.find('severity').text.capitalize()
                     issue_description = self.fetch_advisory_group(issue_data['advisory'])
 
                     for fix_recommendation_group in self.root.iter("fix-recommendation-group"):

@@ -3,13 +3,15 @@
 # The code for the build image should be idendical with the code in
 # Dockerfile.django to use the caching mechanism of Docker.
 
-FROM python:3.5.9-buster@sha256:1baef6be00b82fbd77f1b60ab227a1dbede6f23825ce1b7f1e9c6f7d1469a45c as build
+FROM python:3.6.12-slim-buster@sha256:e5259113df5a7c4dae16ad37c2ca53b1cf722e051cfd5f624e7b76aa72389e0c as build
 WORKDIR /app
 RUN \
   apt-get -y update && \
   apt-get -y install \
+    build-essential \
     dnsutils \
     default-mysql-client \
+    libmariadb-dev-compat \
     postgresql-client \
     xmlsec1 \
     git \
@@ -29,7 +31,7 @@ ENV \
   node="nodejs"
 RUN \
   apt-get -y update && \
-  apt-get -y install apt-transport-https ca-certificates && \
+  apt-get -y install apt-transport-https ca-certificates curl wget && \
   curl -sSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add --no-tty - && \
   curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
   curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
@@ -53,25 +55,25 @@ RUN pip3 install \
 COPY components/ ./components/
 COPY manage.py ./
 COPY dojo/ ./dojo/
-RUN \
-  cp dojo/settings/settings.dist.py dojo/settings/settings.py
+
 RUN \
   cd components && \
   yarn && \
   cd .. && \
-  python3 manage.py collectstatic --noinput && \
+  env DD_SECRET_KEY='.' python3 manage.py collectstatic --noinput && \
   true
 
-FROM nginx:1.17.10@sha256:6b3b6c113f98e901a8b1473dee4c268cf37e93d72bc0a01e57c65b4ab99e58ee
+FROM nginx:1.19.4-alpine@sha256:f9ddfb3fd9590a3b6ba095939b7a5aee110a6fb397922e2684d6e189e78329c9
+ARG uid=1001
+ARG appuser=defectdojo
 COPY --from=collectstatic /app/static/ /usr/share/nginx/html/static/
 COPY wsgi_params nginx/nginx.conf nginx/nginx_TLS.conf /etc/nginx/
 COPY docker/entrypoint-nginx.sh /
 RUN \
-  apt-get -y update && \
-  apt-get -y install openssl && \
-  apt-get clean && \
+  apk add --no-cache openssl && \
   chmod -R g=u /var/cache/nginx && \
-  chmod -R g=u /var/run && \
+  mkdir /var/run/defectdojo && \
+  chmod -R g=u /var/run/defectdojo && \
   mkdir -p /etc/nginx/ssl && \
   chmod -R g=u /etc/nginx && \
   true
@@ -84,6 +86,6 @@ ENV \
   NGINX_METRICS_ENABLED="false" \
   METRICS_HTTP_AUTH_USER="" \
   METRICS_HTTP_AUTH_PASSWORD=""
-USER 1001
+USER ${uid}
 EXPOSE 8080
 ENTRYPOINT ["/entrypoint-nginx.sh"]

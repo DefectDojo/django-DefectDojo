@@ -8,7 +8,7 @@
       "order": 1,
       "polymorphic_ctype": 18
     },
-    "model": "defectDojo_engagement_survey.question",
+    "model": "dojo.question",
     "pk": 3
   },
   {
@@ -20,7 +20,7 @@
       "order": 1,
       "polymorphic_ctype": 18
     },
-    "model": "defectDojo_engagement_survey.question",
+    "model": "dojo.question",
     "pk": 4
   },
   {
@@ -32,7 +32,7 @@
       "order": 1,
       "polymorphic_ctype": 18
     },
-    "model": "defectDojo_engagement_survey.question",
+    "model": "dojo.question",
     "pk": 5
   },
   {
@@ -44,7 +44,7 @@
       "order": 1,
       "polymorphic_ctype": 18
     },
-    "model": "defectDojo_engagement_survey.question",
+    "model": "dojo.question",
     "pk": 6
   },
   {
@@ -56,7 +56,7 @@
       "order": 1,
       "polymorphic_ctype": 18
     },
-    "model": "defectDojo_engagement_survey.question",
+    "model": "dojo.question",
     "pk": 7
   },
   {
@@ -68,7 +68,7 @@
       "order": 1,
       "polymorphic_ctype": 18
     },
-    "model": "defectDojo_engagement_survey.question",
+    "model": "dojo.question",
     "pk": 8
   },
   {
@@ -80,7 +80,7 @@
       "order": 1,
       "polymorphic_ctype": 18
     },
-    "model": "defectDojo_engagement_survey.question",
+    "model": "dojo.question",
     "pk": 9
   },
   {
@@ -92,7 +92,7 @@
       "order": 1,
       "polymorphic_ctype": 18
     },
-    "model": "defectDojo_engagement_survey.question",
+    "model": "dojo.question",
     "pk": 10
   },
   {
@@ -104,7 +104,7 @@
       "order": 1,
       "polymorphic_ctype": 18
     },
-    "model": "defectDojo_engagement_survey.question",
+    "model": "dojo.question",
     "pk": 11
   },
   {
@@ -116,7 +116,7 @@
       "order": 1,
       "polymorphic_ctype": 18
     },
-    "model": "defectDojo_engagement_survey.question",
+    "model": "dojo.question",
     "pk": 12
   },
   {
@@ -128,7 +128,7 @@
       "order": 1,
       "polymorphic_ctype": 18
     },
-    "model": "defectDojo_engagement_survey.question",
+    "model": "dojo.question",
     "pk": 13
   },
   {
@@ -140,7 +140,7 @@
       "order": 1,
       "polymorphic_ctype": 18
     },
-    "model": "defectDojo_engagement_survey.question",
+    "model": "dojo.question",
     "pk": 14
   },
   {
@@ -152,7 +152,7 @@
       "order": 1,
       "polymorphic_ctype": 18
     },
-    "model": "defectDojo_engagement_survey.question",
+    "model": "dojo.question",
     "pk": 15
   },
   {
@@ -164,7 +164,7 @@
       "order": 1,
       "polymorphic_ctype": 18
     },
-    "model": "defectDojo_engagement_survey.question",
+    "model": "dojo.question",
     "pk": 16
   },
   {
@@ -176,7 +176,7 @@
       "order": 1,
       "polymorphic_ctype": 18
     },
-    "model": "defectDojo_engagement_survey.question",
+    "model": "dojo.question",
     "pk": 17
   },
   {
@@ -188,7 +188,7 @@
       "order": 1,
       "polymorphic_ctype": 18
     },
-    "model": "defectDojo_engagement_survey.question",
+    "model": "dojo.question",
     "pk": 18
   },
   {
@@ -200,7 +200,7 @@
       "order": 1,
       "polymorphic_ctype": 18
     },
-    "model": "defectDojo_engagement_survey.question",
+    "model": "dojo.question",
     "pk": 19
   },
   {
@@ -212,7 +212,7 @@
       "order": 1,
       "polymorphic_ctype": 18
     },
-    "model": "defectDojo_engagement_survey.question",
+    "model": "dojo.question",
     "pk": 20
   },
   {
@@ -224,7 +224,7 @@
       "order": 1,
       "polymorphic_ctype": 18
     },
-    "model": "defectDojo_engagement_survey.question",
+    "model": "dojo.question",
     "pk": 21
   },
   {
@@ -236,7 +236,7 @@
       "order": 1,
       "polymorphic_ctype": 18
     },
-    "model": "defectDojo_engagement_survey.question",
+    "model": "dojo.question",
     "pk": 22
   },
   {
@@ -248,7 +248,7 @@
       "order": 1,
       "polymorphic_ctype": 18
     },
-    "model": "defectDojo_engagement_survey.question",
+    "model": "dojo.question",
     "pk": 23
   },
   {
@@ -260,7 +260,7 @@
       "order": 1,
       "polymorphic_ctype": 18
     },
-    "model": "defectDojo_engagement_survey.question",
+    "model": "dojo.question",
     "pk": 24
   },
   {
@@ -272,7 +272,7 @@
       "order": 1,
       "polymorphic_ctype": 18
     },
-    "model": "defectDojo_engagement_survey.question",
+    "model": "dojo.question",
     "pk": 25
   },
   {
@@ -284,7 +284,7 @@
       "order": 1,
       "polymorphic_ctype": 18
     },
-    "model": "defectDojo_engagement_survey.question",
+    "model": "dojo.question",
     "pk": 26
   },
   {
@@ -296,7 +296,7 @@
       "order": 1,
       "polymorphic_ctype": 18
     },
-    "model": "defectDojo_engagement_survey.question",
+    "model": "dojo.question",
     "pk": 27
   },
   {
@@ -308,7 +308,7 @@
       "order": 1,
       "polymorphic_ctype": 18
     },
-    "model": "defectDojo_engagement_survey.question",
+    "model": "dojo.question",
     "pk": 28
   },
   {
@@ -320,7 +320,7 @@
       "order": 1,
       "polymorphic_ctype": 18
     },
-    "model": "defectDojo_engagement_survey.question",
+    "model": "dojo.question",
     "pk": 29
   },
   {
@@ -332,7 +332,7 @@
       "order": 1,
       "polymorphic_ctype": 18
     },
-    "model": "defectDojo_engagement_survey.question",
+    "model": "dojo.question",
     "pk": 30
   },
   {
@@ -344,7 +344,7 @@
       "order": 1,
       "polymorphic_ctype": 18
     },
-    "model": "defectDojo_engagement_survey.question",
+    "model": "dojo.question",
     "pk": 31
   },
   {
@@ -356,7 +356,7 @@
       "order": 1,
       "polymorphic_ctype": 18
     },
-    "model": "defectDojo_engagement_survey.question",
+    "model": "dojo.question",
     "pk": 32
   },
   {
@@ -368,7 +368,7 @@
       "order": 1,
       "polymorphic_ctype": 18
     },
-    "model": "defectDojo_engagement_survey.question",
+    "model": "dojo.question",
     "pk": 33
   },
   {
@@ -380,7 +380,7 @@
       "order": 1,
       "polymorphic_ctype": 18
     },
-    "model": "defectDojo_engagement_survey.question",
+    "model": "dojo.question",
     "pk": 34
   },
   {
@@ -392,7 +392,7 @@
       "order": 1,
       "polymorphic_ctype": 18
     },
-    "model": "defectDojo_engagement_survey.question",
+    "model": "dojo.question",
     "pk": 35
   },
   {
@@ -404,7 +404,7 @@
       "order": 1,
       "polymorphic_ctype": 18
     },
-    "model": "defectDojo_engagement_survey.question",
+    "model": "dojo.question",
     "pk": 36
   },
   {
@@ -416,7 +416,7 @@
       "order": 1,
       "polymorphic_ctype": 18
     },
-    "model": "defectDojo_engagement_survey.question",
+    "model": "dojo.question",
     "pk": 37
   },
   {
@@ -428,7 +428,7 @@
       "order": 1,
       "polymorphic_ctype": 18
     },
-    "model": "defectDojo_engagement_survey.question",
+    "model": "dojo.question",
     "pk": 38
   },
   {
@@ -440,7 +440,7 @@
       "order": 1,
       "polymorphic_ctype": 18
     },
-    "model": "defectDojo_engagement_survey.question",
+    "model": "dojo.question",
     "pk": 39
   },
   {
@@ -452,7 +452,7 @@
       "order": 1,
       "polymorphic_ctype": 18
     },
-    "model": "defectDojo_engagement_survey.question",
+    "model": "dojo.question",
     "pk": 40
   },
   {
@@ -464,7 +464,7 @@
       "order": 1,
       "polymorphic_ctype": 18
     },
-    "model": "defectDojo_engagement_survey.question",
+    "model": "dojo.question",
     "pk": 41
   },
   {
@@ -476,7 +476,7 @@
       "order": 1,
       "polymorphic_ctype": 18
     },
-    "model": "defectDojo_engagement_survey.question",
+    "model": "dojo.question",
     "pk": 42
   },
   {
@@ -488,212 +488,212 @@
       "order": 1,
       "polymorphic_ctype": 18
     },
-    "model": "defectDojo_engagement_survey.question",
+    "model": "dojo.question",
     "pk": 43
   },
   {
     "fields": {},
-    "model": "defectDojo_engagement_survey.textquestion",
+    "model": "dojo.textquestion",
     "pk": 3
   },
   {
     "fields": {},
-    "model": "defectDojo_engagement_survey.textquestion",
+    "model": "dojo.textquestion",
     "pk": 4
   },
   {
     "fields": {},
-    "model": "defectDojo_engagement_survey.textquestion",
+    "model": "dojo.textquestion",
     "pk": 5
   },
   {
     "fields": {},
-    "model": "defectDojo_engagement_survey.textquestion",
+    "model": "dojo.textquestion",
     "pk": 6
   },
   {
     "fields": {},
-    "model": "defectDojo_engagement_survey.textquestion",
+    "model": "dojo.textquestion",
     "pk": 7
   },
   {
     "fields": {},
-    "model": "defectDojo_engagement_survey.textquestion",
+    "model": "dojo.textquestion",
     "pk": 8
   },
   {
     "fields": {},
-    "model": "defectDojo_engagement_survey.textquestion",
+    "model": "dojo.textquestion",
     "pk": 9
   },
   {
     "fields": {},
-    "model": "defectDojo_engagement_survey.textquestion",
+    "model": "dojo.textquestion",
     "pk": 10
   },
   {
     "fields": {},
-    "model": "defectDojo_engagement_survey.textquestion",
+    "model": "dojo.textquestion",
     "pk": 11
   },
   {
     "fields": {},
-    "model": "defectDojo_engagement_survey.textquestion",
+    "model": "dojo.textquestion",
     "pk": 12
   },
   {
     "fields": {},
-    "model": "defectDojo_engagement_survey.textquestion",
+    "model": "dojo.textquestion",
     "pk": 13
   },
   {
     "fields": {},
-    "model": "defectDojo_engagement_survey.textquestion",
+    "model": "dojo.textquestion",
     "pk": 14
   },
   {
     "fields": {},
-    "model": "defectDojo_engagement_survey.textquestion",
+    "model": "dojo.textquestion",
     "pk": 15
   },
   {
     "fields": {},
-    "model": "defectDojo_engagement_survey.textquestion",
+    "model": "dojo.textquestion",
     "pk": 16
   },
   {
     "fields": {},
-    "model": "defectDojo_engagement_survey.textquestion",
+    "model": "dojo.textquestion",
     "pk": 17
   },
   {
     "fields": {},
-    "model": "defectDojo_engagement_survey.textquestion",
+    "model": "dojo.textquestion",
     "pk": 18
   },
   {
     "fields": {},
-    "model": "defectDojo_engagement_survey.textquestion",
+    "model": "dojo.textquestion",
     "pk": 19
   },
   {
     "fields": {},
-    "model": "defectDojo_engagement_survey.textquestion",
+    "model": "dojo.textquestion",
     "pk": 20
   },
   {
     "fields": {},
-    "model": "defectDojo_engagement_survey.textquestion",
+    "model": "dojo.textquestion",
     "pk": 21
   },
   {
     "fields": {},
-    "model": "defectDojo_engagement_survey.textquestion",
+    "model": "dojo.textquestion",
     "pk": 22
   },
   {
     "fields": {},
-    "model": "defectDojo_engagement_survey.textquestion",
+    "model": "dojo.textquestion",
     "pk": 23
   },
   {
     "fields": {},
-    "model": "defectDojo_engagement_survey.textquestion",
+    "model": "dojo.textquestion",
     "pk": 24
   },
   {
     "fields": {},
-    "model": "defectDojo_engagement_survey.textquestion",
+    "model": "dojo.textquestion",
     "pk": 25
   },
   {
     "fields": {},
-    "model": "defectDojo_engagement_survey.textquestion",
+    "model": "dojo.textquestion",
     "pk": 26
   },
   {
     "fields": {},
-    "model": "defectDojo_engagement_survey.textquestion",
+    "model": "dojo.textquestion",
     "pk": 27
   },
   {
     "fields": {},
-    "model": "defectDojo_engagement_survey.textquestion",
+    "model": "dojo.textquestion",
     "pk": 28
   },
   {
     "fields": {},
-    "model": "defectDojo_engagement_survey.textquestion",
+    "model": "dojo.textquestion",
     "pk": 29
   },
   {
     "fields": {},
-    "model": "defectDojo_engagement_survey.textquestion",
+    "model": "dojo.textquestion",
     "pk": 30
   },
   {
     "fields": {},
-    "model": "defectDojo_engagement_survey.textquestion",
+    "model": "dojo.textquestion",
     "pk": 31
   },
   {
     "fields": {},
-    "model": "defectDojo_engagement_survey.textquestion",
+    "model": "dojo.textquestion",
     "pk": 32
   },
   {
     "fields": {},
-    "model": "defectDojo_engagement_survey.textquestion",
+    "model": "dojo.textquestion",
     "pk": 33
   },
   {
     "fields": {},
-    "model": "defectDojo_engagement_survey.textquestion",
+    "model": "dojo.textquestion",
     "pk": 34
   },
   {
     "fields": {},
-    "model": "defectDojo_engagement_survey.textquestion",
+    "model": "dojo.textquestion",
     "pk": 35
   },
   {
     "fields": {},
-    "model": "defectDojo_engagement_survey.textquestion",
+    "model": "dojo.textquestion",
     "pk": 36
   },
   {
     "fields": {},
-    "model": "defectDojo_engagement_survey.textquestion",
+    "model": "dojo.textquestion",
     "pk": 37
   },
   {
     "fields": {},
-    "model": "defectDojo_engagement_survey.textquestion",
+    "model": "dojo.textquestion",
     "pk": 38
   },
   {
     "fields": {},
-    "model": "defectDojo_engagement_survey.textquestion",
+    "model": "dojo.textquestion",
     "pk": 39
   },
   {
     "fields": {},
-    "model": "defectDojo_engagement_survey.textquestion",
+    "model": "dojo.textquestion",
     "pk": 40
   },
   {
     "fields": {},
-    "model": "defectDojo_engagement_survey.textquestion",
+    "model": "dojo.textquestion",
     "pk": 41
   },
   {
     "fields": {},
-    "model": "defectDojo_engagement_survey.textquestion",
+    "model": "dojo.textquestion",
     "pk": 42
   },
   {
     "fields": {},
-    "model": "defectDojo_engagement_survey.textquestion",
+    "model": "dojo.textquestion",
     "pk": 43
   },
   {
@@ -714,7 +714,7 @@
       ],
       "description": "Questions regarding the products physical infrastructure."
     },
-    "model": "defectDojo_engagement_survey.engagement_survey",
+    "model": "dojo.engagement_survey",
     "pk": 2
   },
   {
@@ -733,7 +733,7 @@
       ],
       "description": "Tell us about the specific components that make up your application."
     },
-    "model": "defectDojo_engagement_survey.engagement_survey",
+    "model": "dojo.engagement_survey",
     "pk": 3
   },
   {
@@ -751,7 +751,7 @@
       ],
       "description": "Tell us about the access control configured for your application."
     },
-    "model": "defectDojo_engagement_survey.engagement_survey",
+    "model": "dojo.engagement_survey",
     "pk": 4
   },
   {
@@ -766,7 +766,7 @@
       ],
       "description": "Tell us how is your application used."
     },
-    "model": "defectDojo_engagement_survey.engagement_survey",
+    "model": "dojo.engagement_survey",
     "pk": 5
   },
   {
@@ -784,7 +784,7 @@
       ],
       "description": "Tell us what kind of data you are storing/managing."
     },
-    "model": "defectDojo_engagement_survey.engagement_survey",
+    "model": "dojo.engagement_survey",
     "pk": 6
   },
   {
@@ -800,7 +800,7 @@
       ],
       "description": "Give us detail about your application."
     },
-    "model": "defectDojo_engagement_survey.engagement_survey",
+    "model": "dojo.engagement_survey",
     "pk": 7
   }
 ]

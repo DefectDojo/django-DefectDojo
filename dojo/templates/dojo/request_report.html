@@ -76,7 +76,7 @@
                         {% for finding in paged_findings %}
                             <tr>
                                 <td><a title="{{ finding.title }}"
-                                       href="{% url 'view_finding' finding.id %}">{{ finding.title|truncatechars:50 }}</a>
+                                       href="{% url 'view_finding' finding.id %}">{{ finding.title|truncatechars_html:50 }}</a>
                                        {% if finding.tags %}
                                        <sup>
                                            {% for tag in finding.tags %}

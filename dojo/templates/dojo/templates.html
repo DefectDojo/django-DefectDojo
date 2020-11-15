@@ -75,8 +75,8 @@
                                     {% if add_from_template %}
                                         <a href="{% url 'add_temp_finding' tid finding.id %}"
                                            class="template-popover" data-placement="auto bottom" data-toggle="popover"
-                                           data-trigger="hover" title="{{ finding.title|truncatechars:100 }}"
-                                           data-content="{{ finding.description|truncatechars:500 }}">
+                                           data-trigger="hover" title="{{ finding.title|truncatechars_html:100 }}"
+                                           data-content="{{ finding.description|truncatechars_html:500 }}">
                                             {{ finding.title }}
                                             <sup>
                                                 {% for tag in finding.tags %}
@@ -87,8 +87,8 @@
                                     {% elif apply_template %}
                                         <a href="{% url 'choose_finding_template_options' finding.id fid %}"
                                            class="template-popover" data-placement="auto bottom" data-toggle="popover"
-                                           data-trigger="hover" title="{{ finding.title|truncatechars:100 }}"
-                                           data-content="{{ finding.description|truncatechars:500 }}">
+                                           data-trigger="hover" title="{{ finding.title|truncatechars_html:100 }}"
+                                           data-content="{{ finding.description|truncatechars_html:500 }}">
                                             {{ finding.title }}
                                             <sup>
                                                 {% for tag in finding.tags %}
@@ -157,14 +157,6 @@
 {% block postscript %}
     <script>
         $(function () {
-            var availableTags = [
-                {% for word in title_words %}
-                    "{{word}}",
-                {% endfor %}
-            ];
-            $("#id_title").autocomplete({
-                source: availableTags
-            });
             $('button.template-delete').on('click', function (e) {
                 return confirm('Are you sure you want to delete this template?')
             });

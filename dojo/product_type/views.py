@@ -24,7 +24,7 @@ Product Type views
 
 def product_type(request):
     # query for names outside of query with prefetch to avoid the complex prefetch query from executing twice
-    name_words = [prod_type.name for prod_type in Product_Type.objects.all().only('name')]
+    name_words = Product_Type.objects.all().values_list('name', flat=True)
 
     prod_types = Product_Type.objects.all()
 
@@ -53,9 +53,12 @@ def prefetch_for_product_type(prod_types):
                                 prod_type__engagement__test__finding__false_p=False,
                                 prod_type__engagement__test__finding__duplicate=False,
                                 prod_type__engagement__test__finding__out_of_scope=False)
-
+        prefetch_prod_types = prefetch_prod_types.prefetch_related('authorized_users')
         prefetch_prod_types = prefetch_prod_types.annotate(findings_count=Count('prod_type__engagement__test__finding__id', filter=active_findings_query))
         prefetch_prod_types = prefetch_prod_types.annotate(prod_count=Count('prod_type', distinct=True))
+        prefetch_prod_types = prefetch_prod_types.annotate(user_count=Count('authorized_users', distinct=True))
+    else:
+        logger.debug('unable to prefetch because query was already executed')
 
     return prefetch_prod_types
 
@@ -84,11 +87,13 @@ def add_product_type(request):
 @user_passes_test(lambda u: u.is_staff)
 def edit_product_type(request, ptid):
     pt = get_object_or_404(Product_Type, pk=ptid)
-    pt_form = Product_TypeForm(instance=pt)
+    authed_users = pt.authorized_users.all()
+    pt_form = Product_TypeForm(instance=pt, initial={'authorized_users': authed_users})
     delete_pt_form = Delete_Product_TypeForm(instance=pt)
     if request.method == "POST" and request.POST.get('edit_product_type'):
         pt_form = Product_TypeForm(request.POST, instance=pt)
         if pt_form.is_valid():
+            pt.authorized_users.set(pt_form.cleaned_data['authorized_users'])
             pt = pt_form.save()
             messages.add_message(
                 request,

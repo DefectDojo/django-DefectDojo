@@ -6,7 +6,7 @@ update_configs:
     update_schedule: "live"
 
   - package_manager: "javascript"
-    directory: "/"
+    directory: "/components"
     target_branch: "dev"
     update_schedule: "live"
 

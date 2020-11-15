@@ -1,15 +1,16 @@
 # Running with Docker Compose
 
-Docker compose is not intended for production use.
-If you want to deploy a containerized DefectDojo to a production environment,
-use the [Default installation](setup/README.md) approach.
+The docker-compose.yml in this repo is not intended for production use without first customizing it to fit your specific situation.  Please consider the docker-compose.yml files are templates to create on that fits your needs.
+Docker Compose is acceptable if you want to deploy a containerized DefectDojo to a production environment.
+It is one of the supported [Default installation](setup/README.md) methods.
 
 # Prerequisites
 *  Docker version
     *  Installing with docker-compose requires at least docker 18.09.4 and docker-compose 1.24.0. See "Checking Docker versions" below for version errors during running docker-compose.
 *  Proxies
     *  If you're behind a corporate proxy check https://docs.docker.com/network/proxy/ . 
-
+*  Known issues
+    * finding images only work in `dev` and `ptvsd` mode. Making them work in `release` mode requires modifications to the docker-compose configuration.
 
 # Setup via Docker Compose - introduction
 
@@ -48,6 +49,7 @@ or
 docker-compose build nginx
 ```
 
+> **_NOTE:_**  It's possible to add extra fixtures in folder "/docker/extra_fixtures".
 
 ## Run with Docker compose in release mode
 To run the application based on previously built image (or based on dockerhub images if none was locally built), run: 
@@ -67,8 +69,8 @@ In this setup, you need to rebuild django and/or nginx images after each code ch
 For development, use: 
 
 ```zsh
-cp dojo/settings/settings.dist.py dojo/settings/settings.py
 docker/setEnv.sh dev
+docker-compose build
 docker-compose up
 ```
 
@@ -92,9 +94,7 @@ To update changes in static resources, served by nginx, just refresh the browser
 
 *Notes about volume permissions*
 
-*The manual copy of settings.py is sometimes required once after cloning the repository, on linux hosts when the host files cannot be modified from within the django container. In that case that copy in entrypoint-uwsgi-dev.sh fails.* 
-
-*Another way to fix this is changing `USER 1001` in Dockerfile.django to match your user uid and then rebuild the images. Get your user id with* 
+*If you run into permission issues with the mounted volumes, a way to fix this is changing `USER 1001` in Dockerfile.django to match your user uid and then rebuild the images. Get your user id with* 
 
 ```
 id -u
@@ -107,7 +107,6 @@ If you want to be able to step in your code, you can activate ptvsd.Server.
 You can launch your local dev instance of DefectDojo as
 
 ```zsh
-cp dojo/settings/settings.dist.py dojo/settings/settings.py
 docker/setEnv.sh ptvsd
 docker-compose up
 ```
@@ -152,6 +151,15 @@ docker-compose logs initializer | grep "Admin password:"
 ```
 
 Make sure you write down the first password generated as you'll need it when re-starting the application.
+
+# Option to change the password 
+* If you dont have admin password use the below command to change the password. 
+* After starting the container and open another tab in the same folder.  
+* django-defectdojo_uwsgi_1 -- name obtained from running containers using ```zsh docker ps ``` command
+
+```zsh
+docker exec -it django-defectdojo_uwsgi_1 ./manage.py changepassword admin
+```
 
 # Exploitation, versioning
 ## Disable the database initialization
@@ -253,7 +261,6 @@ The integration-tests are under `tests`
 This will run all unit-tests and leave the uwsgi container up: 
 
 ```
-cp dojo/settings/settings.dist.py dojo/settings/settings.py
 docker/setEnv.sh unit_tests
 docker-compose up
 ```
@@ -284,7 +291,6 @@ python manage.py test dojo.unittests.test_dependency_check_parser.TestDependency
 This will run all integration-tests and leave the containers up: 
 
 ```
-cp dojo/settings/settings.dist.py dojo/settings/settings.py
 docker/setEnv.sh integration_tests
 docker-compose up
 ```

@@ -12,8 +12,10 @@ class AWSScout2Parser(object):
     pdepth = 0
 
     def __init__(self, filename, test):
-        raw_data = filename.read()
-        raw_data = raw_data.replace("aws_info =", "")
+        # filename is instance of class 'django.core.files.uploadedfile.TemporaryUploadedFile'>
+        with open(filename.temporary_file_path(), "r") as fileobj:
+            raw_data = fileobj.read()
+            raw_data = raw_data.replace("aws_info =", "")
         data = json.loads(raw_data)
         find_date = datetime.now()
         dupes = {}
@@ -100,7 +102,7 @@ class AWSScout2Parser(object):
     def formatview(self, depth):
         if depth > 1:
             return "* "
-            print("depth hit")
+            # print("depth hit")
         else:
             return ""
 
