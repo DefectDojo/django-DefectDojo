@@ -1806,7 +1806,7 @@ class Finding(models.Model):
         if hasattr(settings, 'HASHCODE_FIELDS_PER_SCANNER') and hasattr(settings, 'HASHCODE_ALLOWS_NULL_CWE') and hasattr(settings, 'HASHCODE_ALLOWED_FIELDS'):
             # Default fields
             if self.dynamic_finding:
-                deduplicationLogger.debug('dynamig finding, so including endpoints in hash_code computation as default')
+                deduplicationLogger.debug('dynamic finding, so including endpoints in hash_code computation as default')
                 hashcodeFields = ['title', 'cwe', 'line', 'file_path', 'description', 'endpoints']
             else:
                 hashcodeFields = ['title', 'cwe', 'line', 'file_path', 'description']
@@ -1860,7 +1860,7 @@ class Finding(models.Model):
     def compute_hash_code_legacy(self):
         fields_to_hash = self.title + str(self.cwe) + str(self.line) + str(self.file_path) + self.description
         if self.dynamic_finding:
-            deduplicationLogger.debug('dynamig finding, so including endpoints in hash_code computation for legacy algo')
+            deduplicationLogger.debug('dynamic finding, so including endpoints in hash_code computation for legacy algo')
             fields_to_hash = fields_to_hash + self.get_endpoints()
         deduplicationLogger.debug("compute_hash_code_legacy - fields_to_hash = " + fields_to_hash)
         return self.hash_fields(fields_to_hash)
@@ -2149,7 +2149,7 @@ class Finding(models.Model):
 
         # Adding a snippet here for push to JIRA so that it's in one place
         if push_to_jira:
-            logger.debug('pushing to jira from finding.save()')
+            logger.debug('pushing finding %s to jira from finding.save()', self.pk)
             import dojo.jira_link.helper as jira_helper
             jira_helper.push_to_jira(self)
 
@@ -2637,10 +2637,10 @@ class JIRA_Project(models.Model):
         return jira_instance
 
     def __unicode__(self):
-        return self.project_key + '(%s)' % (str(self.jira_instance.configuration_name) if self.jira_instance else '')
+        return self.project_key + '(%s)' % (str(self.jira_instance.url) if self.jira_instance else 'None')
 
     def __str__(self):
-        return self.project_key + '(%s)' % (str(self.jira_instance.configuration_name) if self.jira_instance else '')
+        return self.project_key + '(%s)' % (str(self.jira_instance.url) if self.jira_instance else 'None')
 
 
 class JIRA_Issue(models.Model):

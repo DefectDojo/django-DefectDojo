@@ -85,12 +85,13 @@ class BaseClass():
         def test_update(self):
             current_objects = self.client.get(self.url, format='json').data
             relative_url = self.url + '%s/' % current_objects['results'][0]['id']
-            response = self.client.patch(
-                relative_url, self.update_fields)
+            response = self.client.patch(relative_url, self.update_fields)
+
             for key, value in self.update_fields.items():
                 # some exception as push_to_jira has been implemented strangely in the update methods in the api
                 if key != 'push_to_jira':
                     self.assertEqual(value, response.data[key])
+
             self.assertFalse('push_to_jira' in response.data)
             response = self.client.put(
                 relative_url, self.payload)

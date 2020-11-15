@@ -64,7 +64,7 @@ def webhook(request, secret=None):
                 resolution = parsed['issue']['fields']['resolution']
 
                 #         "resolution":{
-                #             "self":"https://jira.isaac.nl/rest/api/2/resolution/11",
+                #             "self":"http://www.testjira.com/rest/api/2/resolution/11",
                 #             "id":"11",
                 #             "description":"Cancelled by the customer.",
                 #             "name":"Cancelled"
@@ -233,6 +233,7 @@ def new_jira(request):
             jira_username = jform.cleaned_data.get('username')
             jira_password = jform.cleaned_data.get('password')
 
+            logger.debug('calling get_jira_connection_raw')
             jira = jira_helper.get_jira_connection_raw(jira_server, jira_username, jira_password)
 
             new_j = jform.save(commit=False)
@@ -354,17 +355,17 @@ def delete_jira(request, tid):
     # "timestamp":1605117321425,
     # "webhookEvent":"comment_created",
     # "comment":{
-    #     "self":"https://jira.isaac.nl/rest/api/2/issue/89820/comment/456843",
+    #     "self":"http://www.testjira.com/rest/api/2/issue/89820/comment/456843",
     #     "id":"456843",
     #     "author":{
-    #         "self":"https://jira.isaac.nl/rest/api/2/user?username=valentijn",
+    #         "self":"http://www.testjira.com/rest/api/2/user?username=valentijn",
     #         "name":"valentijn",
     #         "key":"valentijn",
     #         "avatarUrls":{
-    #             "48x48":"https://jira.isaac.nl/secure/useravatar?ownerId=valentijn&avatarId=11101",
-    #             "24x24":"https://jira.isaac.nl/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
-    #             "16x16":"https://jira.isaac.nl/secure/useravatar?size=x small&ownerId=valentijn&avatarId=11101",
-    #             "32x32":"https://jira.isaac.nl/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101"
+    #             "48x48":"http://www.testjira.com/secure/useravatar?ownerId=valentijn&avatarId=11101",
+    #             "24x24":"http://www.testjira.com/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
+    #             "16x16":"http://www.testjira.com/secure/useravatar?size=x small&ownerId=valentijn&avatarId=11101",
+    #             "32x32":"http://www.testjira.com/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101"
     #         },
     #         "displ ayName":"Valentijn Scholten",
     #         "active":true,
@@ -372,14 +373,14 @@ def delete_jira(request, tid):
     #     },
     #     "body":"test2",
     #     "updateAuthor":{
-    #         "self":"https://jira.isaac.nl/rest/ap i/2/user?username=valentijn",
+    #         "self":"http://www.testjira.com/rest/ap i/2/user?username=valentijn",
     #         "name":"valentijn",
     #         "key":"valentijn",
     #         "avatarUrls":{
-    #             "48x48":"https://jira.isaac.nl/secure/useravatar?ownerId=valentijn&avatarId=11101",
-    #             "24x24":"https://jira.isaac.nl/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
-    #             "16x16":"https://jira.isaac.nl/secure/useravatar?size=xsmall&ownerId=valentijn&avatarId=11101",
-    #             "32x32":"https://jira.isaac.nl/secure/useravatar?size=medium&ownerId=valen tijn&avatarId=11101"
+    #             "48x48":"http://www.testjira.com/secure/useravatar?ownerId=valentijn&avatarId=11101",
+    #             "24x24":"http://www.testjira.com/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
+    #             "16x16":"http://www.testjira.com/secure/useravatar?size=xsmall&ownerId=valentijn&avatarId=11101",
+    #             "32x32":"http://www.testjira.com/secure/useravatar?size=medium&ownerId=valen tijn&avatarId=11101"
     #         },
     #         "displayName":"Valentijn Scholten",
     #         "active":true,
@@ -397,15 +398,15 @@ def delete_jira(request, tid):
 #    "webhookEvent":"jira:issue_updated",
 #    "issue_event_type_name":"issue_commented",
 #    "user":{
-#       "self":"https://jira.isaac.nl/rest/api/2/user?username=valentijn",
+#       "self":"http://www.testjira.com/rest/api/2/user?username=valentijn",
 #       "name":"valentijn",
 #       "key":"valentijn",
 #       "emailAddress ":"valentijn.scholten@isaac.nl",
 #       "avatarUrls":{
-#          "48x48":"https://jira.isaac.nl/secure/useravatar?ownerId=valentijn&avatarId=11101",
-#          "24x24":"http s://jira.isaac.nl/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
-#          "16x16":"https://jira.isaac.nl/secure/useravatar?size=xsmall& ownerId=valentijn&avatarId=11101",
-#          "32x32":"https://jira.isaac.nl/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101"
+#          "48x48":"http://www.testjira.com/secure/useravatar?ownerId=valentijn&avatarId=11101",
+#          "24x24":"http://www.testjira.com/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
+#          "16x16":"http://www.testjira.com/secure/useravatar?size=xsmall& ownerId=valentijn&avatarId=11101",
+#          "32x32":"http://www.testjira.com/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101"
 #       },
 #       "displayName ":"Valentijn Scholten",
 #       "active":true,
@@ -413,14 +414,14 @@ def delete_jira(request, tid):
 #    },
 #    "issue":{
 #       "id":"89820",
-#       "self":"https://jira.isaac.nl/rest/api/2/issue/89820 ",
+#       "self":"http://www.testjira.com/rest/api/2/issue/89820 ",
 #       "key":"ISEC-277",
 #       "fields":{
 #          "issuetype":{
-#             "self":"https://jira.isaac.nl/rest/api/2/issuetype/3",
+#             "self":"http://www.testjira.com/rest/api/2/issuetype/3",
 #             "id":"3",
 #             "description":"A task is some piece o f work that can be assigned to a user. This does not always result in a quotation/estimate, as it is often some task that needs to be performe d in the context of an existing contract. ",
-#             "iconUrl":"https://jira.isaac.nl/secure/viewavatar?size=xsmall&avatarId=16681&avatarType=issuetype",
+#             "iconUrl":"http://www.testjira.com/secure/viewavatar?size=xsmall&avatarId=16681&avatarType=issuetype",
 #             "name":"Task",
 #             "subtask":false,
 #             "avatarId":16681
@@ -428,19 +429,19 @@ def delete_jira(request, tid):
 #          "timespent":null,
 #          "customfield_10195":null,
 #          "project":{
-#             "self":"https://jira.isaac.nl/rest/api/2/project/13532",
+#             "self":"http://www.testjira.com/rest/api/2/project/13532",
 #             "id":"13532",
 #             "key":"ISEC",
 #             "name":"ISAAC security",
 #             "projectTypeKey":"software",
 #             "avatarUrls":{
-#                "48x48":"https://jira.isaac.nl/secure/projectavatar?avatarId=14803",
-#                "24x24":"https://jira.isaac.nl/secure/projectavatar?size=small&avatarId=14803",
-#                "16x16":"https://jira.isaac.nl/secure/projectavatar?size=xsmall&avatarId=14803",
-#                "32x32":"https://jira.isaac.nl/secure/projectavatar?size=medium&avatarId=14803"
+#                "48x48":"http://www.testjira.com/secure/projectavatar?avatarId=14803",
+#                "24x24":"http://www.testjira.com/secure/projectavatar?size=small&avatarId=14803",
+#                "16x16":"http://www.testjira.com/secure/projectavatar?size=xsmall&avatarId=14803",
+#                "32x32":"http://www.testjira.com/secure/projectavatar?size=medium&avatarId=14803"
 #             },
 #             "projectCategory":{
-#                "self":"https://jira.isaac.nl/rest/api/2/projectCategory/10032",
+#                "self":"http://www.testjira.com/rest/api/2/projectCategory/10032",
 #                "id":"10032",
 #                "description":"All internal isaac projects.",
 #                "name":"isaac internal"
@@ -459,12 +460,12 @@ def delete_jira(request, tid):
 #          "workratio":-1,
 #          "lastViewed":"2020-11-11T18:54:32.489+0100",
 #          "watches":{
-#             "self":"https://jira.isaac.nl/rest/api/2/issue/ISEC-277/watchers",
+#             "self":"http://www.testjira.com/rest/api/2/issue/ISEC-277/watchers",
 #             "watchCount":1,
 #             "isWatching":true
 #          },
 #          "customfield_10060":[
-#             "defect.dojo(defect.dojo)",
+#             "dojo_user(dojo_user)",
 #             "valentijn(valentijn)"
 #          ],
 #          "customfield_10182":null,
@@ -475,8 +476,8 @@ def delete_jira(request, tid):
 #          "customfield_12045":null,
 #          "customfield_10100":null,
 #          "priority":{
-#             "self":"https://jira.isaac.nl/rest/api/2/priority/5",
-#             "iconUrl":"https://jira.isaac.nl/images/icons/priorities/trivial.svg",
+#             "self":"http://www.testjira.com/rest/api/2/priority/5",
+#             "iconUrl":"http://www.testjira.com/images/icons/priorities/trivial.svg",
 #             "name":"Trivial (Sev5)",
 #             "id":"5"
 #          },
@@ -491,15 +492,15 @@ def delete_jira(request, tid):
 #          "issuelinks":[
 #          ],
 #          "assignee":{
-#             "self":"https://jira.isaac.nl/rest/api/2/user?username=valentijn",
+#             "self":"http://www.testjira.com/rest/api/2/user?username=valentijn",
 #             "name":"valentijn",
 #             "key":"valentijn",
 #             "emailAddress":"valentijn.scholten@isaac.nl",
 #             "avatarUrls":{
-#                "48x48":"https://jira.isaac.nl/secure/useravatar?ownerId=valentijn&avatarId=11101",
-#                "24x24":"https://jira.isaac.nl/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
-#                "16x16":"https://jira.isaac.nl/secure/useravatar?size=xsmall&ownerId=valentijn&avatarId=11101",
-#                "32x32":"https://jira.isaac.nl/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101"
+#                "48x48":"http://www.testjira.com/secure/useravatar?ownerId=valentijn&avatarId=11101",
+#                "24x24":"http://www.testjira.com/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
+#                "16x16":"http://www.testjira.com/secure/useravatar?size=xsmall&ownerId=valentijn&avatarId=11101",
+#                "32x32":"http://www.testjira.com/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101"
 #             },
 #             "displayName":"Valentijn Scholten",
 #             "active":true,
@@ -507,13 +508,13 @@ def delete_jira(request, tid):
 #          },
 #          "updated":"2020-11-11T18:54:32.155+0100",
 #          "status":{
-#             "self":"https://jira.isaac.nl/rest/api/2/status/10022",
+#             "self":"http://www.testjira.com/rest/api/2/status/10022",
 #             "description":"Incoming/New issues.",
-#             "iconUrl":"https://jira.isaac.nl/isaac_content/icons/isaac_status_new.gif",
+#             "iconUrl":"http://www.testjira.com/isaac_content/icons/isaac_status_new.gif",
 #             "name":"New",
 #             "id":"10022",
 #             "statusCategory":{
-#                "self":"https://jira.isaac.nl/rest/api/2/statuscategory/2",
+#                "self":"http://www.testjira.com/rest/api/2/statuscategory/2",
 #                "id":2,
 #                "key":"new",
 #                "colorName":"blue-gray",
@@ -534,9 +535,9 @@ def delete_jira(request, tid):
 #          "aggregatetimeestimate":null,
 #          "summary":"Regular Expression Denial of Service - (braces, <2.3.1)",
 #          "creator":{
-#             "self":"https://jira.isaac.nl/rest/api/2/user?username=defect.dojo",
-#             "name":"defect.dojo",
-#             "key":"defect.dojo",
+#             "self":"http://www.testjira.com/rest/api/2/user?username=dojo_user",
+#             "name":"dojo_user",
+#             "key":"dojo_user",
 #             "emailAddress":"defectdojo@isaac.nl",
 #             "avatarUrls":{
 #                "48x48":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=48",
@@ -554,9 +555,9 @@ def delete_jira(request, tid):
 #          "customfield_12140":null,
 #          "customfield_10240":"9223372036854775807",
 #          "reporter":{
-#             "self":"https://jira.isaac.nl/rest/api/2/user?username=defect.dojo",
-#             "name":"defect.dojo",
-#             "key":"defect.dojo",
+#             "self":"http://www.testjira.com/rest/api/2/user?username=dojo_user",
+#             "name":"dojo_user",
+#             "key":"dojo_user",
 #             "emailAddress":"defectdojo@isaac.nl",
 #             "avatarUrls":{
 #                "48x48":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=48",
@@ -583,18 +584,18 @@ def delete_jira(request, tid):
 #          "comment":{
 #             "comments":[
 #                {
-#                   "self":"https://jira.isaac.nl/rest/api/2/issue/89820/comment/456841",
+#                   "self":"http://www.testjira.com/rest/api/2/issue/89820/comment/456841",
 #                   "id":"456841",
 #                   "author":{
-#                      "self":"https://jira.isaac.nl/rest/api/2/user?username=valentijn",
+#                      "self":"http://www.testjira.com/rest/api/2/user?username=valentijn",
 #                      "name":"valentijn",
 #                      "key":"valentijn",
 #                      "emailAddress":"valentijn.scholten@isaac.nl",
 #                      "avatarUrls":{
-#                         "48x48":"https://jira.isaac.nl/secure/useravatar?ownerId=valentijn&avatarId=11101",
-#                         "24x24":"https://jira.isaac.nl/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
-#                         "16x16":"https://jira.isaac.nl/secure/useravatar?size=xsmall&ownerId=valentijn&avatarId=11101",
-#                         "32x32":"https://jira.isaac.nl/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101"
+#                         "48x48":"http://www.testjira.com/secure/useravatar?ownerId=valentijn&avatarId=11101",
+#                         "24x24":"http://www.testjira.com/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
+#                         "16x16":"http://www.testjira.com/secure/useravatar?size=xsmall&ownerId=valentijn&avatarId=11101",
+#                         "32x32":"http://www.testjira.com/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101"
 #                      },
 #                      "displayName":"Valentijn Scholten",
 #                      "active":true,
@@ -602,15 +603,15 @@ def delete_jira(request, tid):
 #                   },
 #                   "body":"test comment valentijn",
 #                   "updateAuthor":{
-#                      "self":"https://jira.isaac.nl/rest/api/2/user?username=valentijn",
+#                      "self":"http://www.testjira.com/rest/api/2/user?username=valentijn",
 #                      "name":"valentijn",
 #                      "key":"valentijn",
 #                      "emailAddress":"valentijn.scholten@isaac.nl",
 #                      "avatarUrls":{
-#                         "48x48":"https://jira.isaac.nl/secure/useravatar?ownerId=valentijn&avatarId=11101",
-#                         "24x24":"https://jira.isaac.nl/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
-#                         "16x16":"https://jira.isaac.nl/secure/useravatar?size=xsmall&ownerId=valentijn&avatarId=11101",
-#                         "32x32":"https://jira.isaac.nl/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101"
+#                         "48x48":"http://www.testjira.com/secure/useravatar?ownerId=valentijn&avatarId=11101",
+#                         "24x24":"http://www.testjira.com/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
+#                         "16x16":"http://www.testjira.com/secure/useravatar?size=xsmall&ownerId=valentijn&avatarId=11101",
+#                         "32x32":"http://www.testjira.com/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101"
 #                      },
 #                      "displayName":"Valentijn Scholten",
 #                      "active":true,
@@ -620,18 +621,18 @@ def delete_jira(request, tid):
 #                   "updated":"2020-11-11T18:54:32.155+0100"
 #                },
 #                {
-#                   "self":"https://jira.isaac.nl/rest/api/2/issue/89820/comment/456843",
+#                   "self":"http://www.testjira.com/rest/api/2/issue/89820/comment/456843",
 #                   "id":"456843",
 #                   "author":{
-#                      "self":"https://jira.isaac.nl/rest/api/2/user?username=valentijn",
+#                      "self":"http://www.testjira.com/rest/api/2/user?username=valentijn",
 #                      "name":"valentijn",
 #                      "key":"valentijn",
 #                      "emailAddress":"valentijn.scholten@isaac.nl",
 #                      "avatarUrls":{
-#                         "48x48":"https://jira.isaac.nl/secure/useravatar?ownerId=valentijn&avatarId=11101",
-#                         "24x24":"https://jira.isaac.nl/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
-#                         "16x16":"https://jira.isaac.nl/secure/useravatar?size=xsmall&ownerId=valentijn&avatarId=11101",
-#                         "32x32":"https://jira.isaac.nl/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101"
+#                         "48x48":"http://www.testjira.com/secure/useravatar?ownerId=valentijn&avatarId=11101",
+#                         "24x24":"http://www.testjira.com/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
+#                         "16x16":"http://www.testjira.com/secure/useravatar?size=xsmall&ownerId=valentijn&avatarId=11101",
+#                         "32x32":"http://www.testjira.com/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101"
 #                      },
 #                      "displayName":"Valentijn Scholten",
 #                      "active":true,
@@ -639,15 +640,15 @@ def delete_jira(request, tid):
 #                   },
 #                   "body":"test2",
 #                   "updateAuthor":{
-#                      "self":"https://jira.isaac.nl/rest/api/2/user?username=valentijn",
+#                      "self":"http://www.testjira.com/rest/api/2/user?username=valentijn",
 #                      "name":"valentijn",
 #                      "key":"valentijn",
 #                      "emailAddress":"valentijn.scholten@isaac.nl",
 #                      "avatarUrls":{
-#                         "48x48":"https://jira.isaac.nl/secure/useravatar?ownerId=valentijn&avatarId=11101",
-#                         "24x24":"https://jira.isaac.nl/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
-#                         "16x16":"https://jira.isaac.nl/secure/useravatar?size=xsmall&ownerId=valentijn&avatarId=11101",
-#                         "32x32":"https://jira.isaac.nl/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101"
+#                         "48x48":"http://www.testjira.com/secure/useravatar?ownerId=valentijn&avatarId=11101",
+#                         "24x24":"http://www.testjira.com/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
+#                         "16x16":"http://www.testjira.com/secure/useravatar?size=xsmall&ownerId=valentijn&avatarId=11101",
+#                         "32x32":"http://www.testjira.com/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101"
 #                      },
 #                      "displayName":"Valentijn Scholten",
 #                      "active":true,
@@ -671,18 +672,18 @@ def delete_jira(request, tid):
 #       }
 #    },
 #    "comment":{
-#       "self":"https://jira.isaac.nl/rest/api/2/issue/89820/comment/456843",
+#       "self":"http://www.testjira.com/rest/api/2/issue/89820/comment/456843",
 #       "id":"456843",
 #       "author":{
-#          "self":"https://jira.isaac.nl/rest/api/2/user?username=valentijn",
+#          "self":"http://www.testjira.com/rest/api/2/user?username=valentijn",
 #          "name":"valentijn",
 #          "key":"valentijn",
 #          "emailAddress":"valentijn.scholten@isaac.nl",
 #          "avatarUrls":{
-#             "48x48":"https://jira.isaac.nl/secure/useravatar?ownerId=valentijn&avatarId=11101",
-#             "24x24":"https://jira.isaac.nl/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
-#             "16x16":"https://jira.isaac.nl/secure/useravatar?size=xsmall&ownerId=valentijn&avatarId=11101",
-#             "32x32":"https://jira.isaac.nl/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101"
+#             "48x48":"http://www.testjira.com/secure/useravatar?ownerId=valentijn&avatarId=11101",
+#             "24x24":"http://www.testjira.com/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
+#             "16x16":"http://www.testjira.com/secure/useravatar?size=xsmall&ownerId=valentijn&avatarId=11101",
+#             "32x32":"http://www.testjira.com/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101"
 #          },
 #          "displayName":"Valentijn Scholten",
 #          "active":true,
@@ -690,15 +691,15 @@ def delete_jira(request, tid):
 #       },
 #       "body":"test2",
 #       "updateAuthor":{
-#          "self":"https://jira.isaac.nl/rest/api/2/user?username=valentijn",
+#          "self":"http://www.testjira.com/rest/api/2/user?username=valentijn",
 #          "name":"valentijn",
 #          "key":"valentijn",
 #          "emailAddress":"valentijn.scholten@isaac.nl",
 #          "avatarUrls":{
-#             "48x48":"https://jira.isaac.nl/secure/useravatar?ownerId=valentijn&avatarId=11101",
-#             "24x24":"https://jira.isaac.nl/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
-#             "16x16":"https://jira.isaac.nl/secure/useravatar?size=xsmall&ownerId=valentijn&avatarId=11101",
-#             "32x32":"https://jira.isaac.nl/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101"
+#             "48x48":"http://www.testjira.com/secure/useravatar?ownerId=valentijn&avatarId=11101",
+#             "24x24":"http://www.testjira.com/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
+#             "16x16":"http://www.testjira.com/secure/useravatar?size=xsmall&ownerId=valentijn&avatarId=11101",
+#             "32x32":"http://www.testjira.com/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101"
 #          },
 #          "displayName":"Valentijn Scholten",
 #          "active":true,
@@ -716,15 +717,15 @@ def delete_jira(request, tid):
 #    "webhookEvent":"jira:issue_updated",
 #    "issue_event_type_name":"issue_closed",
 #    "user":{
-#       "self":"https://jira.isaac.nl/rest/api/2/user?username=valentijn",
+#       "self":"http://www.testjira.com/rest/api/2/user?username=valentijn",
 #       "name":"valentijn",
 #       "key":"valentijn",
 #       "emailAddress":"valentijn.scholten@isaac.nl",
 #       "avatarUrls":{
-#          " 48x48":"https://jira.isaac.nl/secure/useravatar?ownerId=valentijn&avatarId=11101",
-#          "24x24":"https://jira.isaac.nl/secure/useravatar?size=small&ownerId=valentijn&avat arId=11101",
-#          "16x16":"https://jira.isaac.nl/secure/useravatar?size=xsmall&ownerId=valentijn&avatarId=11101",
-#          "32x32":"https://jira.isaac.nl/secure/useravatar?size=med ium&ownerId=valentijn&avatarId=11101"
+#          " 48x48":"http://www.testjira.com/secure/useravatar?ownerId=valentijn&avatarId=11101",
+#          "24x24":"http://www.testjira.com/secure/useravatar?size=small&ownerId=valentijn&avat arId=11101",
+#          "16x16":"http://www.testjira.com/secure/useravatar?size=xsmall&ownerId=valentijn&avatarId=11101",
+#          "32x32":"http://www.testjira.com/secure/useravatar?size=med ium&ownerId=valentijn&avatarId=11101"
 #       },
 #       "displayName":"Valentijn Scholten",
 #       "active":true,
@@ -736,10 +737,10 @@ def delete_jira(request, tid):
 #       "key":"ISEC-277",
 #       "fields":{
 #          "issuetype":{
-#             "self":"https://jira.isaac.nl/rest/api/2/issuetype/3",
+#             "self":"http://www.testjira.com/rest/api/2/issuetype/3",
 #             "id":"3",
 #             "description":"A task is some piece of work that can be assigned to a user. This does not always result in a quotation/estimate, as it is often some task that needs to be performed in the contex t of an existing contract. ",
-#             "iconUrl":"https://jira.isaac.nl/secure/viewavatar?size=xsmall&avatarId=16681&avatarType=issuetype",
+#             "iconUrl":"http://www.testjira.com/secure/viewavatar?size=xsmall&avatarId=16681&avatarType=issuetype",
 #             "name":"Task",
 #             "subtask":false,
 #             "avatarId":16681
@@ -747,19 +748,19 @@ def delete_jira(request, tid):
 #          "timespent":null,
 #          "customfield_10195":null,
 #          "project":{
-#             "self":"https://jira.isaac.nl/rest/api/2/project/13532",
+#             "self":"http://www.testjira.com/rest/api/2/project/13532",
 #             "id":"13532",
 #             "key":"ISEC",
 #             "name":"ISAAC se curity",
 #             "projectTypeKey":"software",
 #             "avatarUrls":{
-#                "48x48":"https://jira.isaac.nl/secure/projectavatar?avatarId=14803",
-#                "24x24":"https://jira.isaac.nl/secure/projecta vatar?size=small&avatarId=14803",
-#                "16x16":"https://jira.isaac.nl/secure/projectavatar?size=xsmall&avatarId=14803",
-#                "32x32":"https://jira.isaac.nl/secure/projectavatar ?size=medium&avatarId=14803"
+#                "48x48":"http://www.testjira.com/secure/projectavatar?avatarId=14803",
+#                "24x24":"http://www.testjira.com/secure/projecta vatar?size=small&avatarId=14803",
+#                "16x16":"http://www.testjira.com/secure/projectavatar?size=xsmall&avatarId=14803",
+#                "32x32":"http://www.testjira.com/secure/projectavatar ?size=medium&avatarId=14803"
 #             },
 #             "projectCategory":{
-#                "self":"https://jira.isaac.nl/rest/api/2/projectCategory/10032",
+#                "self":"http://www.testjira.com/rest/api/2/projectCategory/10032",
 #                "id":"10032",
 #                "description":"All internal isaac proj ects.",
 #                "name":"isaac internal"
@@ -772,7 +773,7 @@ def delete_jira(request, tid):
 #          "aggregatetimespent":null,
 #          "customfield_11640":null,
 #          "resol ution":{
-#             "self":"https://jira.isaac.nl/rest/api/2/resolution/11",
+#             "self":"http://www.testjira.com/rest/api/2/resolution/11",
 #             "id":"11",
 #             "description":"Cancelled by the customer.",
 #             "name":"Cancelled"
@@ -785,12 +786,12 @@ def delete_jira(request, tid):
 #       "workratio":-1,
 #       "lastViewed":"2 020-11-11T21:06:26.501+0100",
 #       "watches":{
-#          "self":"https://jira.isaac.nl/rest/api/2/issue/ISEC-277/watchers",
+#          "self":"http://www.testjira.com/rest/api/2/issue/ISEC-277/watchers",
 #          "watchCount":1,
 #          "isWatching":true
 #       },
 #       "customfield_10060":[
-#          "de fect.dojo(defect.dojo)",
+#          "de fect.dojo(dojo_user)",
 #          "valentijn(valentijn)"
 #       ],
 #       "customfield_10182":null,
@@ -801,7 +802,7 @@ def delete_jira(request, tid):
 #       "customfield_12045":null,
 #       "customfield_10100":null,
 #       "priority":{
-#          "self":"https://jira.isaac.nl/rest/api/2/priority/5",
+#          "self":"http://www.testjira.com/rest/api/2/priority/5",
 #          "iconUrl":"https://jira. isaac.nl/images/icons/priorities/trivial.svg",
 #          "name":"Trivial (Sev5)",
 #          "id":"5"
@@ -817,15 +818,15 @@ def delete_jira(request, tid):
 #       "issuelinks":[
 #       ],
 #       "assignee":{
-#          "self":"https://jira.isaac.nl/rest/api/2/user?username=valentijn",
+#          "self":"http://www.testjira.com/rest/api/2/user?username=valentijn",
 #          "name":"valentijn",
 #          "key":"va lentijn",
 #          "emailAddress":"valentijn.scholten@isaac.nl",
 #          "avatarUrls":{
-#             "48x48":"https://jira.isaac.nl/secure/useravatar?ownerId=valentijn&avatarId=11101",
+#             "48x48":"http://www.testjira.com/secure/useravatar?ownerId=valentijn&avatarId=11101",
 #             "24x24":"http s://jira.isaac.nl/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
-#             "16x16":"https://jira.isaac.nl/secure/useravatar?size=xsmall&ownerId=valentijn&avat arId=11101",
-#             "32x32":"https://jira.isaac.nl/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101"
+#             "16x16":"http://www.testjira.com/secure/useravatar?size=xsmall&ownerId=valentijn&avat arId=11101",
+#             "32x32":"http://www.testjira.com/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101"
 #          },
 #          "displayName":"Valentijn Scholten",
 #          "active":true,
@@ -833,13 +834,13 @@ def delete_jira(request, tid):
 #       },
 #       "updated":"2020-11-11T21:06:26.671+0100",
 #       "status":{
-#          "self":"https://jira.isaac.nl/rest/api/2/status/6",
+#          "self":"http://www.testjira.com/rest/api/2/status/6",
 #          "description":"The issue is closed and finished.",
-#          "iconUrl":"https://jira.isaac.nl/isaac_content/icons/isaac_status_closed.gif",
+#          "iconUrl":"http://www.testjira.com/isaac_content/icons/isaac_status_closed.gif",
 #          "name":"Closed",
 #          "id":"6",
 #          "statusCategory":{
-#             "self":"https://jira.isaac.nl/r est/api/2/statuscategory/3",
+#             "self":"http://www.testjira.com/r est/api/2/statuscategory/3",
 #             "id":3,
 #             "key":"done",
 #             "colorName":"green",
@@ -862,9 +863,9 @@ def delete_jira(request, tid):
 #       "aggregatetimeestimate":0,
 #       "summary":"Regular Expression Denial of Service - (braces, <2.3.1)",
 #       "creator":{
-#          "self":"https://jira.isaac.nl/rest/api/2/user?username=defect.dojo",
-#          "name":"defect.dojo",
-#          "key":"defect.dojo",
+#          "self":"http://www.testjira.com/rest/api/2/user?username=dojo_user",
+#          "name":"dojo_user",
+#          "key":"dojo_user",
 #          "emailAddress":"defectdojo@isaac.nl",
 #          "avatarUrls":{
 #             "48x48":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=48",
@@ -882,9 +883,9 @@ def delete_jira(request, tid):
 #       "customfield_12140":null,
 #       "customfield_10240":"9223372036854775807",
 #       "reporter":{
-#          "self":"https://jira.isaac.nl/rest/api/2/user?username=defect.dojo",
-#          "name":"defect.dojo",
-#          "key":"defect.dojo",
+#          "self":"http://www.testjira.com/rest/api/2/user?username=dojo_user",
+#          "name":"dojo_user",
+#          "key":"dojo_user",
 #          "emailAddress":"defectdojo@isaac.nl",
 #          "avatarUrls":{
 #             "48x48":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=48",
@@ -911,18 +912,18 @@ def delete_jira(request, tid):
 #       "comment":{
 #          "comments":[
 #             {
-#                "self":"https://jira.isaac.nl/rest/api/2/issue/89820/comment/456841",
+#                "self":"http://www.testjira.com/rest/api/2/issue/89820/comment/456841",
 #                "id":"456841",
 #                "author":{
-#                   "self":"https://jira.isaac.nl/rest/api/2/user?username=valentijn",
+#                   "self":"http://www.testjira.com/rest/api/2/user?username=valentijn",
 #                   "name":"valentijn",
 #                   "key":"valentijn",
 #                   "emailAddress":"valentijn.scholten@isaac.nl",
 #                   "avatarUrls":{
-#                      "48x48":"https://jira.isaac.nl/secure/useravatar?ownerId=valentijn&avatarId=11101",
-#                      "24x24":"https://jira.isaac.nl/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
-#                      "16x16":"https://jira.isaac.nl/secure/useravatar?size=xsmall&ownerId=valentijn&avatarId=11101",
-#                      "32x32":"https://jira.isaac.nl/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101"
+#                      "48x48":"http://www.testjira.com/secure/useravatar?ownerId=valentijn&avatarId=11101",
+#                      "24x24":"http://www.testjira.com/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
+#                      "16x16":"http://www.testjira.com/secure/useravatar?size=xsmall&ownerId=valentijn&avatarId=11101",
+#                      "32x32":"http://www.testjira.com/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101"
 #                   },
 #                   "displayName":"Valentijn Scholten",
 #                   "active":true,
@@ -930,15 +931,15 @@ def delete_jira(request, tid):
 #                },
 #                "body":"test comment valentijn",
 #                "updateAuthor":{
-#                   "self":"https://jira.isaac.nl/rest/api/2/user?username=valentijn",
+#                   "self":"http://www.testjira.com/rest/api/2/user?username=valentijn",
 #                   "name":"valentijn",
 #                   "key":"valentijn",
 #                   "emailAddress":"valentijn.scholten@isaac.nl",
 #                   "avatarUrls":{
-#                      "48x48":"https://jira.isaac.nl/secure/useravatar?ownerId=valentijn&avatarId=11101",
-#                      "24x24":"https://jira.isaac.nl/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
-#                      "16x16":"https://jira.isaac.nl/secure/useravatar?size=xsmall&ownerId=valentijn&avatarId=11101",
-#                      "32x32":"https://jira.isaac.nl/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101"
+#                      "48x48":"http://www.testjira.com/secure/useravatar?ownerId=valentijn&avatarId=11101",
+#                      "24x24":"http://www.testjira.com/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
+#                      "16x16":"http://www.testjira.com/secure/useravatar?size=xsmall&ownerId=valentijn&avatarId=11101",
+#                      "32x32":"http://www.testjira.com/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101"
 #                   },
 #                   "displayName":"Valentijn Scholten",
 #                   "active":true,
@@ -948,18 +949,18 @@ def delete_jira(request, tid):
 #                "updated":"2020-11-11T18:54:32.155+0100"
 #             },
 #             {
-#                "self":"https://jira.isaac.nl/rest/api/2/issue/89820/comment/456843",
+#                "self":"http://www.testjira.com/rest/api/2/issue/89820/comment/456843",
 #                "id":"456843",
 #                "author":{
-#                   "self":"https://jira.isaac.nl/rest/api/2/user?username=valentijn",
+#                   "self":"http://www.testjira.com/rest/api/2/user?username=valentijn",
 #                   "name":"valentijn",
 #                   "key":"valentijn",
 #                   "emailAddress":"valentijn.scholten@isaac.nl",
 #                   "avatarUrls":{
-#                      "48x48":"https://jira.isaac.nl/secure/useravatar?ownerId=valentijn&avatarId=11101",
-#                      "24x24":"https://jira.isaac.nl/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
-#                      "16x16":"https://jira.isaac.nl/secure/useravatar?size=xsmall&ownerId=valentijn&avatarId=11101",
-#                      "32x32":"https://jira.isaac.nl/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101"
+#                      "48x48":"http://www.testjira.com/secure/useravatar?ownerId=valentijn&avatarId=11101",
+#                      "24x24":"http://www.testjira.com/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
+#                      "16x16":"http://www.testjira.com/secure/useravatar?size=xsmall&ownerId=valentijn&avatarId=11101",
+#                      "32x32":"http://www.testjira.com/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101"
 #                   },
 #                   "displayName":"Valentijn Scholten",
 #                   "active":true,
@@ -967,15 +968,15 @@ def delete_jira(request, tid):
 #                },
 #                "body":"test2",
 #                "updateAuthor":{
-#                   "self":"https://jira.isaac.nl/rest/api/2/user?username=valentijn",
+#                   "self":"http://www.testjira.com/rest/api/2/user?username=valentijn",
 #                   "name":"valentijn",
 #                   "key":"valentijn",
 #                   "emailAddress":"valentijn.scholten@isaac.nl",
 #                   "avatarUrls":{
-#                      "48x48":"https://jira.isaac.nl/secure/useravatar?ownerId=valentijn&avatarId=11101",
-#                      "24x24":"https://jira.isaac.nl/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
-#                      "16x16":"https://jira.isaac.nl/secure/useravatar?size=xsmall&ownerId=valentijn&avatarId=11101",
-#                      "32x32":"https://jira.isaac.nl/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101"
+#                      "48x48":"http://www.testjira.com/secure/useravatar?ownerId=valentijn&avatarId=11101",
+#                      "24x24":"http://www.testjira.com/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
+#                      "16x16":"http://www.testjira.com/secure/useravatar?size=xsmall&ownerId=valentijn&avatarId=11101",
+#                      "32x32":"http://www.testjira.com/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101"
 #                   },
 #                   "displayName":"Valentijn Scholten",
 #                   "active":true,

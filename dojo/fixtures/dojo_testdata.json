@@ -125,7 +125,7 @@
       "false_positive_history": false,
       "msteams_url": "",
       "slack_token": "",
-      "jira_minimum_severity": "High",
+      "jira_minimum_severity": "Low",
       "max_dupes": 1,
       "slack_username": "",
       "enable_msteams_notifications": false,
@@ -1641,19 +1641,19 @@
     "pk": 2,
     "model": "dojo.jira_instance",
     "fields": {
-      "username": "user1",
-      "default_issue_type": "Task",
-      "finding_text": "",
-      "low_mapping_severity": "test severity",
-      "url": "http://www.testjira.com",
-      "medium_mapping_severity": "test severity",
-      "open_status_key": 111,
-      "close_status_key": 112,
-      "critical_mapping_severity": "test severity",
-      "high_mapping_severity": "test severity",
-      "password": "user1",
-      "epic_name_id": 111,
-      "global_jira_sla_notification": false
+        "url": "https://defectdojo.atlassian.net/",
+        "username": "<YOUR_USER_HERE>",
+        "password": "<YOUR_API_KEY_HERE>",
+        "default_issue_type": "Task",
+        "epic_name_id": 10942,
+        "open_status_key": 3,
+        "close_status_key": 2,
+        "low_mapping_severity": "Low",
+        "medium_mapping_severity": "Medium",
+        "high_mapping_severity": "High",
+        "critical_mapping_severity": "Highest",
+        "finding_text": "",
+        "global_jira_sla_notification": false
     }
   },
   {
@@ -1731,11 +1731,11 @@
     "fields": {
       "push_notes": true,
       "product": 2,
-      "push_all_issues": true,
+      "push_all_issues": false,
       "component": "",
       "enable_engagement_epic_mapping": true,
-      "jira_instance": 3,
-      "project_key": "key2"
+      "jira_instance": 2,
+      "project_key": "NTEST"
     }
   },
   {

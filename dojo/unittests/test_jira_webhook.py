@@ -1,6 +1,6 @@
 from django.urls import reverse
-from django.test import TestCase
-from dojo.models import System_Settings, JIRA_Issue
+from .dojo_test_case import DojoTestCase
+from dojo.models import JIRA_Issue
 import json
 # from unittest import skip
 import logging
@@ -8,24 +8,15 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class JIRAWebhookTest(TestCase):
+class JIRAWebhookTest(DojoTestCase):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
-        TestCase.__init__(self, *args, **kwargs)
+        DojoTestCase.__init__(self, *args, **kwargs)
+
+    def setUp(self):
         self.correct_secret = '12345'
         self.incorrect_secret = '1234567890'
-
-    # def setUp(self):
-        # self.url = reverse(self.viewname + '-list')
-
-    def system_settings(self, enable_jira=False, enable_jira_web_hook=False, disable_jira_webhook_secret=False, jira_webhook_secret=None):
-        ss = System_Settings.objects.get()
-        ss.enable_jira = enable_jira
-        ss.enable_jira_web_hook = enable_jira_web_hook
-        ss.disable_jira_webhook_secret = disable_jira_webhook_secret
-        ss.jira_webhook_secret = jira_webhook_secret
-        ss.save()
 
     def test_webhook_get(self):
         response = self.client.get(reverse('jira_web_hook'))
@@ -82,17 +73,17 @@ class JIRAWebhookTest(TestCase):
             "timestamp": 1605117321425,
             "webhookEvent": "comment_created",
             "comment": {
-                        "self": "https://jira.isaac.nl/rest/api/2/issue/2/comment/456843",
+                        "self": "http://www.testjira.com/rest/api/2/issue/2/comment/456843",
                         "id": "456843",
                         "author": {
-                            "self": "https://jira.isaac.nl/rest/api/2/user?username=valentijn",
+                            "self": "http://www.testjira.com/rest/api/2/user?username=valentijn",
                             "name": "valentijn",
                             "key": "valentijn",
                             "avatarUrls": {
-                                "48x48": "https://jira.isaac.nl/secure/useravatar?ownerId=valentijn&avatarId=11101",
-                                "24x24": "https://jira.isaac.nl/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
-                                "16x16": "https://jira.isaac.nl/secure/useravatar?size=x small&ownerId=valentijn&avatarId=11101",
-                                "32x32": "https://jira.isaac.nl/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101"
+                                "48x48": "http://www.testjira.com/secure/useravatar?ownerId=valentijn&avatarId=11101",
+                                "24x24": "http://www.testjira.com/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
+                                "16x16": "http://www.testjira.com/secure/useravatar?size=x small&ownerId=valentijn&avatarId=11101",
+                                "32x32": "http://www.testjira.com/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101"
                             },
                             "displayName": "Valentijn Scholten",
                             "active": "true",
@@ -100,14 +91,14 @@ class JIRAWebhookTest(TestCase):
                         },
                         "body": "test2",
                         "updateAuthor": {
-                            "self": "https://jira.isaac.nl/rest/api/2/user?username=valentijn",
+                            "self": "http://www.testjira.com/rest/api/2/user?username=valentijn",
                             "name": "valentijn",
                             "key": "valentijn",
                             "avatarUrls": {
-                                "48x48": "https://jira.isaac.nl/secure/useravatar?ownerId=valentijn&avatarId=11101",
-                                "24x24": "https://jira.isaac.nl/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
-                                "16x16": "https://jira.isaac.nl/secure/useravatar?size=xsmall&ownerId=valentijn&avatarId=11101",
-                                "32x32": "https://jira.isaac.nl/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101"
+                                "48x48": "http://www.testjira.com/secure/useravatar?ownerId=valentijn&avatarId=11101",
+                                "24x24": "http://www.testjira.com/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
+                                "16x16": "http://www.testjira.com/secure/useravatar?size=xsmall&ownerId=valentijn&avatarId=11101",
+                                "32x32": "http://www.testjira.com/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101"
                             },
                             "displayName": "Valentijn Scholten",
                             "active": "true",
@@ -195,7 +186,7 @@ class JIRAWebhookTest(TestCase):
          ],
          "customfield_11440":"0|y02wb8: ",
                         "resolution":{
-                            "self":"https://jira.isaac.nl/rest/api/2/resolution/11",
+                            "self":"http://www.testjira.com/rest/api/2/resolution/11",
                             "id":"11",
                             "description":"Cancelled by the customer.",
                             "name":"Cancelled"
@@ -209,7 +200,7 @@ class JIRAWebhookTest(TestCase):
             "isWatching":"true"
          },
          "customfield_10060":[
-            "defect.dojo(defect.dojo)",
+            "dojo_user(dojo_user)",
             "valentijn(valentijn)"
          ],
          "customfield_10182":null,
@@ -279,9 +270,9 @@ class JIRAWebhookTest(TestCase):
          "aggregatetimeestimate":null,
          "summary":"Regular Expression Denial of Service - (braces, <2.3.1)",
          "creator":{
-            "self":"https://jira.onpremise.org/rest/api/2/user?username=defect.dojo",
-            "name":"defect.dojo",
-            "key":"defect.dojo",
+            "self":"https://jira.onpremise.org/rest/api/2/user?username=dojo_user",
+            "name":"dojo_user",
+            "key":"dojo_user",
             "emailAddress":"defectdojo@isaac.nl",
             "avatarUrls":{
                "48x48":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=48",
@@ -297,9 +288,9 @@ class JIRAWebhookTest(TestCase):
          ],
          "customfield_10240":"9223372036854775807",
          "reporter":{
-            "self":"https://jira.onpremise.org/rest/api/2/user?username=defect.dojo",
-            "name":"defect.dojo",
-            "key":"defect.dojo",
+            "self":"https://jira.onpremise.org/rest/api/2/user?username=dojo_user",
+            "name":"dojo_user",
+            "key":"dojo_user",
             "emailAddress":"defectdojo@isaac.nl",
             "avatarUrls":{
                "48x48":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=48",

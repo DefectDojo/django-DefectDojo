@@ -246,7 +246,7 @@ def get_jira_connection_raw(jira_server, jira_username, jira_password):
 
         messages.add_message(get_current_request(),
                             messages.ERROR,
-                            'Unable to authenticate. Please check the URL, username, password, IP whitelist, Network connection. Details in alert on top right.',
+                            'Unable to authenticate. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + e.text,
                             extra_tags='alert-danger')
         raise e
 
@@ -387,13 +387,15 @@ def add_jira_issue(find):
         log_jira_alert('Finding cannot be pushed to JIRA as there is no JIRA configuration for this product.', find)
         return
 
-    jira_minimum_threshold = Finding.get_number_severity(System_Settings.objects.get().jira_minimum_severity)
+    jira_minimum_threshold = None
+    if System_Settings.objects.get().jira_minimum_severity:
+        jira_minimum_threshold = Finding.get_number_severity(System_Settings.objects.get().jira_minimum_severity)
 
     jira_project = get_jira_project(find)
     jira_instance = get_jira_instance(find)
 
     if 'Active' in find.status() and 'Verified' in find.status():
-        if jira_minimum_threshold > Finding.get_number_severity(find.severity):
+        if jira_minimum_threshold and jira_minimum_threshold > Finding.get_number_severity(find.severity):
             log_jira_alert('Finding below the minimum JIRA severity threshold.', find)
             logger.warn("Finding {} is below the minimum JIRA severity threshold.".format(find.id))
             logger.warn("The JIRA issue will NOT be created.")
@@ -488,7 +490,7 @@ def add_jira_issue(find):
             return True
         except JIRAError as e:
             logger.exception(e)
-            logger.error("jira_meta for project: %s and url: %s", jira_config.project_key, jira_config.jira_instance.url, json.dumps(meta, indent=4))  # this is None safe
+            logger.error("jira_meta for project: %s and url: %s meta: %s", jira_project.project_key, jira_project.jira_instance.url, json.dumps(meta, indent=4))  # this is None safe
             log_jira_alert(e.text, find)
             return False
     else:
@@ -569,7 +571,7 @@ def update_jira_issue(find):
 
     except JIRAError as e:
         logger.exception(e)
-        logger.error("jira_meta for project: %s and url: %s", jira_config.project_key, jira_config.jira_instance.url, json.dumps(meta, indent=4))  # this is None safe
+        logger.error("jira_meta for project: %s and url: %s meta: %s", jira_project.project_key, jira_project.jira_instance.url, json.dumps(meta, indent=4))  # this is None safe
         log_jira_alert(e.text, find)
         return False
 
