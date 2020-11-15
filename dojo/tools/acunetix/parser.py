@@ -4,14 +4,13 @@ import hashlib
 import logging
 import re
 
-logger = logging.getLogger(__name__)
-
 __author__ = "Vijay Bheemineni"
 __license__ = "MIT"
 __version__ = "1.0.0"
 __status__ = "Development"
 
 logger = logging.getLogger(__name__)
+
 
 class AcunetixScannerParser(object):
     """
