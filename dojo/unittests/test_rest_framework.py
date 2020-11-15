@@ -73,6 +73,11 @@ class BaseClass():
             relative_url = self.url + '%s/' % current_objects['results'][0]['id']
             response = self.client.get(relative_url)
             self.assertEqual(200, response.status_code)
+            # sensitive data must be set to write_only so those are not returned in the response
+            # https://github.com/DefectDojo/django-DefectDojo/security/advisories/GHSA-8q8j-7wc4-vjg5
+            self.assertFalse('password' in response.data)
+            self.assertFalse('ssh' in response.data)
+            self.assertFalse('api_key' in response.data)
 
         @skipIfNotSubclass('DestroyModelMixin')
         def test_delete(self):
@@ -89,9 +94,12 @@ class BaseClass():
                 relative_url, self.update_fields)
             for key, value in self.update_fields.items():
                 # some exception as push_to_jira has been implemented strangely in the update methods in the api
-                if key != 'push_to_jira':
+                if key not in ['push_to_jira', 'ssh', 'password', 'api_key']:
                     self.assertEqual(value, response.data[key])
             self.assertFalse('push_to_jira' in response.data)
+            self.assertFalse('ssh' in response.data)
+            self.assertFalse('password' in response.data)
+            self.assertFalse('api_key' in response.data)
             response = self.client.put(
                 relative_url, self.payload)
             self.assertEqual(200, response.status_code)
