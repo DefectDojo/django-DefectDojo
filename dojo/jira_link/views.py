@@ -142,7 +142,7 @@ def webhook(request, secret=None):
             finding.jira_issue.jira_change = timezone.now()
             finding.jira_issue.save()
             finding.save()
-            create_notification(event='other', title='JIRA incoming comment - %s' % (jissue.finding), url=reverse("view_finding", args=(jissue.finding.id)), icon='check')
+            create_notification(event='other', title='JIRA incoming comment - %s' % (jissue.finding), url=reverse("view_finding", args=(jissue.finding.id, )), icon='check')
 
         if parsed.get('webhookEvent') not in ['comment_created', 'jira:issue_updated']:
             logger.info('Unrecognized JIRA webhook event received: {}'.format(parsed.get('webhookEvent')))
