@@ -1,6 +1,6 @@
 from dojo.tools import SCAN_SONARQUBE_API
 from celery.decorators import task
-from dojo.decorators import dojo_async_task
+from dojo.decorators import dojo_async_task, dojo_model_to_id, dojo_model_from_id
 
 
 def async_tool_issue_update(finding, *args, **kwargs):
@@ -13,8 +13,10 @@ def is_tool_issue_updater_needed(finding, *args, **kwargs):
     return test_type.name == SCAN_SONARQUBE_API
 
 
+@dojo_model_to_id
 @dojo_async_task
 @task
+@dojo_model_from_id
 def tool_issue_updater(finding, *args, **kwargs):
 
     test_type = finding.test.test_type

@@ -374,8 +374,10 @@ def push_to_jira(obj):
         logger.error('unsupported object passed to push_to_jira: %s %i %s', obj.__name__, obj.id, obj)
 
 
+@dojo_model_to_id
 @dojo_async_task
 @task
+@dojo_model_from_id
 def add_jira_issue(find):
     logger.info('trying to create a new jira issue for %d:%s', find.id, find.title)
 
@@ -499,8 +501,10 @@ def add_jira_issue(find):
         return False
 
 
+@dojo_model_to_id
 @dojo_async_task
 @task
+@dojo_model_from_id
 def update_jira_issue(find):
     logger.info('trying to update a linked jira issue for %d:%s', find.id, find.title)
 
@@ -704,8 +708,10 @@ def jira_check_attachment(issue, source_file_name):
     return file_exists
 
 
+@dojo_model_to_id
 @dojo_async_task
 @task
+@dojo_model_from_id
 def close_epic(eng, push_to_jira):
     engagement = eng
     if not is_jira_enabled():
@@ -736,8 +742,10 @@ def close_epic(eng, push_to_jira):
             return False
 
 
+@dojo_model_to_id
 @dojo_async_task
 @task
+@dojo_model_from_id
 def update_epic(engagement):
 
     if not is_jira_configured_and_enabled(engagement):
@@ -758,8 +766,10 @@ def update_epic(engagement):
             return False
 
 
+@dojo_model_to_id
 @dojo_async_task
 @task
+@dojo_model_from_id
 def add_epic(engagement):
     logger.info('trying to create a new jira EPIC for %d:%s', engagement.id, engagement.name)
 
@@ -822,8 +832,12 @@ def jira_get_issue(jira_project, issue_key):
         return None
 
 
+@dojo_model_to_id(parameter=1)
+@dojo_model_to_id
 @dojo_async_task
 @task
+@dojo_model_from_id(model=Notes, parameter=1)
+@dojo_model_from_id
 def add_comment(find, note, force_push=False):
     if not is_jira_configured_and_enabled(find):
         return False

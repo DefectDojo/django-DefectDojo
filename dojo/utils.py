@@ -33,7 +33,7 @@ from django.contrib import messages
 from django.http import HttpResponseRedirect
 import crum
 from celery.decorators import task
-from dojo.decorators import dojo_async_task
+from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -44,8 +44,10 @@ Helper functions for DefectDojo
 """
 
 
+@dojo_model_to_id
 @dojo_async_task
 @task
+@dojo_model_from_id
 def do_false_positive_history(new_finding, *args, **kwargs):
     logger.debug('%s: sync false positive history', new_finding.id)
     if new_finding.endpoints.count() == 0:
@@ -99,8 +101,10 @@ def is_deduplication_on_engagement_mismatch(new_finding, to_duplicate_finding):
     return not new_finding.test.engagement.deduplication_on_engagement and to_duplicate_finding.test.engagement.deduplication_on_engagement
 
 
+@dojo_model_to_id
 @dojo_async_task
 @task
+@dojo_model_from_id
 def do_dedupe_finding(new_finding, *args, **kwargs):
     try:
         enabled = System_Settings.objects.get(no_cache=True).enable_deduplication
@@ -352,8 +356,10 @@ def set_duplicate_reopen(new_finding, existing_finding):
     existing_finding.save()
 
 
+@dojo_model_to_id
 @dojo_async_task
 @task
+@dojo_model_from_id
 def do_apply_rules(new_finding, *args, **kwargs):
     rules = Rule.objects.filter(applies_to='Finding', parent_rule=None)
     for rule in rules:
@@ -1209,8 +1215,10 @@ def handle_uploaded_selenium(f, cred):
     cred.save()
 
 
+@dojo_model_to_id
 @dojo_async_task
 @task
+@dojo_model_from_id
 def add_external_issue(find, external_issue_provider):
     eng = Engagement.objects.get(test=find.test)
     prod = Product.objects.get(engagement=eng)
@@ -1220,8 +1228,10 @@ def add_external_issue(find, external_issue_provider):
         add_external_issue_github(find, prod, eng)
 
 
+@dojo_model_to_id
 @dojo_async_task
 @task
+@dojo_model_from_id
 def update_external_issue(find, old_status, external_issue_provider):
     prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
     eng = Engagement.objects.get(test=find.test)
@@ -1230,8 +1240,10 @@ def update_external_issue(find, old_status, external_issue_provider):
         update_external_issue_github(find, prod, eng)
 
 
+@dojo_model_to_id
 @dojo_async_task
 @task
+@dojo_model_from_id
 def close_external_issue(find, note, external_issue_provider):
     prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
     eng = Engagement.objects.get(test=find.test)
@@ -1240,8 +1252,10 @@ def close_external_issue(find, note, external_issue_provider):
         close_external_issue_github(find, note, prod, eng)
 
 
+@dojo_model_to_id
 @dojo_async_task
 @task
+@dojo_model_from_id
 def reopen_external_issue(find, note, external_issue_provider):
     prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
     eng = Engagement.objects.get(test=find.test)
