@@ -1477,7 +1477,6 @@ class Product_Tab():
             product=self.product, active=True).count()
         self.open_findings_count = Finding.objects.filter(test__engagement__product=self.product,
                                                           false_p=False,
-                                                          verified=True,
                                                           duplicate=False,
                                                           out_of_scope=False,
                                                           active=True,
@@ -1529,7 +1528,6 @@ def tab_view_count(product_id):
         product=product, active=True).count()
     open_findings = Finding.objects.filter(test__engagement__product=product,
                                            false_p=False,
-                                           verified=True,
                                            duplicate=False,
                                            out_of_scope=False,
                                            active=True,
