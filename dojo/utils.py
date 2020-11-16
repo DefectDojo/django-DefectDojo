@@ -40,7 +40,7 @@ from django.contrib import messages
 from django.http import HttpResponseRedirect
 import crum
 from celery.decorators import task
-from dojo.decorators import dojo_async_task
+from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -51,8 +51,10 @@ Helper functions for DefectDojo
 """
 
 
+@dojo_model_to_id
 @dojo_async_task
 @task
+@dojo_model_from_id
 def do_false_positive_history(new_finding, *args, **kwargs):
     logger.debug('%s: sync false positive history', new_finding.id)
     if new_finding.endpoints.count() == 0:
@@ -106,8 +108,10 @@ def is_deduplication_on_engagement_mismatch(new_finding, to_duplicate_finding):
     return not new_finding.test.engagement.deduplication_on_engagement and to_duplicate_finding.test.engagement.deduplication_on_engagement
 
 
+@dojo_model_to_id
 @dojo_async_task
 @task
+@dojo_model_from_id
 def do_dedupe_finding(new_finding, *args, **kwargs):
     try:
         enabled = System_Settings.objects.get(no_cache=True).enable_deduplication
@@ -359,8 +363,10 @@ def set_duplicate_reopen(new_finding, existing_finding):
     existing_finding.save()
 
 
+@dojo_model_to_id
 @dojo_async_task
 @task
+@dojo_model_from_id
 def do_apply_rules(new_finding, *args, **kwargs):
     rules = Rule.objects.filter(applies_to='Finding', parent_rule=None)
     for rule in rules:
@@ -1314,8 +1320,10 @@ def jira_description(find):
     return render_to_string(template, kwargs)
 
 
+@dojo_model_to_id
 @dojo_async_task
 @task
+@dojo_model_from_id
 def add_external_issue(find, external_issue_provider):
     eng = Engagement.objects.get(test=find.test)
     prod = Product.objects.get(engagement=eng)
@@ -1325,8 +1333,10 @@ def add_external_issue(find, external_issue_provider):
         add_external_issue_github(find, prod, eng)
 
 
+@dojo_model_to_id
 @dojo_async_task
 @task
+@dojo_model_from_id
 def update_external_issue(find, old_status, external_issue_provider):
     prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
     eng = Engagement.objects.get(test=find.test)
@@ -1335,8 +1345,10 @@ def update_external_issue(find, old_status, external_issue_provider):
         update_external_issue_github(find, prod, eng)
 
 
+@dojo_model_to_id
 @dojo_async_task
 @task
+@dojo_model_from_id
 def close_external_issue(find, note, external_issue_provider):
     prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
     eng = Engagement.objects.get(test=find.test)
@@ -1345,8 +1357,10 @@ def close_external_issue(find, note, external_issue_provider):
         close_external_issue_github(find, note, prod, eng)
 
 
+@dojo_model_to_id
 @dojo_async_task
 @task
+@dojo_model_from_id
 def reopen_external_issue(find, note, external_issue_provider):
     prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
     eng = Engagement.objects.get(test=find.test)
@@ -1355,8 +1369,10 @@ def reopen_external_issue(find, note, external_issue_provider):
         reopen_external_issue_github(find, note, prod, eng)
 
 
+@dojo_model_to_id
 @dojo_async_task
 @task
+@dojo_model_from_id
 def add_jira_issue(find, push_to_jira):
     logger.info('trying to create a new jira issue for %d:%s', find.id, find.title)
 
@@ -1520,8 +1536,10 @@ def jira_check_attachment(issue, source_file_name):
     return file_exists
 
 
+@dojo_model_to_id
 @dojo_async_task
 @task
+@dojo_model_from_id
 def update_jira_issue(find, push_to_jira):
     logger.info('trying to update a linked jira issue for %d:%s', find.id, find.title)
     prod = Product.objects.get(
@@ -1617,8 +1635,10 @@ def update_jira_issue(find, push_to_jira):
             find.save()
 
 
+@dojo_model_to_id
 @dojo_async_task
 @task
+@dojo_model_from_id
 def close_epic(eng, push_to_jira):
     engagement = eng
     prod = Product.objects.get(engagement=engagement)
@@ -1642,8 +1662,10 @@ def close_epic(eng, push_to_jira):
             pass
 
 
+@dojo_model_to_id
 @dojo_async_task
 @task
+@dojo_model_from_id
 def update_epic(eng, push_to_jira):
     engagement = eng
     prod = Product.objects.get(engagement=engagement)
@@ -1663,8 +1685,10 @@ def update_epic(eng, push_to_jira):
             pass
 
 
+@dojo_model_to_id
 @dojo_async_task
 @task
+@dojo_model_from_id
 def add_epic(eng, push_to_jira):
     logger.info('trying to create a new jira EPIC for %d:%s', eng.id, eng.name)
     engagement = eng
@@ -1723,8 +1747,12 @@ def jira_get_issue(jpkey, issue_key):
         return None
 
 
+@dojo_model_to_id(parameter=1)
+@dojo_model_to_id
 @dojo_async_task
 @task
+@dojo_model_from_id(model=Notes, parameter=1)
+@dojo_model_from_id
 def add_comment(find, note, force_push=False):
     logger.debug('trying to add a comment to a linked jira issue for: %d:%s', find.id, find.title)
     if not note.private:
