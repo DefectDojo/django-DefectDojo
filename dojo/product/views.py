@@ -24,12 +24,11 @@ from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm
                        GITHUB_Product_Form, GITHUBFindingForm, App_AnalysisTypeForm, JIRAEngagementForm
 from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, GITHUB_PKey, Finding_Template, \
                         Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint_Status, \
-                        Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, Dojo_User, BurpRawRequestResponse
+                        Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, BurpRawRequestResponse
 
 from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, Product_Tab, get_punchcard_data, add_epic, queryset_check
 from dojo.notifications.helper import create_notification
 from custom_field.models import CustomFieldValue, CustomField
-from dojo.tasks import add_epic_task, add_external_issue_task, add_external_issue
 from tagging.models import Tag
 from tagging.utils import get_tag_list
 from django.db.models import Prefetch, F
@@ -230,7 +229,7 @@ def finding_querys(request, prod):
         },
     )
 
-    findings = ProductMetricsFindingFilter(request.GET, queryset=findings_query)
+    findings = ProductMetricsFindingFilter(request.GET, queryset=findings_query, pid=prod)
     findings_qs = queryset_check(findings)
     filters['form'] = findings.form
 
@@ -631,6 +630,7 @@ def prefetch_for_view_engagements(engs):
         prefetched_engs = prefetched_engs.prefetch_related('test_set__test_type')  # test.name uses test_type
         prefetched_engs = prefetched_engs.annotate(count_findings_all=Count('test__finding__id'))
         prefetched_engs = prefetched_engs.annotate(count_findings_open=Count('test__finding__id', filter=Q(test__finding__active=True)))
+        prefetched_engs = prefetched_engs.annotate(count_findings_close=Count('test__finding__id', filter=Q(test__finding__is_Mitigated=True)))
         prefetched_engs = prefetched_engs.annotate(count_findings_duplicate=Count('test__finding__id', filter=Q(test__finding__duplicate=True)))
         prefetched_engs = prefetched_engs.prefetch_related('tagged_items__tag')
     else:
@@ -935,12 +935,7 @@ def new_eng_for_app(request, pid, cicd=False):
 
             if form.is_valid() and (jform is None or jform.is_valid()):
                 if 'jiraform-push_to_jira' in request.POST:
-                    if Dojo_User.wants_block_execution(request.user):
-                        logger.debug('calling add_epic')
-                        add_epic(new_eng, jform.cleaned_data.get("push_to_jira"))
-                    else:
-                        logger.debug('calling add_epic_task')
-                        add_epic_task.delay(new_eng, jform.cleaned_data.get("push_to_jira"))
+                    add_epic(new_eng, jform.cleaned_data.get("push_to_jira"))
 
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -1196,10 +1191,7 @@ def ad_hoc_finding(request, pid):
             if 'githubform-push_to_github' in request.POST:
                 gform = GITHUBFindingForm(request.POST, prefix='jiragithub', enabled=push_all_jira_issues)
                 if gform.is_valid():
-                    if Dojo_User.wants_block_execution(request.user):
-                        add_external_issue(new_finding, 'github')
-                    else:
-                        add_external_issue_task.delay(new_finding, 'github')
+                    add_external_issue(new_finding, 'github')
 
             new_finding.save(push_to_jira=push_to_jira)
 

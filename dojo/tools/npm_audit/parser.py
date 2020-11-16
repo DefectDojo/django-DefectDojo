@@ -27,6 +27,9 @@ class NpmAuditParser(object):
         except:
             raise Exception("Invalid format, unable to parse json.")
 
+        if tree.get('auditReportVersion'):
+            raise ValueError('npm7 with auditReportVersion 2 or higher not yet supported as it lacks the most important fields in the reports')
+
         if tree.get('error'):
             error = tree.get('error')
             code = error['code']

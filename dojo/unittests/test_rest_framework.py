@@ -588,6 +588,7 @@ class UsersTest(BaseClass.RESTEndpointTest):
             "email": "example@email.com",
             "is_active": True,
         }
+        self.update_fields = {"first_name": "test changed"}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 

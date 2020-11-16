@@ -1,6 +1,6 @@
 dependencies:
   - name: mysql
-    version: 1.6.7
+    version: 1.6.9
     repository: "@stable"
     condition: mysql.enabled
   - name: postgresql

@@ -9,7 +9,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
 from django.urls import reverse
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.http import HttpResponseRedirect, StreamingHttpResponse, Http404, HttpResponse, FileResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.cache import cache_page
@@ -34,7 +34,6 @@ from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, message, get_system_setting, Product_Tab, is_scan_file_too_large, update_epic, add_epic
 from dojo.notifications.helper import create_notification
-from dojo.tasks import update_epic_task, add_epic_task
 from dojo.finding.views import find_available_notetypes
 from functools import reduce
 from django.db.models.query import QuerySet
@@ -137,41 +136,6 @@ def prefetch_for_products_with_engagments(products_with_engagements):
     return products_with_engagements
 
 
-@user_passes_test(lambda u: u.is_staff)
-def new_engagement(request):
-    if request.method == 'POST':
-        form = EngForm(request.POST, user=request.user)
-        if form.is_valid():
-            new_eng = form.save()
-            new_eng.lead = request.user
-            new_eng.threat_model = False
-            new_eng.api_test = False
-            new_eng.pen_test = False
-            new_eng.check_list = False
-            new_eng.product_id = form.cleaned_data.get('product').id
-            new_eng.save()
-            tags = request.POST.getlist('tags')
-            t = ", ".join('"{0}"'.format(w) for w in tags)
-            new_eng.tags = t
-            messages.add_message(
-                request,
-                messages.SUCCESS,
-                'Engagement added successfully.',
-                extra_tags='alert-success')
-            if "_Add Tests" in request.POST:
-                return HttpResponseRedirect(
-                    reverse('add_tests', args=(new_eng.id, )))
-            else:
-                return HttpResponseRedirect(
-                    reverse('view_engagement', args=(new_eng.id, )))
-    else:
-        form = EngForm(initial={'date': timezone.now().date()}, user=request.user)
-    add_breadcrumb(title="New Engagement", top_level=False, request=request)
-    return render(request, 'dojo/new_eng.html', {
-        'form': form,
-    })
-
-
 # @user_passes_test(lambda u: u.is_staff)
 @user_must_be_authorized(Engagement, 'change', 'eid')
 def edit_engagement(request, eid):
@@ -193,18 +157,11 @@ def edit_engagement(request, eid):
             if 'jiraform-push_to_jira' in request.POST:
                 logger.debug('push_to_jira true')
                 if JIRA_Issue.objects.filter(engagement=eng).exists():
-                    if Dojo_User.wants_block_execution(request.user):
-                        update_epic(
-                            eng, jform.cleaned_data.get('push_to_jira'))
-                    else:
-                        update_epic_task.delay(
-                            eng, jform.cleaned_data.get('push_to_jira'))
+                    update_epic(
+                        eng, jform.cleaned_data.get('push_to_jira'))
 
                 else:
-                    if Dojo_User.wants_block_execution(request.user):
-                        add_epic(eng, jform.cleaned_data.get('push_to_jira'))
-                    else:
-                        add_epic_task.delay(eng, jform.cleaned_data.get('push_to_jira'))
+                    add_epic(eng, jform.cleaned_data.get('push_to_jira'))
 
             temp_form = form.save(commit=False)
             if (temp_form.status == "Cancelled" or temp_form.status == "Completed"):
@@ -298,7 +255,16 @@ def delete_engagement(request, eid):
 @user_must_be_authorized(Engagement, 'view', 'eid')
 def view_engagement(request, eid):
     eng = get_object_or_404(Engagement, id=eid)
-    tests = Test.objects.filter(engagement=eng).prefetch_related('tagged_items__tag', 'test_type').order_by('test_type__name', '-updated')
+    tests = (
+        Test.objects.filter(engagement=eng)
+        .prefetch_related('tagged_items__tag', 'test_type')
+        .annotate(count_findings_test_all=Count('finding__id'))
+        .annotate(count_findings_test_active_verified=Count('finding__id', filter=Q(finding__active=True)))
+        .annotate(count_findings_test_mitigated=Count('finding__id', filter=Q(finding__is_Mitigated=True)))
+        .annotate(count_findings_test_dups=Count('finding__id', filter=Q(finding__duplicate=True)))
+        .order_by('test_type__name', '-updated')
+    )
+
     prod = eng.product
     risks_accepted = eng.risk_acceptance.all().select_related('owner')
     preset_test_type = None
@@ -656,12 +622,6 @@ def import_scan_results(request, eid=None, pid=None):
                         continue
 
                     item.test = t
-                    if item.date == timezone.now().date():
-                        # logger.warn('setting item.date to target_start')
-                        # logger.warn('type of target_start: %s', type(t.target_start))
-                        item.date = t.target_start.date()
-                        # logger.warn('type of item.date: %s', type(item.date))
-
                     item.reporter = user
                     item.last_reviewed = timezone.now()
                     item.last_reviewed_by = user

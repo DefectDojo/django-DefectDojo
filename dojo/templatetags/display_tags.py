@@ -42,7 +42,7 @@ markdown_tags = [
 markdown_attrs = {
     "*": ["id"],
     "img": ["src", "alt", "title"],
-    "a": ["href", "alt", "title"],
+    "a": ["href", "alt", "target", "title"],
     "span": ["class"],  # used for code highlighting
     "pre": ["class"],  # used for code highlighting
     "div": ["class"],  # used for code highlighting
@@ -87,12 +87,10 @@ def url_shortner(value):
     return_value = str(value)
     url = urlparse(return_value)
 
-    if url.path:
+    if url.path and len(url.path) != 1:
         return_value = url.path
-        if len(return_value) == 1:
-            return_value = value
-    if len(str(return_value)) > 50:
-        return_value = "..." + return_value[50:]
+    if len(return_value) > 50:
+        return_value = "..." + return_value[-47:]
 
     return return_value
 
@@ -125,7 +123,10 @@ def linebreaksasciidocbr(value, autoescape=None):
 @register.simple_tag
 def dojo_version():
     from dojo import __version__
-    return 'v. ' + __version__
+    version = __version__
+    if settings.FOOTER_VERSION:
+        version = settings.FOOTER_VERSION
+    return "v. {}".format(version)
 
 
 @register.simple_tag
