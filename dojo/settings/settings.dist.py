@@ -60,9 +60,9 @@ env = environ.Env(
     DD_CELERY_RESULT_EXPIRES=(int, 86400),
     DD_CELERY_BEAT_SCHEDULE_FILENAME=(str, root('dojo.celery.beat.db')),
     DD_CELERY_TASK_SERIALIZER=(str, 'pickle'),
+    DD_CELERY_PASS_MODEL_BY_ID=(str, False),
     DD_FOOTER_VERSION=(str, ''),
     # models should be passed to celery by ID, default is False (for now)
-    DD_CELERY_PASS_MODEL_BY_ID=(str, False),
     DD_FORCE_LOWERCASE_TAGS=(bool, True),
     DD_MAX_TAG_LENGTH=(int, 25),
     DD_DATABASE_ENGINE=(str, 'django.db.backends.mysql'),
@@ -880,7 +880,7 @@ LOGGING = {
         },
         'dojo': {
             'handlers': [r'%s' % LOGGING_HANDLER],
-            'level': 'INFO',
+            'level': 'DEBUG',
             'propagate': False,
         },
         'dojo.specific-loggers.deduplication': {

@@ -419,7 +419,7 @@
         </div>
         {% endif %}
     {% endif %}
-    {% if finding.static_finding or finding.line > 0 or finding.jira_conf_new or finding.jira_issue or finding.github_issue or finding.github_conf_new %}
+    {% if finding.static_finding or finding.line > 0 or finding.has_jira_configured or finding.jira_issue or finding.github_issue or finding.github_conf_new %}
     <div class="panel panel-default">
         <table id="error_notes" class="table-striped table table-condensed table-hover centered">
             <tr>
@@ -438,7 +438,7 @@
                 {% if finding.component_version %}
                 <th>Component Version</th>
                 {% endif %}
-                {% if finding.jira_conf_new or finding.jira_issue %}
+                {% if finding.has_jira_configured or finding.jira_issue %}
                 <th>JIRA</th>
                 {% endif %}                    
                 {% if finding.github_conf_new or finding.github_issue %}
@@ -483,11 +483,11 @@
                     </span>
                 </td>
                 {% endif %}
-                {% if finding.jira_conf_new or finding.jira_issue %}
+                {% if finding.has_jira_configured or finding.jira_issue %}
                     <td id="jira">
                     {% if finding.jira_issue %}
-                        <a href="{{ finding.jira_conf_new.url }}/browse/{{ finding.jira_issue.jira_key }}"
-                        target="_blank" title="{{ finding.jira_conf_new.url }}/browse/{{ finding.jira_issue.jira_key }}">{{ finding.jira_issue.jira_key }}</a>
+                        <a href="{{ finding | jira_url }}"
+                        target="_blank" title="{{ finding | jira_url }}">{{ finding | jira_key }}</a>
                         <i id="unlink_jira" class="fa fa-trash" title="Unlink JIRA issue from this finding."></i>
                         <i id="push_to_jira" class="fa fa-share-square" title="Push finding data to linked JIRA issue."></i>
                     {% else %}

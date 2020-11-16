@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load static from staticfiles %}
-
+{% load display_tags %}
 {% block add_styles %}
 .chosen-container {
     width: 70% !important;
@@ -17,13 +17,13 @@
         <hr>
 		<div class="form-group">
 			<label class="col-sm-2 control-label" for="id_jira_issue">JIRA URL
-				<i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="JIRA URL connected to this product or engagment" data-placement="right" data-container="body" data-original-title="" title="">
+				<i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="JIRA URL connected to this product or engagement" data-placement="right" data-container="body" data-original-title="" title="">
 				</i>
 			</label>
 			<div class="col-sm-10 form-control-static">
-				{% if product_tab.product.jira_conf %}
-					<a href="{{ product_tab.product.jira_conf.url }}/browse/{{ product_tab.product.jira_pkey.project_key }}"
-					target="_blank"> {{ product_tab.product.jira_conf.url }}/browse/{{ product_tab.product.jira_pkey.project_key }} </a>
+				{% if product_tab.product.has_jira_configured %}
+					<a href="{{ engagement_or_product|jira_url }}"
+					target="_blank"> {{ engagement_or_product|jira_url }} </a>
 				{% else %}
 				None
 				{% endif %}
