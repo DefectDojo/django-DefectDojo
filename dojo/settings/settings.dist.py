@@ -61,6 +61,8 @@ env = environ.Env(
     DD_CELERY_BEAT_SCHEDULE_FILENAME=(str, root('dojo.celery.beat.db')),
     DD_CELERY_TASK_SERIALIZER=(str, 'pickle'),
     DD_FOOTER_VERSION=(str, ''),
+    # models should be passed to celery by ID, default is False (for now)
+    DD_CELERY_PASS_MODEL_BY_ID=(str, False),
     DD_FORCE_LOWERCASE_TAGS=(bool, True),
     DD_MAX_TAG_LENGTH=(int, 25),
     DD_DATABASE_ENGINE=(str, 'django.db.backends.mysql'),
@@ -662,6 +664,7 @@ CELERY_RESULT_EXPIRES = env('DD_CELERY_RESULT_EXPIRES')
 CELERY_BEAT_SCHEDULE_FILENAME = env('DD_CELERY_BEAT_SCHEDULE_FILENAME')
 CELERY_ACCEPT_CONTENT = ['pickle', 'json', 'msgpack', 'yaml']
 CELERY_TASK_SERIALIZER = env('DD_CELERY_TASK_SERIALIZER')
+CELERY_PASS_MODEL_BY_ID = env('DD_CELERY_PASS_MODEL_BY_ID')
 
 # Celery beat scheduled tasks
 CELERY_BEAT_SCHEDULE = {
