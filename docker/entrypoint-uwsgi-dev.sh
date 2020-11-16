@@ -19,4 +19,4 @@ exec uwsgi \
   --reload-mercy 1 \
   --worker-reload-mercy 1 \
   --py-autoreload 1 \
-  --buffer-size="${DD_UWSGI_BUFFER_SIZE:-4096}"
+  --buffer-size="${DD_UWSGI_BUFFER_SIZE:-8192}"
