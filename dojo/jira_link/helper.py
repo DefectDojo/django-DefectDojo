@@ -15,7 +15,7 @@ from requests.auth import HTTPBasicAuth
 from dojo.notifications.helper import create_notification
 from django.contrib import messages
 from celery.decorators import task
-from dojo.decorators import dojo_async_task
+from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
 from dojo.utils import get_current_request, truncate_with_dots
 from django.urls import reverse
 
