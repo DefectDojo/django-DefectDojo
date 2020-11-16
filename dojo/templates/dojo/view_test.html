@@ -322,7 +322,7 @@
                             <th>Reporter</th>
                             <th>Status</th>
                             {% if system_settings.enable_jira %}
-                                {% if jira_config and product_tab or not product_tab %}
+                                {% if jira_project and product_tab or not product_tab %}
                                     <th>Jira</th>
                                     <th>Jira Age</th>
                                     <th>Jira Change</th>
@@ -520,21 +520,20 @@
                         <td>{{ finding|finding_display_status|safe }}
                         </td>
                         {% if system_settings.enable_jira %}
-                            {% if jira_config and product_tab or not product_tab %}
+                            {% if jira_project and product_tab or not product_tab %}
                                 <td>
-                                    <a href="{{finding.jira_conf_new.url}}/browse/{{finding.jira_issue.jira_key}}" target="_blank"> {{finding.jira_issue.jira_key}} </a>
-                                </td>
-
-                                    <td class="nowrap">
-                                        {% if finding.jira_creation %}
-                                            {{ finding.jira_creation|timesince }}
-                                        {% endif %}
+                                    {% if finding.has_jira_issue %}
+                                        <a href="{{ finding | jira_url }}" target="_blank" 
+                                            alt="Jira Bug - {{finding | jira_key}}" data-toggle="tooltip" data-placement="bottom" title="{{finding | jira_key}}"><i class="fa fa-bug fa-fw"></i></a>
+                                    {% endif %}
                                     </td>
 
                                     <td class="nowrap">
-                                        {% if finding.jira_change %}
-                                            {{ finding.jira_change|timesince }}
-                                        {% endif %}
+                                        {{ finding | jira_creation | timesince }}
+                                    </td>
+
+                                    <td class="nowrap">
+                                        {{ finding | jira_change | timesince }}
                                     </td>
 
                             {% endif %}
@@ -774,7 +773,7 @@
                     { "data": "reporter" },
                     { "data": "status" },
                     {% if system_settings.enable_jira %}
-                        {% if jira_config and product_tab or not product_tab %}
+                        {% if jira_project and product_tab or not product_tab %}
                             { "data": "jira" },
                             { "data": "jira_age" },
                             { "data": "jira_change" },

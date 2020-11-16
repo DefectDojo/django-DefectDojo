@@ -1,7 +1,9 @@
+import logging
 import json
 import re
-
 from dojo.models import Finding
+
+logger = logging.getLogger(__name__)
 
 
 class NpmAuditParser(object):

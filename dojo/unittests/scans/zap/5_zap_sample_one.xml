@@ -1,0 +1,72 @@
+<?xml version="1.0"?><OWASPZAPReport version="2.9.0" generated="Tue, 12 May 2020 20:57:30">
+  <site name="https://mainsite.com" host="mainsite.com" port="443" ssl="true"><alerts><alertitem>
+    <pluginid>10011</pluginid>
+    <alert>zap1: Cookie Without Secure Flag</alert>
+    <name>Cookie Without Secure Flag</name>
+    <riskcode>1</riskcode>
+    <confidence>2</confidence>
+    <riskdesc>Low (Medium)</riskdesc>
+    <desc>A cookie has been set without the secure flag, which means that the cookie can be accessed via unencrypted connections.</desc>
+    <instances>
+    <instance>
+    <uri>https://mainsite.com/dashboard</uri>
+    <method>GET</method>
+    <param>opvc</param>
+    <evidence>Set-Cookie: opvc</evidence>
+    </instance>
+    <instance>
+    <uri>https://mainsite.com/dashboard</uri>
+    <method>GET</method>
+    <param>dmid</param>
+    <evidence>Set-Cookie: dmid</evidence>
+    </instance>
+    <instance>
+    <uri>https://mainsite.com</uri>
+    <method>GET</method>
+    <param>sitevisitscookie</param>
+    <evidence>Set-Cookie: sitevisitscookie</evidence>
+    </instance>
+    </instances>
+    <count>3</count>
+    <solution>Whenever a cookie contains sensitive information or is a session token, then it should always be passed using an encrypted channel. Ensure that the secure flag is set for cookies containing such sensitive information.</solution>
+    <reference>http://www.owasp.org/index.php/Testing_for_cookies_attributes_(OWASP-SM-002)</reference>
+    <cweid>614</cweid>
+    <wascid>13</wascid>
+    <sourceid>3</sourceid>
+  </alertitem>
+  <alertitem>  
+    <pluginid>10011</pluginid>
+    <alert>zap2: Cookie Without Secure Flag</alert>
+    <name>Cookie Without Secure Flag</name>
+    <riskcode>1</riskcode>
+    <confidence>2</confidence>
+    <riskdesc>Low (Medium)</riskdesc>
+    <desc>A cookie has been set without the secure flag, which means that the cookie can be accessed via unencrypted connections.</desc>
+    <instances>
+    <instance>
+    <uri>https://mainsite.com/dashboard</uri>
+    <method>GET</method>
+    <param>opvc</param>
+    <evidence>Set-Cookie: opvc</evidence>
+    </instance>
+    <instance>
+    <uri>https://mainsite.com/dashboard</uri>
+    <method>GET</method>
+    <param>dmid</param>
+    <evidence>Set-Cookie: dmid</evidence>
+    </instance>
+    <instance>
+    <uri>https://mainsite.com</uri>
+    <method>GET</method>
+    <param>sitevisitscookie</param>
+    <evidence>Set-Cookie: sitevisitscookie</evidence>
+    </instance>
+    </instances>
+    <count>3</count>
+    <solution>Whenever a cookie contains sensitive information or is a session token, then it should always be passed using an encrypted channel. Ensure that the secure flag is set for cookies containing such sensitive information.</solution>
+    <reference>http://www.owasp.org/index.php/Testing_for_cookies_attributes_(OWASP-SM-002)</reference>
+    <cweid>614</cweid>
+    <wascid>13</wascid>
+    <sourceid>3</sourceid>
+  </alertitem>
+  </alerts></site></OWASPZAPReport>

@@ -1,8 +1,7 @@
-from dojo.models import User, Endpoint, Notes, Finding, Endpoint_Status
-from django.urls import reverse
+from dojo.models import User
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase, APIClient
-import json
+from .dojo_test_case import DojoAPITestCase
 # from unittest import skip
 import logging
 
@@ -38,7 +37,7 @@ logger = logging.getLogger(__name__)
 # 4 absent
 # 5 active sev medium
 
-class DedupeTest(APITestCase):
+class DedupeTest(DojoAPITestCase):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -57,102 +56,6 @@ class DedupeTest(APITestCase):
         self.zap_sample1_filename = self.scans_path + '1_zap_sample_0_and_new_absent.xml'
         self.zap_sample2_filename = self.scans_path + '2_zap_sample_0_and_new_endpoint.xml'
         self.zap_sample3_filename = self.scans_path + '3_zap_sampl_0_and_different_severities.xml'
-
-    def import_scan(self, payload):
-        response = self.client.post(reverse('importscan-list'), payload)
-        self.assertEqual(201, response.status_code)
-        return json.loads(response.content)
-
-    def reimport_scan(self, payload):
-        response = self.client.post(reverse('reimportscan-list'), payload)
-        self.assertEqual(201, response.status_code)
-        return json.loads(response.content)
-
-    def get_test(self, test_id):
-        response = self.client.get(reverse('test-list') + '%s/' % test_id, format='json')
-        self.assertEqual(200, response.status_code)
-        # print('test.content: ', response.content)
-        return json.loads(response.content)
-
-    def get_test_findings(self, test_id, active=None, verified=None):
-        payload = {'test': test_id}
-        if active is not None:
-            payload['active'] = active
-        if verified is not None:
-            payload['verified'] = verified
-
-        logger.debug('getting findings for test: %s', payload)
-
-        response = self.client.get(reverse('finding-list'), payload, format='json')
-        self.assertEqual(200, response.status_code)
-        # print('findings.content: ', response.content)
-        return json.loads(response.content)
-
-    def log_finding_summary(self, findings_content_json=None):
-        # print('summary')
-        # print(findings_content_json)
-        # print(findings_content_json['count'])
-
-        if not findings_content_json or findings_content_json['count'] == 0:
-            logger.debug('no findings')
-        else:
-            for finding in findings_content_json['results']:
-                logger.debug(str(finding['id']) + ': ' + finding['title'][:5] + ':' + finding['severity'] + ': active: ' + str(finding['active']) + ': verified: ' + str(finding['verified']) +
-                        ': is_Mitigated: ' + str(finding['is_Mitigated']) + ": notes: " + str([n['id'] for n in finding['notes']]) +
-                        ": endpoints: " + str(finding['endpoints']))
-
-        logger.debug('endpoints')
-        for ep in Endpoint.objects.all():
-            logger.debug(str(ep.id) + ': ' + str(ep))
-
-        logger.debug('endpoint statuses')
-        for eps in Endpoint_Status.objects.all():
-            logger.debug(str(eps.id) + ': ' + str(eps.endpoint) + ': ' + str(eps.endpoint.id) + ': ' + str(eps.mitigated))
-
-    def assert_finding_count(self, count, findings_content_json):
-        self.assertEqual(findings_content_json['count'], count)
-
-    def db_finding_count(self):
-        return Finding.objects.all().count()
-
-    def db_endpoint_count(self):
-        return Endpoint.objects.all().count()
-
-    def db_endpoint_status_count(self, mitigated=None):
-        eps = Endpoint_Status.objects.all()
-        if mitigated is not None:
-            eps = eps.filter(mitigated=mitigated)
-        return eps.count()
-
-    def db_notes_count(self):
-        return Notes.objects.all().count()
-
-    def import_scan_with_params(self, filename, minimum_severity='Low', active=True, verified=True):
-        return self.import_scan(
-            {
-                "scan_date": '2020-06-04',
-                "minimum_severity": minimum_severity,
-                "active": active,
-                "verified": verified,
-                "scan_type": 'ZAP Scan',
-                "file": open(filename),
-                "engagement": 1,
-                "version": "1.0.1",
-            })
-
-    def reimport_scan_with_params(self, test_id, filename, minimum_severity='Low', active=True, verified=True):
-        return self.reimport_scan(
-            {
-                "test": test_id,
-                "scan_date": '2020-06-04',
-                "minimum_severity": minimum_severity,
-                "active": active,
-                "verified": verified,
-                "scan_type": 'ZAP Scan',
-                "file": open(filename),
-                "engagement": 1,
-                "version": "1.0.1",
-            })
 
     # import zap scan, testing:
     # - import
@@ -175,11 +78,11 @@ class DedupeTest(APITestCase):
         # 5 active
 
         test_id = import0['test']
-        findings = self.get_test_findings(test_id)
-        self.log_finding_summary(findings)
+        findings = self.get_test_findings_api(test_id)
+        self.log_finding_summary_json_api(findings)
 
         # imported count must match count in xml report
-        self.assert_finding_count(4, findings)
+        self.assert_finding_count_json(4, findings)
 
         # the zap scan contains 3 endpoints (mainsite with pot + uris from findings)
         self.assertEqual(endpoint_count_before + 3, self.db_endpoint_count())
@@ -214,12 +117,12 @@ class DedupeTest(APITestCase):
         test_id = reimport0['test']
         self.assertEqual(test_id, test_id)
 
-        findings = self.get_test_findings(test_id)
-        self.log_finding_summary(findings)
+        findings = self.get_test_findings_api(test_id)
+        self.log_finding_summary_json_api(findings)
 
         # reimported count must match count in xml report
-        findings = self.get_test_findings(test_id)
-        self.assert_finding_count(4, findings)
+        findings = self.get_test_findings_api(test_id)
+        self.assert_finding_count_json(4, findings)
 
         # reimporting the exact same scan shouldn't modify the number of endpoints and statuses
         self.assertEqual(endpoint_count_before, self.db_endpoint_count())
@@ -251,17 +154,17 @@ class DedupeTest(APITestCase):
         test_id = reimport0['test']
         self.assertEqual(test_id, test_id)
 
-        findings = self.get_test_findings(test_id)
-        self.log_finding_summary(findings)
+        findings = self.get_test_findings_api(test_id)
+        self.log_finding_summary_json_api(findings)
 
         # reimported count must match count in xml report
         # we set verified=False in this reimport, but currently DD does not update this flag, so it's still True from previous import
-        findings = self.get_test_findings(test_id, verified=True)
-        self.assert_finding_count(4, findings)
+        findings = self.get_test_findings_api(test_id, verified=True)
+        self.assert_finding_count_json(4, findings)
 
         # inversely, we should see no findings with verified=False
-        findings = self.get_test_findings(test_id, verified=False)
-        self.assert_finding_count(0, findings)
+        findings = self.get_test_findings_api(test_id, verified=False)
+        self.assert_finding_count_json(0, findings)
 
         # reimporting the exact same scan shouldn't modify the number of endpoints
         self.assertEqual(endpoint_count_before, self.db_endpoint_count())
@@ -283,8 +186,8 @@ class DedupeTest(APITestCase):
         import0 = self.import_scan_with_params(self.zap_sample0_filename)
 
         test_id = import0['test']
-        findings = self.get_test_findings(test_id)
-        self.log_finding_summary(findings)
+        findings = self.get_test_findings_api(test_id)
+        self.log_finding_summary_json_api(findings)
 
         finding_count_before = self.db_finding_count()
         endpoint_count_before = self.db_endpoint_count()
@@ -298,20 +201,20 @@ class DedupeTest(APITestCase):
         test_id = reimport1['test']
         self.assertEqual(test_id, test_id)
 
-        test = self.get_test(test_id)
-        findings = self.get_test_findings(test_id)
-        self.log_finding_summary(findings)
+        test = self.get_test_api(test_id)
+        findings = self.get_test_findings_api(test_id)
+        self.log_finding_summary_json_api(findings)
 
         # active findings must be equal to those in both reports
-        findings = self.get_test_findings(test_id)
-        self.assert_finding_count(4 + 1, findings)
+        findings = self.get_test_findings_api(test_id)
+        self.assert_finding_count_json(4 + 1, findings)
 
         # verified findings must be equal to those in report 0
-        findings = self.get_test_findings(test_id, verified=True)
-        self.assert_finding_count(4, findings)
+        findings = self.get_test_findings_api(test_id, verified=True)
+        self.assert_finding_count_json(4, findings)
 
-        findings = self.get_test_findings(test_id, verified=False)
-        self.assert_finding_count(1, findings)
+        findings = self.get_test_findings_api(test_id, verified=False)
+        self.assert_finding_count_json(1, findings)
 
         # the updated scan report has
         # - 1 new finding
@@ -335,8 +238,8 @@ class DedupeTest(APITestCase):
         import0 = self.import_scan_with_params(self.zap_sample0_filename)
 
         test_id = import0['test']
-        findings = self.get_test_findings(test_id)
-        self.log_finding_summary(findings)
+        findings = self.get_test_findings_api(test_id)
+        self.log_finding_summary_json_api(findings)
 
         finding_count_before = self.db_finding_count()
         endpoint_count_before = self.db_endpoint_count()
@@ -358,13 +261,13 @@ class DedupeTest(APITestCase):
         test_id = reimport1['test']
         self.assertEqual(test_id, test_id)
 
-        test = self.get_test(test_id)
-        findings = self.get_test_findings(test_id)
-        self.log_finding_summary(findings)
+        test = self.get_test_api(test_id)
+        findings = self.get_test_findings_api(test_id)
+        self.log_finding_summary_json_api(findings)
 
         # active findings must be equal to those in both reports
-        findings = self.get_test_findings(test_id)
-        self.assert_finding_count(4 + 1, findings)
+        findings = self.get_test_findings_api(test_id)
+        self.assert_finding_count_json(4 + 1, findings)
 
         zap1_ok = False
         zap4_ok = False
@@ -380,11 +283,11 @@ class DedupeTest(APITestCase):
         self.assertTrue(zap4_ok)
 
         # verified findings must be equal to those in report 0
-        findings = self.get_test_findings(test_id, verified=True)
-        self.assert_finding_count(4 + 1, findings)
+        findings = self.get_test_findings_api(test_id, verified=True)
+        self.assert_finding_count_json(4 + 1, findings)
 
-        findings = self.get_test_findings(test_id, verified=False)
-        self.assert_finding_count(0, findings)
+        findings = self.get_test_findings_api(test_id, verified=False)
+        self.assert_finding_count_json(0, findings)
 
         self.assertEqual(endpoint_count_before, self.db_endpoint_count())
 
@@ -405,8 +308,8 @@ class DedupeTest(APITestCase):
         import0 = self.import_scan_with_params(self.zap_sample0_filename)
 
         test_id = import0['test']
-        findings = self.get_test_findings(test_id)
-        self.log_finding_summary(findings)
+        findings = self.get_test_findings_api(test_id)
+        self.log_finding_summary_json_api(findings)
 
         finding_count_before = self.db_finding_count()
         endpoint_count_before = self.db_endpoint_count()
@@ -419,12 +322,12 @@ class DedupeTest(APITestCase):
         test_id = reimport2['test']
         self.assertEqual(test_id, test_id)
 
-        findings = self.get_test_findings(test_id)
-        self.log_finding_summary(findings)
+        findings = self.get_test_findings_api(test_id)
+        self.log_finding_summary_json_api(findings)
 
         # reimported count must match count in xml report
-        findings = self.get_test_findings(test_id)
-        self.assert_finding_count(4, findings)
+        findings = self.get_test_findings_api(test_id)
+        self.assert_finding_count_json(4, findings)
 
         self.assertEqual(endpoint_count_before + 1, self.db_endpoint_count())
         self.assertEqual(endpoint_status_count_before_active + 1, self.db_endpoint_status_count(mitigated=False))
@@ -440,20 +343,20 @@ class DedupeTest(APITestCase):
     def test_import_0_reimport_2_extra_endpoint_reimport_0(self):
         logger.debug('reimporting exact same original zap xml report again, with an extra endpoint for zap1')
 
-        # self.log_finding_summary()
+        # self.log_finding_summary_json_api()
 
         import0 = self.import_scan_with_params(self.zap_sample0_filename)
         test_id = import0['test']
-        findings = self.get_test_findings(test_id)
-        self.log_finding_summary(findings)
+        findings = self.get_test_findings_api(test_id)
+        self.log_finding_summary_json_api(findings)
 
         reimport2 = self.reimport_scan_with_params(test_id, self.zap_sample2_filename)
 
         test_id = reimport2['test']
         self.assertEqual(test_id, test_id)
 
-        findings = self.get_test_findings(test_id)
-        self.log_finding_summary(findings)
+        findings = self.get_test_findings_api(test_id)
+        self.log_finding_summary_json_api(findings)
 
         finding_count_before = self.db_finding_count()
         endpoint_count_before = self.db_endpoint_count()
@@ -466,12 +369,12 @@ class DedupeTest(APITestCase):
         test_id = reimport0['test']
         self.assertEqual(test_id, test_id)
 
-        findings = self.get_test_findings(test_id)
-        self.log_finding_summary(findings)
+        findings = self.get_test_findings_api(test_id)
+        self.log_finding_summary_json_api(findings)
 
         # reimported count must match count in xml report
-        findings = self.get_test_findings(test_id)
-        self.assert_finding_count(4, findings)
+        findings = self.get_test_findings_api(test_id)
+        self.assert_finding_count_json(4, findings)
 
         # existing BUG: endpoint that is no longer in last scan should be removed or marked as mitigated
         self.assertEqual(endpoint_count_before, self.db_endpoint_count())
@@ -493,8 +396,8 @@ class DedupeTest(APITestCase):
         import0 = self.import_scan_with_params(self.zap_sample0_filename)
 
         test_id = import0['test']
-        findings = self.get_test_findings(test_id)
-        self.log_finding_summary(findings)
+        findings = self.get_test_findings_api(test_id)
+        self.log_finding_summary_json_api(findings)
 
         finding_count_before = self.db_finding_count()
         endpoint_count_before = self.db_endpoint_count()
@@ -508,10 +411,10 @@ class DedupeTest(APITestCase):
         test_id = reimport1['test']
         self.assertEqual(test_id, test_id)
 
-        test = self.get_test(test_id)
-        findings = self.get_test_findings(test_id)
-        self.log_finding_summary(findings)
-        self.assert_finding_count(4 + 2, findings)
+        test = self.get_test_api(test_id)
+        findings = self.get_test_findings_api(test_id)
+        self.log_finding_summary_json_api(findings)
+        self.assert_finding_count_json(4 + 2, findings)
 
         zap2_ok = False
         zap5_ok = False
@@ -529,11 +432,11 @@ class DedupeTest(APITestCase):
         self.assertTrue(zap5_ok)
 
         # verified findings must be equal to those in report 0
-        findings = self.get_test_findings(test_id, verified=True)
-        self.assert_finding_count(4 + 2, findings)
+        findings = self.get_test_findings_api(test_id, verified=True)
+        self.assert_finding_count_json(4 + 2, findings)
 
-        findings = self.get_test_findings(test_id, verified=False)
-        self.assert_finding_count(0, findings)
+        findings = self.get_test_findings_api(test_id, verified=False)
+        self.assert_finding_count_json(0, findings)
 
         # the updated scan report has
         # - 2 new findings, 2 new endpoints, 3 + 3 new endpoint statuses active, 3 + 3 endpoint statues mitigated due to zap1+2 closed

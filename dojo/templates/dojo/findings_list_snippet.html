@@ -169,9 +169,9 @@
                             <th>Reporter</th>
                             <th>Found By</th>
                             <th>Status</th>
-                            <th>Jira</th>
                             {% if system_settings.enable_jira %}
-                              {% if jira_config and product_tab or not product_tab %}
+                              {% if jira_project and product_tab or not product_tab %}
+                                <th>Jira</th>
                                 <th>JIRA Age</th>
                                 <th>JIRA Change</th>
                               {% endif %}
@@ -388,31 +388,22 @@
                                 </td>
                                 <td>{{ finding|finding_display_status|safe }}
                                 </td>
-                                <td class="nowrap">
-                                  {% if system_settings.enable_jira %}
-                                    {% if finding.has_jira_issue %}
-                                      <a href="{{finding.jira_conf_new.url}}/browse/{{finding.jira_issue.jira_key}}" target="_blank" 
-                                           alt="Jira Bug - {{finding.jira_issue.jira_key}}" data-toggle="tooltip" data-placement="bottom" title="{{finding.jira_issue.jira_key}}"><i class="fa fa-bug fa-fw"></i></a>
-                                    {% endif %}
-                                  {% endif %}
-                                </td>
                                 {% if system_settings.enable_jira %}
-                                  {% if jira_config and product_tab or not product_tab %}
-                                      <td class="nowrap">
-                                        {% if finding.jira_creation %}
-                                          {{ finding.jira_creation|timesince }} 
-                                        {% endif %} 
-                                      </td>
-                                      <td class="nowrap">
-                                        {% if finding.jira_change %}
-                                          {{ finding.jira_change|timesince }} 
-                                        {% endif %}
-                                      </td> 
+                                  {% if jira_project and product_tab or not product_tab %}
+                                    <td class="nowrap">
+                                      {% if finding.has_jira_issue %}
+                                        <a href="{{ finding | jira_url }}" target="_blank" 
+                                            alt="Jira Bug - {{finding | jira_key}}" data-toggle="tooltip" data-placement="bottom" title="{{finding | jira_key}}"><i class="fa fa-bug fa-fw"></i></a>
+                                      {% endif %}
+                                    </td>
+                                    <td class="nowrap">
+                                      {{ finding | jira_creation | timesince }} 
+                                    </td>
+                                    <td class="nowrap">
+                                      {{ finding | jira_change | timesince }} 
+                                    </td> 
                                   {% endif %}
                                 {% endif %}
-                                
-
-
                                 {% if show_product_column and product_tab is None %}
                                 <td><a
                                         href="{% url 'view_product' finding.test.engagement.product.id %}"
@@ -479,9 +470,9 @@
                     { "data": "reported_by" },
                     { "data": "found_by_test" }, 
                     { "data": "status" },
-                    { "data": "jira_id" },
-                    {% if system_settings.enable_jira %}	
-                      {% if jira_config and product_tab or not product_tab %}                    	
+                    {% if system_settings.enable_jira %}
+                    {% if jira_project and product_tab or not product_tab %}                    	
+                        { "data": "jira_id" },
                         { "data": "jira_age" },
                         { "data": "jira_change" },
                       {% endif %}                          	
