@@ -237,7 +237,7 @@
             {% if jira_project %}
             <tr>
               <td><strong>JIRA</strong></td>
-              <td><a href="{{ prod | jira_url }}" target="_blank"><i class="fa fa-external-link"></i> {{ prod | jira_key }}</a></td>
+              <td><a href="{{ prod | jira_project_url }}" target="_blank"><i class="fa fa-external-link"></i> {{ prod | jira_key }}</a></td>
             </tr>
             {% endif %}
           {% endwith %}

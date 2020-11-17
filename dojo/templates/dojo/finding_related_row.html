@@ -62,8 +62,8 @@
     {% if system_settings.enable_jira %} 
         <td>
             {% if similar_finding.jira_issue %}
-                <a href="{{ similar_finding | jira_url }}"
-                target="_blank" title="{{similar_finding | jira_url }}">{{ similar_finding | jira_key }}</a>
+                <a href="{{ similar_finding | jira_issue_url }}"
+                target="_blank" title="{{similar_finding | jira_issue_url }}">{{ similar_finding | jira_key }}</a>
             {% endif %}
         </td>
     {% endif %}

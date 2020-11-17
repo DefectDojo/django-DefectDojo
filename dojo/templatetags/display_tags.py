@@ -836,8 +836,13 @@ def jira_project(obj, use_inheritance=True):
 
 
 @register.filter
-def jira_url(obj):
-    return jira_helper.get_jira_url(obj)
+def jira_issue_url(obj):
+    return jira_helper.get_jira_issue_url(obj)
+
+
+@register.filter
+def jira_project_url(obj):
+    return jira_helper.get_jira_project_url(obj)
 
 
 @register.filter

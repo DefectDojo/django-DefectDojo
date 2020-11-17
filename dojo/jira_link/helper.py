@@ -152,11 +152,15 @@ def get_jira_issue_url(obj):
 
 
 def get_jira_project_url(obj):
-    # jira_url can be called for a JIRA_Project, i.e. http://jira.com/browser/SEC
+
     logger.debug('getting jira project url')
-    if isinstance(obj, JIRA_Project):
-        logger.debug('getting jira project url2')
+    if not isinstance(obj, JIRA_Project):
+        jira_project = get_jira_project(obj)
+    else:
         jira_project = obj
+
+    if jira_project:
+        logger.debug('getting jira project url2')
         jira_instance = get_jira_instance(obj)
         if jira_project and jira_instance:
             logger.debug('getting jira project url3')
