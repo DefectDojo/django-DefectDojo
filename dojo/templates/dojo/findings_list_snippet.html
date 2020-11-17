@@ -442,9 +442,49 @@
         $(document).ready(function() {
             date =  new Date().toISOString().slice(0, 10);
             var fileDated = 'Findings_List_' + date;
+            var columns = [
+                {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled %}
+                { "data": "checkbox" },
+                {% endif %}
+                { "data": "action" },
+                { "data": "severity" },
+                { "data": "finding" , render: function (data, type, row) {
+                        return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
+                }},
+                { "data": "cwe" },
+                { "data": "cve" },
+                { "data": "found_date" },
+                { "data": "finding_age" },
+                {% if system_settings.enable_finding_sla %}
+                { "data": "finding_sla" },
+                {% endif %}
+                { "data": "reported_by" },
+                { "data": "found_by_test" },
+                { "data": "status" },
+                { "data": "jira_id" },
+                {% if system_settings.enable_jira %}
+                  {% if jira_config and product_tab or not product_tab %}
+                    { "data": "jira_age" },
+                    { "data": "jira_change" },
+                  {% endif %}
+                {% endif %}
+                {% if show_product_column and product_tab is None %}
+                    { "data": "product" },
+                {% endif %}
+              ];
+
+            // Filter the list of items to display based on what is shown.
+            var disallowed_entries = new Set(["checkbox", "action"]);
+            var data_column_list = [];
+            for (var i = 0; i < columns.length; i++) {
+                if (!disallowed_entries.has(columns[i]["data"])) {
+                    data_column_list.push(i);
+                }
+            }
+
             var buttonCommon = {
                 exportOptions: {
-                    columns: ':not(:eq(0), :eq(1))',
+                    columns: data_column_list,
                     stripHtml: true,
                     stripNewlines: true,
                     trim: true,
@@ -460,36 +500,7 @@
                       $('.has-popover').popover({'trigger':'hover'});
                 },
                 colReorder: true,                
-                "columns": [	
-                    {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled %}
-                    { "data": "checkbox" },
-                    {% endif %}
-                    { "data": "action" },
-                    { "data": "severity" },
-                    { "data": "finding" , render: function (data, type, row) {	
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;	
-                    }},	
-                    { "data": "cwe" },
-                    { "data": "cve" },
-                    { "data": "found_date" },
-                    { "data": "finding_age" },
-                    {% if system_settings.enable_finding_sla %}	
-                    { "data": "finding_sla" },
-                    {% endif %}                    	
-                    { "data": "reported_by" },
-                    { "data": "found_by_test" }, 
-                    { "data": "status" },
-                    { "data": "jira_id" },
-                    {% if system_settings.enable_jira %}	
-                      {% if jira_config and product_tab or not product_tab %}                    	
-                        { "data": "jira_age" },
-                        { "data": "jira_change" },
-                      {% endif %}                          	
-                    {% endif %}	
-                    {% if show_product_column and product_tab is None %}	
-                        { "data": "product" },
-                    {% endif %}	
-                ],
+                "columns": columns,
                 order: [],
                 columnDefs: [
                     { 
