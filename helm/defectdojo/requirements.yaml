@@ -8,10 +8,10 @@ dependencies:
     repository: "@bitnami"
     condition: postgresql.enabled
   - name: rabbitmq
-    version: 6.18.2
-    repository: "@stable"
+    version: 8.0.2
+    repository: "@bitnami"
     condition: rabbitmq.enabled
   - name: redis
-    version: 10.5.7
-    repository: "@stable"
+    version: 12.0.0
+    repository: "@bitnami"
     condition: redis.enabled
