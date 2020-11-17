@@ -131,6 +131,15 @@ def custom_report(request):
                            "finding_notes": finding_notes,
                            "finding_images": finding_images,
                            "user_id": request.user.id})
+        elif report_format == 'HTML':
+            widgets = list(selected_widgets.values())
+            return render(request,
+                          'dojo/custom_html_report.html',
+                          {"widgets": widgets,
+                           "host": host,
+                           "finding_notes": finding_notes,
+                           "finding_images": finding_images,
+                           "user_id": request.user.id})
         else:
             return HttpResponseForbidden()
     else:
