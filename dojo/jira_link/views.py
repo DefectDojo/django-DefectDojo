@@ -53,99 +53,106 @@ def webhook(request, secret=None):
     if request.method == 'POST':
         # logger.debug('jira_webhook_body:')
         # logger.debug(request.body.decode('utf-8'))
-        parsed = json.loads(request.body.decode('utf-8'))
-        if parsed.get('webhookEvent') == 'jira:issue_updated':
-            jid = parsed['issue']['id']
-            jissue = get_object_or_404(JIRA_Issue, jira_id=jid)
-            if jissue.finding is not None:
-                finding = jissue.finding
-                jira_instance = jira_helper.get_jira_instance(finding)
-                resolved = True
-                resolution = parsed['issue']['fields']['resolution']
+        try:
+            parsed = json.loads(request.body.decode('utf-8'))
+            if parsed.get('webhookEvent') == 'jira:issue_updated':
+                jid = parsed['issue']['id']
+                jissue = get_object_or_404(JIRA_Issue, jira_id=jid)
+                if jissue.finding is not None:
+                    finding = jissue.finding
+                    jira_instance = jira_helper.get_jira_instance(finding)
+                    resolved = True
+                    resolution = parsed['issue']['fields']['resolution']
 
-                #         "resolution":{
-                #             "self":"http://www.testjira.com/rest/api/2/resolution/11",
-                #             "id":"11",
-                #             "description":"Cancelled by the customer.",
-                #             "name":"Cancelled"
-                #         },
+                    #         "resolution":{
+                    #             "self":"http://www.testjira.com/rest/api/2/resolution/11",
+                    #             "id":"11",
+                    #             "description":"Cancelled by the customer.",
+                    #             "name":"Cancelled"
+                    #         },
 
-                # or
-                #         "resolution": null
+                    # or
+                    #         "resolution": null
 
-                if resolution is None:
-                    resolved = False
-                if finding.active == resolved:
-                    if finding.active:
-                        if jira_instance and resolution['name'] in jira_instance.accepted_resolutions:
-                            finding.active = False
-                            finding.mitigated = None
-                            finding.is_Mitigated = False
-                            finding.false_p = False
-                            assignee = parsed['issue']['fields'].get('assignee')
-                            assignee_name = assignee['name'] if assignee else None
-                            Risk_Acceptance.objects.create(
-                                accepted_by=assignee_name,
-                                owner=finding.reporter,
-                            ).accepted_findings.set([finding])
-                        elif jira_instance and resolution['name'] in jira_instance.false_positive_resolutions:
-                            finding.active = False
-                            finding.verified = False
-                            finding.mitigated = None
-                            finding.is_Mitigated = False
-                            finding.false_p = True
-                            finding.remove_from_any_risk_acceptance()
+                    if resolution is None:
+                        resolved = False
+                    if finding.active == resolved:
+                        if finding.active:
+                            if jira_instance and resolution['name'] in jira_instance.accepted_resolutions:
+                                finding.active = False
+                                finding.mitigated = None
+                                finding.is_Mitigated = False
+                                finding.false_p = False
+                                assignee = parsed['issue']['fields'].get('assignee')
+                                assignee_name = assignee['name'] if assignee else None
+                                Risk_Acceptance.objects.create(
+                                    accepted_by=assignee_name,
+                                    owner=finding.reporter,
+                                ).accepted_findings.set([finding])
+                            elif jira_instance and resolution['name'] in jira_instance.false_positive_resolutions:
+                                finding.active = False
+                                finding.verified = False
+                                finding.mitigated = None
+                                finding.is_Mitigated = False
+                                finding.false_p = True
+                                finding.remove_from_any_risk_acceptance()
+                            else:
+                                # Mitigated by default as before
+                                now = timezone.now()
+                                finding.active = False
+                                finding.mitigated = now
+                                finding.is_Mitigated = True
+                                finding.endpoints.clear()
+                                finding.false_p = False
+                                finding.remove_from_any_risk_acceptance()
                         else:
-                            # Mitigated by default as before
-                            now = timezone.now()
-                            finding.active = False
-                            finding.mitigated = now
-                            finding.is_Mitigated = True
-                            finding.endpoints.clear()
+                            # Reopen / Open Jira issue
+                            finding.active = True
+                            finding.mitigated = None
+                            finding.is_Mitigated = False
                             finding.false_p = False
                             finding.remove_from_any_risk_acceptance()
-                    else:
-                        # Reopen / Open Jira issue
-                        finding.active = True
-                        finding.mitigated = None
-                        finding.is_Mitigated = False
-                        finding.false_p = False
-                        finding.remove_from_any_risk_acceptance()
 
-                    finding.jira_issue.jira_change = timezone.now()
-                    finding.jira_issue.save()
-                    finding.save()
+                        finding.jira_issue.jira_change = timezone.now()
+                        finding.jira_issue.save()
+                        finding.save()
+                """
+                if jissue.engagement is not None:
+                    eng = jissue.engagement
+                    if parsed['issue']['fields']['resolution'] != None:
+                        eng.active = False
+                        eng.status = 'Completed'
+                        eng.save()
             """
-            if jissue.engagement is not None:
-                eng = jissue.engagement
-                if parsed['issue']['fields']['resolution'] != None:
-                    eng.active = False
-                    eng.status = 'Completed'
-                    eng.save()
-           """
-        if parsed.get('webhookEvent') == 'comment_created':
-            comment_text = parsed['comment']['body']
-            commentor = parsed['comment']['updateAuthor']['displayName']
-            jid = parsed['comment']['self'].split('/')[7]
-            jissue = JIRA_Issue.objects.get(jira_id=jid)
-            jira_usernames = JIRA_Instance.objects.values_list('username', flat=True)
-            for jira_userid in jira_usernames:
-                if jira_userid.lower() in commentor.lower():
-                    return HttpResponse('')
-                    break
-            finding = jissue.finding
-            new_note = Notes()
-            new_note.entry = '(%s): %s' % (commentor, comment_text)
-            new_note.author, created = User.objects.get_or_create(username='JIRA')
-            new_note.save()
-            finding.notes.add(new_note)
-            finding.jira_issue.jira_change = timezone.now()
-            finding.jira_issue.save()
-            finding.save()
-            create_notification(event='other', title='JIRA incoming comment - %s' % (jissue.finding), url=reverse("view_finding", args=(jissue.finding.id, )), icon='check')
+            if parsed.get('webhookEvent') == 'comment_created':
+                comment_text = parsed['comment']['body']
+                commentor = parsed['comment']['updateAuthor']['displayName']
+                jid = parsed['comment']['self'].split('/')[7]
+                jissue = JIRA_Issue.objects.get(jira_id=jid)
+                jira_usernames = JIRA_Instance.objects.values_list('username', flat=True)
+                for jira_userid in jira_usernames:
+                    if jira_userid.lower() in commentor.lower():
+                        return HttpResponse('')
+                        break
+                finding = jissue.finding
+                new_note = Notes()
+                new_note.entry = '(%s): %s' % (commentor, comment_text)
+                new_note.author, created = User.objects.get_or_create(username='JIRA')
+                new_note.save()
+                finding.notes.add(new_note)
+                finding.jira_issue.jira_change = timezone.now()
+                finding.jira_issue.save()
+                finding.save()
+                create_notification(event='other', title='JIRA incoming comment - %s' % (jissue.finding), url=reverse("view_finding", args=(jissue.finding.id, )), icon='check')
 
-        if parsed.get('webhookEvent') not in ['comment_created', 'jira:issue_updated']:
-            logger.info('Unrecognized JIRA webhook event received: {}'.format(parsed.get('webhookEvent')))
+            if parsed.get('webhookEvent') not in ['comment_created', 'jira:issue_updated']:
+                logger.info('Unrecognized JIRA webhook event received: {}'.format(parsed.get('webhookEvent')))
+
+        except JIRA_Issue.DoesNotExist as je:
+            logger.debug('The JIRA issue received by the webhook matched no JIRA linked in DefectDojo')
+        except Exception as e:
+            logger.error("There was an error when processing the incoming JIRA webhook payload: {}".format(e))
+
     return HttpResponse('')
 
 
