@@ -20,13 +20,13 @@ from django.db.models import Count, Q
 from dojo.models import Product, Engagement, Test, Finding, \
     User, ScanSettings, IPScan, Scan, Stub_Finding, Risk_Acceptance, \
     Finding_Template, Test_Type, Development_Environment, \
-    BurpRawRequestResponse, Endpoint, Notes, JIRA_PKey, JIRA_Conf, \
+    BurpRawRequestResponse, Endpoint, Notes, JIRA_Project, JIRA_Instance, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Languages, Language_Type, App_Analysis, Product_Type, Note_Type, \
     Endpoint_Status
 from dojo.forms import ProductForm, EngForm, TestForm, \
     ScanSettingsForm, FindingForm, StubFindingForm, FindingTemplateForm, \
-    ImportScanForm, SEVERITY_CHOICES, JIRAForm, JIRA_PKeyForm, EditEndpointForm, \
+    ImportScanForm, SEVERITY_CHOICES, JIRAForm, JIRAProjectForm, EditEndpointForm, \
     JIRA_IssueForm, ToolConfigForm, ToolProductSettingsForm, \
     ToolTypeForm, LanguagesTypeForm, Languages_TypeTypeForm, App_AnalysisTypeForm, \
     Development_EnvironmentForm, Product_TypeForm, Test_TypeForm, NoteTypeForm
@@ -799,10 +799,10 @@ class EndpointResource(BaseModelResource):
 
 
 """
-    /api/v1/jira_configurations/
+    /api/v1/JIRA_Issues/
     GET [/id/], DELETE [/id/]
-    Expects: no params or JIRA_PKey
-    Returns jira configuration: ALL or by JIRA_PKey
+    Expects: no params or JIRA_Project
+    Returns jira configuration: ALL or by JIRA_Project
 
     POST, PUT [/id/]
 """
@@ -833,8 +833,8 @@ class JIRA_IssueResource(BaseModelResource):
 """
     /api/v1/jira_configurations/
     GET [/id/], DELETE [/id/]
-    Expects: no params or JIRA_PKey
-    Returns jira configuration: ALL or by JIRA_PKey
+    Expects: no params or JIRA_Project
+    Returns jira configuration: ALL or by JIRA_Project
 
     POST, PUT [/id/]
 """
@@ -843,10 +843,10 @@ class JIRA_IssueResource(BaseModelResource):
 class JIRA_ConfResource(BaseModelResource):
 
     class Meta:
-        resource_name = 'jira_configurations'
+        resource_name = 'JIRA_Configurations'
         list_allowed_methods = ['get', 'post', 'put', 'delete']
         detail_allowed_methods = ['get', 'post', 'put', 'delete']
-        queryset = JIRA_Conf.objects.all()
+        queryset = JIRA_Instance.objects.all()
         include_resource_uri = True
         filtering = {
             'id': ALL,
@@ -882,7 +882,7 @@ class JiraResource(BaseModelResource):
         list_allowed_methods = ['get', 'post', 'put', 'delete']
         detail_allowed_methods = ['get', 'post', 'put', 'delete']
 
-        queryset = JIRA_PKey.objects.all()
+        queryset = JIRA_Project.objects.all()
         include_resource_uri = True
         filtering = {
             'id': ALL,
@@ -900,7 +900,7 @@ class JiraResource(BaseModelResource):
 
         @property
         def validation(self):
-            return ModelFormValidation(form_class=JIRA_PKeyForm, resource=JiraResource)
+            return ModelFormValidation(form_class=JIRAProjectForm, resource=JiraResource)
 
 
 """

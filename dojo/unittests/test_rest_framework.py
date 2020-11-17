@@ -1,12 +1,12 @@
 from dojo.models import Product, Engagement, Test, Finding, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
-    User, ScanSettings, Scan, Stub_Finding, Endpoint, JIRA_PKey, JIRA_Conf, \
+    User, ScanSettings, Scan, Stub_Finding, Endpoint, JIRA_Project, JIRA_Instance, \
     Finding_Template, Note_Type, App_Analysis, Endpoint_Status, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Notes, \
     BurpRawRequestResponse
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
-    FindingTemplatesViewSet, FindingViewSet, JiraConfigurationsViewSet, \
-    JiraIssuesViewSet, JiraViewSet, ProductViewSet, ScanSettingsViewSet, \
+    FindingTemplatesViewSet, FindingViewSet, JiraInstanceViewSet, \
+    JiraIssuesViewSet, JiraProjectViewSet, ProductViewSet, ScanSettingsViewSet, \
     ScansViewSet, StubFindingsViewSet, TestsViewSet, \
     ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
     UsersViewSet, ImportScanView, NoteTypeViewSet, AppAnalysisViewSet, \
@@ -90,12 +90,13 @@ class BaseClass():
         def test_update(self):
             current_objects = self.client.get(self.url, format='json').data
             relative_url = self.url + '%s/' % current_objects['results'][0]['id']
-            response = self.client.patch(
-                relative_url, self.update_fields)
+            response = self.client.patch(relative_url, self.update_fields)
+
             for key, value in self.update_fields.items():
                 # some exception as push_to_jira has been implemented strangely in the update methods in the api
                 if key not in ['push_to_jira', 'ssh', 'password', 'api_key']:
                     self.assertEqual(value, response.data[key])
+
             self.assertFalse('push_to_jira' in response.data)
             self.assertFalse('ssh' in response.data)
             self.assertFalse('password' in response.data)
@@ -277,13 +278,13 @@ class FindingTemplatesTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class JiraConfigurationsTest(BaseClass.RESTEndpointTest):
+class JiraInstancesTest(BaseClass.RESTEndpointTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
-        self.endpoint_model = JIRA_Conf
-        self.viewname = 'jira_conf'
-        self.viewset = JiraConfigurationsViewSet
+        self.endpoint_model = JIRA_Instance
+        self.viewname = 'jira_instance'
+        self.viewset = JiraInstanceViewSet
         self.payload = {
             "url": "http://www.example.com",
             "username": "testuser",
@@ -321,13 +322,13 @@ class JiraIssuesTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class JiraTest(BaseClass.RESTEndpointTest):
+class JiraProjectTest(BaseClass.RESTEndpointTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
-        self.endpoint_model = JIRA_PKey
-        self.viewname = 'jira_pkey'
-        self.viewset = JiraViewSet
+        self.endpoint_model = JIRA_Project
+        self.viewname = 'jira_project'
+        self.viewset = JiraProjectViewSet
         self.payload = {
             "project_key": "TEST KEY",
             "component": "",
@@ -335,9 +336,9 @@ class JiraTest(BaseClass.RESTEndpointTest):
             "enable_engagement_epic_mapping": False,
             "push_notes": False,
             "product": 1,
-            "conf": 2,
+            "jira_instance": 2,
         }
-        self.update_fields = {'conf': 3}
+        self.update_fields = {'jira_instance': 3}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -380,7 +381,7 @@ class SonarqubeProductTest(BaseClass.RESTEndpointTest):
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Sonarqube_Product
         self.viewname = 'sonarqube_product'
-        self.viewset = JiraViewSet
+        self.viewset = JiraProjectViewSet
         self.payload = {
             "product": 2,
             "sonarqube_project_key": "dojo_sonar_key",

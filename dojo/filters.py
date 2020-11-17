@@ -481,8 +481,8 @@ class ApiFindingFilter(DojoFilter):
     # DateRangeFilter
     created = DateRangeFilter()
     date = DateRangeFilter()
-    jira_change = DateRangeFilter()
-    jira_creation = DateRangeFilter()
+    jira_creation = DateRangeFilter(field_name='jira_issue__jira_creation')
+    jira_change = DateRangeFilter(field_name='jira_issue__jira_change')
     last_reviewed = DateRangeFilter()
     mitigated = DateRangeFilter()
     # NumberInFilter
@@ -563,11 +563,10 @@ class OpenFindingFilter(DojoFilter):
     test__engagement__risk_acceptance = ReportRiskAcceptanceFilter(
         label="Risk Accepted")
 
-    if get_system_setting('enable_jira'):
-        has_jira_issue = BooleanFilter(field_name='jira_issue',
-                                   lookup_expr='isnull',
-                                   exclude=True,
-                                   label='has JIRA')
+    has_jira_issue = BooleanFilter(field_name='jira_issue',
+                                lookup_expr='isnull',
+                                exclude=True,
+                                label='has JIRA')
 
     jira_issue__jira_key = CharFilter(field_name='jira_issue__jira_key', lookup_expr='icontains', label="JIRA issue")
 
@@ -595,7 +594,7 @@ class OpenFindingFilter(DojoFilter):
                    'thread_id', 'notes', 'scanner_confidence', 'mitigated',
                    'numerical_severity', 'reporter', 'last_reviewed', 'line',
                    'duplicate_finding', 'hash_code', 'images', 'endpoint_status',
-                   'line_number', 'reviewers', 'mitigated_by', 'sourcefile', 'jira_creation', 'jira_change', 'created']
+                   'line_number', 'reviewers', 'mitigated_by', 'sourcefile', 'created', 'jira_creation', 'jira_change']
 
     def __init__(self, *args, **kwargs):
         self.user = None
@@ -606,6 +605,10 @@ class OpenFindingFilter(DojoFilter):
         if 'pid' in kwargs:
             self.pid = kwargs.pop('pid')
         super(OpenFindingFilter, self).__init__(*args, **kwargs)
+
+        if not get_system_setting('enable_jira'):
+            self.form.fields.pop('jira_issue__jira_key')
+            self.form.fields.pop('has_jira_issue')
 
         cwe = dict()
         cwe = dict([cwe, cwe]
@@ -659,8 +662,7 @@ class ClosedFindingFilter(DojoFilter):
     test__engagement__risk_acceptance = ReportRiskAcceptanceFilter(
         label="Risk Accepted")
 
-    if get_system_setting('enable_jira'):
-        has_jira_issue = BooleanFilter(field_name='jira_issue',
+    has_jira_issue = BooleanFilter(field_name='jira_issue',
                                    lookup_expr='isnull',
                                    exclude=True,
                                    label='has JIRA')
@@ -707,6 +709,11 @@ class ClosedFindingFilter(DojoFilter):
         if 'pid' in kwargs:
             self.pid = kwargs.pop('pid')
         super(ClosedFindingFilter, self).__init__(*args, **kwargs)
+
+        if not get_system_setting('enable_jira'):
+            self.form.fields.pop('jira_issue__jira_key')
+            self.form.fields.pop('has_jira_issue')
+
         cwe = dict()
         cwe = dict([cwe, cwe]
                    for cwe in self.queryset.values_list('cwe', flat=True).distinct()
@@ -869,7 +876,6 @@ class SimilarFindingFilter(DojoFilter):
     date = DateRangeFilter()
     component_name = CharFilter(lookup_expr='icontains')
     component_version = CharFilter(lookup_expr='icontains')
-    jira_issue__jira_key = CharFilter(lookup_expr='icontains')
 
     test__test_type = ModelMultipleChoiceFilter(
         queryset=Test_Type.objects.all())
@@ -880,11 +886,10 @@ class SimilarFindingFilter(DojoFilter):
         queryset=Product_Type.objects.all(),
         label="Product Type")
 
-    if get_system_setting('enable_jira'):
-        has_jira_issue = BooleanFilter(field_name='jira_issue',
-                                   lookup_expr='isnull',
-                                   exclude=True,
-                                   label='has JIRA')
+    has_jira_issue = BooleanFilter(field_name='jira_issue',
+                                lookup_expr='isnull',
+                                exclude=True,
+                                label='has JIRA')
 
     jira_issue__jira_key = CharFilter(field_name='jira_issue__jira_key', lookup_expr='icontains', label="JIRA issue")
 
@@ -933,6 +938,10 @@ class SimilarFindingFilter(DojoFilter):
             data['test__engagement__product__prod_type'] = self.finding.test.engagement.product.prod_type
 
         super().__init__(data, *args, **kwargs)
+
+        if get_system_setting('enable_jira'):
+            self.form.fields.pop('jira_issue__jira_key')
+            self.form.fields.pop('has_jira_issue')
 
         if self.user is not None and not self.user.is_staff:
             if self.form.fields.get('test__engagement__product'):

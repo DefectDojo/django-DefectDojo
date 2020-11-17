@@ -1,5 +1,5 @@
 # requirements.txt for DefectDojo using Python 3.x
-asteval==0.9.20
+asteval==0.9.21
 bleach>=3.1.0
 celery==4.4.7
 coverage==5.3
@@ -67,3 +67,5 @@ JSON-log-formatter==0.3.0
 django-split-settings==1.0.1
 django-debug-toolbar==3.1.1
 django-debug-toolbar-request-history==0.1.3
+vcrpy==4.1.1
+vcrpy-unittest==0.1.7

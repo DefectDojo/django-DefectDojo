@@ -3,7 +3,7 @@ from dojo.models import Product, Engagement, Test, Finding, \
     User, ScanSettings, IPScan, Scan, Stub_Finding, Risk_Acceptance, \
     Finding_Template, Test_Type, Development_Environment, NoteHistory, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
-    Product_Type, JIRA_Conf, Endpoint, BurpRawRequestResponse, JIRA_PKey, \
+    Product_Type, JIRA_Instance, Endpoint, BurpRawRequestResponse, JIRA_Project, \
     Notes, DojoMeta, FindingImage, Note_Type, App_Analysis, Endpoint_Status, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation
 
@@ -24,6 +24,7 @@ import datetime
 import six
 from django.utils.translation import ugettext_lazy as _
 import json
+import dojo.jira_link.helper as jira_helper
 import logging
 
 
@@ -533,18 +534,19 @@ class JIRAIssueSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class JIRAConfSerializer(serializers.ModelSerializer):
+class JIRAInstanceSerializer(serializers.ModelSerializer):
+
     class Meta:
-        model = JIRA_Conf
+        model = JIRA_Instance
         fields = '__all__'
         extra_kwargs = {
             'password': {'write_only': True},
         }
 
 
-class JIRASerializer(serializers.ModelSerializer):
+class JIRAProjectSerializer(serializers.ModelSerializer):
     class Meta:
-        model = JIRA_PKey
+        model = JIRA_Project
         fields = '__all__'
 
 
@@ -692,11 +694,22 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     sla_days_remaining = serializers.IntegerField(read_only=True)
     finding_meta = FindingMetaSerializer(read_only=True, many=True)
     related_fields = serializers.SerializerMethodField()
+    # for backwards compatibility
+    jira_creation = serializers.SerializerMethodField()
+    jira_change = serializers.SerializerMethodField()
     display_status = serializers.SerializerMethodField()
 
     class Meta:
         model = Finding
         fields = '__all__'
+
+    @swagger_serializer_method(serializers.ListField(serializers.DateTimeField()))
+    def get_jira_creation(self, obj):
+        return jira_helper.get_jira_creation(obj)
+
+    @swagger_serializer_method(serializers.ListField(serializers.DateTimeField()))
+    def get_jira_change(self, obj):
+        return jira_helper.get_jira_change(obj)
 
     @swagger_serializer_method(FindingTestSerializer)
     def get_related_fields(self, obj):
@@ -716,7 +729,8 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
         to_be_tagged, validated_data = self._pop_tags(validated_data)
 
         # pop push_to_jira so it won't get send to the model as a field
-        push_to_jira = validated_data.pop('push_to_jira') or instance.get_push_all_to_jira()
+        # TODO: JIRA can we remove this is_push_all_issues, already checked in apiv2 viewset?
+        push_to_jira = validated_data.pop('push_to_jira') or jira_helper.is_push_all_issues(instance)
 
         instance = super(TaggitSerializer, self).update(instance, validated_data)
 
@@ -800,7 +814,8 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         # first save, so we have an instance to get push_all_to_jira from
         new_finding = super(TaggitSerializer, self).create(validated_data)
 
-        push_to_jira = push_to_jira or new_finding.get_push_all_to_jira()
+        # TODO: JIRA can we remove this is_push_all_issues, already checked in apiv2 viewset?
+        push_to_jira = push_to_jira or jira_helper.is_push_all_issues(new_finding)
 
         # If we need to push to JIRA, an extra save call is needed.
         # TODO try to combine create and save, but for now I'm just fixing a bug and don't want to change to much

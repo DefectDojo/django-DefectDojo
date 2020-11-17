@@ -3,14 +3,14 @@ import random
 from django import template
 from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import stringfilter
-from django.utils.html import escape
+from django.utils.html import escape, conditional_escape
 from django.utils.safestring import mark_safe, SafeData
 from django.utils.text import normalize_newlines
 from django.urls import reverse
 from django.contrib.auth.models import User
 from dojo.utils import prepare_for_view, get_system_setting, get_full_url
 from dojo.user.helper import user_is_authorized
-from dojo.models import Check_List, FindingImageAccessToken, Finding, System_Settings, JIRA_PKey, Product
+from dojo.models import Check_List, FindingImageAccessToken, Finding, System_Settings, Product
 import markdown
 from django.db.models import Sum, Case, When, IntegerField, Value
 from django.utils import timezone
@@ -21,7 +21,10 @@ from urllib.parse import urlparse
 import bleach
 import git
 from django.conf import settings
+import dojo.jira_link.helper as jira_helper
+import logging
 
+logger = logging.getLogger(__name__)
 
 register = template.Library()
 
@@ -224,13 +227,6 @@ def asvs_level(benchmark_score):
 
     return "ASVS " + str(benchmark_score.desired_level) + " " + level + " Pass: " + str(
         total_pass) + " Total:  " + total
-
-
-@register.filter(name='get_jira_conf')
-def get_jira_conf(product):
-    jira_conf = JIRA_PKey.objects.filter(product=product)
-
-    return jira_conf
 
 
 @register.filter(name='version_num')
@@ -835,6 +831,31 @@ def jiraencode(value):
 
 
 @register.filter
+def jira_project(obj, use_inheritance=True):
+    return jira_helper.get_jira_project(obj, use_inheritance)
+
+
+@register.filter
+def jira_url(obj):
+    return jira_helper.get_jira_url(obj)
+
+
+@register.filter
+def jira_key(obj):
+    return jira_helper.get_jira_key(obj)
+
+
+@register.filter
+def jira_creation(obj):
+    return jira_helper.get_jira_creation(obj)
+
+
+@register.filter
+def jira_change(obj):
+    return jira_helper.get_jira_change(obj)
+
+
+@register.filter
 def finding_extended_title(finding):
     if not finding:
         return ''
@@ -864,6 +885,7 @@ def finding_related_action_title(related_action):
     return finding_related_action_title_dict.get(related_action, '')
 
 
+@register.filter
 def product_findings(product):
     return Finding.objects.filter(test__engagement__product=product)
 
@@ -871,3 +893,51 @@ def product_findings(product):
 @register.filter
 def class_name(value):
     return value.__class__.__name__
+
+
+@register.filter(needs_autoescape=True)
+def jira_project_tag(product_or_engagement, autoescape=True):
+    if autoescape:
+        esc = conditional_escape
+    else:
+        esc = lambda x: x
+
+    jira_project = jira_helper.get_jira_project(product_or_engagement)
+
+    if not jira_project:
+        logger.debug('no JIRA project!: %s', product_or_engagement)
+        return ''
+
+    html = """
+    <i class="fa %s has-popover %s"
+        title="<i class='fa %s'></i> <b>JIRA Project Configuration%s</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="bottom"
+        data-content="<b>Jira:</b> %s<br/>
+        <b>Project Key:</b> %s<br/>
+        <b>Component:</b> %s<br/>
+        <b>Push All Issues:</b> %s<br/>
+        <b>Engagement Epic Mapping:</b> %s<br/>
+        <b>Push Notes:</b> %s">
+    </i>
+    """
+    jira_project_no_inheritance = jira_helper.get_jira_project(product_or_engagement, use_inheritance=False)
+    inherited = True if not jira_project_no_inheritance else False
+
+    icon = 'fa-bug'
+    color = ''
+    inherited_text = ''
+
+    if inherited:
+        color = 'lightgrey'
+        inherited_text = ' (inherited)'
+
+    if not jira_project.jira_instance:
+        color = 'red'
+        icon = 'fa-exclamation-triangle'
+
+    return mark_safe(html % (icon, color, icon, inherited_text,  # indicator if jira_instance is missing
+                                esc(jira_project.jira_instance),
+                                esc(jira_project.project_key),
+                                esc(jira_project.component),
+                                esc(jira_project.push_all_issues),
+                                esc(jira_project.enable_engagement_epic_mapping),
+                                esc(jira_project.push_notes)))

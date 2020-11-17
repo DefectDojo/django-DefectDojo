@@ -31,6 +31,7 @@ from django.contrib.contenttypes.fields import GenericRelation
 from tagging.models import TaggedItem
 from dateutil.relativedelta import relativedelta
 
+
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
@@ -798,18 +799,9 @@ class Product(models.Model):
         return findings_list
 
     @property
-    def jira_pkey(self):
-        try:
-            return self.jira_pkey_set.all()[0]
-        except:
-            return None
-
-    @property
-    def jira_conf(self):
-        try:
-            return self.jira_pkey_set.all()[0].conf
-        except:
-            return None
+    def has_jira_configured(self):
+        import dojo.jira_link.helper as jira_helper
+        return jira_helper.has_jira_configured(self)
 
     def get_absolute_url(self):
         from django.urls import reverse
@@ -1106,12 +1098,10 @@ class Engagement(models.Model):
     def accept_risks(self, accepted_risks):
         self.risk_acceptance.add(*accepted_risks)
 
+    @property
     def has_jira_issue(self):
-        try:
-            issue = self.jira_issue
-            return True
-        except JIRA_Issue.DoesNotExist:
-            return False
+        import dojo.jira_link.helper as jira_helper
+        return jira_helper.has_jira_issue(self)
 
     def get_absolute_url(self):
         from django.urls import reverse
@@ -1702,14 +1692,17 @@ class Finding(models.Model):
                                    null=True,
                                    verbose_name="Created",
                                    help_text="The date the finding was created inside DefectDojo.")
-    jira_creation = models.DateTimeField(editable=True,
-                                         null=True,
-                                         verbose_name="Jira creation",
-                                         help_text="The date a Jira issue was created from this finding.")
-    jira_change = models.DateTimeField(editable=True,
-                                       null=True,
-                                       verbose_name="Jira change",
-                                       help_text="The date the linked Jira issue was last modified.")
+
+    # # deprecated, moved to jira_issue. left here as we don't want to delete data just yet
+    # jira_creation = models.DateTimeField(editable=True,
+    #                                      null=True,
+    #                                      verbose_name="Jira creation",
+    #                                      help_text="The date a Jira issue was created from this finding.")
+    # # deprecated, moved to jira_issue. left here as we don't want to delete data just yet
+    # jira_change = models.DateTimeField(editable=True,
+    #                                    null=True,
+    #                                    verbose_name="Jira change",
+    #                                    help_text="The date the linked Jira issue was last modified.")
     scanner_confidence = models.IntegerField(null=True,
                                              blank=True,
                                              default=None,
@@ -1847,7 +1840,7 @@ class Finding(models.Model):
         if hasattr(settings, 'HASHCODE_FIELDS_PER_SCANNER') and hasattr(settings, 'HASHCODE_ALLOWS_NULL_CWE') and hasattr(settings, 'HASHCODE_ALLOWED_FIELDS'):
             # Default fields
             if self.dynamic_finding:
-                deduplicationLogger.debug('dynamig finding, so including endpoints in hash_code computation as default')
+                deduplicationLogger.debug('dynamic finding, so including endpoints in hash_code computation as default')
                 hashcodeFields = ['title', 'cwe', 'line', 'file_path', 'description', 'endpoints']
             else:
                 hashcodeFields = ['title', 'cwe', 'line', 'file_path', 'description']
@@ -1901,7 +1894,7 @@ class Finding(models.Model):
     def compute_hash_code_legacy(self):
         fields_to_hash = self.title + str(self.cwe) + str(self.line) + str(self.file_path) + self.description
         if self.dynamic_finding:
-            deduplicationLogger.debug('dynamig finding, so including endpoints in hash_code computation for legacy algo')
+            deduplicationLogger.debug('dynamic finding, so including endpoints in hash_code computation for legacy algo')
             fields_to_hash = fields_to_hash + self.get_endpoints()
         deduplicationLogger.debug("compute_hash_code_legacy - fields_to_hash = " + fields_to_hash)
         return self.hash_fields(fields_to_hash)
@@ -2080,46 +2073,15 @@ class Finding(models.Model):
             return None
             pass
 
-    def jira(self):
-        try:
-            return self.jira_issue
-        except JIRA_Issue.DoesNotExist:
-            return None
-
+    @property
     def has_jira_issue(self):
-        try:
-            issue = self.jira_issue
-            return True
-        except JIRA_Issue.DoesNotExist:
-            return False
+        import dojo.jira_link.helper as jira_helper
+        return jira_helper.has_jira_issue(self)
 
-    def jira_conf(self):
-        try:
-            jpkey = JIRA_PKey.objects.get(product=self.test.engagement.product)
-            jconf = jpkey.conf
-        except:
-            jconf = None
-            pass
-        return jconf
-
-    # newer version that can work with prefetching due to array index isntead of first.
-    def jira_conf_new(self):
-        try:
-            return self.test.engagement.product.jira_pkey_set.all()[0].conf
-        except:
-            return None
-
-    # newer version that can work with prefetching due to array index isntead of first.
-    def jira_pkey(self):
-        try:
-            return self.test.engagement.product.jira_pkey_set.all()[0]
-        except:
-            return None
-            pass
-
-    def get_push_all_to_jira(self):
-        if self.jira_pkey():
-            return self.jira_pkey().push_all_issues
+    @property
+    def has_jira_configured(self):
+        import dojo.jira_link.helper as jira_helper
+        return jira_helper.has_jira_configured(self)
 
     def long_desc(self):
         long_desc = ''
@@ -2153,8 +2115,6 @@ class Finding(models.Model):
             from dojo.utils import get_current_user
             user = get_current_user()
             logger.debug('finding.save() getting current user: %s', user)
-
-        jira_issue_exists = JIRA_Issue.objects.filter(finding=self).exists()
 
         if self.pk is None:
             # We enter here during the first call from serializers.py
@@ -2223,12 +2183,9 @@ class Finding(models.Model):
 
         # Adding a snippet here for push to JIRA so that it's in one place
         if push_to_jira:
-            logger.debug('pushing to jira from finding.save()')
-            from dojo.utils import add_jira_issue, update_jira_issue
-            if jira_issue_exists:
-                update_jira_issue(self, True)
-            else:
-                add_jira_issue(self, True)
+            logger.debug('pushing finding %s to jira from finding.save()', self.pk)
+            import dojo.jira_link.helper as jira_helper
+            jira_helper.push_to_jira(self)
 
     def delete(self, *args, **kwargs):
         for find in self.original_finding.all():
@@ -2295,31 +2252,31 @@ class Finding(models.Model):
         return ''
 
     def get_sast_source_file_path_with_link(self):
-        from dojo.utils import create_link
+        from dojo.utils import create_bleached_link
         if self.sast_source_file_path is None:
             return None
         if self.test.engagement.source_code_management_uri is None:
             return self.sast_source_file_path
-        return create_link(self.test.engagement.source_code_management_uri + '/' + self.sast_source_file_path, self.sast_source_file_path)
+        return create_bleached_link(self.test.engagement.source_code_management_uri + '/' + self.sast_source_file_path, self.sast_source_file_path)
 
     def get_file_path_with_link(self):
-        from dojo.utils import create_link
+        from dojo.utils import create_bleached_link
         if self.file_path is None:
             return None
         if self.test.engagement.source_code_management_uri is None:
             return self.file_path
-        return create_link(self.test.engagement.source_code_management_uri + '/' + self.file_path, self.file_path)
+        return create_bleached_link(self.test.engagement.source_code_management_uri + '/' + self.file_path, self.file_path)
 
     def get_references_with_links(self):
         import re
-        from dojo.utils import create_link
+        from dojo.utils import create_bleached_link
         if self.references is None:
             return None
         matches = re.findall(r'([\(|\[]?(https?):((//)|(\\\\))+([\w\d:#@%/;$~_?\+-=\\\.&](#!)?)*[\)|\]]?)', self.references)
         for match in matches:
             # Check if match isn't already a markdown link
             if not (match[0].startswith('[') or match[0].startswith('(')):
-                self.references = self.references.replace(match[0], create_link(match[0], match[0]), 1)
+                self.references = self.references.replace(match[0], create_bleached_link(match[0], match[0]), 1)
         return self.references
 
 
@@ -2624,14 +2581,12 @@ class GITHUB_PKey(models.Model):
         return self.product.name + " | " + self.git_project
 
 
-class JIRA_Conf(models.Model):
+class JIRA_Instance(models.Model):
     configuration_name = models.CharField(max_length=2000, help_text="Enter a name to give to this configuration", default='')
     url = models.URLField(max_length=2000, verbose_name="JIRA URL", help_text="For configuring Jira, view: https://defectdojo.readthedocs.io/en/latest/features.html#jira-integration")
-    #    product = models.ForeignKey(Product)
     username = models.CharField(max_length=2000)
     password = models.CharField(max_length=2000)
-    #    project_key = models.CharField(max_length=200,null=True, blank=True)
-    #    enabled = models.BooleanField(default=True)
+
     if hasattr(settings, 'JIRA_ISSUE_TYPE_CHOICES_CONFIG'):
         default_issue_type_choices = settings.JIRA_ISSUE_TYPE_CHOICES_CONFIG
     else:
@@ -2712,50 +2667,16 @@ class JIRAForm_Admin(forms.ModelForm):
         return cleaned_data
 
 
-class JIRA_Conf_Admin(admin.ModelAdmin):
+class JIRA_Instance_Admin(admin.ModelAdmin):
     form = JIRAForm_Admin
 
 
-class JIRA_Issue(models.Model):
-    jira_id = models.CharField(max_length=200)
-    jira_key = models.CharField(max_length=200)
-    finding = models.OneToOneField(Finding, null=True, blank=True, on_delete=models.CASCADE)
-    engagement = models.OneToOneField(Engagement, null=True, blank=True, on_delete=models.CASCADE)
-
-    def __unicode__(self):
-        text = ""
-        if self.finding:
-            text = self.finding.test.engagement.product.name + " | Finding: " + self.finding.title + ", ID: " + str(self.finding.id)
-        elif self.engagement:
-            text = self.engagement.product.name + " | Engagement: " + self.engagement.name + ", ID: " + str(self.engagement.id)
-        return text + " | Jira Key: " + str(self.jira_key)
-
-    def __str__(self):
-        text = ""
-        if self.finding:
-            text = self.finding.test.engagement.product.name + " | Finding: " + self.finding.title + ", ID: " + str(self.finding.id)
-        elif self.engagement:
-            text = self.engagement.product.name + " | Engagement: " + self.engagement.name + ", ID: " + str(self.engagement.id)
-        return text + " | Jira Key: " + str(self.jira_key)
-
-
-class JIRA_Clone(models.Model):
-    jira_id = models.CharField(max_length=200)
-    jira_clone_id = models.CharField(max_length=200)
-
-
-class JIRA_Details_Cache(models.Model):
-    jira_id = models.CharField(max_length=200)
-    jira_key = models.CharField(max_length=200)
-    jira_status = models.CharField(max_length=200)
-    jira_resolution = models.CharField(max_length=200)
-
-
-class JIRA_PKey(models.Model):
-    project_key = models.CharField(max_length=200, blank=True)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    conf = models.ForeignKey(JIRA_Conf, verbose_name="JIRA Configuration",
+class JIRA_Project(models.Model):
+    jira_instance = models.ForeignKey(JIRA_Instance, verbose_name="JIRA Instance",
                              null=True, blank=True, on_delete=models.CASCADE)
+    project_key = models.CharField(max_length=200, blank=True)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True)
+    engagement = models.OneToOneField(Engagement, on_delete=models.CASCADE, null=True, blank=True)
     component = models.CharField(max_length=200, blank=True)
     push_all_issues = models.BooleanField(default=False, blank=True,
          help_text="Automatically maintain parity with JIRA. Always create and update JIRA tickets for findings in this Product.")
@@ -2764,11 +2685,75 @@ class JIRA_PKey(models.Model):
     push_notes = models.BooleanField(default=False, blank=True)
     product_jira_sla_notification = models.BooleanField(default=True, blank=False, verbose_name="Send SLA notifications as comment?")
 
+    @property
+    def conf(self):
+        return jira_instance
+
     def __unicode__(self):
-        return self.product.name + " | " + self.project_key
+        return self.project_key + '(%s)' % (str(self.jira_instance.url) if self.jira_instance else 'None')
 
     def __str__(self):
-        return self.product.name + " | " + self.project_key
+        return self.project_key + '(%s)' % (str(self.jira_instance.url) if self.jira_instance else 'None')
+
+
+# declare form here as we can't import forms.py due to circular imports not even locally
+class JIRAForm_Admin(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput, required=True)
+
+    # django doesn't seem to have an easy way to handle password fields as PasswordInput requires reentry of passwords
+    password_from_db = None
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance:
+            # keep password from db to use if the user entered no password
+            self.password_from_db = self.instance.password
+            self.fields['password'].required = False
+
+    def clean(self):
+        # self.fields['endpoints'].queryset = Endpoint.objects.all()
+        cleaned_data = super().clean()
+        if not cleaned_data['password']:
+            cleaned_data['password'] = self.password_from_db
+
+        return cleaned_data
+
+
+class JIRA_Conf_Admin(admin.ModelAdmin):
+    form = JIRAForm_Admin
+
+
+class JIRA_Issue(models.Model):
+    jira_project = models.ForeignKey(JIRA_Project, on_delete=models.SET_NULL, null=True)  # just to be sure we don't delete JIRA_Issue if a jira_project is deleted
+    jira_id = models.CharField(max_length=200)
+    jira_key = models.CharField(max_length=200)
+    finding = models.OneToOneField(Finding, null=True, blank=True, on_delete=models.CASCADE)
+    engagement = models.OneToOneField(Engagement, null=True, blank=True, on_delete=models.CASCADE)
+
+    jira_creation = models.DateTimeField(editable=True,
+                                         null=True,
+                                         verbose_name="Jira creation",
+                                         help_text="The date a Jira issue was created from this finding.")
+    jira_change = models.DateTimeField(editable=True,
+                                       null=True,
+                                       verbose_name="Jira last update",
+                                       help_text="The date the linked Jira issue was last modified.")
+
+    def __unicode__(self):
+        text = ""
+        if self.finding:
+            text = self.finding.test.engagement.product.name + " | Finding: " + self.finding.title + ", ID: " + str(self.finding.id)
+        elif self.engagement:
+            text = self.engagement.product.name + " | Engagement: " + self.engagement.name + ", ID: " + str(self.engagement.id)
+        return text + " | Jira Key: " + str(self.jira_key)
+
+    def __str__(self):
+        text = ""
+        if self.finding:
+            text = self.finding.test.engagement.product.name + " | Finding: " + self.finding.title + ", ID: " + str(self.finding.id)
+        elif self.engagement:
+            text = self.engagement.product.name + " | Engagement: " + self.engagement.name + ", ID: " + str(self.engagement.id)
+        return text + " | Jira Key: " + str(self.jira_key)
 
 
 NOTIFICATION_CHOICES = (
@@ -3563,8 +3548,8 @@ admin.site.register(ScanSettings)
 admin.site.register(IPScan)
 admin.site.register(Alerts)
 admin.site.register(JIRA_Issue)
-admin.site.register(JIRA_Conf, JIRA_Conf_Admin)
-admin.site.register(JIRA_PKey)
+admin.site.register(JIRA_Instance, JIRA_Instance_Admin)
+admin.site.register(JIRA_Project)
 admin.site.register(GITHUB_Conf)
 admin.site.register(GITHUB_PKey)
 admin.site.register(Tool_Configuration, Tool_Configuration_Admin)
