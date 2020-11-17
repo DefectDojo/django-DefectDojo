@@ -49,4 +49,4 @@
 
 *Defect Dojo ID:* {{ finding.id }}
 
-*Reporter:* [{{ finding.reporter.firstname }} {{ finding.reporter.lastname }} ({{ finding.reporter.username }}) ({{ finding.reporter.email }})|mailto:{{ finding.reporter.email }}]
+*Reporter:* [{{finding.reporter.get_full_name}} ({{ finding.reporter.email }})|mailto:{{ finding.reporter.email }}]
