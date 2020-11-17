@@ -109,33 +109,33 @@
             <!-- /.navbar-header -->
 
             <ul class="nav navbar-top-links navbar-right">
-              {% if request.user.is_authenticated %}
-                <li>
-                    <div class="custom-search-form">
-                        <form id="custom_search_form" role="search" method="get" action="{% url 'simple_search' %}">
-                            <div class="input-group">
-                                <input id="simple_search" type="text" name="query" class="form-control"
-                                       placeholder="Search..." value="{{clean_query}}">
-                                <span class="input-group-btn">
-                                    <button id="simple_search_submit" class="btn btn-primary" type="submit" aria-label="Search">
-                                        <i class="fa fa-search"></i>
-                                    </button>
-                                </span>
-                            </div>
-                        </form>
-                    </div>
-                    <!-- /input-group -->
-                </li>
-                <li class="dropdown">
-                    <a class="dropdown-toggle dropdown-toggle-h{{ alert_count }}" data-toggle="dropdown" href="#" aria-expanded="false" aria-label="{{ alert_count }} Alerts">
-                        <i class="fa fa-bell fa-fw"></i>
-                        <span id="alert_count" class="badge badge-count badge-count{{ alert_count }}">{{ alert_count }}</span>
-                        <i class="fa fa-caret-down"></i>
-                    </a>
-                    <ul class="dropdown-menu dropdown-alerts">
-                    </ul>
-                    <!-- /.dropdown-alerts -->
-                </li>
+                {% if request.user.is_authenticated %}
+                    <li>
+                        <div class="custom-search-form">
+                            <form id="custom_search_form" role="search" method="get" action="{% url 'simple_search' %}">
+                                <div class="input-group">
+                                    <input id="simple_search" type="text" name="query" class="form-control"
+                                        placeholder="Search..." value="{{clean_query}}">
+                                    <span class="input-group-btn">
+                                        <button id="simple_search_submit" class="btn btn-primary" type="submit" aria-label="Search">
+                                            <i class="fa fa-search"></i>
+                                        </button>
+                                    </span>
+                                </div>
+                            </form>
+                        </div>
+                        <!-- /input-group -->
+                    </li>
+                    <li class="dropdown">
+                        <a class="dropdown-toggle dropdown-toggle-h{{ alert_count }}" data-toggle="dropdown" href="#" aria-expanded="false" aria-label="{{ alert_count }} Alerts">
+                            <i class="fa fa-bell fa-fw"></i>
+                            <span id="alert_count" class="badge badge-count badge-count{{ alert_count }}">{{ alert_count }}</span>
+                            <i class="fa fa-caret-down"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-alerts">
+                        </ul>
+                        <!-- /.dropdown-alerts -->
+                    </li>
                 {% endif %}
                 <li class="dropdown">
                     <a class="dropdown-toggle" data-toggle="dropdown" href="#" aria-expanded="false" aria-label="User Menu">
@@ -627,6 +627,7 @@
                 </div>
             </div>
         </div>
+        <p id="alert_refresh" class="hidden">{{ 'ALERT_REFRESH'|setting_enabled }}</p>
     </footer>
 </div>
 
@@ -643,11 +644,17 @@
     $(document).ready(function() {
         $('.has-popover').popover({'trigger':'hover'});
         {% if request.user.is_authenticated %}
-        $('.dropdown-toggle').click(function() { get_alerts(); });
-        setInterval(function() {
-            update_alertcount();
-        }, 10000);
+            $('.dropdown-toggle').click(function() { get_alerts(); });
+            refresh = document.getElementById('alert_refresh').innerHTML
+            if(refresh == 'True') {
+                setInterval(function() {
+                    update_alertcount();
+                }, 10000);
+            } else {
+                update_alertcount();
+            }
         {% endif %}
+
         function update_alertcount() {
             $.get("{% url 'alertcount' %}", function (data) {
                 if (data.count != $('#alert_count').text()) {
