@@ -148,7 +148,7 @@ def webhook(request, secret=None):
             if parsed.get('webhookEvent') not in ['comment_created', 'jira:issue_updated']:
                 logger.info('Unrecognized JIRA webhook event received: {}'.format(parsed.get('webhookEvent')))
 
-        except JIRA_Issue.DoesNotExist as je:
+        except JIRA_Issue.DoesNotExist:
             logger.debug('The JIRA issue received by the webhook matched no JIRA linked in DefectDojo')
         except Exception as e:
             logger.error("There was an error when processing the incoming JIRA webhook payload: {}".format(e))
