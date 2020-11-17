@@ -255,11 +255,11 @@ def view_finding(request, fid):
     try:
         prev_finding_id = findings[(list(findings).index(finding.id)) - 1]
     except AssertionError:
-        prev_finding_id = finding
+        prev_finding_id = finding.id
     try:
         next_finding_id = findings[(list(findings).index(finding.id)) + 1]
     except IndexError:
-        next_finding_id = finding
+        next_finding_id = finding.id
 
     cred_finding = Cred_Mapping.objects.filter(
         finding=finding.id).select_related('cred_id').order_by('cred_id')
