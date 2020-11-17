@@ -56,10 +56,9 @@ def get_item(finding, test):
     out_of_scope = False
     impact = None
 
-    datetime_format_dojo = "%Y-%m-%dT%H:%M:%S.%fZ"
     if finding.get('Compliance', {}).get('Status', "PASSED"):
         if finding.get('LastObservedAt', None):
-            mitigated = datetime.strptime(finding.get('LastObservedAt'), datetime_format_dojo)
+            mitigated = datetime.strptime(finding.get('LastObservedAt'), "%Y-%m-%dT%H:%M:%S.%fZ")
         else:
             mitigated = datetime.utcnow()
     else:
