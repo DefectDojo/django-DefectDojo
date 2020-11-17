@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load static from staticfiles %}
-
+{% load display_tags %}
 {% block add_styles %}
 .chosen-container {
     width: 70% !important;
@@ -17,13 +17,13 @@
         <hr>
 		<div class="form-group">
 			<label class="col-sm-2 control-label" for="id_jira_issue">JIRA URL
-				<i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="JIRA URL connected to this product or engagment" data-placement="right" data-container="body" data-original-title="" title="">
+				<i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="JIRA URL connected to this product or engagement" data-placement="right" data-container="body" data-original-title="" title="">
 				</i>
 			</label>
 			<div class="col-sm-10 form-control-static">
-				{% if product_tab.product.jira_conf %}
-					<a href="{{ product_tab.product.jira_conf.url }}/browse/{{ product_tab.product.jira_pkey.project_key }}"
-					target="_blank"> {{ product_tab.product.jira_conf.url }}/browse/{{ product_tab.product.jira_pkey.project_key }} </a>
+				{% if product_tab.product.has_jira_configured %}
+					<a href="{{ engagement_or_product|jira_url }}"
+					target="_blank"> {{ engagement_or_product|jira_url }} </a>
 				{% else %}
 				None
 				{% endif %}
@@ -80,7 +80,6 @@
     <li><b>DrHeader JSON Importer</b> - Import result of DrHeader JSON output.</li>
     <li><b>DSOP Scan</b> - Import XLSX findings from DSOP vulnerability scan pipelines.</li>
 	<li><b>Fortify</b> - Import Findings from XML file format.</li>
-
 	<li><b>Generic Findings Import</b> - Import Generic findings in CSV format.</li>
 	<li><b>GitLab SAST Report</b> - Import GitLab SAST Report vulnerabilities in JSON format.</li>
 	<li><b>Gitleaks Scan </b> - Import Gitleaks Scan findings in JSON format.</li>
@@ -105,6 +104,7 @@
 	<li><b>NPM Audit</b> - NPM Audit Scan output file can be imported in JSON format.</li>
 	<li><b>IBM AppScan DAST</b> - XML file from IBM App Scanner.</li>
 	<li><b>Openscap Vulnerability Scan</b> - Import Openscap Vulnerability Scan in XML formats.</li>
+	<li><b>ORT evaluated model Importer </b> - Import ORT evaluated model report in JSON format.</li>
 	<li><b>Outpost24 Scan</b> - Import Outpost24 endpoint vulnerability scan in XML format.</li>
 	<li><b>OpenVAS CSV</b> - Import OpenVAS Scan in CSV format. Export as CSV Results on OpenVAS.</li>
 	<li><b>PHP Security Audit v2</b> - Import PHP Security Audit v2 Scan in JSON format.</li>
@@ -115,6 +115,7 @@
 	<li><b>Retire.js</b> - Retire.js JavaScript scan (--js) output file can be imported in JSON format.</li>
 	<li><b>Risk Recon API Importer</b> - Risk Recon ApI will be accessed to gather finding information. Report format <a href="https://defectdojo.readthedocs.io/en/latest/integrations.html#risk-recon-api-importer">here</a>.</li>
 	<li><b>Safety Scan</b> - Safety scan (--json) output file can be imported in JSON format.</li>
+	<li><b>Semgrep</b> - Import Semgrep output (--json)</li>
 	<li><b>SKF Scan</b> - Output of SKF Sprint summary export.</li>
 	<li><b>Snyk</b> - Snyk output file (snyk test --json > snyk.json) can be imported in JSON format.</li>
 	<li><b>SonarQube Scan</b> - Aggregates findings per cwe, title, description, file_path. SonarQube output file can be imported in HTML format. Generate with https://github.com/soprasteria/sonar-report version >= 1.1.0</li>

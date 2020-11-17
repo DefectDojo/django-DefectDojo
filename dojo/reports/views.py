@@ -14,6 +14,7 @@ from django.http import Http404, HttpResponseRedirect, HttpResponseForbidden, Js
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
+from django.db.models import Q
 
 from dojo.celery import app
 from dojo.endpoint.views import get_endpoint_ids
@@ -558,7 +559,7 @@ def generate_report(request, obj):
         user.get_full_name(), (timezone.now().strftime("%m/%d/%Y %I:%M%p %Z")))
 
     if type(obj).__name__ == "Product":
-        if request.user.is_staff or check_auth_users_list(request.user, obj) in qs:
+        if request.user.is_staff or check_auth_users_list(request.user, obj):
             pass  # user is authorized for this product
         else:
             raise PermissionDenied

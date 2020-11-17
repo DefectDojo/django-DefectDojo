@@ -1,8 +1,9 @@
+from drf_yasg2.utils import swagger_serializer_method
 from dojo.models import Product, Engagement, Test, Finding, \
     User, ScanSettings, IPScan, Scan, Stub_Finding, Risk_Acceptance, \
     Finding_Template, Test_Type, Development_Environment, NoteHistory, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
-    Product_Type, JIRA_Conf, Endpoint, BurpRawRequestResponse, JIRA_PKey, \
+    Product_Type, JIRA_Instance, Endpoint, BurpRawRequestResponse, JIRA_Project, \
     Notes, DojoMeta, FindingImage, Note_Type, App_Analysis, Endpoint_Status, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation
 
@@ -23,6 +24,7 @@ import datetime
 import six
 from django.utils.translation import ugettext_lazy as _
 import json
+import dojo.jira_link.helper as jira_helper
 import logging
 
 
@@ -276,7 +278,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'first_name', 'last_name', 'email', 'last_login', 'is_active', 'is_staff')
+        fields = ('id', 'username', 'first_name', 'last_name', 'email', 'last_login', 'is_active', 'is_staff', 'is_superuser')
 
 
 class NoteHistorySerializer(serializers.ModelSerializer):
@@ -401,6 +403,11 @@ class ToolConfigurationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tool_Configuration
         fields = '__all__'
+        extra_kwargs = {
+            'password': {'write_only': True},
+            'ssh': {'write_only': True},
+            'api_key': {'write_only': True},
+        }
 
 
 class ToolProductSettingsSerializer(serializers.ModelSerializer):
@@ -527,15 +534,19 @@ class JIRAIssueSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class JIRAConfSerializer(serializers.ModelSerializer):
+class JIRAInstanceSerializer(serializers.ModelSerializer):
+
     class Meta:
-        model = JIRA_Conf
+        model = JIRA_Instance
         fields = '__all__'
+        extra_kwargs = {
+            'password': {'write_only': True},
+        }
 
 
-class JIRASerializer(serializers.ModelSerializer):
+class JIRAProjectSerializer(serializers.ModelSerializer):
     class Meta:
-        model = JIRA_PKey
+        model = JIRA_Project
         fields = '__all__'
 
 
@@ -629,6 +640,50 @@ class FindingMetaSerializer(serializers.ModelSerializer):
         fields = ('name', 'value')
 
 
+class FindingProdTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product_Type
+        fields = ["id", "name"]
+
+
+class FindingProductSerializer(serializers.ModelSerializer):
+    prod_type = FindingProdTypeSerializer(required=False)
+
+    class Meta:
+        model = Product
+        fields = ["id", "name", "prod_type"]
+
+
+class FindingEngagementSerializer(serializers.ModelSerializer):
+    product = FindingProductSerializer(required=False)
+
+    class Meta:
+        model = Engagement
+        fields = ["id", "name", "product", "branch_tag"]
+
+
+class FindingEnvironmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Development_Environment
+        fields = ["id", "name"]
+
+
+class FindingTestTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Test_Type
+        fields = ["id", "name"]
+
+
+class FindingTestSerializer(serializers.ModelSerializer):
+    engagement = FindingEngagementSerializer(required=False)
+    environment = FindingEnvironmentSerializer(required=False)
+    test_type = FindingTestTypeSerializer(required=False)
+
+    class Meta:
+        model = Test
+        fields = ["id", "title", "test_type", "engagement", "environment"]
+
+
 class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     images = FindingImageSerializer(many=True, read_only=True)
     tags = TagListSerializerField(required=False)
@@ -639,41 +694,34 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     sla_days_remaining = serializers.IntegerField(read_only=True)
     finding_meta = FindingMetaSerializer(read_only=True, many=True)
     related_fields = serializers.SerializerMethodField()
+    # for backwards compatibility
+    jira_creation = serializers.SerializerMethodField()
+    jira_change = serializers.SerializerMethodField()
+    display_status = serializers.SerializerMethodField()
 
     class Meta:
         model = Finding
         fields = '__all__'
 
+    @swagger_serializer_method(serializers.ListField(serializers.DateTimeField()))
+    def get_jira_creation(self, obj):
+        return jira_helper.get_jira_creation(obj)
+
+    @swagger_serializer_method(serializers.ListField(serializers.DateTimeField()))
+    def get_jira_change(self, obj):
+        return jira_helper.get_jira_change(obj)
+
+    @swagger_serializer_method(FindingTestSerializer)
     def get_related_fields(self, obj):
         query_params = self.context['request'].query_params
-        if 'related_fields' in query_params:
-            related_fields = {
-                'product_type': {
-                    'id': obj.test.engagement.product.prod_type.id,
-                    'name': obj.test.engagement.product.prod_type.name
-                },
-                'product': {
-                    'id': obj.test.engagement.product.id,
-                    'name': obj.test.engagement.product.name
-                },
-                'engagement': {
-                    'id': obj.test.engagement.id,
-                    'name': obj.test.engagement.name
-                },
-                'test': {
-                    'id': obj.test.id,
-                    'title': obj.test.title
-                },
-                'test_type': {
-                    'id': obj.test.test_type.id,
-                    'name': obj.test.test_type.name
-                },
-                'environment': {
-                    'id': obj.test.environment.id,
-                    'name': obj.test.environment.name
-                }
-            }
-            return related_fields
+        if query_params.get('related_fields', 'false') == 'true':
+            return FindingTestSerializer(required=False).to_representation(obj.test)
+        else:
+            return None
+
+    @swagger_serializer_method(serializers.ListField(serializers.CharField()))
+    def get_display_status(self, obj):
+        return obj.status()
 
     # Overriding this to push add Push to JIRA functionality
     def update(self, instance, validated_data):
@@ -681,7 +729,8 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
         to_be_tagged, validated_data = self._pop_tags(validated_data)
 
         # pop push_to_jira so it won't get send to the model as a field
-        push_to_jira = validated_data.pop('push_to_jira') or instance.get_push_all_to_jira()
+        # TODO: JIRA can we remove this is_push_all_issues, already checked in apiv2 viewset?
+        push_to_jira = validated_data.pop('push_to_jira') or jira_helper.is_push_all_issues(instance)
 
         instance = super(TaggitSerializer, self).update(instance, validated_data)
 
@@ -765,7 +814,8 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         # first save, so we have an instance to get push_all_to_jira from
         new_finding = super(TaggitSerializer, self).create(validated_data)
 
-        push_to_jira = push_to_jira or new_finding.get_push_all_to_jira()
+        # TODO: JIRA can we remove this is_push_all_issues, already checked in apiv2 viewset?
+        push_to_jira = push_to_jira or jira_helper.is_push_all_issues(new_finding)
 
         # If we need to push to JIRA, an extra save call is needed.
         # TODO try to combine create and save, but for now I'm just fixing a bug and don't want to change to much
@@ -947,7 +997,6 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     continue
 
                 item.test = test
-                item.date = test.target_start.date()
                 item.reporter = self.context['request'].user
                 item.last_reviewed = timezone.now()
                 item.last_reviewed_by = self.context['request'].user
@@ -960,8 +1009,8 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     for req_resp in item.unsaved_req_resp:
                         burp_rr = BurpRawRequestResponse(
                             finding=item,
-                            burpRequestBase64=req_resp["req"],
-                            burpResponseBase64=req_resp["resp"])
+                            burpRequestBase64=base64.b64encode(req_resp["req"].encode("utf-8")),
+                            burpResponseBase64=base64.b64encode(req_resp["resp"].encode("utf-8")))
                         burp_rr.clean()
                         burp_rr.save()
 
@@ -969,8 +1018,8 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                         item.unsaved_response is not None):
                     burp_rr = BurpRawRequestResponse(
                         finding=item,
-                        burpRequestBase64=item.unsaved_request,
-                        burpResponseBase64=item.unsaved_response)
+                        burpRequestBase64=base64.b64encode(item.unsaved_request.encode()),
+                        burpResponseBase64=base64.b64encode(item.unsaved_response.encode()))
                     burp_rr.clean()
                     burp_rr.save()
 
@@ -1200,7 +1249,6 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 else:
                     # no existing finding found
                     item.test = test
-                    item.date = scan_date
                     item.reporter = self.context['request'].user
                     item.last_reviewed = timezone.now()
                     item.last_reviewed_by = self.context['request'].user
@@ -1215,16 +1263,16 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                         for req_resp in item.unsaved_req_resp:
                             burp_rr = BurpRawRequestResponse(
                                 finding=finding,
-                                burpRequestBase64=req_resp['req'],
-                                burpResponseBase64=req_resp['resp'])
+                                burpRequestBase64=base64.b64encode(req_resp["req"].encode("utf-8")),
+                                burpResponseBase64=base64.b64encode(req_resp["resp"].encode("utf-8")))
                             burp_rr.clean()
                             burp_rr.save()
 
                     if item.unsaved_request and item.unsaved_response:
                         burp_rr = BurpRawRequestResponse(
                             finding=finding,
-                            burpRequestBase64=item.unsaved_request,
-                            burpResponseBase64=item.unsaved_response)
+                            burpRequestBase64=base64.b64encode(item.unsaved_request.encode()),
+                            burpResponseBase64=base64.b64encode(item.unsaved_response.encode()))
                         burp_rr.clean()
                         burp_rr.save()
 
