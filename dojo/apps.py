@@ -13,7 +13,7 @@ class DojoAppConfig(AppConfig):
 
     def ready(self):
         # we need to initializer waston here because in models.py is to early if we want add extra fields to index
-        #print('ready(): initializing watson')
+        # print('ready(): initializing watson')
         # commented out ^ as it prints in manage.py dumpdata, docker logs and many other places
         # logger doesn't work yet at this stage
 
