@@ -128,7 +128,7 @@ def webhook(request, secret=None):
                 comment_text = parsed['comment']['body']
                 commentor = parsed['comment']['updateAuthor']['displayName']
                 jid = parsed['comment']['self'].split('/')[7]
-                jissue = JIRA_Issue.objects.get(jira_id=jid)
+                jissue = get_object_or_404(JIRA_Issue, jira_id=jid)
                 jira_usernames = JIRA_Instance.objects.values_list('username', flat=True)
                 for jira_userid in jira_usernames:
                     if jira_userid.lower() in commentor.lower():
