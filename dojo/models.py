@@ -2009,7 +2009,7 @@ class Finding(models.Model):
             status += ['Out Of Scope']
         if self.duplicate:
             status += ['Duplicate']
-        if self.risk_acceptance_set.exists():
+        if len(self.risk_acceptance_set.all()) > 0:  # this is normally prefetched so works better than count() or exists()
             status += ['Risk Accepted']
         if not len(status):
             status += ['Initial']
