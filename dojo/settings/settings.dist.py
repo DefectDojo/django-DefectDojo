@@ -139,14 +139,13 @@ env = environ.Env(
     DD_SLA_NOTIFY_WITH_JIRA_ONLY=(bool, False),
     DD_SLA_NOTIFY_PRE_BREACH=(int, 3),
     DD_SLA_NOTIFY_POST_BREACH=(int, 7),
-
     # maximum number of result in search as search can be an expensive operation
     DD_SEARCH_MAX_RESULTS=(int, 100),
     DD_MAX_AUTOCOMPLETE_WORDS=(int, 20000),
     DD_JIRA_SSL_VERIFY=(bool, True),
-
     # if you want to keep logging to the console but in json format, change this here to 'json_console'
-    DD_LOGGING_HANDLER=(str, 'console')
+    DD_LOGGING_HANDLER=(str, 'console'),
+    DD_ALERT_REFRESH=(bool, True)
 )
 
 
@@ -216,6 +215,8 @@ USE_L10N = env('DD_USE_L10N')
 USE_TZ = env('DD_USE_TZ')
 
 TEST_RUNNER = env('DD_TEST_RUNNER')
+
+ALERT_REFRESH = env('DD_ALERT_REFRESH')
 
 # ------------------------------------------------------------------------------
 # DATABASE
