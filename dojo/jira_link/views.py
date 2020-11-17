@@ -150,8 +150,9 @@ def webhook(request, secret=None):
 
         except JIRA_Issue.DoesNotExist:
             logger.debug('The JIRA issue received by the webhook matched no JIRA linked in DefectDojo')
+            raise Http404('JIRA issue not found in DefectDojo.')
         except Exception as e:
-            logger.error("There was an error when processing the incoming JIRA webhook payload: {}".format(e))
+            logger.exception("There was an error when processing the incoming JIRA webhook payload")
 
     return HttpResponse('')
 
