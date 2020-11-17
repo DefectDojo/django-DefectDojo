@@ -145,7 +145,7 @@ env = environ.Env(
     DD_JIRA_SSL_VERIFY=(bool, True),
     # if you want to keep logging to the console but in json format, change this here to 'json_console'
     DD_LOGGING_HANDLER=(str, 'console'),
-    DD_ALERT_REFRESH=(bool, False)
+    DD_ALERT_REFRESH=(bool, True)
 )
 
 
