@@ -755,7 +755,7 @@ def view_engineer(request, eid):
                                  monthrange(now.year,
                                             now.month)[1],
                                  tzinfo=timezone.get_current_timezone())],
-        reporter=user)
+        owner=user)
                       for finding in ra.accepted_findings.all()]
     closed_month = []
     for f in closed_findings:
