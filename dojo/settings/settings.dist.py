@@ -134,8 +134,11 @@ env = environ.Env(
     # Set to True if you want to allow authorized users staff access only on specific products
     # This will only apply to users with 'active' status
     DD_AUTHORIZED_USERS_ALLOW_STAFF=(bool, False),
+    # SLA Notifications via alerts and JIRA comments
+    # enable either DD_SLA_NOTIFY_ACTIVE or DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY to enable the feature
     DD_SLA_NOTIFY_ACTIVE=(bool, False),
-    DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY=(bool, True),
+    DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY=(bool, False),
+    # finetuning settings for when enabled
     DD_SLA_NOTIFY_WITH_JIRA_ONLY=(bool, False),
     DD_SLA_NOTIFY_PRE_BREACH=(int, 3),
     DD_SLA_NOTIFY_POST_BREACH=(int, 7),
