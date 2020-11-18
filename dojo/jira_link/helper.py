@@ -77,7 +77,7 @@ def get_jira_project(obj, use_inheritance=True):
 
     if isinstance(obj, Finding):
         finding = obj
-        return get_jira_project(finding.test.engagement)
+        return get_jira_project(finding.test)
 
     if isinstance(obj, Test):
         test = obj
