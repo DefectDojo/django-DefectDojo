@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import user_passes_test, login_required
 from django.core import serializers
 from django.core.exceptions import PermissionDenied
 from django.urls import reverse
+from django.conf import settings
 from django.db.models import Q
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404
@@ -153,8 +154,10 @@ def alerts_json(request, limit=None):
 
 
 def alertcount(request):
-    count = Alerts.objects.filter(user_id=request.user).count()
-    return JsonResponse({'count': count})
+    if not settings.DISABLE_ALERT_COUNTER:
+        count = Alerts.objects.filter(user_id=request.user).count()
+        return JsonResponse({'count': count})
+    return JsonResponse({'count': 0})
 
 
 def view_profile(request):

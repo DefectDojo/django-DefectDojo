@@ -1852,6 +1852,9 @@ def finding_bulk_update_all(request, pid=None):
                 for finding in finds:
                     from dojo.tools import tool_issue_updater
                     tool_issue_updater.async_tool_issue_update(finding)
+                    if finding.is_Mitigated:
+                        finding.mitigated = timezone.now()
+                        finding.save()
 
                     # not sure yet if we want to support bulk unlink, so leave as commented out for now
                     # if form.cleaned_data['unlink_from_jira']:
