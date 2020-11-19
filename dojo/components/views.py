@@ -16,7 +16,10 @@ def components(request):
     comp_filter = ComponentFilter(request.GET, queryset=component_query)
     result = get_page_items(request, comp_filter.qs, 25)
 
+    component_words = component_query.exclude(component_name__isnull=True).values_list('component_name', flat=True)
+
     return render(request, 'dojo/components.html', {
         'filter': comp_filter,
-        'result': result
+        'result': result,
+        'component_words': sorted(set(component_words))
     })

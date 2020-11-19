@@ -71,6 +71,26 @@
 {% endblock %}
 {% block postscript %}
 <script>
+        $(function () {
+            //Ensures dropdown has proper zindex
+            $('.table-responsive').on('show.bs.dropdown', function () {
+              $('.table-responsive').css( "overflow", "inherit" );
+            });
+
+            $('.table-responsive').on('hide.bs.dropdown', function () {
+              $('.table-responsive').css( "overflow", "auto" );
+            })
+            var availableTags = [
+                {% for word in component_words %}
+                    "{{word}}",
+                {% endfor %}
+            ];
+            $("#id_component_name").autocomplete({
+                source: availableTags
+            });
+        });
+</script>
+<script>
     // DataTables setup
     $(document).ready(function() {
         date =  new Date().toISOString().slice(0, 10);

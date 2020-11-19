@@ -186,12 +186,14 @@ def view_product_components(request, pid):
 
     comp_filter = ProductComponentFilter(request.GET, queryset=component_query)
     result = get_page_items(request, comp_filter.qs, 25)
+    component_words = component_query.exclude(component_name__isnull=True).values_list('component_name', flat=True)
 
     return render(request, 'dojo/product_components.html', {
                     'prod': prod,
                     'filter': comp_filter,
                     'product_tab': product_tab,
                     'result': result,
+                    'component_words': sorted(set(component_words))
     })
 
 
