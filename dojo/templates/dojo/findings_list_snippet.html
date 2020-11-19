@@ -357,18 +357,18 @@
                                         <i class="fa fa-external-link"></i> {{ finding.cwe|default:"" }}
                                     </a>
                                   {% endif %}
-                                </td>                                
-                                {% if filter_name == 'Closed' %}
-                                <td class="nowrap">{{ finding.mitigated|date }}</td>
-                                {% else %}
+                                </td> 
                                 <td class="nowrap">
                                   {% if finding.cve %}
                                     <a target="_blank" href="{{ finding.cve|cve_url }}">
                                         <i class="fa fa-external-link"></i> {{ finding.cve|default:"" }}
                                     </a>
                                   {% endif %}
-                                </td>     
-                                <td class="nowrap">{{ finding.date }}</td>
+                                </td>                               
+                                {% if filter_name == 'Closed' %}
+                                  <td class="nowrap">{{ finding.mitigated|date }}</td>
+                                {% else %}
+                                  <td class="nowrap">{{ finding.date }}</td>
                                 {% endif %}
                                 <td>{{ finding.age }}</td>
                                 {% if system_settings.enable_finding_sla %}

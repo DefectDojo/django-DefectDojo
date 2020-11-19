@@ -628,6 +628,7 @@
             </div>
         </div>
         <p id="alert_refresh" class="hidden">{{ 'ALERT_REFRESH'|setting_enabled }}</p>
+        <p id="disable_count" class="hidden">{{ 'DISABLE_ALERT_COUNTER'|setting_enabled }}</p>
     </footer>
 </div>
 
@@ -646,12 +647,15 @@
         {% if request.user.is_authenticated %}
             $('.dropdown-toggle').click(function() { get_alerts(); });
             refresh = document.getElementById('alert_refresh').innerHTML
-            if(refresh == 'True') {
-                setInterval(function() {
+            disable_count = document.getElementById('disable_count').innerHTML
+            if (disable_count == "False") {
+                if(refresh == 'True') {
+                    setInterval(function() {
+                        update_alertcount();
+                    }, 10000);
+                } else {
                     update_alertcount();
-                }, 10000);
-            } else {
-                update_alertcount();
+                }
             }
         {% endif %}
 

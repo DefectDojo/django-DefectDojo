@@ -1232,7 +1232,7 @@ class EndpointFilter(DojoFilter):
 
     class Meta:
         model = Endpoint
-        exclude = ['mitigated']
+        exclude = ['mitigated', 'endpoint_status']
 
 
 class EndpointReportFilter(DojoFilter):
@@ -1245,7 +1245,7 @@ class EndpointReportFilter(DojoFilter):
 
     class Meta:
         model = Endpoint
-        exclude = ['product']
+        exclude = ['product', 'endpoint_status']
 
 
 class ReportFindingFilter(DojoFilter):
