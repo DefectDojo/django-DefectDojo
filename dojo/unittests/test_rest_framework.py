@@ -3,7 +3,7 @@ from dojo.models import Product, Engagement, Test, Finding, \
     User, ScanSettings, Scan, Stub_Finding, Endpoint, JIRA_Project, JIRA_Instance, \
     Finding_Template, Note_Type, App_Analysis, Endpoint_Status, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Notes, \
-    BurpRawRequestResponse
+    BurpRawRequestResponse, DojoMeta
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraInstanceViewSet, \
     JiraIssuesViewSet, JiraProjectViewSet, ProductViewSet, ScanSettingsViewSet, \
@@ -13,6 +13,7 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     EndpointStatusViewSet, SonarqubeIssueViewSet, NotesViewSet
 from json import dumps
 from django.urls import reverse
+from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase, APIClient
 
@@ -256,6 +257,62 @@ class FindingsTest(BaseClass.RESTEndpointTest):
             "images": []}
         self.update_fields = {'active': True, "push_to_jira": "True"}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class FindingMetadataTest(BaseClass.RESTEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Finding
+        self.viewname = 'finding'
+        self.viewset = FindingViewSet
+        self.payload = {}
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+    def setUp(self):
+        testuser = User.objects.get(username='admin')
+        token = Token.objects.get(user=testuser)
+        self.client = APIClient()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        self.url = reverse(self.viewname + '-list')
+
+        self.current_findings = self.client.get(self.url, format='json').data["results"]
+        finding = Finding.objects.get(id=self.current_findings[0]['id'])
+
+        self.base_url = f"{self.url}{self.current_findings[0]['id']}/metadata/"
+        metadata = DojoMeta(finding=finding, name="test_meta", value="20")
+        metadata.save()
+
+    def test_create(self):
+        self.client.post(self.base_url, data={"name": "test_meta2", "value": "40"})
+        results = self.client.get(self.base_url).data
+        for result in results:
+            if result["name"] == "test_meta2" and result["value"] == "40":
+                return
+
+        assert False, "Metadata was not created correctly"
+
+    def test_create_duplicate(self):
+        result = self.client.post(self.base_url, data={"name": "test_meta", "value": "40"})
+        assert result.status_code == status.HTTP_400_BAD_REQUEST, "Metadata creation did not failed on duplicate"
+
+    def test_get(self):
+        results = self.client.get(self.base_url, format="json").data
+        for result in results:
+            if result["name"] == "test_meta" and result["value"] == "20":
+                return
+
+        assert False, "Metadata was not created correctly"
+
+    def test_update(self):
+        self.client.put(self.base_url + "?name=test_meta", data={"name": "test_meta", "value": "40"})
+        result = self.client.get(self.base_url).data[0]
+        assert result["name"] == "test_meta" and result["value"] == "40", "Metadata not edited correctly"
+
+    def test_delete(self):
+        self.client.delete(self.base_url + "?name=test_meta")
+        result = self.client.get(self.base_url).data
+        assert len(result) == 0, "Metadata not deleted correctly"
 
 
 class FindingTemplatesTest(BaseClass.RESTEndpointTest):
