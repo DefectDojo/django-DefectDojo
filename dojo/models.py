@@ -306,13 +306,7 @@ class Dojo_User(User):
         proxy = True
 
     def get_full_name(self):
-        """
-        Returns the first_name plus the last_name, with a space in between.
-        """
-        full_name = '%s %s (%s)' % (self.first_name,
-                                    self.last_name,
-                                    self.username)
-        return full_name.strip()
+        return Dojo_User.generate_full_name(self)
 
     def __unicode__(self):
         return self.get_full_name()
@@ -324,6 +318,16 @@ class Dojo_User(User):
     def wants_block_execution(user):
         # this return False if there is no user, i.e. in celery processes, unittests, etc.
         return hasattr(user, 'usercontactinfo') and user.usercontactinfo.block_execution
+
+    @staticmethod
+    def generate_full_name(user):
+        """
+        Returns the first_name plus the last_name, with a space in between.
+        """
+        full_name = '%s %s (%s)' % (user.first_name,
+                                    user.last_name,
+                                    user.username)
+        return full_name.strip()
 
 
 class UserContactInfo(models.Model):
