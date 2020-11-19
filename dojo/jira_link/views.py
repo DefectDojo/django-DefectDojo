@@ -69,7 +69,7 @@ def webhook(request, secret=None):
                             assignee_name = assignee['name'] if assignee else None
                             Risk_Acceptance.objects.create(
                                 accepted_by=assignee_name,
-                                owner=finding.reporter,
+                                reporter=finding.reporter,
                             ).accepted_findings.set([finding])
                         elif jira_conf and resolution['name'] in jira_conf.false_positive_resolutions:
                             finding.active = False
