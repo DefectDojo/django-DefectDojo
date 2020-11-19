@@ -461,7 +461,7 @@ def add_jira_issue(find):
             new_issue = jira.create_issue(fields)
 
             j_issue = JIRA_Issue(
-                jira_id=new_issue.id, jira_key=new_issue.key, finding=find)
+                jira_id=new_issue.id, jira_key=new_issue.key, finding=find, jira_project=jira_project)
             j_issue.jira_creation = timezone.now()
             j_issue.jira_change = timezone.now()
             j_issue.save()
@@ -797,7 +797,8 @@ def add_epic(engagement):
             j_issue = JIRA_Issue(
                 jira_id=new_issue.id,
                 jira_key=new_issue.key,
-                engagement=engagement)
+                engagement=engagement,
+                jira_project=jira_project)
             j_issue.save()
             return True
         except JIRAError as e:
@@ -878,13 +879,16 @@ def finding_link_jira(request, finding, new_jira_issue_key):
 
     existing_jira_issue = jira_get_issue(get_jira_project(finding), new_jira_issue_key)
 
+    jira_project = get_jira_project(finding)
+
     if not existing_jira_issue:
         raise ValueError('JIRA issue not found or cannot be retrieved: ' + new_jira_issue_key)
 
     jira_issue = JIRA_Issue(
         jira_id=existing_jira_issue.id,
         jira_key=existing_jira_issue.key,
-        finding=finding)
+        finding=finding,
+        jira_project=jira_project)
 
     jira_issue.jira_key = new_jira_issue_key
     # jira timestampe are in iso format: 'updated': '2020-07-17T09:49:51.447+0200'
