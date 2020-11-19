@@ -643,11 +643,17 @@
 <script src="{% static "dojo/js/cvss_calculator.js" %}"></script>
 <script type="application/javascript">
     $(document).ready(function() {
+        disable_count = document.getElementById('disable_count').innerHTML
+        refresh = document.getElementById('alert_refresh').innerHTML
+
         $('.has-popover').popover({'trigger':'hover'});
         {% if request.user.is_authenticated %}
-            $('.dropdown-toggle').click(function() { get_alerts(); });
-            refresh = document.getElementById('alert_refresh').innerHTML
-            disable_count = document.getElementById('disable_count').innerHTML
+            $('.dropdown-toggle').click(function() {
+                if (disable_count == "False" || refresh == 'True') { 
+                    get_alerts(); 
+                }
+            });
+            
             if (disable_count == "False") {
                 if(refresh == 'True') {
                     setInterval(function() {
