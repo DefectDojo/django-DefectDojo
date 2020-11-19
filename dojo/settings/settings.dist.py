@@ -734,7 +734,6 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Symfony Security Check': ['title', 'cve'],
     'DSOP Scan': ['cve'],
     'Trivy Scan': ['title', 'severity', 'cve', 'cwe'],
-    'AWS Prowler Scan': ['cwe', 'severity', 'description'],
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
@@ -795,7 +794,6 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'DSOP Scan': DEDUPE_ALGO_HASH_CODE,
     'Trivy Scan': DEDUPE_ALGO_HASH_CODE,
     'HackerOne Cases': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
-    'AWS Prowler Scan': DEDUPE_ALGO_HASH_CODE,
 }
 
 DISABLE_FINDING_MERGE = env('DD_DISABLE_FINDING_MERGE')
