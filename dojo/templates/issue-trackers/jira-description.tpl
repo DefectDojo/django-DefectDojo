@@ -44,6 +44,9 @@
 *Impact*:
 {{ finding.impact }}
 
+*Steps to reproduce*:
+{{ finding.steps_to_reproduce }}
+
 *References*:
 {{ finding.references }}
 
