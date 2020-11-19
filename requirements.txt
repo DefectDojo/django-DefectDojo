@@ -4,7 +4,7 @@ bleach>=3.1.0
 celery==4.4.7
 coverage==5.3
 defusedxml==0.6.0
-django_celery_results==1.2.1
+django_celery_results==2.0.0
 django-auditlog==0.4.7
 git+https://github.com/DefectDojo/django-custom-field.git@4e095dd9119858e90fd21560e5618c6347e4ef1b#egg=django-custom-field
 django-dbbackup>=3.2.0
