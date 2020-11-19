@@ -63,7 +63,7 @@ DefectDojo.
 
 0. Pull requests should be submitted to the 'dev' branch.
 
-0. In dev branch, the code should be python 3.5 compliant.
+0. In dev branch, the code should be python 3.6 compliant.
 
 [dojo_settings]: /dojo/settings/settings.dist.py "DefectDojo settings file"
 [setup_py]: /setup.py "Python setup script"
