@@ -146,9 +146,11 @@ class BlackduckHubParser(object):
         try:
             desc += "**Path:** {}\n".format(source.get('Path'))
             desc += "**Archive context:** {}\n".format(source.get('Archive context'))
+            desc += "**Scan:** {}\n".format(source.get('Scan'))
         except KeyError:
             desc += "**Path:** Unable to find path in source data."
             desc += "**Archive context:** Unable to find archive context in source data."
+            desc += "**Scan:** Unable to find scan in source data."
         return desc
 
     def license_mitigation(self, component, violation=True):
