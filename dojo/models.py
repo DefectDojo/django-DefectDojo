@@ -3490,9 +3490,14 @@ def enable_disable_auditlog(enable=True):
         auditlog.unregister(Cred_User)
 
 
+def enable_disable_tag_pathcing(enable=True):
+    if enable:
+        # Patch to support prefetching
+        PrefetchingTagDescriptor.patch()
+
+
 from dojo.utils import get_system_setting
 enable_disable_auditlog(enable=get_system_setting('enable_auditlog'))  # on startup choose safe to retrieve system settiung)
-
 
 # Register tagging for models
 tag_register(Product)
@@ -3504,8 +3509,8 @@ tag_register(Finding_Template)
 tag_register(App_Analysis)
 tag_register(Objects)
 
-# Patch to support prefetching
-PrefetchingTagDescriptor.patch()
+from django.conf import settings
+enable_disable_tag_pathcing(enable=settings.TAG_PREFETCHING)  # on startup choose safe to retrieve system settiung)
 
 # Benchmarks
 admin.site.register(Benchmark_Type)
