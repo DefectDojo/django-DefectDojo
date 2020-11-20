@@ -23,6 +23,8 @@ from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Find
 
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import report_url_resolver
+from dojo.finding.views import set_finding_as_original_internal, reset_finding_duplicate_status_internal, \
+    duplicate_cluster
 from dojo.filters import ReportFindingFilter, ReportAuthedFindingFilter, ApiFindingFilter, ApiProductFilter
 from dojo.risk_acceptance import api as ra_api
 from dateutil.relativedelta import relativedelta
@@ -489,6 +491,39 @@ class FindingViewSet(mixins.ListModelMixin,
         else:
             return Response(delete_tags.errors,
                 status=status.HTTP_400_BAD_REQUEST)
+
+    @swagger_auto_schema(
+        responses={status.HTTP_200_OK: serializers.FindingSerializer(many=True)}
+    )
+    @action(detail=True, methods=['get'], url_path=r'duplicate')
+    def get_duplicate_status(self, request, pk):
+        finding = get_object_or_404(Finding, id=pk)
+        result = duplicate_cluster(request, finding)
+        serializer = serializers.FindingSerializer(instance=result, many=True,
+                                                   context={"request": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        responses={status.HTTP_200_OK: ""},
+        request_body=no_body
+    )
+    @action(detail=True, methods=['post'], url_path=r'duplicate/reset')
+    def reset_finding_duplicate_status(self, request, pk):
+        checked_duplicate_id = reset_finding_duplicate_status_internal(request.user, pk)
+        if checked_duplicate_id is None:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        responses={status.HTTP_200_OK: ""},
+        request_body=no_body
+    )
+    @action(detail=True, methods=['post'], url_path=r'original/(?P<new_fid>\d+)')
+    def set_finding_as_original(self, request, pk, new_fid):
+        success = set_finding_as_original_internal(request.user, pk, new_fid)
+        if not success:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
         request_body=serializers.ReportGenerateOptionSerializer,
