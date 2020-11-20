@@ -15,6 +15,10 @@ from json import dumps
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase, APIClient
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 def skipIfNotSubclass(baseclass_name):
@@ -44,20 +48,30 @@ class BaseClass():
 
         @skipIfNotSubclass('ListModelMixin')
         def test_list(self):
-            if hasattr(self.endpoint_model, 'tags') and self.payload:
+            check_for_tags = False
+            if hasattr(self.endpoint_model, 'tags') and self.payload and self.payload.get('tags', None):
                 # create a new instance first to make sure there's at least 1 instance with tags set by payload to trigger tag handling code
+                logger.debug('creating model with endpoints: %s', self.payload)
                 response = self.client.post(self.url, self.payload)
+                # print('response:', response.data)
+                check_for_id = response.data['id']
+                # print('id: ', check_for_id)
+                check_for_tags = self.payload.get('tags', None)
 
             response = self.client.get(self.url, format='json')
-            # print("RESPONSE[0]:", response.data['results'])
-            # print("RESPONSE[0]:", response.data['results'][0])
-            # print("RESPONSE[0]:", response.data['results'][0]['id'])
-            # finding = Finding.objects.get(id=response.data['results'][0]['id'])
-            # print("RESPONSE.age:", response.data['results'][0]['age'])
-            # print("finding.age:", finding.age)
+            # tags must be present in last entry, the one we created
+            if check_for_tags:
+                tags_found = False
+                for result in response.data['results']:
+                    if result['id'] == check_for_id:
+                        # logger.debug('result.tags: %s', result.get('tags', ''))
+                        self.assertEqual(len(check_for_tags), len(result.get('tags', None)))
+                        for tag in check_for_tags:
+                            # logger.debug('looking for tag %s in tag list %s', tag, result['tags'])
+                            self.assertTrue(tag in result['tags'])
+                        tags_found = True
+                self.assertTrue(tags_found)
 
-            # print("RESPONSE.sla_days_remaining:", response.data['results'][0]['sla_days_remaining'])
-            # print("finding.sla_days_remaining:", finding.sla_days_remaining())
             self.assertEqual(200, response.status_code)
 
         @skipIfNotSubclass('CreateModelMixin')
@@ -66,6 +80,12 @@ class BaseClass():
             response = self.client.post(self.url, self.payload)
             self.assertEqual(201, response.status_code, response.data)
             self.assertEqual(self.endpoint_model.objects.count(), length + 1)
+
+            if hasattr(self.endpoint_model, 'tags') and self.payload and self.payload.get('tags', None):
+                self.assertEqual(len(self.payload.get('tags')), len(response.data.get('tags', None)))
+                for tag in self.payload.get('tags'):
+                    # logger.debug('looking for tag %s in tag list %s', tag, response.data['tags'])
+                    self.assertTrue(tag in response.data['tags'])
 
         @skipIfNotSubclass('RetrieveModelMixin')
         def test_detail(self):
@@ -101,6 +121,13 @@ class BaseClass():
             self.assertFalse('ssh' in response.data)
             self.assertFalse('password' in response.data)
             self.assertFalse('api_key' in response.data)
+
+            if hasattr(self.endpoint_model, 'tags') and self.update_fields and self.update_fields.get('tags', None):
+                self.assertEqual(len(self.update_fields.get('tags')), len(response.data.get('tags', None)))
+                for tag in self.update_fields.get('tags'):
+                    logger.debug('looking for tag %s in tag list %s', tag, response.data['tags'])
+                    self.assertTrue(tag in response.data['tags'])
+
             response = self.client.put(
                 relative_url, self.payload)
             self.assertEqual(200, response.status_code)
@@ -164,7 +191,7 @@ class EndpointTest(BaseClass.RESTEndpointTest):
             'product': 1,
             "tags": ["mytag", "yourtag"]
         }
-        self.update_fields = {'protocol': 'ftp'}
+        self.update_fields = {'protocol': 'ftp', 'tags': ['one_new_tag']}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -253,8 +280,10 @@ class FindingsTest(BaseClass.RESTEndpointTest):
             "static_finding": False,
             "dynamic_finding": False,
             "endpoints": [1, 2],
-            "images": []}
-        self.update_fields = {'active': True, "push_to_jira": "True"}
+            "images": [],
+            "tags": ['tag1', 'tag_2']
+        }
+        self.update_fields = {'active': True, "push_to_jira": "True", 'tags': ['finding_tag_new']}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
