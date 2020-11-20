@@ -441,6 +441,29 @@ class JIRAWebhookTest(DojoTestCase):
         self.assertEqual(200, response.status_code)
         self.assertEqual(notes_count_after, notes_count_before + 1)
 
+    def test_webhook_comment_on_finding_jira_under_path(self):
+        self.system_settings(enable_jira=True, enable_jira_web_hook=True, disable_jira_webhook_secret=False, jira_webhook_secret=self.correct_secret)
+
+        # finding 5 has a JIRA issue in the initial fixture for unit tests with id=2
+
+        body = json.loads(json.dumps(self.jira_issue_comment_template_json))
+        body['comment']['self'] = "http://www.testjira.com/my_little_happy_path_for_jira/rest/api/2/issue/2/comment/456843"
+
+        jira_issue = JIRA_Issue.objects.get(jira_id=2)
+        finding = jira_issue.finding
+        notes_count_before = finding.notes.count()
+
+        response = self.client.post(reverse('jira_web_hook_secret', args=(self.correct_secret, )),
+                                    self.jira_issue_comment_template_json,
+                                    content_type="application/json")
+
+        jira_issue = JIRA_Issue.objects.get(jira_id=2)
+        finding = jira_issue.finding
+        notes_count_after = finding.notes.count()
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(notes_count_after, notes_count_before + 1)
+
     def test_webhook_comment_on_engagement(self):
         self.system_settings(enable_jira=True, enable_jira_web_hook=True, disable_jira_webhook_secret=False, jira_webhook_secret=self.correct_secret)
 

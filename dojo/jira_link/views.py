@@ -127,7 +127,8 @@ def webhook(request, secret=None):
         if parsed.get('webhookEvent') == 'comment_created':
             comment_text = parsed['comment']['body']
             commentor = parsed['comment']['updateAuthor']['displayName']
-            jid = parsed['comment']['self'].split('/')[7]
+            # example: body['comment']['self'] = "http://www.testjira.com/jira_under_a_path/rest/api/2/issue/666/comment/456843"
+            jid = parsed['comment']['self'].split('/')[-3]
             jissue = get_object_or_404(JIRA_Issue, jira_id=jid)
             logger.debug('jissue: %s', vars(jissue))
             if jissue.finding:
