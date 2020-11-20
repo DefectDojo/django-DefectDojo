@@ -103,9 +103,8 @@ def identify_view(request):
         elif get_data.get('false_positive', None):
             return 'Endpoint'
     referer = request.META.get('HTTP_REFERER', None)
-    if not referer:
-        if referer.find('type=Endpoint') > -1:
-            return 'Endpoint'
+    if referer and referer.find('type=Endpoint') > -1:
+        return 'Endpoint'
     return 'Finding'
 
 
