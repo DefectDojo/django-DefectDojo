@@ -30,6 +30,7 @@ from dojo.tag.prefetching_tag_descriptor import PrefetchingTagDescriptor
 from django.contrib.contenttypes.fields import GenericRelation
 from tagging.models import TaggedItem
 from dateutil.relativedelta import relativedelta
+# from tagging.fields import TagField
 
 
 logger = logging.getLogger(__name__)
@@ -667,6 +668,8 @@ class Product(models.Model):
 
     # used for prefetching tags because django-tagging doesn't support that out of the box
     tagged_items = GenericRelation(TaggedItem)
+    tags_from_django_tagging = models.TextField(blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
+    # tags = TagField()
 
     def __unicode__(self):
         return self.name
@@ -1055,6 +1058,7 @@ class Engagement(models.Model):
 
     # used for prefetching tags because django-tagging doesn't support that out of the box
     tagged_items = GenericRelation(TaggedItem)
+    tags_from_django_tagging = models.TextField(blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
 
     class Meta:
         ordering = ['-target_start']
@@ -1175,6 +1179,7 @@ class Endpoint(models.Model):
 
     # used for prefetching tags because django-tagging doesn't support that out of the box
     tagged_items = GenericRelation(TaggedItem)
+    tags_from_django_tagging = models.TextField(blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
 
     class Meta:
         ordering = ['product', 'protocol', 'host', 'path', 'query', 'fragment']
@@ -1357,6 +1362,7 @@ class Test(models.Model):
 
     # used for prefetching tags because django-tagging doesn't support that out of the box
     tagged_items = GenericRelation(TaggedItem)
+    tags_from_django_tagging = models.TextField(blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
 
     version = models.CharField(max_length=100, null=True, blank=True)
 
@@ -1751,6 +1757,7 @@ class Finding(models.Model):
 
     # used for prefetching tags because django-tagging doesn't support that out of the box
     tagged_items = GenericRelation(TaggedItem)
+    tags_from_django_tagging = models.TextField(blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
@@ -2328,6 +2335,7 @@ class Finding_Template(models.Model):
 
     # used for prefetching tags because django-tagging doesn't support that out of the box
     tagged_items = GenericRelation(TaggedItem)
+    tags_from_django_tagging = models.TextField(blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
@@ -2968,6 +2976,7 @@ class App_Analysis(models.Model):
 
     # used for prefetching tags because django-tagging doesn't support that out of the box
     tagged_items = GenericRelation(TaggedItem)
+    tags_from_django_tagging = models.TextField(blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
 
     def __unicode__(self):
         return self.name + " | " + self.product.name
@@ -3001,6 +3010,7 @@ class Objects(models.Model):
 
     # used for prefetching tags because django-tagging doesn't support that out of the box
     tagged_items = GenericRelation(TaggedItem)
+    tags_from_django_tagging = models.TextField(blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
 
     def __unicode__(self):
         name = None
