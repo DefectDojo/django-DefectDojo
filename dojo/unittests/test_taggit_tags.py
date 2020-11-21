@@ -210,6 +210,7 @@ class TaggitTests(DojoAPITestCase):
         self.assertEqual(2, len(response.get('tags')))
         self.assertTrue('one' in response['tags'])
         self.assertTrue('two' in response['tags'])
+        # finding.tags: [<Tag: one>, <Tag: two>]
 
     def test_finding_create_tags_with_spaces_quoted(self):
         tags = ['"one two"']
@@ -221,6 +222,8 @@ class TaggitTests(DojoAPITestCase):
         for tag in tags:
             logger.debug('looking for tag %s in tag list %s', tag, response['tags'])
             self.assertTrue(tag.strip('\"') in response['tags'])
+
+        # finding.tags: <QuerySet [<Tag: one two>]>
 
     def test_finding_create_tags_with_slashes(self):
         tags = ['a/b/c']
