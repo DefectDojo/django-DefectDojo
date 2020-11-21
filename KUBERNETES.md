@@ -33,6 +33,7 @@ helm repo update
 Helm >= v3
 ```zsh
 helm repo add stable https://charts.helm.sh/stable
+helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo update
 ```
 Then pull the dependent charts:
