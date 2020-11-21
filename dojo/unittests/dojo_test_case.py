@@ -120,7 +120,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         # print('test.content: ', response.content)
         return json.loads(response.content)
 
-    def import_scan_with_params(self, filename, engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None):
+    def import_scan_with_params(self, filename, engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None, tags=None):
         payload = {
                 "scan_date": '2020-06-04',
                 "minimum_severity": minimum_severity,
@@ -135,9 +135,12 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         if push_to_jira is not None:
             payload['push_to_jira'] = push_to_jira
 
+        if tags is not None:
+            payload['tags'] = tags
+
         return self.import_scan(payload)
 
-    def reimport_scan_with_params(self, test_id, filename, engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None):
+    def reimport_scan_with_params(self, test_id, filename, engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None, tags=None):
         payload = {
                 "test": test_id,
                 "scan_date": '2020-06-04',
@@ -152,6 +155,9 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
         if push_to_jira is not None:
             payload['push_to_jira'] = push_to_jira
+
+        if tags is not None:
+            payload['tags'] = tags
 
         return self.reimport_scan(payload)
 

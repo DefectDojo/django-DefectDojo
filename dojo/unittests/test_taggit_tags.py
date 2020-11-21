@@ -11,6 +11,8 @@ class TaggitTests(DojoAPITestCase):
     def setUp(self, *args, **kwargs):
         super().setUp()
         self.login_as_admin()
+        self.scans_path = 'dojo/unittests/scans/zap/'
+        self.zap_sample5_filename = self.scans_path + '5_zap_sample_one.xml'
 
     def test_tags_prefetching(self):
         # print('\nadding tags')
@@ -177,3 +179,26 @@ class TaggitTests(DojoAPITestCase):
 
     def test_finding_patch_remove_tags_non_existent(self):
         return self.test_finding_put_remove_tags_non_existent()
+
+    def test_import_and_reimport_with_tags(self):
+        tags = ['tag1', 'tag2']
+        import0 = self.import_scan_with_params(self.zap_sample5_filename, tags=tags)
+        test_id = import0['test']
+
+        response = self.get_test_api(test_id)
+
+        self.assertEqual(len(tags), len(response.get('tags')))
+        for tag in tags:
+            self.assertTrue(tag in response['tags'])
+
+        # reimport, do not specify tags: should retain tags
+        reimport = self.reimport_scan_with_params(test_id, self.zap_sample5_filename)
+        self.assertEqual(len(tags), len(response.get('tags')))
+        for tag in tags:
+            self.assertTrue(tag in response['tags'])
+
+        # reimport, specify tags others: currently reimport doesn't do anything with tags param and silently ignores them
+        reimport = self.reimport_scan_with_params(test_id, self.zap_sample5_filename, tags=['tag3', 'tag4'])
+        self.assertEqual(len(tags), len(response.get('tags')))
+        for tag in tags:
+            self.assertTrue(tag in response['tags'])
