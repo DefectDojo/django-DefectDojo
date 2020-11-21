@@ -608,6 +608,7 @@ INSTALLED_APPS = (
     'django_celery_results',
     'social_django',
     'drf_yasg2',
+    'tagulous',
 )
 
 # ------------------------------------------------------------------------------
