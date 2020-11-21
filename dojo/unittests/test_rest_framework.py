@@ -14,7 +14,8 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
 from json import dumps
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
-from rest_framework.test import APITestCase, APIClient
+from rest_framework.test import APIClient
+from .dojo_test_case import DojoAPITestCase
 import logging
 
 
@@ -33,9 +34,9 @@ def skipIfNotSubclass(baseclass_name):
 
 
 class BaseClass():
-    class RESTEndpointTest(APITestCase):
+    class RESTEndpointTest(DojoAPITestCase):
         def __init__(self, *args, **kwargs):
-            APITestCase.__init__(self, *args, **kwargs)
+            DojoAPITestCase.__init__(self, *args, **kwargs)
             self.view_mixins = list(map(
                 (lambda x: x.__name__), self.viewset.__bases__))
 
@@ -219,7 +220,7 @@ class EngagementTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class FindingRequestResponseTest(APITestCase):
+class FindingRequestResponseTest(DojoAPITestCase):
     fixtures = ['dojo_testdata.json']
 
     def setUp(self):
@@ -622,7 +623,7 @@ class UsersTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class ProductPermissionTest(APITestCase):
+class ProductPermissionTest(DojoAPITestCase):
     fixtures = ['dojo_testdata.json']
 
     def setUp(self):
@@ -642,7 +643,7 @@ class ProductPermissionTest(APITestCase):
         self.assertEqual(response.status_code, 404)
 
 
-class ScanSettingsPermissionTest(APITestCase):
+class ScanSettingsPermissionTest(DojoAPITestCase):
     fixtures = ['dojo_testdata.json']
 
     def setUp(self):
@@ -662,7 +663,7 @@ class ScanSettingsPermissionTest(APITestCase):
         self.assertEqual(response.status_code, 404)
 
 
-class ScansPermissionTest(APITestCase):
+class ScansPermissionTest(DojoAPITestCase):
     fixtures = ['dojo_testdata.json']
 
     def setUp(self):
@@ -704,7 +705,7 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class ReimportScanTest(APITestCase):
+class ReimportScanTest(DojoAPITestCase):
     fixtures = ['dojo_testdata.json']
 
     def setUp(self):

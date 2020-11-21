@@ -2,7 +2,8 @@ from vcr_unittest import VCRTestCase
 from dojo.models import User, Endpoint, Notes, Finding, Endpoint_Status, Test, JIRA_Issue
 from dojo.models import System_Settings, Engagement
 from django.urls import reverse
-from rest_framework.test import APITestCase
+from rest_framework.test import APITestCase, APIClient
+from rest_framework.authtoken.models import Token
 import json
 from django.test import TestCase
 from itertools import chain
@@ -95,6 +96,12 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
     def __init__(self, *args, **kwargs):
         APITestCase.__init__(self, *args, **kwargs)
+
+    def login_as_admin(self):
+        testuser = self.get_test_admin()
+        token = Token.objects.get(user=testuser)
+        self.client = APIClient()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
 
     def import_scan(self, payload):
         # logger.debug('import_scan payload %s', payload)
@@ -196,6 +203,46 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         self.assertEqual(200, response.status_code)
         # print('findings.content: ', response.content)
         return json.loads(response.content)
+
+    def do_finding_tags_api(self, http_method, finding_id, tags=None):
+        data = None
+        if tags:
+            data = {'tags': tags}
+
+        # print('data:' + str(data))
+
+        response = http_method(reverse('finding-tags', args=(finding_id,)), data, format='json')
+        # print(vars(response))
+        # print(response.content)
+        self.assertEqual(200, response.status_code)
+        return response
+
+    def get_finding_tags_api(self, finding_id):
+        response = self.do_finding_tags_api(self.client.get, finding_id)
+        return response.data
+
+    def post_finding_tags_api(self, finding_id, tags):
+        response = self.do_finding_tags_api(self.client.post, finding_id, tags)
+        return response.data
+
+    def do_finding_remove_tags_api(self, http_method, finding_id, tags=None, expected_response_status_code=200):
+        data = None
+        if tags:
+            data = {'tags': tags}
+
+        response = http_method(reverse('finding-remove-tags', args=(finding_id,)), data, format='json')
+        # print(response)
+        # print(response.content)
+        self.assertEqual(expected_response_status_code, response.status_code)
+        return response.data
+
+    def put_finding_remove_tags_api(self, finding_id, tags, *args, **kwargs):
+        response = self.do_finding_remove_tags_api(self.client.put, finding_id, tags, *args, **kwargs)
+        return response
+
+    def patch_finding_remove_tags_api(self, finding_id, tags, *args, **kwargs):
+        response = self.do_finding_remove_tags_api(self.client.patch, finding_id, tags, *args, **kwargs)
+        return response
 
     def log_finding_summary_json_api(self, findings_content_json=None):
         # print('summary')
