@@ -180,7 +180,7 @@ class TaggitTests(DojoAPITestCase):
     def test_finding_patch_remove_tags_non_existent(self):
         return self.test_finding_put_remove_tags_non_existent()
 
-    def test_finding_create_tags_with_comma(self):
+    def test_finding_create_tags_with_commas(self):
         tags = ['one,two']
         finding_id = self.create_finding_with_tags(tags)
         response = self.get_finding_tags_api(finding_id)
@@ -189,6 +189,17 @@ class TaggitTests(DojoAPITestCase):
         self.assertEqual(2, len(response.get('tags')))
         self.assertTrue('one' in response['tags'])
         self.assertTrue('two' in response['tags'])
+
+    def test_finding_create_tags_with_commas_quoted(self):
+        tags = ['"one,two"']
+        finding_id = self.create_finding_with_tags(tags)
+        response = self.get_finding_tags_api(finding_id)
+
+        # no splitting due to quotes
+        self.assertEqual(len(tags), len(response.get('tags', None)))
+        for tag in tags:
+            # logger.debug('looking for tag %s in tag list %s', tag, response['tags'])
+            self.assertTrue(tag.strip('\"') in response['tags'])
 
     def test_finding_create_tags_with_spaces(self):
         tags = ['one two']
@@ -199,6 +210,17 @@ class TaggitTests(DojoAPITestCase):
         self.assertEqual(2, len(response.get('tags')))
         self.assertTrue('one' in response['tags'])
         self.assertTrue('two' in response['tags'])
+
+    def test_finding_create_tags_with_spaces_quoted(self):
+        tags = ['"one two"']
+        finding_id = self.create_finding_with_tags(tags)
+        response = self.get_finding_tags_api(finding_id)
+
+        # no splitting due to quotes
+        self.assertEqual(len(tags), len(response.get('tags', None)))
+        for tag in tags:
+            logger.debug('looking for tag %s in tag list %s', tag, response['tags'])
+            self.assertTrue(tag.strip('\"') in response['tags'])
 
     def test_finding_create_tags_with_slashes(self):
         tags = ['a/b/c']
