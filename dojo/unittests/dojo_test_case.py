@@ -225,6 +225,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
     def get_finding_tags_api(self, finding_id):
         response = self.do_finding_tags_api(self.client.get, finding_id)
+        print(response.data)
         return response.data
 
     def post_finding_tags_api(self, finding_id, tags):

@@ -180,6 +180,36 @@ class TaggitTests(DojoAPITestCase):
     def test_finding_patch_remove_tags_non_existent(self):
         return self.test_finding_put_remove_tags_non_existent()
 
+    def test_finding_create_tags_with_comma(self):
+        tags = ['one,two']
+        finding_id = self.create_finding_with_tags(tags)
+        response = self.get_finding_tags_api(finding_id)
+
+        # via API the tag gets split into two tags (via the UI no splitting happens)
+        self.assertEqual(2, len(response.get('tags')))
+        self.assertTrue('one' in response['tags'])
+        self.assertTrue('two' in response['tags'])
+
+    def test_finding_create_tags_with_spaces(self):
+        tags = ['one two']
+        finding_id = self.create_finding_with_tags(tags)
+        response = self.get_finding_tags_api(finding_id)
+
+        # via API the tag gets split into two tags (via the UI no splitting happens)
+        self.assertEqual(2, len(response.get('tags')))
+        self.assertTrue('one' in response['tags'])
+        self.assertTrue('two' in response['tags'])
+
+    def test_finding_create_tags_with_slashes(self):
+        tags = ['a/b/c']
+        finding_id = self.create_finding_with_tags(tags)
+        response = self.get_finding_tags_api(finding_id)
+
+        self.assertEqual(len(tags), len(response.get('tags', None)))
+        for tag in tags:
+            # logger.debug('looking for tag %s in tag list %s', tag, response['tags'])
+            self.assertTrue(tag in response['tags'])
+
     def test_import_and_reimport_with_tags(self):
         tags = ['tag1', 'tag2']
         import0 = self.import_scan_with_params(self.zap_sample5_filename, tags=tags)
