@@ -193,10 +193,11 @@ class ProductForm(forms.ModelForm):
     name = forms.CharField(max_length=50, required=True)
     description = forms.CharField(widget=forms.Textarea(attrs={}),
                                   required=True)
-    tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
-                           required=False,
-                           help_text="Add tags that help describe this product.  "
-                                     "Choose from the list or add new tags.  Press TAB key to add.")
+    # tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
+    #                        required=False,
+    #                        help_text="Add tags that help describe this product.  "
+    #                                  "Choose from the list or add new tags.  Press TAB key to add.")
+    # tags = TagField()
     prod_type = forms.ModelChoiceField(label='Product Type',
                                        queryset=Product_Type.objects.all().order_by('name'),
                                        required=True)
@@ -216,11 +217,11 @@ class ProductForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         non_staff = Dojo_User.objects.exclude(is_staff=True) \
             .exclude(is_active=False).order_by('first_name', 'last_name')
-        tags = Tag.objects.usage_for_model(Product)
-        t = [(tag.name, tag.name) for tag in tags]
+        # tags = Tag.objects.usage_for_model(Product)
+        # t = [(tag.name, tag.name) for tag in tags]
         super(ProductForm, self).__init__(*args, **kwargs)
         self.fields['authorized_users'].queryset = non_staff
-        self.fields['tags'].widget.choices = t
+        # self.fields['tags'].widget.choices = t
 
     class Meta:
         model = Product

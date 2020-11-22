@@ -200,7 +200,7 @@ def prefetch_for_findings(findings):
         prefetched_findings = prefetched_findings.prefetch_related('risk_acceptance_set')
         # we could try to prefetch only the latest note with SubQuery and OuterRef, but I'm getting that MySql doesn't support limits in subqueries.
         prefetched_findings = prefetched_findings.prefetch_related('notes')
-        prefetched_findings = prefetched_findings.prefetch_related('tagged_items__tag')
+        prefetched_findings = prefetched_findings.prefetch_related('tags')
         prefetched_findings = prefetched_findings.prefetch_related('endpoints')
         prefetched_findings = prefetched_findings.prefetch_related('endpoint_status')
         prefetched_findings = prefetched_findings.prefetch_related('endpoint_status__endpoint')
@@ -603,7 +603,7 @@ def edit_finding(request, fid):
     else:
         req_resp = None
     form = FindingForm(instance=finding, template=False, req_resp=req_resp)
-    form.initial['tags'] = [tag.name for tag in finding.tags]
+    form.initial['tags'] = [tag.name for tag in finding.tags.all()]
     form_error = False
     jform = None
     jira_link_exists = False
@@ -805,7 +805,7 @@ def edit_finding(request, fid):
         form.fields['endpoints'].queryset = form.cleaned_data['endpoints']
     else:
         form.fields['endpoints'].queryset = finding.endpoints.all()
-    form.initial['tags'] = [tag.name for tag in finding.tags]
+    form.initial['tags'] = [tag.name for tag in finding.tags.all()]
 
     product_tab = Product_Tab(finding.test.engagement.product.id, title="Edit Finding", tab="findings")
 
@@ -989,7 +989,7 @@ def mktemplate(request, fid):
             references=finding.references,
             numerical_severity=finding.numerical_severity)
         template.save()
-        tags = [tag.name for tag in list(finding.tags)]
+        tags = [tag.name for tag in list(finding.tags.all())]
         t = ", ".join('"{0}"'.format(w) for w in tags)
         template.tags = t
         messages.add_message(
@@ -1046,7 +1046,7 @@ def choose_finding_template_options(request, tid, fid):
     finding = get_object_or_404(Finding, id=fid)
     template = get_object_or_404(Finding_Template, id=tid)
     data = finding.__dict__
-    data['tags'] = [tag.name for tag in template.tags]
+    data['tags'] = [tag.name for tag in template.tags.all()]
     form = ApplyFindingTemplateForm(data=data, template=template)
     product_tab = Product_Tab(finding.test.engagement.product.id, title="Finding Template Options", tab="findings")
     return render(request, 'dojo/apply_finding_template.html', {
@@ -1054,7 +1054,7 @@ def choose_finding_template_options(request, tid, fid):
         'product_tab': product_tab,
         'template': template,
         'form': form,
-        'finding_tags': [tag.name for tag in finding.tags],
+        'finding_tags': [tag.name for tag in finding.tags.all()],
     })
 
 
@@ -1444,7 +1444,7 @@ def edit_template(request, tid):
                 extra_tags='alert-danger')
 
     count = apply_cwe_mitigation(True, template, False)
-    form.initial['tags'] = [tag.name for tag in template.tags]
+    form.initial['tags'] = [tag.name for tag in template.tags.all()]
     add_breadcrumb(title="Edit Template", top_level=False, request=request)
     return render(request, 'dojo/add_template.html', {
         'form': form,
@@ -1662,7 +1662,7 @@ def merge_finding_product(request, pid):
 
                         # if checked merge the tags
                         if form.cleaned_data['tag_finding']:
-                            for tag in finding.tags:
+                            for tag in finding.tags.all():
                                 Tag.objects.add_tag(finding_to_merge_into, tag)
 
                         # if checked re-assign the burp requests to the merged finding

@@ -159,7 +159,7 @@ def simple_search(request):
                 # prefetch after watson to avoid inavlid query errors due to watson not understanding prefetching
                 findings = prefetch_for_findings(findings)
                 # some over the top tag displaying happening...
-                findings = findings.prefetch_related('test__engagement__product__tagged_items__tag')
+                findings = findings.prefetch_related('test__engagement__product__tags')
 
                 findings = findings[:max_results]
             else:
@@ -172,7 +172,7 @@ def simple_search(request):
 
                 # findings = prefetch_for_findings(findings)
                 # some over the top tag displaying happening...
-                # findings = findings.prefetch_related('test__engagement__product__tagged_items__tag')
+                # findings = findings.prefetch_related('test__engagement__product__tags')
 
                 # paged_findings.object_list = findings
 
@@ -190,7 +190,7 @@ def simple_search(request):
             if search_tests:
                 watson_results = watson.filter(tests, clean_query)
                 tests = tests.filter(id__in=[watson.id for watson in watson_results])
-                tests = tests.prefetch_related('engagement', 'engagement__product', 'test_type', 'tagged_items__tag', 'engagement__tagged_items__tag', 'engagement__product__tagged_items__tag')
+                tests = tests.prefetch_related('engagement', 'engagement__product', 'test_type', 'tags', 'engagement__tags', 'engagement__product__tags')
                 tests = tests[:max_results]
             else:
                 tests = None
@@ -198,7 +198,7 @@ def simple_search(request):
             if search_engagements:
                 watson_results = watson.filter(engagements, clean_query)
                 engagements = engagements.filter(id__in=[watson.id for watson in watson_results])
-                engagements = engagements.prefetch_related('product', 'product__tagged_items__tag', 'tagged_items__tag')
+                engagements = engagements.prefetch_related('product', 'product__tags', 'tags')
                 engagements = engagements[:max_results]
             else:
                 engagements = None
@@ -206,21 +206,21 @@ def simple_search(request):
             if search_products:
                 watson_results = watson.filter(products, clean_query)
                 products = products.filter(id__in=[watson.id for watson in watson_results])
-                products = products.prefetch_related('tagged_items__tag')
+                products = products.prefetch_related('tags')
                 products = products[:max_results]
             else:
                 products = None
 
             if search_endpoints:
                 endpoints = endpoints.filter(Q(host__icontains=clean_query) | Q(path__icontains=clean_query) | Q(fqdn__icontains=clean_query) | Q(protocol__icontains=clean_query))
-                endpoints = endpoints.prefetch_related('product', 'tagged_items__tag', 'product__tagged_items__tag')
+                endpoints = endpoints.prefetch_related('product', 'tags', 'product__tags')
                 endpoints = endpoints[:max_results]
             else:
                 endpoints = None
 
             if search_languages:
                 languages = Languages.objects.filter(language__language__icontains=clean_query)
-                languages = languages.prefetch_related('product', 'product__tagged_items__tag')
+                languages = languages.prefetch_related('product', 'product__tags')
                 languages = languages[:max_results]
             else:
                 languages = None

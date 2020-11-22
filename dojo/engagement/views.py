@@ -130,9 +130,9 @@ def engagements_all(request):
 
 def prefetch_for_products_with_engagments(products_with_engagements):
     if isinstance(products_with_engagements, QuerySet):  # old code can arrive here with prods being a list because the query was already executed
-        return products_with_engagements.prefetch_related('tagged_items__tag',
-            'engagement_set__tagged_items__tag',
-            'engagement_set__test_set__tagged_items__tag',
+        return products_with_engagements.prefetch_related('tags',
+            'engagement_set__tags',
+            'engagement_set__test_set__tags',
             'engagement_set__jira_project__jira_instance',
             'jira_project_set__jira_instance')
 
@@ -237,7 +237,7 @@ def edit_engagement(request, eid):
                 logger.debug('showing jira-epic-form')
                 jira_epic_form = JIRAEngagementForm(prefix='jira-epic-form', instance=engagement)
 
-    form.initial['tags'] = [tag.name for tag in engagement.tags]
+    form.initial['tags'] = [tag.name for tag in engagement.tags.all()]
 
     title = ' CI/CD' if is_ci_cd else ''
     product_tab = Product_Tab(engagement.product.id, title="Edit" + title + " Engagement", tab="engagements")
@@ -300,7 +300,7 @@ def view_engagement(request, eid):
     eng = get_object_or_404(Engagement, id=eid)
     tests = (
         Test.objects.filter(engagement=eng)
-        .prefetch_related('tagged_items__tag', 'test_type')
+        .prefetch_related('tags', 'test_type')
         .annotate(count_findings_test_all=Count('finding__id'))
         .annotate(count_findings_test_active_verified=Count('finding__id', filter=Q(finding__active=True)))
         .annotate(count_findings_test_mitigated=Count('finding__id', filter=Q(finding__is_Mitigated=True)))

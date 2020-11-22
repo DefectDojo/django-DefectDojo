@@ -40,7 +40,7 @@
                                 <td class="prod_name"><a href="{% url 'view_product' p.id %}">{{ p.name }}</a>
                                     {{ p|jira_project_tag }}
                                   <sup>
-                                   {% for tag in p.tags %}
+                                   {% for tag in p.tags.all %}
                                         <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                     {% endfor %}
                                   </sup>
@@ -55,7 +55,7 @@
                                                 <a  style="display: inline" class="eng_link" href="{% url 'view_engagement' e.id %}">
                                                 {% if e.name %}{{ e.name }} {% endif %}{{ e.target_start|date }} - {{ e.target_end|date }}</a>
                                                 <sup>
-                                                    {% for tag in e.tags %}
+                                                    {% for tag in e.tags.all %}
                                                          <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                                      {% endfor %}
                                                 </sup>                                                

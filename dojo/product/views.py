@@ -96,7 +96,7 @@ def prefetch_for_product(prods):
                 finding__active=True,
                 finding__mitigated__isnull=True)
         prefetched_prods = prefetched_prods.prefetch_related(Prefetch('endpoint_set', queryset=active_endpoint_query, to_attr='active_endpoints'))
-        prefetched_prods = prefetched_prods.prefetch_related('tagged_items__tag')
+        prefetched_prods = prefetched_prods.prefetch_related('tags')
     else:
         logger.debug('unable to prefetch because query was already executed')
 
@@ -631,7 +631,7 @@ def prefetch_for_view_engagements(engs):
         prefetched_engs = prefetched_engs.annotate(count_findings_open=Count('test__finding__id', filter=Q(test__finding__active=True)))
         prefetched_engs = prefetched_engs.annotate(count_findings_close=Count('test__finding__id', filter=Q(test__finding__is_Mitigated=True)))
         prefetched_engs = prefetched_engs.annotate(count_findings_duplicate=Count('test__finding__id', filter=Q(test__finding__duplicate=True)))
-        prefetched_engs = prefetched_engs.prefetch_related('tagged_items__tag')
+        prefetched_engs = prefetched_engs.prefetch_related('tags')
     else:
         logger.debug('unable to prefetch because query was already executed')
 
@@ -851,7 +851,7 @@ def edit_product(request, pid):
 
         sonarqube_form = Sonarqube_ProductForm(instance=sonarqube_conf)
 
-    form.initial['tags'] = [tag.name for tag in prod.tags]
+    form.initial['tags'] = [tag.name for tag in prod.tags.all()]
     product_tab = Product_Tab(pid, title="Edit Product", tab="settings")
     return render(request,
                   'dojo/edit_product.html',

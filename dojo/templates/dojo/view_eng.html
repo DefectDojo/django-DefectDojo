@@ -252,7 +252,7 @@
                                 <td><a title="{{ test.description }}" href="{% url 'view_test' test.id %}">{{ test }}</a>
                                   {% if test.tags %}
                                       <sup>
-                                          {% for tag in test.tags %}
+                                          {% for tag in test.tags.all %}
                                           <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                           {% endfor %}
                                       </sup>
@@ -638,7 +638,7 @@
       {% endif %}
       {% if eng.tags %}
           <sup>
-              {% for tag in eng.tags %}
+              {% for tag in eng.tags.all %}
               <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
               {% endfor %}
           </sup>

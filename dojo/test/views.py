@@ -167,7 +167,7 @@ def prefetch_for_findings(findings):
         prefetched_findings = prefetched_findings.prefetch_related('risk_acceptance_set')
         # we could try to prefetch only the latest note with SubQuery and OuterRef, but I'm getting that MySql doesn't support limits in subqueries.
         prefetched_findings = prefetched_findings.prefetch_related('notes')
-        prefetched_findings = prefetched_findings.prefetch_related('tagged_items__tag')
+        prefetched_findings = prefetched_findings.prefetch_related('tags')
         prefetched_findings = prefetched_findings.prefetch_related('endpoints')
         prefetched_findings = prefetched_findings.prefetch_related('endpoint_status')
         prefetched_findings = prefetched_findings.prefetch_related('endpoint_status__endpoint')
@@ -201,7 +201,7 @@ def edit_test(request, tid):
 
     form.initial['target_start'] = test.target_start.date()
     form.initial['target_end'] = test.target_end.date()
-    form.initial['tags'] = [tag.name for tag in test.tags]
+    form.initial['tags'] = [tag.name for tag in test.tags.all()]
     form.initial['description'] = test.description
 
     product_tab = Product_Tab(test.engagement.product.id, title="Edit Test", tab="engagements")
@@ -586,7 +586,7 @@ def add_temp_finding(request, tid, fid):
                                     'impact': finding.impact,
                                     'references': finding.references,
                                     'numerical_severity': finding.numerical_severity,
-                                    'tags': [tag.name for tag in finding.tags]})
+                                    'tags': [tag.name for tag in finding.tags.all()]})
 
     product_tab = Product_Tab(test.engagement.product.id, title="Add Finding", tab="engagements")
     product_tab.setEngagement(test.engagement)
@@ -639,7 +639,7 @@ def re_import_scan_results(request, tid):
     if get_system_setting('enable_jira') and jira_project:
         jform = JIRAImportScanForm(push_all=jira_helper.is_push_all_issues(engagement), prefix='jiraform')
 
-    form.initial['tags'] = [tag.name for tag in test.tags]
+    form.initial['tags'] = [tag.name for tag in test.tags.all()]
     if request.method == "POST":
         form = ReImportScanForm(request.POST, request.FILES)
         if jira_helper.get_jira_project(test):

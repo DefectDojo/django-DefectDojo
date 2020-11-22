@@ -77,7 +77,7 @@ def import_object_eng(request, engagement, json_data):
             object.save()
             found_object = object
             if file_type == "path":
-                for tag in found_object.tags:
+                for tag in found_object.tags.all():
                     Tag.objects.update_tags(object, tag.name)
 
         full_url = None

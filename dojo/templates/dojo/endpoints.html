@@ -83,7 +83,7 @@
                                 {% endif %}
                                   {% if e.tags %}
                                       <sup>
-                                          {% for tag in e.tags %}
+                                          {% for tag in e.tags.all %}
                                           <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                           {% endfor %}
                                       </sup>
@@ -91,7 +91,7 @@
                                 </td>
                                 <td><a href="{% url 'view_product' e.product.id %}">{{ e.product }}</a>
                                   <sup>
-                                      {% for tag in e.product.tags %}
+                                      {% for tag in e.product.tags.all %}
                                           <a title="Search {{ tag }}" class="tag-label tag-color"
                                              href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                       {% endfor %}

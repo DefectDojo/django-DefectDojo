@@ -30,10 +30,10 @@ class TaggitTests(DojoAPITestCase):
         self.check_tags(Product.objects.all())
 
         # print('testing tags for correctness with prefetching')
-        self.check_tags(Product.objects.all().prefetch_related('tagged_items__tag'))
+        self.check_tags(Product.objects.all().prefetch_related('tags'))
 
         # print('testing tags for correctness with nested prefetching')
-        self.check_tags(Product.objects.all().prefetch_related('tagged_items__tag', 'engagement_set__tagged_items__tag'))
+        self.check_tags(Product.objects.all().prefetch_related('tags', 'engagement_set__tags'))
 
     def add_tags(self, curr_tags, extra_tags):
         for tag in extra_tags:
@@ -48,17 +48,17 @@ class TaggitTests(DojoAPITestCase):
             for eng in product.engagement_set.all():
                 # print("         :" + eng.name + ": " + str(eng.tags))
                 self.assertEqual(len(eng.tags), 2)
-                self.assertEqual('product_' + str(product.id) in [tag.name for tag in product.tags], True)
-                self.assertEqual('eng_' + str(eng.id) in [tag.name for tag in eng.tags], True)
-                self.assertEqual('eng_' + str(eng.id + 1) in [tag.name for tag in eng.tags], False)
+                self.assertEqual('product_' + str(product.id) in [tag.name for tag in product.tags.all()], True)
+                self.assertEqual('eng_' + str(eng.id) in [tag.name for tag in eng.tags.all()], True)
+                self.assertEqual('eng_' + str(eng.id + 1) in [tag.name for tag in eng.tags.all()], False)
                 for test in eng.test_set.all():
                     # print("         :" + eng.name + ": " + test.test_type.name + ": " + str(test.tags))
                     self.assertEqual(len(test.tags), 3)
-                    self.assertEqual('product_' + str(product.id) in [tag.name for tag in product.tags], True)
-                    self.assertEqual('eng_' + str(eng.id) in [tag.name for tag in eng.tags], True)
-                    self.assertEqual('eng_' + str(eng.id + 1) in [tag.name for tag in eng.tags], False)
-                    self.assertEqual('test_' + str(test.id) in [tag.name for tag in test.tags], True)
-                    self.assertEqual('test_' + str(test.id + 1) in [tag.name for tag in test.tags], False)
+                    self.assertEqual('product_' + str(product.id) in [tag.name for tag in product.tags.all()], True)
+                    self.assertEqual('eng_' + str(eng.id) in [tag.name for tag in eng.tags.all()], True)
+                    self.assertEqual('eng_' + str(eng.id + 1) in [tag.name for tag in eng.tags.all()], False)
+                    self.assertEqual('test_' + str(test.id) in [tag.name for tag in test.tags.all()], True)
+                    self.assertEqual('test_' + str(test.id + 1) in [tag.name for tag in test.tags.all()], False)
 
     def create_finding_with_tags(self, tags):
         finding_id = Finding.objects.all().first().id

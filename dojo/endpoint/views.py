@@ -201,7 +201,7 @@ def edit_endpoint(request, eid):
             return HttpResponseRedirect(reverse('view_endpoint', args=(endpoint.id,)))
     add_breadcrumb(parent=endpoint, title="Edit", top_level=False, request=request)
     form = EditEndpointForm(instance=endpoint)
-    form.initial['tags'] = [tag.name for tag in endpoint.tags]
+    form.initial['tags'] = [tag.name for tag in endpoint.tags.all()]
 
     product_tab = Product_Tab(endpoint.product.id, "Endpoint", tab="endpoints")
 
