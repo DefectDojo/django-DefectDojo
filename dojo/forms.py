@@ -17,7 +17,7 @@ from django.forms.widgets import Widget, Select
 from django.utils.dates import MONTHS
 from django.utils.safestring import mark_safe
 from django.utils import timezone
-from tagging.models import Tag
+
 from dojo.models import Finding, Product_Type, Product, Note_Type, ScanSettings, VA, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
     Development_Environment, Dojo_User, Scan, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage, \

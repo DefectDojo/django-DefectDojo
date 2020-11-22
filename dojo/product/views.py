@@ -29,8 +29,6 @@ from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, S
 from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, Product_Tab, get_punchcard_data, queryset_check
 from dojo.notifications.helper import create_notification
 from custom_field.models import CustomFieldValue, CustomField
-from tagging.models import Tag
-from tagging.utils import get_tag_list
 from django.db.models import Prefetch, F
 from django.db.models.query import QuerySet
 from github import Github
@@ -831,8 +829,9 @@ def edit_product(request, pid):
             return HttpResponseRedirect(reverse('view_product', args=(pid,)))
     else:
         form = ProductForm(instance=prod,
-                           initial={'auth_users': prod.authorized_users.all(),
-                                    'tags': get_tag_list(Tag.objects.get_for_object(prod))})
+                           initial={'auth_users': prod.authorized_users.all()})
+        #    initial={'auth_users': prod.authorized_users.all(),
+        #             'tags': get_tag_list(Tag.objects.get_for_object(prod))})
 
         if jira_enabled:
             jform = JIRAProjectForm(instance=jira_project)

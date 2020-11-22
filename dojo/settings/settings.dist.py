@@ -595,7 +595,7 @@ INSTALLED_APPS = (
     'dojo',
     'tastypie_swagger',
     'watson',
-    'tagging',
+    # 'tagging',
     'custom_field',
     'imagekit',
     'multiselectfield',

@@ -5,9 +5,7 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from dojo.models import Product, Objects, Objects_Engagement, Engagement
-from tagging.models import Tag
 from dojo.forms import ObjectSettingsForm, DeleteObjectsSettingsForm
-from tagging.utils import get_tag_list
 from dojo.utils import Product_Tab
 
 logger = logging.getLogger(__name__)

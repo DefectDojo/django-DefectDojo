@@ -20,7 +20,6 @@ from django.views.decorators.cache import cache_page
 from django.utils import timezone
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
-from tagging.models import Tag
 
 from dojo.filters import TemplateFindingFilter, OpenFindingFilter
 from dojo.forms import NoteForm, TestForm, FindingForm, \

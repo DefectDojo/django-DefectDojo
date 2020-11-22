@@ -1,7 +1,6 @@
 import logging
 
 from django.shortcuts import render
-from tagging.models import TaggedItem
 from watson import search as watson
 from django.db.models import Q
 from dojo.forms import SimpleSearchForm

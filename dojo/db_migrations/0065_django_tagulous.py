@@ -2,7 +2,7 @@
 
 from django.db import migrations, models
 # import django.db.models.deletion
-from tagging.registry import register as tag_register
+# from tagging.registry import register as tag_register
 
 import tagulous.models.fields
 import tagulous.models.models
@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
         for model_name in ['Product', 'test', 'finding', 'engagement', 'endpoint', 'finding_template', 'app_Analysis', 'objects']:
             model_class = apps.get_model('dojo', model_name)
             # the get_model returns a fake class proxy, which is not registered with django-tagging
-            tag_register(model_class)
+            # tag_register(model_class)
 
             for obj in model_class.objects.all():
                 # logger.debug('%s:%s:%s', model_class, obj.id, obj)

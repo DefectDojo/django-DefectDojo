@@ -23,7 +23,6 @@ from django.utils import formats
 from django.utils.safestring import mark_safe
 from django.utils import timezone
 from django.views.decorators.http import require_POST
-from tagging.models import Tag
 from itertools import chain
 from dojo.user.helper import user_must_be_authorized, check_auth_users_list
 from dojo.utils import close_external_issue, reopen_external_issue

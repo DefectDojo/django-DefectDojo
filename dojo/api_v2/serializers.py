@@ -13,7 +13,7 @@ from dojo.tools.factory import import_parser_factory
 from dojo.utils import max_safe, is_scan_file_too_large
 from dojo.notifications.helper import create_notification
 from django.urls import reverse
-from tagging.models import Tag
+
 from django.core.validators import URLValidator, validate_ipv46_address
 from django.conf import settings
 from rest_framework import serializers
