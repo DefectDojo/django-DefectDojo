@@ -637,15 +637,15 @@ def re_import_scan_results(request, tid):
 
     # Decide if we need to present the Push to JIRA form
     if get_system_setting('enable_jira') and jira_project:
-        jform = JIRAImportScanForm(push_all=jira_helper.is_push_all_issues(engagement), prefix='jiraform')
+        jform = JIRAImportScanForm(push_all=push_all_jira_issues, prefix='jiraform')
 
     form.initial['tags'] = [tag.name for tag in test.tags]
     if request.method == "POST":
         form = ReImportScanForm(request.POST, request.FILES)
-        if jira_helper.get_jira_project(test):
+        if jira_project:
             jform = JIRAImportScanForm(request.POST, push_all=push_all_jira_issues, prefix='jiraform')
 
-        if form.is_valid() and jform.is_valid():
+        if form.is_valid() and (jform is None or jform.is_valid()):
             scan_date = form.cleaned_data['scan_date']
 
             scan_date_time = datetime.combine(scan_date, timezone.now().time())
@@ -848,6 +848,11 @@ def re_import_scan_results(request, tid):
                         finding.is_Mitigated = True
                         finding.mitigated_by = request.user
                         finding.active = False
+
+                        # existing findings may be from before we had component_name/version fields
+                        finding.component_name = finding.component_name if finding.component_name else component_name
+                        finding.component_version = finding.component_version if finding.component_version else component_version
+
                         finding.save()
                         note = Notes(entry="Mitigated by %s re-upload." % scan_type,
                                     author=request.user)

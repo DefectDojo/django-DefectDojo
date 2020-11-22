@@ -414,7 +414,7 @@
                                         {% endif %}
                                     {% endif %}
                                     {% if user|is_authorized_for_staff:finding %}
-                                        {% if finding.risk_acceptance_set.exists %}
+                                        {% if finding.risk_acceptance_set.all %}
                                             <li role="presentation">
                                             <a href="{% url 'simple_risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
                                                 <i class="fa fa-exclamation-circle"></i> Unaccept Risk
@@ -523,7 +523,7 @@
                             {% if jira_project and product_tab or not product_tab %}
                                 <td>
                                     {% if finding.has_jira_issue %}
-                                        <a href="{{ finding | jira_url }}" target="_blank" 
+                                        <a href="{{ finding | jira_issue_url }}" target="_blank" 
                                             alt="Jira Bug - {{finding | jira_key}}" data-toggle="tooltip" data-placement="bottom" title="{{finding | jira_key}}"><i class="fa fa-bug fa-fw"></i></a>
                                     {% endif %}
                                     </td>

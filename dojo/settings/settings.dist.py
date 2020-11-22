@@ -144,11 +144,14 @@ env = environ.Env(
     DD_SLA_NOTIFY_POST_BREACH=(int, 7),
     # maximum number of result in search as search can be an expensive operation
     DD_SEARCH_MAX_RESULTS=(int, 100),
+    DD_SIMILAR_FINDINGS_MAX_RESULTS=(int, 25),
     DD_MAX_AUTOCOMPLETE_WORDS=(int, 20000),
     DD_JIRA_SSL_VERIFY=(bool, True),
     # if you want to keep logging to the console but in json format, change this here to 'json_console'
     DD_LOGGING_HANDLER=(str, 'console'),
-    DD_ALERT_REFRESH=(bool, True)
+    DD_ALERT_REFRESH=(bool, True),
+    DD_DISABLE_ALERT_COUNTER=(bool, False),
+    DD_TAG_PREFETCHING=(bool, True)
 )
 
 
@@ -220,6 +223,9 @@ USE_TZ = env('DD_USE_TZ')
 TEST_RUNNER = env('DD_TEST_RUNNER')
 
 ALERT_REFRESH = env('DD_ALERT_REFRESH')
+DISABLE_ALERT_COUNTER = env("DD_DISABLE_ALERT_COUNTER")
+
+TAG_PREFETCHING = env('DD_TAG_PREFETCHING')
 
 # ------------------------------------------------------------------------------
 # DATABASE
@@ -422,6 +428,7 @@ SLA_NOTIFY_PRE_BREACH = env('DD_SLA_NOTIFY_PRE_BREACH')  # in days, notify betwe
 SLA_NOTIFY_POST_BREACH = env('DD_SLA_NOTIFY_POST_BREACH')  # in days, skip notifications for findings that go past dayofbreach plus this number
 
 SEARCH_MAX_RESULTS = env('DD_SEARCH_MAX_RESULTS')
+SIMILAR_FINDINGS_MAX_RESULTS = env('DD_SIMILAR_FINDINGS_MAX_RESULTS')
 MAX_AUTOCOMPLETE_WORDS = env('DD_MAX_AUTOCOMPLETE_WORDS')
 
 LOGIN_EXEMPT_URLS = (

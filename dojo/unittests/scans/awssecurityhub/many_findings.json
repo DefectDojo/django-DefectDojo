@@ -138,7 +138,6 @@
                 "Software and Configuration Checks/Industry and Regulatory Standards/AWS-Foundational-Security-Best-Practices"
             ],
             "FirstObservedAt": "2020-06-08T14:33:35.245Z",
-            "LastObservedAt": "2020-06-14T21:02:34.695Z",
             "CreatedAt": "2020-06-08T14:33:35.245Z",
             "UpdatedAt": "2020-06-14T21:02:32.493Z",
             "Severity": {
