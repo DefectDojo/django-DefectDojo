@@ -17,6 +17,7 @@ from dojo.utils import calculate_grade
 from dojo.reports.widgets import report_widget_factory
 from dojo.utils import sla_compute_and_notify
 from dojo.notifications.helper import create_notification
+from dojo.utils import auto_delete_engagements
 
 
 logger = get_task_logger(__name__)
@@ -258,3 +259,14 @@ def async_sla_compute_and_notify_task(*args, **kwargs):
             sla_compute_and_notify(*args, **kwargs)
     except Exception as e:
         logger.error("An unexpected error was thrown calling the SLA code: {}".format(e))
+
+
+@app.task(name='dojo.tasks.auto_delete_engagements')
+def async_auto_delete_engagements(*args, **kwargs):
+    try:
+        system_settings = System_Settings.objects.get()
+        if system_settings.engagement_auto_delete_enable:
+            logger.info("Automatically deleting engagements and related as needed")
+            auto_delete_engagements(*args, **kwargs)
+    except Exception as e:
+        logger.error("An unexpected error was thrown calling the engagements auto deletion code: {}".format(e))

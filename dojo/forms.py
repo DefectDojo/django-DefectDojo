@@ -2018,10 +2018,11 @@ class ProductNotificationsForm(forms.ModelForm):
             self.initial['test_added'] = ''
             self.initial['scan_added'] = ''
             self.initial['sla_breach'] = ''
+            self.initial['auto_delete_engagement'] = ''
 
     class Meta:
         model = Notifications
-        fields = ['engagement_added', 'test_added', 'scan_added', 'sla_breach']
+        fields = ['engagement_added', 'test_added', 'scan_added', 'sla_breach', 'auto_delete_engagement']
 
 
 class AjaxChoiceField(forms.ChoiceField):

@@ -240,6 +240,27 @@ class System_Settings(models.Model):
         verbose_name="Engagement Auto-Close Days",
         help_text="Closes an engagement after the specified number of days past due date including last update.")
 
+    engagement_auto_delete_enable = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name="Enable Engagement Auto-Deletion",
+        help_text="Enable the auto-deletion of CI/CD engagements and findings within."
+    )
+
+    engagement_auto_delete_lock_tag = models.CharField(
+        max_length=settings.MAX_TAG_LENGTH,
+        blank=True,
+        verbose_name="Engagement Auto-Deletion lock tag",
+        help_text="One single string only. Prevents the auto-deletion of a CI/CD engagement even if matches all other criteria."
+    )
+
+    engagement_auto_delete_days = models.IntegerField(
+        default=365,
+        blank=False,
+        verbose_name="Engagement Auto-Deletion Days",
+        help_text="Deletes CI/CD engagements if its created date is earlier than today minus this amount of days. It will cascade to relationships."
+    )
+
     enable_finding_sla = models.BooleanField(
         default=True,
         blank=False,
@@ -2785,6 +2806,9 @@ class Notifications(models.Model):
     sla_breach = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True,
         verbose_name="SLA breach",
         help_text="Get notified of upcoming SLA breaches")
+    auto_delete_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True,
+        verbose_name="Automatic Engagement deletion",
+        help_text="Get notified when engagements are automatically deleted")
 
     class Meta:
         constraints = [
@@ -2830,6 +2854,7 @@ class Notifications(models.Model):
                 result.review_requested = merge_sets_safe(result.review_requested, notifications.review_requested)
                 result.other = merge_sets_safe(result.other, notifications.other)
                 result.sla_breach = merge_sets_safe(result.sla_breach, notifications.sla_breach)
+                result.auto_delete_engagement = merge_sets_safe(result.auto_delete_engagement, notifications.auto_delete_engagement)
 
         return result
 

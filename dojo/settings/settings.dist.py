@@ -696,6 +696,10 @@ CELERY_BEAT_SCHEDULE = {
     'compute-sla-age-and-notify': {
         'task': 'dojo.tasks.async_sla_compute_and_notify',
         'schedule': crontab(hour=7, minute=30),
+    },
+    'auto-delete-engagements': {
+        'task': 'dojo.tasks.auto_delete_engagements',
+        'schedule': crontab(hour=5, minute=30)
     }
 }
 
