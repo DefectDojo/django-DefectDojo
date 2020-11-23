@@ -74,8 +74,9 @@ def edit_object(request, pid, ttid):
             return HttpResponseRedirect(reverse('view_objects', args=(pid,)))
     else:
         # TODO TAGS
-        tform = ObjectSettingsForm(instance=object,
-                                    initial={'tags': get_tag_list(Tag.objects.get_for_object(object))})
+        # tform = ObjectSettingsForm(instance=object,
+        #                             initial={'tags': get_tag_list(Tag.objects.get_for_object(object))})
+        pass
 
     # tform.initial['tags'] = [tag.name for tag in object.tags.all()]
     product_tab = Product_Tab(pid, title="Edit Tracked Files", tab="settings")

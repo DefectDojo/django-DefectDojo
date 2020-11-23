@@ -1094,7 +1094,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     status.last_modified = timezone.now()
                     status.save()
 
-                Tag.objects.add_tag(old_finding, 'stale')
+                old_finding.tags.add('stale')
                 old_finding.save()
 
         title = 'Test created for ' + str(test.engagement.product) + ': ' + str(test.engagement.name) + ': ' + str(test)
