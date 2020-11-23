@@ -1326,10 +1326,6 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                         status.last_modified = timezone.now()
                         status.save()
 
-                    # existing findings may be from before we had component_name/version fields
-                    finding.component_name = finding.component_name if finding.component_name else component_name
-                    finding.component_version = finding.component_version if finding.component_version else component_version
-
                     finding.save(push_to_jira=push_to_jira)
                     note = Notes(entry="Mitigated by %s re-upload." % scan_type,
                                 author=self.context['request'].user)
