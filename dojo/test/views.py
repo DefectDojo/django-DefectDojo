@@ -849,10 +849,6 @@ def re_import_scan_results(request, tid):
                         finding.mitigated_by = request.user
                         finding.active = False
 
-                        # existing findings may be from before we had component_name/version fields
-                        finding.component_name = finding.component_name if finding.component_name else component_name
-                        finding.component_version = finding.component_version if finding.component_version else component_version
-
                         finding.save()
                         note = Notes(entry="Mitigated by %s re-upload." % scan_type,
                                     author=request.user)
