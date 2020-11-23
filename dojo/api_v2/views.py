@@ -1,6 +1,7 @@
 from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
 from rest_framework.permissions import DjangoModelPermissions
@@ -511,6 +512,101 @@ class FindingViewSet(mixins.ListModelMixin,
         data = report_generate(request, findings, options)
         report = serializers.ReportGenerateSerializer(data)
         return Response(report.data)
+
+    def _get_metadata(self, request, pk=None):
+        finding = get_object_or_404(Finding.objects, id=pk)
+
+        metadata = DojoMeta.objects.filter(finding=finding)
+        serializer = serializers.FindingMetaSerializer(instance=metadata, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def _edit_metadata(self, request, pk=None):
+        finding = get_object_or_404(Finding.objects, id=pk)
+        metadata_name = request.query_params.get("name", None)
+        if metadata_name is None:
+            return Response({"error": "Metadata name is required"},
+                status=status.HTTP_400_BAD_REQUEST)
+
+        metadata = get_object_or_404(DojoMeta.objects, name=metadata_name, finding=finding)
+        metadata.name = request.data.get("name", metadata.name)
+        metadata.value = request.data.get("value", metadata.value)
+
+        metadata.save()
+        return Response({"success": "Metadata updated"},
+            status=status.HTTP_200_OK)
+
+    def _add_metadata(self, request, pk=None):
+        finding = get_object_or_404(Finding.objects, id=pk)
+        metadata_data = serializers.FindingMetaSerializer(data=request.data)
+
+        if metadata_data.is_valid():
+            name = metadata_data.validated_data["name"]
+            value = metadata_data.validated_data["value"]
+
+            metadata = DojoMeta(finding=finding, name=name, value=value)
+            try:
+                metadata.validate_unique()
+                metadata.save()
+            except ValidationError as err:
+                return Response({"error": err},
+                status=status.HTTP_400_BAD_REQUEST)
+
+            return Response({"success": "Metadata updated"},
+                status=status.HTTP_200_OK)
+        else:
+            return Response(metadata_data.errors,
+                status=status.HTTP_400_BAD_REQUEST)
+
+    def _remove_metadata(self, request, pk=None):
+        finding = get_object_or_404(Finding.objects, id=pk)
+        name = request.query_params.get("name", None)
+        if name is None:
+            return Response({"error": "A metadata name must be provided"},
+                status=status.HTTP_400_BAD_REQUEST)
+
+        metadata = get_object_or_404(DojoMeta.objects, finding=finding, name=name)
+        metadata.delete()
+
+        return Response({"success": "Metadata deleted"},
+            status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        responses={status.HTTP_200_OK: serializers.FindingMetaSerializer(many=True)},
+        methods=['get']
+    )
+    @swagger_auto_schema(
+        responses={status.HTTP_200_OK: ""},
+        methods=['delete'],
+        manual_parameters=[openapi.Parameter(
+            name="name", in_=openapi.IN_QUERY, required=True, type=openapi.TYPE_STRING,
+            description="name of the metadata to retrieve. If name is empty, return all the \
+                            metadata associated with the finding")]
+    )
+    @swagger_auto_schema(
+        responses={status.HTTP_200_OK: ""},
+        methods=['put'],
+        manual_parameters=[openapi.Parameter(
+            name="name", in_=openapi.IN_QUERY, required=True, type=openapi.TYPE_STRING,
+            description="name of the metadata to edit")],
+        request_body=serializers.FindingMetaSerializer
+    )
+    @swagger_auto_schema(
+        responses={status.HTTP_200_OK: ""},
+        methods=['post'],
+        request_body=serializers.FindingMetaSerializer
+    )
+    @action(detail=True, methods=["post", "put", "delete", "get"])
+    def metadata(self, request, pk=None):
+        if request.method == "GET":
+            return self._get_metadata(request, pk)
+        elif request.method == "POST":
+            return self._add_metadata(request, pk)
+        elif request.method == "PUT":
+            return self._edit_metadata(request, pk)
+        elif request.method == "DELETE":
+            return self._remove_metadata(request, pk)
+
+        return Response({"error", "unsupported method"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class JiraInstanceViewSet(mixins.ListModelMixin,

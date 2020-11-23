@@ -266,7 +266,7 @@
                                        {% endif %}                                       
                                        <li class="divider"></li>
                                         {% if user|is_authorized_for_staff:finding %}
-                                          {% if finding.risk_acceptance_set.exists %}
+                                          {% if finding.risk_acceptance_set.all %}
                                               <li role="presentation">
                                               <a href="{% url 'simple_risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
                                                   <i class="fa fa-exclamation-circle"></i> Unaccept Risk
@@ -357,18 +357,18 @@
                                         <i class="fa fa-external-link"></i> {{ finding.cwe|default:"" }}
                                     </a>
                                   {% endif %}
-                                </td>                                
-                                {% if filter_name == 'Closed' %}
-                                <td class="nowrap">{{ finding.mitigated|date }}</td>
-                                {% else %}
+                                </td> 
                                 <td class="nowrap">
                                   {% if finding.cve %}
                                     <a target="_blank" href="{{ finding.cve|cve_url }}">
                                         <i class="fa fa-external-link"></i> {{ finding.cve|default:"" }}
                                     </a>
                                   {% endif %}
-                                </td>     
-                                <td class="nowrap">{{ finding.date }}</td>
+                                </td>                               
+                                {% if filter_name == 'Closed' %}
+                                  <td class="nowrap">{{ finding.mitigated|date }}</td>
+                                {% else %}
+                                  <td class="nowrap">{{ finding.date }}</td>
                                 {% endif %}
                                 <td>{{ finding.age }}</td>
                                 {% if system_settings.enable_finding_sla %}
@@ -392,7 +392,7 @@
                                   {% if jira_project and product_tab or not product_tab %}
                                     <td class="nowrap">
                                       {% if finding.has_jira_issue %}
-                                        <a href="{{ finding | jira_url }}" target="_blank" 
+                                        <a href="{{ finding | jira_issue_url }}" target="_blank" 
                                             alt="Jira Bug - {{finding | jira_key}}" data-toggle="tooltip" data-placement="bottom" title="{{finding | jira_key}}"><i class="fa fa-bug fa-fw"></i></a>
                                       {% endif %}
                                     </td>

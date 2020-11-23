@@ -19,7 +19,7 @@ Please use [these test scripts](./tests) to test your changes. These are the exa
 For changes that require additional settings, settings.dist.py is the file you want to change. This file is loaded by the default settings.py.
 
 ## Python3 version
-For compatibility reasons, the code in dev branch should be python3.5 compliant.
+For compatibility reasons, the code in dev branch should be python3.6 compliant.
 
 ## Logging
 Logging is configured in `settings.dist.py` and can be tuned using a `local_settings.py`, see [template for local_settings.py](dojo/settings/template-local_settings)

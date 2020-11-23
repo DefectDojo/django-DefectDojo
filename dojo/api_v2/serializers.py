@@ -1303,6 +1303,10 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     if item.unsaved_tags:
                         finding.tags = item.unsaved_tags
 
+                    # existing findings may be from before we had component_name/version fields
+                    finding.component_name = finding.component_name if finding.component_name else component_name
+                    finding.component_version = finding.component_version if finding.component_version else component_version
+
                     finding.save(push_to_jira=push_to_jira)
 
             to_mitigate = set(original_items) - set(reactivated_items) - set(unchanged_items)

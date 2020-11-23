@@ -2078,7 +2078,7 @@ class JIRAProjectForm(forms.ModelForm):
         self.product = kwargs.pop('product', None)
         super().__init__(*args, **kwargs)
 
-        logger.debug('self.target: %s, self.product: %s, self.instance: %s', self.target, self.product, self.instance)
+        # logger.debug('self.target: %s, self.product: %s, self.instance: %s', self.target, self.product, self.instance)
         if self.target == 'engagement':
             if not self.product and self.instance and self.instance.engagement and self.instance.engagement.product:
                 self.product = self.instance.engagement.product

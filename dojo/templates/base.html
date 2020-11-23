@@ -628,6 +628,7 @@
             </div>
         </div>
         <p id="alert_refresh" class="hidden">{{ 'ALERT_REFRESH'|setting_enabled }}</p>
+        <p id="disable_count" class="hidden">{{ 'DISABLE_ALERT_COUNTER'|setting_enabled }}</p>
     </footer>
 </div>
 
@@ -642,16 +643,25 @@
 <script src="{% static "dojo/js/cvss_calculator.js" %}"></script>
 <script type="application/javascript">
     $(document).ready(function() {
+        disable_count = document.getElementById('disable_count').innerHTML
+        refresh = document.getElementById('alert_refresh').innerHTML
+
         $('.has-popover').popover({'trigger':'hover'});
         {% if request.user.is_authenticated %}
-            $('.dropdown-toggle').click(function() { get_alerts(); });
-            refresh = document.getElementById('alert_refresh').innerHTML
-            if(refresh == 'True') {
-                setInterval(function() {
+            $('.dropdown-toggle').click(function() {
+                if (disable_count == "False" || refresh == 'True') { 
+                    get_alerts(); 
+                }
+            });
+            
+            if (disable_count == "False") {
+                if(refresh == 'True') {
+                    setInterval(function() {
+                        update_alertcount();
+                    }, 10000);
+                } else {
                     update_alertcount();
-                }, 10000);
-            } else {
-                update_alertcount();
+                }
             }
         {% endif %}
 

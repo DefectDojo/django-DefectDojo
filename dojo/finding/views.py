@@ -24,7 +24,7 @@ from django.utils.safestring import mark_safe
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 from itertools import chain
-from dojo.user.helper import user_must_be_authorized, check_auth_users_list
+from dojo.user.helper import user_must_be_authorized
 from dojo.utils import close_external_issue, reopen_external_issue
 
 from dojo.filters import OpenFindingFilter, \
@@ -193,12 +193,15 @@ def prefetch_for_findings(findings):
     prefetched_findings = findings
     if isinstance(findings, QuerySet):  # old code can arrive here with prods being a list because the query was already executed
         prefetched_findings = prefetched_findings.select_related('reporter')
-        prefetched_findings = prefetched_findings.prefetch_related('jira_issue')
+        prefetched_findings = prefetched_findings.prefetch_related('jira_issue__jira_project__jira_instance')
         prefetched_findings = prefetched_findings.prefetch_related('test__test_type')
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__jira_project__jira_instance')
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__jira_project_set__jira_instance')
         prefetched_findings = prefetched_findings.prefetch_related('found_by')
         prefetched_findings = prefetched_findings.prefetch_related('risk_acceptance_set')
+        prefetched_findings = prefetched_findings.prefetch_related('risk_acceptance_set__accepted_findings')
+        prefetched_findings = prefetched_findings.prefetch_related('original_finding')
+
         # we could try to prefetch only the latest note with SubQuery and OuterRef, but I'm getting that MySql doesn't support limits in subqueries.
         prefetched_findings = prefetched_findings.prefetch_related('notes')
         prefetched_findings = prefetched_findings.prefetch_related('tags')
@@ -215,19 +218,50 @@ def prefetch_for_findings(findings):
     return prefetched_findings
 
 
+def prefetch_for_similar_findings(findings):
+    prefetched_findings = findings
+    if isinstance(findings, QuerySet):  # old code can arrive here with prods being a list because the query was already executed
+        prefetched_findings = prefetched_findings.select_related('reporter')
+        prefetched_findings = prefetched_findings.prefetch_related('jira_issue__jira_project__jira_instance')
+        prefetched_findings = prefetched_findings.prefetch_related('test__test_type')
+        prefetched_findings = prefetched_findings.prefetch_related('test__engagement__jira_project__jira_instance')
+        prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__jira_project_set__jira_instance')
+        prefetched_findings = prefetched_findings.prefetch_related('found_by')
+        prefetched_findings = prefetched_findings.prefetch_related('risk_acceptance_set')
+        prefetched_findings = prefetched_findings.prefetch_related('risk_acceptance_set__accepted_findings')
+        prefetched_findings = prefetched_findings.prefetch_related('original_finding')
+
+        # we could try to prefetch only the latest note with SubQuery and OuterRef, but I'm getting that MySql doesn't support limits in subqueries.
+        prefetched_findings = prefetched_findings.prefetch_related('notes')
+        prefetched_findings = prefetched_findings.prefetch_related('tagged_items__tag')
+        # prefetched_findings = prefetched_findings.prefetch_related('endpoints')
+        # prefetched_findings = prefetched_findings.prefetch_related('endpoint_status')
+        # prefetched_findings = prefetched_findings.prefetch_related('endpoint_status__endpoint')
+        # prefetched_findings = prefetched_findings.annotate(active_endpoint_count=Count('endpoint_status__id', filter=Q(endpoint_status__mitigated=False)))
+        # prefetched_findings = prefetched_findings.annotate(mitigated_endpoint_count=Count('endpoint_status__id', filter=Q(endpoint_status__mitigated=True)))
+        # prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__authorized_users')
+        # prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__prod_type__authorized_users')
+    else:
+        logger.debug('unable to prefetch because query was already executed')
+
+    return prefetched_findings
+
+
 @user_must_be_authorized(Finding, 'view', 'fid')
 def view_finding(request, fid):
-    finding = get_object_or_404(Finding, id=fid)
-    findings = Finding.objects.filter(test=finding.test).order_by('numerical_severity')
+    finding_qs = prefetch_for_findings(Finding.objects.all())
+    finding = get_object_or_404(finding_qs, id=fid)
+    findings = Finding.objects.filter(test=finding.test).order_by('numerical_severity').values_list('id', flat=True)
+    logger.debug(findings)
     try:
-        prev_finding = findings[(list(findings).index(finding)) - 1]
+        prev_finding_id = findings[(list(findings).index(finding.id)) - 1]
     except AssertionError:
-        prev_finding = finding
+        prev_finding_id = finding.id
     try:
-        next_finding = findings[(list(findings).index(finding)) + 1]
+        next_finding_id = findings[(list(findings).index(finding.id)) + 1]
     except IndexError:
-        next_finding = finding
-    findings = [finding.id for finding in findings]
+        next_finding_id = finding.id
+
     cred_finding = Cred_Mapping.objects.filter(
         finding=finding.id).select_related('cred_id').order_by('cred_id')
     creds = Cred_Mapping.objects.filter(
@@ -243,10 +277,6 @@ def view_finding(request, fid):
         pass
 
     dojo_user = get_object_or_404(Dojo_User, id=user.id)
-    if user.is_staff or check_auth_users_list(user, finding):
-        pass  # user is authorized for this product
-    else:
-        raise PermissionDenied
 
     notes = finding.notes.all()
     note_type_activation = Note_Type.objects.filter(is_active=True).count()
@@ -311,7 +341,7 @@ def view_finding(request, fid):
     # similar_findings = get_similar_findings(request, finding)
     similar_findings_filter = SimilarFindingFilter(request.GET, queryset=Finding.objects.all(), user=request.user, finding=finding)
     logger.debug('similar query: %s', similar_findings_filter.qs.query)
-    similar_findings = prefetch_for_findings(similar_findings_filter.qs[:10])
+    similar_findings = prefetch_for_similar_findings(similar_findings_filter.qs[:settings.SIMILAR_FINDINGS_MAX_RESULTS])
     for similar_finding in similar_findings:
         similar_finding.related_actions = calculate_possible_related_actions_for_similar_finding(request, finding, similar_finding)
 
@@ -334,8 +364,8 @@ def view_finding(request, fid):
             'found_by': finding.found_by.all().distinct(),
             'findings_list': findings,
             'findings_list_lastElement': findings[lastPos],
-            'prev_finding': prev_finding,
-            'next_finding': next_finding,
+            'prev_finding_id': prev_finding_id,
+            'next_finding_id': next_finding_id,
             'duplicate_cluster': duplicate_cluster(request, finding),
             'similar_findings': similar_findings,
             'similar_findings_filter': similar_findings_filter
@@ -1860,6 +1890,9 @@ def finding_bulk_update_all(request, pid=None):
                 for finding in finds:
                     from dojo.tools import tool_issue_updater
                     tool_issue_updater.async_tool_issue_update(finding)
+                    if finding.is_Mitigated:
+                        finding.mitigated = timezone.now()
+                        finding.save()
 
                     # not sure yet if we want to support bulk unlink, so leave as commented out for now
                     # if form.cleaned_data['unlink_from_jira']:

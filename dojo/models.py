@@ -303,13 +303,7 @@ class Dojo_User(User):
         proxy = True
 
     def get_full_name(self):
-        """
-        Returns the first_name plus the last_name, with a space in between.
-        """
-        full_name = '%s %s (%s)' % (self.first_name,
-                                    self.last_name,
-                                    self.username)
-        return full_name.strip()
+        return Dojo_User.generate_full_name(self)
 
     def __unicode__(self):
         return self.get_full_name()
@@ -321,6 +315,16 @@ class Dojo_User(User):
     def wants_block_execution(user):
         # this return False if there is no user, i.e. in celery processes, unittests, etc.
         return hasattr(user, 'usercontactinfo') and user.usercontactinfo.block_execution
+
+    @staticmethod
+    def generate_full_name(user):
+        """
+        Returns the first_name plus the last_name, with a space in between.
+        """
+        full_name = '%s %s (%s)' % (user.first_name,
+                                    user.last_name,
+                                    user.username)
+        return full_name.strip()
 
 
 class UserContactInfo(models.Model):
@@ -2011,7 +2015,7 @@ class Finding(models.Model):
             status += ['Out Of Scope']
         if self.duplicate:
             status += ['Duplicate']
-        if self.risk_acceptance_set.exists():
+        if len(self.risk_acceptance_set.all()) > 0:  # this is normally prefetched so works better than count() or exists()
             status += ['Risk Accepted']
         if not len(status):
             status += ['Initial']
@@ -3495,9 +3499,14 @@ def enable_disable_auditlog(enable=True):
         auditlog.unregister(Cred_User)
 
 
+def enable_disable_tag_pathcing(enable=True):
+    if enable:
+        # Patch to support prefetching
+        PrefetchingTagDescriptor.patch()
+
+
 from dojo.utils import get_system_setting
 enable_disable_auditlog(enable=get_system_setting('enable_auditlog'))  # on startup choose safe to retrieve system settiung)
-
 
 # Register tagging for models
 # tag_register(Product)

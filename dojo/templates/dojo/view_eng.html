@@ -717,14 +717,14 @@
         {% if jissue and jira_project %}
         <tr>
             <td><strong>Jira</strong></td>
-            <td><a href="{{ eng | jira_url }}" target="_blank"><i class="fa fa-external-link"></i> {{ eng | jira_key }}
+            <td><a href="{{ eng | jira_issue_url }}" target="_blank"><i class="fa fa-external-link"></i> {{ eng | jira_key }}
             <small>(epic)</small>
             </a></td>
         </tr>
         {% elif jira_project %}
         <tr>
             <td><strong>JIRA</strong></td>
-            <td><a href="{{ eng | jira_url }}" target="_blank"><i class="fa fa-external-link"></i> {{ eng | jira_key }}
+            <td><a href="{{ eng | jira_project_url }}" target="_blank"><i class="fa fa-external-link"></i> {{ eng | jira_key }}
             {% if jira_project.engagement is not eng %}
             <small>(inherited)</small>
             {% else %}
