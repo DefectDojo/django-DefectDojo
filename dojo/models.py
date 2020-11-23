@@ -27,7 +27,7 @@ from django import forms
 from django.utils.translation import gettext as _
 from dateutil.relativedelta import relativedelta
 from tagulous.models import TagField
-
+import tagulous.admin
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -663,8 +663,8 @@ class Product(models.Model):
     regulations = models.ManyToManyField(Regulation, blank=True)
 
     # used for prefetching tags because django-tagging doesn't support that out of the box
-    tags_from_django_tagging = models.TextField(blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
-    tags = TagField()
+    tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
+    tags = TagField(help_text="Add tags that help describe this product. Choose from the list or add new tags. Press Enter key to add.")
 
     def __unicode__(self):
         return self.name
@@ -1052,8 +1052,8 @@ class Engagement(models.Model):
     deduplication_on_engagement = models.BooleanField(default=False, verbose_name="Deduplication within this engagement only", help_text="If enabled deduplication will only mark a finding in this engagement as duplicate of another finding if both findings are in this engagement. If disabled, deduplication is on the product level.")
 
     # used for prefetching tags because django-tagging doesn't support that out of the box
-    tags_from_django_tagging = models.TextField(blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
-    tags = TagField()
+    tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
+    tags = TagField(help_text="Add tags that help describe this engagement. Choose from the list or add new tags.  Press Enter key to add.")
 
     class Meta:
         ordering = ['-target_start']
@@ -1173,8 +1173,8 @@ class Endpoint(models.Model):
     endpoint_status = models.ManyToManyField(Endpoint_Status, blank=True, related_name='endpoint_endpoint_status')
 
     # used for prefetching tags because django-tagging doesn't support that out of the box
-    tags_from_django_tagging = models.TextField(blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
-    tags = TagField()
+    tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
+    tags = TagField(help_text="Add tags that help describe this endpoint. Choose from the list or add new tags. Press Enter key to add.")
 
     class Meta:
         ordering = ['product', 'protocol', 'host', 'path', 'query', 'fragment']
@@ -1356,8 +1356,8 @@ class Test(models.Model):
     created = models.DateTimeField(auto_now_add=True, null=True)
 
     # used for prefetching tags because django-tagging doesn't support that out of the box
-    tags_from_django_tagging = models.TextField(blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
-    tags = TagField()
+    tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
+    tags = TagField(help_text="Add tags that help describe this test. Choose from the list or add new tags.  Press Enter key to add.")
 
     version = models.CharField(max_length=100, null=True, blank=True)
 
@@ -1751,8 +1751,8 @@ class Finding(models.Model):
                                         help_text="Number of occurences in the source tool when several vulnerabilites were found and aggregated by the scanner.")
 
     # used for prefetching tags because django-tagging doesn't support that out of the box
-    tags_from_django_tagging = models.TextField(blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
-    tags = TagField()
+    tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
+    tags = TagField(help_text="Add tags that help describe this finding. Choose from the list or add new tags.  Press Enter key to add.")
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
@@ -2329,8 +2329,8 @@ class Finding_Template(models.Model):
     template_match_title = models.BooleanField(default=False, verbose_name='Match Template by Title and CWE', help_text="Matches by title text (contains search) and CWE.")
 
     # used for prefetching tags because django-tagging doesn't support that out of the box
-    tags_from_django_tagging = models.TextField(blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
-    tags = TagField()
+    tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
+    tags = TagField(help_text="Add tags that help describe this finding template. Choose from the list or add new tags. Press Enter key to add.")
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
@@ -2970,7 +2970,7 @@ class App_Analysis(models.Model):
     created = models.DateTimeField(null=False, editable=False, default=now)
 
     # used for prefetching tags because django-tagging doesn't support that out of the box
-    tags_from_django_tagging = models.TextField(blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
+    tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
     tags = TagField()
 
     def __unicode__(self):
@@ -3004,7 +3004,7 @@ class Objects(models.Model):
     created = models.DateTimeField(null=False, editable=False, default=now)
 
     # used for prefetching tags because django-tagging doesn't support that out of the box
-    tags_from_django_tagging = models.TextField(blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
+    tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
     # tags = TagField()
 
     def __unicode__(self):
@@ -3508,6 +3508,16 @@ enable_disable_auditlog(enable=get_system_setting('enable_auditlog'))  # on star
 # tag_register(Finding_Template)
 # tag_register(App_Analysis)
 # tag_register(Objects)
+
+tagulous.admin.register(Product.tags)
+tagulous.admin.register(Test.tags)
+tagulous.admin.register(Finding.tags)
+tagulous.admin.register(Engagement.tags)
+tagulous.admin.register(Endpoint.tags)
+tagulous.admin.register(Finding_Template.tags)
+tagulous.admin.register(App_Analysis.tags)
+# TODO TAGS
+# tagulous.admin.register(Objects.tags)
 
 # Benchmarks
 admin.site.register(Benchmark_Type)

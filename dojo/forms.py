@@ -32,6 +32,7 @@ from dojo.tools import requires_file, SCAN_SONARQUBE_API
 from dojo.user.helper import user_is_authorized
 from django.urls import reverse
 import dojo.jira_link.helper as jira_helper
+from tagulous.forms import TagField
 import logging
 
 logger = logging.getLogger(__name__)
@@ -197,7 +198,8 @@ class ProductForm(forms.ModelForm):
     #                        required=False,
     #                        help_text="Add tags that help describe this product.  "
     #                                  "Choose from the list or add new tags.  Press TAB key to add.")
-    # tags = TagField()
+    # tags = TagField(help_text="Add tags that help describe this product. Choose from the list or add new tags. Press Enter key to add.")
+
     prod_type = forms.ModelChoiceField(label='Product Type',
                                        queryset=Product_Type.objects.all().order_by('name'),
                                        required=True)
@@ -296,10 +298,10 @@ class Product_TypeProductForm(forms.ModelForm):
     name = forms.CharField(max_length=50, required=True)
     description = forms.CharField(widget=forms.Textarea(attrs={}),
                                   required=True)
-    tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
-                           required=False,
-                           help_text="Add tags that help describe this product.  "
-                                     "Choose from the list or add new tags.  Press TAB key to add.")
+    # tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
+    #                        required=False,
+    #                        help_text="Add tags that help describe this product.  "
+    #                                  "Choose from the list or add new tags.  Press TAB key to add.")
     authorized_users = forms.ModelMultipleChoiceField(
         queryset=None,
         required=False, label="Authorized Users")
@@ -438,10 +440,8 @@ class ImportScanForm(forms.Form):
     scan_type = forms.ChoiceField(required=True, choices=SORTED_SCAN_TYPE_CHOICES)
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
                                                widget=MultipleSelectWithPopPlusMinus(attrs={'size': '5'}))
-    tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
-                           required=False,
-                           help_text="Add tags that help describe this scan.  "
-                                     "Choose from the list or add new tags.  Press TAB key to add.")
+    tags = TagField(required=False, help_text="Add tags that help describe this scan.  "
+                    "Choose from the list or add new tags.  Press TAB key to add.")
     file = forms.FileField(widget=forms.widgets.FileInput(
         attrs={"accept": ".xml, .csv, .nessus, .json, .html, .js, .zip, .xlsx"}),
         label="Choose report file",
@@ -488,10 +488,8 @@ class ReImportScanForm(forms.Form):
     verified = forms.BooleanField(help_text="Select if these findings have been verified.", required=False)
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
                                                widget=MultipleSelectWithPopPlusMinus(attrs={'size': '5'}))
-    tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
-                           required=False,
-                           help_text="Add tags that help describe this scan.  "
-                                     "Choose from the list or add new tags.  Press TAB key to add.")
+    tags = TagField(required=False, help_text="Add tags that help describe this scan.  "
+                    "Choose from the list or add new tags.  Press TAB key to add.")
     file = forms.FileField(widget=forms.widgets.FileInput(
         attrs={"accept": ".xml, .csv, .nessus, .json, .html, .js, .zip, .xlsx"}),
         label="Choose report file",
@@ -715,10 +713,6 @@ class EngForm(forms.ModelForm):
     product = forms.ModelChoiceField(label='Product',
                                        queryset=Product.objects.all().order_by('name'),
                                        required=True)
-    tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
-                           required=False,
-                           help_text="Add tags that help describe this engagement.  "
-                                     "Choose from the list or add new tags.  Press TAB key to add.")
     target_start = forms.DateField(widget=forms.TextInput(
         attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     target_end = forms.DateField(widget=forms.TextInput(
@@ -812,10 +806,7 @@ class TestForm(forms.ModelForm):
         attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     target_end = forms.DateTimeField(widget=forms.TextInput(
         attrs={'class': 'datepicker', 'autocomplete': 'off'}))
-    tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
-                           required=False,
-                           help_text="Add tags that help describe this test.  "
-                                     "Choose from the list or add new tags.  Press TAB key to add.")
+
     lead = forms.ModelChoiceField(
         queryset=None,
         required=False, label="Testing Lead")
@@ -1011,10 +1002,7 @@ class FindingForm(forms.ModelForm):
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
                                                widget=MultipleSelectWithPopPlusMinus(attrs={'size': '11'}))
     references = forms.CharField(widget=forms.Textarea, required=False)
-    tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
-                           required=False,
-                           help_text="Add tags that help describe this finding.  "
-                                     "Choose from the list or add new tags.  Press TAB key to add.")
+
     is_template = forms.BooleanField(label="Create Template?", required=False,
                                      help_text="A new finding template will be created from this finding.")
 
@@ -1108,10 +1096,8 @@ class ApplyFindingTemplateForm(forms.Form):
     mitigation = forms.CharField(widget=forms.Textarea)
     impact = forms.CharField(widget=forms.Textarea)
     references = forms.CharField(widget=forms.Textarea, required=False)
-    tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
-                           required=False,
-                           help_text="Add tags that help describe this finding template.  "
-                                     "Choose from the list or add new tags.  Press TAB key to add.")
+
+    tags = TagField(required=False, help_text="Add tags that help describe this finding template. Choose from the list or add new tags.  Press Enter key to add.")
 
     def __init__(self, template=None, *args, **kwargs):
         # django-tagging apparently can not filter for multiple models at once
@@ -1141,10 +1127,7 @@ class ApplyFindingTemplateForm(forms.Form):
 class FindingTemplateForm(forms.ModelForm):
     apply_to_findings = forms.BooleanField(required=False, help_text="Apply template to all findings that match this CWE. (Update will overwrite mitigation, impact and references for any active, verified findings.)")
     title = forms.CharField(max_length=1000, required=True)
-    tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
-                           required=False,
-                           help_text="Add tags that help describe this finding template.  "
-                                     "Choose from the list or add new tags.  Press TAB key to add.")
+
     cwe = forms.IntegerField(label="CWE", required=False)
     cve = forms.CharField(label="CVE", max_length=28, required=False)
     cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'btn btn-secondary dropdown-toggle', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
@@ -1188,8 +1171,7 @@ class FindingBulkUpdateForm(forms.ModelForm):
     push_to_jira = forms.BooleanField(required=False)
     # unlink_from_jira = forms.BooleanField(required=False)
     push_to_github = forms.BooleanField(required=False)
-    tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
-                           required=False)
+    tags = TagField(required=False)
 
     def __init__(self, *args, **kwargs):
         super(FindingBulkUpdateForm, self).__init__(*args, **kwargs)
@@ -1212,10 +1194,6 @@ class FindingBulkUpdateForm(forms.ModelForm):
 
 
 class EditEndpointForm(forms.ModelForm):
-    tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
-                           required=False,
-                           help_text="Add tags that help describe this endpoint.  "
-                                     "Choose from the list or add new tags.  Press TAB key to add.")
 
     class Meta:
         model = Endpoint
@@ -1931,6 +1909,7 @@ class ToolProductSettingsForm(forms.ModelForm):
 
 class ObjectSettingsForm(forms.ModelForm):
 
+    # TODO TAGS
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
                            required=False,
                            help_text="Add tags that help describe this object.  "
