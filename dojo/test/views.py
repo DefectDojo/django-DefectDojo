@@ -45,7 +45,9 @@ parse_logger = logging.getLogger('dojo')
 def view_test(request, tid):
     test = get_object_or_404(Test, pk=tid)
     prod = test.engagement.product
-    tags = Tag.objects.usage_for_model(Finding)
+    # TODO TAGS
+    # tags = Tag.objects.usage_for_model(Finding)
+    tags = []
     notes = test.notes.all()
     note_type_activation = Note_Type.objects.filter(is_active=True).count()
     if note_type_activation:
@@ -200,7 +202,7 @@ def edit_test(request, tid):
 
     form.initial['target_start'] = test.target_start.date()
     form.initial['target_end'] = test.target_end.date()
-    form.initial['tags'] = [tag.name for tag in test.tags.all()]
+    # form.initial['tags'] = [tag.name for tag in test.tags.all()]
     form.initial['description'] = test.description
 
     product_tab = Product_Tab(test.engagement.product.id, title="Edit Test", tab="engagements")
@@ -585,6 +587,7 @@ def add_temp_finding(request, tid, fid):
                                     'impact': finding.impact,
                                     'references': finding.references,
                                     'numerical_severity': finding.numerical_severity,
+                                    # TODO TAGS
                                     'tags': [tag.name for tag in finding.tags.all()]})
 
     product_tab = Product_Tab(test.engagement.product.id, title="Add Finding", tab="engagements")
@@ -638,7 +641,7 @@ def re_import_scan_results(request, tid):
     if get_system_setting('enable_jira') and jira_project:
         jform = JIRAImportScanForm(push_all=jira_helper.is_push_all_issues(engagement), prefix='jiraform')
 
-    form.initial['tags'] = [tag.name for tag in test.tags.all()]
+    # form.initial['tags'] = [tag.name for tag in test.tags.all()]
     if request.method == "POST":
         form = ReImportScanForm(request.POST, request.FILES)
         if jira_helper.get_jira_project(test):

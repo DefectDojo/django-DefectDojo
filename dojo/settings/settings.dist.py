@@ -595,7 +595,7 @@ INSTALLED_APPS = (
     'dojo',
     'tastypie_swagger',
     'watson',
-    # 'tagging',
+    'tagging',  # not used, but still needed for migration 0065_django_tagulous.py (v1.10.0)
     'custom_field',
     'imagekit',
     'multiselectfield',
@@ -603,8 +603,6 @@ INSTALLED_APPS = (
     'rest_framework.authtoken',
     'rest_framework_swagger',
     'dbbackup',
-    # 'taggit_serializer',
-    # 'axes'
     'django_celery_results',
     'social_django',
     'drf_yasg2',

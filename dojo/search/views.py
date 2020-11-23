@@ -129,7 +129,7 @@ def simple_search(request):
 
             tags = clean_query
             # search tags first to avoid errors due to slicing too early
-            if search_tags:
+            if search_tags and False:
                 tagged_findings = TaggedItem.objects.get_by_model(findings, tags)[:max_results]
                 tagged_finding_templates = TaggedItem.objects.get_by_model(Finding_Template, tags)[:max_results]
                 tagged_tests = TaggedItem.objects.get_by_model(tests, tags)[:max_results]

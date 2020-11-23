@@ -115,7 +115,9 @@ django_filter=open_findings_filter):
     jira_project = None
     github_config = None
 
-    tags = Tag.objects.usage_for_model(Finding)
+    # tags = Tag.objects.usage_for_model(Finding)
+    # TODO TAGS
+    tags = ['one', 'two']
 
     findings = Finding.objects.all()
     if view == "All":
@@ -602,7 +604,7 @@ def edit_finding(request, fid):
     else:
         req_resp = None
     form = FindingForm(instance=finding, template=False, req_resp=req_resp)
-    form.initial['tags'] = [tag.name for tag in finding.tags.all()]
+    # form.initial['tags'] = [tag.name for tag in finding.tags.all()]
     form_error = False
     jform = None
     jira_link_exists = False
@@ -804,7 +806,7 @@ def edit_finding(request, fid):
         form.fields['endpoints'].queryset = form.cleaned_data['endpoints']
     else:
         form.fields['endpoints'].queryset = finding.endpoints.all()
-    form.initial['tags'] = [tag.name for tag in finding.tags.all()]
+    # form.initial['tags'] = [tag.name for tag in finding.tags.all()]
 
     product_tab = Product_Tab(finding.test.engagement.product.id, title="Edit Finding", tab="findings")
 
@@ -988,9 +990,8 @@ def mktemplate(request, fid):
             references=finding.references,
             numerical_severity=finding.numerical_severity)
         template.save()
-        tags = [tag.name for tag in list(finding.tags.all())]
-        t = ", ".join('"{0}"'.format(w) for w in tags)
-        template.tags = t
+        template.tags = finding.tags.all()
+
         messages.add_message(
             request,
             messages.SUCCESS,
@@ -1045,6 +1046,7 @@ def choose_finding_template_options(request, tid, fid):
     finding = get_object_or_404(Finding, id=fid)
     template = get_object_or_404(Finding_Template, id=tid)
     data = finding.__dict__
+    # TODO TAGS
     data['tags'] = [tag.name for tag in template.tags.all()]
     form = ApplyFindingTemplateForm(data=data, template=template)
     product_tab = Product_Tab(finding.test.engagement.product.id, title="Finding Template Options", tab="findings")
@@ -1053,6 +1055,7 @@ def choose_finding_template_options(request, tid, fid):
         'product_tab': product_tab,
         'template': template,
         'form': form,
+        # TODO TAGS
         'finding_tags': [tag.name for tag in finding.tags.all()],
     })
 
@@ -1443,7 +1446,7 @@ def edit_template(request, tid):
                 extra_tags='alert-danger')
 
     count = apply_cwe_mitigation(True, template, False)
-    form.initial['tags'] = [tag.name for tag in template.tags.all()]
+    # form.initial['tags'] = [tag.name for tag in template.tags.all()]
     add_breadcrumb(title="Edit Template", top_level=False, request=request)
     return render(request, 'dojo/add_template.html', {
         'form': form,
@@ -1662,7 +1665,9 @@ def merge_finding_product(request, pid):
                         # if checked merge the tags
                         if form.cleaned_data['tag_finding']:
                             for tag in finding.tags.all():
-                                Tag.objects.add_tag(finding_to_merge_into, tag)
+                                # TODO TAGS
+                                pass
+                                # Tag.objects.add_tag(finding_to_merge_into, tag)
 
                         # if checked re-assign the burp requests to the merged finding
                         if form.cleaned_data['dynamic_raw']:
@@ -1677,7 +1682,9 @@ def merge_finding_product(request, pid):
 
                             # If the merged finding should be tagged as merged-into
                             if form.cleaned_data['mark_tag_finding']:
-                                Tag.objects.add_tag(finding, "merged-inactive")
+                                # TODO TAGS
+                                pass
+                                # Tag.objects.add_tag(finding, "merged-inactive")
 
                     # Update the finding to merge into
                     if finding_descriptions != '':
@@ -1710,7 +1717,9 @@ def merge_finding_product(request, pid):
 
                     # If the finding merged into should be tagged as merged
                     if form.cleaned_data['mark_tag_finding']:
-                        Tag.objects.add_tag(finding_to_merge_into, "merged")
+                        # TODO TAGS
+                        pass
+                        # Tag.objects.add_tag(finding_to_merge_into, "merged")
 
                     finding_action = ""
                     # Take action on the findings

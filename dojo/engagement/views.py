@@ -237,7 +237,7 @@ def edit_engagement(request, eid):
                 logger.debug('showing jira-epic-form')
                 jira_epic_form = JIRAEngagementForm(prefix='jira-epic-form', instance=engagement)
 
-    form.initial['tags'] = [tag.name for tag in engagement.tags.all()]
+    # form.initial['tags'] = [tag.name for tag in engagement.tags.all()]
 
     title = ' CI/CD' if is_ci_cd else ''
     product_tab = Product_Tab(engagement.product.id, title="Edit" + title + " Engagement", tab="engagements")
