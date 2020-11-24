@@ -57,7 +57,7 @@ def webhook(request, secret=None):
         if parsed.get('webhookEvent') == 'jira:issue_updated':
             jid = parsed['issue']['id']
             jissue = get_object_or_404(JIRA_Issue, jira_id=jid)
-            if jissue.finding is not None:
+            if jissue.finding:
                 finding = jissue.finding
                 jira_instance = jira_helper.get_jira_instance(finding)
                 resolved = True
@@ -115,34 +115,44 @@ def webhook(request, secret=None):
                     finding.jira_issue.jira_change = timezone.now()
                     finding.jira_issue.save()
                     finding.save()
-            """
-            if jissue.engagement is not None:
-                eng = jissue.engagement
-                if parsed['issue']['fields']['resolution'] != None:
-                    eng.active = False
-                    eng.status = 'Completed'
-                    eng.save()
-           """
+            elif jissue.engagement:
+                # if parsed['issue']['fields']['resolution'] != None:
+                #     eng.active = False
+                #     eng.status = 'Completed'
+                #     eng.save()
+                return HttpResponse('Update for engagement ignored')
+            else:
+                raise Http404('No finding or engagement found for this JIRA issue')
+
         if parsed.get('webhookEvent') == 'comment_created':
             comment_text = parsed['comment']['body']
             commentor = parsed['comment']['updateAuthor']['displayName']
-            jid = parsed['comment']['self'].split('/')[7]
-            jissue = JIRA_Issue.objects.get(jira_id=jid)
-            jira_usernames = JIRA_Instance.objects.values_list('username', flat=True)
-            for jira_userid in jira_usernames:
-                if jira_userid.lower() in commentor.lower():
-                    return HttpResponse('')
-                    break
-            finding = jissue.finding
-            new_note = Notes()
-            new_note.entry = '(%s): %s' % (commentor, comment_text)
-            new_note.author, created = User.objects.get_or_create(username='JIRA')
-            new_note.save()
-            finding.notes.add(new_note)
-            finding.jira_issue.jira_change = timezone.now()
-            finding.jira_issue.save()
-            finding.save()
-            create_notification(event='other', title='JIRA incoming comment - %s' % (jissue.finding), url=reverse("view_finding", args=(jissue.finding.id, )), icon='check')
+            # example: body['comment']['self'] = "http://www.testjira.com/jira_under_a_path/rest/api/2/issue/666/comment/456843"
+            jid = parsed['comment']['self'].split('/')[-3]
+            jissue = get_object_or_404(JIRA_Issue, jira_id=jid)
+            logger.debug('jissue: %s', vars(jissue))
+            if jissue.finding:
+                logger.debug('finding: %s', vars(jissue.finding))
+                jira_usernames = JIRA_Instance.objects.values_list('username', flat=True)
+                for jira_userid in jira_usernames:
+                    if jira_userid.lower() in commentor.lower():
+                        logger.debug('skipping incoming JIRA comment as the user id of the comment mathces the JIRA user in Defect Dojo')
+                        return HttpResponse('')
+                        break
+                finding = jissue.finding
+                new_note = Notes()
+                new_note.entry = '(%s): %s' % (commentor, comment_text)
+                new_note.author, created = User.objects.get_or_create(username='JIRA')
+                new_note.save()
+                finding.notes.add(new_note)
+                finding.jira_issue.jira_change = timezone.now()
+                finding.jira_issue.save()
+                finding.save()
+                create_notification(event='other', title='JIRA incoming comment - %s' % (jissue.finding), url=reverse("view_finding", args=(jissue.finding.id, )), icon='check')
+            elif jissue.engagement:
+                return HttpResponse('Comment for engagement ignored')
+            else:
+                raise Http404('No finding or engagement found for this JIRA issue')
 
         if parsed.get('webhookEvent') not in ['comment_created', 'jira:issue_updated']:
             logger.info('Unrecognized JIRA webhook event received: {}'.format(parsed.get('webhookEvent')))
