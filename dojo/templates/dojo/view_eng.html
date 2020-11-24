@@ -714,12 +714,25 @@
               {% endif %}
             </td>
           </tr>
-          {% if jissue and jconf %}
-          <tr>
+        {% if jissue and jira_project %}
+        <tr>
             <td><strong>Jira</strong></td>
-            <td><a href="{{ jconf.url }}/browse/{{ jissue.jira_key }}" target="_blank"><i class="fa fa-external-link"></i> Jira Epic ({{ jissue.jira_key }})</a></td>
-          </tr>
-          {% endif %}
+            <td><a href="{{ eng | jira_issue_url }}" target="_blank"><i class="fa fa-external-link"></i> {{ eng | jira_key }}
+            <small>(epic)</small>
+            </a></td>
+        </tr>
+        {% elif jira_project %}
+        <tr>
+            <td><strong>JIRA</strong></td>
+            <td><a href="{{ eng | jira_project_url }}" target="_blank"><i class="fa fa-external-link"></i> {{ eng | jira_key }}
+            {% if jira_project.engagement is not eng %}
+            <small>(inherited)</small>
+            {% else %}
+            <small>(project)</small>              
+            {% endif %}
+            </a></td>
+        </tr>
+        {% endif %}
           <tr>
             <td><strong>Updated</strong></td>
             <td><a target="_blank" data-toggle="tooltip" data-placement="bottom" title="{{ eng.updated|default_if_none:"" }}">

@@ -129,7 +129,7 @@
                                 {% endif %}
                             {% endif %}                                  
                             {% if user|is_authorized_for_change:finding %}
-                                {% if finding.risk_acceptance_set.exists %}
+                                {% if finding.risk_acceptance_set.all %}
                                     <li role="presentation">
                                     <a href="{% url 'simple_risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
                                         <i class="fa fa-exclamation-circle"></i> Unaccept Risk
@@ -337,7 +337,7 @@
                     {% endif %}
                         <td>
                         {% if finding.cwe > 0 %}
-                            <a target="_blank" href={{ finding.cwe|cwe_url }}">
+                            <a target="_blank" href="{{ finding.cwe|cwe_url }}">
                                 <i class="fa fa-external-link"></i> {{ finding.cwe }}
                             </a>
                         {% endif %}
@@ -375,7 +375,7 @@
                 <tr>
                     <td>
                         <span>
-                           {{ finding.sast_source_file_path }}
+                            {{ finding.get_sast_source_file_path_with_link|safe }}
                         </span>
                     </td>
                     <td>
@@ -401,7 +401,7 @@
                 <tr>
                     <td>
                         <span>
-                           {{ finding.file_path }}
+                            {{ finding.get_file_path_with_link|safe }}
                         </span>
                     </td>
                     <td>
@@ -419,7 +419,7 @@
         </div>
         {% endif %}
     {% endif %}
-    {% if finding.static_finding or finding.line > 0 or finding.jira_conf_new or finding.jira_issue or finding.github_issue or finding.github_conf_new %}
+    {% if finding.static_finding or finding.line > 0 or finding.has_jira_configured or finding.has_jira_issue or finding.github_issue or finding.github_conf_new %}
     <div class="panel panel-default">
         <table id="error_notes" class="table-striped table table-condensed table-hover centered">
             <tr>
@@ -438,7 +438,7 @@
                 {% if finding.component_version %}
                 <th>Component Version</th>
                 {% endif %}
-                {% if finding.jira_conf_new or finding.jira_issue %}
+                {% if finding.has_jira_configured or finding.jira_issue %}
                 <th>JIRA</th>
                 {% endif %}                    
                 {% if finding.github_conf_new or finding.github_issue %}
@@ -448,7 +448,8 @@
             <tr>
                 {% if finding.file_path %}
                 <td>
-                    <span>{{ finding.file_path }} 
+                    <span>
+                        {{ finding.get_file_path_with_link|safe }}
                         <i class="fa fa-copy fa-align-right copytoclipboard" title="copy to clipboard"
                         data-clipboard-text="{{finding.file_path}}"></i>
                     </span>
@@ -482,11 +483,11 @@
                     </span>
                 </td>
                 {% endif %}
-                {% if finding.jira_conf_new or finding.jira_issue %}
+                {% if finding.has_jira_configured or finding.jira_issue %}
                     <td id="jira">
                     {% if finding.jira_issue %}
-                        <a href="{{ finding.jira_conf_new.url }}/browse/{{ finding.jira_issue.jira_key }}"
-                        target="_blank" title="{{ finding.jira_conf_new.url }}/browse/{{ finding.jira_issue.jira_key }}">{{ finding.jira_issue.jira_key }}</a>
+                        <a href="{{ finding | jira_issue_url }}"
+                        target="_blank" title="{{ finding | jira_issue_url }}">{{ finding | jira_key }}</a>
                         <i id="unlink_jira" class="fa fa-trash" title="Unlink JIRA issue from this finding."></i>
                         <i id="push_to_jira" class="fa fa-share-square" title="Push finding data to linked JIRA issue."></i>
                     {% else %}
@@ -784,7 +785,7 @@
                         class="glyphicon glyphicon-chevron-{% if finding.references %}up{%else%}down{%endif%}"></i></a></span></h4>
             </div>
             <div id="vuln_refs" class="panel-body collapse {% if finding.references %}in{%endif%}">
-                <pre>{{ finding.references|markdown_render|default_if_none:"" }}</pre>
+                <pre>{{ finding.get_references_with_links|markdown_render|default_if_none:"" }}</pre>
             </div>
         </div>
 
@@ -919,11 +920,11 @@
         var lastID = {{findings_list_lastElement}};
         if(currentID != firstID)
         {
-            $('.PrevAndNext_Buttons').append('<a href="{% url 'view_finding' prev_finding.id %}" class="btn btn-primary">Previous Finding</a> ');
+            $('.PrevAndNext_Buttons').append('<a href="{% url 'view_finding' prev_finding_id %}" class="btn btn-primary">Previous Finding</a> ');
         }
         if(currentID != lastID)
         {
-            $('.PrevAndNext_Buttons').append('<a href="{% url 'view_finding' next_finding.id %}" class="btn btn-primary">Next Finding</a>');
+            $('.PrevAndNext_Buttons').append('<a href="{% url 'view_finding' next_finding_id %}" class="btn btn-primary">Next Finding</a>');
         }
         //Ensures dropdown has proper zindex
         $('.table-responsive').on('show.bs.dropdown', function () {
@@ -963,11 +964,11 @@
         });
         
         $(document).on('keypress', null, 'p', function () {
-            window.location.assign('{% url 'view_finding' prev_finding.id %}');
+            window.location.assign('{% url 'view_finding' prev_finding_id %}');
         });
         
         $(document).on('keypress', null, 'n', function () {
-            window.location.assign('{% url 'view_finding' next_finding.id %}');
+            window.location.assign('{% url 'view_finding' next_finding_id %}');
         });
 
         $('a.delete-finding').on('click', function (e) {

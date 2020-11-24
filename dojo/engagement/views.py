@@ -23,21 +23,23 @@ from dojo.filters import EngagementFilter
 from dojo.forms import CheckForm, \
     UploadThreatForm, UploadRiskForm, NoteForm, \
     EngForm, TestForm, ReplaceRiskAcceptanceForm, AddFindingsRiskAcceptanceForm, DeleteEngagementForm, ImportScanForm, \
-    CredMappingForm, JIRAEngagementForm, JIRAImportScanForm, TypedNoteForm
+    CredMappingForm, JIRAEngagementForm, JIRAImportScanForm, TypedNoteForm, JIRAProjectForm
 
 from dojo.models import Finding, Product, Engagement, Test, \
     Check_List, Test_Type, Notes, \
     Risk_Acceptance, Development_Environment, BurpRawRequestResponse, Endpoint, \
-    JIRA_PKey, JIRA_Issue, Cred_Mapping, Dojo_User, System_Settings, Note_Type, Endpoint_Status
+    Cred_Mapping, Dojo_User, System_Settings, Note_Type, Endpoint_Status
 from dojo.tools import handles_active_verified_statuses
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
-    FileIterWrapper, get_cal_event, message, get_system_setting, Product_Tab, is_scan_file_too_large, update_epic, add_epic
+    FileIterWrapper, get_cal_event, message, Product_Tab, is_scan_file_too_large, \
+    get_system_setting
 from dojo.notifications.helper import create_notification
 from dojo.finding.views import find_available_notetypes
 from functools import reduce
 from django.db.models.query import QuerySet
 from dojo.user.helper import user_must_be_authorized, user_is_authorized, check_auth_users_list
+import dojo.jira_link.helper as jira_helper
 
 
 logger = logging.getLogger(__name__)
@@ -130,116 +132,122 @@ def prefetch_for_products_with_engagments(products_with_engagements):
     if isinstance(products_with_engagements, QuerySet):  # old code can arrive here with prods being a list because the query was already executed
         return products_with_engagements.prefetch_related('tagged_items__tag',
             'engagement_set__tagged_items__tag',
-            'engagement_set__test_set__tagged_items__tag')
+            'engagement_set__test_set__tagged_items__tag',
+            'engagement_set__jira_project__jira_instance',
+            'jira_project_set__jira_instance')
 
     logger.debug('unable to prefetch because query was already executed')
     return products_with_engagements
 
 
-@user_passes_test(lambda u: u.is_staff)
-def new_engagement(request):
-    if request.method == 'POST':
-        form = EngForm(request.POST, user=request.user)
-        if form.is_valid():
-            new_eng = form.save()
-            new_eng.lead = request.user
-            new_eng.threat_model = False
-            new_eng.api_test = False
-            new_eng.pen_test = False
-            new_eng.check_list = False
-            new_eng.product_id = form.cleaned_data.get('product').id
-            new_eng.save()
-            tags = request.POST.getlist('tags')
-            t = ", ".join('"{0}"'.format(w) for w in tags)
-            new_eng.tags = t
-            messages.add_message(
-                request,
-                messages.SUCCESS,
-                'Engagement added successfully.',
-                extra_tags='alert-success')
-            if "_Add Tests" in request.POST:
-                return HttpResponseRedirect(
-                    reverse('add_tests', args=(new_eng.id, )))
-            else:
-                return HttpResponseRedirect(
-                    reverse('view_engagement', args=(new_eng.id, )))
-    else:
-        form = EngForm(initial={'date': timezone.now().date()}, user=request.user)
-    add_breadcrumb(title="New Engagement", top_level=False, request=request)
-    return render(request, 'dojo/new_eng.html', {
-        'form': form,
-    })
-
-
 # @user_passes_test(lambda u: u.is_staff)
 @user_must_be_authorized(Engagement, 'change', 'eid')
 def edit_engagement(request, eid):
-    eng = Engagement.objects.get(pk=eid)
-    ci_cd_form = False
-    if eng.engagement_type == "CI/CD":
-        ci_cd_form = True
-    jform = None
-    use_jira = get_system_setting('enable_jira') and eng.product.jira_pkey is not None
+    engagement = Engagement.objects.get(pk=eid)
+    is_ci_cd = engagement.engagement_type == "CI/CD"
+    jira_epic_form = None
+    jira_project = jira_helper.get_jira_project(engagement, use_inheritance=False)
+    jira_error = False
 
     if request.method == 'POST':
-        form = EngForm(request.POST, instance=eng, cicd=ci_cd_form, product=eng.product.id, user=request.user)
-        if 'jiraform-push_to_jira' in request.POST:
-            jform = JIRAEngagementForm(
-                request.POST, prefix='jiraform', instance=eng)
+        form = EngForm(request.POST, instance=engagement, cicd=is_ci_cd, product=engagement.product.id, user=request.user)
 
-        if (form.is_valid() and jform is None) or (form.is_valid() and jform and jform.is_valid()):
-            logger.debug('jform valid')
-            if 'jiraform-push_to_jira' in request.POST:
-                logger.debug('push_to_jira true')
-                if JIRA_Issue.objects.filter(engagement=eng).exists():
-                    update_epic(
-                        eng, jform.cleaned_data.get('push_to_jira'))
+        jira_project_form = JIRAProjectForm(request.POST, prefix='jira-project-form', instance=jira_project, target='engagement')
+        jira_epic_form = JIRAEngagementForm(request.POST, prefix='jira-epic-form', instance=engagement)
 
-                else:
-                    add_epic(eng, jform.cleaned_data.get('push_to_jira'))
+        if (form.is_valid() and jira_project_form.is_valid() and jira_epic_form.is_valid()):
 
-            temp_form = form.save(commit=False)
-            if (temp_form.status == "Cancelled" or temp_form.status == "Completed"):
-                temp_form.active = False
-            elif(temp_form.active is False):
-                temp_form.active = True
-            temp_form.product_id = form.cleaned_data.get('product').id
-            temp_form.save()
+            # first save engagement details
+            new_status = form.cleaned_data.get('status')
+            engagement = form.save(commit=False)
+            if (new_status == "Cancelled" or new_status == "Completed"):
+                engagement.active = False
+            else:
+                engagement.active = True
+            engagement.save()
+
             tags = request.POST.getlist('tags')
             t = ", ".join('"{0}"'.format(w) for w in tags)
-            eng.tags = t
+            engagement.tags = t
+
+            # save jira project config
+            jira_project = jira_project_form.save(commit=False)
+            jira_project.engagement = engagement
+            # only check jira project if form is sufficiently populated
+            if jira_project.jira_instance and jira_project.project_key:
+                jira_error = not jira_helper.is_jira_project_valid(jira_project)
+
+                if not jira_error:
+                    jira_project.save()
+
+                    messages.add_message(
+                        request,
+                        messages.SUCCESS,
+                        'JIRA Project config added successfully.',
+                        extra_tags='alert-success')
+
+            # push epic
+            if jira_epic_form.cleaned_data.get('push_to_jira'):
+                if jira_helper.push_to_jira(engagement):
+                    messages.add_message(
+                        request,
+                        messages.SUCCESS,
+                        'Push to JIRA for Epic queued succesfully, check alerts on the top right for errors',
+                        extra_tags='alert-success')
+                else:
+                    jira_error = True
+
+                    messages.add_message(
+                        request,
+                        messages.SUCCESS,
+                        'Push to JIRA for Epic failed, check alerts on the top right for errors',
+                        extra_tags='alert-danger')
+
             messages.add_message(
                 request,
                 messages.SUCCESS,
                 'Engagement updated successfully.',
                 extra_tags='alert-success')
-            if '_Add Tests' in request.POST:
-                return HttpResponseRedirect(
-                    reverse('add_tests', args=(eng.id, )))
-            else:
-                return HttpResponseRedirect(
-                    reverse('view_engagement', args=(eng.id, )))
-    else:
-        form = EngForm(initial={'product': eng.product.id}, instance=eng, cicd=ci_cd_form, product=eng.product.id, user=request.user)
 
-        if use_jira:
-            jform = JIRAEngagementForm(prefix='jiraform', instance=eng)
+            if not jira_error:
+                if '_Add Tests' in request.POST:
+                    return HttpResponseRedirect(
+                        reverse('add_tests', args=(engagement.id, )))
+                else:
+                    return HttpResponseRedirect(
+                        reverse('view_engagement', args=(engagement.id, )))
+
         else:
-            jform = None
+            # if forms invalid, page will just reload and show errors
+            if jira_project_form.errors or jira_epic_form.errors:
+                messages.add_message(
+                    request,
+                    messages.ERROR,
+                    'Errors in JIRA forms, see below',
+                    extra_tags='alert-danger')
 
-    form.initial['tags'] = [tag.name for tag in eng.tags]
+    else:
+        form = EngForm(initial={'product': engagement.product}, instance=engagement, cicd=is_ci_cd, product=engagement.product, user=request.user)
 
-    title = ""
-    if eng.engagement_type == "CI/CD":
-        title = " CI/CD"
-    product_tab = Product_Tab(eng.product.id, title="Edit" + title + " Engagement", tab="engagements")
-    product_tab.setEngagement(eng)
+        jira_project_form = None
+        jira_epic_form = None
+        if get_system_setting('enable_jira'):
+            jira_project_form = JIRAProjectForm(prefix='jira-project-form', instance=jira_project, target='engagement', product=engagement.product)
+            if jira_project:
+                logger.debug('showing jira-epic-form')
+                jira_epic_form = JIRAEngagementForm(prefix='jira-epic-form', instance=engagement)
+
+    form.initial['tags'] = [tag.name for tag in engagement.tags]
+
+    title = ' CI/CD' if is_ci_cd else ''
+    product_tab = Product_Tab(engagement.product.id, title="Edit" + title + " Engagement", tab="engagements")
+    product_tab.setEngagement(engagement)
     return render(request, 'dojo/new_eng.html', {
         'product_tab': product_tab,
         'form': form,
         'edit': True,
-        'jform': jform,
-        'eng': eng
+        'jira_epic_form': jira_epic_form,
+        'jira_project_form': jira_project_form,
     })
 
 
@@ -309,20 +317,14 @@ def view_engagement(request, eid):
         network = eng.preset.network_locations.all()
     system_settings = System_Settings.objects.get()
 
-    try:
-        jissue = JIRA_Issue.objects.get(engagement=eng)
-    except:
-        jissue = None
-        pass
-    try:
-        jconf = JIRA_PKey.objects.get(product=eng.product).conf
-    except:
-        jconf = None
-        pass
+    jissue = jira_helper.get_jira_issue(eng)
+    jira_project = jira_helper.get_jira_project(eng)
+
     exclude_findings = [
         finding.id for ra in eng.risk_acceptance.all()
         for finding in ra.accepted_findings.all()
     ]
+
     eng_findings = Finding.objects.filter(test__in=eng.test_set.all()) \
         .exclude(id__in=exclude_findings).order_by('title')
 
@@ -427,7 +429,7 @@ def view_engagement(request, eid):
             'risks_accepted': risks_accepted,
             'can_add_risk': eng_findings.count(),
             'jissue': jissue,
-            'jconf': jconf,
+            'jira_project': jira_project,
             'accepted_findings': accepted_findings,
             'start_date': start_date,
             'creds': creds,
@@ -530,27 +532,23 @@ def import_scan_results(request, eid=None, pid=None):
     form = ImportScanForm()
     cred_form = CredMappingForm()
     finding_count = 0
-    push_all_jira_issues = False
     jform = None
     user = request.user
 
     if eid:
         engagement = get_object_or_404(Engagement, id=eid)
-        if not user_is_authorized(user, 'staff', engagement):
-            raise PermissionDenied
+        engagement_or_product = engagement
         cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(engagement=engagement).order_by('cred_id')
-        if get_system_setting('enable_jira') and engagement.product.jira_pkey_set.first() is not None:
-            push_all_jira_issues = engagement.product.jira_pkey_set.first().push_all_issues
-            jform = JIRAImportScanForm(push_all=push_all_jira_issues, prefix='jiraform')
     elif pid:
         product = get_object_or_404(Product, id=pid)
-        if not user_is_authorized(user, 'staff', product):
-            raise PermissionDenied
-        if get_system_setting('enable_jira') and product.jira_pkey_set.first() is not None:
-            push_all_jira_issues = product.jira_pkey_set.first().push_all_issues
-            jform = JIRAImportScanForm(push_all=push_all_jira_issues, prefix='jiraform')
+        engagement_or_product = product
     elif not user.is_staff:
         raise PermissionDenied
+
+    if not user_is_authorized(user, 'staff', engagement_or_product):
+        raise PermissionDenied
+
+    push_all_jira_issues = jira_helper.is_push_all_issues(engagement_or_product)
 
     if request.method == "POST":
         form = ImportScanForm(request.POST, request.FILES)
@@ -558,7 +556,12 @@ def import_scan_results(request, eid=None, pid=None):
         cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(
             engagement=engagement).order_by('cred_id')
 
-        if form.is_valid():
+        if jira_helper.get_jira_project(engagement_or_product):
+            jform = JIRAImportScanForm(request.POST, push_all=push_all_jira_issues, prefix='jiraform')
+            logger.debug('jform valid: %s', jform.is_valid())
+            logger.debug('jform errors: %s', jform.errors)
+
+        if form.is_valid() and (jform is None or jform.is_valid()):
             # Allows for a test to be imported with an engagement created on the fly
             if engagement is None:
                 engagement = Engagement()
@@ -588,7 +591,7 @@ def import_scan_results(request, eid=None, pid=None):
                                      messages.ERROR,
                                      "Report file is too large. Maximum supported size is {} MB".format(settings.SCAN_FILE_MAX_SIZE),
                                      extra_tags='alert-danger')
-                return HttpResponseRedirect(reverse('import_scan_results', args=(eid,)))
+                return HttpResponseRedirect(reverse('import_scan_results', args=(engagement,)))
 
             tt, t_created = Test_Type.objects.get_or_create(name=scan_type)
             # will save in development environment
@@ -631,18 +634,12 @@ def import_scan_results(request, eid=None, pid=None):
                                      extra_tags='alert-danger')
                 parse_logger.exception(e)
                 parse_logger.error("Error in parser: {}".format(str(e)))
-                return HttpResponseRedirect(reverse('import_scan_results', args=(eid,)))
+                return HttpResponseRedirect(reverse('import_scan_results', args=(engagement.id,)))
 
             try:
-                # Push to Jira?
-                push_to_jira = False
-                if push_all_jira_issues:
-                    push_to_jira = True
-                elif 'jiraform-push_to_jira' in request.POST:
-                    jform = JIRAImportScanForm(request.POST, prefix='jiraform',
-                                            push_all=push_all_jira_issues)
-                    if jform.is_valid():
-                        push_to_jira = jform.cleaned_data.get('push_to_jira')
+                # can't use helper as when push_all_jira_issues is True, the checkbox gets disabled and is always false
+                # push_to_jira = jira_helper.is_push_to_jira(new_finding, jform.cleaned_data.get('push_to_jira'))
+                push_to_jira = push_all_jira_issues or (jform and jform.cleaned_data.get('push_to_jira'))
 
                 for item in parser.items:
                     # print("item blowup")
@@ -657,12 +654,6 @@ def import_scan_results(request, eid=None, pid=None):
                         continue
 
                     item.test = t
-                    if item.date == timezone.now().date():
-                        # logger.warn('setting item.date to target_start')
-                        # logger.warn('type of target_start: %s', type(t.target_start))
-                        item.date = t.target_start.date()
-                        # logger.warn('type of item.date: %s', type(item.date))
-
                     item.reporter = user
                     item.last_reviewed = timezone.now()
                     item.last_reviewed_by = user
@@ -772,10 +763,15 @@ def import_scan_results(request, eid=None, pid=None):
         prod_id = pid
         custom_breadcrumb = {"", ""}
         product_tab = Product_Tab(prod_id, title=title, tab="findings")
+
+    if jira_helper.get_jira_project(engagement_or_product):
+        jform = JIRAImportScanForm(push_all=push_all_jira_issues, prefix='jiraform')
+
     form.fields['endpoints'].queryset = Endpoint.objects.filter(product__id=product_tab.product.id)
     return render(request, 'dojo/import_scan_results.html', {
         'form': form,
         'product_tab': product_tab,
+        'engagement_or_product': engagement_or_product,
         'custom_breadcrumb': custom_breadcrumb,
         'title': title,
         'cred_form': cred_form,

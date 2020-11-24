@@ -60,7 +60,9 @@ env = environ.Env(
     DD_CELERY_RESULT_EXPIRES=(int, 86400),
     DD_CELERY_BEAT_SCHEDULE_FILENAME=(str, root('dojo.celery.beat.db')),
     DD_CELERY_TASK_SERIALIZER=(str, 'pickle'),
+    DD_CELERY_PASS_MODEL_BY_ID=(str, False),
     DD_FOOTER_VERSION=(str, ''),
+    # models should be passed to celery by ID, default is False (for now)
     DD_FORCE_LOWERCASE_TAGS=(bool, True),
     DD_MAX_TAG_LENGTH=(int, 25),
     DD_DATABASE_ENGINE=(str, 'django.db.backends.mysql'),
@@ -71,7 +73,7 @@ env = environ.Env(
     DD_DATABASE_PASSWORD=(str, 'defectdojo'),
     DD_DATABASE_PORT=(int, 3306),
     DD_DATABASE_USER=(str, 'defectdojo'),
-    DD_SECRET_KEY=(str, '.'),
+    DD_SECRET_KEY=(str, ''),
     DD_CREDENTIAL_AES_256_KEY=(str, '.'),
     DD_DATA_UPLOAD_MAX_MEMORY_SIZE=(int, 8388608),  # Max post size set to 8mb
     DD_SOCIAL_AUTH_TRAILING_SLASH=(bool, True),
@@ -133,19 +135,24 @@ env = environ.Env(
     # Set to True if you want to allow authorized users staff access only on specific products
     # This will only apply to users with 'active' status
     DD_AUTHORIZED_USERS_ALLOW_STAFF=(bool, False),
+    # SLA Notifications via alerts and JIRA comments
+    # enable either DD_SLA_NOTIFY_ACTIVE or DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY to enable the feature
     DD_SLA_NOTIFY_ACTIVE=(bool, False),
-    DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY=(bool, True),
+    DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY=(bool, False),
+    # finetuning settings for when enabled
     DD_SLA_NOTIFY_WITH_JIRA_ONLY=(bool, False),
     DD_SLA_NOTIFY_PRE_BREACH=(int, 3),
     DD_SLA_NOTIFY_POST_BREACH=(int, 7),
-
     # maximum number of result in search as search can be an expensive operation
     DD_SEARCH_MAX_RESULTS=(int, 100),
+    DD_SIMILAR_FINDINGS_MAX_RESULTS=(int, 25),
     DD_MAX_AUTOCOMPLETE_WORDS=(int, 20000),
     DD_JIRA_SSL_VERIFY=(bool, True),
-
     # if you want to keep logging to the console but in json format, change this here to 'json_console'
-    DD_LOGGING_FORMAT=(str, 'console')
+    DD_LOGGING_HANDLER=(str, 'console'),
+    DD_ALERT_REFRESH=(bool, True),
+    DD_DISABLE_ALERT_COUNTER=(bool, False),
+    DD_TAG_PREFETCHING=(bool, True)
 )
 
 
@@ -215,6 +222,11 @@ USE_L10N = env('DD_USE_L10N')
 USE_TZ = env('DD_USE_TZ')
 
 TEST_RUNNER = env('DD_TEST_RUNNER')
+
+ALERT_REFRESH = env('DD_ALERT_REFRESH')
+DISABLE_ALERT_COUNTER = env("DD_DISABLE_ALERT_COUNTER")
+
+TAG_PREFETCHING = env('DD_TAG_PREFETCHING')
 
 # ------------------------------------------------------------------------------
 # DATABASE
@@ -419,6 +431,7 @@ SLA_NOTIFY_PRE_BREACH = env('DD_SLA_NOTIFY_PRE_BREACH')  # in days, notify betwe
 SLA_NOTIFY_POST_BREACH = env('DD_SLA_NOTIFY_POST_BREACH')  # in days, skip notifications for findings that go past dayofbreach plus this number
 
 SEARCH_MAX_RESULTS = env('DD_SEARCH_MAX_RESULTS')
+SIMILAR_FINDINGS_MAX_RESULTS = env('DD_SIMILAR_FINDINGS_MAX_RESULTS')
 MAX_AUTOCOMPLETE_WORDS = env('DD_MAX_AUTOCOMPLETE_WORDS')
 
 LOGIN_EXEMPT_URLS = (
@@ -665,6 +678,7 @@ CELERY_RESULT_EXPIRES = env('DD_CELERY_RESULT_EXPIRES')
 CELERY_BEAT_SCHEDULE_FILENAME = env('DD_CELERY_BEAT_SCHEDULE_FILENAME')
 CELERY_ACCEPT_CONTENT = ['pickle', 'json', 'msgpack', 'yaml']
 CELERY_TASK_SERIALIZER = env('DD_CELERY_TASK_SERIALIZER')
+CELERY_PASS_MODEL_BY_ID = env('DD_CELERY_PASS_MODEL_BY_ID')
 
 # Celery beat scheduled tasks
 CELERY_BEAT_SCHEDULE = {
@@ -687,7 +701,6 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': crontab(hour=7, minute=30),
     }
 }
-
 
 # ------------------------------------
 # Monitoring Metrics
@@ -822,7 +835,7 @@ JIRA_SSL_VERIFY = env('DD_JIRA_SSL_VERIFY')
 # ------------------------------------------------------------------------------
 # See http://docs.djangoproject.com/en/dev/topics/logging for
 # more details on how to customize your logging configuration.
-LOGGING_FORMAT = env('DD_LOGGING_FORMAT')
+LOGGING_HANDLER = env('DD_LOGGING_HANDLER')
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -854,6 +867,7 @@ LOGGING = {
         },
         'console': {
             'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
         },
         'json_console': {
             'class': 'logging.StreamHandler',
@@ -867,36 +881,36 @@ LOGGING = {
             'propagate': True,
         },
         'django.security': {
-            'handlers': [r'%s' % LOGGING_FORMAT],
+            'handlers': [r'%s' % LOGGING_HANDLER],
             'level': 'INFO',
             'propagate': False,
         },
         'celery': {
-            'handlers': [r'%s' % LOGGING_FORMAT],
+            'handlers': [r'%s' % LOGGING_HANDLER],
             'level': 'INFO',
             'propagate': False,
-            # does not seem to work?
-            # 'worker_hijack_root_logger': False,
+            # workaround some celery logging known issue
+            'worker_hijack_root_logger': False,
         },
         'dojo': {
-            'handlers': [r'%s' % LOGGING_FORMAT],
+            'handlers': [r'%s' % LOGGING_HANDLER],
             'level': 'INFO',
             'propagate': False,
         },
         'dojo.specific-loggers.deduplication': {
-            'handlers': [r'%s' % LOGGING_FORMAT],
+            'handlers': [r'%s' % LOGGING_HANDLER],
             'level': 'INFO',
             'propagate': False,
         },
         'MARKDOWN': {
             # The markdown library is too verbose in it's logging, reducing the verbosity in our logs.
-            'handlers': [r'%s' % LOGGING_FORMAT],
+            'handlers': [r'%s' % LOGGING_HANDLER],
             'level': 'WARNING',
             'propagate': False,
         },
         'titlecase': {
             # The markdown library is too verbose in it's logging, reducing the verbosity in our logs.
-            'handlers': [r'%s' % LOGGING_FORMAT],
+            'handlers': [r'%s' % LOGGING_HANDLER],
             'level': 'WARNING',
             'propagate': False,
         },

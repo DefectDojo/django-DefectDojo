@@ -24199,15 +24199,14 @@
     "model": "dojo.risk_acceptance",
     "pk": 1,
     "fields": {
+        "name": "Simple Builtin Risk Acceptance",
         "path": "",
+        "accepted_by": null,
         "expiration_date": null,
-        "accepted_by": "",
-        "reporter": [
-            "admin"
-        ],
-        "compensating_control": "",
-        "created": "2018-08-24T14:00:56.984Z",
-        "updated": "2018-08-24T14:00:56.984Z",
+        "owner": 1,
+        "compensating_control": "These findings are accepted using a simple risk acceptance without expiration date, approval document or compensating control information. Unaccept and use full risk acceptance if you need to have more control over those fields.",
+        "created": "2020-11-09T23:13:08.520Z",
+        "updated": "2020-11-09T23:13:08.520Z",
         "accepted_findings": [
             2
         ],
@@ -24229,7 +24228,7 @@
     }
 },
 {
-    "model": "dojo.jira_conf",
+    "model": "dojo.jira_instance",
     "pk": 2,
     "fields": {
         "url": "http://www.testjira.com",
@@ -24247,7 +24246,7 @@
     }
 },
 {
-    "model": "dojo.jira_conf",
+    "model": "dojo.jira_instance",
     "pk": 3,
     "fields": {
         "url": "http://www.testjira.com",
@@ -24265,7 +24264,7 @@
     }
 },
 {
-    "model": "dojo.jira_conf",
+    "model": "dojo.jira_instance",
     "pk": 4,
     "fields": {
         "url": "http://www.testjira.com",
@@ -24304,12 +24303,12 @@
     }
 },
 {
-    "model": "dojo.jira_pkey",
+    "model": "dojo.jira_project",
     "pk": 1,
     "fields": {
         "project_key": "key1",
         "product": 1,
-        "conf": 2,
+        "jira_instance": 2,
         "component": "",
         "push_all_issues": false,
         "enable_engagement_epic_mapping": true,
@@ -24317,12 +24316,12 @@
     }
 },
 {
-    "model": "dojo.jira_pkey",
+    "model": "dojo.jira_project",
     "pk": 2,
     "fields": {
         "project_key": "key2",
         "product": 2,
-        "conf": 3,
+        "jira_instance": 3,
         "component": "",
         "push_all_issues": true,
         "enable_engagement_epic_mapping": true,
@@ -24330,12 +24329,12 @@
     }
 },
 {
-    "model": "dojo.jira_pkey",
+    "model": "dojo.jira_project",
     "pk": 3,
     "fields": {
         "project_key": "key3",
         "product": 3,
-        "conf": 4,
+        "jira_instance": 4,
         "component": "",
         "push_all_issues": false,
         "enable_engagement_epic_mapping": false,
