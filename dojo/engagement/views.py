@@ -155,7 +155,7 @@ def edit_engagement(request, eid):
         jira_project_form = JIRAProjectForm(request.POST, prefix='jira-project-form', instance=jira_project, target='engagement')
         jira_epic_form = JIRAEngagementForm(request.POST, prefix='jira-epic-form', instance=engagement)
 
-        if (form.is_valid() and jira_project_form.is_valid() and jira_epic_form.is_valid()):
+        if (form.is_valid() and (jira_project_form is None or jira_project_form.is_valid()) and (jira_epic_form is None or jira_epic_form.is_valid())):
 
             # first save engagement details
             new_status = form.cleaned_data.get('status')

@@ -916,7 +916,7 @@ def new_eng_for_app(request, pid, cicd=False):
         jira_project_form = JIRAProjectForm(request.POST, prefix='jira-project-form', target='engagement', product=product)
         jira_epic_form = JIRAEngagementForm(request.POST, prefix='jira-epic-form')
 
-        if (form.is_valid() and jira_project_form.is_valid() and jira_epic_form.is_valid()):
+        if (form.is_valid() and (jira_project_form is None or jira_project_form.is_valid()) and (jira_epic_form is None or jira_epic_form.is_valid())):
 
             # first create the new engagement
             engagement = form.save(commit=False)
