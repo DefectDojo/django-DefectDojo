@@ -4,7 +4,7 @@
 
 Before submitting, please ensure that you are using the latests code by performing a `git pull`.
 
-Please include your operating system, your operating system version number (16.04, 10.6, etc), and the dojo install you are using (setup.bash, docker, etc).
+Please include your operating system name, your operating system version number (16.04, 18.6, etc), and the dojo install type you are using (setup.bash, docker, etc).
 
 Bugs that do not have this information will be closed.
 
@@ -14,9 +14,9 @@ Here are a few things to keep in mind when making changes to DefectDojo.
 
 ## Modifying DefectDojo and Testing
 
-Please use [these test scripts](./tests) to test your changes. These are the exact scripts we run in our [Travis Build](https://travis-ci.org/OWASP/django-DefectDojo).
+Please use [these test scripts](./tests) to test your changes. These are the scripts we run in our [integration tests](DOCKER.md#run-the-tests-with-docker).
 
-For changes that require additional settings, settings.dist.py is the file you want to change. This file is loaded by the default settings.py.
+For changes that require additional settings, you can now use local_settings.py file. See the logging section below for more information.
 
 ## Python3 version
 For compatibility reasons, the code in dev branch should be python3.6 compliant.
