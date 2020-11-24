@@ -16,7 +16,8 @@ from pytz import timezone
 from django.db.models import Q
 from dojo.models import Dojo_User, Product_Type, Finding, Product, Test_Type, \
     Endpoint, Development_Environment, Finding_Template, Report, Note_Type, \
-    Engagement_Survey, Question, TextQuestion, ChoiceQuestion, Endpoint_Status, Engagement
+    Engagement_Survey, Question, TextQuestion, ChoiceQuestion, Endpoint_Status, Engagement, \
+    ENGAGEMENT_STATUS_CHOICES
 from dojo.utils import get_system_setting
 from django.contrib.contenttypes.models import ContentType
 
@@ -27,7 +28,6 @@ local_tz = timezone(get_system_setting('time_zone'))
 SEVERITY_CHOICES = (('Info', 'Info'), ('Low', 'Low'), ('Medium', 'Medium'),
                     ('High', 'High'), ('Critical', 'Critical'))
 BOOLEAN_CHOICES = (('false', 'No'), ('true', 'Yes'),)
-
 EARLIEST_FINDING = None
 
 
@@ -307,7 +307,8 @@ class EngagementFilter(DojoFilter):
     prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.all().order_by('name'),
         label="Product Type")
-
+    engagement__status = MultipleChoiceFilter(choices=ENGAGEMENT_STATUS_CHOICES,
+                                              label="Status")
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
@@ -480,8 +481,8 @@ class ApiFindingFilter(DojoFilter):
     # DateRangeFilter
     created = DateRangeFilter()
     date = DateRangeFilter()
-    jira_change = DateRangeFilter()
-    jira_creation = DateRangeFilter()
+    jira_creation = DateRangeFilter(field_name='jira_issue__jira_creation')
+    jira_change = DateRangeFilter(field_name='jira_issue__jira_change')
     last_reviewed = DateRangeFilter()
     mitigated = DateRangeFilter()
     # NumberInFilter
@@ -556,14 +557,16 @@ class OpenFindingFilter(DojoFilter):
     test__engagement__product = ModelMultipleChoiceFilter(
         queryset=Product.objects.all(),
         label="Product")
+    test__engagement = ModelMultipleChoiceFilter(
+        queryset=Engagement.objects.all(),
+        label="Engagement")
     test__engagement__risk_acceptance = ReportRiskAcceptanceFilter(
         label="Risk Accepted")
 
-    if get_system_setting('enable_jira'):
-        has_jira_issue = BooleanFilter(field_name='jira_issue',
-                                   lookup_expr='isnull',
-                                   exclude=True,
-                                   label='has JIRA')
+    has_jira_issue = BooleanFilter(field_name='jira_issue',
+                                lookup_expr='isnull',
+                                exclude=True,
+                                label='has JIRA')
 
     jira_issue__jira_key = CharFilter(field_name='jira_issue__jira_key', lookup_expr='icontains', label="JIRA issue")
 
@@ -591,7 +594,7 @@ class OpenFindingFilter(DojoFilter):
                    'thread_id', 'notes', 'scanner_confidence', 'mitigated',
                    'numerical_severity', 'reporter', 'last_reviewed', 'line',
                    'duplicate_finding', 'hash_code', 'images', 'endpoint_status',
-                   'line_number', 'reviewers', 'mitigated_by', 'sourcefile', 'jira_creation', 'jira_change', 'created']
+                   'line_number', 'reviewers', 'mitigated_by', 'sourcefile', 'created', 'jira_creation', 'jira_change']
 
     def __init__(self, *args, **kwargs):
         self.user = None
@@ -602,6 +605,10 @@ class OpenFindingFilter(DojoFilter):
         if 'pid' in kwargs:
             self.pid = kwargs.pop('pid')
         super(OpenFindingFilter, self).__init__(*args, **kwargs)
+
+        if not get_system_setting('enable_jira'):
+            self.form.fields.pop('jira_issue__jira_key')
+            self.form.fields.pop('has_jira_issue')
 
         cwe = dict()
         cwe = dict([cwe, cwe]
@@ -619,6 +626,9 @@ class OpenFindingFilter(DojoFilter):
         # Don't show the product filter on the product finding view
         if self.pid:
             del self.form.fields['test__engagement__product']
+            self.form.fields['test__engagement'].queryset = Engagement.objects.filter(
+                product_id=self.pid
+            ).all()
 
 
 class OpenFindingSuperFilter(OpenFindingFilter):
@@ -643,14 +653,16 @@ class ClosedFindingFilter(DojoFilter):
     test__engagement__product = ModelMultipleChoiceFilter(
         queryset=Product.objects.all(),
         label="Product")
+    test__engagement = ModelMultipleChoiceFilter(
+        queryset=Engagement.objects.all(),
+        label="Engagement")
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.all(),
         label="Product Type")
     test__engagement__risk_acceptance = ReportRiskAcceptanceFilter(
         label="Risk Accepted")
 
-    if get_system_setting('enable_jira'):
-        has_jira_issue = BooleanFilter(field_name='jira_issue',
+    has_jira_issue = BooleanFilter(field_name='jira_issue',
                                    lookup_expr='isnull',
                                    exclude=True,
                                    label='has JIRA')
@@ -693,13 +705,26 @@ class ClosedFindingFilter(DojoFilter):
                    'last_reviewed_by', 'created', 'jira_creation', 'jira_change']
 
     def __init__(self, *args, **kwargs):
+        self.pid = None
+        if 'pid' in kwargs:
+            self.pid = kwargs.pop('pid')
         super(ClosedFindingFilter, self).__init__(*args, **kwargs)
+
+        if not get_system_setting('enable_jira'):
+            self.form.fields.pop('jira_issue__jira_key')
+            self.form.fields.pop('has_jira_issue')
+
         cwe = dict()
         cwe = dict([cwe, cwe]
                    for cwe in self.queryset.values_list('cwe', flat=True).distinct()
                    if type(cwe) is int and cwe is not None and cwe > 0)
         cwe = collections.OrderedDict(sorted(cwe.items()))
         self.form.fields['cwe'].choices = list(cwe.items())
+
+        if self.pid:
+            self.form.fields['test__engagement'].queryset = Engagement.objects.filter(
+                product_id=self.pid
+            ).all()
 
 
 class ClosedFindingSuperFilter(ClosedFindingFilter):
@@ -723,6 +748,9 @@ class AcceptedFindingFilter(DojoFilter):
     test__engagement__product = ModelMultipleChoiceFilter(
         queryset=Product.objects.all(),
         label="Product")
+    test__engagement = ModelMultipleChoiceFilter(
+        queryset=Engagement.objects.all(),
+        label="Engagement")
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.all(),
         label="Product Type")
@@ -759,6 +787,9 @@ class AcceptedFindingFilter(DojoFilter):
                    'last_reviewed', 'o', 'jira_creation', 'jira_change']
 
     def __init__(self, *args, **kwargs):
+        self.pid = None
+        if 'pid' in kwargs:
+            self.pid = kwargs.pop('pid')
         super(AcceptedFindingFilter, self).__init__(*args, **kwargs)
         cwe = dict()
         cwe = dict([finding.cwe, finding.cwe]
@@ -766,6 +797,11 @@ class AcceptedFindingFilter(DojoFilter):
                    if type(finding.cwe) is int and finding.cwe is not None and finding.cwe > 0 and finding.cwe not in cwe)
         cwe = collections.OrderedDict(sorted(cwe.items()))
         self.form.fields['cwe'].choices = list(cwe.items())
+
+        if self.pid:
+            self.form.fields['test__engagement'].queryset = Engagement.objects.filter(
+                product_id=self.pid
+            ).all()
 
 
 class AcceptedFindingSuperFilter(AcceptedFindingFilter):
@@ -840,7 +876,6 @@ class SimilarFindingFilter(DojoFilter):
     date = DateRangeFilter()
     component_name = CharFilter(lookup_expr='icontains')
     component_version = CharFilter(lookup_expr='icontains')
-    jira_issue__jira_key = CharFilter(lookup_expr='icontains')
 
     test__test_type = ModelMultipleChoiceFilter(
         queryset=Test_Type.objects.all())
@@ -851,11 +886,10 @@ class SimilarFindingFilter(DojoFilter):
         queryset=Product_Type.objects.all(),
         label="Product Type")
 
-    if get_system_setting('enable_jira'):
-        has_jira_issue = BooleanFilter(field_name='jira_issue',
-                                   lookup_expr='isnull',
-                                   exclude=True,
-                                   label='has JIRA')
+    has_jira_issue = BooleanFilter(field_name='jira_issue',
+                                lookup_expr='isnull',
+                                exclude=True,
+                                label='has JIRA')
 
     jira_issue__jira_key = CharFilter(field_name='jira_issue__jira_key', lookup_expr='icontains', label="JIRA issue")
 
@@ -904,6 +938,10 @@ class SimilarFindingFilter(DojoFilter):
             data['test__engagement__product__prod_type'] = self.finding.test.engagement.product.prod_type
 
         super().__init__(data, *args, **kwargs)
+
+        if get_system_setting('enable_jira'):
+            self.form.fields.pop('jira_issue__jira_key')
+            self.form.fields.pop('has_jira_issue')
 
         if self.user is not None and not self.user.is_staff:
             if self.form.fields.get('test__engagement__product'):
@@ -1102,10 +1140,18 @@ class ProductMetricsFindingFilter(FilterSet):
                 args[0]._mutable = True
                 args[0]['date'] = 8
                 args[0]._mutable = False
+        self.pid = None
+        if 'pid' in kwargs:
+            self.pid = kwargs.pop('pid')
         super(ProductMetricsFindingFilter, self).__init__(*args, **kwargs)
         self.form.fields['severity'].choices = self.queryset.order_by(
             'numerical_severity'
         ).values_list('severity', 'severity').distinct()
+
+        if self.pid:
+            self.form.fields['test__engagement'].queryset = Engagement.objects.filter(
+                product_id=self.pid
+            ).all()
 
     class Meta:
         model = Finding
@@ -1186,7 +1232,7 @@ class EndpointFilter(DojoFilter):
 
     class Meta:
         model = Endpoint
-        exclude = ['mitigated']
+        exclude = ['mitigated', 'endpoint_status']
 
 
 class EndpointReportFilter(DojoFilter):
@@ -1199,7 +1245,7 @@ class EndpointReportFilter(DojoFilter):
 
     class Meta:
         model = Endpoint
-        exclude = ['product']
+        exclude = ['product', 'endpoint_status']
 
 
 class ReportFindingFilter(DojoFilter):
