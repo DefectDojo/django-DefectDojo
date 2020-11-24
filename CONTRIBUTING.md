@@ -14,7 +14,7 @@ Here are a few things to keep in mind when making changes to DefectDojo.
 
 ## Modifying DefectDojo and Testing
 
-Please use [these test scripts](./tests) to test your changes. These are the scripts we run in our integration tests.
+Please use [these test scripts](./tests) to test your changes. These are the scripts we run in our [integration tests](DOCKER.md#run-the-tests-with-docker).
 
 For changes that require additional settings, you can now use local_settings.py file. See the logging section below for more information.
 
