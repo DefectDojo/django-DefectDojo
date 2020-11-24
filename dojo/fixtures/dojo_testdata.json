@@ -1699,7 +1699,7 @@
       "jira_key": "222",
       "finding": 5,
       "jira_id": "2",
-      "engagement": 3
+      "engagement": null
     }
   },
   {
@@ -1707,9 +1707,19 @@
     "model": "dojo.jira_issue",
     "fields": {
       "jira_key": "333",
-      "finding": 6,
-      "jira_id": "3",
+      "finding": null,
+      "jira_id": "333",
       "engagement": 1
+    }
+  },
+  {
+    "pk": 4,
+    "model": "dojo.jira_issue",
+    "fields": {
+      "jira_key": "666",
+      "finding": null,
+      "jira_id": "666",
+      "engagement": null
     }
   },
   {
