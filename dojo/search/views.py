@@ -129,13 +129,13 @@ def simple_search(request):
 
             tags = clean_query
             # search tags first to avoid errors due to slicing too early
-            if search_tags and False:
-                tagged_findings = TaggedItem.objects.get_by_model(findings, tags)[:max_results]
-                tagged_finding_templates = TaggedItem.objects.get_by_model(Finding_Template, tags)[:max_results]
-                tagged_tests = TaggedItem.objects.get_by_model(tests, tags)[:max_results]
-                tagged_engagements = TaggedItem.objects.get_by_model(engagements, tags)[:max_results]
-                tagged_products = TaggedItem.objects.get_union_by_model(products, tags)[:max_results]
-                tagged_endpoints = TaggedItem.objects.get_by_model(endpoints, tags)[:max_results]
+            if search_tags:
+                tagged_findings = findings.filter(tags=tags)[:max_results]
+                tagged_finding_templates = Finding_Template.objects.all().filter(tags=tags)[:max_results]
+                tagged_tests = tests.filter(tags=tags)[:max_results]
+                tagged_engagements = engagements.filter(tags=tags)[:max_results]
+                tagged_products = products.filter(tags=tags)[:max_results]
+                tagged_endpoints = endpoints.filter(tags=tags)[:max_results]
             else:
                 tagged_findings = None
                 tagged_finding_templates = None
@@ -143,6 +143,8 @@ def simple_search(request):
                 tagged_engagements = None
                 tagged_products = None
                 tagged_endpoints = None
+
+            tagged_results = tagged_findings or tagged_finding_templates or tagged_tests or tagged_engagements or tagged_products or tagged_endpoints
 
             if search_findings:
                 findings_filter = OpenFindingFilter(request.GET, queryset=findings, user=request.user, pid=None, prefix='finding')
@@ -258,8 +260,8 @@ def simple_search(request):
                 else 'engagements' if engagements else \
                     'tests' if tests else \
                          'endpoint' if endpoints else \
-                            'generic' if generic else \
-                                'tagged'
+                            'tagged' if tagged_results else \
+                                'generic'
 
     response = render(request, 'dojo/simple_search.html', {
         'clean_query': original_clean_query,

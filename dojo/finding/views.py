@@ -118,6 +118,7 @@ django_filter=open_findings_filter):
     # tags = Tag.objects.usage_for_model(Finding)
     # TODO TAGS
     tags = ['one', 'two']
+    tags = Finding.tags.tag_model.objects.all()
 
     findings = Finding.objects.all()
     if view == "All":
@@ -160,6 +161,8 @@ django_filter=open_findings_filter):
 
     paged_findings = get_page_items(request, prefetch_for_findings(findings_filter.qs), 25)
 
+    bulk_edit_form = FindingBulkUpdateForm(request.GET)
+
     # show custom breadcrumb if user has filtered by exactly 1 endpoint
     endpoint = None
     if 'endpoints' in request.GET:
@@ -186,6 +189,7 @@ django_filter=open_findings_filter):
             'filter_name': filter_name,
             'tag_input': tags,
             'jira_project': jira_project,
+            'bulk_edit_form': bulk_edit_form,
         })
 
 
@@ -233,7 +237,7 @@ def prefetch_for_similar_findings(findings):
 
         # we could try to prefetch only the latest note with SubQuery and OuterRef, but I'm getting that MySql doesn't support limits in subqueries.
         prefetched_findings = prefetched_findings.prefetch_related('notes')
-        prefetched_findings = prefetched_findings.prefetch_related('tagged_items__tag')
+        prefetched_findings = prefetched_findings.prefetch_related('tags')
         # prefetched_findings = prefetched_findings.prefetch_related('endpoints')
         # prefetched_findings = prefetched_findings.prefetch_related('endpoint_status')
         # prefetched_findings = prefetched_findings.prefetch_related('endpoint_status__endpoint')
@@ -713,9 +717,8 @@ def edit_finding(request, fid):
                 new_finding.endpoint_status.add(eps)
             new_finding.last_reviewed = timezone.now()
             new_finding.last_reviewed_by = request.user
-            tags = request.POST.getlist('tags')
-            t = ", ".join('"{0}"'.format(w) for w in tags)
-            new_finding.tags = t
+
+            new_finding.tags = form.cleaned_data['tags']
 
             if 'request' in form.cleaned_data or 'response' in form.cleaned_data:
                 burp_rr = BurpRawRequestResponse.objects.filter(finding=finding).first()
@@ -771,10 +774,6 @@ def edit_finding(request, fid):
                         add_external_issue(new_finding, 'github')
 
             new_finding.save(push_to_jira=push_to_jira)
-
-            tags = request.POST.getlist('tags')
-            t = ", ".join('"{0}"'.format(w) for w in tags)
-            new_finding.tags = t
 
             messages.add_message(
                 request,
@@ -1018,7 +1017,8 @@ def mktemplate(request, fid):
             mitigation=finding.mitigation,
             impact=finding.impact,
             references=finding.references,
-            numerical_severity=finding.numerical_severity)
+            numerical_severity=finding.numerical_severity,
+            tags=finding.tags)
         template.save()
         template.tags = finding.tags.all()
 
@@ -1111,9 +1111,7 @@ def apply_template_to_finding(request, fid, tid):
             finding.references = form.cleaned_data['references']
             finding.last_reviewed = timezone.now()
             finding.last_reviewed_by = request.user
-            tags = request.POST.getlist('tags')
-            t = ", ".join('"{0}"'.format(w) for w in tags)
-            finding.tags = t
+            finding.tags = form.cleaned_data['tags']
             finding.save()
         else:
             messages.add_message(
@@ -1415,9 +1413,7 @@ def add_template(request):
             template = form.save(commit=False)
             template.numerical_severity = Finding.get_numerical_severity(template.severity)
             template.save()
-            tags = request.POST.getlist('tags')
-            t = ", ".join('"{0}"'.format(w) for w in tags)
-            template.tags = t
+            form.save_m2m()
             count = apply_cwe_mitigation(form.cleaned_data["apply_to_findings"], template)
             if count > 0:
                 apply_message = " and " + str(count) + pluralize(count, 'finding,findings') + " "
@@ -1452,6 +1448,7 @@ def edit_template(request, tid):
             template = form.save(commit=False)
             template.numerical_severity = Finding.get_numerical_severity(template.severity)
             template.save()
+            form.save_m2m()
 
             count = apply_cwe_mitigation(form.cleaned_data["apply_to_findings"], template)
             if count > 0:
@@ -1459,9 +1456,6 @@ def edit_template(request, tid):
             else:
                 apply_message = ""
 
-            tags = request.POST.getlist('tags')
-            t = ", ".join('"{0}"'.format(w) for w in tags)
-            template.tags = t
             messages.add_message(
                 request,
                 messages.SUCCESS,
@@ -1874,9 +1868,11 @@ def finding_bulk_update_all(request, pid=None):
 
                 if form.cleaned_data['tags']:
                     for finding in finds:
-                        tags = request.POST.getlist('tags')
-                        ts = ", ".join(tags)
-                        finding.tags = ts
+                        # tags = tagulous.utils.render_tags(form.cleaned_data['tags'])
+                        tags = form.cleaned_data['tags']
+                        logger.debug('bulk_edit: setting tags for: %i %s %s', finding.id, finding, tags)
+                        finding.tags = tags
+                        finding.save()
 
                 if form.cleaned_data['severity'] or form.cleaned_data['status']:
                     prev_prod = None

@@ -656,9 +656,6 @@ def new_product(request):
 
         if form.is_valid():
             product = form.save()
-            tags = request.POST.getlist('tags')
-            t = ", ".join('"{0}"'.format(w) for w in tags)
-            product.tags = t
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Product added successfully.',
@@ -666,13 +663,20 @@ def new_product(request):
             if get_system_setting('enable_jira'):
                 if jform.is_valid():
                     jira_project = jform.save(commit=False)
-                    if jira_project.jira_instance is not None:
+
+                    if jira_project.jira_instance is not None and jira_helper.is_jira_project_valid(jira_project):
                         jira_project.product = product
                         jira_project.save()
                         messages.add_message(request,
                                                 messages.SUCCESS,
                                                 'JIRA information added successfully.',
                                                 extra_tags='alert-success')
+                    else:
+                        messages.add_message(
+                            request,
+                            messages.ERROR,
+                            'Error updating JIRA project config',
+                            extra_tags='alert-danger')
 
             if get_system_setting('enable_github'):
                 if gform.is_valid():
@@ -751,9 +755,9 @@ def edit_product(request, pid):
         form = ProductForm(request.POST, instance=prod)
         if form.is_valid():
             form.save()
-            tags = request.POST.getlist('tags')
-            t = ", ".join('"{0}"'.format(w) for w in tags)
-            prod.tags = t
+            # tags = request.POST.getlist('tags')
+            # t = ", ".join('"{0}"'.format(w) for w in tags)
+            # prod.tags = t
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Product updated successfully.',
@@ -762,7 +766,7 @@ def edit_product(request, pid):
             if get_system_setting('enable_jira') and jira_project:
                 jform = JIRAProjectForm(request.POST, instance=jira_project)
                 # need to handle delete
-                if jform.is_valid():
+                if jform.is_valid() and jira_project.jira_instance is not None and jira_helper.is_jira_project_valid(jira_project):
                     try:
                         jform.save()
 
@@ -778,16 +782,30 @@ def edit_product(request, pid):
                                                 'JIRA Project config not updated due to errors.',
                                                 extra_tags='alert-danger')
                         pass
+                else:
+                    messages.add_message(
+                        request,
+                        messages.ERROR,
+                        'Error updating JIRA project config',
+                        extra_tags='alert-danger')
+
             elif get_system_setting('enable_jira'):  # new jira_config
                 jform = JIRAProjectForm(request.POST)
                 if jform.is_valid():
                     new_conf = jform.save(commit=False)
-                    new_conf.product_id = pid
-                    new_conf.save()
-                    messages.add_message(request,
-                                            messages.SUCCESS,
-                                            'JIRA information updated successfully.',
-                                            extra_tags='alert-success')
+                    if new_conf.jira_instance is not None and jira_helper.is_jira_project_valid(new_conf):
+                        new_conf.product_id = pid
+                        new_conf.save()
+                        messages.add_message(request,
+                                                messages.SUCCESS,
+                                                'JIRA information updated successfully.',
+                                                extra_tags='alert-success')
+                    else:
+                        messages.add_message(
+                            request,
+                            messages.ERROR,
+                            'Error updating JIRA project config',
+                            extra_tags='alert-danger')
                 else:
                     logger.info(jform.errors)
                     messages.add_message(request,
@@ -909,7 +927,7 @@ def new_eng_for_app(request, pid, cicd=False):
         jira_project_form = JIRAProjectForm(request.POST, prefix='jira-project-form', target='engagement', product=product)
         jira_epic_form = JIRAEngagementForm(request.POST, prefix='jira-epic-form')
 
-        if (form.is_valid() and jira_project_form.is_valid() and jira_epic_form.is_valid()):
+        if (form.is_valid() and (jira_project_form is None or jira_project_form.is_valid()) and (jira_epic_form is None or jira_epic_form.is_valid())):
 
             # first create the new engagement
             engagement = form.save(commit=False)
@@ -930,10 +948,7 @@ def new_eng_for_app(request, pid, cicd=False):
             engagement.active = True
 
             engagement.save()
-
-            tags = request.POST.getlist('tags')
-            t = ", ".join('"{0}"'.format(w) for w in tags)
-            engagement.tags = t
+            form.save_m2m()
 
             # save jira project config
             jira_project = jira_project_form.save(commit=False)

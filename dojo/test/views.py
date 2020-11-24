@@ -24,7 +24,8 @@ from django.db import DEFAULT_DB_ALIAS
 from dojo.filters import TemplateFindingFilter, OpenFindingFilter
 from dojo.forms import NoteForm, TestForm, FindingForm, \
     DeleteTestForm, AddFindingForm, TypedNoteForm, \
-    ImportScanForm, ReImportScanForm, JIRAFindingForm, JIRAImportScanForm
+    ImportScanForm, ReImportScanForm, JIRAFindingForm, JIRAImportScanForm, \
+    FindingBulkUpdateForm
 from dojo.models import Finding, Test, Notes, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, \
     Finding_Template, Cred_Mapping, Dojo_User, System_Settings, Endpoint_Status
 from dojo.tools.factory import import_parser_factory
@@ -98,6 +99,8 @@ def view_test(request, tid):
     product_tab.setEngagement(test.engagement)
     jira_project = jira_helper.get_jira_project(test)
 
+    bulk_edit_form = FindingBulkUpdateForm(request.GET)
+
     google_sheets_enabled = system_settings.enable_google_sheets
     sheet_url = None
     if google_sheets_enabled:
@@ -152,7 +155,8 @@ def view_test(request, tid):
                    'tag_input': tags,
                    'jira_project': jira_project,
                    'show_export': google_sheets_enabled,
-                   'sheet_url': sheet_url
+                   'sheet_url': sheet_url,
+                   'bulk_edit_form': bulk_edit_form,
                    })
 
 
@@ -191,9 +195,6 @@ def edit_test(request, tid):
         form = TestForm(request.POST, instance=test)
         if form.is_valid():
             new_test = form.save()
-            tags = request.POST.getlist('tags')
-            t = ", ".join('"{0}"'.format(w) for w in tags)
-            new_test.tags = t
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Test saved.',
@@ -529,9 +530,6 @@ def add_temp_finding(request, tid, fid):
                 new_finding.endpoints.add(ep)
                 new_finding.endpoint_status.add(eps)
             new_finding.save(false_history=True)
-            tags = request.POST.getlist('tags')
-            t = ", ".join('"{0}"'.format(w) for w in tags)
-            new_finding.tags = t
             if 'jiraform-push_to_jira' in request.POST:
                 jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_project=jira_helper.get_jira_project(test))
                 if jform.is_valid():
@@ -659,9 +657,9 @@ def re_import_scan_results(request, tid):
             scan_type = test.test_type.name
             active = form.cleaned_data['active']
             verified = form.cleaned_data['verified']
-            tags = request.POST.getlist('tags')
-            ts = ", ".join(tags)
-            test.tags = ts
+            tags = form.cleaned_data['tags']
+            # TODO TAGS Tags are replaced, same behaviour as with django-tagging
+            test.tags = tags
             if file and is_scan_file_too_large(file):
                 messages.add_message(request,
                                      messages.ERROR,

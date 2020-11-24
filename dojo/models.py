@@ -666,9 +666,8 @@ class Product(models.Model):
     internet_accessible = models.BooleanField(default=False, help_text=_('Specify if the application is accessible from the public internet.'))
     regulations = models.ManyToManyField(Regulation, blank=True)
 
-    # used for prefetching tags because django-tagging doesn't support that out of the box
     tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
-    tags = TagField(help_text="Add tags that help describe this product. Choose from the list or add new tags. Press Enter key to add.")
+    tags = TagField(blank=True, help_text="Add tags that help describe this product. Choose from the list or add new tags. Press Enter key to add.")
 
     def __unicode__(self):
         return self.name
@@ -1055,9 +1054,8 @@ class Engagement(models.Model):
     orchestration_engine = models.ForeignKey(Tool_Configuration, verbose_name="Orchestration Engine", help_text="Orchestration service responsible for CI/CD test", null=True, blank=True, related_name='orchestration', on_delete=models.CASCADE)
     deduplication_on_engagement = models.BooleanField(default=False, verbose_name="Deduplication within this engagement only", help_text="If enabled deduplication will only mark a finding in this engagement as duplicate of another finding if both findings are in this engagement. If disabled, deduplication is on the product level.")
 
-    # used for prefetching tags because django-tagging doesn't support that out of the box
     tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
-    tags = TagField(help_text="Add tags that help describe this engagement. Choose from the list or add new tags.  Press Enter key to add.")
+    tags = TagField(blank=True, help_text="Add tags that help describe this engagement. Choose from the list or add new tags.  Press Enter key to add.")
 
     class Meta:
         ordering = ['-target_start']
@@ -1176,9 +1174,8 @@ class Endpoint(models.Model):
     mitigated = models.BooleanField(default=False, blank=True)
     endpoint_status = models.ManyToManyField(Endpoint_Status, blank=True, related_name='endpoint_endpoint_status')
 
-    # used for prefetching tags because django-tagging doesn't support that out of the box
     tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
-    tags = TagField(help_text="Add tags that help describe this endpoint. Choose from the list or add new tags. Press Enter key to add.")
+    tags = TagField(blank=True, help_text="Add tags that help describe this endpoint. Choose from the list or add new tags. Press Enter key to add.")
 
     class Meta:
         ordering = ['product', 'protocol', 'host', 'path', 'query', 'fragment']
@@ -1359,9 +1356,8 @@ class Test(models.Model):
     updated = models.DateTimeField(auto_now=True, null=True)
     created = models.DateTimeField(auto_now_add=True, null=True)
 
-    # used for prefetching tags because django-tagging doesn't support that out of the box
     tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
-    tags = TagField(help_text="Add tags that help describe this test. Choose from the list or add new tags.  Press Enter key to add.")
+    tags = TagField(blank=True, help_text="Add tags that help describe this test. Choose from the list or add new tags.  Press Enter key to add.")
 
     version = models.CharField(max_length=100, null=True, blank=True)
 
@@ -1754,9 +1750,8 @@ class Finding(models.Model):
                                         verbose_name="Number of occurences",
                                         help_text="Number of occurences in the source tool when several vulnerabilites were found and aggregated by the scanner.")
 
-    # used for prefetching tags because django-tagging doesn't support that out of the box
     tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
-    tags = TagField(help_text="Add tags that help describe this finding. Choose from the list or add new tags.  Press Enter key to add.")
+    tags = TagField(blank=True, help_text="Add tags that help describe this finding. Choose from the list or add new tags.  Press Enter key to add.")
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
@@ -2332,9 +2327,8 @@ class Finding_Template(models.Model):
     template_match = models.BooleanField(default=False, verbose_name='Template Match Enabled', help_text="Enables this template for matching remediation advice. Match will be applied to all active, verified findings by CWE.")
     template_match_title = models.BooleanField(default=False, verbose_name='Match Template by Title and CWE', help_text="Matches by title text (contains search) and CWE.")
 
-    # used for prefetching tags because django-tagging doesn't support that out of the box
     tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
-    tags = TagField(help_text="Add tags that help describe this finding template. Choose from the list or add new tags. Press Enter key to add.")
+    tags = TagField(blank=True, help_text="Add tags that help describe this finding template. Choose from the list or add new tags. Press Enter key to add.")
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
@@ -2973,9 +2967,8 @@ class App_Analysis(models.Model):
     website_found = models.URLField(max_length=400, null=True, blank=True)
     created = models.DateTimeField(null=False, editable=False, default=now)
 
-    # used for prefetching tags because django-tagging doesn't support that out of the box
     tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
-    tags = TagField()
+    tags = TagField(blank=True)
 
     def __unicode__(self):
         return self.name + " | " + self.product.name
@@ -2995,7 +2988,7 @@ class Objects_Review(models.Model):
         return self.name
 
 
-class Objects(models.Model):
+class Objects_Product(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     name = models.CharField(max_length=100, null=True, blank=True)
     path = models.CharField(max_length=600, verbose_name='Full file path',
@@ -3007,9 +3000,8 @@ class Objects(models.Model):
     review_status = models.ForeignKey(Objects_Review, on_delete=models.CASCADE)
     created = models.DateTimeField(null=False, editable=False, default=now)
 
-    # used for prefetching tags because django-tagging doesn't support that out of the box
     tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
-    # tags = TagField()
+    tags = TagField(blank=True, help_text="Add tags that help describe this object. Choose from the list or add new tags.  Press Enter key to add.")
 
     def __unicode__(self):
         name = None
@@ -3036,7 +3028,7 @@ class Objects(models.Model):
 
 class Objects_Engagement(models.Model):
     engagement = models.ForeignKey(Engagement, on_delete=models.CASCADE)
-    object_id = models.ForeignKey(Objects, on_delete=models.CASCADE)
+    object_id = models.ForeignKey(Objects_Product, on_delete=models.CASCADE)
     build_id = models.CharField(max_length=150, null=True)
     created = models.DateTimeField(null=False, editable=False, default=now)
     full_url = models.URLField(max_length=400, null=True, blank=True)
@@ -3215,7 +3207,7 @@ class Benchmark_Product_Summary(models.Model):
 # product_opts = [f.name for f in Product._meta.fields]
 # test_opts = [f.name for f in Test._meta.fields]
 # test_type_opts = [f.name for f in Test_Type._meta.fields]
-finding_opts = [f.name for f in Finding._meta.fields]
+finding_opts = [f.name for f in Finding._meta.fields if f.name not in ['tags_from_django_tagging']]
 # endpoint_opts = [f.name for f in Endpoint._meta.fields]
 # engagement_opts = [f.name for f in Engagement._meta.fields]
 # product_type_opts = [f.name for f in Product_Type._meta.fields]
@@ -3516,7 +3508,7 @@ enable_disable_auditlog(enable=get_system_setting('enable_auditlog'))  # on star
 # tag_register(Endpoint)
 # tag_register(Finding_Template)
 # tag_register(App_Analysis)
-# tag_register(Objects)
+# tag_register(Objects_Product)
 
 tagulous.admin.register(Product.tags)
 tagulous.admin.register(Test.tags)
@@ -3525,8 +3517,7 @@ tagulous.admin.register(Engagement.tags)
 tagulous.admin.register(Endpoint.tags)
 tagulous.admin.register(Finding_Template.tags)
 tagulous.admin.register(App_Analysis.tags)
-# TODO TAGS
-# tagulous.admin.register(Objects.tags)
+tagulous.admin.register(Objects_Product.tags)
 
 # Benchmarks
 admin.site.register(Benchmark_Type)
@@ -3541,7 +3532,7 @@ admin.site.register(Testing_Guide)
 
 admin.site.register(Engagement_Presets)
 admin.site.register(Network_Locations)
-admin.site.register(Objects)
+admin.site.register(Objects_Product)
 admin.site.register(Objects_Review)
 admin.site.register(Objects_Engagement)
 admin.site.register(Languages)

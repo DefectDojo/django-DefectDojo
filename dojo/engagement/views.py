@@ -155,7 +155,7 @@ def edit_engagement(request, eid):
         jira_project_form = JIRAProjectForm(request.POST, prefix='jira-project-form', instance=jira_project, target='engagement')
         jira_epic_form = JIRAEngagementForm(request.POST, prefix='jira-epic-form', instance=engagement)
 
-        if (form.is_valid() and jira_project_form.is_valid() and jira_epic_form.is_valid()):
+        if (form.is_valid() and (jira_project_form is None or jira_project_form.is_valid()) and (jira_epic_form is None or jira_epic_form.is_valid())):
 
             # first save engagement details
             new_status = form.cleaned_data.get('status')
@@ -165,10 +165,11 @@ def edit_engagement(request, eid):
             else:
                 engagement.active = True
             engagement.save()
+            form.save_m2m()
 
-            tags = request.POST.getlist('tags')
-            t = ", ".join('"{0}"'.format(w) for w in tags)
-            engagement.tags = t
+            # tags = request.POST.getlist('tags')
+            # t = ", ".join('"{0}"'.format(w) for w in tags)
+            # engagement.tags = t
 
             # save jira project config
             jira_project = jira_project_form.save(commit=False)
@@ -467,9 +468,6 @@ def add_tests(request, eid):
                 eng.save()
 
             new_test.save()
-            tags = request.POST.getlist('tags')
-            t = ", ".join('"{0}"'.format(w) for w in tags)
-            new_test.tags = t
 
             # Save the credential to the test
             if cred_form.is_valid():
@@ -583,6 +581,7 @@ def import_scan_results(request, eid=None, pid=None):
             active = form.cleaned_data['active']
             verified = form.cleaned_data['verified']
             scan_type = request.POST['scan_type']
+            tags = form.cleaned_data['tags']
             if not any(scan_type in code
                        for code in ImportScanForm.SCAN_TYPE_CHOICES):
                 raise Http404()
@@ -603,13 +602,11 @@ def import_scan_results(request, eid=None, pid=None):
                 target_start=scan_date,
                 target_end=scan_date,
                 environment=environment,
-                percent_complete=100)
+                percent_complete=100,
+                tags=tags)
             t.lead = user
             t.full_clean()
             t.save()
-            tags = request.POST.getlist('tags')
-            ts = ", ".join(tags)
-            t.tags = ts
 
             # Save the credential to the test
             if cred_form.is_valid():

@@ -309,6 +309,9 @@ class EngagementFilter(DojoFilter):
         label="Product Type")
     engagement__status = MultipleChoiceFilter(choices=ENGAGEMENT_STATUS_CHOICES,
                                               label="Status")
+    # engagement__tags__name = CharFilter(label="engagement tags")
+    tags__name = CharFilter(lookup_expr='icontains')
+
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
@@ -338,6 +341,7 @@ class ProductFilter(DojoFilter):
     origin = MultipleChoiceFilter(choices=Product.ORIGIN_CHOICES)
     external_audience = BooleanFilter(field_name='external_audience')
     internet_accessible = BooleanFilter(field_name='internet_accessible')
+    tags__name = CharFilter(lookup_expr='icontains')
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
@@ -408,6 +412,7 @@ class ApiProductFilter(DojoFilter):
     user_records = NumberInFilter(field_name='user_records', lookup_expr='in')
     regulations = NumberInFilter(field_name='regulations', lookup_expr='in')
     active_finding_count = NumberInFilter(field_name='active_finding_count', lookup_expr='in')
+    tags__name = CharFilter(lookup_expr='icontains')
     # DateRangeFilter
     created = DateRangeFilter()
     updated = DateRangeFilter()
@@ -505,6 +510,7 @@ class ApiFindingFilter(DojoFilter):
     test__engagement__product = NumberInFilter(field_name='test__engagement__product', lookup_expr='in')
     # ReportRiskAcceptanceFilter
     test__engagement__risk_acceptance = ReportRiskAcceptanceFilter()
+    tags__name = CharFilter(lookup_expr='icontains')
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -574,6 +580,9 @@ class OpenFindingFilter(DojoFilter):
                                 lookup_expr='isnull',
                                 exclude=True,
                                 label='has notes')
+
+    tags__name = CharFilter(lookup_expr='icontains')
+
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
@@ -674,6 +683,8 @@ class ClosedFindingFilter(DojoFilter):
                                 exclude=True,
                                 label='has notes')
 
+    tags__name = CharFilter(lookup_expr='icontains')
+
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
@@ -755,6 +766,8 @@ class AcceptedFindingFilter(DojoFilter):
         queryset=Product_Type.objects.all(),
         label="Product Type")
 
+    tags__name = CharFilter(lookup_expr='icontains')
+
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
@@ -824,6 +837,8 @@ class ProductFindingFilter(DojoFilter):
         queryset=Test_Type.objects.all())
     test__engagement__risk_acceptance = ReportRiskAcceptanceFilter(
         label="Risk Accepted")
+
+    tags__name = CharFilter(lookup_expr='icontains')
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -898,6 +913,8 @@ class SimilarFindingFilter(DojoFilter):
                                 exclude=True,
                                 label='has notes')
 
+    tags__name = CharFilter(lookup_expr='icontains')
+
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
@@ -965,6 +982,8 @@ class TemplateFindingFilter(DojoFilter):
     severity = MultipleChoiceFilter(choices=[])
     numerical_severity = MultipleChoiceFilter(choices=[])
 
+    tags__name = CharFilter(lookup_expr='icontains')
+
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
@@ -981,7 +1000,7 @@ class TemplateFindingFilter(DojoFilter):
     class Meta:
         model = Finding_Template
         exclude = ['description', 'mitigation', 'impact',
-                   'references', 'numerical_severity']
+                   'references', 'numerical_severity', 'tags_from_django_tagging', 'tags']
 
     def __init__(self, *args, **kwargs):
         super(TemplateFindingFilter, self).__init__(*args, **kwargs)
@@ -1212,6 +1231,8 @@ class EndpointFilter(DojoFilter):
     query = CharFilter(lookup_expr='icontains')
     fragment = CharFilter(lookup_expr='icontains')
     mitigated = CharFilter(lookup_expr='icontains')
+
+    tags__name = CharFilter(lookup_expr='icontains')
 
     o = OrderingFilter(
         # tuple-mapping retains order

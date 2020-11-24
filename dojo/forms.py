@@ -23,7 +23,7 @@ from dojo.models import Finding, Product_Type, Product, Note_Type, ScanSettings,
     Development_Environment, Dojo_User, Scan, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage, \
     JIRA_Issue, JIRA_Project, JIRA_Instance, GITHUB_Issue, GITHUB_PKey, GITHUB_Conf, UserContactInfo, Tool_Type, \
     Tool_Configuration, Tool_Product_Settings, Cred_User, Cred_Mapping, System_Settings, Notifications, \
-    Languages, Language_Type, App_Analysis, Objects, Benchmark_Product, Benchmark_Requirement, \
+    Languages, Language_Type, App_Analysis, Objects_Product, Benchmark_Product, Benchmark_Requirement, \
     Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta, Sonarqube_Product, \
     Engagement_Survey, Answered_Survey, TextAnswer, ChoiceAnswer, Choice, Question, TextQuestion, \
     ChoiceQuestion, General_Survey, Regulation
@@ -1282,10 +1282,9 @@ class AddEndpointForm(forms.Form):
     product = forms.CharField(required=True,
                               widget=forms.widgets.HiddenInput(), help_text="The product this endpoint should be "
                                                                             "associated with.")
-    tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
-                           required=False,
-                           help_text="Add tags that help describe this endpoint.  "
-                                     "Choose from the list or add new tags.  Press TAB key to add.")
+    tags = TagField(required=False,
+                    help_text="Add tags that help describe this endpoint.  "
+                              "Choose from the list or add new tags.  Press Enter key to add.")
 
     def __init__(self, *args, **kwargs):
         product = None
@@ -1870,7 +1869,7 @@ class DeleteObjectsSettingsForm(forms.ModelForm):
                             widget=forms.widgets.HiddenInput())
 
     class Meta:
-        model = Objects
+        model = Objects_Product
         exclude = ['tool_type']
 
 
@@ -1916,13 +1915,13 @@ class ObjectSettingsForm(forms.ModelForm):
                                      "Choose from the list or add new tags.  Press TAB key to add.")
 
     class Meta:
-        model = Objects
+        model = Objects_Product
         fields = ['path', 'folder', 'artifact', 'name', 'review_status']
         exclude = ['product']
 
     def __init__(self, *args, **kwargs):
         # TODO TAGS
-        # tags = Tag.objects.usage_for_model(Objects)
+        # tags = Tag.objects.usage_for_model(Objects_Product)
         # t = [(tag.name, tag.name) for tag in tags]
         super(ObjectSettingsForm, self).__init__(*args, **kwargs)
         # self.fields['tags'].widget.choices = t

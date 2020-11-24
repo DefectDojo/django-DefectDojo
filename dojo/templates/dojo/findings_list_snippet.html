@@ -94,13 +94,12 @@
                                 <br/>
                                 {% endif %}
                                 <label style="display: block">Tags</label>
-                                <label style="font-size: 80%; font-weight: normal; display: block; padding-right: 8px;">
-                                    <select multiple class="chosen-select" style="display: none;" name="tags" id="tag_choices">
-                                        {% for tag in tag_input %}
-                                            <option value="{{tag}}">{{tag}}</option>
-                                        {% endfor %}`
-                                    </select>
-                               </label>
+                                {% comment %}
+                                    Quick hack to make bulk edit work without refactoring the whole bulk edit form                                
+                                {% endcomment %}                                
+                                {{ bulk_edit_form.media.css }}
+                                {{ bulk_edit_form.media.js }}
+                                {{ bulk_edit_form.tags }}
                                 <input type="submit" class="btn btn-sm btn-primary" value="Submit"/>
                             </form>
                         </li>
@@ -347,7 +346,7 @@
                                   {% endif %}
                                   <sup>
                                       {% for tag in finding.tags.all %}
-                                      <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                      <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=tag:{{ tag }}">{{ tag }}</a>
                                       {% endfor %}
                                   </sup>
                                 </td>
@@ -523,23 +522,6 @@
         });
     </script>
     <script type="application/javascript">
-        $(function () {
-          $(".chosen-select").chosen({
-            'placeholder_text_multiple': 'Select or add some tags...',
-            'no_results_text': "Tag not found, press TAB key to add."
-            });
-
-          $(".search-field").find("input").on("keydown", function (evt) {
-            var stroke;
-            stroke = (_ref = evt.which) != null ? _ref : evt.keyCode;
-                if (stroke == 9) { // 9 = tab key
-                    var o = new Option($(this).val(), $(this).val(), true, true);
-                    $('#tag_choices').append(o);
-                    $('#tag_choices').trigger('chosen:updated');
-                    $('#tag_choices').focus();
-                }
-            });
-        });
         var checkbox_count = 0;
         function check_checked_finding()
         {

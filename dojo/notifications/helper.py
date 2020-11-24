@@ -116,7 +116,7 @@ def process_notifications(event, notifications=None, *args, **kwargs):
     sync = 'initiator' in kwargs and Dojo_User.wants_block_execution(kwargs['initiator'])
     # TODO TAGS
     # tagulous prevents async notifications as objects can't be pickled (or serialized with json)
-    # sync = True
+    sync = True
 
     # logger.debug('sync: %s %s', sync, vars(notifications))
     logger.debug('sending notification ' + ('synchronously' if sync else 'asynchronously'))
