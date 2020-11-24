@@ -8,18 +8,19 @@ from rest_framework.test import APITestCase
 """
 Fixture description
 - All engagement contain an import of the same anchore json file
-- Engagement 1 is the original, and contains original findings. All other engagements only contain duplicates.
-- Engagement 2 should be deleted by the autodelete, and therefore not be found anymore (404)
-- Engagement 3 should not be deleted because of the lock tag
-- Engagement 4 should not be deleted because of one comment in a finding
-- Engagement 5 will be created here so that its created date is too recent to be taken into consideration by autodelete. It should therefore not be deleted.
-- Engagement 8 is a copy test, much like 8, would not be taken into consideration for deletion.
+- Engagement 7 is the original, and contains original findings. All other engagements only contain duplicates.
+- Engagement 8 should be deleted by the autodelete, and therefore not be found anymore (404)
+- Engagement 9 should not be deleted because of the lock tag
+- Engagement 10 should not be deleted because of one comment in a finding
+- Engagement 11 is a copy test, much like 8, would not be taken into consideration for deletion.
+- Engagement 12 will be created here so that its created date is too recent to be taken into consideration by autodelete. It should therefore not be deleted.
 """
 logger = logging.getLogger(__name__)
 
 
 class AutoDeleteEngagement(APITestCase):
-    fixtures = ['test_autodelete.json']
+    # fixtures = ['test_autodelete.json']
+    fixtures = ['dojo_testdata.json']
 
     def setUp(self):
         testuser = User.objects.get(username='admin')
@@ -50,20 +51,20 @@ class AutoDeleteEngagement(APITestCase):
         with impersonate(testuser):
             super().run(result)
 
-    def test_engagement_1_is_not_deleted(self):
-        response = self.client.get('/engagement/1')
+    def test_engagement_7_is_not_deleted(self):
+        response = self.client.get('/engagement/7')
         self.assertEqual(response.status_code, 200)
 
-    def test_engagement_2_is_deleted(self):
-        response = self.client.get('/engagement/2')
+    def test_engagement_8_is_deleted(self):
+        response = self.client.get('/engagement/8')
         self.assertEqual(response.status_code, 404)
 
-    def test_engagement_3_is_not_deleted(self):
-        response = self.client.get('/engagement/3')
+    def test_engagement_9_is_not_deleted(self):
+        response = self.client.get('/engagement/9')
         self.assertEqual(response.status_code, 200)
 
-    def test_engagement_4_is_not_deleted(self):
-        response = self.client.get('/engagement/4')
+    def test_engagement_10_is_not_deleted(self):
+        response = self.client.get('/engagement/10')
         self.assertEqual(response.status_code, 200)
 
     def test_too_recent_engagement_is_not_deleted(self):
@@ -74,7 +75,7 @@ class AutoDeleteEngagement(APITestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_copy_made_more_recent_engagement_is_not_deleted(self):
-        new_engagement = self.copy_and_reset_engagement(id=1)
+        new_engagement = self.copy_and_reset_engagement(id=7)
         new_engagement.save()
         response = self.client.get('/engagement/{}'.format(new_engagement.pk))
         self.assertEqual(response.status_code, 200)
@@ -82,6 +83,6 @@ class AutoDeleteEngagement(APITestCase):
     def copy_and_reset_engagement(self, id):
         original_engagement = Engagement.objects.get(id=id)
         new_engagement = original_engagement
-        new_engagement.pk = 8
+        new_engagement.pk = 11
         new_engagement.created = date.today().isoformat()
         return new_engagement
