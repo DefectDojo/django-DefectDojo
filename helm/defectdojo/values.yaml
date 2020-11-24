@@ -1,5 +1,9 @@
 ---
 # Global settings
+# Is this deployment for OpenShift? If so, we help with creating a nonroot SCC and adding serviceaccounts to it
+OpenShift:
+  enabled: false
+  createSCC: true
 # create defectdojo specific secret
 createSecret: false
 # create rabbitmq secret in defectdojo chart, outside of rabbitmq chart
@@ -23,6 +27,24 @@ repositoryPrefix: defectdojo
 # imagePullSecrets: defectdojoregistrykey
 tag: latest
 
+securityContext:
+  djangoSecurityContext:
+    # django dockerfile sets USER=1001
+    runAsUser: 1001
+  nginxSecurityContext:
+    # nginx dockerfile sets USER=1001
+    runAsUser: 1001
+
+test:
+  serviceAccount:
+    name: "test-defectdojo"
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
 admin:
   user: admin
   password:
@@ -155,6 +177,8 @@ mysql:
 
 postgresql:
   enabled: true
+  serviceAccount:
+    enabled: true  
   postgresqlUsername: defectdojo
   postgresqlPassword: ""
   postgresqlDatabase: defectdojo
@@ -165,6 +189,7 @@ postgresql:
   replication:
     enabled: false
   service:
+    port: 5432                               
   # To use an external PostgreSQL instance, set enabled to false and uncomment
   # the line below:
   postgresServer: "127.0.0.1"
@@ -184,7 +209,7 @@ cloudsql:
     repository: gcr.io/cloudsql-docker/gce-proxy
     tag: 1.17
     pullPolicy: IfNotPresent
-  # set CloudSQL instance: 'project:zone:instancname'
+  # set CloudSQL instance: 'project:zone:instancename'
   instance: ""
 
 rabbitmq:
@@ -197,7 +222,13 @@ rabbitmq:
     existingErlangSecret: defectdojo-rabbitmq-specific
     affinity: {}
     nodeSelector: {}
-
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
 redis:
   enabled: false
   existingSecret: defectdojo-redis-specific

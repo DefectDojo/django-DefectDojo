@@ -11,6 +11,7 @@ metadata:
   annotations:
     helm.sh/hook: test-success
 spec:
+  serviceAccountName: {{ .Release.Name }}-{{ .Values.test.serviceAccount.name }}
   {{- if .Values.imagePullSecrets }}
   imagePullSecrets:
   - name: {{ .Values.imagePullSecrets }}
@@ -47,4 +48,6 @@ spec:
               key: {{ if eq .Values.database "postgresql" }}{{ .Values.database }}-password{{ end }}{{ if eq .Values.database "mysql" }}{{ .Values.database }}-root-password{{ end }}
         - name: DD_DEBUG
           value: 'True'
+      resources:
+        {{- toYaml .Values.test.resources | nindent 8 }}      
   restartPolicy: Never
