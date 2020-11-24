@@ -103,9 +103,8 @@ def identify_view(request):
         elif get_data.get('false_positive', None):
             return 'Endpoint'
     referer = request.META.get('HTTP_REFERER', None)
-    if not referer:
-        if referer.find('type=Endpoint') > -1:
-            return 'Endpoint'
+    if referer and referer.find('type=Endpoint') > -1:
+        return 'Endpoint'
     return 'Finding'
 
 
@@ -755,7 +754,7 @@ def view_engineer(request, eid):
                                  monthrange(now.year,
                                             now.month)[1],
                                  tzinfo=timezone.get_current_timezone())],
-        reporter=user)
+        owner=user)
                       for finding in ra.accepted_findings.all()]
     closed_month = []
     for f in closed_findings:

@@ -131,6 +131,15 @@ def custom_report(request):
                            "finding_notes": finding_notes,
                            "finding_images": finding_images,
                            "user_id": request.user.id})
+        elif report_format == 'HTML':
+            widgets = list(selected_widgets.values())
+            return render(request,
+                          'dojo/custom_html_report.html',
+                          {"widgets": widgets,
+                           "host": host,
+                           "finding_notes": finding_notes,
+                           "finding_images": finding_images,
+                           "user_id": request.user.id})
         else:
             return HttpResponseForbidden()
     else:
@@ -559,7 +568,7 @@ def generate_report(request, obj):
         user.get_full_name(), (timezone.now().strftime("%m/%d/%Y %I:%M%p %Z")))
 
     if type(obj).__name__ == "Product":
-        if request.user.is_staff or check_auth_users_list(request.user, obj) in qs:
+        if request.user.is_staff or check_auth_users_list(request.user, obj):
             pass  # user is authorized for this product
         else:
             raise PermissionDenied

@@ -28,6 +28,9 @@
                             <th>Product</th>
                             <th>Product Type</th>
                             <th>Engagement Name</th>
+                            {% if system_settings.enable_jira %}                            
+                                <th>JIRA</th>
+                            {% endif %}                                
                             <th>Status</th>
                             <th>Period</th>
                             <th>Lead</th>
@@ -67,6 +70,11 @@
                                         </sup>
                                         <br>
                                     </td>
+                                    {% if system_settings.enable_jira %}
+                                    <td class="text-center">
+                                      {{ e|jira_project_tag }}
+                                    </td>
+                                    {% endif %}     
                                     <td> {{ e.status }} </td>
                                     <td> {{ e.target_start|date:"SHORT_DATE_FORMAT" }} - {{ e.target_end|date:"SHORT_DATE_FORMAT" }}
                                         {% if e.is_overdue %}<sup><div class="tag-label warning-color">{{ e.target_end|overdue }} overdue</div></sup>

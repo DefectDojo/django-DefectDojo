@@ -19,25 +19,23 @@ from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
 from dojo.templatetags.display_tags import get_level
 from dojo.filters import ProductFilter, EngagementFilter, ProductMetricsEndpointFilter, ProductMetricsFindingFilter, ProductComponentFilter
-from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAPKeyForm, JIRAFindingForm, AdHocFindingForm, \
+from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAProjectForm, JIRAFindingForm, AdHocFindingForm, \
                        EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm, ProductNotificationsForm, \
                        GITHUB_Product_Form, GITHUBFindingForm, App_AnalysisTypeForm, JIRAEngagementForm
-from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, GITHUB_PKey, Finding_Template, \
+from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_Project, GITHUB_PKey, Finding_Template, \
                         Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint_Status, \
-                        Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, Dojo_User, BurpRawRequestResponse
+                        Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, BurpRawRequestResponse
 
-from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, Product_Tab, get_punchcard_data, add_epic, queryset_check
+from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, Product_Tab, get_punchcard_data, queryset_check
 from dojo.notifications.helper import create_notification
 from custom_field.models import CustomFieldValue, CustomField
-from dojo.tasks import add_epic_task, add_external_issue_task, add_external_issue
 from tagging.models import Tag
 from tagging.utils import get_tag_list
 from django.db.models import Prefetch, F
 from django.db.models.query import QuerySet
 from github import Github
-from dojo.finding.views import finding_link_jira, finding_unlink_jira
 from dojo.user.helper import user_must_be_authorized, user_is_authorized, check_auth_users_list
-
+import dojo.jira_link.helper as jira_helper
 
 logger = logging.getLogger(__name__)
 
@@ -92,7 +90,7 @@ def prefetch_for_product(prods):
         prefetched_prods = prefetched_prods.annotate(closed_engagement_count=Count('engagement__id', filter=Q(engagement__active=False)))
         prefetched_prods = prefetched_prods.annotate(last_engagement_date=Max('engagement__target_start'))
         prefetched_prods = prefetched_prods.annotate(active_finding_count=Count('engagement__test__finding__id', filter=Q(engagement__test__finding__active=True)))
-        prefetched_prods = prefetched_prods.prefetch_related(Prefetch('jira_pkey_set', queryset=JIRA_PKey.objects.all().select_related('conf'), to_attr='jira_confs'))
+        prefetched_prods = prefetched_prods.prefetch_related('jira_project_set__jira_instance')
         prefetched_prods = prefetched_prods.prefetch_related(Prefetch('github_pkey_set', queryset=GITHUB_PKey.objects.all().select_related('git_conf'), to_attr='github_confs'))
         active_endpoint_query = Endpoint.objects.filter(
                 finding__active=True,
@@ -230,7 +228,7 @@ def finding_querys(request, prod):
         },
     )
 
-    findings = ProductMetricsFindingFilter(request.GET, queryset=findings_query)
+    findings = ProductMetricsFindingFilter(request.GET, queryset=findings_query, pid=prod)
     findings_qs = queryset_check(findings)
     filters['form'] = findings.form
 
@@ -631,6 +629,7 @@ def prefetch_for_view_engagements(engs):
         prefetched_engs = prefetched_engs.prefetch_related('test_set__test_type')  # test.name uses test_type
         prefetched_engs = prefetched_engs.annotate(count_findings_all=Count('test__finding__id'))
         prefetched_engs = prefetched_engs.annotate(count_findings_open=Count('test__finding__id', filter=Q(test__finding__active=True)))
+        prefetched_engs = prefetched_engs.annotate(count_findings_close=Count('test__finding__id', filter=Q(test__finding__is_Mitigated=True)))
         prefetched_engs = prefetched_engs.annotate(count_findings_duplicate=Count('test__finding__id', filter=Q(test__finding__duplicate=True)))
         prefetched_engs = prefetched_engs.prefetch_related('tagged_items__tag')
     else:
@@ -654,7 +653,7 @@ def new_product(request):
     if request.method == 'POST':
         form = ProductForm(request.POST, instance=Product())
         if get_system_setting('enable_jira'):
-            jform = JIRAPKeyForm(request.POST, instance=JIRA_PKey())
+            jform = JIRAProjectForm(request.POST, instance=JIRA_Project())
         else:
             jform = None
 
@@ -674,10 +673,10 @@ def new_product(request):
                                  extra_tags='alert-success')
             if get_system_setting('enable_jira'):
                 if jform.is_valid():
-                    jira_pkey = jform.save(commit=False)
-                    if jira_pkey.conf is not None:
-                        jira_pkey.product = product
-                        jira_pkey.save()
+                    jira_project = jform.save(commit=False)
+                    if jira_project.jira_instance is not None:
+                        jira_project.product = product
+                        jira_project.save()
                         messages.add_message(request,
                                                 messages.SUCCESS,
                                                 'JIRA information added successfully.',
@@ -719,7 +718,7 @@ def new_product(request):
     else:
         form = ProductForm()
         if get_system_setting('enable_jira'):
-            jform = JIRAPKeyForm()
+            jform = JIRAProjectForm()
         else:
             jform = None
         if get_system_setting('enable_github'):
@@ -741,17 +740,13 @@ def edit_product(request, pid):
     prod = Product.objects.get(pk=pid)
     system_settings = System_Settings.objects.get()
     jira_enabled = system_settings.enable_jira
-    jira_inst = None
     jform = None
     github_enabled = system_settings.enable_github
     github_inst = None
     gform = None
     sonarqube_form = None
-    try:
-        jira_inst = JIRA_PKey.objects.get(product=prod)
-    except:
-        jira_inst = None
-        pass
+    jira_project = jira_helper.get_jira_project(prod)
+
     try:
         github_inst = GITHUB_PKey.objects.get(product=prod)
     except:
@@ -772,15 +767,27 @@ def edit_product(request, pid):
                                  'Product updated successfully.',
                                  extra_tags='alert-success')
 
-            if get_system_setting('enable_jira') and jira_inst:
-                jform = JIRAPKeyForm(request.POST, instance=jira_inst)
+            if get_system_setting('enable_jira') and jira_project:
+                jform = JIRAProjectForm(request.POST, instance=jira_project)
                 # need to handle delete
-                try:
-                    jform.save()
-                except:
-                    pass
-            elif get_system_setting('enable_jira'):
-                jform = JIRAPKeyForm(request.POST)
+                if jform.is_valid():
+                    try:
+                        jform.save()
+
+                        messages.add_message(request,
+                                                messages.SUCCESS,
+                                                'JIRA information updated successfully.',
+                                                extra_tags='alert-success')
+                    except Exception as e:
+                        logger.exception(e)
+                        logger.info(jform.errors)
+                        messages.add_message(request,
+                                                messages.ERROR,
+                                                'JIRA Project config not updated due to errors.',
+                                                extra_tags='alert-danger')
+                        pass
+            elif get_system_setting('enable_jira'):  # new jira_config
+                jform = JIRAProjectForm(request.POST)
                 if jform.is_valid():
                     new_conf = jform.save(commit=False)
                     new_conf.product_id = pid
@@ -789,6 +796,12 @@ def edit_product(request, pid):
                                             messages.SUCCESS,
                                             'JIRA information updated successfully.',
                                             extra_tags='alert-success')
+                else:
+                    logger.info(jform.errors)
+                    messages.add_message(request,
+                                            messages.ERROR,
+                                            'JIRA form not valid.',
+                                            extra_tags='alert-danger')
 
             if get_system_setting('enable_github') and github_inst:
                 gform = GITHUB_Product_Form(request.POST, instance=github_inst)
@@ -821,13 +834,8 @@ def edit_product(request, pid):
                            initial={'auth_users': prod.authorized_users.all(),
                                     'tags': get_tag_list(Tag.objects.get_for_object(prod))})
 
-        if jira_enabled and (jira_inst is not None):
-            if jira_inst is not None:
-                jform = JIRAPKeyForm(instance=jira_inst)
-            else:
-                jform = JIRAPKeyForm()
-        elif jira_enabled:
-            jform = JIRAPKeyForm()
+        if jira_enabled:
+            jform = JIRAProjectForm(instance=jira_project)
         else:
             jform = None
 
@@ -895,77 +903,114 @@ def delete_product(request, pid):
 
 @user_must_be_authorized(Product, 'staff', 'pid')  # use arg 0 as using pid causes issues, I think due to cicd being there
 def new_eng_for_app(request, pid, cicd=False):
+
     jform = None
-    prod = Product.objects.get(id=pid)
-    if not user_is_authorized(request.user, 'staff', prod):
+    product = Product.objects.get(id=pid)
+    jira_project = jira_helper.get_jira_project(product)
+    jira_error = False
+    if not user_is_authorized(request.user, 'staff', product):
         raise PermissionDenied
 
-    use_jira = get_system_setting('enable_jira') and prod.jira_pkey is not None
-
     if request.method == 'POST':
+        form = EngForm(request.POST, cicd=cicd, product=product, user=request.user)
+        jira_project_form = JIRAProjectForm(request.POST, prefix='jira-project-form', target='engagement', product=product)
+        jira_epic_form = JIRAEngagementForm(request.POST, prefix='jira-epic-form')
 
-        # for key, value in request.POST.items():
-        #     print(f'Key: {key}')
-        #     print(f'Value: {value}')
+        if (form.is_valid() and (jira_project_form is None or jira_project_form.is_valid()) and (jira_epic_form is None or jira_epic_form.is_valid())):
 
-        form = EngForm(request.POST, cicd=cicd, product=prod.id, user=request.user)
-        if form.is_valid():
-            new_eng = form.save(commit=False)
-            if not new_eng.name:
-                new_eng.name = str(new_eng.target_start)
-            new_eng.threat_model = False
-            new_eng.api_test = False
-            new_eng.pen_test = False
-            new_eng.check_list = False
-            new_eng.product_id = form.cleaned_data.get('product').id
-            if new_eng.threat_model:
-                new_eng.progress = 'threat_model'
+            # first create the new engagement
+            engagement = form.save(commit=False)
+            if not engagement.name:
+                engagement.name = str(engagement.target_start)
+            engagement.threat_model = False
+            engagement.api_test = False
+            engagement.pen_test = False
+            engagement.check_list = False
+            engagement.product = form.cleaned_data.get('product')
+            if engagement.threat_model:
+                engagement.progress = 'threat_model'
             else:
-                new_eng.progress = 'other'
+                engagement.progress = 'other'
             if cicd:
-                new_eng.engagement_type = 'CI/CD'
-                new_eng.status = "In Progress"
+                engagement.engagement_type = 'CI/CD'
+                engagement.status = "In Progress"
+            engagement.active = True
 
-            new_eng.save()
+            engagement.save()
+
             tags = request.POST.getlist('tags')
             t = ", ".join('"{0}"'.format(w) for w in tags)
-            new_eng.tags = t
-            if 'jiraform-push_to_jira' in request.POST:
-                jform = JIRAEngagementForm(request.POST, prefix='jiraform')
+            engagement.tags = t
 
-            if form.is_valid() and (jform is None or jform.is_valid()):
-                if 'jiraform-push_to_jira' in request.POST:
-                    if Dojo_User.wants_block_execution(request.user):
-                        logger.debug('calling add_epic')
-                        add_epic(new_eng, jform.cleaned_data.get("push_to_jira"))
-                    else:
-                        logger.debug('calling add_epic_task')
-                        add_epic_task.delay(new_eng, jform.cleaned_data.get("push_to_jira"))
+            # save jira project config
+            jira_project = jira_project_form.save(commit=False)
+            jira_project.engagement = engagement
+            # only check jira project if form is sufficiently populated
+            if jira_project.jira_instance and jira_project.project_key:
+                jira_error = not jira_helper.is_jira_project_valid(jira_project)
+
+            if not jira_error:
+                jira_project.save()
+
+                messages.add_message(
+                    request,
+                    messages.SUCCESS,
+                    'JIRA Project config added successfully.',
+                    extra_tags='alert-success')
+
+            # push epic
+            if jira_epic_form.cleaned_data.get('push_to_jira'):
+                if jira_helper.push_to_jira(engagement):
+                    messages.add_message(
+                        request,
+                        messages.SUCCESS,
+                        'Push to JIRA for Epic queued succesfully, check alerts on the top right for errors',
+                        extra_tags='alert-success')
+                else:
+                    jira_error = True
+
+            create_notification(event='engagement_added', title=engagement.name + " for " + product.name, engagement=engagement, url=reverse('view_engagement', args=(engagement.id,)), objowner=engagement.lead)
 
             messages.add_message(request,
-                                 messages.SUCCESS,
-                                 'Engagement added successfully.',
-                                 extra_tags='alert-success')
+                                messages.SUCCESS,
+                                'Engagement added successfully.',
+                                extra_tags='alert-success')
 
-            create_notification(event='engagement_added', title=new_eng.name + " for " + prod.name, engagement=new_eng, url=reverse('view_engagement', args=(new_eng.id,)), objowner=new_eng.lead)
-
-            if "_Add Tests" in request.POST:
-                return HttpResponseRedirect(reverse('add_tests', args=(new_eng.id,)))
-            elif "_Import Scan Results" in request.POST:
-                return HttpResponseRedirect(reverse('import_scan_results', args=(new_eng.id,)))
+            if not jira_error:
+                if "_Add Tests" in request.POST:
+                    return HttpResponseRedirect(reverse('add_tests', args=(engagement.id,)))
+                elif "_Import Scan Results" in request.POST:
+                    return HttpResponseRedirect(reverse('import_scan_results', args=(engagement.id,)))
+                else:
+                    return HttpResponseRedirect(reverse('view_engagement', args=(engagement.id,)))
             else:
-                return HttpResponseRedirect(reverse('view_engagement', args=(new_eng.id,)))
+                # engagement was saved, but JIRA errors, so goto edit_engagement
+                return HttpResponseRedirect(reverse('edit_engagement', args=(engagement.id, )))
+        else:
+            # if forms invalid, page will just reload and show errors
+            if jira_project_form.errors or jira_epic_form.errors:
+                messages.add_message(
+                    request,
+                    messages.ERROR,
+                    'Errors in JIRA forms, see below',
+                    extra_tags='alert-danger')
     else:
-        form = EngForm(initial={'lead': request.user, 'target_start': timezone.now().date(), 'target_end': timezone.now().date() + timedelta(days=7), 'product': prod.id}, cicd=cicd, product=prod.id, user=request.user)
-        if use_jira:
-            jform = JIRAEngagementForm(prefix='jiraform')
+        form = EngForm(initial={'lead': request.user, 'target_start': timezone.now().date(), 'target_end': timezone.now().date() + timedelta(days=7), 'product': product}, cicd=cicd, product=product, user=request.user)
+        jira_project_form = None
+        jira_epic_form = None
+        if get_system_setting('enable_jira'):
+            logger.debug('showing jira-project-form')
+            jira_project_form = JIRAProjectForm(prefix='jira-project-form', target='engagement', product=product)
+            if jira_project:
+                logger.debug('showing jira-epic-form')
+                jira_epic_form = JIRAEngagementForm(prefix='jira-epic-form')
 
     product_tab = Product_Tab(pid, title="New Engagement", tab="engagements")
     return render(request, 'dojo/new_eng.html',
-                  {'form': form, 'pid': pid,
+                  {'form': form,
                    'product_tab': product_tab,
-                   'jform': jform
-                   })
+                   'jira_epic_form': jira_epic_form,
+                   'jira_project_form': jira_project_form})
 
 
 # @user_passes_test(lambda u: u.is_staff)
@@ -1080,11 +1125,11 @@ def ad_hoc_finding(request, pid):
                     target_start=timezone.now(), target_end=timezone.now())
         test.save()
     form_error = False
-    push_all_jira_issues = False
+    push_all_jira_issues = jira_helper.is_push_all_issues(test)
     jform = None
     gform = None
     form = AdHocFindingForm(initial={'date': timezone.now().date()}, req_resp=None)
-    use_jira = get_system_setting('enable_jira') and test.engagement.product.jira_pkey is not None
+    use_jira = jira_helper.get_jira_project(test) is not None
 
     if request.method == 'POST':
         form = AdHocFindingForm(request.POST, req_resp=None)
@@ -1104,7 +1149,7 @@ def ad_hoc_finding(request, pid):
                                      'Can not set a finding as inactive or false positive without adding all mandatory notes',
                                      extra_tags='alert-danger')
         if use_jira:
-            jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_pkey=test.engagement.product.jira_pkey)
+            jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_project=jira_helper.get_jira_project(test))
 
         if form.is_valid() and (jform is None or jform.is_valid()):
             new_finding = form.save(commit=False)
@@ -1170,7 +1215,7 @@ def ad_hoc_finding(request, pid):
 
                 # if the jira issue key was changed, update database
                 new_jira_issue_key = jform.cleaned_data.get('jira_issue')
-                if new_finding.has_jira_issue():
+                if new_finding.has_jira_issue:
                     jira_issue = new_finding.jira_issue
 
                     # everything in DD around JIRA integration is based on the internal id of the issue in JIRA
@@ -1179,27 +1224,24 @@ def ad_hoc_finding(request, pid):
                     # we can assume the issue exist, which is already checked in the validation of the jform
 
                     if not new_jira_issue_key:
-                        finding_unlink_jira(request, new_finding)
+                        jira_helper.finding_unlink_jira(request, new_finding)
                         jira_message = 'Link to JIRA issue removed successfully.'
 
                     elif new_jira_issue_key != new_finding.jira_issue.jira_key:
-                        finding_unlink_jira(request, new_finding)
-                        finding_link_jira(request, new_finding, new_jira_issue_key)
+                        jira_helper.finding_unlink_jira(request, new_finding)
+                        jira_helper.finding_link_jira(request, new_finding, new_jira_issue_key)
                         jira_message = 'Changed JIRA link successfully.'
                 else:
                     logger.debug('finding has no jira issue yet')
                     if new_jira_issue_key:
                         logger.debug('finding has no jira issue yet, but jira issue specified in request. trying to link.')
-                        finding_link_jira(request, new_finding, new_jira_issue_key)
+                        jira_helper.finding_link_jira(request, new_finding, new_jira_issue_key)
                         jira_message = 'Linked a JIRA issue successfully.'
 
             if 'githubform-push_to_github' in request.POST:
                 gform = GITHUBFindingForm(request.POST, prefix='jiragithub', enabled=push_all_jira_issues)
                 if gform.is_valid():
-                    if Dojo_User.wants_block_execution(request.user):
-                        add_external_issue(new_finding, 'github')
-                    else:
-                        add_external_issue_task.delay(new_finding, 'github')
+                    add_external_issue(new_finding, 'github')
 
             new_finding.save(push_to_jira=push_to_jira)
 
@@ -1255,8 +1297,7 @@ def ad_hoc_finding(request, pid):
                                  extra_tags='alert-danger')
     else:
         if use_jira:
-            push_all_jira_issues = test.engagement.product.jira_pkey_set.first().push_all_issues
-            jform = JIRAFindingForm(push_all=push_all_jira_issues, prefix='jiraform', jira_pkey=test.engagement.product.jira_pkey)
+            jform = JIRAFindingForm(push_all=jira_helper.is_push_all_issues(test), prefix='jiraform', jira_project=jira_helper.get_jira_project(test))
 
         if get_system_setting('enable_github'):
             if GITHUB_PKey.objects.filter(product=test.engagement.product).count() != 0:

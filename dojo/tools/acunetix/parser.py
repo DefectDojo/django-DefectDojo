@@ -1,14 +1,15 @@
 from .parser_helper import get_defectdojo_findings
 from dojo.models import Finding
-import re
+import hashlib
 import logging
-
-logger = logging.getLogger(__name__)
+import re
 
 __author__ = "Vijay Bheemineni"
 __license__ = "MIT"
 __version__ = "1.0.0"
 __status__ = "Development"
+
+logger = logging.getLogger(__name__)
 
 
 class AcunetixScannerParser(object):
@@ -24,38 +25,30 @@ class AcunetixScannerParser(object):
         self.set_defectdojo_findings(acunetix_defectdojo_findings, test)
 
     def set_defectdojo_findings(self, acunetix_defectdojo_findings, test):
-        defectdojo_findings = []
+        defectdojo_findings = dict()
 
         for acunetix_defectdojo_finding in acunetix_defectdojo_findings:
+            dupe_key = hashlib.md5((acunetix_defectdojo_finding.title + acunetix_defectdojo_finding.description).encode("utf-8")).hexdigest()
 
-            defectdojo_title = acunetix_defectdojo_finding.title
-            defectdojo_date = get_defectdojo_date(acunetix_defectdojo_finding.date)
-            defectdojo_cwe_number = get_cwe_number(acunetix_defectdojo_finding.cwe)
-            defectdojo_severity = get_severity(acunetix_defectdojo_finding.severity)
-            defectdojo_falsep = get_false_positive(acunetix_defectdojo_finding.false_p)
-
-            defectdojo_findings_titles = [finding.title for finding in defectdojo_findings]
-
-            if defectdojo_title not in defectdojo_findings_titles:
-                finding = Finding(
-                            title=defectdojo_title,
-                            date=defectdojo_date,
+            if dupe_key not in defectdojo_findings:
+                defectdojo_findings[dupe_key] = Finding(
+                            title=acunetix_defectdojo_finding.title,
+                            date=get_defectdojo_date(acunetix_defectdojo_finding.date),
                             url=acunetix_defectdojo_finding.url,
-                            cwe=defectdojo_cwe_number,
+                            cwe=get_cwe_number(acunetix_defectdojo_finding.cwe),
                             test=test,
-                            severity=defectdojo_severity,
+                            severity=get_severity(acunetix_defectdojo_finding.severity),
                             description=acunetix_defectdojo_finding.description,
                             mitigation=acunetix_defectdojo_finding.mitigation,
                             references=acunetix_defectdojo_finding.references,
                             impact=acunetix_defectdojo_finding.impact,
-                            false_p=defectdojo_falsep,
+                            false_p=get_false_positive(acunetix_defectdojo_finding.false_p),
                             dynamic_finding=acunetix_defectdojo_finding.dynamic_finding
                 )
-                defectdojo_findings.append(finding)
             else:
-                logger.debug(("Duplicate finding : {defectdojo_title}".format(defectdojo_title=defectdojo_title)))
+                logger.debug("Duplicate finding : {defectdojo_title}".format(defectdojo_title=acunetix_defectdojo_finding.title))
 
-        self.items = defectdojo_findings
+        self.items = list(defectdojo_findings.values())
 
 
 def get_defectdojo_date(date):
@@ -72,7 +65,6 @@ def get_defectdojo_date(date):
     mon = date[1]
     year = date[2]
     defectdojo_date = "{year}-{mon}-{day}".format(year=year, mon=mon, day=day)
-    # print(defectdojo_date)
     return defectdojo_date
 
 
