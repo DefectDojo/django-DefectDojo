@@ -26,6 +26,30 @@ function success() {
     echo "Success: $1 test passed\n"
 }
 
+test="Report Builder tests"
+echo "Running: $test"
+if python3 tests/Report_builder_unit_test.py ; then
+    success $test
+else
+    fail $test
+fi
+
+test="Notes integration tests"
+echo "Running: $test"
+if python3 tests/Notes_unit_test.py ; then
+    success $test
+else
+    fail $test
+fi
+
+test="Regulation integration tests"
+echo "Running: $test"
+if python3 tests/Regulations_unit_test.py ; then
+    success $test
+else
+    fail $test
+fi
+
 test="Product type integration tests"
 echo "Running: $test"
 if python3 tests/Product_type_unit_test.py ; then
@@ -82,7 +106,7 @@ else
     fail $test
 fi
 
-test=echo "User integration tests"
+test="User integration tests"
 echo "Running: $test"
 if python3 tests/User_unit_test.py ; then
     success $test

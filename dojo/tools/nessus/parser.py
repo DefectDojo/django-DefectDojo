@@ -201,6 +201,9 @@ class NessusXMLParser(object):
                     for xref in item.iter("xref"):
                         references += xref.text + "\n"
 
+                    cve = None
+                    if item.findtext("cve"):
+                        cve = item.find("cve").text
                     cwe = None
                     if item.findtext("cwe"):
                         cwe = item.find("cwe").text
@@ -222,7 +225,8 @@ class NessusXMLParser(object):
                                        mitigation=mitigation,
                                        impact=impact,
                                        references=references,
-                                       cwe=cwe)
+                                       cwe=cwe,
+                                       cve=cve)
                         find.unsaved_endpoints = list()
                         dupes[dupe_key] = find
 
