@@ -1,11 +1,13 @@
 import io
 import csv
 import json
-
+import logging
 import hashlib
 
 from django.utils.html import escape
 from dojo.models import Finding
+
+logger = logging.getLogger(__name__)
 
 
 class TwistlockCSVParser(object):
@@ -119,7 +121,7 @@ class TwistlockJsonParser(object):
                         node['packageVersion']) + str(node['severity']))
                     items[unique_key] = item
             except KeyError as ke:
-                print("Could not find key {}".format(ke))
+                logger.warn("Could not find key {}".format(ke))
 
         return list(items.values())
 

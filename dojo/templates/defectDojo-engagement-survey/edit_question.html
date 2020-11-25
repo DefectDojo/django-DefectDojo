@@ -9,14 +9,13 @@
         {% include "dojo/form_fields.html" with form=form %}
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
-                <input class="btn btn-primary" type="submit" label="edit_survey_questions" name="edit_survey_questions"
+                <input class="btn btn-primary" type="submit" label="edit_questionnaire_questions" name="edit_questionnaire_questions"
                        value="Edit Questions"/>
             </div>
         </div>
     </form>
 {% endblock %}
 {% block postscript %}
-    <script type="application/javascript" src="{{ STATIC_URL }}chosen/chosen.jquery.min.js"></script>
     <script type="application/javascript">
         $(function () {
             $("#id_choices").bind("DOMSubtreeModified", function () {

@@ -11,7 +11,7 @@
         {% if include_table_of_contents%}
 			<div class="row">
 				<div class="col-lg-12" id="toc">
-					<h3 id="table_of_contents">Table of Contents for {{ product.name }}</h3>
+					<h3 id="table_of_contents">Table of Contents for {{ product_type.name }}</h3>
 				</div>
 			</div>
 
@@ -29,11 +29,11 @@
                 </div>
                 <div class="col-lg-12">
                     {% if product_type %}
-                        {% for prod in products %}
+                        {% for prod in context.products %}
                             <h4>{{ prod.name }}</h4>
                             {% if prod.engagement_set.all %}
                                 {% for eng in prod.engagement_set.all %}
-                                    {% if eng in engagements %}
+                                    {% if eng in context.engagements %}
                                         <p>
                                             {% if eng.name  and eng.name|length > 0 %}
                                                 The {{ eng.name }}
@@ -54,7 +54,7 @@
                                             </p>
                                             <ul>
                                                 {% for t in eng.test_set.all %}
-                                                    {% if t in tests %}
+                                                    {% if t in context.tests %}
                                                         <li>{{ t.test_type.name }}
                                                             ({{ t.environment.name|default:"unknown" }}):
                                                             {{ t.target_start|date:"SHORT_DATE_FORMAT" }}
@@ -113,86 +113,91 @@
 
         <div class="row">
             <div class="col-lg-12">
-                {% if findings %}
-                    <h3 id="findings">Findings</h3>
-                {% endif %}
-                {% for finding in findings %}
-                    {% ifchanged finding.severity %}
-                        <h4>{{ finding.severity|capfirst }}</h4>
-                    {% endifchanged %}
-                    <div class="panel panel-default">
-                        <div class="panel-heading finding-title">
-                            <div class="clearfix">
-                                <h5>
-                                    Finding {{ finding.id }}: {{ finding.title }}
-                                    {% if finding.tags %}
-                                        <sup>
-                                            {% for tag in finding.tags %}
-                                            {{ tag }}
-                                            {% endfor %}
-                                        </sup>
-                                    {% endif %}
-                                </h5>
-                            </div>
-                        </div>
-                        <div class="table-responsive">
-                            <table id="notes" class="table-striped table table-condensed table-hover centered">
-                                <tr>
-                                    <th>Severity</th>
-                                    <th>Status</th>
-                                    {% if finding.risk_acceptance_set.all %}
-                                        <th>Acceptance</th>
-                                    {% endif %}
-                                    <th>Date discovered</th>
-                                    <th>Age</th>
-                                    <th>Reporter</th>
-                                    {% if finding.mitigated %}
-                                        <th>Date Mitigated</th>
-                                        <th>Mitigated By</th>
-                                    {% endif %}
-                                    {% if finding.cwe > 0 %}
-                                        <th>CWE</th>
-                                    {% endif %}
-                                </tr>
-                                <tr>
-                                    <td>
-                                    <span class="label severity severity-{{ finding.severity }}">
-                                        {% if finding.severity %}
-                                            {{ finding.severity }}
-                                        {% else %}
-                                            Unknown
+                {% for prod in context.products %}
+                    {% if prod|product_findings %}
+                        <h3 id="findings">Findings in {{ prod.name}}</h3>
+                    {% endif %}
+                    {% for finding in prod|product_findings %}
+                        {% ifchanged finding.severity %}
+                            <h4>{{ finding.severity|capfirst }}</h4>
+                        {% endifchanged %}
+                        <div class="panel panel-default">
+                            <div class="panel-heading finding-title">
+                                <div class="clearfix">
+                                    <h5>
+                                        Finding {{ finding.id }}: {{ finding.title }}
+                                        {% if finding.tags %}
+                                            <sup>
+                                                {% for tag in finding.tags %}
+                                                {{ tag }}
+                                                {% endfor %}
+                                            </sup>
                                         {% endif %}
-                                    </span>
-                                    </td>
-                                    <td>{{ finding.status }}</td>
-                                    {% if finding.risk_acceptance_set.all %}
+                                    </h5>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table id="notes" class="table-striped table table-condensed table-hover centered">
+                                    <tr>
+                                        <th>Severity</th>
+                                        <th>Status</th>
+                                        {% if finding.risk_acceptance_set.all %}
+                                            <th>Acceptance</th>
+                                        {% endif %}
+                                        <th>Date discovered</th>
+                                        <th>Age</th>
+                                        <th>Reporter</th>
+                                        {% if finding.mitigated %}
+                                            <th>Date Mitigated</th>
+                                            <th>Mitigated By</th>
+                                        {% endif %}
+                                        {% if finding.cwe > 0 %}
+                                            <th>CWE</th>
+                                        {% endif %}
+                                    </tr>
+                                    <tr>
                                         <td>
-                                            <a href="{% url 'view_risk' finding.test.engagement.id finding.risk_acceptance_set.all.0.id %}">
-                                                View Risk Acceptance</a>
+                                        <span class="label severity severity-{{ finding.severity }}">
+                                            {% if finding.severity %}
+                                                {{ finding.severity }}
+                                            {% else %}
+                                                Unknown
+                                            {% endif %}
+                                        </span>
                                         </td>
-                                    {% endif %}
-                                    <td>{{ finding.date }}</td>
-                                    <td>{{ finding.age }} days</td>
-                                    <td>{{ finding.reporter }}</td>
-                                    {% if finding.mitigated %}
-                                        <td>{{ finding.mitigated }}</td>
-                                        <td>{{ finding.mitigated_by }}</td>
-                                    {% endif %}
-                                    {% if finding.cwe > 0 %}
-                                        <td>
-                                            <a target="_blank"
-                                               href="https://cwe.mitre.org/data/definitions/{{ finding.cwe }}.html">
-                                                <i class="fa fa-external-link"></i> {{ finding.cwe }}
-                                            </a>
-                                        </td>
-                                    {% endif %}
+                                        <td>{{ finding.status }}</td>
+                                        {% if finding.risk_acceptance_set.all %}
+                                            <td>
+                                                <a href="{% url 'view_risk' finding.test.engagement.id finding.risk_acceptance_set.all.0.id %}">
+                                                    View Risk Acceptance</a>
+                                            </td>
+                                        {% endif %}
+                                        <td>{{ finding.date }}</td>
+                                        <td>{{ finding.age }} days</td>
+                                        <td>{{ finding.reporter }}</td>
+                                        {% if finding.mitigated %}
+                                            <td>{{ finding.mitigated }}</td>
+                                            <td>{{ finding.mitigated_by }}</td>
+                                        {% endif %}
+                                        {% if finding.cwe > 0 %}
+                                            <td>
+                                                <a target="_blank"
+                                                href="https://cwe.mitre.org/data/definitions/{{ finding.cwe }}.html">
+                                                    <i class="fa fa-external-link"></i> {{ finding.cwe }}
+                                                </a>
+                                            </td>
+                                        {% endif %}
 
-                                </tr>
-                            </table>
+                                    </tr>
+                                </table>
+                            </div>
                         </div>
                     </div>
                     
                     {% include "dojo/snippets/endpoints.html" with finding=finding destination="Report" %}
+
+                    <h6>CVSSv3</h6>
+                    <pre>{{ finding.cvssv3 }}</pre>
 
                     <h6>Description</h6>
                     <pre>{{ finding.description }}</pre>
@@ -221,53 +226,66 @@
                             {% for pic in finding.images.all %}
                                 <p><img src="{{ host }}{% pic_token pic 'original' %}" style="max-width: 85%"></p>
                             {% endfor %}
-                        {% else %}
-                            <p class="text-center">No images found.</p>
-                        {% endif %}
-                    {% endif %}
-                    {% if include_finding_notes %}
-                        {% with notes=finding.notes.all|get_public_notes %}
-                            {% if notes.count > 0 %}
-                                <h6>Notes</h6>
-                                <table id="notes" class="tablesorter-bootstrap table table-condensed table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>User</th>
-                                            <th>Date</th>
-                                            {% with notes_with_type=notes|get_notetype_notes_count %}
-                                              {% if notes_with_type > 0 %}
-                                                  <th>Note Type</th>
-                                              {% endif %}
-                                            <th>Note</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for note in notes reversed %}
-                                            <tr>
-                                                <td>
-                                                    {{ note.author.username }}
-                                                </td>
-                                                <td>
-                                                    {{ note.date }}
-                                                </td>
-                                                {% if notes_with_type > 0 %}
-                                                <td>
-                                                    {% if note.note_type != None %}
-                                                      {{ note.note_type }}
-                                                    {% endif %}
-                                                </td>
-                                                {% endif %}
-                                                <td>
-                                                    {{ note|linebreaks }}
-                                                </td>
-                                            </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                  {% endwith %}
-                                </table>
                             {% endif %}
-                        {% endwith %}
-                    {% endif %}
+
+                        <h6>Impact</h6>
+                        <pre>{{ finding.impact }}</pre>
+                        <h6>References</h6>
+                        <pre>{{ finding.references }}</pre>
+                        {% if include_finding_images %}
+                            <h6>Images</h6>
+                            {% if finding.images.all.count > 0 %}
+                                {% for pic in finding.images.all %}
+                                    <p><img src="{{ host }}{% pic_token pic 'original' %}" style="max-width: 85%" alt="finding_image"></p>
+                                {% endfor %}
+                            {% else %}
+                                <p class="text-center">No images found.</p>
+                            {% endif %}
+                        {% endif %}
+                        {% if include_finding_notes %}
+                            {% with notes=finding.notes.all|get_public_notes %}
+                                {% if notes.count > 0 %}
+                                    <h6>Notes</h6>
+                                    <table id="notes" class="tablesorter-bootstrap table table-condensed table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>User</th>
+                                                <th>Date</th>
+                                                {% with notes_with_type=notes|get_notetype_notes_count %}
+                                                {% if notes_with_type > 0 %}
+                                                    <th>Note Type</th>
+                                                {% endif %}
+                                                <th>Note</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for note in notes reversed %}
+                                                <tr>
+                                                    <td>
+                                                        {{ note.author.username }}
+                                                    </td>
+                                                    <td>
+                                                        {{ note.date }}
+                                                    </td>
+                                                    {% if notes_with_type > 0 %}
+                                                    <td>
+                                                        {% if note.note_type != None %}
+                                                        {{ note.note_type }}
+                                                        {% endif %}
+                                                    </td>
+                                                    {% endif %}
+                                                    <td>
+                                                        {{ note|linebreaks }}
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    {% endwith %}
+                                    </table>
+                                {% endif %}
+                            {% endwith %}
+                        {% endif %}
+                    {% endfor %}
                 {% endfor %}
             </div>
         </div>

@@ -1,15 +1,15 @@
 dependencies:
 - name: mysql
-  repository: https://kubernetes-charts.storage.googleapis.com
-  version: 1.6.2
+  repository: https://charts.helm.sh/stable
+  version: 1.6.7
 - name: postgresql
-  repository: https://kubernetes-charts.storage.googleapis.com
-  version: 8.1.2
+  repository: https://charts.bitnami.com/bitnami
+  version: 9.8.11
 - name: rabbitmq
-  repository: https://kubernetes-charts.storage.googleapis.com
-  version: 6.16.0
+  repository: https://charts.bitnami.com/bitnami
+  version: 8.0.2
 - name: redis
-  repository: https://kubernetes-charts.storage.googleapis.com
-  version: 10.3.1
-digest: sha256:10b3095a1ece96e42add9b258ca0856e10fd7aeb7d4601f66630a3830f64630d
-generated: "2020-02-11T20:10:45.198726226Z"
+  repository: https://charts.bitnami.com/bitnami
+  version: 12.0.0
+digest: sha256:cfaa0ba0efa1c376bf0e66bf189fd0e7c2a4a36422162d0fe9e30b9d264ac914
+generated: "2020-11-17T10:13:50.145432071+01:00"

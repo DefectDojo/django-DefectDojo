@@ -1363,7 +1363,7 @@ ul#sortable1, ul#sortable2 {
 }
 
 ul#sortable1 li div.panel-heading:hover, ul#sortable2 li div.panel-heading:hover {
-    cursor: url(../img/openhand.cur), default;
+    cursor: default;
 }
 
 .available-widgets .ui-state-highlight, .in-use-widgets .ui-state-highlight {
@@ -1591,4 +1591,32 @@ mark{
 small {
   font-size:12px;
   font-weight:400;
+}
+
+.fa-minus-square, .fa-trash {
+    color: red;
+}
+
+.fa-plus-square, .fa-exchange, .fa-share-square {
+    color: green;
+}
+
+.fa-asterisk {
+    color: blue;
+}
+
+#jira i:hover {
+    cursor: pointer;
+}
+
+.no-bottom-margin {
+    margin-bottom: 0px;
+}
+
+.lightgrey {
+    color:lightgrey;
+}
+
+.red {
+    color:red;
 }

@@ -57,7 +57,7 @@ def get_item(vulnerability, test):
             cve = main_finding.get("reference")
         else:
             # if sonatype of else, will not match Finding model today
-            cve = ""
+            cve = None
 
         if main_finding['severity'] <= 3.9:
             severity = "Low"
@@ -106,7 +106,7 @@ def get_item(vulnerability, test):
         status = main_finding['status']
         score = main_finding.get('severity', "No CVSS score yet.")
         if 'pathnames' in vulnerability:
-            file_path = ' '.join(vulnerability['pathnames'])
+            file_path = ' '.join(vulnerability['pathnames'])[:1000]
         else:
             file_path = ''
 

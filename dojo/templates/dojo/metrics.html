@@ -112,17 +112,42 @@
 {% endblock %}
 {% block content %}
     <div class="col-md-12">
-    <div class="panel panel-default">
-        <div class="panel-heading tight">
-            <h3 {% if not critical_prods %}class="has-filters" {% endif %}>
-                {{ name }}
-                {% if not critical_prods %}
-                    <div class="dropdown pull-right"></div>
-                {% endif %}
-            </h3>
-        </div>
-        <div id="the-filters" class="panel-body collapse {% if request.META.QUERY_STRING %}in{% endif %}">
-            {% include "dojo/filter_snippet.html" with form=findings.form clear_link="/metrics/product/type" %}
+        <div class="panel panel-default">
+            <div class="panel-heading tight">
+                <div class="clearfix">
+                    <h3 {% if not critical_prods %}class="has-filters" {% endif %}>
+                        {{ name }}
+                        {% comment %} {% if not critical_prods %}
+                            <div class="dropdown pull-right"></div>
+                        {% endif %} {% endcomment %}
+                        {% if not critical_prods %}
+                            <div class="dropdown pull-right">
+                                <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
+                                        data-toggle="dropdown" label="view_selector" aria-label="view_selector" aria-expanded="true">
+                                    <span class="fa fa-bars"></span>
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                                    <li role="presentation">
+                                        <a href="{% url 'metrics_product_type' %}?type=Finding">
+                                            <i class="fa fa-file-text-o"></i> Measures Findings
+                                        </a>
+                                    </li>
+                                    <li role="presentation">
+                                        <a href="{% url 'metrics_product_type' %}?type=Endpoint">
+                                            <i class="fa fa-file-text-o"></i> Measure Affected Endpoints
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        {% endif %}
+                    </h3>
+                    
+                </div>
+            </div>
+            <div id="the-filters" class="panel-body collapse">
+                {% include "dojo/filter_snippet.html" with form=findings.form clear_link="/metrics/product/type" %}
+            </div>
         </div>
     </div>
 

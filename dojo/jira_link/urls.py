@@ -2,7 +2,10 @@ from django.conf.urls import url
 from . import views
 
 urlpatterns = [
-    url(r'^webhook', views.webhook, name='web_hook'),
+    url(r'^webhook/(?P<secret>[\w-]+)$', views.webhook, name='web_hook_secret'),
+    url(r'^webhook/', views.webhook, name='web_hook'),
+    url(r'^jira/webhook/(?P<secret>[\w-]+)$', views.webhook, name='jira_web_hook_secret'),
+    url(r'^jira/webhook/', views.webhook, name='jira_web_hook'),
     url(r'^jira/add', views.new_jira, name='add_jira'),
     url(r'^jira/(?P<jid>\d+)/edit$', views.edit_jira,
         name='edit_jira'),

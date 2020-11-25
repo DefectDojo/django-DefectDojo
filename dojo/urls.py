@@ -7,8 +7,8 @@ from tastypie_swagger.views import SwaggerView, ResourcesView, SchemaView
 from rest_framework.routers import DefaultRouter
 from rest_framework.authtoken import views as tokenviews
 from rest_framework import permissions
-from drf_yasg.views import get_schema_view
-from drf_yasg import openapi
+from drf_yasg2.views import get_schema_view
+from drf_yasg2 import openapi
 from django.http import HttpResponse
 import django_saml2_auth.views
 
@@ -23,13 +23,14 @@ from dojo.api import UserResource, ProductResource, EngagementResource, \
     BuildDetails, DevelopmentEnvironmentResource, ProductTypeResource, TestTypeResource, \
     Note_TypeResource
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
-    FindingTemplatesViewSet, FindingViewSet, JiraConfigurationsViewSet, \
-    JiraIssuesViewSet, JiraViewSet, ProductViewSet, ScanSettingsViewSet, \
+    FindingTemplatesViewSet, FindingViewSet, JiraInstanceViewSet, \
+    JiraIssuesViewSet, JiraProjectViewSet, ProductViewSet, ScanSettingsViewSet, \
     ScansViewSet, StubFindingsViewSet, TestsViewSet, TestTypesViewSet, \
     ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
     UsersViewSet, ImportScanView, ReImportScanView, ProductTypeViewSet, DojoMetaViewSet, \
     DevelopmentEnvironmentViewSet, NotesViewSet, NoteTypeViewSet, SystemSettingsViewSet, \
-    AppAnalysisViewSet, EndpointStatusViewSet
+    AppAnalysisViewSet, EndpointStatusViewSet, SonarqubeIssueViewSet, SonarqubeIssueTransitionViewSet, \
+    SonarqubeProductViewSet, RegulationsViewSet
 
 from dojo.utils import get_system_setting
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
@@ -62,6 +63,8 @@ from dojo.note_type.urls import urlpatterns as note_type_urls
 from dojo.google_sheet.urls import urlpatterns as google_sheets_urls
 from dojo.banner.urls import urlpatterns as banner_urls
 from dojo.survey.urls import urlpatterns as survey_urls
+from dojo.components.urls import urlpatterns as component_urls
+from dojo.regulations.urls import urlpatterns as regulations
 
 admin.autodiscover()
 
@@ -106,13 +109,18 @@ v2_api.register(r'engagements', EngagementViewSet)
 v2_api.register(r'development_environments', DevelopmentEnvironmentViewSet)
 v2_api.register(r'finding_templates', FindingTemplatesViewSet)
 v2_api.register(r'findings', FindingViewSet)
-v2_api.register(r'jira_configurations', JiraConfigurationsViewSet)
+v2_api.register(r'jira_configurations', JiraInstanceViewSet)  # backwards compatibility
+v2_api.register(r'jira_instances', JiraInstanceViewSet)
 v2_api.register(r'jira_finding_mappings', JiraIssuesViewSet)
-v2_api.register(r'jira_product_configurations', JiraViewSet)
+v2_api.register(r'jira_product_configurations', JiraProjectViewSet)  # backwards compatibility
+v2_api.register(r'jira_projects', JiraProjectViewSet)
 v2_api.register(r'products', ProductViewSet)
 v2_api.register(r'product_types', ProductTypeViewSet)
 v2_api.register(r'scan_settings', ScanSettingsViewSet)
 v2_api.register(r'scans', ScansViewSet)
+v2_api.register(r'sonarqube_issues', SonarqubeIssueViewSet)
+v2_api.register(r'sonarqube_transitions', SonarqubeIssueTransitionViewSet)
+v2_api.register(r'sonarqube_product_configurations', SonarqubeProductViewSet)
 v2_api.register(r'stub_findings', StubFindingsViewSet)
 v2_api.register(r'tests', TestsViewSet)
 v2_api.register(r'test_types', TestTypesViewSet)
@@ -126,6 +134,7 @@ v2_api.register(r'metadata', DojoMetaViewSet, basename='metadata')
 v2_api.register(r'notes', NotesViewSet)
 v2_api.register(r'note_type', NoteTypeViewSet)
 v2_api.register(r'system_settings', SystemSettingsViewSet)
+v2_api.register(r'regulations', RegulationsViewSet)
 
 ur = []
 ur += dev_env_urls
@@ -157,6 +166,8 @@ ur += notes_urls
 ur += note_type_urls
 ur += google_sheets_urls
 ur += banner_urls
+ur += component_urls
+ur += regulations
 
 swagger_urls = [
     url(r'^$', SwaggerView.as_view(), name='index'),
@@ -218,3 +229,7 @@ if hasattr(settings, 'DJANGO_ADMIN_ENABLED'):
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# sometimes urlpatterns needed be added from local_settings.py to avoid having to modify core defect dojo files
+if hasattr(settings, 'EXTRA_URL_PATTERNS'):
+    urlpatterns += settings.EXTRA_URL_PATTERNS
