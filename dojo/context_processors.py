@@ -20,7 +20,8 @@ def bind_system_settings(request):
 
 
 def bind_alert_count(request):
-    from dojo.models import Alerts
-    if not request.user.is_authenticated:
-        return {}
-    return {'alert_count': Alerts.objects.filter(user_id=request.user).count()}
+    if not settings.DISABLE_ALERT_COUNTER:
+        from dojo.models import Alerts
+        if request.user.is_authenticated:
+            return {'alert_count': Alerts.objects.filter(user_id=request.user).count()}
+    return {}

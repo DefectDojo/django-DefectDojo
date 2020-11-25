@@ -239,8 +239,10 @@
                             <th></th>
                             <th>Date</th>
                             <th>Lead</th>
-                            <th>Findings</th>
-                            <th>Duplicate</th>
+                            <th>Total Findings</th>
+                            <th>Active and Verified</th>
+                            <th>Mitigated</th>
+                            <th>Duplicates</th>
                             <th>Notes</th>
                         </tr>
                         </thead>
@@ -302,8 +304,10 @@
                                       {{ test.lead }}
                                   {% endif %}
                                 </td>
-                                <td><a href="{% url 'view_test' test.id %}">{{ test|count_findings_test_all }}</a></td>
-                                <td>{{ test|count_findings_test_duplicate }}</td>
+                                <td><a href="{% url 'view_test' test.id %}">{{ test.count_findings_test_all }}</a></td>
+                                <td><a href="{% url 'view_test' test.id %}?active=true&verified=true">{{ test.count_findings_test_active_verified }}</a></td>
+                                <td><a href="{% url 'view_test' test.id %}?is_Mitigated=true">{{ test.count_findings_test_mitigated }}</a></td>
+                                <td><a href="{% url 'view_test' test.id %}?duplicate=true">{{ test.count_findings_test_dups }}</a></td>
                                 <td class="nowrap">
                                   {% if test.notes.count %}
                                     <a href="{% url 'view_test' test.id %}#vuln_notes" alt="{{ test.notes.count }} comment{{ test.notes.count|pluralize }}">
@@ -391,9 +395,9 @@
     <h4>Additional Features<span class="pull-right"><a name="collapsible" data-toggle="collapse" href="#add_feat">
       <i class="glyphicon glyphicon-chevron-down"></i></a></span></h4>
   </div>
-  
+
   <div id="add_feat" class="panel-body collapse">
-    
+
     {% if eng.engagement_type == "Interactive" %}
       <div class="panel panel-default">
         <div class="panel-heading">
@@ -410,7 +414,7 @@
                       <span class="fa fa-edit"></span></a></a>
               {% endif %}
             {% endif %}
-            
+
           </h4>
         </div>
         <div id="add_feat_check_list" class="panel-body collapse">
@@ -523,7 +527,7 @@
             <i class="glyphicon glyphicon-chevron-down"></i></a></span>
         </h4>
       </div>
-      
+
       <div id="add_feat_notes" class="panel-body collapse">
         <form class="form-horizontal" action="" method="post">{% csrf_token %}
           {% include "dojo/form_fields.html" with form=form %}
@@ -579,7 +583,7 @@
                           </form>
                         </div>
                       {% endif %}
-                      
+
                       <div class="row-sm-2">
                         <strong>{{ note.author.username }}</strong>
                         <span class="text-muted">commented {{ note.date }}</span>
@@ -594,7 +598,7 @@
                         <div class="row-sm-2">
                           <span class="text-muted">(will not appear in report)</span>
                         </div>
-                      {% endif %} 
+                      {% endif %}
                   </div>
                   <div class="panel-body">
                     {% if note.note_type != None %}
@@ -608,13 +612,13 @@
             {% endfor %}
           </div>
         </div>
-        
+
       </div>
-      
+
     </div>
 
   </div>
-</div> 
+</div>
 
 <!-- Sidebar -->
 </div>
@@ -710,12 +714,25 @@
               {% endif %}
             </td>
           </tr>
-          {% if jissue and jconf %}
-          <tr>
+        {% if jissue and jira_project %}
+        <tr>
             <td><strong>Jira</strong></td>
-            <td><a href="{{ jconf.url }}/browse/{{ jissue.jira_key }}" target="_blank"><i class="fa fa-external-link"></i> Jira Epic ({{ jissue.jira_key }})</a></td>
-          </tr>
-          {% endif %}
+            <td><a href="{{ eng | jira_issue_url }}" target="_blank"><i class="fa fa-external-link"></i> {{ eng | jira_key }}
+            <small>(epic)</small>
+            </a></td>
+        </tr>
+        {% elif jira_project %}
+        <tr>
+            <td><strong>JIRA</strong></td>
+            <td><a href="{{ eng | jira_project_url }}" target="_blank"><i class="fa fa-external-link"></i> {{ eng | jira_key }}
+            {% if jira_project.engagement is not eng %}
+            <small>(inherited)</small>
+            {% else %}
+            <small>(project)</small>              
+            {% endif %}
+            </a></td>
+        </tr>
+        {% endif %}
           <tr>
             <td><strong>Updated</strong></td>
             <td><a target="_blank" data-toggle="tooltip" data-placement="bottom" title="{{ eng.updated|default_if_none:"" }}">

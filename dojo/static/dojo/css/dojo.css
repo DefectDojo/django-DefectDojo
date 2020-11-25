@@ -1363,7 +1363,7 @@ ul#sortable1, ul#sortable2 {
 }
 
 ul#sortable1 li div.panel-heading:hover, ul#sortable2 li div.panel-heading:hover {
-    cursor: url(../img/openhand.cur), default;
+    cursor: default;
 }
 
 .available-widgets .ui-state-highlight, .in-use-widgets .ui-state-highlight {
@@ -1611,4 +1611,12 @@ small {
 
 .no-bottom-margin {
     margin-bottom: 0px;
+}
+
+.lightgrey {
+    color:lightgrey;
+}
+
+.red {
+    color:red;
 }

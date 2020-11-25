@@ -44,9 +44,12 @@
 *Impact*:
 {{ finding.impact }}
 
+*Steps to reproduce*:
+{{ finding.steps_to_reproduce }}
+
 *References*:
 {{ finding.references }}
 
 *Defect Dojo ID:* {{ finding.id }}
 
-*Reporter:* [{{ finding.reporter.firstname }} {{ finding.reporter.lastname }} ({{ finding.reporter.username }}) ({{ finding.reporter.email }})|mailto:{{ finding.reporter.email }}]
+*Reporter:* [{{ finding.reporter|full_name}} ({{ finding.reporter.email }})|mailto:{{ finding.reporter.email }}]

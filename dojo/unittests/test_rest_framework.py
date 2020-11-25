@@ -1,20 +1,26 @@
 from dojo.models import Product, Engagement, Test, Finding, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
-    User, ScanSettings, Scan, Stub_Finding, Endpoint, JIRA_PKey, JIRA_Conf, \
+    User, ScanSettings, Scan, Stub_Finding, Endpoint, JIRA_Project, JIRA_Instance, \
     Finding_Template, Note_Type, App_Analysis, Endpoint_Status, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Notes, \
-    BurpRawRequestResponse
+    BurpRawRequestResponse, DojoMeta
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
-    FindingTemplatesViewSet, FindingViewSet, JiraConfigurationsViewSet, \
-    JiraIssuesViewSet, JiraViewSet, ProductViewSet, ScanSettingsViewSet, \
+    FindingTemplatesViewSet, FindingViewSet, JiraInstanceViewSet, \
+    JiraIssuesViewSet, JiraProjectViewSet, ProductViewSet, ScanSettingsViewSet, \
     ScansViewSet, StubFindingsViewSet, TestsViewSet, \
     ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
     UsersViewSet, ImportScanView, NoteTypeViewSet, AppAnalysisViewSet, \
     EndpointStatusViewSet, SonarqubeIssueViewSet, NotesViewSet
 from json import dumps
 from django.urls import reverse
+from rest_framework import status
 from rest_framework.authtoken.models import Token
-from rest_framework.test import APITestCase, APIClient
+from rest_framework.test import APIClient
+from .dojo_test_case import DojoAPITestCase
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 def skipIfNotSubclass(baseclass_name):
@@ -29,9 +35,9 @@ def skipIfNotSubclass(baseclass_name):
 
 
 class BaseClass():
-    class RESTEndpointTest(APITestCase):
+    class RESTEndpointTest(DojoAPITestCase):
         def __init__(self, *args, **kwargs):
-            APITestCase.__init__(self, *args, **kwargs)
+            DojoAPITestCase.__init__(self, *args, **kwargs)
             self.view_mixins = list(map(
                 (lambda x: x.__name__), self.viewset.__bases__))
 
@@ -44,20 +50,30 @@ class BaseClass():
 
         @skipIfNotSubclass('ListModelMixin')
         def test_list(self):
-            if hasattr(self.endpoint_model, 'tags') and self.payload:
+            check_for_tags = False
+            if hasattr(self.endpoint_model, 'tags') and self.payload and self.payload.get('tags', None):
                 # create a new instance first to make sure there's at least 1 instance with tags set by payload to trigger tag handling code
+                logger.debug('creating model with endpoints: %s', self.payload)
                 response = self.client.post(self.url, self.payload)
+                # print('response:', response.data)
+                check_for_id = response.data['id']
+                # print('id: ', check_for_id)
+                check_for_tags = self.payload.get('tags', None)
 
             response = self.client.get(self.url, format='json')
-            # print("RESPONSE[0]:", response.data['results'])
-            # print("RESPONSE[0]:", response.data['results'][0])
-            # print("RESPONSE[0]:", response.data['results'][0]['id'])
-            # finding = Finding.objects.get(id=response.data['results'][0]['id'])
-            # print("RESPONSE.age:", response.data['results'][0]['age'])
-            # print("finding.age:", finding.age)
+            # tags must be present in last entry, the one we created
+            if check_for_tags:
+                tags_found = False
+                for result in response.data['results']:
+                    if result['id'] == check_for_id:
+                        # logger.debug('result.tags: %s', result.get('tags', ''))
+                        self.assertEqual(len(check_for_tags), len(result.get('tags', None)))
+                        for tag in check_for_tags:
+                            # logger.debug('looking for tag %s in tag list %s', tag, result['tags'])
+                            self.assertTrue(tag in result['tags'])
+                        tags_found = True
+                self.assertTrue(tags_found)
 
-            # print("RESPONSE.sla_days_remaining:", response.data['results'][0]['sla_days_remaining'])
-            # print("finding.sla_days_remaining:", finding.sla_days_remaining())
             self.assertEqual(200, response.status_code)
 
         @skipIfNotSubclass('CreateModelMixin')
@@ -66,6 +82,12 @@ class BaseClass():
             response = self.client.post(self.url, self.payload)
             self.assertEqual(201, response.status_code, response.data)
             self.assertEqual(self.endpoint_model.objects.count(), length + 1)
+
+            if hasattr(self.endpoint_model, 'tags') and self.payload and self.payload.get('tags', None):
+                self.assertEqual(len(self.payload.get('tags')), len(response.data.get('tags', None)))
+                for tag in self.payload.get('tags'):
+                    # logger.debug('looking for tag %s in tag list %s', tag, response.data['tags'])
+                    self.assertTrue(tag in response.data['tags'])
 
         @skipIfNotSubclass('RetrieveModelMixin')
         def test_detail(self):
@@ -90,16 +112,24 @@ class BaseClass():
         def test_update(self):
             current_objects = self.client.get(self.url, format='json').data
             relative_url = self.url + '%s/' % current_objects['results'][0]['id']
-            response = self.client.patch(
-                relative_url, self.update_fields)
+            response = self.client.patch(relative_url, self.update_fields)
+
             for key, value in self.update_fields.items():
                 # some exception as push_to_jira has been implemented strangely in the update methods in the api
                 if key not in ['push_to_jira', 'ssh', 'password', 'api_key']:
                     self.assertEqual(value, response.data[key])
+
             self.assertFalse('push_to_jira' in response.data)
             self.assertFalse('ssh' in response.data)
             self.assertFalse('password' in response.data)
             self.assertFalse('api_key' in response.data)
+
+            if hasattr(self.endpoint_model, 'tags') and self.update_fields and self.update_fields.get('tags', None):
+                self.assertEqual(len(self.update_fields.get('tags')), len(response.data.get('tags', None)))
+                for tag in self.update_fields.get('tags'):
+                    logger.debug('looking for tag %s in tag list %s', tag, response.data['tags'])
+                    self.assertTrue(tag in response.data['tags'])
+
             response = self.client.put(
                 relative_url, self.payload)
             self.assertEqual(200, response.status_code)
@@ -163,7 +193,7 @@ class EndpointTest(BaseClass.RESTEndpointTest):
             'product': 1,
             "tags": ["mytag", "yourtag"]
         }
-        self.update_fields = {'protocol': 'ftp'}
+        self.update_fields = {'protocol': 'ftp', 'tags': ['one_new_tag']}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -191,7 +221,7 @@ class EngagementTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class FindingRequestResponseTest(APITestCase):
+class FindingRequestResponseTest(DojoAPITestCase):
     fixtures = ['dojo_testdata.json']
 
     def setUp(self):
@@ -252,9 +282,67 @@ class FindingsTest(BaseClass.RESTEndpointTest):
             "static_finding": False,
             "dynamic_finding": False,
             "endpoints": [1, 2],
-            "images": []}
-        self.update_fields = {'active': True, "push_to_jira": "True"}
+            "images": [],
+            "tags": ['tag1', 'tag_2']
+        }
+        self.update_fields = {'active': True, "push_to_jira": "True", 'tags': ['finding_tag_new']}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class FindingMetadataTest(BaseClass.RESTEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Finding
+        self.viewname = 'finding'
+        self.viewset = FindingViewSet
+        self.payload = {}
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+    def setUp(self):
+        testuser = User.objects.get(username='admin')
+        token = Token.objects.get(user=testuser)
+        self.client = APIClient()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        self.url = reverse(self.viewname + '-list')
+
+        self.current_findings = self.client.get(self.url, format='json').data["results"]
+        finding = Finding.objects.get(id=self.current_findings[0]['id'])
+
+        self.base_url = f"{self.url}{self.current_findings[0]['id']}/metadata/"
+        metadata = DojoMeta(finding=finding, name="test_meta", value="20")
+        metadata.save()
+
+    def test_create(self):
+        self.client.post(self.base_url, data={"name": "test_meta2", "value": "40"})
+        results = self.client.get(self.base_url).data
+        for result in results:
+            if result["name"] == "test_meta2" and result["value"] == "40":
+                return
+
+        assert False, "Metadata was not created correctly"
+
+    def test_create_duplicate(self):
+        result = self.client.post(self.base_url, data={"name": "test_meta", "value": "40"})
+        assert result.status_code == status.HTTP_400_BAD_REQUEST, "Metadata creation did not failed on duplicate"
+
+    def test_get(self):
+        results = self.client.get(self.base_url, format="json").data
+        for result in results:
+            if result["name"] == "test_meta" and result["value"] == "20":
+                return
+
+        assert False, "Metadata was not created correctly"
+
+    def test_update(self):
+        self.client.put(self.base_url + "?name=test_meta", data={"name": "test_meta", "value": "40"})
+        result = self.client.get(self.base_url).data[0]
+        assert result["name"] == "test_meta" and result["value"] == "40", "Metadata not edited correctly"
+
+    def test_delete(self):
+        self.client.delete(self.base_url + "?name=test_meta")
+        result = self.client.get(self.base_url).data
+        assert len(result) == 0, "Metadata not deleted correctly"
 
 
 class FindingTemplatesTest(BaseClass.RESTEndpointTest):
@@ -277,13 +365,13 @@ class FindingTemplatesTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class JiraConfigurationsTest(BaseClass.RESTEndpointTest):
+class JiraInstancesTest(BaseClass.RESTEndpointTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
-        self.endpoint_model = JIRA_Conf
-        self.viewname = 'jira_conf'
-        self.viewset = JiraConfigurationsViewSet
+        self.endpoint_model = JIRA_Instance
+        self.viewname = 'jira_instance'
+        self.viewset = JiraInstanceViewSet
         self.payload = {
             "url": "http://www.example.com",
             "username": "testuser",
@@ -321,13 +409,13 @@ class JiraIssuesTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class JiraTest(BaseClass.RESTEndpointTest):
+class JiraProjectTest(BaseClass.RESTEndpointTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
-        self.endpoint_model = JIRA_PKey
-        self.viewname = 'jira_pkey'
-        self.viewset = JiraViewSet
+        self.endpoint_model = JIRA_Project
+        self.viewname = 'jira_project'
+        self.viewset = JiraProjectViewSet
         self.payload = {
             "project_key": "TEST KEY",
             "component": "",
@@ -335,9 +423,9 @@ class JiraTest(BaseClass.RESTEndpointTest):
             "enable_engagement_epic_mapping": False,
             "push_notes": False,
             "product": 1,
-            "conf": 2,
+            "jira_instance": 2,
         }
-        self.update_fields = {'conf': 3}
+        self.update_fields = {'jira_instance': 3}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -380,7 +468,7 @@ class SonarqubeProductTest(BaseClass.RESTEndpointTest):
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Sonarqube_Product
         self.viewname = 'sonarqube_product'
-        self.viewset = JiraViewSet
+        self.viewset = JiraProjectViewSet
         self.payload = {
             "product": 2,
             "sonarqube_project_key": "dojo_sonar_key",
@@ -588,10 +676,11 @@ class UsersTest(BaseClass.RESTEndpointTest):
             "email": "example@email.com",
             "is_active": True,
         }
+        self.update_fields = {"first_name": "test changed"}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class ProductPermissionTest(APITestCase):
+class ProductPermissionTest(DojoAPITestCase):
     fixtures = ['dojo_testdata.json']
 
     def setUp(self):
@@ -611,7 +700,7 @@ class ProductPermissionTest(APITestCase):
         self.assertEqual(response.status_code, 404)
 
 
-class ScanSettingsPermissionTest(APITestCase):
+class ScanSettingsPermissionTest(DojoAPITestCase):
     fixtures = ['dojo_testdata.json']
 
     def setUp(self):
@@ -631,7 +720,7 @@ class ScanSettingsPermissionTest(APITestCase):
         self.assertEqual(response.status_code, 404)
 
 
-class ScansPermissionTest(APITestCase):
+class ScansPermissionTest(DojoAPITestCase):
     fixtures = ['dojo_testdata.json']
 
     def setUp(self):
@@ -673,7 +762,7 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class ReimportScanTest(APITestCase):
+class ReimportScanTest(DojoAPITestCase):
     fixtures = ['dojo_testdata.json']
 
     def setUp(self):
