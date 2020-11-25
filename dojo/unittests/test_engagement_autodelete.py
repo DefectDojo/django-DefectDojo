@@ -12,8 +12,8 @@ Fixture description
 - Engagement 8 should be deleted by the autodelete, and therefore not be found anymore (404)
 - Engagement 9 should not be deleted because of the lock tag
 - Engagement 10 should not be deleted because of one comment in a finding
-- Engagement 11 is a copy test, much like 8, would not be taken into consideration for deletion.
-- Engagement 12 will be created here so that its created date is too recent to be taken into consideration by autodelete. It should therefore not be deleted.
+- Engagement 11 contains all dups except for one. Should not be deleted.
+- Engagement 1000 will be created here so that its created date is too recent to be taken into consideration by autodelete. It should therefore not be deleted.
 """
 logger = logging.getLogger(__name__)
 
@@ -33,7 +33,7 @@ class AutoDeleteEngagement(APITestCase):
         cls.system_settings = System_Settings.objects.get()
         cls.system_settings.engagement_auto_delete_enable = True
         cls.system_settings.engagement_auto_delete_days = 10
-        cls.system_settings.engagement_auto_close_lock_tag = 'donotdelete'
+        cls.system_settings.engagement_auto_delete_lock_tag = 'donotdelete'
         cls.system_settings.enable_deduplication = True
         cls.system_settings.enable_auditlog = False
         cls.system_settings.save()
@@ -67,6 +67,10 @@ class AutoDeleteEngagement(APITestCase):
         response = self.client.get('/engagement/10')
         self.assertEqual(response.status_code, 200)
 
+    def test_engagement_11_is_not_deleted(self):
+        response = self.client.get('/engagement/11')
+        self.assertEqual(response.status_code, 200)
+
     def test_too_recent_engagement_is_not_deleted(self):
         new_engagement = Engagement.objects.create(product=Product.objects.get(id=1),
                                                    target_start=date.today(),
@@ -83,6 +87,6 @@ class AutoDeleteEngagement(APITestCase):
     def copy_and_reset_engagement(self, id):
         original_engagement = Engagement.objects.get(id=id)
         new_engagement = original_engagement
-        new_engagement.pk = 11
+        new_engagement.pk = 1000
         new_engagement.created = date.today().isoformat()
         return new_engagement
