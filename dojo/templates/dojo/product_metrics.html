@@ -219,7 +219,7 @@
 
                                 <div class="text-right pull-right">
                                     <span class="fa-2x">{{ all_objs|length }}</span>
-                                    <span><a href="{% url 'product_false_positive_findings' prod.id %}?test__engagement__product={{ prod.id }}"
+                                    <span><a href="{% url 'product_all_findings' prod.id %}?test__engagement__product={{ prod.id }}"
                                             title="All findings.">Total 
                                         {{ view }}{{ all_objs|length|pluralize }} <i
                                                 class="fa fa-arrow-circle-right"></i></a>

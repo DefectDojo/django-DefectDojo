@@ -147,7 +147,7 @@ django_filter=open_findings_filter):
         add_breadcrumb(title="Findings", top_level=not len(request.GET), request=request)
 
     if not request.user.is_staff:
-        findings = Finding.objects.filter(
+        findings = findings.filter(
             Q(test__engagement__product__authorized_users__in=[request.user]) |
             Q(test__engagement__product__prod_type__authorized_users__in=[request.user])
         )
