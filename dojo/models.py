@@ -667,7 +667,8 @@ class Product(models.Model):
     regulations = models.ManyToManyField(Regulation, blank=True)
 
     tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
-    tags = TagField(blank=True, help_text="Add tags that help describe this product. Choose from the list or add new tags. Press Enter key to add.")
+    # tags = TagField(blank=True, force_lowercase=True, help_text="Add tags that help describe this product. Choose from the list or add new tags. Press Enter key to add.")
+    tags = TagField(blank=True, force_lowercase=True, help_text="Add tags that help describe this product. Choose from the list or add new tags. Press Enter key to add.")
 
     def __unicode__(self):
         return self.name
@@ -1055,7 +1056,7 @@ class Engagement(models.Model):
     deduplication_on_engagement = models.BooleanField(default=False, verbose_name="Deduplication within this engagement only", help_text="If enabled deduplication will only mark a finding in this engagement as duplicate of another finding if both findings are in this engagement. If disabled, deduplication is on the product level.")
 
     tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
-    tags = TagField(blank=True, help_text="Add tags that help describe this engagement. Choose from the list or add new tags.  Press Enter key to add.")
+    tags = TagField(blank=True, force_lowercase=True, help_text="Add tags that help describe this engagement. Choose from the list or add new tags.  Press Enter key to add.")
 
     class Meta:
         ordering = ['-target_start']
@@ -1175,7 +1176,7 @@ class Endpoint(models.Model):
     endpoint_status = models.ManyToManyField(Endpoint_Status, blank=True, related_name='endpoint_endpoint_status')
 
     tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
-    tags = TagField(blank=True, help_text="Add tags that help describe this endpoint. Choose from the list or add new tags. Press Enter key to add.")
+    tags = TagField(blank=True, force_lowercase=True, help_text="Add tags that help describe this endpoint. Choose from the list or add new tags. Press Enter key to add.")
 
     class Meta:
         ordering = ['product', 'protocol', 'host', 'path', 'query', 'fragment']
@@ -1357,7 +1358,7 @@ class Test(models.Model):
     created = models.DateTimeField(auto_now_add=True, null=True)
 
     tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
-    tags = TagField(blank=True, help_text="Add tags that help describe this test. Choose from the list or add new tags.  Press Enter key to add.")
+    tags = TagField(blank=True, force_lowercase=True, help_text="Add tags that help describe this test. Choose from the list or add new tags.  Press Enter key to add.")
 
     version = models.CharField(max_length=100, null=True, blank=True)
 
@@ -1751,7 +1752,7 @@ class Finding(models.Model):
                                         help_text="Number of occurences in the source tool when several vulnerabilites were found and aggregated by the scanner.")
 
     tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
-    tags = TagField(blank=True, help_text="Add tags that help describe this finding. Choose from the list or add new tags.  Press Enter key to add.")
+    tags = TagField(blank=True, force_lowercase=True, help_text="Add tags that help describe this finding. Choose from the list or add new tags.  Press Enter key to add.")
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
@@ -2328,7 +2329,7 @@ class Finding_Template(models.Model):
     template_match_title = models.BooleanField(default=False, verbose_name='Match Template by Title and CWE', help_text="Matches by title text (contains search) and CWE.")
 
     tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
-    tags = TagField(blank=True, help_text="Add tags that help describe this finding template. Choose from the list or add new tags. Press Enter key to add.")
+    tags = TagField(blank=True, force_lowercase=True, help_text="Add tags that help describe this finding template. Choose from the list or add new tags. Press Enter key to add.")
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
@@ -2968,7 +2969,7 @@ class App_Analysis(models.Model):
     created = models.DateTimeField(null=False, editable=False, default=now)
 
     tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
-    tags = TagField(blank=True)
+    tags = TagField(blank=True, force_lowercase=True)
 
     def __unicode__(self):
         return self.name + " | " + self.product.name
@@ -3001,7 +3002,7 @@ class Objects_Product(models.Model):
     created = models.DateTimeField(null=False, editable=False, default=now)
 
     tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
-    tags = TagField(blank=True, help_text="Add tags that help describe this object. Choose from the list or add new tags.  Press Enter key to add.")
+    tags = TagField(blank=True, force_lowercase=True, help_text="Add tags that help describe this object. Choose from the list or add new tags.  Press Enter key to add.")
 
     def __unicode__(self):
         name = None

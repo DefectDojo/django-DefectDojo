@@ -20,6 +20,7 @@ from dojo.models import Dojo_User, Product_Type, Finding, Product, Test_Type, \
     ENGAGEMENT_STATUS_CHOICES
 from dojo.utils import get_system_setting
 from django.contrib.contenttypes.models import ContentType
+# from tagulous.forms import TagWidget
 
 logger = logging.getLogger(__name__)
 
@@ -341,7 +342,13 @@ class ProductFilter(DojoFilter):
     origin = MultipleChoiceFilter(choices=Product.ORIGIN_CHOICES)
     external_audience = BooleanFilter(field_name='external_audience')
     internet_accessible = BooleanFilter(field_name='internet_accessible')
-    tags__name = CharFilter(lookup_expr='icontains')
+    # tags__name = CharFilter(lookup_expr='icontains', widget=TagWidget())
+    # tags__name = CharFilter(lookup_expr='icontains')
+
+    tags__name = ModelMultipleChoiceFilter(
+        queryset=Product.tags.tag_model.objects.all().order_by('name'),
+        label="tags")
+
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(

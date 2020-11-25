@@ -60,6 +60,11 @@ def product(request):
     name_words = prods.values_list('name', flat=True)
 
     prod_filter = ProductFilter(request.GET, queryset=prods, user=request.user)
+
+    print(vars(prod_filter))
+    print(vars(prod_filter.form))
+    # print(vars(prod_filter.form.fields))
+
     prod_list = get_page_items(request, prod_filter.qs, 25)
 
     # perform annotation/prefetching by replacing the queryset in the page with an annotated/prefetched queryset.
@@ -844,6 +849,10 @@ def edit_product(request, pid):
                            initial={'auth_users': prod.authorized_users.all()})
         #    initial={'auth_users': prod.authorized_users.all(),
         #             'tags': get_tag_list(Tag.objects.get_for_object(prod))})
+
+        print('tagulous product form:')
+        print(vars(form))
+        print(vars(form.fields['tags']))
 
         if jira_enabled:
             jform = JIRAProjectForm(instance=jira_project)

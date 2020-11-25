@@ -88,8 +88,9 @@ def get_jira_project(obj, use_inheritance=True):
         jira_project = None
         try:
             jira_project = engagement.jira_project  # first() doesn't work with prefetching
-            logger.debug('found jira_project %s for %s', jira_project, engagement)
-            return jira_project
+            if jira_project:
+                logger.debug('found jira_project %s for %s', jira_project, engagement)
+                return jira_project
         except JIRA_Project.DoesNotExist:
             pass  # leave jira_project as None
 
@@ -824,8 +825,8 @@ def add_epic(engagement):
 
 
 def jira_get_issue(jira_project, issue_key):
-    jira_instance = jira_project.jira_instance
     try:
+        jira_instance = jira_project.jira_instance
         jira = get_jira_connection(jira_instance)
         issue = jira.issue(issue_key)
 
