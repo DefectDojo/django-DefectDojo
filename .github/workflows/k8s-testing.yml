@@ -2,11 +2,11 @@ name: k8s deployment
 on:
   pull_request_target:
   push:
-   branches:
-     - master
-     - dev
-     - release/**
-     - hotfix/**
+    branches:
+      - master
+      - dev
+      - release/**
+      - hotfix/**
 
 env:
   DD_DOCKER_REPO: defectdojo
@@ -213,5 +213,15 @@ jobs:
                 echo `kubectl logs --tail=30 -l defectdojo.org/component=django -c uwsgi`
                 echo "ERROR: cannot display login screen; got HTTP code $CR"
                 exit 1
+             fi
+             echo "Final Check of components"
+             errors=`kubectl get pods | grep Error | awk '{print  $1}'`
+             if [[ ! -z  $errors ]]; then
+               echo "Few pods with errors"
+               for line in $errors; do
+                 echo "Dumping log from $line"
+                 kubectl logs --tail 50 $line
+               done
+               exit 1
              fi
              echo "DD K8S successfully deployed"
