@@ -1002,6 +1002,8 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                                            data['scan_type'],)
         except ValueError:
             raise Exception('FileParser ValueError')
+        except:
+            raise Exception('Error while parsing the report, did you specify the correct scan type ?')
 
         new_findings = []
         skipped_hashcodes = []
