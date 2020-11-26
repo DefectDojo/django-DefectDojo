@@ -1,5 +1,5 @@
 from vcr_unittest import VCRTestCase
-from dojo.models import User, Endpoint, Notes, Finding, Endpoint_Status, Test, JIRA_Issue
+from dojo.models import User, Endpoint, Notes, Finding, Endpoint_Status, Test, JIRA_Issue, JIRA_Project
 from dojo.models import System_Settings, Engagement
 from django.urls import reverse
 from rest_framework.test import APITestCase, APIClient
@@ -79,6 +79,9 @@ class DojoTestUtilsMixin(object):
 
     def db_notes_count(self):
         return Notes.objects.all().count()
+
+    def db_jira_project_count(self):
+        return JIRA_Project.objects.all().count()
 
     def set_jira_push_all_issues(self, engagement_or_product):
         jira_project = jira_helper.get_jira_project(engagement_or_product)

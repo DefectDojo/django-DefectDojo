@@ -2097,6 +2097,11 @@ class JIRAProjectForm(forms.ModelForm):
             self.fields['project_key'].help_text = 'JIRA settings are inherited from product ''%s'', unless configured differently here.' % product_name
             self.fields['jira_instance'].help_text = 'JIRA settings are inherited from product ''%s'' , unless configured differently here.' % product_name
 
+        # instance can be a new blank instance to make 'has_changed()' work, so check jira_instance inside instance
+        if self.instance.jira_instance:
+            self.fields['jira_instance'].required = True
+            self.fields['project_key'].required = True
+
     def clean(self):
         logger.debug('validating jira project form')
         cleaned_data = super().clean()
