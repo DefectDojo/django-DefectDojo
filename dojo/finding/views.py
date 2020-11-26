@@ -671,7 +671,7 @@ def edit_finding(request, fid):
                                          extra_tags='alert-danger')
 
         if use_jira:
-            jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, instance=finding)
+            jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, instance=finding, jira_project=jira_helper.get_jira_project(finding))
 
         if form.is_valid() and (jform is None or jform.is_valid()):
             if jform:
@@ -825,7 +825,7 @@ def edit_finding(request, fid):
             form_error = True
     else:
         if use_jira:
-            jform = JIRAFindingForm(push_all=push_all_jira_issues, prefix='jiraform', instance=finding)
+            jform = JIRAFindingForm(push_all=push_all_jira_issues, prefix='jiraform', instance=finding, jira_project=jira_helper.get_jira_project(finding))
 
         if get_system_setting('enable_github'):
             if GITHUB_PKey.objects.filter(product=finding.test.engagement.product).exclude(git_conf_id=None):
