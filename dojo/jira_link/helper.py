@@ -824,8 +824,8 @@ def add_epic(engagement):
 
 
 def jira_get_issue(jira_project, issue_key):
-    jira_instance = jira_project.jira_instance
     try:
+        jira_instance = jira_project.jira_instance
         jira = get_jira_connection(jira_instance)
         issue = jira.issue(issue_key)
 
