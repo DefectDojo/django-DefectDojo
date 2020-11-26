@@ -88,8 +88,9 @@ def get_jira_project(obj, use_inheritance=True):
         jira_project = None
         try:
             jira_project = engagement.jira_project  # first() doesn't work with prefetching
-            logger.debug('found jira_project %s for %s', jira_project, engagement)
-            return jira_project
+            if jira_project:
+                logger.debug('found jira_project %s for %s', jira_project, engagement)
+                return jira_project
         except JIRA_Project.DoesNotExist:
             pass  # leave jira_project as None
 
@@ -105,8 +106,12 @@ def get_jira_project(obj, use_inheritance=True):
         product = obj
         jira_projects = product.jira_project_set.all()  # first() doesn't work with prefetching
         jira_project = jira_projects[0] if len(jira_projects) > 0 else None
-        logger.debug('found jira_project %s for %s', jira_project, product)
-        return jira_project
+        if jira_project:
+            logger.debug('found jira_project %s for %s', jira_project, product)
+            return jira_project
+
+    logger.debug('no jira_project found for %s', obj)
+    return None
 
 
 def get_jira_instance(instance):
