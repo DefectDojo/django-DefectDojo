@@ -1082,7 +1082,10 @@ class ReImportScanView(mixins.CreateModelMixin,
             push_to_jira = push_to_jira or jira_project.push_all_issues
 
         logger.debug('push_to_jira: %s', serializer.validated_data.get('push_to_jira'))
-        serializer.save(push_to_jira=push_to_jira)
+        try:
+            serializer.save(push_to_jira=push_to_jira)
+        except Exception as e:
+            raise ParseError(detail=e)
 
 
 class NoteTypeViewSet(mixins.ListModelMixin,

@@ -1188,6 +1188,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                                            data['scan_type'],)
         except ValueError:
             raise Exception("Parser ValueError")
+        except:
+            raise Exception('Error while parsing the report, did you specify the correct scan type ?')
 
         try:
             items = parser.items
