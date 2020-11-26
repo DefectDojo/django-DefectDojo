@@ -214,4 +214,14 @@ jobs:
                 echo "ERROR: cannot display login screen; got HTTP code $CR"
                 exit 1
              fi
+             echo "Final Check of components"
+             errors=`kubectl get pods | grep Error | awk '{print  $1}'`
+             if [[ ! -z  $errors ]]; then
+               echo "Few pods with errors"
+               for line in $errors; do
+                 echo "Dumping log from $line"
+                 kubectl logs --tail 50 $line
+               done
+               exit 1
+             fi
              echo "DD K8S successfully deployed"
