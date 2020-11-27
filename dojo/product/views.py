@@ -22,7 +22,7 @@ from dojo.filters import ProductFilter, EngagementFilter, ProductMetricsEndpoint
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAProjectForm, JIRAFindingForm, AdHocFindingForm, \
                        EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm, ProductNotificationsForm, \
                        GITHUB_Product_Form, GITHUBFindingForm, App_AnalysisTypeForm, JIRAEngagementForm
-from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_Project, GITHUB_PKey, Finding_Template, \
+from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, GITHUB_PKey, Finding_Template, \
                         Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint_Status, \
                         Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, BurpRawRequestResponse
 
@@ -1407,7 +1407,8 @@ def process_jira_project_form(request, instance=None, product=None):
 
     error = False
     # supply empty instance to form so it has default values needed to make has_changed() work
-    jform = JIRAProjectForm(request.POST, instance=instance if instance else JIRA_Project(), product=product)
+    # jform = JIRAProjectForm(request.POST, instance=instance if instance else JIRA_Project(), product=product)
+    jform = JIRAProjectForm(request.POST, instance=instance, product=product)
     print('jform has changed: ' + str(jform.has_changed()))
 
     if jform.has_changed():  # if no data was changed, no need to do anything!
