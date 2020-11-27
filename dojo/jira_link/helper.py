@@ -732,24 +732,32 @@ def close_epic(eng, push_to_jira):
 
     jira_project = get_jira_project(engagement)
     jira_instance = get_jira_instance(engagement)
-    if jira_project.enable_engagement_epic_mapping and push_to_jira:
-        try:
-            jissue = get_jira_issue(eng)
-            req_url = jira_instance.url + '/rest/api/latest/issue/' + \
-                j_issue.jira_id + '/transitions'
-            json_data = {'transition': {'id': jira_instance.close_status_key}}
-            r = requests.post(
-                url=req_url,
-                auth=HTTPBasicAuth(jira_instance.username, jira_instance.password),
-                json=json_data)
-            if r.status_code != 204:
-                logger.warn("JIRA close epic failed with error: {}".format(r.text))
+    if jira_project.enable_engagement_epic_mapping:
+        if push_to_jira:
+            try:
+                jissue = get_jira_issue(eng)
+                req_url = jira_instance.url + '/rest/api/latest/issue/' + \
+                    j_issue.jira_id + '/transitions'
+                json_data = {'transition': {'id': jira_instance.close_status_key}}
+                r = requests.post(
+                    url=req_url,
+                    auth=HTTPBasicAuth(jira_instance.username, jira_instance.password),
+                    json=json_data)
+                if r.status_code != 204:
+                    logger.warn("JIRA close epic failed with error: {}".format(r.text))
+                    return False
+                return True
+            except JIRAError as e:
+                logger.exception(e)
+                log_jira_generic_alert('Jira Engagement/Epic Close Error', str(e))
                 return False
-            return True
-        except JIRAError as e:
-            logger.exception(e)
-            log_jira_generic_alert('Jira Engagement/Epic Close Error', str(e))
-            return False
+    else:
+        messages.add_message(
+            get_current_request(),
+            messages.ERROR,
+            'Push to JIRA for Epic skipped because enable_engagement_epic_mapping is not checked for this engagement',
+            extra_tags='alert-danger')
+        return False
 
 
 @dojo_model_to_id
@@ -757,9 +765,12 @@ def close_epic(eng, push_to_jira):
 @task
 @dojo_model_from_id(model=Engagement)
 def update_epic(engagement):
+    logger.info('trying to update jira EPIC for %d:%s', engagement.id, engagement.name)
 
     if not is_jira_configured_and_enabled(engagement):
         return False
+
+    logger.debug('config found')
 
     jira_project = get_jira_project(engagement)
     jira_instance = get_jira_instance(engagement)
@@ -774,6 +785,13 @@ def update_epic(engagement):
             logger.exception(e)
             log_jira_generic_alert('Jira Engagement/Epic Update Error', str(e))
             return False
+    else:
+        messages.add_message(
+            get_current_request(),
+            messages.ERROR,
+            'Push to JIRA for Epic skipped because enable_engagement_epic_mapping is not checked for this engagement',
+            extra_tags='alert-danger')
+        return False
 
 
 @dojo_model_to_id
@@ -829,6 +847,13 @@ def add_epic(engagement):
             log_jira_generic_alert('Jira Engagement/Epic Creation Error',
                                    message + error)
             return False
+    else:
+        messages.add_message(
+            get_current_request(),
+            messages.ERROR,
+            'Push to JIRA for Epic skipped because enable_engagement_epic_mapping is not checked for this engagement',
+            extra_tags='alert-danger')
+        return False
 
 
 def jira_get_issue(jira_project, issue_key):
@@ -941,7 +966,7 @@ def finding_unlink_jira(request, finding):
 # return True if no errors
 def process_jira_project_form(request, instance=None, product=None, engagement=None):
     if not get_system_setting('enable_jira'):
-        return True, None, None
+        return True, None
 
     error = False
     jira_project = None
@@ -952,55 +977,47 @@ def process_jira_project_form(request, instance=None, product=None, engagement=N
     logger.debug('jform has changed: ' + str(jform.has_changed()))
 
     if jform.has_changed():  # if no data was changed, no need to do anything!
-        # TODO TAGS: no longer needed?????
-        # for some reason has_changed() == True even when the user didn't put anything in the empty/default form for engagement without jira_project
-        # so we have to check the request manually before validatin (sigh)
-        if instance or (not instance and (request.POST.get('jira-project-form-jira_instance', None) or request.POST.get('jira-project-form-project_key', None))):
+        if jform.is_valid():
+            try:
+                jira_project = jform.save(commit=False)
+                # could be a new jira_project, so set product_id
+                if engagement:
+                    jira_project.engagement_id = engagement.id
+                elif product:
+                    jira_project.product_id = product.id
 
-            if jform.is_valid():
-                try:
-                    jira_project = jform.save(commit=False)
-                    # could be a new jira_project, so set product_id
-                    if engagement:
-                        jira_project.engagement_id = engagement.id
-                    elif product:
-                        jira_project.product_id = product.id
+                if not jira_project.product_id and not jira_project.engagement_id:
+                    raise ValueError('encountered JIRA_Project without product_id and without engagement_id')
 
-                    if not jira_project.product_id and not jira_project.engagement_id:
-                        raise ValueError('encountered JIRA_Project without product_id and without engagement_id')
+                # only check jira project if form is sufficiently populated
+                if jira_project.jira_instance and jira_project.project_key:
+                    # is_jira_project_valid already adds messages if not a valid jira project
+                    if not is_jira_project_valid(jira_project):
+                        logger.debug('unable to retrieve jira project from jira instance, invalid?!')
+                        error = True
+                    else:
+                        jira_project.save()
 
-                    # only check jira project if form is sufficiently populated
-                    if jira_project.jira_instance and jira_project.project_key:
-                        # is_jira_project_valid already adds messages if not a valid jira project
-                        if not is_jira_project_valid(jira_project):
-                            logger.debug('unable to retrieve jira project from jira instance, invalid?!')
-                            error = True
-                        else:
-                            jira_project.save()
-
-                            messages.add_message(request,
-                                                    messages.SUCCESS,
-                                                    'JIRA Project config stored successfully.',
-                                                    extra_tags='alert-success')
-                            error = False
-                            logger.debug('stored JIRA_Project succesfully')
-                except Exception as e:
-                    error = True
-                    logger.exception(e)
-                    pass
-            else:
-                logger.debug(jform.errors)
+                        messages.add_message(request,
+                                                messages.SUCCESS,
+                                                'JIRA Project config stored successfully.',
+                                                extra_tags='alert-success')
+                        error = False
+                        logger.debug('stored JIRA_Project succesfully')
+            except Exception as e:
                 error = True
+                logger.exception(e)
+                pass
         else:
-            # empty jira form, don't store
-            error = False
+            logger.debug(jform.errors)
+            error = True
 
         if error:
             messages.add_message(request,
                                     messages.ERROR,
                                     'JIRA Project config not stored due to errors.',
                                     extra_tags='alert-danger')
-    return not error, jform, jira_project
+    return not error, jform
 
 
 # return True if no errors

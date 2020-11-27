@@ -669,7 +669,7 @@ def new_product(request):
                                  'Product added successfully.',
                                  extra_tags='alert-success')
 
-            success, jira_project_form, jira_project = jira_helper.process_jira_project_form(request, product=product)
+            success, jira_project_form = jira_helper.process_jira_project_form(request, product=product)
             error = not success
 
             if get_system_setting('enable_github'):
@@ -736,12 +736,12 @@ def edit_product(request, pid):
     product = Product.objects.get(pk=pid)
     system_settings = System_Settings.objects.get()
     jira_enabled = system_settings.enable_jira
+    jira_project = None
     jform = None
     github_enabled = system_settings.enable_github
     github_inst = None
     gform = None
     sonarqube_form = None
-    jira_project = jira_helper.get_jira_project(product)
     error = False
 
     try:
@@ -754,6 +754,7 @@ def edit_product(request, pid):
 
     if request.method == 'POST':
         form = ProductForm(request.POST, instance=product)
+        jira_project = jira_helper.get_jira_project(product)
         if form.is_valid():
             form.save()
             tags = request.POST.getlist('tags')
@@ -764,7 +765,7 @@ def edit_product(request, pid):
                                  'Product updated successfully.',
                                  extra_tags='alert-success')
 
-            success, jform, jira_project = jira_helper.process_jira_project_form(request, instance=jira_project, product=product)
+            success, jform = jira_helper.process_jira_project_form(request, instance=jira_project, product=product)
             error = not success
 
             if get_system_setting('enable_github') and github_inst:
@@ -800,6 +801,7 @@ def edit_product(request, pid):
                                 'tags': get_tag_list(Tag.objects.get_for_object(product))})
 
     if jira_enabled:
+        jira_project = jira_helper.get_jira_project(product)
         jform = JIRAProjectForm(instance=jira_project)
     else:
         jform = None
@@ -870,15 +872,16 @@ def delete_product(request, pid):
 def new_eng_for_app(request, pid, cicd=False):
 
     jira_project_form = None
+    jira_project = None
     jira_epic_form = None
     product = Product.objects.get(id=pid)
-    jira_project = jira_helper.get_jira_project(product)
     jira_error = False
     if not user_is_authorized(request.user, 'staff', product):
         raise PermissionDenied
 
     if request.method == 'POST':
         form = EngForm(request.POST, cicd=cicd, product=product, user=request.user)
+        jira_project = jira_helper.get_jira_project(product)
 
         logger.debug('new_eng_for_app')
 
@@ -910,7 +913,7 @@ def new_eng_for_app(request, pid, cicd=False):
             logger.debug('new_eng_for_app: process jira coming')
 
             # new engagement, so do not provide jira_project
-            success, jira_project_form, jira_project = jira_helper.process_jira_project_form(request, instance=None, engagement=engagement)
+            success, jira_project_form = jira_helper.process_jira_project_form(request, instance=None, engagement=engagement)
             error = not success
 
             logger.debug('new_eng_for_app: process jira epic coming')
@@ -943,6 +946,7 @@ def new_eng_for_app(request, pid, cicd=False):
     jira_project_form = None
     jira_epic_form = None
     if get_system_setting('enable_jira'):
+        jira_project = jira_helper.get_jira_project(product)
         logger.debug('showing jira-project-form')
         jira_project_form = JIRAProjectForm(target='engagement', product=product)
         logger.debug('showing jira-epic-form')

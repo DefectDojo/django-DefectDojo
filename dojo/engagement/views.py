@@ -146,11 +146,12 @@ def edit_engagement(request, eid):
     engagement = Engagement.objects.get(pk=eid)
     is_ci_cd = engagement.engagement_type == "CI/CD"
     jira_epic_form = None
-    jira_project = jira_helper.get_jira_project(engagement, use_inheritance=False)
+    jira_project = None
     jira_error = False
 
     if request.method == 'POST':
         form = EngForm(request.POST, instance=engagement, cicd=is_ci_cd, product=engagement.product.id, user=request.user)
+        jira_project = jira_helper.get_jira_project(engagement, use_inheritance=False)
 
         if form.is_valid():
             # first save engagement details
@@ -172,7 +173,7 @@ def edit_engagement(request, eid):
                 'Engagement updated successfully.',
                 extra_tags='alert-success')
 
-            success, jira_project_form, jira_project = jira_helper.process_jira_project_form(request, instance=jira_project, engagement=engagement)
+            success, jira_project_form = jira_helper.process_jira_project_form(request, instance=jira_project, engagement=engagement)
             error = not success
 
             success, jira_epic_form = jira_helper.process_jira_epic_form(request, engagement=engagement)
@@ -193,8 +194,8 @@ def edit_engagement(request, eid):
     jira_project_form = None
     jira_epic_form = None
     if get_system_setting('enable_jira'):
+        jira_project = jira_helper.get_jira_project(engagement, use_inheritance=False)
         jira_project_form = JIRAProjectForm(instance=jira_project, target='engagement', product=engagement.product)
-        jira_project_with_inheritance = jira_helper.get_jira_project(engagement)
         logger.debug('showing jira-epic-form')
         jira_epic_form = JIRAEngagementForm(instance=engagement)
 
