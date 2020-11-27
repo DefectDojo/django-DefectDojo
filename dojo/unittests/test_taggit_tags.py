@@ -36,16 +36,18 @@ class TaggitTests(DojoAPITestCase):
         self.check_tags(Product.objects.all().prefetch_related('tagged_items__tag', 'engagement_set__tagged_items__tag'))
 
     def add_tags(self, curr_tags, extra_tags):
+        current_tags = [tag.name for tag in curr_tags]
         for tag in extra_tags:
-            curr_tags.append(tag)
-        return ", ".join(curr_tags)
+            current_tags.append(tag)
+        return ", ".join(current_tags)
 
     def check_tags(self, queryset):
         for product in queryset:
             # print(product.name + ": " + str(product.tags))
             self.assertEqual(len(product.tags), 1)
             self.assertEqual(product.tags[0].name, 'product_' + str(product.id))
-            for eng in product.engagement_set.all():
+            # quick hack to exlucde engagement 9 which has a pre existing swiss tag so it does not get counted
+            for eng in product.engagement_set.all().exclude(id=9):
                 # print("         :" + eng.name + ": " + str(eng.tags))
                 self.assertEqual(len(eng.tags), 2)
                 self.assertEqual('product_' + str(product.id) in [tag.name for tag in product.tags], True)
