@@ -44,8 +44,8 @@ class NiktoXMLParser(object):
             # Url
             ip = item.find("iplink").text
             # Remove the port numbers for 80/443
-            ip = ip.replace(":80", "")
-            ip = ip.replace(":443", "")
+            ip = ip.replace(r":['80']{2}\/?$", "")
+            ip = ip.replace(r":['443']{3}\/?$", "")
 
             # Severity
             severity = "Info"  # Nikto doesn't assign severity, default to Info
