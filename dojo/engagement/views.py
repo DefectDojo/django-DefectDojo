@@ -210,6 +210,7 @@ def edit_engagement(request, eid):
         'edit': True,
         'jira_epic_form': jira_epic_form,
         'jira_project_form': jira_project_form,
+        'engagement': engagement,
     })
 
 

@@ -957,7 +957,8 @@ def new_eng_for_app(request, pid, cicd=False):
                   {'form': form,
                    'product_tab': product_tab,
                    'jira_epic_form': jira_epic_form,
-                   'jira_project_form': jira_project_form})
+                   'jira_project_form': jira_project_form,
+                   })
 
 
 # @user_passes_test(lambda u: u.is_staff)
