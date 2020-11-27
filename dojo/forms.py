@@ -31,7 +31,6 @@ from dojo.models import Finding, Product_Type, Product, Note_Type, ScanSettings,
 from dojo.tools import requires_file, SCAN_SONARQUBE_API
 from dojo.user.helper import user_is_authorized
 from django.urls import reverse
-import dojo.jira_link.helper as jira_helper
 import logging
 
 logger = logging.getLogger(__name__)
@@ -2077,6 +2076,8 @@ class GITHUB_Product_Form(forms.ModelForm):
 class JIRAProjectForm(forms.ModelForm):
     jira_instance = forms.ModelChoiceField(queryset=JIRA_Instance.objects.all(), label='JIRA Instance', required=False)
 
+    prefix = 'jira-project-form'
+
     class Meta:
         model = JIRA_Project
         exclude = ['product', 'engagement']
@@ -2085,21 +2086,22 @@ class JIRAProjectForm(forms.ModelForm):
         # if the form is shown for an engagement, we set a placeholder text around inherited settings from product
         self.target = kwargs.pop('target', 'product')
         self.product = kwargs.pop('product', None)
+        self.engagement = kwargs.pop('engagement', None)
         super().__init__(*args, **kwargs)
+
+        print('self.instance: ' + str(self.instance))
 
         # logger.debug('self.target: %s, self.product: %s, self.instance: %s', self.target, self.product, self.instance)
         if self.target == 'engagement':
-            if not self.product and self.instance and self.instance.engagement and self.instance.engagement.product:
-                self.product = self.instance.engagement.product
-            product_name = self.product.name if self.product else ''
+            product_name = self.product.name if self.product else self.engagement.product.name if self.engagement.product else ''
 
             self.fields['project_key'].widget = forms.TextInput(attrs={'placeholder': 'JIRA settings inherited from product ''%s''' % product_name})
             self.fields['project_key'].help_text = 'JIRA settings are inherited from product ''%s'', unless configured differently here.' % product_name
             self.fields['jira_instance'].help_text = 'JIRA settings are inherited from product ''%s'' , unless configured differently here.' % product_name
 
         # instance can be a new blank instance to make 'has_changed()' work, so check jira_instance inside instance
-        # if self.instance.jira_instance:
-        if self.instance:
+        # TODO TAGS no longer need to check jira_instance?
+        if self.instance.jira_instance:
             self.fields['jira_instance'].required = True
             self.fields['project_key'].required = True
 
@@ -2161,6 +2163,7 @@ class JIRAFindingForm(forms.Form):
         self.fields['jira_issue'].widget = forms.TextInput(attrs={'placeholder': 'Leave empty and check push to jira to create a new JIRA issue'})
 
     def clean(self):
+        import dojo.jira_link.helper as jira_helper
         logger.debug('validating jirafindingform')
         cleaned_data = super(JIRAFindingForm, self).clean()
         jira_issue_key_new = self.cleaned_data.get('jira_issue')
@@ -2227,6 +2230,8 @@ class JIRAImportScanForm(forms.Form):
 
 
 class JIRAEngagementForm(forms.Form):
+    prefix = 'jira-epic-form'
+
     def __init__(self, *args, **kwargs):
         self.instance = kwargs.pop('instance', None)
 

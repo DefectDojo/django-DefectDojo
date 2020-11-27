@@ -18,6 +18,7 @@ from celery.decorators import task
 from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
 from dojo.utils import get_current_request, truncate_with_dots
 from django.urls import reverse
+from dojo.forms import JIRAProjectForm, JIRAEngagementForm
 
 logger = logging.getLogger(__name__)
 
@@ -933,3 +934,99 @@ def finding_unlink_jira(request, finding):
     new_note.save()
     finding.notes.add(new_note)
     return True
+
+
+# return True if no errors
+def process_jira_project_form(request, instance=None, product=None, engagement=None):
+    if not get_system_setting('enable_jira'):
+        return True, None, None
+
+    error = False
+    jira_project = None
+    # supply empty instance to form so it has default values needed to make has_changed() work
+    # jform = JIRAProjectForm(request.POST, instance=instance if instance else JIRA_Project(), product=product)
+    jform = JIRAProjectForm(request.POST, instance=instance, product=product, engagement=engagement)
+    print('jform has changed: ' + str(jform.has_changed()))
+
+    if jform.has_changed():  # if no data was changed, no need to do anything!
+        print(jform.changed_data)
+        # TODO TAGS: no longer needed?????
+        # for some reason has_changed() == True even when the user didn't put anything in the empty/default form for engagement without jira_project
+        # so we have to check the request manually before validatin (sigh)
+        if instance or (not instance and (request.POST.get('jira-project-form-jira_instance', None) or request.POST.get('jira-project-form-project_key', None))):
+            print('instance and key found')
+            print(request.POST.get('jira-project-form-jira_instance'))
+            print(request.POST.get('jira-project-form-project_key'))
+
+            if jform.is_valid():
+                try:
+                    jira_project = jform.save(commit=False)
+                    # could be a new jira_project, so set product_id
+                    if engagement:
+                        jira_project.engagement_id = engagement.id
+                    elif product:
+                        jira_project.product_id = product.id
+
+                    if not jira_project.product_id and not jira_project.engagement_id:
+                        raise ValueError('encountered JIRA_Project without product_id and without engagement_id')
+
+                    # only check jira project if form is sufficiently populated
+                    if jira_project.jira_instance and jira_project.project_key:
+                        # is_jira_project_valid already adds messages if not a valid jira project
+                        if not is_jira_project_valid(jira_project):
+                            error = True
+                        else:
+                            jira_project.save()
+
+                            messages.add_message(request,
+                                                    messages.SUCCESS,
+                                                    'JIRA Project config stored successfully.',
+                                                    extra_tags='alert-success')
+                            error = False
+                            logger.debug('stored JIRA_Project succesfully')
+                except Exception as e:
+                    error = True
+                    logger.exception(e)
+                    pass
+            else:
+                logger.debug(jform.errors)
+                error = True
+        else:
+            # empty jira form, don't store
+            error = False
+
+        if error:
+            messages.add_message(request,
+                                    messages.ERROR,
+                                    'JIRA Project config not stored due to errors.',
+                                    extra_tags='alert-danger')
+    return not error, jform, jira_project
+
+
+# return True if no errors
+def process_jira_epic_form(request, instance=None, jira_project=None):
+    if not get_system_setting('enable_jira'):
+        return True, None, None
+
+    # push epic
+    error = False
+    jira_epic_form = JIRAEngagementForm(request.POST, instance=None)
+
+    if jira_project and jira_epic_form.is_valid():
+        if jira_epic_form.cleaned_data.get('push_to_jira'):
+            if push_to_jira(engagement):
+                messages.add_message(
+                    request,
+                    messages.SUCCESS,
+                    'Push to JIRA for Epic queued succesfully, check alerts on the top right for errors',
+                    extra_tags='alert-success')
+            else:
+                error = True
+
+                messages.add_message(
+                    request,
+                    messages.ERROR,
+                    'Push to JIRA for Epic failed, check alerts on the top right for errors',
+                    extra_tags='alert-danger')
+
+    return not error, jira_epic_form

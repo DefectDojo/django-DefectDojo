@@ -10,7 +10,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class JIRAConfigAndPushTest(DojoTestCase):
+class JIRAConfigProductTest(DojoTestCase):
     fixtures = ['dojo_testdata.json']
 
     data_jira_instance = {
@@ -71,11 +71,11 @@ class JIRAConfigAndPushTest(DojoTestCase):
             'name': 'new product',
             'description': 'new description',
             'prod_type': 1,
-            'project_key': 'IFFFNEW',
-            'jira_instance': 2,
-            'enable_engagement_epic_mapping': 'on',
-            'push_notes': 'on',
-            'product_jira_sla_notification': 'on'
+            'jira-project-form-project_key': 'IFFFNEW',
+            'jira-project-form-jira_instance': 2,
+            'jira-project-form-enable_engagement_epic_mapping': 'on',
+            'jira-project-form-push_notes': 'on',
+            'jira-project-form-product_jira_sla_notification': 'on'
         }
 
     def get_new_product_without_jira_project_data(self):
@@ -87,7 +87,7 @@ class JIRAConfigAndPushTest(DojoTestCase):
             # 'jira_instance': 2,
             # 'enable_engagement_epic_mapping': 'on',
             # 'push_notes': 'on',
-            'product_jira_sla_notification': 'on'  # default is true so we have to supply to make has_changed() work OK
+            'jira-project-form-product_jira_sla_notification': 'on'  # default is true so we have to supply to make has_changed() work OK
         }
 
     def get_product_with_jira_project_data(self, product):
@@ -95,11 +95,11 @@ class JIRAConfigAndPushTest(DojoTestCase):
             'name': product.name,
             'description': product.description,
             'prod_type': product.prod_type.id,
-            'project_key': 'IFFF',
-            'jira_instance': 2,
-            'enable_engagement_epic_mapping': 'on',
-            'push_notes': 'on',
-            'product_jira_sla_notification': 'on'
+            'jira-project-form-project_key': 'IFFF',
+            'jira-project-form-jira_instance': 2,
+            'jira-project-form-enable_engagement_epic_mapping': 'on',
+            'jira-project-form-push_notes': 'on',
+            'jira-project-form-product_jira_sla_notification': 'on'
         }
 
     def get_product_with_jira_project_data2(self, product):
@@ -107,11 +107,11 @@ class JIRAConfigAndPushTest(DojoTestCase):
             'name': product.name,
             'description': product.description,
             'prod_type': product.prod_type.id,
-            'project_key': 'IFFF2',
-            'jira_instance': 2,
-            'enable_engagement_epic_mapping': 'on',
-            'push_notes': 'on',
-            'product_jira_sla_notification': 'on'
+            'jira-project-form-project_key': 'IFFF2',
+            'jira-project-form-jira_instance': 2,
+            'jira-project-form-enable_engagement_epic_mapping': 'on',
+            'jira-project-form-push_notes': 'on',
+            'jira-project-form-product_jira_sla_notification': 'on'
         }
 
     def get_product_with_empty_jira_project_data(self, product):
@@ -123,14 +123,11 @@ class JIRAConfigAndPushTest(DojoTestCase):
             # 'jira_instance': 2,
             # 'enable_engagement_epic_mapping': 'on',
             # 'push_notes': 'on',
-            'product_jira_sla_notification': 'on'  # default is true so we have to supply to make has_changed() work OK
+            'jira-project-form-product_jira_sla_notification': 'on'  # default is true so we have to supply to make has_changed() work OK
         }
 
     def get_expected_redirect_product(self, product):
         return '/product/%i' % product.id
-
-    def get_expected_redirect_edit_product(self, product):
-        return '/product/edit/%i' % product.id
 
     def add_product_jira(self, data, expect_redirect_to=None, expect_200=False):
         response = self.client.get(reverse('new_product'))
@@ -139,22 +136,27 @@ class JIRAConfigAndPushTest(DojoTestCase):
         self.log_model_instance(JIRA_Project.objects.last())
 
         if not expect_redirect_to and not expect_200:
-            expect_redirect_to_starts_with = '/product/'
+            expect_redirect_to = '/product/%i'
 
         response = self.client.post(reverse('new_product'), urlencode(data), content_type='application/x-www-form-urlencoded')
 
         logger.debug('after: JIRA_Project last')
         self.log_model_instance(JIRA_Project.objects.last())
 
-        # print('url: ' + response.url)
-
         product = None
         if expect_200:
             self.assertEqual(response.status_code, 200)
-        elif expect_redirect_to_starts_with:
+        elif expect_redirect_to:
             self.assertEqual(response.status_code, 302)
-            self.assertTrue(response.url.startswith(expect_redirect_to_starts_with))
-            product = Product.objects.get(id=response.url.split('/')[-1])
+            print('url: ' + response.url)
+            try:
+                product = Product.objects.get(id=response.url.split('/')[-1])
+            except:
+                try:
+                    product = Product.objects.get(id=response.url.split('/')[-2])
+                except:
+                    raise ValueError('error parsing id from redirect uri: ' + response.url)
+            self.assertTrue(response.url == (expect_redirect_to % product.id))
         else:
             self.assertEqual(response.status_code, 200)
 
@@ -289,8 +291,9 @@ class JIRAConfigAndPushTest(DojoTestCase):
     @patch('dojo.jira_link.views.jira_helper.is_jira_project_valid')
     def test_add_product_with_jira_project_invalid_jira_project(self, jira_mock):
         jira_mock.return_value = False  # cannot set return_value in decorated AND have the mock into the method
-        product = self.add_product_with_jira_project(expected_delta_jira_project_db=0, expect_200=True)
-        self.assertIsNone(product)
+        product = self.add_product_with_jira_project(expected_delta_jira_project_db=0, expect_redirect_to='/product/%i/edit')
+        # product is still saved, even with invalid jira project key
+        self.assertIsNotNone(product)
         self.assertEqual(jira_mock.call_count, 1)
 
     @patch('dojo.jira_link.views.jira_helper.is_jira_project_valid')
