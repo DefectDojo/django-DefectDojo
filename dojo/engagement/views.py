@@ -175,7 +175,7 @@ def edit_engagement(request, eid):
             success, jira_project_form, jira_project = jira_helper.process_jira_project_form(request, instance=jira_project, engagement=engagement)
             error = not success
 
-            success, jira_epic_form = jira_helper.process_jira_epic_form(request, instance=engagement, jira_project=jira_project)
+            success, jira_epic_form = jira_helper.process_jira_epic_form(request, engagement=engagement)
             error = error or not success
 
             if not error:
@@ -188,18 +188,15 @@ def edit_engagement(request, eid):
         else:
             logger.debug(form.errors)
 
-    else:
-        form = EngForm(initial={'product': engagement.product}, instance=engagement, cicd=is_ci_cd, product=engagement.product, user=request.user)
+    form = EngForm(initial={'product': engagement.product}, instance=engagement, cicd=is_ci_cd, product=engagement.product, user=request.user)
 
-        jira_project_form = None
-        jira_epic_form = None
-        if get_system_setting('enable_jira'):
-            print('showing jira projectg form without instance')
-            jira_project_form = JIRAProjectForm(instance=jira_project, target='engagement', product=engagement.product)
-            jira_project_with_inheritance = jira_helper.get_jira_project(engagement)
-            if jira_project_with_inheritance:
-                logger.debug('showing jira-epic-form')
-                jira_epic_form = JIRAEngagementForm(instance=engagement)
+    jira_project_form = None
+    jira_epic_form = None
+    if get_system_setting('enable_jira'):
+        jira_project_form = JIRAProjectForm(instance=jira_project, target='engagement', product=engagement.product)
+        jira_project_with_inheritance = jira_helper.get_jira_project(engagement)
+        logger.debug('showing jira-epic-form')
+        jira_epic_form = JIRAEngagementForm(instance=engagement)
 
     form.initial['tags'] = [tag.name for tag in engagement.tags]
 

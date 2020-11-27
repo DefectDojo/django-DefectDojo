@@ -711,17 +711,16 @@ def new_product(request):
                 # engagement was saved, but JIRA errors, so goto edit_product
                 return HttpResponseRedirect(reverse('edit_product', args=(product.id, )))
 
+    form = ProductForm()
+
+    jira_project_form = None
+    if get_system_setting('enable_jira'):
+        jira_project_form = JIRAProjectForm()
+
+    if get_system_setting('enable_github'):
+        gform = GITHUB_Product_Form()
     else:
-        form = ProductForm()
-
-        jira_project_form = None
-        if get_system_setting('enable_jira'):
-            jira_project_form = JIRAProjectForm()
-
-        if get_system_setting('enable_github'):
-            gform = GITHUB_Product_Form()
-        else:
-            gform = None
+        gform = None
 
     add_breadcrumb(title="New Product", top_level=False, request=request)
     return render(request, 'dojo/new_product.html',
@@ -795,27 +794,27 @@ def edit_product(request, pid):
 
             if not error:
                 return HttpResponseRedirect(reverse('view_product', args=(pid,)))
+
+    form = ProductForm(instance=product,
+                        initial={'auth_users': product.authorized_users.all(),
+                                'tags': get_tag_list(Tag.objects.get_for_object(product))})
+
+    if jira_enabled:
+        jform = JIRAProjectForm(instance=jira_project)
     else:
-        form = ProductForm(instance=product,
-                           initial={'auth_users': product.authorized_users.all(),
-                                    'tags': get_tag_list(Tag.objects.get_for_object(product))})
+        jform = None
 
-        if jira_enabled:
-            jform = JIRAProjectForm(instance=jira_project)
+    if github_enabled and (github_inst is not None):
+        if github_inst is not None:
+            gform = GITHUB_Product_Form(instance=github_inst)
         else:
-            jform = None
-
-        if github_enabled and (github_inst is not None):
-            if github_inst is not None:
-                gform = GITHUB_Product_Form(instance=github_inst)
-            else:
-                gform = GITHUB_Product_Form()
-        elif github_enabled:
             gform = GITHUB_Product_Form()
-        else:
-            gform = None
+    elif github_enabled:
+        gform = GITHUB_Product_Form()
+    else:
+        gform = None
 
-        sonarqube_form = Sonarqube_ProductForm(instance=sonarqube_conf)
+    sonarqube_form = Sonarqube_ProductForm(instance=sonarqube_conf)
 
     form.initial['tags'] = [tag.name for tag in product.tags]
     product_tab = Product_Tab(pid, title="Edit Product", tab="settings")
@@ -916,7 +915,7 @@ def new_eng_for_app(request, pid, cicd=False):
 
             logger.debug('new_eng_for_app: process jira epic coming')
 
-            success, jira_epic_form = jira_helper.process_jira_epic_form(request, instance=engagement, jira_project=jira_project)
+            success, jira_epic_form = jira_helper.process_jira_epic_form(request, engagement=engagement)
             error = error or not success
 
             create_notification(event='engagement_added', title=engagement.name + " for " + product.name, engagement=engagement, url=reverse('view_engagement', args=(engagement.id,)), objowner=engagement.lead)
@@ -940,16 +939,14 @@ def new_eng_for_app(request, pid, cicd=False):
         else:
             logger.debug(form.errors)
 
-    else:
-        form = EngForm(initial={'lead': request.user, 'target_start': timezone.now().date(), 'target_end': timezone.now().date() + timedelta(days=7), 'product': product}, cicd=cicd, product=product, user=request.user)
-        jira_project_form = None
-        jira_epic_form = None
-        if get_system_setting('enable_jira'):
-            logger.debug('showing jira-project-form')
-            jira_project_form = JIRAProjectForm(target='engagement', product=product)
-            if jira_project:
-                logger.debug('showing jira-epic-form')
-                jira_epic_form = JIRAEngagementForm()
+    form = EngForm(initial={'lead': request.user, 'target_start': timezone.now().date(), 'target_end': timezone.now().date() + timedelta(days=7), 'product': product}, cicd=cicd, product=product, user=request.user)
+    jira_project_form = None
+    jira_epic_form = None
+    if get_system_setting('enable_jira'):
+        logger.debug('showing jira-project-form')
+        jira_project_form = JIRAProjectForm(target='engagement', product=product)
+        logger.debug('showing jira-epic-form')
+        jira_epic_form = JIRAEngagementForm()
 
     product_tab = Product_Tab(pid, title="New Engagement", tab="engagements")
     return render(request, 'dojo/new_eng.html',

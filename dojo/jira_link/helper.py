@@ -721,7 +721,7 @@ def jira_check_attachment(issue, source_file_name):
 @dojo_model_to_id
 @dojo_async_task
 @task
-@dojo_model_from_id
+@dojo_model_from_id(model=Engagement)
 def close_epic(eng, push_to_jira):
     engagement = eng
     if not is_jira_enabled():
@@ -755,7 +755,7 @@ def close_epic(eng, push_to_jira):
 @dojo_model_to_id
 @dojo_async_task
 @task
-@dojo_model_from_id
+@dojo_model_from_id(model=Engagement)
 def update_epic(engagement):
 
     if not is_jira_configured_and_enabled(engagement):
@@ -779,12 +779,14 @@ def update_epic(engagement):
 @dojo_model_to_id
 @dojo_async_task
 @task
-@dojo_model_from_id
+@dojo_model_from_id(model=Engagement)
 def add_epic(engagement):
     logger.info('trying to create a new jira EPIC for %d:%s', engagement.id, engagement.name)
 
     if not is_jira_configured_and_enabled(engagement):
         return False
+
+    logger.debug('config found')
 
     jira_project = get_jira_project(engagement)
     jira_instance = get_jira_instance(engagement)
@@ -946,17 +948,14 @@ def process_jira_project_form(request, instance=None, product=None, engagement=N
     # supply empty instance to form so it has default values needed to make has_changed() work
     # jform = JIRAProjectForm(request.POST, instance=instance if instance else JIRA_Project(), product=product)
     jform = JIRAProjectForm(request.POST, instance=instance, product=product, engagement=engagement)
-    print('jform has changed: ' + str(jform.has_changed()))
+    # logging has_changed because it sometimes doesn't do what we expect
+    logger.debug('jform has changed: ' + str(jform.has_changed()))
 
     if jform.has_changed():  # if no data was changed, no need to do anything!
-        print(jform.changed_data)
         # TODO TAGS: no longer needed?????
         # for some reason has_changed() == True even when the user didn't put anything in the empty/default form for engagement without jira_project
         # so we have to check the request manually before validatin (sigh)
         if instance or (not instance and (request.POST.get('jira-project-form-jira_instance', None) or request.POST.get('jira-project-form-project_key', None))):
-            print('instance and key found')
-            print(request.POST.get('jira-project-form-jira_instance'))
-            print(request.POST.get('jira-project-form-project_key'))
 
             if jform.is_valid():
                 try:
@@ -1005,29 +1004,38 @@ def process_jira_project_form(request, instance=None, product=None, engagement=N
 
 
 # return True if no errors
-def process_jira_epic_form(request, instance=None, jira_project=None):
+def process_jira_epic_form(request, engagement=None):
     if not get_system_setting('enable_jira'):
         return True, None
 
+    logger.debug('checking jira epic form for engagement: %i:%s', engagement.id if engagement else 0, engagement)
     # push epic
     error = False
-    jira_epic_form = JIRAEngagementForm(request.POST, instance=None)
+    jira_epic_form = JIRAEngagementForm(request.POST, instance=engagement)
 
-    if jira_project and jira_epic_form.is_valid():
-        if jira_epic_form.cleaned_data.get('push_to_jira'):
-            if push_to_jira(engagement):
-                messages.add_message(
-                    request,
-                    messages.SUCCESS,
-                    'Push to JIRA for Epic queued succesfully, check alerts on the top right for errors',
-                    extra_tags='alert-success')
-            else:
-                error = True
+    jira_project = get_jira_project(engagement)  # uses inheritance to get from product if needed
 
-                messages.add_message(
-                    request,
-                    messages.ERROR,
-                    'Push to JIRA for Epic failed, check alerts on the top right for errors',
-                    extra_tags='alert-danger')
+    if jira_project:
+        if jira_epic_form.is_valid():
+            if jira_epic_form.cleaned_data.get('push_to_jira'):
+                logger.debug('pushing engagement to JIRA')
+                if push_to_jira(engagement):
+                    messages.add_message(
+                        request,
+                        messages.SUCCESS,
+                        'Push to JIRA for Epic queued succesfully, check alerts on the top right for errors',
+                        extra_tags='alert-success')
+                else:
+                    error = True
+
+                    messages.add_message(
+                        request,
+                        messages.ERROR,
+                        'Push to JIRA for Epic failed, check alerts on the top right for errors',
+                        extra_tags='alert-danger')
+        else:
+            logger.debug('invalid jira epic form')
+    else:
+        logger.debug('no jira_project for this engagement, skipping epic push')
 
     return not error, jira_epic_form
