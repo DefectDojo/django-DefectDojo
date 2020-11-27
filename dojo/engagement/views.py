@@ -196,7 +196,8 @@ def edit_engagement(request, eid):
         if get_system_setting('enable_jira'):
             print('showing jira projectg form without instance')
             jira_project_form = JIRAProjectForm(instance=jira_project, target='engagement', product=engagement.product)
-            if jira_project:
+            jira_project_with_inheritance = jira_helper.get_jira_project(engagement)
+            if jira_project_with_inheritance:
                 logger.debug('showing jira-epic-form')
                 jira_epic_form = JIRAEngagementForm(instance=engagement)
 
