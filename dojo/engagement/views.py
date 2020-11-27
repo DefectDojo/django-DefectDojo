@@ -176,7 +176,7 @@ def edit_engagement(request, eid):
             error = not success
 
             success, jira_epic_form = jira_helper.process_jira_epic_form(request, instance=engagement, jira_project=jira_project)
-            error = not success
+            error = error or not success
 
             if not error:
                 if '_Add Tests' in request.POST:
@@ -185,6 +185,8 @@ def edit_engagement(request, eid):
                 else:
                     return HttpResponseRedirect(
                         reverse('view_engagement', args=(engagement.id, )))
+        else:
+            logger.debug(form.errors)
 
     else:
         form = EngForm(initial={'product': engagement.product}, instance=engagement, cicd=is_ci_cd, product=engagement.product, user=request.user)

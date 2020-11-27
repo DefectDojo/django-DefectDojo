@@ -881,6 +881,8 @@ def new_eng_for_app(request, pid, cicd=False):
     if request.method == 'POST':
         form = EngForm(request.POST, cicd=cicd, product=product, user=request.user)
 
+        logger.debug('new_eng_for_app')
+
         if form.is_valid():
             # first create the new engagement
             engagement = form.save(commit=False)
@@ -906,12 +908,16 @@ def new_eng_for_app(request, pid, cicd=False):
             t = ", ".join('"{0}"'.format(w) for w in tags)
             engagement.tags = t
 
+            logger.debug('new_eng_for_app: process jira coming')
+
             # new engagement, so do not provide jira_project
             success, jira_project_form, jira_project = jira_helper.process_jira_project_form(request, instance=None, engagement=engagement)
             error = not success
 
+            logger.debug('new_eng_for_app: process jira epic coming')
+
             success, jira_epic_form = jira_helper.process_jira_epic_form(request, instance=engagement, jira_project=jira_project)
-            error = not success
+            error = error or not success
 
             create_notification(event='engagement_added', title=engagement.name + " for " + product.name, engagement=engagement, url=reverse('view_engagement', args=(engagement.id,)), objowner=engagement.lead)
 
@@ -929,7 +935,11 @@ def new_eng_for_app(request, pid, cicd=False):
                     return HttpResponseRedirect(reverse('view_engagement', args=(engagement.id,)))
             else:
                 # engagement was saved, but JIRA errors, so goto edit_engagement
+                logger.debug('new_eng_for_app: jira errors')
                 return HttpResponseRedirect(reverse('edit_engagement', args=(engagement.id, )))
+        else:
+            logger.debug(form.errors)
+
     else:
         form = EngForm(initial={'lead': request.user, 'target_start': timezone.now().date(), 'target_end': timezone.now().date() + timedelta(days=7), 'product': product}, cicd=cicd, product=product, user=request.user)
         jira_project_form = None

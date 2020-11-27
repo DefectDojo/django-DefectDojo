@@ -974,6 +974,7 @@ def process_jira_project_form(request, instance=None, product=None, engagement=N
                     if jira_project.jira_instance and jira_project.project_key:
                         # is_jira_project_valid already adds messages if not a valid jira project
                         if not is_jira_project_valid(jira_project):
+                            logger.debug('unable to retrieve jira project from jira instance, invalid?!')
                             error = True
                         else:
                             jira_project.save()
@@ -1006,7 +1007,7 @@ def process_jira_project_form(request, instance=None, product=None, engagement=N
 # return True if no errors
 def process_jira_epic_form(request, instance=None, jira_project=None):
     if not get_system_setting('enable_jira'):
-        return True, None, None
+        return True, None
 
     # push epic
     error = False
