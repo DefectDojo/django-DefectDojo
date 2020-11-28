@@ -22,7 +22,7 @@ from dojo.filters import ProductFilter, EngagementFilter, ProductMetricsEndpoint
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAProjectForm, JIRAFindingForm, AdHocFindingForm, \
                        EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm, ProductNotificationsForm, \
                        GITHUB_Product_Form, GITHUBFindingForm, App_AnalysisTypeForm, JIRAEngagementForm
-from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_Project, GITHUB_PKey, Finding_Template, \
+from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, GITHUB_PKey, Finding_Template, \
                         Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint_Status, \
                         Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, BurpRawRequestResponse
 
@@ -649,13 +649,10 @@ def import_scan_results_prod(request, pid=None):
 
 @user_passes_test(lambda u: u.is_staff)
 def new_product(request):
-    jform = None
+    jira_project_form = None
+    error = False
     if request.method == 'POST':
         form = ProductForm(request.POST, instance=Product())
-        if get_system_setting('enable_jira'):
-            jform = JIRAProjectForm(request.POST, instance=JIRA_Project())
-        else:
-            jform = None
 
         if get_system_setting('enable_github'):
             gform = GITHUB_Product_Form(request.POST, instance=GITHUB_PKey())
@@ -671,16 +668,9 @@ def new_product(request):
                                  messages.SUCCESS,
                                  'Product added successfully.',
                                  extra_tags='alert-success')
-            if get_system_setting('enable_jira'):
-                if jform.is_valid():
-                    jira_project = jform.save(commit=False)
-                    if jira_project.jira_instance is not None:
-                        jira_project.product = product
-                        jira_project.save()
-                        messages.add_message(request,
-                                                messages.SUCCESS,
-                                                'JIRA information added successfully.',
-                                                extra_tags='alert-success')
+
+            success, jira_project_form = jira_helper.process_jira_project_form(request, product=product)
+            error = not success
 
             if get_system_setting('enable_github'):
                 if gform.is_valid():
@@ -714,22 +704,28 @@ def new_product(request):
                 sonarqube_product.save()
 
             create_notification(event='product_added', title=product.name, url=reverse('view_product', args=(product.id,)))
-            return HttpResponseRedirect(reverse('view_product', args=(product.id,)))
+
+            if not error:
+                return HttpResponseRedirect(reverse('view_product', args=(product.id,)))
+            else:
+                # engagement was saved, but JIRA errors, so goto edit_product
+                return HttpResponseRedirect(reverse('edit_product', args=(product.id, )))
+
+    form = ProductForm()
+
+    jira_project_form = None
+    if get_system_setting('enable_jira'):
+        jira_project_form = JIRAProjectForm()
+
+    if get_system_setting('enable_github'):
+        gform = GITHUB_Product_Form()
     else:
-        form = ProductForm()
-        if get_system_setting('enable_jira'):
-            jform = JIRAProjectForm()
-        else:
-            jform = None
-        if get_system_setting('enable_github'):
-            gform = GITHUB_Product_Form()
-        else:
-            gform = None
+        gform = None
 
     add_breadcrumb(title="New Product", top_level=False, request=request)
     return render(request, 'dojo/new_product.html',
                   {'form': form,
-                   'jform': jform,
+                   'jform': jira_project_form,
                    'gform': gform,
                    'sonarqube_form': Sonarqube_ProductForm()})
 
@@ -737,71 +733,40 @@ def new_product(request):
 # @user_passes_test(lambda u: u.is_staff)
 @user_must_be_authorized(Product, 'staff', 'pid')
 def edit_product(request, pid):
-    prod = Product.objects.get(pk=pid)
+    product = Product.objects.get(pk=pid)
     system_settings = System_Settings.objects.get()
     jira_enabled = system_settings.enable_jira
+    jira_project = None
     jform = None
     github_enabled = system_settings.enable_github
     github_inst = None
     gform = None
     sonarqube_form = None
-    jira_project = jira_helper.get_jira_project(prod)
+    error = False
 
     try:
-        github_inst = GITHUB_PKey.objects.get(product=prod)
+        github_inst = GITHUB_PKey.objects.get(product=product)
     except:
         github_inst = None
         pass
 
-    sonarqube_conf = Sonarqube_Product.objects.filter(product=prod).first()
+    sonarqube_conf = Sonarqube_Product.objects.filter(product=product).first()
 
     if request.method == 'POST':
-        form = ProductForm(request.POST, instance=prod)
+        form = ProductForm(request.POST, instance=product)
+        jira_project = jira_helper.get_jira_project(product)
         if form.is_valid():
             form.save()
             tags = request.POST.getlist('tags')
             t = ", ".join('"{0}"'.format(w) for w in tags)
-            prod.tags = t
+            product.tags = t
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Product updated successfully.',
                                  extra_tags='alert-success')
 
-            if get_system_setting('enable_jira') and jira_project:
-                jform = JIRAProjectForm(request.POST, instance=jira_project)
-                # need to handle delete
-                if jform.is_valid():
-                    try:
-                        jform.save()
-
-                        messages.add_message(request,
-                                                messages.SUCCESS,
-                                                'JIRA information updated successfully.',
-                                                extra_tags='alert-success')
-                    except Exception as e:
-                        logger.exception(e)
-                        logger.info(jform.errors)
-                        messages.add_message(request,
-                                                messages.ERROR,
-                                                'JIRA Project config not updated due to errors.',
-                                                extra_tags='alert-danger')
-                        pass
-            elif get_system_setting('enable_jira'):  # new jira_config
-                jform = JIRAProjectForm(request.POST)
-                if jform.is_valid():
-                    new_conf = jform.save(commit=False)
-                    new_conf.product_id = pid
-                    new_conf.save()
-                    messages.add_message(request,
-                                            messages.SUCCESS,
-                                            'JIRA information updated successfully.',
-                                            extra_tags='alert-success')
-                else:
-                    logger.info(jform.errors)
-                    messages.add_message(request,
-                                            messages.ERROR,
-                                            'JIRA form not valid.',
-                                            extra_tags='alert-danger')
+            success, jform = jira_helper.process_jira_project_form(request, instance=jira_project, product=product)
+            error = not success
 
             if get_system_setting('enable_github') and github_inst:
                 gform = GITHUB_Product_Form(request.POST, instance=github_inst)
@@ -828,30 +793,32 @@ def edit_product(request, pid):
                 new_conf.product_id = pid
                 new_conf.save()
 
-            return HttpResponseRedirect(reverse('view_product', args=(pid,)))
+            if not error:
+                return HttpResponseRedirect(reverse('view_product', args=(pid,)))
+
+    form = ProductForm(instance=product,
+                        initial={'auth_users': product.authorized_users.all(),
+                                'tags': get_tag_list(Tag.objects.get_for_object(product))})
+
+    if jira_enabled:
+        jira_project = jira_helper.get_jira_project(product)
+        jform = JIRAProjectForm(instance=jira_project)
     else:
-        form = ProductForm(instance=prod,
-                           initial={'auth_users': prod.authorized_users.all(),
-                                    'tags': get_tag_list(Tag.objects.get_for_object(prod))})
+        jform = None
 
-        if jira_enabled:
-            jform = JIRAProjectForm(instance=jira_project)
+    if github_enabled and (github_inst is not None):
+        if github_inst is not None:
+            gform = GITHUB_Product_Form(instance=github_inst)
         else:
-            jform = None
-
-        if github_enabled and (github_inst is not None):
-            if github_inst is not None:
-                gform = GITHUB_Product_Form(instance=github_inst)
-            else:
-                gform = GITHUB_Product_Form()
-        elif github_enabled:
             gform = GITHUB_Product_Form()
-        else:
-            gform = None
+    elif github_enabled:
+        gform = GITHUB_Product_Form()
+    else:
+        gform = None
 
-        sonarqube_form = Sonarqube_ProductForm(instance=sonarqube_conf)
+    sonarqube_form = Sonarqube_ProductForm(instance=sonarqube_conf)
 
-    form.initial['tags'] = [tag.name for tag in prod.tags]
+    form.initial['tags'] = [tag.name for tag in product.tags]
     product_tab = Product_Tab(pid, title="Edit Product", tab="settings")
     return render(request,
                   'dojo/edit_product.html',
@@ -860,7 +827,7 @@ def edit_product(request, pid):
                    'jform': jform,
                    'gform': gform,
                    'sonarqube_form': sonarqube_form,
-                   'product': prod
+                   'product': product
                    })
 
 
@@ -904,20 +871,21 @@ def delete_product(request, pid):
 @user_must_be_authorized(Product, 'staff', 'pid')  # use arg 0 as using pid causes issues, I think due to cicd being there
 def new_eng_for_app(request, pid, cicd=False):
 
-    jform = None
+    jira_project_form = None
+    jira_project = None
+    jira_epic_form = None
     product = Product.objects.get(id=pid)
-    jira_project = jira_helper.get_jira_project(product)
     jira_error = False
     if not user_is_authorized(request.user, 'staff', product):
         raise PermissionDenied
 
     if request.method == 'POST':
         form = EngForm(request.POST, cicd=cicd, product=product, user=request.user)
-        jira_project_form = JIRAProjectForm(request.POST, prefix='jira-project-form', target='engagement', product=product)
-        jira_epic_form = JIRAEngagementForm(request.POST, prefix='jira-epic-form')
+        jira_project = jira_helper.get_jira_project(product)
 
-        if (form.is_valid() and (jira_project_form is None or jira_project_form.is_valid()) and (jira_epic_form is None or jira_epic_form.is_valid())):
+        logger.debug('new_eng_for_app')
 
+        if form.is_valid():
             # first create the new engagement
             engagement = form.save(commit=False)
             if not engagement.name:
@@ -942,32 +910,16 @@ def new_eng_for_app(request, pid, cicd=False):
             t = ", ".join('"{0}"'.format(w) for w in tags)
             engagement.tags = t
 
-            # save jira project config
-            jira_project = jira_project_form.save(commit=False)
-            jira_project.engagement = engagement
-            # only check jira project if form is sufficiently populated
-            if jira_project.jira_instance and jira_project.project_key:
-                jira_error = not jira_helper.is_jira_project_valid(jira_project)
+            logger.debug('new_eng_for_app: process jira coming')
 
-            if not jira_error:
-                jira_project.save()
+            # new engagement, so do not provide jira_project
+            success, jira_project_form = jira_helper.process_jira_project_form(request, instance=None, engagement=engagement)
+            error = not success
 
-                messages.add_message(
-                    request,
-                    messages.SUCCESS,
-                    'JIRA Project config added successfully.',
-                    extra_tags='alert-success')
+            logger.debug('new_eng_for_app: process jira epic coming')
 
-            # push epic
-            if jira_epic_form.cleaned_data.get('push_to_jira'):
-                if jira_helper.push_to_jira(engagement):
-                    messages.add_message(
-                        request,
-                        messages.SUCCESS,
-                        'Push to JIRA for Epic queued succesfully, check alerts on the top right for errors',
-                        extra_tags='alert-success')
-                else:
-                    jira_error = True
+            success, jira_epic_form = jira_helper.process_jira_epic_form(request, engagement=engagement)
+            error = error or not success
 
             create_notification(event='engagement_added', title=engagement.name + " for " + product.name, engagement=engagement, url=reverse('view_engagement', args=(engagement.id,)), objowner=engagement.lead)
 
@@ -976,7 +928,7 @@ def new_eng_for_app(request, pid, cicd=False):
                                 'Engagement added successfully.',
                                 extra_tags='alert-success')
 
-            if not jira_error:
+            if not error:
                 if "_Add Tests" in request.POST:
                     return HttpResponseRedirect(reverse('add_tests', args=(engagement.id,)))
                 elif "_Import Scan Results" in request.POST:
@@ -985,32 +937,28 @@ def new_eng_for_app(request, pid, cicd=False):
                     return HttpResponseRedirect(reverse('view_engagement', args=(engagement.id,)))
             else:
                 # engagement was saved, but JIRA errors, so goto edit_engagement
+                logger.debug('new_eng_for_app: jira errors')
                 return HttpResponseRedirect(reverse('edit_engagement', args=(engagement.id, )))
         else:
-            # if forms invalid, page will just reload and show errors
-            if jira_project_form.errors or jira_epic_form.errors:
-                messages.add_message(
-                    request,
-                    messages.ERROR,
-                    'Errors in JIRA forms, see below',
-                    extra_tags='alert-danger')
-    else:
-        form = EngForm(initial={'lead': request.user, 'target_start': timezone.now().date(), 'target_end': timezone.now().date() + timedelta(days=7), 'product': product}, cicd=cicd, product=product, user=request.user)
-        jira_project_form = None
-        jira_epic_form = None
-        if get_system_setting('enable_jira'):
-            logger.debug('showing jira-project-form')
-            jira_project_form = JIRAProjectForm(prefix='jira-project-form', target='engagement', product=product)
-            if jira_project:
-                logger.debug('showing jira-epic-form')
-                jira_epic_form = JIRAEngagementForm(prefix='jira-epic-form')
+            logger.debug(form.errors)
+
+    form = EngForm(initial={'lead': request.user, 'target_start': timezone.now().date(), 'target_end': timezone.now().date() + timedelta(days=7), 'product': product}, cicd=cicd, product=product, user=request.user)
+    jira_project_form = None
+    jira_epic_form = None
+    if get_system_setting('enable_jira'):
+        jira_project = jira_helper.get_jira_project(product)
+        logger.debug('showing jira-project-form')
+        jira_project_form = JIRAProjectForm(target='engagement', product=product)
+        logger.debug('showing jira-epic-form')
+        jira_epic_form = JIRAEngagementForm()
 
     product_tab = Product_Tab(pid, title="New Engagement", tab="engagements")
     return render(request, 'dojo/new_eng.html',
                   {'form': form,
                    'product_tab': product_tab,
                    'jira_epic_form': jira_epic_form,
-                   'jira_project_form': jira_project_form})
+                   'jira_project_form': jira_project_form,
+                   })
 
 
 # @user_passes_test(lambda u: u.is_staff)
