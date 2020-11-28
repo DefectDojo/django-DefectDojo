@@ -51,17 +51,23 @@ class BaseClass():
         @skipIfNotSubclass('ListModelMixin')
         def test_list(self):
             check_for_tags = False
+            test_id = -1
             if hasattr(self.endpoint_model, 'tags') and self.payload and self.payload.get('tags', None):
                 # create a new instance first to make sure there's at least 1 instance with tags set by payload to trigger tag handling code
-                logger.debug('creating model with endpoints: %s', self.payload)
+                # logger.debug('creating model with endpoints: %s', self.payload)
                 response = self.client.post(self.url, self.payload)
                 # print('response:', response.data)
                 check_for_id = response.data['id']
+                test_id = response.data.get('test', -1)
                 # print('id: ', check_for_id)
                 check_for_tags = self.payload.get('tags', None)
 
-            response = self.client.get(self.url, format='json')
+            if test_id > 0:
+                response = self.client.get(self.url + '?test=%s' % test_id, format='json')
+            else:
+                response = self.client.get(self.url, format='json')
             # tags must be present in last entry, the one we created
+            # print('response2:', response.data)
             if check_for_tags:
                 tags_found = False
                 for result in response.data['results']:
