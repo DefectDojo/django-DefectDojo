@@ -2691,11 +2691,15 @@ class JIRA_Project(models.Model):
     def conf(self):
         return jira_instance
 
+    def clean(self):
+        if not self.jira_instance:
+            raise ValidationError('Cannot save JIRA_Project without JIRA_Instance')
+
     def __unicode__(self):
-        return self.project_key + '(%s)' % (str(self.jira_instance.url) if self.jira_instance else 'None')
+        return ('%s: ' + self.project_key + '(%s)') % (str(self.id), str(self.jira_instance.url) if self.jira_instance else 'None')
 
     def __str__(self):
-        return self.project_key + '(%s)' % (str(self.jira_instance.url) if self.jira_instance else 'None')
+        return ('%s: ' + self.project_key + '(%s)') % (str(self.id), str(self.jira_instance.url) if self.jira_instance else 'None')
 
 
 # declare form here as we can't import forms.py due to circular imports not even locally

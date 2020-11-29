@@ -31,6 +31,24 @@
         {%  if jira_epic_form %}
                 <h4> JIRA Epic</h4>
                 <hr>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label" for="id_jira_issue">JIRA URL
+                        <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="JIRA URL connected to this engagement product or engagement" data-placement="right" data-container="body" data-original-title="" title="">
+                        </i>
+                    </label>
+                    <div class="col-sm-10 form-control-static">
+                        {% if engagement.has_jira_issue %}                        
+                            <a href="{{ engagement | jira_issue_url }}"
+                            target="_blank"> {{ engagement | jira_issue_url }} </a>
+                        {% elif engagement %}
+                            <a href="{{ engagement | jira_project_url }}"
+                            target="_blank"> {{ engagement | jira_project_url }} </a>
+                        {% else %}
+                            <a href="{{ product_tab.product | jira_project_url }}"
+                            target="_blank"> {{ product_tab.product | jira_project_url }} </a>
+                        {% endif %}
+                    </div>
+                </div>                    
                 {% include "dojo/form_fields.html" with form=jira_epic_form %}
             {% endif %}
         <div class="form-group">

@@ -734,9 +734,23 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
 
         instance = super(TaggitSerializer, self).update(instance, validated_data)
 
+        # Allow setting or clearing the mitigation date based upon the state of is_Mitigated.
+        mitigation_change = False
+        if instance.is_Mitigated and instance.mitigated is None:
+            mitigation_change = True
+            instance.mitigated = datetime.datetime.now()
+            instance.mitigated_by = self.context['request'].user
+            if settings.USE_TZ:
+                instance.mitigated = timezone.make_aware(instance.mitigated, timezone.get_default_timezone())
+        elif not instance.is_Mitigated and instance.mitigated is not None:
+            mitigation_change = True
+            instance.mitigated = None
+            instance.mitigated_by = None
+
         # If we need to push to JIRA, an extra save call is needed.
+        # Also if we need to update the mitigation date of the finding.
         # TODO try to combine create and save, but for now I'm just fixing a bug and don't want to change to much
-        if push_to_jira:
+        if push_to_jira or mitigation_change:
             instance.save(push_to_jira=push_to_jira)
 
         # not sure why we are returning a tag_object, but don't want to change too much now as we're just fixing a bug
@@ -817,9 +831,16 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         # TODO: JIRA can we remove this is_push_all_issues, already checked in apiv2 viewset?
         push_to_jira = push_to_jira or jira_helper.is_push_all_issues(new_finding)
 
+        # Allow setting the mitigation date based upon the state of is_Mitigated.
+        if new_finding.is_Mitigated:
+            new_finding.mitigated = datetime.datetime.now()
+            new_finding.mitigated_by = self.context['request'].user
+            if settings.USE_TZ:
+                new_finding.mitigated = timezone.make_aware(new_finding.mitigated, timezone.get_default_timezone())
+
         # If we need to push to JIRA, an extra save call is needed.
         # TODO try to combine create and save, but for now I'm just fixing a bug and don't want to change to much
-        if push_to_jira:
+        if push_to_jira or new_finding.is_Mitigated:
             new_finding.save(push_to_jira=push_to_jira)
 
         # not sure why we are returning a tag_object, but don't want to change too much now as we're just fixing a bug
@@ -981,6 +1002,8 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                                            data['scan_type'],)
         except ValueError:
             raise Exception('FileParser ValueError')
+        except:
+            raise Exception('Error while parsing the report, did you specify the correct scan type ?')
 
         new_findings = []
         skipped_hashcodes = []
@@ -1165,6 +1188,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                                            data['scan_type'],)
         except ValueError:
             raise Exception("Parser ValueError")
+        except:
+            raise Exception('Error while parsing the report, did you specify the correct scan type ?')
 
         try:
             items = parser.items

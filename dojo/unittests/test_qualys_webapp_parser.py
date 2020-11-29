@@ -14,7 +14,7 @@ class TestPhpSymfonySecurityCheckerParser(TestCase):
         parser = QualysWebAppParser(testfile, Test())
         testfile.close()
         # 6 non-info findings, 17 total
-        self.assertEqual(6, len([x for x in parser.items if x.severity != "Info"]))
+        self.assertEqual(0, len([x for x in parser.items if x.severity != "Info"]))
         self.assertEqual(17, len(parser.items))
 
     def test_qualys_webapp_parser_with_one_criticle_vuln_has_one_findings(self):
@@ -22,7 +22,7 @@ class TestPhpSymfonySecurityCheckerParser(TestCase):
         parser = QualysWebAppParser(testfile, Test())
         testfile.close()
         # 8 non-info findings, 14 total
-        self.assertEqual(8, len([x for x in parser.items if x.severity != "Info"]))
+        self.assertEqual(1, len([x for x in parser.items if x.severity != "Info"]))
         self.assertEqual(14, len(parser.items))
 
     def test_qualys_webapp_parser_with_many_vuln_has_many_findings(self):
@@ -30,5 +30,5 @@ class TestPhpSymfonySecurityCheckerParser(TestCase):
         parser = QualysWebAppParser(testfile, Test())
         testfile.close()
         # 9 non-info findings, 21 total
-        self.assertEqual(9, len([x for x in parser.items if x.severity != "Info"]))
+        self.assertEqual(3, len([x for x in parser.items if x.severity != "Info"]))
         self.assertEqual(21, len(parser.items))

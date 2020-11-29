@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import DjangoModelPermissions
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser
+from rest_framework.exceptions import ParseError
 from django_filters.rest_framework import DjangoFilterBackend
 from django.utils.decorators import method_decorator
 from drf_yasg2 import openapi
@@ -1060,7 +1061,10 @@ class ImportScanView(mixins.CreateModelMixin,
             push_to_jira = push_to_jira or jira_project.push_all_issues
 
         logger.debug('push_to_jira: %s', serializer.validated_data.get('push_to_jira'))
-        serializer.save(push_to_jira=push_to_jira)
+        try:
+            serializer.save(push_to_jira=push_to_jira)
+        except Exception as e:
+            raise ParseError(detail=e)
 
 
 class ReImportScanView(mixins.CreateModelMixin,
@@ -1078,7 +1082,10 @@ class ReImportScanView(mixins.CreateModelMixin,
             push_to_jira = push_to_jira or jira_project.push_all_issues
 
         logger.debug('push_to_jira: %s', serializer.validated_data.get('push_to_jira'))
-        serializer.save(push_to_jira=push_to_jira)
+        try:
+            serializer.save(push_to_jira=push_to_jira)
+        except Exception as e:
+            raise ParseError(detail=e)
 
 
 class NoteTypeViewSet(mixins.ListModelMixin,
