@@ -190,7 +190,7 @@ cloudsql:
 rabbitmq:
   enabled: true
   replicas: 1
-  rabbitmq:
+  auth:
     password: ""
     erlangCookie: ""
     existingPasswordSecret: defectdojo-rabbitmq-specific
