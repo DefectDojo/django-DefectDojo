@@ -18,6 +18,7 @@ from celery.decorators import task
 from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
 from dojo.utils import get_current_request, truncate_with_dots
 from django.urls import reverse
+from dojo.forms import JIRAProjectForm, JIRAEngagementForm
 
 logger = logging.getLogger(__name__)
 
@@ -88,8 +89,9 @@ def get_jira_project(obj, use_inheritance=True):
         jira_project = None
         try:
             jira_project = engagement.jira_project  # first() doesn't work with prefetching
-            logger.debug('found jira_project %s for %s', jira_project, engagement)
-            return jira_project
+            if jira_project:
+                logger.debug('found jira_project %s for %s', jira_project, engagement)
+                return jira_project
         except JIRA_Project.DoesNotExist:
             pass  # leave jira_project as None
 
@@ -105,8 +107,12 @@ def get_jira_project(obj, use_inheritance=True):
         product = obj
         jira_projects = product.jira_project_set.all()  # first() doesn't work with prefetching
         jira_project = jira_projects[0] if len(jira_projects) > 0 else None
-        logger.debug('found jira_project %s for %s', jira_project, product)
-        return jira_project
+        if jira_project:
+            logger.debug('found jira_project %s for %s', jira_project, product)
+            return jira_project
+
+    logger.debug('no jira_project found for %s', obj)
+    return None
 
 
 def get_jira_instance(instance):
@@ -715,7 +721,7 @@ def jira_check_attachment(issue, source_file_name):
 @dojo_model_to_id
 @dojo_async_task
 @task
-@dojo_model_from_id
+@dojo_model_from_id(model=Engagement)
 def close_epic(eng, push_to_jira):
     engagement = eng
     if not is_jira_enabled():
@@ -726,34 +732,45 @@ def close_epic(eng, push_to_jira):
 
     jira_project = get_jira_project(engagement)
     jira_instance = get_jira_instance(engagement)
-    if jira_project.enable_engagement_epic_mapping and push_to_jira:
-        try:
-            jissue = get_jira_issue(eng)
-            req_url = jira_instance.url + '/rest/api/latest/issue/' + \
-                j_issue.jira_id + '/transitions'
-            json_data = {'transition': {'id': jira_instance.close_status_key}}
-            r = requests.post(
-                url=req_url,
-                auth=HTTPBasicAuth(jira_instance.username, jira_instance.password),
-                json=json_data)
-            if r.status_code != 204:
-                logger.warn("JIRA close epic failed with error: {}".format(r.text))
+    if jira_project.enable_engagement_epic_mapping:
+        if push_to_jira:
+            try:
+                jissue = get_jira_issue(eng)
+                req_url = jira_instance.url + '/rest/api/latest/issue/' + \
+                    j_issue.jira_id + '/transitions'
+                json_data = {'transition': {'id': jira_instance.close_status_key}}
+                r = requests.post(
+                    url=req_url,
+                    auth=HTTPBasicAuth(jira_instance.username, jira_instance.password),
+                    json=json_data)
+                if r.status_code != 204:
+                    logger.warn("JIRA close epic failed with error: {}".format(r.text))
+                    return False
+                return True
+            except JIRAError as e:
+                logger.exception(e)
+                log_jira_generic_alert('Jira Engagement/Epic Close Error', str(e))
                 return False
-            return True
-        except JIRAError as e:
-            logger.exception(e)
-            log_jira_generic_alert('Jira Engagement/Epic Close Error', str(e))
-            return False
+    else:
+        messages.add_message(
+            get_current_request(),
+            messages.ERROR,
+            'Push to JIRA for Epic skipped because enable_engagement_epic_mapping is not checked for this engagement',
+            extra_tags='alert-danger')
+        return False
 
 
 @dojo_model_to_id
 @dojo_async_task
 @task
-@dojo_model_from_id
+@dojo_model_from_id(model=Engagement)
 def update_epic(engagement):
+    logger.info('trying to update jira EPIC for %d:%s', engagement.id, engagement.name)
 
     if not is_jira_configured_and_enabled(engagement):
         return False
+
+    logger.debug('config found')
 
     jira_project = get_jira_project(engagement)
     jira_instance = get_jira_instance(engagement)
@@ -768,17 +785,26 @@ def update_epic(engagement):
             logger.exception(e)
             log_jira_generic_alert('Jira Engagement/Epic Update Error', str(e))
             return False
+    else:
+        messages.add_message(
+            get_current_request(),
+            messages.ERROR,
+            'Push to JIRA for Epic skipped because enable_engagement_epic_mapping is not checked for this engagement',
+            extra_tags='alert-danger')
+        return False
 
 
 @dojo_model_to_id
 @dojo_async_task
 @task
-@dojo_model_from_id
+@dojo_model_from_id(model=Engagement)
 def add_epic(engagement):
     logger.info('trying to create a new jira EPIC for %d:%s', engagement.id, engagement.name)
 
     if not is_jira_configured_and_enabled(engagement):
         return False
+
+    logger.debug('config found')
 
     jira_project = get_jira_project(engagement)
     jira_instance = get_jira_instance(engagement)
@@ -821,11 +847,18 @@ def add_epic(engagement):
             log_jira_generic_alert('Jira Engagement/Epic Creation Error',
                                    message + error)
             return False
+    else:
+        messages.add_message(
+            get_current_request(),
+            messages.ERROR,
+            'Push to JIRA for Epic skipped because enable_engagement_epic_mapping is not checked for this engagement',
+            extra_tags='alert-danger')
+        return False
 
 
 def jira_get_issue(jira_project, issue_key):
-    jira_instance = jira_project.jira_instance
     try:
+        jira_instance = jira_project.jira_instance
         jira = get_jira_connection(jira_instance)
         issue = jira.issue(issue_key)
 
@@ -928,3 +961,98 @@ def finding_unlink_jira(request, finding):
     new_note.save()
     finding.notes.add(new_note)
     return True
+
+
+# return True if no errors
+def process_jira_project_form(request, instance=None, product=None, engagement=None):
+    if not get_system_setting('enable_jira'):
+        return True, None
+
+    error = False
+    jira_project = None
+    # supply empty instance to form so it has default values needed to make has_changed() work
+    # jform = JIRAProjectForm(request.POST, instance=instance if instance else JIRA_Project(), product=product)
+    jform = JIRAProjectForm(request.POST, instance=instance, product=product, engagement=engagement)
+    # logging has_changed because it sometimes doesn't do what we expect
+    logger.debug('jform has changed: ' + str(jform.has_changed()))
+
+    if jform.has_changed():  # if no data was changed, no need to do anything!
+        if jform.is_valid():
+            try:
+                jira_project = jform.save(commit=False)
+                # could be a new jira_project, so set product_id
+                if engagement:
+                    jira_project.engagement_id = engagement.id
+                elif product:
+                    jira_project.product_id = product.id
+
+                if not jira_project.product_id and not jira_project.engagement_id:
+                    raise ValueError('encountered JIRA_Project without product_id and without engagement_id')
+
+                # only check jira project if form is sufficiently populated
+                if jira_project.jira_instance and jira_project.project_key:
+                    # is_jira_project_valid already adds messages if not a valid jira project
+                    if not is_jira_project_valid(jira_project):
+                        logger.debug('unable to retrieve jira project from jira instance, invalid?!')
+                        error = True
+                    else:
+                        jira_project.save()
+
+                        messages.add_message(request,
+                                                messages.SUCCESS,
+                                                'JIRA Project config stored successfully.',
+                                                extra_tags='alert-success')
+                        error = False
+                        logger.debug('stored JIRA_Project succesfully')
+            except Exception as e:
+                error = True
+                logger.exception(e)
+                pass
+        else:
+            logger.debug(jform.errors)
+            error = True
+
+        if error:
+            messages.add_message(request,
+                                    messages.ERROR,
+                                    'JIRA Project config not stored due to errors.',
+                                    extra_tags='alert-danger')
+    return not error, jform
+
+
+# return True if no errors
+def process_jira_epic_form(request, engagement=None):
+    if not get_system_setting('enable_jira'):
+        return True, None
+
+    logger.debug('checking jira epic form for engagement: %i:%s', engagement.id if engagement else 0, engagement)
+    # push epic
+    error = False
+    jira_epic_form = JIRAEngagementForm(request.POST, instance=engagement)
+
+    jira_project = get_jira_project(engagement)  # uses inheritance to get from product if needed
+
+    if jira_project:
+        if jira_epic_form.is_valid():
+            if jira_epic_form.cleaned_data.get('push_to_jira'):
+                logger.debug('pushing engagement to JIRA')
+                if push_to_jira(engagement):
+                    messages.add_message(
+                        request,
+                        messages.SUCCESS,
+                        'Push to JIRA for Epic queued succesfully, check alerts on the top right for errors',
+                        extra_tags='alert-success')
+                else:
+                    error = True
+
+                    messages.add_message(
+                        request,
+                        messages.ERROR,
+                        'Push to JIRA for Epic failed, check alerts on the top right for errors',
+                        extra_tags='alert-danger')
+        else:
+            logger.debug('invalid jira epic form')
+    else:
+        logger.debug('no jira_project for this engagement, skipping epic push')
+
+    return not error, jira_epic_form

@@ -9,12 +9,19 @@ from datetime import datetime
 from dojo.models import Finding, Endpoint
 from urllib.parse import urlparse
 
-
-SEVERITY_MATCH = ['Info',
+# Severities are listed under WAS_SCAN_REPORT/APPENDIX/SEVERITY_CATEGORY_LIST
+# Since Info findings are not recroded in the Confirmed Vulnerability or
+# Potential Vulnerability categories, a severity of 1 is shown as low
+# in the portal.
+SEVERITY_MATCH = ['Low',
                    'Low',
                    'Medium',
                    'High',
                    'Critical']
+# All QIDs in this category will be info because they only carry
+# three levels of severity (Minimal, Medium, Serious)
+INFO_CATEGORIES = ['Sensitive Content',
+                   'Information Gathered']
 
 
 def truncate_str(value: str, maxlen: int):
@@ -169,7 +176,8 @@ def get_glossary_item(glossary, finding):
     severity = glossary.findtext('SEVERITY')
     if severity is not None:
         group = glossary.findtext('GROUP')
-        if group == "DIAG":
+        category = glossary.findtext('CATEGORY')
+        if category in INFO_CATEGORIES or group == "DIAG":
             # Scan Diagnostics are always Info.
             finding.severity = "Info"
         else:
