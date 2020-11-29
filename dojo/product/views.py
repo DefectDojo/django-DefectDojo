@@ -790,8 +790,8 @@ def edit_product(request, pid):
             if not error:
                 return HttpResponseRedirect(reverse('view_product', args=(pid,)))
 
-    form = ProductForm(instance=prod,
-                        initial={'auth_users': prod.authorized_users.all()})
+    form = ProductForm(instance=product,
+                        initial={'auth_users': product.authorized_users.all()})
     #    initial={'auth_users': prod.authorized_users.all(),
     #             'tags': get_tag_list(Tag.objects.get_for_object(prod))})
 

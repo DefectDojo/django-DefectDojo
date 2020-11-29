@@ -628,6 +628,8 @@ def delete_finding(request, fid):
 @user_must_be_authorized(Finding, 'change', 'fid')
 def edit_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
+    # finding = finding._detag_to_serializable()
+    # finding = finding._retag_to_original()
     old_status = finding.status()
     burp_rr = BurpRawRequestResponse.objects.filter(finding=finding).first()
     if burp_rr:

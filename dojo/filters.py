@@ -21,6 +21,7 @@ from dojo.models import Dojo_User, Product_Type, Finding, Product, Test_Type, \
 from dojo.utils import get_system_setting
 from django.contrib.contenttypes.models import ContentType
 # from tagulous.forms import TagWidget
+import tagulous
 
 logger = logging.getLogger(__name__)
 
@@ -342,12 +343,68 @@ class ProductFilter(DojoFilter):
     origin = MultipleChoiceFilter(choices=Product.ORIGIN_CHOICES)
     external_audience = BooleanFilter(field_name='external_audience')
     internet_accessible = BooleanFilter(field_name='internet_accessible')
-    # tags__name = CharFilter(lookup_expr='icontains', widget=TagWidget())
+
+    # not specifying anything for tags will render a multiselect input functioning as OR
+
+    # tags_or = ModelMultipleChoiceFilter(
+    #     field_name='tags__name',
+    #     to_field_name='name',
+    #     # lookup_expr='in',
+    #     queryset=Product.tags.tag_model.objects.all().order_by('name'),
+    #     label='tags (OR)',
+    #     # widget=TagWidget(tag_options={'aaa'}),
+    # )
+
+    # tags__name = ModelMultipleChoiceFilter(
+    #     queryset=Product.tags.tag_model.objects.all().order_by('name'),
+    #     label="tags (AND)"
+    # )
+
+    # not working below
+
+    # tags = ModelMultipleChoiceFilter(
+    #     queryset=Product.tags.tag_model.objects.all().order_by('name'),
+    #     label="tags_widget", widget=TagWidget, tag_options=tagulous.models.TagOptions(
+    #         force_lowercase=True,)
+    # ,)
+
     # tags__name = CharFilter(lookup_expr='icontains')
 
-    tags__name = ModelMultipleChoiceFilter(
-        queryset=Product.tags.tag_model.objects.all().order_by('name'),
-        label="tags")
+    # tags__and = ModelMultipleChoiceFilter(
+    #     field_name='tags__name',
+    #     to_field_name='name',
+    #     lookup_expr='in',
+    #     queryset=Product.tags.tag_model.objects.all().order_by('name'),
+    #     label="tags (AND)"
+    # )
+
+    # tags = ModelMultipleChoiceFilter(
+    #     queryset=Product.tags.tag_model.objects.all().order_by('name'),
+    #     label="tags (OR)"
+    # )
+
+    # tags = ModelMultipleChoiceFilter(
+    #     field_name='tags__name',
+    #     to_field_name='name',
+    #     queryset=Product.tags.tag_model.objects.all().order_by('name'),
+    #     label="tags (OR2)",
+    # )
+
+    # tags = ModelMultipleChoiceFilter(
+    #     field_name='tags',
+    #     to_field_name='name',
+    #     # lookup_expr='icontains', # nor working
+    #     # without lookup_expr we get an error: ValueError: invalid literal for int() with base 10: 'magento'
+    #     queryset=Product.tags.tag_model.objects.all().order_by('name'),
+    #     label="tags (OR3)",
+    # )
+
+    tag__name = CharFilter(
+        field_name='tags__name',
+        # to_field_name='name',
+        lookup_expr='icontains',
+        label="tag contains",
+    )
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -391,8 +448,16 @@ class ProductFilter(DojoFilter):
     class Meta:
         model = Product
         fields = ['name', 'prod_type', 'business_criticality', 'platform', 'lifecycle', 'origin', 'external_audience',
-                  'internet_accessible', ]
-        exclude = ['tags']
+                  'internet_accessible', 'tags']
+        # exclude = ['tags']
+        filter_overrides = {
+            tagulous.models.TagField: {
+                'filter_class': ModelMultipleChoiceFilter,
+                'extra': lambda f: {
+                     'widget': tagulous.forms.TagWidget,
+                },
+            },
+        }
 
 
 class ApiProductFilter(DojoFilter):

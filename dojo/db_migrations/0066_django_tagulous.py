@@ -55,7 +55,7 @@ class Migration(migrations.Migration):
         # raise ValueError('fake error to fail migration')
 
     dependencies = [
-        ('dojo', '0064_jira_refactor_populate'),
+        ('dojo', '0065_delete_empty_jira_project_configs'),
     ]
 
     operations = [
