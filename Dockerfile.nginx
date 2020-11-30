@@ -20,7 +20,8 @@ RUN \
   rm -rf /var/lib/apt/lists && \
   true
 COPY requirements.txt ./
-RUN pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
+RUN pip3 install --no-cache-dir --upgrade pip
+RUN pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt --use-deprecated=legacy-resolver
 
 FROM build AS collectstatic
 
@@ -46,11 +47,13 @@ RUN \
   rm -rf /var/lib/apt/lists && \
   true
 
+RUN pip3 install --no-cache-dir --upgrade pip
 RUN pip3 install \
 	--no-cache-dir \
 	--no-index \
   --find-links=/tmp/wheels \
-	-r ./requirements.txt
+	-r ./requirements.txt \
+    --use-deprecated=legacy-resolver
 
 COPY components/ ./components/
 COPY manage.py ./
