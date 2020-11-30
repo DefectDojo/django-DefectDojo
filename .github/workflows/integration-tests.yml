@@ -42,6 +42,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Set integration-test mode
+        # create symlink manually as calling docker/setEnv.sh would open us up to code execution from public forks via PRs
         run: ln -s docker-compose.override.integration_tests.yml docker-compose.override.yml
       
       # Pull the latest image to build, and avoid caching pull-only images.
