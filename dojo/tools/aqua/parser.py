@@ -125,11 +125,11 @@ def get_item_v2(item, test):
 def severity_of(score):
     if score == 0:
         return "Info"
-    elif score <= 3.9:
+    elif score < 4:
         return "Low"
-    elif 4.0 < score <= 6.9:
+    elif 4.0 < score < 7.0:
         return "Medium"
-    elif 7.0 < score <= 8.9:
+    elif 7.0 < score < 9.0:
         return "High"
     else:
         return "Critical"

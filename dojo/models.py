@@ -26,17 +26,12 @@ from tagging.registry import register as tag_register
 from multiselectfield import MultiSelectField
 from django import forms
 from django.utils.translation import gettext as _
-from dojo.signals import dedupe_signal
 from dojo.tag.prefetching_tag_descriptor import PrefetchingTagDescriptor
 from django.contrib.contenttypes.fields import GenericRelation
 from tagging.models import TaggedItem
 from dateutil.relativedelta import relativedelta
 
-fmt = getattr(settings, 'LOG_FORMAT', None)
-lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
 
-logging.basicConfig(format=fmt, level=lvl)
-import logging
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
@@ -124,12 +119,25 @@ class System_Settings(models.Model):
                                               "issue reaches the maximum "
                                               "number of duplicates, the "
                                               "oldest will be deleted.")
+
     enable_jira = models.BooleanField(default=False,
                                       verbose_name='Enable JIRA integration',
                                       blank=False)
+
     enable_jira_web_hook = models.BooleanField(default=False,
-                                      verbose_name='Enable JIRA web hook. Please note: It is strongly recommended to whitelist the Jira server using a proxy such as Nginx.',
+                                      verbose_name='Enable JIRA web hook',
+                                      help_text='Please note: It is strongly recommended to use a secret below and / or IP whitelist the JIRA server using a proxy such as Nginx.',
                                       blank=False)
+
+    disable_jira_webhook_secret = models.BooleanField(default=False,
+                                      verbose_name='Disable web hook secret',
+                                      help_text='Allows incoming requests without a secret (discouraged legacy behaviour)',
+                                      blank=False)
+
+    # will be set to random / uuid by initializer so null needs to be True
+    jira_webhook_secret = models.CharField(max_length=64, blank=False, null=True, verbose_name='JIRA Webhook URL',
+                                           help_text='Secret needed in URL for incoming JIRA Webhook')
+
     jira_choices = (('Critical', 'Critical'),
                     ('High', 'High'),
                     ('Medium', 'Medium'),
@@ -298,13 +306,7 @@ class Dojo_User(User):
         proxy = True
 
     def get_full_name(self):
-        """
-        Returns the first_name plus the last_name, with a space in between.
-        """
-        full_name = '%s %s (%s)' % (self.first_name,
-                                    self.last_name,
-                                    self.username)
-        return full_name.strip()
+        return Dojo_User.generate_full_name(self)
 
     def __unicode__(self):
         return self.get_full_name()
@@ -316,6 +318,16 @@ class Dojo_User(User):
     def wants_block_execution(user):
         # this return False if there is no user, i.e. in celery processes, unittests, etc.
         return hasattr(user, 'usercontactinfo') and user.usercontactinfo.block_execution
+
+    @staticmethod
+    def generate_full_name(user):
+        """
+        Returns the first_name plus the last_name, with a space in between.
+        """
+        full_name = '%s %s (%s)' % (user.first_name,
+                                    user.last_name,
+                                    user.username)
+        return full_name.strip()
 
 
 class UserContactInfo(models.Model):
@@ -791,18 +803,9 @@ class Product(models.Model):
         return findings_list
 
     @property
-    def jira_pkey(self):
-        try:
-            return self.jira_pkey_set.all()[0]
-        except:
-            return None
-
-    @property
-    def jira_conf(self):
-        try:
-            return self.jira_pkey_set.all()[0].conf
-        except:
-            return None
+    def has_jira_configured(self):
+        import dojo.jira_link.helper as jira_helper
+        return jira_helper.has_jira_configured(self)
 
     def get_absolute_url(self):
         from django.urls import reverse
@@ -918,6 +921,40 @@ class Tool_Configuration(models.Model):
         return self.name
 
 
+# declare form here as we can't import forms.py due to circular imports not even locally
+class ToolConfigForm_Admin(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput, required=False)
+    api_key = forms.CharField(widget=forms.PasswordInput, required=False)
+    ssh = forms.CharField(widget=forms.PasswordInput, required=False)
+
+    # django doesn't seem to have an easy way to handle password fields as PasswordInput requires reentry of passwords
+    password_from_db = None
+    ssh_from_db = None
+    api_key_from_db = None
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance:
+            # keep password from db to use if the user entered no password
+            self.password_from_db = self.instance.password
+            self.ssh_from_db = self.instance.ssh
+            self.api_key = self.instance.api_key
+
+    def clean(self):
+        # self.fields['endpoints'].queryset = Endpoint.objects.all()
+        cleaned_data = super().clean()
+        if not cleaned_data['password'] and not cleaned_data['ssh'] and not cleaned_data['api_key']:
+            cleaned_data['password'] = self.password_from_db
+            cleaned_data['ssh'] = self.ssh_from_db
+            cleaned_data['api_key'] = self.api_key_from_db
+
+        return cleaned_data
+
+
+class Tool_Configuration_Admin(admin.ModelAdmin):
+    form = ToolConfigForm_Admin
+
+
 class Network_Locations(models.Model):
     location = models.CharField(max_length=500, help_text="Location of network testing: Examples: VPN, Internet or Internal.")
 
@@ -957,6 +994,15 @@ class Engagement_Type(models.Model):
         return self.name
 
 
+ENGAGEMENT_STATUS_CHOICES = (('Not Started', 'Not Started'),
+                             ('Blocked', 'Blocked'),
+                             ('Cancelled', 'Cancelled'),
+                             ('Completed', 'Completed'),
+                             ('In Progress', 'In Progress'),
+                             ('On Hold', 'On Hold'),
+                             ('Waiting for Resource', 'Waiting for Resource'))
+
+
 class Engagement(models.Model):
     name = models.CharField(max_length=300, null=True, blank=True)
     description = models.CharField(max_length=2000, null=True, blank=True)
@@ -983,13 +1029,7 @@ class Engagement(models.Model):
     notes = models.ManyToManyField(Notes, blank=True, editable=False)
     status = models.CharField(editable=True, max_length=2000, default='',
                               null=True,
-                              choices=(('Not Started', 'Not Started'),
-                                       ('Blocked', 'Blocked'),
-                                       ('Cancelled', 'Cancelled'),
-                                       ('Completed', 'Completed'),
-                                       ('In Progress', 'In Progress'),
-                                       ('On Hold', 'On Hold'),
-                                       ('Waiting for Resource', 'Waiting for Resource')))
+                              choices=ENGAGEMENT_STATUS_CHOICES)
     progress = models.CharField(max_length=100,
                                 default='threat_model', editable=False)
     tmodel_path = models.CharField(max_length=1000, default='none',
@@ -1062,12 +1102,10 @@ class Engagement(models.Model):
     def accept_risks(self, accepted_risks):
         self.risk_acceptance.add(*accepted_risks)
 
+    @property
     def has_jira_issue(self):
-        try:
-            issue = self.jira_issue
-            return True
-        except JIRA_Issue.DoesNotExist:
-            return False
+        import dojo.jira_link.helper as jira_helper
+        return jira_helper.has_jira_issue(self)
 
     def get_absolute_url(self):
         from django.urls import reverse
@@ -1658,14 +1696,17 @@ class Finding(models.Model):
                                    null=True,
                                    verbose_name="Created",
                                    help_text="The date the finding was created inside DefectDojo.")
-    jira_creation = models.DateTimeField(editable=True,
-                                         null=True,
-                                         verbose_name="Jira creation",
-                                         help_text="The date a Jira issue was created from this finding.")
-    jira_change = models.DateTimeField(editable=True,
-                                       null=True,
-                                       verbose_name="Jira change",
-                                       help_text="The date the linked Jira issue was last modified.")
+
+    # # deprecated, moved to jira_issue. left here as we don't want to delete data just yet
+    # jira_creation = models.DateTimeField(editable=True,
+    #                                      null=True,
+    #                                      verbose_name="Jira creation",
+    #                                      help_text="The date a Jira issue was created from this finding.")
+    # # deprecated, moved to jira_issue. left here as we don't want to delete data just yet
+    # jira_change = models.DateTimeField(editable=True,
+    #                                    null=True,
+    #                                    verbose_name="Jira change",
+    #                                    help_text="The date the linked Jira issue was last modified.")
     scanner_confidence = models.IntegerField(null=True,
                                              blank=True,
                                              default=None,
@@ -1683,6 +1724,11 @@ class Finding(models.Model):
                                            max_length=500,
                                            verbose_name="Unique ID from tool",
                                            help_text="Vulnerability technical id from the source tool. Allows to track unique vulnerabilities.")
+    vuln_id_from_tool = models.CharField(null=True,
+                                         blank=True,
+                                         max_length=500,
+                                         verbose_name="Vulnerability ID from tool",
+                                         help_text="Non-unique technical id from the source tool associated with the vulnerability type.")
     sast_source_object = models.CharField(null=True,
                                           blank=True,
                                           max_length=500,
@@ -1798,7 +1844,7 @@ class Finding(models.Model):
         if hasattr(settings, 'HASHCODE_FIELDS_PER_SCANNER') and hasattr(settings, 'HASHCODE_ALLOWS_NULL_CWE') and hasattr(settings, 'HASHCODE_ALLOWED_FIELDS'):
             # Default fields
             if self.dynamic_finding:
-                deduplicationLogger.debug('dynamig finding, so including endpoints in hash_code computation as default')
+                deduplicationLogger.debug('dynamic finding, so including endpoints in hash_code computation as default')
                 hashcodeFields = ['title', 'cwe', 'line', 'file_path', 'description', 'endpoints']
             else:
                 hashcodeFields = ['title', 'cwe', 'line', 'file_path', 'description']
@@ -1852,7 +1898,7 @@ class Finding(models.Model):
     def compute_hash_code_legacy(self):
         fields_to_hash = self.title + str(self.cwe) + str(self.line) + str(self.file_path) + self.description
         if self.dynamic_finding:
-            deduplicationLogger.debug('dynamig finding, so including endpoints in hash_code computation for legacy algo')
+            deduplicationLogger.debug('dynamic finding, so including endpoints in hash_code computation for legacy algo')
             fields_to_hash = fields_to_hash + self.get_endpoints()
         deduplicationLogger.debug("compute_hash_code_legacy - fields_to_hash = " + fields_to_hash)
         return self.hash_fields(fields_to_hash)
@@ -1967,7 +2013,7 @@ class Finding(models.Model):
             status += ['Out Of Scope']
         if self.duplicate:
             status += ['Duplicate']
-        if self.risk_acceptance_set.exists():
+        if len(self.risk_acceptance_set.all()) > 0:  # this is normally prefetched so works better than count() or exists()
             status += ['Risk Accepted']
         if not len(status):
             status += ['Initial']
@@ -2031,46 +2077,15 @@ class Finding(models.Model):
             return None
             pass
 
-    def jira(self):
-        try:
-            return self.jira_issue
-        except JIRA_Issue.DoesNotExist:
-            return None
-
+    @property
     def has_jira_issue(self):
-        try:
-            issue = self.jira_issue
-            return True
-        except JIRA_Issue.DoesNotExist:
-            return False
+        import dojo.jira_link.helper as jira_helper
+        return jira_helper.has_jira_issue(self)
 
-    def jira_conf(self):
-        try:
-            jpkey = JIRA_PKey.objects.get(product=self.test.engagement.product)
-            jconf = jpkey.conf
-        except:
-            jconf = None
-            pass
-        return jconf
-
-    # newer version that can work with prefetching due to array index isntead of first.
-    def jira_conf_new(self):
-        try:
-            return self.test.engagement.product.jira_pkey_set.all()[0].conf
-        except:
-            return None
-
-    # newer version that can work with prefetching due to array index isntead of first.
-    def jira_pkey(self):
-        try:
-            return self.test.engagement.product.jira_pkey_set.all()[0]
-        except:
-            return None
-            pass
-
-    def get_push_all_to_jira(self):
-        if self.jira_pkey():
-            return self.jira_pkey().push_all_issues
+    @property
+    def has_jira_configured(self):
+        import dojo.jira_link.helper as jira_helper
+        return jira_helper.has_jira_configured(self)
 
     def long_desc(self):
         long_desc = ''
@@ -2104,8 +2119,6 @@ class Finding(models.Model):
             from dojo.utils import get_current_user
             user = get_current_user()
             logger.debug('finding.save() getting current user: %s', user)
-
-        jira_issue_exists = JIRA_Issue.objects.filter(finding=self).exists()
 
         if self.pk is None:
             # We enter here during the first call from serializers.py
@@ -2141,42 +2154,27 @@ class Finding(models.Model):
         self.found_by.add(self.test.test_type)
 
         if rules_option:
-            from dojo.tasks import async_rules
-            from dojo.utils import sync_rules
-            if Dojo_User.wants_block_execution(user):
-                sync_rules(self, *args, **kwargs)
-            else:
-                async_rules(self, *args, **kwargs)
+            from dojo.utils import do_apply_rules
+            do_apply_rules(self, *args, **kwargs)
+
         from dojo.utils import calculate_grade
         calculate_grade(self.test.engagement.product)
+
         # Assign the numerical severity for correct sorting order
         self.numerical_severity = Finding.get_numerical_severity(self.severity)
         super(Finding, self).save()
         system_settings = System_Settings.objects.get()
+
         if dedupe_option and self.hash_code is not None:
             if system_settings.enable_deduplication:
-                from dojo.tasks import async_dedupe
-                try:
-                    if Dojo_User.wants_block_execution(user):
-                        dedupe_signal.send(sender=self.__class__, new_finding=self)
-                    else:
-                        async_dedupe.delay(self, *args, **kwargs)
-                except:
-                    async_dedupe.delay(self, *args, **kwargs)
-                    pass
+                from dojo.utils import do_dedupe_finding
+                do_dedupe_finding(self, *args, **kwargs)
             else:
                 deduplicationLogger.debug("skipping dedupe because it's disabled in system settings")
+
         if system_settings.false_positive_history and false_history:
-            from dojo.tasks import async_false_history
-            from dojo.utils import sync_false_history
-            try:
-                if Dojo_User.wants_block_execution(user):
-                    sync_false_history(self, *args, **kwargs)
-                else:
-                    async_false_history.delay(self, *args, **kwargs)
-            except:
-                async_false_history.delay(self, *args, **kwargs)
-                pass
+            from dojo.utils import do_false_positive_history
+            do_false_positive_history(self, *args, **kwargs)
         else:
             deduplicationLogger.debug("skipping false positive history because it's disabled in system settings or false_history param is False")
 
@@ -2189,19 +2187,9 @@ class Finding(models.Model):
 
         # Adding a snippet here for push to JIRA so that it's in one place
         if push_to_jira:
-            logger.debug('pushing to jira from finding.save()')
-            from dojo.tasks import add_jira_issue_task
-            from dojo.utils import add_jira_issue, update_jira_issue
-            if jira_issue_exists:
-                if Dojo_User.wants_block_execution(user):
-                    update_jira_issue(self, True)
-                else:
-                    update_jira_issue.delay(self, True)
-            else:
-                if Dojo_User.wants_block_execution(user):
-                    add_jira_issue(self, True)
-                else:
-                    add_jira_issue_task.delay(self, True)
+            logger.debug('pushing finding %s to jira from finding.save()', self.pk)
+            import dojo.jira_link.helper as jira_helper
+            jira_helper.push_to_jira(self)
 
     def delete(self, *args, **kwargs):
         for find in self.original_finding.all():
@@ -2266,6 +2254,34 @@ class Finding(models.Model):
             return note.date.strftime("%Y-%m-%d %H:%M:%S") + ': ' + note.author.get_full_name() + ' : ' + note.entry
 
         return ''
+
+    def get_sast_source_file_path_with_link(self):
+        from dojo.utils import create_bleached_link
+        if self.sast_source_file_path is None:
+            return None
+        if self.test.engagement.source_code_management_uri is None:
+            return self.sast_source_file_path
+        return create_bleached_link(self.test.engagement.source_code_management_uri + '/' + self.sast_source_file_path, self.sast_source_file_path)
+
+    def get_file_path_with_link(self):
+        from dojo.utils import create_bleached_link
+        if self.file_path is None:
+            return None
+        if self.test.engagement.source_code_management_uri is None:
+            return self.file_path
+        return create_bleached_link(self.test.engagement.source_code_management_uri + '/' + self.file_path, self.file_path)
+
+    def get_references_with_links(self):
+        import re
+        from dojo.utils import create_bleached_link
+        if self.references is None:
+            return None
+        matches = re.findall(r'([\(|\[]?(https?):((//)|(\\\\))+([\w\d:#@%/;$~_?\+-=\\\.&](#!)?)*[\)|\]]?)', self.references)
+        for match in matches:
+            # Check if match isn't already a markdown link
+            if not (match[0].startswith('[') or match[0].startswith('(')):
+                self.references = self.references.replace(match[0], create_bleached_link(match[0], match[0]), 1)
+        return self.references
 
 
 Finding.endpoints.through.__unicode__ = lambda \
@@ -2569,14 +2585,12 @@ class GITHUB_PKey(models.Model):
         return self.product.name + " | " + self.git_project
 
 
-class JIRA_Conf(models.Model):
+class JIRA_Instance(models.Model):
     configuration_name = models.CharField(max_length=2000, help_text="Enter a name to give to this configuration", default='')
     url = models.URLField(max_length=2000, verbose_name="JIRA URL", help_text="For configuring Jira, view: https://defectdojo.readthedocs.io/en/latest/features.html#jira-integration")
-    #    product = models.ForeignKey(Product)
     username = models.CharField(max_length=2000)
     password = models.CharField(max_length=2000)
-    #    project_key = models.CharField(max_length=200,null=True, blank=True)
-    #    enabled = models.BooleanField(default=True)
+
     if hasattr(settings, 'JIRA_ISSUE_TYPE_CHOICES_CONFIG'):
         default_issue_type_choices = settings.JIRA_ISSUE_TYPE_CHOICES_CONFIG
     else:
@@ -2634,46 +2648,39 @@ class JIRA_Conf(models.Model):
             return 'N/A'
 
 
-class JIRA_Issue(models.Model):
-    jira_id = models.CharField(max_length=200)
-    jira_key = models.CharField(max_length=200)
-    finding = models.OneToOneField(Finding, null=True, blank=True, on_delete=models.CASCADE)
-    engagement = models.OneToOneField(Engagement, null=True, blank=True, on_delete=models.CASCADE)
+# declare form here as we can't import forms.py due to circular imports not even locally
+class JIRAForm_Admin(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput, required=True)
 
-    def __unicode__(self):
-        text = ""
-        if self.finding:
-            text = self.finding.test.engagement.product.name + " | Finding: " + self.finding.title + ", ID: " + str(self.finding.id)
-        elif self.engagement:
-            text = self.engagement.product.name + " | Engagement: " + self.engagement.name + ", ID: " + str(self.engagement.id)
-        return text + " | Jira Key: " + str(self.jira_key)
+    # django doesn't seem to have an easy way to handle password fields as PasswordInput requires reentry of passwords
+    password_from_db = None
 
-    def __str__(self):
-        text = ""
-        if self.finding:
-            text = self.finding.test.engagement.product.name + " | Finding: " + self.finding.title + ", ID: " + str(self.finding.id)
-        elif self.engagement:
-            text = self.engagement.product.name + " | Engagement: " + self.engagement.name + ", ID: " + str(self.engagement.id)
-        return text + " | Jira Key: " + str(self.jira_key)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance:
+            # keep password from db to use if the user entered no password
+            self.password_from_db = self.instance.password
+            self.fields['password'].required = False
 
+    def clean(self):
+        # self.fields['endpoints'].queryset = Endpoint.objects.all()
+        cleaned_data = super().clean()
+        if not cleaned_data['password']:
+            cleaned_data['password'] = self.password_from_db
 
-class JIRA_Clone(models.Model):
-    jira_id = models.CharField(max_length=200)
-    jira_clone_id = models.CharField(max_length=200)
+        return cleaned_data
 
 
-class JIRA_Details_Cache(models.Model):
-    jira_id = models.CharField(max_length=200)
-    jira_key = models.CharField(max_length=200)
-    jira_status = models.CharField(max_length=200)
-    jira_resolution = models.CharField(max_length=200)
+class JIRA_Instance_Admin(admin.ModelAdmin):
+    form = JIRAForm_Admin
 
 
-class JIRA_PKey(models.Model):
-    project_key = models.CharField(max_length=200, blank=True)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    conf = models.ForeignKey(JIRA_Conf, verbose_name="JIRA Configuration",
+class JIRA_Project(models.Model):
+    jira_instance = models.ForeignKey(JIRA_Instance, verbose_name="JIRA Instance",
                              null=True, blank=True, on_delete=models.CASCADE)
+    project_key = models.CharField(max_length=200, blank=True)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True)
+    engagement = models.OneToOneField(Engagement, on_delete=models.CASCADE, null=True, blank=True)
     component = models.CharField(max_length=200, blank=True)
     push_all_issues = models.BooleanField(default=False, blank=True,
          help_text="Automatically maintain parity with JIRA. Always create and update JIRA tickets for findings in this Product.")
@@ -2682,11 +2689,79 @@ class JIRA_PKey(models.Model):
     push_notes = models.BooleanField(default=False, blank=True)
     product_jira_sla_notification = models.BooleanField(default=True, blank=False, verbose_name="Send SLA notifications as comment?")
 
+    @property
+    def conf(self):
+        return jira_instance
+
+    def clean(self):
+        if not self.jira_instance:
+            raise ValidationError('Cannot save JIRA_Project without JIRA_Instance')
+
     def __unicode__(self):
-        return self.product.name + " | " + self.project_key
+        return ('%s: ' + self.project_key + '(%s)') % (str(self.id), str(self.jira_instance.url) if self.jira_instance else 'None')
 
     def __str__(self):
-        return self.product.name + " | " + self.project_key
+        return ('%s: ' + self.project_key + '(%s)') % (str(self.id), str(self.jira_instance.url) if self.jira_instance else 'None')
+
+
+# declare form here as we can't import forms.py due to circular imports not even locally
+class JIRAForm_Admin(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput, required=True)
+
+    # django doesn't seem to have an easy way to handle password fields as PasswordInput requires reentry of passwords
+    password_from_db = None
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance:
+            # keep password from db to use if the user entered no password
+            self.password_from_db = self.instance.password
+            self.fields['password'].required = False
+
+    def clean(self):
+        # self.fields['endpoints'].queryset = Endpoint.objects.all()
+        cleaned_data = super().clean()
+        if not cleaned_data['password']:
+            cleaned_data['password'] = self.password_from_db
+
+        return cleaned_data
+
+
+class JIRA_Conf_Admin(admin.ModelAdmin):
+    form = JIRAForm_Admin
+
+
+class JIRA_Issue(models.Model):
+    jira_project = models.ForeignKey(JIRA_Project, on_delete=models.SET_NULL, null=True)  # just to be sure we don't delete JIRA_Issue if a jira_project is deleted
+    jira_id = models.CharField(max_length=200)
+    jira_key = models.CharField(max_length=200)
+    finding = models.OneToOneField(Finding, null=True, blank=True, on_delete=models.CASCADE)
+    engagement = models.OneToOneField(Engagement, null=True, blank=True, on_delete=models.CASCADE)
+
+    jira_creation = models.DateTimeField(editable=True,
+                                         null=True,
+                                         verbose_name="Jira creation",
+                                         help_text="The date a Jira issue was created from this finding.")
+    jira_change = models.DateTimeField(editable=True,
+                                       null=True,
+                                       verbose_name="Jira last update",
+                                       help_text="The date the linked Jira issue was last modified.")
+
+    def __unicode__(self):
+        text = ""
+        if self.finding:
+            text = self.finding.test.engagement.product.name + " | Finding: " + self.finding.title + ", ID: " + str(self.finding.id)
+        elif self.engagement:
+            text = self.engagement.product.name + " | Engagement: " + self.engagement.name + ", ID: " + str(self.engagement.id)
+        return text + " | Jira Key: " + str(self.jira_key)
+
+    def __str__(self):
+        text = ""
+        if self.finding:
+            text = self.finding.test.engagement.product.name + " | Finding: " + self.finding.title + ", ID: " + str(self.finding.id)
+        elif self.engagement:
+            text = self.engagement.product.name + " | Engagement: " + self.engagement.name + ", ID: " + str(self.engagement.id)
+        return text + " | Jira Key: " + str(self.jira_key)
 
 
 NOTIFICATION_CHOICES = (
@@ -3423,9 +3498,14 @@ def enable_disable_auditlog(enable=True):
         auditlog.unregister(Cred_User)
 
 
+def enable_disable_tag_pathcing(enable=True):
+    if enable:
+        # Patch to support prefetching
+        PrefetchingTagDescriptor.patch()
+
+
 from dojo.utils import get_system_setting
 enable_disable_auditlog(enable=get_system_setting('enable_auditlog'))  # on startup choose safe to retrieve system settiung)
-
 
 # Register tagging for models
 tag_register(Product)
@@ -3437,8 +3517,8 @@ tag_register(Finding_Template)
 tag_register(App_Analysis)
 tag_register(Objects)
 
-# Patch to support prefetching
-PrefetchingTagDescriptor.patch()
+from django.conf import settings
+enable_disable_tag_pathcing(enable=settings.TAG_PREFETCHING)  # on startup choose safe to retrieve system settiung)
 
 # Benchmarks
 admin.site.register(Benchmark_Type)
@@ -3481,11 +3561,11 @@ admin.site.register(ScanSettings)
 admin.site.register(IPScan)
 admin.site.register(Alerts)
 admin.site.register(JIRA_Issue)
-admin.site.register(JIRA_Conf)
-admin.site.register(JIRA_PKey)
+admin.site.register(JIRA_Instance, JIRA_Instance_Admin)
+admin.site.register(JIRA_Project)
 admin.site.register(GITHUB_Conf)
 admin.site.register(GITHUB_PKey)
-admin.site.register(Tool_Configuration)
+admin.site.register(Tool_Configuration, Tool_Configuration_Admin)
 admin.site.register(Tool_Product_Settings)
 admin.site.register(Tool_Type)
 admin.site.register(Cred_User)

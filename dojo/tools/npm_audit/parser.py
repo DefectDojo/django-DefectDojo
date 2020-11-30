@@ -1,7 +1,9 @@
+import logging
 import json
 import re
-
 from dojo.models import Finding
+
+logger = logging.getLogger(__name__)
 
 
 class NpmAuditParser(object):
@@ -26,6 +28,9 @@ class NpmAuditParser(object):
                 tree = json.loads(data)
         except:
             raise Exception("Invalid format, unable to parse json.")
+
+        if tree.get('auditReportVersion'):
+            raise ValueError('npm7 with auditReportVersion 2 or higher not yet supported as it lacks the most important fields in the reports')
 
         if tree.get('error'):
             error = tree.get('error')

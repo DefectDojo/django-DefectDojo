@@ -133,7 +133,7 @@ jobs:
       - name: Setup Minikube
         uses: manusa/actions-setup-minikube@v2.0.1
         with:
-          minikube version: 'v1.14.0'
+          minikube version: 'v1.14.2'
           kubernetes version: 'v1.19.2'
           driver: docker
           start args: '--addons=ingress'
@@ -150,6 +150,8 @@ jobs:
       - name: Configure HELM repos
         run: |-
              helm repo add stable https://charts.helm.sh/stable
+             helm repo add bitnami https://charts.bitnami.com/bitnami
+             helm dependency list ./helm/defectdojo
              helm dependency update ./helm/defectdojo
       - name: Set confings into Outputs
         id: set
@@ -180,20 +182,46 @@ jobs:
              kubectl get services
       - name: Check Application
         run: |-
-             kubectl wait  --for=condition=ready  pod --timeout=500s --selector=defectdojo.org/component=django
-             kubectl wait  --for=condition=ready  pod --timeout=500s --selector=defectdojo.org/component=celery
+             to_complete () {
+               kubectl wait  --for=$1 $2 --timeout=500s --selector=$3
+               if [[ ${?} != 0 ]]; then
+                 echo "ERROR: $2"
+                 echo "INFO: status:"
+                 kubectl get pods
+                 echo "INFO: logs:"
+                 kubectl logs  --selector=$3
+               fi
+               return ${?}
+             }
+             echo "Waiting for init job..."
+             to_complete  "condition=Complete" job "defectdojo.org/component=initializer"
+             echo "Waiting for celery pods..."
+             to_complete  "condition=ready" pod "defectdojo.org/component=celery"
+             echo "Waiting for django pod..."
+             to_complete  "condition=ready" pod "defectdojo.org/component=django"
              echo "Pods up and ready to rumbole"
              kubectl get pods
              OUT=$(kubectl run  curl --quiet=true --image=curlimages/curl:7.73.0 \
                 --overrides='{ "apiVersion": "v1", "spec": { "imagePullSecrets": [{"name": "defectdojoregistrykey"}] } }' \
-                --restart=Never -i --rm -- -m 20 -s -I --header "Host: $DD_HOSTNAME" http://`kubectl get service defectdojo-django -o json \
+                --restart=Never -i --rm -- -s -m 20 -I --header "Host: $DD_HOSTNAME" http://`kubectl get service defectdojo-django -o json \
                |  jq -r '.spec.clusterIP'`/login?next=/)
+             echo $OUT
              CR=`echo $OUT | egrep "^HTTP" | cut -d' ' -f2`
              echo $CR
              if [[ $CR -ne 200 ]]; then
-                echo "Curl Output: $OUT"
-                echo `kubectl logs  -l defectdojo.org/component=django -c uwsgi`
+                kubectl get pods
+                echo `kubectl logs --tail=30 -l defectdojo.org/component=django -c uwsgi`
                 echo "ERROR: cannot display login screen; got HTTP code $CR"
                 exit 1
+             fi
+             echo "Final Check of components"
+             errors=`kubectl get pods | grep Error | awk '{print  $1}'`
+             if [[ ! -z  $errors ]]; then
+               echo "Few pods with errors"
+               for line in $errors; do
+                 echo "Dumping log from $line"
+                 kubectl logs --tail 50 $line
+               done
+               exit 1
              fi
              echo "DD K8S successfully deployed"

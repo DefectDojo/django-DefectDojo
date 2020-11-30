@@ -1,11 +1,13 @@
 from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
 from rest_framework.permissions import DjangoModelPermissions
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser
+from rest_framework.exceptions import ParseError
 from django_filters.rest_framework import DjangoFilterBackend
 from django.utils.decorators import method_decorator
 from drf_yasg2 import openapi
@@ -15,7 +17,7 @@ from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Finding, \
     User, ScanSettings, Scan, Stub_Finding, Finding_Template, Notes, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
-    Endpoint, JIRA_PKey, JIRA_Conf, DojoMeta, Development_Environment, \
+    Endpoint, JIRA_Project, JIRA_Instance, DojoMeta, Development_Environment, \
     Dojo_User, Note_Type, System_Settings, App_Analysis, Endpoint_Status, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation, \
     BurpRawRequestResponse
@@ -30,6 +32,11 @@ from datetime import datetime
 from dojo.utils import get_period_counts_legacy, get_system_setting
 from dojo.api_v2 import serializers, permissions
 from django.db.models import Count, Q
+import dojo.jira_link.helper as jira_helper
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 class EndPointViewSet(mixins.ListModelMixin,
@@ -252,26 +259,30 @@ class FindingViewSet(mixins.ListModelMixin,
                      ra_api.AcceptedFindingsMixin,
                      viewsets.GenericViewSet):
     serializer_class = serializers.FindingSerializer
-    queryset = Finding.objects.all()
+    queryset = Finding.objects.all().prefetch_related('endpoints',
+                                                    'reviewers',
+                                                    'images',
+                                                    'found_by',
+                                                    'notes',
+                                                    'risk_acceptance_set',
+                                                    'test',
+                                                    'test__test_type',
+                                                    'test__engagement',
+                                                    'test__environment',
+                                                    'test__engagement__product',
+                                                    'test__engagement__product__prod_type')
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ApiFindingFilter
 
     # Overriding mixins.UpdateModeMixin perform_update() method to grab push_to_jira
     # data and add that as a parameter to .save()
     def perform_update(self, serializer):
-        push_all = False
-        push_to_jira = serializer.validated_data.get('push_to_jira')
         # IF JIRA is enabled and this product has a JIRA configuration
-        if get_system_setting('enable_jira') and \
-                serializer.instance.test.engagement.product.jira_pkey_set.first() is not None:
-            # Check if push_all_issues is set on this product
-            push_all = serializer.instance.test.engagement.product.jira_pkey_set.first().push_all_issues
+        push_to_jira = serializer.validated_data.get('push_to_jira')
+        jira_project = jira_helper.get_jira_project(serializer.instance)
+        if get_system_setting('enable_jira') and jira_project:
+            push_to_jira = push_to_jira or jira_project.push_all_issues
 
-        # If push_all_issues is set:
-        if push_all:
-            push_to_jira = True
-
-        # add a check for the product having push all issues enabled right here.
         serializer.save(push_to_jira=push_to_jira)
 
     def get_queryset(self):
@@ -282,7 +293,13 @@ class FindingViewSet(mixins.ListModelMixin,
             )
         else:
             findings = Finding.objects.all()
-        return findings.prefetch_related('test',
+        return findings.prefetch_related('endpoints',
+                                        'reviewers',
+                                        'images',
+                                        'found_by',
+                                        'notes',
+                                        'risk_acceptance_set',
+                                        'test',
                                         'test__test_type',
                                         'test__engagement',
                                         'test__environment',
@@ -391,8 +408,8 @@ class FindingViewSet(mixins.ListModelMixin,
             note.save()
             finding.notes.add(note)
 
-            if finding.has_jira_issue():
-                add_comment_task(finding, note)
+            if finding.has_jira_issue:
+                jira_helper.add_comment_task(finding, note)
 
             serialized_note = serializers.NoteSerializer({
                 "author": author, "entry": entry,
@@ -497,15 +514,111 @@ class FindingViewSet(mixins.ListModelMixin,
         report = serializers.ReportGenerateSerializer(data)
         return Response(report.data)
 
+    def _get_metadata(self, request, pk=None):
+        finding = get_object_or_404(Finding.objects, id=pk)
 
-class JiraConfigurationsViewSet(mixins.ListModelMixin,
+        metadata = DojoMeta.objects.filter(finding=finding)
+        serializer = serializers.FindingMetaSerializer(instance=metadata, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def _edit_metadata(self, request, pk=None):
+        finding = get_object_or_404(Finding.objects, id=pk)
+        metadata_name = request.query_params.get("name", None)
+        if metadata_name is None:
+            return Response({"error": "Metadata name is required"},
+                status=status.HTTP_400_BAD_REQUEST)
+
+        metadata = get_object_or_404(DojoMeta.objects, name=metadata_name, finding=finding)
+        metadata.name = request.data.get("name", metadata.name)
+        metadata.value = request.data.get("value", metadata.value)
+
+        metadata.save()
+        return Response({"success": "Metadata updated"},
+            status=status.HTTP_200_OK)
+
+    def _add_metadata(self, request, pk=None):
+        finding = get_object_or_404(Finding.objects, id=pk)
+        metadata_data = serializers.FindingMetaSerializer(data=request.data)
+
+        if metadata_data.is_valid():
+            name = metadata_data.validated_data["name"]
+            value = metadata_data.validated_data["value"]
+
+            metadata = DojoMeta(finding=finding, name=name, value=value)
+            try:
+                metadata.validate_unique()
+                metadata.save()
+            except ValidationError as err:
+                return Response({"error": err},
+                status=status.HTTP_400_BAD_REQUEST)
+
+            return Response({"success": "Metadata updated"},
+                status=status.HTTP_200_OK)
+        else:
+            return Response(metadata_data.errors,
+                status=status.HTTP_400_BAD_REQUEST)
+
+    def _remove_metadata(self, request, pk=None):
+        finding = get_object_or_404(Finding.objects, id=pk)
+        name = request.query_params.get("name", None)
+        if name is None:
+            return Response({"error": "A metadata name must be provided"},
+                status=status.HTTP_400_BAD_REQUEST)
+
+        metadata = get_object_or_404(DojoMeta.objects, finding=finding, name=name)
+        metadata.delete()
+
+        return Response({"success": "Metadata deleted"},
+            status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        responses={status.HTTP_200_OK: serializers.FindingMetaSerializer(many=True)},
+        methods=['get']
+    )
+    @swagger_auto_schema(
+        responses={status.HTTP_200_OK: ""},
+        methods=['delete'],
+        manual_parameters=[openapi.Parameter(
+            name="name", in_=openapi.IN_QUERY, required=True, type=openapi.TYPE_STRING,
+            description="name of the metadata to retrieve. If name is empty, return all the \
+                            metadata associated with the finding")]
+    )
+    @swagger_auto_schema(
+        responses={status.HTTP_200_OK: ""},
+        methods=['put'],
+        manual_parameters=[openapi.Parameter(
+            name="name", in_=openapi.IN_QUERY, required=True, type=openapi.TYPE_STRING,
+            description="name of the metadata to edit")],
+        request_body=serializers.FindingMetaSerializer
+    )
+    @swagger_auto_schema(
+        responses={status.HTTP_200_OK: ""},
+        methods=['post'],
+        request_body=serializers.FindingMetaSerializer
+    )
+    @action(detail=True, methods=["post", "put", "delete", "get"])
+    def metadata(self, request, pk=None):
+        if request.method == "GET":
+            return self._get_metadata(request, pk)
+        elif request.method == "POST":
+            return self._add_metadata(request, pk)
+        elif request.method == "PUT":
+            return self._edit_metadata(request, pk)
+        elif request.method == "DELETE":
+            return self._remove_metadata(request, pk)
+
+        return Response({"error", "unsupported method"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class JiraInstanceViewSet(mixins.ListModelMixin,
                                 mixins.RetrieveModelMixin,
                                 mixins.DestroyModelMixin,
                                 mixins.UpdateModelMixin,
                                 mixins.CreateModelMixin,
                                 viewsets.GenericViewSet):
-    serializer_class = serializers.JIRAConfSerializer
-    queryset = JIRA_Conf.objects.all()
+    serializer_class = serializers.JIRAInstanceSerializer
+    queryset = JIRA_Instance.objects.all()
+
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'url')
 
@@ -522,16 +635,16 @@ class JiraIssuesViewSet(mixins.ListModelMixin,
     filter_fields = ('id', 'jira_id', 'jira_key', 'finding_id')
 
 
-class JiraViewSet(mixins.ListModelMixin,
+class JiraProjectViewSet(mixins.ListModelMixin,
                   mixins.RetrieveModelMixin,
                   mixins.DestroyModelMixin,
                   mixins.UpdateModelMixin,
                   mixins.CreateModelMixin,
                   viewsets.GenericViewSet):
-    serializer_class = serializers.JIRASerializer
-    queryset = JIRA_PKey.objects.all()
+    serializer_class = serializers.JIRAProjectSerializer
+    queryset = JIRA_Project.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'conf', 'product', 'component', 'project_key',
+    filter_fields = ('id', 'jira_instance', 'product', 'component', 'project_key',
                      'push_all_issues', 'enable_engagement_epic_mapping',
                      'push_notes')
 
@@ -923,6 +1036,7 @@ class RegulationsViewSet(mixins.ListModelMixin,
 
 
 class UsersViewSet(mixins.CreateModelMixin,
+                   mixins.UpdateModelMixin,
                    mixins.ListModelMixin,
                    mixins.RetrieveModelMixin,
                    viewsets.GenericViewSet):
@@ -939,20 +1053,18 @@ class ImportScanView(mixins.CreateModelMixin,
     queryset = Test.objects.all()
 
     def perform_create(self, serializer):
-        # Override CreateModeMixin to pass in push_to_jira if needed.
-        push_all_jira_issues = False
-        push_to_jira = serializer.validated_data.get('push_to_jira')
-        # IF JIRA is enabled and this product has a JIRA configuration
         engagement = serializer.validated_data['engagement']
-        jira_config = engagement.product.jira_pkey_set.first() is not None
-        if get_system_setting('enable_jira') and jira_config:
-            # Check if push_all_issues is set on this product
-            push_all_jira_issues = engagement.product.jira_pkey_set.first().push_all_issues
+        jira_project = jira_helper.get_jira_project(engagement)
 
-        # If push_all_issues is set:
-        if push_all_jira_issues:
-            push_to_jira = True
-        serializer.save(push_to_jira=push_to_jira)
+        push_to_jira = serializer.validated_data.get('push_to_jira')
+        if get_system_setting('enable_jira') and jira_project:
+            push_to_jira = push_to_jira or jira_project.push_all_issues
+
+        logger.debug('push_to_jira: %s', serializer.validated_data.get('push_to_jira'))
+        try:
+            serializer.save(push_to_jira=push_to_jira)
+        except Exception as e:
+            raise ParseError(detail=e)
 
 
 class ReImportScanView(mixins.CreateModelMixin,
@@ -962,20 +1074,18 @@ class ReImportScanView(mixins.CreateModelMixin,
     queryset = Test.objects.all()
 
     def perform_create(self, serializer):
-        # Override CreateModeMixin to pass in push_to_jira if needed.
-        push_all_jira_issues = False
-        push_to_jira = serializer.validated_data.get('push_to_jira')
         test = serializer.validated_data['test']
-        jira_config = test.engagement.product.jira_pkey_set.first() is not None
-        # IF JIRA is enabled and this product has a JIRA configuration
-        if get_system_setting('enable_jira') and jira_config:
-            # Check if push_all_issues is set on this product
-            push_all_jira_issues = test.engagement.product.jira_pkey_set.first().push_all_issues
+        jira_project = jira_helper.get_jira_project(test)
 
-        # If push_all_issues is set:
-        if push_all_jira_issues:
-            push_to_jira = True
-        serializer.save(push_to_jira=push_to_jira)
+        push_to_jira = serializer.validated_data.get('push_to_jira')
+        if get_system_setting('enable_jira') and jira_project:
+            push_to_jira = push_to_jira or jira_project.push_all_issues
+
+        logger.debug('push_to_jira: %s', serializer.validated_data.get('push_to_jira'))
+        try:
+            serializer.save(push_to_jira=push_to_jira)
+        except Exception as e:
+            raise ParseError(detail=e)
 
 
 class NoteTypeViewSet(mixins.ListModelMixin,

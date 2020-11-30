@@ -1,7 +1,7 @@
+{% extends "report_base.html" %}
 {% load static from staticfiles %}
 <!DOCTYPE html>
 <html lang="en">
-<head>
     <meta charset="UTF-8">
     <meta name="pdfkit-page-size" content="Letter"/>
     <meta name="pdfkit-orientation" content="Portrait"/>
@@ -182,10 +182,11 @@
             color: black;
         }
     </style>
-</head>
-<body>
-{% for widget in widgets %}
-    {{ widget.get_html }}
-{% endfor %}
-</body>
-</html>
+{% block content %}
+    <div class="container" id="html_report">
+        {% for widget in widgets %}
+            {{ widget.get_html }}
+        {% endfor %}
+    </div>
+{% endblock %}
+
