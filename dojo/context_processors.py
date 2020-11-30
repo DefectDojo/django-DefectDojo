@@ -10,7 +10,8 @@ def globalize_oauth_vars(request):
             'OKTA_ENABLED': settings.OKTA_OAUTH_ENABLED,
             'GITLAB_ENABLED': settings.GITLAB_OAUTH2_ENABLED,
             'AZUREAD_TENANT_OAUTH2_ENABLED': settings.AZUREAD_TENANT_OAUTH2_ENABLED,
-            'SAML2_ENABLED': settings.SAML2_ENABLED, }
+            'SAML2_ENABLED': settings.SAML2_ENABLED,
+            'SAML2_LOGOUT_URL': settings.SAML2_LOGOUT_URL}
 
 
 def bind_system_settings(request):
@@ -19,7 +20,8 @@ def bind_system_settings(request):
 
 
 def bind_alert_count(request):
-    from dojo.models import Alerts
-    if not request.user.is_authenticated:
-        return {}
-    return {'alert_count': Alerts.objects.filter(user_id=request.user).count()}
+    if not settings.DISABLE_ALERT_COUNTER:
+        from dojo.models import Alerts
+        if request.user.is_authenticated:
+            return {'alert_count': Alerts.objects.filter(user_id=request.user).count()}
+    return {}

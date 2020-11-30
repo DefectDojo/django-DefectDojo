@@ -233,6 +233,14 @@
               {% endif %}
             </td>
           </tr>
+          {% with jira_project=prod|jira_project %}
+            {% if jira_project %}
+            <tr>
+              <td><strong>JIRA</strong></td>
+              <td><a href="{{ prod | jira_project_url }}" target="_blank"><i class="fa fa-external-link"></i> {{ prod | jira_key }}</a></td>
+            </tr>
+            {% endif %}
+          {% endwith %}
         </tbody>
       </table>
     </div>
@@ -303,6 +311,7 @@
           <tr>
             <td><strong>Authorized Users</strong></td>
             <td>
+
               {% if prod.authorized_users.all %}
                 {% if prod.authorized_users.all.count > 1 %}
                   {% for au in prod.authorized_users.all %}
@@ -310,6 +319,14 @@
                   {% endfor %}
                 {% else %}
                   {{ prod.authorized_users.all.0 }}
+                {% endif %}
+              {% elif prod.prod_type.authorized_users.all %}
+                {% if prod.prod_type.authorized_users.all.count > 1 %}
+                  {% for au in prod.prod_type.authorized_users.all %}
+                     {{au}}{%if not forloop.last%},{%endif%}
+                  {% endfor %}
+                {% else %}
+                  {{ prod.prod_type.authorized_users.all.0 }}
                 {% endif %}
               {% else %}
                 {{ prod.authorized_users.all|notspecified }}
@@ -326,7 +343,7 @@
   <div class="panel-heading">
     {% url 'notifications' as notifications_url %}
     <h3 class="panel-title"><span class="fa fa-users fa-fw" aria-hidden="true"></span> Notifications
-      <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="These are your personal settings for this product, next to your <a href='{{notifications_url}}'>global notifications</a>." data-placement="right" data-container="body"></i>
+      <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="These are your personal settings for this product." data-placement="right" data-container="body"></i>
     </h3>
   </div>
   <form id="edit_notifications_form" class="form-horizontal" method="post" action="{% url 'edit_notifications' prod.id %}">{% csrf_token %}

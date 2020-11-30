@@ -8,9 +8,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from dojo.utils import add_breadcrumb
 from dojo.forms import ToolTypeForm
-from dojo.models import Tool_Type, JIRA_Issue
-from jira import JIRA
-
+from dojo.models import Tool_Type
 
 logger = logging.getLogger(__name__)
 
@@ -54,14 +52,6 @@ def edit_tool_type(request, ttid):
                   {
                       'tform': tform,
                   })
-
-
-@user_passes_test(lambda u: u.is_staff)
-def delete_issue(request, find):
-    j_issue = JIRA_Issue.objects.get(finding=find)
-    jira = JIRA(server=Tool_Type.url, basic_auth=(Tool_Type.username, Tool_Type.password))
-    issue = jira.issue(j_issue.jira_id)
-    issue.delete()
 
 
 @user_passes_test(lambda u: u.is_staff)

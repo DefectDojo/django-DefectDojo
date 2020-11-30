@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import user_passes_test, login_required
 from django.core import serializers
 from django.core.exceptions import PermissionDenied
 from django.urls import reverse
+from django.conf import settings
 from django.db.models import Q
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404
@@ -15,7 +16,7 @@ from tastypie.models import ApiKey
 
 from dojo.filters import UserFilter
 from dojo.forms import DojoUserForm, AddDojoUserForm, DeleteUserForm, APIKeyForm, UserContactInfoForm
-from dojo.models import Product, Dojo_User, Alerts
+from dojo.models import Product, Product_Type, Dojo_User, Alerts
 from dojo.utils import get_page_items, add_breadcrumb
 
 logger = logging.getLogger(__name__)
@@ -153,8 +154,10 @@ def alerts_json(request, limit=None):
 
 
 def alertcount(request):
-    count = Alerts.objects.filter(user_id=request.user).count()
-    return JsonResponse({'count': count})
+    if not settings.DISABLE_ALERT_COUNTER:
+        count = Alerts.objects.filter(user_id=request.user).count()
+        return JsonResponse({'count': count})
+    return JsonResponse({'count': 0})
 
 
 def view_profile(request):
@@ -258,6 +261,10 @@ def add_user(request):
                 for p in form.cleaned_data['authorized_products']:
                     p.authorized_users.add(user)
                     p.save()
+            if 'authorized_product_types' in form.cleaned_data and len(form.cleaned_data['authorized_product_types']) > 0:
+                for pt in form.cleaned_data['authorized_product_types']:
+                    pt.authorized_users.add(user)
+                    pt.save()
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'User added successfully, you may edit if necessary.',
@@ -280,7 +287,11 @@ def add_user(request):
 def edit_user(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     authed_products = Product.objects.filter(authorized_users__in=[user])
-    form = AddDojoUserForm(instance=user, initial={'authorized_products': authed_products})
+    authed_product_types = Product_Type.objects.filter(authorized_users__in=[user])
+    form = AddDojoUserForm(instance=user, initial={
+        'authorized_products': authed_products,
+        'authorized_product_types': authed_product_types
+    })
     if not request.user.is_superuser:
         form.fields['is_staff'].widget.attrs['disabled'] = True
         form.fields['is_superuser'].widget.attrs['disabled'] = True
@@ -294,9 +305,6 @@ def edit_user(request, uid):
         contact_form = UserContactInfoForm(instance=user_contact)
 
     if request.method == 'POST':
-        for init_auth_prods in authed_products:
-            init_auth_prods.authorized_users.remove(user)
-            init_auth_prods.save()
         form = AddDojoUserForm(request.POST, instance=user)
         if user_contact is None:
             contact_form = UserContactInfoForm(request.POST)
@@ -305,10 +313,20 @@ def edit_user(request, uid):
 
         if form.is_valid() and contact_form.is_valid():
             form.save()
+            for init_auth_prods in authed_products:
+                init_auth_prods.authorized_users.remove(user)
+                init_auth_prods.save()
+            for init_auth_prod_types in authed_product_types:
+                init_auth_prod_types.authorized_users.remove(user)
+                init_auth_prod_types.save()
             if 'authorized_products' in form.cleaned_data and len(form.cleaned_data['authorized_products']) > 0:
                 for p in form.cleaned_data['authorized_products']:
                     p.authorized_users.add(user)
                     p.save()
+            if 'authorized_product_types' in form.cleaned_data and len(form.cleaned_data['authorized_product_types']) > 0:
+                for pt in form.cleaned_data['authorized_product_types']:
+                    pt.authorized_users.add(user)
+                    pt.save()
             contact = contact_form.save(commit=False)
             contact.user = user
             contact.save()

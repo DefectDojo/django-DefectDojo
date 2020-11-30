@@ -35,8 +35,11 @@ class FortifyXMLParser(object):
         cat_meta = {}
         # Get all issues
         issues = []
+        meta_pair = ({}, {})
+        issue_pair = ([], [])
         for ReportSection in root.findall('ReportSection'):
-            if ReportSection.findtext('Title') == "Results Outline":
+            if ReportSection.findtext('Title') in ["Results Outline", "Issue Count by Category"]:
+                place = 0 if ReportSection.findtext('Title') == "Results Outline" else 1
                 # Get information on the vulnerability like the Abstract, Explanation,
                 # Recommendation, and Tips
                 for group in ReportSection.iter("GroupingSection"):
@@ -44,11 +47,18 @@ class FortifyXMLParser(object):
                     maj_attr_summary = group.find("MajorAttributeSummary")
                     if maj_attr_summary:
                         meta_info = maj_attr_summary.findall("MetaInfo")
-                        cat_meta[title] = {x.findtext("Name"): x.findtext("Value")
+                        meta_pair[place][title] = {x.findtext("Name"): x.findtext("Value")
                                            for x in meta_info}
                 # Collect all issues
                 for issue in ReportSection.iter("Issue"):
-                    issues.append(issue)
+                    issue_pair[place].append(issue)
+
+        if len(issue_pair[0]) > len(issue_pair[1]):
+            issues = issue_pair[0]
+            cat_meta = meta_pair[0]
+        else:
+            issues = issue_pair[1]
+            cat_meta = meta_pair[1]
 
         # All issues obtained, create a map for reference
         issue_map = {}

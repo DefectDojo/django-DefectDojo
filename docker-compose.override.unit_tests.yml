@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile.busybox
     image: defectdojo/defectdojo-busybox:${NGINX_VERSION:-latest}
   uwsgi:
-    entrypoint: ['/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/entrypoint-unit-tests-devDocker.sh']
+    entrypoint: ['/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/app/docker/entrypoint-unit-tests-devDocker.sh']
     volumes:
       - '.:/app:z'
     environment:
