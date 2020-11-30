@@ -42,7 +42,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Set integration-test mode
-        run: docker/setEnv.sh integration_tests
+        run: ln -s docker-compose.override.integration_tests.yml docker-compose.override.yml
       
       # Pull the latest image to build, and avoid caching pull-only images.
       # (docker pull is faster than caching in most cases.)
