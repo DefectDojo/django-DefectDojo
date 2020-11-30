@@ -3,6 +3,9 @@ tag-template: '$NEXT_MINOR_VERSION'
 branches:
   - master
 categories:
+  - title: '💣 Breaking changes'
+    labels:
+      - 'Breaking Changes'
   - title: '🚀 New scanners'
     labels:
       - 'Import Scans'

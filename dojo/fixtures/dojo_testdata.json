@@ -125,7 +125,7 @@
       "false_positive_history": false,
       "msteams_url": "",
       "slack_token": "",
-      "jira_minimum_severity": "High",
+      "jira_minimum_severity": "Low",
       "max_dupes": 1,
       "slack_username": "",
       "enable_msteams_notifications": false,
@@ -1639,26 +1639,26 @@
   },
   {
     "pk": 2,
-    "model": "dojo.jira_conf",
+    "model": "dojo.jira_instance",
     "fields": {
-      "username": "user1",
-      "default_issue_type": "Task",
-      "finding_text": "",
-      "low_mapping_severity": "test severity",
-      "url": "http://www.testjira.com",
-      "medium_mapping_severity": "test severity",
-      "open_status_key": 111,
-      "close_status_key": 112,
-      "critical_mapping_severity": "test severity",
-      "high_mapping_severity": "test severity",
-      "password": "user1",
-      "epic_name_id": 111,
-      "global_jira_sla_notification": false
+        "url": "https://defectdojo.atlassian.net/",
+        "username": "<YOUR_USER_HERE>",
+        "password": "<YOUR_API_KEY_HERE>",
+        "default_issue_type": "Task",
+        "epic_name_id": 10942,
+        "open_status_key": 3,
+        "close_status_key": 2,
+        "low_mapping_severity": "Low",
+        "medium_mapping_severity": "Medium",
+        "high_mapping_severity": "High",
+        "critical_mapping_severity": "Highest",
+        "finding_text": "",
+        "global_jira_sla_notification": false
     }
   },
   {
     "pk": 3,
-    "model": "dojo.jira_conf",
+    "model": "dojo.jira_instance",
     "fields": {
       "username": "user2",
       "default_issue_type": "Task",
@@ -1676,7 +1676,7 @@
   },
   {
     "pk": 4,
-    "model": "dojo.jira_conf",
+    "model": "dojo.jira_instance",
     "fields": {
       "username": "user3",
       "default_issue_type": "Spike",
@@ -1699,7 +1699,7 @@
       "jira_key": "222",
       "finding": 5,
       "jira_id": "2",
-      "engagement": 3
+      "engagement": null
     }
   },
   {
@@ -1707,48 +1707,45 @@
     "model": "dojo.jira_issue",
     "fields": {
       "jira_key": "333",
-      "finding": 6,
-      "jira_id": "3",
+      "finding": null,
+      "jira_id": "333",
       "engagement": 1
     }
   },
   {
+    "pk": 4,
+    "model": "dojo.jira_issue",
+    "fields": {
+      "jira_key": "666",
+      "finding": null,
+      "jira_id": "666",
+      "engagement": null
+    }
+  },
+  {
     "pk": 1,
-    "model": "dojo.jira_pkey",
+    "model": "dojo.jira_project",
     "fields": {
       "push_notes": false,
       "product": 1,
       "push_all_issues": false,
       "component": "",
       "enable_engagement_epic_mapping": true,
-      "conf": 2,
+      "jira_instance": 2,
       "project_key": "key1"
     }
   },
   {
     "pk": 2,
-    "model": "dojo.jira_pkey",
+    "model": "dojo.jira_project",
     "fields": {
       "push_notes": true,
       "product": 2,
-      "push_all_issues": true,
-      "component": "",
-      "enable_engagement_epic_mapping": true,
-      "conf": 3,
-      "project_key": "key2"
-    }
-  },
-  {
-    "pk": 3,
-    "model": "dojo.jira_pkey",
-    "fields": {
-      "push_notes": false,
-      "product": 3,
       "push_all_issues": false,
       "component": "",
-      "enable_engagement_epic_mapping": false,
-      "conf": 4,
-      "project_key": "key3"
+      "enable_engagement_epic_mapping": true,
+      "jira_instance": 2,
+      "project_key": "NTEST"
     }
   },
   {

@@ -75,6 +75,10 @@ spec:
         volumeMounts:
         - name: run
           mountPath: /run/defectdojo
+        ports:
+        - name: http
+          protocol: TCP
+          containerPort: 8081
         envFrom:
         - configMapRef:
             name: {{ $fullName }}
@@ -111,6 +115,20 @@ spec:
           value: {{- if or .Values.django.ingress.activateTLS .Values.django.nginx.tls.enabled }} "True" {{- else }} "False" {{- end }}
         - name: DD_CSRF_COOKIE_SECURE
           value: {{- if or .Values.django.ingress.activateTLS .Values.django.nginx.tls.enabled }} "True" {{- else }} "False" {{- end }}
+        {{- if .Values.django.uwsgi.livenessProbe.enabled }}
+        livenessProbe:
+          httpGet:
+            path: /login?next=/
+            port: http
+            httpHeaders:
+            - name: Host
+              value: {{ .Values.host }}
+          failureThreshold: {{ .Values.django.uwsgi.livenessProbe.failureThreshold }}
+          initialDelaySeconds: {{ .Values.django.uwsgi.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.django.uwsgi.livenessProbe.periodSeconds }}
+          successThreshold: {{ .Values.django.uwsgi.livenessProbe.successThreshold }}
+          timeoutSeconds: {{ .Values.django.uwsgi.livenessProbe.timeoutSeconds }}
+        {{- end }}
         resources:
           {{- toYaml .Values.django.uwsgi.resources | nindent 10 }}
       - name: nginx
@@ -138,7 +156,7 @@ spec:
           value: '{{ .Values.django.nginx.tls.generateCertificate }}'
         livenessProbe:
           httpGet:
-            path: /
+            path: /nginx_health
             port: http
             {{- if .Values.django.nginx.tls.enabled }}
             scheme: HTTPS
@@ -146,12 +164,13 @@ spec:
             httpHeaders:
             - name: Host
               value: {{ .Values.host }}
-          initialDelaySeconds: 120
+          initialDelaySeconds: 10
           periodSeconds: 10
           failureThreshold: 6
+        {{- if .Values.django.uwsgi.livenessProbe.enabled }}
         readinessProbe:
           httpGet:
-            path: /
+            path: /uwsgi_health
             port: http
             {{- if .Values.django.nginx.tls.enabled }}
             scheme: HTTPS
@@ -159,9 +178,12 @@ spec:
             httpHeaders:
             - name: Host
               value: {{ .Values.host }}
-          initialDelaySeconds: 120
-          periodSeconds: 10
-          failureThreshold: 12
+          failureThreshold: {{ .Values.django.uwsgi.livenessProbe.failureThreshold }}
+          initialDelaySeconds: {{ .Values.django.uwsgi.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.django.uwsgi.livenessProbe.periodSeconds }}
+          successThreshold: {{ .Values.django.uwsgi.livenessProbe.successThreshold }}
+          timeoutSeconds: {{ .Values.django.uwsgi.livenessProbe.timeoutSeconds }}
+        {{- end }}
         resources:
           {{- toYaml .Values.django.nginx.resources | nindent 10 }}
       {{- with .Values.django.nodeSelector }}

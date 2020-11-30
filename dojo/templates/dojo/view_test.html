@@ -215,7 +215,7 @@
                         </a>
                     </button>
                 {% endif %}
-                {% if user|is_authorized_for_delete:finding %}                    
+                {% if user|is_authorized_for_delete:test %}
                     <button type="button" class="btn btn-info btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom" title="Delete Findings">
                         <a class="white-color delete-bulk" href="#" alt="Delete Findings">
                             <i class="fa fa-trash"></i>
@@ -322,7 +322,7 @@
                             <th>Reporter</th>
                             <th>Status</th>
                             {% if system_settings.enable_jira %}
-                                {% if jira_config and product_tab or not product_tab %}
+                                {% if jira_project and product_tab or not product_tab %}
                                     <th>Jira</th>
                                     <th>Jira Age</th>
                                     <th>Jira Change</th>
@@ -414,7 +414,7 @@
                                         {% endif %}
                                     {% endif %}
                                     {% if user|is_authorized_for_staff:finding %}
-                                        {% if finding.risk_acceptance_set.exists %}
+                                        {% if finding.risk_acceptance_set.all %}
                                             <li role="presentation">
                                             <a href="{% url 'simple_risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
                                                 <i class="fa fa-exclamation-circle"></i> Unaccept Risk
@@ -472,11 +472,11 @@
                             {% else %}
                               {% if finding.endpoints.all %}
                                 <i class="fa dojo-sup fa-sitemap has-popover" data-html="true" data-trigger="hover" data-content="
-                                    {% for endpoint in finding.endpoints.all %}
-                                        {% if endpoint|endpoint_check_active:finding %}
-                                            &#10005; {{ endpoint }}<br/>
+                                    {% for endpoint_status in finding.endpoint_status.all %}
+                                        {% if endpoint_status.mitigated %}
+                                            &#10003; {{ endpoint_status.endpoint }}<br/>
                                         {% else %}
-                                            &#10003; {{ endpoint }}<br/>
+                                            &#10005; {{ endpoint_status.endpoint }}<br/>
                                         {% endif %}
                                     {% endfor %}
                                 " data-placement="right" data-container="body" data-original-title="Endpoints ({{finding.active_endpoint_count}} Active, {{finding.mitigated_endpoint_count}} Mitigated)" title=""></i>
@@ -520,21 +520,20 @@
                         <td>{{ finding|finding_display_status|safe }}
                         </td>
                         {% if system_settings.enable_jira %}
-                            {% if jira_config and product_tab or not product_tab %}
+                            {% if jira_project and product_tab or not product_tab %}
                                 <td>
-                                    <a href="{{finding.jira_conf_new.url}}/browse/{{finding.jira_issue.jira_key}}" target="_blank"> {{finding.jira_issue.jira_key}} </a>
-                                </td>
-
-                                    <td class="nowrap">
-                                        {% if finding.jira_creation %}
-                                            {{ finding.jira_creation|timesince }}
-                                        {% endif %}
+                                    {% if finding.has_jira_issue %}
+                                        <a href="{{ finding | jira_issue_url }}" target="_blank" 
+                                            alt="Jira Bug - {{finding | jira_key}}" data-toggle="tooltip" data-placement="bottom" title="{{finding | jira_key}}"><i class="fa fa-bug fa-fw"></i></a>
+                                    {% endif %}
                                     </td>
 
                                     <td class="nowrap">
-                                        {% if finding.jira_change %}
-                                            {{ finding.jira_change|timesince }}
-                                        {% endif %}
+                                        {{ finding | jira_creation | timesince }}
+                                    </td>
+
+                                    <td class="nowrap">
+                                        {{ finding | jira_change | timesince }}
                                     </td>
 
                             {% endif %}
@@ -774,7 +773,7 @@
                     { "data": "reporter" },
                     { "data": "status" },
                     {% if system_settings.enable_jira %}
-                        {% if jira_config and product_tab or not product_tab %}
+                        {% if jira_project and product_tab or not product_tab %}
                             { "data": "jira" },
                             { "data": "jira_age" },
                             { "data": "jira_change" },
