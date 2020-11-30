@@ -750,6 +750,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     # for backwards compatibility because someone decided to rename this scanner:
     'Symfony Security Check': ['title', 'cve'],
     'DSOP Scan': ['cve'],
+    'Acunetix Scan': ['title', 'description'],
     'Trivy Scan': ['title', 'severity', 'cve', 'cwe'],
 }
 
@@ -766,6 +767,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'ZAP Scan': False,
     'Qualys Scan': True,
     'DSOP Scan': True,
+    'Acunetix Scan': True,
     'Trivy Scan': True,
 }
 
@@ -803,6 +805,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'ZAP Scan': DEDUPE_ALGO_HASH_CODE,
     'Qualys Scan': DEDUPE_ALGO_HASH_CODE,
     'PHP Symfony Security Check': DEDUPE_ALGO_HASH_CODE,
+    'Acunetix Scan': DEDUPE_ALGO_HASH_CODE,
     'Clair Scan': DEDUPE_ALGO_HASH_CODE,
     'Clair Klar Scan': DEDUPE_ALGO_HASH_CODE,
     'Veracode Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
