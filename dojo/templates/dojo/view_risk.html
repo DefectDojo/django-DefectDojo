@@ -2,9 +2,7 @@
 {% load display_tags %}
 {% load humanize %}
 {% load static from staticfiles %}
-{% block add_css %}
-    <link rel="stylesheet" href="{% static "chosen-bootstrap/chosen.bootstrap.min.css" %}">
-{% endblock %}
+
 {% block add_styles %}
     .chosen-container {
     width: 70% !important;
@@ -18,7 +16,7 @@
         <div class="panel-heading tight">
             <div class="clearfix">
                 <h3 class="pull-left">
-                    Risk Exception <small>added by {{ risk_approval.reporter.get_full_name }}, Updated {{ risk_approval.updated|naturaltime|default_if_none:"" }}, Created {{ risk_approval.created|naturaltime|default_if_none:"" }}</small>
+                    Risk Acceptance <small>added by {{ risk_approval.reporter.get_full_name }}, Updated {{ risk_approval.updated|naturaltime|default_if_none:"" }}, Created {{ risk_approval.created|naturaltime|default_if_none:"" }}</small>
                 </h3>
                 <div class="dropdown pull-right">
                     <!--

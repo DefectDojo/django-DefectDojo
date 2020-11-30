@@ -76,6 +76,9 @@ class BaseTestCase(unittest.TestCase):
         driver.get(self.base_url + "product")
         self.wait_for_datatable_if_content("no_products", "products_wrapper")
 
+    def goto_component_overview(self, driver):
+        driver.get(self.base_url + "components")
+
     def goto_active_engagements_overview(self, driver):
         # return self.goto_engagements_internal(driver, 'engagement')
         # engagement overview doesn't seem to have the datatables yet modifying the DOM
@@ -235,8 +238,13 @@ class BaseTestCase(unittest.TestCase):
             examples:
             http://localhost:8080/static/dojo/img/zoom-in.cur - Failed to load resource: the server responded with a status of 404 (Not Found)
             http://localhost:8080/media/CACHE/images/finding_images/1bf9c0b1-5ed1-4b4e-9551-bcbfd198b90a/7d8d9af058566b8f2fe6548d96c63237.jpg - Failed to load resource: the server responded with a status of 404 (Not Found)
+
+            The addition of the trigger exception is due to the Report Builder tests. All of the moving objects are from javascrip
+            Tooltips are attached to each object and operate fine at human speeds. Selenium moves too fast for tooltips to be
+            cleaned up, edited, and displayed, so the issue is only present in the test
             """
-            accepted_javascript_messages = r'((zoom\-in\.cur.*)|(images\/finding_images\/.*))404\ \(Not\ Found\)'
+            accepted_javascript_messages = r'((zoom\-in\.cur.*)|(images\/finding_images\/.*))404\ \(Not\ Found\)|Cannot read property \'trigger\' of null'
+            # accepted_javascript_messages = r'((zoom\-in\.cur.*)|(images\/finding_images\/.*))404\ \(Not\ Found\)|(bootstrap\-chosen\.css\.map)'
 
             if (entry['level'] == 'SEVERE'):
                 # print(self.driver.current_url)  # TODO actually this seems to be the previous url
@@ -306,8 +314,8 @@ def on_exception_html_source_logger(func):
             return func(self, *args, **kwargs)
 
         except Exception as e:
-            # print(self.driver.page_source)
-            print("exception url:", self.driver.current_url)
+            print("exception occured at url:", self.driver.current_url)
+            print("page source:", self.driver.page_source)
             f = open("selenium_page_source.html", "w", encoding='utf-8')
             f.writelines(self.driver.page_source)
             # time.sleep(30)

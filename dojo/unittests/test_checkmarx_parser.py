@@ -224,8 +224,29 @@ class TestCheckmarxParser(TestCase):
         self.assertEqual(True, item.false_p)
 
 # ----------------------------------------------------------------------------
+# two findings with the same aggregate keys, but one is false positive
+# the result should be one exploitable finding, even though the first one found was false positive
+# ----------------------------------------------------------------------------
+
+    def test_file_name_aggregated_parse_file_with_two_aggregated_findings_one_is_false_p(self):
+        my_file_handle, product, engagement, test = self.init("dojo/unittests/scans/checkmarx/two_aggregated_findings_one_is_false_positive.xml")
+        self.parser = CheckmarxXMLParser(my_file_handle, test)
+        self.teardown(my_file_handle)
+        self.assertEqual(1, len(self.parser.items))
+        # check content for aggregated finding
+        item = self.parser.items[0]
+        # finding is never active/verified yet at this time
+        self.assertEqual(bool, type(item.active))
+        self.assertEqual(False, item.active)
+        self.assertEqual(bool, type(item.verified))
+        self.assertEqual(False, item.verified)
+        self.assertEqual(bool, type(item.false_p))
+        self.assertEqual(False, item.false_p)
+
+# ----------------------------------------------------------------------------
 # multiple_findings : source filename = sink filename.
 # ----------------------------------------------------------------------------
+
     def test_file_name_aggregated_parse_file_with_multiple_vulnerabilities_has_multiple_findings(self):
         my_file_handle, product, engagement, test = self.init("dojo/unittests/scans/checkmarx/multiple_findings.xml")
         self.parser = CheckmarxXMLParser(my_file_handle, test)

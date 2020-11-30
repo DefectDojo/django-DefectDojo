@@ -1,8 +1,6 @@
 {% extends "base.html" %}
 {% load static from staticfiles %}
-{% block add_css %}
-    <link rel="stylesheet" href="{% static "chosen-bootstrap/chosen.bootstrap.min.css" %}">
-{% endblock %}
+
 {% block content %}
     <h3> Edit {{ product.name }} Metadata</h3>
     <p>
@@ -17,10 +15,10 @@
                 <div class="col-sm-10">
                     <input type="text" class="form-control" id="cfv_{{ cf.id }}" name="cfv_{{ cf.id }}"
                            value="{{ cf.value }}">
+                    <span for="cfv_{{ cf.id }}">Delete</span>
+                    <input type="checkbox" label="Delete Checkbox" name="delete_cfv_{{ cf.id }}" id="delete_cfv_{{ cf.id }}"/>
                 </div>
             </div>
-
-
         {% endfor %}
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">

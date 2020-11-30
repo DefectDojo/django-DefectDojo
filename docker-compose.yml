@@ -2,25 +2,25 @@
 version: '3.7'
 services:
   nginx:
-    build: 
+    build:
       context: ./
       dockerfile: Dockerfile.nginx
     image: defectdojo/defectdojo-nginx:${NGINX_VERSION:-latest}
     depends_on:
       - uwsgi
-    environment: 
+    environment:
       NGINX_METRICS_ENABLED: ${NGINX_METRICS_ENABLED:-false}
     ports:
-      - target: ${DD_PORT:-8080}
+      - target: 8080
         published: ${DD_PORT:-8080}
         protocol: tcp
         mode: host
-      - target: ${DD_PORT:-8443}
-        published: ${DD_PORT:-8443}
+      - target: 8443
+        published: ${DD_TLS_PORT:-8443}
         protocol: tcp
         mode: host
   uwsgi:
-    build: 
+    build:
       context: ./
       dockerfile: Dockerfile.django
     image: defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}
@@ -36,6 +36,10 @@ services:
       DD_CELERY_BROKER_PASSWORD: ${DD_CELERY_BROKER_USER:-guest}
       DD_SECRET_KEY: ${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}
       DD_CREDENTIAL_AES_256_KEY: ${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}
+    volumes:
+        - type: bind
+          source: ./docker/extra_settings
+          target: /app/docker/extra_settings
   celerybeat:
     image: defectdojo/defectdojo-django:latest
     depends_on:
@@ -74,8 +78,12 @@ services:
       DD_INITIALIZE: ${DD_INITIALIZE:-true}
       DD_SECRET_KEY: ${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}
       DD_CREDENTIAL_AES_256_KEY: ${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}
+    volumes:
+        - type: bind
+          source: ./docker/extra_settings
+          target: /app/docker/extra_settings      
   mysql:
-    image: mysql:5.7.29@sha256:8044616c01e46c6bc826d205103a2b650a1679be2f34beab9bbf6c6f642df673
+    image: mysql:5.7.32@sha256:ec6742af6625f76f98162b17fd62d22e1824d13fd80f214ab9184c7b6b50bad5
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
       DD_DATABASE_URL: ${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}
@@ -86,6 +94,6 @@ services:
     volumes:
        - defectdojo_data:/var/lib/mysql
   rabbitmq:
-    image: rabbitmq:3.7.26@sha256:be00c655a6d4a1012358a3a51d57e2b33d926b181a65863a568adc103edfdb91
+    image: rabbitmq:3.8.9@sha256:b05476a8406e2a77107282840ef1db34564267ac6d9823dc66ee1c3706d885e8
 volumes:
   defectdojo_data: {}

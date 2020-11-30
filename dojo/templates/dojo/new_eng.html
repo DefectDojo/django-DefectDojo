@@ -1,7 +1,8 @@
 {% extends "base.html" %}
+{% load display_tags %}
 {% load static from staticfiles %}
 {% block add_css %}
-    <link rel="stylesheet" href="{% static "chosen-bootstrap/chosen.bootstrap.min.css" %}">
+
     <link rel="stylesheet" href="{% static "easymde/dist/easymde.min.css" %}">
 {% endblock %}
 {% block add_styles %}
@@ -20,10 +21,35 @@
     {% endif %}
     <form class="form-horizontal" method="post">{% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
-        {%  if jform %}
-                <h4> JIRA </h4>
+
+        {%  if jira_project_form %}
+            <h4> JIRA Project</h4>
+            <hr>
+            {% include "dojo/form_fields.html" with form=jira_project_form %}
+        {% endif %}
+
+        {%  if jira_epic_form %}
+                <h4> JIRA Epic</h4>
                 <hr>
-                {% include "dojo/form_fields.html" with form=jform %}
+                <div class="form-group">
+                    <label class="col-sm-2 control-label" for="id_jira_issue">JIRA URL
+                        <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="JIRA URL connected to this engagement product or engagement" data-placement="right" data-container="body" data-original-title="" title="">
+                        </i>
+                    </label>
+                    <div class="col-sm-10 form-control-static">
+                        {% if engagement.has_jira_issue %}                        
+                            <a href="{{ engagement | jira_issue_url }}"
+                            target="_blank"> {{ engagement | jira_issue_url }} </a>
+                        {% elif engagement %}
+                            <a href="{{ engagement | jira_project_url }}"
+                            target="_blank"> {{ engagement | jira_project_url }} </a>
+                        {% else %}
+                            <a href="{{ product_tab.product | jira_project_url }}"
+                            target="_blank"> {{ product_tab.product | jira_project_url }} </a>
+                        {% endif %}
+                    </div>
+                </div>                    
+                {% include "dojo/form_fields.html" with form=jira_epic_form %}
             {% endif %}
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
@@ -35,7 +61,6 @@
     </form>
 {% endblock %}
 {% block postscript %}
-    <script type="application/javascript" src="{% static "chosen/chosen.jquery.min.js" %}"></script>
     <script type="application/javascript" src="{% static "easymde/dist/easymde.min.js" %}"></script>
     <script type="application/javascript">
         $(function () {

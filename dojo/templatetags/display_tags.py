@@ -3,13 +3,14 @@ import random
 from django import template
 from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import stringfilter
-from django.utils.html import escape
+from django.utils.html import escape, conditional_escape
 from django.utils.safestring import mark_safe, SafeData
 from django.utils.text import normalize_newlines
 from django.urls import reverse
 from django.contrib.auth.models import User
 from dojo.utils import prepare_for_view, get_system_setting, get_full_url
-from dojo.models import Check_List, FindingImageAccessToken, Finding, System_Settings, JIRA_PKey, Product
+from dojo.user.helper import user_is_authorized
+from dojo.models import Check_List, FindingImageAccessToken, Finding, System_Settings, Product, Dojo_User
 import markdown
 from django.db.models import Sum, Case, When, IntegerField, Value
 from django.utils import timezone
@@ -20,7 +21,10 @@ from urllib.parse import urlparse
 import bleach
 import git
 from django.conf import settings
+import dojo.jira_link.helper as jira_helper
+import logging
 
+logger = logging.getLogger(__name__)
 
 register = template.Library()
 
@@ -41,10 +45,22 @@ markdown_tags = [
 markdown_attrs = {
     "*": ["id"],
     "img": ["src", "alt", "title"],
-    "a": ["href", "alt", "title"],
+    "a": ["href", "alt", "target", "title"],
     "span": ["class"],  # used for code highlighting
     "pre": ["class"],  # used for code highlighting
     "div": ["class"],  # used for code highlighting
+}
+
+finding_related_action_classes_dict = {
+    'reset_finding_duplicate_status': 'fa fa-eraser',
+    'set_finding_as_original': 'fa fa-superpowers',
+    'mark_finding_duplicate': 'fa fa-copy'
+}
+
+finding_related_action_title_dict = {
+    'reset_finding_duplicate_status': 'Reset duplicate status',
+    'set_finding_as_original': 'Set as original',
+    'mark_finding_duplicate': 'Mark as duplicate'
 }
 
 
@@ -74,12 +90,10 @@ def url_shortner(value):
     return_value = str(value)
     url = urlparse(return_value)
 
-    if url.path:
+    if url.path and len(url.path) != 1:
         return_value = url.path
-        if len(return_value) == 1:
-            return_value = value
-    if len(str(return_value)) > 50:
-        return_value = "..." + return_value[50:]
+    if len(return_value) > 50:
+        return_value = "..." + return_value[-47:]
 
     return return_value
 
@@ -112,7 +126,10 @@ def linebreaksasciidocbr(value, autoescape=None):
 @register.simple_tag
 def dojo_version():
     from dojo import __version__
-    return 'v. ' + __version__
+    version = __version__
+    if settings.FOOTER_VERSION:
+        version = settings.FOOTER_VERSION
+    return "v. {}".format(version)
 
 
 @register.simple_tag
@@ -210,13 +227,6 @@ def asvs_level(benchmark_score):
 
     return "ASVS " + str(benchmark_score.desired_level) + " " + level + " Pass: " + str(
         total_pass) + " Total:  " + total
-
-
-@register.filter(name='get_jira_conf')
-def get_jira_conf(product):
-    jira_conf = JIRA_PKey.objects.filter(product=product)
-
-    return jira_conf
 
 
 @register.filter(name='version_num')
@@ -640,7 +650,7 @@ def get_severity_count(id, table):
                      output_field=IntegerField())),
         )
     elif table == "engagement":
-        counts = Finding.objects.filter(test__engagement=id, active=True, verified=False, duplicate=False). \
+        counts = Finding.objects.filter(test__engagement=id, active=True, duplicate=False). \
             prefetch_related('test__engagement__product').aggregate(
             total=Sum(
                 Case(When(severity__in=('Critical', 'High', 'Medium', 'Low'),
@@ -753,20 +763,17 @@ def finding_display_status(finding):
     # add urls for some statuses
     # outputs html, so make sure to escape user provided fields
     display_status = finding.status()
-    print('status0: ', display_status)
     if finding.risk_acceptance_set.all():
         url = reverse('view_risk', args=(finding.test.engagement.id, finding.risk_acceptance_set.all()[0].id, ))
         name = finding.risk_acceptance_set.all()[0].name
         link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-content="' + escape(name) + '" data-container="body" data-original-title="Risk Acceptance">Risk Accepted</a>'
         # print(link)
         display_status = display_status.replace('Risk Accepted', link)
-        print('status1: ', display_status)
 
     if finding.under_review:
         url = reverse('defect_finding_review', args=(finding.id, ))
         link = '<a href="' + url + '">Under Review</a>'
         display_status = display_status.replace('Under Review', link)
-        print('status2: ', display_status)
 
     if finding.duplicate:
         url = '#'
@@ -781,3 +788,168 @@ def finding_display_status(finding):
         display_status = display_status.replace('Duplicate', link)
 
     return display_status
+
+
+@register.filter
+def is_authorized_for_change(user, obj):
+    # print('filter: is_authorized_for_change')
+    return user_is_authorized(user, 'change', obj)
+
+
+@register.filter
+def is_authorized_for_delete(user, obj):
+    # print('filter: is_authorized_for_delete')
+    return user_is_authorized(user, 'delete', obj)
+
+
+@register.filter
+def is_authorized_for_staff(user, obj):
+    # print('filter: is_authorized_for_staff')
+    return user_is_authorized(user, 'staff', obj)
+
+
+@register.filter
+def cwe_url(cwe):
+    if not cwe:
+        return ''
+    return 'https://cwe.mitre.org/data/definitions/' + str(cwe) + '.html'
+
+
+@register.filter
+def cve_url(cve):
+    if not cve:
+        return ''
+    return 'https://cve.mitre.org/cgi-bin/cvename.cgi?name=' + str(cve)
+
+
+@register.filter
+def jiraencode(value):
+    if not value:
+        return value
+    # jira can't handle some characters inside [] tag for urls https://jira.atlassian.com/browse/CONFSERVER-4009
+    return value.replace("|", "").replace("@", "")
+
+
+@register.filter
+def jira_project(obj, use_inheritance=True):
+    return jira_helper.get_jira_project(obj, use_inheritance)
+
+
+@register.filter
+def jira_issue_url(obj):
+    return jira_helper.get_jira_issue_url(obj)
+
+
+@register.filter
+def jira_project_url(obj):
+    return jira_helper.get_jira_project_url(obj)
+
+
+@register.filter
+def jira_key(obj):
+    return jira_helper.get_jira_key(obj)
+
+
+@register.filter
+def jira_creation(obj):
+    return jira_helper.get_jira_creation(obj)
+
+
+@register.filter
+def jira_change(obj):
+    return jira_helper.get_jira_change(obj)
+
+
+@register.filter
+def finding_extended_title(finding):
+    if not finding:
+        return ''
+    result = finding.title
+
+    if finding.cve:
+        result += ' (' + finding.cve + ')'
+
+    if finding.cwe:
+        result += ' (CWE-' + str(finding.cwe) + ')'
+
+    return result
+
+
+@register.filter
+def finding_duplicate_cluster_size(finding):
+    return len(finding.duplicate_finding_set()) + (1 if finding.duplicate_finding else 0)
+
+
+@register.filter
+def finding_related_action_classes(related_action):
+    return finding_related_action_classes_dict.get(related_action, '')
+
+
+@register.filter
+def finding_related_action_title(related_action):
+    return finding_related_action_title_dict.get(related_action, '')
+
+
+@register.filter
+def product_findings(product):
+    return Finding.objects.filter(test__engagement__product=product)
+
+
+@register.filter
+def class_name(value):
+    return value.__class__.__name__
+
+
+@register.filter(needs_autoescape=True)
+def jira_project_tag(product_or_engagement, autoescape=True):
+    if autoescape:
+        esc = conditional_escape
+    else:
+        esc = lambda x: x
+
+    jira_project = jira_helper.get_jira_project(product_or_engagement)
+
+    if not jira_project:
+        logger.debug('no JIRA project!: %s', product_or_engagement)
+        return ''
+
+    html = """
+    <i class="fa %s has-popover %s"
+        title="<i class='fa %s'></i> <b>JIRA Project Configuration%s</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="bottom"
+        data-content="<b>Jira:</b> %s<br/>
+        <b>Project Key:</b> %s<br/>
+        <b>Component:</b> %s<br/>
+        <b>Push All Issues:</b> %s<br/>
+        <b>Engagement Epic Mapping:</b> %s<br/>
+        <b>Push Notes:</b> %s">
+    </i>
+    """
+    jira_project_no_inheritance = jira_helper.get_jira_project(product_or_engagement, use_inheritance=False)
+    inherited = True if not jira_project_no_inheritance else False
+
+    icon = 'fa-bug'
+    color = ''
+    inherited_text = ''
+
+    if inherited:
+        color = 'lightgrey'
+        inherited_text = ' (inherited)'
+
+    if not jira_project.jira_instance:
+        color = 'red'
+        icon = 'fa-exclamation-triangle'
+
+    return mark_safe(html % (icon, color, icon, inherited_text,  # indicator if jira_instance is missing
+                                esc(jira_project.jira_instance),
+                                esc(jira_project.project_key),
+                                esc(jira_project.component),
+                                esc(jira_project.push_all_issues),
+                                esc(jira_project.enable_engagement_epic_mapping),
+                                esc(jira_project.push_notes)))
+
+
+@register.filter
+def full_name(user):
+    # not in all templates we have access to a Dojo_User instance, so we use a filter
+    # see https://github.com/DefectDojo/django-DefectDojo/pull/3278
+    return Dojo_User.generate_full_name(user)

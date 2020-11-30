@@ -7,7 +7,7 @@ from rest_framework import serializers, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
-from drf_yasg.utils import swagger_auto_schema
+from drf_yasg2.utils import swagger_auto_schema
 
 from dojo.api_v2.serializers import RiskAcceptanceSerializer
 from dojo.models import Engagement, Risk_Acceptance, User
@@ -84,9 +84,10 @@ def _accept_risks(accepted_risks: List[AcceptedRisk], base_findings: QuerySet, o
         if findings.exists():
             # TODO we could use risk.cve to name the risk_acceptance, but would need to check for existing risk_acceptances in that case
             # so for now we add some timestamp based suffix
-            acceptance = Risk_Acceptance.objects.create(owner=owner, name=risk.cve + ' via api at ' + timezone.now().strftime('%b %d, %Y, %H:%M:%S'),
+            name = risk.cve + ' via api at ' + timezone.now().strftime('%b %d, %Y, %H:%M:%S')
+            acceptance = Risk_Acceptance.objects.create(owner=owner, name=name[:100],
                                                         compensating_control=risk.justification,
-                                                        accepted_by=risk.accepted_by)
+                                                        accepted_by=risk.accepted_by[:200])
             acceptance.accepted_findings.set(findings)
             acceptance.save()
             accepted.append(acceptance)

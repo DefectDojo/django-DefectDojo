@@ -1,6 +1,9 @@
+import logging
 import json
-
+import re
 from dojo.models import Finding
+
+logger = logging.getLogger(__name__)
 
 
 class NpmAuditParser(object):
@@ -25,6 +28,9 @@ class NpmAuditParser(object):
                 tree = json.loads(data)
         except:
             raise Exception("Invalid format, unable to parse json.")
+
+        if tree.get('auditReportVersion'):
+            raise ValueError('npm7 with auditReportVersion 2 or higher not yet supported as it lacks the most important fields in the reports')
 
         if tree.get('error'):
             error = tree.get('error')
@@ -69,6 +75,13 @@ def get_item(item_node, test):
         if len(npm_finding['paths']) > 25:
             paths += "\n  - ..... (list of paths truncated after 25 paths)"
 
+    # Use CWE-1035 as fallback
+    cwe = 1035  # Vulnerable Third Party Component
+    if item_node['cwe']:
+        m = re.match(r"^(CWE-)?(\d+)", item_node['cwe'])
+        if m:
+            cwe = int(m.group(2))
+
     dojo_finding = Finding(title=item_node['title'] + " - " + "(" + item_node['module_name'] + ", " + item_node['vulnerable_versions'] + ")",
                       test=test,
                       severity=severity,
@@ -81,7 +94,7 @@ def get_item(item_node, test):
                       str(paths) + "\n CWE: " +
                       str(item_node['cwe']) + "\n Access: " +
                       str(item_node['access']),
-                      cwe=item_node['cwe'][4:],
+                      cwe=cwe,
                       cve=item_node['cves'][0] if (len(item_node['cves']) > 0) else None,
                       mitigation=item_node['recommendation'],
                       references=item_node['url'],

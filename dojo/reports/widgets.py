@@ -14,7 +14,7 @@ from django.utils.safestring import mark_safe
 from dojo.filters import EndpointFilter, ReportAuthedFindingFilter
 from dojo.forms import CustomReportOptionsForm
 from dojo.models import Endpoint, Finding
-from dojo.utils import get_page_items
+from dojo.utils import get_page_items, get_words_for_field
 
 """
 Widgets are content sections that can be included on reports.  The report builder will allow any number of widgets
@@ -178,7 +178,9 @@ class CoverPage(Widget):
         self.help_text = "The cover page includes a page break after its content."
 
     def get_html(self):
-        return mark_safe('')
+        return render_to_string("dojo/custom_html_report_cover_page.html", {"heading": self.title,
+                                                                                "sub_heading": self.sub_heading,
+                                                                                "meta_info": self.meta_info})
 
     def get_asciidoc(self):
         return render_to_string("dojo/custom_asciidoc_report_cover_page.html", {"heading": self.title,
@@ -201,7 +203,8 @@ class TableOfContents(Widget):
         self.help_text = "The table of contents includes a page break after its content."
 
     def get_html(self):
-        return mark_safe('')
+        return render_to_string("dojo/custom_html_toc.html", {"title": self.title,
+                                                                  "depth": self.depth})
 
     def get_asciidoc(self):
         return render_to_string("dojo/custom_asciidoc_toc.html", {"title": self.title,
@@ -223,7 +226,7 @@ class WYSIWYGContent(Widget):
         self.multiple = 'true'
 
     def get_html(self):
-        html = render_to_string("dojo/custom_pdf_report_wysiwyg_content.html", {"title": self.title,
+        html = render_to_string("dojo/custom_html_report_wysiwyg_content.html", {"title": self.title,
                                                                                 "content": self.content})
         return mark_safe(html)
 
@@ -274,11 +277,8 @@ class FindingList(Widget):
         self.multiple = 'true'
         self.extra_help = "You can use this form to filter findings and select only the ones to be included in the " \
                           "report."
-        title_words = [word
-                       for finding in self.findings.qs
-                       for word in finding.title.split() if len(word) > 2]
-
-        self.title_words = sorted(set(title_words))
+        self.title_words = get_words_for_field(self.findings.qs, 'title')
+        self.component_words = get_words_for_field(self.findings.qs, 'component_name')
 
         if self.request is not None:
             self.paged_findings = get_page_items(self.request, self.findings.qs, 25)
@@ -295,7 +295,7 @@ class FindingList(Widget):
         return mark_safe(asciidoc)
 
     def get_html(self):
-        html = render_to_string("dojo/custom_pdf_report_finding_list.html",
+        html = render_to_string("dojo/custom_html_report_finding_list.html",
                                 {"title": self.title,
                                  "findings": self.findings.qs,
                                  "include_finding_notes": self.finding_notes,
@@ -309,6 +309,7 @@ class FindingList(Widget):
                                 {"findings": self.paged_findings,
                                  "filtered": self.findings,
                                  "title_words": self.title_words,
+                                 "component_words": self.component_words,
                                  "request": self.request,
                                  "title": self.title,
                                  "extra_help": self.extra_help,
@@ -355,7 +356,7 @@ class EndpointList(Widget):
                           "report."
 
     def get_html(self):
-        html = render_to_string("dojo/custom_pdf_report_endpoint_list.html",
+        html = render_to_string("dojo/custom_html_report_endpoint_list.html",
                                 {"title": self.title,
                                  "endpoints": self.endpoints.qs,
                                  "include_finding_notes": self.finding_notes,

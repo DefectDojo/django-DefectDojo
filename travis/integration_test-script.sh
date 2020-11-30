@@ -36,17 +36,25 @@ function fail() {
     test_failures=true
 }
 
+function success() {
+    echo "Grepping celery logs for errors:"
+    docker-compose logs --tail="all" celeryworker | grep -A 12 " ERROR" && mark_failed_celery
+    echo "Success: $1 test passed\n"
+}
+
 celery_failures=false
 function mark_failed_celery() {
     # can be used to mark the build as failed, but still continue to see what the rest of the test suite does
     celery_failures=true
 }
 
-function success() {
-    echo "Grepping celery logs for errors:"
-    docker-compose logs --tail="all" celeryworker | grep -A 12 " ERROR" && mark_failed_celery
-    echo "Success: $1 test passed\n"
-}
+test="Running Product type integration tests"
+echo "Running: $test"
+if python3 tests/Regulations_unit_test.py ; then
+    success $test
+else
+    fail $test
+fi
 
 test="Product type integration tests"
 echo "Running: $test"
@@ -59,6 +67,14 @@ fi
 test="Product integration tests"
 echo "Running: $test"
 if python3 tests/Product_unit_test.py ; then 
+    success $test
+else
+    fail $test
+fi
+
+test="Notes integration tests"
+echo "Running: $test"
+if python3 tests/Notes_unit_test.py ; then
     success $test
 else
     fail $test
@@ -171,7 +187,7 @@ fi
 # fi
 
 if [ $test_failures = true ] ; then
-    echo "there ERRORs found in the celery worker logs, see above"
+    echo "some tests have failed, see logs above"
     exit 1
 fi
 

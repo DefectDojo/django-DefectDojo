@@ -1,6 +1,7 @@
 # see tastypie documentation at http://django-tastypie.readthedocs.org/en
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.urls import resolve, get_script_prefix
+import base64
 from tastypie import fields
 from tastypie.fields import RelatedField
 from tastypie.authentication import ApiKeyAuthentication
@@ -19,12 +20,13 @@ from django.db.models import Count, Q
 from dojo.models import Product, Engagement, Test, Finding, \
     User, ScanSettings, IPScan, Scan, Stub_Finding, Risk_Acceptance, \
     Finding_Template, Test_Type, Development_Environment, \
-    BurpRawRequestResponse, Endpoint, Notes, JIRA_PKey, JIRA_Conf, \
+    BurpRawRequestResponse, Endpoint, Notes, JIRA_Project, JIRA_Instance, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
-    Languages, Language_Type, App_Analysis, Product_Type, Note_Type
+    Languages, Language_Type, App_Analysis, Product_Type, Note_Type, \
+    Endpoint_Status
 from dojo.forms import ProductForm, EngForm, TestForm, \
     ScanSettingsForm, FindingForm, StubFindingForm, FindingTemplateForm, \
-    ImportScanForm, SEVERITY_CHOICES, JIRAForm, JIRA_PKeyForm, EditEndpointForm, \
+    ImportScanForm, SEVERITY_CHOICES, JIRAForm, JIRAProjectForm, EditEndpointForm, \
     JIRA_IssueForm, ToolConfigForm, ToolProductSettingsForm, \
     ToolTypeForm, LanguagesTypeForm, Languages_TypeTypeForm, App_AnalysisTypeForm, \
     Development_EnvironmentForm, Product_TypeForm, Test_TypeForm, NoteTypeForm
@@ -110,6 +112,7 @@ class BaseModelResource(ModelResource):
                 res_field = fields.get(django_field.name, None)
                 if res_field:
                     res_field.blank = True
+
         return fields
 
 
@@ -492,6 +495,7 @@ class Tool_ConfigurationResource(BaseModelResource):
         }
         authentication = DojoApiKeyAuthentication()
         authorization = DjangoAuthorization()
+        excludes = ['password', 'ssh', 'api_key']
         serializer = Serializer(formats=['json'])
 
         @property
@@ -795,10 +799,10 @@ class EndpointResource(BaseModelResource):
 
 
 """
-    /api/v1/jira_configurations/
+    /api/v1/JIRA_Issues/
     GET [/id/], DELETE [/id/]
-    Expects: no params or JIRA_PKey
-    Returns jira configuration: ALL or by JIRA_PKey
+    Expects: no params or JIRA_Project
+    Returns jira configuration: ALL or by JIRA_Project
 
     POST, PUT [/id/]
 """
@@ -829,8 +833,8 @@ class JIRA_IssueResource(BaseModelResource):
 """
     /api/v1/jira_configurations/
     GET [/id/], DELETE [/id/]
-    Expects: no params or JIRA_PKey
-    Returns jira configuration: ALL or by JIRA_PKey
+    Expects: no params or JIRA_Project
+    Returns jira configuration: ALL or by JIRA_Project
 
     POST, PUT [/id/]
 """
@@ -839,10 +843,10 @@ class JIRA_IssueResource(BaseModelResource):
 class JIRA_ConfResource(BaseModelResource):
 
     class Meta:
-        resource_name = 'jira_configurations'
+        resource_name = 'JIRA_Configurations'
         list_allowed_methods = ['get', 'post', 'put', 'delete']
         detail_allowed_methods = ['get', 'post', 'put', 'delete']
-        queryset = JIRA_Conf.objects.all()
+        queryset = JIRA_Instance.objects.all()
         include_resource_uri = True
         filtering = {
             'id': ALL,
@@ -850,6 +854,7 @@ class JIRA_ConfResource(BaseModelResource):
         }
         authentication = DojoApiKeyAuthentication()
         authorization = DjangoAuthorization()
+        excludes = ['password']
         serializer = Serializer(formats=['json'])
 
         @property
@@ -877,7 +882,7 @@ class JiraResource(BaseModelResource):
         list_allowed_methods = ['get', 'post', 'put', 'delete']
         detail_allowed_methods = ['get', 'post', 'put', 'delete']
 
-        queryset = JIRA_PKey.objects.all()
+        queryset = JIRA_Project.objects.all()
         include_resource_uri = True
         filtering = {
             'id': ALL,
@@ -895,7 +900,7 @@ class JiraResource(BaseModelResource):
 
         @property
         def validation(self):
-            return ModelFormValidation(form_class=JIRA_PKeyForm, resource=JiraResource)
+            return ModelFormValidation(form_class=JIRAProjectForm, resource=JiraResource)
 
 
 """
@@ -1509,7 +1514,7 @@ class ImportScanResource(MultipartResource, Resource):
         t.tags = bundle.data['tags']
 
         try:
-            parser = import_parser_factory(bundle.data.get('file'), t, bundle.data['active'], bundle.data['verified'],
+            parser = import_parser_factory(bundle.data.get('file', None), t, bundle.data['active'], bundle.data['verified'],
                                            bundle.data['scan_type'])
         except ValueError:
             raise NotFound("Parser ValueError")
@@ -1526,7 +1531,6 @@ class ImportScanResource(MultipartResource, Resource):
                     continue
 
                 item.test = t
-                item.date = t.target_start
                 item.reporter = bundle.request.user
                 item.last_reviewed = timezone.now()
                 item.last_reviewed_by = bundle.request.user
@@ -1537,16 +1541,16 @@ class ImportScanResource(MultipartResource, Resource):
                 if hasattr(item, 'unsaved_req_resp') and len(item.unsaved_req_resp) > 0:
                     for req_resp in item.unsaved_req_resp:
                         burp_rr = BurpRawRequestResponse(finding=item,
-                                                         burpRequestBase64=req_resp["req"],
-                                                         burpResponseBase64=req_resp["resp"],
+                                                         burpRequestBase64=base64.b64encode(req_resp["req"].encode("utf-8")),
+                                                         burpResponseBase64=base64.b64encode(req_resp["resp"].encode("utf-8")),
                                                          )
                         burp_rr.clean()
                         burp_rr.save()
 
                 if item.unsaved_request is not None and item.unsaved_response is not None:
                     burp_rr = BurpRawRequestResponse(finding=item,
-                                                     burpRequestBase64=item.unsaved_request,
-                                                     burpResponseBase64=item.unsaved_response,
+                                                     burpRequestBase64=base64.b64encode(item.unsaved_request.encode()),
+                                                     burpResponseBase64=base64.b64encode(item.unsaved_response.encode())
                                                      )
                     burp_rr.clean()
                     burp_rr.save()
@@ -1558,7 +1562,11 @@ class ImportScanResource(MultipartResource, Resource):
                                                                  query=endpoint.query,
                                                                  fragment=endpoint.fragment,
                                                                  product=t.engagement.product)
+                    eps, created = Endpoint_Status.objects.get_or_create(finding=item,
+                                                                         endpoint=ep)
 
+                    ep.endpoint_status.add(eps)
+                    item.endpoint_status.add(eps)
                     item.endpoints.add(ep)
                 item.save()
 
@@ -1692,7 +1700,7 @@ class ReImportScanResource(MultipartResource, Resource):
         active = bundle.obj.__getattr__('active')
 
         try:
-            parser = import_parser_factory(bundle.data.get('file'), test, active, verified, scan_type)
+            parser = import_parser_factory(bundle.data.get('file', None), test, active, verified, scan_type)
         except ValueError:
             raise NotFound("Parser ValueError")
 
@@ -1712,6 +1720,8 @@ class ReImportScanResource(MultipartResource, Resource):
                 if Finding.SEVERITIES[sev] > Finding.SEVERITIES[min_sev]:
                     continue
 
+                from titlecase import titlecase
+                item.title = titlecase(item.title)
                 if scan_type == 'Veracode Scan' or scan_type == 'Arachni Scan':
                     find = Finding.objects.filter(title=item.title,
                                                   test__id=test.id,
@@ -1743,7 +1753,6 @@ class ReImportScanResource(MultipartResource, Resource):
                     new_items.append(find.id)
                 else:
                     item.test = test
-                    item.date = test.target_start
                     item.reporter = bundle.request.user
                     item.last_reviewed = timezone.now()
                     item.last_reviewed_by = bundle.request.user
@@ -1757,16 +1766,16 @@ class ReImportScanResource(MultipartResource, Resource):
                     if hasattr(item, 'unsaved_req_resp') and len(item.unsaved_req_resp) > 0:
                         for req_resp in item.unsaved_req_resp:
                             burp_rr = BurpRawRequestResponse(finding=find,
-                                                             burpRequestBase64=req_resp["req"],
-                                                             burpResponseBase64=req_resp["resp"],
+                                                             burpRequestBase64=base64.b64encode(req_resp["req"].encode("utf-8")),
+                                                             burpResponseBase64=base64.b64encode(req_resp["resp"].encode("utf-8")),
                                                              )
                             burp_rr.clean()
                             burp_rr.save()
 
                     if item.unsaved_request is not None and item.unsaved_response is not None:
                         burp_rr = BurpRawRequestResponse(finding=find,
-                                                         burpRequestBase64=item.unsaved_request,
-                                                         burpResponseBase64=item.unsaved_response,
+                                                         burpRequestBase64=base64.b64encode(item.unsaved_request.encode()),
+                                                         burpResponseBase64=base64.b64encode(item.unsaved_response.encode()),
                                                          )
                         burp_rr.clean()
                         burp_rr.save()
@@ -1779,6 +1788,11 @@ class ReImportScanResource(MultipartResource, Resource):
                                                                      query=endpoint.query,
                                                                      fragment=endpoint.fragment,
                                                                      product=test.engagement.product)
+                        eps, created = Endpoint_Status.objects.get_or_create(finding=find,
+                                                                             endpoint=ep)
+
+                        ep.endpoint_status.add(eps)
+                        find.endpoint_status.add(eps)
                         find.endpoints.add(ep)
 
                     if item.unsaved_tags is not None:
@@ -1790,6 +1804,7 @@ class ReImportScanResource(MultipartResource, Resource):
                 finding = Finding.objects.get(id=finding_id)
                 finding.mitigated = datetime.combine(scan_date, timezone.now().time())
                 finding.mitigated_by = bundle.request.user
+                finding.is_Mitigated = True
                 finding.active = False
                 finding.save()
                 note = Notes(entry="Mitigated by %s re-upload." % scan_type,
