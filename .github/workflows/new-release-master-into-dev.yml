@@ -27,7 +27,7 @@ jobs:
           ref: master
       - name: Create merge back branch
         run: |
-          echo "NEW_BRANCH=master-into-dev/${{ github.event.inputs.release_number_dev }}" >> $GITHUB_ENV
+          echo "NEW_BRANCH=master-into-dev/${{ github.event.inputs.release_number_dev }}/$(date +'%Y-%m-%dT%Hh%Mm%Ss')" >> $GITHUB_ENV
       - name: Configure git
         run: |
           git config --global user.name "${{ env.GIT_USERNAME }}"
