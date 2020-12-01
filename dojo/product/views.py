@@ -61,8 +61,8 @@ def product(request):
 
     prod_filter = ProductFilter(request.GET, queryset=prods, user=request.user)
 
-    print(vars(prod_filter))
-    print(vars(prod_filter.form))
+    # print(vars(prod_filter))
+    # print(vars(prod_filter.form))
     # print(vars(prod_filter.form.fields))
 
     prod_list = get_page_items(request, prod_filter.qs, 25)
@@ -795,9 +795,9 @@ def edit_product(request, pid):
     #    initial={'auth_users': prod.authorized_users.all(),
     #             'tags': get_tag_list(Tag.objects.get_for_object(prod))})
 
-    print('tagulous product form:')
-    print(vars(form))
-    print(vars(form.fields['tags']))
+    # print('tagulous product form:')
+    # print(vars(form))
+    # print(vars(form.fields['tags']))
 
     if jira_enabled:
         jira_project = jira_helper.get_jira_project(product)

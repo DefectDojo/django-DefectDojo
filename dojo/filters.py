@@ -21,7 +21,7 @@ from dojo.models import Dojo_User, Product_Type, Finding, Product, Test_Type, \
 from dojo.utils import get_system_setting
 from django.contrib.contenttypes.models import ContentType
 # from tagulous.forms import TagWidget
-import tagulous
+# import tagulous
 
 logger = logging.getLogger(__name__)
 
@@ -346,19 +346,30 @@ class ProductFilter(DojoFilter):
 
     # not specifying anything for tags will render a multiselect input functioning as OR
 
-    # tags_or = ModelMultipleChoiceFilter(
-    #     field_name='tags__name',
-    #     to_field_name='name',
-    #     # lookup_expr='in',
-    #     queryset=Product.tags.tag_model.objects.all().order_by('name'),
-    #     label='tags (OR)',
-    #     # widget=TagWidget(tag_options={'aaa'}),
-    # )
+    tags_or = ModelMultipleChoiceFilter(
+        field_name='tags__name',
+        to_field_name='name',
+        # lookup_expr='in',
+        queryset=Product.tags.tag_model.objects.all().order_by('name'),
+        label='tags (OR)',
+        # widget=TagWidget(tag_options={'aaa'}),
+    )
 
     # tags__name = ModelMultipleChoiceFilter(
     #     queryset=Product.tags.tag_model.objects.all().order_by('name'),
     #     label="tags (AND)"
     # )
+
+    tag__name = CharFilter(
+        lookup_expr='icontains',
+        label="tag contains",
+    )
+
+    tags__all = ModelMultipleChoiceFilter(
+        queryset=Product.tags.tag_model.objects.all().order_by('name'),
+        field_name='tags__name',
+        label="tags (AND)"
+    )
 
     # not working below
 
@@ -398,13 +409,6 @@ class ProductFilter(DojoFilter):
     #     queryset=Product.tags.tag_model.objects.all().order_by('name'),
     #     label="tags (OR3)",
     # )
-
-    tag__name = CharFilter(
-        field_name='tags__name',
-        # to_field_name='name',
-        lookup_expr='icontains',
-        label="tag contains",
-    )
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -450,14 +454,14 @@ class ProductFilter(DojoFilter):
         fields = ['name', 'prod_type', 'business_criticality', 'platform', 'lifecycle', 'origin', 'external_audience',
                   'internet_accessible', 'tags']
         # exclude = ['tags']
-        filter_overrides = {
-            tagulous.models.TagField: {
-                'filter_class': ModelMultipleChoiceFilter,
-                'extra': lambda f: {
-                     'widget': tagulous.forms.TagWidget,
-                },
-            },
-        }
+        # filter_overrides = {
+        #     tagulous.models.TagField: {
+        #         'filter_class': ModelMultipleChoiceFilter,
+        #         'extra': lambda f: {
+        #              'widget': tagulous.forms.TagWidget,
+        #         },
+        #     },
+        # }
 
 
 class ApiProductFilter(DojoFilter):
@@ -485,6 +489,7 @@ class ApiProductFilter(DojoFilter):
     regulations = NumberInFilter(field_name='regulations', lookup_expr='in')
     active_finding_count = NumberInFilter(field_name='active_finding_count', lookup_expr='in')
     tags__name = CharFilter(lookup_expr='icontains')
+
     # DateRangeFilter
     created = DateRangeFilter()
     updated = DateRangeFilter()
