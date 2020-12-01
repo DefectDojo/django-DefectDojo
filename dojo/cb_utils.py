@@ -65,7 +65,7 @@ def auto_delete_engagements():
 
     for engagement in engagements_to_delete:
         logger.info("Deleting engagement id {} ({})".format(engagement.id, engagement.name))
-        _notify(engagement, "Engagement {} ({})- auto-deleted".format(engagement.id, engagement.name))
+        # _notify(engagement, "Engagement {} ({})- auto-deleted".format(engagement.id, engagement.name))
         engagement.delete()
 
     else:
