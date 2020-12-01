@@ -78,7 +78,7 @@ COPY \
 COPY wsgi.py manage.py tests/unit-tests.sh ./
 COPY dojo/ ./dojo/
 # this file must exist. If not, then check your branch. Otherwise, it will throw an error.
-COPY dojo/docker/extra_settings/local_settings.py ./dojo/settings/local_settings.py
+COPY docker/extra_settings/local_settings.py ./dojo/settings/local_settings.py
 
 # Add extra fixtures to docker image which are loaded by the initializer
 COPY docker/extra_fixtures/* /app/dojo/fixtures/
