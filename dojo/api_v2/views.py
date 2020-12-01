@@ -984,6 +984,7 @@ class TestTypesViewSet(mixins.ListModelMixin,
     serializer_class = serializers.TestTypeSerializer
     queryset = Test_Type.objects.all()
     filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('name',)
 
 
 class ToolConfigurationsViewSet(mixins.ListModelMixin,
