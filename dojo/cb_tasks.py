@@ -6,7 +6,7 @@ from celery.utils.log import get_task_logger
 logger = get_task_logger(__name__)
 
 
-@app.task(name='dojo.tasks.auto_delete_engagements')
+@app.task(name='dojo.cb_tasks.auto_delete_engagements')
 def async_auto_delete_engagements(*args, **kwargs):
     try:
         # system_settings = System_Settings.objects.get()

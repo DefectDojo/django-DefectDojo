@@ -52,6 +52,10 @@ services:
       DD_CELERY_BROKER_PASSWORD: ${DD_CELERY_BROKER_USER:-guest}
       DD_SECRET_KEY: ${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}
       DD_CREDENTIAL_AES_256_KEY: ${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}
+    volumes:
+        - type: bind
+          source: ./docker/extra_settings
+          target: /app/docker/extra_settings
   celeryworker:
     image: defectdojo/defectdojo-django:latest
     depends_on:
@@ -64,6 +68,10 @@ services:
       DD_CELERY_BROKER_PASSWORD: ${DD_CELERY_BROKER_USER:-guest}
       DD_SECRET_KEY: ${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}
       DD_CREDENTIAL_AES_256_KEY: ${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}
+    volumes:
+        - type: bind
+          source: ./docker/extra_settings
+          target: /app/docker/extra_settings
   initializer:
     image: defectdojo/defectdojo-django:latest
     depends_on:

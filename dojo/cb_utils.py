@@ -1,4 +1,3 @@
-
 from dojo.models import Finding, Engagement, System_Settings
 import logging
 from datetime import datetime, timedelta
