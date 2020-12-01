@@ -62,6 +62,11 @@ RUN pip3 install \
   --find-links=/tmp/wheels \
   -r ./requirements.txt \
   --use-deprecated=legacy-resolver
+# this file must exist. If not, then check your branch. Otherwise, it will throw an error.
+# when building, you have to be in release mode, not dev or ptvsd
+COPY \
+  docker/extra_settings/local_settings.py \
+  /app/dojo/settings/local_settings.py
 COPY \
   docker/entrypoint-celery-beat.sh \
   docker/entrypoint-celery-worker.sh \
