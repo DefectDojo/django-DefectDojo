@@ -85,7 +85,7 @@
                         <p>The engagement included the following tests:</p>
                         <ul>
                             {% for t in engagement.test_set.all %}
-                                  <li>{{ t.test_type.name }}
+                                  <li>{{ t.title }}
                                       ({{ t.environment.name|default:"unknown" }}): {{ t.target_start|date:"SHORT_DATE_FORMAT" }}</li>
                             {% endfor %}
                         </ul>
