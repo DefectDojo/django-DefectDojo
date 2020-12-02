@@ -931,7 +931,6 @@ SERIALIZATION_MODULES = {
     'json': 'tagulous.serializers.json',
     'python': 'tagulous.serializers.python',
     'yaml': 'tagulous.serializers.pyyaml',
-    # 'pickle': 'tagulous.serializers.pyyaml',
 }
 
 # There seems to be no way just use the default and just leave out jquery, so we have to copy...
