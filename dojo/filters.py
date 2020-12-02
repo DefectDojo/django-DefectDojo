@@ -317,8 +317,7 @@ class EngagementFilter(DojoFilter):
         label="Product Type")
     engagement__status = MultipleChoiceFilter(choices=ENGAGEMENT_STATUS_CHOICES,
                                               label="Status")
-    # engagement__tags__name = CharFilter(label="engagement tags")
-    tags__name = CharFilter(lookup_expr='icontains')
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -335,7 +334,7 @@ class EngagementFilter(DojoFilter):
 
     class Meta:
         model = Product
-        fields = ['name', 'prod_type']
+        fields = ['name', 'prod_type', 'tags']
 
 
 class ProductFilter(DojoFilter):
@@ -352,24 +351,26 @@ class ProductFilter(DojoFilter):
 
     # not specifying anything for tags will render a multiselect input functioning as OR
 
-    # tags_or = ModelMultipleChoiceFilter(
-    #     field_name='tags__name',
-    #     to_field_name='name',
-    #     # lookup_expr='in',
-    #     queryset=Product.tags.tag_model.objects.all().order_by('name'),
-    #     label='tags (OR)',
-    #     # widget=TagWidget(tag_options={'aaa'}),
-    # )
+    tags_or = ModelMultipleChoiceFilter(
+        field_name='tags__name',
+        to_field_name='name',
+        # lookup_expr='in',
+        # queryset=Product.tags.tag_model.objects.all().order_by('name'),
+        label='tags (OR)',
+        # widget=TagWidget(tag_options={'aaa'}),
+    )
 
     # tags__name = ModelMultipleChoiceFilter(
     #     queryset=Product.tags.tag_model.objects.all().order_by('name'),
     #     label="tags (AND)"
     # )
 
-    tags__name = CharFilter(
-        lookup_expr='icontains',
-        label="Tag contains",
-    )
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label="Tag contains")
+
+    # tags__name = CharFilter(
+    #     lookup_expr='icontains',
+    #     label="Tag contains",
+    # )
 
     # tags__all = ModelMultipleChoiceFilter(
     #     queryset=Product.tags.tag_model.objects.all().order_by('name'),
@@ -494,8 +495,8 @@ class ApiProductFilter(DojoFilter):
     user_records = NumberInFilter(field_name='user_records', lookup_expr='in')
     regulations = NumberInFilter(field_name='regulations', lookup_expr='in')
     active_finding_count = NumberInFilter(field_name='active_finding_count', lookup_expr='in')
-    # use multipl tag=tag1&tag=tag2 parameters to filter as object having tag1 OR tag2
-    tag = CharFilter(field_name='tags__name', lookup_expr='icontains')
+
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
 
     # doesn't work with many-to-many relationships
     # tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in')
@@ -598,7 +599,14 @@ class ApiFindingFilter(DojoFilter):
     # ReportRiskAcceptanceFilter
     test__engagement__risk_acceptance = ReportRiskAcceptanceFilter()
 
-    tag = CharFilter(field_name='tags__name', lookup_expr='icontains')
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
+
+    tag2 = filters.LookupChoiceFilter(field_name='tags__name', lookup_choices=[
+        ('iexact', 'equals'),
+        ('icontains', 'contains (case insensitive)'),
+        ('exact', 'equals'),
+        ('contains', 'contains'),
+    ])
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -632,7 +640,7 @@ class ApiFindingFilter(DojoFilter):
     class Meta:
         model = Finding
         exclude = ['url', 'is_template', 'thread_id', 'notes', 'images',
-                   'sourcefile', 'line', 'endpoint_status']
+                   'sourcefile', 'line', 'endpoint_status', 'tags_from_django_tagging']
 
 
 class OpenFindingFilter(DojoFilter):
@@ -669,7 +677,7 @@ class OpenFindingFilter(DojoFilter):
                                 exclude=True,
                                 label='has notes')
 
-    tags__name = CharFilter(lookup_expr='icontains')
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -691,7 +699,8 @@ class OpenFindingFilter(DojoFilter):
                    'thread_id', 'notes', 'scanner_confidence', 'mitigated',
                    'numerical_severity', 'reporter', 'last_reviewed', 'line',
                    'duplicate_finding', 'hash_code', 'images', 'endpoint_status',
-                   'line_number', 'reviewers', 'mitigated_by', 'sourcefile', 'created', 'jira_creation', 'jira_change']
+                   'line_number', 'reviewers', 'mitigated_by', 'sourcefile',
+                   'created', 'jira_creation', 'jira_change', 'tags_from_django_tagging']
 
     def __init__(self, *args, **kwargs):
         self.user = None
@@ -771,7 +780,7 @@ class ClosedFindingFilter(DojoFilter):
                                 exclude=True,
                                 label='has notes')
 
-    tags__name = CharFilter(lookup_expr='icontains')
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -801,7 +810,8 @@ class ClosedFindingFilter(DojoFilter):
                    'duplicate', 'thread_id', 'date', 'notes',
                    'numerical_severity', 'reporter', 'endpoints', 'endpoint_status',
                    'last_reviewed', 'review_requested_by', 'defect_review_requested_by',
-                   'last_reviewed_by', 'created', 'jira_creation', 'jira_change']
+                   'last_reviewed_by', 'created', 'jira_creation', 'jira_change',
+                   'tags_from_django_tagging']
 
     def __init__(self, *args, **kwargs):
         self.pid = None
@@ -854,7 +864,7 @@ class AcceptedFindingFilter(DojoFilter):
         queryset=Product_Type.objects.all(),
         label="Product Type")
 
-    tags__name = CharFilter(lookup_expr='icontains')
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -885,7 +895,8 @@ class AcceptedFindingFilter(DojoFilter):
                    'active', 'verified', 'out_of_scope', 'false_p',
                    'duplicate', 'thread_id', 'mitigated', 'notes',
                    'numerical_severity', 'reporter', 'endpoints', 'endpoint_status',
-                   'last_reviewed', 'o', 'jira_creation', 'jira_change']
+                   'last_reviewed', 'o', 'jira_creation', 'jira_change',
+                   'tags_from_django_tagging']
 
     def __init__(self, *args, **kwargs):
         self.pid = None
@@ -926,7 +937,7 @@ class ProductFindingFilter(DojoFilter):
     test__engagement__risk_acceptance = ReportRiskAcceptanceFilter(
         label="Risk Accepted")
 
-    tags__name = CharFilter(lookup_expr='icontains')
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -956,7 +967,8 @@ class ProductFindingFilter(DojoFilter):
                    'active', 'verified', 'out_of_scope', 'false_p',
                    'duplicate_finding', 'thread_id', 'mitigated', 'notes',
                    'numerical_severity', 'reporter', 'endpoints', 'endpoint_status',
-                   'last_reviewed', 'jira_creation', 'jira_change']
+                   'last_reviewed', 'jira_creation', 'jira_change',
+                   'tags_from_django_tagging']
 
     def __init__(self, *args, **kwargs):
         super(ProductFindingFilter, self).__init__(*args, **kwargs)
@@ -1001,7 +1013,7 @@ class SimilarFindingFilter(DojoFilter):
                                 exclude=True,
                                 label='has notes')
 
-    tags__name = CharFilter(lookup_expr='icontains')
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -1017,7 +1029,7 @@ class SimilarFindingFilter(DojoFilter):
 
     class Meta:
         model = Finding
-        fields = ['cwe', 'hash_code', 'unique_id_from_tool', 'line', 'id']
+        fields = ['cwe', 'hash_code', 'unique_id_from_tool', 'line', 'id', 'tags']
 
     def __init__(self, data=None, *args, **kwargs):
         self.user = None
@@ -1070,7 +1082,7 @@ class TemplateFindingFilter(DojoFilter):
     severity = MultipleChoiceFilter(choices=[])
     numerical_severity = MultipleChoiceFilter(choices=[])
 
-    tags__name = CharFilter(lookup_expr='icontains')
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -1088,7 +1100,7 @@ class TemplateFindingFilter(DojoFilter):
     class Meta:
         model = Finding_Template
         exclude = ['description', 'mitigation', 'impact',
-                   'references', 'numerical_severity', 'tags_from_django_tagging', 'tags']
+                   'references', 'numerical_severity', 'tags_from_django_tagging']
 
     def __init__(self, *args, **kwargs):
         super(TemplateFindingFilter, self).__init__(*args, **kwargs)
@@ -1169,6 +1181,8 @@ class MetricsFindingFilter(FilterSet):
     severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     status = FindingStatusFilter(label='Status')
 
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
+
     def __init__(self, *args, **kwargs):
         if args[0]:
             if args[0].get('start_date', '') != '' or args[0].get('end_date', '') != '':
@@ -1201,7 +1215,9 @@ class MetricsFindingFilter(FilterSet):
                    'endpoint_status',
                    'is_template',
                    'jira_creation',
-                   'jira_change']
+                   'jira_change',
+                   'tags_from_django_tagging'
+                   ]
 
 
 class MetricsEndpointFilter(FilterSet):
@@ -1213,6 +1229,8 @@ class MetricsEndpointFilter(FilterSet):
         label="Product Type")
     finding__test__engagement__version = CharFilter(lookup_expr='icontains', label="Engagement Version")
     finding__severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
+
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
 
     def __init__(self, *args, **kwargs):
         if args[0]:
@@ -1227,7 +1245,7 @@ class MetricsEndpointFilter(FilterSet):
 
     class Meta:
         model = Endpoint_Status
-        exclude = ['last_modified']
+        exclude = ['last_modified', 'tags_from_django_tagging']
 
 
 class ProductMetricsFindingFilter(FilterSet):
@@ -1240,6 +1258,8 @@ class ProductMetricsFindingFilter(FilterSet):
     test__engagement__version = CharFilter(lookup_expr='icontains', label="Engagement Version")
     severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     status = FindingStatusFilter(label='Status')
+
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
 
     def __init__(self, *args, **kwargs):
         if args[0]:
@@ -1281,7 +1301,9 @@ class ProductMetricsFindingFilter(FilterSet):
                    'endpoint_status',
                    'is_template',
                    'jira_creation',
-                   'jira_change']
+                   'jira_change',
+                   'tags_from_django_tagging'
+                   ]
 
 
 class ProductMetricsEndpointFilter(FilterSet):
@@ -1320,7 +1342,7 @@ class EndpointFilter(DojoFilter):
     fragment = CharFilter(lookup_expr='icontains')
     mitigated = CharFilter(lookup_expr='icontains')
 
-    tags__name = CharFilter(lookup_expr='icontains')
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -1341,7 +1363,7 @@ class EndpointFilter(DojoFilter):
 
     class Meta:
         model = Endpoint
-        exclude = ['mitigated', 'endpoint_status']
+        exclude = ['mitigated', 'endpoint_status', 'tags_from_django_tagging']
 
 
 class EndpointReportFilter(DojoFilter):
@@ -1352,9 +1374,11 @@ class EndpointReportFilter(DojoFilter):
     finding__severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     finding__mitigated = MitigatedDateRangeFilter()
 
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
+
     class Meta:
         model = Endpoint
-        exclude = ['product', 'endpoint_status']
+        exclude = ['product', 'endpoint_status', 'tags_from_django_tagging']
 
 
 class ReportFindingFilter(DojoFilter):
@@ -1369,12 +1393,15 @@ class ReportFindingFilter(DojoFilter):
     duplicate = ReportBooleanFilter()
     out_of_scope = ReportBooleanFilter()
 
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
+
     class Meta:
         model = Finding
         exclude = ['date', 'cwe', 'url', 'description', 'mitigation', 'impact',
                    'endpoint', 'references', 'test', 'is_template',
                    'thread_id', 'notes', 'endpoints', 'endpoint_status',
-                   'numerical_severity', 'reporter', 'last_reviewed', 'images', 'jira_creation', 'jira_change']
+                   'numerical_severity', 'reporter', 'last_reviewed', 'images',
+                   'jira_creation', 'jira_change', 'tags_from_django_tagging']
 
 
 class ReportAuthedFindingFilter(DojoFilter):
@@ -1393,6 +1420,8 @@ class ReportAuthedFindingFilter(DojoFilter):
         label="Risk Accepted")
     duplicate = ReportBooleanFilter()
     out_of_scope = ReportBooleanFilter()
+
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
 
     def __init__(self, *args, **kwargs):
         self.user = None
@@ -1423,7 +1452,8 @@ class ReportAuthedFindingFilter(DojoFilter):
         exclude = ['date', 'cwe', 'url', 'description', 'mitigation', 'impact',
                    'endpoint', 'references', 'test', 'is_template',
                    'thread_id', 'notes', 'endpoints', 'endpoint_status',
-                   'numerical_severity', 'reporter', 'last_reviewed', 'jira_creation', 'jira_change']
+                   'numerical_severity', 'reporter', 'last_reviewed',
+                   'jira_creation', 'jira_change', 'tags_from_django_tagging']
 
 
 class UserFilter(DojoFilter):
