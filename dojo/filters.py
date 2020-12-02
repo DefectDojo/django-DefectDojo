@@ -351,14 +351,14 @@ class ProductFilter(DojoFilter):
 
     # not specifying anything for tags will render a multiselect input functioning as OR
 
-    tags_or = ModelMultipleChoiceFilter(
-        field_name='tags__name',
-        to_field_name='name',
-        # lookup_expr='in',
-        # queryset=Product.tags.tag_model.objects.all().order_by('name'),
-        label='tags (OR)',
-        # widget=TagWidget(tag_options={'aaa'}),
-    )
+    # tags_or = ModelMultipleChoiceFilter(
+    #     field_name='tags__name',
+    #     to_field_name='name',
+    #     # lookup_expr='in',
+    #     # queryset=Product.tags.tag_model.objects.all().order_by('name'),
+    #     label='tags (OR)',
+    #     # widget=TagWidget(tag_options={'aaa'}),
+    # )
 
     # tags__name = ModelMultipleChoiceFilter(
     #     queryset=Product.tags.tag_model.objects.all().order_by('name'),
