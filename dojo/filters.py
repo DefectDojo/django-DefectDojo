@@ -47,6 +47,12 @@ class NumberInFilter(filters.BaseInFilter, filters.NumberFilter):
     pass
 
 
+# won't work with many-to-many relationships
+class CharFieldInFilter(filters.BaseInFilter, filters.CharFilter):
+    def __init__(self, *args, **kwargs):
+        super(CharFilter, self).__init__(*args, **kwargs)
+
+
 def get_earliest_finding():
     global EARLIEST_FINDING
     if EARLIEST_FINDING is not None:
@@ -346,30 +352,30 @@ class ProductFilter(DojoFilter):
 
     # not specifying anything for tags will render a multiselect input functioning as OR
 
-    tags_or = ModelMultipleChoiceFilter(
-        field_name='tags__name',
-        to_field_name='name',
-        # lookup_expr='in',
-        queryset=Product.tags.tag_model.objects.all().order_by('name'),
-        label='tags (OR)',
-        # widget=TagWidget(tag_options={'aaa'}),
-    )
+    # tags_or = ModelMultipleChoiceFilter(
+    #     field_name='tags__name',
+    #     to_field_name='name',
+    #     # lookup_expr='in',
+    #     queryset=Product.tags.tag_model.objects.all().order_by('name'),
+    #     label='tags (OR)',
+    #     # widget=TagWidget(tag_options={'aaa'}),
+    # )
 
     # tags__name = ModelMultipleChoiceFilter(
     #     queryset=Product.tags.tag_model.objects.all().order_by('name'),
     #     label="tags (AND)"
     # )
 
-    tag__name = CharFilter(
+    tags__name = CharFilter(
         lookup_expr='icontains',
-        label="tag contains",
+        label="Tag contains",
     )
 
-    tags__all = ModelMultipleChoiceFilter(
-        queryset=Product.tags.tag_model.objects.all().order_by('name'),
-        field_name='tags__name',
-        label="tags (AND)"
-    )
+    # tags__all = ModelMultipleChoiceFilter(
+    #     queryset=Product.tags.tag_model.objects.all().order_by('name'),
+    #     field_name='tags__name',
+    #     label="tags (AND)"
+    # )
 
     # not working below
 
@@ -488,7 +494,11 @@ class ApiProductFilter(DojoFilter):
     user_records = NumberInFilter(field_name='user_records', lookup_expr='in')
     regulations = NumberInFilter(field_name='regulations', lookup_expr='in')
     active_finding_count = NumberInFilter(field_name='active_finding_count', lookup_expr='in')
-    tags__name = CharFilter(lookup_expr='icontains')
+    # use multipl tag=tag1&tag=tag2 parameters to filter as object having tag1 OR tag2
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains')
+
+    # doesn't work with many-to-many relationships
+    # tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in')
 
     # DateRangeFilter
     created = DateRangeFilter()
@@ -587,7 +597,8 @@ class ApiFindingFilter(DojoFilter):
     test__engagement__product = NumberInFilter(field_name='test__engagement__product', lookup_expr='in')
     # ReportRiskAcceptanceFilter
     test__engagement__risk_acceptance = ReportRiskAcceptanceFilter()
-    tags__name = CharFilter(lookup_expr='icontains')
+
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains')
 
     o = OrderingFilter(
         # tuple-mapping retains order
