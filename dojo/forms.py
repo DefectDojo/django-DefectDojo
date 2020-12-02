@@ -440,7 +440,7 @@ class ImportScanForm(forms.Form):
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
                                                widget=MultipleSelectWithPopPlusMinus(attrs={'size': '5'}))
     tags = TagField(required=False, help_text="Add tags that help describe this scan.  "
-                    "Choose from the list or add new tags.  Press TAB key to add.")
+                    "Choose from the list or add new tags. Press Enter key to add.")
     file = forms.FileField(widget=forms.widgets.FileInput(
         attrs={"accept": ".xml, .csv, .nessus, .json, .html, .js, .zip, .xlsx"}),
         label="Choose report file",
@@ -488,7 +488,7 @@ class ReImportScanForm(forms.Form):
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
                                                widget=MultipleSelectWithPopPlusMinus(attrs={'size': '5'}))
     tags = TagField(required=False, help_text="Add tags that help describe this scan.  "
-                    "Choose from the list or add new tags.  Press TAB key to add.")
+                    "Choose from the list or add new tags. Press Enter key to add.")
     file = forms.FileField(widget=forms.widgets.FileInput(
         attrs={"accept": ".xml, .csv, .nessus, .json, .html, .js, .zip, .xlsx"}),
         label="Choose report file",
@@ -1096,7 +1096,7 @@ class ApplyFindingTemplateForm(forms.Form):
     impact = forms.CharField(widget=forms.Textarea)
     references = forms.CharField(widget=forms.Textarea, required=False)
 
-    tags = TagField(required=False, help_text="Add tags that help describe this finding template. Choose from the list or add new tags.  Press Enter key to add.")
+    tags = TagField(required=False, help_text="Add tags that help describe this finding template. Choose from the list or add new tags. Press Enter key to add.")
 
     def __init__(self, template=None, *args, **kwargs):
         # django-tagging apparently can not filter for multiple models at once
@@ -1283,7 +1283,7 @@ class AddEndpointForm(forms.Form):
                                                                             "associated with.")
     tags = TagField(required=False,
                     help_text="Add tags that help describe this endpoint.  "
-                              "Choose from the list or add new tags.  Press Enter key to add.")
+                              "Choose from the list or add new tags. Press Enter key to add.")
 
     def __init__(self, *args, **kwargs):
         product = None
@@ -1907,15 +1907,14 @@ class ToolProductSettingsForm(forms.ModelForm):
 
 class ObjectSettingsForm(forms.ModelForm):
 
-    # TODO TAGS
-    tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
-                           required=False,
-                           help_text="Add tags that help describe this object.  "
-                                     "Choose from the list or add new tags.  Press TAB key to add.")
+    # tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
+    #                        required=False,
+    #                        help_text="Add tags that help describe this object.  "
+    #                                  "Choose from the list or add new tags.  Press TAB key to add.")
 
     class Meta:
         model = Objects_Product
-        fields = ['path', 'folder', 'artifact', 'name', 'review_status']
+        fields = ['path', 'folder', 'artifact', 'name', 'review_status', 'tags']
         exclude = ['product']
 
     def __init__(self, *args, **kwargs):

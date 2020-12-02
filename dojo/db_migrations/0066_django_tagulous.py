@@ -245,22 +245,22 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='engagement',
             name='tags',
-            field=tagulous.models.fields.TagField(_set_tag_meta=True, blank=True, help_text='Add tags that help describe this engagement. Choose from the list or add new tags.  Press Enter key to add.', to='dojo.Tagulous_Engagement_tags'),
+            field=tagulous.models.fields.TagField(_set_tag_meta=True, blank=True, help_text='Add tags that help describe this engagement. Choose from the list or add new tags. Press Enter key to add.', to='dojo.Tagulous_Engagement_tags'),
         ),
         migrations.AddField(
             model_name='finding',
             name='tags',
-            field=tagulous.models.fields.TagField(_set_tag_meta=True, blank=True, help_text='Add tags that help describe this finding. Choose from the list or add new tags.  Press Enter key to add.', to='dojo.Tagulous_Finding_tags'),
+            field=tagulous.models.fields.TagField(_set_tag_meta=True, blank=True, help_text='Add tags that help describe this finding. Choose from the list or add new tags. Press Enter key to add.', to='dojo.Tagulous_Finding_tags'),
         ),
         migrations.AddField(
             model_name='objects_product',
             name='tags',
-            field=tagulous.models.fields.TagField(_set_tag_meta=True, blank=True, help_text='Add tags that help describe this object. Choose from the list or add new tags.  Press Enter key to add.', to='dojo.Tagulous_Objects_Product_tags'),
+            field=tagulous.models.fields.TagField(_set_tag_meta=True, blank=True, help_text='Add tags that help describe this object. Choose from the list or add new tags. Press Enter key to add.', to='dojo.Tagulous_Objects_Product_tags'),
         ),
         migrations.AddField(
             model_name='test',
             name='tags',
-            field=tagulous.models.fields.TagField(_set_tag_meta=True, blank=True, help_text='Add tags that help describe this test. Choose from the list or add new tags.  Press Enter key to add.', to='dojo.Tagulous_Test_tags'),
+            field=tagulous.models.fields.TagField(_set_tag_meta=True, blank=True, help_text='Add tags that help describe this test. Choose from the list or add new tags. Press Enter key to add.', to='dojo.Tagulous_Test_tags'),
         ),
         migrations.AddField(
             model_name='product',
