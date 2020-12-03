@@ -48,6 +48,7 @@ class TagList(list):
             return result
 
     def __str__(self):
+        print('TagList str: ' + str(self))
         if self.pretty_print:
             return json.dumps(
                 self, sort_keys=True, indent=4, separators=(',', ': '))
@@ -78,6 +79,7 @@ class TagListSerializerField(serializers.ListField):
         self.pretty_print = pretty_print
 
     def to_internal_value(self, data):
+        print('to_internal_value: ' + str(data))
         if isinstance(data, six.string_types):
             if not data:
                 data = []
@@ -95,11 +97,15 @@ class TagListSerializerField(serializers.ListField):
 
             self.child.run_validation(s)
 
-        return data
+        return ','.join(data)
+        # return data
 
     def to_representation(self, value):
+        print('to_representation: ' + str(value))
         if not isinstance(value, TagList):
+            print('to_representation2: ' + str(value))
             if not isinstance(value, list):
+                print('to_representation3: ' + str(value))
                 # this will trigger when a queryset is found...
                 if self.order_by:
                     tags = value.all().order_by(*self.order_by)
@@ -107,6 +113,7 @@ class TagListSerializerField(serializers.ListField):
                     tags = value.all()
                 value = [tag.name for tag in tags]
             elif len(value) > 0 and isinstance(value[0], Tag):
+                print('to_representation4: ' + str(value))
                 # .. but sometimes the queryset already has been converted into a list, i.e. by prefetch_related
                 tags = value
                 value = [tag.name for tag in tags]
@@ -119,6 +126,7 @@ class TagListSerializerField(serializers.ListField):
 
 class TaggitSerializer(serializers.Serializer):
     def create(self, validated_data):
+        print('create!')
         to_be_tagged, validated_data = self._pop_tags(validated_data)
 
         tag_object = super(TaggitSerializer, self).create(validated_data)
@@ -134,13 +142,21 @@ class TaggitSerializer(serializers.Serializer):
         return self._save_tags(tag_object, to_be_tagged)
 
     def _save_tags(self, tag_object, tags):
+        print('save tags: ' + str(tags))
+        print('tag_object: ' + str(tag_object))
+        print('tag_object.pk: ' + str(tag_object.pk))
         for key in list(tags.keys()):
+            print('save: ' + str(key))
             tag_values = tags.get(key)
-            tag_object.tags = ", ".join(tag_values)
+            # tag_object.tags = ", ".join(tag_values)
+            tag_object.tags = tag_values
+            print('tag_object.tags: ' + str(tag_object.tags))
+        tag_object.save()
 
         return tag_object
 
     def _pop_tags(self, validated_data):
+        print('pop tags: ' + str(validated_data))
         to_be_tagged = {}
 
         for key in list(self.fields.keys()):
@@ -323,11 +339,15 @@ class NoteTypeSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+# class ProductSerializer(serializers.ModelSerializer):
 class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
     findings_count = serializers.SerializerMethodField()
     findings_list = serializers.SerializerMethodField()
 
     tags = TagListSerializerField(required=False)
+    # import tagulous.serializers.json.Serializer as tagulous_json_serializer
+    # import tagulous.serializers.json
+    # tags = tagulous.serializers.json.Serializer()
     product_meta = ProductMetaSerializer(read_only=True, many=True)
 
     class Meta:
@@ -354,8 +374,9 @@ class ProductTypeSerializer(serializers.ModelSerializer):
         }
 
 
-class EngagementSerializer(TaggitSerializer, serializers.ModelSerializer):
-    tags = TagListSerializerField(required=False)
+# class EngagementSerializer(TaggitSerializer, serializers.ModelSerializer):
+class EngagementSerializer(serializers.ModelSerializer):
+    # tags = TagListSerializerField(required=False)
 
     class Meta:
         model = Engagement
@@ -441,8 +462,9 @@ class EndpointStatusSerializer(serializers.ModelSerializer):
         return status
 
 
-class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
-    tags = TagListSerializerField(required=False)
+# class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
+class EndpointSerializer(serializers.ModelSerializer):
+    # tags = TagListSerializerField(required=False)
 
     class Meta:
         model = Endpoint
@@ -575,8 +597,9 @@ class DevelopmentEnvironmentSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class TestSerializer(TaggitSerializer, serializers.ModelSerializer):
-    tags = TagListSerializerField(required=False)
+# class TestSerializer(TaggitSerializer, serializers.ModelSerializer):
+class TestSerializer(serializers.ModelSerializer):
+    # tags = TagListSerializerField(required=False)
     test_type_name = serializers.ReadOnlyField()
 
     class Meta:
@@ -589,7 +612,8 @@ class TestSerializer(TaggitSerializer, serializers.ModelSerializer):
         return super().build_relational_field(field_name, relation_info)
 
 
-class TestCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
+# class TestCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
+class TestCreateSerializer(serializers.ModelSerializer):
     engagement = serializers.PrimaryKeyRelatedField(
         queryset=Engagement.objects.all())
     notes = serializers.PrimaryKeyRelatedField(
@@ -597,15 +621,16 @@ class TestCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         default=[],
         queryset=Notes.objects.all(),
         many=True)
-    tags = TagListSerializerField(required=False)
+    # tags = TagListSerializerField(required=False)
 
     class Meta:
         model = Test
         fields = '__all__'
 
 
-class TestTypeSerializer(TaggitSerializer, serializers.ModelSerializer):
-    tags = TagListSerializerField(required=False)
+# class TestTypeSerializer(TaggitSerializer, serializers.ModelSerializer):
+class TestTypeSerializer(serializers.ModelSerializer):
+    # tags = TagListSerializerField(required=False)
 
     class Meta:
         model = Test_Type
@@ -684,9 +709,10 @@ class FindingTestSerializer(serializers.ModelSerializer):
         fields = ["id", "title", "test_type", "engagement", "environment"]
 
 
-class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
+# class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
+class FindingSerializer(serializers.ModelSerializer):
     images = FindingImageSerializer(many=True, read_only=True)
-    tags = TagListSerializerField(required=False)
+    # tags = TagListSerializerField(required=False)
     request_response = serializers.SerializerMethodField()
     accepted_risks = RiskAcceptanceSerializer(many=True, read_only=True, source='risk_acceptance_set')
     push_to_jira = serializers.BooleanField(default=False)
@@ -726,7 +752,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     # Overriding this to push add Push to JIRA functionality
     def update(self, instance, validated_data):
         # remove tags from validated data and store them seperately
-        to_be_tagged, validated_data = self._pop_tags(validated_data)
+        # to_be_tagged, validated_data = self._pop_tags(validated_data)
 
         # pop push_to_jira so it won't get send to the model as a field
         # TODO: JIRA can we remove this is_push_all_issues, already checked in apiv2 viewset?
@@ -754,8 +780,9 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
             instance.save(push_to_jira=push_to_jira)
 
         # not sure why we are returning a tag_object, but don't want to change too much now as we're just fixing a bug
-        tag_object = self._save_tags(instance, to_be_tagged)
-        return tag_object
+        # tag_object = self._save_tags(instance, to_be_tagged)
+        # return tag_object
+        return instance
 
     def validate(self, data):
         if self.context['request'].method == 'PATCH':
@@ -792,7 +819,8 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
         return serialized_burps.data
 
 
-class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
+# class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
+class FindingCreateSerializer(serializers.ModelSerializer):
     notes = serializers.PrimaryKeyRelatedField(
         read_only=True,
         allow_null=True,
@@ -807,7 +835,7 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
     url = serializers.CharField(
         allow_null=True,
         default=None)
-    tags = TagListSerializerField(required=False)
+    # tags = TagListSerializerField(required=False)
     push_to_jira = serializers.BooleanField(default=False)
 
     class Meta:
@@ -820,7 +848,7 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
     # Overriding this to push add Push to JIRA functionality
     def create(self, validated_data):
         # remove tags from validated data and store them seperately
-        to_be_tagged, validated_data = self._pop_tags(validated_data)
+        # to_be_tagged, validated_data = self._pop_tags(validated_data)
 
         # pop push_to_jira so it won't get send to the model as a field
         push_to_jira = validated_data.pop('push_to_jira')
@@ -844,8 +872,9 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
             new_finding.save(push_to_jira=push_to_jira)
 
         # not sure why we are returning a tag_object, but don't want to change too much now as we're just fixing a bug
-        tag_object = self._save_tags(new_finding, to_be_tagged)
-        return tag_object
+        # tag_object = self._save_tags(new_finding, to_be_tagged)
+        # return tag_object
+        return instance
 
     def validate(self, data):
         if ((data['active'] or data['verified']) and data['duplicate']):
@@ -923,7 +952,8 @@ class ScanSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
+# class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
+class ImportScanSerializer(serializers.Serializer):
     scan_date = serializers.DateField(default=datetime.date.today)
 
     minimum_severity = serializers.ChoiceField(
@@ -944,7 +974,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         allow_null=True,
         default=None,
         queryset=User.objects.all())
-    tags = TagListSerializerField(required=False)
+    # tags = TagListSerializerField(required=False)
     close_old_findings = serializers.BooleanField(required=False, default=False)
     push_to_jira = serializers.BooleanField(default=False)
 
@@ -992,8 +1022,8 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
 
         test.engagement.save()
 
-        if 'tags' in data:
-            test.tags = ' '.join(data['tags'])
+        # if 'tags' in data:
+        #     test.tags = ' '.join(data['tags'])
         try:
             parser = import_parser_factory(data.get('file', None),
                                            test,
@@ -1150,7 +1180,8 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         return value
 
 
-class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
+# class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
+class ReImportScanSerializer(serializers.Serializer):
     scan_date = serializers.DateField()
     minimum_severity = serializers.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -1462,8 +1493,8 @@ class ReportGenerateSerializer(serializers.Serializer):
     finding_notes = FindingToNotesSerializer(many=True, allow_null=True, required=False)
 
 
-class TagSerializer(serializers.Serializer):
-    tags = TagListSerializerField(required=True)
+# class TagSerializer(serializers.Serializer):
+#     tags = TagListSerializerField(required=True)
 
 
 class SystemSettingsSerializer(serializers.Serializer):

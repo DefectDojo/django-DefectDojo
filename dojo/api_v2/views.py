@@ -312,37 +312,38 @@ class FindingViewSet(mixins.ListModelMixin,
         else:
             return serializers.FindingSerializer
 
-    @swagger_auto_schema(
-        method='get',
-        responses={status.HTTP_200_OK: serializers.TagSerializer}
-    )
-    @swagger_auto_schema(
-        method='post',
-        request_body=serializers.TagSerializer,
-        responses={status.HTTP_200_OK: serializers.TagSerializer}
-    )
-    @action(detail=True, methods=['get', 'post'])
-    def tags(self, request, pk=None):
-        finding = get_object_or_404(Finding.objects, id=pk)
+# TODO TAGS
+    # @swagger_auto_schema(
+    #     method='get',
+    #     responses={status.HTTP_200_OK: serializers.TagSerializer}
+    # )
+    # @swagger_auto_schema(
+    #     method='post',
+    #     request_body=serializers.TagSerializer,
+    #     responses={status.HTTP_200_OK: serializers.TagSerializer}
+    # )
+    # @action(detail=True, methods=['get', 'post'])
+    # def tags(self, request, pk=None):
+    #     finding = get_object_or_404(Finding.objects, id=pk)
 
-        if request.method == 'POST':
-            new_tags = serializers.TagSerializer(data=request.data)
-            if new_tags.is_valid():
-                all_tags = finding.tags
-                all_tags = serializers.TagSerializer({"tags": all_tags}).data['tags']
+    #     if request.method == 'POST':
+    #         new_tags = serializers.TagSerializer(data=request.data)
+    #         if new_tags.is_valid():
+    #             all_tags = finding.tags
+    #             all_tags = serializers.TagSerializer({"tags": all_tags}).data['tags']
 
-                for tag in new_tags.validated_data['tags']:
-                    if tag not in all_tags:
-                        all_tags.append(tag)
-                t = ", ".join(all_tags)
-                finding.tags = t
-                finding.save()
-            else:
-                return Response(new_tags.errors,
-                    status=status.HTTP_400_BAD_REQUEST)
-        tags = finding.tags
-        serialized_tags = serializers.TagSerializer({"tags": tags})
-        return Response(serialized_tags.data)
+    #             for tag in new_tags.validated_data['tags']:
+    #                 if tag not in all_tags:
+    #                     all_tags.append(tag)
+    #             t = ", ".join(all_tags)
+    #             finding.tags = t
+    #             finding.save()
+    #         else:
+    #             return Response(new_tags.errors,
+    #                 status=status.HTTP_400_BAD_REQUEST)
+    #     tags = finding.tags
+    #     serialized_tags = serializers.TagSerializer({"tags": tags})
+    #     return Response(serialized_tags.data)
 
     @swagger_auto_schema(
         method='get',
@@ -460,36 +461,37 @@ class FindingViewSet(mixins.ListModelMixin,
         return Response({"Success": "Selected Note has been Removed successfully"},
             status=status.HTTP_200_OK)
 
-    @swagger_auto_schema(
-        responses={status.HTTP_200_OK: ""},
-        methods=['put', 'patch'],
-        request_body=serializers.TagSerializer
-    )
-    @action(detail=True, methods=["put", "patch"])
-    def remove_tags(self, request, pk=None):
-        """ Remove Tag(s) from finding list of tags """
-        finding = get_object_or_404(Finding.objects, id=pk)
-        delete_tags = serializers.TagSerializer(data=request.data)
-        if delete_tags.is_valid():
-            all_tags = finding.tags
-            all_tags = serializers.TagSerializer({"tags": all_tags}).data['tags']
-            del_tags = delete_tags.validated_data['tags']
-            if len(del_tags) < 1:
-                return Response({"error": "Empty Tag List Not Allowed"},
-                        status=status.HTTP_400_BAD_REQUEST)
-            for tag in del_tags:
-                if tag not in all_tags:
-                    return Response({"error": "'{}' is not a valid tag in list".format(tag)},
-                        status=status.HTTP_400_BAD_REQUEST)
-                all_tags.remove(tag)
-            t = ", ".join(all_tags)
-            finding.tags = t
-            finding.save()
-            return Response({"success": "Tag(s) Removed"},
-                status=status.HTTP_200_OK)
-        else:
-            return Response(delete_tags.errors,
-                status=status.HTTP_400_BAD_REQUEST)
+# TODO TAGS
+    # @swagger_auto_schema(
+    #     responses={status.HTTP_200_OK: ""},
+    #     methods=['put', 'patch'],
+    #     request_body=serializers.TagSerializer
+    # )
+    # @action(detail=True, methods=["put", "patch"])
+    # def remove_tags(self, request, pk=None):
+    #     """ Remove Tag(s) from finding list of tags """
+    #     finding = get_object_or_404(Finding.objects, id=pk)
+    #     delete_tags = serializers.TagSerializer(data=request.data)
+    #     if delete_tags.is_valid():
+    #         all_tags = finding.tags
+    #         all_tags = serializers.TagSerializer({"tags": all_tags}).data['tags']
+    #         del_tags = delete_tags.validated_data['tags']
+    #         if len(del_tags) < 1:
+    #             return Response({"error": "Empty Tag List Not Allowed"},
+    #                     status=status.HTTP_400_BAD_REQUEST)
+    #         for tag in del_tags:
+    #             if tag not in all_tags:
+    #                 return Response({"error": "'{}' is not a valid tag in list".format(tag)},
+    #                     status=status.HTTP_400_BAD_REQUEST)
+    #             all_tags.remove(tag)
+    #         t = ", ".join(all_tags)
+    #         finding.tags = t
+    #         finding.save()
+    #         return Response({"success": "Tag(s) Removed"},
+    #             status=status.HTTP_200_OK)
+    #     else:
+    #         return Response(delete_tags.errors,
+    #             status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(
         request_body=serializers.ReportGenerateOptionSerializer,
