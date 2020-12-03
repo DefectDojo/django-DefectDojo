@@ -270,7 +270,7 @@
     "fields": {
         "name": "Veracode Scan"
     }
-  },  
+  },
   {
     "pk": 999,
     "model": "dojo.test_type",
@@ -1750,15 +1750,15 @@
   },
   {
     "pk": 1,
-    "model": "dojo.note_type", 
+    "model": "dojo.note_type",
     "fields": {
-      "name": "Test Note Type", 
-      "description": "not that much", 
-      "is_single": false, 
-      "is_active": true, 
+      "name": "Test Note Type",
+      "description": "not that much",
+      "is_single": false,
+      "is_active": true,
       "is_mandatory": false
     }
-  }, 
+  },
   {
     "pk": 1,
     "model": "dojo.tool_type",
