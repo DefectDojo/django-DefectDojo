@@ -78,6 +78,7 @@ class TagListSerializerField(serializers.ListField):
         self.pretty_print = pretty_print
 
     def to_internal_value(self, data):
+        print('to_internal_value: ' + str(data))
         if isinstance(data, six.string_types):
             if not data:
                 data = []
@@ -95,11 +96,15 @@ class TagListSerializerField(serializers.ListField):
 
             self.child.run_validation(s)
 
-        return data
+        return ','.join(data)
+        # return data
 
     def to_representation(self, value):
+        print('to_representation: ' + str(value))
         if not isinstance(value, TagList):
+            print('to_representation2: ' + str(value))
             if not isinstance(value, list):
+                print('to_representation3: ' + str(value))
                 # this will trigger when a queryset is found...
                 if self.order_by:
                     tags = value.all().order_by(*self.order_by)
@@ -107,6 +112,7 @@ class TagListSerializerField(serializers.ListField):
                     tags = value.all()
                 value = [tag.name for tag in tags]
             elif len(value) > 0 and isinstance(value[0], Tag):
+                print('to_representation4: ' + str(value))
                 # .. but sometimes the queryset already has been converted into a list, i.e. by prefetch_related
                 tags = value
                 value = [tag.name for tag in tags]
@@ -119,6 +125,7 @@ class TagListSerializerField(serializers.ListField):
 
 class TaggitSerializer(serializers.Serializer):
     def create(self, validated_data):
+        print('create!')
         to_be_tagged, validated_data = self._pop_tags(validated_data)
 
         tag_object = super(TaggitSerializer, self).create(validated_data)
@@ -134,13 +141,21 @@ class TaggitSerializer(serializers.Serializer):
         return self._save_tags(tag_object, to_be_tagged)
 
     def _save_tags(self, tag_object, tags):
+        print('save tags: ' + str(tags))
+        print('tag_object: ' + str(tag_object))
+        print('tag_object.pk: ' + str(tag_object.pk))
         for key in list(tags.keys()):
+            print('save: ' + str(key))
             tag_values = tags.get(key)
-            tag_object.tags = ", ".join(tag_values)
+            # tag_object.tags = ", ".join(tag_values)
+            tag_object.tags = tag_values
+            print('tag_object.tags: ' + str(tag_object.tags))
+        tag_object.save()
 
         return tag_object
 
     def _pop_tags(self, validated_data):
+        print('pop tags: ' + str(validated_data))
         to_be_tagged = {}
 
         for key in list(self.fields.keys()):
