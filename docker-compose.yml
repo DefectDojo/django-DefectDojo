@@ -89,7 +89,7 @@ services:
     volumes:
         - type: bind
           source: ./docker/extra_settings
-          target: /app/docker/extra_settings      
+          target: /app/docker/extra_settings
   mysql:
     image: mysql:5.7.32@sha256:ec6742af6625f76f98162b17fd62d22e1824d13fd80f214ab9184c7b6b50bad5
     environment:
