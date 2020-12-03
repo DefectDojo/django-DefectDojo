@@ -23,8 +23,7 @@ RUN \
   rm -rf /var/lib/apt/lists && \
   true
 COPY requirements.txt ./
-RUN pip3 install --no-cache-dir --upgrade pip
-RUN pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt --use-deprecated=legacy-resolver
+RUN pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
 
 FROM python:3.6.12-slim-buster@sha256:e5259113df5a7c4dae16ad37c2ca53b1cf722e051cfd5f624e7b76aa72389e0c
 WORKDIR /app
@@ -53,15 +52,14 @@ RUN \
   apt-get clean && \
   rm -rf /var/lib/apt/lists && \
   true
-RUN pip3 install --no-cache-dir --upgrade pip
 COPY --from=build /tmp/wheels /tmp/wheels
 COPY requirements.txt ./
 RUN pip3 install \
 	--no-cache-dir \
 	--no-index \
   --find-links=/tmp/wheels \
-  -r ./requirements.txt \
-  --use-deprecated=legacy-resolver
+  -r ./requirements.txt
+  
 COPY \
   docker/entrypoint-celery-beat.sh \
   docker/entrypoint-celery-worker.sh \
