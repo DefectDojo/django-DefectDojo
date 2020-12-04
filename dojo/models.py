@@ -1694,7 +1694,6 @@ class Finding(models.Model):
                                    null=True,
                                    verbose_name="Created",
                                    help_text="The date the finding was created inside DefectDojo.")
-
     # # deprecated, moved to jira_issue. left here as we don't want to delete data just yet
     # jira_creation = models.DateTimeField(editable=True,
     #                                      null=True,

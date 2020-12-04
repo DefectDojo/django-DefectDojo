@@ -26,7 +26,7 @@ from django.utils.translation import ugettext_lazy as _
 import json
 import dojo.jira_link.helper as jira_helper
 import logging
-
+import tagulous
 
 logger = logging.getLogger(__name__)
 
@@ -87,31 +87,60 @@ class TagListSerializerField(serializers.ListField):
             except ValueError:
                 self.fail('invalid_json')
 
+        logger.debug('data as json: %s', data)
+
         if not isinstance(data, list):
             self.fail('not_a_list', input_type=type(data).__name__)
 
+        # data_safe = []
         for s in data:
             if not isinstance(s, six.string_types):
                 self.fail('not_a_str')
 
             self.child.run_validation(s)
 
-        return ','.join(data)
+            # if ' ' in s or ',' in s:
+            #     s = '"%s"' % s
+
+            # data_safe.append(s)
+
+        # internal_value = ','.join(data_safe)
+
+        internal_value = tagulous.utils.render_tags(data)
+
+        return internal_value
         # return data
 
     def to_representation(self, value):
-        print('to_representation: ' + str(value))
+        if value:
+            # print('value type: "' + str(type(value)) + '"')
+            # print('value type: "' + str(type(value).__name__) + '"')
+            print('value type: "' + type(value).__name__ + '"')
+            print('to_representation: "' + str(value) + '"')
         if not isinstance(value, TagList):
-            print('to_representation2: ' + str(value))
-            if not isinstance(value, list):
-                print('to_representation3: ' + str(value))
-                # this will trigger when a queryset is found...
-                if self.order_by:
-                    tags = value.all().order_by(*self.order_by)
-                else:
-                    tags = value.all()
-                value = [tag.name for tag in tags]
+            if value:
+                print('to_representation2: "' + str(value) + '"')
+
+            # we can't use isinstance because TagRelatedManager is non-existing class
+            # it cannot be imported or referenced, so we fallback to string comparison
+            if type(value).__name__ == 'TagRelatedManager':
+                if value:
+                    print('to_representation3: "' + str(value) + '"')
+                # if self.order_by:
+                #     tags = value.all().order_by(*self.order_by)
+                # else:
+                #     tags = value.all()
+                # value = [tag.name for tag in tags]
+
+                value = value.get_tag_list()
+
+            elif isinstance(value, str):
+                if value:
+                    print('to_representation4: "' + str(value) + '"')
+                value = tagulous.utils.parse_tags(value)
+
             elif len(value) > 0 and isinstance(value[0], Tag):
+                raise ValueError('unreachable code?!')
                 print('to_representation4: ' + str(value))
                 # .. but sometimes the queryset already has been converted into a list, i.e. by prefetch_related
                 tags = value
@@ -119,6 +148,9 @@ class TagListSerializerField(serializers.ListField):
                 if self.order_by:
                     # the only possible ordering is by name, so we order after creating the list
                     value = sorted(value)
+            else:
+                raise ValueError('unable to convert %s into TagList' % type(value).__name__)
+
             value = TagList(value, pretty_print=self.pretty_print)
         return value
 
@@ -395,6 +427,8 @@ class EngagementToNotesSerializer(serializers.Serializer):
 
 
 class AppAnalysisSerializer(serializers.ModelSerializer):
+    tags = TagListSerializerField(required=False)
+
     class Meta:
         model = App_Analysis
         fields = '__all__'
@@ -873,6 +907,8 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
 
 
 class FindingTemplateSerializer(serializers.ModelSerializer):
+    tags = TagListSerializerField(required=False)
+
     class Meta:
         model = Finding_Template
         fields = '__all__'
@@ -938,6 +974,8 @@ class ScanSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+# class ImportScanSerializer(serializers.Serializer):
+# class ImportScanSerializer(TaggitSerializer, serializers.ModelSerializer):
 class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
     scan_date = serializers.DateField(default=datetime.date.today)
 
@@ -962,6 +1000,11 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
     tags = TagListSerializerField(required=False)
     close_old_findings = serializers.BooleanField(required=False, default=False)
     push_to_jira = serializers.BooleanField(default=False)
+
+    # class Meta:
+    #     model = Test
+    #     # fields = '__all__'
+    #     exclude = ['target_start', 'target_end']
 
     def save(self, push_to_jira=False):
         data = self.validated_data
@@ -1008,7 +1051,9 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         test.engagement.save()
 
         if 'tags' in data:
-            test.tags = ' '.join(data['tags'])
+            logger.debug('import scan tags: %s', data['tags'])
+            # test.tags = ' '.join(data['tags'])
+            # test.save()
         try:
             parser = import_parser_factory(data.get('file', None),
                                            test,
@@ -1040,6 +1085,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 item.last_reviewed_by = self.context['request'].user
                 item.active = data['active']
                 item.verified = data['verified']
+                logger.debug('going to save finding')
                 item.save(dedupe_option=False)
 
                 if (hasattr(item, 'unsaved_req_resp') and
@@ -1135,6 +1181,8 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 old_finding.tags.add('stale')
                 old_finding.save()
 
+        logger.debug('done importing findings')
+
         title = 'Test created for ' + str(test.engagement.product) + ': ' + str(test.engagement.name) + ': ' + str(test)
         create_notification(event='test_added', title=title, test=test, engagement=test.engagement, product=test.engagement.product,
                             url=reverse('view_test', args=(test.id,)))
@@ -1145,7 +1193,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
             create_notification(initiator=self.context['request'].user, event='scan_added', title=title, findings_new=new_findings, findings_mitigated=old_findings,
                                 finding_count=updated_count, test=test, engagement=test.engagement, product=test.engagement.product,
                                 url=reverse('view_test', args=(test.id,)))
-
+        logger.debug('returning test instance')
         return test
 
     def validate(self, data):
