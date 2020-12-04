@@ -736,8 +736,12 @@ def close_epic(eng, push_to_jira):
         if push_to_jira:
             try:
                 jissue = get_jira_issue(eng)
+                if jissue is None:
+                    logger.warn("JIRA close epic failed: no issue found")
+                    return False
+
                 req_url = jira_instance.url + '/rest/api/latest/issue/' + \
-                    j_issue.jira_id + '/transitions'
+                    jissue.jira_id + '/transitions'
                 json_data = {'transition': {'id': jira_instance.close_status_key}}
                 r = requests.post(
                     url=req_url,
