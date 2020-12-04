@@ -139,10 +139,16 @@ class TaggitTests(DojoAPITestCase):
         finding_id = self.create_finding_with_tags(tags)
         response = self.get_finding_tags_api(finding_id)
 
-        # via API the tag gets split into two tags (via the UI no splitting happens)
-        self.assertEqual(2, len(response.get('tags')))
-        self.assertTrue('one' in response['tags'])
-        self.assertTrue('two' in response['tags'])
+        # the old django-tagging library was splitting this tag into 2 tags
+        # with djangotagulous the tag does no longer get split up and we cannot modify tagulous
+        # to keep doing the old behaviour. so this is a small incompatibility, but only for
+        # tags with commas, so should be minor trouble
+        #
+        # self.assertEqual(2, len(response.get('tags')))
+        self.assertEqual(1, len(response.get('tags')))
+        # print("response['tags']:" + str(response['tags']))
+        self.assertTrue('one' in str(response['tags']))
+        self.assertTrue('two' in str(response['tags']))
 
     def test_finding_create_tags_with_commas_quoted(self):
         tags = ['"one,two"']
@@ -152,18 +158,24 @@ class TaggitTests(DojoAPITestCase):
         # no splitting due to quotes
         self.assertEqual(len(tags), len(response.get('tags', None)))
         for tag in tags:
-            # logger.debug('looking for tag %s in tag list %s', tag, response['tags'])
-            self.assertTrue(tag.strip('\"') in response['tags'])
+            logger.debug('looking for tag %s in tag list %s', tag, response['tags'])
+            # with django-tagging the quotes were stripped, with tagulous they remain
+            # self.assertTrue(tag.strip('\"') in response['tags'])
+            self.assertTrue(tag in response['tags'])
 
     def test_finding_create_tags_with_spaces(self):
         tags = ['one two']
         finding_id = self.create_finding_with_tags(tags)
         response = self.get_finding_tags_api(finding_id)
 
-        # via API the tag gets split into two tags (via the UI no splitting happens)
-        self.assertEqual(2, len(response.get('tags')))
-        self.assertTrue('one' in response['tags'])
-        self.assertTrue('two' in response['tags'])
+        # the old django-tagging library was splitting this tag into 2 tags
+        # with djangotagulous the tag does no longer get split up and we cannot modify tagulous
+        # to keep doing the old behaviour. so this is a small incompatibility, but only for
+        # tags with commas, so should be minor trouble
+        # self.assertEqual(2, len(response.get('tags')))
+        self.assertEqual(1, len(response.get('tags')))
+        self.assertTrue('one' in str(response['tags']))
+        self.assertTrue('two' in str(response['tags']))
         # finding.tags: [<Tag: one>, <Tag: two>]
 
     def test_finding_create_tags_with_spaces_quoted(self):
@@ -175,7 +187,9 @@ class TaggitTests(DojoAPITestCase):
         self.assertEqual(len(tags), len(response.get('tags', None)))
         for tag in tags:
             logger.debug('looking for tag %s in tag list %s', tag, response['tags'])
-            self.assertTrue(tag.strip('\"') in response['tags'])
+            # with django-tagging the quotes were stripped, with tagulous they remain
+            # self.assertTrue(tag.strip('\"') in response['tags'])
+            self.assertTrue(tag in response['tags'])
 
         # finding.tags: <QuerySet [<Tag: one two>]>
 

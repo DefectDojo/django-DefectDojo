@@ -286,7 +286,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
     def get_test_api(self, test_id):
         response = self.client.get(reverse('test-list') + '%s/' % test_id, format='json')
         self.assertEqual(200, response.status_code)
-        # print('test.content: ', response.content)
+        print('test.content: ', response.content)
         return json.loads(response.content)
 
     def import_scan_with_params(self, filename, engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None, tags=None):
@@ -407,8 +407,8 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
             data = {'tags': tags}
 
         response = http_method(reverse('finding-remove-tags', args=(finding_id,)), data, format='json')
-        # print(response)
-        # print(response.content)
+        print(response)
+        print(response.content)
         self.assertEqual(expected_response_status_code, response.status_code)
         return response.data
 

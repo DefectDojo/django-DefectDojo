@@ -974,9 +974,9 @@ class ScanSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-# class ImportScanSerializer(serializers.Serializer):
 # class ImportScanSerializer(TaggitSerializer, serializers.ModelSerializer):
-class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
+# class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
+class ImportScanSerializer(serializers.Serializer):
     scan_date = serializers.DateField(default=datetime.date.today)
 
     minimum_severity = serializers.ChoiceField(
@@ -1039,6 +1039,10 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         except ValidationError:
             pass
 
+        if 'tags' in data:
+            logger.debug('import scan tags: %s', data['tags'])
+            test.tags = data['tags']
+
         test.save()
         # return the id of the created test, can't find a better way because this is not a ModelSerializer....
         self.fields['test'] = serializers.IntegerField(read_only=True, default=test.id)
@@ -1050,10 +1054,6 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
 
         test.engagement.save()
 
-        if 'tags' in data:
-            logger.debug('import scan tags: %s', data['tags'])
-            # test.tags = ' '.join(data['tags'])
-            # test.save()
         try:
             parser = import_parser_factory(data.get('file', None),
                                            test,

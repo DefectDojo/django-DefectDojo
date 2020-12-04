@@ -34,7 +34,7 @@ from dojo.api_v2 import serializers, permissions
 from django.db.models import Count, Q
 import dojo.jira_link.helper as jira_helper
 import logging
-
+import tagulous
 
 logger = logging.getLogger(__name__)
 
@@ -331,11 +331,11 @@ class FindingViewSet(mixins.ListModelMixin,
                 all_tags = finding.tags
                 all_tags = serializers.TagSerializer({"tags": all_tags}).data['tags']
 
-                for tag in new_tags.validated_data['tags']:
+                for tag in tagulous.utils.parse_tags(new_tags.validated_data['tags']):
                     if tag not in all_tags:
                         all_tags.append(tag)
-                t = ", ".join(all_tags)
-                finding.tags = t
+                new_tags = tagulous.utils.render_tags(all_tags)
+                finding.tags = new_tags
                 finding.save()
             else:
                 return Response(new_tags.errors,
@@ -471,19 +471,27 @@ class FindingViewSet(mixins.ListModelMixin,
         finding = get_object_or_404(Finding.objects, id=pk)
         delete_tags = serializers.TagSerializer(data=request.data)
         if delete_tags.is_valid():
+            print('delete_tags: %s' % delete_tags)
             all_tags = finding.tags
+            print('all1: %s' % all_tags)
             all_tags = serializers.TagSerializer({"tags": all_tags}).data['tags']
-            del_tags = delete_tags.validated_data['tags']
+            print('all2: %s' % all_tags)
+
+            # serializer turns it into a string, but we need a list
+            del_tags = tagulous.utils.parse_tags(delete_tags.validated_data['tags'])
             if len(del_tags) < 1:
                 return Response({"error": "Empty Tag List Not Allowed"},
                         status=status.HTTP_400_BAD_REQUEST)
+            print('deltags: %s' % del_tags)
             for tag in del_tags:
+                print('deltag: %s' % tag)
                 if tag not in all_tags:
                     return Response({"error": "'{}' is not a valid tag in list".format(tag)},
                         status=status.HTTP_400_BAD_REQUEST)
                 all_tags.remove(tag)
-            t = ", ".join(all_tags)
-            finding.tags = t
+            # t = ", ".join(all_tags)
+            new_tags = tagulous.utils.render_tags(all_tags)
+            finding.tags = new_tags
             finding.save()
             return Response({"success": "Tag(s) Removed"},
                 status=status.HTTP_200_OK)
