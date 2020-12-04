@@ -1,7 +1,7 @@
 ---
 # Global settings
 # Is this deployment for OpenShift? If so, we help with creating a nonroot SCC and adding serviceaccounts to it
-OpenShift:
+openShift:
   enabled: false
   createSCC: true
 # create defectdojo specific secret
