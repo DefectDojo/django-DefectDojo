@@ -1,4 +1,4 @@
-{{- if and (.Values.OpenShift.enabled) (.Values.OpenShift.createSCC) }}
+{{- if and (.Values.openShift.enabled) (.Values.openShift.createSCC) }}
 {{- $fullName := include "defectdojo.fullname" . -}}
 # This SCC allows any user ID except root
 # Pass the --validate=false flag when applying
