@@ -838,8 +838,6 @@ def delete_product(request, pid):
         if 'id' in request.POST and str(product.id) == request.POST['id']:
             form = DeleteProductForm(request.POST, instance=product)
             if form.is_valid():
-                if product.tags:
-                    del product.tags
                 product.delete()
                 messages.add_message(request,
                                      messages.SUCCESS,

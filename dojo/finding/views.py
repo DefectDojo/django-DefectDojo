@@ -599,7 +599,6 @@ def delete_finding(request, fid):
         if form.is_valid():
             tid = finding.test.id
             product = finding.test.engagement.product
-            del finding.tags
             finding.delete()
             calculate_grade(product)
             messages.add_message(
@@ -1188,8 +1187,6 @@ def delete_stub_finding(request, fid):
         form = DeleteStubFindingForm(request.POST, instance=finding)
         if form.is_valid():
             tid = finding.test.id
-            if hasattr(finding, 'tags'):
-                del finding.tags
             finding.delete()
             messages.add_message(
                 request,
@@ -1491,7 +1488,6 @@ def delete_template(request, tid):
     if request.method == 'POST':
         form = DeleteFindingTemplateForm(request.POST, instance=template)
         if form.is_valid():
-            del template.tags
             template.delete()
             messages.add_message(
                 request,

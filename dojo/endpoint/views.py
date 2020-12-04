@@ -223,7 +223,6 @@ def delete_endpoint(request, eid):
         if 'id' in request.POST and str(endpoint.id) == request.POST['id']:
             form = DeleteEndpointForm(request.POST, instance=endpoint)
             if form.is_valid():
-                del endpoint.tags
                 endpoint.delete()
                 messages.add_message(request,
                                      messages.SUCCESS,

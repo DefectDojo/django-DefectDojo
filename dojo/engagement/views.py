@@ -226,7 +226,6 @@ def delete_engagement(request, eid):
         if 'id' in request.POST and str(engagement.id) == request.POST['id']:
             form = DeleteEngagementForm(request.POST, instance=engagement)
             if form.is_valid():
-                del engagement.tags
                 engagement.delete()
                 messages.add_message(
                     request,

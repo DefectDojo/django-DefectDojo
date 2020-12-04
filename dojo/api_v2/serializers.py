@@ -139,15 +139,15 @@ class TagListSerializerField(serializers.ListField):
                     print('to_representation4: "' + str(value) + '"')
                 value = tagulous.utils.parse_tags(value)
 
-            elif len(value) > 0 and isinstance(value[0], Tag):
-                raise ValueError('unreachable code?!')
-                print('to_representation4: ' + str(value))
-                # .. but sometimes the queryset already has been converted into a list, i.e. by prefetch_related
-                tags = value
-                value = [tag.name for tag in tags]
-                if self.order_by:
-                    # the only possible ordering is by name, so we order after creating the list
-                    value = sorted(value)
+            # elif len(value) > 0 and isinstance(value[0], Tag):
+            #     raise ValueError('unreachable code?!')
+            #     print('to_representation4: ' + str(value))
+            #     # .. but sometimes the queryset already has been converted into a list, i.e. by prefetch_related
+            #     tags = value
+            #     value = [tag.name for tag in tags]
+            #     if self.order_by:
+            #         # the only possible ordering is by name, so we order after creating the list
+            #         value = sorted(value)
             else:
                 raise ValueError('unable to convert %s into TagList' % type(value).__name__)
 

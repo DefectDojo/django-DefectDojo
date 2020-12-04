@@ -226,7 +226,6 @@ def delete_test(request, tid):
         if 'id' in request.POST and str(test.id) == request.POST['id']:
             form = DeleteTestForm(request.POST, instance=test)
             if form.is_valid():
-                del test.tags
                 test.delete()
                 messages.add_message(request,
                                      messages.SUCCESS,
