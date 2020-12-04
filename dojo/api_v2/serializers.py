@@ -704,14 +704,22 @@ class FindingTestTypeSerializer(serializers.ModelSerializer):
         fields = ["id", "name"]
 
 
-class FindingTestSerializer(serializers.ModelSerializer):
+class FindingReatedFieldsSerializer(serializers.ModelSerializer):
     engagement = FindingEngagementSerializer(required=False)
     environment = FindingEnvironmentSerializer(required=False)
     test_type = FindingTestTypeSerializer(required=False)
+    jira = serializers.SerializerMethodField()
 
     class Meta:
         model = Test
-        fields = ["id", "title", "test_type", "engagement", "environment"]
+        fields = ["id", "title", "test_type", "engagement", "environment", "jira"]
+
+    @swagger_serializer_method(JIRAIssueSerializer)
+    def get_jira(self, obj):
+        if not jira_helper.has_jira_issue(obj):
+            return None
+        issue = jira_helper.get_jira_issue(obj)
+        return JIRAIssueSerializer(read_only=True).to_representation(issue)
 
 
 class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
@@ -741,11 +749,11 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     def get_jira_change(self, obj):
         return jira_helper.get_jira_change(obj)
 
-    @swagger_serializer_method(FindingTestSerializer)
+    @swagger_serializer_method(FindingReatedFieldsSerializer)
     def get_related_fields(self, obj):
         query_params = self.context['request'].query_params
         if query_params.get('related_fields', 'false') == 'true':
-            return FindingTestSerializer(required=False).to_representation(obj.test)
+            return FindingReatedFieldsSerializer(required=False).to_representation(obj.test)
         else:
             return None
 
