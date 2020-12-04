@@ -21,4 +21,8 @@
 {% block postscript %}
     <script type="text/javascript" src="{% static "admin/js/jquery.init.js"%}"></script>
     <script type="application/javascript" src="{% static "admin/js/admin/RelatedObjectLookups.js" %}"></script>
+
+    <script type="application/javascript">	
+        $ = django.jQuery;	
+    </script>    
 {% endblock %}
