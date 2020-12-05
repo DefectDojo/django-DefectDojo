@@ -1019,7 +1019,7 @@ def mktemplate(request, fid):
             impact=finding.impact,
             references=finding.references,
             numerical_severity=finding.numerical_severity,
-            tags=finding.tags)
+            tags=finding.tags.all())
         template.save()
         template.tags = finding.tags.all()
 
