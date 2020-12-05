@@ -17,9 +17,10 @@ from django.db.models import Q
 from dojo.models import Dojo_User, Product_Type, Finding, Product, Test_Type, \
     Endpoint, Development_Environment, Finding_Template, Report, Note_Type, \
     Engagement_Survey, Question, TextQuestion, ChoiceQuestion, Endpoint_Status, Engagement, \
-    ENGAGEMENT_STATUS_CHOICES
+    ENGAGEMENT_STATUS_CHOICES, Test
 from dojo.utils import get_system_setting
 from django.contrib.contenttypes.models import ContentType
+from crum import get_current_user
 
 logger = logging.getLogger(__name__)
 
@@ -1072,6 +1073,18 @@ class MetricsFindingFilter(FilterSet):
         self.form.fields['severity'].choices = self.queryset.order_by(
             'numerical_severity'
         ).values_list('severity', 'severity').distinct()
+        if get_current_user() is not None and not get_current_user().is_staff:
+            self.form.fields[
+                'test__engagement__product__prod_type'].queryset = Product_Type.objects.filter(
+                authorized_users__in=[get_current_user()])
+            self.form.fields[
+                'test'].queryset = Test.objects.filter(
+                Q(engagement__product__authorized_users__in=[get_current_user()]) |
+                Q(engagement__product__prod_type__authorized_users__in=[get_current_user()]))
+            self.form.fields[
+                'duplicate_finding'].queryset = Finding.objects.filter(
+                Q(test__engagement__product__authorized_users__in=[get_current_user()]) |
+                Q(test__engagement__product__prod_type__authorized_users__in=[get_current_user()]))
 
     class Meta:
         model = Finding
@@ -1117,6 +1130,18 @@ class MetricsEndpointFilter(FilterSet):
         self.form.fields['finding__severity'].choices = self.queryset.order_by(
             'finding__numerical_severity'
         ).values_list('finding__severity', 'finding__severity').distinct()
+        if get_current_user() is not None and not get_current_user().is_staff:
+            self.form.fields[
+                'finding__test__engagement__product__prod_type'].queryset = Product_Type.objects.filter(
+                authorized_users__in=[get_current_user()])
+            self.form.fields[
+                'endpoint'].queryset = Endpoint.objects.filter(
+                Q(product__authorized_users__in=[get_current_user()]) |
+                Q(product__prod_type__authorized_users__in=[get_current_user()]))
+            self.form.fields[
+                'finding'].queryset = Finding.objects.filter(
+                Q(test__engagement__product__authorized_users__in=[get_current_user()]) |
+                Q(test__engagement__product__prod_type__authorized_users__in=[get_current_user()]))
 
     class Meta:
         model = Endpoint_Status
@@ -1222,13 +1247,12 @@ class EndpointFilter(DojoFilter):
     )
 
     def __init__(self, *args, **kwargs):
-        self.user = None
-        if 'user' in kwargs:
-            self.user = kwargs.pop('user')
         super(EndpointFilter, self).__init__(*args, **kwargs)
-        if self.user and not self.user.is_staff:
-            self.form.fields['product'].queryset = Product.objects.filter(
-                authorized_users__in=[self.user]).distinct().order_by('name')
+        if get_current_user() and not get_current_user().is_staff:
+            self.form.fields[
+                'product'].queryset = Product.objects.filter(
+                Q(authorized_users__in=[get_current_user()]) |
+                Q(prod_type__authorized_users__in=[get_current_user()])).distinct().order_by('name')
 
     class Meta:
         model = Endpoint
@@ -1286,28 +1310,30 @@ class ReportAuthedFindingFilter(DojoFilter):
     out_of_scope = ReportBooleanFilter()
 
     def __init__(self, *args, **kwargs):
-        self.user = None
-        if 'user' in kwargs:
-            self.user = kwargs.pop('user')
         super(ReportAuthedFindingFilter, self).__init__(*args, **kwargs)
-        if not self.user.is_staff:
+        if get_current_user() and not get_current_user().is_staff:
             self.form.fields[
                 'test__engagement__product'].queryset = Product.objects.filter(
-                authorized_users__in=[self.user])
+                Q(authorized_users__in=[get_current_user()]) |
+                Q(prod_type__authorized_users__in=[get_current_user()]))
             self.form.fields[
                 'test__engagement__product__prod_type'].queryset = Product_Type.objects.filter(
-                authorized_users__in=[self.user])
+                authorized_users__in=[get_current_user()])
+            self.form.fields[
+                'duplicate_finding'].queryset = Finding.objects.filter(
+                Q(test__engagement__product__authorized_users__in=[get_current_user()]) |
+                Q(test__engagement__product__prod_type__authorized_users__in=[get_current_user()]))
 
     @property
     def qs(self):
         parent = super(ReportAuthedFindingFilter, self).qs
-        if self.user.is_staff:
-            return parent
-        else:
+        if get_current_user() and not get_current_user().is_staff:
             return parent.filter(
-                Q(test__engagement__product__authorized_users__in=[self.user]) |
-                Q(test__engagement__product__prod_type__authorized_users__in=[self.user])
+                Q(test__engagement__product__authorized_users__in=[get_current_user()]) |
+                Q(test__engagement__product__prod_type__authorized_users__in=[get_current_user()])
             )
+        else:
+            return parent
 
     class Meta:
         model = Finding

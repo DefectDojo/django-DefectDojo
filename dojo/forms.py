@@ -32,6 +32,7 @@ from dojo.tools import requires_file, SCAN_SONARQUBE_API
 from dojo.user.helper import user_is_authorized
 from django.urls import reverse
 import logging
+from crum import get_current_user
 
 logger = logging.getLogger(__name__)
 
@@ -1630,6 +1631,12 @@ class ProductTypeCountsForm(forms.Form):
                                           queryset=Product_Type.objects.all(),
                                           error_messages={
                                               'required': '*'})
+
+    def __init__(self, *args, **kwargs):
+        super(ProductTypeCountsForm, self).__init__(*args, **kwargs)
+        if get_current_user() is not None and not get_current_user().is_staff:
+            self.fields['product_type'].queryset = Product_Type.objects.filter(
+                authorized_users__in=[get_current_user()])
 
 
 class APIKeyForm(forms.ModelForm):

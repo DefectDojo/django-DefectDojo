@@ -425,7 +425,7 @@ def report_widget_factory(json_data=None, request=None, user=None, finding_notes
                 else:
                     d[item['name']] = item['value']
 
-            findings = ReportAuthedFindingFilter(d, queryset=findings, user=user)
+            findings = ReportAuthedFindingFilter(d, queryset=findings)
             user_id = user.id if user is not None else None
             selected_widgets[list(widget.keys())[0] + '-' + str(idx)] = FindingList(request=request, findings=findings,
                                                                               finding_notes=finding_notes,

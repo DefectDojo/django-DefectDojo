@@ -53,7 +53,7 @@ def report_url_resolver(request):
 def report_builder(request):
     add_breadcrumb(title="Report Builder", top_level=True, request=request)
     findings = Finding.objects.all()
-    findings = ReportAuthedFindingFilter(request.GET, queryset=findings, user=request.user)
+    findings = ReportAuthedFindingFilter(request.GET, queryset=findings)
     endpoints = Endpoint.objects.filter(finding__active=True,
                                         finding__verified=True,
                                         finding__false_p=False,
