@@ -149,7 +149,7 @@ def custom_report(request):
 def report_findings(request):
     findings = Finding.objects.filter()
 
-    findings = ReportAuthedFindingFilter(request.GET, queryset=findings, user=request.user)
+    findings = ReportAuthedFindingFilter(request.GET, queryset=findings)
 
     title_words = get_words_for_field(findings.qs, 'title')
     component_words = get_words_for_field(findings.qs, 'component_name')
