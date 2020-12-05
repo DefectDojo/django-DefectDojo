@@ -1869,6 +1869,7 @@ def finding_bulk_update_all(request, pid=None):
                         # tags = tagulous.utils.render_tags(form.cleaned_data['tags'])
                         tags = form.cleaned_data['tags']
                         logger.debug('bulk_edit: setting tags for: %i %s %s', finding.id, finding, tags)
+                        # currently bulk edit overwrites existing tags
                         finding.tags = tags
                         finding.save()
 

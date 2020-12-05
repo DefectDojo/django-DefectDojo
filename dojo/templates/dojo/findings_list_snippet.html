@@ -96,9 +96,9 @@
                                 <label style="display: block">Tags</label>
                                 {% comment %}
                                     Quick hack to make bulk edit work without refactoring the whole bulk edit form                                
+                                    {{ bulk_edit_form.media.css }}
+                                    {{ bulk_edit_form.media.js }}
                                 {% endcomment %}                                
-                                {{ bulk_edit_form.media.css }}
-                                {{ bulk_edit_form.media.js }}
                                 {{ bulk_edit_form.tags }}
                                 <input type="submit" class="btn btn-sm btn-primary" value="Submit"/>
                             </form>
