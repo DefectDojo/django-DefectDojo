@@ -28,6 +28,7 @@ from dojo.utils import get_page_items, add_breadcrumb, findings_this_period, ope
     get_period_counts, get_system_setting, get_punchcard_data, queryset_check
 from functools import reduce
 from dojo.user.helper import objects_authorized
+from django.views.decorators.vary import vary_on_cookie
 
 logger = logging.getLogger(__name__)
 
@@ -393,6 +394,7 @@ def endpoint_querys(prod_type, request):
 
 
 @cache_page(60 * 5)  # cache for 5 minutes
+@vary_on_cookie
 def metrics(request, mtype):
     template = 'dojo/metrics.html'
     show_pt_filter = True
@@ -530,6 +532,7 @@ simple metrics for easy reporting
 
 
 @cache_page(60 * 5)  # cache for 5 minutes
+@vary_on_cookie
 def simple_metrics(request):
     now = timezone.now()
 
@@ -609,6 +612,7 @@ def simple_metrics(request):
 
 
 # @cache_page(60 * 5)  # cache for 5 minutes
+# @vary_on_cookie
 def product_type_counts(request):
     form = ProductTypeCountsForm()
     opened_in_period_list = []
@@ -804,6 +808,7 @@ and root can view others metrics
 # noinspection DjangoOrm
 @user_passes_test(lambda u: u.is_staff)
 @cache_page(60 * 5)  # cache for 5 minutes
+@vary_on_cookie
 def view_engineer(request, eid):
     user = get_object_or_404(Dojo_User, pk=eid)
     if not (request.user.is_superuser or
