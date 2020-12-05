@@ -1247,12 +1247,15 @@ class EndpointFilter(DojoFilter):
     )
 
     def __init__(self, *args, **kwargs):
+        self.user = None
+        if 'user' in kwargs:
+            self.user = kwargs.pop('user')
         super(EndpointFilter, self).__init__(*args, **kwargs)
-        if get_current_user() and not get_current_user().is_staff:
+        if self.user and not self.user.is_staff:
             self.form.fields[
                 'product'].queryset = Product.objects.filter(
-                Q(authorized_users__in=[get_current_user()]) |
-                Q(prod_type__authorized_users__in=[get_current_user()])).distinct().order_by('name')
+                Q(authorized_users__in=[self.user]) |
+                Q(prod_type__authorized_users__in=[self.user])).distinct().order_by('name')
 
     class Meta:
         model = Endpoint

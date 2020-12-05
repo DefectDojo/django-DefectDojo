@@ -64,7 +64,7 @@ def report_builder(request):
 
     endpoints = Endpoint.objects.filter(id__in=ids)
 
-    endpoints = EndpointFilter(request.GET, queryset=endpoints)
+    endpoints = EndpointFilter(request.GET, queryset=endpoints, user=request.user)
 
     in_use_widgets = [ReportOptions(request=request)]
     available_widgets = [CoverPage(request=request),
@@ -184,7 +184,7 @@ def report_endpoints(request):
     ids = get_endpoint_ids(endpoints)
 
     endpoints = Endpoint.objects.filter(id__in=ids)
-    endpoints = EndpointFilter(request.GET, queryset=endpoints)
+    endpoints = EndpointFilter(request.GET, queryset=endpoints, user=request.user)
 
     paged_endpoints = get_page_items(request, endpoints.qs, 25)
 
