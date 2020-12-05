@@ -315,6 +315,18 @@ class ProductTest(BaseTestCase):
         # Assert ot the query to dtermine status of failure
         self.assertTrue(self.is_success_message_present(text='Tool Product Configuration Successfully Updated'))
 
+    def test_product_metrics(self):
+        # Test To Edit Product Tracking Files
+        # login to site, password set to fetch from environ
+        driver = self.login_page()
+        # Navigate to the product page
+        self.goto_product_overview(driver)
+        # Select and click on the particular product to edit
+        driver.find_element_by_link_text("QA Test").click()
+        # "Click" the dropdown option
+        # driver.find_element_by_xpath("//span[contains(., 'Metrics')]").click()
+        driver.find_element_by_partial_link_text('Metrics').click()
+
     @on_exception_html_source_logger
     def delete_product_if_exists(self):
         driver = self.login_page()
@@ -369,22 +381,88 @@ class ProductTest(BaseTestCase):
         self.assertTrue(driver.find_element_by_xpath("//input[@name='scan_added' and @value='mail']").is_selected())
         self.assertFalse(driver.find_element_by_xpath("//input[@name='test_added' and @value='mail']").is_selected())
 
+    def test_critical_product_metrics(self):
+        # Test To Edit Product Tracking Files
+        # login to site, password set to fetch from environ
+        driver = self.login_page()
+        # Navigate to the product page
+        driver.get(self.base_url + "critical_product_metrics")
+
+    def test_product_type_metrics(self):
+        # Test To Edit Product Tracking Files
+        # login to site, password set to fetch from environ
+        driver = self.login_page()
+        # Navigate to the product page
+        driver.get(self.base_url + "metrics/product/type")
+
+    def test_product_type_counts_metrics(self):
+        # Test To Edit Product Tracking Files
+        # login to site, password set to fetch from environ
+        driver = self.login_page()
+        # Navigate to the product page
+        driver.get(self.base_url + "metrics/product/type/counts")
+
+        from selenium.webdriver.support.select import Select
+        my_select = Select(driver.find_element_by_id("id_product_type"))
+        my_select.select_by_index(1)
+
+        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+
+    def test_simple_metrics(self):
+        # Test To Edit Product Tracking Files
+        # login to site, password set to fetch from environ
+        driver = self.login_page()
+        # Navigate to the product page
+        driver.get(self.base_url + "metrics/simple")
+
+    def test_engineer_metrics(self):
+        # Test To Edit Product Tracking Files
+        # login to site, password set to fetch from environ
+        driver = self.login_page()
+        # Navigate to the product page
+        driver.get(self.base_url + "metrics/engineer")
+
+    def test_security_research_metrics(self):
+        # Test To Edit Product Tracking Files
+        # login to site, password set to fetch from environ
+        driver = self.login_page()
+        # Navigate to the product page
+        driver.get(self.base_url + "metrics/research")
+
+    def test_metrics_dashboard(self):
+        # Test To Edit Product Tracking Files
+        # login to site, password set to fetch from environ
+        driver = self.login_page()
+        # Navigate to the product page
+        driver.get(self.base_url + "metrics?date=5&view=dashboard")
+
 
 def add_product_tests_to_suite(suite):
     # Add each test and the suite to be run
     # success and failure is output by the test
     suite.addTest(ProductTest('test_create_product'))
-    suite.addTest(ProductTest('test_edit_product_description'))
-    suite.addTest(ProductTest('test_add_product_engagement'))
-    suite.addTest(ProductTest('test_add_product_finding'))
-    suite.addTest(ProductTest('test_add_product_endpoints'))
-    suite.addTest(ProductTest('test_add_product_custom_field'))
-    suite.addTest(ProductTest('test_edit_product_custom_field'))
-    suite.addTest(ProductTest('test_add_product_tracking_files'))
-    suite.addTest(ProductTest('test_edit_product_tracking_files'))
-    suite.addTest(ProductTest('test_list_products'))
-    suite.addTest(ProductTest('test_list_components'))
-    suite.addTest(ProductTest('test_product_notifications_change'))
+    # suite.addTest(ProductTest('test_edit_product_description'))
+    # suite.addTest(ProductTest('test_add_product_engagement'))
+    # suite.addTest(ProductTest('test_add_product_finding'))
+    # suite.addTest(ProductTest('test_add_product_endpoints'))
+    # suite.addTest(ProductTest('test_add_product_custom_field'))
+    # suite.addTest(ProductTest('test_edit_product_custom_field'))
+    # suite.addTest(ProductTest('test_add_product_tracking_files'))
+    # suite.addTest(ProductTest('test_edit_product_tracking_files'))
+    # suite.addTest(ProductTest('test_list_products'))
+    # suite.addTest(ProductTest('test_list_components'))
+    # suite.addTest(ProductTest('test_product_notifications_change'))
+    # suite.addTest(ProductTest('test_product_metrics'))
+
+    # we add metrics tests here as we now have a product that triggers some logic inside metrics
+    suite.addTest(ProductTest('test_critical_product_metrics'))
+    suite.addTest(ProductTest('test_product_type_metrics'))
+    suite.addTest(ProductTest('test_product_type_counts_metrics'))
+    suite.addTest(ProductTest('test_simple_metrics'))
+    suite.addTest(ProductTest('test_engineer_metrics'))
+    suite.addTest(ProductTest('test_security_research_metrics'))
+    suite.addTest(ProductTest('test_metrics_dashboard'))
+
     suite.addTest(ProductTest('test_delete_product'))
     return suite
 
@@ -396,6 +474,7 @@ def suite():
     suite.addTest(ProductTest('enable_github'))
     suite.addTest(ProductTest('enable_block_execution'))
     add_product_tests_to_suite(suite)
+
     return suite
 
 
