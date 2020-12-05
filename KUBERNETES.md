@@ -310,7 +310,7 @@ statefulsets that are kept by default, the problem doesn't exist there.
 
 ### Prometheus metrics
 
-It's possible to enable Nginx prometheus exporter by setting `--set monitoring.enabled=true` and `--set monitoring.prometheus.enabled=true`. This is add the Nginx exporter sidecar and and the standard pod annotations to django deployment.
+It's possible to enable Nginx prometheus exporter by setting `--set monitoring.enabled=true` and `--set monitoring.prometheus.enabled=true`. This adds the Nginx exporter sidecar and the standard Prometheus pod annotations to django deployment.
 
 ## Useful stuff
 
