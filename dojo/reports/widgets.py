@@ -409,7 +409,7 @@ def report_widget_factory(json_data=None, request=None, user=None, finding_notes
             ids = get_endpoint_ids(endpoints)
 
             endpoints = Endpoint.objects.filter(id__in=ids)
-            endpoints = EndpointFilter(d, queryset=endpoints)
+            endpoints = EndpointFilter(d, queryset=endpoints, user=request.user)
             user_id = user.id if user is not None else None
             endpoints = EndpointList(request=request, endpoints=endpoints, finding_notes=finding_notes,
                                      finding_images=finding_images, host=host, user_id=user_id)
@@ -425,7 +425,7 @@ def report_widget_factory(json_data=None, request=None, user=None, finding_notes
                 else:
                     d[item['name']] = item['value']
 
-            findings = ReportAuthedFindingFilter(d, queryset=findings, user=user)
+            findings = ReportAuthedFindingFilter(d, queryset=findings)
             user_id = user.id if user is not None else None
             selected_widgets[list(widget.keys())[0] + '-' + str(idx)] = FindingList(request=request, findings=findings,
                                                                               finding_notes=finding_notes,
