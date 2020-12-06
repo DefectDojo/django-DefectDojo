@@ -165,7 +165,7 @@ docker build --build-arg http_proxy=http://myproxy.com:8080 --build-arg https_pr
 docker build --build-arg http_proxy=http://myproxy.com:8080 --build-arg https_proxy=http://myproxy.com:8080 -t defectdojo/defectdojo-nginx -f Dockerfile.nginx .
 ```
 
-### Debug with uWSGI with ptvsd
+### Debug uWSGI with ptvsd
 
 You can set breakpoints in code that is handled by uWSGI. The feature is meant to be used when you run locally on minikube, and mimics what can be done with docker-compose.
 
