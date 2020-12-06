@@ -145,8 +145,9 @@ def model_to_dict_with_tags(model):
 
 def list_of_models_to_dict_with_tags(model_list):
     result = []
-    for model in model_list:
-        result.append(model_to_dict_with_tags(model))
+    for item in model_list:
+        if isinstance(item, models.Model):
+            result.append(model_to_dict_with_tags(item))
     return result
 
 
