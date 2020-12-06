@@ -125,6 +125,7 @@ django:
     app_settings:
       processes: 2
       threads: 2
+    enable_ptvsd: false  # this also requires DD_DEBUG to be set to True
 
 initializer:
   run: true

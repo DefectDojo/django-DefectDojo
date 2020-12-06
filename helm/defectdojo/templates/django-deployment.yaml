@@ -60,6 +60,11 @@ spec:
         - name: http
           protocol: TCP
           containerPort: 8081
+        {{- if .Values.django.uwsgi.enable_ptvsd }}
+        - name: ptvsd
+          protocol: TCP
+          containerPort: 3000
+        {{- end }}
         envFrom:
         - configMapRef:
             name: {{ $fullName }}
