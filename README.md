@@ -36,7 +36,7 @@ For detailed documentation you can visit
 ## Supported Installation Options
 
 * [Docker / Docker Compose](DOCKER.md)
-* [Setup.bash](https://github.com/DefectDojo/django-DefectDojo/blob/master/setup/README.md)
+* [Setup.bash](https://github.com/DefectDojo/django-DefectDojo/blob/master/setup/README.md)(End of Life 31/12/2020)
 
 ## Getting Started
 
@@ -66,16 +66,17 @@ See [Wrappers](WRAPPERS.md)
 See [Release and branch model](BRANCHING-MODEL.md)
 
 
-## Getting Involved
+## Support, Bug Reports and Getting Involved
+Please come to our Slack channel first, where we can try to help you or point you in the right direction:
 
 ![Slack](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/slack_rgb.png)
 
 Realtime discussion is done in the OWASP Slack Channel, #defectdojo.
 [Get Access.](https://owasp-slack.herokuapp.com/)
 
-![Twitter](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/Twitter_Logo.png)
+## Social Media
 
-More info: [Contributing guideline](CONTRIBUTING.md)
+![Twitter](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/Twitter_Logo.png)
 
 [DefectDojo Twitter Account](https://twitter.com/defectdojo) tweets project
 updates and changes.
@@ -124,6 +125,8 @@ Project Moderators can help you with pull requests or feedback on dev ideas.
 
 We greatly appreciate all of our
 [contributors](https://github.com/DefectDojo/django-DefectDojo/graphs/contributors).
+
+More info: [Contributing guideline](CONTRIBUTING.md)
 
 We would also like to highlight the contributions from Michael Dong and Fatimah
 Zohra who contributed to DefectDojo before it was open source.

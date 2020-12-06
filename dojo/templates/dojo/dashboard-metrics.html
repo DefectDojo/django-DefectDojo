@@ -242,7 +242,9 @@
             chart_div2();
             chart_div3();
             chart_div4();
-            top_ten_products();
+            {% if top_ten_products %}
+                top_ten_products();
+            {% endif %}
             severity_pie();
             total_accepted_pie();
             total_closed_pie();
