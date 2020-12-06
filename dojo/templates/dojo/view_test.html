@@ -739,9 +739,42 @@
         $(document).ready(function(){
             date =  new Date().toISOString().slice(0, 10);
             var fileDated = 'Findings_List_' + date;
+            var columns = [
+                  {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled %}
+                  { "data": "dropdown" },
+                  {% endif %}
+                  { "data": "action" },
+                  { "data": "severity" },
+                  { "data": "name" },
+                  { "data": "cwe" },
+                  { "data": "date" },
+                  { "data": "age" },
+                  {% if system_settings.enable_finding_sla %}
+                      { "data": "sla" },
+                  {% endif %}
+                  { "data": "reporter" },
+                  { "data": "status" },
+                  {% if system_settings.enable_jira %}
+                      {% if jira_project and product_tab or not product_tab %}
+                          { "data": "jira" },
+                          { "data": "jira_age" },
+                          { "data": "jira_change" },
+                      {% endif %}
+                  {% endif %}
+              ];
+
+            // Filter the list of items to display based on what is shown.
+            var disallowed_entries = new Set(["dropdown", "action"]);
+            var data_column_list = [];
+            for (var i = 0; i < columns.length; i++) {
+                if (!disallowed_entries.has(columns[i]["data"])) {
+                    data_column_list.push(i);
+                }
+            }
+
             var buttonCommon = {
                 exportOptions: {
-                    columns: ':not(:eq(8))',
+                    columns: data_column_list,
                     stripHtml: true,
                     stripNewlines: true,
                     trim: true,
@@ -757,29 +790,7 @@
                     $('.has-popover').popover({'trigger':'hover'});
                 },
                 colReorder: true,
-                "columns": [
-                    {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled %}                    
-                    { "data": "dropdown" },
-                    {% endif %}
-                    { "data": "action" },
-                    { "data": "severity" },
-                    { "data": "name" },
-                    { "data": "cwe" },
-                    { "data": "date" },
-                    { "data": "age" },
-                    {% if system_settings.enable_finding_sla %}
-                        { "data": "sla" },
-                    {% endif %}
-                    { "data": "reporter" },
-                    { "data": "status" },
-                    {% if system_settings.enable_jira %}
-                        {% if jira_project and product_tab or not product_tab %}
-                            { "data": "jira" },
-                            { "data": "jira_age" },
-                            { "data": "jira_change" },
-                        {% endif %}
-                    {% endif %}
-                ],
+                "columns": columns,
                 columnDefs: [
                     { 
                         "orderable": false,
