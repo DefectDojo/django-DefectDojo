@@ -1,11 +1,12 @@
 from dojo.models import Finding
 from .dojo_test_case import DojoAPITestCase
 import logging
+import random
 
 logger = logging.getLogger(__name__)
 
 
-class TaggitTests(DojoAPITestCase):
+class TagTests(DojoAPITestCase):
     fixtures = ['dojo_testdata.json']
 
     def setUp(self, *args, **kwargs):
@@ -20,7 +21,7 @@ class TaggitTests(DojoAPITestCase):
 
         del finding_details['id']
 
-        finding_details['title'] = 'tags test 1'
+        finding_details['title'] = 'tags test ' + str(random.randint(1, 9999))
         finding_details['tags'] = tags
         response = self.post_new_finding_api(finding_details)
 
@@ -35,6 +36,25 @@ class TaggitTests(DojoAPITestCase):
         for tag in tags:
             # logger.debug('looking for tag %s in tag list %s', tag, response['tags'])
             self.assertTrue(tag in response['tags'])
+
+    def test_finding_filter_tags(self):
+        tags = ['tag1', 'tag2']
+        finding_id = self.create_finding_with_tags(tags)
+
+        tags2 = ['tag1', 'tag3']
+        finding_id2 = self.create_finding_with_tags(tags2)
+
+        response = self.get_finding_api_filter_tags('tag1')
+        self.assertEqual(response['count'], 2)
+
+        response = self.get_finding_api_filter_tags('tag2')
+        self.assertEqual(response['count'], 1)
+
+        response = self.get_finding_api_filter_tags('tag2,tag3')
+        self.assertEqual(response['count'], 2)
+
+        response = self.get_finding_api_filter_tags('tag4')
+        self.assertEqual(response['count'], 0)
 
     def test_finding_post_tags(self):
         # create finding

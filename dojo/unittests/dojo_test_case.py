@@ -397,6 +397,12 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         print(response.data)
         return response.data
 
+    def get_finding_api_filter_tags(self, tags):
+        response = self.client.get(reverse('finding-list') + '?tags=%s' % tags, format='json')
+        self.assertEqual(200, response.status_code)
+        print(response.data)
+        return response.data
+
     def post_finding_tags_api(self, finding_id, tags):
         response = self.do_finding_tags_api(self.client.post, finding_id, tags)
         return response.data
