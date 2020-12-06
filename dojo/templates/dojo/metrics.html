@@ -672,8 +672,10 @@
             {%  if accepted_per_month %}
                 chart_div2();
             {%  endif %}
-            chart_div3();
-            chart_div4();
+            {% if  not critical_prods %}
+                chart_div3();
+                chart_div4();
+            {% endif %}
 
             {% if opened_per_month %}
                 function chart_div() {
