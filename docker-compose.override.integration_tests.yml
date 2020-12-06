@@ -9,7 +9,9 @@ services:
     depends_on:
       - nginx
       - uwsgi
-    entrypoint: ['/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/entrypoint-integration-tests.sh']
+    entrypoint: ['/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/app/docker/entrypoint-integration-tests.sh']
+    volumes:
+      - '.:/app:z'
     environment:
       DD_BASE_URL: 'http://nginx:8080/'
       DD_ADMIN_USER: ${DD_ADMIN_USER:-admin}
