@@ -265,7 +265,7 @@ def send_mail_notification(event, user=None, *args, **kwargs):
 
 
 def send_alert_notification(event, user=None, *args, **kwargs):
-    logger.info('sending alert notification to %s', user)
+    logger.debug('sending alert notification to %s', user)
     try:
         # no need to differentiate between user/no user
         icon = kwargs.get('icon', 'info-circle')
