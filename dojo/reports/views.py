@@ -53,7 +53,7 @@ def report_url_resolver(request):
 def report_builder(request):
     add_breadcrumb(title="Report Builder", top_level=True, request=request)
     findings = Finding.objects.all()
-    findings = ReportAuthedFindingFilter(request.GET, queryset=findings, user=request.user)
+    findings = ReportAuthedFindingFilter(request.GET, queryset=findings)
     endpoints = Endpoint.objects.filter(finding__active=True,
                                         finding__verified=True,
                                         finding__false_p=False,
@@ -64,7 +64,7 @@ def report_builder(request):
 
     endpoints = Endpoint.objects.filter(id__in=ids)
 
-    endpoints = EndpointFilter(request.GET, queryset=endpoints)
+    endpoints = EndpointFilter(request.GET, queryset=endpoints, user=request.user)
 
     in_use_widgets = [ReportOptions(request=request)]
     available_widgets = [CoverPage(request=request),
@@ -149,7 +149,7 @@ def custom_report(request):
 def report_findings(request):
     findings = Finding.objects.filter()
 
-    findings = ReportAuthedFindingFilter(request.GET, queryset=findings, user=request.user)
+    findings = ReportAuthedFindingFilter(request.GET, queryset=findings)
 
     title_words = get_words_for_field(findings.qs, 'title')
     component_words = get_words_for_field(findings.qs, 'component_name')
@@ -184,7 +184,7 @@ def report_endpoints(request):
     ids = get_endpoint_ids(endpoints)
 
     endpoints = Endpoint.objects.filter(id__in=ids)
-    endpoints = EndpointFilter(request.GET, queryset=endpoints)
+    endpoints = EndpointFilter(request.GET, queryset=endpoints, user=request.user)
 
     paged_endpoints = get_page_items(request, endpoints.qs, 25)
 
