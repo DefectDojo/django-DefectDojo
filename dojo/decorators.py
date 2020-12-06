@@ -2,6 +2,8 @@ from functools import wraps
 from dojo.models import Finding
 from django.db import models
 from django.conf import settings
+from django.forms.models import model_to_dict
+from django.db.models.query import QuerySet
 import logging
 
 
@@ -130,3 +132,35 @@ def get_parameter_froms_args_kwargs(args, kwargs, parameter):
         logger.error('unable to get parameter: ' + parameter)
 
     return model_or_id
+
+
+def model_to_dict_with_tags(model):
+    converted = model_to_dict(model)
+    if 'tags' in converted:
+        # further conversion needed from Tag Queryset to strings
+        converted['tags'] = converted['tags'].values_list()
+    logger.debug('dict: %s', converted)
+    return converted
+
+
+def list_of_models_to_dict_with_tags(model_list):
+    result = []
+    for model in model_list:
+        result.append(model_to_dict_with_tags(model))
+    return result
+
+
+def convert_kwargs_if_async(**kwargs):
+    if we_want_async():
+        # not sync means using celery for notifications.
+        # sending full model instances to celery is bad practice.
+        # and any models with tags cannot be sent to celery due to serialization problems with celery
+        # we convert all model instances into dictionaries
+        for key, value in kwargs.items():
+            if isinstance(value, models.Model):
+                kwargs[key] = model_to_dict_with_tags(value)
+            elif isinstance(value, list):
+                kwargs[key] = list_of_models_to_dict_with_tags(value)
+            elif isinstance(value, QuerySet):
+                kwargs[key] = list_of_models_to_dict_with_tags(list(value))
+    return kwargs
