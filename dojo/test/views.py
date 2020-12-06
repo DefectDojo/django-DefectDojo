@@ -682,6 +682,9 @@ def re_import_scan_results(request, tid):
                 finding_count = 0
                 finding_added_count = 0
                 reactivated_count = 0
+                reactivated_items = []
+                unchanged_count = 0
+                unchanged_items = []
 
                 # can't use helper as when push_all_jira_issues is True, the checkbox gets disabled and is always false
                 # push_to_jira = jira_helper.is_push_to_jira(new_finding, jform.cleaned_data.get('push_to_jira'))
@@ -749,6 +752,7 @@ def re_import_scan_results(request, tid):
                                 status.last_modified = timezone.now()
                                 status.save()
 
+                            reactivated_items.append(finding)
                             reactivated_count += 1
                         else:
                             # existing findings may be from before we had component_name/version fields
@@ -756,8 +760,9 @@ def re_import_scan_results(request, tid):
                                 finding.component_name = finding.component_name if finding.component_name else component_name
                                 finding.component_version = finding.component_version if finding.component_version else component_version
                                 finding.save(dedupe_option=False, push_to_jira=False)
+                            unchanged_items.append(finding)
+                            unchanged_count += 1
 
-                        new_items.append(finding.id)
                     else:
                         item.test = test
                         item.reporter = request.user
@@ -833,7 +838,8 @@ def re_import_scan_results(request, tid):
                     # Save it. This may be the second time we save it in this function.
                     finding.save(push_to_jira=push_to_jira)
                 # calculate the difference
-                to_mitigate = set(original_items) - set(new_items)
+                to_mitigate = set(original_items) - set(reactivated_items) - set(unchanged_items)
+                mitigated_findings = []
                 for finding_id in to_mitigate:
                     finding = Finding.objects.get(id=finding_id)
                     if not finding.mitigated or not finding.is_Mitigated:
@@ -847,6 +853,7 @@ def re_import_scan_results(request, tid):
                                     author=request.user)
                         note.save()
                         finding.notes.add(note)
+                        mitigated_findings.append(finding)
                         mitigated_count += 1
 
                         endpoint_status = finding.endpoint_status.all()
@@ -856,6 +863,8 @@ def re_import_scan_results(request, tid):
                             status.mitigated = True
                             status.last_modified = timezone.now()
                             status.save()
+
+                untouched = set(unchanged_items) - set(to_mitigate)
 
                 test.updated = max_safe([scan_date_time, test.updated])
                 test.engagement.updated = max_safe([scan_date_time, test.engagement.updated])
@@ -887,7 +896,15 @@ def re_import_scan_results(request, tid):
                                                                  'mitigated') + '. Please manually verify each one.',
                                          extra_tags='alert-success')
 
-                create_notification(event='scan_added', title=str(finding_count) + " findings for " + test.engagement.product.name, finding_count=finding_count, test=test, engagement=test.engagement, url=reverse('view_test', args=(test.id,)))
+                # create_notification(event='scan_added', title=str(finding_count) + " findings for " + test.engagement.product.name, finding_count=finding_count, test=test, engagement=test.engagement, url=reverse('view_test', args=(test.id,)))
+
+                updated_count = mitigated_count + reactivated_count + len(new_items)
+                if updated_count > 0:
+                    # new_items = original_items
+                    title = 'Updated ' + str(updated_count) + " findings for " + str(test.engagement.product) + ': ' + str(test.engagement.name) + ': ' + str(test)
+                    create_notification(event='scan_added', title=title, findings_new=new_items, findings_mitigated=mitigated_findings, findings_reactivated=reactivated_items,
+                                        finding_count=updated_count, test=test, engagement=test.engagement, product=test.engagement.product, findings_untouched=untouched,
+                                        url=reverse('view_test', args=(test.id,)))
 
                 return HttpResponseRedirect(reverse('view_test', args=(test.id,)))
             except SyntaxError:

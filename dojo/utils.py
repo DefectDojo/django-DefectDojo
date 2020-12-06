@@ -1308,7 +1308,6 @@ def process_notifications(request, note, parent_url, parent_title):
         event='user_mentioned',
         section=parent_title,
         note=note,
-        initiator=request.user,
         title='%s jotted a note' % request.user,
         url=parent_url,
         icon='commenting',
