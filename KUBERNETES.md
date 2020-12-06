@@ -167,7 +167,7 @@ docker build --build-arg http_proxy=http://myproxy.com:8080 --build-arg https_pr
 
 ### Debug uWSGI with ptvsd
 
-You can set breakpoints in code that is handled by uWSGI. The feature is meant to be used when you run locally on minikube, and mimics what can be done with docker-compose.
+You can set breakpoints in code that is handled by uWSGI. The feature is meant to be used when you run locally on minikube, and mimics [what can be done with docker-compose](DOCKER.md#run-with-docker-compose-in-development-mode-with-ptvsd-remote-debug).
 
 The port is currently hard-coded to 3000.
 
