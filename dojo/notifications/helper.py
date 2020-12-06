@@ -59,7 +59,7 @@ def create_notification(event=None, **kwargs):
             "notifications_set",
             queryset=Notifications.objects.filter(Q(product_id=product) | Q(product__isnull=True)),
             to_attr="applicable_notifications"
-        )).annotate(applicable_notifications_count=Count('notifications__id', filter=Q(notifications__product_id=product.id) | Q(notifications__product__isnull=True)))\
+        )).annotate(applicable_notifications_count=Count('notifications__id', filter=Q(notifications__product_id=product) | Q(notifications__product__isnull=True)))\
             .filter((Q(applicable_notifications_count__gt=0) | Q(is_superuser=True) | Q(is_staff=True)))
 
         # only send to authorized users or admin/superusers
