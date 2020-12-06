@@ -17,7 +17,7 @@ from django.db.models import Q
 from dojo.models import Dojo_User, Product_Type, Finding, Product, Test_Type, \
     Endpoint, Development_Environment, Finding_Template, Report, Note_Type, \
     Engagement_Survey, Question, TextQuestion, ChoiceQuestion, Endpoint_Status, Engagement, \
-    ENGAGEMENT_STATUS_CHOICES, Test
+    ENGAGEMENT_STATUS_CHOICES, Test, App_Analysis
 from dojo.utils import get_system_setting
 from django.contrib.contenttypes.models import ContentType
 import tagulous
@@ -49,7 +49,6 @@ class NumberInFilter(filters.BaseInFilter, filters.NumberFilter):
     pass
 
 
-# won't work with many-to-many relationships
 class CharFieldInFilter(filters.BaseInFilter, filters.CharFilter):
     def __init__(self, *args, **kwargs):
         super(CharFilter, self).__init__(*args, **kwargs)
@@ -356,6 +355,17 @@ class EngagementFilter(DojoFilter):
         fields = ['name', 'prod_type']
 
 
+class ApiEngagementFilter(DojoFilter):
+    tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in')
+
+    class Meta:
+        model = Engagement
+        fields = ['id', 'active', 'eng_type', 'target_start',
+                     'target_end', 'requester', 'report_type',
+                     'updated', 'threat_model', 'api_test',
+                     'pen_test', 'status', 'product', 'name', 'version', 'tags']
+
+
 class ProductFilter(DojoFilter):
     name = CharFilter(lookup_expr='icontains', label="Product Name")
     prod_type = ModelMultipleChoiceFilter(
@@ -532,8 +542,7 @@ class ApiProductFilter(DojoFilter):
 
     tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
 
-    # doesn't work with many-to-many relationships
-    # tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in')
+    tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in')
 
     # DateRangeFilter
     created = DateRangeFilter()
@@ -635,12 +644,7 @@ class ApiFindingFilter(DojoFilter):
 
     tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
 
-    tag2 = filters.LookupChoiceFilter(field_name='tags__name', lookup_choices=[
-        ('iexact', 'equals'),
-        ('icontains', 'contains (case insensitive)'),
-        ('exact', 'equals'),
-        ('contains', 'contains'),
-    ])
+    tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in')
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -1200,6 +1204,15 @@ class TemplateFindingFilter(DojoFilter):
                                                           ('S4', 'S4'))
 
 
+class ApiTemplateFindingFilter(DojoFilter):
+    tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in')
+
+    class Meta:
+        model = Finding_Template
+        fields = ['id', 'title', 'cwe', 'severity', 'description',
+                     'mitigation']
+
+
 class FindingStatusFilter(ChoiceFilter):
     def any(self, qs, name):
         return qs.filter(verified=True,
@@ -1487,6 +1500,32 @@ class EndpointFilter(DojoFilter):
     class Meta:
         model = Endpoint
         exclude = ['mitigated', 'endpoint_status', 'tags_from_django_tagging']
+
+
+class ApiEndpointFilter(DojoFilter):
+    tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in')
+
+    class Meta:
+        model = Endpoint
+        fields = ['id', 'host', 'product']
+
+
+class ApiTestFilter(DojoFilter):
+    tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in')
+
+    class Meta:
+        model = Test
+        fields = ['id', 'title', 'test_type', 'target_start',
+                     'target_end', 'notes', 'percent_complete',
+                     'actual_time', 'engagement']
+
+
+class ApiAppAnalysisFilter(DojoFilter):
+    tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in')
+
+    class Meta:
+        model = App_Analysis
+        fields = ['product', 'name', 'user', 'version']
 
 
 class EndpointReportFilter(DojoFilter):

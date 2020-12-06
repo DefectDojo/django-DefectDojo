@@ -24,7 +24,9 @@ from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Find
 
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import report_url_resolver
-from dojo.filters import ReportFindingFilter, ReportAuthedFindingFilter, ApiFindingFilter, ApiProductFilter
+from dojo.filters import ReportFindingFilter, ReportAuthedFindingFilter, \
+    ApiFindingFilter, ApiProductFilter, ApiEngagementFilter, ApiEndpointFilter, \
+    ApiAppAnalysisFilter, ApiTestFilter, ApiTemplateFindingFilter
 from dojo.risk_acceptance import api as ra_api
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
@@ -48,7 +50,7 @@ class EndPointViewSet(mixins.ListModelMixin,
     serializer_class = serializers.EndpointSerializer
     queryset = Endpoint.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'host', 'product')
+    filter_class = ApiEndpointFilter
 
     def get_queryset(self):
         if not self.request.user.is_staff:
@@ -107,10 +109,7 @@ class EngagementViewSet(mixins.ListModelMixin,
     serializer_class = serializers.EngagementSerializer
     queryset = Engagement.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'active', 'eng_type', 'target_start',
-                     'target_end', 'requester', 'report_type',
-                     'updated', 'threat_model', 'api_test',
-                     'pen_test', 'status', 'product', 'name', 'version')
+    filter_class = ApiEngagementFilter
 
     @property
     def risk_application_model_class(self):
@@ -216,6 +215,8 @@ class AppAnalysisViewSet(mixins.ListModelMixin,
                         viewsets.GenericViewSet):
     serializer_class = serializers.AppAnalysisSerializer
     queryset = App_Analysis.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filter_class = ApiAppAnalysisFilter
 
 
 class FindingTemplatesViewSet(mixins.ListModelMixin,
@@ -226,8 +227,7 @@ class FindingTemplatesViewSet(mixins.ListModelMixin,
     serializer_class = serializers.FindingTemplateSerializer
     queryset = Finding_Template.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'title', 'cwe', 'severity', 'description',
-                     'mitigation')
+    filter_class = ApiTemplateFindingFilter
 
     # def get_queryset(self):
     #     if not self.request.user.is_staff:
@@ -896,9 +896,7 @@ class TestsViewSet(mixins.ListModelMixin,
     serializer_class = serializers.TestSerializer
     queryset = Test.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'title', 'test_type', 'target_start',
-                     'target_end', 'notes', 'percent_complete',
-                     'actual_time', 'engagement')
+    filter_class = ApiTestFilter
 
     @property
     def risk_application_model_class(self):
