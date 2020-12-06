@@ -46,9 +46,6 @@ parse_logger = logging.getLogger('dojo')
 def view_test(request, tid):
     test = get_object_or_404(Test, pk=tid)
     prod = test.engagement.product
-    # TODO TAGS
-    # tags = Tag.objects.usage_for_model(Finding)
-    tags = []
     notes = test.notes.all()
     note_type_activation = Note_Type.objects.filter(is_active=True).count()
     if note_type_activation:
@@ -152,7 +149,6 @@ def view_test(request, tid):
                    'show_re_upload': show_re_upload,
                    'creds': creds,
                    'cred_test': cred_test,
-                   'tag_input': tags,
                    'jira_project': jira_project,
                    'show_export': google_sheets_enabled,
                    'sheet_url': sheet_url,
@@ -583,9 +579,7 @@ def add_temp_finding(request, tid, fid):
                                     'mitigation': finding.mitigation,
                                     'impact': finding.impact,
                                     'references': finding.references,
-                                    'numerical_severity': finding.numerical_severity,
-                                    # TODO TAGS
-                                    'tags': [tag.name for tag in finding.tags.all()]})
+                                    'numerical_severity': finding.numerical_severity})
 
     product_tab = Product_Tab(test.engagement.product.id, title="Add Finding", tab="engagements")
     product_tab.setEngagement(test.engagement)
@@ -657,7 +651,7 @@ def re_import_scan_results(request, tid):
             active = form.cleaned_data['active']
             verified = form.cleaned_data['verified']
             tags = form.cleaned_data['tags']
-            # TODO TAGS Tags are replaced, same behaviour as with django-tagging
+            # Tags are replaced, same behaviour as with django-tagging
             test.tags = tags
             if file and is_scan_file_too_large(file):
                 messages.add_message(request,
