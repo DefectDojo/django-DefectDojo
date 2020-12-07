@@ -1,4 +1,8 @@
-# #  metrics
+"""
+Views for the `dojo.metrics` app.
+Database queries are delegated to `dojo.metrics.queries`
+"""
+
 from calendar import monthrange
 from collections import OrderedDict
 from datetime import date, datetime, timedelta
@@ -820,23 +824,9 @@ def research_metrics(request):
         test__test_type__name='Security Research')
     findings = findings.filter(date__year=now.year, date__month=now.month)
     verified_month = findings.filter(verified=True)
-    month_all_by_product, month_all_aggregate = count_findings(findings)
-    month_verified_by_product, month_verified_aggregate = count_findings(
+    month_all_by_product, _ = count_findings(findings)
+    month_verified_by_product, _ = count_findings(
         verified_month)
-
-    end_of_week = now + relativedelta(weekday=6, hour=23, minute=59, second=59)
-    day_list = [end_of_week - relativedelta(weeks=1, weekday=x,
-                                            hour=0, minute=0, second=0)
-                for x in range(end_of_week.weekday())]
-    q_objects = (Q(date=d) for d in day_list)
-    week_findings = Finding.objects.filter(reduce(operator.or_, q_objects))
-    open_week = week_findings.exclude(mitigated__isnull=False)
-    verified_week = week_findings.filter(verified=True)
-    week_all_by_product, week_all_aggregate = count_findings(week_findings)
-    week_verified_by_product, week_verified_aggregate = count_findings(
-        verified_week)
-    week_remaining_by_product, week_remaining_aggregate = count_findings(
-        open_week)
 
     remaining_by_product, remaining_aggregate = count_findings(
         Finding.objects.filter(mitigated__isnull=True,
