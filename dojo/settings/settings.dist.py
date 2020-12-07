@@ -929,3 +929,6 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
 
 # Maximum size of a scan file in MB
 SCAN_FILE_MAX_SIZE = 100
+
+# Apply a severity level to "Security Weaknesses" in Qualys WAS
+QUALYS_WEAKNESS_IS_VULN = False

@@ -9,6 +9,12 @@ from datetime import datetime
 from dojo.models import Finding, Endpoint
 from urllib.parse import urlparse
 
+try:
+    from dojo.settings.settings import QUALYS_WEAKNESS_IS_VULN
+except ImportError:
+    # Avoid breaking change
+    QUALYS_WEAKNESS_IS_VULN = False
+
 # Severities are listed under WAS_SCAN_REPORT/APPENDIX/SEVERITY_CATEGORY_LIST
 # Since Info findings are not recroded in the Confirmed Vulnerability or
 # Potential Vulnerability categories, a severity of 1 is shown as low
@@ -18,11 +24,6 @@ SEVERITY_MATCH = ['Low',
                    'Medium',
                    'High',
                    'Critical']
-# All QIDs in this category will be info because they only carry
-# three levels of severity (Minimal, Medium, Serious)
-INFO_CATEGORIES = ['Sensitive Content',
-                   'Information Gathered']
-
 
 def truncate_str(value: str, maxlen: int):
     if len(value) > maxlen:
@@ -169,15 +170,14 @@ def get_vulnerabilities(vulnerabilities, is_info=False, is_app_report=False):
 
 # Retrieve information from a single glossary entry such as description,
 # severity, title, impact, mitigation, and CWE
-def get_glossary_item(glossary, finding):
+def get_glossary_item(glossary, finding, is_info=False):
     title = glossary.findtext('TITLE')
     if title is not None:
         finding.title = str(title)
     severity = glossary.findtext('SEVERITY')
     if severity is not None:
         group = glossary.findtext('GROUP')
-        category = glossary.findtext('CATEGORY')
-        if category in INFO_CATEGORIES or group == "DIAG":
+        if is_info and (not QUALYS_WEAKNESS_IS_VULN or group == "DIAG"):
             # Scan Diagnostics are always Info.
             finding.severity = "Info"
         else:
@@ -220,7 +220,7 @@ def get_items(vulnerabilities, info_gathered, glossary, is_app_report):
     for qid, finding in get_vulnerabilities(info_gathered, True, is_app_report).items():
         if qid in g_qid_list:
             index = g_qid_list.index(qid)
-            finding = get_glossary_item(glossary[index], finding)
+            finding = get_glossary_item(glossary[index], finding, True)
         if qid in ig_qid_list:
             index = ig_qid_list.index(qid)
             findings[qid] = get_info_item(info_gathered[index], finding)
