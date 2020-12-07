@@ -70,11 +70,18 @@ class DojoFilter(FilterSet):
     def __init__(self, *args, **kwargs):
         super(DojoFilter, self).__init__(*args, **kwargs)
 
-        # for field in ['tags', 'tags_and']:
+        # for now we have only fields called "tags"
         for field in ['tags']:
             if field in self.form.fields:
+                # print(self.filters)
+                # print(vars(self).keys())
+                # print(vars(self.filters['tags']))
+                # print(self._meta)
 
-                self.form.fields[field] = Product._meta.get_field("tags").formfield()
+                tags_filter = self.filters['tags']
+                model = tags_filter.model
+
+                self.form.fields[field] = model._meta.get_field("tags").formfield()
                 self.form.fields[field].widget.tag_options = \
                     self.form.fields[field].widget.tag_options + tagulous.models.options.TagOptions(autocomplete_settings={'width': '200px'})
             # form.fields['tags_and'].label = self.form.fields['tags_and'].label + ' (and)'

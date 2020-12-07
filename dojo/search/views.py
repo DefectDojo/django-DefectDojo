@@ -11,6 +11,7 @@ import re
 from dojo.finding.views import prefetch_for_findings
 from dojo.filters import OpenFindingFilter
 from django.conf import settings
+import tagulous
 
 logger = logging.getLogger(__name__)
 
@@ -97,7 +98,7 @@ def simple_search(request):
 
             logger.debug('cve clean_query: [%s]', clean_query)
 
-            search_tags = "tag" in search_operator or search_operator == ""
+            search_tags = "tag" in search_operator or "tags" in search_operator or search_operator == ""
             search_findings = "finding" in search_operator or "cve" in search_operator or "id" in search_operator or search_operator == ""
             search_finding_templates = "template" in search_operator or search_operator == ""
             search_tests = "test" in search_operator or search_operator == ""
@@ -130,12 +131,12 @@ def simple_search(request):
             tags = clean_query
             # search tags first to avoid errors due to slicing too early
             if search_tags:
-                tagged_findings = findings.filter(tags=tags)[:max_results]
-                tagged_finding_templates = Finding_Template.objects.all().filter(tags=tags)[:max_results]
-                tagged_tests = tests.filter(tags=tags)[:max_results]
-                tagged_engagements = engagements.filter(tags=tags)[:max_results]
-                tagged_products = products.filter(tags=tags)[:max_results]
-                tagged_endpoints = endpoints.filter(tags=tags)[:max_results]
+                tagged_findings = findings.filter(tags__name__in=tagulous.utils.parse_tags(tags)).distinct()[:max_results]
+                tagged_finding_templates = Finding_Template.objects.all().filter(tags__name__in=tagulous.utils.parse_tags(tags)).distinct()[:max_results]
+                tagged_tests = tests.filter(tags__name__in=tagulous.utils.parse_tags(tags)).distinct()[:max_results]
+                tagged_engagements = engagements.filter(tags__name__in=tagulous.utils.parse_tags(tags)).distinct()[:max_results]
+                tagged_products = products.filter(tags__name__in=tagulous.utils.parse_tags(tags)).distinct()[:max_results]
+                tagged_endpoints = endpoints.filter(tags__name__in=tagulous.utils.parse_tags(tags)).distinct()[:max_results]
             else:
                 tagged_findings = None
                 tagged_finding_templates = None
