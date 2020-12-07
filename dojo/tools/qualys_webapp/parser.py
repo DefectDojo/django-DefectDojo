@@ -25,6 +25,7 @@ SEVERITY_MATCH = ['Low',
                    'High',
                    'Critical']
 
+
 def truncate_str(value: str, maxlen: int):
     if len(value) > maxlen:
         return value[:maxlen - 12] + " (truncated)"
