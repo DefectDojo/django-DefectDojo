@@ -1973,18 +1973,11 @@ def mark_finding_duplicate(request, original_id, duplicate_id):
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(duplicate.id,)))
 
 
-@user_must_be_authorized(Finding, 'change', 'duplicate_id')
-@require_POST
-def reset_finding_duplicate_status(request, duplicate_id):
+def reset_finding_duplicate_status_internal(user, duplicate_id):
     duplicate = get_object_or_404(Finding, id=duplicate_id)
 
     if not duplicate.duplicate:
-        messages.add_message(
-            request,
-            messages.ERROR,
-            "Can't reset duplicate status of a finding that is not a duplicate",
-            extra_tags='alert-danger')
-        return redirect_to_return_url_or_else(request, reverse('view_finding', args=(duplicate_id,)))
+        return None
 
     logger.debug('resetting duplicate status of %i', duplicate.id)
     duplicate.duplicate = False
@@ -1993,26 +1986,34 @@ def reset_finding_duplicate_status(request, duplicate_id):
         # duplicate.duplicate_finding.original_finding.remove(duplicate)  # shouldn't be needed
         duplicate.duplicate_finding = None
     duplicate.last_reviewed = timezone.now()
-    duplicate.last_reviewed_by = request.user
+    duplicate.last_reviewed_by = user
     duplicate.save(dedupe_option=False)
 
-    return redirect_to_return_url_or_else(request, reverse('view_finding', args=(duplicate.id,)))
+    return duplicate.id
 
 
-@user_must_be_authorized(Finding, 'change', 'finding_id')
+@user_must_be_authorized(Finding, 'change', 'duplicate_id')
 @require_POST
-def set_finding_as_original(request, finding_id, new_original_id):
+def reset_finding_duplicate_status(request, duplicate_id):
+    checked_duplicate_id = reset_finding_duplicate_status_internal(request.user, duplicate_id)
+    if checked_duplicate_id is None:
+        messages.add_message(
+            request,
+            messages.ERROR,
+            "Can't reset duplicate status of a finding that is not a duplicate",
+            extra_tags='alert-danger')
+        return redirect_to_return_url_or_else(request, reverse('view_finding', args=(duplicate_id,)))
+
+    return redirect_to_return_url_or_else(request, reverse('view_finding', args=(checked_duplicate_id,)))
+
+
+def set_finding_as_original_internal(user, finding_id, new_original_id):
     finding = get_object_or_404(Finding, id=finding_id)
     new_original = get_object_or_404(Finding, id=new_original_id)
 
     if new_original.test.engagement != new_original.test.engagement:
         if new_original.test.engagement.deduplication_on_engagement or new_original.test.engagement.deduplication_on_engagement:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                'Marking finding as duplicate/original failed as they are not in the same engagement and deduplication_on_engagement is enabled for at least one of them',
-                extra_tags='alert-danger')
-            return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding_id,)))
+            return False
 
     if finding.duplicate or finding.original_finding.all():
         # existing cluster, so update all cluster members
@@ -2041,13 +2042,27 @@ def set_finding_as_original(request, finding_id, new_original_id):
         finding.active = False
         finding.duplicate_finding = new_original
         finding.last_reviewed = timezone.now()
-        finding.last_reviewed_by = request.user
+        finding.last_reviewed_by = user
         finding.save(dedupe_option=False)
 
     logger.debug('marking new original %i as not duplicate', new_original.id)
     new_original.duplicate = False
     new_original.duplicate_finding = None
     new_original.save(dedupe_option=False)
+
+    return True
+
+
+@user_must_be_authorized(Finding, 'change', 'finding_id')
+@require_POST
+def set_finding_as_original(request, finding_id, new_original_id):
+    success = set_finding_as_original_internal(request.user, finding_id, new_original_id)
+    if not success:
+        messages.add_message(
+            request,
+            messages.ERROR,
+            'Marking finding as duplicate/original failed as they are not in the same engagement and deduplication_on_engagement is enabled for at least one of them',
+            extra_tags='alert-danger')
 
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding_id,)))
 

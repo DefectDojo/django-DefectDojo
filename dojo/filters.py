@@ -1504,6 +1504,17 @@ class EndpointFilter(DojoFilter):
                 Q(authorized_users__in=[self.user]) |
                 Q(prod_type__authorized_users__in=[self.user])).distinct().order_by('name')
 
+    @property
+    def qs(self):
+        parent = super(EndpointFilter, self).qs
+        if get_current_user() and not get_current_user().is_staff:
+            return parent.filter(
+                Q(product__authorized_users__in=[get_current_user()]) |
+                Q(product__prod_type__authorized_users__in=[get_current_user()])
+            )
+        else:
+            return parent
+
     class Meta:
         model = Endpoint
         exclude = ['mitigated', 'endpoint_status', 'tags_from_django_tagging']
