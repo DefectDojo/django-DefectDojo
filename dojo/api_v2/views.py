@@ -551,7 +551,7 @@ class FindingViewSet(mixins.ListModelMixin,
                 metadata.validate_unique()
                 metadata.save()
             except ValidationError:
-                return Response("Create failed because the name of the metadata already exists", status=status.HTTP_400_BAD_REQUEST)
+                return Response("Create failed probably because the name of the metadata already exists", status=status.HTTP_400_BAD_REQUEST)
 
             return Response(data=metadata_data.data, status=status.HTTP_200_OK)
         else:
