@@ -704,7 +704,7 @@ class FindingTestTypeSerializer(serializers.ModelSerializer):
         fields = ["id", "name"]
 
 
-class FindingReatedFieldsSerializer(serializers.ModelSerializer):
+class FindingRelatedFieldsSerializer(serializers.ModelSerializer):
     engagement = FindingEngagementSerializer(required=False)
     environment = FindingEnvironmentSerializer(required=False)
     test_type = FindingTestTypeSerializer(required=False)
@@ -749,11 +749,11 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     def get_jira_change(self, obj):
         return jira_helper.get_jira_change(obj)
 
-    @swagger_serializer_method(FindingReatedFieldsSerializer)
+    @swagger_serializer_method(FindingRelatedFieldsSerializer)
     def get_related_fields(self, obj):
         query_params = self.context['request'].query_params
         if query_params.get('related_fields', 'false') == 'true':
-            return FindingReatedFieldsSerializer(required=False).to_representation(obj.test)
+            return FindingRelatedFieldsSerializer(required=False).to_representation(obj.test)
         else:
             return None
 
