@@ -96,10 +96,6 @@ def metrics(request, mtype):
     view = identify_view(request)
     page_name = 'Product Type Metrics by '
 
-    age_detail = [0, 0, 0, 0]
-    in_period_counts = {"Critical": 0, "High": 0, "Medium": 0,
-                        "Low": 0, "Info": 0, "Total": 0}
-    in_period_details = {}
     closed_in_period_counts = {"Critical": 0, "High": 0, "Medium": 0,
                                "Low": 0, "Info": 0, "Total": 0}
     closed_in_period_details = {}
@@ -134,30 +130,10 @@ def metrics(request, mtype):
         page_name += 'Affected Endpoints'
         filters = queries.endpoint_querys(prod_type, request.user, request.GET, alert_error_func)
 
-    for obj in queryset_check(filters['all']):
-        if view == 'Endpoint':
-            obj = obj.finding
-
-        if 0 <= obj.age <= 30:
-            age_detail[0] += 1
-        elif 30 < obj.age <= 60:
-            age_detail[1] += 1
-        elif 60 < obj.age <= 90:
-            age_detail[2] += 1
-        elif obj.age > 90:
-            age_detail[3] += 1
-
-        in_period_counts[obj.severity] += 1
-        in_period_counts['Total'] += 1
-
-        if obj.test.engagement.product.name not in in_period_details:
-            in_period_details[obj.test.engagement.product.name] = {
-                'path': reverse('product_open_findings', args=(obj.test.engagement.product.id,)),
-                'Critical': 0, 'High': 0, 'Medium': 0, 'Low': 0, 'Info': 0, 'Total': 0}
-        in_period_details[
-            obj.test.engagement.product.name
-        ][obj.severity] += 1
-        in_period_details[obj.test.engagement.product.name]['Total'] += 1
+    in_period_counts, in_period_details, age_detail = queries.get_in_period_details([
+        obj.finding if view == 'Endpoint' else obj
+        for obj in queryset_check(filters['all'])
+    ])
 
     for obj in filters['accepted']:
         if view == 'Endpoint':

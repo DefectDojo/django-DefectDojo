@@ -8,6 +8,7 @@ from math import ceil
 from dateutil.relativedelta import relativedelta
 from django.db.models import Case, IntegerField, Sum, Q, Value, When
 from django.db.models.query import QuerySet
+from django.urls import reverse
 
 from dojo.filters import MetricsEndpointFilter, MetricsFindingFilter
 from dojo.models import Endpoint_Status, Finding, Product
@@ -325,6 +326,41 @@ def endpoint_querys(prod_type, user, findings_filter, alert_error_func):
     filters['end_date'] = end_date
 
     return filters
+
+
+def get_in_period_details(findings):
+    in_period_counts = {"Critical": 0, "High": 0, "Medium": 0,
+                        "Low": 0, "Info": 0, "Total": 0}
+    in_period_details = {}
+    age_detail = [0, 0, 0, 0]
+
+    for obj in findings:
+        if 0 <= obj.age <= 30:
+            age_detail[0] += 1
+        elif 30 < obj.age <= 60:
+            age_detail[1] += 1
+        elif 60 < obj.age <= 90:
+            age_detail[2] += 1
+        elif obj.age > 90:
+            age_detail[3] += 1
+
+        in_period_counts[obj.severity] += 1
+        in_period_counts['Total'] += 1
+
+        if obj.test.engagement.product.name not in in_period_details:
+            in_period_details[obj.test.engagement.product.name] = {
+                'path': reverse('product_open_findings', args=(obj.test.engagement.product.id,)),
+                'Critical': 0,
+                'High': 0,
+                'Medium': 0,
+                'Low': 0,
+                'Info': 0,
+                'Total': 0
+            }
+        in_period_details[obj.test.engagement.product.name][obj.severity] += 1
+        in_period_details[obj.test.engagement.product.name]['Total'] += 1
+
+    return in_period_counts, in_period_details, age_detail
 
 
 def get_metrics(mtype):
