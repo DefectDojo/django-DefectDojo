@@ -568,11 +568,11 @@ class JIRAIssueSerializer(serializers.ModelSerializer):
     def get_url(self, obj):
         if obj.jira_project is None:
             return None
-        
+
         jira_project = obj.jira_project
         if jira_project.jira_instance is None:
             return None
-        
+
         jira_instance = jira_project.jira_instance
         return jira_instance.url
 
@@ -715,6 +715,7 @@ class FindingTestTypeSerializer(serializers.ModelSerializer):
         model = Test_Type
         fields = ["id", "name"]
 
+
 class FindingTestSerializer(serializers.ModelSerializer):
     engagement = FindingEngagementSerializer(required=False)
     environment = FindingEnvironmentSerializer(required=False)
@@ -723,6 +724,7 @@ class FindingTestSerializer(serializers.ModelSerializer):
     class Meta:
         model = Test
         fields = ["id", "title", "test_type", "engagement", "environment"]
+
 
 class FindingRelatedFieldsSerializer(serializers.Serializer):
     test = serializers.SerializerMethodField()
