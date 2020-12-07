@@ -96,10 +96,6 @@ def metrics(request, mtype):
     view = identify_view(request)
     page_name = 'Product Type Metrics by '
 
-    closed_in_period_counts = {"Critical": 0, "High": 0, "Medium": 0,
-                               "Low": 0, "Info": 0, "Total": 0}
-    closed_in_period_details = {}
-
     if mtype != 'All':
         pt = Product_Type.objects.filter(id=mtype)
         request.GET._mutable = True
@@ -137,22 +133,10 @@ def metrics(request, mtype):
         obj.finding if view == 'Endpoint' else obj
         for obj in filters['accepted']
     ])
-
-    for obj in filters['closed']:
-        if view == 'Endpoint':
-            obj = obj.finding
-        closed_in_period_counts[obj.severity] += 1
-        closed_in_period_counts['Total'] += 1
-
-        if obj.test.engagement.product.name not in closed_in_period_details:
-            closed_in_period_details[obj.test.engagement.product.name] = {
-                'path': reverse('closed_findings') + '?test__engagement__product=' + str(
-                    obj.test.engagement.product.id),
-                'Critical': 0, 'High': 0, 'Medium': 0, 'Low': 0, 'Info': 0, 'Total': 0}
-        closed_in_period_details[
-            obj.test.engagement.product.name
-        ][obj.severity] += 1
-        closed_in_period_details[obj.test.engagement.product.name]['Total'] += 1
+    closed_in_period_counts, closed_in_period_details = queries.get_closed_in_period_details([
+        obj.finding if view == 'Endpoint' else obj
+        for obj in filters['closed']
+    ])
 
     punchcard = list()
     ticks = list()
