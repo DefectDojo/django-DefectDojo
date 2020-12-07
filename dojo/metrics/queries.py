@@ -363,5 +363,26 @@ def get_in_period_details(findings):
     return in_period_counts, in_period_details, age_detail
 
 
+def get_accepted_in_period_details(findings):
+    accepted_in_period_details = {}
+    for obj in findings:
+        if obj.test.engagement.product.name not in accepted_in_period_details:
+            accepted_in_period_details[obj.test.engagement.product.name] = {
+                'path': reverse('accepted_findings') + '?test__engagement__product=' + str(obj.test.engagement.product.id),
+                'Critical': 0,
+                'High': 0,
+                'Medium': 0,
+                'Low': 0,
+                'Info': 0,
+                'Total': 0
+            }
+        accepted_in_period_details[
+            obj.test.engagement.product.name
+        ][obj.severity] += 1
+        accepted_in_period_details[obj.test.engagement.product.name]['Total'] += 1
+
+    return accepted_in_period_details
+
+
 def get_metrics(mtype):
     print(mtype)
