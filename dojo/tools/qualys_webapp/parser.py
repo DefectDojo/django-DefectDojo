@@ -10,10 +10,10 @@ from dojo.models import Finding, Endpoint
 from urllib.parse import urlparse
 
 try:
-    from dojo.settings.settings import QUALYS_WEAKNESS_IS_VULN
+    from dojo.settings.settings import QUALYS_WAS_WEAKNESS_IS_VULN
 except ImportError:
     # Avoid breaking change
-    QUALYS_WEAKNESS_IS_VULN = False
+    QUALYS_WAS_WEAKNESS_IS_VULN = False
 
 # Severities are listed under WAS_SCAN_REPORT/APPENDIX/SEVERITY_CATEGORY_LIST
 # Since Info findings are not recroded in the Confirmed Vulnerability or
@@ -178,7 +178,7 @@ def get_glossary_item(glossary, finding, is_info=False):
     severity = glossary.findtext('SEVERITY')
     if severity is not None:
         group = glossary.findtext('GROUP')
-        if is_info and (not QUALYS_WEAKNESS_IS_VULN or group == "DIAG"):
+        if is_info and (not QUALYS_WAS_WEAKNESS_IS_VULN or group == "DIAG"):
             # Scan Diagnostics are always Info.
             finding.severity = "Info"
         else:

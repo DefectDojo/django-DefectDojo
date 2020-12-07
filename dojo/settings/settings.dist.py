@@ -152,7 +152,8 @@ env = environ.Env(
     DD_LOGGING_HANDLER=(str, 'console'),
     DD_ALERT_REFRESH=(bool, True),
     DD_DISABLE_ALERT_COUNTER=(bool, False),
-    DD_TAG_PREFETCHING=(bool, True)
+    DD_TAG_PREFETCHING=(bool, True),
+    DD_QUALYS_WAS_WEAKNESS_IS_VULN=(bool, False)
 )
 
 
@@ -931,4 +932,4 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
 SCAN_FILE_MAX_SIZE = 100
 
 # Apply a severity level to "Security Weaknesses" in Qualys WAS
-QUALYS_WEAKNESS_IS_VULN = False
+QUALYS_WAS_WEAKNESS_IS_VULN = env("DD_QUALYS_WAS_WEAKNESS_IS_VULN")
