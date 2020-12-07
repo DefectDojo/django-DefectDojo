@@ -11,19 +11,11 @@ from dojo.metrics import queries
 from dojo.models import User
 
 
-class MockMessages:
-    def add(*args, **kwargs):
-        pass
-
-
 class FindingQueriesTest(TestCase):
     fixtures = ['dojo_testdata.json']
 
     def setUp(self):
-        user = User.objects.get(username='user1')
-        self.request = RequestFactory().get(reverse('metrics'))
-        self.request.user = user
-        self.request._messages = MockMessages()
+        self.user = User.objects.get(username='user1')
 
     def test_finding_queries(self):
         # Queries over Finding and Risk_Acceptance
@@ -31,7 +23,9 @@ class FindingQueriesTest(TestCase):
             product_types = []
             finding_queries = queries.finding_querys(
                 product_types,
-                self.request
+                self.user,
+                {},
+                print
             )
 
             self.assertSequenceEqual(
@@ -123,10 +117,7 @@ class EndpointQueriesTest(TestCase):
     fixtures = ['dojo_testdata.json']
 
     def setUp(self):
-        user = User.objects.get(username='user1')
-        self.request = RequestFactory().get(reverse('metrics'))
-        self.request.user = user
-        self.request._messages = MockMessages()
+        self.user = User.objects.get(username='user1')
 
     def test_endpoint_queries(self):
         # Queries over Finding and Endpoint_Status
@@ -134,7 +125,9 @@ class EndpointQueriesTest(TestCase):
             product_types = []
             endpoint_queries = queries.endpoint_querys(
                 product_types,
-                self.request
+                self.user,
+                {},
+                print
             )
 
             self.assertSequenceEqual(

@@ -121,12 +121,18 @@ def metrics(request, mtype):
     prod_type = objects_authorized(prod_type)
 
     filters = dict()
+    alert_error_func = lambda msg: messages.add_message(
+        request,
+        messages.ERROR,
+        'All objects have been filtered away. Displaying all objects',
+        extra_tags='alert-danger'
+    )
     if view == 'Finding':
         page_name += 'Findings'
-        filters = queries.finding_querys(prod_type, request)
+        filters = queries.finding_querys(prod_type, request.user, request.GET, alert_error_func)
     elif view == 'Endpoint':
         page_name += 'Affected Endpoints'
-        filters = queries.endpoint_querys(prod_type, request)
+        filters = queries.endpoint_querys(prod_type, request.user, request.GET, alert_error_func)
 
     for obj in queryset_check(filters['all']):
         if view == 'Endpoint':

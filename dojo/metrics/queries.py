@@ -1,3 +1,6 @@
+"""
+Database queries used for metrics reporting.
+"""
 
 from datetime import datetime
 from math import ceil
@@ -5,14 +8,13 @@ from math import ceil
 from dateutil.relativedelta import relativedelta
 from django.db.models import Case, IntegerField, Sum, Q, Value, When
 from django.db.models.query import QuerySet
-from django.contrib import messages
 
 from dojo.filters import MetricsEndpointFilter, MetricsFindingFilter
 from dojo.models import Endpoint_Status, Finding, Product
 from dojo.utils import get_period_counts, queryset_check, timezone
 
 
-def finding_querys(prod_type, request):
+def finding_querys(prod_type, user, findings_filter, alert_error_func):
     filters = dict()
 
     findings_query = Finding.objects.filter(
@@ -32,10 +34,10 @@ def finding_querys(prod_type, request):
                         'WHERE dojo_risk_acceptance_accepted_findings.finding_id = dojo_finding.id',
         },
     )
-    if not request.user.is_staff:
+    if not user.is_staff:
         findings_query = findings_query.filter(
-            Q(test__engagement__product__authorized_users__in=[request.user]) |
-            Q(test__engagement__product__prod_type__authorized_users__in=[request.user]))
+            Q(test__engagement__product__authorized_users__in=[user]) |
+            Q(test__engagement__product__prod_type__authorized_users__in=[user]))
 
     active_findings_query = Finding.objects.filter(verified=True, active=True,
                                       severity__in=('Critical', 'High', 'Medium', 'Low', 'Info')).prefetch_related(
@@ -51,13 +53,13 @@ def finding_querys(prod_type, request):
                         'WHERE dojo_risk_acceptance_accepted_findings.finding_id = dojo_finding.id',
         },
     )
-    if not request.user.is_staff:
+    if not user.is_staff:
         active_findings_query = active_findings_query.filter(
-            Q(test__engagement__product__authorized_users__in=[request.user]) |
-            Q(test__engagement__product__prod_type__authorized_users__in=[request.user]))
+            Q(test__engagement__product__authorized_users__in=[user]) |
+            Q(test__engagement__product__prod_type__authorized_users__in=[user]))
 
-    findings = MetricsFindingFilter(request.GET, queryset=findings_query)
-    active_findings = MetricsFindingFilter(request.GET, queryset=active_findings_query)
+    findings = MetricsFindingFilter(findings_filter, queryset=findings_query)
+    active_findings = MetricsFindingFilter(findings_filter, queryset=active_findings_query)
 
     findings_qs = queryset_check(findings)
     active_findings_qs = queryset_check(active_findings)
@@ -67,10 +69,7 @@ def finding_querys(prod_type, request):
         active_findings = active_findings_query
         findings_qs = findings if isinstance(findings, QuerySet) else findings.qs
         active_findings_qs = active_findings if isinstance(active_findings, QuerySet) else active_findings.qs
-        messages.add_message(request,
-                                     messages.ERROR,
-                                     'All objects have been filtered away. Displaying all objects',
-                                     extra_tags='alert-danger')
+        alert_error_func('All objects have been filtered away. Displaying all objects')
 
     try:
         start_date = findings_qs.earliest('date').date
@@ -96,10 +95,10 @@ def finding_querys(prod_type, request):
         accepted_findings_counts = Finding.objects.filter(risk_acceptance__created__date__range=[start_date, end_date],
                                                           test__engagement__product__prod_type__in=prod_type). \
             prefetch_related('test__engagement__product')
-        if not request.user.is_staff:
+        if not user.is_staff:
             accepted_findings_counts = accepted_findings_counts.filter(
-                Q(test__engagement__product__authorized_users__in=[request.user]) |
-                Q(test__engagement__product__prod_type__authorized_users__in=[request.user]))
+                Q(test__engagement__product__authorized_users__in=[user]) |
+                Q(test__engagement__product__prod_type__authorized_users__in=[user]))
         accepted_findings_counts = severity_count(accepted_findings_counts, 'aggregate', 'severity')
     else:
         findings_closed = Finding.objects.filter(mitigated__date__range=[start_date, end_date]).prefetch_related(
@@ -108,19 +107,19 @@ def finding_querys(prod_type, request):
             prefetch_related('test__engagement__product')
         accepted_findings_counts = Finding.objects.filter(risk_acceptance__created__date__range=[start_date, end_date]). \
             prefetch_related('test__engagement__product')
-        if not request.user.is_staff:
+        if not user.is_staff:
             accepted_findings_counts = accepted_findings_counts.filter(
-                Q(test__engagement__product__authorized_users__in=[request.user]) |
-                Q(test__engagement__product__prod_type__authorized_users__in=[request.user]))
+                Q(test__engagement__product__authorized_users__in=[user]) |
+                Q(test__engagement__product__prod_type__authorized_users__in=[user]))
         accepted_findings_counts = severity_count(accepted_findings_counts, 'aggregate', 'severity')
 
-    if not request.user.is_staff:
+    if not user.is_staff:
         findings_closed = findings_closed.filter(
-            Q(test__engagement__product__authorized_users__in=[request.user]) |
-            Q(test__engagement__product__prod_type__authorized_users__in=[request.user]))
+            Q(test__engagement__product__authorized_users__in=[user]) |
+            Q(test__engagement__product__prod_type__authorized_users__in=[user]))
         accepted_findings = accepted_findings.filter(
-            Q(test__engagement__product__authorized_users__in=[request.user]) |
-            Q(test__engagement__product__prod_type__authorized_users__in=[request.user]))
+            Q(test__engagement__product__authorized_users__in=[user]) |
+            Q(test__engagement__product__prod_type__authorized_users__in=[user]))
 
     r = relativedelta(end_date, start_date)
     months_between = (r.years * 12) + r.months
@@ -144,10 +143,10 @@ def finding_querys(prod_type, request):
                                      engagement__test__finding__severity__in=(
                                          'Critical', 'High', 'Medium', 'Low'),
                                      prod_type__in=prod_type)
-    if not request.user.is_staff:
+    if not user.is_staff:
         top_ten = top_ten.filter(
-            Q(authorized_users__in=[request.user]) |
-            Q(prod_type__authorized_users__in=[request.user]))
+            Q(authorized_users__in=[user]) |
+            Q(prod_type__authorized_users__in=[user]))
     top_ten = severity_count(
         top_ten, 'annotate', 'engagement__test__finding__severity'
     ).order_by('-critical', '-high', '-medium', '-low')[:10]
@@ -196,7 +195,7 @@ def severity_count(queryset, method, expression):
     )
 
 
-def endpoint_querys(prod_type, request):
+def endpoint_querys(prod_type, user, findings_filter, alert_error_func):
     filters = dict()
 
     endpoints_query = Endpoint_Status.objects.filter(mitigated=False,
@@ -206,10 +205,10 @@ def endpoint_querys(prod_type, request):
         'finding__test__engagement__risk_acceptance',
         'finding__risk_acceptance_set',
         'finding__reporter')
-    if not request.user.is_staff:
+    if not user.is_staff:
         endpoints_query = endpoints_query.filter(
-            Q(endpoint__product__authorized_users__in=[request.user]) |
-            Q(endpoint__product__prod_type__authorized_users__in=[request.user]))
+            Q(endpoint__product__authorized_users__in=[user]) |
+            Q(endpoint__product__prod_type__authorized_users__in=[user]))
 
     active_endpoints_query = Endpoint_Status.objects.filter(mitigated=False,
                                       finding__severity__in=('Critical', 'High', 'Medium', 'Low', 'Info')).prefetch_related(
@@ -218,13 +217,13 @@ def endpoint_querys(prod_type, request):
         'finding__test__engagement__risk_acceptance',
         'finding__risk_acceptance_set',
         'finding__reporter')
-    if not request.user.is_staff:
+    if not user.is_staff:
         active_endpoints_query = active_endpoints_query.filter(
-            Q(endpoint__product__authorized_users__in=[request.user]) |
-            Q(endpoint__product__prod_type__authorized_users__in=[request.user]))
+            Q(endpoint__product__authorized_users__in=[user]) |
+            Q(endpoint__product__prod_type__authorized_users__in=[user]))
 
-    endpoints = MetricsEndpointFilter(request.GET, queryset=endpoints_query)
-    active_endpoints = MetricsEndpointFilter(request.GET, queryset=active_endpoints_query)
+    endpoints = MetricsEndpointFilter(findings_filter, queryset=endpoints_query)
+    active_endpoints = MetricsEndpointFilter(findings_filter, queryset=active_endpoints_query)
 
     endpoints_qs = queryset_check(endpoints)
     active_endpoints_qs = queryset_check(active_endpoints)
@@ -234,10 +233,7 @@ def endpoint_querys(prod_type, request):
         active_endpoints = active_endpoints_query
         endpoints_qs = endpoints if isinstance(endpoints, QuerySet) else endpoints.qs
         active_endpoints_qs = active_endpoints if isinstance(active_endpoints, QuerySet) else active_endpoints.qs
-        messages.add_message(request,
-                                     messages.ERROR,
-                                     'All objects have been filtered away. Displaying all objects',
-                                     extra_tags='alert-danger')
+        alert_error_func('All objects have been filtered away. Displaying all objects')
 
     try:
         start_date = endpoints_qs.earliest('date').date
@@ -263,10 +259,10 @@ def endpoint_querys(prod_type, request):
         accepted_endpoints_counts = Endpoint_Status.objects.filter(date__range=[start_date, end_date], risk_accepted=True,
                                                           finding__test__engagement__product__prod_type__in=prod_type). \
             prefetch_related('finding__test__engagement__product')
-        if not request.user.is_staff:
+        if not user.is_staff:
             accepted_endpoints_counts = accepted_endpoints_counts.filter(
-                Q(endpoint__product__authorized_users__in=[request.user]) |
-                Q(endpoint__product__prod_type__authorized_users__in=[request.user]))
+                Q(endpoint__product__authorized_users__in=[user]) |
+                Q(endpoint__product__prod_type__authorized_users__in=[user]))
         accepted_endpoints_counts = severity_count(accepted_endpoints_counts, 'aggregate', 'finding__severity')
     else:
         endpoints_closed = Endpoint_Status.objects.filter(date__range=[start_date, end_date]).prefetch_related(
@@ -275,19 +271,19 @@ def endpoint_querys(prod_type, request):
             prefetch_related('finding__test__engagement__product')
         accepted_endpoints_counts = Endpoint_Status.objects.filter(date__range=[start_date, end_date], risk_accepted=True). \
             prefetch_related('finding__test__engagement__product')
-        if not request.user.is_staff:
+        if not user.is_staff:
             accepted_endpoints_counts = accepted_endpoints_counts.filter(
-                Q(endpoint__product__authorized_users__in=[request.user]) |
-                Q(endpoint__product__prod_type__authorized_users__in=[request.user]))
+                Q(endpoint__product__authorized_users__in=[user]) |
+                Q(endpoint__product__prod_type__authorized_users__in=[user]))
         accepted_endpoints_counts = severity_count(accepted_endpoints_counts, 'aggregate', 'finding__severity')
 
-    if not request.user.is_staff:
+    if not user.is_staff:
         endpoints_closed = endpoints_closed.filter(
-            Q(endpoint__product__authorized_users__in=[request.user]) |
-            Q(endpoint__product__prod_type__authorized_users__in=[request.user]))
+            Q(endpoint__product__authorized_users__in=[user]) |
+            Q(endpoint__product__prod_type__authorized_users__in=[user]))
         accepted_endpoints = accepted_endpoints.filter(
-            Q(endpoint__product__authorized_users__in=[request.user]) |
-            Q(endpoint__product__prod_type__authorized_users__in=[request.user]))
+            Q(endpoint__product__authorized_users__in=[user]) |
+            Q(endpoint__product__prod_type__authorized_users__in=[user]))
 
     r = relativedelta(end_date, start_date)
     months_between = (r.years * 12) + r.months
@@ -309,10 +305,10 @@ def endpoint_querys(prod_type, request):
                                      engagement__test__finding__severity__in=(
                                          'Critical', 'High', 'Medium', 'Low'),
                                      prod_type__in=prod_type)
-    if not request.user.is_staff:
+    if not user.is_staff:
         top_ten = top_ten.filter(
-            Q(authorized_users__in=[request.user]) |
-            Q(prod_type__authorized_users__in=[request.user]))
+            Q(authorized_users__in=[user]) |
+            Q(prod_type__authorized_users__in=[user]))
     top_ten = severity_count(
         top_ten, 'annotate', 'engagement__test__finding__severity'
     ).order_by('-critical', '-high', '-medium', '-low')[:10]
