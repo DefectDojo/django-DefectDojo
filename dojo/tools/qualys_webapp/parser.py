@@ -178,7 +178,7 @@ def get_glossary_item(glossary, finding, is_info=False):
     severity = glossary.findtext('SEVERITY')
     if severity is not None:
         group = glossary.findtext('GROUP')
-        if is_info and (not QUALYS_WAS_WEAKNESS_IS_VULN or group == "DIAG"):
+        if is_info and (not QUALYS_WAS_WEAKNESS_IS_VULN or group in ("DIAG", "IG")):
             # Scan Diagnostics are always Info.
             finding.severity = "Info"
         else:
