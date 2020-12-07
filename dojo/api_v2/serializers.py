@@ -559,13 +559,25 @@ class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
 
 
 class JIRAIssueSerializer(serializers.ModelSerializer):
+    url = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = JIRA_Issue
         fields = '__all__'
 
+    def get_url(self, obj):
+        if obj.jira_project is None:
+            return None
+        
+        jira_project = obj.jira_project
+        if jira_project.jira_instance is None:
+            return None
+        
+        jira_instance = jira_project.jira_instance
+        return jira_instance.url
+
 
 class JIRAInstanceSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = JIRA_Instance
         fields = '__all__'
@@ -703,22 +715,28 @@ class FindingTestTypeSerializer(serializers.ModelSerializer):
         model = Test_Type
         fields = ["id", "name"]
 
-
-class FindingRelatedFieldsSerializer(serializers.ModelSerializer):
+class FindingTestSerializer(serializers.ModelSerializer):
     engagement = FindingEngagementSerializer(required=False)
     environment = FindingEnvironmentSerializer(required=False)
     test_type = FindingTestTypeSerializer(required=False)
-    jira = serializers.SerializerMethodField()
 
     class Meta:
         model = Test
-        fields = ["id", "title", "test_type", "engagement", "environment", "jira"]
+        fields = ["id", "title", "test_type", "engagement", "environment"]
+
+class FindingRelatedFieldsSerializer(serializers.Serializer):
+    test = serializers.SerializerMethodField()
+    jira = serializers.SerializerMethodField()
+
+    @swagger_serializer_method(FindingTestSerializer)
+    def get_test(self, obj):
+        return FindingTestSerializer(read_only=True).to_representation(obj.test)
 
     @swagger_serializer_method(JIRAIssueSerializer)
     def get_jira(self, obj):
-        if not jira_helper.has_jira_issue(obj):
-            return None
         issue = jira_helper.get_jira_issue(obj)
+        if issue is None:
+            return None
         return JIRAIssueSerializer(read_only=True).to_representation(issue)
 
 
@@ -733,19 +751,19 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     finding_meta = FindingMetaSerializer(read_only=True, many=True)
     related_fields = serializers.SerializerMethodField()
     # for backwards compatibility
-    jira_creation = serializers.SerializerMethodField()
-    jira_change = serializers.SerializerMethodField()
+    jira_creation = serializers.SerializerMethodField(read_only=True)
+    jira_change = serializers.SerializerMethodField(read_only=True)
     display_status = serializers.SerializerMethodField()
 
     class Meta:
         model = Finding
         fields = '__all__'
 
-    @swagger_serializer_method(serializers.ListField(serializers.DateTimeField()))
+    @swagger_serializer_method(serializers.DateTimeField())
     def get_jira_creation(self, obj):
         return jira_helper.get_jira_creation(obj)
 
-    @swagger_serializer_method(serializers.ListField(serializers.DateTimeField()))
+    @swagger_serializer_method(serializers.DateTimeField())
     def get_jira_change(self, obj):
         return jira_helper.get_jira_change(obj)
 
@@ -753,7 +771,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     def get_related_fields(self, obj):
         query_params = self.context['request'].query_params
         if query_params.get('related_fields', 'false') == 'true':
-            return FindingRelatedFieldsSerializer(required=False).to_representation(obj.test)
+            return FindingRelatedFieldsSerializer(required=False).to_representation(obj)
         else:
             return None
 
