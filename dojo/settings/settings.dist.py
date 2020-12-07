@@ -354,6 +354,8 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.user.user_details',
 )
 
+# Showing login form (form is not needed for OKTA, Google Auth, etc.)
+SHOW_LOGIN_FORM = True
 CLASSIC_AUTH_ENABLED = True
 
 SOCIAL_AUTH_STRATEGY = 'social_django.strategy.DjangoStrategy'
