@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
 
-from dojo.metrics import views
+from dojo.metrics import queries
 from dojo.models import User
 
 
@@ -29,7 +29,7 @@ class FindingQueriesTest(TestCase):
         # Queries over Finding and Risk_Acceptance
         with self.assertNumQueries(23):
             product_types = []
-            finding_queries = views.finding_querys(
+            finding_queries = queries.finding_querys(
                 product_types,
                 self.request
             )
@@ -132,7 +132,7 @@ class EndpointQueriesTest(TestCase):
         # Queries over Finding and Endpoint_Status
         with self.assertNumQueries(50):
             product_types = []
-            endpoint_queries = views.endpoint_querys(
+            endpoint_queries = queries.endpoint_querys(
                 product_types,
                 self.request
             )
