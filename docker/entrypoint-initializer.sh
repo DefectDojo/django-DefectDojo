@@ -111,12 +111,12 @@ EOD
   exec python3 manage.py buildwatson
 fi
 
-if [ "${KEEP_ALIVE}" = true ]
+if [ "${DD_KEEP_ALIVE}" = true ]
 then
   echo "Initializer configured to not exit after completion. Sleeping ..."
-  KEEP_ALIVE_INTERVAL=${KEEP_ALIVE_INTERVAL:-60}
+  DD_KEEP_ALIVE_INTERVAL=${DD_KEEP_ALIVE_INTERVAL:-60}
   while true;
-  do echo "Keep alive loop sleeping for ${KEEP_ALIVE_INTERVAL}";
-  sleep $KEEP_ALIVE_INTERVAL;
+  do echo "Keep alive loop sleeping for ${DD_KEEP_ALIVE_INTERVAL}";
+  sleep $DD_KEEP_ALIVE_INTERVAL;
   done
 fi
