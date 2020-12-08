@@ -123,7 +123,7 @@ class MobSFParser(object):
                         mobsf_item = {
                             "category": "Binary Analysis",
                             "title": details[binary_analysis_type]["description"].split(".")[0],
-                            "severity": details[binary_analysis_type]["severity"].title(),
+                            "severity": details[binary_analysis_type]["severity"].replace("warning", "low").title(),
                             "description": details[binary_analysis_type]["description"],
                             "file_path": details["name"]
                         }
