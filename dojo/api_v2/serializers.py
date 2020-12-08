@@ -78,7 +78,6 @@ class TagListSerializerField(serializers.ListField):
         self.pretty_print = pretty_print
 
     def to_internal_value(self, data):
-        print('to_internal_value: ' + str(data))
         if isinstance(data, six.string_types):
             if not data:
                 data = []
@@ -112,20 +111,11 @@ class TagListSerializerField(serializers.ListField):
         # return data
 
     def to_representation(self, value):
-        if value:
-            # print('value type: "' + str(type(value)) + '"')
-            # print('value type: "' + str(type(value).__name__) + '"')
-            print('value type: "' + type(value).__name__ + '"')
-            print('to_representation: "' + str(value) + '"')
         if not isinstance(value, TagList):
-            if value:
-                print('to_representation2: "' + str(value) + '"')
 
             # we can't use isinstance because TagRelatedManager is non-existing class
             # it cannot be imported or referenced, so we fallback to string comparison
             if type(value).__name__ == 'TagRelatedManager':
-                if value:
-                    print('to_representation3: "' + str(value) + '"')
                 # if self.order_by:
                 #     tags = value.all().order_by(*self.order_by)
                 # else:
@@ -135,8 +125,6 @@ class TagListSerializerField(serializers.ListField):
                 value = value.get_tag_list()
 
             elif isinstance(value, str):
-                if value:
-                    print('to_representation4: "' + str(value) + '"')
                 value = tagulous.utils.parse_tags(value)
 
             # elif len(value) > 0 and isinstance(value[0], Tag):
@@ -157,7 +145,6 @@ class TagListSerializerField(serializers.ListField):
 
 class TaggitSerializer(serializers.Serializer):
     def create(self, validated_data):
-        print('create!')
         to_be_tagged, validated_data = self._pop_tags(validated_data)
 
         tag_object = super(TaggitSerializer, self).create(validated_data)
@@ -173,21 +160,15 @@ class TaggitSerializer(serializers.Serializer):
         return self._save_tags(tag_object, to_be_tagged)
 
     def _save_tags(self, tag_object, tags):
-        print('save tags: ' + str(tags))
-        print('tag_object: ' + str(tag_object))
-        print('tag_object.pk: ' + str(tag_object.pk))
         for key in list(tags.keys()):
-            print('save: ' + str(key))
             tag_values = tags.get(key)
             # tag_object.tags = ", ".join(tag_values)
             tag_object.tags = tag_values
-            print('tag_object.tags: ' + str(tag_object.tags))
         tag_object.save()
 
         return tag_object
 
     def _pop_tags(self, validated_data):
-        print('pop tags: ' + str(validated_data))
         to_be_tagged = {}
 
         for key in list(self.fields.keys()):

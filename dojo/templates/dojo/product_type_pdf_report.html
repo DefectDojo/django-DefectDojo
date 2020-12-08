@@ -207,15 +207,14 @@
                     {% if finding.get_report_requests %}
                         <h5>Sample Request(s): Displaying {{finding.get_report_requests.count}} of {{finding.burprawrequestresponse_set.count}}</h5>
                         {% for req in finding.get_report_requests %}
-                           <h6>Request {{forloop.counter}} </h6>
-                           <pre>{{ req.get_request }}</pre>
-                        {% if req.get_response %}
-                           <h6>Response {{forloop.counter}}</h6>
-                           <pre>{{ req.get_response|truncatechars_html:800 }}</pre>
-                        {% endif %}
+                            <h6>Request {{forloop.counter}} </h6>
+                            <pre>{{ req.get_request }}</pre>
+                            {% if req.get_response %}
+                             <h6>Response {{forloop.counter}}</h6>
+                             <pre>{{ req.get_response|truncatechars_html:800 }}</pre>
+                            {% endif %}
                         {% endfor %}
-                        {% endif %}
-
+                    {% endif %}
                     <h6>Impact</h6>
                     <pre>{{ finding.impact }}</pre>
                     <h6>References</h6>
@@ -226,62 +225,65 @@
                             {% for pic in finding.images.all %}
                                 <p><img src="{{ host }}{% pic_token pic 'original' %}" style="max-width: 85%"></p>
                             {% endfor %}
-                            {% endif %}
-
-                        <h6>Impact</h6>
-                        <pre>{{ finding.impact }}</pre>
-                        <h6>References</h6>
-                        <pre>{{ finding.references }}</pre>
-                        {% if include_finding_images %}
-                            <h6>Images</h6>
-                            {% if finding.images.all.count > 0 %}
-                                {% for pic in finding.images.all %}
-                                    <p><img src="{{ host }}{% pic_token pic 'original' %}" style="max-width: 85%" alt="finding_image"></p>
-                                {% endfor %}
-                            {% else %}
-                                <p class="text-center">No images found.</p>
-                            {% endif %}
                         {% endif %}
+                    {% endif %}
+
+                    <h6>Impact</h6>
+                    <pre>{{ finding.impact }}</pre>
+                    <h6>References</h6>
+                    <pre>{{ finding.references }}</pre>
+
+                    {% if include_finding_images %}
+                        <h6>Images</h6>
+                        {% if finding.images.all.count > 0 %}
+                            {% for pic in finding.images.all %}
+                                <p><img src="{{ host }}{% pic_token pic 'original' %}" style="max-width: 85%" alt="finding_image"></p>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-center">No images found.</p>
+                        {% endif %}
+                    {% endif %}
+
                         {% if include_finding_notes %}
                             {% with notes=finding.notes.all|get_public_notes %}
                                 {% if notes.count > 0 %}
-                                    <h6>Notes</h6>
-                                    <table id="notes" class="tablesorter-bootstrap table table-condensed table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th>User</th>
-                                                <th>Date</th>
-                                                {% with notes_with_type=notes|get_notetype_notes_count %}
-                                                {% if notes_with_type > 0 %}
-                                                    <th>Note Type</th>
-                                                {% endif %}
-                                                <th>Note</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for note in notes reversed %}
+                                    {% with notes_with_type=notes|get_notetype_notes_count %}
+                                        <h6>Notes</h6>
+                                        <table id="notes" class="tablesorter-bootstrap table table-condensed table-striped">
+                                            <thead>
                                                 <tr>
-                                                    <td>
-                                                        {{ note.author.username }}
-                                                    </td>
-                                                    <td>
-                                                        {{ note.date }}
-                                                    </td>
-                                                    {% if notes_with_type > 0 %}
-                                                    <td>
-                                                        {% if note.note_type != None %}
-                                                        {{ note.note_type }}
+                                                    <th>User</th>
+                                                    <th>Date</th>
+                                                        {% if notes_with_type > 0 %}
+                                                            <th>Note Type</th>
                                                         {% endif %}
-                                                    </td>
-                                                    {% endif %}
-                                                    <td>
-                                                        {{ note|linebreaks }}
-                                                    </td>
+                                                    <th>Note</th>
                                                 </tr>
-                                            {% endfor %}
-                                        </tbody>
+                                            </thead>
+                                            <tbody>
+                                                {% for note in notes reversed %}
+                                                    <tr>
+                                                        <td>
+                                                            {{ note.author.username }}
+                                                        </td>
+                                                        <td>
+                                                            {{ note.date }}
+                                                        </td>
+                                                        {% if notes_with_type > 0 %}
+                                                        <td>
+                                                            {% if note.note_type != None %}
+                                                                {{ note.note_type }}
+                                                            {% endif %}
+                                                        </td>
+                                                        {% endif %}
+                                                        <td>
+                                                            {{ note|linebreaks }}
+                                                        </td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
                                     {% endwith %}
-                                    </table>
                                 {% endif %}
                             {% endwith %}
                         {% endif %}
@@ -513,75 +515,77 @@
             }
         {%  endif %}
 
-        window.onload = function () {
-            var toc = "";
-            var level = 3;
+        {% if include_table_of_contents%}        
+            window.onload = function () {
+                var toc = "";
+                var level = 3;
 
-            document.getElementById("contents").innerHTML =
-                document.getElementById("contents").innerHTML.replace(
-                    /<h([\d])([^<]*)>([^<]+)<\/h([\d])>|<h([\d])([^>]*)>([^<]+)<sup>([^<]*)<\/sup>([^<]*)<\/h([\d])>/gi,
-                    function (str, openLevel, id, titleText, closeLevel, openLevel_t, id_t, titleText_t, tags, junk, closeLevel_t) {
-                        if (openLevel != closeLevel || openLevel > 5) {
-                            return str;
-                        }
-
-                        if(tags)
-                        {
-                            openLevel = openLevel_t;
-                            id = id_t;
-                            titleText = titleText_t;
-                            closeLevel = closeLevel_t;
-                        }
-
-                        if (openLevel > level) {
-                            toc += (new Array(openLevel - level + 1)).join("<ul>");
-                        } else if (openLevel < level) {
-                            toc += (new Array(level - openLevel + 1)).join("</ul>");
-                        }
-
-                        level = parseInt(openLevel);
-                        
-                        var anchor = titleText.trim().replace(/ /g, "_");
-
-                        if(tags)
-                        {
-                            if (['Info', 'Low', 'Medium', 'High', 'Critical'].indexOf(titleText) >= 0) {
-                                toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
-                                "<span class=\"label severity severity-" + titleText + "\">" + titleText + "</span></a></li>";
+                document.getElementById("contents").innerHTML =
+                    document.getElementById("contents").innerHTML.replace(
+                        /<h([\d])([^<]*)>([^<]+)<\/h([\d])>|<h([\d])([^>]*)>([^<]+)<sup>([^<]*)<\/sup>([^<]*)<\/h([\d])>/gi,
+                        function (str, openLevel, id, titleText, closeLevel, openLevel_t, id_t, titleText_t, tags, junk, closeLevel_t) {
+                            if (openLevel != closeLevel || openLevel > 5) {
+                                return str;
                             }
-                            else {
-                                toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
-                                titleText + "<sup>" + tags + "</sup></a></li>";
+
+                            if(tags)
+                            {
+                                openLevel = openLevel_t;
+                                id = id_t;
+                                titleText = titleText_t;
+                                closeLevel = closeLevel_t;
+                            }
+
+                            if (openLevel > level) {
+                                toc += (new Array(openLevel - level + 1)).join("<ul>");
+                            } else if (openLevel < level) {
+                                toc += (new Array(level - openLevel + 1)).join("</ul>");
+                            }
+
+                            level = parseInt(openLevel);
+                            
+                            var anchor = titleText.trim().replace(/ /g, "_");
+
+                            if(tags)
+                            {
+                                if (['Info', 'Low', 'Medium', 'High', 'Critical'].indexOf(titleText) >= 0) {
+                                    toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
+                                    "<span class=\"label severity severity-" + titleText + "\">" + titleText + "</span></a></li>";
+                                }
+                                else {
+                                    toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
+                                    titleText + "<sup>" + tags + "</sup></a></li>";
+                                }
+
+                                return "<a style=\"color:black;\" name=\"" + anchor + "\"><h" + openLevel + "" + id + ">"
+                                    + titleText + "<sup>" + tags + "</sup></h" + closeLevel + "></a>";
+                            }
+                            else
+                            {
+                                if (['Info', 'Low', 'Medium', 'High', 'Critical'].indexOf(titleText) >= 0) {
+                                    toc += "<br><li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
+                                    "<span class=\"label severity severity-" + titleText + "\">" + titleText + "</span></a></li><br>";
+                                }
+                                else {
+                                    toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
+                                    titleText + "</a></li>";
+                                }
+
+                                return "<a style=\"color:black;\" name=\"" + anchor + "\"><h" + openLevel + "" + id + ">"
+                                    + titleText + "</h" + closeLevel + "></a>";
                             }
 
                             return "<a style=\"color:black;\" name=\"" + anchor + "\"><h" + openLevel + "" + id + ">"
                                 + titleText + "<sup>" + tags + "</sup></h" + closeLevel + "></a>";
                         }
-                        else
-                        {
-                            if (['Info', 'Low', 'Medium', 'High', 'Critical'].indexOf(titleText) >= 0) {
-                                toc += "<br><li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
-                                "<span class=\"label severity severity-" + titleText + "\">" + titleText + "</span></a></li><br>";
-                            }
-                            else {
-                                toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
-                                titleText + "</a></li>";
-                            }
+                    );
+                    
+                if (level) {
+                    toc += (new Array(level + 1)).join("</ul>");
+                }
 
-                            return "<a style=\"color:black;\" name=\"" + anchor + "\"><h" + openLevel + "" + id + ">"
-                                + titleText + "</h" + closeLevel + "></a>";
-                        }
-
-                        return "<a style=\"color:black;\" name=\"" + anchor + "\"><h" + openLevel + "" + id + ">"
-                            + titleText + "<sup>" + tags + "</sup></h" + closeLevel + "></a>";
-                    }
-                );
-                
-            if (level) {
-                toc += (new Array(level + 1)).join("</ul>");
-            }
-
-            document.getElementById("toc").innerHTML += toc;
-        };
+                document.getElementById("toc").innerHTML += toc;
+            };
+        {% endif %}
     </script>
 {% endblock %}

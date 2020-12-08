@@ -24,6 +24,7 @@ from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Find
     BurpRawRequestResponse
 
 from dojo.endpoint.views import get_endpoint_ids
+from dojo.reports.views import report_url_resolver, prefetch_related_findings_for_report
 from dojo.finding.views import set_finding_as_original_internal, reset_finding_duplicate_status_internal, \
     duplicate_cluster
 from dojo.filters import ReportFindingFilter, ReportAuthedFindingFilter, \
@@ -1211,10 +1212,8 @@ def report_generate(request, obj, options):
         report_title = "Product Type Report"
         report_subtitle = str(product_type)
 
-        findings = ReportFindingFilter(request.GET, queryset=Finding.objects.filter(
-            test__engagement__product__prod_type=product_type).distinct().prefetch_related('test',
-                                                                                           'test__engagement__product',
-                                                                                           'test__engagement__product__prod_type'))
+        findings = ReportFindingFilter(request.GET, prod_type=prod_type, queryset=prefetch_related_findings_for_report(Finding.objects.filter(
+            test__engagement__product__prod_type=product_type)))
         products = Product.objects.filter(prod_type=product_type,
                                           engagement__test__finding__in=findings.qs).distinct()
         engagements = Engagement.objects.filter(product__prod_type=product_type,
@@ -1243,10 +1242,8 @@ def report_generate(request, obj, options):
         report_name = "Product Report: " + str(product)
         report_title = "Product Report"
         report_subtitle = str(product)
-        findings = ReportFindingFilter(request.GET, queryset=Finding.objects.filter(
-            test__engagement__product=product).distinct().prefetch_related('test',
-                                                                           'test__engagement__product',
-                                                                           'test__engagement__product__prod_type'))
+        findings = ReportFindingFilter(request.GET, product=product, queryset=prefetch_related_findings_for_report(Finding.objects.filter(
+            test__engagement__product=product)))
         ids = set(finding.id for finding in findings.qs)
         engagements = Engagement.objects.filter(test__finding__id__in=ids).distinct()
         tests = Test.objects.filter(finding__id__in=ids).distinct()
@@ -1255,13 +1252,8 @@ def report_generate(request, obj, options):
 
     elif type(obj).__name__ == "Engagement":
         engagement = obj
-        findings = ReportFindingFilter(request.GET, queryset=Finding.objects.filter(
-            test__engagement=engagement,
-        ).prefetch_related(
-            'test',
-            'test__engagement__product',
-            'test__engagement__product__prod_type'
-        ).distinct())
+        findings = ReportFindingFilter(request.GET, engagement=engagement,
+                                       queryset=prefetch_related_findings_for_report(Finding.objects.filter(test__engagement=engagement)))
         report_name = "Engagement Report: " + str(engagement)
 
         report_title = "Engagement Report"
@@ -1274,11 +1266,10 @@ def report_generate(request, obj, options):
 
     elif type(obj).__name__ == "Test":
         test = obj
-        findings = ReportFindingFilter(request.GET,
-                                       queryset=Finding.objects.filter(test=test).prefetch_related(
-                                            'test',
-                                            'test__engagement__product',
-                                            'test__engagement__product__prod_type').distinct())
+        findings = ReportFindingFilter(request.GET, engagement=test.engagement,
+                                       queryset=prefetch_related_findings_for_report(Finding.objects.filter(test=test)))
+        filename = "test_finding_report.pdf"
+        template = "dojo/test_pdf_report.html"
         report_name = "Test Report: " + str(test)
         report_title = "Test Report"
         report_subtitle = str(test)
@@ -1293,23 +1284,13 @@ def report_generate(request, obj, options):
         report_title = "Endpoint Report"
         report_subtitle = host
         findings = ReportFindingFilter(request.GET,
-            queryset=Finding.objects.filter(
-                endpoints__in=endpoints,
-            ).prefetch_related(
-                'test',
-                'test__engagement__product',
-                'test__engagement__product__prod_type'
-            ).distinct())
+                                       queryset=prefetch_related_findings_for_report(Finding.objects.filter(endpoints__in=endpoints)))
 
     elif type(obj).__name__ == "QuerySet":
         findings = ReportAuthedFindingFilter(request.GET,
-            queryset=obj.prefetch_related(
-                'test',
-                'test__engagement__product',
-                'test__engagement__product__prod_type'
-            ).distinct(),
-            user=request.user
-        )
+                                             queryset=prefetch_related_findings_for_report(obj).distinct(),
+                                             user=request.user)
+
         report_name = 'Finding'
         report_type = 'Finding'
         report_title = "Finding Report"
