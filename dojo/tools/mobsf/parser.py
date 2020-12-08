@@ -73,7 +73,6 @@ class MobSFParser(object):
                 test_description = "%s  \n**Binary Analysis:** %s\n" % (test_description, data["bin_anal"])
 
         test.description = strip_tags(test_description)
-        test.save()
 
         mobsf_findings = []
         # Mobile Permissions
