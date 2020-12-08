@@ -1295,15 +1295,47 @@ class ReportFindingFilter(DojoFilter):
     false_p = ReportBooleanFilter(label="False Positive")
     test__engagement__risk_acceptance = ReportRiskAcceptanceFilter(
         label="Risk Accepted")
+    # queryset will be restricted in __init__, here we don't have access to the logged in user
     duplicate = ReportBooleanFilter()
+    duplicate_finding = ModelChoiceFilter(queryset=Finding.objects.filter(original_finding__isnull=False))
     out_of_scope = ReportBooleanFilter()
 
     class Meta:
         model = Finding
+        # exclude sonarqube issue as by default it will show all without checking permissions
         exclude = ['date', 'cwe', 'url', 'description', 'mitigation', 'impact',
-                   'endpoint', 'references', 'test', 'is_template',
+                   'endpoint', 'references', 'test', 'is_template', 'sonarqube_issue'
                    'thread_id', 'notes', 'endpoints', 'endpoint_status',
                    'numerical_severity', 'reporter', 'last_reviewed', 'images', 'jira_creation', 'jira_change']
+
+    def __init__(self, *args, **kwargs):
+        self.prod_type = None
+        self.product = None
+        self.engagement = None
+        if 'prod_type' in kwargs:
+            self.prod_type = kwargs.pop('prod_type')
+        if 'product' in kwargs:
+            self.product = kwargs.pop('product')
+        if 'engagement' in kwargs:
+            self.engagement = kwargs.pop('engagement')
+
+        super().__init__(*args, **kwargs)
+        # duplicate_finding queryset needs to restricted in line with permissions
+        # and inline with report scope to avoid a dropdown with 100K entries
+        duplicate_finding_query_set = self.form.fields['duplicate_finding'].queryset
+        if get_current_user() is not None and not get_current_user().is_staff:
+            duplicate_finding_query_set = duplicate_finding_query_set.filter(
+                Q(test__engagement__product__authorized_users__in=[get_current_user()]) |
+                Q(test__engagement__product__prod_type__authorized_users__in=[get_current_user()]))
+
+        if self.engagement:
+            duplicate_finding_query_set = duplicate_finding_query_set.filter(test__engagement=self.engagement)
+        elif self.product:
+            duplicate_finding_query_set = duplicate_finding_query_set.filter(test__engagement__product=self.product)
+        elif self.prod_type:
+            duplicate_finding_query_set = duplicate_finding_query_set.filter(test__engagement__product__prod_type=self.prod_type)
+
+        self.form.fields['duplicate_finding'].queryset = duplicate_finding_query_set
 
 
 class ReportAuthedFindingFilter(DojoFilter):
