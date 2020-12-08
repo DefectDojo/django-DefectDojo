@@ -574,7 +574,7 @@ class JIRAIssueSerializer(serializers.ModelSerializer):
             return None
 
         jira_instance = jira_project.jira_instance
-        return jira_instance.url
+        return jira_instance.url + '/browse/' + obj.jira_key
 
 
 class JIRAInstanceSerializer(serializers.ModelSerializer):
@@ -771,7 +771,11 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     @swagger_serializer_method(FindingRelatedFieldsSerializer)
     def get_related_fields(self, obj):
-        query_params = self.context['request'].query_params
+        request = self.context.get('request', None)
+        if request is None:
+            return None
+
+        query_params = request.query_params
         if query_params.get('related_fields', 'false') == 'true':
             return FindingRelatedFieldsSerializer(required=False).to_representation(obj)
         else:
