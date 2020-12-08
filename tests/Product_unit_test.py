@@ -402,7 +402,6 @@ class ProductTest(BaseTestCase):
         # Navigate to the product page
         driver.get(self.base_url + "metrics/product/type/counts")
 
-        from selenium.webdriver.support.select import Select
         my_select = Select(driver.find_element_by_id("id_product_type"))
         my_select.select_by_index(1)
 
