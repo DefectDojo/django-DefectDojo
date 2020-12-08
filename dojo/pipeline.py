@@ -67,7 +67,7 @@ def modify_permissions(backend, uid, user=None, social=None, *args, **kwargs):
 def update_product_access(backend, uid, user=None, social=None, *args, **kwargs):
     if settings.GITLAB_PROJECT_AUTO_IMPORT is True:
         # Get all product names
-		user_product_names = [prod.name for prod in Product.objects.filter(authorized_users__in=[user])]
+        user_product_names = [prod.name for prod in Product.objects.filter(authorized_users__in=[user])]
         # Get Gitlab access token
         soc = user.social_auth.get()
         token = soc.extra_data['access_token']
