@@ -680,6 +680,8 @@ CELERY_ACCEPT_CONTENT = ['pickle', 'json', 'msgpack', 'yaml']
 CELERY_TASK_SERIALIZER = env('DD_CELERY_TASK_SERIALIZER')
 CELERY_PASS_MODEL_BY_ID = env('DD_CELERY_PASS_MODEL_BY_ID')
 
+CELERY_IMPORTS = ('dojo.tools.tool_issue_updater', )
+
 # Celery beat scheduled tasks
 CELERY_BEAT_SCHEDULE = {
     'add-alerts': {
