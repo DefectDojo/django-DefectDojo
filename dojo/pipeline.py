@@ -3,7 +3,6 @@ import gitlab
 from django.conf import settings
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ObjectDoesNotExist
 from dojo.models import Engagement, Product, Product_Type, Test
 from social_core.backends.azuread_tenant import AzureADTenantOAuth2
 from social_core.backends.google import GoogleOAuth2
