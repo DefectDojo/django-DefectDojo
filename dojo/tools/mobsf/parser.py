@@ -119,14 +119,16 @@ class MobSFParser(object):
         # Binary Analysis
         if "binary_analysis" in data:
             for details in data["binary_analysis"]:
-                mobsf_item = {
-                    "category": "Binary Analysis",
-                    "title": details["title"],
-                    "severity": details["stat"],
-                    "description": details["desc"],
-                    "file_path": details["file"]
-                }
-                mobsf_findings.append(mobsf_item)
+                for binary_analysis_type in details:
+                    if "name" != binary_analysis_type:
+                        mobsf_item = {
+                            "category": "Binary Analysis",
+                            "title": details[binary_analysis_type]["description"].split(".")[0],
+                            "severity": details[binary_analysis_type]["severity"].title(),
+                            "description": details[binary_analysis_type]["description"],
+                            "file_path": details["name"]
+                        }
+                        mobsf_findings.append(mobsf_item)
 
         # Manifest
         if "manifest" in data:
