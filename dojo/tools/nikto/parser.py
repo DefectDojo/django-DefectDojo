@@ -25,11 +25,11 @@ class NiktoXMLParser(object):
         root = tree.getroot()
         scan = root.find('scandetails')
 
-        if  scan is not None:
+        if scan is not None:
             self.process_scandetail(scan, test, dupes)
         else:
-        # New versions of Nikto have a new file type (nxvmlversion="1.2") which adds an additional niktoscan tag
-        # This find statement below is to support new file format while not breaking older Nikto scan files versions.
+            # New versions of Nikto have a new file type (nxvmlversion="1.2") which adds an additional niktoscan tag
+            # This find statement below is to support new file format while not breaking older Nikto scan files versions.
             for scan in root.findall('./niktoscan/scandetails'):
                 self.process_scandetail(scan, test, dupes)
 
