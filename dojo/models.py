@@ -2231,18 +2231,18 @@ class Finding(models.Model):
 
     def get_report_requests(self):
         if self.burprawrequestresponse_set.count() >= 3:
-            return BurpRawRequestResponse.objects.filter(finding=self)[0:3]
+            return self.burprawrequestresponse_set.all()[0:3]
         elif self.burprawrequestresponse_set.count() > 0:
-            return BurpRawRequestResponse.objects.filter(finding=self)
+            return self.burprawrequestresponse_set.all()
 
     def get_request(self):
         if self.burprawrequestresponse_set.count() > 0:
-            reqres = BurpRawRequestResponse.objects.filter(finding=self)[0]
+            reqres = self.burprawrequestresponse_set().first()
         return base64.b64decode(reqres.burpRequestBase64)
 
     def get_response(self):
         if self.burprawrequestresponse_set.count() > 0:
-            reqres = BurpRawRequestResponse.objects.filter(finding=self)[0]
+            reqres = self.burprawrequestresponse_set.first()
         res = base64.b64decode(reqres.burpResponseBase64)
         # Removes all blank lines
         res = re.sub(r'\n\s*\n', '\n', res)
