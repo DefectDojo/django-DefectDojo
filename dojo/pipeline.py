@@ -67,7 +67,7 @@ def modify_permissions(backend, uid, user=None, social=None, *args, **kwargs):
 def update_product_access(backend, uid, user=None, social=None, *args, **kwargs):
     if settings.GITLAB_PROJECT_AUTO_IMPORT is True:
         # Get all product names
-        prod_names = [prod.name for prod in Product.objects.all()]
+		user_product_names = [prod.name for prod in Product.objects.filter(authorized_users__in=[user])]
         # Get Gitlab access token
         soc = user.social_auth.get()
         token = soc.extra_data['access_token']
@@ -77,24 +77,16 @@ def update_product_access(backend, uid, user=None, social=None, *args, **kwargs)
         projects = gl.projects.list(membership=True, all=True)
         project_names = [project.path_with_namespace for project in projects]
         # Create product_type if necessary
-        try:
-            product_type = Product_Type.objects.get(name='Gitlab Import')
-        except ObjectDoesNotExist:
-            product_type = Product_Type.objects.create(name='Gitlab Import')
+        product_type, created = Product_Type.objects.get_or_create(name='Gitlab Import')
         # For each project: create a new product or update product's authorized_users
         for project_name in project_names:
-            if project_name not in prod_names:
+            if project_name not in user_product_names:
                 # Create new product
-                product = Product.objects.create(name=project_name, prod_type=product_type)
-                product.authorized_users.add(user)
-                product.save()
-            else:
-                # Update product
-                product = Product.objects.get(name=project_name)
+                product, created = Product.objects.get_or_create(name=project_name, prod_type=product_type)
                 product.authorized_users.add(user)
                 product.save()
         # For each product: if user is not project member any more, remove him from product's authorized users
-        for product_name in prod_names:
+        for product_name in user_product_names:
             if product_name not in project_names:
                 product = Product.objects.get(name=product_name)
                 product.authorized_users.remove(user)
