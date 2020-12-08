@@ -557,9 +557,11 @@ def import_scan_results(request, eid=None, pid=None):
                 return HttpResponseRedirect(reverse('import_scan_results', args=(engagement,)))
 
             tt, t_created = Test_Type.objects.get_or_create(name=scan_type)
-            # will save in development environment
-            environment, env_created = Development_Environment.objects.get_or_create(
-                name="Development")
+
+            # Will save in the provided environment or in the `Development` one if absent
+            environment_id = request.POST.get('environment', 'Development')
+            environment = Development_Environment.objects.get(id=environment_id)
+
             t = Test(
                 engagement=engagement,
                 test_type=tt,
