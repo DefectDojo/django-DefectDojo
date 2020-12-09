@@ -453,7 +453,7 @@ def add_jira_issue(find):
 
             if System_Settings.objects.get().enable_finding_sla:
 
-                if 'duedate' in meta['projects'][0]['issuetypes'][0]['fields']:
+                if 'duedate' in meta['projects'][0]['issuetypes'][0]['fields'] and Finding.get_number_severity(find.severity):
                     # jira wants YYYY-MM-DD
                     duedate = find.sla_deadline().strftime('%Y-%m-%d')
                     fields['duedate'] = duedate
