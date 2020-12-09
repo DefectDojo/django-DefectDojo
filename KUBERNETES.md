@@ -101,6 +101,8 @@ status of the containers can be viewed by starting up ```minikube dashboard```.
 Note: If the containers are not cached locally the services will start once the
 containers have been pulled locally.
 
+*Amazon ElastiCache for Redis* is *not supported* (tested in Version 10.0.4).
+
 To be able to access DefectDojo, set up an ingress or access the service
 directly by running the following command:
 
