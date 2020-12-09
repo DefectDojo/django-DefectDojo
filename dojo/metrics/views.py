@@ -460,7 +460,7 @@ def metrics(request, mtype):
 
     for obj in filters['accepted']:
         if view == 'Endpoint':
-            obj = finding.finding
+            obj = obj.finding
 
         if obj.test.engagement.product.name not in accepted_in_period_details:
             accepted_in_period_details[obj.test.engagement.product.name] = {
