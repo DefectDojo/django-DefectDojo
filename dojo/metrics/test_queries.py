@@ -4,8 +4,7 @@ Tests for metrics database queries
 
 from datetime import datetime, timezone
 
-from django.test import RequestFactory, TestCase
-from django.urls import reverse
+from django.test import TestCase
 
 from dojo.metrics import queries
 from dojo.models import User

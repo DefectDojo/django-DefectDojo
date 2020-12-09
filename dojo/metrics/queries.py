@@ -40,13 +40,17 @@ def finding_querys(prod_type, user, findings_filter, alert_error_func):
             Q(test__engagement__product__authorized_users__in=[user]) |
             Q(test__engagement__product__prod_type__authorized_users__in=[user]))
 
-    active_findings_query = Finding.objects.filter(verified=True, active=True,
-                                      severity__in=('Critical', 'High', 'Medium', 'Low', 'Info')).prefetch_related(
+    active_findings_query = Finding.objects.filter(
+        verified=True,
+        active=True,
+        severity__in=('Critical', 'High', 'Medium', 'Low', 'Info')
+    ).prefetch_related(
         'test__engagement__product',
         'test__engagement__product__prod_type',
         'test__engagement__risk_acceptance',
         'risk_acceptance_set',
-        'reporter').extra(
+        'reporter'
+    ).extra(
         select={
             'ra_count': 'SELECT COUNT(*) FROM dojo_risk_acceptance INNER JOIN '
                         'dojo_risk_acceptance_accepted_findings ON '
@@ -81,7 +85,7 @@ def finding_querys(prod_type, user, findings_filter, alert_error_func):
         end_date = datetime(end_date.year,
                             end_date.month, end_date.day,
                             tzinfo=timezone.get_current_timezone())
-    except:  #pylint: disable=bare-except
+    except:  # pylint: disable=bare-except
         start_date = timezone.now()
         end_date = timezone.now()
 
@@ -245,7 +249,7 @@ def endpoint_querys(prod_type, user, findings_filter, alert_error_func):
         end_date = datetime(end_date.year,
                             end_date.month, end_date.day,
                             tzinfo=timezone.get_current_timezone())
-    except:  #pylint: disable=bare-except
+    except:  # pylint: disable=bare-except
         start_date = timezone.now()
         end_date = timezone.now()
 
