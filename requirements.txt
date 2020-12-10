@@ -31,7 +31,7 @@ jira==2.0.0
 PyGithub==1.54
 lxml==4.6.2
 Markdown==3.3.3
-mysqlclient==2.0.1
+mysqlclient==2.0.2
 pandas>=0.25
 xlrd>=1.0.0
 pdfkit==0.6.1
