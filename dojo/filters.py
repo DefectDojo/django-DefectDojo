@@ -700,7 +700,7 @@ class ClosedFindingFilter(DojoFilter):
         exclude = ['url', 'description', 'mitigation', 'impact',
                    'endpoint', 'references', 'test', 'is_template',
                    'active', 'verified', 'out_of_scope', 'false_p',
-                   'duplicate', 'thread_id', 'date', 'notes',
+                   'duplicate', 'duplicate_finding', 'thread_id', 'date', 'notes',
                    'numerical_severity', 'reporter', 'endpoints', 'endpoint_status',
                    'last_reviewed', 'review_requested_by', 'defect_review_requested_by',
                    'last_reviewed_by', 'created', 'jira_creation', 'jira_change']
@@ -783,7 +783,7 @@ class AcceptedFindingFilter(DojoFilter):
         exclude = ['url', 'description', 'mitigation', 'impact',
                    'endpoint', 'references', 'test', 'is_template',
                    'active', 'verified', 'out_of_scope', 'false_p',
-                   'duplicate', 'thread_id', 'mitigated', 'notes',
+                   'duplicate', 'duplicate_finding', 'thread_id', 'mitigated', 'notes',
                    'numerical_severity', 'reporter', 'endpoints', 'endpoint_status',
                    'last_reviewed', 'o', 'jira_creation', 'jira_change']
 
@@ -1090,6 +1090,7 @@ class MetricsFindingFilter(FilterSet):
         model = Finding
         exclude = ['url',
                    'description',
+                   'duplicate_finding',
                    'mitigation',
                    'unsaved_endpoints',
                    'unsaved_request',
@@ -1182,6 +1183,7 @@ class ProductMetricsFindingFilter(FilterSet):
         model = Finding
         exclude = ['url',
                    'description',
+                   'duplicate_finding'
                    'mitigation',
                    'unsaved_endpoints',
                    'unsaved_request',
@@ -1297,7 +1299,7 @@ class ReportFindingFilter(DojoFilter):
         label="Risk Accepted")
     # queryset will be restricted in __init__, here we don't have access to the logged in user
     duplicate = ReportBooleanFilter()
-    duplicate_finding = ModelChoiceFilter(queryset=Finding.objects.filter(original_finding__isnull=False))
+    duplicate_finding = ModelChoiceFilter(queryset=Finding.objects.filter(original_finding__isnull=False).distinct())
     out_of_scope = ReportBooleanFilter()
 
     class Meta:
@@ -1353,6 +1355,7 @@ class ReportAuthedFindingFilter(DojoFilter):
     test__engagement__risk_acceptance = ReportRiskAcceptanceFilter(
         label="Risk Accepted")
     duplicate = ReportBooleanFilter()
+    duplicate_finding = ModelChoiceFilter(queryset=Finding.objects.filter(original_finding__isnull=False).distinct())
     out_of_scope = ReportBooleanFilter()
 
     def __init__(self, *args, **kwargs):
