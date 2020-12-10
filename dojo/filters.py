@@ -2,7 +2,7 @@ __author__ = 'Jay Paz'
 import collections
 import logging
 from datetime import timedelta, datetime
-
+from django.apps import apps
 from auditlog.models import LogEntry
 from django.contrib.auth.models import User
 from django.utils import six
@@ -71,7 +71,7 @@ class DojoFilter(FilterSet):
         super(DojoFilter, self).__init__(*args, **kwargs)
 
         # for now we have only fields called "tags"
-        for field in ['tags']:
+        for field in ['tags', 'test__tags', 'test__engagement__tags', 'test__engagement__product__tags']:
             if field in self.form.fields:
                 # print(self.filters)
                 # print(vars(self).keys())
@@ -84,7 +84,26 @@ class DojoFilter(FilterSet):
                 self.form.fields[field] = model._meta.get_field("tags").formfield()
                 self.form.fields[field].widget.tag_options = \
                     self.form.fields[field].widget.tag_options + tagulous.models.options.TagOptions(autocomplete_settings={'width': '200px'})
-            # form.fields['tags_and'].label = self.form.fields['tags_and'].label + ' (and)'
+                tagged_model = get_tags_model_from_field_name(field)
+                if tagged_model:  # only if not the normal tags field
+                    self.form.fields[field].label = get_tags_label_from_model(tagged_model)
+                    self.form.fields[field].autocomplete_tags = tagged_model.tags.tag_model.objects.all().order_by('name')
+
+
+def get_tags_model_from_field_name(field):
+    try:
+        parts = field.split('__')
+        model_name = parts[-2]
+        return apps.get_model('dojo.%s' % model_name, require_ready=True)
+    except Exception as e:
+        return None
+
+
+def get_tags_label_from_model(model):
+    if model:
+        return 'Tags (%s)' % model.__name__.title()
+    else:
+        return 'Tags (Unknown)'
 
 
 class DateRangeFilter(ChoiceFilter):
@@ -731,6 +750,27 @@ class OpenFindingFilter(DojoFilter):
 
     tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
 
+    test__tags = ModelMultipleChoiceFilter(
+        field_name='test__tags__name',
+        to_field_name='name',
+        queryset=Finding.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    test__engagement__tags = ModelMultipleChoiceFilter(
+        field_name='test__engagement__tags__name',
+        to_field_name='name',
+        queryset=Finding.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    test__engagement__product__tags = ModelMultipleChoiceFilter(
+        field_name='test__engagement__product__tags__name',
+        to_field_name='name',
+        queryset=Finding.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
@@ -752,7 +792,8 @@ class OpenFindingFilter(DojoFilter):
                    'numerical_severity', 'reporter', 'last_reviewed', 'line',
                    'duplicate_finding', 'hash_code', 'images', 'endpoint_status',
                    'line_number', 'reviewers', 'mitigated_by', 'sourcefile',
-                   'created', 'jira_creation', 'jira_change', 'tags_from_django_tagging']
+                   'created', 'jira_creation', 'jira_change', 'tags_from_django_tagging',
+                   'tags']
 
     def __init__(self, *args, **kwargs):
         self.user = None

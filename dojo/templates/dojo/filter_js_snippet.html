@@ -17,6 +17,8 @@
             $(this).toggleClass("dropup");
         })
 
+        $('.select2-selection').addClass("form-control input-sm")
+
         $('.{{ request.path|slugify }}-filters select[multiple=multiple]').each(function () {
             var id = this.id
             var label = $("label[for=" + id + "]");

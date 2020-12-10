@@ -100,6 +100,8 @@ def simple_search(request):
 
             search_tags = "tag" in search_operator or "tags" in search_operator or search_operator == ""
             search_findings = "finding" in search_operator or "cve" in search_operator or "id" in search_operator or search_operator == ""
+            # experiment, always show findings tab
+            search_findings = True
             search_finding_templates = "template" in search_operator or search_operator == ""
             search_tests = "test" in search_operator or search_operator == ""
             search_engagements = "engagement" in search_operator or search_operator == ""
@@ -108,21 +110,27 @@ def simple_search(request):
             search_languages = "language" in search_operator or search_operator == ""
             search_technologies = "technology" in search_operator or search_operator == ""
 
-            findings = Finding.objects.all()
-            tests = Test.objects.all()
-            engagements = Engagement.objects.all()
-            products = Product.objects.all()
-            endpoints = Endpoint.objects.all()
+            authorized_findings = Finding.objects.all()
+            authorized_tests = Test.objects.all()
+            authorized_engagements = Engagement.objects.all()
+            authorized_products = Product.objects.all()
+            authorized_endpoints = Endpoint.objects.all()
             finding_templates = Finding_Template.objects.all()
 
             if not request.user.is_staff:
-                findings = findings.filter(Q(test__engagement__product__authorized_users__in=[request.user]) | Q(test__engagement__product__prod_type__authorized_users__in=[request.user]))
-                tests = tests.filter(Q(engagement__product__authorized_users__in=[request.user]) | Q(engagement__product__prod_type__authorized_users__in=[request.user]))
-                engagements = engagements.filter(Q(product__authorized_users__in=[request.user]) | Q(product__prod_type__authorized_users__in=[request.user]))
-                products = products.filter(Q(authorized_users__in=[request.user]) | Q(prod_type__authorized_users__in=[request.user]))
-                endpoints = endpoints.filter(Q(product__authorized_users__in=[request.user]) | Q(product__prod_type__authorized_users__in=[request.user]))
+                authorized_findings = authorized_findings.filter(Q(test__engagement__product__authorized_users__in=[request.user]) | Q(test__engagement__product__prod_type__authorized_users__in=[request.user]))
+                authorized_tests = authorized_tests.filter(Q(engagement__product__authorized_users__in=[request.user]) | Q(engagement__product__prod_type__authorized_users__in=[request.user]))
+                authorized_engagements = authorized_engagements.filter(Q(product__authorized_users__in=[request.user]) | Q(product__prod_type__authorized_users__in=[request.user]))
+                authorized_products = authorized_products.filter(Q(authorized_users__in=[request.user]) | Q(prod_type__authorized_users__in=[request.user]))
+                authorized_endpoints = authorized_endpoints.filter(Q(product__authorized_users__in=[request.user]) | Q(product__prod_type__authorized_users__in=[request.user]))
 
             # TODO better get findings in their own query and match on id. that would allow filtering on additional fields such cve, prod_id, etc.
+
+            findings = authorized_findings
+            tests = authorized_tests
+            engagements = authorized_engagements
+            products = authorized_products
+            endpoints = authorized_endpoints
 
             findings_filter = None
             title_words = None
@@ -148,9 +156,12 @@ def simple_search(request):
             tagged_results = tagged_findings or tagged_finding_templates or tagged_tests or tagged_engagements or tagged_products or tagged_endpoints
 
             if search_findings:
-                findings_filter = OpenFindingFilter(request.GET, queryset=findings, user=request.user, pid=None, prefix='finding')
-                title_words = get_words_for_field(findings_filter.qs, 'title')
-                component_words = get_words_for_field(findings_filter.qs, 'component_name')
+                filter_params = request.GET.copy()
+                # if clean_query and not request.GET.get('title', None):
+                #     filter_params['finding-title'] = clean_query
+                findings_filter = OpenFindingFilter(filter_params, queryset=findings, user=request.user, pid=None, prefix='finding')
+                title_words = get_words_for_field(authorized_findings, 'title')
+                component_words = get_words_for_field(authorized_findings, 'component_name')
                 findings = findings_filter.qs
 
                 if clean_query:
