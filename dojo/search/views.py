@@ -100,7 +100,7 @@ def simple_search(request):
 
             search_tags = "tag" in search_operator or "tags" in search_operator or search_operator == ""
             search_findings = "finding" in search_operator or "cve" in search_operator or "id" in search_operator or search_operator == ""
-            # experiment, always show findings tab
+            # experiment, always search findings even when only supplying a tag or something else
             search_findings = True
             search_finding_templates = "template" in search_operator or search_operator == ""
             search_tests = "test" in search_operator or search_operator == ""
@@ -159,6 +159,12 @@ def simple_search(request):
                 filter_params = request.GET.copy()
                 # if clean_query and not request.GET.get('title', None):
                 #     filter_params['finding-title'] = clean_query
+                if search_tags and clean_query:
+                    # if searching for tags make sure to only show tagged findings
+                    filter_params['finding-tag'] = clean_query
+                    # don't propagate query to watson
+                    clean_query = ''
+
                 findings_filter = OpenFindingFilter(filter_params, queryset=findings, user=request.user, pid=None, prefix='finding')
                 title_words = get_words_for_field(authorized_findings, 'title')
                 component_words = get_words_for_field(authorized_findings, 'component_name')
