@@ -64,34 +64,33 @@ class FortifyXMLParser(object):
         issue_map = {}
         issue_id = "N/A"
         try:
-        for issue in issues:
+            for issue in issues:
                 issue_id = issue.attrib['iid']
-            details = {
-                "Category": issue.find("Category").text,
-                "Folder": issue.find("Folder").text, "Kingdom": issue.find("Kingdom").text,
-                "Abstract": issue.find("Abstract").text,
-                "Friority": issue.find("Friority").text,
-                "FileName": issue.find("Primary").find("FileName").text,
-                "FilePath": issue.find("Primary").find("FilePath").text,
-                    "LineStart": issue.find("Primary").find("LineStart").text}
+                details = {
+                    "Category": issue.find("Category").text,
+                    "Folder": issue.find("Folder").text, "Kingdom": issue.find("Kingdom").text,
+                    "Abstract": issue.find("Abstract").text,
+                    "Friority": issue.find("Friority").text,
+                    "FileName": issue.find("Primary").find("FileName").text,
+                    "FilePath": issue.find("Primary").find("FilePath").text,
+                        "LineStart": issue.find("Primary").find("LineStart").text}
 
                 if issue.find("Primary").find("Snippet"):
                     details["Snippet"] = issue.find("Primary").find("Snippet").text
                 else:
                     details["Snippet"] = "n/a"
 
-            if issue.find("Source"):
-                source = {
-                    "FileName": issue.find("Source").find("FileName").text,
-                    "FilePath": issue.find("Source").find("FilePath").text,
-                    "LineStart": issue.find("Source").find("LineStart").text,
-                    "Snippet": issue.find("Source").find("Snippet").text}
-                details["Source"] = source
+                if issue.find("Source"):
+                    source = {
+                        "FileName": issue.find("Source").find("FileName").text,
+                        "FilePath": issue.find("Source").find("FilePath").text,
+                        "LineStart": issue.find("Source").find("LineStart").text,
+                        "Snippet": issue.find("Source").find("Snippet").text}
+                    details["Source"] = source
 
-            issue_map.update({issue.attrib['iid']: details})
+                issue_map.update({issue.attrib['iid']: details})
         except AttributeError:
             print("XML Parsing blew up on issue number:", issue_id)
-            print("Snippet text was: ", snippet_text)
             raise
         # map created
 
