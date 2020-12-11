@@ -412,7 +412,7 @@ class FindingViewSet(mixins.ListModelMixin,
             finding.notes.add(note)
 
             if finding.has_jira_issue:
-                jira_helper.add_comment_task(finding, note)
+                jira_helper.add_comment(finding, note)
 
             serialized_note = serializers.NoteSerializer({
                 "author": author, "entry": entry,
