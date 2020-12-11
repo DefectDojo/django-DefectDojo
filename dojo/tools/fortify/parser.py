@@ -73,7 +73,7 @@ class FortifyXMLParser(object):
                     "Friority": issue.find("Friority").text,
                     "FileName": issue.find("Primary").find("FileName").text,
                     "FilePath": issue.find("Primary").find("FilePath").text,
-                        "LineStart": issue.find("Primary").find("LineStart").text}
+                    "LineStart": issue.find("Primary").find("LineStart").text}
 
                 if issue.find("Primary").find("Snippet"):
                     details["Snippet"] = issue.find("Primary").find("Snippet").text
