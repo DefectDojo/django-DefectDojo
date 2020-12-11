@@ -62,7 +62,10 @@ class FortifyXMLParser(object):
 
         # All issues obtained, create a map for reference
         issue_map = {}
+        issue_id = "N/A"
+        try:
         for issue in issues:
+                issue_id = issue.attrib['iid']
             details = {
                 "Category": issue.find("Category").text,
                 "Folder": issue.find("Folder").text, "Kingdom": issue.find("Kingdom").text,
@@ -70,8 +73,12 @@ class FortifyXMLParser(object):
                 "Friority": issue.find("Friority").text,
                 "FileName": issue.find("Primary").find("FileName").text,
                 "FilePath": issue.find("Primary").find("FilePath").text,
-                "LineStart": issue.find("Primary").find("LineStart").text,
-                "Snippet": issue.find("Primary").find("Snippet").text}
+                    "LineStart": issue.find("Primary").find("LineStart").text}
+
+                if issue.find("Primary").find("Snippet"):
+                    details["Snippet"] = issue.find("Primary").find("Snippet").text
+                else:
+                    details["Snippet"] = "n/a"
 
             if issue.find("Source"):
                 source = {
@@ -82,6 +89,10 @@ class FortifyXMLParser(object):
                 details["Source"] = source
 
             issue_map.update({issue.attrib['iid']: details})
+        except AttributeError:
+            print("XML Parsing blew up on issue number:", issue_id)
+            print("Snippet text was: ", snippet_text)
+            raise
         # map created
 
         self.items = []
