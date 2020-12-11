@@ -6,7 +6,9 @@ from defusedxml import ElementTree
 from dateutil import parser
 import re
 from dojo.models import Finding
+import logging
 
+logger = logging.getLogger(__name__)
 
 class FortifyXMLParser(object):
     language_list = []
@@ -90,7 +92,7 @@ class FortifyXMLParser(object):
 
                 issue_map.update({issue.attrib['iid']: details})
         except AttributeError:
-            print("XML Parsing blew up on issue number:", issue_id)
+            logger.warning("XML Parsing blew up on issue number:", issue_id)
             raise
         # map created
 
