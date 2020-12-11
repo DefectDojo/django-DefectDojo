@@ -1,67 +1,9 @@
 import logging
 import json
 from datetime import datetime
-#from dojo.models import Finding
+from dojo.models import Finding
 
 logger = logging.getLogger(__name__)
-
-class Finding():
-    def __init__(self, title, test, severity, numerical_severity,
-                 description, mitigation, references, cve, cwe,
-                 active, verified, false_p, duplicate, out_of_scope,
-                 mitigated, impact, static_finding, dynamic_finding, file_path, line):
-        self.title = ""
-        self.file_path = file_path
-        self.line = line
-        self.severity = severity
-        self.description = description
-        self.static_finding = static_finding
-        self.dynamic_finding = dynamic_finding
-
-    @staticmethod
-    def get_numerical_severity(severity):
-        if severity == 'Critical':
-            return 'S0'
-        elif severity == 'High':
-            return 'S1'
-        elif severity == 'Medium':
-            return 'S2'
-        elif severity == 'Low':
-            return 'S3'
-        elif severity == 'Info':
-            return 'S4'
-        else:
-            return 'S5'
-
-    @staticmethod
-    def get_number_severity(severity):
-        if severity == 'Critical':
-            return 4
-        elif severity == 'High':
-            return 3
-        elif severity == 'Medium':
-            return 2
-        elif severity == 'Low':
-            return 1
-        elif severity == 'Info':
-            return 0
-        else:
-            return 5
-
-
-class SarifArtifact(object):
-    """
-    """
-    def __init__(self, location):
-        self.location = location
-
-
-class SarifArtifactLocation(object):
-    """
-    """ 
-    def __init__(self, uri, index):
-        self.uri = uri
-        self.index = index
 
 
 class SarifParser(object):
