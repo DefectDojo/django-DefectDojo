@@ -455,8 +455,9 @@ def add_jira_issue(find):
 
                 if 'duedate' in meta['projects'][0]['issuetypes'][0]['fields']:
                     # jira wants YYYY-MM-DD
-                    duedate = find.sla_deadline().strftime('%Y-%m-%d')
-                    fields['duedate'] = duedate
+                    duedate = find.sla_deadline()
+                    if duedate:
+                        fields['duedate'] = duedate.strftime('%Y-%m-%d')
 
             if len(find.endpoints.all()) > 0:
                 if not meta:
