@@ -10,6 +10,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class FortifyXMLParser(object):
     language_list = []
 
