@@ -741,14 +741,14 @@ class OpenFindingFilter(DojoFilter):
                                 exclude=True,
                                 label='has notes')
 
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
+
     tags = ModelMultipleChoiceFilter(
         field_name='tags__name',
         to_field_name='name',
         queryset=Finding.tags.tag_model.objects.all().order_by('name'),
         # label='tags', # doesn't work with tagulous, need to set in __init__ below
     )
-
-    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
 
     test__tags = ModelMultipleChoiceFilter(
         field_name='test__tags__name',
@@ -1127,6 +1127,8 @@ class SimilarFindingFilter(DojoFilter):
                                 exclude=True,
                                 label='has notes')
 
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
+
     tags = ModelMultipleChoiceFilter(
         field_name='tags__name',
         to_field_name='name',
@@ -1134,7 +1136,26 @@ class SimilarFindingFilter(DojoFilter):
         # label='tags', # doesn't work with tagulous, need to set in __init__ below
     )
 
-    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
+    test__tags = ModelMultipleChoiceFilter(
+        field_name='test__tags__name',
+        to_field_name='name',
+        queryset=Finding.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    test__engagement__tags = ModelMultipleChoiceFilter(
+        field_name='test__engagement__tags__name',
+        to_field_name='name',
+        queryset=Finding.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    test__engagement__product__tags = ModelMultipleChoiceFilter(
+        field_name='test__engagement__product__tags__name',
+        to_field_name='name',
+        queryset=Finding.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
 
     o = OrderingFilter(
         # tuple-mapping retains order
