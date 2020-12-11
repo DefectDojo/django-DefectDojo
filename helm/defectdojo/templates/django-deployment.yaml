@@ -51,6 +51,7 @@ spec:
         {{- end }}
       {{- end }}
       - name: uwsgi
+        command: ["/entrypoint-uwsgi-cb.sh"]
         image: '{{ template "django.uwsgi.repository" . }}:{{ .Values.tag }}'
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         volumeMounts:

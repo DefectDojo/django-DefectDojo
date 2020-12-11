@@ -2,4 +2,3 @@
 .gitignore
 *.md
 .env*
-**/local_settings.py
