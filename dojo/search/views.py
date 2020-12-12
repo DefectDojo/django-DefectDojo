@@ -110,6 +110,8 @@ def simple_search(request):
 
             if search_findings:
                 findings_filter = OpenFindingFilter(request.GET, queryset=authorized_findings, user=request.user, pid=None, prefix='finding')
+                # setting initial values for filters is not supported and discouraged: https://django-filter.readthedocs.io/en/stable/guide/tips.html#using-initial-values-as-defaults
+                # we could try to modify request.GET before generating the filter, but for now we'll leave it as is
 
                 title_words = get_words_for_field(authorized_findings, 'title')
                 component_words = get_words_for_field(authorized_findings, 'component_name')
@@ -385,15 +387,10 @@ def apply_tag_filters(qs, operators, findings_filter=None):
         value = operators['tag']
         value = ','.join(value)  # contains need a single value
         findings = findings.filter(tags__name__contains=value)
-        if findings_filter:
-            findings_filter.form.initial['tag'] = value
 
     if 'tags' in operators:
         value = operators['tags']
         qs = qs.filter(tags__name__in=value)
-        # will this work for modelchoice filter?
-        if findings_filter:
-            findings_filter.form.initial['tags'] = value
 
     return qs
 
@@ -401,7 +398,6 @@ def apply_tag_filters(qs, operators, findings_filter=None):
 def apply_endpoint_filter(qs, operators, findings_filter=None):
     if 'endpoint' in operators:
         qs = qs.filter(endpoints__host__contains=','.join(operators['endpoint']))
-        # unable to set initial?
 
     return qs
 
@@ -410,7 +406,5 @@ def apply_cve_filter(qs, operators, findings_filter=None):
     if 'cve' in operators:
         value = operators[operator]
         qs = qs.filter(Q(cve=value) | Q(cve__isnull=True))  # only check cve if it's present
-        if findings_filter:
-            findings_filter.form.initial['cve'] = value
 
     return qs
