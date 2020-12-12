@@ -16,7 +16,7 @@ class TestSafetyParser(TestCase):
         with open(testfile) as f:
             parser = SarifParser(f, Test())
         self.assertEqual(1, len(parser.items))
-        item = sarif_parser.items[0]
+        item = parser.items[0]
         self.assertEqual("collections/list.h", item.file_path)
         self.assertEqual(15, item.line)
         self.assertEqual("Critical", item.severity)
