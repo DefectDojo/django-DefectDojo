@@ -28,7 +28,7 @@ class SarifParser(object):
             tree = json.loads(data)
         except:
             raise Exception("Invalid format")
-        
+
         return tree
 
     def get_items(self, tree, test):
