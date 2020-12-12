@@ -10,12 +10,10 @@ class DojoTests(BaseTestCase):
 
     def test_login(self):
         driver = self.login_page()
-
         self.assertTrue(self.is_text_present_on_page(text='Active Engagements'))
 
     # not included in suite below for unknown reasons
     def test_create_product(self):
-        driver = self.login_page()
         self.goto_product_overview(driver)
         driver.find_element_by_id("dropdownMenu1").click()
         driver.find_element_by_link_text("Add Product").click()
@@ -30,7 +28,6 @@ class DojoTests(BaseTestCase):
 
     # not included in suite below for unknown reasons
     def test_engagement(self):
-        driver = self.login_page()
         driver = self.driver
         self.goto_product_overview(driver)
         driver.find_element_by_link_text("Product List").click()
@@ -74,9 +71,37 @@ class DojoTests(BaseTestCase):
 
     def test_search(self):
         # very basic search test to see if it doesn't 500
-        driver = self.login_page()
         driver.find_element_by_id("simple_search").clear()
         driver.find_element_by_id("simple_search").send_keys('finding')
+        driver.find_element_by_id("simple_search_submit").click()
+
+    def test_search_cve(self):
+        # very basic search test to see if it doesn't 500
+        driver.find_element_by_id("simple_search").clear()
+        driver.find_element_by_id("simple_search").send_keys('cve:CVE-2020-12345')
+        driver.find_element_by_id("simple_search_submit").click()
+
+        driver.find_element_by_id("simple_search").clear()
+        driver.find_element_by_id("simple_search").send_keys('CVE-2020-12345')
+        driver.find_element_by_id("simple_search_submit").click()
+
+    def test_search_tag(self):
+        # very basic search test to see if it doesn't 500
+        driver.find_element_by_id("simple_search").clear()
+        driver.find_element_by_id("simple_search").send_keys('tag:magento')
+        driver.find_element_by_id("simple_search_submit").click()
+
+    def test_search_tags(self):
+        # very basic search test to see if it doesn't 500
+        driver.find_element_by_id("simple_search").clear()
+        driver.find_element_by_id("simple_search").send_keys('tags:php')
+        driver.find_element_by_id("simple_search_submit").click()
+
+    def test_search_id(self):
+        # very basic search test to see if it doesn't 500
+        driver = self.goto_some_page()
+        driver.find_element_by_id("simple_search").clear()
+        driver.find_element_by_id("simple_search").send_keys('id:1')
         driver.find_element_by_id("simple_search_submit").click()
 
     def is_element_present(self, how, what):
@@ -110,6 +135,10 @@ def suite():
     suite = unittest.TestSuite()
     suite.addTest(DojoTests('test_login'))
     suite.addTest(DojoTests('test_search'))
+    suite.addTest(DojoTests('test_search_cve'))
+    suite.addTest(DojoTests('test_search_tag'))
+    suite.addTest(DojoTests('test_search_tags'))
+    suite.addTest(DojoTests('test_search_id'))
     return suite
 
 
