@@ -12,6 +12,7 @@ from dojo.finding.views import prefetch_for_findings
 from dojo.filters import OpenFindingFilter
 from django.conf import settings
 import shlex
+import itertools
 
 logger = logging.getLogger(__name__)
 
@@ -67,17 +68,19 @@ def simple_search(request):
 
             search_tag = "tag" in operators or not operators
             search_tags = "tags" in operators or not operators
-            search_finding_id = "id" in operators.keys()
-            search_findings = "finding" in operators.keys() or "cve" in operators.keys() or "id" in operators.keys() or not operators
-            # experiment, always search findings even when only supplying a tag or something else
-            search_findings = True
-            search_finding_templates = "template" in operators.keys() or not operators
-            search_tests = "test" in operators.keys() or not operators
-            search_engagements = "engagement" in operators.keys() or not operators
-            search_products = "product" in operators.keys() or not operators
-            search_endpoints = "endpoint" in operators.keys() or not operators
-            search_languages = "language" in operators.keys() or not operators
-            search_technologies = "technology" in operators.keys() or not operators
+
+            search_cve = "cve" in operators
+
+            search_finding_id = "id" in operators
+            search_findings = "finding" in operators or search_cve or search_finding_id or not operators
+
+            search_finding_templates = "template" in operators or not (operators or search_finding_id or search_cve)
+            search_tests = "test" in operators or not operators or not (operators or search_finding_id or search_cve)
+            search_engagements = "engagement" in operators or not (operators or search_finding_id or search_cve)
+            search_products = "product" in operators or not (operators or search_finding_id or search_cve)
+            search_endpoints = "endpoint" in operators or not (operators or search_finding_id or search_cve)
+            search_languages = "language" in operators or not (operators or search_finding_id or search_cve)
+            search_technologies = "technology" in operators or not (operators or search_finding_id or search_cve)
 
             authorized_findings = Finding.objects.all()
             authorized_tests = Test.objects.all()
@@ -108,7 +111,15 @@ def simple_search(request):
 
             keywords_query = ' '.join(keywords)
 
-            if search_findings:
+            if search_finding_id:
+                logger.debug('searching finding id')
+
+                findings = authorized_findings
+                findings = findings.filter(id=operators['id'][0])
+
+            elif search_findings:
+                logger.debug('searching findings')
+
                 findings_filter = OpenFindingFilter(request.GET, queryset=authorized_findings, user=request.user, pid=None, prefix='finding')
                 # setting initial values for filters is not supported and discouraged: https://django-filter.readthedocs.io/en/stable/guide/tips.html#using-initial-values-as-defaults
                 # we could try to modify request.GET before generating the filter, but for now we'll leave it as is
@@ -116,27 +127,32 @@ def simple_search(request):
                 title_words = get_words_for_field(authorized_findings, 'title')
                 component_words = get_words_for_field(authorized_findings, 'component_name')
 
-                findings = apply_tag_filters(findings, operators, findings_filter)
-                findings = apply_endpoint_filter(findings, operators, findings_filter)
-                findings = apply_cve_filter(findings, operators, findings_filter)
+                findings = apply_tag_filters(findings, operators)
+                findings = apply_endpoint_filter(findings, operators)
+                findings = apply_cve_filter(findings, operators)
 
                 if keywords_query:
                     logger.debug('going watson with: %s', keywords_query)
                     watson_results = watson.filter(findings_filter.qs, keywords_query)[:max_results]
                     findings = findings.filter(id__in=[watson.id for watson in watson_results])
 
-                # prefetch after watson to avoid inavlid query errors due to watson not understanding prefetching
-                findings = prefetch_for_findings(findings)
-                # some over the top tag displaying happening...
-                findings = findings.prefetch_related('test__engagement__product__tags')
-
-                findings = findings[:max_results]
             else:
                 findings = None
                 findings_filter = None
                 component_words = None
 
+            # prefetch after watson to avoid inavlid query errors due to watson not understanding prefetching
+            if findings:
+                logger.debug('prefetching findings')
+                findings = prefetch_for_findings(findings)
+                # some over the top tag displaying happening...
+                findings = findings.prefetch_related('test__engagement__product__tags')
+
+                findings = findings[:max_results]
+
             if search_tag or search_tags:
+                logger.debug('searching tags')
+
                 Q1, Q2 = Q(), Q()
 
                 if search_tag:  # single tag => contains
@@ -148,7 +164,6 @@ def simple_search(request):
                     tags = operators['tags'] if 'tags' in operators else keywords
                     Q2 = Q(tags__name__in=tags)
 
-            if Q1 or Q2:
                 tagged_findings = authorized_findings.filter(Q1 | Q2).distinct()[:max_results]
                 tagged_finding_templates = authorized_finding_templates.filter(Q1 | Q2).distinct()[:max_results]
                 tagged_tests = authorized_tests.filter(Q1 | Q2).distinct()[:max_results]
@@ -166,6 +181,8 @@ def simple_search(request):
             tagged_results = tagged_findings or tagged_finding_templates or tagged_tests or tagged_engagements or tagged_products or tagged_endpoints
 
             if search_finding_templates:
+                logger.debug('searching finding templates')
+
                 finding_templates = authorized_finding_templates
                 finding_templates = apply_tag_filters(finding_templates, operators)
 
@@ -178,6 +195,8 @@ def simple_search(request):
                 finding_templates = None
 
             if search_tests:
+                logger.debug('searching tests')
+
                 tests = authorized_tests
                 tests = apply_tag_filters(tests, operators)
 
@@ -191,6 +210,8 @@ def simple_search(request):
                 tests = None
 
             if search_engagements:
+                logger.debug('searching engagements')
+
                 engagements = authorized_engagements
                 engagements = apply_tag_filters(engagements, operators)
 
@@ -204,6 +225,8 @@ def simple_search(request):
                 engagements = None
 
             if search_products:
+                logger.debug('searching products')
+
                 products = authorized_products
                 products = apply_tag_filters(products, operators)
 
@@ -217,6 +240,8 @@ def simple_search(request):
                 products = None
 
             if search_endpoints:
+                logger.debug('searching endpoint')
+
                 endpoints = authorized_endpoints
                 endpoints = apply_tag_filters(endpoints, operators)
 
@@ -227,6 +252,8 @@ def simple_search(request):
                 endpoints = None
 
             if search_languages:
+                logger.debug('searching languages')
+
                 languages = Languages.objects.filter(language__language__icontains=keywords_query)
                 languages = languages.prefetch_related('product', 'product__tags')
                 languages = languages[:max_results]
@@ -234,13 +261,23 @@ def simple_search(request):
                 languages = None
 
             if search_technologies:
+                logger.debug('searching technologies')
+
                 app_analysis = App_Analysis.objects.filter(name__icontains=keywords_query)
                 app_analysis = app_analysis[:max_results]
             else:
                 app_analysis = None
 
-            # generic = watson.search(keywords_query, models=(Finding,)).prefetch_related('object')
-            generic = watson.search(keywords_query).prefetch_related('object')[:max_results]
+            # make sure watson only searches in authorized model instances
+            if keywords_query:
+                logger.debug('searching generic')
+                logger.debug('going generic with: %s', keywords_query)
+                generic = watson.search(keywords_query, models=(
+                    authorized_findings, authorized_tests, authorized_engagements,
+                    authorized_products, authorized_endpoints,
+                    authorized_finding_templates, App_Analysis)).prefetch_related('object')[:max_results]
+            else:
+                generic = None
 
             # paging doesn't work well with django_watson
             # paged_generic = get_page_items(request, generic, 25)
@@ -250,6 +287,8 @@ def simple_search(request):
             # generic = watson.search("qander document 'CVE-2019-8331'")[:10].prefetch_related('object')
             # generic = watson.search("'CVE-2020-6754'")[:10].prefetch_related('object')
             # generic = watson.search(" 'ISEC-433'")[:10].prefetch_related('object')
+
+            logger.debug('all searched')
 
         else:
             logger.debug(form.errors)
@@ -334,7 +373,7 @@ def simple_search(request):
     keywords:  ['some', 'space inside']
 
     query:     tags:anchore cve:CVE-2020-1234 jquery
-    operators: {'tags': ['anchore'], 'cve': ["'CVE-2020-1234'"]}
+    operators: {'tags': ['anchore'], 'cve': ['CVE-2020-1234']}
     keywords:  ['jquery']
     '''
 
@@ -356,7 +395,10 @@ def parse_search_query(clean_query):
             if operator not in operators:
                 operators[operator] = []
 
-            operators[operator].append(cve_fix(parameter))
+            operators[operator].append(parameter)
+
+            # if operator == 'cve':  # operator filters on findings, keywords go to watson
+            #     keywords.append(cve_fix(parameter))
         else:
             keywords.append(cve_fix(query_part))
 
@@ -376,35 +418,82 @@ def cve_fix(keyword):
     # - https://github.com/DefectDojo/django-DefectDojo/issues/1092
     # - https://github.com/DefectDojo/django-DefectDojo/issues/2081
 
-    if bool(cve_pattern.match(keyword)):
-        return '\'' + keyword + '\''
+    cves = []
+    keyword_parts = keyword.split(',')
+    for keyword_part in keyword_parts:
+        if bool(cve_pattern.match(keyword_part)):
+            cves.append('\'' + keyword_part + '\'')
 
-    return keyword
+    return ' '.join(cves)
 
 
-def apply_tag_filters(qs, operators, findings_filter=None):
-    if 'tag' in operators:
-        value = operators['tag']
-        value = ','.join(value)  # contains need a single value
-        findings = findings.filter(tags__name__contains=value)
+def apply_tag_filters(qs, operators, skip_relations=False):
+    tag_filters = {'tag': ''}
 
-    if 'tags' in operators:
-        value = operators['tags']
-        qs = qs.filter(tags__name__in=value)
+    if qs.model == Finding:
+        tag_filters = {
+            'tag': '',
+            'test-tag': 'test',
+            'engagement-tag': 'test__engagement__',
+            'product-tag': 'test__engagement__product__',
+        }
+
+    if qs.model == Test:
+        tag_filters = {
+            'tag': '',
+            'test-tag': '',
+            'engagement-tag': 'engagement__',
+            'product-tag': 'engagement__product__',
+        }
+
+    if qs.model == Engagement:
+        tag_filters = {
+            'tag': '',
+            'engagement-tag': '',
+            'product-tag': 'product__',
+        }
+
+    if qs.model == Product:
+        tag_filters = {
+            'tag': '',
+            'product-tag': '',
+        }
+
+    for tag_filter in tag_filters:
+        if tag_filter in operators:
+            value = operators[tag_filter]
+            value = ','.join(value)  # contains need a single value
+            qs = qs.filter(**{'%stags__name__contains' % tag_filters[tag_filter]: value})
+
+    for tag_filter in tag_filters:
+        if tag_filter + 's' in operators:
+            value = operators[tag_filter + 's']
+            value = ','.join(value)  # contains need a single value
+            qs = qs.filter(**{'%stags__name__in' % tag_filters[tag_filter]})
 
     return qs
 
 
-def apply_endpoint_filter(qs, operators, findings_filter=None):
+def apply_endpoint_filter(qs, operators):
     if 'endpoint' in operators:
         qs = qs.filter(endpoints__host__contains=','.join(operators['endpoint']))
 
     return qs
 
 
-def apply_cve_filter(qs, operators, findings_filter=None):
+def apply_cve_filter(qs, operators):
     if 'cve' in operators:
-        value = operators[operator]
-        qs = qs.filter(Q(cve=value) | Q(cve__isnull=True))  # only check cve if it's present
+        value = operators['cve']
+
+        # possible value:
+        # ['CVE-2020-6754]
+        # ['CVE-2020-6754,CVE-2018-7489']
+        # or when entered multiple times:
+        # ['CVE-2020-6754,CVE-2018-7489', 'CVE-2020-1234']
+
+        # so flatten like mad:
+        cves = list(itertools.chain.from_iterable([cve.split(',') for cve in value]))
+        logger.debug('cve filter: %s', cves)
+        qs = qs.filter(Q(cve__in=cves))
 
     return qs
