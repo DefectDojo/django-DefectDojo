@@ -50,9 +50,10 @@ def get_rules(run):
         rules[item['id']] = item
     return rules
 
+
 def get_artifacts(run):
     artifacts = {}
-    custom_index = 0 # hack because some tool doesn't generate this attribute
+    custom_index = 0  # hack because some tool doesn't generate this attribute
     for tree_artifact in run.get('artifacts', []):
         artifacts[tree_artifact.get('index', custom_index)] = tree_artifact
         custom_index += 1
