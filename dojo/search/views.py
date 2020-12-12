@@ -64,23 +64,21 @@ def simple_search(request):
 
             operators, keywords = parse_search_query(clean_query)
 
-            logger.debug('cve clean_query: [%s]', clean_query)
-
-            search_tag = "tag" in operators or not operators
-            search_tags = "tags" in operators or not operators
+            search_tags = "tag" in operators or "test-tag" in operators or "engagement-tag" in operators or "product-tag" or\
+                          "tags" in operators or "test-tags" in operators or "engagement-tags" in operators or "product-tags" in operators
 
             search_cve = "cve" in operators
 
             search_finding_id = "id" in operators
-            search_findings = "finding" in operators or search_cve or search_finding_id or not operators
+            search_findings = "finding" in operators or search_cve or search_finding_id or search_tags
 
-            search_finding_templates = "template" in operators or not (operators or search_finding_id or search_cve)
-            search_tests = "test" in operators or not operators or not (operators or search_finding_id or search_cve)
-            search_engagements = "engagement" in operators or not (operators or search_finding_id or search_cve)
-            search_products = "product" in operators or not (operators or search_finding_id or search_cve)
-            search_endpoints = "endpoint" in operators or not (operators or search_finding_id or search_cve)
-            search_languages = "language" in operators or not (operators or search_finding_id or search_cve)
-            search_technologies = "technology" in operators or not (operators or search_finding_id or search_cve)
+            search_finding_templates = "template" in operators or search_tags or not (operators or search_finding_id or search_cve)
+            search_tests = "test" in operators or search_tags or not (operators or search_finding_id or search_cve)
+            search_engagements = "engagement" in operators or search_tags or not (operators or search_finding_id or search_cve)
+            search_products = "product" in operators or search_tags or not (operators or search_finding_id or search_cve)
+            search_endpoints = "endpoint" in operators or search_tags or not (operators or search_finding_id or search_cve)
+            search_languages = "language" in operators or search_tags or not (operators or search_finding_id or search_cve)
+            search_technologies = "technology" in operators or search_tags or not (operators or search_finding_id or search_cve)
 
             authorized_findings = Finding.objects.all()
             authorized_tests = Test.objects.all()
@@ -150,18 +148,18 @@ def simple_search(request):
 
                 findings = findings[:max_results]
 
-            if search_tag or search_tags:
+            tag = operators['tag'] if 'tag' in operators else keywords
+            tags = operators['tags'] if 'tags' in operators else keywords
+            if search_tags and tag or tags:
                 logger.debug('searching tags')
 
                 Q1, Q2 = Q(), Q()
 
-                if search_tag:  # single tag => contains
-                    tag = operators['tag'] if 'tag' in operators else keywords
+                if tag:
                     tag = ','.join(tag)  # contains needs a single value
                     Q1 = Q(tags__name__contains=tag)
 
-                if search_tags:  # multiple tags => in
-                    tags = operators['tags'] if 'tags' in operators else keywords
+                if tags:
                     Q2 = Q(tags__name__in=tags)
 
                 tagged_findings = authorized_findings.filter(Q1 | Q2).distinct()[:max_results]
