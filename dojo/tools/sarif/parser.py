@@ -98,7 +98,7 @@ def get_item(finding, rules, artifacts, test):
             mitigated = datetime.utcnow()
     else:
         mitigated = None
-    
+
     # if there is a location get it
     file_path = None
     line = -1
@@ -121,7 +121,6 @@ def get_item(finding, rules, artifacts, test):
         title = finding['message'].get('text', 'No text')
         description = get_message(rule['fullDescription'])
 
-
     finding = Finding(title=finding['ruleId'],
                       test=test,
                       severity=severity,
@@ -138,8 +137,8 @@ def get_item(finding, rules, artifacts, test):
                       out_of_scope=out_of_scope,
                       mitigated=mitigated,
                       impact="No impact provided",
-                      static_finding=True, # by definition
-                      dynamic_finding=False, # by definition
+                      static_finding=True,  # by definition
+                      dynamic_finding=False,  # by definition
                       file_path=file_path,
                       line=line)
 
