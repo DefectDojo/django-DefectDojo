@@ -247,8 +247,8 @@
                                   </sup>
                                 </td>
                                 <td>
-                                  {% if e.finding_count_endpoint > 0 %}
-                                  <a href="{% url 'open_findings' %}?endpoints={{ e.id }}">{{ e.finding_count_endpoint }}</a>
+                                  {% if e.active_finding_count > 0 %}
+                                  <a href="{% url 'open_findings' %}?endpoints={{ e.id }}">{{ e.active_finding_count }}</a>
                                   {% else %}
                                   No Open, Active Findings
                                   {% endif %}

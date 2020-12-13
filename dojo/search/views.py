@@ -9,6 +9,7 @@ from dojo.models import Finding, Finding_Template, Product, Test, Endpoint, Enga
 from dojo.utils import add_breadcrumb, get_words_for_field
 import re
 from dojo.finding.views import prefetch_for_findings
+from dojo.endpoint.views import prefetch_for_endpoints
 from dojo.filters import OpenFindingFilter
 from django.conf import settings
 import shlex
@@ -244,7 +245,7 @@ def simple_search(request):
                 endpoints = apply_tag_filters(endpoints, operators)
 
                 endpoints = endpoints.filter(Q(host__icontains=keywords_query) | Q(path__icontains=keywords_query) | Q(fqdn__icontains=keywords_query) | Q(protocol__icontains=keywords_query))
-                endpoints = endpoints.prefetch_related('product', 'tags', 'product__tags')
+                endpoints = prefetch_for_endpoints(endpoints)
                 endpoints = endpoints[:max_results]
             else:
                 endpoints = None
@@ -422,7 +423,10 @@ def cve_fix(keyword):
         if bool(cve_pattern.match(keyword_part)):
             cves.append('\'' + keyword_part + '\'')
 
-    return ' '.join(cves)
+    if cves:
+        return ' '.join(cves)
+    else:
+        return keyword
 
 
 def apply_tag_filters(qs, operators, skip_relations=False):
