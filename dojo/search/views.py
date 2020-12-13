@@ -71,7 +71,7 @@ def simple_search(request):
             search_cve = "cve" in operators
 
             search_finding_id = "id" in operators
-            search_findings = "finding" in operators or search_cve or search_finding_id or search_tags
+            search_findings = "finding" in operators or search_cve or search_finding_id or search_tags or not operators
 
             search_finding_templates = "template" in operators or search_tags or not (operators or search_finding_id or search_cve)
             search_tests = "test" in operators or search_tags or not (operators or search_finding_id or search_cve)
@@ -120,12 +120,14 @@ def simple_search(request):
             elif search_findings:
                 logger.debug('searching findings')
 
-                findings_filter = OpenFindingFilter(request.GET, queryset=authorized_findings, user=request.user, pid=None, prefix='finding')
+                findings_filter = OpenFindingFilter(request.GET, queryset=findings, user=request.user, pid=None, prefix='finding')
                 # setting initial values for filters is not supported and discouraged: https://django-filter.readthedocs.io/en/stable/guide/tips.html#using-initial-values-as-defaults
                 # we could try to modify request.GET before generating the filter, but for now we'll leave it as is
 
                 title_words = get_words_for_field(authorized_findings, 'title')
                 component_words = get_words_for_field(authorized_findings, 'component_name')
+
+                findings = findings_filter.qs
 
                 findings = apply_tag_filters(findings, operators)
                 findings = apply_endpoint_filter(findings, operators)
