@@ -13,6 +13,9 @@ class SarifParser(object):
     def __init__(self, filehandle, test):
         tree = self.parse_json(filehandle)
 
+        # by default give the test a title linked to the first tool in the report
+        test.title = f"SARIF ({tree['runs'][0]['tool']['driver']['name']})"
+
         if tree:
             self.items = [data for data in self.get_items(tree, test)]
         else:
