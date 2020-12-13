@@ -15,6 +15,7 @@ RUN \
     postgresql-client \
     xmlsec1 \
     git \
+    uuid-runtime \
     && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists && \
