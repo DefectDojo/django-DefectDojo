@@ -7,14 +7,18 @@ from dojo.tools.sarif.parser import SarifParser
 class TestSafetyParser(TestCase):
     def test_example_report(self):
         testfile = "dojo/unittests/scans/sarif/DefectDojo_django-DefectDojo__2020-12-11_13 42 10__export.sarif"
+        test = Test()
         with open(testfile) as f:
-            parser = SarifParser(f, Test())
+            parser = SarifParser(f, test)
+        self.assertIsNotNone(test.title)
         self.assertEqual(510, len(parser.items))
 
     def test_example2_report(self):
         testfile = "dojo/unittests/scans/sarif/appendix_k.sarif"
+        test = Test()
         with open(testfile) as f:
-            parser = SarifParser(f, Test())
+            parser = SarifParser(f, test)
+        self.assertIsNotNone(test.title)
         self.assertEqual(1, len(parser.items))
         item = parser.items[0]
         self.assertEqual("collections/list.h", item.file_path)
