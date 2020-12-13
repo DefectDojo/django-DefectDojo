@@ -21,6 +21,8 @@ logger = logging.getLogger(__name__)
 cve_pattern = re.compile(r'(^CVE-(1999|2\d{3})-(0\d{2}[0-9]|[1-9]\d{3,}))$')
 # cve_pattern = re.compile(r'(CVE-(1999|2\d{3})-(0\d{2}[0-9]|[1-9]\d{3,}))')
 
+max_results = settings.SEARCH_MAX_RESULTS
+
 
 def simple_search(request):
     ip_addresses = []
@@ -51,8 +53,6 @@ def simple_search(request):
     component_words = None
     paged_generic = None
 
-    max_results = settings.SEARCH_MAX_RESULTS
-
     # if request.method == 'GET' and "query" in request.GET:
     if request.method == 'GET':
         form = SimpleSearchForm(request.GET)
@@ -65,7 +65,7 @@ def simple_search(request):
 
             operators, keywords = parse_search_query(clean_query)
 
-            search_tags = "tag" in operators or "test-tag" in operators or "engagement-tag" in operators or "product-tag" or\
+            search_tags = "tag" in operators or "test-tag" in operators or "engagement-tag" in operators or "product-tag" in operators or\
                           "tags" in operators or "test-tags" in operators or "engagement-tags" in operators or "product-tags" in operators
 
             search_cve = "cve" in operators
@@ -76,6 +76,7 @@ def simple_search(request):
             search_finding_templates = "template" in operators or search_tags or not (operators or search_finding_id or search_cve)
             search_tests = "test" in operators or search_tags or not (operators or search_finding_id or search_cve)
             search_engagements = "engagement" in operators or search_tags or not (operators or search_finding_id or search_cve)
+
             search_products = "product" in operators or search_tags or not (operators or search_finding_id or search_cve)
             search_endpoints = "endpoint" in operators or search_tags or not (operators or search_finding_id or search_cve)
             search_languages = "language" in operators or search_tags or not (operators or search_finding_id or search_cve)
@@ -130,10 +131,7 @@ def simple_search(request):
                 findings = apply_endpoint_filter(findings, operators)
                 findings = apply_cve_filter(findings, operators)
 
-                if keywords_query:
-                    logger.debug('going watson with: %s', keywords_query)
-                    watson_results = watson.filter(findings_filter.qs, keywords_query)[:max_results]
-                    findings = findings.filter(id__in=[watson.id for watson in watson_results])
+                findings = perform_keyword_search_for_operator(findings, operators, 'finding', keywords_query)
 
             else:
                 findings = None
@@ -186,7 +184,7 @@ def simple_search(request):
                 finding_templates = apply_tag_filters(finding_templates, operators)
 
                 if keywords_query:
-                    watson_results = watson.filter(authorized_finding_templates, keywords_query)
+                    watson_results = watson.filter(finding_templates, keywords_query)
                     finding_templates = finding_templates.filter(id__in=[watson.id for watson in watson_results])
 
                 finding_templates = finding_templates[:max_results]
@@ -268,7 +266,7 @@ def simple_search(request):
                 app_analysis = None
 
             # make sure watson only searches in authorized model instances
-            if keywords_query:
+            if keywords_query and False:
                 logger.debug('searching generic')
                 logger.debug('going generic with: %s', keywords_query)
                 generic = watson.search(keywords_query, models=(
@@ -497,5 +495,24 @@ def apply_cve_filter(qs, operators):
         cves = list(itertools.chain.from_iterable([cve.split(',') for cve in value]))
         logger.debug('cve filter: %s', cves)
         qs = qs.filter(Q(cve__in=cves))
+
+    return qs
+
+
+def perform_keyword_search_for_operator(qs, operators, operator, keywords_query):
+    watson_results = None
+    operator_query = ''
+    keywords_query = '' if not keywords_query else keywords_query
+
+    if operator in operators:
+        operator_query = ' '.join(operators[operator])
+
+    keywords_query = operator_query + keywords_query
+    keywords_query = keywords_query.strip()
+
+    if keywords_query:
+        logger.debug('going watson with: %s', keywords_query)
+        watson_results = watson.filter(qs, keywords_query)[:max_results]
+        qs = qs.filter(id__in=[watson.id for watson in watson_results])
 
     return qs
