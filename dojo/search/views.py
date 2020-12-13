@@ -141,7 +141,7 @@ def simple_search(request):
                 component_words = None
 
             # prefetch after watson to avoid inavlid query errors due to watson not understanding prefetching
-            if findings:
+            if findings is not None:  # check for None to avoid query execution
                 logger.debug('prefetching findings')
                 findings = prefetch_for_findings(findings)
                 # some over the top tag displaying happening...
