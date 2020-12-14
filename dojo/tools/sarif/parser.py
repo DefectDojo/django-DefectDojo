@@ -115,7 +115,10 @@ def get_item(finding, rules, artifacts, test):
     # test rule link
     rule = rules[finding['ruleId']]
     # get the severity from the rule
-    severity = get_severity(rule['defaultConfiguration'].get('level'))
+    if 'defaultConfiguration' in rule:
+        severity = get_severity(rule['defaultConfiguration'].get('level', 'warning'))
+    else:
+        severity = get_severity('warning')
 
     if 'shortDescription' in rule:
         title = get_message(rule['shortDescription'])
