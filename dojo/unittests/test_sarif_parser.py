@@ -47,6 +47,7 @@ class TestSarifParser(TestCase):
         item = parser.items[0]
         self.assertEqual("src/collections/list.cpp", item.file_path)
         self.assertEqual(15, item.line)
+        self.assertEquals("A variable was used without being initialized. This can result in runtime errors such as null reference exceptions.", item.description)
 
     def test_example_k3_report(self):
         testfile = 'dojo/unittests/scans/sarif/appendix_k3.sarif'
@@ -56,4 +57,4 @@ class TestSarifParser(TestCase):
         self.assertIsNotNone(test.title)
         self.assertEqual(1, len(parser.items))
         item = parser.items[0]
-        self.assertEqual(item.title, 'The insecure method "Crypto.Sha1.Encrypt" should not be used.')
+        self.assertEqual('The insecure method "Crypto.Sha1.Encrypt" should not be used.', item.title)
