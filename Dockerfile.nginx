@@ -15,13 +15,13 @@ RUN \
     postgresql-client \
     xmlsec1 \
     git \
+    uuid-runtime \
     && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists && \
   true
 COPY requirements.txt ./
-RUN pip3 install --no-cache-dir --upgrade pip
-RUN pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt --use-deprecated=legacy-resolver
+RUN pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
 
 FROM build AS collectstatic
 
@@ -47,13 +47,11 @@ RUN \
   rm -rf /var/lib/apt/lists && \
   true
 
-RUN pip3 install --no-cache-dir --upgrade pip
 RUN pip3 install \
 	--no-cache-dir \
 	--no-index \
   --find-links=/tmp/wheels \
-	-r ./requirements.txt \
-    --use-deprecated=legacy-resolver
+	-r ./requirements.txt
 
 COPY components/ ./components/
 COPY manage.py ./
@@ -66,7 +64,7 @@ RUN \
   env DD_SECRET_KEY='.' python3 manage.py collectstatic --noinput && \
   true
 
-FROM nginx:1.19.4-alpine@sha256:f9ddfb3fd9590a3b6ba095939b7a5aee110a6fb397922e2684d6e189e78329c9
+FROM nginx:1.19.5-alpine@sha256:6ceeeab513f7d15cea38c1f8dfe5455323b5a1bfd568516b3b0ee70406f75247
 ARG uid=1001
 ARG appuser=defectdojo
 COPY --from=collectstatic /app/static/ /usr/share/nginx/html/static/

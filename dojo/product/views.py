@@ -218,6 +218,7 @@ def finding_querys(request, prod):
                                       severity__in=('Critical', 'High', 'Medium', 'Low', 'Info')).prefetch_related(
         'test__engagement',
         'test__engagement__risk_acceptance',
+        'test__test_type',
         'risk_acceptance_set',
         'reporter').extra(
         select={

@@ -455,8 +455,9 @@ def add_jira_issue(find):
 
                 if 'duedate' in meta['projects'][0]['issuetypes'][0]['fields']:
                     # jira wants YYYY-MM-DD
-                    duedate = find.sla_deadline().strftime('%Y-%m-%d')
-                    fields['duedate'] = duedate
+                    duedate = find.sla_deadline()
+                    if duedate:
+                        fields['duedate'] = duedate.strftime('%Y-%m-%d')
 
             if len(find.endpoints.all()) > 0:
                 if not meta:
@@ -736,8 +737,12 @@ def close_epic(eng, push_to_jira):
         if push_to_jira:
             try:
                 jissue = get_jira_issue(eng)
+                if jissue is None:
+                    logger.warn("JIRA close epic failed: no issue found")
+                    return False
+
                 req_url = jira_instance.url + '/rest/api/latest/issue/' + \
-                    j_issue.jira_id + '/transitions'
+                    jissue.jira_id + '/transitions'
                 json_data = {'transition': {'id': jira_instance.close_status_key}}
                 r = requests.post(
                     url=req_url,

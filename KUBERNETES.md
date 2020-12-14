@@ -308,6 +308,10 @@ However, that doesn't work and I haven't found out why. In a production
 environment, a redundant PostgreSQL cluster is the better option. As it uses
 statefulsets that are kept by default, the problem doesn't exist there.
 
+### Prometheus metrics
+
+It's possible to enable Nginx prometheus exporter by setting `--set monitoring.enabled=true` and `--set monitoring.prometheus.enabled=true`. This adds the Nginx exporter sidecar and the standard Prometheus pod annotations to django deployment.
+
 ## Useful stuff
 
 ```zsh

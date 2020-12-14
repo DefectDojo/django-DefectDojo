@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.core.exceptions import ValidationError
 from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
+from django.db import IntegrityError
 from rest_framework.permissions import DjangoModelPermissions
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser
@@ -23,7 +24,9 @@ from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Find
     BurpRawRequestResponse
 
 from dojo.endpoint.views import get_endpoint_ids
-from dojo.reports.views import report_url_resolver
+from dojo.reports.views import report_url_resolver, prefetch_related_findings_for_report
+from dojo.finding.views import set_finding_as_original_internal, reset_finding_duplicate_status_internal, \
+    duplicate_cluster
 from dojo.filters import ReportFindingFilter, ReportAuthedFindingFilter, ApiFindingFilter, ApiProductFilter
 from dojo.risk_acceptance import api as ra_api
 from dateutil.relativedelta import relativedelta
@@ -409,7 +412,7 @@ class FindingViewSet(mixins.ListModelMixin,
             finding.notes.add(note)
 
             if finding.has_jira_issue:
-                jira_helper.add_comment_task(finding, note)
+                jira_helper.add_comment(finding, note)
 
             serialized_note = serializers.NoteSerializer({
                 "author": author, "entry": entry,
@@ -492,6 +495,39 @@ class FindingViewSet(mixins.ListModelMixin,
                 status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(
+        responses={status.HTTP_200_OK: serializers.FindingSerializer(many=True)}
+    )
+    @action(detail=True, methods=['get'], url_path=r'duplicate')
+    def get_duplicate_status(self, request, pk):
+        finding = get_object_or_404(Finding, id=pk)
+        result = duplicate_cluster(request, finding)
+        serializer = serializers.FindingSerializer(instance=result, many=True,
+                                                   context={"request": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        responses={status.HTTP_200_OK: ""},
+        request_body=no_body
+    )
+    @action(detail=True, methods=['post'], url_path=r'duplicate/reset')
+    def reset_finding_duplicate_status(self, request, pk):
+        checked_duplicate_id = reset_finding_duplicate_status_internal(request.user, pk)
+        if checked_duplicate_id is None:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        responses={status.HTTP_200_OK: ""},
+        request_body=no_body
+    )
+    @action(detail=True, methods=['post'], url_path=r'original/(?P<new_fid>\d+)')
+    def set_finding_as_original(self, request, pk, new_fid):
+        success = set_finding_as_original_internal(request.user, pk, new_fid)
+        if not success:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
         request_body=serializers.ReportGenerateOptionSerializer,
         responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
     )
@@ -514,30 +550,31 @@ class FindingViewSet(mixins.ListModelMixin,
         report = serializers.ReportGenerateSerializer(data)
         return Response(report.data)
 
-    def _get_metadata(self, request, pk=None):
-        finding = get_object_or_404(Finding.objects, id=pk)
-
+    def _get_metadata(self, request, finding):
         metadata = DojoMeta.objects.filter(finding=finding)
         serializer = serializers.FindingMetaSerializer(instance=metadata, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def _edit_metadata(self, request, pk=None):
-        finding = get_object_or_404(Finding.objects, id=pk)
+    def _edit_metadata(self, request, finding):
         metadata_name = request.query_params.get("name", None)
         if metadata_name is None:
-            return Response({"error": "Metadata name is required"},
+            return Response("Metadata name is required", status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            DojoMeta.objects.update_or_create(
+                name=metadata_name, finding=finding,
+                defaults={
+                    "name": request.data.get("name"),
+                    "value": request.data.get("value")
+                }
+            )
+
+            return Response(data=request.data, status=status.HTTP_200_OK)
+        except IntegrityError:
+            return Response("Update failed because the new name already exists",
                 status=status.HTTP_400_BAD_REQUEST)
 
-        metadata = get_object_or_404(DojoMeta.objects, name=metadata_name, finding=finding)
-        metadata.name = request.data.get("name", metadata.name)
-        metadata.value = request.data.get("value", metadata.value)
-
-        metadata.save()
-        return Response({"success": "Metadata updated"},
-            status=status.HTTP_200_OK)
-
-    def _add_metadata(self, request, pk=None):
-        finding = get_object_or_404(Finding.objects, id=pk)
+    def _add_metadata(self, request, finding):
         metadata_data = serializers.FindingMetaSerializer(data=request.data)
 
         if metadata_data.is_valid():
@@ -548,35 +585,37 @@ class FindingViewSet(mixins.ListModelMixin,
             try:
                 metadata.validate_unique()
                 metadata.save()
-            except ValidationError as err:
-                return Response({"error": err},
-                status=status.HTTP_400_BAD_REQUEST)
+            except ValidationError:
+                return Response("Create failed probably because the name of the metadata already exists", status=status.HTTP_400_BAD_REQUEST)
 
-            return Response({"success": "Metadata updated"},
-                status=status.HTTP_200_OK)
+            return Response(data=metadata_data.data, status=status.HTTP_200_OK)
         else:
             return Response(metadata_data.errors,
                 status=status.HTTP_400_BAD_REQUEST)
 
-    def _remove_metadata(self, request, pk=None):
-        finding = get_object_or_404(Finding.objects, id=pk)
+    def _remove_metadata(self, request, finding):
         name = request.query_params.get("name", None)
         if name is None:
-            return Response({"error": "A metadata name must be provided"},
-                status=status.HTTP_400_BAD_REQUEST)
+            return Response("A metadata name must be provided", status=status.HTTP_400_BAD_REQUEST)
 
         metadata = get_object_or_404(DojoMeta.objects, finding=finding, name=name)
         metadata.delete()
 
-        return Response({"success": "Metadata deleted"},
-            status=status.HTTP_200_OK)
+        return Response("Metadata deleted", status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
-        responses={status.HTTP_200_OK: serializers.FindingMetaSerializer(many=True)},
+        responses={
+            status.HTTP_200_OK: serializers.FindingMetaSerializer(many=True),
+            status.HTTP_404_NOT_FOUND: "Returned if finding does not exist"
+        },
         methods=['get']
     )
     @swagger_auto_schema(
-        responses={status.HTTP_200_OK: ""},
+        responses={
+            status.HTTP_200_OK: "Returned if the metadata was correctly deleted",
+            status.HTTP_404_NOT_FOUND: "Returned if finding does not exist",
+            status.HTTP_400_BAD_REQUEST: "Returned if there was a problem with the metadata information"
+        },
         methods=['delete'],
         manual_parameters=[openapi.Parameter(
             name="name", in_=openapi.IN_QUERY, required=True, type=openapi.TYPE_STRING,
@@ -584,7 +623,11 @@ class FindingViewSet(mixins.ListModelMixin,
                             metadata associated with the finding")]
     )
     @swagger_auto_schema(
-        responses={status.HTTP_200_OK: ""},
+        responses={
+            status.HTTP_200_OK: serializers.FindingMetaSerializer,
+            status.HTTP_404_NOT_FOUND: "Returned if finding does not exist",
+            status.HTTP_400_BAD_REQUEST: "Returned if there was a problem with the metadata information"
+        },
         methods=['put'],
         manual_parameters=[openapi.Parameter(
             name="name", in_=openapi.IN_QUERY, required=True, type=openapi.TYPE_STRING,
@@ -592,20 +635,28 @@ class FindingViewSet(mixins.ListModelMixin,
         request_body=serializers.FindingMetaSerializer
     )
     @swagger_auto_schema(
-        responses={status.HTTP_200_OK: ""},
+        responses={
+            status.HTTP_200_OK: serializers.FindingMetaSerializer,
+            status.HTTP_404_NOT_FOUND: "Returned if finding does not exist",
+            status.HTTP_400_BAD_REQUEST: "Returned if there was a problem with the metadata information"
+        },
         methods=['post'],
         request_body=serializers.FindingMetaSerializer
     )
     @action(detail=True, methods=["post", "put", "delete", "get"])
     def metadata(self, request, pk=None):
+        finding = get_object_or_404(Finding.objects, id=pk)
+
         if request.method == "GET":
-            return self._get_metadata(request, pk)
+            return self._get_metadata(request, finding)
         elif request.method == "POST":
-            return self._add_metadata(request, pk)
+            return self._add_metadata(request, finding)
         elif request.method == "PUT":
-            return self._edit_metadata(request, pk)
+            return self._edit_metadata(request, finding)
+        elif request.method == "PATCH":
+            return self._edit_metadata(request, finding)
         elif request.method == "DELETE":
-            return self._remove_metadata(request, pk)
+            return self._remove_metadata(request, finding)
 
         return Response({"error", "unsupported method"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -984,6 +1035,7 @@ class TestTypesViewSet(mixins.ListModelMixin,
     serializer_class = serializers.TestTypeSerializer
     queryset = Test_Type.objects.all()
     filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('name',)
 
 
 class ToolConfigurationsViewSet(mixins.ListModelMixin,
@@ -1154,10 +1206,8 @@ def report_generate(request, obj, options):
         report_title = "Product Type Report"
         report_subtitle = str(product_type)
 
-        findings = ReportFindingFilter(request.GET, queryset=Finding.objects.filter(
-            test__engagement__product__prod_type=product_type).distinct().prefetch_related('test',
-                                                                                           'test__engagement__product',
-                                                                                           'test__engagement__product__prod_type'))
+        findings = ReportFindingFilter(request.GET, prod_type=prod_type, queryset=prefetch_related_findings_for_report(Finding.objects.filter(
+            test__engagement__product__prod_type=product_type)))
         products = Product.objects.filter(prod_type=product_type,
                                           engagement__test__finding__in=findings.qs).distinct()
         engagements = Engagement.objects.filter(product__prod_type=product_type,
@@ -1186,10 +1236,8 @@ def report_generate(request, obj, options):
         report_name = "Product Report: " + str(product)
         report_title = "Product Report"
         report_subtitle = str(product)
-        findings = ReportFindingFilter(request.GET, queryset=Finding.objects.filter(
-            test__engagement__product=product).distinct().prefetch_related('test',
-                                                                           'test__engagement__product',
-                                                                           'test__engagement__product__prod_type'))
+        findings = ReportFindingFilter(request.GET, product=product, queryset=prefetch_related_findings_for_report(Finding.objects.filter(
+            test__engagement__product=product)))
         ids = set(finding.id for finding in findings.qs)
         engagements = Engagement.objects.filter(test__finding__id__in=ids).distinct()
         tests = Test.objects.filter(finding__id__in=ids).distinct()
@@ -1198,13 +1246,8 @@ def report_generate(request, obj, options):
 
     elif type(obj).__name__ == "Engagement":
         engagement = obj
-        findings = ReportFindingFilter(request.GET, queryset=Finding.objects.filter(
-            test__engagement=engagement,
-        ).prefetch_related(
-            'test',
-            'test__engagement__product',
-            'test__engagement__product__prod_type'
-        ).distinct())
+        findings = ReportFindingFilter(request.GET, engagement=engagement,
+                                       queryset=prefetch_related_findings_for_report(Finding.objects.filter(test__engagement=engagement)))
         report_name = "Engagement Report: " + str(engagement)
 
         report_title = "Engagement Report"
@@ -1217,11 +1260,10 @@ def report_generate(request, obj, options):
 
     elif type(obj).__name__ == "Test":
         test = obj
-        findings = ReportFindingFilter(request.GET,
-                                       queryset=Finding.objects.filter(test=test).prefetch_related(
-                                            'test',
-                                            'test__engagement__product',
-                                            'test__engagement__product__prod_type').distinct())
+        findings = ReportFindingFilter(request.GET, engagement=test.engagement,
+                                       queryset=prefetch_related_findings_for_report(Finding.objects.filter(test=test)))
+        filename = "test_finding_report.pdf"
+        template = "dojo/test_pdf_report.html"
         report_name = "Test Report: " + str(test)
         report_title = "Test Report"
         report_subtitle = str(test)
@@ -1236,23 +1278,13 @@ def report_generate(request, obj, options):
         report_title = "Endpoint Report"
         report_subtitle = host
         findings = ReportFindingFilter(request.GET,
-            queryset=Finding.objects.filter(
-                endpoints__in=endpoints,
-            ).prefetch_related(
-                'test',
-                'test__engagement__product',
-                'test__engagement__product__prod_type'
-            ).distinct())
+                                       queryset=prefetch_related_findings_for_report(Finding.objects.filter(endpoints__in=endpoints)))
 
     elif type(obj).__name__ == "QuerySet":
         findings = ReportAuthedFindingFilter(request.GET,
-            queryset=obj.prefetch_related(
-                'test',
-                'test__engagement__product',
-                'test__engagement__product__prod_type'
-            ).distinct(),
-            user=request.user
-        )
+                                             queryset=prefetch_related_findings_for_report(obj).distinct(),
+                                             user=request.user)
+
         report_name = 'Finding'
         report_type = 'Finding'
         report_title = "Finding Report"

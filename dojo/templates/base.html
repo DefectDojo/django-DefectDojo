@@ -308,8 +308,8 @@
                                     <li><a href="{% url 'critical_product_metrics' %}"> Critical Product Metrics </a></li>
                                     <li><a href="{% url 'metrics_product_type' %}"> Product Type Metrics </a></li>
                                     <li><a href="{% url 'product_type_counts' %}"> Product Type Counts </a></li>
+                                    <li><a href="{% url 'simple_metrics' %}"> Simple Metrics </a></li>
                                     {% if user.is_staff %}
-                                        <li><a href="{% url 'simple_metrics' %}"> Simple Metrics </a></li>
                                         <li><a href="{% url 'engineer_metrics' %}"> Engineer Metrics </a></li>
                                         <li><a href="{% url 'research_metrics' %}"> Security Research Metrics </a></li>
                                     {% endif %}

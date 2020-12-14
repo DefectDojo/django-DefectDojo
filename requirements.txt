@@ -1,6 +1,6 @@
 # requirements.txt for DefectDojo using Python 3.x
 asteval==0.9.21
-bleach>=3.1.0
+bleach==3.2.1
 celery==4.4.7
 coverage==5.3
 defusedxml==0.6.0
@@ -26,36 +26,36 @@ Django==2.2.17
 djangorestframework==3.12.2
 gunicorn==20.0.4
 html2text==2020.1.16
-humanize==3.1.0
+humanize==3.2.0
 jira==2.0.0
-PyGithub==1.53
+PyGithub==1.54
 lxml==4.6.2
 Markdown==3.3.3
-mysqlclient==2.0.1
-pandas>=0.25
-xlrd>=1.0.0
+mysqlclient==2.0.2
+pandas==1.1.5
+xlrd==1.2.0
 pdfkit==0.6.1
 Pillow==8.0.1  # required by django-imagekit
 psycopg2-binary==2.8.6
-cryptography==3.2.1
+cryptography==3.3.1
 python-dateutil==2.8.1
 python-nmap==0.6.1
 pytz==2020.4
 redis==3.5.3
-requests>=2.22.0
+requests==2.25.0
 sqlalchemy  # Required by Celery broker transport
 supervisor==4.2.1
 urllib3==1.26.2
 uWSGI==2.0.19.1
 vobject==0.9.6.1
-whitenoise>=4.1.2
+whitenoise==5.2.0
 titlecase==1.1.1
 social-auth-app-django==4.0.0
 Python-jose==3.2.0
 gitpython>=2.1.13
-ptvsd>=4.2.7
+ptvsd>=4.3.2
 python-gitlab==2.4.0
-google-auth==1.23.0
+google-auth==1.24.0
 google-api-python-client==1.12.8
 google-auth-oauthlib==0.4.2
 drf_yasg2==1.19.4
@@ -66,7 +66,7 @@ packageurl-python==0.9.3
 django-crum==0.7.9
 JSON-log-formatter==0.3.0
 django-split-settings==1.0.1
-django-debug-toolbar==3.1.1
+django-debug-toolbar==3.2
 django-debug-toolbar-request-history==0.1.3
 vcrpy==4.1.1
 vcrpy-unittest==0.1.7
