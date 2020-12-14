@@ -1800,8 +1800,10 @@ class Finding(models.Model):
 
         simple_risk_acceptance = self.test.engagement.risk_acceptance.filter(name=Finding.SIMPLE_RISK_ACCEPTANCE_NAME).prefetch_related('accepted_findings').first()
         if simple_risk_acceptance is None and create:
+            from dojo.utils import get_current_user
+            user = get_current_user()
             simple_risk_acceptance = Risk_Acceptance.objects.create(
-                    owner_id=1,
+                    owner_id=user.id,
                     name=Finding.SIMPLE_RISK_ACCEPTANCE_NAME,
                     compensating_control='These findings are accepted using a simple risk acceptance without expiration date, '
                     'approval document or compensating control information. Unaccept and use full risk acceptance if you '
