@@ -93,7 +93,7 @@ class FortifyXMLParser(object):
 
                 issue_map.update({issue.attrib['iid']: details})
         except AttributeError:
-            logger.warning("XML Parsing error on issue number: %s" % issue_id)
+            logger.warning("XML Parsing error on issue number: %s", issue_id)
             raise
         # map created
 
