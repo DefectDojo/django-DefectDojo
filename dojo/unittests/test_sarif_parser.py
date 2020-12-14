@@ -29,6 +29,14 @@ class TestSarifParser(TestCase):
         self.assertEqual(True, item.static_finding)
         self.assertEqual(False, item.dynamic_finding)
 
+    def test_example_k1_report(self):
+        testfile = "dojo/unittests/scans/sarif/appendix_k1.sarif"
+        test = Test()
+        with open(testfile) as f:
+            parser = SarifParser(f, test)
+        self.assertIsNotNone(test.title)
+        self.assertEqual(0, len(parser.items))
+
     def test_example_k2_report(self):
         testfile = "dojo/unittests/scans/sarif/appendix_k2.sarif"
         test = Test()
