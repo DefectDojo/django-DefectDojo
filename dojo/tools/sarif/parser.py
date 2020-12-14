@@ -1,5 +1,6 @@
 import logging
 import json
+import re
 from datetime import datetime
 from dojo.models import Finding
 
