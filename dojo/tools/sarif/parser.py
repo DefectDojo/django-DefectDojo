@@ -7,6 +7,7 @@ logger = logging.getLogger(__name__)
 
 CWE_REGEX = r'cwe-\d+$'
 
+
 class SarifParser(object):
     """OASIS Static Analysis Results Interchange Format (SARIF) for version 2.1.0 only.
 
@@ -57,9 +58,9 @@ def get_rules(run):
 
 
 def get_rule_tags(rule):
-    if not 'properties' in rule:
+    if 'properties' not in rule:
         return []
-    if not 'tags' in rule['properties']:
+    if 'tags' not in rule['properties']:
         return []
     else:
         return rule['properties']['tags']
