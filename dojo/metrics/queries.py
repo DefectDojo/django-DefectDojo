@@ -27,13 +27,6 @@ def finding_querys(prod_type, user, findings_filter, alert_error_func):
         'test__engagement__risk_acceptance',
         'risk_acceptance_set',
         'reporter'
-    ).extra(
-        select={
-            'ra_count': 'SELECT COUNT(*) FROM dojo_risk_acceptance INNER JOIN '
-                        'dojo_risk_acceptance_accepted_findings ON '
-                        '( dojo_risk_acceptance.id = dojo_risk_acceptance_accepted_findings.risk_acceptance_id ) '
-                        'WHERE dojo_risk_acceptance_accepted_findings.finding_id = dojo_finding.id',
-        },
     )
     if not user.is_staff:
         findings_query = findings_query.filter(
@@ -50,13 +43,6 @@ def finding_querys(prod_type, user, findings_filter, alert_error_func):
         'test__engagement__risk_acceptance',
         'risk_acceptance_set',
         'reporter'
-    ).extra(
-        select={
-            'ra_count': 'SELECT COUNT(*) FROM dojo_risk_acceptance INNER JOIN '
-                        'dojo_risk_acceptance_accepted_findings ON '
-                        '( dojo_risk_acceptance.id = dojo_risk_acceptance_accepted_findings.risk_acceptance_id ) '
-                        'WHERE dojo_risk_acceptance_accepted_findings.finding_id = dojo_finding.id',
-        },
     )
     if not user.is_staff:
         active_findings_query = active_findings_query.filter(
