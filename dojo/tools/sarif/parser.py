@@ -49,7 +49,7 @@ class SarifParser(object):
 
 def get_rules(run):
     rules = {}
-    for item in run['tool']['driver']['rules']:
+    for item in run['tool']['driver'].get('rules', []):
         rules[item['id']] = item
     return rules
 
