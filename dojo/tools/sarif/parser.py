@@ -5,10 +5,12 @@ from dojo.models import Finding
 
 logger = logging.getLogger(__name__)
 
+CWE_REGEX = r'cwe-\d+$'
 
 class SarifParser(object):
-    """
-        This class parse Acunetix XML file using helper methods from 'parser_helper.py'.
+    """OASIS Static Analysis Results Interchange Format (SARIF) for version 2.1.0 only.
+
+    https://www.oasis-open.org/committees/tc_home.php?wg_abbrev=sarif
     """
     def __init__(self, filehandle, test):
         tree = self.parse_json(filehandle)
@@ -64,7 +66,12 @@ def get_rule_tags(rule):
 
 
 def get_rule_cwes(rule):
-
+    cwes = []
+    for tag in get_rule_tags(rule):
+        matches = re.search(CWE_REGEX, tag, re.IGNORECASE)
+        if matches:
+            cwes.append(int(matches[0].split("-")[1]))
+    return cwes
 
 
 def get_artifacts(run):
@@ -79,34 +86,37 @@ def get_artifacts(run):
 def get_severity(data):
     """Convert level value to severity
     """
-    if "warning" == data:
+    if 'warning' == data:
         return 'Medium'
-    elif "error" == data:
+    elif 'error' == data:
         return 'Critical'
     else:
         return 'Info'
 
 
-def get_message(data):
-    # TODO manage markdown
-    return data['text']
+def get_message_from_multiformatMessageString(data, rule):
+    if rule is not None and 'id' in data:
+        return rule['messageStrings'][data['id']]
+    else:
+        # TODO manage markdown
+        return data.get('text')
 
 
-def get_item(finding, rules, artifacts, test):
-    mitigation = finding.get('Remediation', {}).get('Recommendation', {}).get('Text', "")
-    references = finding.get('Remediation', {}).get('Recommendation', {}).get('Url')
+def get_item(result, rules, artifacts, test):
+    mitigation = result.get('Remediation', {}).get('Recommendation', {}).get('Text', "")
+    references = result.get('Remediation', {}).get('Recommendation', {}).get('Url')
     verified = False
     false_p = False
     duplicate = False
     out_of_scope = False
     impact = None
 
-    if finding.get('Compliance', {}).get('Status', "PASSED"):
-        if finding.get('LastObservedAt', None):
+    if result.get('Compliance', {}).get('Status', "PASSED"):
+        if result.get('LastObservedAt', None):
             try:
-                mitigated = datetime.strptime(finding.get('LastObservedAt'), "%Y-%m-%dT%H:%M:%S.%fZ")
+                mitigated = datetime.strptime(result.get('LastObservedAt'), "%Y-%m-%dT%H:%M:%S.%fZ")
             except:
-                mitigated = datetime.strptime(finding.get('LastObservedAt'), "%Y-%m-%dT%H:%M:%fZ")
+                mitigated = datetime.strptime(result.get('LastObservedAt'), "%Y-%m-%dT%H:%M:%fZ")
         else:
             mitigated = datetime.utcnow()
     else:
@@ -115,27 +125,32 @@ def get_item(finding, rules, artifacts, test):
     # if there is a location get it
     file_path = None
     line = -1
-    if "locations" in finding:
-        location = finding['locations'][0]
-        file_path = location['physicalLocation']['artifactLocation']['uri']
-        # 'region' attribute is optionnal
-        if 'region' in location['physicalLocation']:
-            line = location['physicalLocation']['region']['startLine']
+    if "locations" in result:
+        location = result['locations'][0]
+        if 'physicalLocation' in location:
+            file_path = location['physicalLocation']['artifactLocation']['uri']
+            # 'region' attribute is optionnal
+            if 'region' in location['physicalLocation']:
+                line = location['physicalLocation']['region']['startLine']
 
     # test rule link
-    rule = rules[finding['ruleId']]
-    # get the severity from the rule
-    if 'defaultConfiguration' in rule:
-        severity = get_severity(rule['defaultConfiguration'].get('level', 'warning'))
-    else:
-        severity = get_severity('warning')
+    rule = rules.get(result['ruleId'])
+    title = result['ruleId']
+    if 'message' in result:
+        title = get_message_from_multiformatMessageString(result['message'], rule)
+    description = ''
+    severity = get_severity('warning')
+    if rule is not None:
+        # get the severity from the rule
+        if 'defaultConfiguration' in rule:
+            severity = get_severity(rule['defaultConfiguration'].get('level', 'warning'))
 
-    if 'shortDescription' in rule:
-        title = get_message(rule['shortDescription'])
-        description = get_message(rule['shortDescription'])
-    else:
-        title = finding['message'].get('text', 'No text')
-        description = get_message(rule['fullDescription'])
+        if 'shortDescription' in rule:
+            title = get_message_from_multiformatMessageString(rule['shortDescription'], rule)
+            description = get_message_from_multiformatMessageString(rule['shortDescription'], rule)
+        else:
+            title = result['message'].get('text', 'No text')
+            description = get_message_from_multiformatMessageString(rule['fullDescription'], rule)
 
     # we add a special 'None' case if there is no CWE
     cwes = [None]
@@ -145,7 +160,7 @@ def get_item(finding, rules, artifacts, test):
             cwes = cwes_extracted
 
     for cwe in cwes:
-        finding = Finding(title=finding['ruleId'],
+        finding = Finding(title=title,
                         test=test,
                         severity=severity,
                         numerical_severity=Finding.get_numerical_severity(severity),
