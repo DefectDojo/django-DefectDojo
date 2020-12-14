@@ -54,6 +54,19 @@ def get_rules(run):
     return rules
 
 
+def get_rule_tags(rule):
+    if not 'properties' in rule:
+        return []
+    if not 'tags' in rule['properties']:
+        return []
+    else:
+        return rule['properties']['tags']
+
+
+def get_rule_cwes(rule):
+
+
+
 def get_artifacts(run):
     artifacts = {}
     custom_index = 0  # hack because some tool doesn't generate this attribute
@@ -82,9 +95,6 @@ def get_message(data):
 def get_item(finding, rules, artifacts, test):
     mitigation = finding.get('Remediation', {}).get('Recommendation', {}).get('Text', "")
     references = finding.get('Remediation', {}).get('Recommendation', {}).get('Url')
-    cve = None
-    cwe = None
-    active = True
     verified = False
     false_p = False
     duplicate = False
@@ -127,25 +137,33 @@ def get_item(finding, rules, artifacts, test):
         title = finding['message'].get('text', 'No text')
         description = get_message(rule['fullDescription'])
 
-    finding = Finding(title=finding['ruleId'],
-                      test=test,
-                      severity=severity,
-                      numerical_severity=Finding.get_numerical_severity(severity),
-                      description=description,
-                      mitigation=mitigation,
-                      references=references,
-                      cve=cve,
-                      cwe=cwe,
-                      active=active,
-                      verified=verified,
-                      false_p=false_p,
-                      duplicate=duplicate,
-                      out_of_scope=out_of_scope,
-                      mitigated=mitigated,
-                      impact="No impact provided",
-                      static_finding=True,  # by definition
-                      dynamic_finding=False,  # by definition
-                      file_path=file_path,
-                      line=line)
+    # we add a special 'None' case if there is no CWE
+    cwes = [None]
+    if rule is not None:
+        cwes_extracted = get_rule_cwes(rule)
+        if len(cwes_extracted) > 1:
+            cwes = cwes_extracted
+
+    for cwe in cwes:
+        finding = Finding(title=finding['ruleId'],
+                        test=test,
+                        severity=severity,
+                        numerical_severity=Finding.get_numerical_severity(severity),
+                        description=description,
+                        mitigation=mitigation,
+                        references=references,
+                        cve=None,  # for now CVE are not managed or it's not very clear how in the spec
+                        cwe=cwe,
+                        active=True,
+                        verified=verified,
+                        false_p=false_p,
+                        duplicate=duplicate,
+                        out_of_scope=out_of_scope,
+                        mitigated=mitigated,
+                        impact="No impact provided",
+                        static_finding=True,  # by definition
+                        dynamic_finding=False,  # by definition
+                        file_path=file_path,
+                        line=line)
 
     return finding
