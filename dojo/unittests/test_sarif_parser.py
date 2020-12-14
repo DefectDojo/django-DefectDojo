@@ -4,7 +4,7 @@ from dojo.models import Test
 from dojo.tools.sarif.parser import SarifParser
 
 
-class TestSafetyParser(TestCase):
+class TestSarifParser(TestCase):
     def test_example_report(self):
         testfile = "dojo/unittests/scans/sarif/DefectDojo_django-DefectDojo__2020-12-11_13 42 10__export.sarif"
         test = Test()
