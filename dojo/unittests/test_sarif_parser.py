@@ -28,3 +28,14 @@ class TestSafetyParser(TestCase):
                          item.description)
         self.assertEqual(True, item.static_finding)
         self.assertEqual(False, item.dynamic_finding)
+
+    def test_example_k2_report(self):
+        testfile = "dojo/unittests/scans/sarif/appendix_k2.sarif"
+        test = Test()
+        with open(testfile) as f:
+            parser = SarifParser(f, test)
+        self.assertIsNotNone(test.title)
+        self.assertEqual(1, len(parser.items))
+        item = parser.items[0]
+        self.assertEqual("src/collections/list.cpp", item.file_path)
+        self.assertEqual(15, item.line)
