@@ -165,9 +165,10 @@ postgresql:
   replication:
     enabled: false
   service:
+    port: 5432
   # To use an external PostgreSQL instance, set enabled to false and uncomment
   # the line below:
-  postgresServer: "127.0.0.1"
+  # postgresServer: "127.0.0.1"
   master:
     affinity: {}
     nodeSelector: {}
@@ -200,6 +201,9 @@ rabbitmq:
 
 redis:
   enabled: false
+  transitEncryption:
+    enabled: false
+    params: ''
   existingSecret: defectdojo-redis-specific
   secretKey: redis-password
   password: ""

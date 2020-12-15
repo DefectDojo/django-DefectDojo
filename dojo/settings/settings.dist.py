@@ -55,6 +55,7 @@ env = environ.Env(
     DD_CELERY_BROKER_HOST=(str, ''),
     DD_CELERY_BROKER_PORT=(int, -1),
     DD_CELERY_BROKER_PATH=(str, '/dojo.celerydb.sqlite'),
+    DD_CELERY_BROKER_PARAMS=(str, ''),
     DD_CELERY_TASK_IGNORE_RESULT=(bool, True),
     DD_CELERY_RESULT_BACKEND=(str, 'django-db'),
     DD_CELERY_RESULT_EXPIRES=(int, 86400),
@@ -155,7 +156,7 @@ env = environ.Env(
 )
 
 
-def generate_url(scheme, double_slashes, user, password, host, port, path):
+def generate_url(scheme, double_slashes, user, password, host, port, path, params):
     result_list = []
     result_list.append(scheme)
     result_list.append(':')
@@ -174,6 +175,9 @@ def generate_url(scheme, double_slashes, user, password, host, port, path):
     if len(path) > 0 and path[0] != '/':
         result_list.append('/')
     result_list.append(path)
+    if len(params) > 0 and params[0] != '?':
+        result_list.append('?')
+    result_list.append(params)
     return ''.join(result_list)
 
 
@@ -667,6 +671,7 @@ CELERY_BROKER_URL = env('DD_CELERY_BROKER_URL') \
     env('DD_CELERY_BROKER_HOST'),
     env('DD_CELERY_BROKER_PORT'),
     env('DD_CELERY_BROKER_PATH'),
+    env('DD_CELERY_BROKER_PARAMS')
 )
 CELERY_TASK_IGNORE_RESULT = env('DD_CELERY_TASK_IGNORE_RESULT')
 CELERY_RESULT_BACKEND = env('DD_CELERY_RESULT_BACKEND')
