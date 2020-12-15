@@ -1,39 +1,42 @@
-import re
-import binascii
-import os
-import hashlib
-import bleach
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cryptography.hazmat.backends import default_backend
 from calendar import monthrange
 from datetime import date, datetime
 from math import pi, sqrt
-import vobject
+import binascii
+import calendar as tcalendar
+import hashlib
+import itertools
+import logging
+import os
+import re
+
+from asteval import Interpreter
+from celery.decorators import task
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.backends import default_backend
 from dateutil.relativedelta import relativedelta, MO, SU
 from django.conf import settings
+from django.contrib import messages
 from django.core.mail import send_mail
 from django.core.paginator import Paginator
-from django.urls import get_resolver, reverse
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
-from django.template.defaultfilters import pluralize
-from django.utils import timezone
-from django.dispatch import receiver
 from django.db.models.signals import post_save
 from django.db.models.query import QuerySet
-import calendar as tcalendar
+from django.dispatch import receiver
+from django.http import HttpResponseRedirect
+from django.template.defaultfilters import pluralize
+from django.urls import get_resolver, reverse
+from django.utils import timezone
+import bleach
+import crum
+import vobject
+
+from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
 from dojo.github import add_external_issue_github, update_external_issue_github, close_external_issue_github, reopen_external_issue_github
 from dojo.models import Finding, Engagement, Finding_Template, Product, \
     Dojo_User, User, System_Settings, Notifications, Endpoint, Benchmark_Type, \
     Language_Type, Languages, Rule
-from asteval import Interpreter
 from dojo.notifications.helper import create_notification
-import logging
-import itertools
-from django.contrib import messages
-from django.http import HttpResponseRedirect
-import crum
-from celery.decorators import task
-from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
+
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -105,7 +108,7 @@ def is_deduplication_on_engagement_mismatch(new_finding, to_duplicate_finding):
 @dojo_async_task
 @task
 @dojo_model_from_id
-def do_dedupe_finding(new_finding, *args, **kwargs):
+def do_dedupe_finding(new_finding, *_args, **_kwargs):
     try:
         enabled = System_Settings.objects.get(no_cache=True).enable_deduplication
     except System_Settings.DoesNotExist:
@@ -121,14 +124,14 @@ def do_dedupe_finding(new_finding, *args, **kwargs):
             # Default algorithm
             deduplicationAlgorithm = settings.DEDUPE_ALGO_LEGACY
             # Check for an override for this scan_type in the deduplication configuration
-            if (scan_type in settings.DEDUPLICATION_ALGORITHM_PER_PARSER):
+            if scan_type in settings.DEDUPLICATION_ALGORITHM_PER_PARSER:
                 deduplicationAlgorithm = settings.DEDUPLICATION_ALGORITHM_PER_PARSER[scan_type]
             deduplicationLogger.debug('deduplication algorithm: ' + deduplicationAlgorithm)
-            if(deduplicationAlgorithm == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL):
+            if deduplicationAlgorithm == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL:
                 deduplicate_unique_id_from_tool(new_finding)
-            elif(deduplicationAlgorithm == settings.DEDUPE_ALGO_HASH_CODE):
+            elif deduplicationAlgorithm == settings.DEDUPE_ALGO_HASH_CODE:
                 deduplicate_hash_code(new_finding)
-            elif(deduplicationAlgorithm == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE):
+            elif deduplicationAlgorithm == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE:
                 deduplicate_uid_or_hash_code(new_finding)
             else:
                 deduplicate_legacy(new_finding)
@@ -326,7 +329,7 @@ def set_duplicate(new_finding, existing_finding):
         raise Exception("Can not add duplicate to itself")
     deduplicationLogger.debug('Setting new finding ' + str(new_finding.id) + ' as a duplicate of existing finding ' + str(existing_finding.id))
     if is_duplicate_reopen(new_finding, existing_finding):
-        set_duplicate_reopen_(new_finding, existing_finding)
+        set_duplicate_reopen(new_finding, existing_finding)
     new_finding.duplicate = True
     new_finding.active = False
     new_finding.verified = False
@@ -340,10 +343,13 @@ def set_duplicate(new_finding, existing_finding):
 
 
 def is_duplicate_reopen(new_finding, existing_finding):
-    if (existing_finding.is_Mitigated or existing_finding.mitigated) and not existing_finding.out_of_scope and not existing_finding.false_p and new_finding.active and not new_finding.is_Mitigated:
-        return True
-    else:
-        return False
+    return (
+        (existing_finding.is_Mitigated or existing_finding.mitigated)
+        and not existing_finding.out_of_scope
+        and not existing_finding.false_p
+        and new_finding.active
+        and not new_finding.is_Mitigated
+    )
 
 
 def set_duplicate_reopen(new_finding, existing_finding):
@@ -360,12 +366,12 @@ def set_duplicate_reopen(new_finding, existing_finding):
 @dojo_async_task
 @task
 @dojo_model_from_id
-def do_apply_rules(new_finding, *args, **kwargs):
+def do_apply_rules(new_finding, *_args, **_kwargs):
     rules = Rule.objects.filter(applies_to='Finding', parent_rule=None)
     for rule in rules:
         child_val = True
         child_list = [val for val in rule.child_rules.all()]
-        while (len(child_list) != 0):
+        while len(child_list) != 0:
             child_val = child_val and child_rule(child_list.pop(), new_finding)
         if child_val:
             if rule.operator == 'Matches':
@@ -399,15 +405,9 @@ def set_attribute_rule(new_finding, rule, value):
 
 def child_rule(rule, new_finding):
     if rule.operator == 'Matches':
-        if getattr(new_finding, rule.match_field) == rule.match_text:
-            return True
-        else:
-            return False
+        return getattr(new_finding, rule.match_field) == rule.match_text
     else:
-        if rule.match_text in getattr(new_finding, rule.match_field):
-            return True
-        else:
-            return False
+        return rule.match_text in getattr(new_finding, rule.match_field)
 
 
 def count_findings(findings):
@@ -554,7 +554,6 @@ def add_breadcrumb(parent=None,
                    url=None,
                    request=None,
                    clear=False):
-    title_done = False
     if clear:
         request.session['dojo_breadcrumbs'] = None
         return
@@ -571,7 +570,6 @@ def add_breadcrumb(parent=None,
         if parent is not None and getattr(parent, "get_breadcrumbs", None):
             crumbs += parent.get_breadcrumbs()
         else:
-            title_done = True
             crumbs += [{
                 'title': title,
                 'url': request.get_full_path() if url is None else url
@@ -588,7 +586,6 @@ def add_breadcrumb(parent=None,
                     request.get_full_path() if url is None else url
                 }]
         else:
-            title_done = True
             obj_crumbs = [{
                 'title':
                 title,
@@ -783,8 +780,8 @@ def get_period_counts_legacy(findings,
         else:
             risks_a = None
 
-        crit_count, high_count, med_count, low_count, closed_count = [
-            0, 0, 0, 0, 0
+        crit_count, high_count, med_count, low_count = [
+            0, 0, 0, 0
         ]
         for finding in findings:
             if new_date <= datetime.combine(finding.date, datetime.min.time(
@@ -803,7 +800,7 @@ def get_period_counts_legacy(findings,
             [(tcalendar.timegm(new_date.timetuple()) * 1000), new_date,
              crit_count, high_count, med_count, low_count, total,
              closed_in_range_count])
-        crit_count, high_count, med_count, low_count, closed_count = [
+        crit_count, high_count, med_count, low_count = [
             0, 0, 0, 0, 0
         ]
         if risks_a is not None:
@@ -901,8 +898,8 @@ def get_period_counts(active_findings,
         else:
             risks_a = None
 
-        crit_count, high_count, med_count, low_count, closed_count = [
-            0, 0, 0, 0, 0
+        crit_count, high_count, med_count, low_count = [
+            0, 0, 0, 0
         ]
         for finding in findings:
             try:
@@ -931,15 +928,14 @@ def get_period_counts(active_findings,
                         med_count += 1
                     elif severity == 'Low':
                         low_count += 1
-                pass
 
         total = crit_count + high_count + med_count + low_count
         opened_in_period.append(
             [(tcalendar.timegm(new_date.timetuple()) * 1000), new_date,
              crit_count, high_count, med_count, low_count, total,
              closed_in_range_count])
-        crit_count, high_count, med_count, low_count, closed_count = [
-            0, 0, 0, 0, 0
+        crit_count, high_count, med_count, low_count = [
+            0, 0, 0, 0
         ]
         if risks_a is not None:
             for finding in risks_a:
@@ -989,7 +985,6 @@ def get_period_counts(active_findings,
                         med_count += 1
                     elif severity == 'Low':
                         low_count += 1
-                pass
         total = crit_count + high_count + med_count + low_count
         active_in_period.append(
             [(tcalendar.timegm(new_date.timetuple()) * 1000), new_date,
@@ -1404,8 +1399,6 @@ def prepare_for_view(encrypted_value):
         encrypted_values = encrypted_value.split(":")
 
         if len(encrypted_values) > 1:
-            type = encrypted_values[0]
-
             iv = binascii.a2b_hex(encrypted_values[1])
             value = encrypted_values[2]
 
@@ -1604,7 +1597,7 @@ def get_site_url():
 
 
 @receiver(post_save, sender=Dojo_User)
-def set_default_notifications(sender, instance, created, **kwargs):
+def set_default_notifications(sender, instance, created, **_kwargs):
     # for new user we create a Notifications object so the default 'alert' notifications work
     # this needs to be a signal to make it also work for users created via ldap, oauth and other authentication backends
     if created:
@@ -1615,7 +1608,7 @@ def set_default_notifications(sender, instance, created, **kwargs):
 
 
 @receiver(post_save, sender=Engagement)
-def engagement_post_Save(sender, instance, created, **kwargs):
+def engagement_post_Save(sender, instance, created, **_kwargs):
     if created:
         engagement = instance
         title = 'Engagement created for ' + str(engagement.product) + ': ' + str(engagement.name)
@@ -1673,7 +1666,7 @@ def queryset_check(query):
     return query if isinstance(query, QuerySet) else query.qs
 
 
-def sla_compute_and_notify(*args, **kwargs):
+def sla_compute_and_notify(*_args, **_kwargs):
     """
     The SLA computation and notification will be disabled if the user opts out
     of the Findings SLA on the System Settings page.
@@ -1781,7 +1774,7 @@ def sla_compute_and_notify(*args, **kwargs):
                             logger.debug("JIRA issue is {}".format(jira_issue.jira_key))
 
                 logger.debug("Finding {} has {} days left to breach SLA.".format(finding.id, sla_age))
-                if (sla_age < 0):
+                if sla_age < 0:
                     post_breach_count += 1
                     logger.info("Finding {} has breached by {} days.".format(finding.id, abs(sla_age)))
                     _notify(finding, 'Finding {} - SLA breached by {} day(s)! Overdue notice'.format(finding.id, abs(sla_age)))
@@ -1791,7 +1784,7 @@ def sla_compute_and_notify(*args, **kwargs):
                     logger.info("Security SLA pre-breach warning for finding ID {}. Days remaining: {}".format(finding.id, sla_age))
                     _notify(finding, 'Finding {} - SLA pre-breach warning - {} day(s) left'.format(finding.id, sla_age))
                 # The finding breaches the SLA today
-                elif (sla_age == 0):
+                elif sla_age == 0:
                     at_breach_count += 1
                     logger.info("Security SLA breach warning. Finding ID {} breaching today ({})".format(finding.id, sla_age))
                     _notify(finding, "Finding {} - SLA is breaching today".format(finding.id))
