@@ -247,7 +247,7 @@ class System_Settings(models.Model):
         help_text="Enables Finding SLA's for time to remediate.")
 
     sla_critical = models.IntegerField(default=7,
-                                          verbose_name="Crital Finding SLA Days",
+                                          verbose_name="Critical Finding SLA Days",
                                           help_text="# of days to remediate a critical finding.")
 
     sla_high = models.IntegerField(default=30,
