@@ -95,18 +95,17 @@ def metrics(request, mtype):
     show_pt_filter = True
     view = identify_view(request)
     page_name = 'Product Type Metrics by '
+    filter_query_dict = request.GET.copy()
 
     if mtype != 'All':
         pt = Product_Type.objects.filter(id=mtype)
-        request.GET._mutable = True
-        request.GET.appendlist('test__engagement__product__prod_type', mtype)
-        request.GET._mutable = False
+        filter_query_dict.appendlist('test__engagement__product__prod_type', mtype)
         mtype = pt[0].name
         show_pt_filter = False
         page_name = '%s Metrics' % mtype
         prod_type = pt
-    elif 'test__engagement__product__prod_type' in request.GET:
-        prod_type = Product_Type.objects.filter(id__in=request.GET.getlist('test__engagement__product__prod_type', []))
+    elif 'test__engagement__product__prod_type' in filter_query_dict:
+        prod_type = Product_Type.objects.filter(id__in=filter_query_dict.getlist('test__engagement__product__prod_type', []))
     else:
         prod_type = Product_Type.objects.all()
     prod_type = objects_authorized(prod_type)
@@ -120,10 +119,10 @@ def metrics(request, mtype):
     )
     if view == 'Finding':
         page_name += 'Findings'
-        filters = queries.finding_querys(prod_type, request.user, request.GET, alert_error_func)
+        filters = queries.finding_querys(prod_type, request.user, filter_query_dict, alert_error_func)
     elif view == 'Endpoint':
         page_name += 'Affected Endpoints'
-        filters = queries.endpoint_querys(prod_type, request.user, request.GET, alert_error_func)
+        filters = queries.endpoint_querys(prod_type, request.user, filter_query_dict, alert_error_func)
 
     in_period_counts, in_period_details, age_detail = queries.get_in_period_details([
         obj.finding if view == 'Endpoint' else obj
@@ -143,12 +142,12 @@ def metrics(request, mtype):
     monthly_counts = filters['monthly_counts']
     weekly_counts = filters['weekly_counts']
 
-    if 'view' in request.GET and request.GET['view'] == 'dashboard':
+    if 'view' in filter_query_dict and filter_query_dict['view'] == 'dashboard':
         punchcard, ticks = get_punchcard_data(queryset_check(filters['all']), filters['start_date'], filters['weeks_between'], view)
         page_name = (get_system_setting('team_name')) + " Metrics"
         template = 'dojo/dashboard-metrics.html'
 
-    add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
+    add_breadcrumb(title=page_name, top_level=not len(filter_query_dict), request=request)
 
     return render(request, template, {
         'name': page_name,

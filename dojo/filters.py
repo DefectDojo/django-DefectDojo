@@ -1063,13 +1063,13 @@ class MetricsFindingFilter(FilterSet):
     severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     status = FindingStatusFilter(label='Status')
 
-    def __init__(self, *args, **kwargs):
-        if args[0]:
-            if args[0].get('start_date', '') != '' or args[0].get('end_date', '') != '':
-                args[0]._mutable = True
-                args[0]['date'] = 8
-                args[0]._mutable = False
-        super(MetricsFindingFilter, self).__init__(*args, **kwargs)
+    def __init__(self, data=None, *args, **kwargs):
+        if data is not None:
+            # Create a mutable copy of the QueryDict
+            data = data.copy()
+            if data.get('start_date', '') != '' or data.get('end_date', '') != '':
+                data['date'] = 8
+        super(MetricsFindingFilter, self).__init__(data, *args, **kwargs)
         self.form.fields['severity'].choices = self.queryset.order_by(
             'numerical_severity'
         ).values_list('severity', 'severity').distinct()
@@ -1120,13 +1120,13 @@ class MetricsEndpointFilter(FilterSet):
     finding__test__engagement__version = CharFilter(lookup_expr='icontains', label="Engagement Version")
     finding__severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
 
-    def __init__(self, *args, **kwargs):
-        if args[0]:
-            if args[0].get('start_date', '') != '' or args[0].get('end_date', '') != '':
-                args[0]._mutable = True
-                args[0]['date'] = 8
-                args[0]._mutable = False
-        super(MetricsEndpointFilter, self).__init__(*args, **kwargs)
+    def __init__(self, data=None, *args, **kwargs):
+        if data is not None:
+            # Create a mutable copy of the QueryDict
+            data = data.copy()
+            if data.get('start_date', '') != '' or data.get('end_date', '') != '':
+                data['date'] = 8
+        super(MetricsEndpointFilter, self).__init__(data, *args, **kwargs)
         self.form.fields['finding__severity'].choices = self.queryset.order_by(
             'finding__numerical_severity'
         ).values_list('finding__severity', 'finding__severity').distinct()
@@ -1159,16 +1159,16 @@ class ProductMetricsFindingFilter(FilterSet):
     severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     status = FindingStatusFilter(label='Status')
 
-    def __init__(self, *args, **kwargs):
-        if args[0]:
-            if args[0].get('start_date', '') != '' or args[0].get('end_date', '') != '':
-                args[0]._mutable = True
-                args[0]['date'] = 8
-                args[0]._mutable = False
+    def __init__(self, data=None, *args, **kwargs):
+        if data is not None:
+            # Create a mutable copy of the QueryDict
+            data = data.copy()
+            if data.get('start_date', '') != '' or data.get('end_date', '') != '':
+                data['date'] = 8
         self.pid = None
         if 'pid' in kwargs:
             self.pid = kwargs.pop('pid')
-        super(ProductMetricsFindingFilter, self).__init__(*args, **kwargs)
+        super(ProductMetricsFindingFilter, self).__init__(data, *args, **kwargs)
         self.form.fields['severity'].choices = self.queryset.order_by(
             'numerical_severity'
         ).values_list('severity', 'severity').distinct()
@@ -1212,13 +1212,13 @@ class ProductMetricsEndpointFilter(FilterSet):
     finding__test__engagement__version = CharFilter(lookup_expr='icontains', label="Engagement Version")
     finding__severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
 
-    def __init__(self, *args, **kwargs):
-        if args[0]:
-            if args[0].get('start_date', '') != '' or args[0].get('end_date', '') != '':
-                args[0]._mutable = True
-                args[0]['date'] = 8
-                args[0]._mutable = False
-        super(ProductMetricsEndpointFilter, self).__init__(*args, **kwargs)
+    def __init__(self, data=None, *args, **kwargs):
+        if data is not None:
+            # Create a mutable copy of the QueryDict
+            data = data.copy()
+            if data.get('start_date', '') != '' or data.get('end_date', '') != '':
+                data['date'] = 8
+        super(ProductMetricsEndpointFilter, self).__init__(data, *args, **kwargs)
         self.form.fields['finding__severity'].choices = self.queryset.order_by(
             'finding__numerical_severity'
         ).values_list('finding__severity', 'finding__severity').distinct()
