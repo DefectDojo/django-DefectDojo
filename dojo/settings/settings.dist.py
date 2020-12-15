@@ -60,7 +60,7 @@ env = environ.Env(
     DD_CELERY_RESULT_EXPIRES=(int, 86400),
     DD_CELERY_BEAT_SCHEDULE_FILENAME=(str, root('dojo.celery.beat.db')),
     DD_CELERY_TASK_SERIALIZER=(str, 'pickle'),
-    DD_CELERY_PASS_MODEL_BY_ID=(str, False),
+    DD_CELERY_PASS_MODEL_BY_ID=(str, True),
     DD_FOOTER_VERSION=(str, ''),
     # models should be passed to celery by ID, default is False (for now)
     DD_FORCE_LOWERCASE_TAGS=(bool, True),
@@ -605,7 +605,7 @@ INSTALLED_APPS = (
     'dojo',
     'tastypie_swagger',
     'watson',
-    'tagging',
+    'tagging',  # not used, but still needed for migration 0065_django_tagulous.py (v1.10.0)
     'custom_field',
     'imagekit',
     'multiselectfield',
@@ -613,11 +613,10 @@ INSTALLED_APPS = (
     'rest_framework.authtoken',
     'rest_framework_swagger',
     'dbbackup',
-    # 'taggit_serializer',
-    # 'axes'
     'django_celery_results',
     'social_django',
     'drf_yasg2',
+    'tagulous',
 )
 
 # ------------------------------------------------------------------------------
@@ -931,3 +930,22 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
 
 # Maximum size of a scan file in MB
 SCAN_FILE_MAX_SIZE = 100
+
+SERIALIZATION_MODULES = {
+    'xml': 'tagulous.serializers.xml_serializer',
+    'json': 'tagulous.serializers.json',
+    'python': 'tagulous.serializers.python',
+    'yaml': 'tagulous.serializers.pyyaml',
+}
+
+# There seems to be no way just use the default and just leave out jquery, so we have to copy...
+# ... and keep it up-to-date.
+TAGULOUS_AUTOCOMPLETE_JS = (
+    # 'tagulous/lib/jquery.js',
+    'tagulous/lib/select2-4/js/select2.full.min.js',
+    'tagulous/tagulous.js',
+    'tagulous/adaptor/select2-4.js',
+)
+
+# using 'element' for width should take width from css defined in template, but it doesn't. So set to 70% here.
+TAGULOUS_AUTOCOMPLETE_SETTINGS = {'placeholder': "Enter some tags (comma separated, use enter to select / create a new tag)", 'width': '70%'}
