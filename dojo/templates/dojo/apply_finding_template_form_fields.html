@@ -1,6 +1,12 @@
 {% load as_json %}
 {% load event_tags %}
 {% load get_attribute %}
+{% block css %}
+    {{ form.media.css }}
+{% endblock %}
+{% block js %}
+    {{ form.media.js }}
+{% endblock %}
 {% if form.non_field_errors %}
     <div class="alert alert-danger alert-dismissible" role="alert">
         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
@@ -23,7 +29,7 @@
         <label class="col-sm-2 control-label">{{ field.label }} Option</label>
         <div class="col-sm-10 {{ classes.value }}">
             {% if field.name == 'tags' %}
-                <select class="form-control" data-field-value="{{ finding_tags|as_json }}" data-template-value="{{ field.value|as_json }}" onchange="(function(t){ var field = document.forms['apply_template']['{{ field.name }}']; var fieldValue = ''; switch(t.value.toLowerCase()){ case 'keep': fieldValue=JSON.parse(t.getAttribute('data-field-value')); break; case 'replace': fieldValue= JSON.parse(t.getAttribute('data-template-value')); break; case 'combine': fieldValue= JSON.parse(t.getAttribute('data-field-value')).concat(JSON.parse(t.getAttribute('data-template-value'))); break;  } $(field).val(fieldValue); $('#id_tags').trigger('chosen:updated'); })(this)">
+                <select class="form-control" data-field-value="{{ finding_tags|as_json }}" data-template-value="{{ field.value|as_json }}" onchange="(function(t){ var field = document.forms['apply_template']['{{ field.name }}']; var fieldValue = ''; switch(t.value.toLowerCase()){ case 'keep': fieldValue=JSON.parse(t.getAttribute('data-field-value')); break; case 'replace': fieldValue= JSON.parse(t.getAttribute('data-template-value')); break; case 'combine': fieldValue= JSON.parse(t.getAttribute('data-field-value')).concat(JSON.parse(t.getAttribute('data-template-value'))); break;  } $(field).val(fieldValue); })(this)">
             {% else %}
                 <select class="form-control" data-field-value="{{ field.value }}" data-template-value="{{ template_value }}" onchange="(function(t){ var field = document.forms['apply_template']['{{ field.name }}']; var fieldValue = ''; switch(t.value.toLowerCase()){ case 'keep': fieldValue=t.getAttribute('data-field-value'); break; case 'replace': fieldValue= t.getAttribute('data-template-value'); break; case 'combine': fieldValue= t.getAttribute('data-field-value').concat('\r\n').concat(t.getAttribute('data-template-value')); break;  } field.mde === undefined ? field.value = fieldValue : field.mde.value(fieldValue); })(this)">
             {% endif %}

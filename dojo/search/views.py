@@ -1,7 +1,6 @@
 import logging
 
 from django.shortcuts import render
-from tagging.models import TaggedItem
 from watson import search as watson
 from django.db.models import Q
 from dojo.forms import SimpleSearchForm
@@ -12,6 +11,7 @@ import re
 from dojo.finding.views import prefetch_for_findings
 from dojo.filters import OpenFindingFilter
 from django.conf import settings
+import tagulous
 
 logger = logging.getLogger(__name__)
 
@@ -98,7 +98,7 @@ def simple_search(request):
 
             logger.debug('cve clean_query: [%s]', clean_query)
 
-            search_tags = "tag" in search_operator or search_operator == ""
+            search_tags = "tag" in search_operator or "tags" in search_operator or search_operator == ""
             search_findings = "finding" in search_operator or "cve" in search_operator or "id" in search_operator or search_operator == ""
             search_finding_templates = "template" in search_operator or search_operator == ""
             search_tests = "test" in search_operator or search_operator == ""
@@ -131,12 +131,12 @@ def simple_search(request):
             tags = clean_query
             # search tags first to avoid errors due to slicing too early
             if search_tags:
-                tagged_findings = TaggedItem.objects.get_by_model(findings, tags)[:max_results]
-                tagged_finding_templates = TaggedItem.objects.get_by_model(Finding_Template, tags)[:max_results]
-                tagged_tests = TaggedItem.objects.get_by_model(tests, tags)[:max_results]
-                tagged_engagements = TaggedItem.objects.get_by_model(engagements, tags)[:max_results]
-                tagged_products = TaggedItem.objects.get_union_by_model(products, tags)[:max_results]
-                tagged_endpoints = TaggedItem.objects.get_by_model(endpoints, tags)[:max_results]
+                tagged_findings = findings.filter(tags__name__in=tagulous.utils.parse_tags(tags)).distinct()[:max_results]
+                tagged_finding_templates = Finding_Template.objects.all().filter(tags__name__in=tagulous.utils.parse_tags(tags)).distinct()[:max_results]
+                tagged_tests = tests.filter(tags__name__in=tagulous.utils.parse_tags(tags)).distinct()[:max_results]
+                tagged_engagements = engagements.filter(tags__name__in=tagulous.utils.parse_tags(tags)).distinct()[:max_results]
+                tagged_products = products.filter(tags__name__in=tagulous.utils.parse_tags(tags)).distinct()[:max_results]
+                tagged_endpoints = endpoints.filter(tags__name__in=tagulous.utils.parse_tags(tags)).distinct()[:max_results]
             else:
                 tagged_findings = None
                 tagged_finding_templates = None
@@ -144,6 +144,8 @@ def simple_search(request):
                 tagged_engagements = None
                 tagged_products = None
                 tagged_endpoints = None
+
+            tagged_results = tagged_findings or tagged_finding_templates or tagged_tests or tagged_engagements or tagged_products or tagged_endpoints
 
             if search_findings:
                 findings_filter = OpenFindingFilter(request.GET, queryset=findings, user=request.user, pid=None, prefix='finding')
@@ -159,7 +161,7 @@ def simple_search(request):
                 # prefetch after watson to avoid inavlid query errors due to watson not understanding prefetching
                 findings = prefetch_for_findings(findings)
                 # some over the top tag displaying happening...
-                findings = findings.prefetch_related('test__engagement__product__tagged_items__tag')
+                findings = findings.prefetch_related('test__engagement__product__tags')
 
                 findings = findings[:max_results]
             else:
@@ -172,7 +174,7 @@ def simple_search(request):
 
                 # findings = prefetch_for_findings(findings)
                 # some over the top tag displaying happening...
-                # findings = findings.prefetch_related('test__engagement__product__tagged_items__tag')
+                # findings = findings.prefetch_related('test__engagement__product__tags')
 
                 # paged_findings.object_list = findings
 
@@ -190,7 +192,7 @@ def simple_search(request):
             if search_tests:
                 watson_results = watson.filter(tests, clean_query)
                 tests = tests.filter(id__in=[watson.id for watson in watson_results])
-                tests = tests.prefetch_related('engagement', 'engagement__product', 'test_type', 'tagged_items__tag', 'engagement__tagged_items__tag', 'engagement__product__tagged_items__tag')
+                tests = tests.prefetch_related('engagement', 'engagement__product', 'test_type', 'tags', 'engagement__tags', 'engagement__product__tags')
                 tests = tests[:max_results]
             else:
                 tests = None
@@ -198,7 +200,7 @@ def simple_search(request):
             if search_engagements:
                 watson_results = watson.filter(engagements, clean_query)
                 engagements = engagements.filter(id__in=[watson.id for watson in watson_results])
-                engagements = engagements.prefetch_related('product', 'product__tagged_items__tag', 'tagged_items__tag')
+                engagements = engagements.prefetch_related('product', 'product__tags', 'tags')
                 engagements = engagements[:max_results]
             else:
                 engagements = None
@@ -206,21 +208,21 @@ def simple_search(request):
             if search_products:
                 watson_results = watson.filter(products, clean_query)
                 products = products.filter(id__in=[watson.id for watson in watson_results])
-                products = products.prefetch_related('tagged_items__tag')
+                products = products.prefetch_related('tags')
                 products = products[:max_results]
             else:
                 products = None
 
             if search_endpoints:
                 endpoints = endpoints.filter(Q(host__icontains=clean_query) | Q(path__icontains=clean_query) | Q(fqdn__icontains=clean_query) | Q(protocol__icontains=clean_query))
-                endpoints = endpoints.prefetch_related('product', 'tagged_items__tag', 'product__tagged_items__tag')
+                endpoints = endpoints.prefetch_related('product', 'tags', 'product__tags')
                 endpoints = endpoints[:max_results]
             else:
                 endpoints = None
 
             if search_languages:
                 languages = Languages.objects.filter(language__language__icontains=clean_query)
-                languages = languages.prefetch_related('product', 'product__tagged_items__tag')
+                languages = languages.prefetch_related('product', 'product__tags')
                 languages = languages[:max_results]
             else:
                 languages = None
@@ -259,8 +261,8 @@ def simple_search(request):
                 else 'engagements' if engagements else \
                     'tests' if tests else \
                          'endpoint' if endpoints else \
-                            'generic' if generic else \
-                                'tagged'
+                            'tagged' if tagged_results else \
+                                'generic'
 
     response = render(request, 'dojo/simple_search.html', {
         'clean_query': original_clean_query,

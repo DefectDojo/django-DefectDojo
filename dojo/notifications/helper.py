@@ -7,12 +7,12 @@ from django.template.loader import render_to_string
 from django.db.models import Q, Count, Prefetch
 from django.urls import reverse
 from dojo.celery import app
-
+from dojo.decorators import we_want_async, dojo_async_task, convert_kwargs_if_async
 
 logger = logging.getLogger(__name__)
 
 
-def create_notification(event=None, *args, **kwargs):
+def create_notification(event=None, **kwargs):
     if 'recipients' in kwargs:
         # mimic existing code so that when recipients is specified, no other system or personal notifications are sent.
         logger.debug('creating notifications for recipients')
@@ -23,20 +23,7 @@ def create_notification(event=None, *args, **kwargs):
         logger.debug('creating system notifications for event: %s', event)
         # send system notifications to all admin users
 
-        # System notifications
-        try:
-            system_notifications = Notifications.objects.get(user=None)
-        except Exception:
-            system_notifications = Notifications()
-
-        # System notifications are sent one with user=None, which will trigger email to configured system email, to global slack channel, etc.
-        process_notifications(event, system_notifications, *args, **kwargs)
-
-        # All admins will also receive system notifications, but as part of the person global notifications section below
-        # This time user is set, so will trigger email to personal email, to personal slack channel (mention), etc.
-        # only retrieve users which have at least one notification type enabled for this event type.
-        logger.debug('creating personal notifications for event: %s', event)
-
+        # parse kwargs before converting them to dicts
         product = None
         if 'product' in kwargs:
             product = kwargs.get('product')
@@ -49,6 +36,22 @@ def create_notification(event=None, *args, **kwargs):
 
         if not product and 'finding' in kwargs:
             product = kwargs['finding'].test.engagement.product
+
+        kwargs = convert_kwargs_if_async(**kwargs)
+
+        # System notifications
+        try:
+            system_notifications = Notifications.objects.get(user=None)
+        except Exception:
+            system_notifications = Notifications()
+
+        # System notifications are sent one with user=None, which will trigger email to configured system email, to global slack channel, etc.
+        process_notifications(event, system_notifications, **kwargs)
+
+        # All admins will also receive system notifications, but as part of the person global notifications section below
+        # This time user is set, so will trigger email to personal email, to personal slack channel (mention), etc.
+        # only retrieve users which have at least one notification type enabled for this event type.
+        logger.debug('creating personal notifications for event: %s', event)
 
         # get users with either global notifications, or a product specific noditiciation
         # and all admin/superuser, they will always be notified
@@ -73,7 +76,7 @@ def create_notification(event=None, *args, **kwargs):
 
             notifications_set = Notifications.merge_notifications_list(applicable_notifications)
             notifications_set.user = user
-            process_notifications(event, notifications_set, *args, **kwargs)
+            process_notifications(event, notifications_set, **kwargs)
 
 
 def create_description(event, *args, **kwargs):
@@ -106,17 +109,15 @@ def create_notification_message(event, user, notification_type, *args, **kwargs)
     return notification_message if notification_message else ''
 
 
-def process_notifications(event, notifications=None, *args, **kwargs):
+def process_notifications(event, notifications=None, **kwargs):
     from dojo.utils import get_system_setting
 
     if not notifications:
         logger.warn('no notifications!')
         return
 
-    sync = 'initiator' in kwargs and Dojo_User.wants_block_execution(kwargs['initiator'])
-
     # logger.debug('sync: %s %s', sync, vars(notifications))
-    logger.debug('sending notification ' + ('synchronously' if sync else 'asynchronously'))
+    logger.debug('sending notification ' + ('asynchronously' if we_want_async() else 'synchronously'))
     logger.debug('process notifications for %s', notifications.user)
     logger.debug('notifications: %s', vars(notifications))
 
@@ -125,29 +126,19 @@ def process_notifications(event, notifications=None, *args, **kwargs):
     mail_enabled = get_system_setting('enable_mail_notifications')
 
     if slack_enabled and 'slack' in getattr(notifications, event):
-        if not sync:
-            send_slack_notification.delay(event, notifications.user, *args, **kwargs)
-        else:
-            send_slack_notification(event, notifications.user, *args, **kwargs)
+        send_slack_notification(event, notifications.user, **kwargs)
 
     if msteams_enabled and 'msteams' in getattr(notifications, event):
-        if not sync:
-            send_msteams_notification.delay(event, notifications.user, *args, **kwargs)
-        else:
-            send_msteams_notification(event, notifications.user, *args, **kwargs)
+        send_msteams_notification(event, notifications.user, **kwargs)
 
-    logger.debug('mail_enabled: %s', mail_enabled)
-    logger.debug('getattr(notifications, event): %s', getattr(notifications, event))
     if mail_enabled and 'mail' in getattr(notifications, event):
-        if not sync:
-            send_mail_notification.delay(event, notifications.user, *args, **kwargs)
-        else:
-            send_mail_notification(event, notifications.user, *args, **kwargs)
+        send_mail_notification(event, notifications.user, **kwargs)
 
     if 'alert' in getattr(notifications, event, None):
-        send_alert_notification(event, notifications.user, *args, **kwargs)
+        send_alert_notification(event, notifications.user, **kwargs)
 
 
+@dojo_async_task
 @app.task(name='send_slack_notification')
 def send_slack_notification(event, user=None, *args, **kwargs):
     from dojo.utils import get_system_setting
@@ -205,6 +196,7 @@ def send_slack_notification(event, user=None, *args, **kwargs):
         log_alert(e, 'Slack Notification', title=kwargs['title'], description=str(e), url=kwargs['url'])
 
 
+@dojo_async_task
 @app.task(name='send_msteams_notification')
 def send_msteams_notification(event, user=None, *args, **kwargs):
     from dojo.utils import get_system_setting
@@ -230,6 +222,7 @@ def send_msteams_notification(event, user=None, *args, **kwargs):
         pass
 
 
+@dojo_async_task
 @app.task(name='send_mail_notification')
 def send_mail_notification(event, user=None, *args, **kwargs):
     from dojo.utils import get_system_setting
@@ -265,7 +258,7 @@ def send_mail_notification(event, user=None, *args, **kwargs):
 
 
 def send_alert_notification(event, user=None, *args, **kwargs):
-    logger.info('sending alert notification to %s', user)
+    logger.debug('sending alert notification to %s', user)
     try:
         # no need to differentiate between user/no user
         icon = kwargs.get('icon', 'info-circle')

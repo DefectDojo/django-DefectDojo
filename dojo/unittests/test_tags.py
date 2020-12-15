@@ -1,11 +1,12 @@
-from dojo.models import Product, Finding
+from dojo.models import Finding
 from .dojo_test_case import DojoAPITestCase
 import logging
+import random
 
 logger = logging.getLogger(__name__)
 
 
-class TaggitTests(DojoAPITestCase):
+class TagTests(DojoAPITestCase):
     fixtures = ['dojo_testdata.json']
 
     def setUp(self, *args, **kwargs):
@@ -14,59 +15,13 @@ class TaggitTests(DojoAPITestCase):
         self.scans_path = 'dojo/unittests/scans/zap/'
         self.zap_sample5_filename = self.scans_path + '5_zap_sample_one.xml'
 
-    def test_tags_prefetching(self):
-        # print('\nadding tags')
-        for product in Product.objects.all():
-            product.tags = self.add_tags(product.tags, ['product_' + str(product.id)])
-            product.save()
-            for eng in product.engagement_set.all():
-                eng.tags = self.add_tags(eng.tags, ['eng_' + str(eng.id), 'product_' + str(product.id)])
-                eng.save()
-                for test in eng.test_set.all():
-                    test.tags = self.add_tags(test.tags, ['test_' + str(test.id), 'eng_' + str(eng.id), 'product_' + str(product.id)])
-                    test.save()
-
-        # print('testing tags for correctness without prefetching')
-        self.check_tags(Product.objects.all())
-
-        # print('testing tags for correctness with prefetching')
-        self.check_tags(Product.objects.all().prefetch_related('tagged_items__tag'))
-
-        # print('testing tags for correctness with nested prefetching')
-        self.check_tags(Product.objects.all().prefetch_related('tagged_items__tag', 'engagement_set__tagged_items__tag'))
-
-    def add_tags(self, curr_tags, extra_tags):
-        for tag in extra_tags:
-            curr_tags.append(tag)
-        return ", ".join(curr_tags)
-
-    def check_tags(self, queryset):
-        for product in queryset:
-            # print(product.name + ": " + str(product.tags))
-            self.assertEqual(len(product.tags), 1)
-            self.assertEqual(product.tags[0].name, 'product_' + str(product.id))
-            for eng in product.engagement_set.all():
-                # print("         :" + eng.name + ": " + str(eng.tags))
-                self.assertEqual(len(eng.tags), 2)
-                self.assertEqual('product_' + str(product.id) in [tag.name for tag in product.tags], True)
-                self.assertEqual('eng_' + str(eng.id) in [tag.name for tag in eng.tags], True)
-                self.assertEqual('eng_' + str(eng.id + 1) in [tag.name for tag in eng.tags], False)
-                for test in eng.test_set.all():
-                    # print("         :" + eng.name + ": " + test.test_type.name + ": " + str(test.tags))
-                    self.assertEqual(len(test.tags), 3)
-                    self.assertEqual('product_' + str(product.id) in [tag.name for tag in product.tags], True)
-                    self.assertEqual('eng_' + str(eng.id) in [tag.name for tag in eng.tags], True)
-                    self.assertEqual('eng_' + str(eng.id + 1) in [tag.name for tag in eng.tags], False)
-                    self.assertEqual('test_' + str(test.id) in [tag.name for tag in test.tags], True)
-                    self.assertEqual('test_' + str(test.id + 1) in [tag.name for tag in test.tags], False)
-
     def create_finding_with_tags(self, tags):
         finding_id = Finding.objects.all().first().id
         finding_details = self.get_finding_api(finding_id)
 
         del finding_details['id']
 
-        finding_details['title'] = 'tags test 1'
+        finding_details['title'] = 'tags test ' + str(random.randint(1, 9999))
         finding_details['tags'] = tags
         response = self.post_new_finding_api(finding_details)
 
@@ -81,6 +36,25 @@ class TaggitTests(DojoAPITestCase):
         for tag in tags:
             # logger.debug('looking for tag %s in tag list %s', tag, response['tags'])
             self.assertTrue(tag in response['tags'])
+
+    def test_finding_filter_tags(self):
+        tags = ['tag1', 'tag2']
+        finding_id = self.create_finding_with_tags(tags)
+
+        tags2 = ['tag1', 'tag3']
+        finding_id2 = self.create_finding_with_tags(tags2)
+
+        response = self.get_finding_api_filter_tags('tag1')
+        self.assertEqual(response['count'], 2)
+
+        response = self.get_finding_api_filter_tags('tag2')
+        self.assertEqual(response['count'], 1)
+
+        response = self.get_finding_api_filter_tags('tag2,tag3')
+        self.assertEqual(response['count'], 2)
+
+        response = self.get_finding_api_filter_tags('tag4')
+        self.assertEqual(response['count'], 0)
 
     def test_finding_post_tags(self):
         # create finding
@@ -185,10 +159,16 @@ class TaggitTests(DojoAPITestCase):
         finding_id = self.create_finding_with_tags(tags)
         response = self.get_finding_tags_api(finding_id)
 
-        # via API the tag gets split into two tags (via the UI no splitting happens)
-        self.assertEqual(2, len(response.get('tags')))
-        self.assertTrue('one' in response['tags'])
-        self.assertTrue('two' in response['tags'])
+        # the old django-tagging library was splitting this tag into 2 tags
+        # with djangotagulous the tag does no longer get split up and we cannot modify tagulous
+        # to keep doing the old behaviour. so this is a small incompatibility, but only for
+        # tags with commas, so should be minor trouble
+        #
+        # self.assertEqual(2, len(response.get('tags')))
+        self.assertEqual(1, len(response.get('tags')))
+        # print("response['tags']:" + str(response['tags']))
+        self.assertTrue('one' in str(response['tags']))
+        self.assertTrue('two' in str(response['tags']))
 
     def test_finding_create_tags_with_commas_quoted(self):
         tags = ['"one,two"']
@@ -198,18 +178,24 @@ class TaggitTests(DojoAPITestCase):
         # no splitting due to quotes
         self.assertEqual(len(tags), len(response.get('tags', None)))
         for tag in tags:
-            # logger.debug('looking for tag %s in tag list %s', tag, response['tags'])
-            self.assertTrue(tag.strip('\"') in response['tags'])
+            logger.debug('looking for tag %s in tag list %s', tag, response['tags'])
+            # with django-tagging the quotes were stripped, with tagulous they remain
+            # self.assertTrue(tag.strip('\"') in response['tags'])
+            self.assertTrue(tag in response['tags'])
 
     def test_finding_create_tags_with_spaces(self):
         tags = ['one two']
         finding_id = self.create_finding_with_tags(tags)
         response = self.get_finding_tags_api(finding_id)
 
-        # via API the tag gets split into two tags (via the UI no splitting happens)
-        self.assertEqual(2, len(response.get('tags')))
-        self.assertTrue('one' in response['tags'])
-        self.assertTrue('two' in response['tags'])
+        # the old django-tagging library was splitting this tag into 2 tags
+        # with djangotagulous the tag does no longer get split up and we cannot modify tagulous
+        # to keep doing the old behaviour. so this is a small incompatibility, but only for
+        # tags with commas, so should be minor trouble
+        # self.assertEqual(2, len(response.get('tags')))
+        self.assertEqual(1, len(response.get('tags')))
+        self.assertTrue('one' in str(response['tags']))
+        self.assertTrue('two' in str(response['tags']))
         # finding.tags: [<Tag: one>, <Tag: two>]
 
     def test_finding_create_tags_with_spaces_quoted(self):
@@ -221,7 +207,9 @@ class TaggitTests(DojoAPITestCase):
         self.assertEqual(len(tags), len(response.get('tags', None)))
         for tag in tags:
             logger.debug('looking for tag %s in tag list %s', tag, response['tags'])
-            self.assertTrue(tag.strip('\"') in response['tags'])
+            # with django-tagging the quotes were stripped, with tagulous they remain
+            # self.assertTrue(tag.strip('\"') in response['tags'])
+            self.assertTrue(tag in response['tags'])
 
         # finding.tags: <QuerySet [<Tag: one two>]>
 

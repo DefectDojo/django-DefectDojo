@@ -24,8 +24,8 @@
                 <h3 class="pull-left"> {{ test }}
                 {% if test.tags %}
                     <sup>
-                        {% for tag in test.tags %}
-                        <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                        {% for tag in test.tags.all %}
+                        <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=tag:{{ tag }}">{{ tag }}</a>
                         {% endfor %}
                     </sup>
                 {% endif %}
@@ -270,13 +270,12 @@
                             <b>Push to JIRA</b> <input id="id_push_tojira" name="push_to_jira" type="checkbox" alt="Select to push to JIRA" title="Push_To_Jira"/><br/>
                         {% endif %}
                         <label style="display: block">Tags</label>
-                        <label style="font-size: 80%; font-weight: normal; display: block; padding-right: 8px;">
-                            <select multiple class="chosen-select" style="display: none;" name="tags" id="tag_choices">
-                                {% for tag in tag_input %}
-                                    <option value="{{tag}}">{{tag}}</option>
-                                {% endfor %}`
-                            </select>
-                        </label>
+                        {% comment %}
+                            Quick hack to make bulk edit work without refactoring the whole bulk edit form                                
+                        {% endcomment %}                                
+                        {{ bulk_edit_form.media.css }}
+                        {{ bulk_edit_form.media.js }}
+                        {{ bulk_edit_form.tags }}
                         <input type="submit" class="btn btn-sm btn-primary" value="Submit" title="sub-button"/>
                     </form>
                 </li>
@@ -490,8 +489,8 @@
                              {% endif %}
                           {% if finding.tags %}
                               <sup>
-                                  {% for tag in finding.tags %}
-                                  <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                  {% for tag in finding.tags.all %}
+                                  <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=tag:{{ tag }}">{{ tag }}</a>
                                   {% endfor %}
                               </sup>
                           {% endif %}
@@ -739,9 +738,42 @@
         $(document).ready(function(){
             date =  new Date().toISOString().slice(0, 10);
             var fileDated = 'Findings_List_' + date;
+            var columns = [
+                  {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled %}
+                  { "data": "dropdown" },
+                  {% endif %}
+                  { "data": "action" },
+                  { "data": "severity" },
+                  { "data": "name" },
+                  { "data": "cwe" },
+                  { "data": "date" },
+                  { "data": "age" },
+                  {% if system_settings.enable_finding_sla %}
+                      { "data": "sla" },
+                  {% endif %}
+                  { "data": "reporter" },
+                  { "data": "status" },
+                  {% if system_settings.enable_jira %}
+                      {% if jira_project and product_tab or not product_tab %}
+                          { "data": "jira" },
+                          { "data": "jira_age" },
+                          { "data": "jira_change" },
+                      {% endif %}
+                  {% endif %}
+              ];
+
+            // Filter the list of items to display based on what is shown.
+            var disallowed_entries = new Set(["dropdown", "action"]);
+            var data_column_list = [];
+            for (var i = 0; i < columns.length; i++) {
+                if (!disallowed_entries.has(columns[i]["data"])) {
+                    data_column_list.push(i);
+                }
+            }
+
             var buttonCommon = {
                 exportOptions: {
-                    columns: ':not(:eq(8))',
+                    columns: data_column_list,
                     stripHtml: true,
                     stripNewlines: true,
                     trim: true,
@@ -757,29 +789,7 @@
                     $('.has-popover').popover({'trigger':'hover'});
                 },
                 colReorder: true,
-                "columns": [
-                    {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled %}                    
-                    { "data": "dropdown" },
-                    {% endif %}
-                    { "data": "action" },
-                    { "data": "severity" },
-                    { "data": "name" },
-                    { "data": "cwe" },
-                    { "data": "date" },
-                    { "data": "age" },
-                    {% if system_settings.enable_finding_sla %}
-                        { "data": "sla" },
-                    {% endif %}
-                    { "data": "reporter" },
-                    { "data": "status" },
-                    {% if system_settings.enable_jira %}
-                        {% if jira_project and product_tab or not product_tab %}
-                            { "data": "jira" },
-                            { "data": "jira_age" },
-                            { "data": "jira_change" },
-                        {% endif %}
-                    {% endif %}
-                ],
+                "columns": columns,
                 columnDefs: [
                     { 
                         "orderable": false,
