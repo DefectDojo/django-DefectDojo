@@ -3,6 +3,7 @@ Tests for metrics database queries
 """
 
 from datetime import datetime, timezone
+from unittest.mock import patch
 
 from django.test import TestCase
 
@@ -16,7 +17,11 @@ class FindingQueriesTest(TestCase):
     def setUp(self):
         self.user = User.objects.get(username='user1')
 
-    def test_finding_queries(self):
+    @patch('django.utils.timezone.now')
+    def test_finding_queries(self, mock_timezone):
+        mock_datetime = datetime(2020, 12, 9, tzinfo=timezone.utc)
+        mock_timezone.return_value = mock_datetime
+
         # Queries over Finding and Risk_Acceptance
         with self.assertNumQueries(23):
             product_types = []
