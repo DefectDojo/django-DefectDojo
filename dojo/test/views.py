@@ -1,5 +1,5 @@
 # #  tests
-
+import os
 import logging
 import operator
 import json
@@ -23,11 +23,11 @@ from django.db import DEFAULT_DB_ALIAS
 
 from dojo.filters import TemplateFindingFilter, OpenFindingFilter
 from dojo.forms import NoteForm, TestForm, FindingForm, \
-    DeleteTestForm, AddFindingForm, TypedNoteForm, \
+    DeleteTestForm, AddFindingForm, TypedNoteForm, ManageFileFormSet, \
     ImportScanForm, ReImportScanForm, JIRAFindingForm, JIRAImportScanForm, \
     FindingBulkUpdateForm
 from dojo.models import Finding, Test, Notes, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, \
-    Finding_Template, Cred_Mapping, Dojo_User, System_Settings, Endpoint_Status
+    Finding_Template, Cred_Mapping, Dojo_User, System_Settings, Endpoint_Status, FileUpload
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting, \
     Product_Tab, max_safe, is_scan_file_too_large, get_words_for_field
@@ -51,6 +51,7 @@ def view_test(request, tid):
     note_type_activation = Note_Type.objects.filter(is_active=True).count()
     if note_type_activation:
         available_note_types = find_available_notetypes(notes)
+    files = test.files.all()
     person = request.user.username
     findings = Finding.objects.filter(test=test).order_by('numerical_severity')
     findings = OpenFindingFilter(request.GET, queryset=findings)
@@ -145,6 +146,7 @@ def view_test(request, tid):
                    'component_words': component_words,
                    'form': form,
                    'notes': notes,
+                   'files': files,
                    'person': person,
                    'request': request,
                    'show_re_upload': show_re_upload,
@@ -925,3 +927,64 @@ def re_import_scan_results(request, tid):
                    'additional_message': additional_message,
                    'jform': jform,
                    })
+
+
+@user_passes_test(lambda u: u.is_staff)
+def manage_files(request, tid):
+    test = get_object_or_404(Test, id=tid)
+    files_formset = ManageFileFormSet(queryset=test.files.all())
+    error = False
+
+    if request.method == 'POST':
+        files_formset = ManageFileFormSet(
+            request.POST, request.FILES, queryset=test.files.all())
+        if files_formset.is_valid():
+            # remove all from database and disk
+
+            files_formset.save()
+
+            for obj in files_formset.deleted_objects:
+                os.remove(os.path.join(settings.MEDIA_ROOT, obj.file.name))
+
+            for obj in files_formset.new_objects:
+                test.files.add(obj)
+
+            orphan_files = FileUpload.objects.filter(test__isnull=True)
+            for obj in orphan_files:
+                os.remove(os.path.join(settings.MEDIA_ROOT, obj.file.name))
+                obj.delete()
+
+            files = os.listdir(os.path.join(settings.MEDIA_ROOT, 'uploaded_files'))
+
+            for file in files:
+                with_media_root = os.path.join(settings.MEDIA_ROOT, 'uploaded_files', file)
+                with_part_root_only = os.path.join('uploaded_files', file)
+                if os.path.isfile(with_media_root):
+                    file = FileUpload.objects.filter(
+                        file=with_part_root_only)
+
+                    if len(file) == 0:
+                        os.remove(with_media_root)
+                        file.delete()
+
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                'Files updated successfully.',
+                extra_tags='alert-success')
+        else:
+            error = True
+            messages.add_message(
+                request,
+                messages.ERROR,
+                'Please check form data and try again.',
+                extra_tags='alert-danger')
+
+        if not error:
+            return HttpResponseRedirect(reverse("view_test", args=(tid, )))
+    return render(
+        request, 'dojo/manage_files.html', {
+            'files_formset': files_formset,
+            'obj': test,
+            'obj_type': 'Test',
+        })

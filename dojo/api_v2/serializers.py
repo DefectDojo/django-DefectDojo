@@ -5,7 +5,8 @@ from dojo.models import Product, Engagement, Test, Finding, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Product_Type, JIRA_Instance, Endpoint, BurpRawRequestResponse, JIRA_Project, \
     Notes, DojoMeta, FindingImage, Note_Type, App_Analysis, Endpoint_Status, \
-    Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation
+    Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation, \
+    FileUpload
 
 from dojo.forms import ImportScanForm, SEVERITY_CHOICES
 from dojo.tools import requires_file
@@ -353,6 +354,13 @@ class NoteTypeSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class FileSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = FileUpload
+        fields = '__all__'
+
+
 class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
     findings_count = serializers.SerializerMethodField()
     findings_list = serializers.SerializerMethodField()
@@ -401,12 +409,16 @@ class EngagementSerializer(TaggitSerializer, serializers.ModelSerializer):
     def build_relational_field(self, field_name, relation_info):
         if field_name == 'notes':
             return NoteSerializer, {'many': True, 'read_only': True}
+        if field_name == 'files':
+            return FileSerializer, {'many': True, 'read_only': True}
         return super().build_relational_field(field_name, relation_info)
 
 
 class EngagementToNotesSerializer(serializers.Serializer):
     engagement_id = serializers.PrimaryKeyRelatedField(queryset=Engagement.objects.all(), many=False, allow_null=True)
     notes = NoteSerializer(many=True)
+
+        
 
 
 class AppAnalysisSerializer(serializers.ModelSerializer):
@@ -415,6 +427,11 @@ class AppAnalysisSerializer(serializers.ModelSerializer):
     class Meta:
         model = App_Analysis
         fields = '__all__'
+
+
+class EngagementToFilesSerializer(serializers.Serializer):
+    engagement_id = serializers.PrimaryKeyRelatedField(queryset=Engagement.objects.all(), many=False, allow_null=True)
+    files = FileSerializer(many=True)
 
 
 class ToolTypeSerializer(serializers.ModelSerializer):
@@ -622,6 +639,8 @@ class TestSerializer(TaggitSerializer, serializers.ModelSerializer):
     def build_relational_field(self, field_name, relation_info):
         if field_name == 'notes':
             return NoteSerializer, {'many': True, 'read_only': True}
+        if field_name == 'files':
+            return FileSerializer, {'many': True, 'read_only': True}
         return super().build_relational_field(field_name, relation_info)
 
 
@@ -651,6 +670,9 @@ class TestTypeSerializer(TaggitSerializer, serializers.ModelSerializer):
 class TestToNotesSerializer(serializers.Serializer):
     test_id = serializers.PrimaryKeyRelatedField(queryset=Test.objects.all(), many=False, allow_null=True)
     notes = NoteSerializer(many=True)
+class TestToFilesSerializer(serializers.Serializer):
+    test_id = serializers.PrimaryKeyRelatedField(queryset=Test.objects.all(), many=False, allow_null=True)
+    files = FileSerializer(many=True)
 
 
 class RiskAcceptanceSerializer(serializers.ModelSerializer):

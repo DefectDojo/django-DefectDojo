@@ -860,6 +860,10 @@ def jira_change(obj):
     return jira_helper.get_jira_change(obj)
 
 
+def get_filename(filename):
+    return filename.rsplit('/', 1)[-1]
+
+
 @register.filter
 def finding_extended_title(finding):
     if not finding:

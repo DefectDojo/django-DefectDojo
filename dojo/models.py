@@ -403,6 +403,11 @@ class Notes(models.Model):
         return self.entry
 
 
+class FileUpload(models.Model):
+    title = models.CharField(max_length=100, unique=True)
+    file = models.FileField(upload_to=UniqueUploadNameProvider('uploaded_files'))
+
+
 class Product_Type(models.Model):
     name = models.CharField(max_length=255, unique=True)
     critical_product = models.BooleanField(default=False)
@@ -1025,6 +1030,7 @@ class Engagement(models.Model):
     pen_test = models.BooleanField(default=True)
     check_list = models.BooleanField(default=True)
     notes = models.ManyToManyField(Notes, blank=True, editable=False)
+    files = models.ManyToManyField(FileUpload, blank=True, editable=False)
     status = models.CharField(editable=True, max_length=2000, default='',
                               null=True,
                               choices=ENGAGEMENT_STATUS_CHOICES)
@@ -1351,6 +1357,7 @@ class Test(models.Model):
                                            editable=True)
     notes = models.ManyToManyField(Notes, blank=True,
                                    editable=False)
+    files = models.ManyToManyField(FileUpload, blank=True, editable=False)
     environment = models.ForeignKey(Development_Environment, null=True,
                                     blank=False, on_delete=models.CASCADE)
 

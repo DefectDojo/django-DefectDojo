@@ -19,4 +19,5 @@ urlpatterns = [
         views.add_temp_finding, name='add_temp_finding'),
     url(r'^test/(?P<tid>\d+)/search$', views.search, name='search'),
     url(r'^test/(?P<tid>\d+)/re_import_scan_results', views.re_import_scan_results, name='re_import_scan_results'),
+    url(r'^test/(?P<tid>\d+)/manage_files$', views.manage_files, name='manage_test_files'),
 ]
