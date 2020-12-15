@@ -9,10 +9,11 @@ from dateutil.relativedelta import relativedelta
 from django.db.models import Case, IntegerField, Sum, Q, Value, When
 from django.db.models.query import QuerySet
 from django.urls import reverse
+from django.utils import timezone
 
 from dojo.filters import MetricsEndpointFilter, MetricsFindingFilter
 from dojo.models import Endpoint_Status, Finding, Product
-from dojo.utils import get_period_counts, queryset_check, timezone
+from dojo.utils import get_period_counts, queryset_check
 
 
 def finding_querys(prod_type, user, findings_filter, alert_error_func):
