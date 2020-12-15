@@ -58,3 +58,15 @@ class TestSarifParser(TestCase):
         self.assertEqual(1, len(parser.items))
         item = parser.items[0]
         self.assertEqual('The insecure method "Crypto.Sha1.Encrypt" should not be used.', item.title)
+
+    def test_example_report_ms(self):
+        """Report file come from Microsoft SARIF sdk on GitHub
+        """
+        testfile = 'dojo/unittests/scans/sarif/SuppressionTestCurrent.sarif'
+        test = Test()
+        with open(testfile) as f:
+            parser = SarifParser(f, test)
+        self.assertIsNotNone(test.title)
+        self.assertEqual(4, len(parser.items))
+        item = parser.items[0]
+        self.assertEqual('New suppressed result.', item.title)
