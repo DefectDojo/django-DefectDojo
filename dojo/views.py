@@ -14,7 +14,6 @@ from dojo.forms import ManageFileFormSet
 from dojo.utils import get_page_items, Product_Tab, get_system_setting
 
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -125,14 +124,13 @@ def manage_files(request, oid, obj_type):
             for o in orphan_files:
                 logger.debug("purging orphan file: %s", o.file.name)
                 os.remove(os.path.join(settings.MEDIA_ROOT, o.file.name))
-                o.delete()                    
+                o.delete()
 
             messages.add_message(
                 request,
                 messages.SUCCESS,
                 'Files updated successfully.',
                 extra_tags='alert-success')
-
         else:
             error = True
             messages.add_message(

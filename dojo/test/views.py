@@ -927,3 +927,64 @@ def re_import_scan_results(request, tid):
                    'additional_message': additional_message,
                    'jform': jform,
                    })
+
+
+@user_passes_test(lambda u: u.is_staff)
+def manage_files(request, tid):
+    test = get_object_or_404(Test, id=tid)
+    files_formset = ManageFileFormSet(queryset=test.files.all())
+    error = False
+
+    if request.method == 'POST':
+        files_formset = ManageFileFormSet(
+            request.POST, request.FILES, queryset=test.files.all())
+        if files_formset.is_valid():
+            # remove all from database and disk
+
+            files_formset.save()
+
+            for obj in files_formset.deleted_objects:
+                os.remove(os.path.join(settings.MEDIA_ROOT, obj.file.name))
+
+            for obj in files_formset.new_objects:
+                test.files.add(obj)
+
+            orphan_files = FileUpload.objects.filter(test__isnull=True)
+            for obj in orphan_files:
+                os.remove(os.path.join(settings.MEDIA_ROOT, obj.file.name))
+                obj.delete()
+
+            files = os.listdir(os.path.join(settings.MEDIA_ROOT, 'uploaded_files'))
+
+            for file in files:
+                with_media_root = os.path.join(settings.MEDIA_ROOT, 'uploaded_files', file)
+                with_part_root_only = os.path.join('uploaded_files', file)
+                if os.path.isfile(with_media_root):
+                    file = FileUpload.objects.filter(
+                        file=with_part_root_only)
+
+                    if len(file) == 0:
+                        os.remove(with_media_root)
+                        file.delete()
+
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                'Files updated successfully.',
+                extra_tags='alert-success')
+        else:
+            error = True
+            messages.add_message(
+                request,
+                messages.ERROR,
+                'Please check form data and try again.',
+                extra_tags='alert-danger')
+
+        if not error:
+            return HttpResponseRedirect(reverse("view_test", args=(tid, )))
+    return render(
+        request, 'dojo/manage_files.html', {
+            'files_formset': files_formset,
+            'obj': test,
+            'obj_type': 'Test',
+        })

@@ -631,6 +631,7 @@
       
       <div id="add_feat_files" class="panel-body collapse">
         {% for file in files %}
+<<<<<<< HEAD
             <div class="col-md-2" style="text-align: center">
               <div class="row">
                 <a href="{{ request.scheme }}://{{ request.get_host }}{{ file.file.url }}" target="_blank">
@@ -639,6 +640,17 @@
                   {% else %}
                     <span style="font-size: 50px;" class="glyphicon glyphicon-file"></span>
                   {% endif %}
+=======
+            <div class="col-md-2">
+              <div class="row">
+                <a href="#"
+                    data-imageurl="{{ request.scheme }}://{{ request.get_host }}{{ file.file.url }}}"
+                    data-origurl="{{ request.scheme }}://{{ request.get_host }}{{ file.file.url }}"
+                    data-caption="{{ file.title }}"
+                    class="thumbnail" data-toggle="modal"
+                    data-target="#fileModal" id="file">
+                    <img src="{{ request.scheme }}://{{ request.get_host }}{{ file.file.url }}" alt="{{ file.title }}" title="{{ file.title }}" />
+>>>>>>> Pre-rebase commit
                 </a>
               </div>
               <div class="row">
@@ -646,7 +658,38 @@
               </div>
             </div>
         {% endfor %}
+<<<<<<< HEAD
       </div> 
+=======
+
+        <div class="modal fade" id="fileModal" tabindex="-1" role="dialog" aria-labelledby="fileModalLabel">
+          <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                  <div class="modal-header">
+                      <h4 class="pull-left">Files</h4>
+                      <button type="button" class="pull-right btn btn-xs btn-default" data-dismiss="modal"><span
+                              class="fa fa-close"></span></button>
+                  </div>
+
+                  <div class="modal-body">
+                      <a id="a_to_replace" class="modal_file" href="{{ request.scheme }}://{{ request.get_host }}{{ file.file.url }}" target="_blank"
+                          title="View original image.">
+                          <img id="to_replace" src="{{ request.scheme }}://{{ request.get_host }}{{ file.file.url }}" class="img-responsive"/>
+                      </a>
+                      <p id="caption_to_replace">{{ file.title }}</p>
+                  </div>
+
+                  <div class="modal-footer">
+                      <a href="#" id="next" class="btn btn-default bnt-xs pull-right"><span
+                              class="fa fa-arrow-right"></span></a>
+                  </div>
+              </div>
+          </div>
+        </div>
+      </div>
+
+      
+>>>>>>> Pre-rebase commit
 
     </div>
   </div>
@@ -990,6 +1033,39 @@
             var host = slashes.concat(window.location.host);
             modal.find('p#questionnaireURL').text('Questionnaire URL: ' + host + path)
             })
+        });
+
+        $('#fileModal').on('show.bs.modal', function (event) {
+            var link = $(event.relatedTarget);
+            var loc = link.data('imageurl')
+            var loco = link.data('origurl')
+            var caption = link.data('caption');
+            console.log(link);
+            console.log(loc);
+            var modal = $(this);
+            modal.find('#to_replace').attr('src', loc);
+            modal.find('#a_to_replace').attr('href', loco);
+            modal.find('#caption_to_replace').html(caption);
+        });
+        $("a#next").on('click', function (e) {
+            e.preventDefault();
+            var showing = $("img#to_replace").attr('src');
+            var thumbnails = $('a.thumbnail');
+
+            thumbnails.each(function (index) {
+                if ($(this).data('imageurl') == showing) {
+                    console.log(index, thumbnails.length)
+                    if (index == thumbnails.length - 1) {
+                        // at the end
+                        $("img#to_replace").attr('src', $(thumbnails[0]).data('imageurl'));
+                        $("#caption_to_replace").html($(thumbnails[0]).data('caption'));
+                    }
+                    else {
+                        $("img#to_replace").attr('src', $(thumbnails[index + 1]).data('imageurl'));
+                        $("#caption_to_replace").html($(thumbnails[index + 1]).data('caption'));
+                    }
+                }
+            });
         });
     </script>
 {% endblock %}
