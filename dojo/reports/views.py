@@ -757,8 +757,7 @@ def generate_report(request, obj):
                    'user_id': request.user.id}
     elif type(obj).__name__ == "QuerySet":
         findings = ReportAuthedFindingFilter(request.GET,
-                                             queryset=prefetch_related_findings_for_report(obj).distinct(),
-                                             user=request.user)
+                                             queryset=prefetch_related_findings_for_report(obj).distinct())
         filename = "finding_report.pdf"
         report_name = 'Finding'
         report_type = 'Finding'
