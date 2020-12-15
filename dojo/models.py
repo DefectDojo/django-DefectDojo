@@ -1803,7 +1803,7 @@ class Finding(models.Model):
             from dojo.utils import get_current_user
             user = get_current_user()
             simple_risk_acceptance = Risk_Acceptance.objects.create(
-                    owner_id=user.id,
+                    owner=user,
                     name=Finding.SIMPLE_RISK_ACCEPTANCE_NAME,
                     compensating_control='These findings are accepted using a simple risk acceptance without expiration date, '
                     'approval document or compensating control information. Unaccept and use full risk acceptance if you '
