@@ -160,6 +160,23 @@ class ReportBuilderTest(BaseTestCase):
 
         driver.find_element_by_name('_generate').click()
 
+    def test_product_list_report(self):
+        driver = self.driver
+        self.goto_product_overview(driver)
+        driver.find_element_by_id("dropdownMenu1").click()
+        driver.find_element_by_link_text("Findings Report").click()
+
+        my_select = Select(driver.find_element_by_id("id_include_finding_notes"))
+        my_select.select_by_index(1)
+
+        my_select = Select(driver.find_element_by_id("id_include_executive_summary"))
+        my_select.select_by_index(1)
+
+        my_select = Select(driver.find_element_by_id("id_include_table_of_contents"))
+        my_select.select_by_index(1)
+
+        driver.find_element_by_name('_generate').click()
+
 
 def add_report_tests_to_suite(suite):
     # Add each test the the suite to be run
