@@ -2042,9 +2042,10 @@ class Finding(models.Model):
         return sla_calculation
 
     def sla_deadline(self):
-        if self.severity == 'Info':
+        days_remaining = self.sla_days_remaining()
+        if days_remaining:
             return None
-        return self.date + relativedelta(days=self.sla_days_remaining())
+        return self.date + relativedelta(days=days_remaining)
 
     def github(self):
         try:
