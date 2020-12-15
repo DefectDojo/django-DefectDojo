@@ -55,7 +55,7 @@
                                             <ul>
                                                 {% for t in eng.test_set.all %}
                                                     {% if t in context.tests %}
-                                                        <li>{{ t.title }}
+                                                        <li>{{ t }}
                                                             ({{ t.environment.name|default:"unknown" }}):
                                                             {{ t.target_start|date:"SHORT_DATE_FORMAT" }}
                                                         </li>
@@ -214,7 +214,7 @@
                            <pre>{{ req.get_response|truncatechars_html:800 }}</pre>
                         {% endif %}
                         {% endfor %}
-                        {% endif %}
+                    {% endif %}
 
                     <h6>Impact</h6>
                     <pre>{{ finding.impact }}</pre>
@@ -226,7 +226,7 @@
                             {% for pic in finding.images.all %}
                                 <p><img src="{{ host }}{% pic_token pic 'original' %}" style="max-width: 85%"></p>
                             {% endfor %}
-                            {% endif %}
+                        {% endif %}
 
                         <h6>Impact</h6>
                         <pre>{{ finding.impact }}</pre>
@@ -285,6 +285,8 @@
                                 {% endif %}
                             {% endwith %}
                         {% endif %}
+                        {% endif %}
+                    {% endif }
                     {% endfor %}
                 {% endfor %}
             </div>
