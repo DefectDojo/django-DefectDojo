@@ -1,9 +1,5 @@
 ---
 # Global settings
-# Is this deployment for OpenShift? If so, we help with creating a nonroot SCC and adding serviceaccounts to it
-openShift:
-  enabled: false
-  createSCC: true
 # create defectdojo specific secret
 createSecret: false
 # create rabbitmq secret in defectdojo chart, outside of rabbitmq chart
@@ -36,8 +32,6 @@ securityContext:
     runAsUser: 1001
 
 test:
-  serviceAccount:
-    name: "test-defectdojo"
   resources:
     requests:
       cpu: 100m
@@ -45,6 +39,7 @@ test:
     limits:
       cpu: 500m
       memory: 512Mi
+
 admin:
   user: admin
   password:
@@ -89,7 +84,7 @@ celery:
         memory: 128Mi
       limits:
         cpu: 2000m
-        memory: 256Mi
+        memory: 512Mi
     tolerations: []
     app_settings:
       pool_type: solo
@@ -174,7 +169,6 @@ mysql:
   # the line below:
   mysqlServer: "127.0.0.1"
 
-
 postgresql:
   enabled: true
   serviceAccount:
@@ -229,6 +223,7 @@ rabbitmq:
     limits:
       cpu: 500m
       memory: 512Mi
+
 redis:
   enabled: false
   existingSecret: defectdojo-redis-specific

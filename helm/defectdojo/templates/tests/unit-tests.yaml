@@ -11,7 +11,7 @@ metadata:
   annotations:
     helm.sh/hook: test-success
 spec:
-  serviceAccountName: {{ .Release.Name }}-{{ .Values.test.serviceAccount.name }}
+  serviceAccountName: {{ $fullName }}
   {{- if .Values.imagePullSecrets }}
   imagePullSecrets:
   - name: {{ .Values.imagePullSecrets }}
