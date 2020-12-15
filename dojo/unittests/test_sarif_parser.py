@@ -70,3 +70,12 @@ class TestSarifParser(TestCase):
         self.assertEqual(4, len(parser.items))
         item = parser.items[0]
         self.assertEqual('New suppressed result.', item.title)
+
+    def test_example_report_semgrep(self):
+        testfile = 'dojo/unittests/scans/sarif/semgrepowasp-benchmark-sample.sarif'
+        test = Test()
+        with open(testfile) as f:
+            parser = SarifParser(f, test)
+        self.assertIsNotNone(test.title)
+        item = parser.items[0]
+        self.assertEqual('src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02660.java', item.file_path)
