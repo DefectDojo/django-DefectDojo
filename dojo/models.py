@@ -2044,8 +2044,8 @@ class Finding(models.Model):
     def sla_deadline(self):
         days_remaining = self.sla_days_remaining()
         if days_remaining:
-            return None
-        return self.date + relativedelta(days=days_remaining)
+            return self.date + relativedelta(days=days_remaining)
+        return None
 
     def github(self):
         try:
