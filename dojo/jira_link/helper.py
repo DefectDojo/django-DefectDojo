@@ -896,7 +896,7 @@ def add_comment(find, note, force_push=False):
                 j_issue = find.jira_issue
                 jira.add_comment(
                     j_issue.jira_id,
-                    '(%s): %s' % (note.author.get_full_name(), note.entry))
+                    '(%s): %s' % (note.author.get_full_name() if note.author.get_full_name() else note.author.username, note.entry))
                 return True
             except JIRAError as e:
                 log_jira_generic_alert('Jira Add Comment Error', str(e))
