@@ -232,8 +232,8 @@ def async_dupe_delete(*args, **kwargs):
         return
 
     if enabled:
-        logger.info("delete excess duplicates (max_dupes per finding=%s)", dupe_max)
-        deduplicationLogger.info("delete excess duplicates (max_dupes per finding=%s)", dupe_max)
+        logger.info("delete excess duplicates (max_dupes per finding: %s, max deletes per run: %s)", dupe_max, total_duplicate_delete_count_max_per_run)
+        deduplicationLogger.info("delete excess duplicates (max_dupes per finding: %s, max deletes per run: %s)", dupe_max, total_duplicate_delete_count_max_per_run)
 
         # limit to 100 to prevent overlapping jobs
         results = Finding.objects \
