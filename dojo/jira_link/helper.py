@@ -482,13 +482,6 @@ def add_jira_issue(find):
 
             jira_issue_url = get_jira_issue_url(find)
 
-            # commented out as it creates too much noise and clutters the search for issue for which 'has_notes==True'
-            # new_note = Notes()
-            # new_note.entry = 'created JIRA issue %s for finding' % (jira_issue_url)
-            # new_note.author, created = User.objects.get_or_create(username='JIRA')  # quick hack copied from webhook because we don't have request.user here
-            # new_note.save()
-            # find.notes.add(new_note)
-
             # Upload dojo finding screenshots to Jira
             for pic in find.images.all():
                 jira_attachment(
@@ -945,11 +938,6 @@ def finding_link_jira(request, finding, new_jira_issue_key):
 
     jira_issue_url = get_jira_url(finding)
 
-    new_note = Notes()
-    new_note.entry = 'linked JIRA issue %s to finding' % (jira_issue_url)
-    new_note.author = request.user
-    new_note.save()
-    finding.notes.add(new_note)
     return True
 
 
@@ -960,11 +948,6 @@ def finding_unlink_jira(request, finding):
 
     jira_issue_url = get_jira_url(finding)
 
-    new_note = Notes()
-    new_note.entry = 'unlinked JIRA issue %s from finding' % (jira_issue_url)
-    new_note.author = request.user
-    new_note.save()
-    finding.notes.add(new_note)
     return True
 
 
