@@ -2,7 +2,7 @@ import logging
 import tempfile
 import pdfkit
 from datetime import timedelta
-from django.db.models import Count
+from django.db.models import Count, Prefetch
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.urls import reverse
@@ -222,26 +222,54 @@ def async_dupe_delete(*args, **kwargs):
     try:
         system_settings = System_Settings.objects.get()
         enabled = system_settings.delete_dupulicates
-        dupe_max = system_settings.get_max_dupes()
+        dupe_max = system_settings.max_dupes
+        total_duplicate_delete_count_max_per_run = settings.DUPE_DELETE_MAX_PER_RUN
     except System_Settings.DoesNotExist:
         enabled = False
+
+    if enabled and dupe_max is None:
+        logger.info('skipping deletion of excess duplicates: max_dupes not configured')
+        return
+
     if enabled:
-        logger.info("delete excess duplicates (max_dupes=%s)", dupe_max)
-        deduplicationLogger.info("delete excess duplicates (max_dupes=%s)", dupe_max)
-        findings = Finding.objects \
-                .filter(original_finding__duplicate=True) \
-                .annotate(num_dupes=Count('original_finding')) \
-                .filter(num_dupes__gt=dupe_max)
-        for finding in findings:
-            duplicate_list = finding.original_finding \
-                    .filter(duplicate=True).order_by('date')
+        logger.info("delete excess duplicates (max_dupes per finding=%s)", dupe_max)
+        deduplicationLogger.info("delete excess duplicates (max_dupes per finding=%s)", dupe_max)
+
+        # limit to 100 to prevent overlapping jobs
+        results = Finding.objects \
+                .filter(duplicate=True) \
+                .order_by() \
+                .values('duplicate_finding') \
+                .annotate(num_dupes=Count('id')) \
+                .filter(num_dupes__gt=dupe_max)[:total_duplicate_delete_count_max_per_run]
+
+        originals_with_too_many_duplicates_ids = [result['duplicate_finding'] for result in results]
+
+        originals_with_too_many_duplicates = Finding.objects.filter(id__in=originals_with_too_many_duplicates_ids).order_by('id')
+
+        # prefetch to make it faster
+        originals_with_too_many_duplicates = originals_with_too_many_duplicates.prefetch_related((Prefetch("original_finding",
+            queryset=Finding.objects.filter(duplicate=True).order_by('date'))))
+
+        total_deleted_count = 0
+        for original in originals_with_too_many_duplicates:
+            duplicate_list = original.original_finding.all()
             dupe_count = len(duplicate_list) - dupe_max
+
             for finding in duplicate_list:
                 deduplicationLogger.debug('deleting finding {}:{} ({}))'.format(finding.id, finding.title, finding.hash_code))
                 finding.delete()
-                dupe_count = dupe_count - 1
-                if dupe_count == 0:
+                total_deleted_count += 1
+                dupe_count -= 1
+                if dupe_count <= 0:
                     break
+                if total_deleted_count >= total_duplicate_delete_count_max_per_run:
+                    break
+
+            if total_deleted_count >= total_duplicate_delete_count_max_per_run:
+                break
+
+        logger.info('total number of excess duplicates deleted: %s', total_deleted_count)
 
 
 @task(name='celery_status', ignore_result=False)
