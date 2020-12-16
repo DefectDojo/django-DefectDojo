@@ -69,7 +69,7 @@
                                     Finding {{ finding.id }}: {{ finding.title }}
                                     {% if finding.tags %}
                                         <sup>
-                                            {% for tag in finding.tags %}
+                                            {% for tag in finding.tags.all %}
                                             {{ tag }}
                                             {% endfor %}
                                         </sup>

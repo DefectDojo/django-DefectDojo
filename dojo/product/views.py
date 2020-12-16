@@ -29,8 +29,6 @@ from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, S
 from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, Product_Tab, get_punchcard_data, queryset_check
 from dojo.notifications.helper import create_notification
 from custom_field.models import CustomFieldValue, CustomField
-from tagging.models import Tag
-from tagging.utils import get_tag_list
 from django.db.models import Prefetch, F
 from django.db.models.query import QuerySet
 from github import Github
@@ -62,16 +60,15 @@ def product(request):
     name_words = prods.values_list('name', flat=True)
 
     prod_filter = ProductFilter(request.GET, queryset=prods, user=request.user)
+
+    # print(vars(prod_filter))
+    # print(vars(prod_filter.form))
+    # print(vars(prod_filter.form.fields))
+
     prod_list = get_page_items(request, prod_filter.qs, 25)
 
     # perform annotation/prefetching by replacing the queryset in the page with an annotated/prefetched queryset.
     prod_list.object_list = prefetch_for_product(prod_list.object_list)
-
-    """
-    if 'tags' in request.GET:
-        tags = request.GET.getlist('tags', [])
-        initial_queryset = TaggedItem.objects.get_by_model(initial_queryset, Tag.objects.filter(name__in=tags))
-    """
 
     add_breadcrumb(title="Product List", top_level=not len(request.GET), request=request)
     return render(request,
@@ -96,7 +93,7 @@ def prefetch_for_product(prods):
                 finding__active=True,
                 finding__mitigated__isnull=True)
         prefetched_prods = prefetched_prods.prefetch_related(Prefetch('endpoint_set', queryset=active_endpoint_query, to_attr='active_endpoints'))
-        prefetched_prods = prefetched_prods.prefetch_related('tagged_items__tag')
+        prefetched_prods = prefetched_prods.prefetch_related('tags')
     else:
         logger.debug('unable to prefetch because query was already executed')
 
@@ -218,6 +215,7 @@ def finding_querys(request, prod):
                                       severity__in=('Critical', 'High', 'Medium', 'Low', 'Info')).prefetch_related(
         'test__engagement',
         'test__engagement__risk_acceptance',
+        'test__test_type',
         'risk_acceptance_set',
         'reporter').extra(
         select={
@@ -631,7 +629,7 @@ def prefetch_for_view_engagements(engs):
         prefetched_engs = prefetched_engs.annotate(count_findings_open=Count('test__finding__id', filter=Q(test__finding__active=True)))
         prefetched_engs = prefetched_engs.annotate(count_findings_close=Count('test__finding__id', filter=Q(test__finding__is_Mitigated=True)))
         prefetched_engs = prefetched_engs.annotate(count_findings_duplicate=Count('test__finding__id', filter=Q(test__finding__duplicate=True)))
-        prefetched_engs = prefetched_engs.prefetch_related('tagged_items__tag')
+        prefetched_engs = prefetched_engs.prefetch_related('tags')
     else:
         logger.debug('unable to prefetch because query was already executed')
 
@@ -661,9 +659,6 @@ def new_product(request):
 
         if form.is_valid():
             product = form.save()
-            tags = request.POST.getlist('tags')
-            t = ", ".join('"{0}"'.format(w) for w in tags)
-            product.tags = t
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Product added successfully.',
@@ -797,8 +792,13 @@ def edit_product(request, pid):
                 return HttpResponseRedirect(reverse('view_product', args=(pid,)))
 
     form = ProductForm(instance=product,
-                        initial={'auth_users': product.authorized_users.all(),
-                                'tags': get_tag_list(Tag.objects.get_for_object(product))})
+                        initial={'auth_users': product.authorized_users.all()})
+    #    initial={'auth_users': prod.authorized_users.all(),
+    #             'tags': get_tag_list(Tag.objects.get_for_object(prod))})
+
+    # print('tagulous product form:')
+    # print(vars(form))
+    # print(vars(form.fields['tags']))
 
     if jira_enabled:
         jira_project = jira_helper.get_jira_project(product)
@@ -809,16 +809,14 @@ def edit_product(request, pid):
     if github_enabled and (github_inst is not None):
         if github_inst is not None:
             gform = GITHUB_Product_Form(instance=github_inst)
-        else:
             gform = GITHUB_Product_Form()
-    elif github_enabled:
         gform = GITHUB_Product_Form()
     else:
         gform = None
 
     sonarqube_form = Sonarqube_ProductForm(instance=sonarqube_conf)
 
-    form.initial['tags'] = [tag.name for tag in product.tags]
+    # # form.initial['tags'] = [tag.name for tag in prod.tags.all()]
     product_tab = Product_Tab(pid, title="Edit Product", tab="settings")
     return render(request,
                   'dojo/edit_product.html',
@@ -841,8 +839,6 @@ def delete_product(request, pid):
         if 'id' in request.POST and str(product.id) == request.POST['id']:
             form = DeleteProductForm(request.POST, instance=product)
             if form.is_valid():
-                if product.tags:
-                    del product.tags
                 product.delete()
                 messages.add_message(request,
                                      messages.SUCCESS,
@@ -905,10 +901,7 @@ def new_eng_for_app(request, pid, cicd=False):
             engagement.active = True
 
             engagement.save()
-
-            tags = request.POST.getlist('tags')
-            t = ", ".join('"{0}"'.format(w) for w in tags)
-            engagement.tags = t
+            form.save_m2m()
 
             logger.debug('new_eng_for_app: process jira coming')
 

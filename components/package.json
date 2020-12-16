@@ -1,6 +1,6 @@
 {
   "name": "DefectDojo",
-  "version": "1.10.4",
+  "version": "1.11.0-dev",
   "dependencies": {
     "JUMFlot": "jumjum123/JUMFlot#*",
     "bootstrap": "^3.4.0",
@@ -15,7 +15,7 @@
     "datatables.net-bs": "^1.10.22",
     "datatables.net-buttons-bs": "^1.6.5",
     "datatables.net-buttons-dt": "^1.6.5",
-    "datatables.net-colreorder": "^1.5.2",
+    "datatables.net-colreorder": "^1.5.3",
     "datatables.net-dt": "^1.10.22",
     "drmonty-datatables-plugins": "^1.0.0",
     "drmonty-datatables-responsive": "^1.0.0",

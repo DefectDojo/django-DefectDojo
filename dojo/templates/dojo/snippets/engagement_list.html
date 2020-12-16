@@ -124,8 +124,8 @@
                     {% endif %}
                     {% if eng.tags %}
                         <sup>
-                            {% for tag in eng.tags %}
-                            <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                            {% for tag in eng.tags.all %}
+                            <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=tag:{{ tag }}">{{ tag }}</a>
                             {% endfor %}
                         </sup>
                     {% endif %}

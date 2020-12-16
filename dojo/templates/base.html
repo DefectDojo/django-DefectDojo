@@ -406,8 +406,8 @@
                     {% endwith %}
                     {% if product_tab.product.tags %}
                       <sup>
-                          {% for tag in product_tab.product.tags %}
-                          <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                          {% for tag in product_tab.product.tags.all.all %}
+                          <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=tag:{{ tag }}">{{ tag }}</a>
                           {% endfor %}
                       </sup>
                     {% endif %}
@@ -717,6 +717,12 @@
                 $this.val($this.val().substring($this.val().lastIndexOf("/") + 1));
             }, 100);
         });
+
+        <!-- TODO not working with django tagulous which uses select2, break styling -->
+        <!-- $('#id_tags').select2({ -->
+            <!-- 'placeholder': 'Select or add some tags...', -->
+            <!-- 'no_results_text': "Tag not found, press TAB key to add.", -->
+        <!-- }); -->
 
     });
 </script>
