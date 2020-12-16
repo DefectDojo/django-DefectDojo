@@ -153,7 +153,12 @@ env = environ.Env(
     DD_LOGGING_HANDLER=(str, 'console'),
     DD_ALERT_REFRESH=(bool, True),
     DD_DISABLE_ALERT_COUNTER=(bool, False),
-    DD_TAG_PREFETCHING=(bool, True)
+    DD_TAG_PREFETCHING=(bool, True),
+
+    # when enabled in sytem settings,  every minute a job run to delete excess duplicates
+    # we limit the amount of duplicates that can be deleted in a single run of that job
+    # to prevent overlapping runs of that job from occurrring
+    DD_DUPE_DELETE_MAX_PER_RUN=(int, 200)
 )
 
 
@@ -817,6 +822,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Trivy Scan': DEDUPE_ALGO_HASH_CODE,
     'HackerOne Cases': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
 }
+
+DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')
 
 DISABLE_FINDING_MERGE = env('DD_DISABLE_FINDING_MERGE')
 
