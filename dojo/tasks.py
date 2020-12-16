@@ -222,12 +222,12 @@ def async_dupe_delete(*args, **kwargs):
     try:
         system_settings = System_Settings.objects.get()
         enabled = system_settings.delete_dupulicates
-        dupe_max = system_settings.max_dupes
+        dupe_max = system_settings.get_max_dupes()
     except System_Settings.DoesNotExist:
         enabled = False
     if enabled:
-        logger.info("delete excess duplicates")
-        deduplicationLogger.info("delete excess duplicates")
+        logger.info("delete excess duplicates (max_dupes=%s)", dupe_max)
+        deduplicationLogger.info("delete excess duplicates (max_dupes=%s)", dupe_max)
         findings = Finding.objects \
                 .filter(original_finding__duplicate=True) \
                 .annotate(num_dupes=Count('original_finding')) \

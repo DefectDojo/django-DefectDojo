@@ -275,6 +275,9 @@ class System_Settings(models.Model):
     from dojo.middleware import System_Settings_Manager
     objects = System_Settings_Manager()
 
+    def get_max_dupes(self):
+        return self.max_dupes if self.max_dupes else 0
+
 
 class SystemSettingsFormAdmin(forms.ModelForm):
     product_grade = forms.CharField(widget=forms.Textarea)
