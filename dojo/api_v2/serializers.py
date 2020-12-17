@@ -566,15 +566,7 @@ class JIRAIssueSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def get_url(self, obj):
-        if obj.jira_project is None:
-            return None
-
-        jira_project = obj.jira_project
-        if jira_project.jira_instance is None:
-            return None
-
-        jira_instance = jira_project.jira_instance
-        return jira_instance.url + '/browse/' + obj.jira_key
+        return jira_helper.get_jira_issue_url(obj)
 
 
 class JIRAInstanceSerializer(serializers.ModelSerializer):
