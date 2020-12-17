@@ -117,18 +117,36 @@ class MobSFParser(object):
 
         # Binary Analysis
         if "binary_analysis" in data:
-            for details in data["binary_analysis"]:
-                for binary_analysis_type in details:
-                    if "name" != binary_analysis_type:
-                        mobsf_item = {
-                            "category": "Binary Analysis",
-                            "title": details[binary_analysis_type]["description"].split(".")[0],
-                            "severity": details[binary_analysis_type]["severity"].replace("warning", "low").title(),
-                            "description": details[binary_analysis_type]["description"],
-                            "file_path": details["name"]
-                        }
-                        mobsf_findings.append(mobsf_item)
-
+            if type(data["binary_analysis"]) is list:
+                for details in data["binary_analysis"]:
+                    for binary_analysis_type in details:
+                        if "name" != binary_analysis_type:
+                            mobsf_item = {
+                                "category": "Binary Analysis",
+                                "title": details[binary_analysis_type]["description"].split(".")[0],
+                                "severity": details[binary_analysis_type]["severity"].replace("warning", "low").title(),
+                                "description": details[binary_analysis_type]["description"],
+                                "file_path": details["name"]
+                            }
+                            mobsf_findings.append(mobsf_item)
+            else:
+                for binary_analysis_type, details in list(data["binary_analysis"].items()):
+                    # "Binary makes use of insecure API(s)":{
+                    #     "detailed_desc":"The binary may contain the following insecure API(s) _vsprintf.",
+                    #     "severity":"high",
+                    #     "cvss":6,
+                    #     "cwe":"CWE-676 - Use of Potentially Dangerous Function",
+                    #     "owasp-mobile":"M7: Client Code Quality",
+                    #     "masvs":"MSTG-CODE-8"
+                    # }
+                    mobsf_item = {
+                        "category": "Binary Analysis",
+                        "title": details["detailed_desc"],
+                        "severity": details["severity"].replace("good", "info").title(),
+                        "description": details["detailed_desc"],
+                        "file_path": None
+                    }
+                    mobsf_findings.append(mobsf_item)
         # Manifest
         if "manifest" in data:
             for details in data["manifest"]:
