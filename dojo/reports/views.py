@@ -896,7 +896,7 @@ def prefetch_related_findings_for_report(findings):
                                      'risk_acceptance_set__accepted_findings',
                                      'burprawrequestresponse_set',
                                      'endpoints',
-                                     'tags'
+                                     'tags',
                                      'notes',
                                      'images',
                                      'reporter',
