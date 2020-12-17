@@ -47,4 +47,16 @@ spec:
               key: {{ if eq .Values.database "postgresql" }}{{ .Values.database }}-password{{ end }}{{ if eq .Values.database "mysql" }}{{ .Values.database }}-root-password{{ end }}
         - name: DD_DEBUG
           value: 'True'
+        - name: DD_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ $fullName }}
+              key: DD_SECRET_KEY
+        - name: DD_CREDENTIAL_AES_256_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ $fullName }}
+              key: DD_CREDENTIAL_AES_256_KEY
+      resources:
+        {{- toYaml .Values.test.unitTests.resources | nindent 8 }}
   restartPolicy: Never

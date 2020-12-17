@@ -144,6 +144,16 @@ initializer:
       cpu: 2000m
       memory: 256Mi
 
+test:
+  unitTests:
+    resources:
+      requests:
+        cpu: 500m
+        memory: 512Mi
+      limits:
+        cpu: 1000m
+        memory: 1024Mi
+
 mysql:
   enabled: false
   mysqlUser: defectdojo
