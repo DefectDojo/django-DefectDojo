@@ -82,19 +82,19 @@ class MobSFParser(object):
                 for details in data["permissions"]:
                     mobsf_item = {
                         "category": "Mobile Permissions",
-                        "title": details[1],
-                        "severity": "info",
-                        "description": "**Permission Type:** " + details[1] + " (" + details[0] + ")\n\n**Description:** " + details[2],
+                        "title": details.get("name", ""),
+                        "severity": getSeverityForPermission(details.get("status")),
+                        "description": "**Permission Type:** " + details.get("name", "") + " (" + details.get("status", "") + ")\n\n**Description:** " + details.get("description", "") + "\n\n**Reason:** " + details.get("reason", ""),
                         "file_path": None
                     }
                     mobsf_findings.append(mobsf_item)
             else:
                 for permission, details in list(data["permissions"].items()):
                     mobsf_item = {
-                        "category": "**Mobile Permissions**",
+                        "category": "Mobile Permissions",
                         "title": permission,
-                        "severity": "info",
-                        "description": "**Permission Type:** " + details["status"] + "\n\n**Description:** " + details["description"],
+                        "severity": getSeverityForPermission(details.get("status", "")),
+                        "description": "**Permission Type:** " + permission + "\n\n**Description:** " + details.get("description", ""),
                         "file_path": None
                     }
                     mobsf_findings.append(mobsf_item)
@@ -194,6 +194,21 @@ class MobSFParser(object):
                                static_finding=True)
                 dupes[dupe_key] = find
         self.items = list(dupes.values())
+
+    def getSeverityForPermission(self, status):
+        """Convert status for permission detection to severity
+
+        In MobSF there is only 4 know values for permission,
+         we map them as this:
+        dangerous         => High (Critical?)
+        normal            => Info
+        signature         => Info (it's positive so... Info)
+        signatureOrSystem => Info (it's positive so... Info)
+        """
+        if "dangerous" == status:
+            return "High"
+        else:
+            return "Info"
 
     # Criticality rating
     def getCriticalityRating(self, rating):
