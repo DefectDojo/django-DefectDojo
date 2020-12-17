@@ -31,14 +31,15 @@ securityContext:
     # nginx dockerfile sets USER=1001
     runAsUser: 1001
 
-test:
-  resources:
-    requests:
-      cpu: 100m
-      memory: 128Mi
-    limits:
-      cpu: 500m
-      memory: 512Mi
+tests:
+  unit-tests:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
 
 admin:
   user: admin
