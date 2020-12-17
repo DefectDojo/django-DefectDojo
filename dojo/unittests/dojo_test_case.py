@@ -426,6 +426,23 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         response = self.do_finding_remove_tags_api(self.client.patch, finding_id, tags, *args, **kwargs)
         return response
 
+    def do_finding_notes_api(self, http_method, finding_id, note=None):
+        data = None
+        if note:
+            data = {'entry': note}
+
+        print('data:' + str(data))
+
+        response = http_method(reverse('finding-notes', args=(finding_id,)), data, format='json')
+        print(vars(response))
+        print(response.content)
+        self.assertEqual(200, response.status_code)
+        return response
+
+    def post_finding_notes_api(self, finding_id, note):
+        response = self.do_finding_notes_api(self.client.post, finding_id, note)
+        return response.data
+
     def log_finding_summary_json_api(self, findings_content_json=None):
         # print('summary')
         # print(findings_content_json)
