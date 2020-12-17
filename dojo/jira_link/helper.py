@@ -76,6 +76,9 @@ def get_jira_project(obj, use_inheritance=True):
     if isinstance(obj, JIRA_Project):
         return obj
 
+    if isinstance(obj, JIRA_Issue):
+        return obj.jira_project
+
     if isinstance(obj, Finding):
         finding = obj
         return get_jira_project(finding.test)
@@ -147,11 +150,8 @@ def get_jira_url(obj):
 
 def get_jira_issue_url(issue):
     logger.debug('getting jira issue url')
-    jira_project = issue.jira_project
-    if jira_project is None:
-        return None
-
-    jira_instance = jira_project.jira_instance
+    jira_project = get_jira_project(issue)
+    jira_instance = get_jira_instance(jira_project)
     if jira_instance is None:
         return None
 
