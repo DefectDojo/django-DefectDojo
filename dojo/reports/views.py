@@ -898,7 +898,6 @@ def prefetch_related_findings_for_report(findings):
                                      'endpoints',
                                      'notes',
                                      'images',
-                                     'tagged_items',
                                      'reporter',
                                      'mitigated_by'
                                      )
@@ -907,5 +906,4 @@ def prefetch_related_findings_for_report(findings):
 def prefetch_related_endpoints_for_report(endpoints):
     return endpoints.prefetch_related(
                                       'product',
-                                      'tagged_items',
                                      )
