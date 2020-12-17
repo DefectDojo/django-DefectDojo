@@ -317,6 +317,15 @@ def jira_change_resolution_id(jira, issue, jid):
     jira.transition_issue(issue, jid)
 
 
+# Used for unit testing so geting all the connections is manadatory
+def get_jira_status(finding):
+    if finding.has_jira_issue:
+        j_issue = finding.jira_issue.jira_id
+        project = get_jira_project(finding)
+        issue = jira_get_issue(project, j_issue)
+        return issue.fields.status
+
+
 # Logs the error to the alerts table, which appears in the notification toolbar
 def log_jira_generic_alert(title, description):
     create_notification(
