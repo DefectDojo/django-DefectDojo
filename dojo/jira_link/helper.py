@@ -27,13 +27,14 @@ RESOLVED_STATUS = [
     'Mitigated',
     'False Positive',
     'Out of Scope',
-    'Duplicate'   
+    'Duplicate'
 ]
 
 OPEN_STATUS = [
     'Active',
     'Verified'
 ]
+
 
 def is_jira_enabled():
     if not get_system_setting('enable_jira'):
@@ -599,7 +600,7 @@ def update_jira_issue(find):
         if any(item in status_list for item in RESOLVED_STATUS):
             logger.debug('Transitioning Jira issue to Resolved')
             jira_change_resolution_id(jira, issue, jira_instance.close_status_key)
-            
+
         find.jira_issue.jira_change = timezone.now()
         find.jira_issue.save()
         find.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
