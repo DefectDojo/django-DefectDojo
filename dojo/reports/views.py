@@ -896,6 +896,7 @@ def prefetch_related_findings_for_report(findings):
                                      'risk_acceptance_set__accepted_findings',
                                      'burprawrequestresponse_set',
                                      'endpoints',
+                                     'tags'
                                      'notes',
                                      'images',
                                      'reporter',
@@ -906,4 +907,5 @@ def prefetch_related_findings_for_report(findings):
 def prefetch_related_endpoints_for_report(endpoints):
     return endpoints.prefetch_related(
                                       'product',
+                                      'tags'
                                      )
