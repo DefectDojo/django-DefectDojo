@@ -42,7 +42,7 @@
                         <div class="panel-heading finding-title">
                             <div class="clearfix">
                                 <h5>
-                                    {{ test.test_type.name }}
+                                    {{ test }}
                                 </h5>
                             </div>
                         </div>
@@ -78,7 +78,7 @@
                 </div>
                 <div class="col-lg-12">
                     <p>
-                        A {{ test.test_type.name }} was conducted in the {{ test.environment.name }} environment
+                        A {{ test }} was conducted in the {{ test.environment.name }} environment
                         {% if test.target_end %}
                             from {{ test.target_start|date:"SHORT_DATE_FORMAT" }} to
                             {{ test.target_end|date:"SHORT_DATE_FORMAT" }}
@@ -108,7 +108,7 @@
                         <ul>
                             {% for t in test.engagement.test_set.all %}
                                 {% if test.id != t.id %}
-                                    <li>{{ t.test_type.name }}
+                                    <li>{{ t }}
                                         ({{ t.environment.name|default:"unknown" }}):
                                         {{ t.target_start|date:"SHORT_DATE_FORMAT" }}</li>
                                 {% endif %}
