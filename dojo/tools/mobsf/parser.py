@@ -83,7 +83,7 @@ class MobSFParser(object):
                     mobsf_item = {
                         "category": "Mobile Permissions",
                         "title": details.get("name", ""),
-                        "severity": getSeverityForPermission(details.get("status")),
+                        "severity": self.getSeverityForPermission(details.get("status")),
                         "description": "**Permission Type:** " + details.get("name", "") + " (" + details.get("status", "") + ")\n\n**Description:** " + details.get("description", "") + "\n\n**Reason:** " + details.get("reason", ""),
                         "file_path": None
                     }
@@ -93,7 +93,7 @@ class MobSFParser(object):
                     mobsf_item = {
                         "category": "Mobile Permissions",
                         "title": permission,
-                        "severity": getSeverityForPermission(details.get("status", "")),
+                        "severity": self.getSeverityForPermission(details.get("status", "")),
                         "description": "**Permission Type:** " + permission + "\n\n**Description:** " + details.get("description", ""),
                         "file_path": None
                     }
