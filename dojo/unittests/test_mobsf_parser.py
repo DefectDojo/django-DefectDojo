@@ -38,7 +38,7 @@ class TestMobSFParser(TestCase):
         engagement = Engagement()
         engagement.product = Product()
         test.engagement = engagement
-        testfile = open("dojo/unittests/scans/mobsf/android_mobsf.json")
+        testfile = open("dojo/unittests/scans/mobsf/android.json")
         parser = MobSFParser(testfile, test)
         testfile.close()
         # TODO add more checks dedicated to this file

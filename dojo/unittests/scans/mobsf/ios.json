@@ -386,12 +386,12 @@
                "hash":"b5f597a0d1d6c5d2ac429cfc5a653ac8"
             },
             {
-               "file_path":"SmartQwering_Trunk copy.app/Frameworks/KBCAppKit.framework/Info.plist",
+               "file_path":"SmartQwering_Trunk copy.app/Frameworks/MYCOMPANYAppKit.framework/Info.plist",
                "type":"ipa",
                "hash":"b5f597a0d1d6c5d2ac429cfc5a653ac8"
             },
             {
-               "file_path":"SmartQwering_Trunk copy.app/Frameworks/KBCFoundation.framework/Info.plist",
+               "file_path":"SmartQwering_Trunk copy.app/Frameworks/MYCOMPANYFoundation.framework/Info.plist",
                "type":"ipa",
                "hash":"b5f597a0d1d6c5d2ac429cfc5a653ac8"
             },
@@ -451,17 +451,17 @@
          "issue":"Certificate/Key Files Hardcoded inside the App.",
          "files":[
             {
-               "file_path":"SmartQwering_Trunk copy.app/Frameworks/KBCAppKit.framework/BCMCSelectorSDKResources.bundle/Indiv_SMIME_Bundle.pem",
+               "file_path":"SmartQwering_Trunk copy.app/Frameworks/MYCOMPANYAppKit.framework/BCMCSelectorSDKResources.bundle/Indiv_SMIME_Bundle.pem",
                "type":null,
                "hash":null
             },
             {
-               "file_path":"SmartQwering_Trunk copy.app/Frameworks/KBCAppKit.framework/BCMCSelectorSDKResources.bundle/BC-MC Root CA.cer",
+               "file_path":"SmartQwering_Trunk copy.app/Frameworks/MYCOMPANYAppKit.framework/BCMCSelectorSDKResources.bundle/BC-MC Root CA.cer",
                "type":null,
                "hash":null
             },
             {
-               "file_path":"SmartQwering_Trunk copy.app/Frameworks/KBCFoundation.framework/phnios.pub64",
+               "file_path":"SmartQwering_Trunk copy.app/Frameworks/MYCOMPANYFoundation.framework/phnios.pub64",
                "type":null,
                "hash":null
             }
@@ -506,14 +506,14 @@
       "\t/System/Library/Frameworks/QuartzCore.framework/QuartzCore (compatibility version 1.2.0, current version 1.11.0)",
       "\t/System/Library/Frameworks/QuickLook.framework/QuickLook (compatibility version 1.0.0, current version 1.0.0)",
       "\t/System/Library/Frameworks/Security.framework/Security (compatibility version 1.0.0, current version 59306.142.1)",
-      "\t@rpath/KBCAppKit.framework/KBCAppKit (compatibility version 1.0.0, current version 1.0.0)",
+      "\t@rpath/MYCOMPANYAppKit.framework/MYCOMPANYAppKit (compatibility version 1.0.0, current version 1.0.0)",
       "\t/System/Library/Frameworks/Social.framework/Social (compatibility version 1.0.0, current version 87.0.0)",
       "\t/System/Library/Frameworks/SystemConfiguration.framework/SystemConfiguration (compatibility version 1.0.0, current version 1061.140.1)",
       "\t/System/Library/Frameworks/UIKit.framework/UIKit (compatibility version 1.0.0, current version 61000.0.0)",
       "\t@rpath/AioSdk.framework/AioSdk (compatibility version 1.0.0, current version 1.0.0)",
       "\t/System/Library/Frameworks/VideoToolbox.framework/VideoToolbox (compatibility version 1.0.0, current version 1.0.0)",
       "\t/usr/lib/libicucore.A.dylib (compatibility version 1.0.0, current version 64.2.0)",
-      "\t@rpath/KBCFoundation.framework/KBCFoundation (compatibility version 1.0.0, current version 1.0.0)",
+      "\t@rpath/MYCOMPANYFoundation.framework/MYCOMPANYFoundation (compatibility version 1.0.0, current version 1.0.0)",
       "\t/usr/lib/libsqlite3.dylib (compatibility version 9.0.0, current version 308.5.0)",
       "\t@rpath/Lottie.framework/Lottie (compatibility version 1.0.0, current version 1.0.0)",
       "\t/System/Library/Frameworks/PassKit.framework/PassKit (compatibility version 1.0.0, current version 1.0.0)",
@@ -547,13 +547,13 @@
       "SmartQwering_Trunk copy.app/MYCOMPANYEditableMobileTopUpPhoneTableViewCell.nib",
       "SmartQwering_Trunk copy.app/MYCOMPANYMobileTopUpOperatorsTableViewCell.nib",
       "SmartQwering_Trunk copy.app/MYCOMPANYEditableDipTableViewCell.nib",
-      "SmartQwering_Trunk copy.app/KBC-ACT-ws.der",
+      "SmartQwering_Trunk copy.app/MYCOMPANY-ACT-ws.der",
       "SmartQwering_Trunk copy.app/GWPushMessageRequest.json",
       "SmartQwering_Trunk copy.app/MYCOMPANYStandingOrdersCell.nib",
       "SmartQwering_Trunk copy.app/NewAccountDetailsCell.nib",
       "SmartQwering_Trunk copy.app/GWFXTransferRequest.json",
-      "SmartQwering_Trunk copy.app/KBC-INT 2-edma.der",
-      "SmartQwering_Trunk copy.app/KBC-INT 3-edma.der",
+      "SmartQwering_Trunk copy.app/MYCOMPANY-INT 2-edma.der",
+      "SmartQwering_Trunk copy.app/MYCOMPANY-INT 3-edma.der",
       "SmartQwering_Trunk copy.app/GWAccountListRequest-222222-en.json",
       "SmartQwering_Trunk copy.app/CSOBMyAccountView.nib",
       "SmartQwering_Trunk copy.app/MYCOMPANYBlockedAmountsHeadeerFooterView.nib",
@@ -578,7 +578,7 @@
       "SmartQwering_Trunk copy.app/CSOBMainMenuViewController.nib",
       "SmartQwering_Trunk copy.app/iTunesArtwork",
       "SmartQwering_Trunk copy.app/GWInternationalValuesRequest.json",
-      "SmartQwering_Trunk copy.app/KBC-ACT-new.der",
+      "SmartQwering_Trunk copy.app/MYCOMPANY-ACT-new.der",
       "SmartQwering_Trunk copy.app/SBCalendarRangeViewController.nib",
       "SmartQwering_Trunk copy.app/MYCOMPANYMapItemCell.nib",
       "SmartQwering_Trunk copy.app/MYCOMPANYEditableHungarianPhoneTableViewCell.nib",
@@ -600,7 +600,7 @@
       "SmartQwering_Trunk copy.app/CSOBCommonIntroViewController.nib",
       "SmartQwering_Trunk copy.app/signature",
       "SmartQwering_Trunk copy.app/GWPartnerListRequest-222222-en.json",
-      "SmartQwering_Trunk copy.app/KBC-PROCOPY.der",
+      "SmartQwering_Trunk copy.app/MYCOMPANY-PROCOPY.der",
       "SmartQwering_Trunk copy.app/MYCOMPANYTransactionHistoryCell.nib",
       "SmartQwering_Trunk copy.app/CSOBBadgeView.nib",
       "SmartQwering_Trunk copy.app/GWCustomerLoansRequest-222222-en.json",
@@ -623,7 +623,7 @@
       "SmartQwering_Trunk copy.app/GWApolloCustomerRequest-BBBBBB-hu.json",
       "SmartQwering_Trunk copy.app/GWAdministrativeTransactionsRequest-222222-en.json",
       "SmartQwering_Trunk copy.app/GWPartnerListRequest-222222-hu.json",
-      "SmartQwering_Trunk copy.app/KBC-INT-edma-root.der",
+      "SmartQwering_Trunk copy.app/MYCOMPANY-INT-edma-root.der",
       "SmartQwering_Trunk copy.app/GWCardOrderNewRequest.json",
       "SmartQwering_Trunk copy.app/CSOBBottomItemView.nib",
       "SmartQwering_Trunk copy.app/MYCOMPANYPartnerAddModifyHeader.nib",
@@ -654,26 +654,26 @@
       "SmartQwering_Trunk copy.app/GWAccountListRequest-222222-hu.json",
       "SmartQwering_Trunk copy.app/MYCOMPANYSubtitleCell.nib",
       "SmartQwering_Trunk copy.app/GWStandingOrdersRequest-222222-en.json",
-      "SmartQwering_Trunk copy.app/KBC-PROCOPY-ws.der",
-      "SmartQwering_Trunk copy.app/KBC-PROD-ws.der",
+      "SmartQwering_Trunk copy.app/MYCOMPANY-PROCOPY-ws.der",
+      "SmartQwering_Trunk copy.app/MYCOMPANY-PROD-ws.der",
       "SmartQwering_Trunk copy.app/MYCOMPANYMessageDetailsHeader.nib",
       "SmartQwering_Trunk copy.app/MYCOMPANYEditableDipPhoneTableViewCell.nib",
-      "SmartQwering_Trunk copy.app/KBC-INT 3-ws.der",
+      "SmartQwering_Trunk copy.app/MYCOMPANY-INT 3-ws.der",
       "SmartQwering_Trunk copy.app/GWFinancialTransactionsRequest-222222-hu.json",
       "SmartQwering_Trunk copy.app/GoogleService-Info.plist",
       "SmartQwering_Trunk copy.app/MYCOMPANYPartnerPickerCell.nib",
       "SmartQwering_Trunk copy.app/SBCalendarViewController.nib",
-      "SmartQwering_Trunk copy.app/KBC-PROD-edma.der",
+      "SmartQwering_Trunk copy.app/MYCOMPANY-PROD-edma.der",
       "SmartQwering_Trunk copy.app/MYCOMPANYImageTitleBoldTextCell.nib",
       "SmartQwering_Trunk copy.app/GWSupportDocumentRequest-E2ECL.REPEXAMPLE.VIP_SUBPRODUCT.ABOVE_VIP_AMOUNT_LIMIT.json",
       "SmartQwering_Trunk copy.app/GWTransactionsRequest-BBBBBB-en.json",
-      "SmartQwering_Trunk copy.app/KBC-PROCOPY-ws2.der",
+      "SmartQwering_Trunk copy.app/MYCOMPANY-PROCOPY-ws2.der",
       "SmartQwering_Trunk copy.app/GWPartnerModifyRequest.json",
-      "SmartQwering_Trunk copy.app/KBC-INT-ws.der",
+      "SmartQwering_Trunk copy.app/MYCOMPANY-INT-ws.der",
       "SmartQwering_Trunk copy.app/GWCustomerFeedbackRequest.json",
       "SmartQwering_Trunk copy.app/MYCOMPANYStatusPaymentTransactionCell.nib",
       "SmartQwering_Trunk copy.app/MYCOMPANYSCAPaymentTransactionCell.nib",
-      "SmartQwering_Trunk copy.app/KBC-PROD-edma-new.der",
+      "SmartQwering_Trunk copy.app/MYCOMPANY-PROD-edma-new.der",
       "SmartQwering_Trunk copy.app/GWCardActivateRequest.json",
       "SmartQwering_Trunk copy.app/MYCOMPANYCommonConfirmationVC.nib",
       "SmartQwering_Trunk copy.app/DummyTableViewCell.nib",
@@ -689,7 +689,7 @@
       "SmartQwering_Trunk copy.app/GWBranchListRequest.json",
       "SmartQwering_Trunk copy.app/GWCustomerDepositsRequest-en.json",
       "SmartQwering_Trunk copy.app/GWValidateConfirmationCodeRequest-hu.json",
-      "SmartQwering_Trunk copy.app/KBC-PRO-cc.der",
+      "SmartQwering_Trunk copy.app/MYCOMPANY-PRO-cc.der",
       "SmartQwering_Trunk copy.app/MYCOMPANYDetailDeletableTableViewCell.nib",
       "SmartQwering_Trunk copy.app/MYCOMPANYMainLoginVC.nib",
       "SmartQwering_Trunk copy.app/CSOBPaymentAccountChooser.nib",
@@ -698,7 +698,7 @@
       "SmartQwering_Trunk copy.app/MYCOMPANYTableViewHeaderFooterView.nib",
       "SmartQwering_Trunk copy.app/MYCOMPANYCurrencyChooserTableViewCell.nib",
       "SmartQwering_Trunk copy.app/MYCOMPANYTableViewController.nib",
-      "SmartQwering_Trunk copy.app/KBC-PROD-ws-root.der",
+      "SmartQwering_Trunk copy.app/MYCOMPANY-PROD-ws-root.der",
       "SmartQwering_Trunk copy.app/GWCardVirtualPaymentRequest.json",
       "SmartQwering_Trunk copy.app/GWCardModificationsRequest.json",
       "SmartQwering_Trunk copy.app/GWTransactionHistoryRequest-222222-hu.json",
@@ -727,7 +727,7 @@
       "SmartQwering_Trunk copy.app/AppIcon76x76@2x~ipad.png",
       "SmartQwering_Trunk copy.app/GWApolloCustomerRequest-222222-en.json",
       "SmartQwering_Trunk copy.app/LaunchImage-800-Portrait-736h@3x.png",
-      "SmartQwering_Trunk copy.app/KBC-PROCOPY-new.der",
+      "SmartQwering_Trunk copy.app/MYCOMPANY-PROCOPY-new.der",
       "SmartQwering_Trunk copy.app/MYCOMPANYFilterCell.nib",
       "SmartQwering_Trunk copy.app/GWMenuURLRequest.json",
       "SmartQwering_Trunk copy.app/Environments.plist",
@@ -737,7 +737,7 @@
       "SmartQwering_Trunk copy.app/GWSupportDocumentRequest-SecondaryIdentifierForm.statement.retail.text.json",
       "SmartQwering_Trunk copy.app/CSOBPickerViewController.nib",
       "SmartQwering_Trunk copy.app/LaunchImage-700@2x.png",
-      "SmartQwering_Trunk copy.app/KBC-PROD-edma-root.der",
+      "SmartQwering_Trunk copy.app/MYCOMPANY-PROD-edma-root.der",
       "SmartQwering_Trunk copy.app/GWPaymentDataRequest.json",
       "SmartQwering_Trunk copy.app/MYCOMPANYTermsAndConditionsVC.nib",
       "SmartQwering_Trunk copy.app/GWTransactionsRequest-222222-hu.json",
@@ -748,7 +748,7 @@
       "SmartQwering_Trunk copy.app/CSOBRoundedSegmentedContol.nib",
       "SmartQwering_Trunk copy.app/CSOBNewWaitingIndicator.nib",
       "SmartQwering_Trunk copy.app/MYCOMPANYPartnerHeader.nib",
-      "SmartQwering_Trunk copy.app/KBC-ACT.der",
+      "SmartQwering_Trunk copy.app/MYCOMPANY-ACT.der",
       "SmartQwering_Trunk copy.app/MyTreeViewCell.nib",
       "SmartQwering_Trunk copy.app/GWStandingOrdersRequest-BBBBBB-hu.json",
       "SmartQwering_Trunk copy.app/MYCOMPANYChangeCardLimitVC.nib",
@@ -758,17 +758,17 @@
       "SmartQwering_Trunk copy.app/GWConfirmationCodeRequest.json",
       "SmartQwering_Trunk copy.app/MYCOMPANYEqwerOfflineSigningVC.nib",
       "SmartQwering_Trunk copy.app/GWFinancialTransactionsRequest-BBBBBB-en.json",
-      "SmartQwering_Trunk copy.app/Budapest.gpx",
+      "SmartQwering_Trunk copy.app/City.gpx",
       "SmartQwering_Trunk copy.app/GWStandingOrdersRequest-BBBBBB-en.json",
       "SmartQwering_Trunk copy.app/CSOBNewAccountListViewController.nib",
-      "SmartQwering_Trunk copy.app/KBC-PROD-ws-new.der",
+      "SmartQwering_Trunk copy.app/MYCOMPANY-PROD-ws-new.der",
       "SmartQwering_Trunk copy.app/GWAccountListRequest-BBBBBB-hu.json",
-      "SmartQwering_Trunk copy.app/KBC-ACT-new3.der",
+      "SmartQwering_Trunk copy.app/MYCOMPANY-ACT-new3.der",
       "SmartQwering_Trunk copy.app/CSOBAccountChooserViewController.nib",
       "SmartQwering_Trunk copy.app/MYCOMPANYMapItemsListVC.nib",
       "SmartQwering_Trunk copy.app/GWFinancialTransactionsRequest-BBBBBB-hu.json",
       "SmartQwering_Trunk copy.app/MYCOMPANYButtonCell.nib",
-      "SmartQwering_Trunk copy.app/KBC-ACT-new2.der",
+      "SmartQwering_Trunk copy.app/MYCOMPANY-ACT-new2.der",
       "SmartQwering_Trunk copy.app/CSOBLeftLabelRightTextFieldCell.nib",
       "SmartQwering_Trunk copy.app/CSOBExpandableTextCell.nib",
       "SmartQwering_Trunk copy.app/MYCOMPANYBigButtonCell.nib",
@@ -807,11 +807,11 @@
       "SmartQwering_Trunk copy.app/GWCustomerLoansRequest-BBBBBB-hu.json",
       "SmartQwering_Trunk copy.app/GWGetPendingVirtualPosTransactionsRequest.json",
       "SmartQwering_Trunk copy.app/MYCOMPANYButtonWithInfoButtonCell.nib",
-      "SmartQwering_Trunk copy.app/KBC-PROCOPY-new2.der",
+      "SmartQwering_Trunk copy.app/MYCOMPANY-PROCOPY-new2.der",
       "SmartQwering_Trunk copy.app/MYCOMPANYMaintenanceWidget.nib",
       "SmartQwering_Trunk copy.app/MYCOMPANYSwitcherCell.nib",
       "SmartQwering_Trunk copy.app/MYCOMPANYTemrsAndConditionsCell.nib",
-      "SmartQwering_Trunk copy.app/KBC-INT 2-ws.der",
+      "SmartQwering_Trunk copy.app/MYCOMPANY-INT 2-ws.der",
       "SmartQwering_Trunk copy.app/Launch Screen.nib",
       "SmartQwering_Trunk copy.app/CSOBiPhoneIntroViewController.nib",
       "SmartQwering_Trunk copy.app/GWTransactionHistoryRequest-222222-en.json",
@@ -826,10 +826,10 @@
       "SmartQwering_Trunk copy.app/DummySceneViewController.nib",
       "SmartQwering_Trunk copy.app/MYCOMPANYIconLabelCell.nib",
       "SmartQwering_Trunk copy.app/GWLoginRequest.json",
-      "SmartQwering_Trunk copy.app/KBC-ACT-ws2.der",
+      "SmartQwering_Trunk copy.app/MYCOMPANY-ACT-ws2.der",
       "SmartQwering_Trunk copy.app/MYCOMPANYMobileTopUpVC.nib",
       "SmartQwering_Trunk copy.app/MYCOMPANYInsuranceSummaryCell.nib",
-      "SmartQwering_Trunk copy.app/KBC-PROCOPY-new3.der",
+      "SmartQwering_Trunk copy.app/MYCOMPANY-PROCOPY-new3.der",
       "SmartQwering_Trunk copy.app/GWValidateConfirmationCodeRequest-en.json",
       "SmartQwering_Trunk copy.app/GWInitSessionRequest.json",
       "SmartQwering_Trunk copy.app/GWCustomerDepositsRequest-hu.json",
@@ -881,26 +881,26 @@
       "SmartQwering_Trunk copy.app/Frameworks/AioSdkSca.framework/AioSdkSca",
       "SmartQwering_Trunk copy.app/Frameworks/AioSdkSca.framework/Info.plist",
       "SmartQwering_Trunk copy.app/Frameworks/AioSdkSca.framework/_CodeSignature/CodeResources",
-      "SmartQwering_Trunk copy.app/Frameworks/KBCAppKit.framework/KBCAppKit",
-      "SmartQwering_Trunk copy.app/Frameworks/KBCAppKit.framework/Info.plist",
-      "SmartQwering_Trunk copy.app/Frameworks/KBCAppKit.framework/_CodeSignature/CodeResources",
-      "SmartQwering_Trunk copy.app/Frameworks/KBCAppKit.framework/BCMCSelectorSDKResources.bundle/Indiv_SMIME_Bundle.pem",
-      "SmartQwering_Trunk copy.app/Frameworks/KBCAppKit.framework/BCMCSelectorSDKResources.bundle/BC-MC Root CA.cer",
-      "SmartQwering_Trunk copy.app/Frameworks/KBCAppKit.framework/BCMCSelectorSDKResources.bundle/background.png",
-      "SmartQwering_Trunk copy.app/Frameworks/KBCAppKit.framework/BCMCSelectorSDKResources.bundle/BCMCSelectorViewController_iPad.nib/objects-13.0x.nib",
-      "SmartQwering_Trunk copy.app/Frameworks/KBCAppKit.framework/BCMCSelectorSDKResources.bundle/BCMCSelectorViewController_iPad.nib/runtime.nib",
-      "SmartQwering_Trunk copy.app/Frameworks/KBCAppKit.framework/BCMCSelectorSDKResources.bundle/en.lproj/Localizable.strings",
-      "SmartQwering_Trunk copy.app/Frameworks/KBCAppKit.framework/BCMCSelectorSDKResources.bundle/BCMCQwerAppCell.nib/objects-13.0x.nib",
-      "SmartQwering_Trunk copy.app/Frameworks/KBCAppKit.framework/BCMCSelectorSDKResources.bundle/BCMCQwerAppCell.nib/runtime.nib",
-      "SmartQwering_Trunk copy.app/Frameworks/KBCAppKit.framework/BCMCSelectorSDKResources.bundle/BCMCQwerAppCell.nib/objects-12.3x.nib",
-      "SmartQwering_Trunk copy.app/Frameworks/KBCAppKit.framework/BCMCSelectorSDKResources.bundle/fr.lproj/Localizable.strings",
-      "SmartQwering_Trunk copy.app/Frameworks/KBCAppKit.framework/BCMCSelectorSDKResources.bundle/nl.lproj/Localizable.strings",
-      "SmartQwering_Trunk copy.app/Frameworks/KBCAppKit.framework/BCMCSelectorSDKResources.bundle/BCMCSelectorViewController_iPhone.nib/objects-13.0x.nib",
-      "SmartQwering_Trunk copy.app/Frameworks/KBCAppKit.framework/BCMCSelectorSDKResources.bundle/BCMCSelectorViewController_iPhone.nib/runtime.nib",
-      "SmartQwering_Trunk copy.app/Frameworks/KBCFoundation.framework/phnios.pub64",
-      "SmartQwering_Trunk copy.app/Frameworks/KBCFoundation.framework/KBCFoundation",
-      "SmartQwering_Trunk copy.app/Frameworks/KBCFoundation.framework/Info.plist",
-      "SmartQwering_Trunk copy.app/Frameworks/KBCFoundation.framework/_CodeSignature/CodeResources",
+      "SmartQwering_Trunk copy.app/Frameworks/MYCOMPANYAppKit.framework/MYCOMPANYAppKit",
+      "SmartQwering_Trunk copy.app/Frameworks/MYCOMPANYAppKit.framework/Info.plist",
+      "SmartQwering_Trunk copy.app/Frameworks/MYCOMPANYAppKit.framework/_CodeSignature/CodeResources",
+      "SmartQwering_Trunk copy.app/Frameworks/MYCOMPANYAppKit.framework/BCMCSelectorSDKResources.bundle/Indiv_SMIME_Bundle.pem",
+      "SmartQwering_Trunk copy.app/Frameworks/MYCOMPANYAppKit.framework/BCMCSelectorSDKResources.bundle/BC-MC Root CA.cer",
+      "SmartQwering_Trunk copy.app/Frameworks/MYCOMPANYAppKit.framework/BCMCSelectorSDKResources.bundle/background.png",
+      "SmartQwering_Trunk copy.app/Frameworks/MYCOMPANYAppKit.framework/BCMCSelectorSDKResources.bundle/BCMCSelectorViewController_iPad.nib/objects-13.0x.nib",
+      "SmartQwering_Trunk copy.app/Frameworks/MYCOMPANYAppKit.framework/BCMCSelectorSDKResources.bundle/BCMCSelectorViewController_iPad.nib/runtime.nib",
+      "SmartQwering_Trunk copy.app/Frameworks/MYCOMPANYAppKit.framework/BCMCSelectorSDKResources.bundle/en.lproj/Localizable.strings",
+      "SmartQwering_Trunk copy.app/Frameworks/MYCOMPANYAppKit.framework/BCMCSelectorSDKResources.bundle/BCMCQwerAppCell.nib/objects-13.0x.nib",
+      "SmartQwering_Trunk copy.app/Frameworks/MYCOMPANYAppKit.framework/BCMCSelectorSDKResources.bundle/BCMCQwerAppCell.nib/runtime.nib",
+      "SmartQwering_Trunk copy.app/Frameworks/MYCOMPANYAppKit.framework/BCMCSelectorSDKResources.bundle/BCMCQwerAppCell.nib/objects-12.3x.nib",
+      "SmartQwering_Trunk copy.app/Frameworks/MYCOMPANYAppKit.framework/BCMCSelectorSDKResources.bundle/fr.lproj/Localizable.strings",
+      "SmartQwering_Trunk copy.app/Frameworks/MYCOMPANYAppKit.framework/BCMCSelectorSDKResources.bundle/nl.lproj/Localizable.strings",
+      "SmartQwering_Trunk copy.app/Frameworks/MYCOMPANYAppKit.framework/BCMCSelectorSDKResources.bundle/BCMCSelectorViewController_iPhone.nib/objects-13.0x.nib",
+      "SmartQwering_Trunk copy.app/Frameworks/MYCOMPANYAppKit.framework/BCMCSelectorSDKResources.bundle/BCMCSelectorViewController_iPhone.nib/runtime.nib",
+      "SmartQwering_Trunk copy.app/Frameworks/MYCOMPANYFoundation.framework/phnios.pub64",
+      "SmartQwering_Trunk copy.app/Frameworks/MYCOMPANYFoundation.framework/MYCOMPANYFoundation",
+      "SmartQwering_Trunk copy.app/Frameworks/MYCOMPANYFoundation.framework/Info.plist",
+      "SmartQwering_Trunk copy.app/Frameworks/MYCOMPANYFoundation.framework/_CodeSignature/CodeResources",
       "SmartQwering_Trunk copy.app/Frameworks/AioSdkDomain.framework/AioSdkDomain",
       "SmartQwering_Trunk copy.app/Frameworks/AioSdkDomain.framework/Info.plist",
       "SmartQwering_Trunk copy.app/Frameworks/AioSdkDomain.framework/_CodeSignature/CodeResources",
@@ -978,37 +978,37 @@
    "urls":[
       {
          "urls":[
-            "http://crl3.digicert.com/KBCGroupPrivateIntermediateCA2016.crl0DB@",
-            "http://crl4.digicert.com/KBCGroupPrivateIntermediateCA2016.crl0A",
+            "http://crl3.digicert.com/MYCOMPANYGroupPrivateIntermediateCA2016.crl0DB@",
+            "http://crl4.digicert.com/MYCOMPANYGroupPrivateIntermediateCA2016.crl0A",
             "https://www.digicert.com/CPS0",
             "http://ocsp.digicert.com0M",
-            "http://cacerts.digicert.com/KBCGroupPrivateIntermediateCA2016.crt0"
+            "http://cacerts.digicert.com/MYCOMPANYGroupPrivateIntermediateCA2016.crt0"
          ],
-         "path":"SmartQwering_Trunk copy.app/KBC-ACT-ws.der"
+         "path":"SmartQwering_Trunk copy.app/MYCOMPANY-ACT-ws.der"
       },
       {
          "urls":[
-            "http://crl3.digicert.com/KBCGroupPrivateIntermediateCA2016.crl0DB@",
-            "http://crl4.digicert.com/KBCGroupPrivateIntermediateCA2016.crl0B",
+            "http://crl3.digicert.com/MYCOMPANYGroupPrivateIntermediateCA2016.crl0DB@",
+            "http://crl4.digicert.com/MYCOMPANYGroupPrivateIntermediateCA2016.crl0B",
             "https://www.digicert.com/CPS0",
             "http://ocsp.digicert.com0M",
-            "http://cacerts.digicert.com/KBCGroupPrivateIntermediateCA2016.crt0"
+            "http://cacerts.digicert.com/MYCOMPANYGroupPrivateIntermediateCA2016.crt0"
          ],
-         "path":"SmartQwering_Trunk copy.app/KBC-INT 2-edma.der"
+         "path":"SmartQwering_Trunk copy.app/MYCOMPANY-INT 2-edma.der"
       },
       {
          "urls":[
-            "http://crl3.digicert.com/KBCGroupPrivateIntermediateCA2016.crl0DB@",
-            "http://crl4.digicert.com/KBCGroupPrivateIntermediateCA2016.crl0B",
+            "http://crl3.digicert.com/MYCOMPANYGroupPrivateIntermediateCA2016.crl0DB@",
+            "http://crl4.digicert.com/MYCOMPANYGroupPrivateIntermediateCA2016.crl0B",
             "https://www.digicert.com/CPS0",
             "http://ocsp.digicert.com0M",
-            "http://cacerts.digicert.com/KBCGroupPrivateIntermediateCA2016.crt0"
+            "http://cacerts.digicert.com/MYCOMPANYGroupPrivateIntermediateCA2016.crt0"
          ],
-         "path":"SmartQwering_Trunk copy.app/KBC-INT 3-edma.der"
+         "path":"SmartQwering_Trunk copy.app/MYCOMPANY-INT 3-edma.der"
       },
       {
          "urls":[
-            "https://idp2-f.kbc.com/ASK/oauth/authorize/1?client_id=l78d984e32ba804e49874c4e5e0faeb94f&redirect_uri=be.kbc.multiqweraddaccount%3A%2F%2F%2F&scope=AccountInformation&response_type=code&state=6QM12KJHOTLVUJJ0M4T3&code_challenge=Dmq9UHSrbRxMDsl9IqfBPw2RgkOMPhhiN5xQ6tWaHnw%3D&code_challenge_method=S256&AccountInformation_ACCOUNT=333"
+            "https://idp2-f.mycompany.com/ASK/oauth/authorize/1?client_id=l78d984e32ba804e49874c4e5e0faeb94f&redirect_uri=be.mycompany.multiqweraddaccount%3A%2F%2F%2F&scope=AccountInformation&response_type=code&state=6QM12KJHOTLVUJJ0M4T3&code_challenge=Dmq9UHSrbRxMDsl9IqfBPw2RgkOMPhhiN5xQ6tWaHnw%3D&code_challenge_method=S256&AccountInformation_ACCOUNT=333"
          ],
          "path":"SmartQwering_Trunk copy.app/GWPostAuthorizationRequest.json"
       },
@@ -1026,20 +1026,20 @@
       },
       {
          "urls":[
-            "http://crl3.digicert.com/KBCGroupPrivateIntermediateCA2016.crl0DB@",
-            "http://crl4.digicert.com/KBCGroupPrivateIntermediateCA2016.crl0A",
+            "http://crl3.digicert.com/MYCOMPANYGroupPrivateIntermediateCA2016.crl0DB@",
+            "http://crl4.digicert.com/MYCOMPANYGroupPrivateIntermediateCA2016.crl0A",
             "https://www.digicert.com/CPS0",
             "http://ocsp.digicert.com0M",
-            "http://cacerts.digicert.com/KBCGroupPrivateIntermediateCA2016.crt0"
+            "http://cacerts.digicert.com/MYCOMPANYGroupPrivateIntermediateCA2016.crt0"
          ],
-         "path":"SmartQwering_Trunk copy.app/KBC-ACT-new.der"
+         "path":"SmartQwering_Trunk copy.app/MYCOMPANY-ACT-new.der"
       },
       {
          "urls":[
-            "http://aia1.com-strong-id.net/CA/kbc-gs-root-ca.p7c0",
-            "http://cdp1.com-strong-id.net/CDP/kbc-gs-root-ca.crl0ldap://dir1.com-strong-id.net/cn%3dKBC%20Global%20Services%20Private%20Root%20CA,o%3dKBC%20Global%20Services,c%3dBE?certificateRevocationList0"
+            "http://aia1.com-strong-id.net/CA/mycompany-gs-root-ca.p7c0",
+            "http://cdp1.com-strong-id.net/CDP/mycompany-gs-root-ca.crl0ldap://dir1.com-strong-id.net/cn%3dMYCOMPANY%20Global%20Services%20Private%20Root%20CA,o%3dMYCOMPANY%20Global%20Services,c%3dBE?certificateRevocationList0"
          ],
-         "path":"SmartQwering_Trunk copy.app/KBC-PROCOPY.der"
+         "path":"SmartQwering_Trunk copy.app/MYCOMPANY-PROCOPY.der"
       },
       {
          "urls":[
@@ -1049,13 +1049,13 @@
       },
       {
          "urls":[
-            "http://crl3.digicert.com/KBCGroupPrivateIntermediateCA2016.crl0DB@",
-            "http://crl4.digicert.com/KBCGroupPrivateIntermediateCA2016.crl0A",
+            "http://crl3.digicert.com/MYCOMPANYGroupPrivateIntermediateCA2016.crl0DB@",
+            "http://crl4.digicert.com/MYCOMPANYGroupPrivateIntermediateCA2016.crl0A",
             "https://www.digicert.com/CPS0",
             "http://ocsp.digicert.com0M",
-            "http://cacerts.digicert.com/KBCGroupPrivateIntermediateCA2016.crt0"
+            "http://cacerts.digicert.com/MYCOMPANYGroupPrivateIntermediateCA2016.crt0"
          ],
-         "path":"SmartQwering_Trunk copy.app/KBC-PROCOPY-ws.der"
+         "path":"SmartQwering_Trunk copy.app/MYCOMPANY-PROCOPY-ws.der"
       },
       {
          "urls":[
@@ -1064,17 +1064,17 @@
             "https://cacert.omniroot.com/CybertrustGlobalRoot_rs.crt0/",
             "http://ctrootsha2.ocsp.omniroot.com0"
          ],
-         "path":"SmartQwering_Trunk copy.app/KBC-PROD-ws.der"
+         "path":"SmartQwering_Trunk copy.app/MYCOMPANY-PROD-ws.der"
       },
       {
          "urls":[
-            "http://crl3.digicert.com/KBCGroupPrivateIntermediateCA2016.crl0DB@",
-            "http://crl4.digicert.com/KBCGroupPrivateIntermediateCA2016.crl0B",
+            "http://crl3.digicert.com/MYCOMPANYGroupPrivateIntermediateCA2016.crl0DB@",
+            "http://crl4.digicert.com/MYCOMPANYGroupPrivateIntermediateCA2016.crl0B",
             "https://www.digicert.com/CPS0",
             "http://ocsp.digicert.com0M",
-            "http://cacerts.digicert.com/KBCGroupPrivateIntermediateCA2016.crt0"
+            "http://cacerts.digicert.com/MYCOMPANYGroupPrivateIntermediateCA2016.crt0"
          ],
-         "path":"SmartQwering_Trunk copy.app/KBC-INT 3-ws.der"
+         "path":"SmartQwering_Trunk copy.app/MYCOMPANY-INT 3-ws.der"
       },
       {
          "urls":[
@@ -1090,27 +1090,27 @@
             "https://cacert.omniroot.com/baltimoreroot.der0",
             "http://cdp1.public-trust.com/CRL/Omniroot2025.crl0"
          ],
-         "path":"SmartQwering_Trunk copy.app/KBC-PROD-edma.der"
+         "path":"SmartQwering_Trunk copy.app/MYCOMPANY-PROD-edma.der"
       },
       {
          "urls":[
             "www.fteqwerngmobile.hu.app0",
-            "http://crl3.digicert.com/KBCGroupPrivateIntermediateCA2016.crl0DB@",
-            "http://crl4.digicert.com/KBCGroupPrivateIntermediateCA2016.crl0B",
+            "http://crl3.digicert.com/MYCOMPANYGroupPrivateIntermediateCA2016.crl0DB@",
+            "http://crl4.digicert.com/MYCOMPANYGroupPrivateIntermediateCA2016.crl0B",
             "https://www.digicert.com/CPS0",
             "http://ocsp.digicert.com0M",
-            "http://cacerts.digicert.com/KBCGroupPrivateIntermediateCA2016.crt0"
+            "http://cacerts.digicert.com/MYCOMPANYGroupPrivateIntermediateCA2016.crt0"
          ],
-         "path":"SmartQwering_Trunk copy.app/KBC-PROCOPY-ws2.der"
+         "path":"SmartQwering_Trunk copy.app/MYCOMPANY-PROCOPY-ws2.der"
       },
       {
          "urls":[
             "https://www.digicert.com/CPS04",
             "http://ocsp.digicert.com0",
-            "http://crl3.digicert.com/KBCGroupPrivateRootCA2016.crl0",
-            "http://crl4.digicert.com/KBCGroupPrivateRootCA2016.crl0"
+            "http://crl3.digicert.com/MYCOMPANYGroupPrivateRootCA2016.crl0",
+            "http://crl4.digicert.com/MYCOMPANYGroupPrivateRootCA2016.crl0"
          ],
-         "path":"SmartQwering_Trunk copy.app/KBC-INT-ws.der"
+         "path":"SmartQwering_Trunk copy.app/MYCOMPANY-INT-ws.der"
       },
       {
          "urls":[
@@ -1119,7 +1119,7 @@
             "http://crl3.digicert.com/DigiCertGlobalRootCA.crl07531http://crl4.digicert.com/DigiCertGlobalRootCA.crl0=",
             "https://www.digicert.com/CPS0"
          ],
-         "path":"SmartQwering_Trunk copy.app/KBC-PROD-edma-new.der"
+         "path":"SmartQwering_Trunk copy.app/MYCOMPANY-PROD-edma-new.der"
       },
       {
          "urls":[
@@ -1146,23 +1146,23 @@
             "http://ocsp.digicert.com0F",
             "http://cacerts.digicert.com/DigiCertSHA2SecureServerCA.crt0"
          ],
-         "path":"SmartQwering_Trunk copy.app/KBC-PRO-cc.der"
+         "path":"SmartQwering_Trunk copy.app/MYCOMPANY-PRO-cc.der"
       },
       {
          "urls":[
             "www.digicert.com1+0)"
          ],
-         "path":"SmartQwering_Trunk copy.app/KBC-PROD-ws-root.der"
+         "path":"SmartQwering_Trunk copy.app/MYCOMPANY-PROD-ws-root.der"
       },
       {
          "urls":[
-            "http://crl3.digicert.com/KBCGroupPrivateIntermediateCA2016.crl0DB@",
-            "http://crl4.digicert.com/KBCGroupPrivateIntermediateCA2016.crl0A",
+            "http://crl3.digicert.com/MYCOMPANYGroupPrivateIntermediateCA2016.crl0DB@",
+            "http://crl4.digicert.com/MYCOMPANYGroupPrivateIntermediateCA2016.crl0A",
             "https://www.digicert.com/CPS0",
             "http://ocsp.digicert.com0M",
-            "http://cacerts.digicert.com/KBCGroupPrivateIntermediateCA2016.crt0"
+            "http://cacerts.digicert.com/MYCOMPANYGroupPrivateIntermediateCA2016.crt0"
          ],
-         "path":"SmartQwering_Trunk copy.app/KBC-PROCOPY-new.der"
+         "path":"SmartQwering_Trunk copy.app/MYCOMPANY-PROCOPY-new.der"
       },
       {
          "urls":[
@@ -1191,14 +1191,14 @@
          "urls":[
             "www.digicert.com1"
          ],
-         "path":"SmartQwering_Trunk copy.app/KBC-PROD-edma-root.der"
+         "path":"SmartQwering_Trunk copy.app/MYCOMPANY-PROD-edma-root.der"
       },
       {
          "urls":[
-            "http://aia1.com-strong-id.net/CA/kbc-gs-root-ca.p7c0",
-            "http://cdp1.com-strong-id.net/CDP/kbc-gs-root-ca.crl0ldap://dir1.com-strong-id.net/cn%3dKBC%20Global%20Services%20Private%20Root%20CA,o%3dKBC%20Global%20Services,c%3dBE?certificateRevocationList0"
+            "http://aia1.com-strong-id.net/CA/mycompany-gs-root-ca.p7c0",
+            "http://cdp1.com-strong-id.net/CDP/mycompany-gs-root-ca.crl0ldap://dir1.com-strong-id.net/cn%3dMYCOMPANY%20Global%20Services%20Private%20Root%20CA,o%3dMYCOMPANY%20Global%20Services,c%3dBE?certificateRevocationList0"
          ],
-         "path":"SmartQwering_Trunk copy.app/KBC-ACT.der"
+         "path":"SmartQwering_Trunk copy.app/MYCOMPANY-ACT.der"
       },
       {
          "urls":[
@@ -1208,28 +1208,28 @@
             "http://crl4.digicert.com/DigiCertHighAssuranceEVRootCA.crl0=",
             "https://www.digicert.com/CPS0"
          ],
-         "path":"SmartQwering_Trunk copy.app/KBC-PROD-ws-new.der"
+         "path":"SmartQwering_Trunk copy.app/MYCOMPANY-PROD-ws-new.der"
       },
       {
          "urls":[
             "www.edma-act.mycompany.hu0",
-            "http://crl3.digicert.com/KBCGroupPrivateIntermediateCA2016.crl0DB@",
-            "http://crl4.digicert.com/KBCGroupPrivateIntermediateCA2016.crl0B",
+            "http://crl3.digicert.com/MYCOMPANYGroupPrivateIntermediateCA2016.crl0DB@",
+            "http://crl4.digicert.com/MYCOMPANYGroupPrivateIntermediateCA2016.crl0B",
             "https://www.digicert.com/CPS0",
             "http://ocsp.digicert.com0M",
-            "http://cacerts.digicert.com/KBCGroupPrivateIntermediateCA2016.crt0"
+            "http://cacerts.digicert.com/MYCOMPANYGroupPrivateIntermediateCA2016.crt0"
          ],
-         "path":"SmartQwering_Trunk copy.app/KBC-ACT-new3.der"
+         "path":"SmartQwering_Trunk copy.app/MYCOMPANY-ACT-new3.der"
       },
       {
          "urls":[
-            "http://crl3.digicert.com/KBCGroupPrivateIntermediateCA2016.crl0DB@",
-            "http://crl4.digicert.com/KBCGroupPrivateIntermediateCA2016.crl0A",
+            "http://crl3.digicert.com/MYCOMPANYGroupPrivateIntermediateCA2016.crl0DB@",
+            "http://crl4.digicert.com/MYCOMPANYGroupPrivateIntermediateCA2016.crl0A",
             "https://www.digicert.com/CPS0",
             "http://ocsp.digicert.com0M",
-            "http://cacerts.digicert.com/KBCGroupPrivateIntermediateCA2016.crt0"
+            "http://cacerts.digicert.com/MYCOMPANYGroupPrivateIntermediateCA2016.crt0"
          ],
-         "path":"SmartQwering_Trunk copy.app/KBC-ACT-new2.der"
+         "path":"SmartQwering_Trunk copy.app/MYCOMPANY-ACT-new2.der"
       },
       {
          "urls":[
@@ -1309,23 +1309,23 @@
       },
       {
          "urls":[
-            "http://crl3.digicert.com/KBCGroupPrivateIntermediateCA2016.crl0DB@",
-            "http://crl4.digicert.com/KBCGroupPrivateIntermediateCA2016.crl0A",
+            "http://crl3.digicert.com/MYCOMPANYGroupPrivateIntermediateCA2016.crl0DB@",
+            "http://crl4.digicert.com/MYCOMPANYGroupPrivateIntermediateCA2016.crl0A",
             "https://www.digicert.com/CPS0",
             "http://ocsp.digicert.com0M",
-            "http://cacerts.digicert.com/KBCGroupPrivateIntermediateCA2016.crt0"
+            "http://cacerts.digicert.com/MYCOMPANYGroupPrivateIntermediateCA2016.crt0"
          ],
-         "path":"SmartQwering_Trunk copy.app/KBC-PROCOPY-new2.der"
+         "path":"SmartQwering_Trunk copy.app/MYCOMPANY-PROCOPY-new2.der"
       },
       {
          "urls":[
-            "http://crl3.digicert.com/KBCGroupPrivateIntermediateCA2016.crl0DB@",
-            "http://crl4.digicert.com/KBCGroupPrivateIntermediateCA2016.crl0B",
+            "http://crl3.digicert.com/MYCOMPANYGroupPrivateIntermediateCA2016.crl0DB@",
+            "http://crl4.digicert.com/MYCOMPANYGroupPrivateIntermediateCA2016.crl0B",
             "https://www.digicert.com/CPS0",
             "http://ocsp.digicert.com0M",
-            "http://cacerts.digicert.com/KBCGroupPrivateIntermediateCA2016.crt0"
+            "http://cacerts.digicert.com/MYCOMPANYGroupPrivateIntermediateCA2016.crt0"
          ],
-         "path":"SmartQwering_Trunk copy.app/KBC-INT 2-ws.der"
+         "path":"SmartQwering_Trunk copy.app/MYCOMPANY-INT 2-ws.der"
       },
       {
          "urls":[
@@ -1336,24 +1336,24 @@
       {
          "urls":[
             "www.teqwerngmobile.hu.app0",
-            "http://crl3.digicert.com/KBCGroupPrivateIntermediateCA2016.crl0DB@",
-            "http://crl4.digicert.com/KBCGroupPrivateIntermediateCA2016.crl0B",
+            "http://crl3.digicert.com/MYCOMPANYGroupPrivateIntermediateCA2016.crl0DB@",
+            "http://crl4.digicert.com/MYCOMPANYGroupPrivateIntermediateCA2016.crl0B",
             "https://www.digicert.com/CPS0",
             "http://ocsp.digicert.com0M",
-            "http://cacerts.digicert.com/KBCGroupPrivateIntermediateCA2016.crt0"
+            "http://cacerts.digicert.com/MYCOMPANYGroupPrivateIntermediateCA2016.crt0"
          ],
-         "path":"SmartQwering_Trunk copy.app/KBC-ACT-ws2.der"
+         "path":"SmartQwering_Trunk copy.app/MYCOMPANY-ACT-ws2.der"
       },
       {
          "urls":[
             "www.edma-procopy.mycompany.hu0",
-            "http://crl3.digicert.com/KBCGroupPrivateIntermediateCA2016.crl0DB@",
-            "http://crl4.digicert.com/KBCGroupPrivateIntermediateCA2016.crl0B",
+            "http://crl3.digicert.com/MYCOMPANYGroupPrivateIntermediateCA2016.crl0DB@",
+            "http://crl4.digicert.com/MYCOMPANYGroupPrivateIntermediateCA2016.crl0B",
             "https://www.digicert.com/CPS0",
             "http://ocsp.digicert.com0M",
-            "http://cacerts.digicert.com/KBCGroupPrivateIntermediateCA2016.crt0"
+            "http://cacerts.digicert.com/MYCOMPANYGroupPrivateIntermediateCA2016.crt0"
          ],
-         "path":"SmartQwering_Trunk copy.app/KBC-PROCOPY-new3.der"
+         "path":"SmartQwering_Trunk copy.app/MYCOMPANY-PROCOPY-new3.der"
       },
       {
          "urls":[
@@ -7483,7 +7483,7 @@
       "'setShadowPath:'",
       "'dcS ch 1'",
       "'GPBUInt32Array'",
-      "'K&H mobilqwer'",
+      "'MyCompany mobilqwer'",
       "'yjz`j:''",
       "'WebRTC.Audio.LevelControl.AveragePeakLevel'",
       "'Wlv le 1'",
@@ -9656,7 +9656,7 @@
       "'35iBfPa'",
       "'StartGettingPorts'",
       "'T@\"NSString\",R,N,V_databasePath'",
-      "'K&H mobilqwer demo'",
+      "'MyCompany mobilqwer demo'",
       "'N)s@ly'",
       "'Audience filter count out of range'",
       "'eJj er 1'",
@@ -9679,7 +9679,7 @@
       "'jo8v)'^k'",
       "'ptraCompactArray'",
       "'tbY th 1'",
-      "'kbc\"M2m@P:w~wh'",
+      "'mycompany\"M2m@P:w~wh'",
       "'update_with_analytics'",
       "'Wnh th 1'",
       "'documentAuthor'",
@@ -31409,7 +31409,7 @@
       "'sqR qu 1'",
       "'framesEncoded'",
       "'PlatformAudioLayer'",
-      "'K&H mobilqwer activation'",
+      "'MyCompany mobilqwer activation'",
       "'erFfvFg>ChFiF''",
       "'2H2a_#}'",
       "'B[A@?/?t>=<?<;:'",
@@ -45481,7 +45481,7 @@
       "'setCurrentRmqIdBeingSent:'",
       "'xzW sz 1'",
       "'Znd an 1'",
-      "'1851 Budapest'",
+      "'1851 City'",
       "'CAMELLIA-256-CBC'",
       "'Channel::SendData() failed to send data to RTP/RTCP module'",
       "'8[8`[~'",
@@ -49699,7 +49699,7 @@
       "'aio_alert_message_sme'",
       "'rk 5@_dispatch_once'",
       "'A#v+ri'",
-      "'K&H Qwer Zrt.'",
+      "'MyCompany Qwer Zrt.'",
       "'C@!3#\\0=v'",
       "'lxC GC 1'",
       "'N5zxing15LuminanceSourceE'",
@@ -53246,7 +53246,7 @@
       "'T@\"NSString\",&,N,V_dynamicDataRegex'",
       "'supportedApplicationContext'",
       "'pbG pr 1'",
-      "'r0 +@_$sSS13KBCFoundationE6lengthSivg'",
+      "'r0 +@_$sSS13MYCOMPANYFoundationE6lengthSivg'",
       "'4Dfh@s8.#|r34U'",
       "'pioxiox'",
       "'T}@mz.M}'",
@@ -60979,7 +60979,7 @@
       "'OB<B<C'",
       "'2w@?G '",
       "'word_pix'",
-      "'K&H Qwer Zrt.1'",
+      "'MyCompany Qwer Zrt.1'",
       "'SpeakerVolumeIsAvailable'",
       "'googDecodingPLCCNG'",
       "'T@\"NSMutableArray\",&,N,V_sendOnConnectMessages'",
@@ -73784,7 +73784,7 @@
       "'loanAmountHufDefault'",
       "'POkUpOk'",
       "'x_ht_min_change'",
-      "'K&H TeleCenter'",
+      "'MyCompany TeleCenter'",
       "'language_model_viterbi_list_max_num_prunable'",
       "'pureStringWithPrefixFromIBANorGIROWith:'",
       "'pithsync.cpp'",
@@ -87425,7 +87425,7 @@
       "'IBD/gz'",
       "'Unsupported color conversion request'",
       "'ND'\\NYD'",
-      "'K&H SmartQwering'",
+      "'MyCompany SmartQwering'",
       "'vVvVvVvv'",
       "'Failed to initialize the offer.'",
       "'OWhOWOW'",
