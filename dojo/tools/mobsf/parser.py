@@ -147,6 +147,39 @@ class MobSFParser(object):
                         "file_path": None
                     }
                     mobsf_findings.append(mobsf_item)
+
+        # specific node for Android reports
+        if "android_api" in data:
+            # "android_insecure_random": {
+            #     "files": {
+            #         "u/c/a/b/a/c.java": "9",
+            #         "kotlinx/coroutines/repackaged/net/bytebuddy/utility/RandomString.java": "3",
+            #         ...
+            #         "hu/mycompany/vbnmqweq/gateway/msg/Response.java": "13"
+            #     },
+            #     "metadata": {
+            #         "id": "android_insecure_random",
+            #         "description": "The App uses an insecure Random Number Generator.",
+            #         "type": "Regex",
+            #         "pattern": "java\\.util\\.Random;",
+            #         "severity": "high",
+            #         "input_case": "exact",
+            #         "cvss": 7.5,
+            #         "cwe": "CWE-330 Use of Insufficiently Random Values",
+            #         "owasp-mobile": "M5: Insufficient Cryptography",
+            #         "masvs": "MSTG-CRYPTO-6"
+            #     }
+            # },
+            for api, details in list(data["android_api"].items()):
+                mobsf_item = {
+                    "category": "Android API",
+                    "title": details["metadata"]["description"],
+                    "severity": details["metadata"]["severity"].replace("warning", "low").title(),
+                    "description": "**API:** " + api + "\n\n**Description:** " + details["metadata"]["description"],
+                    "file_path": None
+                }
+                mobsf_findings.append(mobsf_item)
+
         # Manifest
         if "manifest" in data:
             for details in data["manifest"]:
