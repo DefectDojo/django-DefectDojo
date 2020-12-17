@@ -481,12 +481,7 @@ def add_jira_issue(find):
 
             find.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
 
-            # commented out as it creates too much noise and clutters the search for issue for which 'has_notes==True'
-            # new_note = Notes()
-            # new_note.entry = 'created JIRA issue %s for finding' % (jira_issue_url)
-            # new_note.author, created = User.objects.get_or_create(username='JIRA')  # quick hack copied from webhook because we don't have request.user here
-            # new_note.save()
-            # find.notes.add(new_note)
+            jira_issue_url = get_jira_issue_url(find)
 
             # Upload dojo finding screenshots to Jira
             for pic in find.images.all():
@@ -895,7 +890,7 @@ def add_comment(find, note, force_push=False):
                 j_issue = find.jira_issue
                 jira.add_comment(
                     j_issue.jira_id,
-                    '(%s): %s' % (note.author.get_full_name(), note.entry))
+                    '(%s): %s' % (note.author.get_full_name() if note.author.get_full_name() else note.author.username, note.entry))
                 return True
             except JIRAError as e:
                 log_jira_generic_alert('Jira Add Comment Error', str(e))
@@ -944,11 +939,6 @@ def finding_link_jira(request, finding, new_jira_issue_key):
 
     jira_issue_url = get_jira_url(finding)
 
-    new_note = Notes()
-    new_note.entry = 'linked JIRA issue %s to finding' % (jira_issue_url)
-    new_note.author = request.user
-    new_note.save()
-    finding.notes.add(new_note)
     return True
 
 
@@ -959,11 +949,6 @@ def finding_unlink_jira(request, finding):
 
     jira_issue_url = get_jira_url(finding)
 
-    new_note = Notes()
-    new_note.entry = 'unlinked JIRA issue %s from finding' % (jira_issue_url)
-    new_note.author = request.user
-    new_note.save()
-    finding.notes.add(new_note)
     return True
 
 
