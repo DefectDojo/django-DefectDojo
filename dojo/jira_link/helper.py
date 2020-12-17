@@ -22,6 +22,18 @@ from dojo.forms import JIRAProjectForm, JIRAEngagementForm
 
 logger = logging.getLogger(__name__)
 
+RESOLVED_STATUS = [
+    'Inactive',
+    'Mitigated',
+    'False Positive',
+    'Out of Scope',
+    'Duplicate'   
+]
+
+OPEN_STATUS = [
+    'Active',
+    'Verified'
+]
 
 def is_jira_enabled():
     if not get_system_setting('enable_jira'):
@@ -300,8 +312,8 @@ def jira_get_resolution_id(jira, issue, status):
     return resolution_id
 
 
-def jira_change_resolution_id(jira, issue, id):
-    jira.transition_issue(issue, id)
+def jira_change_resolution_id(jira, issue, jid):
+    jira.transition_issue(issue, jid)
 
 
 # Logs the error to the alerts table, which appears in the notification toolbar
@@ -579,6 +591,15 @@ def update_jira_issue(find):
             priority={'name': jira_instance.get_priority(find.severity)},
             fields=fields)
 
+        status_list = find.status()
+        if any(item in status_list for item in OPEN_STATUS):
+            logger.debug('Transitioning Jira issue to Active')
+            jira_change_resolution_id(jira, issue, jira_instance.open_status_key)
+
+        if any(item in status_list for item in RESOLVED_STATUS):
+            logger.debug('Transitioning Jira issue to Resolved')
+            jira_change_resolution_id(jira, issue, jira_instance.close_status_key)
+            
         find.jira_issue.jira_change = timezone.now()
         find.jira_issue.save()
         find.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
@@ -590,34 +611,35 @@ def update_jira_issue(find):
         log_jira_alert(e.text, find)
         return False
 
-    req_url = jira_instance.url + '/rest/api/latest/issue/' + \
-        j_issue.jira_id + '/transitions'
-    if 'Inactive' in find.status() or 'Mitigated' in find.status(
-    ) or 'False Positive' in find.status(
-    ) or 'Out of Scope' in find.status() or 'Duplicate' in find.status():
-        # if 'Active' in old_status:
-        json_data = {'transition': {'id': jira_instance.close_status_key}}
-        r = requests.post(
-            url=req_url,
-            auth=HTTPBasicAuth(jira_instance.username, jira_instance.password),
-            json=json_data)
-        if r.status_code != 204:
-            logger.warn("JIRA transition failed with error: {}".format(r.text))
-        find.jira_issue.jira_change = timezone.now()
-        find.jira_issue.save()
-        find.save()
-    elif 'Active' in find.status() and 'Verified' in find.status():
-        # if 'Inactive' in old_status:
-        json_data = {'transition': {'id': jira_instance.open_status_key}}
-        r = requests.post(
-            url=req_url,
-            auth=HTTPBasicAuth(jira_instance.username, jira_instance.password),
-            json=json_data)
-        if r.status_code != 204:
-            logger.warn("JIRA transition failed with error: {}".format(r.text))
-        find.jira_issue.jira_change = timezone.now()
-        find.jira_issue.save()
-        find.save()
+    # This appears to be unreachable.
+    # req_url = jira_instance.url + '/rest/api/latest/issue/' + \
+    #     j_issue.jira_id + '/transitions'
+    # if 'Inactive' in find.status() or 'Mitigated' in find.status(
+    # ) or 'False Positive' in find.status(
+    # ) or 'Out of Scope' in find.status() or 'Duplicate' in find.status():
+    #     # if 'Active' in old_status:
+    #     json_data = {'transition': {'id': jira_instance.close_status_key}}
+    #     r = requests.post(
+    #         url=req_url,
+    #         auth=HTTPBasicAuth(jira_instance.username, jira_instance.password),
+    #         json=json_data)
+    #     if r.status_code != 204:
+    #         logger.warn("JIRA transition failed with error: {}".format(r.text))
+    #     find.jira_issue.jira_change = timezone.now()
+    #     find.jira_issue.save()
+    #     find.save()
+    # elif 'Active' in find.status() and 'Verified' in find.status():
+    #     # if 'Inactive' in old_status:
+    #     json_data = {'transition': {'id': jira_instance.open_status_key}}
+    #     r = requests.post(
+    #         url=req_url,
+    #         auth=HTTPBasicAuth(jira_instance.username, jira_instance.password),
+    #         json=json_data)
+    #     if r.status_code != 204:
+    #         logger.warn("JIRA transition failed with error: {}".format(r.text))
+    #     find.jira_issue.jira_change = timezone.now()
+    #     find.jira_issue.save()
+    #     find.save()
 
 
 # gets the metadata for the default issue type in this jira project
