@@ -139,10 +139,8 @@ def metrics(request, mtype):
 
     punchcard = list()
     ticks = list()
-    monthly_counts = filters['monthly_counts']
-    weekly_counts = filters['weekly_counts']
 
-    if 'view' in filter_query_dict and filter_query_dict['view'] == 'dashboard':
+    if filter_query_dict.get('view') == 'dashboard':
         punchcard, ticks = get_punchcard_data(queryset_check(filters['all']), filters['start_date'], filters['weeks_between'], view)
         page_name = (get_system_setting('team_name')) + " Metrics"
         template = 'dojo/dashboard-metrics.html'
@@ -154,11 +152,11 @@ def metrics(request, mtype):
         'start_date': filters['start_date'],
         'end_date': filters['end_date'],
         'findings': filters['all'],
-        'opened_per_month': monthly_counts['opened_per_period'],
-        'active_per_month': monthly_counts['active_per_period'],
-        'opened_per_week': weekly_counts['opened_per_period'],
-        'accepted_per_month': monthly_counts['accepted_per_period'],
-        'accepted_per_week': weekly_counts['accepted_per_period'],
+        'opened_per_month': filters['monthly_counts']['opened_per_period'],
+        'active_per_month': filters['monthly_counts']['active_per_period'],
+        'opened_per_week': filters['weekly_counts']['opened_per_period'],
+        'accepted_per_month': filters['monthly_counts']['accepted_per_period'],
+        'accepted_per_week': filters['weekly_counts']['accepted_per_period'],
         'top_ten_products': filters['top_ten'],
         'age_detail': age_detail,
         'in_period_counts': in_period_counts,

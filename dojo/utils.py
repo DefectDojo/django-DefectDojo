@@ -619,7 +619,7 @@ def add_breadcrumb(parent=None,
 
 
 def get_punchcard_data(objs, start_date, weeks, view='Finding'):
-    # use try catch to make sure any teething bugs in the bunchcard don't break the dashboard
+    # use try catch to make sure any teething bugs in the punchcard doesn't break the dashboard
     try:
         # gather findings over past half year, make sure to start on a sunday
         first_sunday = start_date - relativedelta(weekday=SU(-1))

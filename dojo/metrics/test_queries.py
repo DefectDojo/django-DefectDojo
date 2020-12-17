@@ -23,7 +23,7 @@ class FindingQueriesTest(TestCase):
         mock_timezone.return_value = mock_datetime
 
         # Queries over Finding and Risk_Acceptance
-        with self.assertNumQueries(23):
+        with self.assertNumQueries(19):
             product_types = []
             finding_queries = queries.finding_querys(
                 product_types,

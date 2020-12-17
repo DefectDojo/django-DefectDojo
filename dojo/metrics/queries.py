@@ -17,17 +17,18 @@ from dojo.utils import get_period_counts, queryset_check
 
 
 def finding_querys(prod_type, user, findings_filter, alert_error_func):
-    filters = dict()
-
     findings_query = Finding.objects.filter(
         verified=True,
         severity__in=('Critical', 'High', 'Medium', 'Low', 'Info')
-    ).prefetch_related(
+    ).select_related(
+        'reporter',
+        'test',
         'test__engagement__product',
         'test__engagement__product__prod_type',
-        'test__engagement__risk_acceptance',
+    ).prefetch_related(
         'risk_acceptance_set',
-        'reporter'
+        'test__engagement__risk_acceptance',
+        'test__test_type',
     )
     if not user.is_staff:
         findings_query = findings_query.filter(
@@ -38,12 +39,15 @@ def finding_querys(prod_type, user, findings_filter, alert_error_func):
         verified=True,
         active=True,
         severity__in=('Critical', 'High', 'Medium', 'Low', 'Info')
-    ).prefetch_related(
+    ).select_related(
+        'reporter',
+        'test',
         'test__engagement__product',
         'test__engagement__product__prod_type',
-        'test__engagement__risk_acceptance',
+    ).prefetch_related(
         'risk_acceptance_set',
-        'reporter'
+        'test__engagement__risk_acceptance',
+        'test__test_type',
     )
     if not user.is_staff:
         active_findings_query = active_findings_query.filter(
@@ -143,18 +147,18 @@ def finding_querys(prod_type, user, findings_filter, alert_error_func):
         top_ten, 'annotate', 'engagement__test__finding__severity'
     ).order_by('-critical', '-high', '-medium', '-low')[:10]
 
-    filters['all'] = findings
-    filters['closed'] = findings_closed
-    filters['accepted'] = accepted_findings
-    filters['accepted_count'] = accepted_findings_counts
-    filters['top_ten'] = top_ten
-    filters['monthly_counts'] = monthly_counts
-    filters['weekly_counts'] = weekly_counts
-    filters['weeks_between'] = weeks_between
-    filters['start_date'] = start_date
-    filters['end_date'] = end_date
-
-    return filters
+    return {
+        'all': findings,
+        'closed': findings_closed,
+        'accepted': accepted_findings,
+        'accepted_count': accepted_findings_counts,
+        'top_ten': top_ten,
+        'monthly_counts': monthly_counts,
+        'weekly_counts': weekly_counts,
+        'weeks_between': weeks_between,
+        'start_date': start_date,
+        'end_date': end_date,
+    }
 
 
 def severity_count(queryset, method, expression):
@@ -188,8 +192,6 @@ def severity_count(queryset, method, expression):
 
 
 def endpoint_querys(prod_type, user, findings_filter, alert_error_func):
-    filters = dict()
-
     endpoints_query = Endpoint_Status.objects.filter(mitigated=False,
                                       finding__severity__in=('Critical', 'High', 'Medium', 'Low', 'Info')).prefetch_related(
         'finding__test__engagement__product',
@@ -305,18 +307,18 @@ def endpoint_querys(prod_type, user, findings_filter, alert_error_func):
         top_ten, 'annotate', 'engagement__test__finding__severity'
     ).order_by('-critical', '-high', '-medium', '-low')[:10]
 
-    filters['all'] = endpoints
-    filters['closed'] = endpoints_closed
-    filters['accepted'] = accepted_endpoints
-    filters['accepted_count'] = accepted_endpoints_counts
-    filters['top_ten'] = top_ten
-    filters['monthly_counts'] = monthly_counts
-    filters['weekly_counts'] = weekly_counts
-    filters['weeks_between'] = weeks_between
-    filters['start_date'] = start_date
-    filters['end_date'] = end_date
-
-    return filters
+    return {
+        'all': endpoints,
+        'closed': endpoints_closed,
+        'accepted': accepted_endpoints,
+        'accepted_count': accepted_endpoints_counts,
+        'top_ten': top_ten,
+        'monthly_counts': monthly_counts,
+        'weekly_counts': weekly_counts,
+        'weeks_between': weeks_between,
+        'start_date': start_date,
+        'end_date': end_date,
+    }
 
 
 def get_in_period_details(findings):
@@ -401,7 +403,3 @@ def get_closed_in_period_details(findings):
         closed_in_period_details[obj.test.engagement.product.name]['Total'] += 1
 
     return closed_in_period_counts, closed_in_period_details
-
-
-def get_metrics(mtype):
-    print(mtype)
