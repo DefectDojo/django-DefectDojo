@@ -32,7 +32,7 @@ securityContext:
     runAsUser: 1001
 
 tests:
-  unit-tests:
+  unitTests:
     resources:
       requests:
         cpu: 100m

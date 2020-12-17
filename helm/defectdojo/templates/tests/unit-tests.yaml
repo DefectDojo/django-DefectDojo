@@ -51,5 +51,5 @@ spec:
         - name: DD_DEBUG
           value: 'True'
       resources:
-        {{- toYaml .Values.tests.unit-tests.resources | nindent 8 }}      
+        {{- toYaml .Values.tests.unitTests.resources | nindent 8 }}      
   restartPolicy: Never
