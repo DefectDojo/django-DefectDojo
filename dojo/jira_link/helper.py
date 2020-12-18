@@ -322,7 +322,6 @@ def jira_change_resolution_id(jira, issue, jid):
         logger.exception(jira_error)
         log_jira_generic_alert('error transitioning jira issue ' + issue.key, str(jira_error))
         return None
-    
 
 
 # Used for unit testing so geting all the connections is manadatory
