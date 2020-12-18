@@ -54,17 +54,29 @@ class MicrofocusWebinspectXMLParser(object):
                 for content in issue.findall('ReportSection'):
                     name = content.find('Name').text
                     if 'Summary' in name:
-                        description = content.find('SectionText').text
+                        if content.find('SectionText').text:
+                            description = content.find('SectionText').text
+                        else:
+                            description = ""
                     if 'Fix' in name:
-                        mitigation = content.find('SectionText').text
-                    if 'Reference' in name:
-                        reference = content.find('SectionText').text
+                        if content.find('SectionText').text:
+                            mitigation = content.find('SectionText').text
+                        else:
+                            mitigation = ""
+                    if 'Reference':
+                        if name and content.find('SectionText').text:
+                            reference = content.find('SectionText').text
+                        else:
+                            reference = ""
                 Classifications = issue.find('Classifications')
                 for content in Classifications.findall('Classification'):
-                    cwe_content = content.text
-                    if 'CWE' in cwe_content:
+
+                    if content.text and 'CWE' in content.text:
                         cwe = re.findall(r'\d+', content.attrib['identifier'])[0]
-                        description += "\n\n" + cwe_content + "\n"
+                        description += "\n\n" + content.text + "\n"
+                    else:
+                        cwe = None
+                        description = ""
 
                 # make dupe hash key
                 dupe_key = hashlib.md5(str(description + title + severity).encode('utf-8')).hexdigest()

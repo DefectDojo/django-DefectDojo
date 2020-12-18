@@ -301,7 +301,7 @@ def finding_sla(finding):
                 sla_age) + ' days or less'
 
     if find_sla is not None:
-        title = '<a data-toggle="tooltip" data-placement="bottom" title="" href="#" data-original-title="' + status_text + '">' \
+        title = '<a class="has-popover" data-toggle="tooltip" data-placement="bottom" title="" href="#" data-content="' + status_text + '">' \
                                                                                                                            '<span class="label severity age-' + status + '">' + str(find_sla) + '</span></a>'
 
     return mark_safe(title)

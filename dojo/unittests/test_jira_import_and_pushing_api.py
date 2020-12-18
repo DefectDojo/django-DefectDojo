@@ -243,3 +243,18 @@ class JIRAConfigAndPushTestApi(DojoVCRAPITestCase):
         self.assert_jira_issue_count_in_test(test_id, 3)
 
         self.assert_cassette_played()
+
+    def test_import_with_push_to_jira_add_comment(self):
+        import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True)
+        test_id = import0['test']
+        self.assert_jira_issue_count_in_test(test_id, 2)
+
+        findings = self.get_test_findings_api(test_id)
+
+        finding_id = findings['results'][0]['id']
+
+        response = self.post_finding_notes_api(finding_id, 'testing note. creating it and pushing it to JIRA')
+
+        # by asserting full cassette is played we know all calls to JIRA have been made as expected
+        self.assert_cassette_played()
+        return test_id

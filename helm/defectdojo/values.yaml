@@ -23,6 +23,24 @@ repositoryPrefix: defectdojo
 # imagePullSecrets: defectdojoregistrykey
 tag: latest
 
+securityContext:
+  djangoSecurityContext:
+    # django dockerfile sets USER=1001
+    runAsUser: 1001
+  nginxSecurityContext:
+    # nginx dockerfile sets USER=1001
+    runAsUser: 1001
+
+tests:
+  unitTests:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
 admin:
   user: admin
   password:
@@ -35,6 +53,11 @@ admin:
 
 monitoring:
   enabled: false
+  # Add the nginx prometheus exporter sidecar
+  prometheus:
+    enabled: false
+    image: nginx/nginx-prometheus-exporter:0.8.0
+    imagePullPolicy: IfNotPresent
 
 annotations: {}
 
@@ -67,7 +90,7 @@ celery:
         memory: 128Mi
       limits:
         cpu: 2000m
-        memory: 256Mi
+        memory: 512Mi
     tolerations: []
     app_settings:
       pool_type: solo
@@ -153,9 +176,10 @@ mysql:
   # the line below:
   mysqlServer: "127.0.0.1"
 
-
 postgresql:
   enabled: true
+  serviceAccount:
+    enabled: true  
   postgresqlUsername: defectdojo
   postgresqlPassword: ""
   postgresqlDatabase: defectdojo
@@ -166,6 +190,7 @@ postgresql:
   replication:
     enabled: false
   service:
+    port: 5432                               
   # To use an external PostgreSQL instance, set enabled to false and uncomment
   # the line below:
   postgresServer: "127.0.0.1"
@@ -185,7 +210,7 @@ cloudsql:
     repository: gcr.io/cloudsql-docker/gce-proxy
     tag: 1.17
     pullPolicy: IfNotPresent
-  # set CloudSQL instance: 'project:zone:instancname'
+  # set CloudSQL instance: 'project:zone:instancename'
   instance: ""
 
 rabbitmq:
@@ -198,6 +223,13 @@ rabbitmq:
     existingErlangSecret: defectdojo-rabbitmq-specific
     affinity: {}
     nodeSelector: {}
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
 
 redis:
   enabled: false

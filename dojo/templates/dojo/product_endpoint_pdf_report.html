@@ -50,7 +50,7 @@
                                     </p>
                                     <ul>
                                         {% for t in eng.test_set.all %}
-                                            <li>{{ t.test_type.name }}
+                                            <li>{{ t }}
                                                 ({{ t.environment.name|default:"unknown" }}): {{ t.target_start|date:"SHORT_DATE_FORMAT" }}</li>
                                         {% endfor %}
                                     </ul>
@@ -141,7 +141,7 @@
                                         Finding {{ finding.id }}: {{ finding.title }}
                                         {% if finding.tags %}
                                             <sup>
-                                                {% for tag in finding.tags %}
+                                                {% for tag in finding.tags.all %}
                                                 {{ tag }}
                                                 {% endfor %}
                                             </sup>
