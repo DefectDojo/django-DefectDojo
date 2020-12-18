@@ -400,8 +400,8 @@ class FindingViewSet(mixins.ListModelMixin,
             new_note = serializers.AddNewNoteOptionSerializer(data=request.data)
             if new_note.is_valid():
                 entry = new_note.validated_data['entry']
-                private = new_note.validated_data['private']
-                note_type = new_note.validated_data['note_type']
+                private = new_note.validated_data['private'] if 'private' in new_note.validated_data else False
+                note_type = new_note.validated_data['note_type'] if 'note_type' in new_note.validated_data else None
             else:
                 return Response(new_note.errors,
                     status=status.HTTP_400_BAD_REQUEST)
@@ -412,7 +412,7 @@ class FindingViewSet(mixins.ListModelMixin,
             finding.notes.add(note)
 
             if finding.has_jira_issue:
-                jira_helper.add_comment_task(finding, note)
+                jira_helper.add_comment(finding, note)
 
             serialized_note = serializers.NoteSerializer({
                 "author": author, "entry": entry,

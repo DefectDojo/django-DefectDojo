@@ -303,7 +303,7 @@ def view_finding(request, fid):
             finding.last_reviewed_by = user
             finding.save()
             if finding.has_jira_issue:
-                jira_helper.add_comment_task(finding, new_note)
+                jira_helper.add_comment(finding, new_note)
             if note_type_activation:
                 form = TypedNoteForm(available_note_types=available_note_types)
             else:

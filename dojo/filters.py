@@ -741,8 +741,6 @@ class OpenFindingFilter(DojoFilter):
                                 exclude=True,
                                 label='has notes')
 
-    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
-
     tags = ModelMultipleChoiceFilter(
         field_name='tags__name',
         to_field_name='name',
@@ -770,6 +768,7 @@ class OpenFindingFilter(DojoFilter):
         queryset=Finding.tags.tag_model.objects.all().order_by('name'),
         # label='tags', # doesn't work with tagulous, need to set in __init__ below
     )
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -907,7 +906,7 @@ class ClosedFindingFilter(DojoFilter):
         exclude = ['url', 'description', 'mitigation', 'impact',
                    'endpoint', 'references', 'test', 'is_template',
                    'active', 'verified', 'out_of_scope', 'false_p',
-                   'duplicate', 'thread_id', 'date', 'notes',
+                   'duplicate', 'duplicate_finding', 'thread_id', 'date', 'notes',
                    'numerical_severity', 'reporter', 'endpoints', 'endpoint_status',
                    'last_reviewed', 'review_requested_by', 'defect_review_requested_by',
                    'last_reviewed_by', 'created', 'jira_creation', 'jira_change',
@@ -1000,7 +999,7 @@ class AcceptedFindingFilter(DojoFilter):
         exclude = ['url', 'description', 'mitigation', 'impact',
                    'endpoint', 'references', 'test', 'is_template',
                    'active', 'verified', 'out_of_scope', 'false_p',
-                   'duplicate', 'thread_id', 'mitigated', 'notes',
+                   'duplicate', 'duplicate_finding', 'thread_id', 'mitigated', 'notes',
                    'numerical_severity', 'reporter', 'endpoints', 'endpoint_status',
                    'last_reviewed', 'o', 'jira_creation', 'jira_change',
                    'tags_from_django_tagging']
@@ -1127,8 +1126,6 @@ class SimilarFindingFilter(DojoFilter):
                                 exclude=True,
                                 label='has notes')
 
-    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
-
     tags = ModelMultipleChoiceFilter(
         field_name='tags__name',
         to_field_name='name',
@@ -1156,6 +1153,8 @@ class SimilarFindingFilter(DojoFilter):
         queryset=Finding.tags.tag_model.objects.all().order_by('name'),
         # label='tags', # doesn't work with tagulous, need to set in __init__ below
     )
+
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -1375,6 +1374,7 @@ class MetricsFindingFilter(FilterSet):
         model = Finding
         exclude = ['url',
                    'description',
+                   'duplicate_finding',
                    'mitigation',
                    'unsaved_endpoints',
                    'unsaved_request',
@@ -1480,6 +1480,7 @@ class ProductMetricsFindingFilter(FilterSet):
         model = Finding
         exclude = ['url',
                    'description',
+                   'duplicate_finding'
                    'mitigation',
                    'unsaved_endpoints',
                    'unsaved_request',
@@ -1641,7 +1642,7 @@ class ReportFindingFilter(DojoFilter):
         label="Risk Accepted")
     # queryset will be restricted in __init__, here we don't have access to the logged in user
     duplicate = ReportBooleanFilter()
-    duplicate_finding = ModelChoiceFilter(queryset=Finding.objects.filter(original_finding__isnull=False))
+    duplicate_finding = ModelChoiceFilter(queryset=Finding.objects.filter(original_finding__isnull=False).distinct())
     out_of_scope = ReportBooleanFilter()
 
     tags = ModelMultipleChoiceFilter(
@@ -1707,6 +1708,7 @@ class ReportAuthedFindingFilter(DojoFilter):
     test__engagement__risk_acceptance = ReportRiskAcceptanceFilter(
         label="Risk Accepted")
     duplicate = ReportBooleanFilter()
+    duplicate_finding = ModelChoiceFilter(queryset=Finding.objects.filter(original_finding__isnull=False).distinct())
     out_of_scope = ReportBooleanFilter()
 
     tags = ModelMultipleChoiceFilter(

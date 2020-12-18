@@ -1107,7 +1107,7 @@ class ImportScanSerializer(serializers.Serializer):
                     eps, created = Endpoint_Status.objects.get_or_create(
                             finding=item,
                             endpoint=endpoint_to_add)
-                    ep.endpoint_status.add(eps)
+                    endpoint_to_add.endpoint_status.add(eps)
                     item.endpoint_status.add(eps)
                 if item.unsaved_tags is not None:
                     item.tags = item.unsaved_tags
