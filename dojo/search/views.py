@@ -464,13 +464,12 @@ def apply_tag_filters(qs, operators, skip_relations=False):
     for tag_filter in tag_filters:
         if tag_filter in operators:
             value = operators[tag_filter]
-            value = ','.join(value)  # contains need a single value
+            value = ','.join(value)  # contains needs a single value
             qs = qs.filter(**{'%stags__name__contains' % tag_filters[tag_filter]: value})
 
     for tag_filter in tag_filters:
         if tag_filter + 's' in operators:
             value = operators[tag_filter + 's']
-            # value = ','.join(value)
             qs = qs.filter(**{'%stags__name__in' % tag_filters[tag_filter]: value})
 
     return qs
