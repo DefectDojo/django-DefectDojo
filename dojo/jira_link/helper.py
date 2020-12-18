@@ -481,8 +481,6 @@ def add_jira_issue(find):
 
             find.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
 
-            jira_issue_url = get_jira_issue_url(find)
-
             # Upload dojo finding screenshots to Jira
             for pic in find.images.all():
                 jira_attachment(
