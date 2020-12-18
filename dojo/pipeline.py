@@ -3,6 +3,7 @@ import gitlab
 from django.conf import settings
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
+from django.db.models import Q
 from dojo.models import Engagement, Product, Product_Type, Test
 from social_core.backends.azuread_tenant import AzureADTenantOAuth2
 from social_core.backends.google import GoogleOAuth2
@@ -66,7 +67,7 @@ def modify_permissions(backend, uid, user=None, social=None, *args, **kwargs):
 def update_product_access(backend, uid, user=None, social=None, *args, **kwargs):
     if settings.GITLAB_PROJECT_AUTO_IMPORT is True:
         # Get all product names
-        user_product_names = [prod.name for prod in Product.objects.filter(authorized_users__in=[user])]
+        user_product_names = [prod.name for prod in Product.objects.filter(Q(authorized_users__in=[user])|Q(prod_type__authorized_users__in=[user]))]
         # Get Gitlab access token
         soc = user.social_auth.get()
         token = soc.extra_data['access_token']
