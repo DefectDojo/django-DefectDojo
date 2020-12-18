@@ -136,7 +136,7 @@ def webhook(request, secret=None):
                 jira_usernames = JIRA_Instance.objects.values_list('username', flat=True)
                 for jira_userid in jira_usernames:
                     if jira_userid.lower() in commentor.lower():
-                        logger.debug('skipping incoming JIRA comment as the user id of the comment mathces the JIRA user in Defect Dojo')
+                        logger.info('skipping incoming JIRA comment as the user id of the comment mathces the JIRA user in Defect Dojo')
                         return HttpResponse('')
                         break
                 finding = jissue.finding
