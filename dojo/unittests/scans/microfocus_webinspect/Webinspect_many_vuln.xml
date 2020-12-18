@@ -1,4 +1,560 @@
-﻿<Sessions><Session requestId="A61EB7C7546A7963515555C7B255BC4D"><URL>https://www.microfocus.com:443/en-us/home</URL><Scheme>https</Scheme><Host>www.microfocus.com</Host><Port>443</Port><AttackParamDescriptor></AttackParamDescriptor><Issues /><RawRequest id="A61EB7C7546A7963515555C7B255BC4D"><![CDATA[GET /en-us/home HTTP/1.1
+﻿<Sessions>
+	<Session requestId="DD4E05C8521F7A29194D4BE7487B1CA5">
+		<URL>http://php.vulnweb.com:80/</URL>
+		<Scheme>http</Scheme>
+		<Host>php.vulnweb.com</Host>
+		<Port>80</Port>
+		<AttackParamDescriptor />
+		<Issues>
+		  <Issue id="9f5b49d1-85c0-4263-83a3-0c2874321f47">
+			<CheckTypeID>Best Practices</CheckTypeID>
+			<EngineType>CUSTOM</EngineType>
+			<AttackHTTPRequest />
+			<VulnerabilityID>5546</VulnerabilityID>
+			<Severity>0</Severity>
+			<Name>Privacy Policy Not Present</Name>
+			<Classifications>
+			  <Classification kind="7PK" identifier="Security Features" href="https://vulncat.fortify.com/">Security Features</Classification>
+			  <Classification kind="7PK Category" identifier="Compliance Failure: Missing Privacy Policy" href="https://vulncat.fortify.com/">Compliance Failure: Missing Privacy Policy</Classification>
+			</Classifications>
+			<ReportSection>
+			  <Name>Summary</Name>
+			  <SectionText/>
+			</ReportSection>
+			<ReportSection>
+			  <Name>Implication</Name>
+			  <SectionText/>
+			</ReportSection>
+			<ReportSection>
+			  <Name>Execution</Name>
+			  <SectionText/>
+			</ReportSection>
+			<ReportSection>
+			  <Name>Fix</Name>
+			  <SectionText/>
+			</ReportSection>
+			<ReportSection>
+			  <Name>Reference Info</Name>
+			  <SectionText>
+				<![CDATA[<b>California Online Privacy Protection Act</b><br /><a href="http://oag.ca.gov/privacy/COPPA">http://oag.ca.gov/privacy/COPPA</a><br /><br /><b>National Conference of State Legislation</b><br /><a href="http://www.ncsl.org/issues-research/telecom/state-laws-related-to-internet-privacy.aspx">http://www.ncsl.org/issues-research/telecom/state-laws-related-to-internet-privacy.aspx</a><br /><br /><b>Gramm-Leach-Bliley Act</b><br /><a href="http://www.gpo.gov/fdsys/pkg/PLAW-106publ102/pdf/PLAW-106publ102.pdf">http://www.gpo.gov/fdsys/pkg/PLAW-106publ102/pdf/PLAW-106publ102.pdf</a><br /><br /><b>Health Insurance Portability and Accountability Act of 1996</b><br /><a href="https://www.cms.gov/Regulations-and-Guidance/HIPAA-Administrative-Simplification/HIPAAGenInfo/downloads/HIPAALaw.pdf">https://www.cms.gov/Regulations-and-Guidance/HIPAA-Administrative-Simplification/HIPAAGenInfo/downloads/HIPAALaw.pdf</a><br /><br /><b>Health Insurance Portability and Accountability Act of 1996</b><br /><a href="http://ec.europa.eu/justice/policies/privacy/docs/guide/guide-ukingdom_en.pdf">http://ec.europa.eu/justice/policies/privacy/docs/guide/guide-ukingdom_en.pdf</a><br /><br />]]>
+			  </SectionText>
+			</ReportSection>
+		  </Issue>
+		  <Issue id="1cfe38ee-89f7-4110-ad7c-8fca476b2f04">
+			<CheckTypeID>Best Practices</CheckTypeID>
+			<EngineType>11546</EngineType>
+			<AttackHTTPRequest />
+			<VulnerabilityID>5597</VulnerabilityID>
+			<Severity>0</Severity>
+			<Name>Form Auto Complete Active</Name>
+			<Classifications>
+			  <Classification kind="CWE" identifier="CWE-525" href="http://cwe.mitre.org/data/definitions/525.html">CWE-525: Information Exposure Through Browser Caching</Classification>
+			  <Classification kind="7PK" identifier="Security Features" href="https://vulncat.fortify.com/">Security Features</Classification>
+			  <Classification kind="7PK Category" identifier="Privacy Violation: Autocomplete" href="https://vulncat.fortify.com/">Privacy Violation: Autocomplete</Classification>
+			</Classifications>
+			<DetectionSelection>
+			  <Location offset="2623" length="46" />
+			</DetectionSelection>
+			<ReportSection>
+			  <Name>Summary</Name>
+			  <SectionText>
+				<![CDATA[Most recent browsers have features that will save form field content entered by users and then automatically complete form entry the next time the fields are encountered. This feature is enabled by default and could leak sensitive information since it is stored on the hard drive of the user. The risk of this issue is greatly increased if users are accessing the application from a shared environment. Recommendations include setting autocomplete to "off" on all your forms.]]>
+			  </SectionText>
+			</ReportSection>
+			<ReportSection>
+			  <Name>Implication</Name>
+			  <SectionText />
+			</ReportSection>
+			<ReportSection>
+			  <Name>Execution</Name>
+			  <SectionText />
+			</ReportSection>
+			<ReportSection>
+			  <Name>Fix</Name>
+			  <SectionText />
+			</ReportSection>
+			<ReportSection>
+			  <Name>Reference Info</Name>
+			  <SectionText>
+				<![CDATA[<br /><b>Microsoft:</b><br /><a href="http://msdn.microsoft.com/en-us/library/ms533032(VS.85).aspx#security">Autocomplete Security</a>]]>
+			  </SectionText>
+			</ReportSection>
+		  </Issue>
+		  <Issue id="5cccad20-ec34-471a-bd34-f7eccc1ce529">
+			<CheckTypeID>Info</CheckTypeID>
+			<EngineType>10028</EngineType>
+			<AttackHTTPRequest />
+			<VulnerabilityID>10436</VulnerabilityID>
+			<Severity>0</Severity>
+			<Name>Flash Object Detected</Name>
+			<Classifications>
+			  <Classification kind="7PK" identifier="Encapsulation" href="https://vulncat.fortify.com/">Encapsulation</Classification>
+			  <Classification kind="7PK Category" identifier="Flash Misconfiguration: Source Code Disclosure" href="https://vulncat.fortify.com/">Flash Misconfiguration: Source Code Disclosure</Classification>
+			  <Classification kind="CWE" identifier="CWE-540" href="https://cwe.mitre.org/data/definitions/540.html">CWE-540: Information Exposure Through Source Code</Classification>
+			</Classifications>
+			<DetectionSelection>
+			  <Location offset="3995" length="201" />
+			</DetectionSelection>
+			<ReportSection>
+			  <Name>Summary</Name>
+			  <SectionText>
+				<![CDATA[A Flash movie or Flash object was found. Flash movies and objects can be decompiled and may contain sensitive information. An attacker could decompile the Flash file and gain access to the confidential information, including any hard-coded passwords and keys, within the Flash file.]]>
+			  </SectionText>
+			</ReportSection>
+			<ReportSection>
+			  <Name>Implication</Name>
+			  <SectionText>
+				<![CDATA[<br />
+	The attacker’s goal in re-creating the original source code may include one or more of the following:
+	<ul><li>To steal a valuable algorithm for use in his own code </li><li>To understand how a security function works to enable him to bypass it </li><li>To extract confidential information, such as hard-coded passwords and keys</li><li>To enable him to alter the code so that it behaves in a malicious way</li></ul>]]>
+			  </SectionText>
+			</ReportSection>
+			<ReportSection>
+			  <Name>Execution</Name>
+			  <SectionText>
+				<![CDATA[<br />
+	A primary tool in the arsenal of the attacker who wants to get inside your code is the decompiler. A decompiler takes an executable file and attempts to re-create the original source code. It may be almost impossible to go from machine code to a high-level language. It is, however, easy to recover an assembly language version of the program.]]>
+			  </SectionText>
+			</ReportSection>
+			<ReportSection>
+			  <Name>Fix</Name>
+			  <SectionText />
+			</ReportSection>
+			<ReportSection>
+			  <Name>Reference Info</Name>
+			  <SectionText>
+				<![CDATA[<br />Flare - Flash Decompiler<br /><a href="http://www.nowrap.de/flare.html">http://www.nowrap.de/flare.html</a>]]>
+			  </SectionText>
+			</ReportSection>
+		  </Issue>
+		  <Issue id="d71b118a-a7c1-4e7f-82d8-f0c4d403de3b">
+			<CheckTypeID>Vulnerability</CheckTypeID>
+			<EngineType>10028</EngineType>
+			<AttackHTTPRequest />
+			<VulnerabilityID>10561</VulnerabilityID>
+			<Severity>1</Severity>
+			<Name>Vulnerable Flash Engine Allowed</Name>
+			<Classifications>
+			  <Classification kind="7PK" identifier="Encapsulation" href="https://vulncat.fortify.com/">Encapsulation</Classification>
+			  <Classification kind="7PK Category" identifier="Flash Misconfiguration: Vulnerable Flash Engine" href="https://vulncat.fortify.com/">Flash Misconfiguration: Vulnerable Flash Engine</Classification>
+			  <Classification kind="CWE" identifier="CWE-937" href="https://cwe.mitre.org/data/definitions/937.html">CWE-937: OWASP Top Ten 2013 Category A9 - Using Components with Known Vulnerabilities</Classification>
+			</Classifications>
+			<DetectionSelection>
+			  <Location offset="3995" length="201" />
+			</DetectionSelection>
+			<ReportSection>
+			  <Name>Summary</Name>
+			  <SectionText>
+				<![CDATA[<br />WebInspect has detected the use of Adobe Flash in your application. <br /><br />
+	Adobe has deprecated Flash with an end-of-life set to the end of 2020.  Flash support has been disabled by default in many browsers, for example Chrome 76 amd Firefox 69. Further, starting in December 2020, Chrome, Firefox and Microsoft Edge will completely eliminate support for Flash.<br /><br />
+	Adobe Flash has had many vulnerabilities associated with it since its inception.  Of date there are over 1000 CVE’s (Common Vulnerabilities and Exposures) reported against Adobe Flash.  Many of which lead to Remote Code Execution, and Cross-Site Scripting attacks that can compromise user and/or system data and privacy. <br /><br />
+	Consider updating your application to replace Adobe Flash with safer, alternative technologies that provide similar functionality such as HTML5, WebGL and WebAssembly.]]>
+			  </SectionText>
+			</ReportSection>
+			<ReportSection>
+			  <Name>Implication</Name>
+			  <SectionText>
+				<![CDATA[<br />Use of deprecated and vulnerable technology can enable attackers to compromise the target by exploiting known vulnerabilities against the detected server.]]>
+			  </SectionText>
+			</ReportSection>
+			<ReportSection>
+			  <Name>Fix</Name>
+			  <SectionText>
+				<![CDATA[<br />Consider replacing the Flash code with safer, alternative technologies such as HTML5, WebGL or WebAssembly.]]>
+			  </SectionText>
+			</ReportSection>
+			<ReportSection>
+			  <Name>Reference Info</Name>
+			  <SectionText>
+				<![CDATA[<br /><a href="https://web.archive.org/web/20171202123704/https://theblog.adobe.com/adobe-flash-update/"><b>Flash and The Future of Interactive Content</b></a><br /><br /><a href="https://www.cvedetails.com/vulnerability-list/vendor_id-53/product_id-6761/Adobe-Flash-Player.html"><b>CVE Details</b></a>]]>
+			  </SectionText>
+			</ReportSection>
+		  </Issue>
+		</Issues>
+		<RawRequest id="DD4E05C8521F7A29194D4BE7487B1CA5">
+		  <![CDATA[GET / HTTP/1.1
+	Accept: */*
+	Accept-Encoding: gzip, deflate
+	Pragma: no-cache
+	User-Agent: Mozilla/5.0 (Windows NT 6.2; Win64; x64; rv:58.0) Gecko/20100101 Firefox/58.0
+	Host: php.vulnweb.com
+	Connection: Keep-Alive
+	X-WIPP: AscVersion=20.1.0.199
+	X-Scan-Memo: Category="Crawl";SID="DD4E05C8521F7A29194D4BE7487B1CA5";SessionType="ExternalAddedToCrawl";CrawlType="None";AttackType="None";OriginatingEngineID="00000000-0000-0000-0000-000000000000";tid="19";tt="31";
+	X-RequestManager-Memo: sid="37";smi="0";sc="1";ID="1a53b978";
+	X-Request-Memo: ID="e0d3db82";sc="1";tid="64";
+	Cookie: CustomCookie=WebInspect0
+	
+	]]>
+		</RawRequest>
+		<RawResponse>
+		  <![CDATA[HTTP/1.1 200 OK
+	Via: 1.1 189.9.60.22 (McAfee Web Gateway 7.8.2.11.0.29361)
+	Date: Mon, 14 Dec 2020 17:37:09 GMT
+	Server: nginx/1.19.0
+	Connection: keep-alive
+	Content-Type: text/html; charset=UTF-8
+	X-Powered-By: PHP/5.6.40-38+ubuntu20.04.1+deb.sury.org+1
+	Content-Length: 4958
+	
+	<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+	"http://www.w3.org/TR/html4/loose.dtd">
+	<html><!-- InstanceBegin template="/Templates/main_dynamic_template.dwt.php" codeOutsideHTMLIsLocked="false" -->
+	<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-2">
+	
+	<!-- InstanceBeginEditable name="document_title_rgn" -->
+	<title>Home of Acunetix Art</title>
+	<!-- InstanceEndEditable -->
+	<link rel="stylesheet" href="style.css" type="text/css">
+	<!-- InstanceBeginEditable name="headers_rgn" -->
+	<!-- here goes headers headers -->
+	<!-- InstanceEndEditable -->
+	<script language="JavaScript" type="text/JavaScript">
+	<!--
+	function MM_reloadPage(init) {  //reloads the window if Nav4 resized
+	  if (init==true) with (navigator) {if ((appName=="Netscape")&&(parseInt(appVersion)==4)) {
+		document.MM_pgW=innerWidth; document.MM_pgH=innerHeight; onresize=MM_reloadPage; }}
+	  else if (innerWidth!=document.MM_pgW || innerHeight!=document.MM_pgH) location.reload();
+	}
+	MM_reloadPage(true);
+	//-->
+	</script>
+	
+	</head>
+	<body> 
+	<div id="mainLayer" style="position:absolute; width:700px; z-index:1">
+	<div id="masthead"> 
+	  <h1 id="siteName"><a href="https://www.acunetix.com/"><img src="images/logo.gif" width="306" height="38" border="0" alt="Acunetix website security"></a></h1>   
+	  <h6 id="siteInfo">TEST and Demonstration site for <a href="https://www.acunetix.com/vulnerability-scanner/">Acunetix Web Vulnerability Scanner</a></h6>
+	  <div id="globalNav"> 
+			  <table border="0" cellpadding="0" cellspacing="0" width="100%"><tr>
+		<td align="left">
+			<a href="index.php">home</a> | <a href="categories.php">categories</a> | <a href="artists.php">artists
+			</a> | <a href="disclaimer.php">disclaimer</a> | <a href="cart.php">your cart</a> | 
+			<a href="guestbook.php">guestbook</a> | 
+			<a href="AJAX/index.php">AJAX Demo</a>
+		</td>
+		<td align="right">
+			</td>
+		</tr></table>
+	  </div> 
+	</div> 
+	<!-- end masthead --> 
+	
+	<!-- begin content -->
+	<!-- InstanceBeginEditable name="content_rgn" -->
+	<div id="content">
+		<h2 id="pageName">welcome to our page</h2>
+		  <div class="story">
+			<h3>Test site for Acunetix WVS.</h3>
+		  </div>
+	</div>
+	<!-- InstanceEndEditable -->
+	<!--end content -->
+	
+	<div id="navBar"> 
+	  <div id="search"> 
+		<form action="search.php?test=query" method="post"> 
+		  <label>search art</label> 
+		  <input name="searchFor" type="text" size="10"> 
+		  <input name="goButton" type="submit" value="go"> 
+		</form> 
+	  </div> 
+	  <div id="sectionLinks"> 
+		<ul> 
+		  <li><a href="categories.php">Browse categories</a></li> 
+		  <li><a href="artists.php">Browse artists</a></li> 
+		  <li><a href="cart.php">Your cart</a></li> 
+		  <li><a href="login.php">Signup</a></li>
+		  <li><a href="userinfo.php">Your profile</a></li>
+		  <li><a href="guestbook.php">Our guestbook</a></li>
+			<li><a href="AJAX/index.php">AJAX Demo</a></li>
+		  </li> 
+		</ul> 
+	  </div> 
+	  <div class="relatedLinks"> 
+		<h3>Links</h3> 
+		<ul> 
+		  <li><a href="http://www.acunetix.com">Security art</a></li> 
+		  <li><a href="https://www.acunetix.com/vulnerability-scanner/php-security-scanner/">PHP scanner</a></li>
+		  <li><a href="https://www.acunetix.com/blog/articles/prevent-sql-injection-vulnerabilities-in-php-applications/">PHP vuln help</a></li>
+		  <li><a href="http://www.eclectasy.com/Fractal-Explorer/index.html">Fractal Explorer</a></li>
+		</ul> 
+	  </div> 
+	  <div id="advert"> 
+		<p>
+		  <object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,29,0" width="107" height="66">
+			<param name="movie" value="Flash/add.swf">
+			<param name=quality value=high>
+			<embed src="Flash/add.swf" quality=high pluginspage="http://www.macromedia.com/shockwave/download/index.cgi?P1_Prod_Version=ShockwaveFlash" type="application/x-shockwave-flash" width="107" height="66"></embed>
+		  </object>
+		</p>
+	  </div> 
+	</div> 
+	
+	<!--end navbar -->
+	<div id="siteInfo">  <a href="http://www.acunetix.com">About Us</a> | <a href="privacy.php">Privacy Policy</a> | <a href="mailto:wvs@acunetix.com">Contact Us</a> | <a href="/Mod_Rewrite_Shop/">Shop</a> | <a href="/hpp/">HTTP Parameter Pollution</a> | &copy;2019
+	  Acunetix Ltd 
+	</div> 
+		
+		
+	<br> 
+	<div style="background-color:lightgray;width:100%;text-align:center;font-size:12px;padding:1px">
+	<p style="padding-left:5%;padding-right:5%"><b>Warning</b>: This is not a real shop. This is an example PHP application, which is intentionally vulnerable to web attacks. It is intended to help you test Acunetix. It also helps you understand how developer errors and bad configuration may let someone break into your website. You can use it to test other tools and your manual hacking skills as well. Tip: Look for potential SQL Injections, Cross-site Scripting (XSS), and Cross-site Request Forgery (CSRF), and more.</p>
+	</div>
+	</div>
+	</body>
+	<!-- InstanceEnd --></html>
+	]]>
+		</RawResponse>
+		<Request id="DD4E05C8521F7A29194D4BE7487B1CA5">
+		  <Method>GET</Method>
+		  <Path>/</Path>
+		  <File />
+		  <Ext />
+		  <PageMark />
+		  <HTTPVersion>HTTP/1.1</HTTPVersion>
+		  <FullQuery />
+		  <FullPostData />
+		  <XMLPostData />
+		  <MultiPartPostData />
+		  <RawASCIIPostData>
+			<![CDATA[]]>
+		  </RawASCIIPostData>
+		  <Cookie>Cookie: CustomCookie=WebInspect0
+	</Cookie>
+		  <Queries />
+		  <Headers>
+			<Header>
+			  <Name>Accept</Name>
+			  <Value>*/*</Value>
+			</Header>
+			<Header>
+			  <Name>Accept-Encoding</Name>
+			  <Value>gzip, deflate</Value>
+			</Header>
+			<Header>
+			  <Name>Pragma</Name>
+			  <Value>no-cache</Value>
+			</Header>
+			<Header>
+			  <Name>User-Agent</Name>
+			  <Value>Mozilla/5.0 (Windows NT 6.2; Win64; x64; rv:58.0) Gecko/20100101 Firefox/58.0</Value>
+			</Header>
+			<Header>
+			  <Name>Host</Name>
+			  <Value>php.vulnweb.com</Value>
+			</Header>
+			<Header>
+			  <Name>Connection</Name>
+			  <Value>Keep-Alive</Value>
+			</Header>
+			<Header>
+			  <Name>X-WIPP</Name>
+			  <Value>AscVersion=20.1.0.199</Value>
+			</Header>
+			<Header>
+			  <Name>X-Scan-Memo</Name>
+			  <Value>Category="Crawl";SID="DD4E05C8521F7A29194D4BE7487B1CA5";SessionType="ExternalAddedToCrawl";CrawlType="None";AttackType="None";OriginatingEngineID="00000000-0000-0000-0000-000000000000";tid="19";tt="31";</Value>
+			</Header>
+			<Header>
+			  <Name>X-RequestManager-Memo</Name>
+			  <Value>sid="37";smi="0";sc="1";ID="1a53b978";</Value>
+			</Header>
+			<Header>
+			  <Name>X-Request-Memo</Name>
+			  <Value>ID="e0d3db82";sc="1";tid="64";</Value>
+			</Header>
+		  </Headers>
+		  <Cookies>
+			<Cookie>
+			  <Name>CustomCookie</Name>
+			  <Value>WebInspect0</Value>
+			  <Domain />
+			  <Path />
+			</Cookie>
+		  </Cookies>
+		</Request>
+		<Response>
+		  <HTTPVersion>HTTP/1.1</HTTPVersion>
+		  <StatusCode>200</StatusCode>
+		  <StatusDescription>OK</StatusDescription>
+		  <SetCookie />
+		  <ResponseBody>
+			<![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+	"http://www.w3.org/TR/html4/loose.dtd">
+	<html><!-- InstanceBegin template="/Templates/main_dynamic_template.dwt.php" codeOutsideHTMLIsLocked="false" -->
+	<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-2">
+	
+	<!-- InstanceBeginEditable name="document_title_rgn" -->
+	<title>Home of Acunetix Art</title>
+	<!-- InstanceEndEditable -->
+	<link rel="stylesheet" href="style.css" type="text/css">
+	<!-- InstanceBeginEditable name="headers_rgn" -->
+	<!-- here goes headers headers -->
+	<!-- InstanceEndEditable -->
+	<script language="JavaScript" type="text/JavaScript">
+	<!--
+	function MM_reloadPage(init) {  //reloads the window if Nav4 resized
+	  if (init==true) with (navigator) {if ((appName=="Netscape")&&(parseInt(appVersion)==4)) {
+		document.MM_pgW=innerWidth; document.MM_pgH=innerHeight; onresize=MM_reloadPage; }}
+	  else if (innerWidth!=document.MM_pgW || innerHeight!=document.MM_pgH) location.reload();
+	}
+	MM_reloadPage(true);
+	//-->
+	</script>
+	
+	</head>
+	<body> 
+	<div id="mainLayer" style="position:absolute; width:700px; z-index:1">
+	<div id="masthead"> 
+	  <h1 id="siteName"><a href="https://www.acunetix.com/"><img src="images/logo.gif" width="306" height="38" border="0" alt="Acunetix website security"></a></h1>   
+	  <h6 id="siteInfo">TEST and Demonstration site for <a href="https://www.acunetix.com/vulnerability-scanner/">Acunetix Web Vulnerability Scanner</a></h6>
+	  <div id="globalNav"> 
+			  <table border="0" cellpadding="0" cellspacing="0" width="100%"><tr>
+		<td align="left">
+			<a href="index.php">home</a> | <a href="categories.php">categories</a> | <a href="artists.php">artists
+			</a> | <a href="disclaimer.php">disclaimer</a> | <a href="cart.php">your cart</a> | 
+			<a href="guestbook.php">guestbook</a> | 
+			<a href="AJAX/index.php">AJAX Demo</a>
+		</td>
+		<td align="right">
+			</td>
+		</tr></table>
+	  </div> 
+	</div> 
+	<!-- end masthead --> 
+	
+	<!-- begin content -->
+	<!-- InstanceBeginEditable name="content_rgn" -->
+	<div id="content">
+		<h2 id="pageName">welcome to our page</h2>
+		  <div class="story">
+			<h3>Test site for Acunetix WVS.</h3>
+		  </div>
+	</div>
+	<!-- InstanceEndEditable -->
+	<!--end content -->
+	
+	<div id="navBar"> 
+	  <div id="search"> 
+		<form action="search.php?test=query" method="post"> 
+		  <label>search art</label> 
+		  <input name="searchFor" type="text" size="10"> 
+		  <input name="goButton" type="submit" value="go"> 
+		</form> 
+	  </div> 
+	  <div id="sectionLinks"> 
+		<ul> 
+		  <li><a href="categories.php">Browse categories</a></li> 
+		  <li><a href="artists.php">Browse artists</a></li> 
+		  <li><a href="cart.php">Your cart</a></li> 
+		  <li><a href="login.php">Signup</a></li>
+		  <li><a href="userinfo.php">Your profile</a></li>
+		  <li><a href="guestbook.php">Our guestbook</a></li>
+			<li><a href="AJAX/index.php">AJAX Demo</a></li>
+		  </li> 
+		</ul> 
+	  </div> 
+	  <div class="relatedLinks"> 
+		<h3>Links</h3> 
+		<ul> 
+		  <li><a href="http://www.acunetix.com">Security art</a></li> 
+		  <li><a href="https://www.acunetix.com/vulnerability-scanner/php-security-scanner/">PHP scanner</a></li>
+		  <li><a href="https://www.acunetix.com/blog/articles/prevent-sql-injection-vulnerabilities-in-php-applications/">PHP vuln help</a></li>
+		  <li><a href="http://www.eclectasy.com/Fractal-Explorer/index.html">Fractal Explorer</a></li> 
+		</ul> 
+	  </div> 
+	  <div id="advert"> 
+		<p>
+		  <object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,29,0" width="107" height="66">
+			<param name="movie" value="Flash/add.swf">
+			<param name=quality value=high>
+			<embed src="Flash/add.swf" quality=high pluginspage="http://www.macromedia.com/shockwave/download/index.cgi?P1_Prod_Version=ShockwaveFlash" type="application/x-shockwave-flash" width="107" height="66"></embed>
+		  </object>
+		</p>
+	  </div> 
+	</div> 
+	
+	<!--end navbar --> 
+	<div id="siteInfo">  <a href="http://www.acunetix.com">About Us</a> | <a href="privacy.php">Privacy Policy</a> | <a href="mailto:wvs@acunetix.com">Contact Us</a> | <a href="/Mod_Rewrite_Shop/">Shop</a> | <a href="/hpp/">HTTP Parameter Pollution</a> | &copy;2019
+	  Acunetix Ltd 
+	</div> 
+		
+		
+	<br> 
+	<div style="background-color:lightgray;width:100%;text-align:center;font-size:12px;padding:1px">
+	<p style="padding-left:5%;padding-right:5%"><b>Warning</b>: This is not a real shop. This is an example PHP application, which is intentionally vulnerable to web attacks. It is intended to help you test Acunetix. It also helps you understand how developer errors and bad configuration may let someone break into your website. You can use it to test other tools and your manual hacking skills as well. Tip: Look for potential SQL Injections, Cross-site Scripting (XSS), and Cross-site Request Forgery (CSRF), and more.</p>
+	</div>
+	</div>
+	</body>
+	<!-- InstanceEnd --></html>
+	]]>
+		  </ResponseBody>
+		  <Headers>
+			<Header>
+			  <Name>Via</Name>
+			  <Value>1.1 189.9.60.22 (McAfee Web Gateway 7.8.2.11.0.29361)</Value>
+			</Header>
+			<Header>
+			  <Name>Date</Name>
+			  <Value>Mon, 14 Dec 2020 17:37:09 GMT</Value>
+			</Header>
+			<Header>
+			  <Name>Server</Name>
+			  <Value>nginx/1.19.0</Value>
+			</Header>
+			<Header>
+			  <Name>Connection</Name>
+			  <Value>keep-alive</Value>
+			</Header>
+			<Header>
+			  <Name>Content-Type</Name>
+			  <Value>text/html; charset=UTF-8</Value>
+			</Header>
+			<Header>
+			  <Name>X-Powered-By</Name>
+			  <Value>PHP/5.6.40-38+ubuntu20.04.1+deb.sury.org+1</Value>
+			</Header>
+			<Header>
+			  <Name>Content-Length</Name>
+			  <Value>4958</Value>
+			</Header>
+		  </Headers>
+		  <SetCookies />
+		  <Forms>
+			<Form>
+			  <Action>search.php?test=query</Action>
+			  <Method>post</Method>
+			  <Name />
+			  <OnSubmit />
+			  <InputFields>
+				<InputField>
+				  <Name>searchFor</Name>
+				  <Value />
+				  <Size>10</Size>
+				  <MaxLength>0</MaxLength>
+				  <sType>text</sType>
+				  <Class />
+				</InputField>
+				<InputField>
+				  <Name>goButton</Name>
+				  <Value>go</Value>
+				  <Size />
+				  <MaxLength>0</MaxLength>
+				  <sType>submit</sType>
+				  <Class />
+				</InputField>
+			  </InputFields>
+			  <TextAreas />
+			  <SelectFields />
+			</Form>
+		  </Forms>
+		</Response>
+	  </Session>
+	<Session requestId="A61EB7C7546A7963515555C7B255BC4D"><URL>https://www.microfocus.com:443/en-us/home</URL><Scheme>https</Scheme><Host>www.microfocus.com</Host><Port>443</Port><AttackParamDescriptor></AttackParamDescriptor><Issues /><RawRequest id="A61EB7C7546A7963515555C7B255BC4D"><![CDATA[GET /en-us/home HTTP/1.1
 Accept: */*
 Accept-Encoding: gzip, deflate
 Pragma: no-cache
@@ -126,7 +682,7 @@ Connection: keep-alive
 								</li>
 							
 								<li>
-									
+
 										<a href="/en-us/support-and-services/support-login/">Support</a>
 									
 
@@ -24567,7 +25123,7 @@ Link: <https://use.typekit.net>;rel="preconnect",<https://www.googletagmanager.c
 								<div class="uk-width-1-2@m">
 									<div class="each-event">
 										
-										
+
 											<a target="_blank" href="http://www.cvent.com/events/secure-content-management-workshop/event-summary-05096f5055f94723a8cd4446dcd169c5.aspx">Secure Content Management Workshop</a>
 										
 

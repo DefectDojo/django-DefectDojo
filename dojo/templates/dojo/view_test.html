@@ -25,7 +25,7 @@
                 {% if test.tags %}
                     <sup>
                         {% for tag in test.tags.all %}
-                        <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=tag:{{ tag }}">{{ tag }}</a>
+                        <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=test-tag:{{ tag }}">{{ tag }}</a>
                         {% endfor %}
                     </sup>
                 {% endif %}
