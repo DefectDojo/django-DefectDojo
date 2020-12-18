@@ -314,7 +314,15 @@ def jira_get_resolution_id(jira, issue, status):
 
 
 def jira_change_resolution_id(jira, issue, jid):
-    jira.transition_issue(issue, jid)
+    try:
+        if issue and jid:
+            jira.transition_issue(issue, jid)
+    except JIRAError as jira_error:
+        logger.debug('error transisioning jira issue ' + issue.key + ' ' + str(jira_error))
+        logger.exception(jira_error)
+        log_jira_generic_alert('error transitioning jira issue ' + issue.key, str(jira_error))
+        return None
+    
 
 
 # Used for unit testing so geting all the connections is manadatory
