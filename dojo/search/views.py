@@ -435,7 +435,7 @@ def apply_tag_filters(qs, operators, skip_relations=False):
     if qs.model == Finding:
         tag_filters = {
             'tag': '',
-            'test-tag': 'test',
+            'test-tag': 'test__',
             'engagement-tag': 'test__engagement__',
             'product-tag': 'test__engagement__product__',
         }
