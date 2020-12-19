@@ -140,7 +140,12 @@ else
     fail $test
 fi
 
-
+echo "Check Various Pages integration test"
+if python3 tests/check_various_pages.py ; then
+    echo "Success: Check Various Pages tests passed"
+else
+    echo "Error: Check Various Pages test failed"; exit 1
+fi
 
 # The below tests are commented out because they are still an unstable work in progress
 ## Once Ready they can be uncommented.
@@ -150,13 +155,6 @@ fi
 #     echo "Success: Import Scanner integration tests passed" 
 # else
 #     echo "Error: Import Scanner integration test failed"; exit 1
-# fi
-
-# echo "Check Status UI integration test"
-# if python3 tests/check_status_ui.py ; then
-#     echo "Success: Check Status UI tests passed"
-# else
-#     echo "Error: Check Status UI test failed"; exit 1
 # fi
 
 # echo "Zap integration test"

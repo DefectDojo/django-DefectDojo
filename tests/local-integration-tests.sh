@@ -114,13 +114,14 @@ else
     echo "Error: Search integration test failed"; exit 1
 fi
 
-echo "Running Check Status test"
-if python3 tests/check_status.py ; then
-    echo "Success: check status tests passed"
+test="Check Various Pages integration test"
+echo "Running: $test"
+if python3 tests/check_various_pages.py ; then
+    success $test
 else
-    docker-compose logs uwsgi --tail=120
-    echo "Error: Check status tests failed"; exit 1
+    fail $test
 fi
+
 
 # The below tests are commented out because they are still an unstable work in progress
 ## Once Ready they can be uncommented.
@@ -130,13 +131,6 @@ fi
 #     echo "Success: Import Scanner integration tests passed" 
 # else
 #     echo "Error: Import Scanner integration test failed"; exit 1
-# fi
-
-# echo "Running Check Status UI integration test"
-# if python3 tests/check_status_ui.py ; then
-#     echo "Success: Check Status UI tests passed"
-# else
-#     echo "Error: Check Status UI test failed"; exit 1
 # fi
 
 # echo "Running Zap integration test"

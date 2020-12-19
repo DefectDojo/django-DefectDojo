@@ -42,10 +42,6 @@ echo "Running Search integration test"
 python tests/search_test.py
 if %ERRORLEVEL% NEQ 0 GOTO END
 
-echo "Running Check Status test"
-python tests/check_status.py
-if %ERRORLEVEL% NEQ 0 GOTO END
-
 echo "Running Dedupe integration tests"
 python tests/dedupe_test.py
 if %ERRORLEVEL% NEQ 0 GOTO END
@@ -54,6 +50,9 @@ echo "Running Report Builder integration tests"
 python tests/report_builder_test.py
 if %ERRORLEVEL% NEQ 0 GOTO END
 
+echo "Running Check Various Pages integration test"
+python tests/check_various_pages.py
+if %ERRORLEVEL% NEQ 0 GOTO END
 
 
 REM REM  The below tests are commented out because they are still an unstable work in progress
@@ -64,13 +63,6 @@ rem rem python tests/import_scanner_test.py
 REM REM     echo "Success: Import Scanner integration tests passed" 
 REM REM else
 REM REM     echo "Error: Import Scanner integration test failed"; exit 1
-REM REM fi
-
-REM REM echo "Running Check Status UI integration test"
-REM REM python tests/check_status_ui.py
-REM REM     echo "Success: Check Status UI tests passed"
-REM REM else
-REM REM     echo "Error: Check Status UI test failed"; exit 1
 REM REM fi
 
 REM REM echo "Running Zap integration test"
