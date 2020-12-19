@@ -72,7 +72,7 @@ COPY \
   docker/wait-for-it.sh \
   docker/certs/* \
   /
-COPY wsgi.py manage.py tests/unit-tests.sh ./
+COPY wsgi.py manage.py docker/unit-tests.sh ./
 COPY dojo/ ./dojo/
 
 # Add extra fixtures to docker image which are loaded by the initializer
