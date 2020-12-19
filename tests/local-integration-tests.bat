@@ -38,9 +38,8 @@ echo "Running Ibm Appscan integration test"
 python tests/ibm_appscan_test.py
 if %ERRORLEVEL% NEQ 0 GOTO END
 
-everything in the smoke test is already covered by the other tests
-echo "Running Smoke integration test"
-python tests/smoke_test.py
+echo "Running Search integration test"
+python tests/search_test.py
 if %ERRORLEVEL% NEQ 0 GOTO END
 
 echo "Running Check Status test"
