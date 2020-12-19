@@ -8,6 +8,10 @@ import os
 from base_test_class import BaseTestCase, on_exception_html_source_logger
 from Product_unit_test import ProductTest
 import time
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -21,11 +25,10 @@ class DedupeTest(BaseTestCase):
         self.relative_path = dir_path = os.path.dirname(os.path.realpath(__file__))
 
     def check_nb_duplicates(self, expected_number_of_duplicates):
-        print("checking duplicates...")
+        logger.debug("checking duplicates...")
         retries = 0
         for i in range(0, 18):
             time.sleep(5)  # wait bit for celery dedupe task which can be slow on travis
-            driver = self.login_page()
             self.goto_all_findings_list(driver)
             dupe_count = 0
             # iterate over the rows of the findings table and concatenates all columns into td.text
@@ -37,7 +40,7 @@ class DedupeTest(BaseTestCase):
                     dupe_count += 1
 
             if (dupe_count != expected_number_of_duplicates):
-                print("duplicate count mismatch, let's wait a bit for the celery dedupe task to finish and try again (5s)")
+                logger.debug("duplicate count mismatch, let's wait a bit for the celery dedupe task to finish and try again (5s)")
             else:
                 break
 
@@ -49,8 +52,7 @@ class DedupeTest(BaseTestCase):
 
     @on_exception_html_source_logger
     def test_enable_deduplication(self):
-        print("enabling deduplication...")
-        driver = self.login_page()
+        logger.debug("enabling deduplication...")
         driver.get(self.base_url + 'system_settings')
         if not driver.find_element_by_id('id_enable_deduplication').is_selected():
             driver.find_element_by_xpath('//*[@id="id_enable_deduplication"]').click()
@@ -62,8 +64,7 @@ class DedupeTest(BaseTestCase):
 
     @on_exception_html_source_logger
     def test_delete_findings(self):
-        print("removing previous findings...")
-        driver = self.login_page()
+        logger.debug("removing previous findings...")
         driver.get(self.base_url + "finding?page=1")
 
         if self.element_exists_by_id("no_findings"):
@@ -96,9 +97,8 @@ class DedupeTest(BaseTestCase):
 # --------------------------------------------------------------------------------------------------------
     @on_exception_html_source_logger  # noqa: E301
     def test_add_path_test_suite(self):
-        print("Same scanner deduplication - Deduplication on engagement - static. Creating tests...")
+        logger.debug("Same scanner deduplication - Deduplication on engagement - static. Creating tests...")
         # Create engagement
-        driver = self.login_page()
         self.goto_product_overview(driver)
         driver.find_element_by_class_name("pull-left").click()
         driver.find_element_by_link_text("Add New Engagement").click()
@@ -125,9 +125,8 @@ class DedupeTest(BaseTestCase):
 
     @on_exception_html_source_logger
     def test_import_path_tests(self):
-        print("importing reports...")
+        logger.debug("importing reports...")
         # First test
-        driver = self.login_page()
         self.goto_active_engagements_overview(driver)
         driver.find_element_by_partial_link_text("Dedupe Path Test").click()
         driver.find_element_by_partial_link_text("Path Test 1").click()
@@ -167,9 +166,9 @@ class DedupeTest(BaseTestCase):
 # --------------------------------------------------------------------------------------------------------
     @on_exception_html_source_logger
     def test_add_endpoint_test_suite(self):
-        print("Same scanner deduplication - Deduplication on engagement - dynamic. Creating tests...")
+        logger.debug("Same scanner deduplication - Deduplication on engagement - dynamic. Creating tests...")
         # Create engagement
-        driver = self.login_page()
+
         self.goto_product_overview(driver)
         driver.find_element_by_class_name("pull-left").click()
         driver.find_element_by_link_text("Add New Engagement").click()
@@ -196,9 +195,9 @@ class DedupeTest(BaseTestCase):
 
     @on_exception_html_source_logger
     def test_import_endpoint_tests(self):
-        print("Importing reports...")
+        logger.debug("Importing reports...")
         # First test : Immuniweb Scan (dynamic)
-        driver = self.login_page()
+
         self.goto_active_engagements_overview(driver)
         driver.find_element_by_partial_link_text("Dedupe Endpoint Test").click()
         driver.find_element_by_partial_link_text("Endpoint Test 1").click()
@@ -235,9 +234,9 @@ class DedupeTest(BaseTestCase):
 
     @on_exception_html_source_logger
     def test_add_same_eng_test_suite(self):
-        print("Test different scanners - same engagement - dynamic; Adding tests on the same engagement...")
+        logger.debug("Test different scanners - same engagement - dynamic; Adding tests on the same engagement...")
         # Create engagement
-        driver = self.login_page()
+
         self.goto_product_overview(driver)
         driver.find_element_by_class_name("pull-left").click()
         driver.find_element_by_link_text("Add New Engagement").click()
@@ -264,9 +263,9 @@ class DedupeTest(BaseTestCase):
 
     @on_exception_html_source_logger
     def test_import_same_eng_tests(self):
-        print("Importing reports")
+        logger.debug("Importing reports")
         # First test : Immuniweb Scan (dynamic)
-        driver = self.login_page()
+
         self.goto_active_engagements_overview(driver)
         driver.find_element_by_partial_link_text("Dedupe Same Eng Test").click()
         driver.find_element_by_partial_link_text("Same Eng Test 1").click()
@@ -307,9 +306,9 @@ class DedupeTest(BaseTestCase):
 #     makes it possible to detect the duplicate even if the line number has changed (which will occur in a normal software lifecycle)
 # --------------------------------------------------------------------------------------------------------
     def test_add_path_test_suite_checkmarx_scan(self):
-        print("Same scanner deduplication - Deduplication on engagement. Test dedupe on checkmarx aggregated with custom hash_code computation")
+        logger.debug("Same scanner deduplication - Deduplication on engagement. Test dedupe on checkmarx aggregated with custom hash_code computation")
         # Create engagement
-        driver = self.login_page()
+
         self.goto_product_overview(driver)
         driver.find_element_by_class_name("pull-left").click()
         driver.find_element_by_link_text("Add New Engagement").click()
@@ -336,7 +335,7 @@ class DedupeTest(BaseTestCase):
 
     def test_import_path_tests_checkmarx_scan(self):
         # First test
-        driver = self.login_page()
+
         self.goto_active_engagements_overview(driver)
         driver.find_element_by_partial_link_text("Dedupe on hash_code only").click()
         driver.find_element_by_partial_link_text("Path Test 1").click()
@@ -374,9 +373,9 @@ class DedupeTest(BaseTestCase):
 #   Test deduplication for Generic Findings Import with URL (dynamic) vs Immuniweb dynamic scanner
 # --------------------------------------------------------------------------------------------------------
     def test_add_cross_test_suite(self):
-        print("Cross scanners deduplication dynamic; generic finding vs immuniweb. Creating tests...")
+        logger.debug("Cross scanners deduplication dynamic; generic finding vs immuniweb. Creating tests...")
         # Create generic engagement
-        driver = self.login_page()
+
         self.goto_product_overview(driver)
         driver.find_element_by_class_name("pull-left").click()
         driver.find_element_by_link_text("Add New Engagement").click()
@@ -411,9 +410,9 @@ class DedupeTest(BaseTestCase):
         self.assertTrue(self.is_success_message_present(text='Test added successfully'))
 
     def test_import_cross_test(self):
-        print("Importing findings...")
+        logger.debug("Importing findings...")
         # First test : Immuniweb Scan (dynamic)
-        driver = self.login_page()
+
         self.goto_active_engagements_overview(driver)
         driver.find_element_by_partial_link_text("Dedupe Immuniweb Test").click()
         driver.find_element_by_partial_link_text("Immuniweb Test").click()
@@ -444,6 +443,7 @@ class DedupeTest(BaseTestCase):
 
 
 def add_dedupe_tests_to_suite(suite):
+    suite.addTest(BaseTestCase('test_login'))
     suite.addTest(ProductTest('test_create_product'))
     suite.addTest(DedupeTest('test_enable_deduplication'))
     # Test same scanners - same engagement - static - dedupe

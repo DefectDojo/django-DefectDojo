@@ -59,6 +59,7 @@ class RegulationTest(BaseTestCase):
 
 def suite():
     suite = unittest.TestSuite()
+    suite.addTest(BaseTestCase('test_login'))
     suite.addTest(RegulationTest('test_create_regulation'))
     suite.addTest(RegulationTest('test_edit_regulation'))
     suite.addTest(RegulationTest('test_delete_regulation'))

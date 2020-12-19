@@ -318,6 +318,7 @@ class FindingTest(BaseTestCase):
 
 
 def add_finding_tests_to_suite(suite, jira=False, github=False, block_execution=False):
+    suite.addTest(BaseTestCase('test_login'))
     if jira:
         suite.addTest(FindingTest('enable_jira'))
     if github:

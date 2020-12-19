@@ -72,6 +72,9 @@ class BaseTestCase(unittest.TestCase):
         self.assertFalse(self.is_element_by_css_selector_present('.alert-danger', 'Please enter a correct username and password'))
         return driver
 
+    def test_login(self):
+        return self.login_page()
+
     # used to load some page just to get started
     # we choose /user because it's lightweight and fast
     def goto_some_page(self):

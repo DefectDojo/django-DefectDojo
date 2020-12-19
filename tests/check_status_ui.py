@@ -4,46 +4,6 @@ from base_test_class import BaseTestCase
 
 
 class Login(BaseTestCase):
-    def test_engagement_status(self):
-        driver = self.login_page()
-        cookies = driver.get_cookies()
-        url = self.base_url + "engagement"
-        s = requests.Session()
-        for cookie in cookies:
-            s.cookies.set(cookie['name'], cookie['value'])
-        r = s.get(url)
-        self.assertEqual(r.status_code, 200)
-
-    def test_product_status(self):
-        driver = self.login_page()
-        cookies = driver.get_cookies()
-        url = self.base_url + "product"
-        s = requests.Session()
-        for cookie in cookies:
-            s.cookies.set(cookie['name'], cookie['value'])
-        r = s.get(url)
-        self.assertEqual(r.status_code, 200)
-
-    def test_finding_status(self):
-        driver = self.login_page()
-        cookies = driver.get_cookies()
-        url = self.base_url + "finding/open"
-        s = requests.Session()
-        for cookie in cookies:
-            s.cookies.set(cookie['name'], cookie['value'])
-        r = s.get(url)
-        self.assertEqual(r.status_code, 200)
-
-    def test_endpoint_status(self):
-        driver = self.login_page()
-        cookies = driver.get_cookies()
-        url = self.base_url + "endpoint"
-        s = requests.Session()
-        for cookie in cookies:
-            s.cookies.set(cookie['name'], cookie['value'])
-        r = s.get(url)
-        self.assertEqual(r.status_code, 200)
-
     def test_user_status(self):
         driver = self.login_page()
         cookies = driver.get_cookies()

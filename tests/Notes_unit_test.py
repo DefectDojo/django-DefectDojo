@@ -77,6 +77,7 @@ class NoteTest(BaseTestCase):
 
 def suite():
     suite = unittest.TestSuite()
+    suite.addTest(BaseTestCase('test_login'))
     suite.addTest(ProductTest('test_create_product'))
     suite.addTest(ProductTest('test_add_product_finding'))
     suite.addTest(NoteTest('test_finding_note'))

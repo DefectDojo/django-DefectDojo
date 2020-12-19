@@ -48,6 +48,7 @@ class NoteTypeTest(BaseTestCase):
 
 def suite():
     suite = unittest.TestSuite()
+    suite.addTest(BaseTestCase('test_login'))
     suite.addTest(NoteTypeTest('test_create_note_type'))
     suite.addTest(NoteTypeTest('test_edit_note_type'))
     suite.addTest(NoteTypeTest('test_disable_note_type'))

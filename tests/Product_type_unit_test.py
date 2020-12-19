@@ -43,6 +43,7 @@ class ProductTypeTest(BaseTestCase):
 
 def suite():
     suite = unittest.TestSuite()
+    suite.addTest(BaseTestCase('test_login'))
     suite.addTest(ProductTypeTest('test_create_product_type'))
     suite.addTest(ProductTypeTest('test_edit_product_type'))
     suite.addTest(ProductTypeTest('test_delete_product_type'))

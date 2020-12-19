@@ -131,13 +131,6 @@ else
     fail $test
 fi
 
-test="Check Status test"
-echo "Running: $test"
-if python3 tests/check_status.py ; then
-    success $test
-else
-    fail $test
-fi
 
 test="Dedupe integration tests"
 echo "Running: $test"

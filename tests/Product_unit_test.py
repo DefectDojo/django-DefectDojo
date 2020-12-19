@@ -439,6 +439,7 @@ class ProductTest(BaseTestCase):
 def add_product_tests_to_suite(suite):
     # Add each test and the suite to be run
     # success and failure is output by the test
+    suite.addTest(BaseTestCase('test_login'))
     suite.addTest(ProductTest('test_create_product'))
     suite.addTest(ProductTest('test_edit_product_description'))
     suite.addTest(ProductTest('test_add_product_engagement'))
