@@ -27,6 +27,7 @@ class FindingMother:
         p = Product()
         p.Name = 'Test Product'
         p.Description = 'Product for Testing Apply Template functionality'
+        p.prod_type = 1
         p.save()
 
         e = Engagement()
@@ -108,6 +109,7 @@ class FindingTemplateTestUtil:
 
 
 class TestApplyFindingTemplate(TestCase):
+    fixtures = ['dojo_testdata.json']
 
     apply_template_url = 'finding/1/1/apply_template_to_finding'
 
@@ -221,6 +223,7 @@ class TestApplyFindingTemplate(TestCase):
 
 
 class TestFindTemplateToApply(TestCase):
+    fixtures = ['dojo_testdata.json']
     choose_template_url = 'finding/1/find_template_to_apply'
 
     def setUp(self):
@@ -258,6 +261,7 @@ class TestFindTemplateToApply(TestCase):
 
 
 class TestChooseFindingTemplateOptions(TestCase):
+    fixtures = ['dojo_testdata.json']
     finding_template_options_url = 'finding/1/1/choose_finding_template_options'
 
     def setUp(self):
