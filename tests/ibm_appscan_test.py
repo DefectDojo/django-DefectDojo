@@ -3,7 +3,7 @@ import unittest
 import sys
 import os
 from base_test_class import BaseTestCase
-from Product_unit_test import ProductTest
+from product_test import ProductTest
 
 
 dir_path = os.path.dirname(os.path.realpath(__file__))

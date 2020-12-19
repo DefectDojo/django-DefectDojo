@@ -6,7 +6,7 @@ import unittest
 import sys
 import os
 from base_test_class import BaseTestCase, on_exception_html_source_logger
-from Product_unit_test import ProductTest
+from product_test import ProductTest
 import time
 import logging
 

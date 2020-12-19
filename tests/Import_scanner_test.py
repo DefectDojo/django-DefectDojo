@@ -6,7 +6,7 @@ import os
 import git
 import shutil
 from base_test_class import BaseTestCase
-from Product_unit_test import ProductTest
+from product_test import ProductTest
 
 
 class ScannerTest(BaseTestCase):

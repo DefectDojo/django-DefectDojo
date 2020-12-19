@@ -2,7 +2,7 @@ import unittest
 import sys
 import time
 from base_test_class import BaseTestCase
-from Product_unit_test import ProductTest
+from product_test import ProductTest
 
 '''
 Tests Notes functionality on all levels (Engagement, Test, and Finding)
