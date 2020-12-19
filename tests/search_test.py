@@ -92,7 +92,7 @@ class SearchTests(BaseTestCase):
 
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(SearchTests('test_login'))
+    suite.addTest(BaseTestCase('test_login'))
     suite.addTest(SearchTests('test_search'))
     suite.addTest(SearchTests('test_search_cve'))
     suite.addTest(SearchTests('test_search_tag'))
