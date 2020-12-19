@@ -60,6 +60,9 @@ class EngagementTest(BaseTestCase):
         self.goto_product_overview(driver)
         driver.find_element_by_class_name("pull-left").click()
         driver.find_element_by_link_text('View Engagements').click()
+
+        self.wait_for_datatable_if_content("no_active_engagements", "open_wrapper")
+
         driver.find_element_by_link_text("edited test engagement").click()
         driver.find_element_by_id("dropdownMenu1").click()
         driver.find_element_by_link_text('Delete Engagement').click()
