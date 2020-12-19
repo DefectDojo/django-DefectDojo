@@ -17,7 +17,7 @@ class RegulationTest(BaseTestCase):
         return driver
 
     def test_create_regulation(self):
-        driver = self.login_page()
+        driver = self.driver
         driver.get(self.base_url + "regulations")
         driver.find_element_by_link_text("Regulations").click()
         driver.find_element_by_id("dropdownMenu1").click()
@@ -38,7 +38,7 @@ class RegulationTest(BaseTestCase):
         self.assertTrue(self.is_success_message_present(text='Regulation Successfully Created.'))
 
     def test_edit_regulation(self):
-        driver = self.login_page()
+        driver = self.driver
         driver.get(self.base_url + "regulations")
         driver.find_element_by_link_text("Regulations").click()
         driver.find_element_by_link_text("PSA_TEST").click()
@@ -48,7 +48,7 @@ class RegulationTest(BaseTestCase):
         self.assertTrue(self.is_success_message_present(text='Regulation Successfully Updated.'))
 
     def test_delete_regulation(self):
-        driver = self.login_page()
+        driver = self.driver
         driver.get(self.base_url + "regulations")
         driver.find_element_by_link_text("Regulations").click()
         driver.find_element_by_link_text("Edited PSA test").click()

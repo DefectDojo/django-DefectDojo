@@ -53,14 +53,14 @@ class NoteTest(BaseTestCase):
         self.assertTrue(pass_test)
 
     def test_finding_note(self):
-        driver = self.login_page()
+        driver = self.driver
         self.goto_all_findings_list(driver)
         driver.find_element_by_link_text("App Vulnerable to XSS").click()
         self.create_public_note(driver, 'Finding')
         self.create_private_note(driver, 'Finding')
 
     def test_test_note(self):
-        driver = self.login_page()
+        driver = self.driver
         self.goto_all_engagements_overview(driver)
         driver.find_element_by_partial_link_text("Ad Hoc Engagement").click()
         driver.find_element_by_partial_link_text("Pen Test").click()
@@ -68,7 +68,7 @@ class NoteTest(BaseTestCase):
         self.create_private_note(driver, 'Test')
 
     def test_engagement_note(self):
-        driver = self.login_page()
+        driver = self.driver
         self.goto_all_engagements_overview(driver)
         driver.find_element_by_partial_link_text("Ad Hoc Engagement").click()
         self.create_public_note(driver, 'Engagement')

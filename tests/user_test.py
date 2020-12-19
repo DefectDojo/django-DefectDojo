@@ -12,7 +12,7 @@ class UserTest(BaseTestCase):
 
     def test_create_user(self):
         # Login to the site.
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to the User managegement page
         driver.get(self.base_url + "user")
         # "Click" the dropdown button to see options
@@ -47,7 +47,7 @@ class UserTest(BaseTestCase):
     def test_user_edit_permissions(self):
         # Login to the site. Password will have to be modified
         # to match an admin password in your own container
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to User Management page
         driver.get(self.base_url + "user")
         # Select the previously created user to edit
@@ -75,7 +75,7 @@ class UserTest(BaseTestCase):
     def test_user_delete(self):
         # Login to the site. Password will have to be modified
         # to match an admin password in your own container
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to the product page
         driver.get(self.base_url + "user")
         # Select A user to edit
@@ -101,7 +101,7 @@ class UserTest(BaseTestCase):
     def test_user_notifications_change(self):
         # Login to the site. Password will have to be modified
         # to match an admin password in your own container
-        driver = self.login_page()
+        driver = self.driver
 
         wait = WebDriverWait(driver, 5)
         actions = ActionChains(driver)

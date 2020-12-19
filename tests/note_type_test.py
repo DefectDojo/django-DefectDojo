@@ -6,7 +6,7 @@ from base_test_class import BaseTestCase
 class NoteTypeTest(BaseTestCase):
 
     def test_create_note_type(self):
-        driver = self.login_page()
+        driver = self.driver
         driver.get(self.base_url + "note_type")
         driver.find_element_by_id("dropdownMenu1").click()
         driver.find_element_by_link_text("Add Note Type").click()
@@ -20,7 +20,7 @@ class NoteTypeTest(BaseTestCase):
         self.assertTrue(self.is_success_message_present(text='Note Type added successfully.'))
 
     def test_edit_note_type(self):
-        driver = self.login_page()
+        driver = self.driver
         driver.get(self.base_url + "note_type")
         driver.find_element_by_link_text("Edit Note Type").click()
         driver.find_element_by_id("id_name").clear()
@@ -30,7 +30,7 @@ class NoteTypeTest(BaseTestCase):
         self.assertTrue(self.is_success_message_present(text='Note type updated successfully.'))
 
     def test_disable_note_type(self):
-        driver = self.login_page()
+        driver = self.driver
         driver.get(self.base_url + "note_type")
         driver.find_element_by_link_text("Disable Note Type").click()
         driver.find_element_by_css_selector("input.btn.btn-danger").click()
@@ -38,7 +38,7 @@ class NoteTypeTest(BaseTestCase):
         self.assertTrue(self.is_success_message_present(text='Note type Disabled successfully.'))
 
     def test_enable_note_type(self):
-        driver = self.login_page()
+        driver = self.driver
         driver.get(self.base_url + "note_type")
         driver.find_element_by_link_text("Enable Note Type").click()
         driver.find_element_by_css_selector("input.btn.btn-success").click()

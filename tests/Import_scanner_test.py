@@ -195,7 +195,7 @@ class ScannerTest(BaseTestCase):
         assert len(missing_templates) == 0
 
     def test_engagement_import_scan_result(self):
-        driver = self.login_page()
+        driver = self.driver
         self.goto_product_overview(driver)
         driver.find_element_by_class_name("pull-left").click()
         driver.find_element_by_link_text("Add New Engagement").click()

@@ -8,15 +8,15 @@ from Product_unit_test import ProductTest
 class EngagementTest(BaseTestCase):
 
     def test_list_active_engagements(self):
-        driver = self.login_page()
+        driver = self.driver
         self.goto_active_engagements_overview(driver)
 
     def test_list_all_engagements(self):
-        driver = self.login_page()
+        driver = self.driver
         self.goto_all_engagements_overview(driver)
 
     def test_add_new_engagement(self):
-        driver = self.login_page()
+        driver = self.driver
         self.goto_product_overview(driver)
         driver.find_element_by_class_name("pull-left").click()
         driver.find_element_by_link_text("Add New Engagement").click()
@@ -30,7 +30,7 @@ class EngagementTest(BaseTestCase):
         self.assertTrue(self.is_success_message_present(text='Engagement added successfully.'))
 
     def test_edit_created_new_engagement(self):
-        driver = self.login_page()
+        driver = self.driver
         self.goto_product_overview(driver)
         driver.find_element_by_class_name("pull-left").click()
         driver.find_element_by_link_text("View Engagements").click()
@@ -45,7 +45,7 @@ class EngagementTest(BaseTestCase):
         self.assertTrue(self.is_success_message_present(text='Engagement updated successfully.'))
 
     def test_close_new_engagement(self):
-        driver = self.login_page()
+        driver = self.driver
         self.goto_product_overview(driver)
         driver.find_element_by_class_name("pull-left").click()
         driver.find_element_by_link_text("View Engagements").click()
@@ -56,7 +56,7 @@ class EngagementTest(BaseTestCase):
         self.assertTrue(self.is_success_message_present(text='Engagement closed successfully.'))
 
     def test_delete_new_closed_engagement(self):
-        driver = self.login_page()
+        driver = self.driver
         self.goto_product_overview(driver)
         driver.find_element_by_class_name("pull-left").click()
         driver.find_element_by_link_text('View Engagements').click()
@@ -68,7 +68,7 @@ class EngagementTest(BaseTestCase):
         self.assertTrue(self.is_success_message_present(text='Engagement and relationships removed.'))
 
     def test_new_ci_cd_engagement(self):
-        driver = self.login_page()
+        driver = self.driver
         self.goto_product_overview(driver)
         # wait for product_wrapper div as datatables javascript modifies the DOM on page load.
         driver.find_element_by_id('products_wrapper')

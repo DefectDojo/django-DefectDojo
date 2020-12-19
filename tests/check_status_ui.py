@@ -5,7 +5,7 @@ from base_test_class import BaseTestCase
 
 class Login(BaseTestCase):
     def test_user_status(self):
-        driver = self.login_page()
+        driver = self.driver
         cookies = driver.get_cookies()
         url = self.base_url + "user"
         s = requests.Session()
@@ -15,7 +15,7 @@ class Login(BaseTestCase):
         self.assertEqual(r.status_code, 200)
 
     def test_calendar_status(self):
-        driver = self.login_page()
+        driver = self.driver
         cookies = driver.get_cookies()
         url = self.base_url + "calendar"
         s = requests.Session()
@@ -25,7 +25,7 @@ class Login(BaseTestCase):
         self.assertEqual(r.status_code, 200)
 
     def test_metric_product_type_status(self):
-        driver = self.login_page()
+        driver = self.driver
         cookies = driver.get_cookies()
         url = self.base_url + "metrics/product/type"
         s = requests.Session()
@@ -35,7 +35,7 @@ class Login(BaseTestCase):
         self.assertEqual(r.status_code, 200)
 
     def test_metric_type_count_status(self):
-        driver = self.login_page()
+        driver = self.driver
         cookies = driver.get_cookies()
         url = self.base_url + "metrics/product/type/counts"
         s = requests.Session()
@@ -45,7 +45,7 @@ class Login(BaseTestCase):
         self.assertEqual(r.status_code, 200)
 
     def test_metric_simple_status(self):
-        driver = self.login_page()
+        driver = self.driver
         cookies = driver.get_cookies()
         url = self.base_url + "metrics/simple"
         s = requests.Session()
@@ -55,7 +55,7 @@ class Login(BaseTestCase):
         self.assertEqual(r.status_code, 200)
 
     def test_metric_engineer_status(self):
-        driver = self.login_page()
+        driver = self.driver
         cookies = driver.get_cookies()
         url = self.base_url + "metrics/engineer"
         s = requests.Session()
@@ -65,7 +65,7 @@ class Login(BaseTestCase):
         self.assertEqual(r.status_code, 200)
 
     def test_metric_research_status(self):
-        driver = self.login_page()
+        driver = self.driver
         cookies = driver.get_cookies()
         url = self.base_url + "metrics/research"
         s = requests.Session()
@@ -75,7 +75,7 @@ class Login(BaseTestCase):
         self.assertEqual(r.status_code, 200)
 
     def test_metric_dashboard_status(self):
-        driver = self.login_page()
+        driver = self.driver
         cookies = driver.get_cookies()
         url = self.base_url + "metrics?date=5&view=dashboard"
         s = requests.Session()

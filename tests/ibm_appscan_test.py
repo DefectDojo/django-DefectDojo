@@ -14,7 +14,7 @@ class IBMAppScanTest(BaseTestCase):
     def test_import_ibm_app_scan_result(self):
         # Login to the site.
         # Username and password will be gotten from environ
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to the Endpoint page
         self.goto_product_overview(driver)
         # wait for product_wrapper div as datatables javascript modifies the DOM on page load.

@@ -35,7 +35,7 @@ class ReportBuilderTest(BaseTestCase):
                 content = widget.find_element_by_class_name("editor").send_keys('wysiwyg')
 
     def generate_HTML_report(self):
-        driver = self.login_page()
+        driver = self.driver
         driver.get(self.base_url + "reports/builder")
         self.move_blocks(driver)
         self.enter_values(driver)
@@ -45,7 +45,7 @@ class ReportBuilderTest(BaseTestCase):
         self.assertTrue(driver.current_url == self.base_url + "reports/custom")
 
     def generate_AsciiDoc_report(self):
-        driver = self.login_page()
+        driver = self.driver
         driver.get(self.base_url + "reports/builder")
         self.move_blocks(driver)
         self.enter_values(driver)

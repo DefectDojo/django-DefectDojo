@@ -10,7 +10,7 @@ class EndpointTest(BaseTestCase):
     def test_create_endpoint(self):
         # Login to the site.
         # Username and password will be gotten from environ
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to the Endpoint page
         driver.get(self.base_url + "endpoint")
         # "Click" the dropdown button to see options
@@ -33,7 +33,7 @@ class EndpointTest(BaseTestCase):
     def test_edit_endpoint(self):
         # Login to the site. Password will have to be modified
         # to match an admin password in your own container
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to the endpoint page
         driver.get(self.base_url + "endpoint")
         # Select one of the previously created endpoint to edit
@@ -59,7 +59,7 @@ class EndpointTest(BaseTestCase):
     def test_delete_endpoint(self):
         # Login to the site. Password will have to be modified
         # to match an admin password in your own container
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to the endpoint page
         driver.get(self.base_url + "endpoint")
         # Select one of the previously created endpoint to delete

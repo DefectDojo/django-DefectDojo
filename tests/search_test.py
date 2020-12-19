@@ -6,7 +6,7 @@ from base_test_class import BaseTestCase
 class SearchTests(BaseTestCase):
 
     def test_login(self):
-        driver = self.login_page()
+        driver = self.driver
 
     def test_search(self):
         # very basic search test to see if it doesn't 500
