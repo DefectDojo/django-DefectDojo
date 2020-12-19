@@ -27,7 +27,7 @@ class FindingMother:
         p = Product()
         p.Name = 'Test Product'
         p.Description = 'Product for Testing Apply Template functionality'
-        p.prod_type = 1
+        p.prod_type = Product_Type.objects.get(id=1)
         p.save()
 
         e = Engagement()
