@@ -1,4 +1,6 @@
 name: Cancel outdated workflow runs
+# For each branch (i.e. PR) we're only interested in the latest commit to be tested
+# this job cancels any previous workflow runs still in progress on the same branch
 on: [push]
 jobs:
   cancel:
