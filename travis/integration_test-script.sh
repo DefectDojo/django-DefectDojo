@@ -50,7 +50,7 @@ function mark_failed_celery() {
 
 test="Running Product type integration tests"
 echo "Running: $test"
-if python3 tests/Regulations_unit_test.py ; then
+if python3 tests/regulations_test.py ; then
     success $test
 else
     fail $test
@@ -58,7 +58,7 @@ fi
 
 test="Product type integration tests"
 echo "Running: $test"
-if python3 tests/Product_type_unit_test.py ; then
+if python3 tests/product_type_test.py ; then
     success $test
 else
     fail $test
@@ -66,7 +66,7 @@ fi
 
 test="Product integration tests"
 echo "Running: $test"
-if python3 tests/Product_unit_test.py ; then 
+if python3 tests/product_test.py ; then 
     success $test
 else
     fail $test
@@ -74,7 +74,7 @@ fi
 
 test="Notes integration tests"
 echo "Running: $test"
-if python3 tests/Notes_unit_test.py ; then
+if python3 tests/notes_test.py ; then
     success $test
 else
     fail $test
@@ -82,7 +82,7 @@ fi
 
 test="Endpoint integration tests"
 echo "Running: $test"
-if python3 tests/Endpoint_unit_test.py ; then
+if python3 tests/endpoint_test.py ; then
     success $test
 else
     fail $test
@@ -90,7 +90,7 @@ fi
 
 test="Engagement integration tests"
 echo "Running: $test"
-if python3 tests/Engagement_unit_test.py ; then
+if python3 tests/engagement_test.py ; then
     success $test
 else
     fail $test
@@ -98,7 +98,7 @@ fi
 
 test="Environment integration tests"
 echo "Running: $test"
-if python3 tests/Environment_unit_test.py ; then 
+if python3 tests/environment_test.py ; then 
     success $test
 else
     fail $test
@@ -106,7 +106,7 @@ fi
 
 test="Finding integration tests"
 echo "Running: $test"
-if python3 tests/Finding_unit_test.py ; then
+if python3 tests/finding_test.py ; then
     success $test
 else
     fail $test
@@ -114,7 +114,7 @@ fi
 
 test="Test integration tests"
 echo "Running: $test"
-if python3 tests/Test_unit_test.py ; then
+if python3 tests/test_test.py ; then
     success $test
 else
     fail $test
@@ -122,7 +122,7 @@ fi
 
 test=echo "User integration tests"
 echo "Running: $test"
-if python3 tests/User_unit_test.py ; then
+if python3 tests/user_test.py ; then
     success $test
 else
     fail $test
@@ -154,7 +154,7 @@ fi
 
 test="Dedupe integration tests"
 echo "Running: $test"
-if python3 tests/dedupe_unit_test.py ; then
+if python3 tests/dedupe_test.py ; then
     success $test
 else
     fail $test
@@ -166,7 +166,7 @@ fi
 ## Once Ready they can be uncommented.
 
 # echo "Import Scanner integration test"
-# if python3 tests/Import_scanner_unit_test.py ; then
+# if python3 tests/import_scanner_test.py ; then
 #     echo "Success: Import Scanner integration tests passed" 
 # else
 #     echo "Error: Import Scanner integration test failed"; exit 1

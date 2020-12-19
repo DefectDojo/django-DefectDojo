@@ -68,7 +68,7 @@ travis_fold start travis_integration_tests
 
 python tests/check_status.py -v
 python tests/search_test.py
-python tests/dedupe_unit_test.py
+python tests/dedupe_test.py
 
 travis_fold end travis_integration_tests
 # python tests/zap.py
