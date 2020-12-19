@@ -3,7 +3,7 @@ import sys
 from base_test_class import BaseTestCase
 
 
-class DojoTests(BaseTestCase):
+class SearchTests(BaseTestCase):
 
     def test_login(self):
         driver = self.login_page()
@@ -91,19 +91,18 @@ class DojoTests(BaseTestCase):
 
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(DojoTests('test_login'))
-    suite.addTest(DojoTests('test_search'))
-    suite.addTest(DojoTests('test_search_cve'))
-    suite.addTest(DojoTests('test_search_tag'))
-    suite.addTest(DojoTests('test_search_product_tag'))
-    suite.addTest(DojoTests('test_search_engagement_tag'))
-    suite.addTest(DojoTests('test_search_test_tag'))
-    suite.addTest(DojoTests('test_search_tags'))
-    suite.addTest(DojoTests('test_search_product_tags'))
-    suite.addTest(DojoTests('test_search_engagement_tags'))
-    suite.addTest(DojoTests('test_search_test_tags'))
-    suite.addTest(DojoTests('test_search_id'))
-    test_search_product_tag
+    suite.addTest(SearchTests('test_login'))
+    suite.addTest(SearchTests('test_search'))
+    suite.addTest(SearchTests('test_search_cve'))
+    suite.addTest(SearchTests('test_search_tag'))
+    suite.addTest(SearchTests('test_search_product_tag'))
+    suite.addTest(SearchTests('test_search_engagement_tag'))
+    suite.addTest(SearchTests('test_search_test_tag'))
+    suite.addTest(SearchTests('test_search_tags'))
+    suite.addTest(SearchTests('test_search_product_tags'))
+    suite.addTest(SearchTests('test_search_engagement_tags'))
+    suite.addTest(SearchTests('test_search_test_tags'))
+    suite.addTest(SearchTests('test_search_id'))
     return suite
 
 
