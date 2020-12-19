@@ -10,6 +10,7 @@ class SearchTests(BaseTestCase):
 
     def test_search(self):
         # very basic search test to see if it doesn't 500
+        driver = self.goto_some_page()
         driver.find_element_by_id("simple_search").clear()
         driver.find_element_by_id("simple_search").send_keys('finding')
         driver.find_element_by_id("simple_search_submit").click()
