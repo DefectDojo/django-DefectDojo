@@ -2,7 +2,7 @@ import unittest
 from base_test_class import BaseTestCase
 
 
-class Login(BaseTestCase):
+class VariousPagesTest(BaseTestCase):
     def test_user_status(self):
         driver = self.driver
         driver.get(self.base_url + "user")
@@ -15,8 +15,8 @@ class Login(BaseTestCase):
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(BaseTestCase('test_login'))
-    suite.addTest(ProductTest('test_user_status'))
-    suite.addTest(ProductTest('test_calendar_status'))
+    suite.addTest(VariousPagesTest('test_user_status'))
+    suite.addTest(VariousPagesTest('test_calendar_status'))
     return suite
 
 
