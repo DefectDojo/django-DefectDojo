@@ -93,6 +93,7 @@ from dojo.tools.drheader.parser import DrHeaderJSONParser
 from dojo.tools.checkov.parser import CheckovParser
 from dojo.tools.kubebench.parser import KubeBenchParser
 from dojo.tools.ort.parser import OrtParser
+from dojo.tools.sarif.parser import SarifParser
 
 
 __author__ = 'Jay Paz'
@@ -298,6 +299,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = KubeBenchParser(file, test)
     elif scan_type == 'ORT evaluated model Importer':
         parser = OrtParser(file, test)
+    elif scan_type == 'SARIF':
+        parser = SarifParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 
