@@ -1,6 +1,6 @@
 name: k8s deployment
 on:
-  pull_request_target:
+  pull_request:
   push:
     branches:
       - master
@@ -130,10 +130,10 @@ jobs:
               echo ::set-output name=mysql:: "${{ env.HELM_MYSQL_DATABASE_SETTINGS }}"
               echo ::set-output name=redis:: "${{ env.HELM_REDIS_BROKER_SETTINGS }}"
               echo ::set-output name=rabbit:: "${{ env.HELM_RABBIT_BROKER_SETTINGS }}"
-      - name: Create image pull Secrets
-        run: |-
-              kubectl create secret docker-registry defectdojoregistrykey --docker-username=${{ secrets.DOCKERHUB_USERNAME }} --docker-password=${{ secrets.DOCKERHUB_TOKEN }}
-              kubectl get secrets
+      # - name: Create image pull Secrets
+      #   run: |-
+      #         kubectl create secret docker-registry defectdojoregistrykey --docker-username=${{ secrets.DOCKERHUB_USERNAME }} --docker-password=${{ secrets.DOCKERHUB_TOKEN }}
+      #         kubectl get secrets
       - name: Deploying Djano application with ${{ matrix.databases }} ${{ matrix.brokers }}
         run: |-
              helm install \
@@ -144,7 +144,7 @@ jobs:
                ${{ steps.set.outputs[matrix.databases] }} \
                ${{ steps.set.outputs[matrix.brokers] }} \
                --set createSecret=true \
-               --set imagePullSecrets=defectdojoregistrykey
+              #  --set imagePullSecrets=defectdojoregistrykey
       - name: Check deployment status
         run: |-
              kubectl get pods
@@ -172,9 +172,10 @@ jobs:
              echo "Pods up and ready to rumbole"
              kubectl get pods
              OUT=$(kubectl run  curl --quiet=true --image=curlimages/curl:7.73.0 \
-                --overrides='{ "apiVersion": "v1", "spec": { "imagePullSecrets": [{"name": "defectdojoregistrykey"}] } }' \
+                --overrides='{ "apiVersion": "v1" }' \
                 --restart=Never -i --rm -- -s -m 20 -I --header "Host: $DD_HOSTNAME" http://`kubectl get service defectdojo-django -o json \
                |  jq -r '.spec.clusterIP'`/login?next=/)
+
              echo $OUT
              CR=`echo $OUT | egrep "^HTTP" | cut -d' ' -f2`
              echo $CR
