@@ -3,6 +3,9 @@ name: Cancel outdated workflow runs
 # this job cancels any previous workflow runs still in progress on the same branch
 # freeing up spots in the queue for the most recent commits
 # and saving some trees along the way
+
+# run on pull_request_target because we need write access to the GItHub API
+# don't run any code from PR here!
 on: [push, pull_request_target]
 jobs:
   cancel:
