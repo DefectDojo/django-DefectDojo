@@ -1,10 +1,9 @@
 name: Unit tests
-# pull requests: 
-#      run on pull_request_target instead of just pull_request as we need write access to update the status check
-# dev, master:
+# pull requests:
+# push:
 #      run on every push, which is when something gets merged also
-on: 
-  pull_request_target:
+on:
+  pull_request:
   push:
     branches:
       - master
@@ -42,7 +41,7 @@ jobs:
 
       - name: Set unit-test mode
         run: docker/setEnv.sh unit_tests_cicd
-      
+
       # Pull the latest image to build, and avoid caching pull-only images.
       # (docker pull is faster than caching in most cases.)
       - run: docker-compose pull
@@ -62,7 +61,7 @@ jobs:
 
       # phased startup so we can use the exit code from integrationtest container
       - name: Stary MySQL
-        run: docker-compose up -d 
+        run: docker-compose up -d
 
       - name: Initialize
         run: docker-compose up --exit-code-from initializer initializer
