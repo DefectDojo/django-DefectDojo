@@ -11,6 +11,7 @@ metadata:
   annotations:
     helm.sh/hook: test-success
 spec:
+  serviceAccountName: {{ $fullName }}
   {{- if .Values.imagePullSecrets }}
   imagePullSecrets:
   - name: {{ .Values.imagePullSecrets }}
@@ -19,6 +20,8 @@ spec:
     - name: unit-tests
       image: '{{ .Values.repositoryPrefix }}/defectdojo-django:{{ .Values.tag }}'
       imagePullPolicy: {{ .Values.imagePullPolicy }}
+      securityContext:
+        {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 8 }}      
       command: ['/entrypoint-unit-tests.sh']
       envFrom:
         - configMapRef:
@@ -57,4 +60,6 @@ spec:
             secretKeyRef:
               name: {{ $fullName }}
               key: DD_CREDENTIAL_AES_256_KEY
+      resources:
+        {{- toYaml .Values.tests.unitTests.resources | nindent 8 }}
   restartPolicy: Never
