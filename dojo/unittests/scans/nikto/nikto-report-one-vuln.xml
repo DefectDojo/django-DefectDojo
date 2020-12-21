@@ -1,0 +1,21 @@
+<?xml version="1.0" ?>
+<!DOCTYPE niktoscan SYSTEM "docs/nikto.dtd">
+<niktoscan>
+
+<niktoscan hoststest="0" options="-Format xml -output nikto.xml -h -" version="2.1.6" scanstart="Sat Nov 14 19:00:19 2020" scanend="Thu Jan  1 01:00:00 1970" scanelapsed=" seconds" nxmlversion="1.2">
+
+<scandetails targetip="192.168.0.24" targethostname="192.168.0.24" targetport="443" targetbanner="Apache Tomcat" starttime="2020-11-14 19:24:57" sitename="https://192.168.0.24:443/" siteip="https://192.168.0.24:443/" hostheader="192.168.0.24" errors="0" checks="6953">
+<ssl ciphers="ECDHE-RSA-AES256-GCM-SHA384" issuers="/C=US/O=Let's Encrypt/CN=Let's Encrypt Authority X3" info="/CN=jamf.example.com" altnames="jamf-dmz-01.mwea.de, jamf.example.com" />
+
+<item id="999970" osvdbid="0" osvdblink="" method="GET">
+<description><![CDATA[CDATA[Finding 1.1]]></description>
+<uri><![CDATA[/]]></uri>
+<namelink><![CDATA[https://192.168.0.24:443/]]></namelink>
+<iplink><![CDATA[https://192.168.0.24:443/]]></iplink>
+</item>
+<statistics elapsed="4218" itemsfound="1" itemstested="6953" endtime="2020-11-14 20:35:15" />
+</scandetails>
+
+</niktoscan>
+
+</niktoscan>

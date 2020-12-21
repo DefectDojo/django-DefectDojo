@@ -24,10 +24,12 @@ from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Find
     BurpRawRequestResponse
 
 from dojo.endpoint.views import get_endpoint_ids
-from dojo.reports.views import report_url_resolver
+from dojo.reports.views import report_url_resolver, prefetch_related_findings_for_report
 from dojo.finding.views import set_finding_as_original_internal, reset_finding_duplicate_status_internal, \
     duplicate_cluster
-from dojo.filters import ReportFindingFilter, ReportAuthedFindingFilter, ApiFindingFilter, ApiProductFilter
+from dojo.filters import ReportFindingFilter, ReportAuthedFindingFilter, \
+    ApiFindingFilter, ApiProductFilter, ApiEngagementFilter, ApiEndpointFilter, \
+    ApiAppAnalysisFilter, ApiTestFilter, ApiTemplateFindingFilter
 from dojo.risk_acceptance import api as ra_api
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
@@ -37,7 +39,7 @@ from dojo.api_v2 import serializers, permissions
 from django.db.models import Count, Q
 import dojo.jira_link.helper as jira_helper
 import logging
-
+import tagulous
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +53,7 @@ class EndPointViewSet(mixins.ListModelMixin,
     serializer_class = serializers.EndpointSerializer
     queryset = Endpoint.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'host', 'product')
+    filter_class = ApiEndpointFilter
 
     def get_queryset(self):
         if not self.request.user.is_staff:
@@ -110,10 +112,7 @@ class EngagementViewSet(mixins.ListModelMixin,
     serializer_class = serializers.EngagementSerializer
     queryset = Engagement.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'active', 'eng_type', 'target_start',
-                     'target_end', 'requester', 'report_type',
-                     'updated', 'threat_model', 'api_test',
-                     'pen_test', 'status', 'product', 'name', 'version')
+    filter_class = ApiEngagementFilter
 
     @property
     def risk_application_model_class(self):
@@ -219,6 +218,8 @@ class AppAnalysisViewSet(mixins.ListModelMixin,
                         viewsets.GenericViewSet):
     serializer_class = serializers.AppAnalysisSerializer
     queryset = App_Analysis.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filter_class = ApiAppAnalysisFilter
 
 
 class FindingTemplatesViewSet(mixins.ListModelMixin,
@@ -229,8 +230,7 @@ class FindingTemplatesViewSet(mixins.ListModelMixin,
     serializer_class = serializers.FindingTemplateSerializer
     queryset = Finding_Template.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'title', 'cwe', 'severity', 'description',
-                     'mitigation')
+    filter_class = ApiTemplateFindingFilter
 
     # def get_queryset(self):
     #     if not self.request.user.is_staff:
@@ -334,11 +334,11 @@ class FindingViewSet(mixins.ListModelMixin,
                 all_tags = finding.tags
                 all_tags = serializers.TagSerializer({"tags": all_tags}).data['tags']
 
-                for tag in new_tags.validated_data['tags']:
+                for tag in tagulous.utils.parse_tags(new_tags.validated_data['tags']):
                     if tag not in all_tags:
                         all_tags.append(tag)
-                t = ", ".join(all_tags)
-                finding.tags = t
+                new_tags = tagulous.utils.render_tags(all_tags)
+                finding.tags = new_tags
                 finding.save()
             else:
                 return Response(new_tags.errors,
@@ -400,8 +400,8 @@ class FindingViewSet(mixins.ListModelMixin,
             new_note = serializers.AddNewNoteOptionSerializer(data=request.data)
             if new_note.is_valid():
                 entry = new_note.validated_data['entry']
-                private = new_note.validated_data['private']
-                note_type = new_note.validated_data['note_type']
+                private = new_note.validated_data['private'] if 'private' in new_note.validated_data else False
+                note_type = new_note.validated_data['note_type'] if 'note_type' in new_note.validated_data else None
             else:
                 return Response(new_note.errors,
                     status=status.HTTP_400_BAD_REQUEST)
@@ -412,7 +412,7 @@ class FindingViewSet(mixins.ListModelMixin,
             finding.notes.add(note)
 
             if finding.has_jira_issue:
-                jira_helper.add_comment_task(finding, note)
+                jira_helper.add_comment(finding, note)
 
             serialized_note = serializers.NoteSerializer({
                 "author": author, "entry": entry,
@@ -474,19 +474,27 @@ class FindingViewSet(mixins.ListModelMixin,
         finding = get_object_or_404(Finding.objects, id=pk)
         delete_tags = serializers.TagSerializer(data=request.data)
         if delete_tags.is_valid():
+            print('delete_tags: %s' % delete_tags)
             all_tags = finding.tags
+            print('all1: %s' % all_tags)
             all_tags = serializers.TagSerializer({"tags": all_tags}).data['tags']
-            del_tags = delete_tags.validated_data['tags']
+            print('all2: %s' % all_tags)
+
+            # serializer turns it into a string, but we need a list
+            del_tags = tagulous.utils.parse_tags(delete_tags.validated_data['tags'])
             if len(del_tags) < 1:
                 return Response({"error": "Empty Tag List Not Allowed"},
                         status=status.HTTP_400_BAD_REQUEST)
+            print('deltags: %s' % del_tags)
             for tag in del_tags:
+                print('deltag: %s' % tag)
                 if tag not in all_tags:
                     return Response({"error": "'{}' is not a valid tag in list".format(tag)},
                         status=status.HTTP_400_BAD_REQUEST)
                 all_tags.remove(tag)
-            t = ", ".join(all_tags)
-            finding.tags = t
+            # t = ", ".join(all_tags)
+            new_tags = tagulous.utils.render_tags(all_tags)
+            finding.tags = new_tags
             finding.save()
             return Response({"success": "Tag(s) Removed"},
                 status=status.HTTP_200_OK)
@@ -939,9 +947,7 @@ class TestsViewSet(mixins.ListModelMixin,
     serializer_class = serializers.TestSerializer
     queryset = Test.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'title', 'test_type', 'target_start',
-                     'target_end', 'notes', 'percent_complete',
-                     'actual_time', 'engagement')
+    filter_class = ApiTestFilter
 
     @property
     def risk_application_model_class(self):
@@ -1206,10 +1212,8 @@ def report_generate(request, obj, options):
         report_title = "Product Type Report"
         report_subtitle = str(product_type)
 
-        findings = ReportFindingFilter(request.GET, queryset=Finding.objects.filter(
-            test__engagement__product__prod_type=product_type).distinct().prefetch_related('test',
-                                                                                           'test__engagement__product',
-                                                                                           'test__engagement__product__prod_type'))
+        findings = ReportFindingFilter(request.GET, prod_type=prod_type, queryset=prefetch_related_findings_for_report(Finding.objects.filter(
+            test__engagement__product__prod_type=product_type)))
         products = Product.objects.filter(prod_type=product_type,
                                           engagement__test__finding__in=findings.qs).distinct()
         engagements = Engagement.objects.filter(product__prod_type=product_type,
@@ -1238,10 +1242,8 @@ def report_generate(request, obj, options):
         report_name = "Product Report: " + str(product)
         report_title = "Product Report"
         report_subtitle = str(product)
-        findings = ReportFindingFilter(request.GET, queryset=Finding.objects.filter(
-            test__engagement__product=product).distinct().prefetch_related('test',
-                                                                           'test__engagement__product',
-                                                                           'test__engagement__product__prod_type'))
+        findings = ReportFindingFilter(request.GET, product=product, queryset=prefetch_related_findings_for_report(Finding.objects.filter(
+            test__engagement__product=product)))
         ids = set(finding.id for finding in findings.qs)
         engagements = Engagement.objects.filter(test__finding__id__in=ids).distinct()
         tests = Test.objects.filter(finding__id__in=ids).distinct()
@@ -1250,13 +1252,8 @@ def report_generate(request, obj, options):
 
     elif type(obj).__name__ == "Engagement":
         engagement = obj
-        findings = ReportFindingFilter(request.GET, queryset=Finding.objects.filter(
-            test__engagement=engagement,
-        ).prefetch_related(
-            'test',
-            'test__engagement__product',
-            'test__engagement__product__prod_type'
-        ).distinct())
+        findings = ReportFindingFilter(request.GET, engagement=engagement,
+                                       queryset=prefetch_related_findings_for_report(Finding.objects.filter(test__engagement=engagement)))
         report_name = "Engagement Report: " + str(engagement)
 
         report_title = "Engagement Report"
@@ -1269,11 +1266,10 @@ def report_generate(request, obj, options):
 
     elif type(obj).__name__ == "Test":
         test = obj
-        findings = ReportFindingFilter(request.GET,
-                                       queryset=Finding.objects.filter(test=test).prefetch_related(
-                                            'test',
-                                            'test__engagement__product',
-                                            'test__engagement__product__prod_type').distinct())
+        findings = ReportFindingFilter(request.GET, engagement=test.engagement,
+                                       queryset=prefetch_related_findings_for_report(Finding.objects.filter(test=test)))
+        filename = "test_finding_report.pdf"
+        template = "dojo/test_pdf_report.html"
         report_name = "Test Report: " + str(test)
         report_title = "Test Report"
         report_subtitle = str(test)
@@ -1288,23 +1284,13 @@ def report_generate(request, obj, options):
         report_title = "Endpoint Report"
         report_subtitle = host
         findings = ReportFindingFilter(request.GET,
-            queryset=Finding.objects.filter(
-                endpoints__in=endpoints,
-            ).prefetch_related(
-                'test',
-                'test__engagement__product',
-                'test__engagement__product__prod_type'
-            ).distinct())
+                                       queryset=prefetch_related_findings_for_report(Finding.objects.filter(endpoints__in=endpoints)))
 
     elif type(obj).__name__ == "QuerySet":
         findings = ReportAuthedFindingFilter(request.GET,
-            queryset=obj.prefetch_related(
-                'test',
-                'test__engagement__product',
-                'test__engagement__product__prod_type'
-            ).distinct(),
-            user=request.user
-        )
+                                             queryset=prefetch_related_findings_for_report(obj).distinct(),
+                                             user=request.user)
+
         report_name = 'Finding'
         report_type = 'Finding'
         report_title = "Finding Report"
