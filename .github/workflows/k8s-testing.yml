@@ -171,11 +171,6 @@ jobs:
              to_complete  "condition=ready" pod "defectdojo.org/component=django"
              echo "Pods up and ready to rumbole"
              kubectl get pods
-            #  OUT=$(kubectl run  curl --quiet=true --image=curlimages/curl:7.73.0 \
-            #     --overrides='{ "apiVersion": "v1", "spec": { "imagePullSecrets": [{"name": "defectdojoregistrykey"}] } }' \
-            #     --restart=Never -i --rm -- -s -m 20 -I --header "Host: $DD_HOSTNAME" http://`kubectl get service defectdojo-django -o json \
-            #    |  jq -r '.spec.clusterIP'`/login?next=/)
-
              OUT=$(kubectl run  curl --quiet=true --image=curlimages/curl:7.73.0 \
                 --overrides='{ "apiVersion": "v1" }' \
                 --restart=Never -i --rm -- -s -m 20 -I --header "Host: $DD_HOSTNAME" http://`kubectl get service defectdojo-django -o json \
