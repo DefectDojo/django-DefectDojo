@@ -3,13 +3,21 @@ from dojo.models import Finding
 from django.db.models import Count, Q
 from dojo.utils import add_breadcrumb, get_page_items
 from dojo.filters import ComponentFilter
-from dojo.components.group_concat import GroupConcat
+from dojo.components.sql_group_concat import Sql_GroupConcat
+from django.db import connection
+from django.contrib.postgres.aggregates import StringAgg
 
 
 def components(request):
     add_breadcrumb(title='Components', top_level=True, request=request)
-    component_query = Finding.objects.filter().values("component_name")
-    component_query = component_query.annotate(component_version=GroupConcat('component_version', distinct=True))
+    if connection.vendor == 'postgresql':
+        component_query = Finding.objects.values("component_name").order_by('component_name').annotate(
+            component_version=StringAgg('component_version', delimiter=' | ', distinct=True))
+    else:
+        component_query = Finding.objects.values("component_name").order_by('component_name')
+        component_query = component_query.annotate(component_version=Sql_GroupConcat('component_version', distinct=True))
+
+    # Append counts
     component_query = component_query.annotate(total=Count('id')).order_by('component_name')
     component_query = component_query.annotate(active=Count('id', filter=Q(active=True)))
     component_query = component_query.annotate(duplicate=(Count('id', filter=Q(duplicate=True))))

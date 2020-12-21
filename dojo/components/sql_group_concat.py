@@ -1,17 +1,17 @@
 from django.db.models import Aggregate, CharField
 
 
-class GroupConcat(Aggregate):
+class Sql_GroupConcat(Aggregate):
     function = 'GROUP_CONCAT'
     allow_distinct = True
-    separator = ', '
+    separator = ' | '
 
     def __init__(self, expression, distinct=False, ordering=None, **extra):
-        super(GroupConcat, self).__init__(expression,
-                                          distinct='DISTINCT ' if distinct else '',
-                                          ordering=' ORDER BY %s' % ordering if ordering is not None else '',
-                                          output_field=CharField(),
-                                          **extra)
+        super(Sql_GroupConcat, self).__init__(expression,
+                                              distinct='DISTINCT ' if distinct else '',
+                                              ordering=' ORDER BY %s' % ordering if ordering is not None else '',
+                                              output_field=CharField(),
+                                              **extra)
 
     def as_mysql(self, compiler, connection, separator=separator):
         return super().as_sql(compiler,

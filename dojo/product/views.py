@@ -16,7 +16,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 from django.db.models import Sum, Count, Q, Max, Min, Case, When
 from django.contrib.admin.utils import NestedObjects
-from django.db import DEFAULT_DB_ALIAS
+from django.db import DEFAULT_DB_ALIAS, connection
 from dojo.templatetags.display_tags import get_level
 from dojo.filters import ProductFilter, EngagementFilter, ProductMetricsEndpointFilter, ProductMetricsFindingFilter, \
     ProductComponentFilter
@@ -40,6 +40,8 @@ from django.db.models.query import QuerySet
 from github import Github
 from dojo.user.helper import user_must_be_authorized, user_is_authorized, check_auth_users_list
 import dojo.jira_link.helper as jira_helper
+from django.contrib.postgres.aggregates import StringAgg
+from dojo.components.sql_group_concat import Sql_GroupConcat
 
 logger = logging.getLogger(__name__)
 
@@ -194,9 +196,13 @@ def view_product(request, pid):
 def view_product_components(request, pid):
     prod = get_object_or_404(Product, id=pid)
     product_tab = Product_Tab(pid, title="Product", tab="components")
+    if connection.vendor == 'postgresql':
+        component_query = Finding.objects.filter(test__engagement__product__id=pid).values("component_name").order_by('component_name').annotate(
+            component_version=StringAgg('component_version', delimiter=' | ', distinct=True))
+    else:
+        component_query = Finding.objects.filter(test__engagement__product__id=pid).values("component_name")
+        component_query = component_query.annotate(component_version=Sql_GroupConcat('component_version', distinct=True))
 
-    component_query = Finding.objects.filter(test__engagement__product__id=pid).values("component_name",
-                                                                                       "component_version")
     component_query = component_query.annotate(total=Count('id')).order_by('component_name', 'component_version')
     component_query = component_query.annotate(actives=Count('id', filter=Q(active=True)))
     component_query = component_query.annotate(duplicate=(Count('id', filter=Q(duplicate=True))))
