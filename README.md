@@ -107,7 +107,7 @@ DefectDojo is maintained by:
 Project Moderators can help you with pull requests or feedback on dev ideas.
 
 * [Alex Dracea](https://www.linkedin.com/in/alexandru-marin-dracea-910b51122/)
-* [Valentijn Scholten](https://www.linkedin.com/in/valentijn-scholten/)
+* Valentijn Scholten (@valentijnscholten) ([github](https://github.com/valentijnscholten) | [sponsor](https://github.com/sponsors/valentijnscholten) | [linkedin](https://www.linkedin.com/in/valentijn-scholten/))
 * Jannik Jürgens
 * [Fred Blaise](https://www.linkedin.com/in/fredblaise/)
 * Saurabh kumar

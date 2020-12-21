@@ -1,0 +1,19 @@
+name: Cancel outdated workflow runs
+# For each branch (i.e. PR) we're only interested in the latest commit to be tested
+# this job cancels any previous workflow runs still in progress on the same branch
+# freeing up spots in the queue for the most recent commits
+# and saving some trees along the way
+
+# run on pull_request_target because we need write access to the GItHub API
+# don't run any code from PR here!
+on: [push, pull_request_target]
+jobs:
+  cancel:
+    name: 'Cancel Outdated Workflow Runs'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: styfle/cancel-workflow-action@0.6.0
+        with:
+          workflow_id: 'integration-tests.yml,k8s-testing.yml,unit-tests.yml'
+          access_token: ${{ github.token }}
