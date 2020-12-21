@@ -122,14 +122,14 @@ else
     fail $test
 fi
 
-# all smoke tests are already covered by other testcases above/below
-# test="Smoke integration test"
-# echo "Running: $test"
-# if python3 tests/smoke_test.py ; then
-#     success $test
-# else
-#     fail $test
-# fi
+
+test="Search integration test"
+echo "Running: $test"
+if python3 tests/search_test.py ; then
+    success $test
+else
+    fail $test
+fi
 
 test="Check Status test"
 echo "Running: $test"

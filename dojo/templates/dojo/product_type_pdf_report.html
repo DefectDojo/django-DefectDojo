@@ -55,7 +55,7 @@
                                             <ul>
                                                 {% for t in eng.test_set.all %}
                                                     {% if t in context.tests %}
-                                                        <li>{{ t.test_type.name }}
+                                                        <li>{{ t }}
                                                             ({{ t.environment.name|default:"unknown" }}):
                                                             {{ t.target_start|date:"SHORT_DATE_FORMAT" }}
                                                         </li>
@@ -227,7 +227,6 @@
                             {% endfor %}
                         {% endif %}
                     {% endif %}
-
                     <h6>Impact</h6>
                     <pre>{{ finding.impact }}</pre>
                     <h6>References</h6>
@@ -287,6 +286,7 @@
                                 {% endif %}
                             {% endwith %}
                         {% endif %}
+                    {% endif }
                     {% endfor %}
                 {% endfor %}
             </div>

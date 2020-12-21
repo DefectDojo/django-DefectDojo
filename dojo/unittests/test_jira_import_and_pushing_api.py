@@ -225,9 +225,14 @@ class JIRAConfigAndPushTestApi(DojoVCRAPITestCase):
         self.assert_jira_issue_count_in_test(test_id, 1)
         self.patch_finding_api(new_finding_json['id'], {"push_to_jira": True})
         self.assert_jira_issue_count_in_test(test_id, 2)
+        pre_jira_status = self.get_jira_issue_severity(new_finding_json['id'])
 
-        self.patch_finding_api(new_finding_json['id'], {"push_to_jira": True})
+        self.patch_finding_api(new_finding_json['id'], {"push_to_jira": True,
+                                                        "is_Mitigated": True,
+                                                        "active": False})
         self.assert_jira_issue_count_in_test(test_id, 2)
+        post_jira_status = self.get_jira_issue_severity(new_finding_json['id'])
+        self.assert_jira_status_change(pre_jira_status, post_jira_status)
 
         finding_details['title'] = 'jira api test 4'
         new_finding_json = self.post_new_finding_api(finding_details)

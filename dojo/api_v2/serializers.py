@@ -1005,6 +1005,7 @@ class ImportScanSerializer(serializers.Serializer):
     tags = TagListSerializerField(required=False)
     close_old_findings = serializers.BooleanField(required=False, default=False)
     push_to_jira = serializers.BooleanField(default=False)
+    environment = serializers.CharField(required=False)
 
     # class Meta:
     #     model = Test
@@ -1019,8 +1020,6 @@ class ImportScanSerializer(serializers.Serializer):
         test_type, created = Test_Type.objects.get_or_create(
             name=data.get('test_type', data['scan_type']))
         endpoint_to_add = data['endpoint_to_add']
-        environment, created = Development_Environment.objects.get_or_create(
-            name='Development')
         scan_date = data['scan_date']
         scan_date_time = datetime.datetime.combine(scan_date, timezone.now().time())
         if settings.USE_TZ:
@@ -1029,6 +1028,9 @@ class ImportScanSerializer(serializers.Serializer):
         version = ''
         if 'version' in data:
             version = data['version']
+        # Will save in the provided environment or in the `Development` one if absent
+        environment_name = data.get('environment', 'Development')
+        environment = Development_Environment.objects.get(name=environment_name)
 
         test = Test(
             engagement=data['engagement'],
