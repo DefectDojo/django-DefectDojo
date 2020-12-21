@@ -35,7 +35,7 @@ EOF
     exit 1
 }
 
-echo "VALENTIJN WAS HERE 2"
+echo "VALENTIJN WAS HERE 3"
 exit 0
 
 # python3 manage.py migrate
