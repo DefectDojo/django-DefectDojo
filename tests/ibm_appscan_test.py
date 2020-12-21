@@ -26,6 +26,8 @@ class IBMAppScanTest(BaseTestCase):
         driver.find_element_by_link_text("Import Scan Results").click()
         # Select scan type
         Select(driver.find_element_by_id("id_scan_type")).select_by_visible_text("IBM AppScan DAST")
+        # Select `Default` as the Environment
+        Select(driver.find_element_by_id("id_environment")).select_by_visible_text('Development')
         # Upload Scan result file
         scanner_file = os.path.join(dir_path, "ibm_appscan_xml_file.xml")
         driver.find_element_by_name("file").send_keys(scanner_file)

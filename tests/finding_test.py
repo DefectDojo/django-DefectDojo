@@ -274,8 +274,10 @@ class FindingTest(BaseTestCase):
         driver.find_element_by_partial_link_text("Findings").click()
         # Click on `Import Scan Results` link text
         driver.find_element_by_link_text("Import Scan Results").click()
-        # Select `ZAP Scan' as Scan Type
+        # Select `ZAP Scan` as Scan Type
         Select(driver.find_element_by_id("id_scan_type")).select_by_visible_text('ZAP Scan')
+        # Select `Default` as the Environment
+        Select(driver.find_element_by_id("id_environment")).select_by_visible_text('Development')
         # upload scan file
         file_path = os.path.join(dir_path, 'zap_sample.xml')
         driver.find_element_by_name("file").send_keys(file_path)
