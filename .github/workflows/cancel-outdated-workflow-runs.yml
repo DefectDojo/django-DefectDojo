@@ -3,7 +3,7 @@ name: Cancel outdated workflow runs
 # this job cancels any previous workflow runs still in progress on the same branch
 # freeing up spots in the queue for the most recent commits
 # and saving some trees along the way
-on: [push, pull_request_target]
+on: [push, pull_request]
 jobs:
   cancel:
     name: 'Cancel Outdated Workflow Runs'

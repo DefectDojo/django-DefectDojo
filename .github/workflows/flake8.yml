@@ -1,28 +1,14 @@
 name: Flake8
-# pull requests: 
+# pull requests:
 #      run on pull_request_target instead of just pull_request as we need write access to update the status check
-# dev, master:
-#      run on every push, which is when something gets merged also
-on: 
+on:
   pull_request_target:
   push:
-    branches:
-      - master
-      - dev
-      - release/**
-      - hotfix/**
-  
+
 jobs:
   flake8-your-pr:
     runs-on: ubuntu-latest
     steps:
-      # disabled login as it leaves plain text credentials behind
-
-      # - name: Login to DockerHub
-      #   uses: docker/login-action@v1
-      #   with:
-      #     username: ${{ secrets.DOCKERHUB_USERNAME }}
-      #     password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Checkout
         if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'
         uses: actions/checkout@v2
@@ -41,7 +27,7 @@ jobs:
         # for non PR runs we just checkout the default, which is a sha on a branch probably
         if: github.event_name != 'pull_request' && github.event_name != 'pull_request_target'
         uses: actions/checkout@v2
-        
+
       # - uses: tayfun/flake8-your-pr@master
       - uses: valentijnscholten/flake8-your-pr@master
         env:
