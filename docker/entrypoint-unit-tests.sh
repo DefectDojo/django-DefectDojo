@@ -35,6 +35,9 @@ EOF
     exit 1
 }
 
-python3 manage.py migrate
+echo "VALENTIJN WAS HERE 2"
+exit 1
 
-python3 manage.py test dojo.unittests -v 3 --no-input
+# python3 manage.py migrate
+
+# python3 manage.py test dojo.unittests -v 3 --no-input
