@@ -15,8 +15,9 @@ Please update any documentation when needed (in the .MD files in this repo, as w
 
 This checklist is for your information.
 
-- [ ] Features/Changes/Bugfixes should be submitted against the `dev` branch by default
-- [ ] Hotfixes should be submitted against master (urgent bugfixes requiring a hotfix release)
+- [ ] Features/Changes/Bugfixes should be submitted against the `dev` branch by default.
+- [ ] Make sure to rebase your PR against the very latest `dev`.
+- [ ] Hotfixes should be submitted against master (urgent bugfixes requiring a hotfix release).
 - [ ] Give a meaningful name to your PR, as it may end up being used in the release notes.
 - [ ] Your code is flake8 compliant.
 - [ ] Your code is python 3.6 compliant (specific python >3.6 syntax is currently not accepted).
@@ -28,7 +29,6 @@ This checklist is for your information.
 **Extra information**
 
 Please clear everything below when submitting your pull request, it's here purely for your information.
-
 
 Moderators: Labels currently accepted for PRs:
 - Import Scans (for new scanners/importers)

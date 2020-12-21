@@ -12,6 +12,7 @@ env = environ.Env(
     DD_SITE_URL=(str, 'http://localhost:8080'),
     DD_DEBUG=(bool, False),
     DD_TEMPLATE_DEBUG=(bool, False),
+    DD_LOG_LEVEL=(str, ''),
     DD_DJANGO_METRICS_ENABLED=(bool, False),
     DD_LOGIN_REDIRECT_URL=(str, '/'),
     DD_DJANGO_ADMIN_ENABLED=(bool, False),
@@ -153,7 +154,12 @@ env = environ.Env(
     DD_LOGGING_HANDLER=(str, 'console'),
     DD_ALERT_REFRESH=(bool, True),
     DD_DISABLE_ALERT_COUNTER=(bool, False),
-    DD_TAG_PREFETCHING=(bool, True)
+    DD_TAG_PREFETCHING=(bool, True),
+
+    # when enabled in sytem settings,  every minute a job run to delete excess duplicates
+    # we limit the amount of duplicates that can be deleted in a single run of that job
+    # to prevent overlapping runs of that job from occurrring
+    DD_DUPE_DELETE_MAX_PER_RUN=(int, 200)
 )
 
 
@@ -822,6 +828,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'HackerOne Cases': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
 }
 
+DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')
+
 DISABLE_FINDING_MERGE = env('DD_DISABLE_FINDING_MERGE')
 
 # ------------------------------------------------------------------------------
@@ -845,6 +853,11 @@ JIRA_SSL_VERIFY = env('DD_JIRA_SSL_VERIFY')
 # See http://docs.djangoproject.com/en/dev/topics/logging for
 # more details on how to customize your logging configuration.
 LOGGING_HANDLER = env('DD_LOGGING_HANDLER')
+
+LOG_LEVEL = env('DD_LOG_LEVEL')
+if not LOG_LEVEL:
+    LOG_LEVEL = 'DEBUG' if DEBUG else 'INFO'
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -891,24 +904,24 @@ LOGGING = {
         },
         'django.security': {
             'handlers': [r'%s' % LOGGING_HANDLER],
-            'level': 'INFO',
+            'level': '%s' % LOG_LEVEL,
             'propagate': False,
         },
         'celery': {
             'handlers': [r'%s' % LOGGING_HANDLER],
-            'level': 'INFO',
+            'level': '%s' % LOG_LEVEL,
             'propagate': False,
             # workaround some celery logging known issue
             'worker_hijack_root_logger': False,
         },
         'dojo': {
             'handlers': [r'%s' % LOGGING_HANDLER],
-            'level': 'INFO',
+            'level': '%s' % LOG_LEVEL,
             'propagate': False,
         },
         'dojo.specific-loggers.deduplication': {
             'handlers': [r'%s' % LOGGING_HANDLER],
-            'level': 'INFO',
+            'level': '%s' % LOG_LEVEL,
             'propagate': False,
         },
         'MARKDOWN': {
