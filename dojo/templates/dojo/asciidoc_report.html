@@ -59,7 +59,7 @@
                                 <br><br>The engagement also included the following tests which may be reported here:<br>
                                 <br>
                                 {% for t in eng.test_set.all %}
-                                    * {{ t.test_type.name }}
+                                    * {{ t }}
                                     ({{ t.environment.name|default:"unknown" }}):
                                     {{ t.target_start|date:"SHORT_DATE_FORMAT" }}<br>
                                 {% endfor %}
@@ -96,7 +96,7 @@
                     {% if eng.test_set %}
                         <br><br>The engagement also included the following tests which may be reported here:<br><br>
                         {% for t in eng.test_set.all %}
-                            * {{ t.test_type.name }}
+                            * {{ t }}
                             ({{ t.environment.name|default:"unknown" }}): {{ t.target_start|date:"SHORT_DATE_FORMAT" }}
                             <br>
                         {% endfor %}
@@ -130,7 +130,7 @@
             {% if engagement.test_set %}
                 <br><br>The engagement also included the following tests which may be reported here:<br><br>
                 {% for t in engagement.test_set.all %}
-                    * {{ t.test_type.name }}
+                    * {{ t }}
                     ({{ t.environment.name|default:"unknown" }}): {{ t.target_start|date:"SHORT_DATE_FORMAT" }}<br>
                 {% endfor %}
             {% endif %}
@@ -145,7 +145,7 @@
         {% endif %}
         {% if test %}
             <br>
-            A {{ test.test_type.name }} was conducted in the {{ test.environment.name }} environment
+            A {{ test }} was conducted in the {{ test.environment.name }} environment
             {% if test.target_end %}
                 from {{ test.target_start|date:"SHORT_DATE_FORMAT" }} to {{ test.target_end|date:"SHORT_DATE_FORMAT" }}
             {% else %}
@@ -170,7 +170,7 @@
                 The engagement also included the following tests which are not reported here:<br><br>
                 {% for t in test.engagement.test_set.all %}
                     {% if test.id != t.id %}
-                        * {{ t.test_type.name }}
+                        * {{ t }}
                         ({{ t.environment.name|default:"unknown" }}): {{ t.target_start|date:"SHORT_DATE_FORMAT" }}<br>
                     {% endif %}
                 {% endfor %}
@@ -236,7 +236,7 @@
             {% if find.tags %}
                 <sup>
                     [
-                    {% for tag in find.tags %}
+                    {% for tag in find.tags.all %}
                     {{ tag }}
                     {% endfor %}
                     ]

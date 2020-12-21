@@ -23,4 +23,4 @@ class TestMicrofocusWebinspectXMLParser(TestCase):
     def test_parse_file_with_multiple_vuln_has_multiple_finding(self):
         testfile = open("dojo/unittests/scans/microfocus_webinspect/Webinspect_many_vuln.xml")
         parser = MicrofocusWebinspectXMLParser(testfile, Test())
-        self.assertEqual(4, len(parser.items))
+        self.assertEqual(8, len(parser.items))

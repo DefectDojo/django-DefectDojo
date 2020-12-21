@@ -18,7 +18,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 from .dojo_test_case import DojoAPITestCase
 import logging
-
+# from unittest import skip
 
 logger = logging.getLogger(__name__)
 
@@ -80,6 +80,9 @@ class BaseClass():
         def test_create(self):
             length = self.endpoint_model.objects.count()
             response = self.client.post(self.url, self.payload)
+            logger.debug('test_create_response:')
+            logger.debug(response)
+            logger.debug(response.data)
             self.assertEqual(201, response.status_code, response.data)
             self.assertEqual(self.endpoint_model.objects.count(), length + 1)
 
@@ -519,7 +522,7 @@ class ProductTest(BaseClass.RESTEndpointTest):
             "prod_type": 1,
             "name": "Test Product",
             "description": "test product",
-            "tags": ["mytag", "yourtag"]
+            "tags": ["mytag, yourtag"]
         }
         self.update_fields = {'prod_type': 2}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
@@ -782,7 +785,7 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
             "file": open('tests/zap_sample.xml'),
             "engagement": 1,
             "lead": 2,
-            "tags": ["'ci/cd, api"],
+            "tags": ["ci/cd", "api"],
             "version": "1.0.0",
         }
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
