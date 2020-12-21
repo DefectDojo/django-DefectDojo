@@ -11,6 +11,15 @@ do
 done
 echo
 
+# Allow for bind-mount setting.py overrides
+FILE=/app/docker/extra_settings/local_settings.py
+if test -f "$FILE"; then
+    echo "============================================================"
+    echo "     Overriding DefectDojo's local_settings.py with $FILE."
+    echo "============================================================"
+    cp "$FILE" /app/dojo/settings/local_settings.py
+fi
+
 if [ "${DD_CELERY_WORKER_POOL_TYPE}" = "prefork" ]; then
   EXTRA_PARAMS="--autoscale=${DD_CELERY_WORKER_AUTOSCALE_MAX},${DD_CELERY_WORKER_AUTOSCALE_MIN}
     --prefetch-multiplier=${DD_CELERY_WORKER_PREFETCH_MULTIPLIER}"

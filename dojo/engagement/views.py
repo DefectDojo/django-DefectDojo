@@ -130,9 +130,9 @@ def engagements_all(request):
 
 def prefetch_for_products_with_engagments(products_with_engagements):
     if isinstance(products_with_engagements, QuerySet):  # old code can arrive here with prods being a list because the query was already executed
-        return products_with_engagements.prefetch_related('tagged_items__tag',
-            'engagement_set__tagged_items__tag',
-            'engagement_set__test_set__tagged_items__tag',
+        return products_with_engagements.prefetch_related('tags',
+            'engagement_set__tags',
+            'engagement_set__test_set__tags',
             'engagement_set__jira_project__jira_instance',
             'jira_project_set__jira_instance')
 
@@ -162,10 +162,11 @@ def edit_engagement(request, eid):
             else:
                 engagement.active = True
             engagement.save()
+            form.save_m2m()
 
-            tags = request.POST.getlist('tags')
-            t = ", ".join('"{0}"'.format(w) for w in tags)
-            engagement.tags = t
+            # tags = request.POST.getlist('tags')
+            # t = ", ".join('"{0}"'.format(w) for w in tags)
+            # engagement.tags = t
 
             messages.add_message(
                 request,
@@ -199,7 +200,7 @@ def edit_engagement(request, eid):
         logger.debug('showing jira-epic-form')
         jira_epic_form = JIRAEngagementForm(instance=engagement)
 
-    form.initial['tags'] = [tag.name for tag in engagement.tags]
+    # form.initial['tags'] = [tag.name for tag in engagement.tags.all()]
 
     title = ' CI/CD' if is_ci_cd else ''
     product_tab = Product_Tab(engagement.product.id, title="Edit" + title + " Engagement", tab="engagements")
@@ -225,7 +226,6 @@ def delete_engagement(request, eid):
         if 'id' in request.POST and str(engagement.id) == request.POST['id']:
             form = DeleteEngagementForm(request.POST, instance=engagement)
             if form.is_valid():
-                del engagement.tags
                 engagement.delete()
                 messages.add_message(
                     request,
@@ -263,7 +263,7 @@ def view_engagement(request, eid):
     eng = get_object_or_404(Engagement, id=eid)
     tests = (
         Test.objects.filter(engagement=eng)
-        .prefetch_related('tagged_items__tag', 'test_type')
+        .prefetch_related('tags', 'test_type')
         .annotate(count_findings_test_all=Count('finding__id'))
         .annotate(count_findings_test_active_verified=Count('finding__id', filter=Q(finding__active=True)))
         .annotate(count_findings_test_mitigated=Count('finding__id', filter=Q(finding__is_Mitigated=True)))
@@ -430,9 +430,6 @@ def add_tests(request, eid):
                 eng.save()
 
             new_test.save()
-            tags = request.POST.getlist('tags')
-            t = ", ".join('"{0}"'.format(w) for w in tags)
-            new_test.tags = t
 
             # Save the credential to the test
             if cred_form.is_valid():
@@ -546,6 +543,7 @@ def import_scan_results(request, eid=None, pid=None):
             active = form.cleaned_data['active']
             verified = form.cleaned_data['verified']
             scan_type = request.POST['scan_type']
+            tags = form.cleaned_data['tags']
             if not any(scan_type in code
                        for code in ImportScanForm.SCAN_TYPE_CHOICES):
                 raise Http404()
@@ -557,22 +555,22 @@ def import_scan_results(request, eid=None, pid=None):
                 return HttpResponseRedirect(reverse('import_scan_results', args=(engagement,)))
 
             tt, t_created = Test_Type.objects.get_or_create(name=scan_type)
-            # will save in development environment
-            environment, env_created = Development_Environment.objects.get_or_create(
-                name="Development")
+
+            # Will save in the provided environment or in the `Development` one if absent
+            environment_id = request.POST.get('environment', 'Development')
+            environment = Development_Environment.objects.get(id=environment_id)
+
             t = Test(
                 engagement=engagement,
                 test_type=tt,
                 target_start=scan_date,
                 target_end=scan_date,
                 environment=environment,
-                percent_complete=100)
+                percent_complete=100,
+                tags=tags)
             t.lead = user
             t.full_clean()
             t.save()
-            tags = request.POST.getlist('tags')
-            ts = ", ".join(tags)
-            t.tags = ts
 
             # Save the credential to the test
             if cred_form.is_valid():
@@ -699,7 +697,6 @@ def import_scan_results(request, eid=None, pid=None):
                     extra_tags='alert-success')
 
                 create_notification(
-                    initiator=user,
                     event='scan_added',
                     title=str(finding_count) + " findings for " + engagement.product.name,
                     finding_count=finding_count,

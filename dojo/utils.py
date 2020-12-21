@@ -335,7 +335,9 @@ def set_duplicate(new_finding, existing_finding):
         new_finding.original_finding.remove(find)
         set_duplicate(find, existing_finding)
     existing_finding.found_by.add(new_finding.test.test_type)
+    logger.debug('saving new finding')
     super(Finding, new_finding).save()
+    logger.debug('saving existing finding')
     super(Finding, existing_finding).save()
 
 
@@ -1306,7 +1308,6 @@ def process_notifications(request, note, parent_url, parent_title):
         event='user_mentioned',
         section=parent_title,
         note=note,
-        initiator=request.user,
         title='%s jotted a note' % request.user,
         url=parent_url,
         icon='commenting',

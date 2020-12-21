@@ -12,6 +12,7 @@ env = environ.Env(
     DD_SITE_URL=(str, 'http://localhost:8080'),
     DD_DEBUG=(bool, False),
     DD_TEMPLATE_DEBUG=(bool, False),
+    DD_LOG_LEVEL=(str, ''),
     DD_DJANGO_METRICS_ENABLED=(bool, False),
     DD_LOGIN_REDIRECT_URL=(str, '/'),
     DD_DJANGO_ADMIN_ENABLED=(bool, False),
@@ -60,7 +61,7 @@ env = environ.Env(
     DD_CELERY_RESULT_EXPIRES=(int, 86400),
     DD_CELERY_BEAT_SCHEDULE_FILENAME=(str, root('dojo.celery.beat.db')),
     DD_CELERY_TASK_SERIALIZER=(str, 'pickle'),
-    DD_CELERY_PASS_MODEL_BY_ID=(str, False),
+    DD_CELERY_PASS_MODEL_BY_ID=(str, True),
     DD_FOOTER_VERSION=(str, ''),
     # models should be passed to celery by ID, default is False (for now)
     DD_FORCE_LOWERCASE_TAGS=(bool, True),
@@ -76,6 +77,7 @@ env = environ.Env(
     DD_SECRET_KEY=(str, ''),
     DD_CREDENTIAL_AES_256_KEY=(str, '.'),
     DD_DATA_UPLOAD_MAX_MEMORY_SIZE=(int, 8388608),  # Max post size set to 8mb
+    DD_SOCIAL_AUTH_SHOW_LOGIN_FORM=(bool, True),  # do we show user/pass input
     DD_SOCIAL_AUTH_TRAILING_SLASH=(bool, True),
     DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_AUTH0_KEY=(str, ''),
@@ -151,7 +153,12 @@ env = environ.Env(
     DD_LOGGING_HANDLER=(str, 'console'),
     DD_ALERT_REFRESH=(bool, True),
     DD_DISABLE_ALERT_COUNTER=(bool, False),
-    DD_TAG_PREFETCHING=(bool, True)
+    DD_TAG_PREFETCHING=(bool, True),
+
+    # when enabled in sytem settings,  every minute a job run to delete excess duplicates
+    # we limit the amount of duplicates that can be deleted in a single run of that job
+    # to prevent overlapping runs of that job from occurrring
+    DD_DUPE_DELETE_MAX_PER_RUN=(int, 200)
 )
 
 
@@ -355,6 +362,8 @@ SOCIAL_AUTH_PIPELINE = (
 )
 
 CLASSIC_AUTH_ENABLED = True
+# Showing login form (form is not needed for external auth: OKTA, Google Auth, etc.)
+SHOW_LOGIN_FORM = env('DD_SOCIAL_AUTH_SHOW_LOGIN_FORM')
 
 SOCIAL_AUTH_STRATEGY = 'social_django.strategy.DjangoStrategy'
 SOCIAL_AUTH_STORAGE = 'social_django.models.DjangoStorage'
@@ -602,7 +611,7 @@ INSTALLED_APPS = (
     'dojo',
     'tastypie_swagger',
     'watson',
-    'tagging',
+    'tagging',  # not used, but still needed for migration 0065_django_tagulous.py (v1.10.0)
     'custom_field',
     'imagekit',
     'multiselectfield',
@@ -610,11 +619,10 @@ INSTALLED_APPS = (
     'rest_framework.authtoken',
     'rest_framework_swagger',
     'dbbackup',
-    # 'taggit_serializer',
-    # 'axes'
     'django_celery_results',
     'social_django',
     'drf_yasg2',
+    'tagulous',
 )
 
 # ------------------------------------------------------------------------------
@@ -676,6 +684,8 @@ CELERY_BEAT_SCHEDULE_FILENAME = env('DD_CELERY_BEAT_SCHEDULE_FILENAME')
 CELERY_ACCEPT_CONTENT = ['pickle', 'json', 'msgpack', 'yaml']
 CELERY_TASK_SERIALIZER = env('DD_CELERY_TASK_SERIALIZER')
 CELERY_PASS_MODEL_BY_ID = env('DD_CELERY_PASS_MODEL_BY_ID')
+
+CELERY_IMPORTS = ('dojo.tools.tool_issue_updater', )
 
 # Celery beat scheduled tasks
 CELERY_BEAT_SCHEDULE = {
@@ -813,6 +823,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'HackerOne Cases': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
 }
 
+DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')
+
 DISABLE_FINDING_MERGE = env('DD_DISABLE_FINDING_MERGE')
 
 # ------------------------------------------------------------------------------
@@ -836,6 +848,11 @@ JIRA_SSL_VERIFY = env('DD_JIRA_SSL_VERIFY')
 # See http://docs.djangoproject.com/en/dev/topics/logging for
 # more details on how to customize your logging configuration.
 LOGGING_HANDLER = env('DD_LOGGING_HANDLER')
+
+LOG_LEVEL = env('DD_LOG_LEVEL')
+if not LOG_LEVEL:
+    LOG_LEVEL = 'DEBUG' if DEBUG else 'INFO'
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -882,24 +899,24 @@ LOGGING = {
         },
         'django.security': {
             'handlers': [r'%s' % LOGGING_HANDLER],
-            'level': 'INFO',
+            'level': '%s' % LOG_LEVEL,
             'propagate': False,
         },
         'celery': {
             'handlers': [r'%s' % LOGGING_HANDLER],
-            'level': 'INFO',
+            'level': '%s' % LOG_LEVEL,
             'propagate': False,
             # workaround some celery logging known issue
             'worker_hijack_root_logger': False,
         },
         'dojo': {
             'handlers': [r'%s' % LOGGING_HANDLER],
-            'level': 'INFO',
+            'level': '%s' % LOG_LEVEL,
             'propagate': False,
         },
         'dojo.specific-loggers.deduplication': {
             'handlers': [r'%s' % LOGGING_HANDLER],
-            'level': 'INFO',
+            'level': '%s' % LOG_LEVEL,
             'propagate': False,
         },
         'MARKDOWN': {
@@ -926,3 +943,22 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
 
 # Maximum size of a scan file in MB
 SCAN_FILE_MAX_SIZE = 100
+
+SERIALIZATION_MODULES = {
+    'xml': 'tagulous.serializers.xml_serializer',
+    'json': 'tagulous.serializers.json',
+    'python': 'tagulous.serializers.python',
+    'yaml': 'tagulous.serializers.pyyaml',
+}
+
+# There seems to be no way just use the default and just leave out jquery, so we have to copy...
+# ... and keep it up-to-date.
+TAGULOUS_AUTOCOMPLETE_JS = (
+    # 'tagulous/lib/jquery.js',
+    'tagulous/lib/select2-4/js/select2.full.min.js',
+    'tagulous/tagulous.js',
+    'tagulous/adaptor/select2-4.js',
+)
+
+# using 'element' for width should take width from css defined in template, but it doesn't. So set to 70% here.
+TAGULOUS_AUTOCOMPLETE_SETTINGS = {'placeholder': "Enter some tags (comma separated, use enter to select / create a new tag)", 'width': '70%'}
