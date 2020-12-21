@@ -1,10 +1,9 @@
 name: Integration tests
-# pull requests: 
-#      run on pull_request_target instead of just pull_request as we need write access to update the status check
-# dev, master:
+# pull requests:
+# push:
 #      run on every push, which is when something gets merged also
-on: 
-  pull_request_target:
+on:
+  pull_request:
   push:
     branches:
       - master
@@ -16,13 +15,6 @@ jobs:
   integration_tests:
     runs-on: ubuntu-latest
     steps:
-      # disabled login as it leaves plain text credentials behind
-
-      # - name: Login to DockerHub
-      #   uses: docker/login-action@v1
-      #   with:
-      #     username: ${{ secrets.DOCKERHUB_USERNAME }}
-      #     password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Checkout
         if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'
@@ -45,7 +37,7 @@ jobs:
 
       - name: Set integration-test mode
         run: ln -s docker-compose.override.integration_tests.yml docker-compose.override.yml
-      
+
       # Pull the latest image to build, and avoid caching pull-only images.
       # (docker pull is faster than caching in most cases.)
       - run: docker-compose pull
@@ -61,7 +53,7 @@ jobs:
 
       # phased startup so we can use the exit code from integrationtest container
       - name: Stary MySQL
-        run: docker-compose up -d 
+        run: docker-compose up -d
 
       - name: Initialize
         run: docker-compose up --exit-code-from initializer initializer
