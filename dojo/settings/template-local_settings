@@ -16,12 +16,16 @@ MIDDLEWARE = [
     'debug_toolbar.middleware.DebugToolbarMiddleware',
 ] + MIDDLEWARE
 
+# adding DEBUG logging for all of Django.
 LOGGING['loggers']['root'] = {
             'handlers': ['console'],
             'level': 'DEBUG',
         }
-LOGGING['loggers']['dojo']['level'] = 'DEBUG'
-LOGGING['loggers']['dojo.specific-loggers.deduplication']['level'] = 'DEBUG'
+# setting log level WARN for defect dojo
+# LOGGING['loggers']['dojo']['level'] = 'WARN'
+
+# output DEBUG logging for deduplication
+# LOGGING['loggers']['dojo.specific-loggers.deduplication']['level'] = 'DEBUG'
 
 
 def show_toolbar(request):

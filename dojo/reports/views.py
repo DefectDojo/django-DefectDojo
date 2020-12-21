@@ -757,8 +757,7 @@ def generate_report(request, obj):
                    'user_id': request.user.id}
     elif type(obj).__name__ == "QuerySet":
         findings = ReportAuthedFindingFilter(request.GET,
-                                             queryset=prefetch_related_findings_for_report(obj).distinct(),
-                                             user=request.user)
+                                             queryset=prefetch_related_findings_for_report(obj).distinct())
         filename = "finding_report.pdf"
         report_name = 'Finding'
         report_type = 'Finding'
@@ -897,9 +896,9 @@ def prefetch_related_findings_for_report(findings):
                                      'risk_acceptance_set__accepted_findings',
                                      'burprawrequestresponse_set',
                                      'endpoints',
+                                     'tags',
                                      'notes',
                                      'images',
-                                     'tagged_items',
                                      'reporter',
                                      'mitigated_by'
                                      )
@@ -908,5 +907,5 @@ def prefetch_related_findings_for_report(findings):
 def prefetch_related_endpoints_for_report(endpoints):
     return endpoints.prefetch_related(
                                       'product',
-                                      'tagged_items',
+                                      'tags'
                                      )

@@ -160,22 +160,39 @@ class ReportBuilderTest(BaseTestCase):
 
         driver.find_element_by_name('_generate').click()
 
+    def test_product_list_report(self):
+        driver = self.driver
+        self.goto_product_overview(driver)
+        driver.find_element_by_id("dropdownMenu1").click()
+        driver.find_element_by_link_text("Findings Report").click()
+
+        my_select = Select(driver.find_element_by_id("id_include_finding_notes"))
+        my_select.select_by_index(1)
+
+        my_select = Select(driver.find_element_by_id("id_include_executive_summary"))
+        my_select.select_by_index(1)
+
+        my_select = Select(driver.find_element_by_id("id_include_table_of_contents"))
+        my_select.select_by_index(1)
+
+        driver.find_element_by_name('_generate').click()
+
 
 def add_report_tests_to_suite(suite):
     # Add each test the the suite to be run
     # success and failure is output by the test
     suite.addTest(ProductTest('test_create_product'))
-    # suite.addTest(ProductTest('test_add_product_finding'))
-    # suite.addTest(ProductTest('test_add_product_endpoints'))
+    suite.addTest(ProductTest('test_add_product_finding'))
+    suite.addTest(ProductTest('test_add_product_endpoints'))
 
-    # suite.addTest(ReportBuilderTest('generate_HTML_report'))
-    # suite.addTest(ReportBuilderTest('generate_AsciiDoc_report'))
+    suite.addTest(ReportBuilderTest('generate_HTML_report'))
+    suite.addTest(ReportBuilderTest('generate_AsciiDoc_report'))
 
     # we add reports here as we now have a product that triggers some logic inside reports
-    # suite.addTest(ReportBuilderTest('test_product_type_report'))
-    # suite.addTest(ReportBuilderTest('test_product_report'))
-    # suite.addTest(ReportBuilderTest('test_engagement_report'))
-    # suite.addTest(ReportBuilderTest('test_test_report'))
+    suite.addTest(ReportBuilderTest('test_product_type_report'))
+    suite.addTest(ReportBuilderTest('test_product_report'))
+    suite.addTest(ReportBuilderTest('test_engagement_report'))
+    suite.addTest(ReportBuilderTest('test_test_report'))
     suite.addTest(ReportBuilderTest('test_product_endpoint_report'))
 
     suite.addTest(ProductTest('test_delete_product'))

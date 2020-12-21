@@ -72,6 +72,8 @@ spec:
       - name: uwsgi
         image: '{{ template "django.uwsgi.repository" . }}:{{ .Values.tag }}'
         imagePullPolicy: {{ .Values.imagePullPolicy }}
+        securityContext:
+          {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 10 }}
         volumeMounts:
         - name: run
           mountPath: /run/defectdojo
@@ -79,6 +81,11 @@ spec:
         - name: http
           protocol: TCP
           containerPort: 8081
+        {{- if .Values.django.uwsgi.enable_ptvsd }}
+        - name: ptvsd
+          protocol: TCP
+          containerPort: 3000
+        {{- end }}
         envFrom:
         - configMapRef:
             name: {{ $fullName }}
@@ -134,6 +141,8 @@ spec:
       - name: nginx
         image: '{{ template "django.nginx.repository" . }}:{{ .Values.tag }}'
         imagePullPolicy: {{ .Values.imagePullPolicy }}
+        securityContext:
+          {{- toYaml .Values.securityContext.nginxSecurityContext | nindent 10 }}
         volumeMounts:
         - name: run
           mountPath: /run/defectdojo

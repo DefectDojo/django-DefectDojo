@@ -106,14 +106,13 @@ else
     echo "Error: Report Builder integration test failed."; exit 1
 fi
 
-# everything in the smoke test is already covered by the other tests
-# echo "Running Smoke integration test"
-# if python3 tests/smoke_test.py ; then
-#     echo "Success: Smoke integration tests passed"
-# else
-#     docker-compose logs uwsgi --tail=120
-#     echo "Error: Smoke integration test failed"; exit 1
-# fi
+echo "Running Search integration test"
+if python3 tests/search_test.py ; then
+    echo "Success: Search integration tests passed"
+else
+    docker-compose logs uwsgi --tail=120
+    echo "Error: Search integration test failed"; exit 1
+fi
 
 echo "Running Check Status test"
 if python3 tests/check_status.py ; then
