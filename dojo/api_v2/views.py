@@ -10,7 +10,6 @@ from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser
 from rest_framework.exceptions import ParseError
 from django_filters.rest_framework import DjangoFilterBackend
-from django.utils.decorators import method_decorator
 from drf_yasg2 import openapi
 from drf_yasg2.utils import swagger_auto_schema, no_body
 import base64
@@ -250,7 +249,7 @@ def _finding_related_fields_decorator():
                 description="Expand finding external relations (engagement, environment, product, product_type, test, test_type)",
                 type=openapi.TYPE_BOOLEAN)
         ])
-        
+
 
 class FindingViewSet(prefetch.PrefetchListMixin,
                      prefetch.PrefetchRetrieveMixin,
