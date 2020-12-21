@@ -136,9 +136,9 @@ else
     fail $test
 fi
 
-test="Smoke integration test"
+test="Search integration test"
 echo "Running: $test"
-if python3 tests/smoke_test.py ; then
+if python3 tests/search_test.py ; then
     success $test
 else
     fail $test

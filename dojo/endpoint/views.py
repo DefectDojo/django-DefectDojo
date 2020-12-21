@@ -13,7 +13,7 @@ from django.utils.html import escape
 from django.utils import timezone
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
-from django.db.models import Q
+from django.db.models import Q, QuerySet, Count
 from dojo.filters import EndpointFilter
 from dojo.forms import EditEndpointForm, \
     DeleteEndpointForm, AddEndpointForm, DojoMetaDataForm
@@ -442,3 +442,13 @@ def endpoint_status_bulk_update(request, fid):
                                     'Unable to process bulk update. Required fields were not selected.',
                                     extra_tags='alert-danger')
     return HttpResponseRedirect(post['return_url'])
+
+
+def prefetch_for_endpoints(endpoints):
+    if isinstance(endpoints, QuerySet):
+        endpoints = endpoints.prefetch_related('product', 'tags', 'product__tags')
+        endpoints = endpoints.annotate(active_finding_count=Count('finding__id', filter=Q(finding__active=True)))
+    else:
+        logger.debug('unable to prefetch because query was already executed')
+
+    return endpoints
