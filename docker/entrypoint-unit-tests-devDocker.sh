@@ -10,12 +10,15 @@ cd /app
 # Unset the database URL so that we can force the DD_TEST_DATABASE_NAME (see django "DATABASES" configuration in settings.dist.py)
 unset DD_DATABASE_URL
 
-python3 manage.py makemigrations dojo
-python3 manage.py migrate
+echo "VALENTIJN WAS HERE"
+exit 1
 
-python3 manage.py test dojo.unittests --keepdb -v 3 
+# python3 manage.py makemigrations dojo
+# python3 manage.py migrate
 
-# you can select a single file to "test" unit tests 
+# python3 manage.py test dojo.unittests --keepdb -v 3
+
+# you can select a single file to "test" unit tests
 # python3 manage.py test dojo.unittests.test_npm_audit_scan_parser.TestNpmAuditParser --keepdb -v 3
 
 # or even a single method
