@@ -379,7 +379,10 @@
                                 <td>{{ risk_acceptance.expiration_date|default_if_none:"Never" }}</td>
                                 <td>{{ risk_acceptance.accepted_findings.count }}</td>
                                 {% if risk_acceptance.filename %}
-                                    <td><a href="{% url 'download_risk_acceptance' eng.id risk_acceptance.id %}">{{ risk_acceptance.filename }}</a></td>
+                                <td><a href="{% url 'download_risk_acceptance' eng.id risk_acceptance.id %}">Yes</a>
+                                    &nbsp;<i style="position:absolute;" class="fa has-popover fa-info-circle" title="Uploaded proof" data-trigger="hover" data-placement="bottom" data-container="body" data-html="true"
+                                    data-content="{{ risk_acceptance.filename }}"></i>
+                                </td>
                                 {% else %}
                                     <td>No</a></td>
                                 {% endif %}

@@ -2463,7 +2463,7 @@ class Risk_Acceptance(models.Model):
 
     accepted_by = models.CharField(max_length=200, default=None, null=True, blank=True, verbose_name='Accepted By', help_text="The entity or person that accepts the risk, can be outside of defect dojo.")
     path = models.FileField(upload_to='risk/%Y/%m/%d',
-                            editable=False, null=True,
+                            editable=True, null=True,
                             blank=True, verbose_name="Proof")
     owner = models.ForeignKey(Dojo_User, editable=True, on_delete=models.CASCADE, help_text="User in defect dojo owning this acceptance. Only the owner and staff users can edit the risk acceptance.")
 
@@ -2481,8 +2481,10 @@ class Risk_Acceptance(models.Model):
         return str(self.name)
 
     def filename(self):
-        return os.path.basename(self.path.name) \
-            if self.path is not None else ''
+        # logger.debug('path: "%s"', self.path)
+        if not self.path:
+            return None
+        return os.path.basename(self.path.name)
 
     def get_breadcrumbs(self):
         bc = self.engagement_set.first().get_breadcrumbs()

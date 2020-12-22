@@ -566,7 +566,7 @@ class RiskAcceptanceForm(forms.ModelForm):
         help_text=('Active, verified findings listed, please select to add findings.'))
     # accepted_by = forms.CharField(help_text="The entity or person that accepts the risk.", required=False)
     expiration_date = forms.DateTimeField(required=False, widget=forms.TextInput(attrs={'class': 'datepicker'}))
-    # expiration_date = forms.DateTimeField(label='Date Risk Exception Expires', required=False, widget=forms.TextInput(attrs={'class': 'datepicker'}))
+    # expiration_date = forms.DateTimeField(label='Date Risk Acceptance Expires', required=False, widget=forms.TextInput(attrs={'class': 'datepicker'}))
     # compensating_control = forms.CharField(label='Compensating Control', help_text="Compensating control (if applicable) for this risk acceptance", required=False, max_length=2400, widget=forms.Textarea)
     notes = forms.CharField(required=False, max_length=2400,
                             widget=forms.Textarea,
@@ -577,16 +577,18 @@ class RiskAcceptanceForm(forms.ModelForm):
         fields = '__all__'
         # fields = ['name', 'accepted_findings', 'owner']
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-class ReplaceRiskAcceptanceForm(forms.ModelForm):
-    path = forms.FileField(label="Select File",
-                           required=True,
-                           widget=forms.widgets.FileInput(
-                               attrs={"accept": ".jpg,.png,.pdf"}))
+        self.fields['path'].help_text = 'Existing proof uploaded: %s' % self.instance.filename() if self.instance.filename() else 'None'
+
+
+class ReplaceRiskAcceptanceProofForm(forms.ModelForm):
+    path = forms.FileField(label="Proof", required=True, widget=forms.widgets.FileInput(attrs={"accept": ".jpg,.png,.pdf"}))
 
     class Meta:
         model = Risk_Acceptance
-        exclude = ('name', 'owner', 'accepted_findings', 'notes')
+        fields = ['path']
 
 
 class AddFindingsRiskAcceptanceForm(forms.ModelForm):
