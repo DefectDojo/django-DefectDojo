@@ -486,8 +486,8 @@ class ReImportScanForm(forms.Form):
     def clean(self):
         cleaned_data = super().clean()
         scan_type = cleaned_data.get("scan_type")
-        file = cleaned_data.get("file")
-        if requires_file(scan_type) and not file:
+        
+        if requires_file(scan_type) and 'file' not in self.cleaned_data:
             raise forms.ValidationError('Uploading a Report File is required for {}'.format(scan_type))
         return cleaned_data
 

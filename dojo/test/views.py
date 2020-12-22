@@ -810,10 +810,10 @@ def re_import_scan_results(request, tid):
                                                                          path=endpoint.path,
                                                                          query=endpoint.query,
                                                                          fragment=endpoint.fragment,
-                                                                         product=test.engagement.product)
+                                                                         product=test.engagement.product).first()
                             eps, created = Endpoint_Status.objects.get_or_create(
                                 finding=finding,
-                                endpoint=ep)
+                                endpoint=ep).first()
                             ep.endpoint_status.add(eps)
 
                             finding.endpoints.add(ep)
