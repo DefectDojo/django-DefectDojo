@@ -685,7 +685,7 @@ def edit_finding(request, fid):
             new_finding.test = finding.test
             new_finding.numerical_severity = Finding.get_numerical_severity(
                 new_finding.severity)
-            if new_finding.false_p or (finding.active is True and new_finding.active is False):
+            if new_finding.false_p or new_finding.out_of_scope or (finding.active is True and new_finding.active is False):
                 new_finding.mitigated = timezone.now()
                 new_finding.mitigated_by = request.user
                 new_finding.is_Mitigated = True
