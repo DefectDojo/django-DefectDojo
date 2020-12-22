@@ -10,6 +10,8 @@ from django.contrib.postgres.aggregates import StringAgg
 
 def components(request):
     add_breadcrumb(title='Components', top_level=True, request=request)
+
+    # Get components ordered by component_name and concat component versions to the same row
     if connection.vendor == 'postgresql':
         component_query = Finding.objects.values("component_name").order_by('component_name').annotate(
             component_version=StringAgg('component_version', delimiter=' | ', distinct=True))
@@ -26,6 +28,7 @@ def components(request):
     comp_filter = ComponentFilter(request.GET, queryset=component_query)
     result = get_page_items(request, comp_filter.qs, 25)
 
+    # Filter out None values for auto-complete
     component_words = component_query.exclude(component_name__isnull=True).values_list('component_name', flat=True)
 
     return render(request, 'dojo/components.html', {
