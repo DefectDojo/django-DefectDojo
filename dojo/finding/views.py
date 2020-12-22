@@ -642,7 +642,6 @@ def edit_finding(request, fid):
     # form.initial['tags'] = [tag.name for tag in finding.tags.all()]
     form_error = False
     jform = None
-    jira_link_exists = False
     push_all_jira_issues = jira_helper.is_push_all_issues(finding)
     gform = None
     use_jira = jira_helper.get_jira_project(finding) is not None
