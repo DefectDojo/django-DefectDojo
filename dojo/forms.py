@@ -556,26 +556,26 @@ class MergeFindings(forms.ModelForm):
         fields = ['append_description', 'add_endpoints', 'append_reference']
 
 
-class UploadRiskForm(forms.ModelForm):
+class RiskAcceptanceForm(forms.ModelForm):
     # name = forms.CharField()
-    path = forms.FileField(label="Select File",
-                           required=False,
-                           widget=forms.widgets.FileInput(
-                               attrs={"accept": ".jpg,.png,.pdf"}))
+    # need to specify label here as Django doesn't seem to pick up verbose_name for FileField
+    path = forms.FileField(label="Proof", required=False, widget=forms.widgets.FileInput(attrs={"accept": ".jpg,.png,.pdf"}))
     accepted_findings = forms.ModelMultipleChoiceField(
         queryset=Finding.objects.all(), required=True,
         widget=forms.widgets.SelectMultiple(attrs={'size': 10}),
         help_text=('Active, verified findings listed, please select to add findings.'))
-    accepted_by = forms.CharField(help_text="The entity or person that accepts the risk.", required=False)
-    expiration_date = forms.DateTimeField(label='Date Risk Exception Expires', required=False, widget=forms.TextInput(attrs={'class': 'datepicker'}))
-    compensating_control = forms.CharField(label='Compensating Control', help_text="Compensating control (if applicable) for this risk acceptance", required=False, max_length=2400, widget=forms.Textarea)
+    # accepted_by = forms.CharField(help_text="The entity or person that accepts the risk.", required=False)
+    expiration_date = forms.DateTimeField(required=False, widget=forms.TextInput(attrs={'class': 'datepicker'}))
+    # expiration_date = forms.DateTimeField(label='Date Risk Exception Expires', required=False, widget=forms.TextInput(attrs={'class': 'datepicker'}))
+    # compensating_control = forms.CharField(label='Compensating Control', help_text="Compensating control (if applicable) for this risk acceptance", required=False, max_length=2400, widget=forms.Textarea)
     notes = forms.CharField(required=False, max_length=2400,
                             widget=forms.Textarea,
                             label='Notes')
 
     class Meta:
         model = Risk_Acceptance
-        fields = ['name', 'accepted_findings', 'owner']
+        fields = '__all__'
+        # fields = ['name', 'accepted_findings', 'owner']
 
 
 class ReplaceRiskAcceptanceForm(forms.ModelForm):
@@ -597,7 +597,8 @@ class AddFindingsRiskAcceptanceForm(forms.ModelForm):
 
     class Meta:
         model = Risk_Acceptance
-        exclude = ('name', 'owner', 'path', 'notes', 'accepted_by', 'expiration_date', 'compensating_control')
+        fields = ['accepted_findings']
+        # exclude = ('name', 'owner', 'path', 'notes', 'accepted_by', 'expiration_date', 'compensating_control')
 
 
 class ScanSettingsForm(forms.ModelForm):
@@ -1962,10 +1963,11 @@ class ProductNotificationsForm(forms.ModelForm):
             self.initial['test_added'] = ''
             self.initial['scan_added'] = ''
             self.initial['sla_breach'] = ''
+            self.initial['risk_acceptance_expiry'] = ''
 
     class Meta:
         model = Notifications
-        fields = ['engagement_added', 'test_added', 'scan_added', 'sla_breach']
+        fields = ['engagement_added', 'test_added', 'scan_added', 'sla_breach', 'risk_acceptance_expiry']
 
 
 class AjaxChoiceField(forms.ChoiceField):

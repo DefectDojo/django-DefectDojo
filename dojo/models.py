@@ -268,6 +268,11 @@ class System_Settings(models.Model):
     drive_folder_ID = models.CharField(max_length=100, blank=True)
     enable_google_sheets = models.BooleanField(default=False, null=True, blank=True)
     email_address = models.EmailField(max_length=100, blank=True)
+    risk_acceptance_form_mandatory = models.BooleanField(null=False, blank=False, default=False, help_text="Always require risk acceptance form to accept findings? Without a form, a risk acceptance is a simple checkbox")
+    risk_acceptance_form_default_days = models.IntegerField(null=False, blank=False, default=180, help_text="Default expiry period for risk acceptance form.")
+    risk_acceptance_reactivate_expired = models.BooleanField(null=False, blank=False, default=True, help_text="Reactive findings when risk acceptance expires?")
+    risk_acceptance_notify_expired = models.IntegerField(null=True, blank=True, default=10, help_text="Notify X days before risk acceptance expires. Leave empty to disable.")
+    risk_acceptance_delete_expired = models.IntegerField(null=True, blank=True, default=10, help_text="Delete expired risk acceptances after X days. Leave empty to disable.")
 
     from dojo.middleware import System_Settings_Manager
     objects = System_Settings_Manager()
@@ -1466,6 +1471,11 @@ class Finding(models.Model):
     date = models.DateField(default=get_current_date,
                             verbose_name="Date",
                             help_text="The date the flaw was discovered.")
+
+    sla_start_date = models.DateField(default=get_current_date,
+                            verbose_name="SLA Start Date",
+                            help_text="The date used as start date for SLA calculation.")
+
     cwe = models.IntegerField(default=0, null=True, blank=True,
                               verbose_name="CWE",
                               help_text="The CWE number associated with this flaw.")
@@ -2424,16 +2434,43 @@ class BurpRawRequestResponse(models.Model):
 
 
 class Risk_Acceptance(models.Model):
+    TREATMENT_ACCEPT = 'A'
+    TREATMENT_AVOID = 'V'
+    TREATMENT_COMPENSATE = 'C'
+    TREATMENT_REDUCE = 'R'
+    TREATMENT_TRANSFER = 'T'
+
+    TREATMENT_CHOICES = [
+        (TREATMENT_ACCEPT, 'Accept'),
+        (TREATMENT_AVOID, 'Avoid'),
+        (TREATMENT_COMPENSATE, 'Compensate'),
+        (TREATMENT_REDUCE, 'Reduce'),
+        (TREATMENT_TRANSFER, 'Transfer'),
+    ]
+
     name = models.CharField(max_length=100, null=False, blank=False, help_text="Descriptive name which in the future may also be used to group risk acceptances together across engagements and products")
-    path = models.FileField(upload_to='risk/%Y/%m/%d',
-                            editable=False, null=False,
-                            blank=False, verbose_name="Risk Acceptance File")
+
     accepted_findings = models.ManyToManyField(Finding)
-    accepted_by = models.CharField(max_length=200, default=None, null=True, blank=True, verbose_name='Accepted By', help_text="The entity or person that accepts the risk.")
-    expiration_date = models.DateTimeField(default=None, null=True, blank=True)
-    owner = models.ForeignKey(Dojo_User, editable=True, on_delete=models.CASCADE, help_text="Only the owner and staff users can edit the risk acceptance.")
+
+    recommendation = models.CharField(choices=TREATMENT_CHOICES, max_length=2, null=False, default=TREATMENT_REDUCE, help_text="Recommendation from the security team.")
+
+    recommendation_details = models.TextField(null=True,
+                                      blank=True,
+                                      help_text="Explanation of recommendation")
+
+    decision = models.CharField(choices=TREATMENT_CHOICES, max_length=2, null=False, default=TREATMENT_ACCEPT, help_text="Risk treatment decision by risk owner")
+    decision_details = models.TextField(default=None, blank=True, null=True, help_text="If a compensating control exists to mitigate the finding or reduce risk, then list the compensating control(s).")
+
+    accepted_by = models.CharField(max_length=200, default=None, null=True, blank=True, verbose_name='Accepted By', help_text="The entity or person that accepts the risk, can be outside of defect dojo.")
+    path = models.FileField(upload_to='risk/%Y/%m/%d',
+                            editable=False, null=True,
+                            blank=True, verbose_name="Proof")
+    owner = models.ForeignKey(Dojo_User, editable=True, on_delete=models.CASCADE, help_text="User in defect dojo owning this acceptance. Only the owner and staff users can edit the risk acceptance.")
+
+    expiration_date = models.DateTimeField(default=None, null=True, blank=True, help_text="When the risk acceptance expires, the findings will be reactivated")
+    restart_sla_on_expiration = models.BooleanField(default=False, null=False, help_text="When enabled, the SLA for findings is restarted when the risk acceptance expires")
+
     notes = models.ManyToManyField(Notes, editable=False)
-    compensating_control = models.TextField(default=None, blank=True, null=True, help_text="If a compensating control exists to mitigate the finding or reduce risk, then list the compensating control(s).")
     created = models.DateTimeField(null=False, editable=False, auto_now_add=True)
     updated = models.DateTimeField(editable=False, auto_now=True)
 
@@ -2450,7 +2487,7 @@ class Risk_Acceptance(models.Model):
     def get_breadcrumbs(self):
         bc = self.engagement_set.first().get_breadcrumbs()
         bc += [{'title': self.__unicode__(),
-                'url': reverse('view_risk', args=(
+                'url': reverse('view_risk_acceptance', args=(
                     self.engagement_set.first().product.id, self.id,))}]
         return bc
 
@@ -2788,7 +2825,10 @@ class Notifications(models.Model):
     product = models.ForeignKey(Product, default=None, null=True, editable=False, on_delete=models.CASCADE)
     sla_breach = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True,
         verbose_name="SLA breach",
-        help_text="Get notified of upcoming SLA breaches")
+        help_text="Get notified of (upcoming) SLA breaches")
+    risk_acceptance_expiry = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True,
+        verbose_name="Risk Acceptance Expiryh",
+        help_text="Get notified of (upcoming) Risk Acceptance expiries")
 
     class Meta:
         constraints = [
@@ -2834,6 +2874,7 @@ class Notifications(models.Model):
                 result.review_requested = merge_sets_safe(result.review_requested, notifications.review_requested)
                 result.other = merge_sets_safe(result.other, notifications.other)
                 result.sla_breach = merge_sets_safe(result.sla_breach, notifications.sla_breach)
+                result.risk_acceptance_expiry = merge_sets_safe(result.risk_acceptance_expiry, notifications.risk_acceptance_expiry)
 
         return result
 

@@ -63,7 +63,7 @@
                         <td>{{ finding.status }}</td>
                         {% if finding.risk_acceptance_set.all %}
                             <td>
-                                <a href="{% url 'view_risk' finding.test.engagement.id finding.risk_acceptance_set.all.0.id %}">
+                                <a href="{% url 'view_risk_acceptance' finding.test.engagement.id finding.risk_acceptance_set.all.0.id %}">
                                     View Risk Acceptance</a>
                             </td>
                         {% endif %}
@@ -89,7 +89,7 @@
         </div>
 
         {% include "dojo/snippets/endpoints.html" with finding=finding destination="Report" %}
-        
+
         {% if finding.cvssv3 %}
             <h6>CVSSv3</h6>
             <pre>{{ finding.cvssv3|markdown_render }}</pre>

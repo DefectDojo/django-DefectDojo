@@ -92,11 +92,11 @@
                 </div>
             </div>
         </div>
-    {% endif %}    
+    {% endif %}
 {% else %}
     {% with endpoints=finding|get_vulnerable_endpoints %}
         {% if endpoints %}
-            <div class="row to_highlight">
+            <div class="row">
                 <div class="col-md-12">
                     <div class="panel panel-default table-responsive">
                         <div class="panel-heading">
@@ -105,7 +105,7 @@
                                         class="glyphicon glyphicon-chevron-up"></i></a></span>
                             </h4>
                         </div>
-                       
+
                         <table id="vuln_endpoints" class="table-striped table table-hover">
                             <thead>
                                 {% if user|is_authorized_for_change:finding %}
@@ -157,7 +157,7 @@
 
     {% with endpoints=finding|get_mitigated_endpoints %}
         {% if endpoints %}
-            <div class="row to_highlight">
+            <div class="row">
                 <div class="col-md-12">
                     <div class="panel panel-default table-responsive">
                         <div class="panel-heading">

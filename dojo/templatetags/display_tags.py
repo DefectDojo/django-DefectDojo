@@ -764,7 +764,7 @@ def finding_display_status(finding):
     # outputs html, so make sure to escape user provided fields
     display_status = finding.status()
     if finding.risk_acceptance_set.all():
-        url = reverse('view_risk', args=(finding.test.engagement.id, finding.risk_acceptance_set.all()[0].id, ))
+        url = reverse('view_risk_acceptance', args=(finding.test.engagement.id, finding.risk_acceptance_set.all()[0].id, ))
         name = finding.risk_acceptance_set.all()[0].name
         link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-content="' + escape(name) + '" data-container="body" data-original-title="Risk Acceptance">Risk Accepted</a>'
         # print(link)
@@ -804,8 +804,9 @@ def is_authorized_for_delete(user, obj):
 
 @register.filter
 def is_authorized_for_staff(user, obj):
-    # print('filter: is_authorized_for_staff')
-    return user_is_authorized(user, 'staff', obj)
+    result = user_is_authorized(user, 'staff', obj)
+    # print('filter: is_authorized_for_staff: ' + str(result))
+    return result
 
 
 @register.filter

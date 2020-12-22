@@ -338,7 +338,7 @@
                 <h4> Risk Acceptance
                     {% if can_add_risk %}
                         <a title="Add Risk Acceptance..." class="pull-right btn btn-sm btn-primary"
-                           href="{% url 'upload_risk_acceptance$' eng.id %}"><span class="fa fa-plus"></span></a>
+                           href="{% url 'add_risk_acceptance$' eng.id %}"><span class="fa fa-plus"></span></a>
                         </a>
                     {% endif %}
                 </h4>
@@ -349,29 +349,43 @@
                            class="tablesorter-bootstrap table table-condensed table-striped">
                         <thead>
                         <tr>
-                            <th>Owner</th>
                             <th>Date</th>
+                            <th>Accepted By</th>
                             <th>Name</th>
-                            <th>Date Expires</th>
-                            <th>Accepted by</th>
-                            <th>Findings Accepted</th>
-                            <th>View File</th>
-                            <th>Actions</th>
+                            <th>Decision</th>
+                            <!-- <th>Decision Details</th> -->
+                            <th>Expiration</th>
+                            <th>Findings</th>
+                            <th>Proof</th>
+                            <th>Owner</th>
+                            <th>View</th>
                         </thead>
                         <tbody>
-                        {% for risk in risks_accepted %}
+                        {% for risk_acceptance in risks_accepted %}
                             <tr>
-                                <td>{{ risk.owner }}</td>
-                                <td>{{ risk.created }}</td>
-                                <td>{{ risk.name }}</td>
-                                <td>{{ risk.expiration_date|default_if_none:"" }}</td>
-                                <td>{{ risk.accepted_by|default_if_none:"" }}</td>
-                                <td>{{ risk.accepted_findings.count }}</td>
-                                <td><a href="{% url 'download_risk' eng.id risk.id %}">{{ risk.filename }}</a></td>
+                                <td><a href="{% url 'view_risk_acceptance' eng.id risk_acceptance.id %}">{{ risk_acceptance.created }}</a></td>
+                                <td>{{ risk_acceptance.accepted_by.get_full_name }}</td>
+                                <td><a href="{% url 'view_risk_acceptance' eng.id risk_acceptance.id %}">{{ risk_acceptance.name }}</a></td>
                                 <td>
-                                    <a class="btn btn-sm btn-primary" href="{% url 'view_risk' eng.id risk.id %}">
-                                        View
-                                        Acceptance</a>
+                                    {{ risk_acceptance.get_decision_display|default_if_none:"" }}
+
+                                    {% if risk_acceptance.decision_details %}
+                                    &nbsp;<i style="position:absolute;" class="fa has-popover fa-info-circle" title="Decision Details" data-trigger="hover" data-placement="bottom" data-container="body" data-html="true"
+                                    data-content="{{ risk_acceptance.decision_details }}"></i>
+                                    {% endif %}
+
+                                </td>
+                                <!-- <td>{{ risk_acceptance.decision_details|default_if_none:""| truncatechars_html:100 }}</td> -->
+                                <td>{{ risk_acceptance.expiration_date|default_if_none:"Never" }}</td>
+                                <td>{{ risk_acceptance.accepted_findings.count }}</td>
+                                {% if risk_acceptance.filename %}
+                                    <td><a href="{% url 'download_risk_acceptance' eng.id risk_acceptance.id %}">{{ risk_acceptance.filename }}</a></td>
+                                {% else %}
+                                    <td>No</a></td>
+                                {% endif %}
+                                <td>{{ risk_acceptance.owner.get_full_name }}</td>
+                                <td>
+                                    <a class="btn btn-sm btn-primary" href="{% url 'view_risk_acceptance' eng.id risk_acceptance.id %}">View</a>
                                 </td>
                             </tr>
                         {% endfor %}
@@ -728,7 +742,7 @@
             {% if jira_project.engagement is not eng %}
             <small>(inherited)</small>
             {% else %}
-            <small>(project)</small>              
+            <small>(project)</small>
             {% endif %}
             </a></td>
         </tr>
