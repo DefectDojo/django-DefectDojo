@@ -18,8 +18,11 @@ def update_finding_status(new_state_finding, request_user, old_state_finding=Non
         new_state_finding.mitigated = timezone.now()
         new_state_finding.mitigated_by = request_user
         new_state_finding.is_Mitigated = True
+        new_state_finding.active = False
+        new_state_finding.verified = False
     if new_state_finding.active is True:
         new_state_finding.false_p = False
+        new_state_finding.out_of_scope = False
         new_state_finding.mitigated = None
         new_state_finding.mitigated_by = None
         new_state_finding.is_Mitigated = False
