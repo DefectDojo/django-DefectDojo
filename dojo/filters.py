@@ -568,6 +568,11 @@ class OpenFindingFilter(DojoFilter):
                                 exclude=True,
                                 label='has JIRA')
 
+    has_component = BooleanFilter(field_name='component_name',
+                                lookup_expr='isnull',
+                                exclude=True,
+                                label='has Component')
+
     jira_issue__jira_key = CharFilter(field_name='jira_issue__jira_key', lookup_expr='icontains', label="JIRA issue")
 
     has_notes = BooleanFilter(field_name='notes',

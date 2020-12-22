@@ -9,7 +9,7 @@
             <div class="panel-heading tight">
                 <h3 class="has-filters">
                     Components
-                    <div class="dropdown pull-right">
+                    <div class="dropdown pull-right"></div>
                 </h3>
             </div>
         </div>
@@ -33,10 +33,9 @@
                 <tbody>
                     {% for result in result  %}
                     <tr>
-
                         <td>
                             {% if result.component_name == none %}
-                                {{ result.component_name }}
+                            <a href="{% url 'findings' %}?has_component=false"><b>{{ result.component_name }}</b></a>
                             {% else %}
                                 <a href="{% url 'findings' %}?component_name={{ result.component_name }}"><b>{{ result.component_name }}</b></a>
                             {% endif %}
@@ -44,25 +43,28 @@
 
                         <td>{{result.component_version}} </td>
                         <td>
-                            {% if result.active %}
-                            <a
-                                href="{% url 'open_findings' %}?component_name={{ result.component_name }}"><b>{{ result.active }}</b></a>
+                            {% if result.active and result.component_name == none %}
+                            <a href="{% url 'open_findings' %}?has_component=false"><b>{{ result.active }}</b></a>
+                            {% elif result.active%}
+                            <a href="{% url 'open_findings' %}?component_name={{ result.component_name }}"><b>{{ result.active }}</b></a>
                             {% else %}
                             0
                             {% endif %}
                         </td>
                         <td>
-                            {% if result.duplicate %}
-                            <a
-                                href="{% url 'findings' %}?component_name={{ result.component_name }}&duplicate=1"><b>{{ result.duplicate }}</b></a>
+                            {% if result.duplicate and result.component_name == none %}
+                            <a href="{% url 'findings' %}?has_component=false&duplicate=1"><b>{{ result.duplicate }}</b></a>
+                            {% elif result.duplicate %}
+                            <a href="{% url 'findings' %}?component_name={{ result.component_name }}&duplicate=1"><b>{{ result.duplicate }}</b></a>
                             {% else %}
                             0
                             {% endif %}
                         </td>
                         <td>
-                            {% if result.total %}
-                            <a
-                                href="{% url 'findings' %}?component_name={{ result.component_name }}"><b>{{ result.total }}</b></a>
+                            {% if result.total and result.component_name == none %}
+                            <a href="{% url 'findings' %}?has_component=false"><b>{{ result.total }}</b></a>
+                            {% elif result.total %}
+                            <a href="{% url 'findings' %}?component_name={{ result.component_name }}"><b>{{ result.total }}</b></a>
                             {% else %}
                             0
                             {% endif %}
