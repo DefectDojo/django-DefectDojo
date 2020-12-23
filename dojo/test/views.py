@@ -676,7 +676,7 @@ def re_import_scan_results(request, tid):
 
             try:
                 items = parser.items
-                original_items = test.finding_set.all().values_list("id", flat=True)
+                original_items = test.finding_set.all()
                 new_items = []
                 mitigated_count = 0
                 finding_count = 0
