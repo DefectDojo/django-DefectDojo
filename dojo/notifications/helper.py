@@ -280,6 +280,9 @@ def send_alert_notification(event, user=None, *args, **kwargs):
 
 
 def get_slack_user_id(user_email):
+    from dojo.utils import get_system_setting
+    import json
+
     user_id = None
 
     res = requests.request(
