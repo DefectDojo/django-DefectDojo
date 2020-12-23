@@ -622,6 +622,7 @@ def re_import_scan_results(request, tid):
                          "is highly recommended."
     test = get_object_or_404(Test, id=tid)
     scan_type = test.test_type.name
+    scan_type = test.test_type.name
     engagement = test.engagement
     form = ReImportScanForm()
     jform = None
@@ -634,7 +635,7 @@ def re_import_scan_results(request, tid):
 
     # form.initial['tags'] = [tag.name for tag in test.tags.all()]
     if request.method == "POST":
-        form = ReImportScanForm(request.POST, request.FILES)
+        form = ReImportScanForm(request.POST, request.FILES, scan_type=scan_type)
         if jira_project:
             jform = JIRAImportScanForm(request.POST, push_all=push_all_jira_issues, prefix='jiraform')
         if form.is_valid() and (jform is None or jform.is_valid()):
@@ -646,7 +647,6 @@ def re_import_scan_results(request, tid):
 
             min_sev = form.cleaned_data['minimum_severity']
             file = request.FILES.get('file', None)
-            scan_type = test.test_type.name
             active = form.cleaned_data['active']
             verified = form.cleaned_data['verified']
             tags = form.cleaned_data['tags']
