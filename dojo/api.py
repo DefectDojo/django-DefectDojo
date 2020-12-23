@@ -401,7 +401,7 @@ class ProductResource(BaseModelResource):
         # Append the tags in a comma delimited list with the tag element
         """
         tags = ""
-        for tag in bundle.obj.tags:
+        for tag in bundle.obj.tags.all():
             tags = tags + str(tag) + ","
         if len(tags) > 0:
             tags = tags[:-1]

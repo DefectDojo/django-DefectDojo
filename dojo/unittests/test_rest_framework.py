@@ -18,7 +18,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 from .dojo_test_case import DojoAPITestCase
 import logging
-
+# from unittest import skip
 
 logger = logging.getLogger(__name__)
 
@@ -80,6 +80,9 @@ class BaseClass():
         def test_create(self):
             length = self.endpoint_model.objects.count()
             response = self.client.post(self.url, self.payload)
+            logger.debug('test_create_response:')
+            logger.debug(response)
+            logger.debug(response.data)
             self.assertEqual(201, response.status_code, response.data)
             self.assertEqual(self.endpoint_model.objects.count(), length + 1)
 
@@ -288,6 +291,32 @@ class FindingsTest(BaseClass.RESTEndpointTest):
         self.update_fields = {'active': True, "push_to_jira": "True", 'tags': ['finding_tag_new']}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
+    def test_duplicate(self):
+        # Reassign duplicate
+        result = self.client.post(self.url + "2/original/3/")
+        assert result.status_code == status.HTTP_200_OK, "Could not move duplicate"
+        result = self.client.get(self.url + "2/")
+        assert result.status_code == status.HTTP_200_OK, "Could not check new duplicate"
+        result_json = result.json()
+        assert result_json["duplicate"]
+        assert result_json["duplicate_finding"] == 3
+
+        # Check duplicate status
+        result = self.client.get(self.url + "3/duplicate/")
+        assert result.status_code == status.HTTP_200_OK, "Could not check duplicate status"
+        result_json = result.json()
+        # Should return all duplicates for id=3
+        assert set(x["id"] for x in result_json) == {2, 4, 5, 6}
+
+        # Reset duplicate
+        result = self.client.post(self.url + "2/duplicate/reset/")
+        assert result.status_code == status.HTTP_200_OK, "Could not reset duplicate"
+        new_result = self.client.get(self.url + "2/")
+        assert result.status_code == status.HTTP_200_OK, "Could not check reset duplicate status"
+        result_json = new_result.json()
+        assert not result_json["duplicate"]
+        assert result_json["duplicate_finding"] is None
+
 
 class FindingMetadataTest(BaseClass.RESTEndpointTest):
     fixtures = ['dojo_testdata.json']
@@ -493,7 +522,7 @@ class ProductTest(BaseClass.RESTEndpointTest):
             "prod_type": 1,
             "name": "Test Product",
             "description": "test product",
-            "tags": ["mytag", "yourtag"]
+            "tags": ["mytag, yourtag"]
         }
         self.update_fields = {'prod_type': 2}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
@@ -756,7 +785,7 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
             "file": open('tests/zap_sample.xml'),
             "engagement": 1,
             "lead": 2,
-            "tags": ["'ci/cd, api"],
+            "tags": ["ci/cd", "api"],
             "version": "1.0.0",
         }
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)

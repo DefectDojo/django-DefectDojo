@@ -26,7 +26,7 @@
 
                                 <li role="presentation">
                                     <a href="{% url 'product_findings_report' %}">
-                                        <i class="fa fa-file-text-o"></i> Product Report
+                                        <i class="fa fa-file-text-o"></i> Findings Report
                                     </a>
                                 </li>
                             </ul>
@@ -178,8 +178,8 @@
                                 <!-- Tags column -->
                                 <td>
                                     <sup>
-                                    {% for tag in prod.tags %}
-                                      <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                    {% for tag in prod.tags.all %}
+                                      <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=product-tag:{{ tag }}">{{ tag }}</a>
                                     {% endfor %}
                                   </sup>
                                 </td>
@@ -197,7 +197,7 @@
                                     <i style="position:absolute;" class="fa fa-calendar happy-green-color has-popover" title="<i class='fa fa-bullseye'></i> <b>Engagements</b>" data-trigger="hover" data-placement="bottom" data-container="body" data-html="true"
                                     data-content="{{ prod.active_engagement_count }} Active,
                                     {{ prod.closed_engagement_count }} Closed<br>
-                                    <b>Last Assessed:</b> {{ prod.last_engagement_date.target_end }}"></i>
+                                    <b>Last Assessed:</b> {{ prod.last_engagement_date }}"></i>
                                   {% else %}
                                     <i class="fa fa-calendar text-danger has-popover" title="<i class='fa fa-bullseye'></i> <b>Engagements</b>" data-trigger="hover" data-container="body" data-placement="bottom" data-html="true"
                                     data-content="No Engagements Exist"></i>

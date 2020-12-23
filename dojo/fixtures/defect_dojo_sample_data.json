@@ -1138,7 +1138,10 @@
         "regulations": [
             13,
             1
-        ]
+        ],
+        "tags": [
+            "retire"
+        ]        
     }
 },
 {
@@ -1452,7 +1455,7 @@
         "source_code_management_server": null,
         "source_code_management_uri": null,
         "orchestration_engine": null,
-        "risk_acceptance": []
+        "risk_acceptance": []     
     }
 },
 {
@@ -1628,7 +1631,10 @@
         "source_code_management_server": null,
         "source_code_management_uri": null,
         "orchestration_engine": null,
-        "risk_acceptance": []
+        "risk_acceptance": [],
+        "tags": [
+            "pci"
+        ]           
     }
 },
 {
@@ -1758,7 +1764,10 @@
         "source_code_management_server": null,
         "source_code_management_uri": null,
         "orchestration_engine": null,
-        "risk_acceptance": []
+        "risk_acceptance": [],
+        "tags": [
+            "pci"
+        ]        
     }
 },
 {
@@ -40625,53 +40634,23 @@
     }
 },
 {
-    "model": "tagging.tag",
+    "model": "dojo.tagulous_product_tags",
     "pk": 1,
     "fields": {
-        "name": "retire"
+        "name": "retire",
+        "slug": "retire",
+        "count": 1,
+        "protected": false
     }
 },
 {
-    "model": "tagging.tag",
+    "model": "dojo.tagulous_engagment_tags",
     "pk": 2,
     "fields": {
-        "name": "pci"
-    }
-},
-{
-    "model": "tagging.taggeditem",
-    "pk": 1,
-    "fields": {
-        "tag": 1,
-        "content_type": [
-            "dojo",
-            "product"
-        ],
-        "object_id": 1
-    }
-},
-{
-    "model": "tagging.taggeditem",
-    "pk": 2,
-    "fields": {
-        "tag": 2,
-        "content_type": [
-            "dojo",
-            "engagement"
-        ],
-        "object_id": 6
-    }
-},
-{
-    "model": "tagging.taggeditem",
-    "pk": 3,
-    "fields": {
-        "tag": 2,
-        "content_type": [
-            "dojo",
-            "engagement"
-        ],
-        "object_id": 10
+        "name": "pci",
+        "slug": "pci",
+        "count": 1,
+        "protected": false
     }
 },
 {

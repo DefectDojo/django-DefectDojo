@@ -1,7 +1,7 @@
 
 # code: language=Dockerfile
 
-# The code for the build image should be idendical with the code in
+# The code for the build image should be identical with the code in
 # Dockerfile.nginx to use the caching mechanism of Docker.
 
 # Ref: https://devguide.python.org/#branchstatus
@@ -23,8 +23,7 @@ RUN \
   rm -rf /var/lib/apt/lists && \
   true
 COPY requirements.txt ./
-RUN pip3 install --no-cache-dir --upgrade pip
-RUN pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt --use-deprecated=legacy-resolver
+RUN pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
 
 FROM python:3.6.12-slim-buster@sha256:e5259113df5a7c4dae16ad37c2ca53b1cf722e051cfd5f624e7b76aa72389e0c
 WORKDIR /app
@@ -53,15 +52,14 @@ RUN \
   apt-get clean && \
   rm -rf /var/lib/apt/lists && \
   true
-RUN pip3 install --no-cache-dir --upgrade pip
 COPY --from=build /tmp/wheels /tmp/wheels
 COPY requirements.txt ./
 RUN pip3 install \
 	--no-cache-dir \
 	--no-index \
   --find-links=/tmp/wheels \
-  -r ./requirements.txt \
-  --use-deprecated=legacy-resolver
+  -r ./requirements.txt
+  
 COPY \
   docker/entrypoint-celery-beat.sh \
   docker/entrypoint-celery-worker.sh \
@@ -98,9 +96,12 @@ RUN \
     chown -R ${appuser} /app && \
     chmod 0700 /app && \
     chmod 0750 -R /app/* && \
+	chmod g=u /app && \
+	chmod -R g=u /app/* && \
     mkdir /var/run/${appuser} && \
-    chown ${appuser} /var/run/${appuser}
-USER ${appuser}
+    chown ${appuser} /var/run/${appuser} && \
+	chmod g=u /var/run/${appuser}
+USER ${uid}
 ENV \
   DD_ADMIN_USER=admin \
   DD_ADMIN_MAIL=admin@defectdojo.local \

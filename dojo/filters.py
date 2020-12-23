@@ -2,7 +2,7 @@ __author__ = 'Jay Paz'
 import collections
 import logging
 from datetime import timedelta, datetime
-
+from django.apps import apps
 from auditlog.models import LogEntry
 from django.contrib.auth.models import User
 from django.utils import six
@@ -17,9 +17,12 @@ from django.db.models import Q
 from dojo.models import Dojo_User, Product_Type, Finding, Product, Test_Type, \
     Endpoint, Development_Environment, Finding_Template, Report, Note_Type, \
     Engagement_Survey, Question, TextQuestion, ChoiceQuestion, Endpoint_Status, Engagement, \
-    ENGAGEMENT_STATUS_CHOICES, Test
+    ENGAGEMENT_STATUS_CHOICES, Test, App_Analysis
 from dojo.utils import get_system_setting
 from django.contrib.contenttypes.models import ContentType
+import tagulous
+# from tagulous.forms import TagWidget
+# import tagulous
 from crum import get_current_user
 
 logger = logging.getLogger(__name__)
@@ -46,6 +49,11 @@ class NumberInFilter(filters.BaseInFilter, filters.NumberFilter):
     pass
 
 
+class CharFieldInFilter(filters.BaseInFilter, filters.CharFilter):
+    def __init__(self, *args, **kwargs):
+        super(CharFilter, self).__init__(*args, **kwargs)
+
+
 def get_earliest_finding():
     global EARLIEST_FINDING
     if EARLIEST_FINDING is not None:
@@ -61,6 +69,41 @@ def get_earliest_finding():
 class DojoFilter(FilterSet):
     def __init__(self, *args, **kwargs):
         super(DojoFilter, self).__init__(*args, **kwargs)
+
+        # for now we have only fields called "tags"
+        for field in ['tags', 'test__tags', 'test__engagement__tags', 'test__engagement__product__tags']:
+            if field in self.form.fields:
+                # print(self.filters)
+                # print(vars(self).keys())
+                # print(vars(self.filters['tags']))
+                # print(self._meta)
+
+                tags_filter = self.filters['tags']
+                model = tags_filter.model
+
+                self.form.fields[field] = model._meta.get_field("tags").formfield()
+                self.form.fields[field].widget.tag_options = \
+                    self.form.fields[field].widget.tag_options + tagulous.models.options.TagOptions(autocomplete_settings={'width': '200px'})
+                tagged_model = get_tags_model_from_field_name(field)
+                if tagged_model:  # only if not the normal tags field
+                    self.form.fields[field].label = get_tags_label_from_model(tagged_model)
+                    self.form.fields[field].autocomplete_tags = tagged_model.tags.tag_model.objects.all().order_by('name')
+
+
+def get_tags_model_from_field_name(field):
+    try:
+        parts = field.split('__')
+        model_name = parts[-2]
+        return apps.get_model('dojo.%s' % model_name, require_ready=True)
+    except Exception as e:
+        return None
+
+
+def get_tags_label_from_model(model):
+    if model:
+        return 'Tags (%s)' % model.__name__.title()
+    else:
+        return 'Tags (Unknown)'
 
 
 class DateRangeFilter(ChoiceFilter):
@@ -310,6 +353,16 @@ class EngagementFilter(DojoFilter):
         label="Product Type")
     engagement__status = MultipleChoiceFilter(choices=ENGAGEMENT_STATUS_CHOICES,
                                               label="Status")
+
+    tags = ModelMultipleChoiceFilter(
+        field_name='tags__name',
+        to_field_name='name',
+        queryset=Engagement.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
+
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
@@ -328,6 +381,17 @@ class EngagementFilter(DojoFilter):
         fields = ['name', 'prod_type']
 
 
+class ApiEngagementFilter(DojoFilter):
+    tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in')
+
+    class Meta:
+        model = Engagement
+        fields = ['id', 'active', 'eng_type', 'target_start',
+                     'target_end', 'requester', 'report_type',
+                     'updated', 'threat_model', 'api_test',
+                     'pen_test', 'status', 'product', 'name', 'version', 'tags']
+
+
 class ProductFilter(DojoFilter):
     name = CharFilter(lookup_expr='icontains', label="Product Name")
     prod_type = ModelMultipleChoiceFilter(
@@ -339,6 +403,81 @@ class ProductFilter(DojoFilter):
     origin = MultipleChoiceFilter(choices=Product.ORIGIN_CHOICES)
     external_audience = BooleanFilter(field_name='external_audience')
     internet_accessible = BooleanFilter(field_name='internet_accessible')
+
+    # not specifying anything for tags will render a multiselect input functioning as OR
+
+    tags = ModelMultipleChoiceFilter(
+        field_name='tags__name',
+        to_field_name='name',
+        queryset=Product.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    # tags_and = ModelMultipleChoiceFilter(
+    #     field_name='tags__name',
+    #     to_field_name='name',
+    #     queryset=Product.tags.tag_model.objects.all().order_by('name'),
+    #     label='tags (AND)',
+    #     conjoined=True,
+    # )
+
+    # tags__name = ModelMultipleChoiceFilter(
+    #     queryset=Product.tags.tag_model.objects.all().order_by('name'),
+    #     label="tags (AND)"
+    # )
+
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label="Tag contains")
+
+    # tags__name = CharFilter(
+    #     lookup_expr='icontains',
+    #     label="Tag contains",
+    # )
+
+    # tags__all = ModelMultipleChoiceFilter(
+    #     queryset=Product.tags.tag_model.objects.all().order_by('name'),
+    #     field_name='tags__name',
+    #     label="tags (AND)"
+    # )
+
+    # not working below
+
+    # tags = ModelMultipleChoiceFilter(
+    #     queryset=Product.tags.tag_model.objects.all().order_by('name'),
+    #     label="tags_widget", widget=TagWidget, tag_options=tagulous.models.TagOptions(
+    #         force_lowercase=True,)
+    # ,)
+
+    # tags__name = CharFilter(lookup_expr='icontains')
+
+    # tags__and = ModelMultipleChoiceFilter(
+    #     field_name='tags__name',
+    #     to_field_name='name',
+    #     lookup_expr='in',
+    #     queryset=Product.tags.tag_model.objects.all().order_by('name'),
+    #     label="tags (AND)"
+    # )
+
+    # tags = ModelMultipleChoiceFilter(
+    #     queryset=Product.tags.tag_model.objects.all().order_by('name'),
+    #     label="tags (OR)"
+    # )
+
+    # tags = ModelMultipleChoiceFilter(
+    #     field_name='tags__name',
+    #     to_field_name='name',
+    #     queryset=Product.tags.tag_model.objects.all().order_by('name'),
+    #     label="tags (OR2)",
+    # )
+
+    # tags = ModelMultipleChoiceFilter(
+    #     field_name='tags',
+    #     to_field_name='name',
+    #     # lookup_expr='icontains', # nor working
+    #     # without lookup_expr we get an error: ValueError: invalid literal for int() with base 10: 'magento'
+    #     queryset=Product.tags.tag_model.objects.all().order_by('name'),
+    #     label="tags (OR3)",
+    # )
+
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
@@ -378,11 +517,28 @@ class ProductFilter(DojoFilter):
                 'prod_type'].queryset = Product_Type.objects.filter(
                 authorized_users__in=[self.user])
 
+        # for field in ['tags', 'tags_and']:
+        #     self.form.fields[field] = Product._meta.get_field("tags").formfield()
+        #     self.form.fields[field].widget.attrs.update({'style': 'width=150px;'})
+        #     self.form.fields[field].widget.tag_options = \
+        #         self.form.fields[field].widget.tag_options + tagulous.models.options.TagOptions(autocomplete_settings={'width': '200px'})
+        # self.form.fields['tags_and'].label = self.form.fields['tags_and'].label + ' (and)'
+        # print(vars(self.form.fields[field].widget.tag_options))
+        # print(vars(self.form.fields[field]))
+
     class Meta:
         model = Product
         fields = ['name', 'prod_type', 'business_criticality', 'platform', 'lifecycle', 'origin', 'external_audience',
-                  'internet_accessible', ]
-        exclude = ['tags']
+                  'internet_accessible', 'tags']
+        # exclude = ['tags']
+        # filter_overrides = {
+        #     tagulous.models.TagField: {
+        #         'filter_class': ModelMultipleChoiceFilter,
+        #         'extra': lambda f: {
+        #              'widget': tagulous.forms.TagWidget,
+        #         },
+        #     },
+        # }
 
 
 class ApiProductFilter(DojoFilter):
@@ -409,6 +565,11 @@ class ApiProductFilter(DojoFilter):
     user_records = NumberInFilter(field_name='user_records', lookup_expr='in')
     regulations = NumberInFilter(field_name='regulations', lookup_expr='in')
     active_finding_count = NumberInFilter(field_name='active_finding_count', lookup_expr='in')
+
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
+
+    tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in')
+
     # DateRangeFilter
     created = DateRangeFilter()
     updated = DateRangeFilter()
@@ -507,6 +668,10 @@ class ApiFindingFilter(DojoFilter):
     # ReportRiskAcceptanceFilter
     test__engagement__risk_acceptance = ReportRiskAcceptanceFilter()
 
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
+
+    tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in')
+
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
@@ -539,7 +704,7 @@ class ApiFindingFilter(DojoFilter):
     class Meta:
         model = Finding
         exclude = ['url', 'is_template', 'thread_id', 'notes', 'images',
-                   'sourcefile', 'line', 'endpoint_status']
+                   'sourcefile', 'line', 'endpoint_status', 'tags_from_django_tagging']
 
 
 class OpenFindingFilter(DojoFilter):
@@ -575,6 +740,36 @@ class OpenFindingFilter(DojoFilter):
                                 lookup_expr='isnull',
                                 exclude=True,
                                 label='has notes')
+
+    tags = ModelMultipleChoiceFilter(
+        field_name='tags__name',
+        to_field_name='name',
+        queryset=Finding.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    test__tags = ModelMultipleChoiceFilter(
+        field_name='test__tags__name',
+        to_field_name='name',
+        queryset=Finding.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    test__engagement__tags = ModelMultipleChoiceFilter(
+        field_name='test__engagement__tags__name',
+        to_field_name='name',
+        queryset=Finding.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    test__engagement__product__tags = ModelMultipleChoiceFilter(
+        field_name='test__engagement__product__tags__name',
+        to_field_name='name',
+        queryset=Finding.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
+
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
@@ -595,7 +790,9 @@ class OpenFindingFilter(DojoFilter):
                    'thread_id', 'notes', 'scanner_confidence', 'mitigated',
                    'numerical_severity', 'reporter', 'last_reviewed', 'line',
                    'duplicate_finding', 'hash_code', 'images', 'endpoint_status',
-                   'line_number', 'reviewers', 'mitigated_by', 'sourcefile', 'created', 'jira_creation', 'jira_change']
+                   'line_number', 'reviewers', 'mitigated_by', 'sourcefile',
+                   'created', 'jira_creation', 'jira_change', 'tags_from_django_tagging',
+                   'tags']
 
     def __init__(self, *args, **kwargs):
         self.user = None
@@ -675,6 +872,15 @@ class ClosedFindingFilter(DojoFilter):
                                 exclude=True,
                                 label='has notes')
 
+    tags = ModelMultipleChoiceFilter(
+        field_name='tags__name',
+        to_field_name='name',
+        queryset=Finding.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
+
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
@@ -700,10 +906,11 @@ class ClosedFindingFilter(DojoFilter):
         exclude = ['url', 'description', 'mitigation', 'impact',
                    'endpoint', 'references', 'test', 'is_template',
                    'active', 'verified', 'out_of_scope', 'false_p',
-                   'duplicate', 'thread_id', 'date', 'notes',
+                   'duplicate', 'duplicate_finding', 'thread_id', 'date', 'notes',
                    'numerical_severity', 'reporter', 'endpoints', 'endpoint_status',
                    'last_reviewed', 'review_requested_by', 'defect_review_requested_by',
-                   'last_reviewed_by', 'created', 'jira_creation', 'jira_change']
+                   'last_reviewed_by', 'created', 'jira_creation', 'jira_change',
+                   'tags_from_django_tagging']
 
     def __init__(self, *args, **kwargs):
         self.pid = None
@@ -756,6 +963,15 @@ class AcceptedFindingFilter(DojoFilter):
         queryset=Product_Type.objects.all(),
         label="Product Type")
 
+    tags = ModelMultipleChoiceFilter(
+        field_name='tags__name',
+        to_field_name='name',
+        queryset=Finding.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
+
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
@@ -783,9 +999,10 @@ class AcceptedFindingFilter(DojoFilter):
         exclude = ['url', 'description', 'mitigation', 'impact',
                    'endpoint', 'references', 'test', 'is_template',
                    'active', 'verified', 'out_of_scope', 'false_p',
-                   'duplicate', 'thread_id', 'mitigated', 'notes',
+                   'duplicate', 'duplicate_finding', 'thread_id', 'mitigated', 'notes',
                    'numerical_severity', 'reporter', 'endpoints', 'endpoint_status',
-                   'last_reviewed', 'o', 'jira_creation', 'jira_change']
+                   'last_reviewed', 'o', 'jira_creation', 'jira_change',
+                   'tags_from_django_tagging']
 
     def __init__(self, *args, **kwargs):
         self.pid = None
@@ -826,6 +1043,15 @@ class ProductFindingFilter(DojoFilter):
     test__engagement__risk_acceptance = ReportRiskAcceptanceFilter(
         label="Risk Accepted")
 
+    tags = ModelMultipleChoiceFilter(
+        field_name='tags__name',
+        to_field_name='name',
+        queryset=Finding.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
+
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
@@ -854,7 +1080,8 @@ class ProductFindingFilter(DojoFilter):
                    'active', 'verified', 'out_of_scope', 'false_p',
                    'duplicate_finding', 'thread_id', 'mitigated', 'notes',
                    'numerical_severity', 'reporter', 'endpoints', 'endpoint_status',
-                   'last_reviewed', 'jira_creation', 'jira_change']
+                   'last_reviewed', 'jira_creation', 'jira_change',
+                   'tags_from_django_tagging']
 
     def __init__(self, *args, **kwargs):
         super(ProductFindingFilter, self).__init__(*args, **kwargs)
@@ -899,6 +1126,36 @@ class SimilarFindingFilter(DojoFilter):
                                 exclude=True,
                                 label='has notes')
 
+    tags = ModelMultipleChoiceFilter(
+        field_name='tags__name',
+        to_field_name='name',
+        queryset=Finding.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    test__tags = ModelMultipleChoiceFilter(
+        field_name='test__tags__name',
+        to_field_name='name',
+        queryset=Finding.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    test__engagement__tags = ModelMultipleChoiceFilter(
+        field_name='test__engagement__tags__name',
+        to_field_name='name',
+        queryset=Finding.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    test__engagement__product__tags = ModelMultipleChoiceFilter(
+        field_name='test__engagement__product__tags__name',
+        to_field_name='name',
+        queryset=Finding.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
+
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
@@ -913,7 +1170,7 @@ class SimilarFindingFilter(DojoFilter):
 
     class Meta:
         model = Finding
-        fields = ['cwe', 'hash_code', 'unique_id_from_tool', 'line', 'id']
+        fields = ['cwe', 'hash_code', 'unique_id_from_tool', 'line', 'id', 'tags']
 
     def __init__(self, data=None, *args, **kwargs):
         self.user = None
@@ -966,6 +1223,15 @@ class TemplateFindingFilter(DojoFilter):
     severity = MultipleChoiceFilter(choices=[])
     numerical_severity = MultipleChoiceFilter(choices=[])
 
+    tags = ModelMultipleChoiceFilter(
+        field_name='tags__name',
+        to_field_name='name',
+        queryset=Finding_Template.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
+
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
@@ -982,7 +1248,7 @@ class TemplateFindingFilter(DojoFilter):
     class Meta:
         model = Finding_Template
         exclude = ['description', 'mitigation', 'impact',
-                   'references', 'numerical_severity']
+                   'references', 'numerical_severity', 'tags_from_django_tagging']
 
     def __init__(self, *args, **kwargs):
         super(TemplateFindingFilter, self).__init__(*args, **kwargs)
@@ -1004,6 +1270,15 @@ class TemplateFindingFilter(DojoFilter):
                                                           ('S2', 'S2'),
                                                           ('S3', 'S3'),
                                                           ('S4', 'S4'))
+
+
+class ApiTemplateFindingFilter(DojoFilter):
+    tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in')
+
+    class Meta:
+        model = Finding_Template
+        fields = ['id', 'title', 'cwe', 'severity', 'description',
+                     'mitigation']
 
 
 class FindingStatusFilter(ChoiceFilter):
@@ -1063,6 +1338,15 @@ class MetricsFindingFilter(FilterSet):
     severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     status = FindingStatusFilter(label='Status')
 
+    tags = ModelMultipleChoiceFilter(
+        field_name='tags__name',
+        to_field_name='name',
+        queryset=Finding.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
+
     def __init__(self, *args, **kwargs):
         if args[0]:
             if args[0].get('start_date', '') != '' or args[0].get('end_date', '') != '':
@@ -1090,6 +1374,7 @@ class MetricsFindingFilter(FilterSet):
         model = Finding
         exclude = ['url',
                    'description',
+                   'duplicate_finding',
                    'mitigation',
                    'unsaved_endpoints',
                    'unsaved_request',
@@ -1107,7 +1392,9 @@ class MetricsFindingFilter(FilterSet):
                    'endpoint_status',
                    'is_template',
                    'jira_creation',
-                   'jira_change']
+                   'jira_change',
+                   'tags_from_django_tagging'
+                   ]
 
 
 class MetricsEndpointFilter(FilterSet):
@@ -1119,6 +1406,8 @@ class MetricsEndpointFilter(FilterSet):
         label="Product Type")
     finding__test__engagement__version = CharFilter(lookup_expr='icontains', label="Engagement Version")
     finding__severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
+
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
 
     def __init__(self, *args, **kwargs):
         if args[0]:
@@ -1145,7 +1434,7 @@ class MetricsEndpointFilter(FilterSet):
 
     class Meta:
         model = Endpoint_Status
-        exclude = ['last_modified']
+        exclude = ['last_modified', 'tags_from_django_tagging']
 
 
 class ProductMetricsFindingFilter(FilterSet):
@@ -1158,6 +1447,15 @@ class ProductMetricsFindingFilter(FilterSet):
     test__engagement__version = CharFilter(lookup_expr='icontains', label="Engagement Version")
     severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     status = FindingStatusFilter(label='Status')
+
+    tags = ModelMultipleChoiceFilter(
+        field_name='tags__name',
+        to_field_name='name',
+        queryset=Finding.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
 
     def __init__(self, *args, **kwargs):
         if args[0]:
@@ -1182,6 +1480,7 @@ class ProductMetricsFindingFilter(FilterSet):
         model = Finding
         exclude = ['url',
                    'description',
+                   'duplicate_finding'
                    'mitigation',
                    'unsaved_endpoints',
                    'unsaved_request',
@@ -1199,7 +1498,9 @@ class ProductMetricsFindingFilter(FilterSet):
                    'endpoint_status',
                    'is_template',
                    'jira_creation',
-                   'jira_change']
+                   'jira_change',
+                   'tags_from_django_tagging'
+                   ]
 
 
 class ProductMetricsEndpointFilter(FilterSet):
@@ -1238,6 +1539,15 @@ class EndpointFilter(DojoFilter):
     fragment = CharFilter(lookup_expr='icontains')
     mitigated = CharFilter(lookup_expr='icontains')
 
+    tags = ModelMultipleChoiceFilter(
+        field_name='tags__name',
+        to_field_name='name',
+        queryset=Endpoint.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
+
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
@@ -1270,7 +1580,33 @@ class EndpointFilter(DojoFilter):
 
     class Meta:
         model = Endpoint
-        exclude = ['mitigated', 'endpoint_status']
+        exclude = ['mitigated', 'endpoint_status', 'tags_from_django_tagging']
+
+
+class ApiEndpointFilter(DojoFilter):
+    tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in')
+
+    class Meta:
+        model = Endpoint
+        fields = ['id', 'host', 'product']
+
+
+class ApiTestFilter(DojoFilter):
+    tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in')
+
+    class Meta:
+        model = Test
+        fields = ['id', 'title', 'test_type', 'target_start',
+                     'target_end', 'notes', 'percent_complete',
+                     'actual_time', 'engagement']
+
+
+class ApiAppAnalysisFilter(DojoFilter):
+    tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in')
+
+    class Meta:
+        model = App_Analysis
+        fields = ['product', 'name', 'user', 'version']
 
 
 class EndpointReportFilter(DojoFilter):
@@ -1281,9 +1617,18 @@ class EndpointReportFilter(DojoFilter):
     finding__severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     finding__mitigated = MitigatedDateRangeFilter()
 
+    tags = ModelMultipleChoiceFilter(
+        field_name='tags__name',
+        to_field_name='name',
+        queryset=Endpoint.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
+
     class Meta:
         model = Endpoint
-        exclude = ['product', 'endpoint_status']
+        exclude = ['product', 'endpoint_status', 'tags_from_django_tagging']
 
 
 class ReportFindingFilter(DojoFilter):
@@ -1295,15 +1640,57 @@ class ReportFindingFilter(DojoFilter):
     false_p = ReportBooleanFilter(label="False Positive")
     test__engagement__risk_acceptance = ReportRiskAcceptanceFilter(
         label="Risk Accepted")
+    # queryset will be restricted in __init__, here we don't have access to the logged in user
     duplicate = ReportBooleanFilter()
+    duplicate_finding = ModelChoiceFilter(queryset=Finding.objects.filter(original_finding__isnull=False).distinct())
     out_of_scope = ReportBooleanFilter()
+
+    tags = ModelMultipleChoiceFilter(
+        field_name='tags__name',
+        to_field_name='name',
+        queryset=Finding.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
 
     class Meta:
         model = Finding
+        # exclude sonarqube issue as by default it will show all without checking permissions
         exclude = ['date', 'cwe', 'url', 'description', 'mitigation', 'impact',
-                   'endpoint', 'references', 'test', 'is_template',
+                   'endpoint', 'references', 'test', 'is_template', 'sonarqube_issue'
                    'thread_id', 'notes', 'endpoints', 'endpoint_status',
-                   'numerical_severity', 'reporter', 'last_reviewed', 'images', 'jira_creation', 'jira_change']
+                   'numerical_severity', 'reporter', 'last_reviewed', 'images',
+                   'jira_creation', 'jira_change', 'tags_from_django_tagging']
+
+    def __init__(self, *args, **kwargs):
+        self.prod_type = None
+        self.product = None
+        self.engagement = None
+        if 'prod_type' in kwargs:
+            self.prod_type = kwargs.pop('prod_type')
+        if 'product' in kwargs:
+            self.product = kwargs.pop('product')
+        if 'engagement' in kwargs:
+            self.engagement = kwargs.pop('engagement')
+
+        super().__init__(*args, **kwargs)
+        # duplicate_finding queryset needs to restricted in line with permissions
+        # and inline with report scope to avoid a dropdown with 100K entries
+        duplicate_finding_query_set = self.form.fields['duplicate_finding'].queryset
+        if get_current_user() is not None and not get_current_user().is_staff:
+            duplicate_finding_query_set = duplicate_finding_query_set.filter(
+                Q(test__engagement__product__authorized_users__in=[get_current_user()]) |
+                Q(test__engagement__product__prod_type__authorized_users__in=[get_current_user()]))
+
+        if self.engagement:
+            duplicate_finding_query_set = duplicate_finding_query_set.filter(test__engagement=self.engagement)
+        elif self.product:
+            duplicate_finding_query_set = duplicate_finding_query_set.filter(test__engagement__product=self.product)
+        elif self.prod_type:
+            duplicate_finding_query_set = duplicate_finding_query_set.filter(test__engagement__product__prod_type=self.prod_type)
+
+        self.form.fields['duplicate_finding'].queryset = duplicate_finding_query_set
 
 
 class ReportAuthedFindingFilter(DojoFilter):
@@ -1321,7 +1708,17 @@ class ReportAuthedFindingFilter(DojoFilter):
     test__engagement__risk_acceptance = ReportRiskAcceptanceFilter(
         label="Risk Accepted")
     duplicate = ReportBooleanFilter()
+    duplicate_finding = ModelChoiceFilter(queryset=Finding.objects.filter(original_finding__isnull=False).distinct())
     out_of_scope = ReportBooleanFilter()
+
+    tags = ModelMultipleChoiceFilter(
+        field_name='tags__name',
+        to_field_name='name',
+        queryset=Finding.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
 
     def __init__(self, *args, **kwargs):
         super(ReportAuthedFindingFilter, self).__init__(*args, **kwargs)
@@ -1354,7 +1751,8 @@ class ReportAuthedFindingFilter(DojoFilter):
         exclude = ['date', 'cwe', 'url', 'description', 'mitigation', 'impact',
                    'endpoint', 'references', 'test', 'is_template',
                    'thread_id', 'notes', 'endpoints', 'endpoint_status',
-                   'numerical_severity', 'reporter', 'last_reviewed', 'jira_creation', 'jira_change']
+                   'numerical_severity', 'reporter', 'last_reviewed',
+                   'jira_creation', 'jira_change', 'tags_from_django_tagging']
 
 
 class UserFilter(DojoFilter):
