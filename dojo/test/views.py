@@ -839,8 +839,16 @@ def re_import_scan_results(request, tid):
                     finding.save(push_to_jira=push_to_jira)
                 # calculate the difference
                 to_mitigate = set(original_items) - set(reactivated_items) - set(unchanged_items)
+                logger.debug('QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ')
+                logger.debug('to_mitigate is')
+                logger.debug(to_mitigate)
                 mitigated_findings = []
                 for finding_id in to_mitigate:
+                    logger.debug('QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ')
+                    logger.debug('finding_id')
+                    logger.debug(finding_id)
+                    logger.debug('finding_id type')
+                    logger.debug(type(finding_id))
                     finding = Finding.objects.get(id=finding_id)
                     if not finding.mitigated or not finding.is_Mitigated:
                         finding.mitigated = scan_date_time
