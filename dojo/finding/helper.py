@@ -42,6 +42,6 @@ def update_finding_status(new_state_finding, request_user, old_state_finding=Non
         new_state_finding.mitigated = None
         new_state_finding.mitigated_by = None
 
-    logger.info("Finding status after update: {}".format(new_state_finding.status()))
+    logger.debug("Finding status after update: {}".format(new_state_finding.status()))
 
     return finding_status_changed
