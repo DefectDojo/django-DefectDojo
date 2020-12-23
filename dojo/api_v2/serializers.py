@@ -1056,9 +1056,9 @@ class ImportScanSerializer(serializers.Serializer):
                 if sev == 'Information' or sev == 'Informational':
                     sev = 'Info'
                 elif sev.lower() == 'moderate':
-                     sev = 'Medium'
+                    sev = 'Medium'
                 elif sev.lower() == 'important':
-                     sev = 'High'
+                    sev = 'High'
 
                 item.severity = sev
 
