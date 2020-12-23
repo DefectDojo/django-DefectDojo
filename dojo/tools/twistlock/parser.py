@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 shift_column_1 = 0
 shift_column_2 = 0
 
+
 class TwistlockCSVParser(object):
 
     def get_field_from_row_or_default(self, row, column, default_value):
