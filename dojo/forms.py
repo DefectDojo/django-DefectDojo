@@ -486,9 +486,9 @@ class ReImportScanForm(forms.Form):
     def clean(self):
         cleaned_data = super().clean()
         scan_type = cleaned_data.get("scan_type")
-        
-        if requires_file(scan_type) and 'file' not in self.cleaned_data:
-            raise forms.ValidationError('Uploading a Report File is required for {}'.format(scan_type))
+        file = cleaned_data.get("file")
+        if file is None:
+            raise forms.ValidationError("Uploading a report file is required for re-uploading findings.")
         return cleaned_data
 
     # date can only be today or in the past, not the future
