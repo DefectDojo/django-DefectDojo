@@ -1141,7 +1141,7 @@
         ],
         "tags": [
             "retire"
-        ]        
+        ]
     }
 },
 {
@@ -1455,7 +1455,7 @@
         "source_code_management_server": null,
         "source_code_management_uri": null,
         "orchestration_engine": null,
-        "risk_acceptance": []     
+        "risk_acceptance": []
     }
 },
 {
@@ -1634,7 +1634,7 @@
         "risk_acceptance": [],
         "tags": [
             "pci"
-        ]           
+        ]
     }
 },
 {
@@ -1767,7 +1767,7 @@
         "risk_acceptance": [],
         "tags": [
             "pci"
-        ]        
+        ]
     }
 },
 {
@@ -24213,7 +24213,7 @@
         "accepted_by": null,
         "expiration_date": null,
         "owner": 1,
-        "compensating_control": "These findings are accepted using a simple risk acceptance without expiration date, approval document or compensating control information. Unaccept and use full risk acceptance if you need to have more control over those fields.",
+        "decision_details": "These findings are accepted using a simple risk acceptance without expiration date, approval document or compensating control information. Unaccept and use full risk acceptance if you need to have more control over those fields.",
         "created": "2020-11-09T23:13:08.520Z",
         "updated": "2020-11-09T23:13:08.520Z",
         "accepted_findings": [

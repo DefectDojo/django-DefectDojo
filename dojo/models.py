@@ -1810,7 +1810,8 @@ class Finding(models.Model):
             simple_risk_acceptance = Risk_Acceptance.objects.create(
                     owner_id=1,
                     name=Finding.SIMPLE_RISK_ACCEPTANCE_NAME,
-                    compensating_control='These findings are accepted using a simple risk acceptance without expiration date, '
+                    decision=Risk_Acceptance.TREATMENT_ACCEPT,
+                    decision_details='These findings are accepted using a simple risk acceptance without expiration date, '
                     'approval document or compensating control information. Unaccept and use full risk acceptance if you '
                     'need to have more control over those fields.'
             )

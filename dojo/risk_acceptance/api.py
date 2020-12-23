@@ -86,7 +86,8 @@ def _accept_risks(accepted_risks: List[AcceptedRisk], base_findings: QuerySet, o
             # so for now we add some timestamp based suffix
             name = risk.cve + ' via api at ' + timezone.now().strftime('%b %d, %Y, %H:%M:%S')
             acceptance = Risk_Acceptance.objects.create(owner=owner, name=name[:100],
-                                                        compensating_control=risk.justification,
+                                                        decision=Risk_Acceptance.TREATMENT_ACCEPT,
+                                                        decision_details=risk.justification,
                                                         accepted_by=risk.accepted_by[:200])
             acceptance.accepted_findings.set(findings)
             acceptance.save()
