@@ -3,12 +3,17 @@ import csv
 import json
 import logging
 import hashlib
+import textwrap
 
 from django.utils.html import escape
 from dojo.models import Finding
 
 logger = logging.getLogger(__name__)
 
+# Global variables to control the displacement of columns when the imported CSV file
+# was generated from PrismaCloud/Twistlock as "image scans" and not from "twistcli".
+shift_column_1 = 0
+shift_column_2 = 0
 
 class TwistlockCSVParser(object):
 
@@ -26,13 +31,13 @@ class TwistlockCSVParser(object):
         id_column = 4
         line_column = 5
         code_line_column = 6
-        vulnerability_id_column = 10
-        severity_column = 13
-        package_name_column = 14
-        package_version_column = 16
-        cvss_column = 18
-        fix_status_column = 19
-        description_column = 20
+        vulnerability_id_column = 10 + shift_column_1
+        severity_column = 13 + shift_column_1
+        package_name_column = 14 + shift_column_1
+        package_version_column = 16 + shift_column_1
+        cvss_column = 18 + shift_column_1
+        fix_status_column = 19 + shift_column_1
+        description_column = 20 + shift_column_2
         data_vulnerability_id = self.get_field_from_row_or_default(row, vulnerability_id_column, '')
         data_package_version = self.get_field_from_row_or_default(row, package_version_column, '')
         data_fix_status = self.get_field_from_row_or_default(row, fix_status_column, '')
@@ -43,7 +48,7 @@ class TwistlockCSVParser(object):
         data_description = self.get_field_from_row_or_default(row, description_column, '')
 
         finding = Finding(
-            title=data_vulnerability_id + ": " + data_package_name + " - " + data_package_version,
+            title=textwrap.shorten(data_vulnerability_id + ": " + data_package_name + " - " + data_package_version, width=255, placeholder="..."),
             cve=data_vulnerability_id,
             test=test,
             severity=data_severity,
@@ -51,7 +56,7 @@ class TwistlockCSVParser(object):
             data_package_name + "</p><p> Current Version: " + str(
                 data_package_version) + "</p>",
             mitigation=data_fix_status,
-            component_name=data_package_name,
+            component_name=textwrap.shorten(data_package_name, width=200, placeholder="..."),
             component_version=data_package_version,
             active=False,
             verified=False,
@@ -78,6 +83,10 @@ class TwistlockCSVParser(object):
         firstline = True
         for row in reader:
             if firstline:
+                if row[10].lower() == 'severity':
+                    global shift_column_1, shift_column_2
+                    shift_column_1 = -3
+                    shift_column_2 = -1
                 firstline = False
                 continue
             finding = self.parse_issue(row, test)
@@ -132,7 +141,7 @@ def get_item(vulnerability, test):
         # If we're dealing with a license finding, there will be no cvssScore
         if vulnerability['severity'] == 'important':
             severity = "High"
-        elif vulnerability['severity'] == 'moderate':
+        elif vulnerability['severity'].lower() == 'moderate':
             severity = "Medium"
         else:
             severity = vulnerability['severity'].title()
