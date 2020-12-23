@@ -27,3 +27,21 @@ class TestTwistlockParser(TestCase):
         parser = TwistlockParser(testfile, Test())
         testfile.close()
         self.assertEqual(4, len(parser.items))
+
+    def test_parse_file_prisma_twistlock_images_no_vuln(self):
+        testfile = open("dojo/unittests/scans/twistlock/scan_report_prisma_twistlock_images_no_vuln.csv")
+        parser = TwistlockParser(testfile, Test())
+        testfile.close()
+        self.assertEqual(0, len(parser.items))
+
+    def test_parse_file_prisma_twistlock_images_four_vulns(self):
+        testfile = open("dojo/unittests/scans/twistlock/scan_report_prisma_twistlock_images_four_vulns.csv")
+        parser = TwistlockParser(testfile, Test())
+        testfile.close()
+        self.assertEqual(4, len(parser.items))
+
+    def test_parse_file_prisma_twistlock_images_long_package_name(self):
+        testfile = open("dojo/unittests/scans/twistlock/scan_report_prisma_twistlock_images_long_package_name.csv")
+        parser = TwistlockParser(testfile, Test())
+        testfile.close()
+        self.assertEqual(1, len(parser.items))
