@@ -482,8 +482,8 @@ class ReImportScanForm(forms.Form):
 
     def __init__(self, *args, scan_type=None, **kwargs):
         super(ReImportScanForm, self).__init__(*args, **kwargs)
-        self.scan_type=scan_type
-        
+        self.scan_type = scan_type
+    
     def clean(self):
         cleaned_data = super().clean()
         file = cleaned_data.get("file")
