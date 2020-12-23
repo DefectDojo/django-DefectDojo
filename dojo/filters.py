@@ -1358,10 +1358,6 @@ class MetricsFindingFilter(FilterSet):
             'numerical_severity'
         ).values_list('severity', 'severity').distinct()
         if get_current_user() is not None and not get_current_user().is_staff:
-            logger.debug('*******************')
-            logger.debug('FORM FIELDS ARE')
-            logger.debug(self.form.fields)
-            logger.debug('*******************')
             self.form.fields[
                 'test__engagement__product__prod_type'].queryset = Product_Type.objects.filter(
                 authorized_users__in=[get_current_user()])
