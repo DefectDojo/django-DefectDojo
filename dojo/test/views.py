@@ -752,7 +752,7 @@ def re_import_scan_results(request, tid):
                                 status.last_modified = timezone.now()
                                 status.save()
 
-                            reactivated_items.append(finding)
+                            reactivated_items.append(finding.id)
                             reactivated_count += 1
                         else:
                             # existing findings may be from before we had component_name/version fields
@@ -760,7 +760,7 @@ def re_import_scan_results(request, tid):
                                 finding.component_name = finding.component_name if finding.component_name else component_name
                                 finding.component_version = finding.component_version if finding.component_version else component_version
                                 finding.save(dedupe_option=False, push_to_jira=False)
-                            unchanged_items.append(finding)
+                            unchanged_items.append(finding.id)
                             unchanged_count += 1
 
                     else:
