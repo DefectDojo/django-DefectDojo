@@ -61,6 +61,9 @@ def engagement_calendar(request):
         filters.append(Q(lead__in=leads))
         engagements = Engagement.objects.filter(reduce(operator.or_, filters))
 
+    engagements = engagements.select_related('lead')
+    engagements = engagements.prefetch_related('product')
+
     add_breadcrumb(
         title="Engagement Calendar", top_level=True, request=request)
     return render(
