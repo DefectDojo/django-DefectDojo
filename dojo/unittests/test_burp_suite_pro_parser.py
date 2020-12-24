@@ -12,7 +12,7 @@ class TestParser(TestCase):
             test_parser = BurpSuiteProParser(f, test)
         self.assertIsNotNone(test.title)
         self.assertEqual(5, len(test_parser.items))
-        item = parser.items[0]
+        item = test_parser.items[0]
         self.assertEqual('Info', item.severity)
         self.assertEqual('TLS cookie without secure flag set', item.title)
         self.assertEqual('5605602767570803712', item.unique_id_from_tool)
