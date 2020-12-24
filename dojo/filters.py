@@ -1372,7 +1372,6 @@ class MetricsFindingFilter(FilterSet):
     class Meta:
         model = Finding
         exclude = ['url',
-                   'found_by',
                    'description',
                    'duplicate_finding',
                    'mitigation',
