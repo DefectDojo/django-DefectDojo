@@ -23,7 +23,7 @@ class BurpSuiteProParser(object):
         tree = json.load(file)
 
         # by default give the test a title
-        test.title = f"Burp Suite Pro scan"
+        test.title = f"Burp Suite Pro scan ({file.name})"
 
         # for each issue found
         for issue_event in tree.get("issue_events", list()):
