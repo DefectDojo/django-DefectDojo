@@ -1,4 +1,6 @@
 {% if type == 'mail' %}
+{% load navigation_tags %}
+{% load display_tags %}
     Hello,
 
     {{ description|safe }}{% if url is not None %}
