@@ -995,7 +995,7 @@ class FindingForm(forms.ModelForm):
     is_template = forms.BooleanField(label="Create Template?", required=False,
                                      help_text="A new finding template will be created from this finding.")
 
-    simple_risk_accept = forms.BooleanField(label="Accept Risk (simple)", required=False, help_text="Check to accept this risk and deactivate the finding. Uncheck to unaccept the risk. Use full risk acceptance from the dropdown menu if you need afvanced settings such as an expiry date.")
+    simple_risk_accept = forms.BooleanField(label="Accept Risk (simple)", required=False, help_text="Check to accept this risk and deactivate the finding. Uncheck to unaccept the risk. Use full risk acceptance from the dropdown menu if you need advanced settings such as an expiry date.")
 
     # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
     field_order = ('title', 'date', 'cwe', 'cve', 'severity', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
