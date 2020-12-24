@@ -1365,14 +1365,14 @@ class MetricsFindingFilter(FilterSet):
                 'test'].queryset = Test.objects.filter(
                 Q(engagement__product__authorized_users__in=[get_current_user()]) |
                 Q(engagement__product__prod_type__authorized_users__in=[get_current_user()]))
-            self.form.fields[
-                'duplicate_finding'].queryset = Finding.objects.filter(
-                Q(test__engagement__product__authorized_users__in=[get_current_user()]) |
-                Q(test__engagement__product__prod_type__authorized_users__in=[get_current_user()]))
+
+        # str() uses test_type
+        self.form.fields['test'].queryset = self.form.fields['test'].queryset.prefetch_related('test_type')
 
     class Meta:
         model = Finding
         exclude = ['url',
+                   'found_by',
                    'description',
                    'duplicate_finding',
                    'mitigation',
@@ -1475,12 +1475,18 @@ class ProductMetricsFindingFilter(FilterSet):
             self.form.fields['test__engagement'].queryset = Engagement.objects.filter(
                 product_id=self.pid
             ).all()
+            self.form.fields['test'].queryset = Test.objects.filter(
+                engagement__product_id=self.pid
+            ).all()
+
+        # str() uses test_type
+        self.form.fields['test'].queryset = self.form.fields['test'].queryset.prefetch_related('test_type')
 
     class Meta:
         model = Finding
         exclude = ['url',
                    'description',
-                   'duplicate_finding'
+                   'duplicate_finding',
                    'mitigation',
                    'unsaved_endpoints',
                    'unsaved_request',

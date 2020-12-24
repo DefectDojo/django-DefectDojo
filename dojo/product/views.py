@@ -215,16 +215,11 @@ def finding_querys(request, prod):
                                       severity__in=('Critical', 'High', 'Medium', 'Low', 'Info')).prefetch_related(
         'test__engagement',
         'test__engagement__risk_acceptance',
+        'found_by',
+        'test',
         'test__test_type',
         'risk_acceptance_set',
-        'reporter').extra(
-        select={
-            'ra_count': 'SELECT COUNT(*) FROM dojo_risk_acceptance INNER JOIN '
-                        'dojo_risk_acceptance_accepted_findings ON '
-                        '( dojo_risk_acceptance.id = dojo_risk_acceptance_accepted_findings.risk_acceptance_id ) '
-                        'WHERE dojo_risk_acceptance_accepted_findings.finding_id = dojo_finding.id',
-        },
-    )
+        'reporter')
 
     findings = ProductMetricsFindingFilter(request.GET, queryset=findings_query, pid=prod)
     findings_qs = queryset_check(findings)
@@ -239,6 +234,7 @@ def finding_querys(request, prod):
                                      extra_tags='alert-danger')
 
     try:
+        logger.debug(findings_qs.query)
         start_date = findings_qs.earliest('date').date
         start_date = datetime(start_date.year,
                             start_date.month, start_date.day,
@@ -247,7 +243,8 @@ def finding_querys(request, prod):
         end_date = datetime(end_date.year,
                             end_date.month, end_date.day,
                             tzinfo=timezone.get_current_timezone())
-    except:
+    except Exception as e:
+        logger.debug(e)
         start_date = timezone.now()
         end_date = timezone.now()
     week = end_date - timedelta(days=7)  # seven days and /newnewer are considered "new"
@@ -538,6 +535,7 @@ def view_product_metrics(request, pid):
         else:
             test_data[t.test_type.name] = t.verified_finding_count()
     product_tab = Product_Tab(pid, title="Product", tab="metrics")
+
     return render(request,
                   'dojo/product_metrics.html',
                   {'prod': prod,
