@@ -23,7 +23,8 @@ from dojo.filters import EngagementFilter
 from dojo.forms import CheckForm, \
     UploadThreatForm, RiskAcceptanceForm, NoteForm, \
     EngForm, TestForm, ReplaceRiskAcceptanceProofForm, AddFindingsRiskAcceptanceForm, DeleteEngagementForm, ImportScanForm, \
-    CredMappingForm, JIRAEngagementForm, JIRAImportScanForm, TypedNoteForm, JIRAProjectForm
+    CredMappingForm, JIRAEngagementForm, JIRAImportScanForm, TypedNoteForm, JIRAProjectForm, \
+    EditRiskAcceptanceForm
 
 from dojo.models import Finding, Product, Engagement, Test, \
     Check_List, Test_Type, Notes, \
@@ -835,16 +836,15 @@ def complete_checklist(request, eid):
 
 # @user_passes_test(lambda u: u.is_staff)
 @user_must_be_authorized(Engagement, 'staff', 'eid')
-def add_or_edit_risk_acceptance(request, eid, raid=None):
+def add_risk_acceptance(request, eid, raid=None):
     eng = get_object_or_404(Engagement, id=eid)
     instance = get_object_or_none(Risk_Acceptance, id=raid)
 
     if request.method == 'POST':
         form = RiskAcceptanceForm(request.POST, request.FILES, instance=instance)
+        logger.debug(vars(request.POST))
         if form.is_valid():
-            # need to extract the ids as when the instance gets updated by the form, the old set will be overwritten
-            old_finding_ids = [finding.id for finding in instance.accepted_findings.all()]
-
+            logger.debug(vars(form))
             risk_acceptance = form.save()
 
             if not instance:
@@ -865,19 +865,6 @@ def add_or_edit_risk_acceptance(request, eid, raid=None):
                     finding.save()
             risk_acceptance.accepted_findings.set(findings)
 
-            # TODO reactivate findings that are removed from the risk acceptance
-            old_findings = Finding.objects.filter(id__in=old_finding_ids)
-            logger.debug('old_findings: %s', old_findings)
-            logger.debug('findings: %s', findings)
-            for old_finding in old_findings:
-                logger.debug('handling: %s', old_finding)
-                if old_finding not in findings:
-                    logger.debug('old finding not found in new set: %s', old_finding)
-                    if not old_finding.active:
-                        logger.debug('reactivating: %s', old_finding)
-                        old_finding.active = True
-                        old_finding.save()
-
             messages.add_message(
                 request,
                 messages.SUCCESS,
@@ -894,21 +881,13 @@ def add_or_edit_risk_acceptance(request, eid, raid=None):
         form = RiskAcceptanceForm(instance=instance, initial={'owner': request.user, 'name': 'Ad Hoc ' + timezone.now().strftime('%b %d, %Y, %H:%M:%S')})
 
     finding_choices = Finding.objects.filter(active=True, verified=True, duplicate=False, test__engagement=eng).filter(Q(risk_acceptance__isnull=True)).order_by('title')
-    if instance:
-        # for existing risk acceptances we show unaccepted findings + all findings in current risk acceptance
-        # so they are shown on screen
-
-        # using a '|' to join the two querysets results in extremely slow query (why?)
-        # so we use a union as we already know the two querysets are distinct anyway
-        # finding_choices = instance.accepted_findings.all() | finding_choices
-        finding_choices = instance.accepted_findings.all().union(finding_choices)
 
     form.fields["accepted_findings"].queryset = finding_choices
     title = ("Edit " if instance else "Add ") + "Risk Acceptance"
     product_tab = Product_Tab(eng.product.id, title=title, tab="engagements")
     product_tab.setEngagement(eng)
 
-    return render(request, 'dojo/edit_risk_acceptance.html', {
+    return render(request, 'dojo/add_risk_acceptance.html', {
                   'eng': eng,
                   'product_tab': product_tab,
                   'form': form
@@ -917,22 +896,54 @@ def add_or_edit_risk_acceptance(request, eid, raid=None):
 
 @user_must_be_authorized(Engagement, 'view', 'eid')
 def view_risk_acceptance(request, eid, raid):
+    return view_edit_risk_acceptance(request, eid=eid, raid=raid, edit_mode=False)
+
+
+@user_must_be_authorized(Engagement, 'staff', 'eid')
+def edit_risk_acceptance(request, eid, raid):
+    return view_edit_risk_acceptance(request, eid=eid, raid=raid, edit_mode=True)
+
+
+def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
     risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
     eng = get_object_or_404(Engagement, pk=eid)
+    risk_acceptance_form = None
+    errors = False
 
     if request.method == 'POST':
-        note_form = NoteForm(request.POST)
-        if note_form.is_valid():
-            new_note = note_form.save(commit=False)
-            new_note.author = request.user
-            new_note.date = timezone.now()
-            new_note.save()
-            risk_acceptance.notes.add(new_note)
-            messages.add_message(
-                request,
-                messages.SUCCESS,
-                'Note added successfully.',
-                extra_tags='alert-success')
+        # deleting before instantiating the form otherwise django messes up and we end up with an empty path value
+        if len(request.FILES) > 0:
+            logger.debug('new proof uploaded')
+            risk_acceptance.path.delete()
+
+        if 'decision' in request.POST:
+            risk_acceptance_form = EditRiskAcceptanceForm(request.POST, request.FILES, instance=risk_acceptance)
+            errors = errors or not risk_acceptance_form.is_valid()
+            if not errors:
+                logger.debug('path: %s', risk_acceptance_form.cleaned_data['path'])
+
+                risk_acceptance_form.save()
+
+                messages.add_message(
+                    request,
+                    messages.SUCCESS,
+                    'Risk Acceptance saved successfully.',
+                    extra_tags='alert-success')
+
+        if 'entry' in request.POST:
+            note_form = NoteForm(request.POST)
+            errors = errors or not note_form.is_valid()
+            if not errors:
+                new_note = note_form.save(commit=False)
+                new_note.author = request.user
+                new_note.date = timezone.now()
+                new_note.save()
+                risk_acceptance.notes.add(new_note)
+                messages.add_message(
+                    request,
+                    messages.SUCCESS,
+                    'Note added successfully.',
+                    extra_tags='alert-success')
 
         if 'delete_note' in request.POST:
             note = get_object_or_404(Notes, pk=request.POST['delete_note_id'])
@@ -960,29 +971,31 @@ def view_risk_acceptance(request, eid, raid):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                'Finding removed successfully.',
+                'Finding removed successfully from risk acceptance.',
                 extra_tags='alert-success')
-        if 'replace_file' in request.POST:
-            logger.debug('replacing file')
-            # deleting before instantiating the form otherwise django messes up and we end up with an empty path value
-            risk_acceptance.path.delete()
 
+        if 'replace_file' in request.POST:
             replace_form = ReplaceRiskAcceptanceProofForm(
                 request.POST, request.FILES, instance=risk_acceptance)
-            if replace_form.is_valid():
+
+            errors = errors or not replace_form.is_valid()
+            if not errors:
                 replace_form.save()
 
                 messages.add_message(
                     request,
                     messages.SUCCESS,
-                    'File replaced successfully.',
+                    'New Proof uploaded successfully.',
                     extra_tags='alert-success')
             else:
                 logger.error(replace_form.errors)
+
         if 'add_findings' in request.POST:
             add_findings_form = AddFindingsRiskAcceptanceForm(
                 request.POST, request.FILES, instance=risk_acceptance)
-            if add_findings_form.is_valid():
+
+            errors = errors or not add_findings_form.is_valid()
+            if not errors:
                 findings = add_findings_form.cleaned_data['accepted_findings']
                 for finding in findings:
                     if finding.active:
@@ -996,6 +1009,16 @@ def view_risk_acceptance(request, eid, raid):
                     'Finding%s added successfully.' % ('s' if len(findings) > 1
                                                        else ''),
                     extra_tags='alert-success')
+
+        if not errors:
+            logger.debug('redirecting to view_risk_acceptance')
+            return HttpResponseRedirect(reverse("view_risk_acceptance", args=(eid, raid)))
+        else:
+            logger.error('errors found')
+
+    else:
+        if edit_mode:
+            risk_acceptance_form = EditRiskAcceptanceForm(instance=risk_acceptance)
 
     note_form = NoteForm()
     replace_form = ReplaceRiskAcceptanceProofForm(instance=risk_acceptance)
@@ -1021,6 +1044,8 @@ def view_risk_acceptance(request, eid, raid):
             'accepted_findings': fpage,
             'notes': risk_acceptance.notes.all(),
             'eng': eng,
+            'edit_mode': edit_mode,
+            'risk_acceptance_form': risk_acceptance_form,
             'note_form': note_form,
             'replace_form': replace_form,
             'add_findings_form': add_findings_form,
@@ -1030,118 +1055,117 @@ def view_risk_acceptance(request, eid, raid):
         })
 
 
-@user_must_be_authorized(Engagement, 'staff', 'eid')
-def edit_risk_acceptance(request, eid, raid):
-    risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
-    eng = get_object_or_404(Engagement, pk=eid)
+# @user_must_be_authorized(Engagement, 'staff', 'eid')
+# def edit_risk_acceptance(request, eid, raid):
+#     risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
+#     eng = get_object_or_404(Engagement, pk=eid)
 
-    if request.method == 'POST':
-        note_form = NoteForm(request.POST)
-        if note_form.is_valid():
-            new_note = note_form.save(commit=False)
-            new_note.author = request.user
-            new_note.date = timezone.now()
-            new_note.save()
-            risk_acceptance.notes.add(new_note)
-            messages.add_message(
-                request,
-                messages.SUCCESS,
-                'Note added successfully.',
-                extra_tags='alert-success')
+#     if request.method == 'POST':
+#         note_form = NoteForm(request.POST)
+#         if note_form.is_valid():
+#             new_note = note_form.save(commit=False)
+#             new_note.author = request.user
+#             new_note.date = timezone.now()
+#             new_note.save()
+#             risk_acceptance.notes.add(new_note)
+#             messages.add_message(
+#                 request,
+#                 messages.SUCCESS,
+#                 'Note added successfully.',
+#                 extra_tags='alert-success')
 
-        if 'delete_note' in request.POST:
-            note = get_object_or_404(Notes, pk=request.POST['delete_note_id'])
-            if note.author.username == request.user.username:
-                risk_acceptance.notes.remove(note)
-                note.delete()
-                messages.add_message(
-                    request,
-                    messages.SUCCESS,
-                    'Note deleted successfully.',
-                    extra_tags='alert-success')
-            else:
-                messages.add_message(
-                    request,
-                    messages.ERROR,
-                    "Since you are not the note's author, it was not deleted.",
-                    extra_tags='alert-danger')
+#         if 'delete_note' in request.POST:
+#             note = get_object_or_404(Notes, pk=request.POST['delete_note_id'])
+#             if note.author.username == request.user.username:
+#                 risk_acceptance.notes.remove(note)
+#                 note.delete()
+#                 messages.add_message(
+#                     request,
+#                     messages.SUCCESS,
+#                     'Note deleted successfully.',
+#                     extra_tags='alert-success')
+#             else:
+#                 messages.add_message(
+#                     request,
+#                     messages.ERROR,
+#                     "Since you are not the note's author, it was not deleted.",
+#                     extra_tags='alert-danger')
 
-        if 'remove_finding' in request.POST:
-            finding = get_object_or_404(
-                Finding, pk=request.POST['remove_finding_id'])
-            risk_acceptance.accepted_findings.remove(finding)
-            finding.active = True
-            finding.save()
-            messages.add_message(
-                request,
-                messages.SUCCESS,
-                'Finding removed successfully.',
-                extra_tags='alert-success')
-        if 'replace_file' in request.POST:
-            replace_form = ReplaceRiskAcceptanceProofForm(
-                request.POST, request.FILES, instance=risk_acceptance)
-            if replace_form.is_valid():
-                risk_acceptance.path.delete(save=False)
-                risk_acceptance.path = replace_form.cleaned_data['path']
-                risk_acceptance.save()
-                messages.add_message(
-                    request,
-                    messages.SUCCESS,
-                    'File replaced successfully.',
-                    extra_tags='alert-success')
-        if 'add_findings' in request.POST:
-            add_findings_form = AddFindingsRiskAcceptanceForm(
-                request.POST, request.FILES, instance=risk_acceptance)
-            if add_findings_form.is_valid():
-                findings = add_findings_form.cleaned_data['accepted_findings']
-                for finding in findings:
-                    finding.active = False
-                    finding.save()
-                    risk_acceptance.accepted_findings.add(finding)
-                risk_acceptance.save()
-                messages.add_message(
-                    request,
-                    messages.SUCCESS,
-                    'Finding%s added successfully.' % ('s' if len(findings) > 1
-                                                       else ''),
-                    extra_tags='alert-success')
+#         if 'remove_finding' in request.POST:
+#             finding = get_object_or_404(
+#                 Finding, pk=request.POST['remove_finding_id'])
+#             risk_acceptance.accepted_findings.remove(finding)
+#             finding.active = True
+#             finding.save()
+#             messages.add_message(
+#                 request,
+#                 messages.SUCCESS,
+#                 'Finding removed successfully.',
+#                 extra_tags='alert-success')
+#         if 'replace_file' in request.POST:
+#             replace_form = ReplaceRiskAcceptanceProofForm(
+#                 request.POST, request.FILES, instance=risk_acceptance)
+#             if replace_form.is_valid():
+#                 risk_acceptance.path.delete(save=False)
+#                 risk_acceptance.path = replace_form.cleaned_data['path']
+#                 risk_acceptance.save()
+#                 messages.add_message(
+#                     request,
+#                     messages.SUCCESS,
+#                     'File replaced successfully.',
+#                     extra_tags='alert-success')
+#         if 'add_findings' in request.POST:
+#             add_findings_form = AddFindingsRiskAcceptanceForm(
+#                 request.POST, request.FILES, instance=risk_acceptance)
+#             if add_findings_form.is_valid():
+#                 findings = add_findings_form.cleaned_data['accepted_findings']
+#                 for finding in findings:
+#                     finding.active = False
+#                     finding.save()
+#                     risk_acceptance.accepted_findings.add(finding)
+#                 risk_acceptance.save()
+#                 messages.add_message(
+#                     request,
+#                     messages.SUCCESS,
+#                     'Finding%s added successfully.' % ('s' if len(findings) > 1
+#                                                        else ''),
+#                     extra_tags='alert-success')
 
-    note_form = NoteForm()
-    replace_form = ReplaceRiskAcceptanceProofForm()
-    add_findings_form = AddFindingsRiskAcceptanceForm()
+#     note_form = NoteForm()
+#     replace_form = ReplaceRiskAcceptanceProofForm()
+#     add_findings_form = AddFindingsRiskAcceptanceForm()
 
-    accepted_findings = risk_acceptance.accepted_findings.order_by('numerical_severity')
-    fpage = get_page_items(request, accepted_findings, 15)
+#     accepted_findings = risk_acceptance.accepted_findings.order_by('numerical_severity')
+#     fpage = get_page_items(request, accepted_findings, 15)
 
-    unaccepted_findings = Finding.objects.filter(test__in=eng.test_set.all()) \
-        .exclude(id__in=accepted_findings).order_by("title")
-    add_fpage = get_page_items(request, unaccepted_findings, 10, 'apage')
-    # on this page we need to add unaccepted findings as possible findings to add as accepted
-    add_findings_form.fields[
-        "accepted_findings"].queryset = add_fpage.object_list
+#     unaccepted_findings = Finding.objects.filter(test__in=eng.test_set.all()) \
+#         .exclude(id__in=accepted_findings).order_by("title")
+#     add_fpage = get_page_items(request, unaccepted_findings, 10, 'apage')
+#     # on this page we need to add unaccepted findings as possible findings to add as accepted
+#     add_findings_form.fields[
+#         "accepted_findings"].queryset = add_fpage.object_list
 
-    authorized = (request.user == risk_acceptance.owner.username or request.user.is_staff)
+#     authorized = (request.user == risk_acceptance.owner.username or request.user.is_staff)
 
-    product_tab = Product_Tab(eng.product.id, title="Risk Acceptance", tab="engagements")
-    product_tab.setEngagement(eng)
-    return render(
-        request, 'dojo/view_risk_acceptance.html', {
-            'risk_acceptance': risk_acceptance,
-            'product_tab': product_tab,
-            'accepted_findings': fpage,
-            'notes': risk_acceptance.notes.all(),
-            'eng': eng,
-            'note_form': note_form,
-            'replace_form': replace_form,
-            'add_findings_form': add_findings_form,
-            # 'show_add_findings_form': len(unaccepted_findings),
-            'request': request,
-            'add_findings': add_fpage,
-            'authorized': authorized,
-        })
+#     product_tab = Product_Tab(eng.product.id, title="Risk Acceptance", tab="engagements")
+#     product_tab.setEngagement(eng)
+#     return render(
+#         request, 'dojo/view_risk_acceptance.html', {
+#             'risk_acceptance': risk_acceptance,
+#             'product_tab': product_tab,
+#             'accepted_findings': fpage,
+#             'notes': risk_acceptance.notes.all(),
+#             'eng': eng,
+#             'note_form': note_form,
+#             'replace_form': replace_form,
+#             'add_findings_form': add_findings_form,
+#             # 'show_add_findings_form': len(unaccepted_findings),
+#             'request': request,
+#             'add_findings': add_fpage,
+#             'authorized': authorized,
+#         })
 
 
-# @user_passes_test(lambda u: u.is_staff)
 @user_must_be_authorized(Engagement, 'staff', 'eid')
 def delete_risk_acceptance(request, eid, raid):
     risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
@@ -1182,7 +1206,7 @@ def download_risk_acceptance(request, eid, raid):
 
     response = StreamingHttpResponse(
         FileIterWrapper(
-            open(settings.MEDIA_ROOT + "/" + risk_acceptance.path.name)))
+            open(settings.MEDIA_ROOT + "/" + risk_acceptance.path.name, mode='rb')))
     response['Content-Disposition'] = 'attachment; filename="%s"' \
                                       % risk_acceptance.filename()
     mimetype, encoding = mimetypes.guess_type(risk_acceptance.path.name)

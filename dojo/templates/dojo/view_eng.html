@@ -359,6 +359,9 @@
                             <th>Proof</th>
                             <th>Owner</th>
                             <th>View</th>
+                            {% if user|is_authorized_for_staff:eng %}
+                                <th>Delete</th>
+                            {% endif %}
                         </thead>
                         <tbody>
                         {% for risk_acceptance in risks_accepted %}
@@ -390,6 +393,14 @@
                                 <td>
                                     <a class="btn btn-sm btn-primary" href="{% url 'view_risk_acceptance' eng.id risk_acceptance.id %}">View</a>
                                 </td>
+                                {% if user|is_authorized_for_staff:eng %}
+                                    <td>
+                                        <form class="delete-risk_acceptance-form" method="post" action="{% url 'delete_risk_acceptance' eng.id risk_acceptance.id %}" >
+                                            {% csrf_token %}
+                                            <input class="btn btn-sm btn-primary" type="submit" value="Delete"/>
+                                        </form>
+                                    </td>
+                                {% endif %}
                             </tr>
                         {% endfor %}
                         </tbody>
@@ -926,6 +937,11 @@
     <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
         <script type="text/javascript">
         $(function () {
+            $('.delete-risk_acceptance-form').on('submit', function (e) {
+                return confirm('Are you sure you want to delete this risk acceptance? ' +
+                'Deleting this Risk Acceptance will remove the uploaded file, delete associated Notes and make findings active again.')
+            });
+
             $(document).on('keypress', null, 'e', function () {
               window.location.assign('{% url 'edit_engagement' eng.id %}');
             });
