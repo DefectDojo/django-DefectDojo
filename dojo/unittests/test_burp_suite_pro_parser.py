@@ -16,4 +16,4 @@ class TestParser(TestCase):
         self.assertEqual('Info', item.severity)
         self.assertEqual('TLS cookie without secure flag set', item.title)
         self.assertEqual('5605602767570803712', item.unique_id_from_tool)
-        self.assassertEqual('5243392', item.vuln_id_from_tool)
+        self.assertEqual('5243392', item.vuln_id_from_tool)
