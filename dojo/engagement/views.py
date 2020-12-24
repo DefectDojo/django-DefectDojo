@@ -834,7 +834,6 @@ def complete_checklist(request, eid):
     })
 
 
-# @user_passes_test(lambda u: u.is_staff)
 @user_must_be_authorized(Engagement, 'staff', 'eid')
 def add_risk_acceptance(request, eid, raid=None):
     eng = get_object_or_404(Engagement, id=eid)
