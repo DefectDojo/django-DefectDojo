@@ -1365,10 +1365,6 @@ class MetricsFindingFilter(FilterSet):
                 'test'].queryset = Test.objects.filter(
                 Q(engagement__product__authorized_users__in=[get_current_user()]) |
                 Q(engagement__product__prod_type__authorized_users__in=[get_current_user()]))
-            self.form.fields[
-                'duplicate_finding'].queryset = Finding.objects.filter(
-                Q(test__engagement__product__authorized_users__in=[get_current_user()]) |
-                Q(test__engagement__product__prod_type__authorized_users__in=[get_current_user()]))
 
     class Meta:
         model = Finding
