@@ -55,7 +55,7 @@ class CharFieldInFilter(filters.BaseInFilter, filters.CharFilter):
 
 
 def get_earliest_finding(queryset=None):
-    if not queryset:
+    if queryset is None:  # don't to 'if not queryset' which will trigger the query
         queryset = Finding.objects.all()
 
     try:

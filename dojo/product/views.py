@@ -225,14 +225,14 @@ def finding_querys(request, prod):
     findings_qs = queryset_check(findings)
     filters['form'] = findings.form
 
-    if not findings_qs and not findings_query:
-        # logger.debug('all filtered')
-        findings = findings_query
-        findings_qs = queryset_check(findings)
-        messages.add_message(request,
-                                     messages.ERROR,
-                                     'All objects have been filtered away. Displaying all objects',
-                                     extra_tags='alert-danger')
+    # if not findings_qs and not findings_query:
+    #     # logger.debug('all filtered')
+    #     findings = findings_query
+    #     findings_qs = queryset_check(findings)
+    #     messages.add_message(request,
+    #                                  messages.ERROR,
+    #                                  'All objects have been filtered away. Displaying all objects',
+    #                                  extra_tags='alert-danger')
 
     try:
         # logger.debug(findings_qs.query)
@@ -435,7 +435,7 @@ def view_product_metrics(request, pid):
     end_date = filters['end_date']
     week_date = filters['week']
 
-    tests = Test.objects.filter(engagement__product=prod).prefetch_related('finding_set')
+    tests = Test.objects.filter(engagement__product=prod).prefetch_related('finding_set', 'test_type')
 
     open_vulnerabilities = filters['open_vulns']
     all_vulnerabilities = filters['all_vulns']
