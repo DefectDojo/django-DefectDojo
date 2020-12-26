@@ -226,6 +226,7 @@ def finding_querys(request, prod):
     filters['form'] = findings.form
 
     if not findings_qs and not findings_query:
+        # logger.debug('all filtered')
         findings = findings_query
         findings_qs = queryset_check(findings)
         messages.add_message(request,
@@ -234,7 +235,7 @@ def finding_querys(request, prod):
                                      extra_tags='alert-danger')
 
     try:
-        logger.debug(findings_qs.query)
+        # logger.debug(findings_qs.query)
         start_date = findings_qs.earliest('date').date
         start_date = datetime(start_date.year,
                             start_date.month, start_date.day,
