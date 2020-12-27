@@ -10,43 +10,22 @@ from dojo.models import Finding
 
 logger = logging.getLogger(__name__)
 
-# Global variables to control the displacement of columns when the imported CSV file
-# was generated from PrismaCloud/Twistlock as "image scans" and not from "twistcli".
-shift_column_1 = 0
-shift_column_2 = 0
-
 
 class TwistlockCSVParser(object):
-
-    def get_field_from_row_or_default(self, row, column, default_value):
-        field = row[column]
-        if field is None or field == '':
-            return default_value
-        return escape(field)
 
     def parse_issue(self, row, test):
 
         if not row:
             return None
 
-        id_column = 4
-        line_column = 5
-        code_line_column = 6
-        vulnerability_id_column = 10 + shift_column_1
-        severity_column = 13 + shift_column_1
-        package_name_column = 14 + shift_column_1
-        package_version_column = 16 + shift_column_1
-        cvss_column = 18 + shift_column_1
-        fix_status_column = 19 + shift_column_1
-        description_column = 20 + shift_column_2
-        data_vulnerability_id = self.get_field_from_row_or_default(row, vulnerability_id_column, '')
-        data_package_version = self.get_field_from_row_or_default(row, package_version_column, '')
-        data_fix_status = self.get_field_from_row_or_default(row, fix_status_column, '')
-        data_package_name = self.get_field_from_row_or_default(row, package_name_column, '')
-        data_id = self.get_field_from_row_or_default(row, id_column, '')
-        data_severity = self.get_field_from_row_or_default(row, severity_column, 'Info').capitalize()
-        data_cvss = self.get_field_from_row_or_default(row, cvss_column, '')
-        data_description = self.get_field_from_row_or_default(row, description_column, '')
+        data_vulnerability_id = row['CVE ID']
+        data_package_version = row['Package Version']
+        data_fix_status = row['Fix Status']
+        data_package_name = row['Packages']
+        data_id = row['Id']
+        data_severity = row['Severity'].capitalize()
+        data_cvss = row['CVSS']
+        data_description = description_column = row['Description']
 
         finding = Finding(
             title=textwrap.shorten(data_vulnerability_id + ": " + data_package_name + " - " + data_package_version, width=255, placeholder="..."),
@@ -80,16 +59,8 @@ class TwistlockCSVParser(object):
         dupes = dict()
         if type(content) is bytes:
             content = content.decode('utf-8')
-        reader = csv.reader(io.StringIO(content), delimiter=',', quotechar='"')
-        firstline = True
+        reader = csv.DictReader(io.StringIO(content), delimiter=',', quotechar='"')
         for row in reader:
-            if firstline:
-                if row[10].lower() == 'severity':
-                    global shift_column_1, shift_column_2
-                    shift_column_1 = -3
-                    shift_column_2 = -1
-                firstline = False
-                continue
             finding = self.parse_issue(row, test)
             if finding is not None:
                 key = hashlib.md5((finding.severity + '|' + finding.title + '|' + finding.description).encode('utf-8')).hexdigest()
