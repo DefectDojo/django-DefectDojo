@@ -5,7 +5,6 @@ import logging
 import hashlib
 import textwrap
 
-#from django.utils.html import escape
 from dojo.models import Finding
 
 logger = logging.getLogger(__name__)
