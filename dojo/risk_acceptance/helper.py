@@ -1,4 +1,6 @@
 from django.utils import timezone
+from dojo.utils import get_system_setting
+from dateutil.relativedelta import relativedelta
 import logging
 
 logger = logging.getLogger(__name__)
@@ -19,11 +21,11 @@ def expire_now(risk_acceptance):
 
 
 def reinstate(risk_acceptance, old_expiration_date):
-    if risk_acceptance.expiration_date > timezone.now() and old_expiration_date <= timezone.now():
+    if risk_acceptance.expiration_date.date() >= timezone.now().date() and old_expiration_date <= timezone.now():
         logger.info('Reinstating risk acceptance %i:%s with %i findings', risk_acceptance.id, risk_acceptance, len(risk_acceptance.accepted_findings.all()))
 
         expiration_delta_days = get_system_setting('risk_acceptance_form_default_days', 90)
-        risk_acceptance.expiration_date = timezone.now() + relativedelta(expiration_delta_days)
+        risk_acceptance.expiration_date = timezone.now() + relativedelta(days=expiration_delta_days)
 
         for finding in risk_acceptance.accepted_findings.all():
             logger.debug('accepting and deactivating finding %i:%s', finding.id, finding)

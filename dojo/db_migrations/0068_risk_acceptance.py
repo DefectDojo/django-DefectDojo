@@ -35,8 +35,8 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='risk_acceptance',
-            name='restart_sla_on_expiration',
-            field=models.BooleanField(default=False, help_text='When enabled, the SLA for findings is restarted when the risk acceptance expires'),
+            name='restart_sla_expired',
+            field=models.BooleanField(default=False, help_text='When enabled, the SLA for findings is restarted when the risk acceptance expires', verbose_name='Restart SLA on expiration'),
         ),
         migrations.AddField(
             model_name='system_settings',
@@ -52,11 +52,6 @@ class Migration(migrations.Migration):
             model_name='system_settings',
             name='risk_acceptance_notify_expired',
             field=models.IntegerField(blank=True, default=10, help_text='Notify X days before risk acceptance expires. Leave empty to disable.', null=True),
-        ),
-        migrations.AddField(
-            model_name='system_settings',
-            name='risk_acceptance_reactivate_expired',
-            field=models.BooleanField(default=True, help_text='Reactive findings when risk acceptance expires?'),
         ),
         migrations.AlterField(
             model_name='child_rule',
@@ -108,5 +103,9 @@ class Migration(migrations.Migration):
             name='recommendation',
             field=models.CharField(choices=[('A', 'Accept'), ('V', 'Avoid'), ('C', 'Compensate'), ('R', 'Reduce'), ('T', 'Transfer')], default='R', help_text='Recommendation from the security team.', max_length=2),
         ),
-
+        migrations.AddField(
+            model_name='risk_acceptance',
+            name='reactivate_expired',
+            field=models.BooleanField(default=True, help_text='Reactivate findings when risk acceptance expires?', verbose_name='Reactivate findings on expiration'),
+        ),
     ]

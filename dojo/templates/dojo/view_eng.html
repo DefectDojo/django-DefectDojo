@@ -935,13 +935,6 @@
     <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
         <script type="text/javascript">
         $(function () {
-            $('.delete-risk_acceptance-form').on('submit', function (e) {
-                return confirm('Are you sure you want to delete this risk acceptance? ' +
-                'Deleting this Risk Acceptance will remove the uploaded file, delete associated Notes and make findings active again.' +
-                'Metrics over historical data will no longer show/count anything related to this risk acceptance.'
-                )
-            });
-
             $(document).on('keypress', null, 'e', function () {
               window.location.assign('{% url 'edit_engagement' eng.id %}');
             });

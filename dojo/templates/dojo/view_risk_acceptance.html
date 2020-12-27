@@ -73,6 +73,8 @@
                         <th>Expiration</th>
                         <th>Findings</th>
                         <th>Proof</th>
+                        <th>Reactivate</th>
+                        <th>Restart SLA</th>
                         <th>Owner</th>
                     </tr>
                     <tr>
@@ -88,6 +90,16 @@
                         {% else %}
                             <td>No</a></td>
                         {% endif %}
+                        <td>
+                            {{ risk_acceptance.reactivate_expired }}
+                            <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="Reactivate findings when risk acceptance expires?" data-placement="right" data-container="body" data-original-title="" title="">
+                            </i>
+                        </td>
+                        <td>
+                            {{ risk_acceptance.restart_sla_expired }}
+                            <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="Restart SLA for findings when risk acceptance expires?" data-placement="right" data-container="body" data-original-title="" title="">
+                            </i>
+                        </td>
                         <td>{{ risk_acceptance.owner.get_full_name }}</td>
                     </tr>
                 </table>

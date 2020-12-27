@@ -270,7 +270,6 @@ class System_Settings(models.Model):
     email_address = models.EmailField(max_length=100, blank=True)
     risk_acceptance_form_mandatory = models.BooleanField(null=False, blank=False, default=False, help_text="Always require risk acceptance form to accept findings? Without a form, a risk acceptance is a simple checkbox")
     risk_acceptance_form_default_days = models.IntegerField(null=True, blank=True, default=180, help_text="Default expiry period for risk acceptance form.")
-    risk_acceptance_reactivate_expired = models.BooleanField(null=False, blank=False, default=True, help_text="Reactive findings when risk acceptance expires?")
     risk_acceptance_notify_expired = models.IntegerField(null=True, blank=True, default=10, help_text="Notify X days before risk acceptance expires. Leave empty to disable.")
 
     from dojo.middleware import System_Settings_Manager
@@ -2481,7 +2480,8 @@ class Risk_Acceptance(models.Model):
     owner = models.ForeignKey(Dojo_User, editable=True, on_delete=models.CASCADE, help_text="User in defect dojo owning this acceptance. Only the owner and staff users can edit the risk acceptance.")
 
     expiration_date = models.DateTimeField(default=None, null=True, blank=True, help_text="When the risk acceptance expires, the findings will be reactivated")
-    restart_sla_on_expiration = models.BooleanField(default=False, null=False, help_text="When enabled, the SLA for findings is restarted when the risk acceptance expires")
+    reactivate_expired = models.BooleanField(null=False, blank=False, default=True, verbose_name="Reactivate findings on expiration", help_text="Reactivate findings when risk acceptance expires?")
+    restart_sla_expired = models.BooleanField(default=False, null=False, verbose_name="Restart SLA on expiration", help_text="When enabled, the SLA for findings is restarted when the risk acceptance expires")
 
     notes = models.ManyToManyField(Notes, editable=False)
     created = models.DateTimeField(null=False, editable=False, auto_now_add=True)
