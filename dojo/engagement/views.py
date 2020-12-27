@@ -34,13 +34,16 @@ from dojo.tools import handles_active_verified_statuses
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, message, Product_Tab, is_scan_file_too_large, \
-    get_system_setting, get_object_or_none
+    get_system_setting, get_object_or_none, redirect_to_return_url_or_else
 from dojo.notifications.helper import create_notification
 from dojo.finding.views import find_available_notetypes
 from functools import reduce
 from django.db.models.query import QuerySet
 from dojo.user.helper import user_must_be_authorized, user_is_authorized, check_auth_users_list
 import dojo.jira_link.helper as jira_helper
+import dojo.risk_acceptance.helper as ra_helper
+from dateutil.relativedelta import relativedelta
+from dojo.finding.views import NOT_ACCEPTED_FINDINGS_QUERY
 
 
 logger = logging.getLogger(__name__)
@@ -882,7 +885,7 @@ def add_risk_acceptance(request, eid, raid=None):
     else:
         form = RiskAcceptanceForm(instance=instance, initial={'owner': request.user, 'name': 'Ad Hoc ' + timezone.now().strftime('%b %d, %Y, %H:%M:%S')})
 
-    finding_choices = Finding.objects.filter(active=True, verified=True, duplicate=False, test__engagement=eng).filter(Q(risk_acceptance__isnull=True)).order_by('title')
+    finding_choices = Finding.objects.filter(active=True, verified=True, duplicate=False, test__engagement=eng).filter(NOT_ACCEPTED_FINDINGS_QUERY(timezone.now())).order_by('title')
 
     form.fields["accepted_findings"].queryset = finding_choices
     title = ("Edit " if instance else "Add ") + "Risk Acceptance"
@@ -919,12 +922,17 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
             risk_acceptance.path.delete()
 
         if 'decision' in request.POST:
+            old_expiration_date = risk_acceptance.expiration_date
             risk_acceptance_form = EditRiskAcceptanceForm(request.POST, request.FILES, instance=risk_acceptance)
             errors = errors or not risk_acceptance_form.is_valid()
             if not errors:
                 logger.debug('path: %s', risk_acceptance_form.cleaned_data['path'])
 
                 risk_acceptance_form.save()
+
+                if risk_acceptance.expiration_date != old_expiration_date:
+                    # risk acceptance was changed, check if risk acceptance needs to be reinstated and findings made accepted again
+                    ra_helper.reinstate(risk_acceptance, old_expiration_date)
 
                 messages.add_message(
                     request,
@@ -1014,7 +1022,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
 
         if not errors:
             logger.debug('redirecting to view_risk_acceptance')
-            return HttpResponseRedirect(reverse("view_risk_acceptance", args=(eid, raid)))
+            redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
         else:
             logger.error('errors found')
 
@@ -1166,6 +1174,27 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
 #             'add_findings': add_fpage,
 #             'authorized': authorized,
 #         })
+
+
+@user_must_be_authorized(Engagement, 'staff', 'eid')
+def expire_risk_acceptance(request, eid, raid):
+    risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
+    eng = get_object_or_404(Engagement, pk=eid)
+
+    ra_helper.expire_now(risk_acceptance)
+
+    return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
+
+
+@user_must_be_authorized(Engagement, 'staff', 'eid')
+def reinstate_risk_acceptance(request, eid, raid):
+    risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
+    eng = get_object_or_404(Engagement, pk=eid)
+
+    # TODO remove hardcoded new expiration_date
+    ra_helper.reinstate(risk_acceptance, risk_acceptance.expiration_date, timezone.now() + relativedelta(months=3))
+
+    return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
 
 
 @user_must_be_authorized(Engagement, 'staff', 'eid')

@@ -413,7 +413,7 @@
                                         {% endif %}
                                     {% endif %}
                                     {% if user|is_authorized_for_staff:finding %}
-                                        {% if finding.risk_acceptance_set.all %}
+                                        {% if finding.active_risk_acceptance %}
                                             <li role="presentation">
                                             <a href="{% url 'simple_risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
                                                 <i class="fa fa-exclamation-circle"></i> Unaccept Risk

@@ -129,7 +129,7 @@
                                 {% endif %}
                             {% endif %}
                             {% if user|is_authorized_for_change:finding %}
-                                {% if finding.risk_acceptance_set.all %}
+                                {% if finding.active_risk_acceptance %}
                                     <li role="presentation">
                                     <a href="{% url 'simple_risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
                                         <i class="fa fa-exclamation-circle"></i> Unaccept Risk
@@ -264,8 +264,10 @@
                     {% if finding.risk_acceptance_set.all %}
                         <td>
                             {% for ra in finding.risk_acceptance_set.all|slice:":5" %}
-                                <a href="{% url 'view_risk_acceptance' finding.test.engagement.id ra.id %}" class="fa fa-exclamation-circle fa-lg has-popover" data-trigger="hover" data-placement="right"
-                                data-content="{{ ra.name }}"
+                                <a href="{% url 'view_risk_acceptance' finding.test.engagement.id ra.id %}"
+                                class="fa fa-exclamation-circle fa-lg has-popover {% if ra.is_expired %}lightgrey{% endif%}"
+                                data-trigger="hover" data-placement="right"
+                                data-content="{{ ra }}"
                                 data-container="body" data-original-title="Risk Acceptance"></a>
                             {% endfor %}
                         </td>

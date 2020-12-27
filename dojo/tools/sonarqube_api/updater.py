@@ -58,7 +58,7 @@ class SonarQubeApiUpdater(object):
             target_status = 'RESOLVED / FALSE-POSITIVE'
         elif finding.mitigated or finding.is_Mitigated:
             target_status = 'RESOLVED / FIXED'
-        elif finding.risk_acceptance_set.all():
+        elif finding.active_risk_acceptance:
             target_status = 'RESOLVED / WONTFIX'
         elif finding.active:
             if finding.verified:

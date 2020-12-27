@@ -379,7 +379,7 @@
 
                                 </td>
                                 <!-- <td>{{ risk_acceptance.decision_details|default_if_none:""| truncatechars_html:100 }}</td> -->
-                                <td>{{ risk_acceptance.expiration_date|default_if_none:"Never" }}</td>
+                                <td class="{% if risk_acceptance.is_expired %}red{% endif%}">{{ risk_acceptance.expiration_date|default_if_none:"Never" }}</td>
                                 <td>{{ risk_acceptance.accepted_findings.count }}</td>
                                 {% if risk_acceptance.filename %}
                                 <td><a href="{% url 'download_risk_acceptance' eng.id risk_acceptance.id %}">Yes</a>

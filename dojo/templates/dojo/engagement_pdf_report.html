@@ -258,8 +258,11 @@
                                     <td>{{ finding.status }}</td>
                                     {% if finding.risk_acceptance_set.all %}
                                         <td>
-                                            <a href="{% url 'view_risk_acceptance' finding.test.engagement.id finding.risk_acceptance_set.all.0.id %}">
-                                                View Risk Acceptance</a>
+                                            {% comment %} for some reason the font-awesome icons don't work with the report template{% endcomment %}
+                                            {% for ra in finding.risk_acceptance_set.all|slice:":5" %}
+                                                <a href="{% url 'view_risk_acceptance' finding.test.engagement.id ra.id %}"
+                                                class="{% if ra.is_expired %}lightgrey{% endif%}">acceptance</a>&nbsp;
+                                            {% endfor %}
                                         </td>
                                     {% endif %}
                                     <td>{{ finding.date }}</td>
@@ -666,6 +669,8 @@
             }
         {%  endif %}
 
+
+        {% if include_table_of_contents%}
         window.onload = function () {
             var toc = "";
             var level = 3;
@@ -736,5 +741,6 @@
 
             document.getElementById("toc").innerHTML += toc;
         };
+        {% endif %}
     </script>
 {% endblock %}

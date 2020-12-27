@@ -1474,7 +1474,7 @@ class Finding(models.Model):
 
     sla_start_date = models.DateField(default=get_current_date,
                             verbose_name="SLA Start Date",
-                            help_text="The date used as start date for SLA calculation.")
+                            help_text="The date used as start date for SLA calculation. Empty by default, causing a fallback to 'date'.")
 
     cwe = models.IntegerField(default=0, null=True, blank=True,
                               verbose_name="CWE",
@@ -1848,6 +1848,11 @@ class Finding(models.Model):
 
         return False
 
+    @property
+    def active_risk_acceptance(self):
+        # risk_acceptance_set is normally prefetched so works better than count() or exists()
+        return next((ra for ra in self.risk_acceptance_set.all() if not ra.is_expired), None)
+
     def compute_hash_code(self):
         if hasattr(settings, 'HASHCODE_FIELDS_PER_SCANNER') and hasattr(settings, 'HASHCODE_ALLOWS_NULL_CWE') and hasattr(settings, 'HASHCODE_ALLOWED_FIELDS'):
             # Default fields
@@ -2004,6 +2009,7 @@ class Finding(models.Model):
         return self.title
 
     def status(self):
+        ra = self.active_risk_acceptance
         status = []
         if self.under_review:
             status += ['Under Review']
@@ -2021,29 +2027,42 @@ class Finding(models.Model):
             status += ['Out Of Scope']
         if self.duplicate:
             status += ['Duplicate']
-        if len(self.risk_acceptance_set.all()) > 0:  # this is normally prefetched so works better than count() or exists()
+        if ra:
             status += ['Risk Accepted']
         if not len(status):
             status += ['Initial']
 
         return ", ".join([str(s) for s in status])
 
-    @property
-    def age(self):
+    def _age(self, start_date):
         if self.mitigated:
-            diff = self.mitigated.date() - self.date
+            diff = self.mitigated.date() - start_date
         else:
-            diff = get_current_date() - self.date
+            diff = get_current_date() - start_date
         days = diff.days
         return days if days > 0 else 0
+
+    @property
+    def age(self):
+        return self._age(self.date)
+
+    def get_sla_start_date(self):
+        if self.sla_start_date:
+            return self.sla_start_date
+        else:
+            return self.date
+
+    @property
+    def sla_age(self):
+        return self._age(self.get_sla_start_date())
 
     def sla_days_remaining(self):
         sla_calculation = None
         severity = self.severity
         from dojo.utils import get_system_setting
-        sla_age = get_system_setting('sla_' + self.severity.lower())
-        if sla_age:
-            sla_calculation = sla_age - self.age
+        max_sla_age = get_system_setting('sla_' + self.severity.lower())
+        if max_sla_age:
+            sla_calculation = max_sla_age - self.sla_age
         return sla_calculation
 
     def sla_deadline(self):
@@ -2470,10 +2489,10 @@ class Risk_Acceptance(models.Model):
     updated = models.DateTimeField(editable=False, auto_now=True)
 
     def __unicode__(self):
-        return str(self.name)
+        return str(self.name) + (' (expired)' if self.is_expired else '')
 
     def __str__(self):
-        return str(self.name)
+        return str(self.name) + (' (expired)' if self.is_expired else '')
 
     def filename(self):
         # logger.debug('path: "%s"', self.path)
@@ -2487,6 +2506,10 @@ class Risk_Acceptance(models.Model):
                 'url': reverse('view_risk_acceptance', args=(
                     self.engagement_set.first().product.id, self.id,))}]
         return bc
+
+    @property
+    def is_expired(self):
+        return self.expiration_date is not None and self.expiration_date.date() <= timezone.now().date()
 
 
 class Report(models.Model):

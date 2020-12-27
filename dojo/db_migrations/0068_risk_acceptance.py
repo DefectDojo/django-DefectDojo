@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='finding',
             name='sla_start_date',
-            field=models.DateField(default=dojo.models.get_current_date, help_text='The date used as start date for SLA calculation.', verbose_name='SLA Start Date'),
+            field=models.DateField(default=dojo.models.get_current_date, help_text="The date used as start date for SLA calculation. Empty by default, causing a fallback to 'date'.", verbose_name='SLA Start Date'),
         ),
         migrations.AddField(
             model_name='notifications',

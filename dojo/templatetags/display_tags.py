@@ -763,12 +763,14 @@ def finding_display_status(finding):
     # add urls for some statuses
     # outputs html, so make sure to escape user provided fields
     display_status = finding.status()
-    if finding.risk_acceptance_set.all():
-        url = reverse('view_risk_acceptance', args=(finding.test.engagement.id, finding.risk_acceptance_set.all()[0].id, ))
-        name = finding.risk_acceptance_set.all()[0].name
-        link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-content="' + escape(name) + '" data-container="body" data-original-title="Risk Acceptance">Risk Accepted</a>'
-        # print(link)
-        display_status = display_status.replace('Risk Accepted', link)
+    if 'Risk Accepted' in display_status:
+        ra = finding.active_risk_acceptance
+        if ra:
+            url = reverse('view_risk_acceptance', args=(finding.test.engagement.id, ra.id, ))
+            name = ra.name
+            link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-content="' + escape(name) + '" data-container="body" data-original-title="Risk Acceptance">Risk Accepted</a>'
+            # print(link)
+            display_status = display_status.replace('Risk Accepted', link)
 
     if finding.under_review:
         url = reverse('defect_finding_review', args=(finding.id, ))

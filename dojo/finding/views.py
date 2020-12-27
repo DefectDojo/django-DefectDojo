@@ -54,7 +54,9 @@ VERIFIED_FINDINGS_QUERY = Q(verified=True)
 OUT_OF_SCOPE_FINDINGS_QUERY = Q(active=False, out_of_scope=True)
 FALSE_POSITIVE_FINDINGS_QUERY = Q(active=False, duplicate=False, false_p=True)
 INACTIVE_FINDINGS_QUERY = Q(active=False, duplicate=False, is_Mitigated=False, false_p=False, out_of_scope=False)
-ACCEPTED_FINDINGS_QUERY = Q(risk_acceptance__isnull=False)
+ACCEPTED_FINDINGS_QUERY = lambda now: Q(risk_acceptance__isnull=False) & (Q(risk_acceptance__expiration_date__gt=now) | Q(risk_acceptance__expiration_date__isnull=True))
+NOT_ACCEPTED_FINDINGS_QUERY = lambda now: Q(risk_acceptance__isnull=True) | ~(Q(risk_acceptance__expiration_date__gt=now) | Q(risk_acceptance__expiration_date__isnull=True))
+WAS_ACCEPTED_FINDINGS_QUERY = lambda now: Q(risk_acceptance__isnull=False) & ~(Q(risk_acceptance__expiration_date__gt=now) | Q(risk_acceptance__expiration_date__isnull=True))
 CLOSED_FINDINGS_QUERY = Q(is_Mitigated=True)
 
 
@@ -97,7 +99,7 @@ def inactive_findings(request, pid=None, eid=None, view=None):
 
 @user_passes_test(lambda u: u.is_staff)
 def accepted_findings(request, pid=None, eid=None, view=None):
-    return findings(request, pid=pid, eid=eid, view=view, filter_name="Accepted", query_filter=ACCEPTED_FINDINGS_QUERY,
+    return findings(request, pid=pid, eid=eid, view=view, filter_name="Accepted", query_filter=ACCEPTED_FINDINGS_QUERY(timezone.now()),
                     django_filter=accepted_findings_filter)
 
 
