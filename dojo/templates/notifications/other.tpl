@@ -1,8 +1,10 @@
 {% if type == 'mail' %}
+{% load navigation_tags %}
+{% load display_tags %}
     Hello,
 
     {{ description|safe }}{% if url is not None %}
-    More information on this event can be found here: {{ url }}
+    More information on this event can be found here: {{ url|full_url }}
     {% endif %}
 
     Kind regards,
@@ -11,7 +13,7 @@
     {{ description|safe }}
 {% elif type == 'slack' %}
     {{ description|safe }}{% if url is not None %}
-More information on this event can be found here: {{ url }}
+More information on this event can be found here: {{ url|full_url }}
     {% endif %}
 {% elif type == 'msteams' %}
     {
@@ -31,7 +33,7 @@ More information on this event can be found here: {{ url }}
             "@type": "OpenUri",
             "name": "View",
             "targets": [
-                { "os": "default", "uri": "{{ url }}" }
+                { "os": "default", "uri": "{{ url|full_url }}" }
                 ]
             }
         ]

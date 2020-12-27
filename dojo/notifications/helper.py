@@ -18,7 +18,7 @@ def create_notification(event=None, **kwargs):
         logger.debug('creating notifications for recipients')
         for recipient_notifications in Notifications.objects.filter(user__username__in=kwargs['recipients'], user__is_active=True, product=None):
             # kwargs.update({'user': recipient_notifications.user})
-            process_notifications(event, recipient_notifications, *args, **kwargs)
+            process_notifications(event, recipient_notifications, **kwargs)
     else:
         logger.debug('creating system notifications for event: %s', event)
         # send system notifications to all admin users
@@ -280,6 +280,9 @@ def send_alert_notification(event, user=None, *args, **kwargs):
 
 
 def get_slack_user_id(user_email):
+    from dojo.utils import get_system_setting
+    import json
+
     user_id = None
 
     res = requests.request(
