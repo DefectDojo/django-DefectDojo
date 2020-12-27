@@ -269,10 +269,9 @@ class System_Settings(models.Model):
     enable_google_sheets = models.BooleanField(default=False, null=True, blank=True)
     email_address = models.EmailField(max_length=100, blank=True)
     risk_acceptance_form_mandatory = models.BooleanField(null=False, blank=False, default=False, help_text="Always require risk acceptance form to accept findings? Without a form, a risk acceptance is a simple checkbox")
-    risk_acceptance_form_default_days = models.IntegerField(null=False, blank=False, default=180, help_text="Default expiry period for risk acceptance form.")
+    risk_acceptance_form_default_days = models.IntegerField(null=True, blank=True, default=180, help_text="Default expiry period for risk acceptance form.")
     risk_acceptance_reactivate_expired = models.BooleanField(null=False, blank=False, default=True, help_text="Reactive findings when risk acceptance expires?")
     risk_acceptance_notify_expired = models.IntegerField(null=True, blank=True, default=10, help_text="Notify X days before risk acceptance expires. Leave empty to disable.")
-    risk_acceptance_delete_expired = models.IntegerField(null=True, blank=True, default=10, help_text="Delete expired risk acceptances after X days. Leave empty to disable.")
 
     from dojo.middleware import System_Settings_Manager
     objects = System_Settings_Manager()

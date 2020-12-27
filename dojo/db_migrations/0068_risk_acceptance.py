@@ -40,13 +40,8 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='system_settings',
-            name='risk_acceptance_delete_expired',
-            field=models.IntegerField(blank=True, default=10, help_text='Delete expired risk acceptances after X days. Leave empty to disable.', null=True),
-        ),
-        migrations.AddField(
-            model_name='system_settings',
             name='risk_acceptance_form_default_days',
-            field=models.IntegerField(default=180, help_text='Default expiry period for risk acceptance form.'),
+            field=models.IntegerField(blank=True, default=180, help_text='Default expiry period for risk acceptance form.', null=True),
         ),
         migrations.AddField(
             model_name='system_settings',
