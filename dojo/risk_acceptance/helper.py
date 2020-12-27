@@ -18,14 +18,16 @@ def expire_now(risk_acceptance):
     risk_acceptance.save()
 
 
-def reinstate(risk_acceptance, old_expiration_date, new_expiration_date):
-    if new_expiration_date > timezone.now() and old_expiration_date <= timezone.now():
+def reinstate(risk_acceptance, old_expiration_date):
+    if risk_acceptance.expiration_date > timezone.now() and old_expiration_date <= timezone.now():
         logger.info('Reinstating risk acceptance %i:%s with %i findings', risk_acceptance.id, risk_acceptance, len(risk_acceptance.accepted_findings.all()))
 
-    for finding in risk_acceptance.accepted_findings.all():
-        logger.debug('accepting and deactivating finding %i:%s', finding.id, finding)
-        finding.active = False
-        finding.save()
+        expiration_delta_days = get_system_setting('risk_acceptance_form_default_days', 90)
+        risk_acceptance.expiration_date = timezone.now() + relativedelta(expiration_delta_days)
 
-    risk_acceptance.expiration_date = new_expiration_date
+        for finding in risk_acceptance.accepted_findings.all():
+            logger.debug('accepting and deactivating finding %i:%s', finding.id, finding)
+            finding.active = False
+            finding.save()
+
     risk_acceptance.save()

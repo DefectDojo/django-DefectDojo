@@ -263,7 +263,7 @@
                                    <li class="dropdown" style="list-style:none;position:absolute">
                                          <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
                                          <ul class="dropdown-menu">
-                                           <li>
+                                            <li>
                                              <a class="" href="{% url 'view_test' test.id %}">
                                                <i class="fa fa-list-alt"></i> View</a>
                                           </li>
@@ -336,9 +336,9 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h4> Risk Acceptance
-                    {% if can_add_risk %}
+                    {% if user|is_authorized_for_staff:eng %}
                         <a title="Add Risk Acceptance..." class="pull-right btn btn-sm btn-primary"
-                           href="{% url 'add_risk_acceptance$' eng.id %}"><span class="fa fa-plus"></span></a>
+                           href="{% url 'add_risk_acceptance$' eng.id %}?return_url={{ request.get_full_path|urlencode }}"><span class="fa fa-plus"></span></a>
                         </a>
                     {% endif %}
                 </h4>
@@ -358,10 +358,7 @@
                             <th>Findings</th>
                             <th>Proof</th>
                             <th>Owner</th>
-                            <th>View</th>
-                            {% if user|is_authorized_for_staff:eng %}
-                                <th>Delete</th>
-                            {% endif %}
+                            <th class="centered">Actions</th>
                         </thead>
                         <tbody>
                         {% for risk_acceptance in risks_accepted %}
@@ -390,17 +387,18 @@
                                     <td>No</a></td>
                                 {% endif %}
                                 <td>{{ risk_acceptance.owner.get_full_name }}</td>
-                                <td>
-                                    <a class="btn btn-sm btn-primary" href="{% url 'view_risk_acceptance' eng.id risk_acceptance.id %}">View</a>
+                                <td class="centered">
+                                    <ul>
+                                        <li class="dropdown" style="list-style:none;position:absolute">
+                                              <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                                              <ul class="dropdown-menu">
+                                                {% with engagement=eng %}
+                                                    {% include 'dojo/snippets/risk_acceptance_actions_snippet.html' with include_view=True %}
+                                                {% endwith %}
+                                            </ul>
+                                        </li>
+                                    </ul>
                                 </td>
-                                {% if user|is_authorized_for_staff:eng %}
-                                    <td>
-                                        <form class="delete-risk_acceptance-form" method="post" action="{% url 'delete_risk_acceptance' eng.id risk_acceptance.id %}" >
-                                            {% csrf_token %}
-                                            <input class="btn btn-sm btn-primary" type="submit" value="Delete"/>
-                                        </form>
-                                    </td>
-                                {% endif %}
                             </tr>
                         {% endfor %}
                         </tbody>

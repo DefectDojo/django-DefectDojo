@@ -57,44 +57,7 @@
                             <span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                            {% if user|is_authorized_for_staff:risk_acceptance %}
-                                <li role="presentation">
-                                    <a href="{% url 'edit_risk_acceptance' engagement.id risk_acceptance.id %}?return_url={{ request.get_full_path|urlencode }}">
-                                        <i class="fa fa-pencil-square-o"></i> Edit Risk Acceptance
-                                    </a>
-                                </li>
-                                {% if risk_acceptance.is_expired %}
-                                    <li role="presentation">
-                                        <a href="{% url 'reinstate_risk_acceptance' engagement.id risk_acceptance.id %}?return_url={{ request.get_full_path|urlencode }}">
-                                            <i class="fa fa-pencil-square-o"></i> Reinstate Risk
-                                        </a>
-                                    </li>
-                                {% else %}
-                                    <li role="presentation">
-                                        <a href="{% url 'expire_risk_acceptance' engagement.id risk_acceptance.id %}?return_url={{ request.get_full_path|urlencode }}">
-                                            <i class="fa fa-pencil-square-o"></i> Expire Risk Now
-                                        </a>
-                                    </li>
-                                {% endif %}
-                            {% endif %}
-                            <li role="separator" class="divider"></li>
-                            <li role="presentation">
-                                <a href="{% url 'action_history' risk_acceptance|content_type risk_acceptance.id %}">
-                                    <i class="fa fa-history"></i> View History
-                                </a>
-                            </li>
-                            {% if user|is_authorized_for_staff:risk_acceptance %}
-                                <li role="separator" class="divider"></li>
-                                <li role="presentation">
-                                    <a class="text-danger delete-risk_acceptance" href="#">
-                                        <i class="fa fa-trash"></i> Delete Risk Acceptance
-                                    </a>
-                                </li>
-                                <form id="delete-risk_acceptance-form" method="post" action="{% url 'delete_risk_acceptance' engagement.id risk_acceptance.id %}" >
-                                    {% csrf_token %}
-                                        <input type="hidden" label="delete_risk_acceptance" aria-label="delete_risk_acceptance" name="id" value="{{ risk_acceptance.id }}"/>
-                                </form>
-                            {% endif %}
+                            {% include 'dojo/snippets/risk_acceptance_actions_snippet.html' %}
                         </ul>
                     </div>
                 </div>
@@ -335,15 +298,6 @@
 {% block postscript %}
 <script type="application/javascript" src="{% static 'easymde/dist/easymde.min.js' %}"></script>
 <script type="text/javascript">
-    $('a.delete-risk_acceptance').on('click', function (e) {
-        if (confirm('Are you sure you want to delete this risk acceptance? ' +
-            'Deleting this Risk Acceptance will remove the uploaded file, delete associated Notes and make findings active again.' +
-            'Metrics over historical data will no longer show/count anything related to this risk acceptance.'
-            )) {
-                $("form#delete-risk_acceptance-form").submit();
-            }
-    });
-
     $("#edit_risk_acceptance textarea").each(function (index, elem) {
         if (elem.hasAttribute("required")) {
             elem.removeAttribute("required");

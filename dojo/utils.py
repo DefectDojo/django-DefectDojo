@@ -1420,9 +1420,9 @@ def prepare_for_view(encrypted_value):
     return decrypted_value
 
 
-def get_system_setting(setting):
+def get_system_setting(setting, default=None):
     system_settings = System_Settings.objects.get()
-    return getattr(system_settings, setting, None)
+    return getattr(system_settings, setting, (default if default is not None else None))
 
 
 def calculate_grade(product):

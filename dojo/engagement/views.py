@@ -34,7 +34,7 @@ from dojo.tools import handles_active_verified_statuses
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, message, Product_Tab, is_scan_file_too_large, \
-    get_system_setting, get_object_or_none, redirect_to_return_url_or_else
+    get_system_setting, redirect_to_return_url_or_else
 from dojo.notifications.helper import create_notification
 from dojo.finding.views import find_available_notetypes
 from functools import reduce
@@ -42,7 +42,6 @@ from django.db.models.query import QuerySet
 from dojo.user.helper import user_must_be_authorized, user_is_authorized, check_auth_users_list
 import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
-from dateutil.relativedelta import relativedelta
 from dojo.finding.views import NOT_ACCEPTED_FINDINGS_QUERY
 
 
@@ -397,7 +396,6 @@ def view_engagement(request, eid):
             'form': form,
             'notes': notes,
             'risks_accepted': risks_accepted,
-            'can_add_risk': eng_findings.count(),
             'jissue': jissue,
             'jira_project': jira_project,
             'accepted_findings': accepted_findings,
@@ -841,19 +839,17 @@ def complete_checklist(request, eid):
 
 
 @user_must_be_authorized(Engagement, 'staff', 'eid')
-def add_risk_acceptance(request, eid, raid=None):
+def add_risk_acceptance(request, eid, fid=None):
     eng = get_object_or_404(Engagement, id=eid)
-    instance = get_object_or_none(Risk_Acceptance, id=raid)
 
     if request.method == 'POST':
-        form = RiskAcceptanceForm(request.POST, request.FILES, instance=instance)
+        form = RiskAcceptanceForm(request.POST, request.FILES)
         logger.debug(vars(request.POST))
         if form.is_valid():
             logger.debug(vars(form))
             risk_acceptance = form.save()
 
-            if not instance:
-                eng.risk_acceptance.add(risk_acceptance)
+            eng.risk_acceptance.add(risk_acceptance)
 
             if form.cleaned_data['notes']:
                 notes = Notes(
@@ -876,20 +872,16 @@ def add_risk_acceptance(request, eid, raid=None):
                 'Risk acceptance saved.',
                 extra_tags='alert-success')
 
-            if instance:
-                return HttpResponseRedirect(
-                    reverse('view_risk_acceptance', args=(eid, raid, )))
-            else:
-                return HttpResponseRedirect(
-                    reverse('view_engagement', args=(eid, )))
+            return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
     else:
-        form = RiskAcceptanceForm(instance=instance, initial={'owner': request.user, 'name': 'Ad Hoc ' + timezone.now().strftime('%b %d, %Y, %H:%M:%S')})
+        form = RiskAcceptanceForm(initial={'owner': request.user, 'name': 'Ad Hoc ' + timezone.now().strftime('%b %d, %Y, %H:%M:%S')})
 
     finding_choices = Finding.objects.filter(active=True, verified=True, duplicate=False, test__engagement=eng).filter(NOT_ACCEPTED_FINDINGS_QUERY(timezone.now())).order_by('title')
 
-    form.fields["accepted_findings"].queryset = finding_choices
-    title = ("Edit " if instance else "Add ") + "Risk Acceptance"
-    product_tab = Product_Tab(eng.product.id, title=title, tab="engagements")
+    form.fields['accepted_findings'].queryset = finding_choices
+    if fid:
+        form.fields['accepted_findings'].initial = {fid}
+    product_tab = Product_Tab(eng.product.id, title="Risk Acceptance", tab="engagements")
     product_tab.setEngagement(eng)
 
     return render(request, 'dojo/add_risk_acceptance.html', {
@@ -1191,8 +1183,7 @@ def reinstate_risk_acceptance(request, eid, raid):
     risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
     eng = get_object_or_404(Engagement, pk=eid)
 
-    # TODO remove hardcoded new expiration_date
-    ra_helper.reinstate(risk_acceptance, risk_acceptance.expiration_date, timezone.now() + relativedelta(months=3))
+    ra_helper.reinstate(risk_acceptance, risk_acceptance.expiration_date)
 
     return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
 

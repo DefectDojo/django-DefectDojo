@@ -28,6 +28,8 @@ urlpatterns = [
         views.complete_checklist, name='complete_checklist'),
     url(r'^engagement/(?P<eid>\d+)/risk_acceptance/add$',
         views.add_risk_acceptance, name='add_risk_acceptance$'),
+    url(r'^engagement/(?P<eid>\d+)/risk_acceptance/add/(?P<fid>\d+)$',
+        views.add_risk_acceptance, name='add_risk_acceptance$'),
     url(r'^engagement/(?P<eid>\d+)/risk_acceptance/(?P<raid>\d+)$',
         views.view_risk_acceptance, name='view_risk_acceptance'),
     url(r'^engagement/(?P<eid>\d+)/risk_acceptance/(?P<raid>\d+)/edit$',

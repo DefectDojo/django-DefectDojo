@@ -34,6 +34,7 @@ from django.urls import reverse
 from tagulous.forms import TagField
 import logging
 from crum import get_current_user
+from dojo.utils import get_system_setting
 
 logger = logging.getLogger(__name__)
 
@@ -590,6 +591,12 @@ class RiskAcceptanceForm(EditRiskAcceptanceForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        expiration_delta_days = get_system_setting('risk_acceptance_form_default_days')
+        logger.debug('expiration_delta_days: %i', expiration_delta_days)
+        if expiration_delta_days > 0:
+            expiration_date = timezone.now().date() + relativedelta(days=expiration_delta_days)
+            # logger.debug('setting default expiration_date: %s', expiration_date)
+            self.fields['expiration_date'].initial = expiration_date
         # self.fields['path'].help_text = 'Existing proof uploaded: %s' % self.instance.filename() if self.instance.filename() else 'None'
 
 
