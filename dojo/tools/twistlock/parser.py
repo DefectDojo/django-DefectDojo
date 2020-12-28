@@ -11,26 +11,31 @@ logger = logging.getLogger(__name__)
 
 
 class TwistlockCSVParser(object):
-
     def parse_issue(self, row, test):
-
         if not row:
             return None
 
-        data_vulnerability_id = row['CVE ID']
-        data_package_version = row['Package Version']
-        data_fix_status = row['Fix Status']
-        data_package_name = row['Packages']
-        data_id = row['Id']
-        data_severity = row['Severity'].capitalize()
-        data_cvss = row['CVSS']
-        data_description = description_column = row['Description']
+        data_vulnerability_id = row.get('CVE ID', '')
+        data_package_version = row.get('Package Version', '')
+        data_fix_status = row.get('Fix Status', '')
+        data_package_name = row.get('Packages', '')
+        data_id = row.get('Id', '')
+        data_severity = row.get('Severity', '')
+        data_cvss = row.get('CVSS', '')
+        data_description = description_column = row.get('Description', '')
+
+        if data_vulnerability_id and data_package_name:
+            title = data_vulnerability_id + ": " + data_package_name + " - " + data_package_version
+        elif data_package_name and data_package_version:
+            title = data_package_name + " - " + data_package_version
+        else:
+            title = data_description
 
         finding = Finding(
-            title=textwrap.shorten(data_vulnerability_id + ": " + data_package_name + " - " + data_package_version, width=255, placeholder="..."),
+            title=textwrap.shorten(title, width=255, placeholder="..."),
             cve=data_vulnerability_id,
             test=test,
-            severity=data_severity,
+            severity=convert_severity(data_severity),
             description=data_description + "<p> Vulnerable Package: " +
             data_package_name + "</p><p> Current Version: " + str(
                 data_package_version) + "</p>",
@@ -107,19 +112,7 @@ class TwistlockJsonParser(object):
 
 
 def get_item(vulnerability, test):
-    # Following the CVSS Scoring per https://nvd.nist.gov/vuln-metrics/cvss
-    if 'severity' in vulnerability:
-        # If we're dealing with a license finding, there will be no cvssScore
-        if vulnerability['severity'] == 'important':
-            severity = "High"
-        elif vulnerability['severity'].lower() == 'moderate':
-            severity = "Medium"
-        else:
-            severity = vulnerability['severity'].title()
-    # TODO: some seem to not have anything. Needs UNKNOWN new status in the model. Some vuln do not yet have cvss assigned.
-    else:
-        severity = "Info"
-
+    severity = convert_severity(vulnerability['severity']) if 'severity' in vulnerability else "Info"
     vector = vulnerability['vector'] if 'vector' in vulnerability else "CVSS vector not provided. "
     status = vulnerability['status'] if 'status' in vulnerability else "There seems to be no fix yet. Please check description field."
     cvss = vulnerability['cvss'] if 'cvss' in vulnerability else "No CVSS score yet."
@@ -150,6 +143,21 @@ def get_item(vulnerability, test):
     finding.description = finding.description.strip()
 
     return finding
+
+
+def convert_severity(severity):
+    if severity.lower() == 'important':
+        return "High"
+    elif severity.lower() == 'moderate':
+        return "Medium"
+    elif severity.lower() == 'information':
+        return "Info"
+    elif severity.lower() == 'informational':
+        return "Info"
+    elif severity == '':
+        return "Info"
+    else:
+        return severity.title()
 
 
 class TwistlockParser(object):
