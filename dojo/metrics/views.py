@@ -120,14 +120,8 @@ def finding_querys(prod_type, request):
         'test__engagement__product__prod_type',
         'test__engagement__risk_acceptance',
         'risk_acceptance_set',
-        'reporter').extra(
-        select={
-            'ra_count': 'SELECT COUNT(*) FROM dojo_risk_acceptance INNER JOIN '
-                        'dojo_risk_acceptance_accepted_findings ON '
-                        '( dojo_risk_acceptance.id = dojo_risk_acceptance_accepted_findings.risk_acceptance_id ) '
-                        'WHERE dojo_risk_acceptance_accepted_findings.finding_id = dojo_finding.id',
-        },
-    )
+        'reporter')
+
     if not request.user.is_staff:
         findings_query = findings_query.filter(
             Q(test__engagement__product__authorized_users__in=[request.user]) |
@@ -139,14 +133,8 @@ def finding_querys(prod_type, request):
         'test__engagement__product__prod_type',
         'test__engagement__risk_acceptance',
         'risk_acceptance_set',
-        'reporter').extra(
-        select={
-            'ra_count': 'SELECT COUNT(*) FROM dojo_risk_acceptance INNER JOIN '
-                        'dojo_risk_acceptance_accepted_findings ON '
-                        '( dojo_risk_acceptance.id = dojo_risk_acceptance_accepted_findings.risk_acceptance_id ) '
-                        'WHERE dojo_risk_acceptance_accepted_findings.finding_id = dojo_finding.id',
-        },
-    )
+        'reporter')
+
     if not request.user.is_staff:
         active_findings_query = active_findings_query.filter(
             Q(test__engagement__product__authorized_users__in=[request.user]) |
@@ -423,6 +411,8 @@ def metrics(request, mtype):
         prod_type = Product_Type.objects.filter(id__in=request.GET.getlist('test__engagement__product__prod_type', []))
     else:
         prod_type = Product_Type.objects.all()
+    # legacy code calls has 'prod_type' as 'related_name' for product.... so weird looking prefetch
+    prod_type = prod_type.prefetch_related('prod_type', 'prod_type__authorized_users', 'authorized_users')
     prod_type = objects_authorized(prod_type)
 
     filters = dict()
@@ -548,7 +538,8 @@ def simple_metrics(request):
 
     # for each product type find each product with open findings and
     # count the S0, S1, S2 and S3
-    product_types = Product_Type.objects.order_by('name')
+    # legacy code calls has 'prod_type' as 'related_name' for product.... so weird looking prefetch
+    product_types = Product_Type.objects.order_by('name').prefetch_related('prod_type', 'prod_type__authorized_users', 'authorized_users')
     product_types = objects_authorized(product_types)
     for pt in product_types:
         total_critical = []
@@ -567,7 +558,7 @@ def simple_metrics(request):
                                        out_of_scope=False,
                                        date__month=now.month,
                                        date__year=now.year,
-                                       ).distinct()
+                                       ).distinct().prefetch_related('test__engagement__product__authorized_users', 'test__engagement__product__prod_type__authorized_users')
         total = objects_authorized(total.all())
 
         for f in total:
