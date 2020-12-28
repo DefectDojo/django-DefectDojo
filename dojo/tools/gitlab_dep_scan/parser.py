@@ -85,7 +85,7 @@ def get_item(vuln, test):
 
     severity = vuln['severity']
     if severity == 'Undefined' or severity == 'Unknown':
-        # Severity can be "Undefined" or "Unknown" in SAST report
+        # Severity can be "Undefined" or "Unknown" in report
         # In that case we set it as Info and specify the initial severity in the title
         title = '[{} severity] {}'.format(severity, title)
         severity = 'Info'
