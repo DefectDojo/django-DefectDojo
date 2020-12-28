@@ -6,7 +6,7 @@ import os
 import git
 import shutil
 from base_test_class import BaseTestCase
-from Product_unit_test import ProductTest
+from product_test import ProductTest
 
 
 class ScannerTest(BaseTestCase):
@@ -195,7 +195,7 @@ class ScannerTest(BaseTestCase):
         assert len(missing_templates) == 0
 
     def test_engagement_import_scan_result(self):
-        driver = self.login_page()
+        driver = self.driver
         self.goto_product_overview(driver)
         driver.find_element_by_class_name("pull-left").click()
         driver.find_element_by_link_text("Add New Engagement").click()
@@ -287,6 +287,7 @@ class ScannerTest(BaseTestCase):
 
 def suite():
     suite = unittest.TestSuite()
+    suite.addTest(BaseTestCase('test_login'))
     suite.addTest(ScannerTest('test_check_test_file'))
     suite.addTest(ScannerTest('test_check_for_doc'))
     suite.addTest(ScannerTest('test_check_for_fixtures'))

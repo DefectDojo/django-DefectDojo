@@ -37,7 +37,7 @@ from functools import reduce
 from dojo.user.helper import user_must_be_authorized
 import dojo.jira_link.helper as jira_helper
 import dojo.finding.helper as finding_helper
-
+from django.views.decorators.vary import vary_on_cookie
 
 logger = logging.getLogger(__name__)
 parse_logger = logging.getLogger('dojo')
@@ -253,6 +253,7 @@ def delete_test(request, tid):
 
 @user_passes_test(lambda u: u.is_staff)
 @cache_page(60 * 5)  # cache for 5 minutes
+@vary_on_cookie
 def test_calendar(request):
     if 'lead' not in request.GET or '0' in request.GET.getlist('lead'):
         tests = Test.objects.all()
@@ -264,6 +265,9 @@ def test_calendar(request):
             filters.append(Q(lead__isnull=True))
         filters.append(Q(lead__in=leads))
         tests = Test.objects.filter(reduce(operator.or_, filters))
+
+    tests = tests.prefetch_related('test_type', 'lead', 'engagement__product')
+
     add_breadcrumb(title="Test Calendar", top_level=True, request=request)
     return render(request, 'dojo/calendar.html', {
         'caltype': 'tests',
@@ -747,7 +751,7 @@ def re_import_scan_results(request, tid):
                                 status.last_modified = timezone.now()
                                 status.save()
 
-                            reactivated_items.append(finding)
+                            reactivated_items.append(finding.id)
                             reactivated_count += 1
                         else:
                             # existing findings may be from before we had component_name/version fields
@@ -755,7 +759,7 @@ def re_import_scan_results(request, tid):
                                 finding.component_name = finding.component_name if finding.component_name else component_name
                                 finding.component_version = finding.component_version if finding.component_version else component_version
                                 finding.save(dedupe_option=False, push_to_jira=False)
-                            unchanged_items.append(finding)
+                            unchanged_items.append(finding.id)
                             unchanged_count += 1
 
                     else:

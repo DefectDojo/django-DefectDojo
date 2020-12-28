@@ -6,7 +6,7 @@ class TestSystemSettings(TestCase):
 
     def test_system_settings_update(self):
         try:
-            # although the unittests are run after initial data has been loaded, for some reason in travis sometimes the settings aren't present
+            # although the unittests are run after initial data has been loaded, for some reason in cicd sometimes the settings aren't present
             system_settings = System_Settings.objects.get()
         except System_Settings.DoesNotExist:
             system_settings = System_Settings()
