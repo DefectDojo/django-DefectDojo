@@ -2,7 +2,6 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
-import dojo.models
 import multiselectfield.db.fields
 
 
@@ -21,7 +20,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='finding',
             name='sla_start_date',
-            field=models.DateField(default=dojo.models.get_current_date, help_text="The date used as start date for SLA calculation. Empty by default, causing a fallback to 'date'.", verbose_name='SLA Start Date'),
+            field=models.DateField(blank=True, help_text="The date used as start date for SLA calculation. Set by expiring risk acceptances. Empty by default, causing a fallback to 'date'.", null=True, verbose_name='SLA Start Date'),
         ),
         migrations.AddField(
             model_name='notifications',
@@ -42,11 +41,6 @@ class Migration(migrations.Migration):
             model_name='system_settings',
             name='risk_acceptance_form_default_days',
             field=models.IntegerField(blank=True, default=180, help_text='Default expiry period for risk acceptance form.', null=True),
-        ),
-        migrations.AddField(
-            model_name='system_settings',
-            name='risk_acceptance_form_mandatory',
-            field=models.BooleanField(default=False, help_text='Always require risk acceptance form to accept findings? Without a form, a risk acceptance is a simple checkbox'),
         ),
         migrations.AddField(
             model_name='system_settings',
@@ -107,5 +101,22 @@ class Migration(migrations.Migration):
             model_name='risk_acceptance',
             name='reactivate_expired',
             field=models.BooleanField(default=True, help_text='Reactivate findings when risk acceptance expires?', verbose_name='Reactivate findings on expiration'),
+        ),
+        migrations.AddField(
+            model_name='product',
+            name='enable_full_risk_acceptance',
+            field=models.BooleanField(default=True, help_text='Allows full risk acceptanc using a risk acceptance form, expiration date, uploaded proof, etc.'),
+        ),
+        # convert existing products to have simple risk acceptance enabled as before
+        migrations.AddField(
+            model_name='product',
+            name='enable_simple_risk_acceptance',
+            field=models.BooleanField(default=True, help_text='Allows simple risk acceptance by checking/unchecking a checkbox.'),
+        ),
+        # new products will have simple risk acceptance disabled
+        migrations.AlterField(
+            model_name='product',
+            name='enable_simple_risk_acceptance',
+            field=models.BooleanField(default=False, help_text='Allows simple risk acceptance by checking/unchecking a checkbox.'),
         ),
     ]

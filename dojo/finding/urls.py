@@ -54,7 +54,7 @@ urlpatterns = [
     url(r'^finding/(?P<fid>\d+)/simple_risk_accept',
         views.simple_risk_accept, name='simple_risk_accept_finding'),
     url(r'^finding/(?P<fid>\d+)/simple_risk_unaccept',
-        views.simple_risk_unaccept, name='simple_risk_unaccept_finding'),
+        views.risk_unaccept, name='risk_unaccept_finding'),
     url(r'^finding/(?P<fid>\d+)/request_review',
         views.request_finding_review, name='request_finding_review'),
     url(r'^finding/(?P<fid>\d+)/review',

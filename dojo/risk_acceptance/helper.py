@@ -33,3 +33,19 @@ def reinstate(risk_acceptance, old_expiration_date):
             finding.save()
 
     risk_acceptance.save()
+
+
+def delete(risk_acceptance):
+    for finding in risk_acceptance.accepted_findings.all():
+        finding.active = True
+        finding.save()
+
+    risk_acceptance.accepted_findings.clear()
+    eng.risk_acceptance.remove(risk_acceptance)
+    eng.save()
+
+    for note in risk_acceptance.notes.all():
+        note.delete()
+
+    risk_acceptance.path.delete()
+    risk_acceptance.delete()

@@ -700,10 +700,11 @@ def edit_finding(request, fid):
                 new_finding.duplicate = False
                 new_finding.duplicate_finding = None
 
-            if form['simple_risk_accept'].value():
-                new_finding.simple_risk_accept()
+            if 'simple_risk_accept' in form.cleaned_data and form['simple_risk_accept'].value():
+                if new_finding.test.engagement.product.enable_simple_risk_acceptance:
+                    new_finding.simple_risk_accept()
             else:
-                new_finding.simple_risk_unaccept()
+                new_finding.risk_unaccept()
 
             create_template = new_finding.is_template
             # always false now since this will be deprecated soon in favor of new Finding_Template model
@@ -866,15 +867,19 @@ def touch_finding(request, fid):
 @user_must_be_authorized(Finding, 'staff', 'fid')
 def simple_risk_accept(request, fid):
     finding = get_object_or_404(Finding, id=fid)
+
+    if not finding.test.engagement.product.enable_simple_risk_acceptance:
+        raise PermissionDenied()
+
     finding.simple_risk_accept()
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id, )))
 
 
 # @user_passes_test(lambda u: u.is_staff)
 @user_must_be_authorized(Finding, 'staff', 'fid')
-def simple_risk_unaccept(request, fid):
+def risk_unaccept(request, fid):
     finding = get_object_or_404(Finding, id=fid)
-    finding.simple_risk_unaccept()
+    finding.risk_unaccept()
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id, )))
 
 

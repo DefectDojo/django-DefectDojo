@@ -285,20 +285,20 @@ def finding_sla(finding):
     sla_age = get_system_setting('sla_' + severity.lower())
     if finding.mitigated:
         status = "blue"
-        status_text = 'Remediated within SLA for ' + severity.lower() + ' findings (' + str(sla_age) + ' days)'
+        status_text = 'Remediated within SLA for ' + severity.lower() + ' findings (' + str(sla_age) + ' days since ' + finding.get_sla_start_date().strftime("%b %d, %Y") + ')'
         if find_sla and find_sla < 0:
             status = "orange"
             find_sla = abs(find_sla)
             status_text = 'Out of SLA: Remediatied ' + str(
-                find_sla) + ' days past SLA for ' + severity.lower() + ' findings (' + str(sla_age) + ' days)'
+                find_sla) + ' days past SLA for ' + severity.lower() + ' findings (' + str(sla_age) + ' days since ' + finding.get_sla_start_date().strftime("%b %d, %Y") + ')'
     else:
         status = "green"
-        status_text = 'Remediation for ' + severity.lower() + ' findings in ' + str(sla_age) + ' days or less'
+        status_text = 'Remediation for ' + severity.lower() + ' findings in ' + str(sla_age) + ' days or less since ' + finding.get_sla_start_date().strftime("%b %d, %Y") + ')'
         if find_sla and find_sla < 0:
             status = "red"
             find_sla = abs(find_sla)
             status_text = 'Overdue: Remediation for ' + severity.lower() + ' findings in ' + str(
-                sla_age) + ' days or less'
+                sla_age) + ' days or less since ' + finding.get_sla_start_date().strftime("%b %d, %Y") + ')'
 
     if find_sla is not None:
         title = '<a class="has-popover" data-toggle="tooltip" data-placement="bottom" title="" href="#" data-content="' + status_text + '">' \

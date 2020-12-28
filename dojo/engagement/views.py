@@ -842,6 +842,9 @@ def complete_checklist(request, eid):
 def add_risk_acceptance(request, eid, fid=None):
     eng = get_object_or_404(Engagement, id=eid)
 
+    if not eng.product.enable_full_risk_acceptance:
+        raise PermissionDenied()
+
     if request.method == 'POST':
         form = RiskAcceptanceForm(request.POST, request.FILES)
         logger.debug(vars(request.POST))
@@ -876,7 +879,7 @@ def add_risk_acceptance(request, eid, fid=None):
     else:
         form = RiskAcceptanceForm(initial={'owner': request.user, 'name': 'Ad Hoc ' + timezone.now().strftime('%b %d, %Y, %H:%M:%S')})
 
-    finding_choices = Finding.objects.filter(active=True, verified=True, duplicate=False, test__engagement=eng).filter(NOT_ACCEPTED_FINDINGS_QUERY(timezone.now())).order_by('title')
+    finding_choices = Finding.objects.filter(duplicate=False, test__engagement=eng).filter(NOT_ACCEPTED_FINDINGS_QUERY(timezone.now())).order_by('title')
 
     form.fields['accepted_findings'].queryset = finding_choices
     if fid:
@@ -904,6 +907,10 @@ def edit_risk_acceptance(request, eid, raid):
 def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
     risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
     eng = get_object_or_404(Engagement, pk=eid)
+
+    if edit_mode and not eng.product.enable_full_risk_acceptance:
+        raise PermissionDenied()
+
     risk_acceptance_form = None
     errors = False
 
@@ -1173,6 +1180,9 @@ def expire_risk_acceptance(request, eid, raid):
     risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
     eng = get_object_or_404(Engagement, pk=eid)
 
+    if not eng.product.enable_simple_full_acceptance:
+        raise PermissionDenied()
+
     ra_helper.expire_now(risk_acceptance)
 
     return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
@@ -1182,6 +1192,9 @@ def expire_risk_acceptance(request, eid, raid):
 def reinstate_risk_acceptance(request, eid, raid):
     risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
     eng = get_object_or_404(Engagement, pk=eid)
+
+    if not eng.product.enable_simple_full_acceptance:
+        raise PermissionDenied()
 
     ra_helper.reinstate(risk_acceptance, risk_acceptance.expiration_date)
 
@@ -1193,19 +1206,8 @@ def delete_risk_acceptance(request, eid, raid):
     risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
     eng = get_object_or_404(Engagement, pk=eid)
 
-    for finding in risk_acceptance.accepted_findings.all():
-        finding.active = True
-        finding.save()
+    ra_helper.delete(risk_acceptance)
 
-    risk_acceptance.accepted_findings.clear()
-    eng.risk_acceptance.remove(risk_acceptance)
-    eng.save()
-
-    for note in risk_acceptance.notes.all():
-        note.delete()
-
-    risk_acceptance.path.delete()
-    risk_acceptance.delete()
     messages.add_message(
         request,
         messages.SUCCESS,

@@ -221,7 +221,8 @@ class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
         fields = ['name', 'description', 'tags', 'product_manager', 'technical_contact', 'team_manager', 'prod_type', 'regulations', 'app_analysis',
-                  'authorized_users', 'business_criticality', 'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience', 'internet_accessible']
+                  'authorized_users', 'business_criticality', 'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience',
+                  'internet_accessible', 'enable_simple_risk_acceptance', 'enable_full_risk_acceptance']
 
 
 class DeleteProductForm(forms.ModelForm):
@@ -853,6 +854,8 @@ class AddFindingForm(forms.ModelForm):
     title = forms.CharField(max_length=1000)
     date = forms.DateField(required=True,
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
+    sla_start_date = forms.DateField(required=False,
+                           widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     cwe = forms.IntegerField(required=False)
     cve = forms.CharField(max_length=28, required=False)
     cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'cvsscalculator', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
@@ -874,7 +877,8 @@ class AddFindingForm(forms.ModelForm):
 
     # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
     field_order = ('title', 'date', 'cwe', 'cve', 'severity', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
-                   'severity_justification', 'endpoints', 'references', 'is_template', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope', 'simple_risk_accept', 'under_defect_review')
+                   'severity_justification', 'endpoints', 'references', 'is_template', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope',
+                   'simple_risk_accept', 'under_defect_review', 'sla_start_date')
 
     def __init__(self, *args, **kwargs):
         req_resp = kwargs.pop('req_resp')
@@ -905,6 +909,8 @@ class AdHocFindingForm(forms.ModelForm):
     title = forms.CharField(max_length=1000)
     date = forms.DateField(required=True,
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
+    sla_start_date = forms.DateField(required=False,
+                           widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     cwe = forms.IntegerField(required=False)
     cve = forms.CharField(max_length=28, required=False)
     cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'cvsscalculator', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
@@ -926,7 +932,8 @@ class AdHocFindingForm(forms.ModelForm):
 
     # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
     field_order = ('title', 'date', 'cwe', 'cve', 'severity', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
-                   'severity_justification', 'endpoints', 'references', 'is_template', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope', 'simple_risk_accept', 'under_defect_review')
+                   'severity_justification', 'endpoints', 'references', 'is_template', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope',
+                   'simple_risk_accept', 'under_defect_review', 'sla_start_date')
 
     def __init__(self, *args, **kwargs):
         req_resp = kwargs.pop('req_resp')
@@ -982,6 +989,8 @@ class FindingForm(forms.ModelForm):
     title = forms.CharField(max_length=1000)
     date = forms.DateField(required=True,
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
+    sla_start_date = forms.DateField(required=False,
+                           widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     cwe = forms.IntegerField(required=False)
     cve = forms.CharField(max_length=28, required=False, strip=False)
     cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'cvsscalculator', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
@@ -1002,11 +1011,12 @@ class FindingForm(forms.ModelForm):
     is_template = forms.BooleanField(label="Create Template?", required=False,
                                      help_text="A new finding template will be created from this finding.")
 
-    simple_risk_accept = forms.BooleanField(label="Accept Risk (simple)", required=False, help_text="Check to accept this risk and deactivate the finding. Uncheck to unaccept the risk. Use full risk acceptance from the dropdown menu if you need advanced settings such as an expiry date.")
+    simple_risk_accept = forms.BooleanField(label="Accept Risk", required=False, help_text="Check to accept this risk and deactivate the finding. Uncheck to unaccept the risk. Use full risk acceptance from the dropdown menu if you need advanced settings such as an expiry date.")
 
     # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
     field_order = ('title', 'date', 'cwe', 'cve', 'severity', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
-                   'severity_justification', 'endpoints', 'references', 'is_template', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope', 'simple_risk_accept', 'under_defect_review')
+                   'severity_justification', 'endpoints', 'references', 'is_template', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope',
+                   'simple_risk_accept', 'under_defect_review', 'sla_start_date')
 
     def __init__(self, *args, **kwargs):
         template = kwargs.pop('template')
@@ -1017,7 +1027,13 @@ class FindingForm(forms.ModelForm):
 
         super(FindingForm, self).__init__(*args, **kwargs)
         print('instance: ', self.instance)
-        self.fields['simple_risk_accept'].initial = True if hasattr(self, 'instance') and self.instance.is_simple_risk_accepted else False
+        self.fields['simple_risk_accept'].initial = True if hasattr(self, 'instance') and self.instance.active_risk_acceptance else False
+
+        # do not show checkbox if finding is not accepted and simple risk acceptance is disabled
+        # if chcked, always show to allow unaccept also with full risk acceptance enabled
+        if not self.instance.active_risk_acceptance and not self.instance.test.engagement.product.enable_simple_risk_acceptance:
+            del self.fields['simple_risk_accept']
+
         # self.fields['tags'].widget.choices = t
         if req_resp:
             self.fields['request'].initial = req_resp[0]

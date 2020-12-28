@@ -268,7 +268,6 @@ class System_Settings(models.Model):
     drive_folder_ID = models.CharField(max_length=100, blank=True)
     enable_google_sheets = models.BooleanField(default=False, null=True, blank=True)
     email_address = models.EmailField(max_length=100, blank=True)
-    risk_acceptance_form_mandatory = models.BooleanField(null=False, blank=False, default=False, help_text="Always require risk acceptance form to accept findings? Without a form, a risk acceptance is a simple checkbox")
     risk_acceptance_form_default_days = models.IntegerField(null=True, blank=True, default=180, help_text="Default expiry period for risk acceptance form.")
     risk_acceptance_notify_expired = models.IntegerField(null=True, blank=True, default=10, help_text="Notify X days before risk acceptance expires. Leave empty to disable.")
 
@@ -673,6 +672,9 @@ class Product(models.Model):
     # tags = TagField(blank=True, force_lowercase=True, help_text="Add tags that help describe this product. Choose from the list or add new tags. Press Enter key to add.")
     tags = TagField(blank=True, force_lowercase=True, help_text="Add tags that help describe this product. Choose from the list or add new tags. Press Enter key to add.")
 
+    enable_simple_risk_acceptance = models.BooleanField(default=False, help_text=_('Allows simple risk acceptance by checking/unchecking a checkbox.'))
+    enable_full_risk_acceptance = models.BooleanField(default=True, help_text=_('Allows full risk acceptanc using a risk acceptance form, expiration date, uploaded proof, etc.'))
+
     def __unicode__(self):
         return self.name
 
@@ -785,6 +787,10 @@ class Product(models.Model):
         bc = [{'title': self.__unicode__(),
                'url': reverse('view_product', args=(self.id,))}]
         return bc
+
+    @property
+    def enable_risk_acceptance(self):
+        return self.enable_full_risk_acceptance or self.enable_simple_risk_acceptance
 
     @property
     def get_product_type(self):
@@ -1470,9 +1476,11 @@ class Finding(models.Model):
                             verbose_name="Date",
                             help_text="The date the flaw was discovered.")
 
-    sla_start_date = models.DateField(default=get_current_date,
+    sla_start_date = models.DateField(
+                            blank=True,
+                            null=True,
                             verbose_name="SLA Start Date",
-                            help_text="The date used as start date for SLA calculation. Empty by default, causing a fallback to 'date'.")
+                            help_text="The date used as start date for SLA calculation. Set by expiring risk acceptances. Empty by default, causing a fallback to 'date'.")
 
     cwe = models.IntegerField(default=0, null=True, blank=True,
                               verbose_name="CWE",
@@ -1823,7 +1831,7 @@ class Finding(models.Model):
         self.active = False
         self.save()
 
-    def simple_risk_unaccept(self):
+    def risk_unaccept(self):
         # removing from ManyToMany will not fail for non-existing entries
         self.get_simple_risk_acceptance().accepted_findings.remove(self)
         # risk acceptance no longer in place, so reactivate, but only when it makes sense
@@ -1836,15 +1844,15 @@ class Finding(models.Model):
             self.active = True
             self.save()
 
-    @property
-    def is_simple_risk_accepted(self):
+    # @property
+    # def is_simple_risk_accepted(self):
 
-        if self.get_simple_risk_acceptance(create=False) is not None:
-            return self.get_simple_risk_acceptance().accepted_findings.filter(id=self.id).exists()
-            # print('exists: ', exists)
-            # return exists
+    #     if self.get_simple_risk_acceptance(create=False) is not None:
+    #         return self.get_simple_risk_acceptance().accepted_findings.filter(id=self.id).exists()
+    #         # print('exists: ', exists)
+    #         # return exists
 
-        return False
+    #     return False
 
     @property
     def active_risk_acceptance(self):
