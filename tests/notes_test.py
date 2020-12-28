@@ -2,7 +2,7 @@ import unittest
 import sys
 import time
 from base_test_class import BaseTestCase
-from Product_unit_test import ProductTest
+from product_test import ProductTest
 
 '''
 Tests Notes functionality on all levels (Engagement, Test, and Finding)
@@ -53,14 +53,14 @@ class NoteTest(BaseTestCase):
         self.assertTrue(pass_test)
 
     def test_finding_note(self):
-        driver = self.login_page()
+        driver = self.driver
         self.goto_all_findings_list(driver)
         driver.find_element_by_link_text("App Vulnerable to XSS").click()
         self.create_public_note(driver, 'Finding')
         self.create_private_note(driver, 'Finding')
 
     def test_test_note(self):
-        driver = self.login_page()
+        driver = self.driver
         self.goto_all_engagements_overview(driver)
         driver.find_element_by_partial_link_text("Ad Hoc Engagement").click()
         driver.find_element_by_partial_link_text("Pen Test").click()
@@ -68,7 +68,7 @@ class NoteTest(BaseTestCase):
         self.create_private_note(driver, 'Test')
 
     def test_engagement_note(self):
-        driver = self.login_page()
+        driver = self.driver
         self.goto_all_engagements_overview(driver)
         driver.find_element_by_partial_link_text("Ad Hoc Engagement").click()
         self.create_public_note(driver, 'Engagement')
@@ -77,6 +77,7 @@ class NoteTest(BaseTestCase):
 
 def suite():
     suite = unittest.TestSuite()
+    suite.addTest(BaseTestCase('test_login'))
     suite.addTest(ProductTest('test_create_product'))
     suite.addTest(ProductTest('test_add_product_finding'))
     suite.addTest(NoteTest('test_finding_note'))

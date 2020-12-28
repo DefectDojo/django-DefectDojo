@@ -77,7 +77,7 @@ You can manage your notification settings here: <a href="{{ notification_url|ful
 
 {% if url is not None %}
 {{ test }} results have been uploaded.
-They can be viewed here: {{ url }}
+They can be viewed here: {{ url|full_url }}
 {% endif %}
 {% elif type == 'msteams' %}
 {% url 'view_test' test.id as test_url %}

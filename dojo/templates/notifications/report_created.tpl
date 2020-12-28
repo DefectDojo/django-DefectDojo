@@ -1,14 +1,14 @@
 {% if type == 'mail' %}
     Greetings,
 
-    Your report "{{ report.name }}" is ready. It can be downloaded here: {{ url }}
+    Your report "{{ report.name }}" is ready. It can be downloaded here: {{ url|full_url }}
 
     Kind regards,
     {{ system_settings.team_name }}
 {% elif type == 'alert' %}
     Your report "{{ report.name }}" is ready.
 {% elif type == 'slack' %}
-    Your report "{{ report.name }}" is ready. It can be downloaded here: {{ url }}
+    Your report "{{ report.name }}" is ready. It can be downloaded here: {{ url|full_url }}
 {% elif type == 'msteams' %}
     {
         "@context": "https://schema.org/extensions",
@@ -33,7 +33,7 @@
             "@type": "OpenUri",
             "name": "Download",
             "targets": [
-                { "os": "default", "uri": "{{ url }}" }
+                { "os": "default", "uri": "{{ url|full_url }}" }
                 ]
             }
         ]

@@ -410,7 +410,8 @@ class ImportScanForm(forms.Form):
                          ("Checkov Scan", "Checkov Scan"),
                          ("kube-bench Scan", "Kube-Bench Scan"),
                          ("CCVS Report", "CCVS Report"),
-                         ("ORT evaluated model Importer", "ORT evaluated model Importer"))
+                         ("ORT evaluated model Importer", "ORT evaluated model Importer"),
+                         ("SARIF", "SARIF"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
     scan_date = forms.DateTimeField(
@@ -422,7 +423,7 @@ class ImportScanForm(forms.Form):
     minimum_severity = forms.ChoiceField(help_text='Minimum severity level to be imported',
                                          required=True,
                                          choices=SEVERITY_CHOICES)
-    active = forms.BooleanField(help_text="Select if these findings are currently active.", required=False)
+    active = forms.BooleanField(help_text="Select if these findings are currently active.", required=False, initial=True)
     verified = forms.BooleanField(help_text="Select if these findings have been verified.", required=False)
     scan_type = forms.ChoiceField(required=True, choices=SORTED_SCAN_TYPE_CHOICES)
     environment = forms.ModelChoiceField(
@@ -469,7 +470,7 @@ class ReImportScanForm(forms.Form):
     minimum_severity = forms.ChoiceField(help_text='Minimum severity level to be imported',
                                          required=True,
                                          choices=SEVERITY_CHOICES[0:4])
-    active = forms.BooleanField(help_text="Select if these findings are currently active.", required=False)
+    active = forms.BooleanField(help_text="Select if these findings are currently active.", required=False, initial=True)
     verified = forms.BooleanField(help_text="Select if these findings have been verified.", required=False)
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
                                                widget=MultipleSelectWithPopPlusMinus(attrs={'size': '5'}))

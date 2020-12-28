@@ -43,7 +43,7 @@ Defect Dojo</br>
     SLA breach alert for finding {{ finding.id }}. Relative days count to SLA due date: {{sla_age}}.
 Title: {{finding.title}}
 Severity: {{finding.severity}}
-You can find details here: {{ url }}
+You can find details here: {{ url|full_url }}
 {% elif type == 'msteams' %}
 {% url 'view_finding' finding.id as finding_url %}
     {

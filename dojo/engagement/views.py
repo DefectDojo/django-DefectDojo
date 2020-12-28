@@ -40,7 +40,7 @@ from functools import reduce
 from django.db.models.query import QuerySet
 from dojo.user.helper import user_must_be_authorized, user_is_authorized, check_auth_users_list
 import dojo.jira_link.helper as jira_helper
-
+from django.views.decorators.vary import vary_on_cookie
 
 logger = logging.getLogger(__name__)
 parse_logger = logging.getLogger('dojo')
@@ -48,6 +48,7 @@ parse_logger = logging.getLogger('dojo')
 
 @user_passes_test(lambda u: u.is_staff)
 @cache_page(60 * 5)  # cache for 5 minutes
+@vary_on_cookie
 def engagement_calendar(request):
     if 'lead' not in request.GET or '0' in request.GET.getlist('lead'):
         engagements = Engagement.objects.all()
@@ -59,6 +60,9 @@ def engagement_calendar(request):
             filters.append(Q(lead__isnull=True))
         filters.append(Q(lead__in=leads))
         engagements = Engagement.objects.filter(reduce(operator.or_, filters))
+
+    engagements = engagements.select_related('lead')
+    engagements = engagements.prefetch_related('product')
 
     add_breadcrumb(
         title="Engagement Calendar", top_level=True, request=request)

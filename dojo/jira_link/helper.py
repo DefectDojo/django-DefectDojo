@@ -89,6 +89,9 @@ def get_jira_project(obj, use_inheritance=True):
     if isinstance(obj, JIRA_Project):
         return obj
 
+    if isinstance(obj, JIRA_Issue):
+        return obj.jira_project
+
     if isinstance(obj, Finding):
         finding = obj
         return get_jira_project(finding.test)
@@ -144,13 +147,13 @@ def get_jira_url(obj):
     logger.debug('getting jira url')
 
     # finding + engagement
-    if hasattr(obj, 'has_jira_issue') and obj.has_jira_issue:
-        return get_jira_issue_url(obj)
-    else:
+    issue = get_jira_issue(obj)
+    if issue is not None:
+        return get_jira_issue_url(issue)
+    elif isinstance(obj, Finding):
         # finding must only have url if there is a jira_issue
         # engagement can continue to show url of jiraproject instead of jira issue
-        if isinstance(obj, Finding):
-            return None
+        return None
 
     if isinstance(obj, JIRA_Project):
         return get_jira_project_url(obj)
@@ -158,20 +161,18 @@ def get_jira_url(obj):
     return get_jira_project_url(get_jira_project(obj))
 
 
-def get_jira_issue_url(obj):
+def get_jira_issue_url(issue):
     logger.debug('getting jira issue url')
-    if obj.has_jira_issue:
-        jira_project = get_jira_project(obj)
-        jira_instance = get_jira_instance(obj)
-        if jira_project and jira_instance:
-            # example http://jira.com/browser/SEC-123
-            return jira_project.jira_instance.url + '/browse/' + obj.jira_issue.jira_key
+    jira_project = get_jira_project(issue)
+    jira_instance = get_jira_instance(jira_project)
+    if jira_instance is None:
+        return None
 
-    return None
+    # example http://jira.com/browser/SEC-123
+    return jira_instance.url + '/browse/' + issue.jira_key
 
 
 def get_jira_project_url(obj):
-
     logger.debug('getting jira project url')
     if not isinstance(obj, JIRA_Project):
         jira_project = get_jira_project(obj)
@@ -508,8 +509,6 @@ def add_jira_issue(find):
             issue = jira.issue(new_issue.id)
 
             find.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
-
-            jira_issue_url = get_jira_issue_url(find)
 
             # Upload dojo finding screenshots to Jira
             for pic in find.images.all():

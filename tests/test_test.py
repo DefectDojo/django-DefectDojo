@@ -2,7 +2,7 @@ from selenium.webdriver.support.ui import Select
 import unittest
 import sys
 from base_test_class import BaseTestCase
-from Product_unit_test import ProductTest
+from product_test import ProductTest
 
 
 class TestUnitTest(BaseTestCase):
@@ -10,7 +10,7 @@ class TestUnitTest(BaseTestCase):
     def test_view_test(self):
         # View existing test from ProductTest()
         # Login to the site.
-        driver = self.login_page()
+        driver = self.driver
 
         # goto engagemnent list (and wait for javascript to load)
         self.goto_all_engagements_overview(driver)
@@ -46,7 +46,7 @@ class TestUnitTest(BaseTestCase):
         # You must have an engagement and then tests are packed in engagements
         # Login to the site.
         # Username and password will be gotten from environ
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to the Product page to select the product we created earlier
         self.goto_product_overview(driver)
         # wait for product_wrapper div as datatables javascript modifies the DOM on page load.
@@ -95,7 +95,7 @@ class TestUnitTest(BaseTestCase):
 
     def test_edit_test(self):
         # Login to the site.
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to the engagement page
         self.goto_active_engagements_overview(driver)
         # Select a previously created engagement title
@@ -115,7 +115,7 @@ class TestUnitTest(BaseTestCase):
 
     def test_add_note(self):
         # Login to the site.
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to the engagement page
         self.goto_active_engagements_overview(driver)
         # Select a previously created engagement title
@@ -137,7 +137,7 @@ class TestUnitTest(BaseTestCase):
     def test_delete_test(self):
         # Login to the site. Password will have to be modified
         # to match an admin password in your own container
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to the engagement page
         self.goto_active_engagements_overview(driver)
         # Select a previously created engagement title
@@ -161,6 +161,7 @@ def suite():
     suite = unittest.TestSuite()
     # Add each test the the suite to be run
     # success and failure is output by the test
+    suite.addTest(BaseTestCase('test_login'))
     suite.addTest(ProductTest('test_create_product'))
     suite.addTest(ProductTest('test_add_product_finding'))
     suite.addTest(TestUnitTest('test_view_test'))
