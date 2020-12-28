@@ -2,7 +2,7 @@ from selenium.webdriver.support.ui import Select
 import unittest
 import sys
 from base_test_class import BaseTestCase
-from Product_unit_test import ProductTest
+from product_test import ProductTest
 
 
 class EndpointTest(BaseTestCase):
@@ -10,7 +10,7 @@ class EndpointTest(BaseTestCase):
     def test_create_endpoint(self):
         # Login to the site.
         # Username and password will be gotten from environ
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to the Endpoint page
         driver.get(self.base_url + "endpoint")
         # "Click" the dropdown button to see options
@@ -33,7 +33,7 @@ class EndpointTest(BaseTestCase):
     def test_edit_endpoint(self):
         # Login to the site. Password will have to be modified
         # to match an admin password in your own container
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to the endpoint page
         driver.get(self.base_url + "endpoint")
         # Select one of the previously created endpoint to edit
@@ -59,7 +59,7 @@ class EndpointTest(BaseTestCase):
     def test_delete_endpoint(self):
         # Login to the site. Password will have to be modified
         # to match an admin password in your own container
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to the endpoint page
         driver.get(self.base_url + "endpoint")
         # Select one of the previously created endpoint to delete
@@ -80,6 +80,7 @@ def suite():
     suite = unittest.TestSuite()
     # Add each test the the suite to be run
     # success and failure is output by the test
+    suite.addTest(BaseTestCase('test_login'))
     suite.addTest(ProductTest('test_create_product'))
     suite.addTest(EndpointTest('test_create_endpoint'))
     suite.addTest(EndpointTest('test_edit_endpoint'))

@@ -44,6 +44,7 @@ import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.risk_acceptance.helper import prefetch_for_expiration
 from dojo.finding.views import NOT_ACCEPTED_FINDINGS_QUERY
+from django.views.decorators.vary import vary_on_cookie
 
 
 logger = logging.getLogger(__name__)
@@ -52,6 +53,7 @@ parse_logger = logging.getLogger('dojo')
 
 @user_passes_test(lambda u: u.is_staff)
 @cache_page(60 * 5)  # cache for 5 minutes
+@vary_on_cookie
 def engagement_calendar(request):
     if 'lead' not in request.GET or '0' in request.GET.getlist('lead'):
         engagements = Engagement.objects.all()

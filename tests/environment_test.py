@@ -17,7 +17,7 @@ class EnvironmentTest(BaseTestCase):
         return driver
 
     def test_create_environment(self):
-        driver = self.login_page()
+        driver = self.driver
         driver.get(self.base_url + "dev_env")
         driver.find_element_by_id("dropdownMenu1").click()
         driver.find_element_by_link_text("New Environment").click()
@@ -28,7 +28,7 @@ class EnvironmentTest(BaseTestCase):
         self.assertTrue(self.is_success_message_present(text='Environment added successfully.'))
 
     def test_edit_environment(self):
-        driver = self.login_page()
+        driver = self.driver
         driver.get(self.base_url + "dev_env")
         driver.find_element_by_link_text("environment test").click()
         driver.find_element_by_id("id_name").clear()
@@ -38,7 +38,7 @@ class EnvironmentTest(BaseTestCase):
         self.assertTrue(self.is_success_message_present(text='Environment updated successfully.'))
 
     def test_delete_environment(self):
-        driver = self.login_page()
+        driver = self.driver
         driver.get(self.base_url + "dev_env")
         driver.find_element_by_link_text("Edited environment test").click()
         driver.find_element_by_css_selector("input.btn.btn-danger").click()
@@ -48,6 +48,7 @@ class EnvironmentTest(BaseTestCase):
 
 def suite():
     suite = unittest.TestSuite()
+    suite.addTest(BaseTestCase('test_login'))
     suite.addTest(EnvironmentTest('test_create_environment'))
     suite.addTest(EnvironmentTest('test_edit_environment'))
     suite.addTest(EnvironmentTest('test_delete_environment'))

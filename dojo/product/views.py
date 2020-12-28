@@ -213,6 +213,8 @@ def finding_querys(request, prod):
 
     findings_query = Finding.objects.filter(test__engagement__product=prod,
                                       severity__in=('Critical', 'High', 'Medium', 'Low', 'Info'))
+
+    # prefetch only what's needed to avoid lots of repeated queries
     findings_query = findings_query.prefetch_related(
         # 'test__engagement',
         # 'test__engagement__risk_acceptance',
@@ -226,6 +228,7 @@ def finding_querys(request, prod):
     findings_qs = queryset_check(findings)
     filters['form'] = findings.form
 
+    # dead code:
     # if not findings_qs and not findings_query:
     #     # logger.debug('all filtered')
     #     findings = findings_query
@@ -440,7 +443,6 @@ def view_product_metrics(request, pid):
     week_date = filters['week']
 
     tests = Test.objects.filter(engagement__product=prod).prefetch_related('finding_set', 'test_type')
-
     tests = tests.annotate(verified_finding_count=Count('finding__id', filter=Q(finding__verified=True)))
 
     open_vulnerabilities = filters['open_vulns']

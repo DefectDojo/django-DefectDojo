@@ -412,7 +412,8 @@ class ImportScanForm(forms.Form):
                          ("Checkov Scan", "Checkov Scan"),
                          ("kube-bench Scan", "Kube-Bench Scan"),
                          ("CCVS Report", "CCVS Report"),
-                         ("ORT evaluated model Importer", "ORT evaluated model Importer"))
+                         ("ORT evaluated model Importer", "ORT evaluated model Importer"),
+                         ("SARIF", "SARIF"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
     scan_date = forms.DateTimeField(
@@ -482,15 +483,15 @@ class ReImportScanForm(forms.Form):
         label="Choose report file",
         required=False)
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, scan_type=None, **kwargs):
         super(ReImportScanForm, self).__init__(*args, **kwargs)
+        self.scan_type = scan_type
 
     def clean(self):
         cleaned_data = super().clean()
-        scan_type = cleaned_data.get("scan_type")
         file = cleaned_data.get("file")
-        if requires_file(scan_type) and not file:
-            raise forms.ValidationError('Uploading a Report File is required for {}'.format(scan_type))
+        if requires_file(self.scan_type) and not file:
+            raise forms.ValidationError("Uploading a report file is required for re-uploading findings.")
         return cleaned_data
 
     # date can only be today or in the past, not the future

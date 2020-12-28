@@ -2075,9 +2075,9 @@ class Finding(models.Model):
         sla_calculation = None
         severity = self.severity
         from dojo.utils import get_system_setting
-        max_sla_age = get_system_setting('sla_' + self.severity.lower())
-        if max_sla_age:
-            sla_calculation = max_sla_age - self.sla_age
+        sla_age = get_system_setting('sla_' + self.severity.lower())
+        if sla_age:
+            sla_calculation = sla_age - self.age
         return sla_calculation
 
     def sla_deadline(self):
