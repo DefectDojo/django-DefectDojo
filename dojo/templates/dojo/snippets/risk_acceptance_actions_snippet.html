@@ -1,0 +1,79 @@
+{% load display_tags %}
+
+{% if include_view %}
+    <li role="presentation">
+        <a href="{% url 'view_risk_acceptance' engagement.id risk_acceptance.id %}?return_url={{ request.get_full_path|urlencode }}">
+            <i class="fa fa-list-alt"></i> View Risk Acceptance
+        </a>
+    </li>
+{% endif %}
+
+{% if engagement.product.enable_full_risk_acceptance %}
+    {% if user|is_authorized_for_staff:risk_acceptance %}
+        <li role="presentation">
+            <a href="{% url 'edit_risk_acceptance' engagement.id risk_acceptance.id %}?return_url={{ request.get_full_path|urlencode }}">
+                <i class="fa fa-pencil-square-o"></i> Edit Risk Acceptance
+            </a>
+        </li>
+        <li role="separator" class="divider"></li>
+        {% if risk_acceptance.is_expired %}
+            <li role="presentation">
+                <a class="reinstate-risk_acceptance" href="{% url 'reinstate_risk_acceptance' engagement.id risk_acceptance.id %}?return_url={{ request.get_full_path|urlencode }}">
+                    <i class="fa fa-fast-backward"></i> Reinstate
+                </a>
+            </li>
+        {% else %}
+            <li role="presentation">
+                <a class="expire-risk_acceptance" href="{% url 'expire_risk_acceptance' engagement.id risk_acceptance.id %}?return_url={{ request.get_full_path|urlencode }}">
+                    <i class="fa fa-fast-forward"></i> Expire Now
+                </a>
+            </li>
+        {% endif %}
+    {% endif %}
+{% endif %}
+<li role="separator" class="divider"></li>
+<li role="presentation">
+<a href="{% url 'action_history' risk_acceptance|content_type risk_acceptance.id %}">
+    <i class="fa fa-history"></i> View History
+</a>
+</li>
+{% if user|is_authorized_for_staff:risk_acceptance %}
+<li role="separator" class="divider"></li>
+<li role="presentation">
+    <a class="text-danger delete-risk_acceptance" href="#">
+        <i class="fa fa-trash"></i> Delete Risk Acceptance
+    </a>
+    <form id="delete-risk_acceptance-form-{{risk_acceptance.id}}" method="post" action="{% url 'delete_risk_acceptance' engagement.id risk_acceptance.id %}zz" >
+        {% csrf_token %}
+        <input type="hidden" label="delete_risk_acceptance" aria-label="delete_risk_acceptance" name="id" value="{{ risk_acceptance.id }}"/>
+    </form>
+</li>
+{% endif %}
+
+<script type="text/javascript">
+    $('a.delete-risk_acceptance').on('click', function (e) {
+        if (confirm('Are you sure you want to delete this risk acceptance? ' +
+            'Deleting this Risk Acceptance will remove the uploaded file, delete associated Notes and make findings active again. ' +
+            'Metrics over historical data will no longer show/count anything related to this risk acceptance.'
+            )) {
+                $(this).next().submit();
+            }
+    });
+
+    $('a.reinstate-risk_acceptance').on('click', function (e) {
+        return confirm('Are you sure you want reinstate this risk acceptance? ' +
+            'All its findings will be deactivated and marked as accepted. ' +
+            'The default of {{ system_settings.risk_acceptance_form_default_days }} days from now will be the expirdation date.'
+            )
+    });
+
+    $('a.expire-risk_acceptance').on('click', function (e) {
+        return confirm('Are you sure you want let this risk acceptance expire now? ' +
+            'All its findings will be re-activated and no longer marked as accepted. ' +
+            'The expiration date for this risk acceptance will be set to "now".'
+            )
+    });
+
+
+
+</script>
