@@ -638,10 +638,9 @@ def re_import_scan_results(request, tid):
 
     # form.initial['tags'] = [tag.name for tag in test.tags.all()]
     if request.method == "POST":
-        form = ReImportScanForm(request.POST, request.FILES)
+        form = ReImportScanForm(request.POST, request.FILES, scan_type=scan_type)
         if jira_project:
             jform = JIRAImportScanForm(request.POST, push_all=push_all_jira_issues, prefix='jiraform')
-
         if form.is_valid() and (jform is None or jform.is_valid()):
             scan_date = form.cleaned_data['scan_date']
 
@@ -651,7 +650,6 @@ def re_import_scan_results(request, tid):
 
             min_sev = form.cleaned_data['minimum_severity']
             file = request.FILES.get('file', None)
-            scan_type = test.test_type.name
             active = form.cleaned_data['active']
             verified = form.cleaned_data['verified']
             tags = form.cleaned_data['tags']
@@ -809,19 +807,23 @@ def re_import_scan_results(request, tid):
                     if finding:
                         finding_count += 1
                         for endpoint in item.unsaved_endpoints:
-                            ep, created = Endpoint.objects.get_or_create(protocol=endpoint.protocol,
-                                                                         host=endpoint.host,
-                                                                         path=endpoint.path,
-                                                                         query=endpoint.query,
-                                                                         fragment=endpoint.fragment,
-                                                                         product=test.engagement.product)
-                            eps, created = Endpoint_Status.objects.get_or_create(
-                                finding=finding,
-                                endpoint=ep)
-                            ep.endpoint_status.add(eps)
+                            from django.core.exceptions import MultipleObjectsReturned
+                            try:
+                                ep, created = Endpoint.objects.get_or_create(protocol=endpoint.protocol,
+                                                                            host=endpoint.host,
+                                                                            path=endpoint.path,
+                                                                            query=endpoint.query,
+                                                                            fragment=endpoint.fragment,
+                                                                            product=test.engagement.product)
+                                eps, created = Endpoint_Status.objects.get_or_create(
+                                    finding=finding,
+                                    endpoint=ep)
+                                ep.endpoint_status.add(eps)
 
-                            finding.endpoints.add(ep)
-                            finding.endpoint_status.add(eps)
+                                finding.endpoints.add(ep)
+                                finding.endpoint_status.add(eps)
+                            except (MultipleObjectsReturned):
+                                pass
                         for endpoint in form.cleaned_data['endpoints']:
                             ep, created = Endpoint.objects.get_or_create(protocol=endpoint.protocol,
                                                                          host=endpoint.host,
