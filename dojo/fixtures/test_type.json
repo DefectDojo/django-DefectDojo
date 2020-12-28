@@ -677,6 +677,12 @@
         },
         "model": "dojo.test_type",
         "pk": 188
+    },
+    {
+        "fields": {
+            "name": "SARIF"
+        },
+        "model": "dojo.test_type",
+        "pk": 189
     }
-
 ]

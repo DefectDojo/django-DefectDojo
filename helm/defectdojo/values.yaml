@@ -179,7 +179,7 @@ mysql:
 postgresql:
   enabled: true
   serviceAccount:
-    enabled: true  
+    enabled: true
   postgresqlUsername: defectdojo
   postgresqlPassword: ""
   postgresqlDatabase: defectdojo
@@ -216,7 +216,7 @@ cloudsql:
 
 rabbitmq:
   enabled: true
-  replicas: 1
+  replicaCount: 1
   auth:
     password: ""
     erlangCookie: ""

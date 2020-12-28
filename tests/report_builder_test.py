@@ -8,7 +8,7 @@ import sys
 import os
 from base_test_class import BaseTestCase
 # from base_test_class import on_exception_html_source_logger
-from Product_unit_test import ProductTest
+from product_test import ProductTest
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -35,7 +35,7 @@ class ReportBuilderTest(BaseTestCase):
                 content = widget.find_element_by_class_name("editor").send_keys('wysiwyg')
 
     def generate_HTML_report(self):
-        driver = self.login_page()
+        driver = self.driver
         driver.get(self.base_url + "reports/builder")
         self.move_blocks(driver)
         self.enter_values(driver)
@@ -45,7 +45,7 @@ class ReportBuilderTest(BaseTestCase):
         self.assertTrue(driver.current_url == self.base_url + "reports/custom")
 
     def generate_AsciiDoc_report(self):
-        driver = self.login_page()
+        driver = self.driver
         driver.get(self.base_url + "reports/builder")
         self.move_blocks(driver)
         self.enter_values(driver)
@@ -181,6 +181,7 @@ class ReportBuilderTest(BaseTestCase):
 def add_report_tests_to_suite(suite):
     # Add each test the the suite to be run
     # success and failure is output by the test
+    suite.addTest(BaseTestCase('test_login'))
     suite.addTest(ProductTest('test_create_product'))
     suite.addTest(ProductTest('test_add_product_finding'))
     suite.addTest(ProductTest('test_add_product_endpoints'))

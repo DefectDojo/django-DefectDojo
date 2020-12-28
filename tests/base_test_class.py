@@ -72,6 +72,9 @@ class BaseTestCase(unittest.TestCase):
         self.assertFalse(self.is_element_by_css_selector_present('.alert-danger', 'Please enter a correct username and password'))
         return driver
 
+    def test_login(self):
+        return self.login_page()
+
     # used to load some page just to get started
     # we choose /user because it's lightweight and fast
     def goto_some_page(self):
@@ -161,7 +164,7 @@ class BaseTestCase(unittest.TestCase):
 
     def change_system_setting(self, id, enable=True):
         print("changing system setting " + id + " enable: " + str(enable))
-        driver = self.login_page()
+        driver = self.driver
         driver.get(self.base_url + 'system_settings')
 
         is_enabled = driver.find_element_by_id(id).is_selected()
@@ -203,7 +206,7 @@ class BaseTestCase(unittest.TestCase):
     def enable_block_execution(self):
         # we set the admin user (ourselves) to have block_execution checked
         # this will force dedupe to happen synchronously, among other things like notifications, rules, ...
-        driver = self.login_page()
+        driver = self.driver
         driver.get(self.base_url + 'profile')
         if not driver.find_element_by_id('id_block_execution').is_selected():
             driver.find_element_by_xpath('//*[@id="id_block_execution"]').click()

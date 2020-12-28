@@ -2031,14 +2031,8 @@ class Finding(models.Model):
         severity = self.severity
         from dojo.utils import get_system_setting
         sla_age = get_system_setting('sla_' + self.severity.lower())
-        if sla_age and self.active:
+        if sla_age:
             sla_calculation = sla_age - self.age
-        elif sla_age and self.mitigated:
-            age = self.age
-            if age < sla_age:
-                sla_calculation = 0
-            else:
-                sla_calculation = sla_age - age
         return sla_calculation
 
     def sla_deadline(self):
