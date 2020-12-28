@@ -37,7 +37,7 @@ class ProductTest(BaseTestCase):
         # make sure no left overs from previous runs are left behind
         self.delete_product_if_exists()
 
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to the product page
         self.goto_product_overview(driver)
         # "Click" the dropdown button to see options
@@ -64,14 +64,14 @@ class ProductTest(BaseTestCase):
 
     @on_exception_html_source_logger
     def test_list_products(self):
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to the product page
         self.goto_product_overview(driver)
         # list products which will make sure there are no javascript errors such as before in https://github.com/DefectDojo/django-DefectDojo/issues/2050
 
     @on_exception_html_source_logger
     def test_list_components(self):
-        driver = self.login_page()
+        driver = self.driver
         self.goto_product_overview(driver)
         driver.find_element_by_link_text("QA Test").click()
         driver.find_element_by_link_text("Components").click()
@@ -84,7 +84,7 @@ class ProductTest(BaseTestCase):
     def test_edit_product_description(self):
         # Login to the site. Password will have to be modified
         # to match an admin password in your own container
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to the product page
         self.goto_product_overview(driver)
         # Select and click on the particular product to edit
@@ -108,7 +108,7 @@ class ProductTest(BaseTestCase):
     def test_add_product_engagement(self):
         # Test To Add Engagement To product
         # login to site, password set to fetch from environ
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to the product page
         self.goto_product_overview(driver)
         # Select and click on the particular product to edit
@@ -146,7 +146,7 @@ class ProductTest(BaseTestCase):
     def test_add_product_finding(self):
         # Test To Add Finding To product
         # login to site, password set to fetch from environ
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to the product page
         self.goto_product_overview(driver)
         # Select and click on the particular product to edit
@@ -188,7 +188,7 @@ class ProductTest(BaseTestCase):
     def test_add_product_endpoints(self):
         # Test To Add Endpoints To product
         # login to site, password set to fetch from environ
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to the product page
         self.goto_product_overview(driver)
         # Select and click on the particular product to edit
@@ -212,7 +212,7 @@ class ProductTest(BaseTestCase):
     def test_add_product_custom_field(self):
         # Test To Add Custom Fields To product
         # login to site, password set to fetch from environ
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to the product page
         self.goto_product_overview(driver)
         # Select and click on the particular product to edit
@@ -241,7 +241,7 @@ class ProductTest(BaseTestCase):
     def test_edit_product_custom_field(self):
         # Test To Edit Product Custom Fields
         # login to site, password set to fetch from environ
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to the product page
         self.goto_product_overview(driver)
         # Select and click on the particular product to edit
@@ -266,7 +266,7 @@ class ProductTest(BaseTestCase):
     def test_add_product_tracking_files(self):
         # Test To Add tracking files To product
         # login to site, password set to fetch from environ
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to the product page
         self.goto_product_overview(driver)
         # Select and click on the particular product to edit
@@ -293,7 +293,7 @@ class ProductTest(BaseTestCase):
     def test_edit_product_tracking_files(self):
         # Test To Edit Product Tracking Files
         # login to site, password set to fetch from environ
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to the product page
         self.goto_product_overview(driver)
         # Select and click on the particular product to edit
@@ -318,7 +318,7 @@ class ProductTest(BaseTestCase):
     def test_product_metrics(self):
         # Test To Edit Product Tracking Files
         # login to site, password set to fetch from environ
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to the product page
         self.goto_product_overview(driver)
         # Select and click on the particular product to edit
@@ -329,7 +329,7 @@ class ProductTest(BaseTestCase):
 
     @on_exception_html_source_logger
     def delete_product_if_exists(self):
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to the product page
         self.goto_product_overview(driver)
         # Select the specific product to delete
@@ -340,7 +340,7 @@ class ProductTest(BaseTestCase):
 
     @on_exception_html_source_logger
     def test_delete_product(self):
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to the product page
         self.goto_product_overview(driver)
         # Select the specific product to delete
@@ -361,7 +361,7 @@ class ProductTest(BaseTestCase):
     def test_product_notifications_change(self):
         # Login to the site. Password will have to be modified
         # to match an admin password in your own container
-        driver = self.login_page()
+        driver = self.driver
         self.goto_product_overview(driver)
         # Select the specific product to delete
         driver.find_element_by_link_text("QA Test").click()
@@ -384,21 +384,21 @@ class ProductTest(BaseTestCase):
     def test_critical_product_metrics(self):
         # Test To Edit Product Tracking Files
         # login to site, password set to fetch from environ
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to the product page
         driver.get(self.base_url + "critical_product_metrics")
 
     def test_product_type_metrics(self):
         # Test To Edit Product Tracking Files
         # login to site, password set to fetch from environ
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to the product page
         driver.get(self.base_url + "metrics/product/type")
 
     def test_product_type_counts_metrics(self):
         # Test To Edit Product Tracking Files
         # login to site, password set to fetch from environ
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to the product page
         driver.get(self.base_url + "metrics/product/type/counts")
 
@@ -410,28 +410,28 @@ class ProductTest(BaseTestCase):
     def test_simple_metrics(self):
         # Test To Edit Product Tracking Files
         # login to site, password set to fetch from environ
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to the product page
         driver.get(self.base_url + "metrics/simple")
 
     def test_engineer_metrics(self):
         # Test To Edit Product Tracking Files
         # login to site, password set to fetch from environ
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to the product page
         driver.get(self.base_url + "metrics/engineer")
 
     def test_security_research_metrics(self):
         # Test To Edit Product Tracking Files
         # login to site, password set to fetch from environ
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to the product page
         driver.get(self.base_url + "metrics/research")
 
     def test_metrics_dashboard(self):
         # Test To Edit Product Tracking Files
         # login to site, password set to fetch from environ
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to the product page
         driver.get(self.base_url + "metrics?date=5&view=dashboard")
 
@@ -439,6 +439,7 @@ class ProductTest(BaseTestCase):
 def add_product_tests_to_suite(suite):
     # Add each test and the suite to be run
     # success and failure is output by the test
+    suite.addTest(BaseTestCase('test_login'))
     suite.addTest(ProductTest('test_create_product'))
     suite.addTest(ProductTest('test_edit_product_description'))
     suite.addTest(ProductTest('test_add_product_engagement'))
