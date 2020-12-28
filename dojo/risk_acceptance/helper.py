@@ -26,7 +26,7 @@ def expire_now(risk_acceptance):
             else:
                 logger.debug('%i:%s already active, no changes made.', finding.id, finding)
 
-    logger.debug('setting expiration date handled to: %s', timezone.now())
+    risk_acceptance.expiration_date = timezone.now()
     risk_acceptance.expiration_handled_date = timezone.now()
     risk_acceptance.save()
 
@@ -89,7 +89,7 @@ def expiration_handler(*args, **kwargs):
     except System_Settings.DoesNotExist:
         logger.warn("Unable to get system_settings, skipping risk acceptance expiration job")
 
-    risk_acceptances = Risk_Acceptance.objects.filter(expiration_date_handled__isnull=True, expiration_date__date_gte=timezone.now().date())
+    risk_acceptances = Risk_Acceptance.objects.filter(expiration_handled_date__isnull=True, expiration_date__date_gte=timezone.now().date())
     risk_acceptances = prefetch_for_expiration(risk_acceptances)
 
     logger.info('expiring %i risk acceptances that are past expiration date', len(risk_acceptances))
@@ -105,7 +105,7 @@ def expiration_handler(*args, **kwargs):
                 jira_helper.add_simple_jira_comment(jira_instance, jira_issue, title)
 
     if system_settings.risk_acceptance_notify_before_expiration > 0:
-        risk_acceptances = Risk_Acceptance.objects.filter(expiration_date_handled__isnull=True,
+        risk_acceptances = Risk_Acceptance.objects.filter(expiration_handled_date__isnull=True,
                 expiration_date__date_gte=timezone.now().date() - relativedelta(days=system_settings.risk_acceptance_notify_before_expiration))
 
         risk_acceptances = prefetch_for_expiration(risk_acceptances)

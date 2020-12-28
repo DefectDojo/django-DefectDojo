@@ -880,7 +880,7 @@ def add_risk_acceptance(request, eid, fid=None):
     else:
         form = RiskAcceptanceForm(initial={'owner': request.user, 'name': 'Ad Hoc ' + timezone.now().strftime('%b %d, %Y, %H:%M:%S')})
 
-    finding_choices = Finding.objects.filter(duplicate=False, test__engagement=eng).filter(NOT_ACCEPTED_FINDINGS_QUERY(timezone.now())).order_by('title')
+    finding_choices = Finding.objects.filter(duplicate=False, test__engagement=eng).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
 
     form.fields['accepted_findings'].queryset = finding_choices
     if fid:

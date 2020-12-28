@@ -40,12 +40,8 @@ def dashboard(request):
         mitigated_count = Finding.objects.filter(mitigated__date__range=[seven_days_ago,
                                                                    now]).count()
 
-        # accepted_count = len([finding for ra in Risk_Acceptance.objects.filter(
-        #     created__date__range=[seven_days_ago, now]).prefetch_related('accepted_findings') for finding in ra.accepted_findings.all()])
-
         accepted_findings = Finding.objects.filter(risk_acceptance__created__date__range=[seven_days_ago, now])
-        # accepted_findings = accepted_findings.filter(Q(risk_acceptance__expiration_date__gt=now) | Q(risk_acceptance__expiration_date__isnull=True))
-        accepted_findings = accepted_findings.filter(ACCEPTED_FINDINGS_QUERY(now))
+        accepted_findings = accepted_findings.filter(ACCEPTED_FINDINGS_QUERY)
         accepted_count = accepted_findings.count()
 
         # forever counts

@@ -12,7 +12,6 @@ from django_filters import FilterSet, CharFilter, OrderingFilter, \
     BooleanFilter, NumberFilter, DateFilter
 from django_filters import rest_framework as filters
 from django_filters.filters import ChoiceFilter, _truncate, DateTimeFilter
-from django.utils import timezone
 import pytz
 from django.db.models import Q
 from dojo.models import Dojo_User, Product_Type, Finding, Product, Test_Type, \
@@ -208,15 +207,15 @@ class ReportRiskAcceptanceFilter(ChoiceFilter):
     def accepted(self, qs, name):
         # return qs.filter(risk_acceptance__isnull=False)
         from dojo.finding.views import ACCEPTED_FINDINGS_QUERY
-        return qs.filter(ACCEPTED_FINDINGS_QUERY(timezone.now()))
+        return qs.filter(ACCEPTED_FINDINGS_QUERY)
 
     def not_accepted(self, qs, name):
         from dojo.finding.views import NOT_ACCEPTED_FINDINGS_QUERY
-        return qs.filter(NOT_ACCEPTED_FINDINGS_QUERY(timezone.now()))
+        return qs.filter(NOT_ACCEPTED_FINDINGS_QUERY)
 
     def was_accepted(self, qs, name):
         from dojo.finding.views import WAS_ACCEPTED_FINDINGS_QUERY
-        return qs.filter(WAS_ACCEPTED_FINDINGS_QUERY(timezone.now()))
+        return qs.filter(WAS_ACCEPTED_FINDINGS_QUERY)
 
     options = {
         '': (_('Either'), any),
