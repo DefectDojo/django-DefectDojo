@@ -55,13 +55,12 @@ class CharFieldInFilter(filters.BaseInFilter, filters.CharFilter):
         super(CharFilter, self).__init__(*args, **kwargs)
 
 
-def get_earliest_finding():
-    global EARLIEST_FINDING
-    if EARLIEST_FINDING is not None:
-        return EARLIEST_FINDING
+def get_earliest_finding(queryset=None):
+    if queryset is None:  # don't to 'if not queryset' which will trigger the query
+        queryset = Finding.objects.all()
 
     try:
-        EARLIEST_FINDING = Finding.objects.earliest('date')
+        EARLIEST_FINDING = queryset.earliest('date')
     except Finding.DoesNotExist:
         EARLIEST_FINDING = None
     return EARLIEST_FINDING
@@ -241,9 +240,10 @@ class ReportRiskAcceptanceFilter(ChoiceFilter):
 
 class MetricsDateRangeFilter(ChoiceFilter):
     def any(self, qs, name):
-        if get_earliest_finding() is not None:
+        earliest_finding = get_earliest_finding(qs)
+        if earliest_finding is not None:
             start_date = local_tz.localize(datetime.combine(
-                get_earliest_finding().date, datetime.min.time())
+                earliest_finding.date, datetime.min.time())
             )
             self.start_date = _truncate(start_date - timedelta(days=1))
             self.end_date = _truncate(now() + timedelta(days=1))
@@ -308,9 +308,10 @@ class MetricsDateRangeFilter(ChoiceFilter):
     def filter(self, qs, value):
         if value == 8:
             return qs
-        if get_earliest_finding() is not None:
+        earliest_finding = get_earliest_finding(qs)
+        if earliest_finding is not None:
             start_date = local_tz.localize(datetime.combine(
-                get_earliest_finding().date, datetime.min.time())
+                earliest_finding.date, datetime.min.time())
             )
             self.start_date = _truncate(start_date - timedelta(days=1))
             self.end_date = _truncate(now() + timedelta(days=1))
@@ -1324,9 +1325,10 @@ class FindingStatusFilter(ChoiceFilter):
         super(FindingStatusFilter, self).__init__(*args, **kwargs)
 
     def filter(self, qs, value):
-        if get_earliest_finding() is not None:
+        earliest_finding = get_earliest_finding(qs)
+        if earliest_finding is not None:
             start_date = local_tz.localize(datetime.combine(
-                get_earliest_finding().date, datetime.min.time())
+                earliest_finding.date, datetime.min.time())
             )
             self.start_date = _truncate(start_date - timedelta(days=1))
             self.end_date = _truncate(now() + timedelta(days=1))
@@ -1375,6 +1377,9 @@ class MetricsFindingFilter(FilterSet):
                 'test'].queryset = Test.objects.filter(
                 Q(engagement__product__authorized_users__in=[get_current_user()]) |
                 Q(engagement__product__prod_type__authorized_users__in=[get_current_user()]))
+
+        # str() uses test_type
+        self.form.fields['test'].queryset = self.form.fields['test'].queryset.prefetch_related('test_type')
 
     class Meta:
         model = Finding
@@ -1446,7 +1451,7 @@ class MetricsEndpointFilter(FilterSet):
 class ProductMetricsFindingFilter(FilterSet):
     start_date = DateFilter(field_name='date', label='Start Date', lookup_expr=('gt'))
     end_date = DateFilter(field_name='date', label='End Date', lookup_expr=('lt'))
-    date = MetricsDateRangeFilter()
+    # date = MetricsDateRangeFilter()
     test__engagement = ModelMultipleChoiceFilter(
         queryset=Engagement.objects.all().order_by('name'),
         label="Engagement")
@@ -1464,8 +1469,10 @@ class ProductMetricsFindingFilter(FilterSet):
     tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
 
     def __init__(self, *args, **kwargs):
+        # logger.debug('query before super: %s', kwargs.get('queryset', None).query)
         if args[0]:
             if args[0].get('start_date', '') != '' or args[0].get('end_date', '') != '':
+                logger.debug('doing magic with args0')
                 args[0]._mutable = True
                 args[0]['date'] = 8
                 args[0]._mutable = False
@@ -1473,6 +1480,7 @@ class ProductMetricsFindingFilter(FilterSet):
         if 'pid' in kwargs:
             self.pid = kwargs.pop('pid')
         super(ProductMetricsFindingFilter, self).__init__(*args, **kwargs)
+        # logger.debug('query after init: %s', self.queryset.query)
         self.form.fields['severity'].choices = self.queryset.order_by(
             'numerical_severity'
         ).values_list('severity', 'severity').distinct()
@@ -1481,12 +1489,18 @@ class ProductMetricsFindingFilter(FilterSet):
             self.form.fields['test__engagement'].queryset = Engagement.objects.filter(
                 product_id=self.pid
             ).all()
+            self.form.fields['test'].queryset = Test.objects.filter(
+                engagement__product_id=self.pid
+            ).all()
+
+        # str() uses test_type
+        self.form.fields['test'].queryset = self.form.fields['test'].queryset.prefetch_related('test_type')
 
     class Meta:
         model = Finding
         exclude = ['url',
                    'description',
-                   'duplicate_finding'
+                   'duplicate_finding',
                    'mitigation',
                    'unsaved_endpoints',
                    'unsaved_request',
