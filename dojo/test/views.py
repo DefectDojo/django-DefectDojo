@@ -622,7 +622,6 @@ def re_import_scan_results(request, tid):
                          "is highly recommended."
     test = get_object_or_404(Test, id=tid)
     scan_type = test.test_type.name
-    scan_type = test.test_type.name
     engagement = test.engagement
     form = ReImportScanForm()
     jform = None
