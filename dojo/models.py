@@ -269,7 +269,8 @@ class System_Settings(models.Model):
     enable_google_sheets = models.BooleanField(default=False, null=True, blank=True)
     email_address = models.EmailField(max_length=100, blank=True)
     risk_acceptance_form_default_days = models.IntegerField(null=True, blank=True, default=180, help_text="Default expiry period for risk acceptance form.")
-    risk_acceptance_notify_expired = models.IntegerField(null=True, blank=True, default=10, help_text="Notify X days before risk acceptance expires. Leave empty to disable.")
+    risk_acceptance_notify_before_expiration = models.IntegerField(null=True, blank=True, default=10,
+                    verbose_name="Risk acceptance expiration heads up days", help_text="Notify X days before risk acceptance expires. Leave empty to disable.")
 
     from dojo.middleware import System_Settings_Manager
     objects = System_Settings_Manager()
@@ -2491,9 +2492,10 @@ class Risk_Acceptance(models.Model):
                             blank=True, verbose_name="Proof")
     owner = models.ForeignKey(Dojo_User, editable=True, on_delete=models.CASCADE, help_text="User in defect dojo owning this acceptance. Only the owner and staff users can edit the risk acceptance.")
 
-    expiration_date = models.DateTimeField(default=None, null=True, blank=True, help_text="When the risk acceptance expires, the findings will be reactivated")
+    expiration_date = models.DateTimeField(default=None, null=True, blank=True, help_text="When the risk acceptance expires, the findings will be reactivated (unless disabled below).")
+    expiration_handled_date = models.DateTimeField(default=None, null=True, blank=True, help_text="When the risk acceptance expiration was handled (manually or by the daily job.")
     reactivate_expired = models.BooleanField(null=False, blank=False, default=True, verbose_name="Reactivate findings on expiration", help_text="Reactivate findings when risk acceptance expires?")
-    restart_sla_expired = models.BooleanField(default=False, null=False, verbose_name="Restart SLA on expiration", help_text="When enabled, the SLA for findings is restarted when the risk acceptance expires")
+    restart_sla_expired = models.BooleanField(default=False, null=False, verbose_name="Restart SLA on expiration", help_text="When enabled, the SLA for findings is restarted when the risk acceptance expires.")
 
     notes = models.ManyToManyField(Notes, editable=False)
     created = models.DateTimeField(null=False, editable=False, auto_now_add=True)
@@ -2520,7 +2522,16 @@ class Risk_Acceptance(models.Model):
 
     @property
     def is_expired(self):
-        return self.expiration_date is not None and self.expiration_date.date() <= timezone.now().date()
+        return self.expiration_handled_date is not None
+
+    # relationship is many to many, but we use it as one-to-many
+    @property
+    def engagement(self):
+        engs = self.engagement_set.all()
+        if engs:
+            return engs[0]
+
+        return None
 
 
 class Report(models.Model):
@@ -2756,6 +2767,7 @@ class JIRA_Project(models.Model):
                                                          blank=True)
     push_notes = models.BooleanField(default=False, blank=True)
     product_jira_sla_notification = models.BooleanField(default=True, blank=False, verbose_name="Send SLA notifications as comment?")
+    risk_acceptance_expiration_notification = models.BooleanField(default=False, blank=False, verbose_name="Send SLA notifications as comment?")
 
     @property
     def conf(self):
@@ -2857,8 +2869,8 @@ class Notifications(models.Model):
     sla_breach = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True,
         verbose_name="SLA breach",
         help_text="Get notified of (upcoming) SLA breaches")
-    risk_acceptance_expiry = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True,
-        verbose_name="Risk Acceptance Expiryh",
+    risk_acceptance_expiration = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True,
+        verbose_name="Risk Acceptance Expiration",
         help_text="Get notified of (upcoming) Risk Acceptance expiries")
 
     class Meta:
@@ -2905,7 +2917,7 @@ class Notifications(models.Model):
                 result.review_requested = merge_sets_safe(result.review_requested, notifications.review_requested)
                 result.other = merge_sets_safe(result.other, notifications.other)
                 result.sla_breach = merge_sets_safe(result.sla_breach, notifications.sla_breach)
-                result.risk_acceptance_expiry = merge_sets_safe(result.risk_acceptance_expiry, notifications.risk_acceptance_expiry)
+                result.risk_acceptance_expiration = merge_sets_safe(result.risk_acceptance_expiration, notifications.risk_acceptance_expiration)
 
         return result
 

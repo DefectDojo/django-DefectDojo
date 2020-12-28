@@ -34,7 +34,7 @@ from dojo.tools import handles_active_verified_statuses
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, message, Product_Tab, is_scan_file_too_large, \
-    get_system_setting, redirect_to_return_url_or_else
+    get_system_setting, redirect_to_return_url_or_else, get_return_url
 from dojo.notifications.helper import create_notification
 from dojo.finding.views import find_available_notetypes
 from functools import reduce
@@ -42,6 +42,7 @@ from django.db.models.query import QuerySet
 from dojo.user.helper import user_must_be_authorized, user_is_authorized, check_auth_users_list
 import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
+from dojo.risk_acceptance.helper import prefetch_for_expiration
 from dojo.finding.views import NOT_ACCEPTED_FINDINGS_QUERY
 
 
@@ -1020,8 +1021,8 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
                     extra_tags='alert-success')
 
         if not errors:
-            logger.debug('redirecting to view_risk_acceptance')
-            redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
+            logger.debug('redirecting to return_url')
+            return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
         else:
             logger.error('errors found')
 
@@ -1061,6 +1062,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
             # 'show_add_findings_form': len(unaccepted_findings),
             'request': request,
             'add_findings': add_fpage,
+            'return_url': get_return_url(request),
         })
 
 
@@ -1177,11 +1179,8 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
 
 @user_must_be_authorized(Engagement, 'staff', 'eid')
 def expire_risk_acceptance(request, eid, raid):
-    risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
+    risk_acceptance = get_object_or_404(prefetch_for_expiration(Risk_Acceptance.objects.all()), pk=raid)
     eng = get_object_or_404(Engagement, pk=eid)
-
-    if not eng.product.enable_simple_full_acceptance:
-        raise PermissionDenied()
 
     ra_helper.expire_now(risk_acceptance)
 
@@ -1190,10 +1189,10 @@ def expire_risk_acceptance(request, eid, raid):
 
 @user_must_be_authorized(Engagement, 'staff', 'eid')
 def reinstate_risk_acceptance(request, eid, raid):
-    risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
+    risk_acceptance = get_object_or_404(prefetch_for_expiration(Risk_Acceptance.objects.all()), pk=raid)
     eng = get_object_or_404(Engagement, pk=eid)
 
-    if not eng.product.enable_simple_full_acceptance:
+    if not eng.product.enable_full_risk_acceptance:
         raise PermissionDenied()
 
     ra_helper.reinstate(risk_acceptance, risk_acceptance.expiration_date)

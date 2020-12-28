@@ -34,6 +34,9 @@
             <br/>
             <form id="edit_risk_acceptance" enctype="multipart/form-data"  class="form-horizontal" action="{% url 'edit_risk_acceptance' engagement.id risk_acceptance.id %}" method="post">
                 {% csrf_token %}
+                {% if return_url %}
+                    <input type="hidden" name="return_url" value="{{ return_url }}" />
+                {% endif %}
                 {% include "dojo/form_fields.html" with form=risk_acceptance_form %}
                 <div class="form-group">
                     <div class="col-sm-offset-2 col-sm-10">
@@ -71,6 +74,7 @@
                         <th>Decision</th>
                         <!-- <th>Decision Details</th> -->
                         <th>Expiration</th>
+                        <th>Expiration handled</th>
                         <th>Findings</th>
                         <th>Proof</th>
                         <th>Reactivate</th>
@@ -78,12 +82,19 @@
                         <th>Owner</th>
                     </tr>
                     <tr>
-                        <td>{{ risk_acceptance.created }}</td>
+                        <td>{{ risk_acceptance.created|date }}</td>
                         <td>{{ risk_acceptance.accepted_by.get_full_name }}</td>
                         <td>{{ risk_acceptance.name }}</td>
                         <td>{{ risk_acceptance.get_decision_display|default_if_none:"" }}</td>
                         <!-- <td>{{ risk_acceptance.decision_details|default_if_none:""| truncatechars_html:100 }}</td> -->
-                        <td class="{% if risk_acceptance.is_expired %}red{% endif%}">{{ risk_acceptance.expiration_date|default_if_none:"Never" }}</td>
+                        <td>
+                            {% if risk_acceptance.expiration_date %}
+                                {{ risk_acceptance.expiration_date|date }}
+                            {% else %}
+                                Never
+                            {% endif %}
+                        </td>
+                        <td>{{ risk_acceptance.expiration_handled_date|date }}</td>
                         <td>{{ risk_acceptance.accepted_findings.count }}</td>
                         {% if risk_acceptance.filename %}
                             <td><a href="{% url 'download_risk_acceptance' eng.id risk_acceptance.id %}">{{ risk_acceptance.filename }}</a></td>

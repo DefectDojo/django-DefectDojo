@@ -1645,6 +1645,7 @@ def get_return_url(request):
 def redirect_to_return_url_or_else(request, or_else):
     return_url = get_return_url(request)
     if return_url:
+        # logger.debug('redirecting to %s: ', return_url.strip())
         return HttpResponseRedirect(return_url.strip())
     elif or_else:
         return HttpResponseRedirect(or_else)

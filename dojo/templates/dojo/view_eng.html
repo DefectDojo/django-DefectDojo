@@ -363,7 +363,7 @@
                         <tbody>
                         {% for risk_acceptance in risks_accepted %}
                             <tr>
-                                <td><a href="{% url 'view_risk_acceptance' eng.id risk_acceptance.id %}">{{ risk_acceptance.created }}</a></td>
+                                <td><a href="{% url 'view_risk_acceptance' eng.id risk_acceptance.id %}">{{ risk_acceptance.created|date }}</a></td>
                                 <td>{{ risk_acceptance.accepted_by.get_full_name }}</td>
                                 <td><a href="{% url 'view_risk_acceptance' eng.id risk_acceptance.id %}">{{ risk_acceptance.name }}</a></td>
                                 <td>
@@ -376,7 +376,13 @@
 
                                 </td>
                                 <!-- <td>{{ risk_acceptance.decision_details|default_if_none:""| truncatechars_html:100 }}</td> -->
-                                <td class="{% if risk_acceptance.is_expired %}red{% endif%}">{{ risk_acceptance.expiration_date|default_if_none:"Never" }}</td>
+                                <td class="{% if risk_acceptance.is_expired %}red{% endif%}">
+                                    {% if risk_acceptance.expiration_date %}
+                                        {{ risk_acceptance.expiration_date|date }}
+                                    {% else %}
+                                        Never
+                                    {% endif %}
+                                </td>
                                 <td>{{ risk_acceptance.accepted_findings.count }}</td>
                                 {% if risk_acceptance.filename %}
                                 <td><a href="{% url 'download_risk_acceptance' eng.id risk_acceptance.id %}">Yes</a>

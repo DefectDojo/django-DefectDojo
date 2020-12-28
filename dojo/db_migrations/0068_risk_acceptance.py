@@ -24,8 +24,8 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='notifications',
-            name='risk_acceptance_expiry',
-            field=multiselectfield.db.fields.MultiSelectField(blank=True, choices=[('slack', 'slack'), ('msteams', 'msteams'), ('mail', 'mail'), ('alert', 'alert')], default='alert', help_text='Get notified of (upcoming) Risk Acceptance expiries', max_length=24, verbose_name='Risk Acceptance Expiryh'),
+            name='risk_acceptance_expiration',
+            field=multiselectfield.db.fields.MultiSelectField(blank=True, choices=[('slack', 'slack'), ('msteams', 'msteams'), ('mail', 'mail'), ('alert', 'alert')], default='alert', help_text='Get notified of (upcoming) Risk Acceptance expiries', max_length=24, verbose_name='Risk Acceptance Expiration'),
         ),
         migrations.AddField(
             model_name='risk_acceptance',
@@ -35,7 +35,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='risk_acceptance',
             name='restart_sla_expired',
-            field=models.BooleanField(default=False, help_text='When enabled, the SLA for findings is restarted when the risk acceptance expires', verbose_name='Restart SLA on expiration'),
+            field=models.BooleanField(default=False, help_text='When enabled, the SLA for findings is restarted when the risk acceptance expires.', verbose_name='Restart SLA on expiration'),
         ),
         migrations.AddField(
             model_name='system_settings',
@@ -44,8 +44,8 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='system_settings',
-            name='risk_acceptance_notify_expired',
-            field=models.IntegerField(blank=True, default=10, help_text='Notify X days before risk acceptance expires. Leave empty to disable.', null=True),
+            name='risk_acceptance_notify_before_expiration',
+            field=models.IntegerField(blank=True, default=10, help_text='Notify X days before risk acceptance expires. Leave empty to disable.', null=True, verbose_name='Risk acceptance expiration heads up days'),
         ),
         migrations.AlterField(
             model_name='child_rule',
@@ -65,7 +65,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='risk_acceptance',
             name='expiration_date',
-            field=models.DateTimeField(blank=True, default=None, help_text='When the risk acceptance expires, the findings will be reactivated', null=True),
+            field=models.DateTimeField(blank=True, default=None, help_text='When the risk acceptance expires, the findings will be reactivated (unless disabled below).', null=True),
         ),
         migrations.AlterField(
             model_name='risk_acceptance',
@@ -119,4 +119,15 @@ class Migration(migrations.Migration):
             name='enable_simple_risk_acceptance',
             field=models.BooleanField(default=False, help_text='Allows simple risk acceptance by checking/unchecking a checkbox.'),
         ),
+        migrations.AddField(
+            model_name='jira_project',
+            name='risk_acceptance_expiration_notification',
+            field=models.BooleanField(default=False, verbose_name='Send SLA notifications as comment?'),
+        ),
+        migrations.AddField(
+            model_name='risk_acceptance',
+            name='expiration_handled_date',
+            field=models.DateTimeField(blank=True, default=None, help_text='When the risk acceptance expiration was handled (manually or by the daily job.', null=True),
+        ),
+
     ]
