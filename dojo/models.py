@@ -458,6 +458,7 @@ class Product_Type(models.Model):
     #         Q(severity="Medium") |
     #         Q(severity="Low")).count()
 
+    # only used by bulk risk acceptance api
     @property
     def unaccepted_open_findings(self):
         engagements = Engagement.objects.filter(product__prod_type=self)
@@ -1099,6 +1100,7 @@ class Engagement(models.Model):
                 'url': reverse('view_engagement', args=(self.id,))}]
         return bc
 
+    # only used by bulk risk acceptance api
     @property
     def unaccepted_open_findings(self):
         accepted_findings = Finding.objects.filter(risk_acceptance__engagement=self)
@@ -1393,6 +1395,7 @@ class Test(models.Model):
     def verified_finding_count(self):
         return self.finding_set.filter(verified=True).count()
 
+    # only used by bulk risk acceptance api
     @property
     def unaccepted_open_findings(self):
         accepted_findings = Finding.objects.filter(risk_acceptance__engagement=self.engagement)
@@ -1798,6 +1801,7 @@ class Finding(models.Model):
         from django.urls import reverse
         return reverse('view_finding', args=[str(self.id)])
 
+    # only used by bulk risk acceptance api
     @classmethod
     def unaccepted_open_findings(cls):
         return cls.objects.filter(active=True, verified=True, duplicate=False, risk_acceptance__isnull=True)
