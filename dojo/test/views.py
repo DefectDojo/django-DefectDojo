@@ -36,7 +36,7 @@ from dojo.finding.views import find_available_notetypes
 from functools import reduce
 from dojo.user.helper import user_must_be_authorized
 import dojo.jira_link.helper as jira_helper
-
+from django.views.decorators.vary import vary_on_cookie
 
 logger = logging.getLogger(__name__)
 parse_logger = logging.getLogger('dojo')
@@ -252,6 +252,7 @@ def delete_test(request, tid):
 
 @user_passes_test(lambda u: u.is_staff)
 @cache_page(60 * 5)  # cache for 5 minutes
+@vary_on_cookie
 def test_calendar(request):
     if 'lead' not in request.GET or '0' in request.GET.getlist('lead'):
         tests = Test.objects.all()
@@ -263,6 +264,9 @@ def test_calendar(request):
             filters.append(Q(lead__isnull=True))
         filters.append(Q(lead__in=leads))
         tests = Test.objects.filter(reduce(operator.or_, filters))
+
+    tests = tests.prefetch_related('test_type', 'lead', 'engagement__product')
+
     add_breadcrumb(title="Test Calendar", top_level=True, request=request)
     return render(request, 'dojo/calendar.html', {
         'caltype': 'tests',
