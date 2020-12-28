@@ -6,6 +6,13 @@ categories:
   - title: '💣 Breaking changes'
     labels:
       - 'Breaking Changes'
+  - title: '🚩 Requires settings change/database migration'
+    labels:
+      - 'settings_changes'
+      - 'New Migration'
+  - title: '🚩 Security'
+    labels:
+      - 'security'
   - title: '🚀 New scanners'
     labels:
       - 'Import Scans'
@@ -23,12 +30,6 @@ categories:
     labels:
       - 'dependencies'
       - 'maintenance'
-  - title: '🚩 Requires settings change'
-    labels:
-      - 'settings_changes'
-  - title: '🚩 Security'
-    labels:
-      - 'security'
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 template: |
   ## Changes

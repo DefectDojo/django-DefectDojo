@@ -1367,7 +1367,6 @@ class MetricsFindingFilter(FilterSet):
                 'test'].queryset = Test.objects.filter(
                 Q(engagement__product__authorized_users__in=[get_current_user()]) |
                 Q(engagement__product__prod_type__authorized_users__in=[get_current_user()]))
-
         # str() uses test_type
         self.form.fields['test'].queryset = self.form.fields['test'].queryset.prefetch_related('test_type')
 
