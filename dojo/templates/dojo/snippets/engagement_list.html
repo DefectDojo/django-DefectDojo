@@ -216,7 +216,7 @@
                 </tbody>
             </table>
         {% else %}
-            <div class="panel-body">
+            <div id='no_{% if status == "open" %}active{% elif status == "paused" %}paused{% else %}closed{% endif %}_engagements' class="panel-body">
                 <p class="text-muted">No {% if status == "open" %}active{% elif status == "paused" %}paused{% else %}closed{% endif %} engagements found.</p>
             </div>
         {% endif %}
