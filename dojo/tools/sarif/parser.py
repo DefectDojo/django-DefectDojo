@@ -155,7 +155,7 @@ def get_item(result, rules, artifacts, test):
             description = get_message_from_multiformatMessageString(rule['fullDescription'], rule)
 
     # we add a special 'None' case if there is no CWE
-    cwes = [None]
+    cwes = [0]
     if rule is not None:
         cwes_extracted = get_rule_cwes(rule)
         if len(cwes_extracted) > 1:
