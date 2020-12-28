@@ -8,7 +8,7 @@ import unittest
 import sys
 import os
 from base_test_class import BaseTestCase, on_exception_html_source_logger
-from Product_unit_test import ProductTest, WaitForPageLoad
+from product_test import ProductTest, WaitForPageLoad
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -29,7 +29,7 @@ class FindingTest(BaseTestCase):
 
     def test_list_findings(self, suffix):
         # bulk edit dropdown menu
-        driver = self.login_page()
+        driver = self.driver
         driver.get(self.base_url + "finding")
 
         driver.find_element_by_id("select_all").click()
@@ -57,7 +57,7 @@ class FindingTest(BaseTestCase):
         # The Name of the Finding created by test_add_product_finding => 'App Vulnerable to XSS'
         # Test To Add Finding To product
         # login to site, password set to fetch from environ
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to All Finding page
         self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
@@ -83,7 +83,7 @@ class FindingTest(BaseTestCase):
         # The Name of the Finding created by test_add_product_finding => 'App Vulnerable to XSS'
         # Test To Add Finding To product
         # login to site, password set to fetch from environ
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to All Finding page
         self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
@@ -106,7 +106,7 @@ class FindingTest(BaseTestCase):
 
     def test_mark_finding_for_review(self):
         # login to site, password set to fetch from environ
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to All Finding page
         self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
@@ -141,7 +141,7 @@ class FindingTest(BaseTestCase):
 
     def test_clear_review_from_finding(self):
         # login to site, password set to fetch from environ
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to All Finding page
         self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
@@ -163,7 +163,7 @@ class FindingTest(BaseTestCase):
 
     def test_delete_image(self):
         # login to site, password set to fetch from environ
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to All Finding page
         self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
@@ -182,7 +182,7 @@ class FindingTest(BaseTestCase):
         self.assertTrue(self.is_success_message_present(text='Images updated successfully'))
 
     def test_close_finding(self):
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to All Finding page
         self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
@@ -201,7 +201,7 @@ class FindingTest(BaseTestCase):
         self.assertTrue(self.is_success_message_present(text='Finding closed.'))
 
     def test_make_finding_a_template(self):
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to All Finding page
         self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
@@ -216,7 +216,7 @@ class FindingTest(BaseTestCase):
         self.assertTrue(self.is_success_message_present(text='Finding template added successfully. You may edit it here.'))
 
     def test_apply_template_to_a_finding(self):
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to All Finding page
         print("\nListing findings \n")
         self.goto_all_findings_list(driver)
@@ -250,7 +250,7 @@ class FindingTest(BaseTestCase):
 
     @on_exception_html_source_logger
     def test_delete_finding_template(self):
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to All Finding page
         driver.get(self.base_url + "template")
         # Select and click on the particular finding to edit
@@ -265,7 +265,7 @@ class FindingTest(BaseTestCase):
         self.assertTrue(self.is_success_message_present(text='Finding Template deleted successfully.'))
 
     def test_import_scan_result(self):
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to All Finding page
         self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
@@ -294,7 +294,7 @@ class FindingTest(BaseTestCase):
         # The Name of the Finding created by test_add_product_finding => 'App Vulnerable to XSS'
         # Test To Add Finding To product
         # login to site, password set to fetch from environ
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to All Finding page
         # driver.get(self.base_url + "finding")
         self.goto_all_findings_list(driver)
@@ -314,12 +314,13 @@ class FindingTest(BaseTestCase):
         # check that user was redirect back to url where it came from based on return_url
 
     def test_list_components(self):
-        driver = self.login_page()
+        driver = self.driver
         self.goto_component_overview(driver)
         self.assertTrue(self.is_element_by_css_selector_present("table"))
 
 
 def add_finding_tests_to_suite(suite, jira=False, github=False, block_execution=False):
+    suite.addTest(BaseTestCase('test_login'))
     if jira:
         suite.addTest(FindingTest('enable_jira'))
     if github:
