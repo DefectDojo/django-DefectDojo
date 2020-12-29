@@ -24,11 +24,16 @@ class NiktoXMLParser(object):
         tree = ET.parse(filename)
         root = tree.getroot()
         scan = root.find('scandetails')
-        # New versions of Nikto have a new file type (nxvmlversion="1.2") which adds an additional niktoscan tag
-        # This find statement below is to support new file format while not breaking older Nikto scan files versions.
-        if scan is None:
-            scan = root.find('./niktoscan/scandetails')
 
+        if scan is not None:
+            self.process_scandetail(scan, test, dupes)
+        else:
+            # New versions of Nikto have a new file type (nxvmlversion="1.2") which adds an additional niktoscan tag
+            # This find statement below is to support new file format while not breaking older Nikto scan files versions.
+            for scan in root.findall('./niktoscan/scandetails'):
+                self.process_scandetail(scan, test, dupes)
+
+    def process_scandetail(self, scan, test, dupes):
         for item in scan.findall('item'):
             # Title
             titleText = None
@@ -44,8 +49,8 @@ class NiktoXMLParser(object):
             # Url
             ip = item.find("iplink").text
             # Remove the port numbers for 80/443
-            ip = ip.replace(":80", "")
-            ip = ip.replace(":443", "")
+            ip = ip.replace(r":['80']{2}\/?$", "")
+            ip = ip.replace(r":['443']{3}\/?$", "")
 
             # Severity
             severity = "Info"  # Nikto doesn't assign severity, default to Info

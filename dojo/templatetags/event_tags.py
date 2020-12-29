@@ -52,6 +52,11 @@ def addcss(field, attr):
     return _process_field_attributes(field, attr, process)
 
 
+# @register.filter
+# def addclass(field, arg):
+#     return field.as_widget(attrs={'class': arg})
+
+
 @register.filter
 def is_checkbox(field):
     return isinstance(field.field.widget, forms.CheckboxInput)

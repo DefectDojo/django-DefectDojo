@@ -85,7 +85,7 @@ def check_auth_users_list(user, obj):
     if isinstance(obj, Product_Type):
         is_authorized = user in obj.authorized_users.all()
         if not is_authorized:
-            products = Product.objects.filter(prod_type=obj)
+            products = obj.prod_type.all()
             for product in products:
                 is_authorized = is_authorized or user in product.authorized_users.all()
     if isinstance(obj, Finding):
