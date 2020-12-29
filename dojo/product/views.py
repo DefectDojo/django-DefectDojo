@@ -34,6 +34,7 @@ from django.db.models.query import QuerySet
 from github import Github
 from dojo.user.helper import user_must_be_authorized, user_is_authorized, check_auth_users_list
 import dojo.jira_link.helper as jira_helper
+import dojo.finding.helper as finding_helper
 
 logger = logging.getLogger(__name__)
 
@@ -1107,10 +1108,7 @@ def ad_hoc_finding(request, pid):
             new_finding.reporter = request.user
             new_finding.numerical_severity = Finding.get_numerical_severity(
                 new_finding.severity)
-            if new_finding.false_p or new_finding.active is False:
-                new_finding.mitigated = timezone.now()
-                new_finding.mitigated_by = request.user
-                new_finding.is_Mitigated = True
+            finding_helper.update_finding_status(new_finding, request.user)
             create_template = new_finding.is_template
             # always false now since this will be deprecated soon in favor of new Finding_Template model
             new_finding.is_template = False

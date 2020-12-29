@@ -26,6 +26,7 @@ from django.views.decorators.http import require_POST
 from itertools import chain
 from dojo.user.helper import user_must_be_authorized
 from dojo.utils import close_external_issue, reopen_external_issue
+import copy
 
 from dojo.filters import OpenFindingFilter, \
     OpenFindingSuperFilter, AcceptedFindingSuperFilter, \
@@ -46,6 +47,7 @@ from dojo.notifications.helper import create_notification
 from django.template.defaultfilters import pluralize
 from django.db.models import Q, QuerySet, Prefetch, Count
 import dojo.jira_link.helper as jira_helper
+import dojo.finding.helper as finding_helper
 
 logger = logging.getLogger(__name__)
 
@@ -629,6 +631,7 @@ def edit_finding(request, fid):
     # finding = finding._detag_to_serializable()
     # finding = finding._retag_to_original()
     old_status = finding.status()
+    old_finding = copy.copy(finding)
     burp_rr = BurpRawRequestResponse.objects.filter(finding=finding).first()
     if burp_rr:
         req_resp = (
@@ -641,7 +644,6 @@ def edit_finding(request, fid):
     # form.initial['tags'] = [tag.name for tag in finding.tags.all()]
     form_error = False
     jform = None
-    jira_link_exists = False
     push_all_jira_issues = jira_helper.is_push_all_issues(finding)
     gform = None
     use_jira = jira_helper.get_jira_project(finding) is not None
@@ -687,18 +689,7 @@ def edit_finding(request, fid):
             new_finding.test = finding.test
             new_finding.numerical_severity = Finding.get_numerical_severity(
                 new_finding.severity)
-            if new_finding.false_p or new_finding.active is False:
-                new_finding.mitigated = timezone.now()
-                new_finding.mitigated_by = request.user
-                new_finding.is_Mitigated = True
-            if new_finding.active is True:
-                new_finding.false_p = False
-                new_finding.mitigated = None
-                new_finding.mitigated_by = None
-                new_finding.is_Mitigated = False
-            if not new_finding.duplicate:
-                new_finding.duplicate = False
-                new_finding.duplicate_finding = None
+            finding_helper.update_finding_status(new_finding, request.user, old_state_finding=old_finding)
 
             if 'simple_risk_accept' in form.cleaned_data and form['simple_risk_accept'].value():
                 if new_finding.test.engagement.product.enable_simple_risk_acceptance:
