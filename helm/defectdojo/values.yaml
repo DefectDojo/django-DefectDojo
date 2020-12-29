@@ -234,7 +234,7 @@ rabbitmq:
 
 redis:
   enabled: false
-  transitEncryption:
+  transportEncryption:
     enabled: false
     params: ''
   existingSecret: defectdojo-redis-specific

@@ -68,7 +68,7 @@ Create chart name and version as used by the chart label.
 */}}
 {{- define "redis.scheme" -}}
 {{- if eq .Values.celery.broker "redis" -}}
-{{- if .Values.redis.transitEncryption.enabled -}}
+{{- if .Values.redis.transportEncryption.enabled -}}
 {{- printf "rediss" -}}
 {{- else -}}
 {{- printf "redis" -}}
