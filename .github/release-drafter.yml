@@ -6,7 +6,7 @@ categories:
   - title: '💣 Breaking changes'
     labels:
       - 'Breaking Changes'
-  - title: '🚩 Requires settings change/database migration'
+  - title: '🚩 Requires settings change or database migration'
     labels:
       - 'settings_changes'
       - 'New Migration'
