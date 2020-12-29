@@ -27,6 +27,8 @@ import json
 import dojo.jira_link.helper as jira_helper
 import logging
 import tagulous
+import dojo.finding.helper as finding_helper
+
 
 logger = logging.getLogger(__name__)
 
@@ -788,18 +790,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
 
         instance = super(TaggitSerializer, self).update(instance, validated_data)
 
-        # Allow setting or clearing the mitigation date based upon the state of is_Mitigated.
-        mitigation_change = False
-        if instance.is_Mitigated and instance.mitigated is None:
-            mitigation_change = True
-            instance.mitigated = datetime.datetime.now()
-            instance.mitigated_by = self.context['request'].user
-            if settings.USE_TZ:
-                instance.mitigated = timezone.make_aware(instance.mitigated, timezone.get_default_timezone())
-        elif not instance.is_Mitigated and instance.mitigated is not None:
-            mitigation_change = True
-            instance.mitigated = None
-            instance.mitigated_by = None
+        mitigation_change = finding_helper.update_finding_status(instance, self.context['request'].user)
 
         # If we need to push to JIRA, an extra save call is needed.
         # Also if we need to update the mitigation date of the finding.
