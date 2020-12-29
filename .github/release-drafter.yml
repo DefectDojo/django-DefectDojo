@@ -21,14 +21,15 @@ categories:
       - 'feature'
       - 'enhancement'
       - 'performance'
-  - title: ':factory: API features and enhancements'
-    labels:
-      - 'apiv2'
+  - title: '🚀 API features and enhancements'
+    label: 'apiv2'
   - title: '🐛 Bug Fixes'
     labels:
       - 'fix'
       - 'bugfix'
       - 'bug'
+  - title: 📝 Documentation updates
+    label: documentation
   - title: '🧰 Maintenance'
     labels:
       - 'dependencies'
