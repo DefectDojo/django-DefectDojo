@@ -677,6 +677,20 @@
         },
         "model": "dojo.test_type",
         "pk": 188
+    },
+    {
+        "fields": {
+            "name": "SARIF"
+        },
+        "model": "dojo.test_type",
+        "pk": 189
+    },
+    {
+        "fields": {
+            "name": "GitLab Dependency Scanning Report"
+        },
+        "model": "dojo.test_type",
+        "pk": 190
     }
 
 ]

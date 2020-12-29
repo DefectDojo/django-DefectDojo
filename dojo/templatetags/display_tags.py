@@ -301,7 +301,7 @@ def finding_sla(finding):
                 sla_age) + ' days or less'
 
     if find_sla is not None:
-        title = '<a data-toggle="tooltip" data-placement="bottom" title="" href="#" data-original-title="' + status_text + '">' \
+        title = '<a class="has-popover" data-toggle="tooltip" data-placement="bottom" title="" href="#" data-content="' + status_text + '">' \
                                                                                                                            '<span class="label severity age-' + status + '">' + str(find_sla) + '</span></a>'
 
     return mark_safe(title)
@@ -837,7 +837,7 @@ def jira_project(obj, use_inheritance=True):
 
 @register.filter
 def jira_issue_url(obj):
-    return jira_helper.get_jira_issue_url(obj)
+    return jira_helper.get_jira_url(obj)
 
 
 @register.filter

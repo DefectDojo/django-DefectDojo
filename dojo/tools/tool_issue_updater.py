@@ -5,7 +5,7 @@ from dojo.decorators import dojo_async_task, dojo_model_to_id, dojo_model_from_i
 
 def async_tool_issue_update(finding, *args, **kwargs):
     if is_tool_issue_updater_needed(finding):
-        tool_issue_updater.delay(finding)
+        tool_issue_updater(finding)
 
 
 def is_tool_issue_updater_needed(finding, *args, **kwargs):

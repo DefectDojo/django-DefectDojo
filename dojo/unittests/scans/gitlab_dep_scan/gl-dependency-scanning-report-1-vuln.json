@@ -1,0 +1,77 @@
+{
+  "version": "3.0.0",
+  "vulnerabilities": [
+    {
+      "id": "2d8b607cb56d9866c73cdcf33a016f64b4fa37d909c1dd300037b1ac026a3ca5",
+      "category": "dependency_scanning",
+      "name": "XML Entity Expansion",
+      "message": "XML Entity Expansion in gopkg.in/yaml.v2",
+      "description": "go-yaml is vulnerable to a Billion Laughs Attack.",
+      "cve": "service/go.sum:gopkg.in/yaml.v2:gemnasium:7368f513-0aa9-4e34-a08d-40ea81f48e0e",
+      "severity": "Unknown",
+      "solution": "Upgrade to version 2.2.3 or above.",
+      "scanner": {
+        "id": "gemnasium",
+        "name": "Gemnasium"
+      },
+      "location": {
+        "file": "service/go.sum",
+        "dependency": {
+          "package": {
+            "name": "gopkg.in/yaml.v2"
+          },
+          "version": "v2.2.2"
+        }
+      },
+      "identifiers": [
+        {
+          "type": "gemnasium",
+          "name": "Gemnasium-7368f513-0aa9-4e34-a08d-40ea81f48e0e",
+          "value": "7368f513-0aa9-4e34-a08d-40ea81f48e0e",
+          "url": "https://gitlab.com/gitlab-org/security-products/gemnasium-db/-/blob/master/go/gopkg.in/yaml.v2/GMS-2019-2.yml"
+        }
+      ],
+      "links": [
+        {
+          "url": "https://github.com/docker/cli/pull/2117"
+        }
+      ]
+    }
+  ],
+  "remediations": [],
+  "dependency_files": [
+    {
+      "path": "service/go.sum",
+      "package_manager": "go",
+      "dependencies": [
+        {
+          "package": {
+            "name": "gopkg.in/yaml.v2"
+          },
+          "version": "v2.2.2"
+        },
+        {
+          "package": {
+            "name": "gopkg.in/yaml.v2"
+          },
+          "version": "v2.2.4"
+        }
+      ]
+    }
+  ],
+  "scan": {
+    "scanner": {
+      "id": "gemnasium",
+      "name": "Gemnasium",
+      "url": "https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium",
+      "vendor": {
+        "name": "GitLab"
+      },
+      "version": "2.24.1"
+    },
+    "type": "dependency_scanning",
+    "start_time": "2020-12-23T13:43:48",
+    "end_time": "2020-12-23T13:43:49",
+    "status": "success"
+  }
+}

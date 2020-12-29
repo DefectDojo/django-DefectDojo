@@ -41,6 +41,8 @@ spec:
       - name: initializer
         image: "{{ template "initializer.repository" . }}:{{ .Values.tag }}"
         imagePullPolicy: {{ .Values.imagePullPolicy }}
+        securityContext:
+          {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 10 }}           
         command:
           - /entrypoint-initializer.sh
         envFrom:
