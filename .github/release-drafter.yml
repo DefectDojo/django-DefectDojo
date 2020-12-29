@@ -13,14 +13,17 @@ categories:
   - title: '🚩 Security'
     labels:
       - 'security'
-  - title: '🚀 New scanners'
+  - title: '🚀 New importers'
     labels:
       - 'Import Scans'
-  - title: '🚀 Features and enhancements'
+  - title: '🚀 General features and enhancements'
     labels:
       - 'feature'
       - 'enhancement'
       - 'performance'
+  - title: ':factory: API features and enhancements'
+    labels:
+      - 'apiv2'
   - title: '🐛 Bug Fixes'
     labels:
       - 'fix'
