@@ -1822,8 +1822,10 @@ class Finding(models.Model):
 
         simple_risk_acceptance = self.test.engagement.risk_acceptance.filter(name=Finding.SIMPLE_RISK_ACCEPTANCE_NAME).prefetch_related('accepted_findings').first()
         if simple_risk_acceptance is None and create:
+            from dojo.utils import get_current_user
+            user = get_current_user()
             simple_risk_acceptance = Risk_Acceptance.objects.create(
-                    owner_id=1,
+                    owner=user,
                     name=Finding.SIMPLE_RISK_ACCEPTANCE_NAME,
                     decision=Risk_Acceptance.TREATMENT_ACCEPT,
                     decision_details='These findings are accepted using a simple risk acceptance without expiration date, '
