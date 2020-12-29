@@ -4,6 +4,8 @@ from dateutil.relativedelta import relativedelta
 import dojo.jira_link.helper as jira_helper
 from dojo.notifications.helper import create_notification
 from django.urls import reverse
+from celery.decorators import task
+from dojo.models import System_Settings, Risk_Acceptance
 import logging
 
 logger = logging.getLogger(__name__)
@@ -75,6 +77,7 @@ def delete(risk_acceptance):
     risk_acceptance.delete()
 
 
+@task(name='risk_acceptance_expiration_handler')
 def expiration_handler(*args, **kwargs):
     """
     Creates a notification upon risk expiration and X days beforehand if configured.
@@ -89,42 +92,43 @@ def expiration_handler(*args, **kwargs):
     except System_Settings.DoesNotExist:
         logger.warn("Unable to get system_settings, skipping risk acceptance expiration job")
 
-    risk_acceptances = Risk_Acceptance.objects.filter(expiration_handled_date__isnull=True, expiration_date__date_gte=timezone.now().date())
+    risk_acceptances = Risk_Acceptance.objects.filter(expiration_handled_date__isnull=True, expiration_date__date__gte=timezone.now().date())
     risk_acceptances = prefetch_for_expiration(risk_acceptances)
 
     logger.info('expiring %i risk acceptances that are past expiration date', len(risk_acceptances))
-    for ra in risk_acceptances:
-        expire_now(ra)
+    for risk_acceptance in risk_acceptances:
+        expire_now(risk_acceptance)
 
         # notification created by expire_now code
 
         jira_project = jira_helper.get_jira_project(ra.engagement)
-        if jira_project.risk_acceptance_expiration_notification:
-            for finding in ra.accepted_findings.all():
+        if jira_project and jira_project.risk_acceptance_expiration_notification:
+            for finding in risk_acceptance.accepted_findings.all():
                 logger.debug("Creating JIRA comment to notify of risk acceptance expiration.")
                 jira_helper.add_simple_jira_comment(jira_instance, jira_issue, title)
 
-    if system_settings.risk_acceptance_notify_before_expiration > 0:
+    heads_up_days = system_settings.risk_acceptance_notify_before_expiration
+    if heads_up_days > 0:
         risk_acceptances = Risk_Acceptance.objects.filter(expiration_handled_date__isnull=True,
-                expiration_date__date_gte=timezone.now().date() - relativedelta(days=system_settings.risk_acceptance_notify_before_expiration))
+                expiration_date__date__gte=timezone.now().date() - relativedelta(days=heads_up_days))
 
         risk_acceptances = prefetch_for_expiration(risk_acceptances)
 
-        accepted_findings = risk_acceptance.accepted_findings.all()
-        title = 'Risk acceptance with ' + str(len(accepted_findings)) + " accepted findings will expire on " + \
-            risk_acceptance.expiration_date.strftime("%b %d, %Y") + " for " + \
-            str(risk_acceptance.engagement.product) + ': ' + str(risk_acceptance.engagement.name)
+        logger.info('notifying for %i risk acceptances that are expiring within %i days', len(risk_acceptances), heads_up_days)
+        for risk_acceptance in risk_acceptances:
+            accepted_findings = risk_acceptance.accepted_findings.all()
+            title = 'Risk acceptance with ' + str(len(accepted_findings)) + " accepted findings will expire on " + \
+                risk_acceptance.expiration_date.strftime("%b %d, %Y") + " for " + \
+                str(risk_acceptance.engagement.product) + ': ' + str(risk_acceptance.engagement.name)
 
-        create_notification(event='risk_acceptance_expiration', title=title, accepted_findings=accepted_findings,
-                            engagement=risk_acceptance.engagement, product=risk_acceptance.engagement.product,
-                            url=reverse('view_risk_acceptance', args=(risk_acceptance.engagement.id, risk_acceptance.id, )))
+            create_notification(event='risk_acceptance_expiration', title=title, accepted_findings=accepted_findings,
+                                engagement=risk_acceptance.engagement, product=risk_acceptance.engagement.product,
+                                url=reverse('view_risk_acceptance', args=(risk_acceptance.engagement.id, risk_acceptance.id, )))
 
-        logger.info('notifying for %i risk acceptances that are expiring within %i days', len(risk_acceptances))
-        for ra in risk_acceptances:
-            jira_project = jira_helper.get_jira_project(ra.engagement)
-            if jira_project.risk_acceptance_expiration_notification:
-                jira_instance = jira_helper.get_jira_instance(ra.engagement)
-                for finding in ra.accepted_findings.all():
+            jira_project = jira_helper.get_jira_project(risk_acceptance.engagement)
+            if jira_project and jira_project.risk_acceptance_expiration_notification:
+                jira_instance = jira_helper.get_jira_instance(risk_acceptance.engagement)
+                for finding in risk_acceptance.accepted_findings.all():
                     logger.debug("Creating JIRA comment to notify of upcoming risk acceptance expiration.")
                     jira_helper.add_simple_jira_comment(jira_instance, jira_issue, title)
 

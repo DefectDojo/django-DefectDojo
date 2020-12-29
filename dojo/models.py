@@ -2773,7 +2773,7 @@ class JIRA_Project(models.Model):
                                                          blank=True)
     push_notes = models.BooleanField(default=False, blank=True)
     product_jira_sla_notification = models.BooleanField(default=True, blank=False, verbose_name="Send SLA notifications as comment?")
-    risk_acceptance_expiration_notification = models.BooleanField(default=False, blank=False, verbose_name="Send SLA notifications as comment?")
+    risk_acceptance_expiration_notification = models.BooleanField(default=False, blank=False, verbose_name="Send Risk Acceptance expiration notifications as comment?")
 
     @property
     def conf(self):

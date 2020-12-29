@@ -122,7 +122,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='jira_project',
             name='risk_acceptance_expiration_notification',
-            field=models.BooleanField(default=False, verbose_name='Send SLA notifications as comment?'),
+            field=models.BooleanField(default=False, verbose_name='Send Risk Acceptance expiration notifications as comment?'),
         ),
         migrations.AddField(
             model_name='risk_acceptance',
