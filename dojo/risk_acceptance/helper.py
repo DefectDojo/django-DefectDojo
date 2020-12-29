@@ -92,8 +92,7 @@ def expiration_handler(*args, **kwargs):
     except System_Settings.DoesNotExist:
         logger.warn("Unable to get system_settings, skipping risk acceptance expiration job")
 
-    risk_acceptances = Risk_Acceptance.objects.filter(expiration_handled_date__isnull=True, expiration_date__date__gte=timezone.now().date())
-    risk_acceptances = prefetch_for_expiration(risk_acceptances)
+    risk_acceptances = get_expired_risk_acceptances_to_handle()
 
     logger.info('expiring %i risk acceptances that are past expiration date', len(risk_acceptances))
     for risk_acceptance in risk_acceptances:
@@ -109,14 +108,14 @@ def expiration_handler(*args, **kwargs):
 
     heads_up_days = system_settings.risk_acceptance_notify_before_expiration
     if heads_up_days > 0:
-        risk_acceptances = Risk_Acceptance.objects.filter(expiration_handled_date__isnull=True,
-                expiration_date__date__gte=timezone.now().date() - relativedelta(days=heads_up_days))
-
-        risk_acceptances = prefetch_for_expiration(risk_acceptances)
+        risk_acceptances = get_almost_expired_risk_acceptances_to_handle(heads_up_days)
 
         logger.info('notifying for %i risk acceptances that are expiring within %i days', len(risk_acceptances), heads_up_days)
         for risk_acceptance in risk_acceptances:
+            logger.debug('notifying for risk acceptance %i:%s', risk_acceptance.id, risk_acceptance)
             accepted_findings = risk_acceptance.accepted_findings.all()
+            logger.debug('notifying for %i accepted finding that are expiring within %i days', len(accepted_findings), heads_up_days)
+
             title = 'Risk acceptance with ' + str(len(accepted_findings)) + " accepted findings will expire on " + \
                 risk_acceptance.expiration_date.strftime("%b %d, %Y") + " for " + \
                 str(risk_acceptance.engagement.product) + ': ' + str(risk_acceptance.engagement.name)
@@ -126,11 +125,25 @@ def expiration_handler(*args, **kwargs):
                                 url=reverse('view_risk_acceptance', args=(risk_acceptance.engagement.id, risk_acceptance.id, )))
 
             jira_project = jira_helper.get_jira_project(risk_acceptance.engagement)
+            print(jira_project.risk_acceptance_expiration_notification)
             if jira_project and jira_project.risk_acceptance_expiration_notification:
                 jira_instance = jira_helper.get_jira_instance(risk_acceptance.engagement)
                 for finding in risk_acceptance.accepted_findings.all():
-                    logger.debug("Creating JIRA comment to notify of upcoming risk acceptance expiration.")
-                    jira_helper.add_simple_jira_comment(jira_instance, jira_issue, title)
+                    if finding.has_jira_issue:
+                        logger.debug("Creating JIRA comment to notify of upcoming risk acceptance expiration.")
+                        jira_issue = finding.jira_issue
+                        jira_helper.add_simple_jira_comment(jira_instance, jira_issue, title)
+
+
+def get_expired_risk_acceptances_to_handle():
+    risk_acceptances = Risk_Acceptance.objects.filter(expiration_handled_date__isnull=True, expiration_date__date__gte=timezone.now().date())
+    return prefetch_for_expiration(risk_acceptances)
+
+
+def get_almost_expired_risk_acceptances_to_handle(heads_up_days):
+    risk_acceptances = Risk_Acceptance.objects.filter(expiration_handled_date__isnull=True,
+            expiration_date__date__gte=timezone.now().date() - relativedelta(days=heads_up_days))
+    return prefetch_for_expiration(risk_acceptances)
 
 
 def prefetch_for_expiration(risk_acceptances):
