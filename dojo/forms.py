@@ -402,7 +402,7 @@ class ImportScanForm(forms.Form):
                          ("BugCrowd Scan", "BugCrowd Scan"),
                          ("GitLab SAST Report", "GitLab SAST Report"),
                          ("AWS Security Hub Scan", "AWS Security Hub Scan"),
-                         ("GitLab SAST Report", "GitLab SAST Report"),
+                         ("GitLab Dependency Scanning Report", "GitLab Dependency Scanning Report"),
                          ("HuskyCI Report", "HuskyCI Report"),
                          ("Semgrep JSON Report", "Semgrep JSON Report"),
                          ("Risk Recon API Importer", "Risk Recon API Importer"),
