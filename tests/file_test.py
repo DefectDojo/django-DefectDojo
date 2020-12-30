@@ -2,7 +2,7 @@ import unittest
 import sys
 import os
 import time
-from base_test_class import BaseTestCase, on_exception_html_source_logger
+from base_test_class import BaseTestCase
 from Product_unit_test import ProductTest, WaitForPageLoad
 
 dir_path = os.path.dirname(os.path.realpath(__file__))

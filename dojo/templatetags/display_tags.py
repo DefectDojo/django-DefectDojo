@@ -67,7 +67,7 @@ supported_file_formats = [
         'apng', 'avif', 'gif', 'jpg',
         'jpeg', 'jfif', 'pjpeg', 'pjp',
         'png', 'svg', 'webp', 'pdf'
-    ]
+]
 
 
 @register.filter

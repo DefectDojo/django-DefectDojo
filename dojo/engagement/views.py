@@ -3,8 +3,6 @@ import logging
 from datetime import datetime
 import operator
 import base64
-import os
-import shutil
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.contrib import messages
@@ -25,12 +23,11 @@ from dojo.filters import EngagementFilter
 from dojo.forms import CheckForm, \
     UploadThreatForm, UploadRiskForm, NoteForm, DoneForm, \
     EngForm, TestForm, ReplaceRiskAcceptanceForm, AddFindingsRiskAcceptanceForm, DeleteEngagementForm, ImportScanForm, \
-    CredMappingForm, JIRAEngagementForm, JIRAImportScanForm, TypedNoteForm, JIRAProjectForm, \
-    UploadFileForm, ManageFileFormSet
+    CredMappingForm, JIRAEngagementForm, JIRAImportScanForm, TypedNoteForm, JIRAProjectForm
 from dojo.models import Finding, Product, Engagement, Test, \
     Check_List, Test_Type, Notes, \
     Risk_Acceptance, Development_Environment, BurpRawRequestResponse, Endpoint, \
-    Cred_Mapping, Dojo_User, System_Settings, Note_Type, Endpoint_Status, FileUpload
+    Cred_Mapping, Dojo_User, System_Settings, Note_Type, Endpoint_Status
 from dojo.tools import handles_active_verified_statuses
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
