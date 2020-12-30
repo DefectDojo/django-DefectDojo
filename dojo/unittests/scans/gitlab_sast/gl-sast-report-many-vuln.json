@@ -8,6 +8,7 @@
       "description": "Password in URL detected; please remove and revoke it if this is a leak.",
       "cve": "docker-compose.override.unit_tests.yml:4dd25cfea7294af80c58a87f764286ce21ec612e78ae7a208c0a92887870963b:Password in URL",
       "severity": "Critical",
+      "confidence": "Unknown",
       "scanner": {
         "id": "trufflehog",
         "name": "TruffleHog"
