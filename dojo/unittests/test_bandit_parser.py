@@ -24,6 +24,6 @@ class TestBanditParser(TestCase):
         testfile = open("dojo/unittests/scans/bandit/many_vulns.json")
         parser = BanditParser(testfile, Test())
         testfile.close()
-        self.assertEqual(214, len(parser.items))
+        self.assertEqual(213, len(parser.items))
         item = parser.items[0]
         self.assertEqual("Low", item.severity)
