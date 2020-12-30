@@ -126,8 +126,13 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='risk_acceptance',
-            name='expiration_handled_date',
+            name='expiration_date_handled',
             field=models.DateTimeField(blank=True, default=None, help_text='When the risk acceptance expiration was handled (manually or by the daily job.', null=True),
+        ),
+        migrations.AddField(
+            model_name='risk_acceptance',
+            name='expiration_date_warned',
+            field=models.DateTimeField(blank=True, default=None, help_text='When the risk acceptance expiration was warned for by the daily job.', null=True),
         ),
 
     ]

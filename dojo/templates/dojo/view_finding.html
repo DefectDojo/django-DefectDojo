@@ -271,7 +271,7 @@
                                 <a href="{% url 'view_risk_acceptance' finding.test.engagement.id ra.id %}"
                                 class="fa fa-exclamation-circle fa-lg has-popover {% if ra.is_expired %}lightgrey{% endif%}"
                                 data-trigger="hover" data-placement="right"
-                                data-content="{{ ra }}"
+                                data-content="{{ ra.name_and_expiration_info }}"
                                 data-container="body" data-original-title="Risk Acceptance"></a>
                             {% endfor %}
                         </td>

@@ -144,7 +144,7 @@ def dojo_current_hash():
 
 @register.simple_tag
 def display_date():
-    return timezone.now().strftime("%b %d, %Y")
+    return timezone.localtime(timezone.now()).strftime("%b %d, %Y")
 
 
 @register.simple_tag
@@ -767,8 +767,8 @@ def finding_display_status(finding):
         ra = finding.active_risk_acceptance
         if ra:
             url = reverse('view_risk_acceptance', args=(finding.test.engagement.id, ra.id, ))
-            name = ra.name
-            link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-content="' + escape(name) + '" data-container="body" data-original-title="Risk Acceptance">Risk Accepted</a>'
+            info = ra.name_and_expiration_info
+            link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-content="' + escape(info) + '" data-container="body" data-original-title="Risk Acceptance">Risk Accepted</a>'
             # print(link)
             display_status = display_status.replace('Risk Accepted', link)
 

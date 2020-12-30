@@ -1825,7 +1825,7 @@ class Finding(models.Model):
             from dojo.utils import get_current_user
             user = get_current_user()
             simple_risk_acceptance = Risk_Acceptance.objects.create(
-                    owner=user,
+                    owner=user if user else User.objects.first(),
                     name=Finding.SIMPLE_RISK_ACCEPTANCE_NAME,
                     decision=Risk_Acceptance.TREATMENT_ACCEPT,
                     decision_details='These findings are accepted using a simple risk acceptance without expiration date, '
@@ -2499,7 +2499,8 @@ class Risk_Acceptance(models.Model):
     owner = models.ForeignKey(Dojo_User, editable=True, on_delete=models.CASCADE, help_text="User in defect dojo owning this acceptance. Only the owner and staff users can edit the risk acceptance.")
 
     expiration_date = models.DateTimeField(default=None, null=True, blank=True, help_text="When the risk acceptance expires, the findings will be reactivated (unless disabled below).")
-    expiration_handled_date = models.DateTimeField(default=None, null=True, blank=True, help_text="When the risk acceptance expiration was handled (manually or by the daily job.")
+    expiration_date_warned = models.DateTimeField(default=None, null=True, blank=True, help_text="When the risk acceptance expiration was warned for by the daily job.")
+    expiration_date_handled = models.DateTimeField(default=None, null=True, blank=True, help_text="When the risk acceptance expiration was handled (manually or by the daily job.")
     reactivate_expired = models.BooleanField(null=False, blank=False, default=True, verbose_name="Reactivate findings on expiration", help_text="Reactivate findings when risk acceptance expires?")
     restart_sla_expired = models.BooleanField(default=False, null=False, verbose_name="Restart SLA on expiration", help_text="When enabled, the SLA for findings is restarted when the risk acceptance expires.")
 
@@ -2508,16 +2509,20 @@ class Risk_Acceptance(models.Model):
     updated = models.DateTimeField(editable=False, auto_now=True)
 
     def __unicode__(self):
-        return str(self.name) + (' (expired)' if self.is_expired else '')
+        return str(self.name)
 
     def __str__(self):
-        return str(self.name) + (' (expired)' if self.is_expired else '')
+        return str(self.name)
 
     def filename(self):
         # logger.debug('path: "%s"', self.path)
         if not self.path:
             return None
         return os.path.basename(self.path.name)
+
+    @property
+    def name_and_expiration_info(self):
+        return str(self.name) + (' (expired ' if self.is_expired else ' (expires ') + (timezone.localtime(self.expiration_date).strftime("%b %d, %Y") if self.expiration_date else 'Never') + ')'
 
     def get_breadcrumbs(self):
         bc = self.engagement_set.first().get_breadcrumbs()
@@ -2528,7 +2533,7 @@ class Risk_Acceptance(models.Model):
 
     @property
     def is_expired(self):
-        return self.expiration_handled_date is not None
+        return self.expiration_date_handled is not None
 
     # relationship is many to many, but we use it as one-to-many
     @property

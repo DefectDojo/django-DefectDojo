@@ -637,7 +637,7 @@ def prefetch_for_view_engagements(engs):
         prefetched_engs = prefetched_engs.annotate(count_findings_open=Count('test__finding__id', filter=Q(test__finding__active=True)))
         prefetched_engs = prefetched_engs.annotate(count_findings_close=Count('test__finding__id', filter=Q(test__finding__is_Mitigated=True)))
         prefetched_engs = prefetched_engs.annotate(count_findings_duplicate=Count('test__finding__id', filter=Q(test__finding__duplicate=True)))
-        ACCEPTED_FINDINGS_QUERY = Q(test__finding__risk_acceptance__isnull=False) & Q(test__finding__risk_acceptance__expiration_handled_date__isnull=True)
+        ACCEPTED_FINDINGS_QUERY = Q(test__finding__risk_acceptance__isnull=False) & Q(test__finding__risk_acceptance__expiration_date_handled__isnull=True)
         prefetched_engs = prefetched_engs.annotate(count_findings_accepted=Count('test__finding__id', filter=ACCEPTED_FINDINGS_QUERY))
         prefetched_engs = prefetched_engs.prefetch_related('tags')
     else:
