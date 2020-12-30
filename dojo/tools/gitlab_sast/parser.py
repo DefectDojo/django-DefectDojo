@@ -90,7 +90,9 @@ def get_item(vuln, test):
         title = '[{} severity] {}'.format(severity, title)
         severity = 'Info'
     numerical_severity = Finding.get_numerical_severity(severity)
-    scanner_confidence = Finding.get_number_severity(vuln['confidence'])
+    scanner_confidence = None
+    if 'confidence' in vuln:
+        scanner_confidence = Finding.get_number_severity(vuln['confidence'])
 
     mitigation = ''
     if 'solution' in vuln:
