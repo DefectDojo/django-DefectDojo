@@ -131,6 +131,7 @@ def manage_files(request, oid, obj_type):
                 messages.SUCCESS,
                 'Files updated successfully.',
                 extra_tags='alert-success')
+
         else:
             error = True
             messages.add_message(

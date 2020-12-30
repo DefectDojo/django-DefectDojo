@@ -112,7 +112,15 @@ class EngagementViewSet(mixins.ListModelMixin,
     serializer_class = serializers.EngagementSerializer
     queryset = Engagement.objects.all()
     filter_backends = (DjangoFilterBackend,)
+<<<<<<< HEAD
     filter_class = ApiEngagementFilter
+=======
+    parser_classes = [MultiPartParser]
+    filter_fields = ('id', 'active', 'eng_type', 'target_start',
+                     'target_end', 'requester', 'report_type',
+                     'updated', 'threat_model', 'api_test',
+                     'pen_test', 'status', 'product', 'name', 'version')
+>>>>>>> Add unit tests
 
     @property
     def risk_application_model_class(self):
@@ -1040,7 +1048,14 @@ class TestsViewSet(mixins.ListModelMixin,
     serializer_class = serializers.TestSerializer
     queryset = Test.objects.all()
     filter_backends = (DjangoFilterBackend,)
+<<<<<<< HEAD
     filter_class = ApiTestFilter
+=======
+    parser_classes = [MultiPartParser]
+    filter_fields = ('id', 'title', 'test_type', 'target_start',
+                     'target_end', 'notes', 'percent_complete',
+                     'actual_time', 'engagement')
+>>>>>>> Add unit tests
 
     @property
     def risk_application_model_class(self):
