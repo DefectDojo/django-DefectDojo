@@ -1506,6 +1506,12 @@ def manage_images(request, fid):
     images_formset = FindingImageFormSet(queryset=finding.images.all())
     error = False
 
+    messages.add_message(
+                request,
+                messages.INFO,
+                'Finding Images will be removed as of 06/31/2020. Please use the File Uploads instead.',
+                extra_tags='alert-danger')
+
     if request.method == 'POST':
         images_formset = FindingImageFormSet(
             request.POST, request.FILES, queryset=finding.images.all())
