@@ -209,6 +209,15 @@ class EngagementViewSet(mixins.ListModelMixin,
         return Response(serialized_notes,
                 status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(
+        method='get',
+        responses={status.HTTP_200_OK: serializers.EngagementToFilesSerializer}
+    )
+    @swagger_auto_schema(
+        methods=['post', 'patch'],
+        request_body=serializers.AddNewFileOptionSerializer,
+        responses={status.HTTP_200_OK: serializers.FileSerializer}
+    )
     @action(detail=True, methods=["get", "post", "patch"])
     def files(self, request, pk=None):
         engagement = get_object_or_404(Engagement.objects, id=pk)
@@ -313,6 +322,7 @@ class FindingViewSet(mixins.ListModelMixin,
                                                     'test__engagement__product__prod_type')
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ApiFindingFilter
+    parser_classes = [MultiPartParser]
 
     # Overriding mixins.UpdateModeMixin perform_update() method to grab push_to_jira
     # data and add that as a parameter to .save()
@@ -471,6 +481,52 @@ class FindingViewSet(mixins.ListModelMixin,
                     status=status.HTTP_200_OK)
 
         return Response(serialized_notes,
+                status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        method='get',
+        responses={status.HTTP_200_OK: serializers.FindingToFilesSerializer}
+    )
+    @swagger_auto_schema(
+        methods=['post', 'patch'],
+        request_body=serializers.AddNewFileOptionSerializer,
+        responses={status.HTTP_200_OK: serializers.FindingToFilesSerializer}
+    )
+    @action(detail=True, methods=["get", "post", "patch"])
+    def files(self, request, pk=None):
+        finding = get_object_or_404(Finding.objects, id=pk)
+        if request.method == 'POST':
+            new_file = serializers.FileSerializer(data=request.data)
+            if new_file.is_valid():
+                title = new_file.validated_data['title']
+                file = new_file.validated_data['file']
+            else:
+                return Response(new_file.errors,
+                    status=status.HTTP_400_BAD_REQUEST)
+
+            file = FileUpload(title=title, file=file)
+            file.save()
+            finding.files.add(file)
+
+            serialized_file = serializers.FileSerializer({
+                "title": title, "file": file,
+            })
+            result = serializers.FindingToFilesSerializer({
+                "finding_id": finding, "files": [serialized_file.data]
+            })
+            return Response(serialized_file.data,
+                status=status.HTTP_200_OK)
+        files = finding.files.all()
+
+        serialized_files = []
+        if files:
+            serialized_files = serializers.FindingToFilesSerializer({
+                    "finding_id": finding, "files": files
+            })
+            return Response(serialized_files.data,
+                    status=status.HTTP_200_OK)
+
+        return Response(serialized_files,
                 status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
@@ -1069,6 +1125,15 @@ class TestsViewSet(mixins.ListModelMixin,
         return Response(serialized_notes,
                 status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(
+        method='get',
+        responses={status.HTTP_200_OK: serializers.TestToFilesSerializer}
+    )
+    @swagger_auto_schema(
+        methods=['post', 'patch'],
+        request_body=serializers.AddNewFileOptionSerializer,
+        responses={status.HTTP_200_OK: serializers.FileSerializer}
+    )
     @action(detail=True, methods=["get", "post", "patch"])
     def files(self, request, pk=None):
         test = get_object_or_404(Test.objects, id=pk)

@@ -1,10 +1,12 @@
 import logging
-
+import os
 from auditlog.models import LogEntry
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
-from django.http import Http404
+from django.http import Http404, HttpResponseRedirect
+from django.conf import settings
+from django.urls import reverse
 from django.shortcuts import render, get_object_or_404
 from dojo.models import Engagement, Test, Finding, Endpoint, Product, FileUpload
 from dojo.filters import LogEntryFilter
@@ -88,13 +90,13 @@ def action_history(request, cid, oid):
 def manage_files(request, oid, obj_type):
     if obj_type == 'Engagement':
         obj = get_object_or_404(Engagement, pk=oid)
-        obj_vars = ('view_engagement', 'engagement__isnull', 'engagement_set')
+        obj_vars = ('view_engagement', 'engagement_set')
     elif obj_type == 'Test':
         obj = get_object_or_404(Test, pk=oid)
-        obj_vars = ('view_test', 'test__isnull', 'test_set')
+        obj_vars = ('view_test', 'test_set')
     elif obj_type == 'Finding':
         obj = get_object_or_404(Finding, pk=oid)
-        obj_vars = ('view_finding', 'finding__isnull', 'finding_set')
+        obj_vars = ('view_finding', 'finding_set')
     else:
         raise Http404()
 
@@ -110,41 +112,27 @@ def manage_files(request, oid, obj_type):
             files_formset.save()
 
             for o in files_formset.deleted_objects:
+                logger.debug("removing file: %s", o.file.name)
                 os.remove(os.path.join(settings.MEDIA_ROOT, o.file.name))
 
             for o in files_formset.new_objects:
+                logger.debug("adding file: %s", o.file.name)
                 obj.files.add(o)
 
-            keyword = obj_vars[1]
-            orphan_files = FileUpload.objects.filter(keyword=True)
+            orphan_files = FileUpload.objects.filter(engagement__isnull=True,
+                                                     test__isnull=True,
+                                                     finding__isnull=True)
             for o in orphan_files:
+                logger.debug("purging orphan file: %s", o.file.name)
                 os.remove(os.path.join(settings.MEDIA_ROOT, o.file.name))
-                o.delete()
-
-            files = os.listdir(os.path.join(settings.MEDIA_ROOT, 'uploaded_files'))
-
-            for file in files:
-                with_media_root = os.path.join(settings.MEDIA_ROOT, 'uploaded_files', file)
-                with_part_root_only = os.path.join('uploaded_files', file)
-                if os.path.isfile(with_media_root):
-                    file = FileUpload.objects.filter(
-                        file=with_part_root_only)
-
-                    if len(file) == 0:
-                        os.remove(with_media_root)
-                        cache_to_remove = os.path.join(settings.MEDIA_ROOT, 'CACHE', os.path.splitext(file)[0])
-                        if os.path.isdir(cache_to_remove):
-                            shutil.rmtree(cache_to_remove)
-                    else:
-                        for f in file:
-                            if getattr(f, obj_vars[2]) is None:
-                                f.delete()
+                o.delete()                    
 
             messages.add_message(
                 request,
                 messages.SUCCESS,
                 'Files updated successfully.',
                 extra_tags='alert-success')
+
         else:
             error = True
             messages.add_message(
@@ -154,7 +142,7 @@ def manage_files(request, oid, obj_type):
                 extra_tags='alert-danger')
 
         if not error:
-            return HttpResponseRedirect(reverse(obj_vars[0], args=(eid, )))
+            return HttpResponseRedirect(reverse(obj_vars[0], args=(oid, )))
     return render(
         request, 'dojo/manage_files.html', {
             'files_formset': files_formset,

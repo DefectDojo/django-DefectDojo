@@ -26,6 +26,14 @@ function success() {
     echo "Success: $1 test passed\n"
 }
 
+test="File Upload tests"
+echo "Running: $test"
+if python3 tests/file_test.py ; then
+    success $test
+else
+    fail $test
+fi
+
 test="Report Builder tests"
 echo "Running: $test"
 if python3 tests/report_builder_test.py ; then

@@ -1635,7 +1635,11 @@ class Finding(models.Model):
                                     blank=True,
                                     verbose_name="Images",
                                     help_text="Image(s) / Screenshot(s) related to the flaw.")
-
+    files = models.ManyToManyField(FileUpload,
+                                   blank=True,
+                                   editable=False,
+                                   verbose_name="Files",
+                                   help_text="Files(s) related to the flaw.")
     line_number = models.CharField(null=True,
                                    blank=True,
                                    max_length=200,
