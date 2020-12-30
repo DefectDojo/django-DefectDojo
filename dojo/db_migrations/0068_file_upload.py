@@ -7,7 +7,7 @@ import dojo.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0067_max_dedupes'),
+        ('dojo', '0067_max_dupes'),
     ]
 
     operations = [
