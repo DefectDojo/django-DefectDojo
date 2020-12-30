@@ -7,7 +7,7 @@ import dojo.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0065_delete_empty_jira_project_configs'),
+        ('dojo', '0067_max_dedupes'),
     ]
 
     operations = [
