@@ -102,7 +102,10 @@ def get_item(vuln, test):
     if 'identifiers' in vuln:
         for identifier in vuln['identifiers']:
             if identifier['type'].lower() == 'cwe':
-                cwe = identifier['value']
+                if isinstance(identifier['value'], int):
+                    cwe = identifier['value']
+                elif identifier['value'].isdigit():
+                    cwe = int(identifier['value'])
             elif identifier['type'].lower() == 'cve':
                 cve = identifier['value']
             else:

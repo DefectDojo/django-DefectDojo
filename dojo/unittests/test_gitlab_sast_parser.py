@@ -30,8 +30,17 @@ class TestGitlabSastReportParser(TestCase):
         self.assertTrue(len(parser.items) == 8)
         i = 0
         for item in parser.items:
+            self.assertTrue(item.cwe is None or isinstance(item.cwe, int))
             self.assertEqual(item.get_scanner_confidence_text(), get_confidence_defectdojo(i))
             i = i + 1
+
+    def test_parse_file_with_various_cwes(self):
+        testfile = open("dojo/unittests/scans/gitlab_sast/gl-sast-report-cwe.json")
+        parser = GitlabSastReportParser(testfile, Test())
+        self.assertTrue(len(parser.items) == 3)
+        self.assertEqual(79, parser.items[0].cwe)
+        self.assertEqual(89, parser.items[1].cwe)
+        self.assertEqual(None, parser.items[2].cwe)
 
 
 def get_confidence_defectdojo(argument):
