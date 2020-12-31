@@ -1235,7 +1235,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         endpoint_to_add = data['endpoint_to_add']
         min_sev = data['minimum_severity']
         scan_date = data['scan_date']
-        # Close the old findings if the parameter is not provided. This is to 
+        # Close the old findings if the parameter is not provided. This is to
         # mentain the old API behavior after reintroducing the close_old_findings parameter
         # also for ReImport.
         close_old_findings = data.get('close_old_findings', True)
