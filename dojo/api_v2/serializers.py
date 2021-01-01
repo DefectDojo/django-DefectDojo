@@ -5,7 +5,7 @@ from dojo.models import Product, Engagement, Test, Finding, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Product_Type, JIRA_Instance, Endpoint, BurpRawRequestResponse, JIRA_Project, \
     Notes, DojoMeta, FindingImage, Note_Type, App_Analysis, Endpoint_Status, \
-    Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation
+    Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation, System_Settings
 
 from dojo.forms import ImportScanForm, SEVERITY_CHOICES
 from dojo.tools import requires_file
@@ -1536,59 +1536,12 @@ class TagSerializer(serializers.Serializer):
     tags = TagListSerializerField(required=True)
 
 
-class SystemSettingsSerializer(serializers.Serializer):
-    enable_auditlog = serializers.BooleanField(default=True)
-    enable_deduplication = serializers.BooleanField(default=False)
-    delete_dupulicates = serializers.BooleanField(default=False)
-    max_dupes = serializers.IntegerField(allow_null=True, required=False)
-    enable_jira = serializers.BooleanField(default=False)
-    s_finding_severity_naming = serializers.BooleanField(default=False)
-    false_positive_history = serializers.BooleanField(default=False)
-    display_endpoint_uri = serializers.BooleanField(default=False)
-    enable_benchmark = serializers.BooleanField(default=True)
-    enable_template_match = serializers.BooleanField(default=False)
-    engagement_auto_close = serializers.BooleanField(default=False)
-    engagement_auto_close_days = serializers.IntegerField(allow_null=True, required=False)
-    enable_product_grade = serializers.BooleanField(default=False)
-    product_grade_a = serializers.IntegerField(allow_null=False, required=False)
-    product_grade_b = serializers.IntegerField(allow_null=False, required=False)
-    product_grade_c = serializers.IntegerField(allow_null=False, required=False)
-    product_grade_d = serializers.IntegerField(allow_null=False, required=False)
-    product_grade_f = serializers.IntegerField(allow_null=False, required=False)
-    enable_finding_sla = serializers.BooleanField(default=True)
-    sla_critical = serializers.IntegerField(allow_null=False, required=False)
-    sla_high = serializers.IntegerField(allow_null=False, required=False)
-    sla_medium = serializers.IntegerField(allow_null=False, required=False)
-    sla_low = serializers.IntegerField(allow_null=False, required=False)
-    allow_anonymous_survey_repsonse = serializers.BooleanField(default=False)
+class SystemSettingsSerializer(TaggitSerializer, serializers.ModelSerializer):
+    tags = TagListSerializerField(required=False)
 
-    def update(self, instance, validated_data):
-        instance.enable_auditlog = validated_data.get('enable_auditlog', instance.enable_auditlog)
-        instance.enable_deduplication = validated_data.get('enable_deduplication', instance.enable_deduplication)
-        instance.delete_dupulicates = validated_data.get('delete_dupulicates', instance.delete_dupulicates)
-        instance.max_dupes = validated_data.get('max_dupes', instance.max_dupes)
-        instance.enable_jira = validated_data.get('enable_jira', instance.enable_jira)
-        instance.s_finding_severity_naming = validated_data.get('s_finding_severity_naming', instance.s_finding_severity_naming)
-        instance.false_positive_history = validated_data.get('false_positive_history', instance.false_positive_history)
-        instance.display_endpoint_uri = validated_data.get('display_endpoint_uri', instance.display_endpoint_uri)
-        instance.enable_benchmark = validated_data.get('enable_benchmark', instance.enable_benchmark)
-        instance.enable_template_match = validated_data.get('enable_template_match', instance.enable_template_match)
-        instance.engagement_auto_close = validated_data.get('engagement_auto_close', instance.engagement_auto_close)
-        instance.engagement_auto_close_days = validated_data.get('engagement_auto_close_days', instance.engagement_auto_close_days)
-        instance.enable_product_grade = validated_data.get('enable_product_grade', instance.enable_product_grade)
-        instance.product_grade_a = validated_data.get('product_grade_a', instance.product_grade_a)
-        instance.product_grade_b = validated_data.get('product_grade_b', instance.product_grade_b)
-        instance.product_grade_c = validated_data.get('product_grade_c', instance.product_grade_c)
-        instance.product_grade_d = validated_data.get('product_grade_d', instance.product_grade_d)
-        instance.product_grade_f = validated_data.get('product_grade_f', instance.product_grade_f)
-        instance.enable_finding_sla = validated_data.get('enable_finding_sla', instance.enable_finding_sla)
-        instance.sla_critical = validated_data.get('sla_critical', instance.sla_critical)
-        instance.sla_high = validated_data.get('sla_high', instance.sla_high)
-        instance.sla_medium = validated_data.get('sla_medium', instance.sla_medium)
-        instance.sla_low = validated_data.get('sla_low', instance.sla_low)
-        instance.allow_anonymous_survey_repsonse = validated_data.get('allow_anonymous_survey_repsonse', instance.allow_anonymous_survey_repsonse)
-        instance.save()
-        return instance
+    class Meta:
+        model = System_Settings
+        fields = '__all__'
 
 
 class FindingNoteSerializer(serializers.Serializer):
