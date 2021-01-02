@@ -1537,7 +1537,6 @@ class TagSerializer(serializers.Serializer):
 
 
 class SystemSettingsSerializer(TaggitSerializer, serializers.ModelSerializer):
-    tags = TagListSerializerField(required=False)
 
     class Meta:
         model = System_Settings
