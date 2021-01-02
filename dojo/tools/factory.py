@@ -305,7 +305,7 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = OrtParser(file, test)
     elif scan_type == 'SARIF':
         parser = SarifParser(file, test)
-    elif scan_type == 'OssIndex Devaudit SCA Scan Results':
+    elif scan_type == 'OssIndex Devaudit SCA Scan Importer':
         parser = OssIndexDevauditParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
