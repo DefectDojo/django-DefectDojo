@@ -53,7 +53,7 @@ def get_item(dependency_name, dependency_version, dependency_source, vulnerabili
         cwe = 1035
     else:
         cwe_text = vulnerability['cwe']
-        cwe = vulnerability['cwe'].replace('CWE-','')
+        cwe = vulnerability['cwe'].replace('CWE-', '')
 
     references = '{}, {}'.format(
         vulnerability['reference'],
