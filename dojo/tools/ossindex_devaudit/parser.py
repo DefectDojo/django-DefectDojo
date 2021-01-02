@@ -55,10 +55,8 @@ def get_item(dependency_name, dependency_version, dependency_source, vulnerabili
         cwe_text = vulnerability['cwe']
         cwe = vulnerability['cwe'].replace('CWE-', '')
 
-    references = '{}, {}'.format(
-        vulnerability['reference'],
-        'https://snyk.io/vuln/search?q={}&type={}'.format(dependency_name, dependency_source)
-    )
+    reference = vulnerability.get('reference', '')
+    references = 'https://snyk.io/vuln/search?q={}&type={}'.format(dependency_name, dependency_source) + ' ' + reference
 
     finding = Finding(title=dependency_source + ":" + dependency_name + " - " + "(" + dependency_version + ", " + cwe_text + ")",
                       test=test,
