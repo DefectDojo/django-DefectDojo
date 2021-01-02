@@ -48,12 +48,14 @@ class OssIndexDevauditParser(object):
 
 def get_item(dependency_name, dependency_version, dependency_source, vulnerability, test):
 
-    if vulnerability['cwe'] is None:
+    cwe_data = vulnerability.get('cwe', '')
+
+    if cwe_data == '' or cwe_data is None:
         cwe_text = ''
         cwe = 1035
     else:
-        cwe_text = vulnerability['cwe']
-        cwe = vulnerability['cwe'].replace('CWE-', '')
+        cwe_text = cwe_data
+        cwe = cwe_data.replace('CWE-', '')
 
     reference = vulnerability.get('reference', '')
     references = 'https://snyk.io/vuln/search?q={}&type={}'.format(dependency_name, dependency_source) + ' ' + reference

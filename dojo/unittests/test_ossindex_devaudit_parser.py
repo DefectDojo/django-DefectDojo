@@ -57,3 +57,27 @@ class TestOssIndexDevauditParser(TestCase):
         if len(parser.items) > 0:
             for item in parser.items:
                 self.assertTrue(item.references.startswith('https://snyk.io/vuln/search'))
+
+    def test_ossindex_devaudit_parser_with_missing_cwe_shows_1035(self):
+        testfile = open("dojo/unittests/scans/ossindex_devaudit_sample/ossindex_devaudit_missing_cwe.json")
+        parser = OssIndexDevauditParser(testfile, Test())
+        testfile.close()
+        if len(parser.items) > 0:
+            for item in parser.items:
+                self.assertTrue(item.cwe == 1035)
+
+    def test_ossindex_devaudit_parser_with_null_cwe_shows_1035(self):
+        testfile = open("dojo/unittests/scans/ossindex_devaudit_sample/ossindex_devaudit_null_cwe.json")
+        parser = OssIndexDevauditParser(testfile, Test())
+        testfile.close()
+        if len(parser.items) > 0:
+            for item in parser.items:
+                self.assertTrue(item.cwe == 1035)
+
+    def test_ossindex_devaudit_parser_with_empty_cwe_shows_1035(self):
+        testfile = open("dojo/unittests/scans/ossindex_devaudit_sample/ossindex_devaudit_empty_cwe.json")
+        parser = OssIndexDevauditParser(testfile, Test())
+        testfile.close()
+        if len(parser.items) > 0:
+            for item in parser.items:
+                self.assertTrue(item.cwe == 1035)
