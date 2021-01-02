@@ -48,22 +48,24 @@ class OssIndexDevauditParser(object):
 
 def get_item(dependency_name, dependency_version, dependency_source, vulnerability, test):
 
+    print(vulnerability['cwe'])
     if vulnerability['cwe'] is None:
-        cwe = ''
+        cwe_text = ''
+        cwe = 1035
     else:
-        cwe = vulnerability['cwe']
+        cwe_text = vulnerability['cwe']
+        cwe = vulnerability['cwe'].replace('CWE-','')
 
     references = '{}, {}'.format(
         vulnerability['reference'],
         'https://snyk.io/vuln/search?q={}&type={}'.format(dependency_name, dependency_source)
     )
 
-    finding = Finding(title=dependency_source + ":" + dependency_name + " - " + "(" + dependency_version + ", " + cwe + ")",
+    finding = Finding(title=dependency_source + ":" + dependency_name + " - " + "(" + dependency_version + ", " + cwe_text + ")",
                       test=test,
                       severity=get_severity(vulnerability['cvssScore']),
                       description=vulnerability['title'],
-                      cwe=1035,
-                      cve=vulnerability['cvssScore'],
+                      cwe=cwe,
                       cvssv3=vulnerability['cvssVector'].replace('CVSS:3.0', ''),
                       mitigation='Upgrade the component to the latest non-vulnerable version, or remove the package if it is not in use.',
                       references=references,
