@@ -31,5 +31,4 @@ class TestOssIndexDevauditParser(TestCase):
         testfile = open("dojo/unittests/scans/ossindex_devaudit_sample/ossindex_devaudit_vuln_no_cvssscore.json")
         parser = OssIndexDevauditParser(testfile, Test())
         testfile.close()
-        print(parser.items)
         self.assertTrue(len(parser.items) == 1)

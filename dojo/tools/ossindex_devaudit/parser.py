@@ -48,7 +48,6 @@ class OssIndexDevauditParser(object):
 
 def get_item(dependency_name, dependency_version, dependency_source, vulnerability, test):
 
-    print(vulnerability['cwe'])
     if vulnerability['cwe'] is None:
         cwe_text = ''
         cwe = 1035
