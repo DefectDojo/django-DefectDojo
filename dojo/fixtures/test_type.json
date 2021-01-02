@@ -697,6 +697,6 @@
             "name": "OssIndex DevAudit scan result importer"
         },
         "model": "dojo.test_type",
-        "pk": 199
+        "pk": 191
     }
 ]
