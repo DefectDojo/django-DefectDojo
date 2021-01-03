@@ -26,8 +26,8 @@ class TestParser(TestCase):
             self.assertEqual('TLS cookie without secure flag set', item.title)
             self.assertEqual('5605602767570803712', item.unique_id_from_tool)
             self.assertEqual('5243392', item.vuln_id_from_tool)
-            self.assertGreater(2, item.scanner_confidence)
-            self.assertLess(6, item.scanner_confidence)
+            self.assertLess(2, item.scanner_confidence)
+            self.assertGreater(6, item.scanner_confidence)
 
     def test_validate(self):
         testfile = 'dojo/unittests/scans/burp_suite_pro/example.json'
@@ -45,12 +45,12 @@ class TestParser(TestCase):
     def test_convert_confidence(self):
         confidence = None
         with self.subTest(confidence='firm'):
-            self.assertLess(3, convert_confidence({'confidence': 'firm'}))
+            self.assertGreater(3, convert_confidence({'confidence': 'firm'}))
         with self.subTest(confidence='certain'):
-            self.assertGreater(2, convert_confidence({'confidence': 'certain'}))
-            self.assertLess(6, convert_confidence({'confidence': 'certain'}))
+            self.assertLess(2, convert_confidence({'confidence': 'certain'}))
+            self.assertGreater(6, convert_confidence({'confidence': 'certain'}))
         with self.subTest(confidence='tentative'):
-            self.assertGreater(5, convert_confidence({'confidence': 'tentative'}))
+            self.assertLess(5, convert_confidence({'confidence': 'tentative'}))
         with self.subTest(confidence='undefined'):
             self.assertIsNone(convert_confidence({'confidence': 'undefined'}))
         with self.subTest(confidence=None):
