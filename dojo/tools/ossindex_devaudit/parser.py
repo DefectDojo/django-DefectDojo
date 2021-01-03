@@ -3,6 +3,10 @@ import json
 from dojo.models import Finding
 
 
+# OssIndex Devaudit Results Parser
+# Parses files created by the Sonatype OssIndex Devaudit tool
+# https://github.com/sonatype-nexus-community/DevAudit
+
 class OssIndexDevauditParser(object):
     def __init__(self, json_file, test):
 
@@ -29,10 +33,10 @@ class OssIndexDevauditParser(object):
         items = {}
 
         results = {key: value for (key, value) in tree.items()}
-        for package in results['Packages']:
+        for package in results.get('Packages', []):
             package_data = package['Package']
-            if len(package['Vulnerabilities']) > 0:
-                for vulnerability in package['Vulnerabilities']:
+            if len(package.get('Vulnerabilities', [])) > 0:
+                for vulnerability in package.get('Vulnerabilities', []):
                     item = get_item(
                         dependency_name=package_data['name'],
                         dependency_version=package_data['version'],
@@ -48,18 +52,14 @@ class OssIndexDevauditParser(object):
 
 def get_item(dependency_name, dependency_version, dependency_source, vulnerability, test):
 
-    cwe_data = vulnerability.get('cwe', '')
+    cwe_data = vulnerability.get('cwe', 'CWE-1035')
+    if cwe_data is None or cwe_data.startswith('CWE') is False:
+        cwe_data = 'CWE-1035'
+    cwe = int(cwe_data.split('-')[1])
 
-    if cwe_data == '' or cwe_data is None:
-        cwe_text = ''
-        cwe = 1035
-    else:
-        cwe_text = cwe_data
-        cwe = cwe_data.replace('CWE-', '')
-
-    finding = Finding(title=dependency_source + ":" + dependency_name + " - " + "(" + dependency_version + ", " + cwe_text + ")",
+    finding = Finding(title=dependency_source + ":" + dependency_name + " - " + "(" + dependency_version + ", " + cwe_data + ")",
                       test=test,
-                      severity=get_severity(vulnerability['cvssScore']),
+                      severity=get_severity(vulnerability.get('cvssScore', '')),
                       description=vulnerability['title'],
                       cwe=cwe,
                       cvssv3=vulnerability['cvssVector'].replace('CVSS:3.0', ''),

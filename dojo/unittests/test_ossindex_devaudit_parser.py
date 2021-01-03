@@ -81,3 +81,43 @@ class TestOssIndexDevauditParser(TestCase):
         if len(parser.items) > 0:
             for item in parser.items:
                 self.assertTrue(item.cwe == 1035)
+
+    def test_ossindex_devaudit_parser_get_severity_shows_unknown(self):
+        testfile = open("dojo/unittests/scans/ossindex_devaudit_sample/ossindex_devaudit_severity_unknown.json")
+        parser = OssIndexDevauditParser(testfile, Test())
+        testfile.close()
+        if len(parser.items) > 0:
+            for item in parser.items:
+                self.assertTrue(item.severity == "Unknown")
+
+    def test_ossindex_devaudit_parser_get_severity_shows_critical(self):
+        testfile = open("dojo/unittests/scans/ossindex_devaudit_sample/ossindex_devaudit_severity_critical.json")
+        parser = OssIndexDevauditParser(testfile, Test())
+        testfile.close()
+        if len(parser.items) > 0:
+            for item in parser.items:
+                self.assertTrue(item.severity == "Critical")
+
+    def test_ossindex_devaudit_parser_get_severity_shows_high(self):
+        testfile = open("dojo/unittests/scans/ossindex_devaudit_sample/ossindex_devaudit_severity_high.json")
+        parser = OssIndexDevauditParser(testfile, Test())
+        testfile.close()
+        if len(parser.items) > 0:
+            for item in parser.items:
+                self.assertTrue(item.severity == "High")
+
+    def test_ossindex_devaudit_parser_get_severity_shows_medium(self):
+        testfile = open("dojo/unittests/scans/ossindex_devaudit_sample/ossindex_devaudit_severity_medium.json")
+        parser = OssIndexDevauditParser(testfile, Test())
+        testfile.close()
+        if len(parser.items) > 0:
+            for item in parser.items:
+                self.assertTrue(item.severity == "Medium")
+
+    def test_ossindex_devaudit_parser_get_severity_shows_low(self):
+        testfile = open("dojo/unittests/scans/ossindex_devaudit_sample/ossindex_devaudit_severity_low.json")
+        parser = OssIndexDevauditParser(testfile, Test())
+        testfile.close()
+        if len(parser.items) > 0:
+            for item in parser.items:
+                self.assertTrue(item.severity == "Low")
