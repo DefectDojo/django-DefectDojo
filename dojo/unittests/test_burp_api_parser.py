@@ -38,4 +38,4 @@ class TestParser(TestCase):
         with self.subTest(confidence='undefined'):
             self.assertIsNone(convert_confidence({'confidence': confidence}))
         with self.subTest(confidence=None):
-            self.assertIsNone(convert_confidence({'confidence': confidence}))
+            self.assertIsNone(convert_confidence({}))
