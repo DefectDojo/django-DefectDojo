@@ -1,6 +1,7 @@
 import logging
 import json
-from dojo.models import Finding
+from dojo.models import Finding, Endpoint
+from urllib.parse import urlparse
 
 logger = logging.getLogger(__name__)
 
@@ -73,8 +74,19 @@ class BurpApiParser(object):
                         issue.get("type_index", "")
                     ),  # the type index is a good candidate for this attribute
                 )
+                # manage confidence
                 if convert_confidence(issue) is not None:
                     finding.scanner_confidence = convert_confidence(issue)
+                # manage endpoints
+                if "origin" in issue and "path" in issue:
+                    parts = urlparse(issue.get("origin") + issue("path"))
+                    finding.unsaved_endpoints = [Endpoint(protocol=parts.scheme,
+                                                            host=parts.netloc,
+                                                            path=parts.path,
+                                                            query=parts.query,
+                                                            fragment=parts.fragment,
+                                                            product=test.engagement.product)
+                                                 ]
                 self.items.append(finding)
 
 

@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from dojo.models import Test
+from dojo.models import Test, Product, Engagement
 from dojo.tools.burp_api.parser import BurpApiParser
 from dojo.tools.burp_api.parser import convert_severity, convert_confidence
 
@@ -13,6 +13,8 @@ class TestParser(TestCase):
     def test_example_report(self):
         testfile = 'dojo/unittests/scans/burp_suite_pro/example.json'
         test = Test()
+        test.engagement = Engagement()
+        engagement.product = Product()
         with open(testfile) as f:
             parser = BurpApiParser(f, test)
         self.assertIsNotNone(test.title)
@@ -43,13 +45,13 @@ class TestParser(TestCase):
     def test_convert_confidence(self):
         confidence = None
         with self.subTest(confidence='firm'):
-            self.assertLess(3, convert_confidence({'confidence': confidence}))
+            self.assertLess(3, convert_confidence({'confidence': 'firm'}))
         with self.subTest(confidence='certain'):
-            self.assertGreater(2, convert_confidence({'confidence': confidence}))
-            self.assertLess(6, convert_confidence({'confidence': confidence}))
+            self.assertGreater(2, convert_confidence({'confidence': 'certain'}))
+            self.assertLess(6, convert_confidence({'confidence': 'certain'}))
         with self.subTest(confidence='tentative'):
-            self.assertGreater(5, convert_confidence({'confidence': confidence}))
+            self.assertGreater(5, convert_confidence({'confidence': 'tentative'}))
         with self.subTest(confidence='undefined'):
-            self.assertIsNone(convert_confidence({'confidence': confidence}))
+            self.assertIsNone(convert_confidence({'confidence': 'undefined'}))
         with self.subTest(confidence=None):
             self.assertIsNone(convert_confidence({}))
