@@ -14,7 +14,7 @@ class TestParser(TestCase):
         testfile = 'dojo/unittests/scans/burp_suite_pro/example.json'
         test = Test()
         test.engagement = Engagement()
-        engagement.product = Product()
+        test.engagement.product = Product()
         with open(testfile) as f:
             parser = BurpApiParser(f, test)
         self.assertIsNotNone(test.title)
@@ -40,7 +40,7 @@ class TestParser(TestCase):
     def test_convert_severity(self):
         severity = None
         with self.subTest(severity='info'):
-            self.assertEqual("Info", convert_severity({'severity': severity}))
+            self.assertEqual("Info", convert_severity({'severity': 'info'}))
 
     def test_convert_confidence(self):
         confidence = None

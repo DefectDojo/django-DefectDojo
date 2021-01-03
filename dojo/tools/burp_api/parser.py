@@ -79,7 +79,7 @@ class BurpApiParser(object):
                     finding.scanner_confidence = convert_confidence(issue)
                 # manage endpoints
                 if "origin" in issue and "path" in issue:
-                    parts = urlparse(issue.get("origin") + issue("path"))
+                    parts = urlparse(issue.get("origin") + issue.get("path"))
                     finding.unsaved_endpoints = [Endpoint(protocol=parts.scheme,
                                                             host=parts.netloc,
                                                             path=parts.path,
