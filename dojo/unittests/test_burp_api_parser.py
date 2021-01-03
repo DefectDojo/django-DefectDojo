@@ -25,7 +25,7 @@ class TestParser(TestCase):
             self.assertEqual('TLS cookie without secure flag set', item.title)
             self.assertEqual('5605602767570803712', item.unique_id_from_tool)
             self.assertEqual('5243392', item.vuln_id_from_tool)
-            self.assertLess(3, item.scanner_confidence)
+            self.assertGreater(3, item.scanner_confidence)
 
     def test_validate(self):
         testfile = 'dojo/unittests/scans/burp_suite_pro/example.json'
