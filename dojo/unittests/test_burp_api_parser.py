@@ -19,15 +19,13 @@ class TestParser(TestCase):
             parser = BurpApiParser(f, test)
         self.assertIsNotNone(test.title)
         self.assertEqual(5, len(parser.items))
-        i = None
         with self.subTest(i=0):
-            item = parser.items[i]
+            item = parser.items[0]
             self.assertEqual('Info', item.severity)
             self.assertEqual('TLS cookie without secure flag set', item.title)
             self.assertEqual('5605602767570803712', item.unique_id_from_tool)
             self.assertEqual('5243392', item.vuln_id_from_tool)
-            self.assertLess(2, item.scanner_confidence)
-            self.assertGreater(6, item.scanner_confidence)
+            self.assertLess(3, item.scanner_confidence)
 
     def test_validate(self):
         testfile = 'dojo/unittests/scans/burp_suite_pro/example.json'
@@ -38,17 +36,26 @@ class TestParser(TestCase):
                 item.full_clean()
 
     def test_convert_severity(self):
-        severity = None
-        with self.subTest(severity='info'):
-            self.assertEqual("Info", convert_severity({'severity': 'info'}))
+        with self.subTest(severity='high'):
+            self.assertEqual("High", convert_severity({'severity': 'high'}))
+        with self.subTest(severity='medium'):
+            self.assertEqual("Medium", convert_severity({'severity': 'medium'}))
+        with self.subTest(severity='low'):
+            self.assertEqual("Low", convert_severity({'severity': 'low'}))
+            self.assertEqual("Low", convert_severity({'severity': 'LOW'}))
+        with self.subTest(severity='undefined'):
+            self.assertEqual("Info", convert_severity({'severity': 'undefined'}))
+        with self.subTest(severity=None):
+            self.assertEqual("Info", convert_severity({'severity': None}))
+            self.assertEqual("Info", convert_severity({}))
 
     def test_convert_confidence(self):
         confidence = None
-        with self.subTest(confidence='firm'):
-            self.assertGreater(3, convert_confidence({'confidence': 'firm'}))
         with self.subTest(confidence='certain'):
-            self.assertLess(2, convert_confidence({'confidence': 'certain'}))
-            self.assertGreater(6, convert_confidence({'confidence': 'certain'}))
+            self.assertGreater(3, convert_confidence({'confidence': 'certain'}))
+        with self.subTest(confidence='firm'):
+            self.assertLess(2, convert_confidence({'confidence': 'firm'}))
+            self.assertGreater(6, convert_confidence({'confidence': 'firm'}))
         with self.subTest(confidence='tentative'):
             self.assertLess(5, convert_confidence({'confidence': 'tentative'}))
         with self.subTest(confidence='undefined'):
