@@ -31,7 +31,7 @@ class BurpApiParser(object):
         # for each issue found
         for issue_event in tree.get("issue_events", list()):
             if "issue_found" == issue_event.get("type") and "issue" in issue_event:
-                issue = issue_event.get("")
+                issue = issue_event.get("issue")
 
                 title = issue.get("name", "Burp issue")
                 severity = convert_severity(issue)
