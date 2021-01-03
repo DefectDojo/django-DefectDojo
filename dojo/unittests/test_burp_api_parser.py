@@ -17,14 +17,28 @@ class TestParser(TestCase):
             parser = BurpApiParser(f, test)
         self.assertIsNotNone(test.title)
         self.assertEqual(5, len(parser.items))
-        item = parser.items[0]
-        self.assertEqual('Info', item.severity)
-        self.assertEqual('TLS cookie without secure flag set', item.title)
-        self.assertEqual('5605602767570803712', item.unique_id_from_tool)
-        self.assertEqual('5243392', item.vuln_id_from_tool)
+        i = None
+        with self.subTest(i=0):
+            item = parser.items[i]
+            self.assertEqual('Info', item.severity)
+            self.assertEqual('TLS cookie without secure flag set', item.title)
+            self.assertEqual('5605602767570803712', item.unique_id_from_tool)
+            self.assertEqual('5243392', item.vuln_id_from_tool)
+            self.assertGreater(2, item.scanner_confidence)
+            self.assertLess(6, item.scanner_confidence)
+
+    def test_validate(self):
+        testfile = 'dojo/unittests/scans/burp_suite_pro/example.json'
+        with open(testfile) as f:
+            test = Test()
+            parser = BurpApiParser(f, test)
+            for item in parser.items:
+                item.full_clean()
 
     def test_convert_severity(self):
-        self.assertEqual("Info", convert_severity({'severity': 'info'}))
+        severity = None
+        with self.subTest(severity='info'):
+            self.assertEqual("Info", convert_severity({'severity': severity}))
 
     def test_convert_confidence(self):
         confidence = None
