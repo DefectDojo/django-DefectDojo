@@ -26,7 +26,7 @@ class BurpApiParser(object):
         tree = json.load(file)
 
         # by default give the test a title
-        test.title = f"Burp REST API"
+        test.title = "Burp REST API"
 
         # for each issue found
         for issue_event in tree.get("issue_events", list()):
@@ -80,7 +80,7 @@ class BurpApiParser(object):
 
 def convert_severity(issue):
     """According to OpenAPI definition of the API
-    
+
     "Severity":{
              "type":"string",
              "enum":[
@@ -112,7 +112,7 @@ def convert_confidence(issue):
              ]
           },
     """
-    value = issue.get('confidence' ,'undefined').lower()
+    value = issue.get('confidence', 'undefined').lower()
     if "certain" == value:
         return 2
     elif "firm" == value:

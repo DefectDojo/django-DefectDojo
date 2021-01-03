@@ -25,8 +25,9 @@ class TestParser(TestCase):
 
     def test_convert_severity(self):
         self.assertEqual("Info", convert_severity({'severity': 'info'}))
-    
+
     def test_convert_confidence(self):
+        confidence = None
         with self.subTest(confidence='firm'):
             self.assertLess(3, convert_confidence({'confidence': confidence}))
         with self.subTest(confidence='certain'):
