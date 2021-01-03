@@ -33,30 +33,30 @@ class TestOssIndexDevauditParser(TestCase):
         testfile.close()
         self.assertTrue(len(parser.items) == 1)
 
-    def test_ossindex_devaudit_parser_with_reference_shows_snyk_reference(self):
+    def test_ossindex_devaudit_parser_with_reference_shows_reference(self):
         testfile = open("dojo/unittests/scans/ossindex_devaudit_sample/ossindex_devaudit_one_vuln.json")
         parser = OssIndexDevauditParser(testfile, Test())
         testfile.close()
 
         if len(parser.items) > 0:
             for item in parser.items:
-                self.assertTrue(item.references.startswith('https://snyk.io/vuln/search'))
+                self.assertTrue(item.references != "")
 
-    def test_ossindex_devaudit_parser_with_empty_reference_shows_snyk_reference(self):
+    def test_ossindex_devaudit_parser_with_empty_reference_shows_empty_reference(self):
         testfile = open("dojo/unittests/scans/ossindex_devaudit_sample/ossindex_devaudit_empty_reference.json")
         parser = OssIndexDevauditParser(testfile, Test())
         testfile.close()
         if len(parser.items) > 0:
             for item in parser.items:
-                self.assertTrue(item.references.startswith('https://snyk.io/vuln/search'))
+                self.assertTrue(item.references == "")
 
-    def test_ossindex_devaudit_parser_with_missing_reference_shows_snyk_reference(self):
+    def test_ossindex_devaudit_parser_with_missing_reference_shows_empty(self):
         testfile = open("dojo/unittests/scans/ossindex_devaudit_sample/ossindex_devaudit_missing_reference.json")
         parser = OssIndexDevauditParser(testfile, Test())
         testfile.close()
         if len(parser.items) > 0:
             for item in parser.items:
-                self.assertTrue(item.references.startswith('https://snyk.io/vuln/search'))
+                self.assertTrue(item.references == "")
 
     def test_ossindex_devaudit_parser_with_missing_cwe_shows_1035(self):
         testfile = open("dojo/unittests/scans/ossindex_devaudit_sample/ossindex_devaudit_missing_cwe.json")
