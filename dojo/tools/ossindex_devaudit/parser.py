@@ -1,5 +1,5 @@
 import json
-
+from json import JSONDecodeError
 from dojo.models import Finding
 
 
@@ -23,7 +23,7 @@ class OssIndexDevauditParser(object):
             return
         try:
             tree = json.load(json_file)
-        except:
+        except JSONDecodeError:
             raise Exception("Invalid format")
 
         return tree
@@ -55,7 +55,10 @@ def get_item(dependency_name, dependency_version, dependency_source, vulnerabili
     cwe_data = vulnerability.get('cwe', 'CWE-1035')
     if cwe_data is None or cwe_data.startswith('CWE') is False:
         cwe_data = 'CWE-1035'
-    cwe = int(cwe_data.split('-')[1])
+    try:
+        cwe = int(cwe_data.split('-')[1])
+    except ValueError:
+        raise ValueError('Attempting to convert the CWE value to an integer failed')
 
     finding = Finding(title=dependency_source + ":" + dependency_name + " - " + "(" + dependency_version + ", " + cwe_data + ")",
                       test=test,
