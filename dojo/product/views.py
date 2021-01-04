@@ -14,19 +14,23 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
-from django.db.models import Sum, Count, Q, Max, Min, Case, When
+from django.db.models import Sum, Count, Q, Max
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS, connection
 from dojo.templatetags.display_tags import get_level
-from dojo.filters import ProductFilter, EngagementFilter, ProductMetricsEndpointFilter, ProductMetricsFindingFilter, ProductComponentFilter
-from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAProjectForm, JIRAFindingForm, AdHocFindingForm, \
-                       EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm, ProductNotificationsForm, \
-                       GITHUB_Product_Form, GITHUBFindingForm, App_AnalysisTypeForm, JIRAEngagementForm
-from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, GITHUB_PKey, Finding_Template, \
-                        Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint_Status, \
-                        Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, BurpRawRequestResponse
+from dojo.filters import ProductFilter, EngagementFilter, ProductMetricsEndpointFilter, ProductMetricsFindingFilter, \
+    ProductComponentFilter
+from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAProjectForm, JIRAFindingForm, \
+    AdHocFindingForm, \
+    EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm, ProductNotificationsForm, \
+    GITHUB_Product_Form, GITHUBFindingForm, App_AnalysisTypeForm, JIRAEngagementForm
+from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, \
+    GITHUB_PKey, Finding_Template, \
+    Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint_Status, \
+    Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, BurpRawRequestResponse
 
-from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, Product_Tab, get_punchcard_data, queryset_check
+from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, Product_Tab, get_punchcard_data, \
+    queryset_check
 from dojo.notifications.helper import create_notification
 from custom_field.models import CustomFieldValue, CustomField
 from django.db.models import Prefetch, F
@@ -37,7 +41,6 @@ from django.contrib.postgres.aggregates import StringAgg
 from dojo.components.sql_group_concat import Sql_GroupConcat
 import dojo.jira_link.helper as jira_helper
 import dojo.finding.helper as finding_helper
-
 
 logger = logging.getLogger(__name__)
 
@@ -102,9 +105,10 @@ def prefetch_for_product(prods):
             Prefetch('github_pkey_set', queryset=GITHUB_PKey.objects.all().select_related('git_conf'),
                      to_attr='github_confs'))
         active_endpoint_query = Endpoint.objects.filter(
-                finding__active=True,
-                finding__mitigated__isnull=True)
-        prefetched_prods = prefetched_prods.prefetch_related(Prefetch('endpoint_set', queryset=active_endpoint_query, to_attr='active_endpoints'))
+            finding__active=True,
+            finding__mitigated__isnull=True)
+        prefetched_prods = prefetched_prods.prefetch_related(
+            Prefetch('endpoint_set', queryset=active_endpoint_query, to_attr='active_endpoints'))
         prefetched_prods = prefetched_prods.prefetch_related('tags')
 
     else:
@@ -194,11 +198,13 @@ def view_product_components(request, pid):
 
     # Get components ordered by component_name and concat component versions to the same row
     if connection.vendor == 'postgresql':
-        component_query = Finding.objects.filter(test__engagement__product__id=pid).values("component_name").order_by('component_name').annotate(
+        component_query = Finding.objects.filter(test__engagement__product__id=pid).values("component_name").order_by(
+            'component_name').annotate(
             component_version=StringAgg('component_version', delimiter=' | ', distinct=True))
     else:
         component_query = Finding.objects.filter(test__engagement__product__id=pid).values("component_name")
-        component_query = component_query.annotate(component_version=Sql_GroupConcat('component_version', distinct=True))
+        component_query = component_query.annotate(
+            component_version=Sql_GroupConcat('component_version', distinct=True))
 
     # Append finding counts
     component_query = component_query.annotate(total=Count('id')).order_by('component_name', 'component_version')
@@ -245,7 +251,7 @@ def finding_querys(request, prod):
 
     findings_query = Finding.objects.filter(test__engagement__product=prod,
                                             severity__in=(
-                                            'Critical', 'High', 'Medium', 'Low', 'Info')).prefetch_related(
+                                                'Critical', 'High', 'Medium', 'Low', 'Info')).prefetch_related(
         'test__engagement',
         'test__engagement__risk_acceptance',
         'found_by',
@@ -253,11 +259,9 @@ def finding_querys(request, prod):
         'test__test_type',
         'risk_acceptance_set',
         'reporter')
-
     findings = ProductMetricsFindingFilter(request.GET, queryset=findings_query, pid=prod)
     findings_qs = queryset_check(findings)
     filters['form'] = findings.form
-
 
     # if not findings_qs and not findings_query:
     #     # logger.debug('all filtered')
@@ -357,10 +361,9 @@ def finding_querys(request, prod):
 
 def endpoint_querys(request, prod):
     filters = dict()
-
     endpoints_query = Endpoint_Status.objects.filter(finding__test__engagement__product=prod,
                                                      finding__severity__in=(
-                                                     'Critical', 'High', 'Medium', 'Low', 'Info')).prefetch_related(
+                                                         'Critical', 'High', 'Medium', 'Low', 'Info')).prefetch_related(
         'finding__test__engagement',
         'finding__test__engagement__risk_acceptance',
         'finding__risk_acceptance_set',
@@ -664,9 +667,12 @@ def prefetch_for_view_engagements(engs):
         prefetched_engs = prefetched_engs.prefetch_related('test_set')
         prefetched_engs = prefetched_engs.prefetch_related('test_set__test_type')  # test.name uses test_type
         prefetched_engs = prefetched_engs.annotate(count_findings_all=Count('test__finding__id'))
-        prefetched_engs = prefetched_engs.annotate(count_findings_open=Count('test__finding__id', filter=Q(test__finding__active=True)))
-        prefetched_engs = prefetched_engs.annotate(count_findings_close=Count('test__finding__id', filter=Q(test__finding__is_Mitigated=True)))
-        prefetched_engs = prefetched_engs.annotate(count_findings_duplicate=Count('test__finding__id', filter=Q(test__finding__duplicate=True)))
+        prefetched_engs = prefetched_engs.annotate(
+            count_findings_open=Count('test__finding__id', filter=Q(test__finding__active=True)))
+        prefetched_engs = prefetched_engs.annotate(
+            count_findings_close=Count('test__finding__id', filter=Q(test__finding__is_Mitigated=True)))
+        prefetched_engs = prefetched_engs.annotate(
+            count_findings_duplicate=Count('test__finding__id', filter=Q(test__finding__duplicate=True)))
         prefetched_engs = prefetched_engs.prefetch_related('tags')
     else:
         logger.debug('unable to prefetch because query was already executed')
@@ -741,13 +747,14 @@ def new_product(request):
                 sonarqube_product.product = product
                 sonarqube_product.save()
 
-            create_notification(event='product_added', title=product.name, url=reverse('view_product', args=(product.id,)))
+            create_notification(event='product_added', title=product.name,
+                                url=reverse('view_product', args=(product.id,)))
 
             if not error:
                 return HttpResponseRedirect(reverse('view_product', args=(product.id,)))
             else:
                 # engagement was saved, but JIRA errors, so goto edit_product
-                return HttpResponseRedirect(reverse('edit_product', args=(product.id, )))
+                return HttpResponseRedirect(reverse('edit_product', args=(product.id,)))
 
     form = ProductForm()
 
@@ -835,7 +842,7 @@ def edit_product(request, pid):
                 return HttpResponseRedirect(reverse('view_product', args=(pid,)))
 
     form = ProductForm(instance=product,
-                        initial={'auth_users': product.authorized_users.all()})
+                       initial={'auth_users': product.authorized_users.all()})
     #    initial={'auth_users': prod.authorized_users.all(),
     #             'tags': get_tag_list(Tag.objects.get_for_object(prod))})
 
@@ -949,7 +956,8 @@ def new_eng_for_app(request, pid, cicd=False):
             logger.debug('new_eng_for_app: process jira coming')
 
             # new engagement, so do not provide jira_project
-            success, jira_project_form = jira_helper.process_jira_project_form(request, instance=None, engagement=engagement)
+            success, jira_project_form = jira_helper.process_jira_project_form(request, instance=None,
+                                                                               engagement=engagement)
             error = not success
 
             logger.debug('new_eng_for_app: process jira epic coming')
@@ -976,11 +984,13 @@ def new_eng_for_app(request, pid, cicd=False):
             else:
                 # engagement was saved, but JIRA errors, so goto edit_engagement
                 logger.debug('new_eng_for_app: jira errors')
-                return HttpResponseRedirect(reverse('edit_engagement', args=(engagement.id, )))
+                return HttpResponseRedirect(reverse('edit_engagement', args=(engagement.id,)))
         else:
             logger.debug(form.errors)
 
-    form = EngForm(initial={'lead': request.user, 'target_start': timezone.now().date(), 'target_end': timezone.now().date() + timedelta(days=7), 'product': product}, cicd=cicd, product=product, user=request.user)
+    form = EngForm(initial={'lead': request.user, 'target_start': timezone.now().date(),
+                            'target_end': timezone.now().date() + timedelta(days=7), 'product': product}, cicd=cicd,
+                   product=product, user=request.user)
     jira_project_form = None
     jira_epic_form = None
     if get_system_setting('enable_jira'):
