@@ -10,7 +10,7 @@ from django.urls import reverse
 from django.contrib.auth.models import User
 from dojo.utils import prepare_for_view, get_system_setting, get_full_url
 from dojo.user.helper import user_is_authorized
-from dojo.models import Check_List, FindingImageAccessToken, Finding, System_Settings, Product
+from dojo.models import Check_List, FindingImageAccessToken, Finding, System_Settings, Product, Dojo_User
 import markdown
 from django.db.models import Sum, Case, When, IntegerField, Value
 from django.utils import timezone
@@ -301,7 +301,7 @@ def finding_sla(finding):
                 sla_age) + ' days or less'
 
     if find_sla is not None:
-        title = '<a data-toggle="tooltip" data-placement="bottom" title="" href="#" data-original-title="' + status_text + '">' \
+        title = '<a class="has-popover" data-toggle="tooltip" data-placement="bottom" title="" href="#" data-content="' + status_text + '">' \
                                                                                                                            '<span class="label severity age-' + status + '">' + str(find_sla) + '</span></a>'
 
     return mark_safe(title)
@@ -836,8 +836,13 @@ def jira_project(obj, use_inheritance=True):
 
 
 @register.filter
-def jira_url(obj):
+def jira_issue_url(obj):
     return jira_helper.get_jira_url(obj)
+
+
+@register.filter
+def jira_project_url(obj):
+    return jira_helper.get_jira_project_url(obj)
 
 
 @register.filter
@@ -941,3 +946,10 @@ def jira_project_tag(product_or_engagement, autoescape=True):
                                 esc(jira_project.push_all_issues),
                                 esc(jira_project.enable_engagement_epic_mapping),
                                 esc(jira_project.push_notes)))
+
+
+@register.filter
+def full_name(user):
+    # not in all templates we have access to a Dojo_User instance, so we use a filter
+    # see https://github.com/DefectDojo/django-DefectDojo/pull/3278
+    return Dojo_User.generate_full_name(user)

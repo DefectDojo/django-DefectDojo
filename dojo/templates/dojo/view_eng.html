@@ -252,8 +252,8 @@
                                 <td><a title="{{ test.description }}" href="{% url 'view_test' test.id %}">{{ test }}</a>
                                   {% if test.tags %}
                                       <sup>
-                                          {% for tag in test.tags %}
-                                          <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                          {% for tag in test.tags.all %}
+                                          <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=test-tag:{{ tag }}">{{ tag }}</a>
                                           {% endfor %}
                                       </sup>
                                   {% endif %}
@@ -638,8 +638,8 @@
       {% endif %}
       {% if eng.tags %}
           <sup>
-              {% for tag in eng.tags %}
-              <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+              {% for tag in eng.tags.all %}
+              <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=engagement-tag:{{ tag }}">{{ tag }}</a>
               {% endfor %}
           </sup>
       {% endif %}
@@ -717,14 +717,14 @@
         {% if jissue and jira_project %}
         <tr>
             <td><strong>Jira</strong></td>
-            <td><a href="{{ eng | jira_url }}" target="_blank"><i class="fa fa-external-link"></i> {{ eng | jira_key }}
+            <td><a href="{{ eng | jira_issue_url }}" target="_blank"><i class="fa fa-external-link"></i> {{ eng | jira_key }}
             <small>(epic)</small>
             </a></td>
         </tr>
         {% elif jira_project %}
         <tr>
             <td><strong>JIRA</strong></td>
-            <td><a href="{{ eng | jira_url }}" target="_blank"><i class="fa fa-external-link"></i> {{ eng | jira_key }}
+            <td><a href="{{ eng | jira_project_url }}" target="_blank"><i class="fa fa-external-link"></i> {{ eng | jira_key }}
             {% if jira_project.engagement is not eng %}
             <small>(inherited)</small>
             {% else %}

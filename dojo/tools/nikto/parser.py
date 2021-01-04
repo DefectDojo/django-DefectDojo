@@ -4,8 +4,11 @@ import re
 from defusedxml import ElementTree as ET
 import hashlib
 from urllib.parse import urlparse
+import logging
 
 from dojo.models import Finding, Endpoint
+
+logger = logging.getLogger(__name__)
 
 
 class NiktoXMLParser(object):
@@ -21,11 +24,16 @@ class NiktoXMLParser(object):
         tree = ET.parse(filename)
         root = tree.getroot()
         scan = root.find('scandetails')
-        # New versions of Nikto have a new file type (nxvmlversion="1.2") which adds an additional niktoscan tag
-        # This find statement below is to support new file format while not breaking older Nikto scan files versions.
-        if scan is None:
-            scan = root.find('./niktoscan/scandetails')
 
+        if scan is not None:
+            self.process_scandetail(scan, test, dupes)
+        else:
+            # New versions of Nikto have a new file type (nxvmlversion="1.2") which adds an additional niktoscan tag
+            # This find statement below is to support new file format while not breaking older Nikto scan files versions.
+            for scan in root.findall('./niktoscan/scandetails'):
+                self.process_scandetail(scan, test, dupes)
+
+    def process_scandetail(self, scan, test, dupes):
         for item in scan.findall('item'):
             # Title
             titleText = None
@@ -41,8 +49,8 @@ class NiktoXMLParser(object):
             # Url
             ip = item.find("iplink").text
             # Remove the port numbers for 80/443
-            ip = ip.replace(":80", "")
-            ip = ip.replace(":443", "")
+            ip = ip.replace(r":['80']{2}\/?$", "")
+            ip = ip.replace(r":['443']{3}\/?$", "")
 
             # Severity
             severity = "Info"  # Nikto doesn't assign severity, default to Info
@@ -96,11 +104,14 @@ class NiktoXMLParser(object):
         if url:
             path = url.path
 
-        rhost = re.search(
-            "(http|https|ftp)\://([a-zA-Z0-9\.\-]+(\:[a-zA-Z0-9\.&amp;%\$\-]+)*@)*((25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9])\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])|localhost|([a-zA-Z0-9\-]+\.)*[a-zA-Z0-9\-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))[\:]*([0-9]+)*([/]*($|[a-zA-Z0-9\.\,\?\'\\\+&amp;%\$#\=~_\-]+)).*?$",
-            host)
-        protocol = rhost.group(1)
-        host = rhost.group(4)
+        try:
+            rhost = re.search(
+                r"(http|https|ftp)\://([a-zA-Z0-9\.\-]+(\:[a-zA-Z0-9\.&amp;%\$\-]+)*@)*((25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9])\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])|localhost|([a-zA-Z0-9\-]+\.)*[a-zA-Z0-9\-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))[\:]*([0-9]+)*([/]*($|[a-zA-Z0-9\.\,\?\'\\\+&amp;%\$#\=~_\-]+)).*?$",
+                host)
+            protocol = rhost.group(1)
+            host = rhost.group(4)
+        except:
+            logger.exception("Could not apply regex to endpoint")
 
         try:
             dupe_endpoint = Endpoint.objects.get(protocol="protocol",

@@ -40,7 +40,7 @@ from functools import reduce
 from django.db.models.query import QuerySet
 from dojo.user.helper import user_must_be_authorized, user_is_authorized, check_auth_users_list
 import dojo.jira_link.helper as jira_helper
-
+from django.views.decorators.vary import vary_on_cookie
 
 logger = logging.getLogger(__name__)
 parse_logger = logging.getLogger('dojo')
@@ -48,6 +48,7 @@ parse_logger = logging.getLogger('dojo')
 
 @user_passes_test(lambda u: u.is_staff)
 @cache_page(60 * 5)  # cache for 5 minutes
+@vary_on_cookie
 def engagement_calendar(request):
     if 'lead' not in request.GET or '0' in request.GET.getlist('lead'):
         engagements = Engagement.objects.all()
@@ -59,6 +60,9 @@ def engagement_calendar(request):
             filters.append(Q(lead__isnull=True))
         filters.append(Q(lead__in=leads))
         engagements = Engagement.objects.filter(reduce(operator.or_, filters))
+
+    engagements = engagements.select_related('lead')
+    engagements = engagements.prefetch_related('product')
 
     add_breadcrumb(
         title="Engagement Calendar", top_level=True, request=request)
@@ -130,9 +134,9 @@ def engagements_all(request):
 
 def prefetch_for_products_with_engagments(products_with_engagements):
     if isinstance(products_with_engagements, QuerySet):  # old code can arrive here with prods being a list because the query was already executed
-        return products_with_engagements.prefetch_related('tagged_items__tag',
-            'engagement_set__tagged_items__tag',
-            'engagement_set__test_set__tagged_items__tag',
+        return products_with_engagements.prefetch_related('tags',
+            'engagement_set__tags',
+            'engagement_set__test_set__tags',
             'engagement_set__jira_project__jira_instance',
             'jira_project_set__jira_instance')
 
@@ -146,17 +150,14 @@ def edit_engagement(request, eid):
     engagement = Engagement.objects.get(pk=eid)
     is_ci_cd = engagement.engagement_type == "CI/CD"
     jira_epic_form = None
-    jira_project = jira_helper.get_jira_project(engagement, use_inheritance=False)
+    jira_project = None
     jira_error = False
 
     if request.method == 'POST':
         form = EngForm(request.POST, instance=engagement, cicd=is_ci_cd, product=engagement.product.id, user=request.user)
+        jira_project = jira_helper.get_jira_project(engagement, use_inheritance=False)
 
-        jira_project_form = JIRAProjectForm(request.POST, prefix='jira-project-form', instance=jira_project, target='engagement')
-        jira_epic_form = JIRAEngagementForm(request.POST, prefix='jira-epic-form', instance=engagement)
-
-        if (form.is_valid() and jira_project_form.is_valid() and jira_epic_form.is_valid()):
-
+        if form.is_valid():
             # first save engagement details
             new_status = form.cleaned_data.get('status')
             engagement = form.save(commit=False)
@@ -165,43 +166,11 @@ def edit_engagement(request, eid):
             else:
                 engagement.active = True
             engagement.save()
+            form.save_m2m()
 
-            tags = request.POST.getlist('tags')
-            t = ", ".join('"{0}"'.format(w) for w in tags)
-            engagement.tags = t
-
-            # save jira project config
-            jira_project = jira_project_form.save(commit=False)
-            jira_project.engagement = engagement
-            # only check jira project if form is sufficiently populated
-            if jira_project.jira_instance and jira_project.project_key:
-                jira_error = not jira_helper.is_jira_project_valid(jira_project)
-
-                if not jira_error:
-                    jira_project.save()
-
-                    messages.add_message(
-                        request,
-                        messages.SUCCESS,
-                        'JIRA Project config added successfully.',
-                        extra_tags='alert-success')
-
-            # push epic
-            if jira_epic_form.cleaned_data.get('push_to_jira'):
-                if jira_helper.push_to_jira(engagement):
-                    messages.add_message(
-                        request,
-                        messages.SUCCESS,
-                        'Push to JIRA for Epic queued succesfully, check alerts on the top right for errors',
-                        extra_tags='alert-success')
-                else:
-                    jira_error = True
-
-                    messages.add_message(
-                        request,
-                        messages.SUCCESS,
-                        'Push to JIRA for Epic failed, check alerts on the top right for errors',
-                        extra_tags='alert-danger')
+            # tags = request.POST.getlist('tags')
+            # t = ", ".join('"{0}"'.format(w) for w in tags)
+            # engagement.tags = t
 
             messages.add_message(
                 request,
@@ -209,35 +178,33 @@ def edit_engagement(request, eid):
                 'Engagement updated successfully.',
                 extra_tags='alert-success')
 
-            if not jira_error:
+            success, jira_project_form = jira_helper.process_jira_project_form(request, instance=jira_project, engagement=engagement)
+            error = not success
+
+            success, jira_epic_form = jira_helper.process_jira_epic_form(request, engagement=engagement)
+            error = error or not success
+
+            if not error:
                 if '_Add Tests' in request.POST:
                     return HttpResponseRedirect(
                         reverse('add_tests', args=(engagement.id, )))
                 else:
                     return HttpResponseRedirect(
                         reverse('view_engagement', args=(engagement.id, )))
-
         else:
-            # if forms invalid, page will just reload and show errors
-            if jira_project_form.errors or jira_epic_form.errors:
-                messages.add_message(
-                    request,
-                    messages.ERROR,
-                    'Errors in JIRA forms, see below',
-                    extra_tags='alert-danger')
+            logger.debug(form.errors)
 
-    else:
-        form = EngForm(initial={'product': engagement.product}, instance=engagement, cicd=is_ci_cd, product=engagement.product, user=request.user)
+    form = EngForm(initial={'product': engagement.product}, instance=engagement, cicd=is_ci_cd, product=engagement.product, user=request.user)
 
-        jira_project_form = None
-        jira_epic_form = None
-        if get_system_setting('enable_jira'):
-            jira_project_form = JIRAProjectForm(prefix='jira-project-form', instance=jira_project, target='engagement', product=engagement.product)
-            if jira_project:
-                logger.debug('showing jira-epic-form')
-                jira_epic_form = JIRAEngagementForm(prefix='jira-epic-form', instance=engagement)
+    jira_project_form = None
+    jira_epic_form = None
+    if get_system_setting('enable_jira'):
+        jira_project = jira_helper.get_jira_project(engagement, use_inheritance=False)
+        jira_project_form = JIRAProjectForm(instance=jira_project, target='engagement', product=engagement.product)
+        logger.debug('showing jira-epic-form')
+        jira_epic_form = JIRAEngagementForm(instance=engagement)
 
-    form.initial['tags'] = [tag.name for tag in engagement.tags]
+    # form.initial['tags'] = [tag.name for tag in engagement.tags.all()]
 
     title = ' CI/CD' if is_ci_cd else ''
     product_tab = Product_Tab(engagement.product.id, title="Edit" + title + " Engagement", tab="engagements")
@@ -248,6 +215,7 @@ def edit_engagement(request, eid):
         'edit': True,
         'jira_epic_form': jira_epic_form,
         'jira_project_form': jira_project_form,
+        'engagement': engagement,
     })
 
 
@@ -262,7 +230,6 @@ def delete_engagement(request, eid):
         if 'id' in request.POST and str(engagement.id) == request.POST['id']:
             form = DeleteEngagementForm(request.POST, instance=engagement)
             if form.is_valid():
-                del engagement.tags
                 engagement.delete()
                 messages.add_message(
                     request,
@@ -300,7 +267,7 @@ def view_engagement(request, eid):
     eng = get_object_or_404(Engagement, id=eid)
     tests = (
         Test.objects.filter(engagement=eng)
-        .prefetch_related('tagged_items__tag', 'test_type')
+        .prefetch_related('tags', 'test_type')
         .annotate(count_findings_test_all=Count('finding__id'))
         .annotate(count_findings_test_active_verified=Count('finding__id', filter=Q(finding__active=True)))
         .annotate(count_findings_test_mitigated=Count('finding__id', filter=Q(finding__is_Mitigated=True)))
@@ -467,9 +434,6 @@ def add_tests(request, eid):
                 eng.save()
 
             new_test.save()
-            tags = request.POST.getlist('tags')
-            t = ", ".join('"{0}"'.format(w) for w in tags)
-            new_test.tags = t
 
             # Save the credential to the test
             if cred_form.is_valid():
@@ -583,6 +547,7 @@ def import_scan_results(request, eid=None, pid=None):
             active = form.cleaned_data['active']
             verified = form.cleaned_data['verified']
             scan_type = request.POST['scan_type']
+            tags = form.cleaned_data['tags']
             if not any(scan_type in code
                        for code in ImportScanForm.SCAN_TYPE_CHOICES):
                 raise Http404()
@@ -594,22 +559,22 @@ def import_scan_results(request, eid=None, pid=None):
                 return HttpResponseRedirect(reverse('import_scan_results', args=(engagement,)))
 
             tt, t_created = Test_Type.objects.get_or_create(name=scan_type)
-            # will save in development environment
-            environment, env_created = Development_Environment.objects.get_or_create(
-                name="Development")
+
+            # Will save in the provided environment or in the `Development` one if absent
+            environment_id = request.POST.get('environment', 'Development')
+            environment = Development_Environment.objects.get(id=environment_id)
+
             t = Test(
                 engagement=engagement,
                 test_type=tt,
                 target_start=scan_date,
                 target_end=scan_date,
                 environment=environment,
-                percent_complete=100)
+                percent_complete=100,
+                tags=tags)
             t.lead = user
             t.full_clean()
             t.save()
-            tags = request.POST.getlist('tags')
-            ts = ", ".join(tags)
-            t.tags = ts
 
             # Save the credential to the test
             if cred_form.is_valid():
@@ -736,7 +701,6 @@ def import_scan_results(request, eid=None, pid=None):
                     extra_tags='alert-success')
 
                 create_notification(
-                    initiator=user,
                     event='scan_added',
                     title=str(finding_count) + " findings for " + engagement.product.name,
                     finding_count=finding_count,

@@ -29,11 +29,11 @@ jobs:
         with:
           ref: ${{ github.event.inputs.from_branch }}
       - name: Create release branch
-        if: "!startsWith('${{ github.event.inputs.from_branch }}', 'release/')"
+        if: ${{ !startsWith(github.event.inputs.from_branch, 'release/') }}
         run: |
           echo "NEW_BRANCH=release/${{ github.event.inputs.release_number }}" >> $GITHUB_ENV
       - name: Use existing release branch
-        if: startsWith('${{ github.event.inputs.from_branch }}', 'release/')
+        if: startsWith(github.event.inputs.from_branch, 'release/')
         run: |
           echo "NEW_BRANCH=${{ github.event.inputs.from_branch }}" >> $GITHUB_ENV
       - name: Configure git
@@ -60,7 +60,7 @@ jobs:
           grep appVersion helm/defectdojo/Chart.yaml
           grep version components/package.json
       - name: Push version changes
-        uses: stefanzweifel/git-auto-commit-action@v4.7.2
+        uses: stefanzweifel/git-auto-commit-action@v4.8.0
         with:
           commit_user_name: "${{ env.GIT_USERNAME }}"
           commit_user_email: "${{ env.GIT_EMAIL }}"

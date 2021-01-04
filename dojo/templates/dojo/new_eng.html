@@ -31,25 +31,24 @@
         {%  if jira_epic_form %}
                 <h4> JIRA Epic</h4>
                 <hr>
-                <!-- <div class="form-group">
+                <div class="form-group">
                     <label class="col-sm-2 control-label" for="id_jira_issue">JIRA URL
-                        <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="JIRA URL connected to this product or engagement" data-placement="right" data-container="body" data-original-title="" title="">
+                        <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="JIRA URL connected to this engagement product or engagement" data-placement="right" data-container="body" data-original-title="" title="">
                         </i>
                     </label>
                     <div class="col-sm-10 form-control-static">
-                        {% if product_tab.product.has_jira_configured %}
-                            {% if eng %}
-                                <a href="{{ eng | jira_url }}"
-                                target="_blank"> {{ eng | jira_url }} </a>
-                            {% else %}
-                                <a href="{{ product_tab.product|jira_url }}"
-                                target="_blank"> {{ product_tab.product|jira_url }} </a>
-                            {% endif %}
+                        {% if engagement.has_jira_issue %}                        
+                            <a href="{{ engagement | jira_issue_url }}"
+                            target="_blank"> {{ engagement | jira_issue_url }} </a>
+                        {% elif engagement %}
+                            <a href="{{ engagement | jira_project_url }}"
+                            target="_blank"> {{ engagement | jira_project_url }} </a>
                         {% else %}
-                        None
+                            <a href="{{ product_tab.product | jira_project_url }}"
+                            target="_blank"> {{ product_tab.product | jira_project_url }} </a>
                         {% endif %}
                     </div>
-                </div> -->
+                </div>                    
                 {% include "dojo/form_fields.html" with form=jira_epic_form %}
             {% endif %}
         <div class="form-group">
@@ -85,22 +84,6 @@
                     ]
                 });
                 mde.render();
-            });
-            $('#id_tags').chosen({
-                'placeholder_text_multiple': 'Select or add some tags...',
-                'no_results_text': "Tag not found, press TAB key to add.",
-            });
-
-            $(".search-field").find("input").on("keydown", function (evt) {
-                var stroke;
-                stroke = (_ref = evt.which) != null ? _ref : evt.keyCode;
-                if (stroke == 9) { // 9 = tab key
-                    var o = new Option($(this).val(), $(this).val(), true, true);
-			        $("#id_tags").append(o);
-                    $('#id_tags').trigger('chosen:updated');
-                    $('#id_tags').focus();
-                    return false;
-                }
             });
         });
     </script>

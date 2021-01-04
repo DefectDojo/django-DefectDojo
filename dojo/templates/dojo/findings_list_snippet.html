@@ -94,13 +94,12 @@
                                 <br/>
                                 {% endif %}
                                 <label style="display: block">Tags</label>
-                                <label style="font-size: 80%; font-weight: normal; display: block; padding-right: 8px;">
-                                    <select multiple class="chosen-select" style="display: none;" name="tags" id="tag_choices">
-                                        {% for tag in tag_input %}
-                                            <option value="{{tag}}">{{tag}}</option>
-                                        {% endfor %}`
-                                    </select>
-                               </label>
+                                {% comment %}
+                                    Quick hack to make bulk edit work without refactoring the whole bulk edit form                                
+                                    {{ bulk_edit_form.media.css }}
+                                    {{ bulk_edit_form.media.js }}
+                                {% endcomment %}                                
+                                {{ bulk_edit_form.tags }}
                                 <input type="submit" class="btn btn-sm btn-primary" value="Submit"/>
                             </form>
                         </li>
@@ -346,8 +345,8 @@
                                     </a>
                                   {% endif %}
                                   <sup>
-                                      {% for tag in finding.tags %}
-                                      <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                      {% for tag in finding.tags.all %}
+                                      <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=tag:{{ tag }}">{{ tag }}</a>
                                       {% endfor %}
                                   </sup>
                                 </td>
@@ -392,7 +391,7 @@
                                   {% if jira_project and product_tab or not product_tab %}
                                     <td class="nowrap">
                                       {% if finding.has_jira_issue %}
-                                        <a href="{{ finding | jira_url }}" target="_blank" 
+                                        <a href="{{ finding | jira_issue_url }}" target="_blank" 
                                             alt="Jira Bug - {{finding | jira_key}}" data-toggle="tooltip" data-placement="bottom" title="{{finding | jira_key}}"><i class="fa fa-bug fa-fw"></i></a>
                                       {% endif %}
                                     </td>
@@ -433,9 +432,49 @@
         $(document).ready(function() {
             date =  new Date().toISOString().slice(0, 10);
             var fileDated = 'Findings_List_' + date;
+            var columns = [
+                {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled %}
+                { "data": "checkbox" },
+                {% endif %}
+                { "data": "action" },
+                { "data": "severity" },
+                { "data": "finding" , render: function (data, type, row) {
+                        return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
+                }},
+                { "data": "cwe" },
+                { "data": "cve" },
+                { "data": "found_date" },
+                { "data": "finding_age" },
+                {% if system_settings.enable_finding_sla %}
+                { "data": "finding_sla" },
+                {% endif %}
+                { "data": "reported_by" },
+                { "data": "found_by_test" },
+                { "data": "status" },
+                {% if system_settings.enable_jira %}
+                {% if jira_project and product_tab or not product_tab %}
+                    { "data": "jira_id" },
+                    { "data": "jira_age" },
+                    { "data": "jira_change" },
+                  {% endif %}
+                {% endif %}
+                {% if show_product_column and product_tab is None %}
+                    { "data": "product" },
+                {% endif %}
+              ];
+
+            // Filter the list of items to display based on what is shown.
+            var disallowed_entries = new Set(["checkbox", "action"]);
+            var data_column_list = [];
+            for (var i = 0; i < columns.length; i++) {
+                if (!disallowed_entries.has(columns[i]["data"])) {
+                    data_column_list.push(i);
+                }
+            }
+
             var buttonCommon = {
                 exportOptions: {
-                    columns: ':not(:eq(0), :eq(1))',
+                    columns: data_column_list,
                     stripHtml: true,
                     stripNewlines: true,
                     trim: true,
@@ -451,36 +490,7 @@
                       $('.has-popover').popover({'trigger':'hover'});
                 },
                 colReorder: true,                
-                "columns": [	
-                    {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled %}
-                    { "data": "checkbox" },
-                    {% endif %}
-                    { "data": "action" },
-                    { "data": "severity" },
-                    { "data": "finding" , render: function (data, type, row) {	
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;	
-                    }},	
-                    { "data": "cwe" },
-                    { "data": "cve" },
-                    { "data": "found_date" },
-                    { "data": "finding_age" },
-                    {% if system_settings.enable_finding_sla %}	
-                    { "data": "finding_sla" },
-                    {% endif %}                    	
-                    { "data": "reported_by" },
-                    { "data": "found_by_test" }, 
-                    { "data": "status" },
-                    {% if system_settings.enable_jira %}
-                    {% if jira_project and product_tab or not product_tab %}                    	
-                        { "data": "jira_id" },
-                        { "data": "jira_age" },
-                        { "data": "jira_change" },
-                      {% endif %}                          	
-                    {% endif %}	
-                    {% if show_product_column and product_tab is None %}	
-                        { "data": "product" },
-                    {% endif %}	
-                ],
+                "columns": columns,
                 order: [],
                 columnDefs: [
                     { 
@@ -523,23 +533,6 @@
         });
     </script>
     <script type="application/javascript">
-        $(function () {
-          $(".chosen-select").chosen({
-            'placeholder_text_multiple': 'Select or add some tags...',
-            'no_results_text': "Tag not found, press TAB key to add."
-            });
-
-          $(".search-field").find("input").on("keydown", function (evt) {
-            var stroke;
-            stroke = (_ref = evt.which) != null ? _ref : evt.keyCode;
-                if (stroke == 9) { // 9 = tab key
-                    var o = new Option($(this).val(), $(this).val(), true, true);
-                    $('#tag_choices').append(o);
-                    $('#tag_choices').trigger('chosen:updated');
-                    $('#tag_choices').focus();
-                }
-            });
-        });
         var checkbox_count = 0;
         function check_checked_finding()
         {

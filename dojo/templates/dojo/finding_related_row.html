@@ -20,9 +20,9 @@
         <a title="{{ similar_finding.title }}" href="{% url 'view_finding' similar_finding.id %}">{{ similar_finding.title|truncatechars_html:80 }}</a>
         {% if similar_finding.tags %}
         <small>
-            {% for tag in similar_finding.tags %}
+            {% for tag in similar_finding.tags.all %}
                 <a title="Search {{ tag }}" class="tag-label tag-color"
-                    href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                    href="{% url 'simple_search' %}?query=tag:{{ tag }}">{{ tag }}</a>
             {% endfor %}
         </small>
         {% endif %}
@@ -31,8 +31,8 @@
         {% endwith %}
     </td>
     <td class="nowrap">{{ finding.date|date }}</td>
-    <td>{{ similar_finding|finding_display_status|safe }}</td>                                
-    <td><a href="{% url 'view_test' similar_finding.test_id %}">{{ similar_finding.test.test_type.name }}</a></td>
+    <td>{{ similar_finding|finding_display_status|safe }}</td>
+    <td><a href="{% url 'view_test' similar_finding.test_id %}">{{ similar_finding.test }}</a></td>
     <td><a href="{% url 'view_engagement' similar_finding.test.engagement_id %}">{{ similar_finding.test.engagement.name }}</a>
     {% if similar_finding.test.engagement.version %}
         <sup>
@@ -62,8 +62,8 @@
     {% if system_settings.enable_jira %} 
         <td>
             {% if similar_finding.jira_issue %}
-                <a href="{{ similar_finding | jira_url }}"
-                target="_blank" title="{{similar_finding | jira_url }}">{{ similar_finding | jira_key }}</a>
+                <a href="{{ similar_finding | jira_issue_url }}"
+                target="_blank" title="{{similar_finding | jira_issue_url }}">{{ similar_finding | jira_key }}</a>
             {% endif %}
         </td>
     {% endif %}

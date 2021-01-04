@@ -1,7 +1,7 @@
 
 # code: language=Dockerfile
 
-# The code for the build image should be idendical with the code in
+# The code for the build image should be identical with the code in
 # Dockerfile.nginx to use the caching mechanism of Docker.
 
 # Ref: https://devguide.python.org/#branchstatus
@@ -52,7 +52,6 @@ RUN \
   apt-get clean && \
   rm -rf /var/lib/apt/lists && \
   true
-RUN pip3 install --no-cache-dir --upgrade pip
 COPY --from=build /tmp/wheels /tmp/wheels
 COPY requirements.txt ./
 RUN pip3 install \
@@ -60,6 +59,7 @@ RUN pip3 install \
 	--no-index \
   --find-links=/tmp/wheels \
   -r ./requirements.txt
+  
 COPY \
   docker/entrypoint-celery-beat.sh \
   docker/entrypoint-celery-worker.sh \
@@ -72,7 +72,7 @@ COPY \
   docker/wait-for-it.sh \
   docker/certs/* \
   /
-COPY wsgi.py manage.py tests/unit-tests.sh ./
+COPY wsgi.py manage.py docker/unit-tests.sh ./
 COPY dojo/ ./dojo/
 
 # Add extra fixtures to docker image which are loaded by the initializer
@@ -96,9 +96,12 @@ RUN \
     chown -R ${appuser} /app && \
     chmod 0700 /app && \
     chmod 0750 -R /app/* && \
+	chmod g=u /app && \
+	chmod -R g=u /app/* && \
     mkdir /var/run/${appuser} && \
-    chown ${appuser} /var/run/${appuser}
-USER ${appuser}
+    chown ${appuser} /var/run/${appuser} && \
+	chmod g=u /var/run/${appuser}
+USER ${uid}
 ENV \
   DD_ADMIN_USER=admin \
   DD_ADMIN_MAIL=admin@defectdojo.local \

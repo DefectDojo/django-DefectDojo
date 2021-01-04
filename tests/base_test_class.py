@@ -72,12 +72,24 @@ class BaseTestCase(unittest.TestCase):
         self.assertFalse(self.is_element_by_css_selector_present('.alert-danger', 'Please enter a correct username and password'))
         return driver
 
+    def test_login(self):
+        return self.login_page()
+
+    # used to load some page just to get started
+    # we choose /user because it's lightweight and fast
+    def goto_some_page(self):
+        driver = self.driver
+        driver.get(self.base_url + "user")
+        return driver
+
     def goto_product_overview(self, driver):
         driver.get(self.base_url + "product")
         self.wait_for_datatable_if_content("no_products", "products_wrapper")
+        return driver
 
     def goto_component_overview(self, driver):
         driver.get(self.base_url + "components")
+        return driver
 
     def goto_active_engagements_overview(self, driver):
         # return self.goto_engagements_internal(driver, 'engagement')
@@ -98,6 +110,7 @@ class BaseTestCase(unittest.TestCase):
     def goto_all_findings_list(self, driver):
         driver.get(self.base_url + "finding")
         self.wait_for_datatable_if_content("no_findings", "open_findings_wrapper")
+        return driver
 
     def wait_for_datatable_if_content(self, no_content_id, wrapper_id):
         no_content = None
@@ -151,7 +164,7 @@ class BaseTestCase(unittest.TestCase):
 
     def change_system_setting(self, id, enable=True):
         print("changing system setting " + id + " enable: " + str(enable))
-        driver = self.login_page()
+        driver = self.driver
         driver.get(self.base_url + 'system_settings')
 
         is_enabled = driver.find_element_by_id(id).is_selected()
@@ -193,7 +206,7 @@ class BaseTestCase(unittest.TestCase):
     def enable_block_execution(self):
         # we set the admin user (ourselves) to have block_execution checked
         # this will force dedupe to happen synchronously, among other things like notifications, rules, ...
-        driver = self.login_page()
+        driver = self.driver
         driver.get(self.base_url + 'profile')
         if not driver.find_element_by_id('id_block_execution').is_selected():
             driver.find_element_by_xpath('//*[@id="id_block_execution"]').click()

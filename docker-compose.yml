@@ -52,6 +52,10 @@ services:
       DD_CELERY_BROKER_PASSWORD: ${DD_CELERY_BROKER_USER:-guest}
       DD_SECRET_KEY: ${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}
       DD_CREDENTIAL_AES_256_KEY: ${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}
+    volumes:
+        - type: bind
+          source: ./docker/extra_settings
+          target: /app/docker/extra_settings
   celeryworker:
     image: defectdojo/defectdojo-django:latest
     depends_on:
@@ -64,6 +68,10 @@ services:
       DD_CELERY_BROKER_PASSWORD: ${DD_CELERY_BROKER_USER:-guest}
       DD_SECRET_KEY: ${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}
       DD_CREDENTIAL_AES_256_KEY: ${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}
+    volumes:
+        - type: bind
+          source: ./docker/extra_settings
+          target: /app/docker/extra_settings
   initializer:
     image: defectdojo/defectdojo-django:latest
     depends_on:
@@ -81,9 +89,9 @@ services:
     volumes:
         - type: bind
           source: ./docker/extra_settings
-          target: /app/docker/extra_settings      
+          target: /app/docker/extra_settings
   mysql:
-    image: mysql:5.7.32@sha256:ce6815027949d0b48e3097a94fa3ec062866a78868d50c7900c697c13574599f
+    image: mysql:5.7.32@sha256:360d1924d86cbf416f2c84687c2037e153080fed932798a73c5c6b4ceb7399e9
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
       DD_DATABASE_URL: ${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}
@@ -94,6 +102,6 @@ services:
     volumes:
        - defectdojo_data:/var/lib/mysql
   rabbitmq:
-    image: rabbitmq:3.8.9@sha256:fc5666482d497b9c9de04924d69afa80701990b0d25eb7df5a29370a00a8632f
+    image: rabbitmq:3.8.9@sha256:65eb9b71a8023ea49a616c1a567052574e9af1eaf266bf82832f9104b7abfeb0
 volumes:
   defectdojo_data: {}
