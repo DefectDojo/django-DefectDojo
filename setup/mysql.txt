@@ -1,4 +1,4 @@
 # Pip installs needed for MySQL DB support
 -r ../requirements.txt
-mysqlclient==2.0.2
+mysqlclient==2.0.3
 mysql-connector-python==8.0.22
