@@ -33,8 +33,11 @@ from django.db.models import Prefetch, F
 from django.db.models.query import QuerySet
 from github import Github
 from dojo.user.helper import user_must_be_authorized, user_is_authorized, check_auth_users_list
+from django.contrib.postgres.aggregates import StringAgg
+from dojo.components.sql_group_concat import Sql_GroupConcat
 import dojo.jira_link.helper as jira_helper
 import dojo.finding.helper as finding_helper
+
 
 logger = logging.getLogger(__name__)
 
