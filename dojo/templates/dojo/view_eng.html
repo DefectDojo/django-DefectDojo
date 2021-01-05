@@ -240,7 +240,7 @@
                             <th>Date</th>
                             <th>Lead</th>
                             <th>Total Findings</th>
-                            <th>Active and Verified</th>
+                            <th>Active (Verified)</th>
                             <th>Mitigated</th>
                             <th>Duplicates</th>
                             <th>Notes</th>
@@ -305,7 +305,10 @@
                                   {% endif %}
                                 </td>
                                 <td><a href="{% url 'view_test' test.id %}">{{ test.count_findings_test_all }}</a></td>
-                                <td><a href="{% url 'view_test' test.id %}?active=true&verified=true">{{ test.count_findings_test_active_verified }}</a></td>
+                                <td>
+                                  <a href="{% url 'view_test' test.id %}?active=true">{{ test.count_findings_test_active }}</a>&nbsp;
+                                  (<a href="{% url 'view_test' test.id %}?active=true&verified=true">{{ test.count_findings_test_active_verified }}</a>)
+                                </td>
                                 <td><a href="{% url 'view_test' test.id %}?is_Mitigated=true">{{ test.count_findings_test_mitigated }}</a></td>
                                 <td><a href="{% url 'view_test' test.id %}?duplicate=true">{{ test.count_findings_test_dups }}</a></td>
                                 <td class="nowrap">
@@ -728,7 +731,7 @@
             {% if jira_project.engagement is not eng %}
             <small>(inherited)</small>
             {% else %}
-            <small>(project)</small>              
+            <small>(project)</small>
             {% endif %}
             </a></td>
         </tr>
