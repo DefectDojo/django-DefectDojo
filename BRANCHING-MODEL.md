@@ -15,6 +15,4 @@ PRs that relate to security issues are done through [Security advisories](https:
 # Release and hotfix model
 ![Schemas](doc/branching_model.png)
 
-Diagrams created with https://www.planttext.com/
-
-This model is inspired by https://nvie.com/posts/a-successful-git-branching-model/ with the feature branch being made in each contributor repository.
+Diagrams created with [plantUML](https://plantuml.com). Find a web-based editor for PlantUML at https://www.planttext.com.
