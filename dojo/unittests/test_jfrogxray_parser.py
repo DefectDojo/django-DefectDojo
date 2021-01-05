@@ -12,9 +12,22 @@ class TestJfrogXrayJSONParser(TestCase):
         item = parser.items[0]
         self.assertEquals('debian:stretch:libx11', item.component_name)
         self.assertEquals('2:1.6.4-3', item.component_version)
+        self.assertEquals('CVE-2018-14600', item.cve)
+        self.assertEquals(787, item.cwe)
 
     def test_parse_file_with_many_vulns(self):
         testfile = open("dojo/unittests/scans/jfrogxray/many_vulns.json")
         parser = XrayJSONParser(testfile, Test())
         testfile.close()
         self.assertEqual(3, len(parser.items))
+
+    def test_parse_file_with_many_vulns2(self):
+        testfile = open("dojo/unittests/scans/jfrogxray/many_vulns2.json")
+        parser = XrayJSONParser(testfile, Test())
+        testfile.close()
+        self.assertEqual(344, len(parser.items))
+        item = parser.items[36]
+        self.assertEquals('requests', item.component_name)
+        self.assertEquals('2.18.4', item.component_version)
+        self.assertEquals('CVE-2018-18074', item.cve)
+        self.assertEquals(522, item.cwe)
