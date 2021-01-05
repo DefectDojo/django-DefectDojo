@@ -475,7 +475,7 @@ class DedupeTest(DojoAPITestCase):
         mitigated = 0
         not_mitigated = 0
         for finding in findings['results']:
-            if finding['mitigated']:
+            if finding['is_Mitigated']:
                 mitigated += 1
             else:
                 not_mitigated += 1
