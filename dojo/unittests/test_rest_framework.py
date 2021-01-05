@@ -17,6 +17,7 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 from .dojo_test_case import DojoAPITestCase
+from dojo.api_v2.prefetch.utils import _get_prefetchable_fields
 import logging
 # from unittest import skip
 
@@ -136,6 +137,56 @@ class BaseClass():
             response = self.client.put(
                 relative_url, self.payload)
             self.assertEqual(200, response.status_code)
+
+    @skipIfNotSubclass("PrefetchRetrieveMixin")
+    def test_detail_prefetch(self):
+        prefetchable_fields = [x[0] for x in _get_prefetchable_fields(self.viewset.serializer_class)]
+
+        current_objects = self.client.get(self.url, format='json').data
+        relative_url = self.url + '%s/' % current_objects['results'][0]['id']
+        response = self.client.get(relative_url, data={
+            "prefetch": ','.join(prefetchable_fields)
+        })
+
+        self.assertEqual(200, response.status_code)
+        obj = response.data
+        self.assertTrue("prefetch" in obj)
+
+        for field in prefetchable_fields:
+            field_value = obj.get(field, None)
+            if field_value is None:
+                continue
+            
+            self.assertTrue(field in obj["prefetch"])
+            values = field_value if type(field_value) is list else [field_value]
+
+            for value in values:
+                self.assertTrue(value in obj["prefetch"][field])
+
+    @skipIfNotSubclass("PrefetchListMixin")
+    def test_list_prefetch(self):
+        prefetchable_fields = [x[0] for x in _get_prefetchable_fields(self.viewset.serializer_class)]
+        
+        response = self.client.get(self.url, data={
+            "prefetch": ','.join(prefetchable_fields)
+        })
+
+        self.assertEqual(200, response.status_code)
+        objs = response.data
+        self.assertTrue("results" in objs)
+        self.assertTrue("prefetch" in objs)
+
+        for obj in objs:
+            for field in prefetchable_fields:
+                field_value = obj.get(field, None)
+                if field_value is None:
+                    continue
+                
+                self.assertTrue(field in obj["prefetch"])
+                values = field_value if type(field_value) is list else [field_value]
+
+                for value in values:
+                    self.assertTrue(value in obj["prefetch"][field])
 
 
 class AppAnalysisTest(BaseClass.RESTEndpointTest):
@@ -526,6 +577,63 @@ class ProductTest(BaseClass.RESTEndpointTest):
         }
         self.update_fields = {'prod_type': 2}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+    @skipIfNotSubclass('PrefetchRetrieveMixin')
+    def test_detail_prefetch(self):
+        current_objects = self.client.get(self.url, format='json').data
+        relative_url = self.url + '%s/' % current_objects['results'][0]['id']
+        response = self.client.get(relative_url, data={
+            "prefetch": [
+                "product_manager",
+                "technical_contact",
+                "authorized_users"
+            ]
+        })
+
+        self.assertEqual(200, response.status_code)
+        obj = response.data
+    
+        for user in obj.get("authorized_users", []):
+            self.assertTrue("authorized_users" in obj["prefetch"])
+            self.assertTrue(user in obj["prefetch"]["authorized_users"])
+
+        if obj.product_manager is not None:
+            self.assertTrue("product_manager" in obj["prefetch"])
+            self.assertTrue(obj.product_manager in obj.prefetch["product_manager"])
+
+        if obj.technical_contact is not None:
+            self.assertTrue("technical_contact" in obj["prefetch"])
+            self.assertTrue(obj.technical_contact in obj.prefetch["technical_contact"])
+        
+        self.assertTrue("prod_type" not in obj.prefetch)
+
+    @skipIfNotSubclass('PrefetchListMixin')
+    def test_list_prefetch(self):
+        response = self.client.get(self.url, data={
+            "prefetch": [
+                "product_manager",
+                "technical_contact",
+                "authorized_users"
+            ]
+        })
+
+        self.assertEqual(200, response.status_code)
+        objs = response.data
+
+        for obj in objs:
+            for user in obj.authorized_users:
+                self.assertTrue("authorized_users" in obj.prefetch)
+                self.assertTrue(user in obj.prefetch["authorized_users"])
+
+            if obj.product_manager is not None:
+                self.assertTrue("product_manager" in obj.prefetch)
+                self.assertTrue(obj.product_manager in obj.prefetch["product_manager"])
+
+            if obj.technical_contact is not None:
+                self.assertTrue("technical_contact" in obj.prefetch)
+                self.assertTrue(obj.technical_contact in obj.prefetch["technical_contact"])
+        
+        self.assertTrue("prod_type" not in obj.prefetch)
 
 
 class ScanSettingsTest(BaseClass.RESTEndpointTest):
