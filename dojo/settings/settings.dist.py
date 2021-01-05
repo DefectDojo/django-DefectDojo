@@ -616,7 +616,6 @@ INSTALLED_APPS = (
     'tastypie_swagger',
     'watson',
     'tagging',  # not used, but still needed for migration 0065_django_tagulous.py (v1.10.0)
-    'custom_field',
     'imagekit',
     'multiselectfield',
     'rest_framework',

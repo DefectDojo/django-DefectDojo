@@ -12,7 +12,6 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
-from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 from django.db.models import Sum, Count, Q, Max
 from django.contrib.admin.utils import NestedObjects
@@ -28,7 +27,6 @@ from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, S
 
 from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, Product_Tab, get_punchcard_data, queryset_check
 from dojo.notifications.helper import create_notification
-from custom_field.models import CustomFieldValue, CustomField
 from django.db.models import Prefetch, F
 from django.db.models.query import QuerySet
 from github import Github
@@ -417,14 +415,6 @@ def view_product_metrics(request, pid):
     i_engs_page = get_page_items(request, result.qs, 10)
 
     scan_sets = ScanSettings.objects.filter(product=prod)
-    ct = ContentType.objects.get_for_model(prod)
-    product_cf = CustomField.objects.filter(content_type=ct)
-    product_metadata = {}
-
-    for cf in product_cf:
-        cfv = CustomFieldValue.objects.filter(field=cf, object_id=prod.id)
-        if len(cfv):
-            product_metadata[cf.name] = cfv[0].value
 
     filters = dict()
     if view == 'Finding':
@@ -542,7 +532,6 @@ def view_product_metrics(request, pid):
                   'dojo/product_metrics.html',
                   {'prod': prod,
                    'product_tab': product_tab,
-                   'product_metadata': product_metadata,
                    'engs': engs,
                    'i_engs': i_engs_page,
                    'scan_sets': scan_sets,
