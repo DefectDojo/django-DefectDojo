@@ -451,6 +451,7 @@ def apply_tag_filters(qs, operators, skip_relations=False):
     if qs.model == Engagement:
         tag_filters = {
             'tag': '',
+            'test-tag': 'test__',
             'engagement-tag': '',
             'product-tag': 'product__',
         }
@@ -458,6 +459,8 @@ def apply_tag_filters(qs, operators, skip_relations=False):
     if qs.model == Product:
         tag_filters = {
             'tag': '',
+            'test-tag': 'engagement__test__',
+            'engagement-tag': 'engagement__',
             'product-tag': '',
         }
 
@@ -465,11 +468,13 @@ def apply_tag_filters(qs, operators, skip_relations=False):
         if tag_filter in operators:
             value = operators[tag_filter]
             value = ','.join(value)  # contains needs a single value
+            print('adding filter: ' + str('%stags__name__contains' % tag_filters[tag_filter]))
             qs = qs.filter(**{'%stags__name__contains' % tag_filters[tag_filter]: value})
 
     for tag_filter in tag_filters:
         if tag_filter + 's' in operators:
             value = operators[tag_filter + 's']
+            print('adding filter: ' + str('%stags__name__contains' % tag_filters[tag_filter]))
             qs = qs.filter(**{'%stags__name__in' % tag_filters[tag_filter]: value})
 
     return qs

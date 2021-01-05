@@ -364,6 +364,14 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         self.assertEqual(200, response.status_code)
         return response.data
 
+    def get_jira_issue_severity(self, finding_id):
+        finding = Finding.objects.get(id=finding_id)
+        status = jira_helper.get_jira_status(finding)
+        return status
+
+    def assert_jira_status_change(self, old_status, new_status):
+        self.assertFalse(old_status == new_status)
+
     def assert_finding_count_json(self, count, findings_content_json):
         self.assertEqual(findings_content_json['count'], count)
 

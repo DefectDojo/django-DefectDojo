@@ -1797,8 +1797,10 @@ class Finding(models.Model):
 
         simple_risk_acceptance = self.test.engagement.risk_acceptance.filter(name=Finding.SIMPLE_RISK_ACCEPTANCE_NAME).prefetch_related('accepted_findings').first()
         if simple_risk_acceptance is None and create:
+            from dojo.utils import get_current_user
+            user = get_current_user()
             simple_risk_acceptance = Risk_Acceptance.objects.create(
-                    owner_id=1,
+                    owner=user,
                     name=Finding.SIMPLE_RISK_ACCEPTANCE_NAME,
                     compensating_control='These findings are accepted using a simple risk acceptance without expiration date, '
                     'approval document or compensating control information. Unaccept and use full risk acceptance if you '
@@ -2031,14 +2033,8 @@ class Finding(models.Model):
         severity = self.severity
         from dojo.utils import get_system_setting
         sla_age = get_system_setting('sla_' + self.severity.lower())
-        if sla_age and self.active:
+        if sla_age:
             sla_calculation = sla_age - self.age
-        elif sla_age and self.mitigated:
-            age = self.age
-            if age < sla_age:
-                sla_calculation = 0
-            else:
-                sla_calculation = sla_age - age
         return sla_calculation
 
     def sla_deadline(self):

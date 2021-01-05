@@ -23,6 +23,24 @@ repositoryPrefix: defectdojo
 # imagePullSecrets: defectdojoregistrykey
 tag: latest
 
+securityContext:
+  djangoSecurityContext:
+    # django dockerfile sets USER=1001
+    runAsUser: 1001
+  nginxSecurityContext:
+    # nginx dockerfile sets USER=1001
+    runAsUser: 1001
+
+tests:
+  unitTests:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
 admin:
   user: admin
   password:
@@ -72,7 +90,7 @@ celery:
         memory: 128Mi
       limits:
         cpu: 2000m
-        memory: 256Mi
+        memory: 512Mi
     tolerations: []
     app_settings:
       pool_type: solo
@@ -130,6 +148,7 @@ django:
     app_settings:
       processes: 2
       threads: 2
+    enable_ptvsd: false  # this also requires DD_DEBUG to be set to True
 
 initializer:
   run: true
@@ -157,9 +176,10 @@ mysql:
   # the line below:
   mysqlServer: "127.0.0.1"
 
-
 postgresql:
   enabled: true
+  serviceAccount:
+    enabled: true
   postgresqlUsername: defectdojo
   postgresqlPassword: ""
   postgresqlDatabase: defectdojo
@@ -170,9 +190,11 @@ postgresql:
   replication:
     enabled: false
   service:
+    port: 5432
+
   # To use an external PostgreSQL instance, set enabled to false and uncomment
   # the line below:
-  postgresServer: "127.0.0.1"
+  # postgresServer: "127.0.0.1"
   master:
     affinity: {}
     nodeSelector: {}
@@ -189,12 +211,12 @@ cloudsql:
     repository: gcr.io/cloudsql-docker/gce-proxy
     tag: 1.17
     pullPolicy: IfNotPresent
-  # set CloudSQL instance: 'project:zone:instancname'
+  # set CloudSQL instance: 'project:zone:instancename'
   instance: ""
 
 rabbitmq:
   enabled: true
-  replicas: 1
+  replicaCount: 1
   auth:
     password: ""
     erlangCookie: ""
@@ -202,9 +224,19 @@ rabbitmq:
     existingErlangSecret: defectdojo-rabbitmq-specific
     affinity: {}
     nodeSelector: {}
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
 
 redis:
   enabled: false
+  transportEncryption:
+    enabled: false
+    params: ''
   existingSecret: defectdojo-redis-specific
   secretKey: redis-password
   password: ""

@@ -1,6 +1,6 @@
 {
   "name": "DefectDojo",
-  "version": "1.11.0-dev",
+  "version": "1.12.0-dev",
   "dependencies": {
     "JUMFlot": "jumjum123/JUMFlot#*",
     "bootstrap": "^3.4.0",
@@ -12,11 +12,11 @@
     "clipboard": "^2.0.6",
     "components-jqueryui": "^1.0.0",
     "datatables.net": "^1.10.22",
-    "datatables.net-bs": "^1.10.22",
+    "datatables.net-bs": "^1.10.23",
     "datatables.net-buttons-bs": "^1.6.5",
     "datatables.net-buttons-dt": "^1.6.5",
     "datatables.net-colreorder": "^1.5.3",
-    "datatables.net-dt": "^1.10.22",
+    "datatables.net-dt": "^1.10.23",
     "drmonty-datatables-plugins": "^1.0.0",
     "drmonty-datatables-responsive": "^1.0.0",
     "easymde": "^2.13.0",
@@ -35,7 +35,7 @@
     "metismenu": "~3.0.6",
     "moment": "^2.29.1",
     "morris.js": "morrisjs/morris.js",
-    "pdfmake": "^0.1.68",
+    "pdfmake": "^0.1.69",
     "startbootstrap-sb-admin-2": "1.0.7"
   },
   "engines": {

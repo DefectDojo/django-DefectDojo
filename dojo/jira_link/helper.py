@@ -22,6 +22,19 @@ from dojo.forms import JIRAProjectForm, JIRAEngagementForm
 
 logger = logging.getLogger(__name__)
 
+RESOLVED_STATUS = [
+    'Inactive',
+    'Mitigated',
+    'False Positive',
+    'Out of Scope',
+    'Duplicate'
+]
+
+OPEN_STATUS = [
+    'Active',
+    'Verified'
+]
+
 
 def is_jira_enabled():
     if not get_system_setting('enable_jira'):
@@ -75,6 +88,9 @@ def get_jira_project(obj, use_inheritance=True):
 
     if isinstance(obj, JIRA_Project):
         return obj
+
+    if isinstance(obj, JIRA_Issue):
+        return obj.jira_project
 
     if isinstance(obj, Finding):
         finding = obj
@@ -131,13 +147,13 @@ def get_jira_url(obj):
     logger.debug('getting jira url')
 
     # finding + engagement
-    if hasattr(obj, 'has_jira_issue') and obj.has_jira_issue:
-        return get_jira_issue_url(obj)
-    else:
+    issue = get_jira_issue(obj)
+    if issue is not None:
+        return get_jira_issue_url(issue)
+    elif isinstance(obj, Finding):
         # finding must only have url if there is a jira_issue
         # engagement can continue to show url of jiraproject instead of jira issue
-        if isinstance(obj, Finding):
-            return None
+        return None
 
     if isinstance(obj, JIRA_Project):
         return get_jira_project_url(obj)
@@ -145,20 +161,18 @@ def get_jira_url(obj):
     return get_jira_project_url(get_jira_project(obj))
 
 
-def get_jira_issue_url(obj):
+def get_jira_issue_url(issue):
     logger.debug('getting jira issue url')
-    if obj.has_jira_issue:
-        jira_project = get_jira_project(obj)
-        jira_instance = get_jira_instance(obj)
-        if jira_project and jira_instance:
-            # example http://jira.com/browser/SEC-123
-            return jira_project.jira_instance.url + '/browse/' + obj.jira_issue.jira_key
+    jira_project = get_jira_project(issue)
+    jira_instance = get_jira_instance(jira_project)
+    if jira_instance is None:
+        return None
 
-    return None
+    # example http://jira.com/browser/SEC-123
+    return jira_instance.url + '/browse/' + issue.jira_key
 
 
 def get_jira_project_url(obj):
-
     logger.debug('getting jira project url')
     if not isinstance(obj, JIRA_Project):
         jira_project = get_jira_project(obj)
@@ -300,8 +314,24 @@ def jira_get_resolution_id(jira, issue, status):
     return resolution_id
 
 
-def jira_change_resolution_id(jira, issue, id):
-    jira.transition_issue(issue, id)
+def jira_change_resolution_id(jira, issue, jid):
+    try:
+        if issue and jid:
+            jira.transition_issue(issue, jid)
+    except JIRAError as jira_error:
+        logger.debug('error transisioning jira issue ' + issue.key + ' ' + str(jira_error))
+        logger.exception(jira_error)
+        log_jira_generic_alert('error transitioning jira issue ' + issue.key, str(jira_error))
+        return None
+
+
+# Used for unit testing so geting all the connections is manadatory
+def get_jira_status(finding):
+    if finding.has_jira_issue:
+        j_issue = finding.jira_issue.jira_id
+        project = get_jira_project(finding)
+        issue = jira_get_issue(project, j_issue)
+        return issue.fields.status
 
 
 # Logs the error to the alerts table, which appears in the notification toolbar
@@ -480,8 +510,6 @@ def add_jira_issue(find):
 
             find.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
 
-            jira_issue_url = get_jira_issue_url(find)
-
             # Upload dojo finding screenshots to Jira
             for pic in find.images.all():
                 jira_attachment(
@@ -572,6 +600,15 @@ def update_jira_issue(find):
             priority={'name': jira_instance.get_priority(find.severity)},
             fields=fields)
 
+        status_list = find.status()
+        if any(item in status_list for item in OPEN_STATUS):
+            logger.debug('Transitioning Jira issue to Active')
+            jira_change_resolution_id(jira, issue, jira_instance.open_status_key)
+
+        if any(item in status_list for item in RESOLVED_STATUS):
+            logger.debug('Transitioning Jira issue to Resolved')
+            jira_change_resolution_id(jira, issue, jira_instance.close_status_key)
+
         find.jira_issue.jira_change = timezone.now()
         find.jira_issue.save()
         find.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
@@ -583,34 +620,35 @@ def update_jira_issue(find):
         log_jira_alert(e.text, find)
         return False
 
-    req_url = jira_instance.url + '/rest/api/latest/issue/' + \
-        j_issue.jira_id + '/transitions'
-    if 'Inactive' in find.status() or 'Mitigated' in find.status(
-    ) or 'False Positive' in find.status(
-    ) or 'Out of Scope' in find.status() or 'Duplicate' in find.status():
-        # if 'Active' in old_status:
-        json_data = {'transition': {'id': jira_instance.close_status_key}}
-        r = requests.post(
-            url=req_url,
-            auth=HTTPBasicAuth(jira_instance.username, jira_instance.password),
-            json=json_data)
-        if r.status_code != 204:
-            logger.warn("JIRA transition failed with error: {}".format(r.text))
-        find.jira_issue.jira_change = timezone.now()
-        find.jira_issue.save()
-        find.save()
-    elif 'Active' in find.status() and 'Verified' in find.status():
-        # if 'Inactive' in old_status:
-        json_data = {'transition': {'id': jira_instance.open_status_key}}
-        r = requests.post(
-            url=req_url,
-            auth=HTTPBasicAuth(jira_instance.username, jira_instance.password),
-            json=json_data)
-        if r.status_code != 204:
-            logger.warn("JIRA transition failed with error: {}".format(r.text))
-        find.jira_issue.jira_change = timezone.now()
-        find.jira_issue.save()
-        find.save()
+    # This appears to be unreachable.
+    # req_url = jira_instance.url + '/rest/api/latest/issue/' + \
+    #     j_issue.jira_id + '/transitions'
+    # if 'Inactive' in find.status() or 'Mitigated' in find.status(
+    # ) or 'False Positive' in find.status(
+    # ) or 'Out of Scope' in find.status() or 'Duplicate' in find.status():
+    #     # if 'Active' in old_status:
+    #     json_data = {'transition': {'id': jira_instance.close_status_key}}
+    #     r = requests.post(
+    #         url=req_url,
+    #         auth=HTTPBasicAuth(jira_instance.username, jira_instance.password),
+    #         json=json_data)
+    #     if r.status_code != 204:
+    #         logger.warn("JIRA transition failed with error: {}".format(r.text))
+    #     find.jira_issue.jira_change = timezone.now()
+    #     find.jira_issue.save()
+    #     find.save()
+    # elif 'Active' in find.status() and 'Verified' in find.status():
+    #     # if 'Inactive' in old_status:
+    #     json_data = {'transition': {'id': jira_instance.open_status_key}}
+    #     r = requests.post(
+    #         url=req_url,
+    #         auth=HTTPBasicAuth(jira_instance.username, jira_instance.password),
+    #         json=json_data)
+    #     if r.status_code != 204:
+    #         logger.warn("JIRA transition failed with error: {}".format(r.text))
+    #     find.jira_issue.jira_change = timezone.now()
+    #     find.jira_issue.save()
+    #     find.save()
 
 
 # gets the metadata for the default issue type in this jira project

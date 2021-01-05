@@ -14,10 +14,11 @@ data:
   DD_ADMIN_FIRST_NAME: {{ .Values.admin.FirstName | default "Admin" }}
   DD_ADMIN_LAST_NAME: {{ .Values.admin.LastName | default "User" }}
   DD_ALLOWED_HOSTS: {{ .Values.host }}
-  DD_CELERY_BROKER_SCHEME: {{ if eq .Values.celery.broker "rabbitmq" }}amqp{{ end }}{{ if eq .Values.celery.broker "redis" }}redis{{ end }}
+  DD_CELERY_BROKER_SCHEME: {{ if eq .Values.celery.broker "rabbitmq" }}amqp{{ end }}{{ if eq .Values.celery.broker "redis" }}{{ template "redis.scheme" . }}{{ end }}
   DD_CELERY_BROKER_USER: '{{ if eq .Values.celery.broker "rabbitmq" }}user{{ end }}'
   DD_CELERY_BROKER_HOST: {{ if eq .Values.celery.broker "rabbitmq" }}{{ .Release.Name }}-rabbitmq{{ else if eq .Values.celery.broker "redis" }}{{ template "redis.hostname" . }}{{ end }}
   DD_CELERY_BROKER_PORT: '{{ if eq .Values.celery.broker "rabbitmq" }}5672{{ end }}{{ if eq .Values.celery.broker "redis" }}6379{{ end }}'
+  DD_CELERY_BROKER_PARAMS: '{{ if eq .Values.celery.broker "redis" }}{{- if .Values.redis.transportEncryption.enabled -}}{{ .Values.redis.transportEncryption.params | default "ssl_cert_reqs=optional" }}{{ end }}{{ end }}'
   DD_CELERY_LOG_LEVEL: {{ .Values.celery.logLevel }}
   DD_CELERY_WORKER_POOL_TYPE: {{ .Values.celery.worker.app_settings.pool_type | default "solo" }}
   DD_CELERY_WORKER_AUTOSCALE_MIN: '{{ if eq .Values.celery.worker.app_settings.pool_type "prefork" }}2{{ end }}'

@@ -1,7 +1,7 @@
 
 # code: language=Dockerfile
 
-# The code for the build image should be idendical with the code in
+# The code for the build image should be identical with the code in
 # Dockerfile.nginx to use the caching mechanism of Docker.
 
 # Ref: https://devguide.python.org/#branchstatus
@@ -79,7 +79,7 @@ COPY \
   docker/extra_settings/local_settings.py \
   /app/dojo/settings/local_settings.py
 
-COPY wsgi.py manage.py tests/unit-tests.sh ./
+COPY wsgi.py manage.py docker/unit-tests.sh ./
 COPY dojo/ ./dojo/
 
 # Add extra fixtures to docker image which are loaded by the initializer
@@ -103,9 +103,12 @@ RUN \
     chown -R ${appuser} /app && \
     chmod 0700 /app && \
     chmod 0750 -R /app/* && \
+	chmod g=u /app && \
+	chmod -R g=u /app/* && \
     mkdir /var/run/${appuser} && \
-    chown ${appuser} /var/run/${appuser}
-USER ${appuser}
+    chown ${appuser} /var/run/${appuser} && \
+	chmod g=u /var/run/${appuser}
+USER ${uid}
 ENV \
   DD_ADMIN_USER=admin \
   DD_ADMIN_MAIL=admin@defectdojo.local \

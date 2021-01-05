@@ -27,6 +27,8 @@ import json
 import dojo.jira_link.helper as jira_helper
 import logging
 import tagulous
+import dojo.finding.helper as finding_helper
+
 
 logger = logging.getLogger(__name__)
 
@@ -559,13 +561,17 @@ class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
 
 
 class JIRAIssueSerializer(serializers.ModelSerializer):
+    url = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = JIRA_Issue
         fields = '__all__'
 
+    def get_url(self, obj):
+        return jira_helper.get_jira_issue_url(obj)
+
 
 class JIRAInstanceSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = JIRA_Instance
         fields = '__all__'
@@ -714,6 +720,22 @@ class FindingTestSerializer(serializers.ModelSerializer):
         fields = ["id", "title", "test_type", "engagement", "environment"]
 
 
+class FindingRelatedFieldsSerializer(serializers.Serializer):
+    test = serializers.SerializerMethodField()
+    jira = serializers.SerializerMethodField()
+
+    @swagger_serializer_method(FindingTestSerializer)
+    def get_test(self, obj):
+        return FindingTestSerializer(read_only=True).to_representation(obj.test)
+
+    @swagger_serializer_method(JIRAIssueSerializer)
+    def get_jira(self, obj):
+        issue = jira_helper.get_jira_issue(obj)
+        if issue is None:
+            return None
+        return JIRAIssueSerializer(read_only=True).to_representation(issue)
+
+
 class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     images = FindingImageSerializer(many=True, read_only=True)
     tags = TagListSerializerField(required=False)
@@ -725,27 +747,31 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     finding_meta = FindingMetaSerializer(read_only=True, many=True)
     related_fields = serializers.SerializerMethodField()
     # for backwards compatibility
-    jira_creation = serializers.SerializerMethodField()
-    jira_change = serializers.SerializerMethodField()
+    jira_creation = serializers.SerializerMethodField(read_only=True)
+    jira_change = serializers.SerializerMethodField(read_only=True)
     display_status = serializers.SerializerMethodField()
 
     class Meta:
         model = Finding
         fields = '__all__'
 
-    @swagger_serializer_method(serializers.ListField(serializers.DateTimeField()))
+    @swagger_serializer_method(serializers.DateTimeField())
     def get_jira_creation(self, obj):
         return jira_helper.get_jira_creation(obj)
 
-    @swagger_serializer_method(serializers.ListField(serializers.DateTimeField()))
+    @swagger_serializer_method(serializers.DateTimeField())
     def get_jira_change(self, obj):
         return jira_helper.get_jira_change(obj)
 
-    @swagger_serializer_method(FindingTestSerializer)
+    @swagger_serializer_method(FindingRelatedFieldsSerializer)
     def get_related_fields(self, obj):
-        query_params = self.context['request'].query_params
+        request = self.context.get('request', None)
+        if request is None:
+            return None
+
+        query_params = request.query_params
         if query_params.get('related_fields', 'false') == 'true':
-            return FindingTestSerializer(required=False).to_representation(obj.test)
+            return FindingRelatedFieldsSerializer(required=False).to_representation(obj)
         else:
             return None
 
@@ -764,18 +790,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
 
         instance = super(TaggitSerializer, self).update(instance, validated_data)
 
-        # Allow setting or clearing the mitigation date based upon the state of is_Mitigated.
-        mitigation_change = False
-        if instance.is_Mitigated and instance.mitigated is None:
-            mitigation_change = True
-            instance.mitigated = datetime.datetime.now()
-            instance.mitigated_by = self.context['request'].user
-            if settings.USE_TZ:
-                instance.mitigated = timezone.make_aware(instance.mitigated, timezone.get_default_timezone())
-        elif not instance.is_Mitigated and instance.mitigated is not None:
-            mitigation_change = True
-            instance.mitigated = None
-            instance.mitigated_by = None
+        mitigation_change = finding_helper.update_finding_status(instance, self.context['request'].user)
 
         # If we need to push to JIRA, an extra save call is needed.
         # Also if we need to update the mitigation date of the finding.
@@ -981,6 +996,7 @@ class ImportScanSerializer(serializers.Serializer):
     tags = TagListSerializerField(required=False)
     close_old_findings = serializers.BooleanField(required=False, default=False)
     push_to_jira = serializers.BooleanField(default=False)
+    environment = serializers.CharField(required=False)
 
     # class Meta:
     #     model = Test
@@ -995,8 +1011,6 @@ class ImportScanSerializer(serializers.Serializer):
         test_type, created = Test_Type.objects.get_or_create(
             name=data.get('test_type', data['scan_type']))
         endpoint_to_add = data['endpoint_to_add']
-        environment, created = Development_Environment.objects.get_or_create(
-            name='Development')
         scan_date = data['scan_date']
         scan_date_time = datetime.datetime.combine(scan_date, timezone.now().time())
         if settings.USE_TZ:
@@ -1005,6 +1019,9 @@ class ImportScanSerializer(serializers.Serializer):
         version = ''
         if 'version' in data:
             version = data['version']
+        # Will save in the provided environment or in the `Development` one if absent
+        environment_name = data.get('environment', 'Development')
+        environment = Development_Environment.objects.get(name=environment_name)
 
         test = Test(
             engagement=data['engagement'],

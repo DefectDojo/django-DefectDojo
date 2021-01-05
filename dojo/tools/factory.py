@@ -82,6 +82,7 @@ from dojo.tools.harbor_vulnerability.parser import HarborVulnerabilityParser
 from dojo.tools.github_vulnerability.parser import GithubVulnerabilityParser
 from dojo.tools.choctaw_hog.parser import ChoctawhogParser
 from dojo.tools.gitlab_sast.parser import GitlabSastReportParser
+from dojo.tools.gitlab_dep_scan.parser import GitlabDepScanReportParser
 from dojo.tools.yarn_audit.parser import YarnAuditParser
 from dojo.tools.bugcrowd.parser import BugCrowdCSVParser
 from dojo.tools.huskyci.parser import HuskyCIReportParser
@@ -93,6 +94,7 @@ from dojo.tools.drheader.parser import DrHeaderJSONParser
 from dojo.tools.checkov.parser import CheckovParser
 from dojo.tools.kubebench.parser import KubeBenchParser
 from dojo.tools.ort.parser import OrtParser
+from dojo.tools.sarif.parser import SarifParser
 
 
 __author__ = 'Jay Paz'
@@ -276,6 +278,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = ChoctawhogParser(file, test)
     elif scan_type == 'GitLab SAST Report':
         parser = GitlabSastReportParser(file, test)
+    elif scan_type == 'GitLab Dependency Scanning Report':
+        parser = GitlabDepScanReportParser(file, test)
     elif scan_type == 'Yarn Audit Scan':
         parser = YarnAuditParser(file, test)
     elif scan_type == 'BugCrowd Scan':
@@ -298,6 +302,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = KubeBenchParser(file, test)
     elif scan_type == 'ORT evaluated model Importer':
         parser = OrtParser(file, test)
+    elif scan_type == 'SARIF':
+        parser = SarifParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 

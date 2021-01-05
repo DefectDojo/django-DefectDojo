@@ -1,6 +1,6 @@
 name: k8s deployment
 on:
-  pull_request_target:
+  pull_request:
   push:
     branches:
       - master
@@ -44,27 +44,12 @@ jobs:
       matrix:
         component: [django, nginx]
     steps:
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      # - name: Login to DockerHub
+      #   uses: docker/login-action@v1
+      #   with:
+      #     username: ${{ secrets.DOCKERHUB_USERNAME }}
+      #     password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Checkout
-        if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'
-        uses: actions/checkout@v2
-        # by default the pull_requst_target event checks out the base branch, i.e. dev
-        # so we need to explicitly checkout the head of the PR
-        # we use fetch-depth 0 to make sure the full history is checked out and we can compare against
-        # the base commit (branch) of the PR
-        # more info https://github.community/t/github-actions-are-severely-limited-on-prs/18179/16
-        # we checkout merge_commit here as this contains all new code from dev also. we don't need to compare against base_commit
-        with:
-          fetch-depth: 0
-          ref: refs/pull/${{ github.event.pull_request.number }}/merge
-          # repository: ${{github.event.pull_request.head.repo.full_name}}
-      - name: Checkout
-        # for non PR runs we just checkout the default, which is a sha on a branch probably
-        if: github.event_name != 'pull_request' && github.event_name != 'pull_request_target'
         uses: actions/checkout@v2
       - name: Read Docker Image Identifiers
         id: read-docker-image-identifiers
@@ -114,24 +99,9 @@ jobs:
 #          username: ${{ secrets.DOCKERHUB_USERNAME }}
 #          password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Checkout
-        if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'
-        uses: actions/checkout@v2
-        # by default the pull_requst_target event checks out the base branch, i.e. dev
-        # so we need to explicitly checkout the head of the PR
-        # we use fetch-depth 0 to make sure the full history is checked out and we can compare against
-        # the base commit (branch) of the PR
-        # more info https://github.community/t/github-actions-are-severely-limited-on-prs/18179/16
-        # we checkout merge_commit here as this contains all new code from dev also. we don't need to compare against base_commit
-        with:
-          fetch-depth: 0
-          ref: refs/pull/${{ github.event.pull_request.number }}/merge
-          # repository: ${{github.event.pull_request.head.repo.full_name}}
-      - name: Checkout
-        # for non PR runs we just checkout the default, which is a sha on a branch probably
-        if: github.event_name != 'pull_request' && github.event_name != 'pull_request_target'
         uses: actions/checkout@v2
       - name: Setup Minikube
-        uses: manusa/actions-setup-minikube@v2.1.0
+        uses: manusa/actions-setup-minikube@v2.3.0
         with:
           minikube version: 'v1.14.2'
           kubernetes version: 'v1.19.2'
@@ -160,10 +130,10 @@ jobs:
               echo ::set-output name=mysql:: "${{ env.HELM_MYSQL_DATABASE_SETTINGS }}"
               echo ::set-output name=redis:: "${{ env.HELM_REDIS_BROKER_SETTINGS }}"
               echo ::set-output name=rabbit:: "${{ env.HELM_RABBIT_BROKER_SETTINGS }}"
-      - name: Create image pull Secrets
-        run: |-
-              kubectl create secret docker-registry defectdojoregistrykey --docker-username=${{ secrets.DOCKERHUB_USERNAME }} --docker-password=${{ secrets.DOCKERHUB_TOKEN }}
-              kubectl get secrets
+      # - name: Create image pull Secrets
+      #   run: |-
+      #         kubectl create secret docker-registry defectdojoregistrykey --docker-username=${{ secrets.DOCKERHUB_USERNAME }} --docker-password=${{ secrets.DOCKERHUB_TOKEN }}
+      #         kubectl get secrets
       - name: Deploying Djano application with ${{ matrix.databases }} ${{ matrix.brokers }}
         run: |-
              helm install \
@@ -174,7 +144,7 @@ jobs:
                ${{ steps.set.outputs[matrix.databases] }} \
                ${{ steps.set.outputs[matrix.brokers] }} \
                --set createSecret=true \
-               --set imagePullSecrets=defectdojoregistrykey
+              #  --set imagePullSecrets=defectdojoregistrykey
       - name: Check deployment status
         run: |-
              kubectl get pods
@@ -202,9 +172,10 @@ jobs:
              echo "Pods up and ready to rumbole"
              kubectl get pods
              OUT=$(kubectl run  curl --quiet=true --image=curlimages/curl:7.73.0 \
-                --overrides='{ "apiVersion": "v1", "spec": { "imagePullSecrets": [{"name": "defectdojoregistrykey"}] } }' \
+                --overrides='{ "apiVersion": "v1" }' \
                 --restart=Never -i --rm -- -s -m 20 -I --header "Host: $DD_HOSTNAME" http://`kubectl get service defectdojo-django -o json \
                |  jq -r '.spec.clusterIP'`/login?next=/)
+
              echo $OUT
              CR=`echo $OUT | egrep "^HTTP" | cut -d' ' -f2`
              echo $CR

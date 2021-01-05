@@ -731,7 +731,7 @@
     "pk": 1,
     "model": "dojo.development_environment",
     "fields": {
-      "name": "Ad officia praesentium sequi suscipit error iste qui nihil illum q"
+      "name": "Development"
     }
   },
   {
@@ -1646,8 +1646,8 @@
         "password": "<YOUR_API_KEY_HERE>",
         "default_issue_type": "Task",
         "epic_name_id": 10942,
-        "open_status_key": 3,
-        "close_status_key": 2,
+        "open_status_key": 11,
+        "close_status_key": 41,
         "low_mapping_severity": "Low",
         "medium_mapping_severity": "Medium",
         "high_mapping_severity": "High",

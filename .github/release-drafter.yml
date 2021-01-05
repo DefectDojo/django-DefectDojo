@@ -6,29 +6,34 @@ categories:
   - title: '💣 Breaking changes'
     labels:
       - 'Breaking Changes'
-  - title: '🚀 New scanners'
+  - title: '🚩 Requires settings change or database migration'
+    labels:
+      - 'settings_changes'
+      - 'New Migration'
+  - title: '🚩 Security'
+    labels:
+      - 'security'
+  - title: '🚀 New importers'
     labels:
       - 'Import Scans'
-  - title: '🚀 Features and enhancements'
+  - title: '🚀 General features and enhancements'
     labels:
       - 'feature'
       - 'enhancement'
       - 'performance'
+  - title: '🚀 API features and enhancements'
+    label: 'apiv2'
   - title: '🐛 Bug Fixes'
     labels:
       - 'fix'
       - 'bugfix'
       - 'bug'
+  - title: 📝 Documentation updates
+    label: 'documentation'
   - title: '🧰 Maintenance'
     labels:
       - 'dependencies'
       - 'maintenance'
-  - title: '🚩 Requires settings change'
-    labels:
-      - 'settings_changes'
-  - title: '🚩 Security'
-    labels:
-      - 'security'
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 template: |
   ## Changes

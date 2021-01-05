@@ -32,3 +32,23 @@ class TestMobSFParser(TestCase):
         parser = MobSFParser(testfile, test)
         testfile.close()
         # TODO add more checks dedicated to this file
+
+    def test_parse_file_3_1_9_android(self):
+        test = Test()
+        engagement = Engagement()
+        engagement.product = Product()
+        test.engagement = engagement
+        testfile = open("dojo/unittests/scans/mobsf/android.json")
+        parser = MobSFParser(testfile, test)
+        testfile.close()
+        # TODO add more checks dedicated to this file
+
+    def test_parse_file_3_1_9_ios(self):
+        test = Test()
+        engagement = Engagement()
+        engagement.product = Product()
+        test.engagement = engagement
+        testfile = open("dojo/unittests/scans/mobsf/ios.json")
+        parser = MobSFParser(testfile, test)
+        testfile.close()
+        # TODO add more checks dedicated to this file
