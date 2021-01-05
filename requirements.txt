@@ -43,7 +43,7 @@ python-nmap==0.6.1
 pytz==2020.5
 redis==3.5.3
 requests==2.25.1
-sqlalchemy  # Required by Celery broker transport
+sqlalchemy==1.3.22  # Required by Celery broker transport
 supervisor==4.2.1
 urllib3==1.26.2
 uWSGI==2.0.19.1
