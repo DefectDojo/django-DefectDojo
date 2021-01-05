@@ -83,7 +83,7 @@ def get_item(dependency_name, dependency_version, dependency_source, vulnerabili
 
 def get_severity(cvss_score):
 
-    result = 'Unknown'
+    result = 'Info'
 
     if cvss_score != "":
         ratings = [

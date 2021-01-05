@@ -27,7 +27,7 @@ class TestOssIndexDevauditParser(TestCase):
         testfile.close()
         self.assertTrue(len(parser.items) > 1)
 
-    def test_ossindex_devaudit_parser_with_no_cve_returns_unknown_severity(self):
+    def test_ossindex_devaudit_parser_with_no_cve_returns_info_severity(self):
         testfile = open("dojo/unittests/scans/ossindex_devaudit_sample/ossindex_devaudit_vuln_no_cvssscore.json")
         parser = OssIndexDevauditParser(testfile, Test())
         testfile.close()
@@ -82,13 +82,13 @@ class TestOssIndexDevauditParser(TestCase):
             for item in parser.items:
                 self.assertTrue(item.cwe == 1035)
 
-    def test_ossindex_devaudit_parser_get_severity_shows_unknown(self):
-        testfile = open("dojo/unittests/scans/ossindex_devaudit_sample/ossindex_devaudit_severity_unknown.json")
+    def test_ossindex_devaudit_parser_get_severity_shows_info(self):
+        testfile = open("dojo/unittests/scans/ossindex_devaudit_sample/ossindex_devaudit_severity_info.json")
         parser = OssIndexDevauditParser(testfile, Test())
         testfile.close()
         if len(parser.items) > 0:
             for item in parser.items:
-                self.assertTrue(item.severity == "Unknown")
+                self.assertTrue(item.severity == "Info")
 
     def test_ossindex_devaudit_parser_get_severity_shows_critical(self):
         testfile = open("dojo/unittests/scans/ossindex_devaudit_sample/ossindex_devaudit_severity_critical.json")
