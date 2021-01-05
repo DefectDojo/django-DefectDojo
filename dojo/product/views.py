@@ -195,16 +195,17 @@ def view_product(request, pid):
 def view_product_components(request, pid):
     prod = get_object_or_404(Product, id=pid)
     product_tab = Product_Tab(pid, title="Product", tab="components")
+    separator = ', '
 
     # Get components ordered by component_name and concat component versions to the same row
     if connection.vendor == 'postgresql':
         component_query = Finding.objects.filter(test__engagement__product__id=pid).values("component_name").order_by(
             'component_name').annotate(
-            component_version=StringAgg('component_version', delimiter=' | ', distinct=True))
+            component_version=StringAgg('component_version', delimiter=separator, distinct=True))
     else:
         component_query = Finding.objects.filter(test__engagement__product__id=pid).values("component_name")
         component_query = component_query.annotate(
-            component_version=Sql_GroupConcat('component_version', distinct=True))
+            component_version=Sql_GroupConcat('component_version', separator=separator, distinct=True))
 
     # Append finding counts
     component_query = component_query.annotate(total=Count('id')).order_by('component_name', 'component_version')

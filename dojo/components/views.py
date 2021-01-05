@@ -10,14 +10,15 @@ from django.contrib.postgres.aggregates import StringAgg
 
 def components(request):
     add_breadcrumb(title='Components', top_level=True, request=request)
-
+    separator = ', '
     # Get components ordered by component_name and concat component versions to the same row
     if connection.vendor == 'postgresql':
         component_query = Finding.objects.values("component_name").order_by('component_name').annotate(
-            component_version=StringAgg('component_version', delimiter=' | ', distinct=True))
+            component_version=StringAgg('component_version', delimiter=separator, distinct=True))
     else:
         component_query = Finding.objects.values("component_name").order_by('component_name')
-        component_query = component_query.annotate(component_version=Sql_GroupConcat('component_version', distinct=True))
+        component_query = component_query.annotate(component_version=Sql_GroupConcat(
+            'component_version', separator=separator, distinct=True))
 
     # Append counts
     component_query = component_query.annotate(total=Count('id')).order_by('component_name')
