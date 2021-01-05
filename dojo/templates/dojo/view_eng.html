@@ -628,66 +628,26 @@
               <span class="fa fa-edit"></span></a>
         </h4>
       </div>
-      
-      <div id="add_feat_files" class="panel-body collapse">
-        {% for file in files %}
-            <div class="col-md-2" style="text-align: center">
-              <div class="row">
-                <a href="{{ request.scheme }}://{{ request.get_host }}{{ file.file.url }}" target="_blank">
-                  {% if file.file.url|get_thumbnail %}
-                    <img src="{{ file.file.url }}" alt="thumbnail" style="width:150px">
-                  {% else %}
-                    <span style="font-size: 50px;" class="glyphicon glyphicon-file"></span>
-                  {% endif %}
-            <div class="col-md-2">
-              <div class="row">
-                <a href="#"
-                    data-imageurl="{{ request.scheme }}://{{ request.get_host }}{{ file.file.url }}}"
-                    data-origurl="{{ request.scheme }}://{{ request.get_host }}{{ file.file.url }}"
-                    data-caption="{{ file.title }}"
-                    class="thumbnail" data-toggle="modal"
-                    data-target="#fileModal" id="file">
-                    <img src="{{ request.scheme }}://{{ request.get_host }}{{ file.file.url }}" alt="{{ file.title }}" title="{{ file.title }}" />
-            <div class="col-md-2" style="text-align: center">
-              <div class="row">
-                <a href="{{ request.scheme }}://{{ request.get_host }}{{ file.file.url }}" target="_blank">
-                  {% if file.file.url|get_thumbnail %}
-                    <img src="{{ file.file.url }}" alt="thumbnail" style="width:150px">
-                  {% else %}
-                    <span style="font-size: 50px;" class="glyphicon glyphicon-file"></span>
-                  {% endif %}
-                </a>
-              </div>
-              <div class="row">
-                <caption style="text-align:center">{{ file.title }}</caption>
-              </div>
+
+      <div id="add_feat_files" class="panel-body collapse {% if files %}in{% endif %}">
+                {% for file in files %}
+                <div class="col-md-2" style="text-align: center">
+                    <div class="row">
+                        <a href="{{ request.scheme }}://{{ request.get_host }}{{ file.file.url }}" target="_blank">
+                            {% if file.file.url|get_thumbnail %}
+                                <img src="{{ file.file.url }}" alt="thumbnail" style="width:150px">
+                            {% else %}
+                                <span style="font-size: 50px;" class="glyphicon glyphicon-file"></span>
+                            {% endif %}
+                        </a>
+                    </div>
+                    <div class="row">
+                        <caption style="text-align:center">{{ file.title }}</caption>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
-        {% endfor %}
-      </div> 
-        <div class="modal fade" id="fileModal" tabindex="-1" role="dialog" aria-labelledby="fileModalLabel">
-          <div class="modal-dialog" role="document">
-              <div class="modal-content">
-                  <div class="modal-header">
-                      <h4 class="pull-left">Files</h4>
-                      <button type="button" class="pull-right btn btn-xs btn-default" data-dismiss="modal"><span
-                              class="fa fa-close"></span></button>
-                  </div>
-
-                  <div class="modal-body">
-                      <a id="a_to_replace" class="modal_file" href="{{ request.scheme }}://{{ request.get_host }}{{ file.file.url }}" target="_blank"
-                          title="View original image.">
-                          <img id="to_replace" src="{{ request.scheme }}://{{ request.get_host }}{{ file.file.url }}" class="img-responsive"/>
-                      </a>
-                      <p id="caption_to_replace">{{ file.title }}</p>
-                  </div>
-
-                  <div class="modal-footer">
-                      <a href="#" id="next" class="btn btn-default bnt-xs pull-right"><span
-                              class="fa fa-arrow-right"></span></a>
-                  </div>
-              </div>
-          </div>
-        </div>
+        
       </div>
       
       </div> 

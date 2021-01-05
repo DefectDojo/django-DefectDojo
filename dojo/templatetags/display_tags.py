@@ -874,13 +874,6 @@ def get_thumbnail(filename):
 
 
 @register.filter
-def get_thumbnail(filename):
-    from pathlib import Path
-    file_format = Path(filename).suffix[1:]
-    return file_format in supported_file_formats
-
-
-@register.filter
 def finding_extended_title(finding):
     if not finding:
         return ''

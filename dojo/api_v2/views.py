@@ -322,7 +322,6 @@ class FindingViewSet(mixins.ListModelMixin,
                                                     'test__engagement__product__prod_type')
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ApiFindingFilter
-    parser_classes = [MultiPartParser]
 
     # Overriding mixins.UpdateModeMixin perform_update() method to grab push_to_jira
     # data and add that as a parameter to .save()
