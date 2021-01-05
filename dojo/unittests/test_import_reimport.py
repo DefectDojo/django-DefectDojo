@@ -481,7 +481,7 @@ class DedupeTest(DojoAPITestCase):
                 not_mitigated += 1
         self.assertEqual(mitigated, 0)
         self.assertEqual(not_mitigated, 2)
- 
+
 # Observations:
 # - When reopening a mitigated finding, almost no fields are updated such as title, description, severity, impact, references, ....
 # - Basically fields (and req/resp) are only stored on the initial import, reimporting only changes the active/mitigated/verified flags + some dates + notes
