@@ -289,7 +289,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         print('test.content: ', response.content)
         return json.loads(response.content)
 
-    def import_scan_with_params(self, filename, engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None, tags=None):
+    def import_scan_with_params(self, filename, engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None, tags=None, close_old_findings=False):
         payload = {
                 "scan_date": '2020-06-04',
                 "minimum_severity": minimum_severity,
@@ -299,6 +299,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
                 "file": open(filename),
                 "engagement": engagement,
                 "version": "1.0.1",
+                "close_old_findings": close_old_findings,
         }
 
         if push_to_jira is not None:
@@ -309,7 +310,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
         return self.import_scan(payload)
 
-    def reimport_scan_with_params(self, test_id, filename, engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None, tags=None):
+    def reimport_scan_with_params(self, test_id, filename, engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None, tags=None, close_old_findings=True):
         payload = {
                 "test": test_id,
                 "scan_date": '2020-06-04',
@@ -320,6 +321,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
                 "file": open(filename),
                 "engagement": engagement,
                 "version": "1.0.1",
+                "close_old_findings": close_old_findings,
         }
 
         if push_to_jira is not None:
