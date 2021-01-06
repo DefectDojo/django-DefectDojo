@@ -57,6 +57,7 @@ coverage.xml
 *.log
 *.pot
 **/local_settings.py
+dojo/settings/settings.py
 
 # Vim swapfiles
 *.swp
