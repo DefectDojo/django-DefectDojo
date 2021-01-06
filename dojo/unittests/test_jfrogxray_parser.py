@@ -4,6 +4,10 @@ from dojo.tools.jfrogxray.parser import XrayJSONParser
 
 
 class TestJfrogXrayJSONParser(TestCase):
+    def test_parse_without_file_has_no_finding(self):
+        parser = XrayJSONParser(None, Test())
+        self.assertEqual(0, len(parser.items))
+
     def test_parse_file_with_one_vuln(self):
         testfile = open("dojo/unittests/scans/jfrogxray/one_vuln.json")
         parser = XrayJSONParser(testfile, Test())
@@ -25,7 +29,7 @@ class TestJfrogXrayJSONParser(TestCase):
         testfile = open("dojo/unittests/scans/jfrogxray/many_vulns2.json")
         parser = XrayJSONParser(testfile, Test())
         testfile.close()
-        self.assertEqual(344, len(parser.items))
+        self.assertEqual(357, len(parser.items))
         item = parser.items[36]
         self.assertEquals('requests', item.component_name)
         self.assertEquals('2.18.4', item.component_version)

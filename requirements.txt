@@ -71,3 +71,4 @@ vcrpy==4.1.1
 vcrpy-unittest==0.1.7
 git+https://github.com/radiac/django-tagulous.git@develop#egg=django-tagulous
 PyJWT==1.7.1
+cvss==2.1
