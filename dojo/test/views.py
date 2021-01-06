@@ -622,7 +622,7 @@ def re_import_scan_results(request, tid):
     test = get_object_or_404(Test, id=tid)
     scan_type = test.test_type.name
     engagement = test.engagement
-    form = ReImportScanForm()
+    form = ReImportScanForm(test=test)
     jform = None
     jira_project = jira_helper.get_jira_project(test)
     push_all_jira_issues = jira_helper.is_push_all_issues(test)
@@ -633,7 +633,7 @@ def re_import_scan_results(request, tid):
 
     # form.initial['tags'] = [tag.name for tag in test.tags.all()]
     if request.method == "POST":
-        form = ReImportScanForm(request.POST, request.FILES, scan_type=scan_type)
+        form = ReImportScanForm(request.POST, request.FILES, test=test)
         if jira_project:
             jform = JIRAImportScanForm(request.POST, push_all=push_all_jira_issues, prefix='jiraform')
         if form.is_valid() and (jform is None or jform.is_valid()):
