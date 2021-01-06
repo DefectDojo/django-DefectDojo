@@ -24,6 +24,7 @@ repositoryPrefix: defectdojo
 tag: latest
 
 securityContext:
+  enabled: true
   djangoSecurityContext:
     # django dockerfile sets USER=1001
     runAsUser: 1001

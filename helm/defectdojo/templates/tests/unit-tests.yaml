@@ -20,8 +20,10 @@ spec:
     - name: unit-tests
       image: '{{ .Values.repositoryPrefix }}/defectdojo-django:{{ .Values.tag }}'
       imagePullPolicy: {{ .Values.imagePullPolicy }}
+      {{- if .Values.securityContext.enabled }}
       securityContext:
         {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 8 }}
+      {{- end }}
       command: ['/entrypoint-unit-tests.sh']
       envFrom:
         - configMapRef:
