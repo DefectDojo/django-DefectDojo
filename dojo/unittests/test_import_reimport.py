@@ -448,6 +448,38 @@ class DedupeTest(DojoAPITestCase):
         # - zap2 and zap5 closed
         self.assertEqual(notes_count_before + 2, self.db_notes_count())
 
+    # import 1 and then reimport 2 without closing old findings
+    # - reimport should not mitigate the zap1
+    def test_import_reimport_without_closing_old_findings(self):
+        logger.debug('reimporting updated zap xml report and keep old findings open')
+
+        import1 = self.import_scan_with_params(self.zap_sample1_filename)
+
+        test_id = import1['test']
+        findings = self.get_test_findings_api(test_id)
+        self.assert_finding_count_json(4, findings)
+
+        reimport1 = self.reimport_scan_with_params(test_id, self.zap_sample2_filename, close_old_findings=False)
+
+        test_id = reimport1['test']
+        self.assertEqual(test_id, test_id)
+
+        findings = self.get_test_findings_api(test_id, verified=False)
+        self.assert_finding_count_json(0, findings)
+
+        findings = self.get_test_findings_api(test_id, verified=True)
+        self.assert_finding_count_json(5, findings)
+
+        mitigated = 0
+        not_mitigated = 0
+        for finding in findings['results']:
+            logger.debug(finding)
+            if finding['is_Mitigated']:
+                mitigated += 1
+            else:
+                not_mitigated += 1
+        self.assertEqual(mitigated, 0)
+        self.assertEqual(not_mitigated, 5)
 
 # Observations:
 # - When reopening a mitigated finding, almost no fields are updated such as title, description, severity, impact, references, ....

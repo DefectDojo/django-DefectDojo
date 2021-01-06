@@ -480,6 +480,8 @@ class ReImportScanForm(forms.Form):
         attrs={"accept": ".xml, .csv, .nessus, .json, .html, .js, .zip, .xlsx"}),
         label="Choose report file",
         required=False)
+    close_old_findings = forms.BooleanField(help_text="Select if old findings get mitigated when importing.",
+                                            required=False, initial=True)
 
     def __init__(self, *args, scan_type=None, **kwargs):
         super(ReImportScanForm, self).__init__(*args, **kwargs)

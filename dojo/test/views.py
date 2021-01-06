@@ -648,6 +648,7 @@ def re_import_scan_results(request, tid):
             active = form.cleaned_data['active']
             verified = form.cleaned_data['verified']
             tags = form.cleaned_data['tags']
+            close_old_findings = form.cleaned_data.get('close_old_findings', True)
             # Tags are replaced, same behaviour as with django-tagging
             test.tags = tags
             if file and is_scan_file_too_large(file):
@@ -841,29 +842,30 @@ def re_import_scan_results(request, tid):
                 # calculate the difference
                 to_mitigate = set(original_items) - set(reactivated_items) - set(unchanged_items)
                 mitigated_findings = []
-                for finding_id in to_mitigate:
-                    finding = Finding.objects.get(id=finding_id)
-                    if not finding.mitigated or not finding.is_Mitigated:
-                        finding.mitigated = scan_date_time
-                        finding.is_Mitigated = True
-                        finding.mitigated_by = request.user
-                        finding.active = False
+                if close_old_findings:
+                    for finding_id in to_mitigate:
+                        finding = Finding.objects.get(id=finding_id)
+                        if not finding.mitigated or not finding.is_Mitigated:
+                            finding.mitigated = scan_date_time
+                            finding.is_Mitigated = True
+                            finding.mitigated_by = request.user
+                            finding.active = False
 
-                        finding.save()
-                        note = Notes(entry="Mitigated by %s re-upload." % scan_type,
-                                    author=request.user)
-                        note.save()
-                        finding.notes.add(note)
-                        mitigated_findings.append(finding)
-                        mitigated_count += 1
+                            finding.save()
+                            note = Notes(entry="Mitigated by %s re-upload." % scan_type,
+                                        author=request.user)
+                            note.save()
+                            finding.notes.add(note)
+                            mitigated_findings.append(finding)
+                            mitigated_count += 1
 
-                        endpoint_status = finding.endpoint_status.all()
-                        for status in endpoint_status:
-                            status.mitigated_by = request.user
-                            status.mitigated_time = timezone.now()
-                            status.mitigated = True
-                            status.last_modified = timezone.now()
-                            status.save()
+                            endpoint_status = finding.endpoint_status.all()
+                            for status in endpoint_status:
+                                status.mitigated_by = request.user
+                                status.mitigated_time = timezone.now()
+                                status.mitigated = True
+                                status.last_modified = timezone.now()
+                                status.save()
 
                 untouched = set(unchanged_items) - set(to_mitigate)
 
