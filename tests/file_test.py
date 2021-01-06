@@ -143,9 +143,10 @@ class FileUploadTest(BaseTestCase):
         self.assertTrue(self.is_success_message_present(text='Files updated successfully'))
 
 
-def add_finding_tests_to_suite(suite):
+def add_file_tests_to_suite(suite):
     # Add each test the the suite to be run
     # success and failure is output by the test
+    suite.addTest(BaseTestCase('test_login'))
     suite.addTest(ProductTest('test_create_product'))
     suite.addTest(ProductTest('test_add_product_finding'))
     suite.addTest(FileUploadTest('test_add_file_finding_level'))
@@ -161,7 +162,7 @@ def add_finding_tests_to_suite(suite):
 
 def suite():
     suite = unittest.TestSuite()
-    add_finding_tests_to_suite(suite)
+    add_file_tests_to_suite(suite)
     return suite
 
 
