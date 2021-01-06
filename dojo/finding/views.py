@@ -414,7 +414,13 @@ def close_finding(request, fid):
                 finding.is_Mitigated = True
                 finding.last_reviewed = finding.mitigated
                 finding.last_reviewed_by = request.user
-                finding.endpoints.clear()
+                endpoint_status = finding.endpoint_status.all()
+                for status in endpoint_status:
+                    status.mitigated_by = request.user
+                    status.mitigated_time = timezone.now()
+                    status.mitigated = True
+                    status.last_modified = timezone.now()
+                    status.save()
 
                 # only push to JIRA if there is an issue, otherwise a new one is created
                 if jira_helper.is_push_all_issues(finding) and finding.has_jira_issue:
@@ -540,6 +546,13 @@ def reopen_finding(request, fid):
     finding.is_Mitigated = False
     finding.last_reviewed = finding.mitigated
     finding.last_reviewed_by = request.user
+    endpoint_status = finding.endpoint_status.all()
+    for status in endpoint_status:
+        status.mitigated_by = None
+        status.mitigated_time = None
+        status.mitigated = False
+        status.last_modified = timezone.now()
+        status.save()
 
     # only push to JIRA if there is an issue, otherwise a new one is created
     if jira_helper.is_push_all_issues(finding) and finding.has_jira_issue:
