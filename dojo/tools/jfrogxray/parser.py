@@ -9,11 +9,12 @@ class XrayJSONParser(object):
     def __init__(self, json_output, test):
         # Start with an empty findings
         self.items = []
+        # Exit if file is not provided
+        if json_output is None:
+            return
 
         tree = json.load(json_output)
-
-        if tree:
-            self.items = [data for data in self.get_items(tree, test)]
+        self.items = [data for data in self.get_items(tree, test)]
 
     def get_items(self, tree, test):
         items = {}
@@ -68,7 +69,8 @@ def get_item(vulnerability, test):
         if 'cve' in cves[0]:
             cve = cves[0]['cve']
         # take only the first one for now, limitation of DD model.
-        cwe = decode_cwe_number(cves[0].get('cwe', [])[0])
+        if len(cves[0].get('cwe', [])) > 0:
+            cwe = decode_cwe_number(cves[0].get('cwe', [])[0])
         if 'cvss_v3' in cves[0]:
             cvss_v3 = cves[0]['cvss_v3']
             # this dedicated package will clean the vector
