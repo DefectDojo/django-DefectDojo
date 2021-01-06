@@ -1227,6 +1227,10 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     test = serializers.PrimaryKeyRelatedField(
         queryset=Test.objects.all())
     push_to_jira = serializers.BooleanField(default=False)
+    # Close the old findings if the parameter is not provided. This is to
+    # mentain the old API behavior after reintroducing the close_old_findings parameter
+    # also for ReImport.
+    close_old_findings = serializers.BooleanField(required=False, default=True)
 
     def save(self, push_to_jira=False):
         data = self.validated_data
@@ -1235,10 +1239,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         endpoint_to_add = data['endpoint_to_add']
         min_sev = data['minimum_severity']
         scan_date = data['scan_date']
-        # Close the old findings if the parameter is not provided. This is to
-        # mentain the old API behavior after reintroducing the close_old_findings parameter
-        # also for ReImport.
-        close_old_findings = data.get('close_old_findings', True)
+        close_old_findings = data['close_old_findings']
         scan_date_time = datetime.datetime.combine(scan_date, timezone.now().time())
         if settings.USE_TZ:
             scan_date_time = timezone.make_aware(scan_date_time, timezone.get_default_timezone())

@@ -56,8 +56,6 @@ class DedupeTest(DojoAPITestCase):
         self.zap_sample1_filename = self.scans_path + '1_zap_sample_0_and_new_absent.xml'
         self.zap_sample2_filename = self.scans_path + '2_zap_sample_0_and_new_endpoint.xml'
         self.zap_sample3_filename = self.scans_path + '3_zap_sampl_0_and_different_severities.xml'
-        self.zap_sample6_filename = self.scans_path + '6_zap_sample_one.xml'
-        self.zap_sample7_filename = self.scans_path + '7_zap_sample_two.xml'
 
     # import zap scan, testing:
     # - import
@@ -455,13 +453,13 @@ class DedupeTest(DojoAPITestCase):
     def test_import_reimport_without_closing_old_findings(self):
         logger.debug('reimporting updated zap xml report and keep old findings open')
 
-        import1 = self.import_scan_with_params(self.zap_sample6_filename, close_old_findings=False)
+        import1 = self.import_scan_with_params(self.zap_sample1_filename)
 
         test_id = import1['test']
         findings = self.get_test_findings_api(test_id)
-        self.assert_finding_count_json(1, findings)
+        self.assert_finding_count_json(4, findings)
 
-        reimport1 = self.reimport_scan_with_params(test_id, self.zap_sample7_filename, close_old_findings=False)
+        reimport1 = self.reimport_scan_with_params(test_id, self.zap_sample2_filename, close_old_findings=False)
 
         test_id = reimport1['test']
         self.assertEqual(test_id, test_id)
@@ -470,17 +468,18 @@ class DedupeTest(DojoAPITestCase):
         self.assert_finding_count_json(0, findings)
 
         findings = self.get_test_findings_api(test_id, verified=True)
-        self.assert_finding_count_json(2, findings)
+        self.assert_finding_count_json(5, findings)
 
         mitigated = 0
         not_mitigated = 0
         for finding in findings['results']:
+            logger.debug(finding)
             if finding['is_Mitigated']:
                 mitigated += 1
             else:
                 not_mitigated += 1
         self.assertEqual(mitigated, 0)
-        self.assertEqual(not_mitigated, 2)
+        self.assertEqual(not_mitigated, 5)
 
 # Observations:
 # - When reopening a mitigated finding, almost no fields are updated such as title, description, severity, impact, references, ....

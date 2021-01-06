@@ -289,7 +289,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         print('test.content: ', response.content)
         return json.loads(response.content)
 
-    def import_scan_with_params(self, filename, engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None, tags=None, close_old_findings=True):
+    def import_scan_with_params(self, filename, engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None, tags=None, close_old_findings=False):
         payload = {
                 "scan_date": '2020-06-04',
                 "minimum_severity": minimum_severity,
