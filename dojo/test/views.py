@@ -747,7 +747,7 @@ def re_import_scan_results(request, tid):
                                 status.mitigated_time = None
                                 status.mitigated = False
                                 status.last_modified = timezone.now()
-                                status.save()
+                                status.save(push_to_jira=push_to_jira)
 
                             reactivated_items.append(finding.id)
                             reactivated_count += 1
@@ -849,7 +849,7 @@ def re_import_scan_results(request, tid):
                         finding.mitigated_by = request.user
                         finding.active = False
 
-                        finding.save()
+                        finding.save(push_to_jira=push_to_jira)
                         note = Notes(entry="Mitigated by %s re-upload." % scan_type,
                                     author=request.user)
                         note.save()
