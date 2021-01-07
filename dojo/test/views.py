@@ -842,7 +842,6 @@ def re_import_scan_results(request, tid):
                 # calculate the difference
                 to_mitigate = set(original_items) - set(reactivated_items) - set(unchanged_items)
                 mitigated_findings = []
-                
                 if close_old_findings:
                     for finding_id in to_mitigate:
                         finding = Finding.objects.get(id=finding_id)
