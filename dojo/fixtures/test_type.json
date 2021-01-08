@@ -698,6 +698,13 @@
         },
         "model": "dojo.test_type",
         "pk": 191
+    },
+    {
+        "fields": {
+            "name": "ScoutSuite Multi-Cloud Security Auditing Tool"
+        },
+        "model": "dojo.test_type",
+        "pk": 191
     }
 
 ]

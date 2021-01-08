@@ -1,5 +1,6 @@
-__author__ = 'Marco Lancini'
+__author__ = 'Hasan Tayyar Besik'
 
+# Cloned form aws_scout2 scanner
 from dojo.models import Finding
 from datetime import datetime
 import json
@@ -8,11 +9,12 @@ from django.utils.html import strip_tags
 
 
 class ScoutSuiteParser(object):
+    """"ScoutSuite Wiki: https://github.com/nccgroup/ScoutSuite/wiki"""
+
     item_data = ""
     pdepth = 0
 
     def __init__(self, filename, test):
-        print(filename.temporary_file_path())
         with open(filename.temporary_file_path(), "r") as fileobj:
             raw_data = fileobj.read()
             raw_data = raw_data.replace("scoutsuite_results =", "")
@@ -37,9 +39,8 @@ class ScoutSuiteParser(object):
             test_description = "%s* **Resource Count:** %s\n" % (test_description, items["resources_count"])
             test_description = "%s* **Rules Count:** %s\n\n" % (test_description, items["rules_count"])
         test.description = test_description
-        test.save()
 
-        scout2_findings = []
+        scoutsuite_findings = []
 
         # Configured Services
         for service in list(data["services"].items()):
@@ -66,18 +67,21 @@ class ScoutSuiteParser(object):
                                 description_text = description_text + self.item_data
                                 self.item_data = ""
 
+                            refs = finding["references"]
                             mobsf_item = {
                                 "category": "Mobile Permissions",
                                 "title": finding["description"],
                                 "severity": finding["level"],
-                                "description": description_text
+                                "description": description_text,
+                                "references": ' '.join(filter(None, refs) if hasattr(refs, '__len__') else [])
                             }
-                            scout2_findings.append(mobsf_item)
+                            scoutsuite_findings.append(mobsf_item)
 
-        for scout2_finding in scout2_findings:
-            title = strip_tags(scout2_finding["title"])
-            sev = self.getCriticalityRating(scout2_finding["severity"])
-            description = scout2_finding["description"]
+        for scoutsuite_finding in scoutsuite_findings:
+            title = strip_tags(scoutsuite_finding["title"])
+            sev = self.getCriticalityRating(scoutsuite_finding["severity"])
+            description = scoutsuite_finding["description"]
+            references = scoutsuite_finding["references"]
             dupe_key = sev + title
             if dupe_key in dupes:
                 find = dupes[dupe_key]
@@ -85,23 +89,22 @@ class ScoutSuiteParser(object):
                     find.description += description
             else:
                 find = Finding(title=Truncator(title).words(6),
-                               cwe=1032,  # Security Configuration Weaknesses, would like to fine tune
-                               test=test,
-                               active=False,
-                               verified=False,
-                               description="**Account:** " + account_id + "\n" + description,
-                               severity=sev,
-                               numerical_severity=Finding.get_numerical_severity(sev),
-                               references=None,
-                               date=find_date,
-                               dynamic_finding=True)
+                                cwe=1032,  # Security Configuration Weaknesses, would like to fine tune
+                                test=test,
+                                active=False,
+                                verified=False,
+                                description="**Account:** " + account_id + "\n" + description,
+                                severity=sev,
+                                numerical_severity=Finding.get_numerical_severity(sev),
+                                references=references,
+                                date=find_date,
+                                dynamic_finding=True)
                 dupes[dupe_key] = find
         self.items = list(dupes.values())
 
     def formatview(self, depth):
         if depth > 1:
             return "* "
-            print("depth hit")
         else:
             return ""
 
