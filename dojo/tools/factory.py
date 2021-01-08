@@ -41,6 +41,7 @@ from dojo.tools.sonarqube_api.importer import SonarQubeApiImporter
 from dojo.tools.clair.parser import ClairParser
 from dojo.tools.mobsf.parser import MobSFParser
 from dojo.tools.aws_scout2.parser import AWSScout2Parser
+from dojo.tools.scout_suite.parser import ScoutSuiteParser
 from dojo.tools.aws_prowler.parser import AWSProwlerParser
 from dojo.tools.brakeman.parser import BrakemanScanParser
 from dojo.tools.spotbugs.parser import SpotbugsXMLParser
@@ -201,6 +202,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = MobSFParser(file, test)
     elif scan_type == 'AWS Scout2 Scan':
         parser = AWSScout2Parser(file, test)
+    elif scan_type == 'Scout Suite Scan':
+        parser = ScoutSuiteParser(file, test)
     elif scan_type == 'AWS Prowler Scan':
         parser = AWSProwlerParser(file, test)
     elif scan_type == 'Brakeman Scan':
