@@ -702,7 +702,7 @@ CELERY_BEAT_SCHEDULE = {
         'args': [timedelta(hours=1)]
     },
     'cleanup-alerts': {
-        'task': 'dojo.tasks.async_dupe_delete',
+        'task': 'dojo.tasks.cleanup_alerts',
         'schedule': timedelta(hours=8),
     },
     'dedupe-delete': {
