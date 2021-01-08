@@ -33,6 +33,12 @@ You'd want to build your docker images locally, and eventually pass in your loca
 |`dojo/unittests/test_<parser_dir>_parser.py`   | The unittest class, holding unit tests definitions
 |`dojo/tools/factory.py`                        | Import there your new parser class and add it to the long "if/else" statement
 
+## Things to pay attention to
+
+Parsers may have many fields, out of which many of them may be optional.
+
+Always make sure you include checks to avoid potential `KeyError` errors (e.g. field does not exist), for those fields you are not absolutely certain will always be in file that will get uploaded. These translate to 500 error, and do not look good.
+
 ## Unit tests
 
 Each parser must have unit tests, at least to test for 0 vuln, 1 vuln and many vulns. You can take a look at how other parsers have them for starters. The more quality tests, the better.
