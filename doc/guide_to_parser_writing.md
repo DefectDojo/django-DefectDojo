@@ -5,6 +5,7 @@
 ## Pre-requisites
 - You have forked https://github.com/DefectDojo/django-DefectDojo and cloned locally.
 - Checkout `dev` and make sure you're up to date with the latest changes.
+- It's advised that you create a dedicated branch for your development, such as `git checkout -b parser-name` yet that's up to you.
 
 It is probably easier to use the docker-compose stack (and benefit from the hot-reload capbility for uWSGI).
 Set up your environment to use the dev or ptvsd environment, such as:
@@ -13,7 +14,7 @@ Set up your environment to use the dev or ptvsd environment, such as:
 or
 `$ docker/setEnv.sh ptvsd` (allows to set breakpoints in uWSGI)
 
-Please have a look at [../DOCKER.md] for more details.
+Please have a look at [DOCKER.md](../DOCKER.md) for more details.
 
 ### docker images
 You'd want to build your docker images locally, and eventually pass in your local user's `uid` to be able to write to the image (handy for database migration files). Assuming your user's `uid` is `1000`, then:
@@ -24,20 +25,20 @@ You'd want to build your docker images locally, and eventually pass in your loca
 
 | File                                          | Purpose
 |-------                                        |--------
-|dojo/fixtures/test_type.json                   | Django fixture for the type of scan.
-dojo/templates/dojo/import_scan_results.html    | Add the scan to the array presented in the drop-down box
-dojo/tools/<parser_dir>/__init__.py             | Empty file for class initialization
-dojo/tools/<parser_dir>/parser.py               | The meat. This is where you write your actual parser
-dojo/unittests/scans/<parser_dir>/{many_vulns,no_vuln,one_vuln}.json | Sample files containing meaningful data for unit tests. The minimal set.
-dojo/unittests/test_<parser_dir>_parser.py      | The unittest class, holding unit tests definitions
-dojo/tools/factory.py                           | Import there your new parser class and add it to the long "if/else" statement
+|`dojo/fixtures/test_type.json`                 | Django fixture for the type of scan.
+|`dojo/templates/dojo/import_scan_results.html` | Add the scan to the array presented in the drop-down box
+|`dojo/tools/<parser_dir>/__init__.py`          | Empty file for class initialization
+|`dojo/tools/<parser_dir>/parser.py`            | The meat. This is where you write your actual parser
+|`dojo/unittests/scans/<parser_dir>/{many_vulns,no_vuln,one_vuln}.json` | Sample files containing meaningful data for unit tests. The minimal set.
+|`dojo/unittests/test_<parser_dir>_parser.py`   | The unittest class, holding unit tests definitions
+|`dojo/tools/factory.py`                        | Import there your new parser class and add it to the long "if/else" statement
 
 ## Unit tests
 
 Each parser must have unit tests, at least to test for 0 vuln, 1 vuln and many vulns. You can take a look at how other parsers have them for starters. The more quality tests, the better.
 
 ### Test database
-To test your unit tests locally, you first need to grant some rights:
+To test your unit tests locally, you first need to grant some rights. Get your MySQL root password from the docker-compose logs, login as root and issue the following commands:
 
 ```
 MYSQL> grant all privileges on test_defectdojo.* to defectdojo@'%';
