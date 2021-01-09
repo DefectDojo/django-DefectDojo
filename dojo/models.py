@@ -688,7 +688,6 @@ class Product(models.Model):
             # ideally it's always prefetched and we can remove this code in the future
             self.active_finding_count = Finding.objects.filter(mitigated__isnull=True,
                                             active=True,
-                                            verified=False,
                                             false_p=False,
                                             duplicate=False,
                                             out_of_scope=False,
