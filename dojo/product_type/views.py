@@ -47,17 +47,9 @@ def prefetch_for_product_type(prod_types):
     prefetch_prod_types = prod_types
 
     if isinstance(prefetch_prod_types, QuerySet):  # old code can arrive here with prods being a list because the query was already executed
-        active_findings_query = Q(prod_type__engagement__test__finding__active=True,
-                                prod_type__engagement__test__finding__mitigated__isnull=True,
-                                prod_type__engagement__test__finding__false_p=False,
-                                prod_type__engagement__test__finding__duplicate=False,
-                                prod_type__engagement__test__finding__out_of_scope=False)
+        active_findings_query = Q(prod_type__engagement__test__finding__active=True)
         active_verified_findings_query = Q(prod_type__engagement__test__finding__active=True,
-                                prod_type__engagement__test__finding__mitigated__isnull=True,
-                                prod_type__engagement__test__finding__verified=True,
-                                prod_type__engagement__test__finding__false_p=False,
-                                prod_type__engagement__test__finding__duplicate=False,
-                                prod_type__engagement__test__finding__out_of_scope=False)
+                                prod_type__engagement__test__finding__verified=True)
         prefetch_prod_types = prefetch_prod_types.prefetch_related('authorized_users')
         prefetch_prod_types = prefetch_prod_types.annotate(
             active_findings_count=Count('prod_type__engagement__test__finding__id', filter=active_findings_query))

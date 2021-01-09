@@ -686,11 +686,7 @@ class Product(models.Model):
             return self.active_finding_count
         except AttributeError:
             # ideally it's always prefetched and we can remove this code in the future
-            self.active_finding_count = Finding.objects.filter(mitigated__isnull=True,
-                                            active=True,
-                                            false_p=False,
-                                            duplicate=False,
-                                            out_of_scope=False,
+            self.active_finding_count = Finding.objects.filter(active=True,
                                             test__engagement__product=self).count()
             return self.active_finding_count
 
@@ -701,12 +697,8 @@ class Product(models.Model):
             return self.active_verified_finding_count
         except AttributeError:
             # ideally it's always prefetched and we can remove this code in the future
-            self.active_verified_finding_count = Finding.objects.filter(mitigated__isnull=True,
-                                            active=True,
+            self.active_verified_finding_count = Finding.objects.filter(active=True,
                                             verified=True,
-                                            false_p=False,
-                                            duplicate=False,
-                                            out_of_scope=False,
                                             test__engagement__product=self).count()
             return self.active_verified_finding_count
 
