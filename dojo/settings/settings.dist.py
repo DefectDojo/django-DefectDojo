@@ -629,7 +629,6 @@ INSTALLED_APPS = (
     'social_django',
     'drf_yasg2',
     'tagulous',
-    'debug_toolbar',
 )
 
 # ------------------------------------------------------------------------------
