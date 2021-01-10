@@ -25,7 +25,7 @@ You'd want to build your docker images locally, and eventually pass in your loca
 
 | File                                          | Purpose
 |-------                                        |--------
-|`dojo/fixtures/test_type.json`                 | Django fixture for the type of scan.
+|`dojo/fixtures/test_type.json`                 | Django fixture for the type of scan. Take the next available integer if you intend to push upstream. If you're planning to use only in your own fork, you could jump ahead by 1000 to avoid any potential conflicts.
 |`dojo/templates/dojo/import_scan_results.html` | Add the scan to the array presented in the drop-down box
 |`dojo/tools/<parser_dir>/__init__.py`          | Empty file for class initialization
 |`dojo/tools/<parser_dir>/parser.py`            | The meat. This is where you write your actual parser
