@@ -1642,8 +1642,8 @@
     "model": "dojo.jira_instance",
     "fields": {
         "url": "https://defectdojo.atlassian.net/",
-        "username": "defectdojo-project@owasp.org",
-        "password": "enlYy6Ke2RdCOEwv2KTf9209",
+        "username": "<your username>",
+        "password": "<your password>",
         "default_issue_type": "Task",
         "epic_name_id": 10011,
         "open_status_key": 11,
