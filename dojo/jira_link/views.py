@@ -51,8 +51,8 @@ def webhook(request, secret=None):
         return HttpResponseBadRequest("only application/json supported")
 
     if request.method == 'POST':
-        logger.debug('jira_webhook_body:')
-        logger.debug(request.body.decode('utf-8'))
+        # logger.debug('jira_webhook_body:')
+        # logger.debug(request.body.decode('utf-8'))
         parsed = json.loads(request.body.decode('utf-8'))
         if parsed.get('webhookEvent') == 'jira:issue_updated':
             # xml examples at the end of file
@@ -176,12 +176,12 @@ def webhook(request, secret=None):
             jissue = get_object_or_404(JIRA_Issue, jira_id=jid)
             logger.debug('jissue: %s', vars(jissue))
             if jissue.finding:
-                logger.debug('finding: %s', vars(jissue.finding))
+                # logger.debug('finding: %s', vars(jissue.finding))
                 jira_usernames = JIRA_Instance.objects.values_list('username', flat=True)
                 for jira_userid in jira_usernames:
-                    logger.debug('incoming username: %s jira config username: %s', commentor.lower(), jira_userid.lower())
+                    # logger.debug('incoming username: %s jira config username: %s', commentor.lower(), jira_userid.lower())
                     if jira_userid.lower() == commentor.lower():
-                        logger.debug('skipping incoming JIRA comment as the user id of the comment mathces the JIRA user in Defect Dojo')
+                        logger.debug('skipping incoming JIRA comment as the user id of the comment in JIRA (%s) matches the JIRA username in Defect Dojo (%s)', commentor.lower(), jira_userid.lower())
                         return HttpResponse('')
                         break
                 finding = jissue.finding
