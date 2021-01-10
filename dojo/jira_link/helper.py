@@ -275,24 +275,26 @@ def get_jira_connection_raw(jira_server, jira_username, jira_password):
         else:
             log_jira_generic_alert('Unknown JIRA Connection Error', e)
 
-        messages.add_message(get_current_request(),
-                            messages.ERROR,
-                            'Unable to authenticate. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + e.text,
-                            extra_tags='alert-danger')
+        add_error_message_to_response('Unable to authenticate. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + e.text)
         raise e
 
     except requests.exceptions.RequestException as re:
         logger.exception(re)
         log_jira_generic_alert('Unknown JIRA Connection Error', re)
 
-        messages.add_message(get_current_request(),
-                            messages.ERROR,
-                            'Unable to authenticate. Please check the URL, username, password, IP whitelist, Network connection. Details in alert on top right.',
-                            extra_tags='alert-danger')
+        add_error_message_to_response('Unable to authenticate. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + e.text)
         raise re
 
     # except RequestException as re:
     #     logger.exception(re)
+
+
+def add_error_message_to_response(message):
+    if get_current_request():
+        messages.add_message(get_current_request(),
+                            messages.ERROR,
+                            message,
+                            extra_tags='alert-danger')
 
 
 # Gets a connection to a Jira server based on the finding
@@ -712,10 +714,8 @@ def get_jira_meta(jira, jira_project):
         logger.warn(message)
         logger.warn("get_jira_meta: %s", json.dumps(meta, indent=4))  # this is None safe
 
-        messages.add_message(get_current_request(),
-                            messages.ERROR,
-                            message,
-                            extra_tags='alert-danger')
+        add_error_message_to_response(message)
+
         raise JIRAError(text=message)
     else:
         return meta
@@ -805,11 +805,7 @@ def close_epic(eng, push_to_jira):
                 log_jira_generic_alert('Jira Engagement/Epic Close Error', str(e))
                 return False
     else:
-        messages.add_message(
-            get_current_request(),
-            messages.ERROR,
-            'Push to JIRA for Epic skipped because enable_engagement_epic_mapping is not checked for this engagement',
-            extra_tags='alert-danger')
+        add_error_message_to_response('Push to JIRA for Epic skipped because enable_engagement_epic_mapping is not checked for this engagement')
         return False
 
 
@@ -839,11 +835,8 @@ def update_epic(engagement):
             log_jira_generic_alert('Jira Engagement/Epic Update Error', str(e))
             return False
     else:
-        messages.add_message(
-            get_current_request(),
-            messages.ERROR,
-            'Push to JIRA for Epic skipped because enable_engagement_epic_mapping is not checked for this engagement',
-            extra_tags='alert-danger')
+        add_error_message_to_response('Push to JIRA for Epic skipped because enable_engagement_epic_mapping is not checked for this engagement')
+
         return False
 
 
@@ -901,11 +894,7 @@ def add_epic(engagement):
                                    message + error)
             return False
     else:
-        messages.add_message(
-            get_current_request(),
-            messages.ERROR,
-            'Push to JIRA for Epic skipped because enable_engagement_epic_mapping is not checked for this engagement',
-            extra_tags='alert-danger')
+        add_error_message_to_response('Push to JIRA for Epic skipped because enable_engagement_epic_mapping is not checked for this engagement')
         return False
 
 
