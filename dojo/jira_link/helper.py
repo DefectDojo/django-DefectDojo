@@ -234,6 +234,13 @@ def get_jira_change(obj):
     return None
 
 
+def get_epic_name_field_name(jira_instance):
+    if not jira_instance or not jira_instance.epic_name_id:
+        return None
+
+    return 'customfield_' + str(jira_instance.epic_name_id)
+
+
 def has_jira_issue(obj):
     return get_jira_issue(obj) is not None
 
@@ -471,6 +478,12 @@ def add_jira_issue(find):
             if not meta:
                 meta = get_jira_meta(jira, jira_project)
 
+            epic_name_field = get_epic_name_field_name(jira_instance)
+            if epic_name_field in meta['projects'][0]['issuetypes'][0]['fields']:
+                # epic name is present in this issuetype
+                # epic name is always mandatory in jira, so we populate it
+                fields[epic_name_field] = fields['summary']
+
             if 'priority' in meta['projects'][0]['issuetypes'][0]['fields']:
                 fields['priority'] = {
                                         'name': jira_instance.get_priority(find.severity)
@@ -654,7 +667,11 @@ def update_jira_issue(find):
 # gets the metadata for the default issue type in this jira project
 def get_jira_meta(jira, jira_project):
     meta = jira.createmeta(projectKeys=jira_project.project_key, issuetypeNames=jira_project.jira_instance.default_issue_type, expand="projects.issuetypes.fields")
+    # meta = jira.createmeta(projectKeys=jira_project.project_key, expand="projects.issuetypes.fields")
     # logger.debug("get_jira_meta: %s", json.dumps(meta, indent=4))  # this is None safe
+    # with open('jira_meta.log', 'w') as outfile:
+    #     logger.debug('logging jira meta to file: %s', os.path.realpath(outfile.name))
+    #     json.dump(meta, outfile, indent=4)
     # meta['projects'][0]['issuetypes'][0]['fields']:
 
     meta_data_error = False
@@ -854,7 +871,7 @@ def add_epic(engagement):
             'issuetype': {
                 'name': 'Epic'
             },
-            'customfield_' + str(jira_instance.epic_name_id): engagement.name,
+            get_epic_name_field_name(jira_instance): engagement.name,
         }
         try:
             jira = get_jira_connection(jira_instance)
