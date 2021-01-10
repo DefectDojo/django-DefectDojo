@@ -270,7 +270,7 @@
     "fields": {
         "name": "Veracode Scan"
     }
-  },  
+  },
   {
     "pk": 999,
     "model": "dojo.test_type",
@@ -1642,10 +1642,10 @@
     "model": "dojo.jira_instance",
     "fields": {
         "url": "https://defectdojo.atlassian.net/",
-        "username": "<YOUR_USER_HERE>",
-        "password": "<YOUR_API_KEY_HERE>",
+        "username": "defectdojo-project@owasp.org",
+        "password": "enlYy6Ke2RdCOEwv2KTf9209",
         "default_issue_type": "Task",
-        "epic_name_id": 10942,
+        "epic_name_id": 10011,
         "open_status_key": 11,
         "close_status_key": 41,
         "low_mapping_severity": "Low",
@@ -1750,15 +1750,15 @@
   },
   {
     "pk": 1,
-    "model": "dojo.note_type", 
+    "model": "dojo.note_type",
     "fields": {
-      "name": "Test Note Type", 
-      "description": "not that much", 
-      "is_single": false, 
-      "is_active": true, 
+      "name": "Test Note Type",
+      "description": "not that much",
+      "is_single": false,
+      "is_active": true,
       "is_mandatory": false
     }
-  }, 
+  },
   {
     "pk": 1,
     "model": "dojo.tool_type",
