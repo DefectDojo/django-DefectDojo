@@ -112,7 +112,7 @@ class BaseModelResource(ModelResource):
             try:
                 api_v1_deprecation_warning = 'APIv1 is deprecated and may contain vulnerabilities. It is disabled by default. '
                 if not settings.LEGACY_API_V1_ENABLE:
-                    raise BadRequest({'code': 666, 'message': api_v1_deprecation_warning + 'It can be enabled at your own risk by setting DD_LEGACY_API_V1_ENABLE to True, or by setting LEGACY_API_V1_ENABLE to True in  settings(.dist).py or local_settings.py'})
+                    raise BadRequest({'code': 666, 'message': api_v1_deprecation_warning + 'It can be enabled at your own risk by setting DD_LEGACY_API_V1_ENABLE to True, or by setting LEGACY_API_V1_ENABLE to True in  settings(.dist).py or local_settings.py. APIv1 will be removed at 2021-06-30'})
 
                 callback = getattr(self, view)
                 response = callback(request, *args, **kwargs)
@@ -141,7 +141,7 @@ class BaseModelResource(ModelResource):
                 response['Deprecation'] = 'true'
 
                 # official header for warning (666 is not official)
-                response['Warning'] = '666 APIv1 ' + api_v1_deprecation_warning + 'At your own or your admins risk it has been enabled.'
+                response['Warning'] = '666 APIv1 ' + api_v1_deprecation_warning + 'At your own or your admins risk it has been enabled. APIv1 will be removed at 2021-06-30'
 
                 return response
             except (BadRequest, fields.ApiFieldError) as e:
