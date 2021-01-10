@@ -162,6 +162,7 @@ env = environ.Env(
     # we limit the amount of duplicates that can be deleted in a single run of that job
     # to prevent overlapping runs of that job from occurrring
     DD_DUPE_DELETE_MAX_PER_RUN=(int, 200),
+    # APIv1 is depreacted and will be removed 30/06/2021
     DD_LEGACY_API_V1_ENABLE=(bool, False),
 )
 

@@ -110,8 +110,9 @@ class BaseModelResource(ModelResource):
         @csrf_exempt
         def wrapper(request, *args, **kwargs):
             try:
+                api_v1_deprecation_warning = 'APIv1 is deprecated and may contain vulnerabilities. It\'s disabled by default. '
                 if not settings.LEGACY_API_V1_ENABLE:
-                    raise BadRequest({'code': 666, 'message': 'APIv1 is deprecated and may contain vulnerabilities. It\'s disabled by default. At your own risk it can be enabled by setting DD_LEGACY_API_V1_ENABLE to True, or by setting LEGACY_API_V1_ENABLE to True in  settings(.dist).py or local_settings.py'})
+                    raise BadRequest({'code': 666, 'message': api_v1_deprecation_warning + 'At your own risk it can be enabled by setting DD_LEGACY_API_V1_ENABLE to True, or by setting LEGACY_API_V1_ENABLE to True in  settings(.dist).py or local_settings.py'})
 
                 callback = getattr(self, view)
                 response = callback(request, *args, **kwargs)
@@ -135,6 +136,12 @@ class BaseModelResource(ModelResource):
                     # the browser cache here.
                     # See http://www.enhanceie.com/ie/bugs.asp for details.
                     patch_cache_control(response, no_cache=True)
+
+                # official header for deprecation
+                response['Deprecation'] = 'true'
+
+                # official header for warning (666 is not official)
+                response['Warning'] = '666 APIv1 ' + api_v1_deprecation_warning + 'At your own or your admins risk it has been enabled.'
 
                 return response
             except (BadRequest, fields.ApiFieldError) as e:
