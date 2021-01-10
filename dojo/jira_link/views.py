@@ -169,8 +169,10 @@ def webhook(request, secret=None):
                 }
             """
 
+            comment_url = parsed['comment']['self']
             comment_text = parsed['comment']['body']
             commentor = parsed['comment']['updateAuthor']['key']
+            commentor_display_name = parsed['comment']['updateAuthor']['displayName']
             # example: body['comment']['self'] = "http://www.testjira.com/jira_under_a_path/rest/api/2/issue/666/comment/456843"
             jid = parsed['comment']['self'].split('/')[-3]
             jissue = get_object_or_404(JIRA_Issue, jira_id=jid)
@@ -186,7 +188,7 @@ def webhook(request, secret=None):
                         break
                 finding = jissue.finding
                 new_note = Notes()
-                new_note.entry = '(%s): %s' % (commentor, comment_text)
+                new_note.entry = '(%s (%s)): %s (url: %s)' % (commentor_display_name, commentor, comment_text, comment_url)
                 new_note.author, created = User.objects.get_or_create(username='JIRA')
                 new_note.save()
                 finding.notes.add(new_note)
