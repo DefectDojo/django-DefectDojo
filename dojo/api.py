@@ -2,7 +2,6 @@
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.http import HttpResponse
 from django.urls import resolve, get_script_prefix
-from django.utils.html import escape
 import base64
 from tastypie import fields
 from tastypie import http
@@ -13,7 +12,7 @@ from tastypie.authorization import DjangoAuthorization
 from tastypie.constants import ALL, ALL_WITH_RELATIONS
 from tastypie.exceptions import Unauthorized, ImmediateHttpResponse, NotFound
 from tastypie.http import HttpCreated
-from tastypie.resources import ModelResource, Resource
+from tastypie.resources import ModelResource, Resource, sanitize
 from tastypie.serializers import Serializer
 from tastypie.validation import FormValidation, Validation
 from tastypie.exceptions import BadRequest
@@ -93,12 +92,6 @@ class ModelFormValidation(FormValidation):
                 kwargs['data'][name] = pk
 
         return kwargs
-
-
-def sanitize(text):
-    # We put the single quotes back, due to their frequent usage in exception
-    # messages.
-    return escape(text).replace('&#39;', "'").replace('&quot;', '"').replace('&#x27;', "'")
 
 
 class BaseModelResource(ModelResource):
