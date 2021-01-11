@@ -691,6 +691,13 @@
         },
         "model": "dojo.test_type",
         "pk": 190
+    },
+    {
+        "fields": {
+            "name": "Scantist Vulnerability Scanning Report"
+        },
+        "model": "dojo.test_type",
+        "pk": 191
     }
 
 ]
