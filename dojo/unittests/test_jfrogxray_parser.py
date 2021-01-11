@@ -1,6 +1,6 @@
 from django.test import TestCase
 from dojo.models import Test
-from dojo.tools.jfrogxray.parser import XrayJSONParser
+from dojo.tools.jfrogxray.parser import XrayJSONParser, decode_cwe_number
 
 
 class TestJfrogXrayJSONParser(TestCase):
@@ -39,3 +39,11 @@ class TestJfrogXrayJSONParser(TestCase):
         self.assertEquals('CVE-2020-14386', item.cve)
         self.assertEquals(787, item.cwe)
         self.assertEquals("AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H", item.cvssv3)
+
+    def test_decode_cwe_number(self):
+        with self.subTest(val="CWE-1234"):
+            self.assertEquals(1234, decode_cwe_number("CWE-1234"))
+        with self.subTest(val=""):
+            self.assertEquals(0, decode_cwe_number(""))
+        with self.subTest(val="cwe-1"):
+            self.assertEquals(1, decode_cwe_number("cwe-1"))
