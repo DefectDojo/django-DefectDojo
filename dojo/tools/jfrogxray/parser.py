@@ -39,7 +39,7 @@ class XrayJSONParser(object):
 
 
 def decode_cwe_number(value):
-    match = re.match(r"CWE-\d+", value)
+    match = re.match(r"CWE-\d+", value, re.IGNORECASE)
     if match is None:
         return 0
     return int(match[0].rsplit('-')[1])
