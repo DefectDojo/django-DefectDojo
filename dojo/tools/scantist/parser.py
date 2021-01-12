@@ -6,6 +6,16 @@ __author__ = 'mohcer'
 
 
 class ScantistJSONParser(object):
+    """
+    Scantist Parser: Scantist does a deep scan of source code and binaries for vulnerabilities and has reports
+    following three main categories
+    - Components (primary components from dependency graph)
+    - Vulnerabilities (Security Issues)
+    - Compliance (policies and its violations)
+
+    This parser primarily focuses on Vulnerability report and the risks identified in JSON format.
+    @todo: other format will be available soon.
+    """
     def __init__(self, file, test):
         self.items = []
 
@@ -35,6 +45,9 @@ class ScantistJSONParser(object):
             test :
             """
             cve = vuln.get("Public ID")
+            # default use OWASP a9 until the Scantist output report includes
+            cwe = 1035
+
             component_name = vuln.get("Library")
             component_version = vuln.get("Library Version")
 
@@ -42,10 +55,8 @@ class ScantistJSONParser(object):
             description = vuln.get("Description")
 
             file_path = vuln.get("File Path", "")
-            sourcefile = None
 
-            severity = vuln.get("Score", "N/A")
-            score = vuln.get("cvss_v3_score", "N/A")
+            severity = vuln.get("Score", "Info")
 
             mitigation = vuln.get("Patched Version")
 
@@ -55,10 +66,9 @@ class ScantistJSONParser(object):
                 description=description,
                 severity=severity,
                 cve=cve,
-                cwe=vuln.get('cwe'),
+                cwe=cwe,
                 mitigation=mitigation,
-                numerical_severity=Finding.get_numerical_severity(
-                                  vuln.get('Score')),
+                numerical_severity=Finding.get_numerical_severity(severity),
                 references=vuln.get('references'),
                 file_path=file_path,
                 component_name=component_name,
