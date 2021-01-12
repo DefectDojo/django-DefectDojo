@@ -1,6 +1,6 @@
 from django.test import TestCase
 from dojo.tools.microfocus_webinspect.parser import MicrofocusWebinspectXMLParser
-from dojo.models import Test
+from dojo.models import Test, Engagement, Product
 
 
 class TestMicrofocusWebinspectXMLParser(TestCase):
@@ -10,19 +10,31 @@ class TestMicrofocusWebinspectXMLParser(TestCase):
         self.assertEqual(0, len(parser.items))
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
-
+        test = Test()
+        test.engagement = Engagement()
+        test.engagement.product = Product()
         testfile = open("dojo/unittests/scans/microfocus_webinspect/Webinspect_no_vuln.xml")
-        parser = MicrofocusWebinspectXMLParser(testfile, Test())
+        parser = MicrofocusWebinspectXMLParser(testfile, test)
         self.assertEqual(0, len(parser.items))
 
     def test_parse_file_with_one_vuln_has_one_findings(self):
+        test = Test()
+        test.engagement = Engagement()
+        test.engagement.product = Product()
         testfile = open("dojo/unittests/scans/microfocus_webinspect/Webinspect_one_vuln.xml")
-        parser = MicrofocusWebinspectXMLParser(testfile, Test())
+        parser = MicrofocusWebinspectXMLParser(testfile, test)
         self.assertEqual(1, len(parser.items))
+        item = parser.items[0]
+        self.assertEqual(200, item.cwe)
+        self.assertEqual("A61EB7C7546A7963515555C7B255BC4D", item.unique_id_from_tool)
+        self.assertEqual(1, len(item.unsaved_endpoints))
 
     def test_parse_file_with_multiple_vuln_has_multiple_finding(self):
+        test = Test()
+        test.engagement = Engagement()
+        test.engagement.product = Product()
         testfile = open("dojo/unittests/scans/microfocus_webinspect/Webinspect_many_vuln.xml")
-        parser = MicrofocusWebinspectXMLParser(testfile, Test())
+        parser = MicrofocusWebinspectXMLParser(testfile, test)
         self.assertEqual(8, len(parser.items))
         item = parser.items[1]
         self.assertEqual(525, item.cwe)
