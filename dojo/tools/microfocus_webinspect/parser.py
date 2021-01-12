@@ -45,6 +45,8 @@ class MicrofocusWebinspectXMLParser(object):
                             reference = html2text.html2text(content.find('SectionText').text)
                         else:
                             reference = ""
+                cwe = 0
+                description = ""
                 classifications = issue.find('Classifications')
                 for content in classifications.findall('Classification'):
                     # detect CWE number
