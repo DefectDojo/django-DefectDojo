@@ -21,7 +21,7 @@ class SnykParser(object):
             return [data for data in self.get_items(tree, test)]
         else:
             return []
-            
+
     def parse_json(self, json_output):
         try:
             data = json_output.read()
@@ -106,7 +106,7 @@ def get_item(vulnerability, test):
     if cve_references or cwe_references:
         references += "Several CVEs or CWEs were reported: \n\n{}\n{}\n".format(
             cve_references, cwe_references)
-    
+
     # Append vuln references to references section
     for item in vulnerability['references']:
         references += "<b>" + item['title'] + "</b>: " + item['url'] + "\n"
@@ -116,8 +116,8 @@ def get_item(vulnerability, test):
         title=vulnerability['from'][0] + ": " + vulnerability['title'],
         test=test,
         severity=severity,
-        severity_justification="Issue severity of: <b>" + severity + "</b> from a base " + 
-            "CVSS score of: <b>" + str(vulnerability['cvssScore']) + "</b>",
+        severity_justification="Issue severity of: <b>" + severity + "</b> from a base " +
+        "CVSS score of: <b>" + str(vulnerability['cvssScore']) + "</b>",
         cwe=cwe,
         cve=cve,
         cvssv3=vulnerability['CVSSv3'][9:],
@@ -144,7 +144,7 @@ def get_item(vulnerability, test):
     remediation_index = finding.description.find("## Remediation")
     references_index = finding.description.find("## References")
 
-    # Add the remediation substring to mitigation section 
+    # Add the remediation substring to mitigation section
     if (remediation_index != -1) and (references_index != -1):
         finding.mitigation = finding.description[remediation_index:references_index]
 
