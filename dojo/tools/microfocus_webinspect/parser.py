@@ -25,7 +25,7 @@ class MicrofocusWebinspectXMLParser(object):
             url = session.find('URL').text
             issues = session.find('Issues')
             for issue in issues.findall('Issue'):
-                unique_id_from_tool = issue.attrib["id"]
+                unique_id_from_tool = issue.attrib.get("id", None)
                 title = issue.find('Name').text
                 severity = MicrofocusWebinspectXMLParser.convert_severity(issue.find('Severity').text)
                 for content in issue.findall('ReportSection'):
@@ -78,8 +78,9 @@ class MicrofocusWebinspectXMLParser(object):
                                     mitigation=mitigation,
                                     references=reference,
                                     static_finding=False,
-                                    dynamic_finding=True,
-                                    unique_id_from_tool=unique_id_from_tool)
+                                    dynamic_finding=True)
+                    if "id" in issue.attrib:
+                        finding.unique_id_from_tool = issue.attrib.get("id")
                     # manage endpoints
                     parts = urlparse(url)
                     finding.unsaved_endpoints.append(Endpoint(protocol=parts.scheme,
