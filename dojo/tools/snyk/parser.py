@@ -6,13 +6,22 @@ from dojo.models import Finding
 class SnykParser(object):
     def __init__(self, json_output, test):
 
-        tree = self.parse_json(json_output)
+        reportTree = self.parse_json(json_output)
 
-        if tree:
-            self.items = [data for data in self.get_items(tree, test)]
+        if type(reportTree) is list:
+            temp = []
+            for moduleTree in reportTree:
+                temp += self.process_tree(moduleTree, test)
+            self.items = temp
         else:
-            self.items = []
+            self.items = self.process_tree(reportTree, test)
 
+    def process_tree(self, tree, test):
+        if tree:
+            return [data for data in self.get_items(tree, test)]
+        else:
+            return []
+            
     def parse_json(self, json_output):
         try:
             data = json_output.read()
