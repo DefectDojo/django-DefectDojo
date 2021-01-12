@@ -15,6 +15,8 @@ class ScantistJSONParser(object):
 
     This parser primarily focuses on Vulnerability report and the risks identified in JSON format.
     @todo: other format will be available soon.
+
+    Website: https://scantist.com/
     """
     def __init__(self, file, test):
         self.items = []
