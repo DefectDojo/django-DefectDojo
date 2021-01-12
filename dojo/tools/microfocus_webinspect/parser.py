@@ -27,7 +27,7 @@ class MicrofocusWebinspectXMLParser(object):
             for issue in issues.findall('Issue'):
                 unique_id_from_tool = issue.attrib["id"]
                 title = issue.find('Name').text
-                severity = convert_severity(issue.find('Severity').text)
+                severity = MicrofocusWebinspectXMLParser.convert_severity(issue.find('Severity').text)
                 for content in issue.findall('ReportSection'):
                     name = content.find('Name').text
                     if 'Summary' in name:
@@ -50,7 +50,7 @@ class MicrofocusWebinspectXMLParser(object):
                     # detect CWE number
                     # TODO support more than one CWE number
                     if "kind" in content.attrib and "CWE" == content.attrib["kind"]:
-                        cwe = get_cwe(content.attrib['identifier'])
+                        cwe = MicrofocusWebinspectXMLParser.get_cwe(content.attrib['identifier'])
                         description += "\n\n" + content.text + "\n"
 
                 # make dupe hash key
