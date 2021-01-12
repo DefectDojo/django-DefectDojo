@@ -24,3 +24,8 @@ class TestMicrofocusWebinspectXMLParser(TestCase):
         testfile = open("dojo/unittests/scans/microfocus_webinspect/Webinspect_many_vuln.xml")
         parser = MicrofocusWebinspectXMLParser(testfile, Test())
         self.assertEqual(8, len(parser.items))
+        item = parser.items[1]
+        self.assertEqual(525, item.cwe)
+        self.assertIsNotNone(item.references)
+        self.assertEqual("1cfe38ee-89f7-4110-ad7c-8fca476b2f04", item.unique_id_from_tool)
+        self.assertEqual(1, len(item.unsaved_endpoints))
