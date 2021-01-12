@@ -101,25 +101,30 @@ def get_item(vulnerability, test):
         severity = vulnerability['severity'].title()
 
     if 'id' in vulnerability:
-        references = "Custom SNYK ID: {}\n\n".format(vulnerability['id'])
+        references = "<b>Custom SNYK ID</b>: https://app.snyk.io/vuln/{}\n\n".format(vulnerability['id'])
 
     if cve_references or cwe_references:
-        references += "Several CVEs or CWEs were reported: \n\n{}\n{}".format(
+        references += "Several CVEs or CWEs were reported: \n\n{}\n{}\n".format(
             cve_references, cwe_references)
-    else:
-        references += "Refer to the description above for references."
+    
+    # Append vuln references to references section
+    for item in vulnerability['references']:
+        references += "<b>" + item['title'] + "</b>: " + item['url'] + "\n"
 
     # create the finding object
     finding = Finding(
         title=vulnerability['from'][0] + ": " + vulnerability['title'],
         test=test,
         severity=severity,
+        severity_justification="Issue severity of: <b>" + severity + "</b> from a base " + 
+            "CVSS score of: <b>" + str(vulnerability['cvssScore']) + "</b>",
         cwe=cwe,
         cve=cve,
-        description="<h2>Details</h2><p><li>Vulnerable Package: " +
-        vulnerability['packageName'] + "</li><li> Current Version: " + str(
-            vulnerability['version']) + "</li><li>Vulnerable Version(s): " +
-        vulnerable_versions + "</li><li>Vulnerable Path: " + " > ".join(
+        cvssv3=vulnerability['CVSSv3'][9:],
+        description="<h2>Details</h2><p><li><b>Vulnerable Package</b>: " +
+        vulnerability['packageName'] + "</li><li><b>Current Version</b>: " + str(
+            vulnerability['version']) + "</li><li><b>Vulnerable Version(s)</b>: " +
+        vulnerable_versions + "</li><li><b>Vulnerable Path</b>: " + " > ".join(
             vulnerability['from']) + "</li></p>" + vulnerability['description'],
         mitigation="A fix (if available) will be provided in the description.",
         references=references,
@@ -134,5 +139,13 @@ def get_item(vulnerability, test):
         impact=severity)
 
     finding.description = finding.description.strip()
+
+    # Find remediation string limit indexes
+    remediation_index = finding.description.find("## Remediation")
+    references_index = finding.description.find("## References")
+
+    # Add the remediation substring to mitigation section 
+    if (remediation_index != -1) and (references_index != -1):
+        finding.mitigation = finding.description[remediation_index:references_index]
 
     return finding
