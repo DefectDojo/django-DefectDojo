@@ -171,20 +171,33 @@ jobs:
              to_complete  "condition=ready" pod "defectdojo.org/component=django"
              echo "Pods up and ready to rumbole"
              kubectl get pods
-             OUT=$(kubectl run  curl --quiet=true --image=curlimages/curl:7.73.0 \
-                --overrides='{ "apiVersion": "v1" }' \
-                --restart=Never -i --rm -- -s -m 20 -I --header "Host: $DD_HOSTNAME" http://`kubectl get service defectdojo-django -o json \
-               |  jq -r '.spec.clusterIP'`/login?next=/)
-
-             echo $OUT
-             CR=`echo $OUT | egrep "^HTTP" | cut -d' ' -f2`
-             echo $CR
-             if [[ $CR -ne 200 ]]; then
-                kubectl get pods
-                echo `kubectl logs --tail=30 -l defectdojo.org/component=django -c uwsgi`
-                echo "ERROR: cannot display login screen; got HTTP code $CR"
-                exit 1
-             fi
+             RETRY=0
+             while :
+               do
+               OUT=$(kubectl run  curl --quiet=true --image=curlimages/curl:7.73.0 \
+                  --overrides='{ "apiVersion": "v1" }' \
+                  --restart=Never -i --rm -- -s -m 20 -I --header "Host: $DD_HOSTNAME" http://`kubectl get service defectdojo-django -o json \
+                 |  jq -r '.spec.clusterIP'`/login?next=/)
+               echo $OUT
+               CR=`echo $OUT | egrep "^HTTP" | cut -d' ' -f2`
+               echo $CR
+               if [[ $CR -ne 200 ]]; then
+                  echo $RETRY
+                  if [[ $RETRY -gt 2 ]]; then
+                    kubectl get pods
+                    echo `kubectl logs --tail=30 -l defectdojo.org/component=django -c uwsgi`
+                    echo "ERROR: cannot display login screen; got HTTP code $CR"
+                    exit 1
+                  else
+                    ((RETRY++))
+                    echo "Attempt $RETRY to get login page"
+                    sleep 5
+                  fi
+               else
+                echo "Result received"
+                break
+               fi
+             done
              echo "Final Check of components"
              errors=`kubectl get pods | grep Error | awk '{print  $1}'`
              if [[ ! -z  $errors ]]; then
@@ -194,5 +207,6 @@ jobs:
                  kubectl logs --tail 50 $line
                done
                exit 1
+             else
+               echo "DD K8S successfully deployed"
              fi
-             echo "DD K8S successfully deployed"
