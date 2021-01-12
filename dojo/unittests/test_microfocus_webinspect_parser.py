@@ -26,7 +26,6 @@ class TestMicrofocusWebinspectXMLParser(TestCase):
         self.assertEqual(1, len(parser.items))
         item = parser.items[0]
         self.assertEqual(200, item.cwe)
-        self.assertEqual("A61EB7C7546A7963515555C7B255BC4D", item.unique_id_from_tool)
         self.assertEqual(1, len(item.unsaved_endpoints))
 
     def test_parse_file_with_multiple_vuln_has_multiple_finding(self):
