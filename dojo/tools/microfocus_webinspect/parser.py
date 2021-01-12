@@ -23,11 +23,9 @@ class MicrofocusWebinspectXMLParser(object):
 
         for session in root:
             url = session.find('URL').text
-            host = session.find('Host').text
-            port = session.find('Port').text
-            scheme = session.find('Scheme').text
             issues = session.find('Issues')
             for issue in issues.findall('Issue'):
+                unique_id_from_tool = issue.attrib["id"]
                 title = issue.find('Name').text
                 severity = convert_severity(issue.find('Severity').text)
                 for content in issue.findall('ReportSection'):
@@ -62,7 +60,6 @@ class MicrofocusWebinspectXMLParser(object):
                     finding = self.dupes[dupe_key]
                     if finding.description:
                         finding.description = finding.description
-                    self.process_endpoints(finding, host)
                     self.dupes[dupe_key] = finding
                 else:
                     self.dupes[dupe_key] = True
@@ -79,7 +76,8 @@ class MicrofocusWebinspectXMLParser(object):
                                     mitigation=mitigation,
                                     references=reference,
                                     static_finding=False,
-                                    dynamic_finding=True)
+                                    dynamic_finding=True,
+                                    unique_id_from_tool=unique_id_from_tool)
                     # manage endpoints
                     parts = urlparse(url)
                     finding.unsaved_endpoints.append(Endpoint(protocol=parts.scheme,
