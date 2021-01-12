@@ -711,7 +711,7 @@ CELERY_BEAT_SCHEDULE = {
         'args': [timedelta(minutes=1)]
     },
     'update-findings-from-source-issues': {
-        'task': 'dojo.tasks.async_update_findings_from_source_issues',
+        'task': 'dojo.tools.tool_issue_updater.update_findings_from_source_issues',
         'schedule': timedelta(hours=3),
     },
     'compute-sla-age-and-notify': {
