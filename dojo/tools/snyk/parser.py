@@ -81,9 +81,9 @@ def get_item(vulnerability, test):
         # If we're dealing with a license finding, there will be no cvssScore
         if vulnerability['cvssScore'] <= 3.9:
             severity = "Low"
-        elif vulnerability['cvssScore'] > 4.0 and vulnerability['cvssScore'] <= 6.9:
+        elif vulnerability['cvssScore'] >= 4.0 and vulnerability['cvssScore'] <= 6.9:
             severity = "Medium"
-        elif vulnerability['cvssScore'] > 7.0 and vulnerability['cvssScore'] <= 8.9:
+        elif vulnerability['cvssScore'] >= 7.0 and vulnerability['cvssScore'] <= 8.9:
             severity = "High"
         else:
             severity = "Critical"
