@@ -8,7 +8,7 @@ See the file 'doc/LICENSE' for the license information
 
 from defusedxml import ElementTree as ET
 import html2text
-from dojo.models import Endpoint, Finding
+from dojo.models import Finding
 
 __author__ = "Micaela Ranea Sanchez"
 __copyright__ = "Copyright (c) 2013, Infobyte LLC"
