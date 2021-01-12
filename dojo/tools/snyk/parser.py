@@ -34,7 +34,7 @@ class SnykParser(object):
 
                 item = get_item(node, test)
                 unique_key = node['title'] + str(node['packageName'] + str(
-                    node['version']) + str(node['from']))
+                    node['version']) + str(node['from']) + str(node['id']))
                 items[unique_key] = item
 
         return list(items.values())
