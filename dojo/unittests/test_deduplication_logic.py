@@ -6,9 +6,6 @@ import logging
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
-loglevel = logging.DEBUG
-logging.basicConfig(level=loglevel)
-
 # things to consider:
 # - cross scanner deduplication is still flaky as if some scanners don't provide severity, but another doesn, the hashcode will be different so no deduplication happens.
 #   so I couldn't create any good tests
