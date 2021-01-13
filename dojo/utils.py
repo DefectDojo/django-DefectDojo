@@ -11,6 +11,7 @@ from math import pi, sqrt
 import vobject
 from dateutil.relativedelta import relativedelta, MO, SU
 from django.conf import settings
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.core.mail import send_mail
 from django.core.paginator import Paginator
 from django.urls import get_resolver, reverse
@@ -1643,13 +1644,22 @@ def get_return_url(request):
 
 def redirect_to_return_url_or_else(request, or_else):
     return_url = get_return_url(request)
+
     if return_url:
-        return HttpResponseRedirect(return_url.strip())
+        # logger.debug('redirecting to %s: ', return_url.strip())
+        return redirect(return_url.strip())
     elif or_else:
-        return HttpResponseRedirect(or_else)
+        return redirect(or_else)
     else:
         messages.add_message(request, messages.ERROR, 'Unable to redirect anywhere.', extra_tags='alert-danger')
-        return HttpResponseRedirect(request.get_full_path())
+        return redirect(request.get_full_path())
+
+
+# only allow redirects to allowed_hosts to prevent open redirects
+def redirect(request, redirect_to):
+    if url_has_allowed_host_and_scheme(redirect_to):
+        return HttpResponseRedirect(redirect_to)
+    raise ValueError('invalid redirect, host and scheme not in allowed_hosts')
 
 
 def file_size_mb(file_obj):
