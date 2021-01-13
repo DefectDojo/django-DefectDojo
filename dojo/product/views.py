@@ -196,7 +196,11 @@ def identify_view(request):
     get_data = request.GET
     view = get_data.get('type', None)
     if view:
-        return view
+        # value of view is reflected in the template, make sure it's valid
+        # although any XSS should be catch by django autoescape, we see people sometimes using '|safe'...
+        if view in ['Endpoint', 'Finding']:
+            return view
+        raise ValueError('invalid view, view must be "Endpoint" or "Finding"')
     else:
         if get_data.get('finding__severity', None):
             return 'Endpoint'

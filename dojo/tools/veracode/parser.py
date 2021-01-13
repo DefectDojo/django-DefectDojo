@@ -27,7 +27,7 @@ class VeracodeXMLParser(object):
             self.items = list()
             return
         try:
-            xml = etree.parse(filename)
+            xml = etree.parse(filename, etree.XMLParser(resolve_entities=False))
         except:
             raise NamespaceErr('Cannot parse this report. Make sure to upload a proper Veracode Detailed XML report.')
 
