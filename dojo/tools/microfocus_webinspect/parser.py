@@ -23,6 +23,13 @@ class MicrofocusWebinspectXMLParser(object):
 
         for session in root:
             url = session.find('URL').text
+            parts = urlparse(url)
+            endpoint = Endpoint(protocol=parts.scheme,
+                                host=parts.netloc,
+                                path=parts.path,
+                                query=parts.query,
+                                fragment=parts.fragment,
+                                product=test.engagement.product)
             issues = session.find('Issues')
             for issue in issues.findall('Issue'):
                 unique_id_from_tool = issue.attrib.get("id", None)
@@ -78,14 +85,8 @@ class MicrofocusWebinspectXMLParser(object):
                                     dynamic_finding=True)
                     if "id" in issue.attrib:
                         finding.unique_id_from_tool = issue.attrib.get("id")
-                    # manage endpoints
-                    parts = urlparse(url)
-                    finding.unsaved_endpoints.append(Endpoint(protocol=parts.scheme,
-                                                     host=parts.netloc,
-                                                     path=parts.path,
-                                                     query=parts.query,
-                                                     fragment=parts.fragment,
-                                                     product=test.engagement.product))
+                    # manage endpoint
+                    finding.unsaved_endpoints.append(endpoint)
                     self.dupes[dupe_key] = finding
 
             self.items = list(self.dupes.values())
