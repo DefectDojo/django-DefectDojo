@@ -40,3 +40,9 @@ class TestMicrofocusWebinspectXMLParser(TestCase):
         self.assertIsNotNone(item.references)
         self.assertEqual("1cfe38ee-89f7-4110-ad7c-8fca476b2f04", item.unique_id_from_tool)
         self.assertEqual(1, len(item.unsaved_endpoints))
+
+    def test_convert_severity(self):
+        with self.subTest("convert info", val="0"):
+            self.assertEqual("Info", "0")
+        with self.subTest("convert medium", val="2"):
+            self.assertEqual("Info", "2")

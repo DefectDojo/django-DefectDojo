@@ -27,24 +27,21 @@ class MicrofocusWebinspectXMLParser(object):
             for issue in issues.findall('Issue'):
                 unique_id_from_tool = issue.attrib.get("id", None)
                 title = issue.find('Name').text
+                description = ""
+                mitigation = ""
+                reference = ""
                 severity = MicrofocusWebinspectXMLParser.convert_severity(issue.find('Severity').text)
                 for content in issue.findall('ReportSection'):
                     name = content.find('Name').text
                     if 'Summary' in name:
                         if content.find('SectionText').text:
                             description = content.find('SectionText').text
-                        else:
-                            description = ""
                     if 'Fix' in name:
                         if content.find('SectionText').text:
                             mitigation = content.find('SectionText').text
-                        else:
-                            mitigation = ""
                     if 'Reference' in name:
                         if name and content.find('SectionText').text:
                             reference = html2text.html2text(content.find('SectionText').text)
-                        else:
-                            reference = ""
                 cwe = 0
                 description = ""
                 classifications = issue.find('Classifications')
@@ -100,7 +97,7 @@ class MicrofocusWebinspectXMLParser(object):
         elif val == "1":
             return "Low"
         elif val == "2":
-            return "Medium",
+            return "Medium"
         elif val == "3":
             return "High"
         else:
