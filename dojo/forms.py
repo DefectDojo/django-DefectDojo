@@ -413,7 +413,8 @@ class ImportScanForm(forms.Form):
                          ("kube-bench Scan", "Kube-Bench Scan"),
                          ("CCVS Report", "CCVS Report"),
                          ("ORT evaluated model Importer", "ORT evaluated model Importer"),
-                         ("SARIF", "SARIF"))
+                         ("SARIF", "SARIF"),
+                         ("Scantist Scan", "Scantist Scan"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
     scan_date = forms.DateTimeField(
@@ -476,16 +477,21 @@ class ReImportScanForm(forms.Form):
     verified = forms.BooleanField(help_text="Select if these findings have been verified.", required=False)
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
                                                widget=MultipleSelectWithPopPlusMinus(attrs={'size': '5'}))
-    tags = TagField(required=False, help_text="Add tags that help describe this scan.  "
+    tags = TagField(required=False, help_text="Modify existing tags that help describe this scan.  "
                     "Choose from the list or add new tags. Press Enter key to add.")
     file = forms.FileField(widget=forms.widgets.FileInput(
         attrs={"accept": ".xml, .csv, .nessus, .json, .html, .js, .zip, .xlsx"}),
         label="Choose report file",
         required=False)
+    close_old_findings = forms.BooleanField(help_text="Select if old findings get mitigated when importing.",
+                                            required=False, initial=True)
 
-    def __init__(self, *args, scan_type=None, **kwargs):
+    def __init__(self, *args, test=None, **kwargs):
         super(ReImportScanForm, self).__init__(*args, **kwargs)
-        self.scan_type = scan_type
+        self.scan_type = None
+        if test:
+            self.scan_type = test.test_type.name
+            self.fields['tags'].initial = test.tags.all()
 
     def clean(self):
         cleaned_data = super().clean()

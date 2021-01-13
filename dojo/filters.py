@@ -344,12 +344,12 @@ class ProductComponentFilter(DojoFilter):
 
 
 class ComponentFilter(ProductComponentFilter):
-    test__engagement__product = ModelMultipleChoiceFilter(
-        queryset=Product.objects.all(),
-        label="Product Type")
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.all().order_by('name'),
         label="Product Type")
+    test__engagement__product = ModelMultipleChoiceFilter(
+        queryset=Product.objects.all(),
+        label="Product")
 
 
 class EngagementFilter(DojoFilter):
@@ -743,6 +743,11 @@ class OpenFindingFilter(DojoFilter):
                                 lookup_expr='isnull',
                                 exclude=True,
                                 label='has JIRA')
+
+    has_component = BooleanFilter(field_name='component_name',
+                                lookup_expr='isnull',
+                                exclude=True,
+                                label='has Component')
 
     jira_issue__jira_key = CharFilter(field_name='jira_issue__jira_key', lookup_expr='icontains', label="JIRA issue")
 
