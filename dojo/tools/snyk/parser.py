@@ -43,7 +43,7 @@ class SnykParser(object):
 
                 item = get_item(node, test)
                 unique_key = node['title'] + str(node['packageName'] + str(
-                    node['version']) + str(node['from']))
+                    node['version']) + str(node['from']) + str(node['id']))
                 items[unique_key] = item
 
         return list(items.values())
@@ -90,9 +90,9 @@ def get_item(vulnerability, test):
         # If we're dealing with a license finding, there will be no cvssScore
         if vulnerability['cvssScore'] <= 3.9:
             severity = "Low"
-        elif vulnerability['cvssScore'] > 4.0 and vulnerability['cvssScore'] <= 6.9:
+        elif vulnerability['cvssScore'] >= 4.0 and vulnerability['cvssScore'] <= 6.9:
             severity = "Medium"
-        elif vulnerability['cvssScore'] > 7.0 and vulnerability['cvssScore'] <= 8.9:
+        elif vulnerability['cvssScore'] >= 7.0 and vulnerability['cvssScore'] <= 8.9:
             severity = "High"
         else:
             severity = "Critical"
