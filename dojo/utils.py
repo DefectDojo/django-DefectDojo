@@ -1658,12 +1658,12 @@ def redirect_to_return_url_or_else(request, or_else):
 
     if return_url:
         # logger.debug('redirecting to %s: ', return_url.strip())
-        return redirect(return_url.strip())
+        return redirect(request, return_url.strip())
     elif or_else:
-        return redirect(or_else)
+        return redirect(request, or_else)
     else:
         messages.add_message(request, messages.ERROR, 'Unable to redirect anywhere.', extra_tags='alert-danger')
-        return redirect(request.get_full_path())
+        return redirect(request, request.get_full_path())
 
 
 # only allow redirects to allowed_hosts to prevent open redirects
