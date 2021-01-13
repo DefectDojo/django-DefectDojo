@@ -691,6 +691,13 @@
         },
         "model": "dojo.test_type",
         "pk": 190
+    },
+    {
+        "fields": {
+            "name": "Scantist Scan"
+        },
+        "model": "dojo.test_type",
+        "pk": 191
     }
 
 ]

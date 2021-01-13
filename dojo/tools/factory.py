@@ -95,6 +95,7 @@ from dojo.tools.checkov.parser import CheckovParser
 from dojo.tools.kubebench.parser import KubeBenchParser
 from dojo.tools.ort.parser import OrtParser
 from dojo.tools.sarif.parser import SarifParser
+from dojo.tools.scantist.parser import ScantistJSONParser
 
 
 __author__ = 'Jay Paz'
@@ -304,6 +305,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = OrtParser(file, test)
     elif scan_type == 'SARIF':
         parser = SarifParser(file, test)
+    elif scan_type == 'Scantist Scan':
+        parser = ScantistJSONParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 
