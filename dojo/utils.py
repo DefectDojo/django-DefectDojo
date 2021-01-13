@@ -1630,7 +1630,7 @@ def merge_sets_safe(set1, set2):
     # return {*set1, *set2}
 
 
-def is_safe_url(self, url):
+def is_safe_url(url):
     try:
         # available in django 3+
         from django.utils.http import url_has_allowed_host_and_scheme
