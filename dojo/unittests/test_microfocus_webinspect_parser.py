@@ -26,7 +26,7 @@ class TestMicrofocusWebinspectXMLParser(TestCase):
         self.assertEqual(1, len(parser.items))
         item = parser.items[0]
         self.assertEqual(200, item.cwe)
-        self.assertEqual(1, len(item.unsaved_endpoints))
+        self.assertLess(0, len(item.unsaved_endpoints))
 
     def test_parse_file_with_multiple_vuln_has_multiple_finding(self):
         test = Test()
@@ -39,10 +39,10 @@ class TestMicrofocusWebinspectXMLParser(TestCase):
         self.assertEqual(525, item.cwe)
         self.assertIsNotNone(item.references)
         self.assertEqual("1cfe38ee-89f7-4110-ad7c-8fca476b2f04", item.unique_id_from_tool)
-        self.assertEqual(1, len(item.unsaved_endpoints))
+        self.assertLess(0, len(item.unsaved_endpoints))
 
     def test_convert_severity(self):
         with self.subTest("convert info", val="0"):
-            self.assertEqual("Info", "0")
+            self.assertEqual("Info", MicrofocusWebinspectXMLParser.convert_severity("0"))
         with self.subTest("convert medium", val="2"):
-            self.assertEqual("Info", "2")
+            self.assertEqual("Medium", MicrofocusWebinspectXMLParser.convert_severity("2"))
