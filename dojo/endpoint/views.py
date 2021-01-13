@@ -18,7 +18,8 @@ from dojo.filters import EndpointFilter
 from dojo.forms import EditEndpointForm, \
     DeleteEndpointForm, AddEndpointForm, DojoMetaDataForm
 from dojo.models import Product, Endpoint, Finding, System_Settings, DojoMeta, Endpoint_Status
-from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, get_system_setting, Product_Tab, calculate_grade
+from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, get_system_setting, Product_Tab, \
+    calculate_grade, redirect
 from dojo.notifications.helper import create_notification
 from dojo.user.helper import user_must_be_authorized
 
@@ -441,7 +442,7 @@ def endpoint_status_bulk_update(request, fid):
                                     messages.ERROR,
                                     'Unable to process bulk update. Required fields were not selected.',
                                     extra_tags='alert-danger')
-    return HttpResponseRedirect(post['return_url'])
+    return redirect(post['return_url'])
 
 
 def prefetch_for_endpoints(endpoints):
