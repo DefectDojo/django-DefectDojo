@@ -6,7 +6,7 @@ from dojo.models import Finding
 class SnykParser(object):
     def __init__(self, json_output, test):
         self.items = []
-        
+
         if json_output is None:
             return
 
