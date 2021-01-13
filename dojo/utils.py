@@ -11,7 +11,6 @@ from math import pi, sqrt
 import vobject
 from dateutil.relativedelta import relativedelta, MO, SU
 from django.conf import settings
-from django.utils.http import url_has_allowed_host_and_scheme
 from django.core.mail import send_mail
 from django.core.paginator import Paginator
 from django.urls import get_resolver, reverse
@@ -1631,6 +1630,18 @@ def merge_sets_safe(set1, set2):
     # return {*set1, *set2}
 
 
+def is_safe_url(self, url):
+    try:
+        # available in django 3+
+        from django.utils.http import url_has_allowed_host_and_scheme
+    except ImportError:
+        # django < 3
+        from django.utils.http import \
+            is_safe_url as url_has_allowed_host_and_scheme
+
+    return url_has_allowed_host_and_scheme(url, allowed_hosts=None)
+
+
 def get_return_url(request):
     return_url = request.POST.get('return_url', None)
     # print('return_url from POST: ', return_url)
@@ -1657,7 +1668,7 @@ def redirect_to_return_url_or_else(request, or_else):
 
 # only allow redirects to allowed_hosts to prevent open redirects
 def redirect(request, redirect_to):
-    if url_has_allowed_host_and_scheme(redirect_to):
+    if is_safe_url(redirect_to):
         return HttpResponseRedirect(redirect_to)
     raise ValueError('invalid redirect, host and scheme not in allowed_hosts')
 
