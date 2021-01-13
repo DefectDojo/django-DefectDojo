@@ -1,0 +1,269 @@
+{
+    "version": "3.0.0",
+    "vulnerabilities": [
+      {
+        "id": "c4c9c908068d938a0acf63c69b2e37c755bad1920f1a5d7b419ea5ae1a5fe5b1",
+        "category": "sast",
+        "name": "node_username",
+        "message": "A hardcoded username in plain text is identified. Store it properly in an environment variable.",
+        "description": "A hardcoded username in plain text is identified. Store it properly in an environment variable.",
+        "cve": "data/datacreator.js:246:node_username:CWE-798",
+        "severity": "High",
+        "scanner": {
+          "id": "nodejs-scan",
+          "name": "NodeJsScan"
+        },
+        "location": {
+          "file": "data/datacreator.js",
+          "start_line": 246,
+          "end_line": 246
+        },
+        "identifiers": [
+          {
+            "type": "njsscan_rule_type",
+            "name": "node_username",
+            "value": "A hardcoded username in plain text is identified. Store it properly in an environment variable."
+          },
+          {
+            "type": "cwe",
+            "name": "CWE-798",
+            "value": "node_username"
+          }
+        ]
+      },
+      {
+        "id": "5e5c3291fc206c0bc4bd0a1278e78967076ac093ed482fcb38c39ab161025c2f",
+        "category": "sast",
+        "name": "node_username",
+        "message": "A hardcoded username in plain text is identified. Store it properly in an environment variable.",
+        "description": "A hardcoded username in plain text is identified. Store it properly in an environment variable.",
+        "cve": "data/datacreator.js:250:node_username:CWE-798",
+        "severity": "High",
+        "confidence": "Ignore",
+        "scanner": {
+          "id": "nodejs-scan",
+          "name": "NodeJsScan"
+        },
+        "location": {
+          "file": "data/datacreator.js",
+          "start_line": 250,
+          "end_line": 250
+        },
+        "identifiers": [
+          {
+            "type": "njsscan_rule_type",
+            "name": "node_username",
+            "value": "A hardcoded username in plain text is identified. Store it properly in an environment variable."
+          },
+          {
+            "type": "cwe",
+            "name": "CWE-798",
+            "value": "node_username"
+          }
+        ]
+      },
+      {
+        "id": "5e6efd7a1bef47a9ebef9f1fd11fb11bd01e2f6f0decdd0316d3158750f7d391",
+        "category": "sast",
+        "name": "hardcoded_jwt_secret",
+        "message": "Hardcoded JWT secret was found. Store it properly in an environment variable.",
+        "description": "Hardcoded JWT secret was found. Store it properly in an environment variable.",
+        "cve": "lib/insecurity.js:9:hardcoded_jwt_secret:CWE-798",
+        "severity": "High",
+        "confidence": "Unkown",
+        "scanner": {
+          "id": "nodejs-scan",
+          "name": "NodeJsScan"
+        },
+        "location": {
+          "file": "lib/insecurity.js",
+          "start_line": 9,
+          "end_line": 34
+        },
+        "identifiers": [
+          {
+            "type": "njsscan_rule_type",
+            "name": "hardcoded_jwt_secret",
+            "value": "Hardcoded JWT secret was found. Store it properly in an environment variable."
+          },
+          {
+            "type": "cwe",
+            "name": "CWE-798",
+            "value": "hardcoded_jwt_secret"
+          }
+        ]
+      },
+      {
+        "id": "46af6f74b3a85f6b9009268e97027b75b378053ee8f81fc9aa8930d65ec2d468",
+        "category": "sast",
+        "name": "node_nosqli_injection",
+        "message": "Untrusted user input in findOne() function can result in NoSQL Injection.",
+        "description": "Untrusted user input in findOne() function can result in NoSQL Injection.",
+        "cve": "routes/likeProductReviews.js:13:node_nosqli_injection:CWE-943",
+        "severity": "High",
+        "confidence": "Experimental",
+        "scanner": {
+          "id": "nodejs-scan",
+          "name": "NodeJsScan"
+        },
+        "location": {
+          "file": "routes/likeProductReviews.js",
+          "start_line": 13,
+          "end_line": 56
+        },
+        "identifiers": [
+          {
+            "type": "njsscan_rule_type",
+            "name": "node_nosqli_injection",
+            "value": "Untrusted user input in findOne() function can result in NoSQL Injection."
+          },
+          {
+            "type": "cwe",
+            "name": "CWE-943",
+            "value": "node_nosqli_injection"
+          }
+        ]
+      },
+      {
+        "id": "ac0fb217a233731d52e8e2558ecaa49d139ccb863b9b9922e82349c2b571d54f",
+        "category": "sast",
+        "name": "node_sqli_injection",
+        "message": "Untrusted input concatinated with raw SQL query can result in SQL Injection.",
+        "description": "Untrusted input concatinated with raw SQL query can result in SQL Injection.",
+        "cve": "routes/login.js:29:node_sqli_injection:CWE-89",
+        "severity": "High",
+        "confidence": "Low",
+        "scanner": {
+          "id": "nodejs-scan",
+          "name": "NodeJsScan"
+        },
+        "location": {
+          "file": "routes/login.js",
+          "start_line": 29,
+          "end_line": 29
+        },
+        "identifiers": [
+          {
+            "type": "njsscan_rule_type",
+            "name": "node_sqli_injection",
+            "value": "Untrusted input concatinated with raw SQL query can result in SQL Injection."
+          },
+          {
+            "type": "cwe",
+            "name": "CWE-89",
+            "value": "node_sqli_injection"
+          }
+        ]
+      },
+      {
+        "id": "cdae14ebd54e5c96817e08c21686eaf72a47738b7c4af80faa6c284b5c8892f1",
+        "category": "sast",
+        "name": "node_ssrf",
+        "message": "User controlled URL in http client libraries can result in Server Side Request Forgery (SSRF).",
+        "description": "User controlled URL in http client libraries can result in Server Side Request Forgery (SSRF).",
+        "cve": "routes/profileImageUrlUpload.js:15:node_ssrf:CWE-918",
+        "severity": "High",
+        "confidence": "Medium",
+        "scanner": {
+          "id": "nodejs-scan",
+          "name": "NodeJsScan"
+        },
+        "location": {
+          "file": "routes/profileImageUrlUpload.js",
+          "start_line": 15,
+          "end_line": 34
+        },
+        "identifiers": [
+          {
+            "type": "njsscan_rule_type",
+            "name": "node_ssrf",
+            "value": "User controlled URL in http client libraries can result in Server Side Request Forgery (SSRF)."
+          },
+          {
+            "type": "cwe",
+            "name": "CWE-918",
+            "value": "node_ssrf"
+          }
+        ]
+      },
+      {
+        "id": "9b5327ba93ebcf995af9d64176e2af564ff23d88b3a545cb2b9020a77d2f1d9a",
+        "category": "sast",
+        "name": "node_ssrf",
+        "message": "User controlled URL in http client libraries can result in Server Side Request Forgery (SSRF).",
+        "description": "User controlled URL in http client libraries can result in Server Side Request Forgery (SSRF).",
+        "cve": "routes/profileImageUrlUpload.js:17:node_ssrf:CWE-918",
+        "severity": "High",
+        "confidence": "High",
+        "scanner": {
+          "id": "nodejs-scan",
+          "name": "NodeJsScan"
+        },
+        "location": {
+          "file": "routes/profileImageUrlUpload.js",
+          "start_line": 17,
+          "end_line": 17
+        },
+        "identifiers": [
+          {
+            "type": "njsscan_rule_type",
+            "name": "node_ssrf",
+            "value": "User controlled URL in http client libraries can result in Server Side Request Forgery (SSRF)."
+          },
+          {
+            "type": "cwe",
+            "name": "CWE-918",
+            "value": "node_ssrf"
+          }
+        ]
+      },
+      {
+        "id": "863c039d992efa87e76afe04831d0b986a7f492a6badc3cd04e6cfab4e90ee09",
+        "category": "sast",
+        "name": "node_sqli_injection",
+        "message": "Untrusted input concatinated with raw SQL query can result in SQL Injection.",
+        "description": "Untrusted input concatinated with raw SQL query can result in SQL Injection.",
+        "cve": "routes/search.js:12:node_sqli_injection:CWE-89",
+        "severity": "High",
+        "confidence": "Confirmed",
+        "scanner": {
+          "id": "nodejs-scan",
+          "name": "NodeJsScan"
+        },
+        "location": {
+          "file": "routes/search.js",
+          "start_line": 12,
+          "end_line": 58
+        },
+        "identifiers": [
+          {
+            "type": "njsscan_rule_type",
+            "name": "node_sqli_injection",
+            "value": "Untrusted input concatinated with raw SQL query can result in SQL Injection."
+          },
+          {
+            "type": "cwe",
+            "name": "CWE-89",
+            "value": "node_sqli_injection"
+          }
+        ]
+      }
+    ],
+    "remediations": [],
+    "scan": {
+      "scanner": {
+        "id": "njsscan",
+        "name": "njsscan",
+        "url": "https://github.com/ajinabraham/njsscan",
+        "vendor": {
+          "name": "GitLab"
+        },
+        "version": "0.1.9"
+      },
+      "type": "sast",
+      "start_time": "2020-12-30T07:17:08",
+      "end_time": "2020-12-30T07:18:45",
+      "status": "success"
+    }
+  }
+  

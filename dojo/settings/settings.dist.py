@@ -100,6 +100,7 @@ env = environ.Env(
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID=(str, ''),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE=(str, 'https://graph.microsoft.com/'),
     DD_SOCIAL_AUTH_GITLAB_OAUTH2_ENABLED=(bool, False),
+    DD_SOCIAL_AUTH_GITLAB_PROJECT_AUTO_IMPORT=(bool, False),
     DD_SOCIAL_AUTH_GITLAB_KEY=(str, ''),
     DD_SOCIAL_AUTH_GITLAB_SECRET=(str, ''),
     DD_SOCIAL_AUTH_GITLAB_API_URL=(str, 'https://gitlab.com'),
@@ -154,6 +155,8 @@ env = environ.Env(
     DD_LOGGING_HANDLER=(str, 'console'),
     DD_ALERT_REFRESH=(bool, True),
     DD_DISABLE_ALERT_COUNTER=(bool, False),
+    # to disable deleting alerts per user set value to -1
+    DD_MAX_ALERTS_PER_USER=(int, 999),
     DD_TAG_PREFETCHING=(bool, True),
 
     # when enabled in sytem settings,  every minute a job run to delete excess duplicates
@@ -235,6 +238,7 @@ TEST_RUNNER = env('DD_TEST_RUNNER')
 
 ALERT_REFRESH = env('DD_ALERT_REFRESH')
 DISABLE_ALERT_COUNTER = env("DD_DISABLE_ALERT_COUNTER")
+MAX_ALERTS_PER_USER = env("DD_MAX_ALERTS_PER_USER")
 
 TAG_PREFETCHING = env('DD_TAG_PREFETCHING')
 
@@ -363,6 +367,7 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.social_auth.associate_user',
     'social_core.pipeline.social_auth.load_extra_data',
     'social_core.pipeline.user.user_details',
+    'dojo.pipeline.update_product_access',
 )
 
 CLASSIC_AUTH_ENABLED = True
@@ -394,6 +399,7 @@ SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID = env('DD_SOCIAL_AUTH_AZUREAD_TENANT
 SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE = env('DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE')
 
 GITLAB_OAUTH2_ENABLED = env('DD_SOCIAL_AUTH_GITLAB_OAUTH2_ENABLED')
+GITLAB_PROJECT_AUTO_IMPORT = env('DD_SOCIAL_AUTH_GITLAB_PROJECT_AUTO_IMPORT')
 SOCIAL_AUTH_GITLAB_KEY = env('DD_SOCIAL_AUTH_GITLAB_KEY')
 SOCIAL_AUTH_GITLAB_SECRET = env('DD_SOCIAL_AUTH_GITLAB_SECRET')
 SOCIAL_AUTH_GITLAB_API_URL = env('DD_SOCIAL_AUTH_GITLAB_API_URL')
@@ -616,7 +622,6 @@ INSTALLED_APPS = (
     'tastypie_swagger',
     'watson',
     'tagging',  # not used, but still needed for migration 0065_django_tagulous.py (v1.10.0)
-    'custom_field',
     'imagekit',
     'multiselectfield',
     'rest_framework',
@@ -698,6 +703,10 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'dojo.tasks.add_alerts',
         'schedule': timedelta(hours=1),
         'args': [timedelta(hours=1)]
+    },
+    'cleanup-alerts': {
+        'task': 'dojo.tasks.cleanup_alerts',
+        'schedule': timedelta(hours=8),
     },
     'dedupe-delete': {
         'task': 'dojo.tasks.async_dupe_delete',

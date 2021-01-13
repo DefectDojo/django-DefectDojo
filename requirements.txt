@@ -6,7 +6,6 @@ coverage==5.3.1
 defusedxml==0.6.0
 django_celery_results==2.0.0
 django-auditlog==0.4.7
-git+https://github.com/DefectDojo/django-custom-field.git@4e095dd9119858e90fd21560e5618c6347e4ef1b#egg=django-custom-field
 django-dbbackup>=3.2.0
 django-environ==0.4.5
 django-filter==2.4.0
@@ -31,11 +30,11 @@ jira==2.0.0
 PyGithub==1.54.1
 lxml==4.6.2
 Markdown==3.3.3
-mysqlclient==2.0.2
+mysqlclient==2.0.3
 pandas==1.1.5
 xlrd==1.2.0
 pdfkit==0.6.1
-Pillow==8.0.1  # required by django-imagekit
+Pillow==8.1.0  # required by django-imagekit
 psycopg2-binary==2.8.6
 cryptography==3.3.1
 python-dateutil==2.8.1
@@ -43,7 +42,7 @@ python-nmap==0.6.1
 pytz==2020.5
 redis==3.5.3
 requests==2.25.1
-sqlalchemy  # Required by Celery broker transport
+sqlalchemy==1.3.22  # Required by Celery broker transport
 supervisor==4.2.1
 urllib3==1.26.2
 uWSGI==2.0.19.1
@@ -54,11 +53,12 @@ social-auth-app-django==4.0.0
 Python-jose==3.2.0
 gitpython>=2.1.13
 ptvsd==4.3.2
+python-gitlab==2.4.0
 google-auth==1.24.0
 google-api-python-client==1.12.8
 google-auth-oauthlib==0.4.2
 drf_yasg2==1.19.4
-jsonlines==1.2.0  # requred by yarn audit parser
+jsonlines==2.0.0  # requred by yarn audit parser
 django-saml2-auth==2.2.1
 cpe==1.2.1
 packageurl-python==0.9.3
@@ -69,5 +69,5 @@ django-debug-toolbar==3.2
 django-debug-toolbar-request-history==0.1.3
 vcrpy==4.1.1
 vcrpy-unittest==0.1.7
-git+https://github.com/radiac/django-tagulous.git@develop#egg=django-tagulous
+django-tagulous==1.1.0
 PyJWT==1.7.1

@@ -96,6 +96,7 @@ from dojo.tools.kubebench.parser import KubeBenchParser
 from dojo.tools.ort.parser import OrtParser
 from dojo.tools.sarif.parser import SarifParser
 from dojo.tools.ossindex_devaudit.parser import OssIndexDevauditParser
+from dojo.tools.scantist.parser import ScantistJSONParser
 
 
 __author__ = 'Jay Paz'
@@ -307,6 +308,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = SarifParser(file, test)
     elif scan_type == 'OssIndex Devaudit SCA Scan Importer':
         parser = OssIndexDevauditParser(file, test)
+    elif scan_type == 'Scantist Scan':
+        parser = ScantistJSONParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 
