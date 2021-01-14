@@ -31,6 +31,7 @@ import dojo.finding.helper as finding_helper
 
 
 logger = logging.getLogger(__name__)
+deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 
 class TagList(list):
