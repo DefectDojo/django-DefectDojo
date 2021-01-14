@@ -970,8 +970,6 @@ class ScanSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-# class ImportScanSerializer(TaggitSerializer, serializers.ModelSerializer):
-# class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
 class ImportScanSerializer(serializers.Serializer):
     scan_date = serializers.DateField(default=datetime.date.today)
 
@@ -1177,7 +1175,7 @@ class ImportScanSerializer(serializers.Serializer):
                     status.save()
 
                 old_finding.tags.add('stale')
-                old_finding.save()
+                old_finding.save(dedupe_option=False)
 
         logger.debug('done importing findings')
 
@@ -1313,7 +1311,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                         finding.component_name = finding.component_name if finding.component_name else component_name
                         finding.component_version = finding.component_version if finding.component_version else component_version
 
-                        finding.save()
+                        finding.save(dedupe_option=False, push_to_jira=push_to_jira)
                         note = Notes(
                             entry="Re-activated by %s re-upload." % scan_type,
                             author=self.context['request'].user)
@@ -1418,7 +1416,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                             status.last_modified = timezone.now()
                             status.save()
 
-                        finding.save(push_to_jira=push_to_jira)
+                        # don't try to dedupe findings that we are closing
+                        finding.save(push_to_jira=push_to_jira, dedupe_option=False)
                         note = Notes(entry="Mitigated by %s re-upload." % scan_type,
                                     author=self.context['request'].user)
                         note.save()

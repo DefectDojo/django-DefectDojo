@@ -131,8 +131,9 @@ def do_dedupe_finding(new_finding, *args, **kwargs):
             elif(deduplicationAlgorithm == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE):
                 deduplicate_uid_or_hash_code(new_finding)
             else:
+                logger.debug('dedupe legacy start')
                 deduplicate_legacy(new_finding)
-                logger.debug('done legacy')
+                logger.debug('dedupe legacy start.done.')
         else:
             deduplicationLogger.debug("no configuration per parser found; using legacy algorithm")
             deduplicate_legacy(new_finding)

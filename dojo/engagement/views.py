@@ -606,9 +606,10 @@ def import_scan_results(request, eid=None, pid=None):
                 # push_to_jira = jira_helper.is_push_to_jira(new_finding, jform.cleaned_data.get('push_to_jira'))
                 push_to_jira = push_all_jira_issues or (jform and jform.cleaned_data.get('push_to_jira'))
 
-                for item in parser.items:
-                    # print("item blowup")
-                    # print(item)
+                items = parser.items
+                logger.debug('starting reimport of %i items.', len(items))
+                i = 0
+                for item in items:
                     sev = item.severity
                     if sev == 'Information' or sev == 'Informational':
                         sev = 'Info'
@@ -627,6 +628,7 @@ def import_scan_results(request, eid=None, pid=None):
                         item.verified = verified
 
                     item.save(dedupe_option=False, false_history=True)
+                    logger.debug('%i: creating new finding: %i:%s:%s:%s', i, item.id, item, item.component_name, item.component_version)
 
                     if hasattr(item, 'unsaved_req_resp') and len(
                             item.unsaved_req_resp) > 0:
@@ -692,6 +694,7 @@ def import_scan_results(request, eid=None, pid=None):
                         item.tags = item.unsaved_tags
 
                     finding_count += 1
+                    i += 1
 
                 messages.add_message(
                     request,
