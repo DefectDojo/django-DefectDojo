@@ -162,7 +162,9 @@ env = environ.Env(
     # when enabled in sytem settings,  every minute a job run to delete excess duplicates
     # we limit the amount of duplicates that can be deleted in a single run of that job
     # to prevent overlapping runs of that job from occurrring
-    DD_DUPE_DELETE_MAX_PER_RUN=(int, 200)
+    DD_DUPE_DELETE_MAX_PER_RUN=(int, 200),
+    # APIv1 is depreacted and will be removed at 2021-06-30
+    DD_LEGACY_API_V1_ENABLE=(bool, False),
 )
 
 
@@ -465,6 +467,8 @@ LOGIN_EXEMPT_URLS = (
     r'saml2/acs',
     r'empty_questionnaire/([\d]+)/answer'
 )
+
+LEGACY_API_V1_ENABLE = env('DD_LEGACY_API_V1_ENABLE')
 
 # ------------------------------------------------------------------------------
 # SECURITY DIRECTIVES
