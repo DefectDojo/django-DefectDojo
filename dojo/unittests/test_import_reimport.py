@@ -1,6 +1,8 @@
-from dojo.models import User
+from django.urls import reverse
+from dojo.models import User, Test
 from rest_framework.authtoken.models import Token
-from rest_framework.test import APITestCase, APIClient
+from rest_framework.test import APIClient
+from django.test.client import Client
 from .dojo_test_case import DojoAPITestCase
 # from unittest import skip
 import logging
@@ -37,20 +39,9 @@ logger = logging.getLogger(__name__)
 # 4 absent
 # 5 active sev medium
 
-class DedupeTest(DojoAPITestCase):
-    fixtures = ['dojo_testdata.json']
-
+# test methods to be used both by API Test and UI Test
+class ImportReimportMixin(object):
     def __init__(self, *args, **kwargs):
-        # TODO remove __init__ if it does nothing...
-        APITestCase.__init__(self, *args, **kwargs)
-
-    def setUp(self):
-        testuser = User.objects.get(username='admin')
-        token = Token.objects.get(user=testuser)
-        self.client = APIClient()
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
-        # self.url = reverse(self.viewname + '-list')
-
         self.scans_path = 'dojo/unittests/scans/zap/'
         self.zap_sample0_filename = self.scans_path + '0_zap_sample.xml'
         self.zap_sample1_filename = self.scans_path + '1_zap_sample_0_and_new_absent.xml'
@@ -480,6 +471,114 @@ class DedupeTest(DojoAPITestCase):
                 not_mitigated += 1
         self.assertEqual(mitigated, 0)
         self.assertEqual(not_mitigated, 5)
+
+
+class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        # TODO remove __init__ if it does nothing...
+        ImportReimportMixin.__init__(self, *args, **kwargs)
+        # super(ImportReimportMixin, self).__init__(*args, **kwargs)
+        # super(DojoAPITestCase, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
+
+    def setUp(self):
+        testuser = User.objects.get(username='admin')
+        token = Token.objects.get(user=testuser)
+        self.client = APIClient()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        # self.url = reverse(self.viewname + '-list')
+
+
+class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
+    fixtures = ['dojo_testdata.json']
+    client_ui = Client()
+
+    def __init__(self, *args, **kwargs):
+        # TODO remove __init__ if it does nothing...
+        ImportReimportMixin.__init__(self, *args, **kwargs)
+        # super(ImportReimportMixin, self).__init__(*args, **kwargs)
+        # super(DojoAPITestCase, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
+
+    def setUp(self):
+        # still using the API to verify results
+        testuser = User.objects.get(username='admin')
+        token = Token.objects.get(user=testuser)
+        self.client = APIClient()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        # self.url = reverse(self.viewname + '-list')
+
+        self.client_ui = Client()
+        self.client_ui.force_login(self.get_test_admin())
+
+    # override methods to use UI
+    def import_scan_with_params(self, *args, **kwargs):
+        return self.import_scan_with_params_ui(*args, **kwargs)
+
+    def reimport_scan_with_params(self, *args, **kwargs):
+        return self.reimport_scan_with_params_ui(*args, **kwargs)
+
+    def import_scan_ui(self, engagement, payload):
+        logger.debug('import_scan payload %s', payload)
+        # response = self.client_ui.post(reverse('import_scan_results', args=(engagement, )), urlencode(payload), content_type='application/x-www-form-urlencoded')
+        response = self.client_ui.post(reverse('import_scan_results', args=(engagement, )), payload)
+        # print(vars(response))
+        print('url: ' + response.url)
+        test = Test.objects.get(id=response.url.split('/')[-1])
+        # f = open('response.html', 'w+')
+        # f.write(str(response.content, 'utf-8'))
+        # f.close()
+        self.assertEqual(302, response.status_code)
+        return {'test': test.id}
+
+    def reimport_scan_ui(self, test, payload):
+        response = self.client_ui.post(reverse('re_import_scan_results', args=(test, )), payload)
+        self.assertEqual(302, response.status_code)
+        test = Test.objects.get(id=response.url.split('/')[-1])
+        return {'test': test.id}
+
+    def import_scan_with_params_ui(self, filename, engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None, tags=None, close_old_findings=False):
+        payload = {
+                "scan_date": '2020-06-04',
+                "minimum_severity": minimum_severity,
+                "active": active,
+                "verified": verified,
+                "scan_type": 'ZAP Scan',
+                "file": open(filename),
+                "environment": 1
+                # "version": "1.0.1",
+                # "close_old_findings": close_old_findings,
+        }
+
+        if push_to_jira is not None:
+            payload['push_to_jira'] = push_to_jira
+
+        if tags is not None:
+            payload['tags'] = tags
+
+        return self.import_scan_ui(engagement, payload)
+
+    def reimport_scan_with_params_ui(self, test_id, filename, minimum_severity='Low', active=True, verified=True, push_to_jira=None, tags=None, close_old_findings=True):
+        payload = {
+                "scan_date": '2020-06-04',
+                "minimum_severity": minimum_severity,
+                "active": active,
+                "verified": verified,
+                "scan_type": 'ZAP Scan',
+                "file": open(filename),
+                "version": "1.0.1",
+                "close_old_findings": close_old_findings,
+        }
+
+        if push_to_jira is not None:
+            payload['push_to_jira'] = push_to_jira
+
+        if tags is not None:
+            payload['tags'] = tags
+
+        return self.reimport_scan_ui(test_id, payload)
 
 # Observations:
 # - When reopening a mitigated finding, almost no fields are updated such as title, description, severity, impact, references, ....
