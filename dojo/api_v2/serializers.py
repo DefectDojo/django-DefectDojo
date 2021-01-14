@@ -1270,6 +1270,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             unchanged_count = 0
             unchanged_items = []
 
+            logger.debug('starting reimport of %i items.', len(items))
+            i = 0
             for item in items:
                 sev = item.severity
 
