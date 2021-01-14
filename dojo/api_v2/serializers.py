@@ -1064,7 +1064,10 @@ class ImportScanSerializer(serializers.Serializer):
         new_findings = []
         skipped_hashcodes = []
         try:
-            for item in parser.items:
+            items = parser.items
+            logger.debug('starting reimport of %i items.', len(items))
+            i = 0
+            for item in items:
                 sev = item.severity
                 if sev == 'Information' or sev == 'Informational':
                     sev = 'Info'
@@ -1301,6 +1304,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     # existing finding found
                     finding = findings[0]
                     if finding.mitigated or finding.is_Mitigated:
+                        logger.debug('%i: reactivating: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
                         finding.mitigated = None
                         finding.is_Mitigated = False
                         finding.mitigated_by = None
@@ -1329,6 +1333,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                         reactivated_count += 1
                     else:
                         # existing findings may be from before we had component_name/version fields
+                        logger.debug('%i: updating existing finding: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
                         if not finding.component_name or not finding.component_version:
                             finding.component_name = finding.component_name if finding.component_name else component_name
                             finding.component_version = finding.component_version if finding.component_version else component_version
@@ -1346,6 +1351,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     item.active = active
                     # Save it. Don't dedupe before endpoints are added.
                     item.save(dedupe_option=False)
+                    logger.debug('%i: creating new finding: %i:%s:%s:%s', i, item.id, item, item.component_name, item.component_version)
+                    deduplicationLogger.debug('reimport found multiple identical existing findings for %i, a non-exact match. these are ignored and a new finding has been created', item.id)
                     finding_added_count += 1
                     new_items.append(item)
                     finding = item
@@ -1405,6 +1412,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             if close_old_findings:
                 for finding in to_mitigate:
                     if not finding.mitigated or not finding.is_Mitigated:
+                        logger.debug('mitigating finding: %i:%s', finding.id, finding)
                         finding.mitigated = scan_date_time
                         finding.is_Mitigated = True
                         finding.mitigated_by = self.context['request'].user
