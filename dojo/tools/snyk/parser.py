@@ -105,7 +105,7 @@ def get_item(vulnerability, test):
         severity = vulnerability['severity'].title()
 
     if 'id' in vulnerability:
-        references = "<b>Custom SNYK ID</b>: https://app.snyk.io/vuln/{}\n\n".format(vulnerability['id'])
+        references = "**SNYK ID**: https://app.snyk.io/vuln/{}\n\n".format(vulnerability['id'])
 
     if cve_references or cwe_references:
         references += "Several CVEs or CWEs were reported: \n\n{}\n{}\n".format(
@@ -113,23 +113,23 @@ def get_item(vulnerability, test):
 
     # Append vuln references to references section
     for item in vulnerability['references']:
-        references += "<b>" + item['title'] + "</b>: " + item['url'] + "\n"
+        references += "**" + item['title'] + "**: " + item['url'] + "\n"
 
     # create the finding object
     finding = Finding(
         title=vulnerability['from'][0] + ": " + vulnerability['title'],
         test=test,
         severity=severity,
-        severity_justification="Issue severity of: <b>" + severity + "</b> from a base " +
-        "CVSS score of: <b>" + str(vulnerability['cvssScore']) + "</b>",
+        severity_justification="Issue severity of: **" + severity + "** from a base " +
+        "CVSS score of: **" + str(vulnerability['cvssScore']) + "**",
         cwe=cwe,
         cve=cve,
         cvssv3=vulnerability['CVSSv3'][9:],
-        description="<h2>Details</h2><p><li><b>Vulnerable Package</b>: " +
-        vulnerability['packageName'] + "</li><li><b>Current Version</b>: " + str(
-            vulnerability['version']) + "</li><li><b>Vulnerable Version(s)</b>: " +
-        vulnerable_versions + "</li><li><b>Vulnerable Path</b>: " + " > ".join(
-            vulnerability['from']) + "</li></p>" + vulnerability['description'],
+        description="## Component Details\n - **Vulnerable Package**: " +
+        vulnerability['packageName'] + "\n- **Current Version**: " + str(
+            vulnerability['version']) + "\n- **Vulnerable Version(s)**: " +
+        vulnerable_versions + "\n- **Vulnerable Path**: " + " > ".join(
+            vulnerability['from']) + "\n" + vulnerability['description'],
         mitigation="A fix (if available) will be provided in the description.",
         references=references,
         component_name=vulnerability['packageName'],

@@ -55,7 +55,7 @@ class TestSnykParser(TestCase):
         self.assertEqual(
             "Medium", finding.severity)
         self.assertEqual(
-            "Issue severity of: <b>Medium</b> from a base CVSS score of: <b>6.5</b>",
+            "Issue severity of: **Medium** from a base CVSS score of: **6.5**",
             finding.severity_justification)
         self.assertEqual(
             "CVE-2019-12400",
@@ -70,10 +70,10 @@ class TestSnykParser(TestCase):
             "## Remediation\nUpgrade `org.apache.santuario:xmlsec` to version 2.1.4 or higher.\n",
             finding.mitigation)
         self.assertEqual(
-            "<b>Custom SNYK ID</b>: https://app.snyk.io/vuln/SNYK-JAVA-ORGAPACHESANTUARIO-460281\n\n<b>GitHub " +
-            "Commit</b>: https://github.com/apache/santuario-java/commit/52ae824cf5f5c873a0e37bb33fedcc3b387" +
-            "cdba6\n<b>GitHub Commit</b>: https://github.com/apache/santuario-java/commit/c5210f77a77105fba81" +
-            "311d16c07ceacc21f39d5\n<b>Possible Jira Issue</b>: https://issues.apache.org/jira/browse/SANTUARIO-" +
-            "504?jql=project%20%3D%20SANTUARIO\n<b>Security Release</b>: http://santuario.apache.org/secadv.data/" +
+            "**SNYK ID**: https://app.snyk.io/vuln/SNYK-JAVA-ORGAPACHESANTUARIO-460281\n\n**GitHub " +
+            "Commit**: https://github.com/apache/santuario-java/commit/52ae824cf5f5c873a0e37bb33fedcc3b387" +
+            "cdba6\n**GitHub Commit**: https://github.com/apache/santuario-java/commit/c5210f77a77105fba81" +
+            "311d16c07ceacc21f39d5\n**Possible Jira Issue**: https://issues.apache.org/jira/browse/SANTUARIO-" +
+            "504?jql=project%20%3D%20SANTUARIO\n**Security Release**: http://santuario.apache.org/secadv.data/" +
             "CVE-2019-12400.asc?version=1&modificationDate=1566573083000&api=v2\n",
             finding.references)
