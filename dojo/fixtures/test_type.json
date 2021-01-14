@@ -701,7 +701,7 @@
     },
     {
         "fields": {
-		"name": "OssIndex DevAudit scan result importer"
+		"name": "OssIndex Devaudit SCA Scan Importer"
 	},
         "model": "dojo.test_type",
         "pk": 192
