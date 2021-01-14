@@ -1311,7 +1311,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                         finding.component_name = finding.component_name if finding.component_name else component_name
                         finding.component_version = finding.component_version if finding.component_version else component_version
 
-                        finding.save(dedupe_option=False, push_to_jira=push_to_jira)
+                        # don't dedupe before endpoints are added
+                        finding.save(dedupe_option=False)
                         note = Notes(
                             entry="Re-activated by %s re-upload." % scan_type,
                             author=self.context['request'].user)
@@ -1331,7 +1332,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                         if not finding.component_name or not finding.component_version:
                             finding.component_name = finding.component_name if finding.component_name else component_name
                             finding.component_version = finding.component_version if finding.component_version else component_version
-                            finding.save(dedupe_option=False, push_to_jira=False)
+                            finding.save(dedupe_option=False)
 
                         unchanged_items.append(finding)
                         unchanged_count += 1
@@ -1343,6 +1344,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     item.last_reviewed_by = self.context['request'].user
                     item.verified = verified
                     item.active = active
+                    # Save it. Don't dedupe before endpoints are added.
                     item.save(dedupe_option=False)
                     finding_added_count += 1
                     new_items.append(item)

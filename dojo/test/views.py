@@ -787,8 +787,8 @@ def re_import_scan_results(request, tid):
                         item.verified = verified
                         item.active = active
 
-                        # Save it. New finding may be deduplicated by dojo
-                        item.save(push_to_jira=push_to_jira, dedupe_option=True)
+                        # Save it. Don't dedupe before endpoints are added.
+                        item.save(dedupe_option=False)
                         logger.debug('%i: creating new finding: %i:%s:%s:%s', i, item.id, item, item.component_name, item.component_version)
                         deduplicationLogger.debug('reimport found multiple identical existing findings for %i, a non-exact match. these are ignored and a new finding has been created', item.id)
                         finding_added_count += 1
