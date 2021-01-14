@@ -61,7 +61,7 @@ class TestSnykParser(TestCase):
             "CVE-2019-12400",
             finding.cve)
         self.assertEqual(
-            "611",
+            611,
             finding.cwe)
         self.assertEqual(
             "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:L",

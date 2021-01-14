@@ -66,28 +66,24 @@ def get_item(vulnerability, test):
 
     if 'identifiers' in vulnerability:
         if 'CVE' in vulnerability['identifiers']:
-            if isinstance(vulnerability['identifiers']['CVE'], list):
+            cves = vulnerability['identifiers']['CVE']
+            if cves:
                 # Per the current json format, if several CVEs listed, take the first one.
-                cve = ' '.join(vulnerability['identifiers']['CVE']).split(" ")[0]
-                if len(vulnerability['identifiers']['CVE']) > 1:
-                    cve_references = ', '.join(vulnerability['identifiers']['CVE'])
+                cve = cves[0]
+                if len(cves) > 1:
+                    cve_references = ', '.join(cves)
             else:
-                # In case the structure is not a list?
-                cve = vulnerability['identifiers']['CVE']
+                cve = None
 
         if 'CWE' in vulnerability['identifiers']:
-            if isinstance(vulnerability['identifiers']['CWE'], list):
+            cwes = vulnerability['identifiers']['CWE']
+            if cwes:
                 # Per the current json format, if several CWEs, take the first one.
-                cwe = ' '.join(vulnerability['identifiers']['CWE']).split(" ")[0].split("-")[1]
+                cwe = int(cwes[0].split("-")[1])
                 if len(vulnerability['identifiers']['CVE']) > 1:
-                    cwe_references = ', '.join(vulnerability['identifiers']['CWE'])
+                    cwe_references = ', '.join(cwes)
             else:
-                # in case the structure is not a list?
-                cwe = ''.join(vulnerability['identifiers']['CWE']).split("-")[1]
-    else:
-        # If no identifiers, set to defaults
-        cve = None
-        cwe = 1035
+                cwe = 1035
 
     # Following the CVSS Scoring per https://nvd.nist.gov/vuln-metrics/cvss
     if 'cvssScore' in vulnerability:
