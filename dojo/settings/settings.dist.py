@@ -165,6 +165,9 @@ env = environ.Env(
     DD_DUPE_DELETE_MAX_PER_RUN=(int, 200),
     # APIv1 is depreacted and will be removed at 2021-06-30
     DD_LEGACY_API_V1_ENABLE=(bool, False),
+
+    # feature flag for the new permissions
+    DD_FEATURE_NEW_PERMISSIONS=(bool, True)
 )
 
 
@@ -980,3 +983,6 @@ TAGULOUS_AUTOCOMPLETE_JS = (
 
 # using 'element' for width should take width from css defined in template, but it doesn't. So set to 70% here.
 TAGULOUS_AUTOCOMPLETE_SETTINGS = {'placeholder': "Enter some tags (comma separated, use enter to select / create a new tag)", 'width': '70%'}
+
+# Feature toggles
+FEATURE_NEW_PERMISSIONS = env('DD_FEATURE_NEW_PERMISSIONS')

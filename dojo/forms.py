@@ -5,7 +5,7 @@ import pickle
 from crispy_forms.bootstrap import InlineRadios, InlineCheckboxes
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout
-from django.db.models import Count
+from django.db.models import Count, Q
 
 from dateutil.relativedelta import relativedelta
 from django import forms
@@ -26,7 +26,7 @@ from dojo.models import Finding, Product_Type, Product, Note_Type, ScanSettings,
     Languages, Language_Type, App_Analysis, Objects_Product, Benchmark_Product, Benchmark_Requirement, \
     Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta, Sonarqube_Product, \
     Engagement_Survey, Answered_Survey, TextAnswer, ChoiceAnswer, Choice, Question, TextQuestion, \
-    ChoiceQuestion, General_Survey, Regulation
+    ChoiceQuestion, General_Survey, Regulation, Product_Type_Member
 
 from dojo.tools import requires_file, SCAN_SONARQUBE_API
 from dojo.user.helper import user_is_authorized
@@ -34,6 +34,9 @@ from django.urls import reverse
 from tagulous.forms import TagField
 import logging
 from crum import get_current_user
+from dojo.authorization.roles_permissions import Permissions, Roles
+from dojo.product_type.queries import get_authorized_product_types
+from dojo.feature_decisions import new_permissions_enabled
 
 logger = logging.getLogger(__name__)
 
@@ -151,6 +154,8 @@ class MonthYearWidget(Widget):
 
 
 class Product_TypeForm(forms.ModelForm):
+    description = forms.CharField(widget=forms.Textarea(attrs={}),
+                                  required=False)
     authorized_users = forms.ModelMultipleChoiceField(
         queryset=None,
         required=False, label="Authorized Users")
@@ -159,17 +164,85 @@ class Product_TypeForm(forms.ModelForm):
         non_staff = Dojo_User.objects.exclude(is_staff=True) \
             .exclude(is_active=False).order_by('first_name', 'last_name')
         super(Product_TypeForm, self).__init__(*args, **kwargs)
+
         self.fields['authorized_users'].queryset = non_staff
 
     class Meta:
         model = Product_Type
-        fields = ['name', 'authorized_users', 'critical_product', 'key_product']
+        fields = ['name', 'description', 'authorized_users', 'critical_product', 'key_product']
 
 
 class Delete_Product_TypeForm(forms.ModelForm):
+
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    user = forms.ModelChoiceField(
+        queryset=None,
+        required=True, label="User")
+
+    def __init__(self, *args, **kwargs):
+        users = Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name')
+        super(Delete_Product_Type_MemberForm, self).__init__(*args, **kwargs)
+        self.fields['product_type'].disabled = True
+        self.fields['user'].disabled = True
+        self.fields['user'].queryset = users
+
     class Meta:
         model = Product_Type
         exclude = ['name', 'critical_product', 'key_product']
+
+
+class Add_Product_Type_MemberForm(forms.ModelForm):
+
+    user = forms.ModelChoiceField(
+        queryset=None,
+        required=True, label="User")
+
+    role = forms.ChoiceField(choices=[(tag.value, tag) for tag in Roles])
+
+    def __init__(self, *args, **kwargs):
+        super(Add_Product_Type_MemberForm, self).__init__(*args, **kwargs)
+        self.fields['product_type'].disabled = True
+        current_members = Product_Type_Member.objects.filter(product_type=self.initial["product_type"]).values_list('user', flat=True)
+        self.fields['user'].queryset = Dojo_User.objects.exclude(Q(is_superuser=True) | Q(id__in=current_members)).exclude(is_active=False).order_by('first_name', 'last_name')
+
+    class Meta:
+        model = Product_Type_Member
+        fields = ['product_type', 'user', 'role']
+
+
+class Edit_Product_Type_MemberForm(forms.ModelForm):
+
+    role = forms.ChoiceField(choices=[(tag.value, tag) for tag in Roles])
+
+    def __init__(self, *args, **kwargs):
+        users = Dojo_User.objects.order_by('first_name', 'last_name')
+        super(Edit_Product_Type_MemberForm, self).__init__(*args, **kwargs)
+        self.fields['product_type'].disabled = True
+        self.fields['user'].disabled = True
+        self.fields['user'].queryset = users
+
+    class Meta:
+        model = Product_Type_Member
+        fields = ['product_type', 'user', 'role']
+
+
+class Delete_Product_Type_MemberForm(forms.ModelForm):
+
+    role_value = forms.CharField(required=False, label="Role")
+
+    def __init__(self, *args, **kwargs):
+        users = Dojo_User.objects.order_by('first_name', 'last_name')
+        super(Delete_Product_Type_MemberForm, self).__init__(*args, **kwargs)
+        self.fields['product_type'].disabled = True
+        self.fields['user'].disabled = True
+        self.fields['user'].queryset = users
+        self.fields['role_value'].disabled = True
+
+    class Meta:
+        model = Product_Type_Member
+        fields = ['product_type', 'user']
 
 
 class Test_TypeForm(forms.ModelForm):
@@ -196,7 +269,7 @@ class ProductForm(forms.ModelForm):
                                   required=True)
 
     prod_type = forms.ModelChoiceField(label='Product Type',
-                                       queryset=Product_Type.objects.all().order_by('name'),
+                                       queryset=None,
                                        required=True)
 
     authorized_users = forms.ModelMultipleChoiceField(
@@ -216,6 +289,7 @@ class ProductForm(forms.ModelForm):
             .exclude(is_active=False).order_by('first_name', 'last_name')
         super(ProductForm, self).__init__(*args, **kwargs)
         self.fields['authorized_users'].queryset = non_staff
+        self.fields['prod_type'].queryset = get_authorized_product_types(Permissions.Product_Type_Add_Product)
 
     class Meta:
         model = Product
@@ -297,13 +371,14 @@ class Product_TypeProductForm(forms.ModelForm):
         queryset=None,
         required=False, label="Authorized Users")
     prod_type = forms.ModelChoiceField(label='Product Type',
-                                       queryset=Product_Type.objects.all().order_by('name'),
+                                       queryset=None,
                                        required=True)
 
     def __init__(self, *args, **kwargs):
         non_staff = User.objects.exclude(is_staff=True) \
             .exclude(is_active=False)
         super(Product_TypeProductForm, self).__init__(*args, **kwargs)
+        self.fields['prod_type'].queryset = get_authorized_product_types(Permissions.Product_Type_Add_Product)
         self.fields['authorized_users'].queryset = non_staff
 
     class Meta:

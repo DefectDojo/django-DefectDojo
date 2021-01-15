@@ -1,5 +1,6 @@
 {% load navigation_tags %}
 {% load display_tags %}
+{% load authorization_tags %}
 {% load static from staticfiles %}
 <!DOCTYPE html>
 <html lang="en">
@@ -195,18 +196,23 @@
                                 {% elif request.user.is_authenticated %}
                                 <a href="{% url 'product' %}" title="Products" aria-label="Products"><i class="fa fa-list fa-fw"></i><span>Products</span></a>
                                 {% endif %}
-                                {% if request.user.is_staff %}
+                                {% if request.user|feature_new_permissions_or_user_is_staff %}
                                     <ul class="nav nav-second-level">
-                                      {% if request.user.is_staff %}
+                                        {% if request.user.is_staff %}
                                         <li>
                                             <a href="{% url 'new_product' %}"> Add Product</a>
                                         </li>
-                                      {% endif %}
+                                        {% endif %}
                                         <li>
                                             <a href="{% url 'product' %}"> All Products</a>
                                         </li>
+                                        {% if request.user.is_staff %}
                                         <li>
-                                            <a href="{% url 'product_type' %}">View Product Types</a>
+                                            <a href="{% url 'add_product_type' %}"> Add Product Type</a>
+                                        </li>
+                                        {% endif %}
+                                        <li>
+                                            <a href="{% url 'product_type' %}">All Product Types</a>
                                         </li>
 
                                     </ul>

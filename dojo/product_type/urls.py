@@ -5,11 +5,21 @@ from dojo.product_type import views
 urlpatterns = [
     #  product type
     url(r'^product/type$', views.product_type, name='product_type'),
+    url(r'^product/type/(?P<ptid>\d+)$',
+        views.view_product_type, name='view_product_type'),
     url(r'^product/type/(?P<ptid>\d+)/edit$',
         views.edit_product_type, name='edit_product_type'),
+    url(r'^product/type/(?P<ptid>\d+)/delete$',
+        views.delete_product_type, name='delete_product_type'),
     url(r'^product/type/add$', views.add_product_type,
         name='add_product_type'),
     url(r'^product/type/(?P<ptid>\d+)/add_product',
         views.add_product_to_product_type,
         name='add_product_to_product_type'),
+    url(r'^product/type/(?P<ptid>\d+)/add_member$', views.add_product_type_member,
+        name='add_product_type_member'),
+    url(r'^product/type/(?P<ptid>\d+)/edit_member/(?P<memberid>\d+)$', views.edit_product_type_member,
+        name='edit_product_type_member'),
+    url(r'^product/type/(?P<ptid>\d+)/delete_member/(?P<memberid>\d+)$', views.delete_product_type_member,
+        name='delete_product_type_member'),
 ]

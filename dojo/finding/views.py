@@ -49,6 +49,9 @@ from django.db.models import Q, QuerySet, Prefetch, Count
 import dojo.jira_link.helper as jira_helper
 import dojo.finding.helper as finding_helper
 
+from dojo.authorization.roles_permissions import Permissions
+from dojo.authorization.authorization_decorators import user_is_authorized
+
 logger = logging.getLogger(__name__)
 
 OPEN_FINDINGS_QUERY = Q(active=True)
@@ -250,7 +253,7 @@ def prefetch_for_similar_findings(findings):
     return prefetched_findings
 
 
-@user_must_be_authorized(Finding, 'view', 'fid')
+@user_is_authorized(Finding, Permissions.Finding_View, 'fid')
 def view_finding(request, fid):
     finding_qs = prefetch_for_findings(Finding.objects.all())
     finding = get_object_or_404(finding_qs, id=fid)

@@ -1,4 +1,14 @@
 from rest_framework import permissions
+from dojo.authorization.roles_permissions import Permissions
+from dojo.authorization.authorization import user_has_permission
+
+
+class UserHasProductTypePermission(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return user_has_permission(request.user, obj, Permissions.Product_Type_View)
+        else:
+            return user_has_permission(request.user, obj, Permissions.Product_Type_Edit)
 
 
 class UserHasProductPermission(permissions.BasePermission):
