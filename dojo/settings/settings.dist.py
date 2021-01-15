@@ -754,7 +754,7 @@ if env('DD_DJANGO_METRICS_ENABLED'):
 HASHCODE_FIELDS_PER_SCANNER = {
     # In checkmarx, same CWE may appear with different severities: example "sql injection" (high) and "blind sql injection" (low).
     # Including the severity in the hash_code keeps those findings not duplicate
-    'Anchore Engine Scan': ['title', 'severity', 'component_name', 'component_version'],
+    'Anchore Engine Scan': ['title', 'severity', 'component_name', 'component_version', 'file_path'],
     'Checkmarx Scan': ['cwe', 'severity', 'file_path'],
     'SonarQube Scan': ['cwe', 'severity', 'file_path'],
     'Dependency Check Scan': ['cve', 'file_path'],
