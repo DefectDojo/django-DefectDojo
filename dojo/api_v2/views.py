@@ -40,6 +40,8 @@ from django.db.models import Count, Q
 import dojo.jira_link.helper as jira_helper
 import logging
 import tagulous
+from dojo.authorization.roles_permissions import Permissions
+from dojo.product_type.queries import get_authorized_product_types
 
 logger = logging.getLogger(__name__)
 
@@ -817,13 +819,11 @@ class ProductTypeViewSet(mixins.ListModelMixin,
     queryset = Product_Type.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'name', 'critical_product', 'key_product', 'created', 'updated')
+    permission_classes = (permissions.UserHasProductTypePermission,
+                          DjangoModelPermissions)
 
     def get_queryset(self):
-        if not self.request.user.is_staff:
-            return Product_Type.objects.filter(
-                prod_type__authorized_users__in=[self.request.user])
-        else:
-            return Product_Type.objects.all()
+        return get_authorized_product_types(Permissions.Product_Type_View)
 
     @swagger_auto_schema(
         request_body=serializers.ReportGenerateOptionSerializer,

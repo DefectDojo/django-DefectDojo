@@ -161,7 +161,10 @@ env = environ.Env(
     # when enabled in sytem settings,  every minute a job run to delete excess duplicates
     # we limit the amount of duplicates that can be deleted in a single run of that job
     # to prevent overlapping runs of that job from occurrring
-    DD_DUPE_DELETE_MAX_PER_RUN=(int, 200)
+    DD_DUPE_DELETE_MAX_PER_RUN=(int, 200),
+
+    # feature flag for the new permissions
+    DD_FEATURE_NEW_PERMISSIONS=(bool, True)
 )
 
 
@@ -973,3 +976,6 @@ TAGULOUS_AUTOCOMPLETE_JS = (
 
 # using 'element' for width should take width from css defined in template, but it doesn't. So set to 70% here.
 TAGULOUS_AUTOCOMPLETE_SETTINGS = {'placeholder': "Enter some tags (comma separated, use enter to select / create a new tag)", 'width': '70%'}
+
+# Feature toggles
+FEATURE_NEW_PERMISSIONS = env('DD_FEATURE_NEW_PERMISSIONS')

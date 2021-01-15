@@ -405,11 +405,13 @@ class Notes(models.Model):
 
 class Product_Type(models.Model):
     name = models.CharField(max_length=255, unique=True)
+    description = models.CharField(max_length=4000, null=True)
     critical_product = models.BooleanField(default=False)
     key_product = models.BooleanField(default=False)
     updated = models.DateTimeField(auto_now=True, null=True)
     created = models.DateTimeField(auto_now_add=True, null=True)
     authorized_users = models.ManyToManyField(User, blank=True)
+    members = models.ManyToManyField(User, through='Product_Type_Member', related_name='prod_type_members', blank=True)
 
     @cached_property
     def critical_present(self):
@@ -653,6 +655,7 @@ class Product(models.Model):
     updated = models.DateTimeField(editable=False, null=True, blank=True)
     tid = models.IntegerField(default=0, editable=False)
     authorized_users = models.ManyToManyField(User, blank=True)
+    members = models.ManyToManyField(User, through='Product_Member', related_name='product_members', blank=True)
     prod_numeric_grade = models.IntegerField(null=True, blank=True)
 
     # Metadata
@@ -808,6 +811,18 @@ class Product(models.Model):
     def get_absolute_url(self):
         from django.urls import reverse
         return reverse('view_product', args=[str(self.id)])
+
+
+class Product_Member(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    role = models.IntegerField(default=0)
+
+
+class Product_Type_Member(models.Model):
+    product_type = models.ForeignKey(Product_Type, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    role = models.IntegerField(default=0)
 
 
 class ScanSettings(models.Model):
