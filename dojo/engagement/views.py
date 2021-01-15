@@ -844,6 +844,9 @@ def complete_checklist(request, eid):
 @user_must_be_authorized(Engagement, 'staff', 'eid')
 def add_risk_acceptance(request, eid, fid=None):
     eng = get_object_or_404(Engagement, id=eid)
+    finding = None
+    if fid:
+        finding = get_object_or_404(Finding, id=fid)
 
     if not eng.product.enable_full_risk_acceptance:
         raise PermissionDenied()
@@ -880,7 +883,8 @@ def add_risk_acceptance(request, eid, fid=None):
 
             return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
     else:
-        form = RiskAcceptanceForm(initial={'owner': request.user, 'name': 'Ad Hoc ' + timezone.now().strftime('%b %d, %Y, %H:%M:%S')})
+        risk_acceptance_title_suggestion = 'Accept: %s' % finding
+        form = RiskAcceptanceForm(initial={'owner': request.user, 'name': risk_acceptance_title_suggestion})
 
     finding_choices = Finding.objects.filter(duplicate=False, test__engagement=eng).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
 
