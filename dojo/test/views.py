@@ -737,9 +737,9 @@ def re_import_scan_results(request, tid):
                     # or we may need to change the matching logic here to use the same logic
                     # as the deduplication logic (hashcode fields)
 
-                    # if scan_type == 'Anchore Engine Scan':
-                    #     if item.file_path:
-                    #         findings = findings.filter(file_path=item.file_path)
+                    if scan_type == 'Anchore Engine Scan':
+                        if item.file_path:
+                            findings = findings.filter(file_path=item.file_path)
 
                     if findings:
                         finding = findings[0]

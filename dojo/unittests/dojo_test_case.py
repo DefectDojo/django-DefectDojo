@@ -275,7 +275,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
     def import_scan(self, payload):
         # logger.debug('import_scan payload %s', payload)
         response = self.client.post(reverse('importscan-list'), payload)
-        print(response.content)
+        # print(response.content)
         self.assertEqual(201, response.status_code)
         return json.loads(response.content)
 
