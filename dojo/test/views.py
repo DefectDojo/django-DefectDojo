@@ -723,18 +723,22 @@ def re_import_scan_results(request, tid):
                                                       severity=sev,
                                                       numerical_severity=Finding.get_numerical_severity(sev))
 
-                        # some parsers generate 1 finding for each vulnerable file for each vulnerability
-                        # i.e
-                        # #: title                     : sev : file_path
-                        # 1: CVE-2020-1234 jquery      : 1   : /file1.jar
-                        # 2: CVE-2020-1234 jquery      : 1   : /file2.jar
-                        #
-                        # if we don't filter on file_path, we would find 2 existing findings
-                        # and the logic below will get confused and just create a new finding
-                        # and close the two existing ones. including and duplicates.
-
-                        # if item.file_path:
-                        #     finding = finding.filter(file_path=item.file_path)
+                    # some parsers generate 1 finding for each vulnerable file for each vulnerability
+                    # i.e
+                    # #: title                     : sev : file_path
+                    # 1: CVE-2020-1234 jquery      : 1   : /file1.jar
+                    # 2: CVE-2020-1234 jquery      : 1   : /file2.jar
+                    #
+                    # if we don't filter on file_path, we would find 2 existing findings
+                    # and the logic below will get confused and just create a new finding
+                    # and close the two existing ones. including and duplicates.
+                    #
+                    # for Anchore we fix this here, we may need a broader fix (and testcases)
+                    # or we may need to change the matching logic here to use the same logic
+                    # as the deduplication logic (hashcode fields)
+                    if scan_type == 'Anchore Engine Scan':
+                        if item.file_path:
+                            finding = finding.filter(file_path=item.file_path)
 
                     if len(finding) == 1:
                         finding = finding[0]
