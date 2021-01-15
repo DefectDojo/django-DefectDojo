@@ -701,10 +701,17 @@
     },
     {
         "fields": {
+		"name": "OssIndex Devaudit SCA Scan Importer"
+	},
+        "model": "dojo.test_type",
+        "pk": 192
+    },
+    {
+        "fields": {
             "name": "ScoutSuite Multi-Cloud Security Auditing Tool"
         },
         "model": "dojo.test_type",
-        "pk": 192
+        "pk": 193
     }
 
 ]
