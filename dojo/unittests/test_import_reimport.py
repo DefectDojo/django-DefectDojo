@@ -42,11 +42,14 @@ logger = logging.getLogger(__name__)
 # test methods to be used both by API Test and UI Test
 class ImportReimportMixin(object):
     def __init__(self, *args, **kwargs):
-        self.scans_path = 'dojo/unittests/scans/zap/'
-        self.zap_sample0_filename = self.scans_path + '0_zap_sample.xml'
-        self.zap_sample1_filename = self.scans_path + '1_zap_sample_0_and_new_absent.xml'
-        self.zap_sample2_filename = self.scans_path + '2_zap_sample_0_and_new_endpoint.xml'
-        self.zap_sample3_filename = self.scans_path + '3_zap_sampl_0_and_different_severities.xml'
+        self.scans_path = 'dojo/unittests/scans/'
+        self.zap_sample0_filename = self.scans_path + 'zap/0_zap_sample.xml'
+        self.zap_sample1_filename = self.scans_path + 'zap/1_zap_sample_0_and_new_absent.xml'
+        self.zap_sample2_filename = self.scans_path + 'zap/2_zap_sample_0_and_new_endpoint.xml'
+        self.zap_sample3_filename = self.scans_path + 'zap/3_zap_sampl_0_and_different_severities.xml'
+
+        self.anchore_file_name = self.scans_path + 'anchore/one_vuln_many_files.json'
+        self.scan_type_anchore = 'Anchore Engine Scan'
 
     # import zap scan, testing:
     # - import
@@ -472,6 +475,37 @@ class ImportReimportMixin(object):
         self.assertEqual(mitigated, 0)
         self.assertEqual(not_mitigated, 5)
 
+    # some parsers generate 1 finding for each vulnerable file for each vulnerability
+    # i.e
+    # #: title                     : sev : file_path
+    # 1: CVE-2020-1234 jquery      : 1   : /file1.jar
+    # 2: CVE-2020-1234 jquery      : 1   : /file2.jar
+    #
+    # if we don't filter on file_path, we would find 2 existing findings
+    # and the logic below will get confused and just create a new finding
+    # and close the two existing ones. including and duplicates.
+    #
+    def test_import_0_reimport_0_anchore_file_path(self):
+        import0 = self.import_scan_with_params(self.anchore_file_name, scan_type=self.scan_type_anchore)
+
+        test_id = import0['test']
+
+        active_findings_before = self.get_test_findings_api(test_id, active=True)
+        self.log_finding_summary_json_api(active_findings_before)
+
+        active_findings_count_before = active_findings_before['count']
+        notes_count_before = self.db_notes_count()
+
+        # reimport exact same report
+        reimport0 = self.reimport_scan_with_params(test_id, self.anchore_file_name, scan_type=self.scan_type_anchore)
+
+        active_findings_after = self.get_test_findings_api(test_id, active=True)
+        self.log_finding_summary_json_api(active_findings_after)
+        self.assert_finding_count_json(active_findings_count_before, active_findings_after)
+
+        # reimporting the exact same scan shouldn't create any notes
+        self.assertEqual(notes_count_before, self.db_notes_count())
+
 
 class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
     fixtures = ['dojo_testdata.json']
@@ -539,13 +573,13 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
         test = Test.objects.get(id=response.url.split('/')[-1])
         return {'test': test.id}
 
-    def import_scan_with_params_ui(self, filename, engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None, tags=None, close_old_findings=False):
+    def import_scan_with_params_ui(self, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None, tags=None, close_old_findings=False):
         payload = {
                 "scan_date": '2020-06-04',
                 "minimum_severity": minimum_severity,
                 "active": active,
                 "verified": verified,
-                "scan_type": 'ZAP Scan',
+                "scan_type": scan_type,
                 "file": open(filename),
                 "environment": 1
                 # "version": "1.0.1",
@@ -560,13 +594,13 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
 
         return self.import_scan_ui(engagement, payload)
 
-    def reimport_scan_with_params_ui(self, test_id, filename, minimum_severity='Low', active=True, verified=True, push_to_jira=None, tags=None, close_old_findings=True):
+    def reimport_scan_with_params_ui(self, test_id, filename, scan_type='ZAP Scan', minimum_severity='Low', active=True, verified=True, push_to_jira=None, tags=None, close_old_findings=True):
         payload = {
                 "scan_date": '2020-06-04',
                 "minimum_severity": minimum_severity,
                 "active": active,
                 "verified": verified,
-                "scan_type": 'ZAP Scan',
+                "scan_type": scan_type,
                 "file": open(filename),
                 "version": "1.0.1",
                 "close_old_findings": close_old_findings,

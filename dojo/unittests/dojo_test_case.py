@@ -275,6 +275,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
     def import_scan(self, payload):
         # logger.debug('import_scan payload %s', payload)
         response = self.client.post(reverse('importscan-list'), payload)
+        print(response.content)
         self.assertEqual(201, response.status_code)
         return json.loads(response.content)
 
@@ -290,13 +291,13 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         # print('test.content: ', response.content)
         return json.loads(response.content)
 
-    def import_scan_with_params(self, filename, engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None, tags=None, close_old_findings=False):
+    def import_scan_with_params(self, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None, tags=None, close_old_findings=False):
         payload = {
                 "scan_date": '2020-06-04',
                 "minimum_severity": minimum_severity,
                 "active": active,
                 "verified": verified,
-                "scan_type": 'ZAP Scan',
+                "scan_type": scan_type,
                 "file": open(filename),
                 "engagement": engagement,
                 "version": "1.0.1",
@@ -311,14 +312,14 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
         return self.import_scan(payload)
 
-    def reimport_scan_with_params(self, test_id, filename, engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None, tags=None, close_old_findings=True):
+    def reimport_scan_with_params(self, test_id, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None, tags=None, close_old_findings=True):
         payload = {
                 "test": test_id,
                 "scan_date": '2020-06-04',
                 "minimum_severity": minimum_severity,
                 "active": active,
                 "verified": verified,
-                "scan_type": 'ZAP Scan',
+                "scan_type": scan_type,
                 "file": open(filename),
                 "engagement": engagement,
                 "version": "1.0.1",

@@ -1066,7 +1066,7 @@ class ImportScanSerializer(serializers.Serializer):
         skipped_hashcodes = []
         try:
             items = parser.items
-            logger.debug('starting reimport of %i items.', len(items))
+            logger.debug('starting import of %i items.', len(items))
             i = 0
             for item in items:
                 sev = item.severity
@@ -1302,6 +1302,24 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                         test=test,
                         severity=sev,
                         numerical_severity=Finding.get_numerical_severity(sev)).all()
+
+                # some parsers generate 1 finding for each vulnerable file for each vulnerability
+                # i.e
+                # #: title                     : sev : file_path
+                # 1: CVE-2020-1234 jquery      : 1   : /file1.jar
+                # 2: CVE-2020-1234 jquery      : 1   : /file2.jar
+                #
+                # if we don't filter on file_path, we would find 2 existing findings
+                # and the logic below will get confused and map all incoming findings
+                # from the reimport on the first finding
+                #
+                # for Anchore we fix this here, we may need a broader fix (and testcases)
+                # or we may need to change the matching logic here to use the same logic
+                # as the deduplication logic (hashcode fields)
+
+                # if scan_type == 'Anchore Engine Scan':
+                #     if item.file_path:
+                #         findings = findings.filter(file_path=item.file_path)
 
                 if findings:
                     # existing finding found

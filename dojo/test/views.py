@@ -711,14 +711,14 @@ def re_import_scan_results(request, tid):
                     from titlecase import titlecase
                     item.title = titlecase(item.title)
                     if scan_type == 'Veracode Scan' or scan_type == 'Arachni Scan':
-                        finding = Finding.objects.filter(title=item.title,
+                        findings = Finding.objects.filter(title=item.title,
                                                         test__id=test.id,
                                                         severity=sev,
                                                         numerical_severity=Finding.get_numerical_severity(sev),
                                                         description=item.description)
 
                     else:
-                        finding = Finding.objects.filter(title=item.title,
+                        findings = Finding.objects.filter(title=item.title,
                                                       test__id=test.id,
                                                       severity=sev,
                                                       numerical_severity=Finding.get_numerical_severity(sev))
@@ -730,18 +730,19 @@ def re_import_scan_results(request, tid):
                     # 2: CVE-2020-1234 jquery      : 1   : /file2.jar
                     #
                     # if we don't filter on file_path, we would find 2 existing findings
-                    # and the logic below will get confused and just create a new finding
-                    # and close the two existing ones. including and duplicates.
+                    # and the logic below will get confused and map all incoming findings
+                    # from the reimport on the first finding
                     #
                     # for Anchore we fix this here, we may need a broader fix (and testcases)
                     # or we may need to change the matching logic here to use the same logic
                     # as the deduplication logic (hashcode fields)
-                    if scan_type == 'Anchore Engine Scan':
-                        if item.file_path:
-                            finding = finding.filter(file_path=item.file_path)
 
-                    if len(finding) == 1:
-                        finding = finding[0]
+                    # if scan_type == 'Anchore Engine Scan':
+                    #     if item.file_path:
+                    #         findings = findings.filter(file_path=item.file_path)
+
+                    if findings:
+                        finding = findings[0]
                         if finding.mitigated or finding.is_Mitigated:
                             logger.debug('%i: reactivating: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
                             # it was once fixed, but now back
