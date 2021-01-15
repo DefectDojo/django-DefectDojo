@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='risk_acceptance',
             name='recommendation_details',
-            field=models.TextField(blank=True, help_text='Explanation of recommendation', null=True),
+            field=models.TextField(blank=True, help_text='Explanation of recommendation', null=True, verbose_name="Security Recommendation Details"),
         ),
         migrations.AddField(
             model_name='risk_acceptance',
@@ -95,7 +95,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='risk_acceptance',
             name='recommendation',
-            field=models.CharField(choices=[('A', 'Accept'), ('V', 'Avoid'), ('C', 'Compensate'), ('R', 'Reduce'), ('T', 'Transfer')], default='R', help_text='Recommendation from the security team.', max_length=2),
+            field=models.CharField(choices=[('A', 'Accept'), ('V', 'Avoid'), ('C', 'Compensate'), ('R', 'Reduce'), ('T', 'Transfer')], default='R', help_text='Recommendation from the security team.', max_length=2, verbose_name="Security Recommendation"),
         ),
         migrations.AddField(
             model_name='risk_acceptance',
@@ -127,12 +127,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='risk_acceptance',
             name='expiration_date_handled',
-            field=models.DateTimeField(blank=True, default=None, help_text='When the risk acceptance expiration was handled (manually or by the daily job.', null=True),
+            field=models.DateTimeField(blank=True, default=None, help_text='(readonly) When the risk acceptance expiration was handled (manually or by the daily job.', null=True),
         ),
         migrations.AddField(
             model_name='risk_acceptance',
             name='expiration_date_warned',
-            field=models.DateTimeField(blank=True, default=None, help_text='When the risk acceptance expiration was warned for by the daily job.', null=True),
+            field=models.DateTimeField(blank=True, default=None, help_text='(readonly) When the risk acceptance expiration was warned for by the daily job.', null=True),
         ),
 
     ]
