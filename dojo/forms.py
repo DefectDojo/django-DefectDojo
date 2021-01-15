@@ -412,7 +412,9 @@ class ImportScanForm(forms.Form):
                          ("CCVS Report", "CCVS Report"),
                          ("ORT evaluated model Importer", "ORT evaluated model Importer"),
                          ("SARIF", "SARIF"),
-                         ("Scantist Scan", "Scantist Scan"))
+                         ("OssIndex Devaudit SCA Scan Importer", "OssIndex Devaudit SCA Scan Importer"),
+                         ("Scantist Scan", "Scantist Scan"),
+                         )
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
     scan_date = forms.DateTimeField(
