@@ -648,8 +648,8 @@ DJANGO_MIDDLEWARE_CLASSES = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'dojo.middleware.LoginRequiredMiddleware',
     'social_django.middleware.SocialAuthExceptionMiddleware',
-    'watson.middleware.SearchContextMiddleware',
-    'auditlog.middleware.AuditlogMiddleware',
+    # 'watson.middleware.SearchContextMiddleware',
+    # 'auditlog.middleware.AuditlogMiddleware',
     'crum.CurrentRequestUserMiddleware',
 ]
 
@@ -754,6 +754,7 @@ if env('DD_DJANGO_METRICS_ENABLED'):
 HASHCODE_FIELDS_PER_SCANNER = {
     # In checkmarx, same CWE may appear with different severities: example "sql injection" (high) and "blind sql injection" (low).
     # Including the severity in the hash_code keeps those findings not duplicate
+    'Anchore Engine Scan': ['title', 'severity', 'component_name', 'component_version'],
     'Checkmarx Scan': ['cwe', 'severity', 'file_path'],
     'SonarQube Scan': ['cwe', 'severity', 'file_path'],
     'Dependency Check Scan': ['cve', 'file_path'],
@@ -779,6 +780,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
 # If False and cwe = 0, then the hash_code computation will fallback to legacy algorithm for the concerned finding
 # Default is True (if scanner is not configured here but is configured in HASHCODE_FIELDS_PER_SCANNER, it allows null cwe)
 HASHCODE_ALLOWS_NULL_CWE = {
+    'Anchore Engine Scan': True,
     'Checkmarx Scan': False,
     'SonarQube Scan': False,
     'Dependency Check Scan': True,
@@ -791,6 +793,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'Acunetix Scan': True,
     'Trivy Scan': True,
 }
+
 
 # List of fields that are known to be usable in hash_code computation)
 # 'endpoints' is a pseudo field that uses the endpoints (for dynamic scanners)
@@ -815,6 +818,7 @@ DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE = 'unique_id_from_tool_or_hash_code
 # Key = the scan_type from factory.py (= the test_type)
 # Default is DEDUPE_ALGO_LEGACY
 DEDUPLICATION_ALGORITHM_PER_PARSER = {
+    'Anchore Engine Scan': DEDUPE_ALGO_HASH_CODE,
     'Checkmarx Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Checkmarx Scan': DEDUPE_ALGO_HASH_CODE,
     'SonarQube Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
@@ -904,6 +908,13 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'json'
         },
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'debug.log',
+            'formatter': 'verbose',
+            'mode': 'w',
+        },
     },
     'loggers': {
         'django.request': {
@@ -912,24 +923,24 @@ LOGGING = {
             'propagate': True,
         },
         'django.security': {
-            'handlers': [r'%s' % LOGGING_HANDLER],
+            'handlers': [r'%s' % LOGGING_HANDLER, 'file'],
             'level': '%s' % LOG_LEVEL,
             'propagate': False,
         },
         'celery': {
-            'handlers': [r'%s' % LOGGING_HANDLER],
+            'handlers': [r'%s' % LOGGING_HANDLER, 'file'],
             'level': '%s' % LOG_LEVEL,
             'propagate': False,
             # workaround some celery logging known issue
             'worker_hijack_root_logger': False,
         },
         'dojo': {
-            'handlers': [r'%s' % LOGGING_HANDLER],
+            'handlers': [r'%s' % LOGGING_HANDLER, 'file'],
             'level': '%s' % LOG_LEVEL,
             'propagate': False,
         },
         'dojo.specific-loggers.deduplication': {
-            'handlers': [r'%s' % LOGGING_HANDLER],
+            'handlers': [r'%s' % LOGGING_HANDLER, 'file'],
             'level': '%s' % LOG_LEVEL,
             'propagate': False,
         },
