@@ -686,13 +686,21 @@ class Product(models.Model):
             return self.active_finding_count
         except AttributeError:
             # ideally it's always prefetched and we can remove this code in the future
-            self.active_finding_count = Finding.objects.filter(mitigated__isnull=True,
-                                            active=True,
-                                            false_p=False,
-                                            duplicate=False,
-                                            out_of_scope=False,
+            self.active_finding_count = Finding.objects.filter(active=True,
                                             test__engagement__product=self).count()
             return self.active_finding_count
+
+    @cached_property
+    def findings_active_verified_count(self):
+        try:
+            # if prefetched, it's already there
+            return self.active_verified_finding_count
+        except AttributeError:
+            # ideally it's always prefetched and we can remove this code in the future
+            self.active_verified_finding_count = Finding.objects.filter(active=True,
+                                            verified=True,
+                                            test__engagement__product=self).count()
+            return self.active_verified_finding_count
 
     # @property
     # def active_engagement_count(self):
