@@ -29,8 +29,13 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='risk_acceptance',
+            name='recommendation',
+            field=models.CharField(choices=[('A', 'Accept'), ('V', 'Avoid'), ('C', 'Compensate'), ('R', 'Reduce'), ('T', 'Transfer')], default='R', help_text='Recommendation from the security team.', max_length=2, verbose_name='Security Recommendation'),
+        ),
+        migrations.AddField(
+            model_name='risk_acceptance',
             name='recommendation_details',
-            field=models.TextField(blank=True, help_text='Explanation of recommendation', null=True, verbose_name="Security Recommendation Details"),
+            field=models.TextField(blank=True, help_text='Explanation of security recommendation', null=True, verbose_name='Security Recommendation Details'),
         ),
         migrations.AddField(
             model_name='risk_acceptance',
@@ -91,11 +96,6 @@ class Migration(migrations.Migration):
             model_name='risk_acceptance',
             name='path',
             field=models.FileField(blank=True, null=True, upload_to='risk/%Y/%m/%d', verbose_name='Proof'),
-        ),
-        migrations.AddField(
-            model_name='risk_acceptance',
-            name='recommendation',
-            field=models.CharField(choices=[('A', 'Accept'), ('V', 'Avoid'), ('C', 'Compensate'), ('R', 'Reduce'), ('T', 'Transfer')], default='R', help_text='Recommendation from the security team.', max_length=2, verbose_name="Security Recommendation"),
         ),
         migrations.AddField(
             model_name='risk_acceptance',
