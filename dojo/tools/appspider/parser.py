@@ -3,14 +3,15 @@ from defusedxml import ElementTree
 from dojo.models import Endpoint, Finding
 import html2text
 import urllib.parse
+import logging
 
 
 class AppSpiderXMLParser(object):
     def __init__(self, filename, test):
 
         if "VulnerabilitiesSummary.xml" not in str(filename):
-            raise NamespaceErr('Please ensure that you are uploading AppSpider\'s VulnerabilitiesSummary.xml file.'
-                               'At this time it is the only file that is consumable by DefectDojo.')
+            logging.warning('Please ensure that you are uploading AppSpider\'s VulnerabilitiesSummary.xml file.'
+                            'At this time it is the only file that is consumable by DefectDojo.')
 
         vscan = ElementTree.parse(filename)
         root = vscan.getroot()
