@@ -1082,3 +1082,10 @@ def process_jira_epic_form(request, engagement=None):
         logger.debug('no jira_project for this engagement, skipping epic push')
 
     return not error, jira_epic_form
+
+
+# some character will mess with JIRA formatting, for example when constructing a link:
+# [name|url]. if name contains a '|' is will break it
+# so [%s|%s] % (escape_for_jira(name), url)
+def escape_for_jira(text):
+    return text.replace('|', '%7D')

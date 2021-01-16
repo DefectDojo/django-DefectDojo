@@ -47,6 +47,7 @@ from dojo.notifications.helper import create_notification
 from django.template.defaultfilters import pluralize
 from django.db.models import Q, QuerySet, Prefetch, Count
 import dojo.jira_link.helper as jira_helper
+import dojo.risk_acceptance.helper as ra_helper
 import dojo.finding.helper as finding_helper
 
 logger = logging.getLogger(__name__)

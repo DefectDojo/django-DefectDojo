@@ -1913,12 +1913,6 @@ class Finding(models.Model):
             hash_string = str(fields_to_hash).encode('utf-8').strip()
         return hashlib.sha256(hash_string).hexdigest()
 
-    def remove_from_any_risk_acceptance(self):
-        for r in self.risk_acceptance_set.all():
-            r.accepted_findings.remove(self)
-            if not r.accepted_findings.exists():
-                r.delete()
-
     def duplicate_finding_set(self):
         if self.duplicate:
             if self.duplicate_finding is not None:
