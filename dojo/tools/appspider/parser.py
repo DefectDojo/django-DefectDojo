@@ -8,6 +8,10 @@ import logging
 
 class AppSpiderXMLParser(object):
     def __init__(self, filename, test):
+        self.items = []
+
+        if filename is None:
+            return
 
         if "VulnerabilitiesSummary.xml" not in str(filename):
             logging.warning('Please ensure that you are uploading AppSpider\'s VulnerabilitiesSummary.xml file.'
