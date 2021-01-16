@@ -196,19 +196,18 @@ def unaccepted_message_creator(risk_acceptance, heads_up_days=0):
 
 
 def post_jira_comments(risk_acceptance, findings, message_factory, heads_up_days=0):
+    if not risk_acceptance:
+        return
+
     jira_project = jira_helper.get_jira_project(risk_acceptance.engagement)
-    logger.debug("1")
 
     if jira_project and jira_project.risk_acceptance_expiration_notification:
-        logger.debug("2")
         jira_instance = jira_helper.get_jira_instance(risk_acceptance.engagement)
 
         if jira_instance:
-            logger.debug("3")
             jira_comment = message_factory(risk_acceptance, heads_up_days)
 
             for finding in findings:
-                logger.debug("4")
                 if finding.has_jira_issue:
                     logger.debug("Creating JIRA comment for something risk acceptance related")
                     jira_helper.add_simple_jira_comment(jira_instance, finding.jira_issue, jira_comment)
@@ -272,17 +271,17 @@ def risk_unaccept(finding):
     logger.debug('unaccepting finding %i:%s', finding.id, finding)
     # removing from ManyToMany will not fail for non-existing entries
     risk_acceptance = finding.active_risk_acceptance
+    if risk_acceptance:
+        # for now also remove from any other risk acceptance as differianting between simple and full here would clutter the menu.
+        # also currently you can only add a finding to 1 risk acceptance, so this would only affect old findings added to multiple
+        # risk acceptances in some obcure way
+        remove_from_any_risk_acceptance(finding)
+        if not finding.mitigated and not finding.false_p and not finding.out_of_scope and not finding.risk_acceptance_set.exists():
+            finding.active = True
+            finding.save(dedupe_option=False)
 
-    # for now also remove from any other risk acceptance as differianting between simple and full here would clutter the menu.
-    # also currently you can only add a finding to 1 risk acceptance, so this would only affect old findings added to multiple
-    # risk acceptances in some obcure way
-    remove_from_any_risk_acceptance(finding)
-    if not finding.mitigated and not finding.false_p and not finding.out_of_scope and not finding.risk_acceptance_set.exists():
-        finding.active = True
-        finding.save(dedupe_option=False)
-
-    # logger.debug('posting comments for unaccept')
-    post_jira_comments(risk_acceptance, [finding], unaccepted_message_creator)
+        # logger.debug('posting comments for unaccept')
+        post_jira_comments(risk_acceptance, [finding], unaccepted_message_creator)
 
 
 def remove_from_any_risk_acceptance(finding):
