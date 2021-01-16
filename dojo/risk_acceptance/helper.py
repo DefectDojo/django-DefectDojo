@@ -112,11 +112,7 @@ def add_findings_to_risk_acceptance(risk_acceptance, findings):
     risk_acceptance.save()
 
     # best effort jira integration, no status changes
-    post_jira_comments(risk_acceptance, findings, unaccepted_message_creator)
-
-
-def unaccept_finding(finding):
-    find.risk_unaccept()
+    post_jira_comments(risk_acceptance, findings, accepted_message_creator)
 
 
 @task(name='risk_acceptance_expiration_handler')
@@ -263,6 +259,7 @@ def simple_risk_accept(finding):
     # risk accepted, so finding no longer considered active
     finding.active = False
     finding.save(dedupe_option=False)
+    post_jira_comments(risk_acceptance, [finding], accepted_message_creator)
 
 
 def risk_unaccept(finding):
@@ -277,6 +274,8 @@ def risk_unaccept(finding):
     if not finding.mitigated and not finding.false_p and not finding.out_of_scope and not finding.risk_acceptance_set.exists():
         finding.active = True
         finding.save(dedupe_option=False)
+
+    post_jira_comments(risk_acceptance, [finding], unaccepted_message_creator)
 
 # @property
 # def is_simple_risk_accepted(finding):
