@@ -1,6 +1,6 @@
 from django.test import TestCase
 from dojo.tools.appspider.parser import AppSpiderXMLParser
-from dojo.models import Test, Finding
+from dojo.models import Product, Engagement, Test, Finding
 
 
 class TestAppSpiderXMLParser(TestCase):
@@ -9,8 +9,11 @@ class TestAppSpiderXMLParser(TestCase):
         self.assertEqual(0, len(parser.items))
 
     def test_appspider_parser_has_one_finding(self):
+        test = Test()
+        test.engagement = Engagement()
+        test.engagement.product = Product()
         testfile = open("dojo/unittests/scans/appspider/one_vuln.xml")
-        parser = AppSpiderXMLParser(testfile, Test())
+        parser = AppSpiderXMLParser(testfile, test)
         testfile.close()
         self.assertEqual(1, len(parser.items))
         item = parser.items[0]
