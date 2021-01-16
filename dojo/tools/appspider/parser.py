@@ -29,21 +29,7 @@ class AppSpiderXMLParser(object):
         dupes = dict()
 
         for finding in root.iter('Vuln'):
-
-            severity = finding.find("AttackScore").text
-            if severity == "0-Safe":
-                severity = "Info"
-            elif severity == "1-Informational":
-                severity = "Low"
-            elif severity == "2-Low":
-                severity = "Medium"
-            elif severity == "3-Medium":
-                severity = "High"
-            elif severity == "4-High":
-                severity = "Critical"
-            else:
-                severity = "Info"
-
+            severity = convert_severity(finding.find("AttackScore").text)
             title = finding.find("VulnType").text
             description = finding.find("Description").text
             mitigation = finding.find("Recommendation").text
@@ -100,3 +86,18 @@ class AppSpiderXMLParser(object):
                                                        product=test.engagement.product))
 
         self.items = list(dupes.values())
+
+    @staticmethod
+    def convert_severity(val):
+        severity = "Info"
+        if val == "0-Safe":
+            severity = "Info"
+        elif val == "1-Informational":
+            severity = "Low"
+        elif val == "2-Low":
+            severity = "Medium"
+        elif val == "3-Medium":
+            severity = "High"
+        elif val == "4-High":
+            severity = "Critical"
+        return severity
