@@ -1,15 +1,8 @@
-
-
-from datetime import datetime
 from xml.dom import NamespaceErr
-
 from defusedxml import ElementTree
-
 from dojo.models import Endpoint, Finding
 import html2text
 import urllib.parse
-
-__author__ = "Jay Paz"
 
 
 class AppSpiderXMLParser(object):
