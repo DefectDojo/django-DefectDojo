@@ -22,7 +22,7 @@ def expire_now(risk_acceptance):
                 finding.active = True
                 if risk_acceptance.restart_sla_expired:
                     finding.sla_start_date = timezone.now().date()
-                finding.save()
+                finding.save(dedupe_option=False)
                 reactivated_findings.append(finding)
                 # findings remain in this risk acceptance for reporting / metrics purposes
             else:
@@ -53,7 +53,7 @@ def reinstate(risk_acceptance, old_expiration_date):
             if finding.active:
                 logger.debug('%i:%s: accepting a.k.a. deactivating finding', finding.id, finding)
                 finding.active = False
-                finding.save()
+                finding.save(dedupe_option=False)
             else:
                 logger.debug('%i:%s: already inactive, not making any changes', finding.id, finding)
 
@@ -65,7 +65,7 @@ def reinstate(risk_acceptance, old_expiration_date):
 def delete(eng, risk_acceptance):
     for finding in risk_acceptance.accepted_findings.all():
         finding.active = True
-        finding.save()
+        finding.save(dedupe_option=False)
 
     risk_acceptance.accepted_findings.clear()
     eng.risk_acceptance.remove(risk_acceptance)
@@ -82,14 +82,14 @@ def remove_finding_from_risk_acceptance(risk_acceptance, finding):
     logger.debug('removing finding %i from risk acceptance %i', finding.id, risk_acceptance.id)
     risk_acceptance.accepted_findings.remove(finding)
     finding.active = True
-    finding.save()
+    finding.save(dedupe_option=False)
 
 
 def add_findings_to_risk_acceptance(risk_acceptance, findings):
     for finding in findings:
         if finding.active:
             finding.active = False
-            finding.save()
+            finding.save(dedupe_option=False)
         risk_acceptance.accepted_findings.add(finding)
     risk_acceptance.save()
 
@@ -176,7 +176,7 @@ def get_expired_risk_acceptances_to_handle():
 
 def get_almost_expired_risk_acceptances_to_handle(heads_up_days):
     risk_acceptances = Risk_Acceptance.objects.filter(expiration_date__isnull=False, expiration_date_handled__isnull=True, expiration_date_warned__isnull=True,
-            expiration_date__date__gte=timezone.now().date() - relativedelta(days=heads_up_days))
+            expiration_date__date__lte=timezone.now().date() + relativedelta(days=heads_up_days), expiration_date__date__gte=timezone.now().date())
     return prefetch_for_expiration(risk_acceptances)
 
 
