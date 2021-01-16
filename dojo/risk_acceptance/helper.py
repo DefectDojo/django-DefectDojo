@@ -254,7 +254,7 @@ def get_simple_risk_acceptance(finding, create=True):
                 'approval document or compensating control information. Unaccept and use full risk acceptance if you '
                 'need to have more control over those fields.'
         )
-        self.test.engagement.risk_acceptance.add(simple_risk_acceptance)
+        find.test.engagement.risk_acceptance.add(simple_risk_acceptance)
     return simple_risk_acceptance
 
 
