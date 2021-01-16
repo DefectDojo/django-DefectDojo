@@ -3474,8 +3474,6 @@ class ChoiceAnswer(Answer):
 # auditlog.register(Answered_Survey)
 # auditlog.register(Question)
 # auditlog.register(Engagement_Survey)
-
-
 def enable_disable_auditlog(enable=True):
     if enable:
         # Register for automatic logging to database
@@ -3500,6 +3498,7 @@ def enable_disable_auditlog(enable=True):
         auditlog.unregister(Risk_Acceptance)
         auditlog.unregister(Finding_Template)
         auditlog.unregister(Cred_User)
+
 
 from dojo.utils import get_system_setting
 enable_disable_auditlog(enable=get_system_setting('enable_auditlog'))  # on startup choose safe to retrieve system settiung)
