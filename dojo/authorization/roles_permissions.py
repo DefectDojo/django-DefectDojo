@@ -8,18 +8,18 @@ class Roles(IntEnum):
     Maintainer = 3
     Owner = 4
 
-
-def get_role_as_string(id):
-    switcher = {
-        0: "Reader",
-        1: "Technical User",
-        2: "Writer",
-        3: "Maintainer",
-        4: "Owner"
-    }
-    return switcher.get(id, "Invalid role")
+    @classmethod
+    def choices(cls):
+        return [(key.value, key.name) for key in cls]
 
 
+def django_enum(cls):
+    # decorator needed to enable enums in django templates
+    cls.do_not_call_in_templates = True
+    return cls
+
+
+@django_enum
 class Permissions(IntEnum):
     Product_Type_Add_Product = 1001
     Product_Type_View = 1002

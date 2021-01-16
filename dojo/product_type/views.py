@@ -15,7 +15,7 @@ from dojo.utils import get_page_items, add_breadcrumb
 from dojo.notifications.helper import create_notification
 from django.db.models import Count, Q
 from django.db.models.query import QuerySet
-from dojo.authorization.roles_permissions import Permissions, Roles, get_role_as_string
+from dojo.authorization.roles_permissions import Permissions, Roles
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.product_type.queries import get_authorized_product_types, get_authorized_members
@@ -43,6 +43,7 @@ def product_type(request):
     add_breadcrumb(title="Product Type List", top_level=True, request=request)
     return render(request, 'dojo/product_type.html', {
         'name': 'Product Type List',
+        'Permissions': Permissions,
         'metric': False,
         'user': request.user,
         'pts': pts,
@@ -104,6 +105,7 @@ def view_product_type(request, ptid):
     add_breadcrumb(title="View Product Type", top_level=False, request=request)
     return render(request, 'dojo/view_product_type.html', {
         'name': 'View Product Type',
+        'Permissions': Permissions,
         'metric': False,
         'user': request.user,
         'pt': pt,
@@ -257,30 +259,30 @@ def edit_product_type_member(request, ptid, memberid):
 @user_is_authorized(Product_Type_Member, Permissions.Product_Type_Remove_Member, 'memberid')
 def delete_product_type_member(request, ptid, memberid):
     member = get_object_or_404(Product_Type_Member, pk=memberid)
-    memberform = Delete_Product_Type_MemberForm(instance=member, initial={'role_value': get_role_as_string(member.role)})
+    memberform = Delete_Product_Type_MemberForm(instance=member)
     if request.method == 'POST':
         memberform = Delete_Product_Type_MemberForm(request.POST, instance=member)
-        if memberform.is_valid():
-            member = memberform.instance
-            if member.role == Roles.Owner:
-                owners = Product_Type_Member.objects.filter(product_type=member.product_type, role=Roles.Owner).count()
-                if owners <= 1:
-                    messages.add_message(request,
-                                        messages.SUCCESS,
-                                        'There must be at least one owner.',
-                                        extra_tags='alert-warning')
-                    return HttpResponseRedirect(reverse('view_product_type', args=(ptid, )))
-
-            user = member.user
-            member.delete()
-            messages.add_message(request,
-                                messages.SUCCESS,
-                                'Product type member deleted successfully.',
-                                extra_tags='alert-success')
-            if user == request.user:
-                return HttpResponseRedirect(reverse('product_type'))
-            else:
+#        if memberform.is_valid():
+        member = memberform.instance
+        if member.role == Roles.Owner:
+            owners = Product_Type_Member.objects.filter(product_type=member.product_type, role=Roles.Owner).count()
+            if owners <= 1:
+                messages.add_message(request,
+                                    messages.SUCCESS,
+                                    'There must be at least one owner.',
+                                    extra_tags='alert-warning')
                 return HttpResponseRedirect(reverse('view_product_type', args=(ptid, )))
+
+        user = member.user
+        member.delete()
+        messages.add_message(request,
+                            messages.SUCCESS,
+                            'Product type member deleted successfully.',
+                            extra_tags='alert-success')
+        if user == request.user:
+            return HttpResponseRedirect(reverse('product_type'))
+        else:
+            return HttpResponseRedirect(reverse('view_product_type', args=(ptid, )))
     add_breadcrumb(title="Delete Product Type Member", top_level=False, request=request)
     return render(request, 'dojo/delete_product_type_member.html', {
         'name': 'Delete Product Type Member',

@@ -177,20 +177,9 @@ class Delete_Product_TypeForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
                             widget=forms.widgets.HiddenInput())
 
-    user = forms.ModelChoiceField(
-        queryset=None,
-        required=True, label="User")
-
-    def __init__(self, *args, **kwargs):
-        users = Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name')
-        super(Delete_Product_Type_MemberForm, self).__init__(*args, **kwargs)
-        self.fields['product_type'].disabled = True
-        self.fields['user'].disabled = True
-        self.fields['user'].queryset = users
-
     class Meta:
         model = Product_Type
-        exclude = ['name', 'critical_product', 'key_product']
+        exclude = ['name', 'description', 'critical_product', 'key_product']
 
 
 class Add_Product_Type_MemberForm(forms.ModelForm):
@@ -199,7 +188,7 @@ class Add_Product_Type_MemberForm(forms.ModelForm):
         queryset=None,
         required=True, label="User")
 
-    role = forms.ChoiceField(choices=[(tag.value, tag) for tag in Roles])
+    role = forms.ChoiceField(choices=Roles.choices())
 
     def __init__(self, *args, **kwargs):
         super(Add_Product_Type_MemberForm, self).__init__(*args, **kwargs)
@@ -214,7 +203,7 @@ class Add_Product_Type_MemberForm(forms.ModelForm):
 
 class Edit_Product_Type_MemberForm(forms.ModelForm):
 
-    role = forms.ChoiceField(choices=[(tag.value, tag) for tag in Roles])
+    role = forms.ChoiceField(choices=Roles.choices())
 
     def __init__(self, *args, **kwargs):
         users = Dojo_User.objects.order_by('first_name', 'last_name')
@@ -230,7 +219,7 @@ class Edit_Product_Type_MemberForm(forms.ModelForm):
 
 class Delete_Product_Type_MemberForm(forms.ModelForm):
 
-    role_value = forms.CharField(required=False, label="Role")
+    role = forms.ChoiceField(choices=Roles.choices())
 
     def __init__(self, *args, **kwargs):
         users = Dojo_User.objects.order_by('first_name', 'last_name')
@@ -238,7 +227,7 @@ class Delete_Product_Type_MemberForm(forms.ModelForm):
         self.fields['product_type'].disabled = True
         self.fields['user'].disabled = True
         self.fields['user'].queryset = users
-        self.fields['role_value'].disabled = True
+        self.fields['role'].disabled = True
 
     class Meta:
         model = Product_Type_Member

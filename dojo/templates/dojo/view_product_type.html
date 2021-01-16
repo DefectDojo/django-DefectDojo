@@ -17,7 +17,7 @@
                                       <span class="caret"></span>
                                   </button>
                         <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                            {% if user|user_has_product_type_edit_permission:pt %}
+                            {% if pt|has_object_permission:Permissions.Product_Type_Edit %}
                             <li>
                                 <a class="" href="{% url 'edit_product_type' pt.id %}">
                                 <i class="fa fa-pencil-square-o"></i> Edit</a>
@@ -28,7 +28,7 @@
                                 <a class="" href="{% url 'product_type_report' pt.id %}">
                                 <i class="fa fa-file-text-o"></i> Product Type Report</a>
                             </li>
-                            {% if user|user_has_product_type_delete_permission:pt %}
+                            {% if pt|has_object_permission:Permissions.Product_Type_Delete %}
                             <li role="separator" class="divider"></li>
                             <li>
                                 <a class="" href="{% url 'delete_product_type' pt.id %}">
@@ -48,7 +48,7 @@
                 <div class="panel-heading">
                     <div class="clearfix">
                         <h4 class="pull-left">Products</h4>
-                        {% if user|user_has_product_type_add_product_permission:pt %}
+                        {% if pt|has_object_permission:Permissions.Product_Type_Add_Product %}
                         <div class="dropdown pull-right">
                             <div class="btn-group">
                                 <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
@@ -115,7 +115,7 @@
                     <div class="panel-heading">
                         <div class="clearfix">
                             <h4 class="pull-left">Members</h4>
-                            {% if user|user_has_product_type_manage_members_permission:pt %}
+                            {% if pt|has_object_permission:Permissions.Product_Type_Manage_Members %}
                             <div class="dropdown pull-right">
                                 <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                         data-toggle="dropdown" aria-expanded="true">
@@ -151,13 +151,13 @@
                                             <li class="dropdown" style="list-style:none;position:absolute">
                                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
                                                 <ul class="dropdown-menu">
-                                                    {% if user|user_has_product_type_manage_members_permission:pt %}
+                                                    {% if pt|has_object_permission:Permissions.Product_Type_Manage_Members %}
                                                     <li>
                                                         <a class="" href="{% url 'edit_product_type_member' pt.id member.id %}">
                                                         <i class="fa fa-pencil-square-o"></i> Edit</a>
                                                     </li>
                                                     {% endif %}
-                                                    {% if user|user_has_product_type_remove_member_permission:member %}
+                                                    {% if member|has_object_permission:Permissions.Product_Type_Remove_Member %}
                                                     <li>
                                                         <a class="" href="{% url 'delete_product_type_member' pt.id member.id %}">
                                                         <i class="fa fa-trash"></i> Delete</a>
@@ -167,7 +167,7 @@
                                             </li>
                                             </ul>
                                         </td>
-                                        <td>{% user_full_name member.user %}</td>
+                                        <td>{{ member.user|full_name }}</td>
                                         <td>{% role_as_string member.role %}</td>
                                     </tr>
                                 {% endfor %}
