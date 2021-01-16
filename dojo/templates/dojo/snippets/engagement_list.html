@@ -31,7 +31,7 @@
                     <th class="text-center">JIRA</td>
                     {% endif %}
                     <th class="text-center">Tests</th>
-                    <th class="text-center">Open</th>
+                    <th class="text-center">Active (Verified)</th>
                     <th class="text-center">Mitigated</th>
                     <th class="text-center">Accepted</th>
                     <th class="text-center">All</th>
@@ -84,8 +84,13 @@
                             </li>
                             <li class="divider"></li>
                             <li role="presentation">
+                              <a href="{% url 'engagment_open_findings' eng.id %}?active=2&false_p=3&duplicate=2&out_of_scope=1&test__engagement={{ eng.id }}">
+                                <i class="fa fa-file-text-o"></i> View Active Findings
+                              </a>
+                            </li>
+                            <li role="presentation">
                               <a href="{% url 'engagment_open_findings' eng.id %}?active=2&verified=2&false_p=3&duplicate=2&out_of_scope=1&test__engagement={{ eng.id }}">
-                                <i class="fa fa-file-text-o"></i> View Open Findings
+                                <i class="fa fa-file-text-o"></i> View Active and Verified Findings
                               </a>
                             </li>
                             <li role="presentation">
@@ -198,7 +203,7 @@
                       {% endif %}
                       </div>
                     </td>
-                    <td class="text-center">{{ eng.count_findings_open }}</td>
+                    <td class="text-center">{{ eng.count_findings_open }}&nbsp;({{ eng.count_findings_open_verified}})</td>
                     <td class="text-center">{{ eng.count_findings_close }}</td>
                     <td class="text-center">{{ eng.count_findings_accepted }}</td>
                     <td class="text-center">{{ eng.count_findings_all }}</td>
