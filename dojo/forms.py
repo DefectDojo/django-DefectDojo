@@ -359,6 +359,7 @@ class ImportScanForm(forms.Form):
                          ("SpotBugs Scan", "SpotBugs Scan"),
                          ("AWS Scout2 Scan", "AWS Scout2 Scan"),
                          ("AWS Prowler Scan", "AWS Prowler Scan"),
+                         ("Scout Suite Scan", "Scout Suite Scan"),
                          ("IBM AppScan DAST", "IBM AppScan DAST"),
                          ("PHP Security Audit v2", "PHP Security Audit v2"),
                          ("PHP Symfony Security Check", "PHP Symfony Security Check"),
