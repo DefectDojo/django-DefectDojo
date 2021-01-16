@@ -27,7 +27,7 @@ class AppSpiderXMLParser(object):
         dupes = dict()
 
         for finding in root.iter('Vuln'):
-            severity = convert_severity(finding.find("AttackScore").text)
+            severity = self.convert_severity(finding.find("AttackScore").text)
             title = finding.find("VulnType").text
             description = finding.find("Description").text
             mitigation = finding.find("Recommendation").text
