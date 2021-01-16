@@ -272,9 +272,6 @@ def risk_unaccept(finding):
     logger.debug('unaccepting finding %i:%s', finding.id, finding)
     # removing from ManyToMany will not fail for non-existing entries
     risk_acceptance = finding.active_risk_acceptance
-    # logger.debug('active risk acceptance: %i:%s', risk_acceptance.id, risk_acceptance)
-    get_simple_risk_acceptance(finding).accepted_findings.remove(finding)
-    # risk acceptance no longer in place, so reactivate, but only when it makes sense
 
     # for now also remove from any other risk acceptance as differianting between simple and full here would clutter the menu.
     # also currently you can only add a finding to 1 risk acceptance, so this would only affect old findings added to multiple
@@ -291,13 +288,3 @@ def risk_unaccept(finding):
 def remove_from_any_risk_acceptance(finding):
     for r in finding.risk_acceptance_set.all():
         r.accepted_findings.remove(finding)
-
-# @property
-# def is_simple_risk_accepted(finding):
-
-#     if finding.get_simple_risk_acceptance(create=False) is not None:
-#         return finding.get_simple_risk_acceptance().accepted_findings.filter(id=finding.id).exists()
-#         # print('exists: ', exists)
-#         # return exists
-
-#     return False
