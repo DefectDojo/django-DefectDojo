@@ -270,7 +270,7 @@ def get_jira_connection_raw(jira_server, jira_username, jira_password):
 
         messages.add_message(get_current_request(),
                             messages.ERROR,
-                            'Unable to authenticate. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + e.text,
+                            'Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + e.text,
                             extra_tags='alert-danger')
         raise e
 
@@ -280,7 +280,7 @@ def get_jira_connection_raw(jira_server, jira_username, jira_password):
 
         messages.add_message(get_current_request(),
                             messages.ERROR,
-                            'Unable to authenticate. Please check the URL, username, password, IP whitelist, Network connection. Details in alert on top right.',
+                            'Unable to authenticate to JIRA. Please check the URL, username, password, IP whitelist, Network connection. Details in alert on top right.',
                             extra_tags='alert-danger')
         raise re
 
