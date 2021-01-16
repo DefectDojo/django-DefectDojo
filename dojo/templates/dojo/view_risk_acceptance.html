@@ -348,5 +348,8 @@
     $(document).on('keypress', null, 'e', function () {
         window.location.assign('{% url 'edit_risk_acceptance' eng.id risk_acceptance.id %}');
     });
+
+    {% include 'dojo/snippets/risk_acceptance_actions_snippet_js.html' %}
+
 </script>
 {% endblock %}

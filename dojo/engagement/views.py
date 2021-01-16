@@ -857,10 +857,15 @@ def add_risk_acceptance(request, eid, fid=None):
 
     if request.method == 'POST':
         form = RiskAcceptanceForm(request.POST, request.FILES)
-        logger.debug(vars(request.POST))
         if form.is_valid():
-            logger.debug(vars(form))
-            risk_acceptance = form.save()
+            try:
+                # we sometimes see a weird exception here, but are unable to reproduce.
+                # we add some logging in case it happens
+                risk_acceptance = form.save()
+            except Exception as e:
+                logger.debug(vars(request.POST))
+                logger.error(vars(form))
+                logger.exception(e)
 
             eng.risk_acceptance.add(risk_acceptance)
 
@@ -985,9 +990,9 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
         if 'remove_finding' in request.POST:
             finding = get_object_or_404(
                 Finding, pk=request.POST['remove_finding_id'])
-            risk_acceptance.accepted_findings.remove(finding)
-            finding.active = True
-            finding.save()
+
+            ra_helper.remove_finding_from_risk_acceptance(risk_acceptance, finding)
+
             messages.add_message(
                 request,
                 messages.SUCCESS,
@@ -1017,12 +1022,9 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
             errors = errors or not add_findings_form.is_valid()
             if not errors:
                 findings = add_findings_form.cleaned_data['accepted_findings']
-                for finding in findings:
-                    if finding.active:
-                        finding.active = False
-                        finding.save()
-                    risk_acceptance.accepted_findings.add(finding)
-                risk_acceptance.save()
+
+                ra_helper.add_findings_to_risk_acceptance(risk_acceptance, findings)
+
                 messages.add_message(
                     request,
                     messages.SUCCESS,
@@ -1215,7 +1217,7 @@ def delete_risk_acceptance(request, eid, raid):
     risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
     eng = get_object_or_404(Engagement, pk=eid)
 
-    ra_helper.delete(risk_acceptance)
+    ra_helper.delete(eng, risk_acceptance)
 
     messages.add_message(
         request,

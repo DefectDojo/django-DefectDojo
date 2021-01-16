@@ -62,7 +62,7 @@ def reinstate(risk_acceptance, old_expiration_date):
     risk_acceptance.save()
 
 
-def delete(risk_acceptance):
+def delete(eng, risk_acceptance):
     for finding in risk_acceptance.accepted_findings.all():
         finding.active = True
         finding.save()
@@ -76,6 +76,22 @@ def delete(risk_acceptance):
 
     risk_acceptance.path.delete()
     risk_acceptance.delete()
+
+
+def remove_finding_from_risk_acceptance(risk_acceptance, finding):
+    logger.debug('removing finding %i from risk acceptance %i', finding.id, risk_acceptance.id)
+    risk_acceptance.accepted_findings.remove(finding)
+    finding.active = True
+    finding.save()
+
+
+def add_findings_to_risk_acceptance(risk_acceptance, findings):
+    for finding in findings:
+        if finding.active:
+            finding.active = False
+            finding.save()
+        risk_acceptance.accepted_findings.add(finding)
+    risk_acceptance.save()
 
 
 @task(name='risk_acceptance_expiration_handler')

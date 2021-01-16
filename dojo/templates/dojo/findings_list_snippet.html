@@ -281,7 +281,7 @@
                                               {% endif %}
                                               {% if finding.test.engagement.product.enable_full_risk_acceptance %}
                                                 <li role="presentation">
-                                                    <a href ="{% url 'add_risk_acceptance$' finding.test.engagement.id finding.id %}">
+                                                    <a href ="{% url 'add_risk_acceptance' finding.test.engagement.id finding.id %}">
                                                         <i class="fa fa-exclamation-circle"></i> Add Risk Acceptance...
                                                     </a>
                                                 </li>
