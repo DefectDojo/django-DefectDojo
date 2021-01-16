@@ -269,11 +269,10 @@ def simple_risk_accept(finding):
 
 
 def risk_unaccept(finding):
-    logger.debug('unaccepting finding')
+    logger.debug('unaccepting finding %i:%s', finding.id, finding)
     # removing from ManyToMany will not fail for non-existing entries
     risk_acceptance = finding.active_risk_acceptance
-    print(vars(risk_acceptance))
-    logger.debug('active risk acceptance: %i:%s', risk_acceptance.id, risk_acceptance)
+    # logger.debug('active risk acceptance: %i:%s', risk_acceptance.id, risk_acceptance)
     get_simple_risk_acceptance(finding).accepted_findings.remove(finding)
     # risk acceptance no longer in place, so reactivate, but only when it makes sense
 
@@ -285,7 +284,7 @@ def risk_unaccept(finding):
         finding.active = True
         finding.save(dedupe_option=False)
 
-    logger.debug('posting comments for unaccept')
+    # logger.debug('posting comments for unaccept')
     post_jira_comments(risk_acceptance, [finding], unaccepted_message_creator)
 
 
