@@ -878,11 +878,8 @@ def add_risk_acceptance(request, eid, fid=None):
                 risk_acceptance.notes.add(notes)
 
             findings = form.cleaned_data['accepted_findings']
-            for finding in findings:
-                if finding.active:
-                    finding.active = False
-                    finding.save()
-            risk_acceptance.accepted_findings.set(findings)
+
+            risk_acceptance = ra_helper.add_findings_to_risk_acceptance(risk_acceptance, findings)
 
             messages.add_message(
                 request,

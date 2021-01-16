@@ -1819,60 +1819,6 @@ class Finding(models.Model):
     def unaccepted_open_findings(cls):
         return cls.objects.filter(active=True, verified=True, duplicate=False, risk_acceptance__isnull=True)
 
-    # gets or creates the simple risk acceptance instance connected to the engagement. only contains this finding if it is simple accepted
-    def get_simple_risk_acceptance(self, create=True):
-        # check if has test, if not, return False to avoid errors on test being None later on. This can happen when creating a finding from a template
-        if not hasattr(self, 'test'):
-            return None
-
-        if hasattr(self.test.engagement, 'simple_risk_acceptance') and len(self.test.engagement.simple_risk_acceptance) > 0:
-            return self.test.engagement.simple_risk_acceptance[0]
-
-        simple_risk_acceptance = self.test.engagement.risk_acceptance.filter(name=Finding.SIMPLE_RISK_ACCEPTANCE_NAME).prefetch_related('accepted_findings').first()
-        if simple_risk_acceptance is None and create:
-            from dojo.utils import get_current_user
-            user = get_current_user()
-            simple_risk_acceptance = Risk_Acceptance.objects.create(
-                    owner=user if user else User.objects.first(),
-                    name=Finding.SIMPLE_RISK_ACCEPTANCE_NAME,
-                    decision=Risk_Acceptance.TREATMENT_ACCEPT,
-                    decision_details='These findings are accepted using a simple risk acceptance without expiration date, '
-                    'approval document or compensating control information. Unaccept and use full risk acceptance if you '
-                    'need to have more control over those fields.'
-            )
-            self.test.engagement.risk_acceptance.add(simple_risk_acceptance)
-        return simple_risk_acceptance
-
-    def simple_risk_accept(self):
-        # adding to ManyToMany will not cause duplicate entries
-        self.get_simple_risk_acceptance().accepted_findings.add(self)
-        # risk accepted, so finding no longer considered active
-        self.active = False
-        self.save()
-
-    def risk_unaccept(self):
-        # removing from ManyToMany will not fail for non-existing entries
-        self.get_simple_risk_acceptance().accepted_findings.remove(self)
-        # risk acceptance no longer in place, so reactivate, but only when it makes sense
-
-        # for now also remove from any other risk acceptance as differianting between simple and full here would clutter the menu.
-        # also currently you can only add a finding to 1 risk acceptance, so this would only affect old findings added to multiple
-        # risk acceptances in some obcure way
-        self.remove_from_any_risk_acceptance()
-        if not self.mitigated and not self.false_p and not self.out_of_scope and not self.risk_acceptance_set.exists():
-            self.active = True
-            self.save()
-
-    # @property
-    # def is_simple_risk_accepted(self):
-
-    #     if self.get_simple_risk_acceptance(create=False) is not None:
-    #         return self.get_simple_risk_acceptance().accepted_findings.filter(id=self.id).exists()
-    #         # print('exists: ', exists)
-    #         # return exists
-
-    #     return False
-
     @property
     def active_risk_acceptance(self):
         # risk_acceptance_set is normally prefetched so works better than count() or exists()

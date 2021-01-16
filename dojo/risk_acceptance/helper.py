@@ -22,11 +22,18 @@ def expire_now(risk_acceptance):
                 finding.active = True
                 if risk_acceptance.restart_sla_expired:
                     finding.sla_start_date = timezone.now().date()
+
+                if finding.has_jira_issue:
+                    jira_helper.add_simple_jira_comment(jira_instance, finding.jira_issue, jira_comment)
+
                 finding.save(dedupe_option=False)
                 reactivated_findings.append(finding)
                 # findings remain in this risk acceptance for reporting / metrics purposes
             else:
                 logger.debug('%i:%s already active, no changes made.', finding.id, finding)
+
+        # best effort JIRA integration, no status changes
+        post_jira_comments(risk_acceptance, reactivated_findings, expiration_message_creator)
 
     risk_acceptance.expiration_date = timezone.now()
     risk_acceptance.expiration_date_handled = timezone.now()
@@ -49,13 +56,18 @@ def reinstate(risk_acceptance, old_expiration_date):
         expiration_delta_days = get_system_setting('risk_acceptance_form_default_days', 90)
         risk_acceptance.expiration_date = timezone.now() + relativedelta(days=expiration_delta_days)
 
+        reinstated_findings = []
         for finding in risk_acceptance.accepted_findings.all():
             if finding.active:
                 logger.debug('%i:%s: accepting a.k.a. deactivating finding', finding.id, finding)
                 finding.active = False
                 finding.save(dedupe_option=False)
+                reinstated_findings.append(finding)
             else:
                 logger.debug('%i:%s: already inactive, not making any changes', finding.id, finding)
+
+        # best effort JIRA integration, no status changes
+        post_jira_comments(risk_acceptance, reinstated_findings, reinstation_message_creator)
 
     risk_acceptance.expiration_date_handled = None
     risk_acceptance.expiration_date_warned = None
@@ -63,9 +75,13 @@ def reinstate(risk_acceptance, old_expiration_date):
 
 
 def delete(eng, risk_acceptance):
-    for finding in risk_acceptance.accepted_findings.all():
+    findings = risk_acceptance.accepted_findings.all()
+    for finding in findings:
         finding.active = True
         finding.save(dedupe_option=False)
+
+    # best effort jira integration, no status changes
+    post_jira_comments(risk_acceptance, findings, unaccepted_message_creator)
 
     risk_acceptance.accepted_findings.clear()
     eng.risk_acceptance.remove(risk_acceptance)
@@ -83,6 +99,8 @@ def remove_finding_from_risk_acceptance(risk_acceptance, finding):
     risk_acceptance.accepted_findings.remove(finding)
     finding.active = True
     finding.save(dedupe_option=False)
+    # best effort jira integration, no status changes
+    post_jira_comments(risk_acceptance, [finding], unaccepted_message_creator)
 
 
 def add_findings_to_risk_acceptance(risk_acceptance, findings):
@@ -92,6 +110,13 @@ def add_findings_to_risk_acceptance(risk_acceptance, findings):
             finding.save(dedupe_option=False)
         risk_acceptance.accepted_findings.add(finding)
     risk_acceptance.save()
+
+    # best effort jira integration, no status changes
+    post_jira_comments(risk_acceptance, findings, unaccepted_message_creator)
+
+
+def unaccept_finding(finding):
+    find.risk_unaccept()
 
 
 @task(name='risk_acceptance_expiration_handler')
@@ -116,8 +141,6 @@ def expiration_handler(*args, **kwargs):
         expire_now(risk_acceptance)
         # notification created by expire_now code
 
-        post_jira_comments(risk_acceptance, expiration_message_creator)
-
     heads_up_days = system_settings.risk_acceptance_notify_before_expiration
     if heads_up_days > 0:
         risk_acceptances = get_almost_expired_risk_acceptances_to_handle(heads_up_days)
@@ -141,7 +164,7 @@ def expiration_handler(*args, **kwargs):
             risk_acceptance.save()
 
 
-def expiration_message_creator(risk_acceptance, heads_up_days=0):
+def expiration_message_creator(risk_acceptance):
     return '[Risk acceptance (%s)|%s] with %i findings has expired on %s' % \
         (risk_acceptance.name,
         get_full_url(reverse('view_risk_acceptance', args=(risk_acceptance.engagement.id, risk_acceptance.id))),
@@ -155,7 +178,28 @@ def expiration_warning_message_creator(risk_acceptance, heads_up_days=0):
         len(risk_acceptance.accepted_findings.all()), heads_up_days)
 
 
-def post_jira_comments(risk_acceptance, message_factory, heads_up_days=0):
+def reinstation_message_creator(risk_acceptance):
+    return '[Risk acceptance (%s)|%s] with %i findings has been reinstated on %s' % \
+        (risk_acceptance.name,
+        get_full_url(reverse('view_risk_acceptance', args=(risk_acceptance.engagement.id, risk_acceptance.id))),
+        len(risk_acceptance.accepted_findings.all()), timezone.localtime(risk_acceptance.expiration_date).strftime("%b %d, %Y"))
+
+
+def accepted_message_creator(risk_acceptance):
+    return '[Risk acceptance (%s)|%s] with %i findings has been reinstated on %s' % \
+        (risk_acceptance.name,
+        get_full_url(reverse('view_risk_acceptance', args=(risk_acceptance.engagement.id, risk_acceptance.id))),
+        len(risk_acceptance.accepted_findings.all()), timezone.localtime(risk_acceptance.expiration_date).strftime("%b %d, %Y"))
+
+
+def unaccepted_message_creator(risk_acceptance):
+    return '[finding was unaccepted/deleted from risk acceptance (%s)|%s]  on %s' % \
+        (risk_acceptance.name,
+        get_full_url(reverse('view_risk_acceptance', args=(risk_acceptance.engagement.id, risk_acceptance.id))),
+        timezone.localtime(risk_acceptance.expiration_date).strftime("%b %d, %Y"))
+
+
+def post_jira_comments(risk_acceptance, findings, message_factory, heads_up_days=0):
     jira_project = jira_helper.get_jira_project(risk_acceptance.engagement)
     if jira_project and jira_project.risk_acceptance_expiration_notification:
         jira_instance = jira_helper.get_jira_instance(risk_acceptance.engagement)
@@ -163,7 +207,7 @@ def post_jira_comments(risk_acceptance, message_factory, heads_up_days=0):
         if jira_instance:
             jira_comment = message_factory(risk_acceptance, heads_up_days)
 
-            for finding in risk_acceptance.accepted_findings.all():
+            for finding in findings:
                 if finding.has_jira_issue:
                     logger.debug("Creating JIRA comment to notify of (upcoming) risk acceptance expiration.")
                     jira_helper.add_simple_jira_comment(jira_instance, finding.jira_issue, jira_comment)
@@ -186,3 +230,60 @@ def prefetch_for_expiration(risk_acceptances):
                                                 'engagement__jira_project',
                                                 'engagement__jira_project__jira_instance'
                                              )
+
+
+# gets or creates the simple risk acceptance instance connected to the engagement. only contains this finding if it is simple accepted
+def get_simple_risk_acceptance(finding, create=True):
+    # check if has test, if not, return False to avoid errors on test being None later on. This can happen when creating a finding from a template
+    if not hasattr(finding, 'test'):
+        return None
+
+    if hasattr(finding.test.engagement, 'simple_risk_acceptance') and len(finding.test.engagement.simple_risk_acceptance) > 0:
+        return finding.test.engagement.simple_risk_acceptance[0]
+
+    simple_risk_acceptance = finding.test.engagement.risk_acceptance.filter(name=Finding.SIMPLE_RISK_ACCEPTANCE_NAME).prefetch_related('accepted_findings').first()
+    if simple_risk_acceptance is None and create:
+        from dojo.utils import get_current_user
+        user = get_current_user()
+        simple_risk_acceptance = Risk_Acceptance.objects.create(
+                owner=user if user else User.objects.first(),
+                name=Finding.SIMPLE_RISK_ACCEPTANCE_NAME,
+                decision=Risk_Acceptance.TREATMENT_ACCEPT,
+                decision_details='These findings are accepted using a simple risk acceptance without expiration date, '
+                'approval document or compensating control information. Unaccept and use full risk acceptance if you '
+                'need to have more control over those fields.'
+        )
+        self.test.engagement.risk_acceptance.add(simple_risk_acceptance)
+    return simple_risk_acceptance
+
+
+def simple_risk_accept(finding):
+    # adding to ManyToMany will not cause duplicate entries
+    finding.get_simple_risk_acceptance().accepted_findings.add(finding)
+    # risk accepted, so finding no longer considered active
+    finding.active = False
+    finding.save(dedupe_option=False)
+
+
+def risk_unaccept(finding):
+    # removing from ManyToMany will not fail for non-existing entries
+    finding.get_simple_risk_acceptance().accepted_findings.remove(finding)
+    # risk acceptance no longer in place, so reactivate, but only when it makes sense
+
+    # for now also remove from any other risk acceptance as differianting between simple and full here would clutter the menu.
+    # also currently you can only add a finding to 1 risk acceptance, so this would only affect old findings added to multiple
+    # risk acceptances in some obcure way
+    finding.remove_from_any_risk_acceptance()
+    if not finding.mitigated and not finding.false_p and not finding.out_of_scope and not finding.risk_acceptance_set.exists():
+        finding.active = True
+        finding.save(dedupe_option=False)
+
+# @property
+# def is_simple_risk_accepted(finding):
+
+#     if finding.get_simple_risk_acceptance(create=False) is not None:
+#         return finding.get_simple_risk_acceptance().accepted_findings.filter(id=finding.id).exists()
+#         # print('exists: ', exists)
+#         # return exists
+
+#     return False

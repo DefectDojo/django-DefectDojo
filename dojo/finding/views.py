@@ -693,9 +693,9 @@ def edit_finding(request, fid):
 
             if 'simple_risk_accept' in form.cleaned_data and form['simple_risk_accept'].value():
                 if new_finding.test.engagement.product.enable_simple_risk_acceptance:
-                    new_finding.simple_risk_accept()
+                    ra_helper.simple_risk_accept(new_finding)
             else:
-                new_finding.risk_unaccept()
+                ra_helper.risk_unaccept(new_finding)
 
             create_template = new_finding.is_template
             # always false now since this will be deprecated soon in favor of new Finding_Template model
@@ -862,7 +862,8 @@ def simple_risk_accept(request, fid):
     if not finding.test.engagement.product.enable_simple_risk_acceptance:
         raise PermissionDenied()
 
-    finding.simple_risk_accept()
+    ra_helper.simple_risk_accept(finding)
+
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id, )))
 
 
@@ -870,7 +871,7 @@ def simple_risk_accept(request, fid):
 @user_must_be_authorized(Finding, 'staff', 'fid')
 def risk_unaccept(request, fid):
     finding = get_object_or_404(Finding, id=fid)
-    finding.risk_unaccept()
+    ra_helper.risk_unaccept(finding)
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id, )))
 
 
@@ -1837,9 +1838,9 @@ def finding_bulk_update_all(request, pid=None):
                 if form.cleaned_data['risk_acceptance']:
                     for find in finds:
                         if form.cleaned_data['risk_accept']:
-                            find.simple_risk_accept()
+                            ra_helper.simple_risk_accept(find)
                         elif form.cleaned_data['risk_unaccept']:
-                            find.simple_risk_unaccept()
+                            ra_helper.risk_unaccept(find)
 
                 if form.cleaned_data['push_to_github']:
                     logger.info('push selected findings to github')
