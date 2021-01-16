@@ -34,7 +34,7 @@ def expire_now(risk_acceptance):
                 logger.debug('%i:%s already active, no changes made.', finding.id, finding)
 
         # best effort JIRA integration, no status changes
-        post_jira_comments(risk_acceptance, reactivated_findings, expiration_message_creator)
+        post_jira_comments(risk_acceptance, risk_acceptance.accepted_findings.all(), expiration_message_creator)
 
     risk_acceptance.expiration_date = timezone.now()
     risk_acceptance.expiration_date_handled = timezone.now()
@@ -68,7 +68,7 @@ def reinstate(risk_acceptance, old_expiration_date):
                 logger.debug('%i:%s: already inactive, not making any changes', finding.id, finding)
 
         # best effort JIRA integration, no status changes
-        post_jira_comments(risk_acceptance, reinstated_findings, reinstation_message_creator)
+        post_jira_comments(risk_acceptance, risk_acceptance.accepted_findings.all(), reinstation_message_creator)
 
     risk_acceptance.expiration_date_handled = None
     risk_acceptance.expiration_date_warned = None
