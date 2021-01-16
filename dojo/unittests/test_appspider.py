@@ -1,6 +1,6 @@
 from django.test import TestCase
 from dojo.tools.appspider.parser import AppSpiderXMLParser
-from dojo.models import Test, SEVERITIES
+from dojo.models import Test, Finding
 
 
 class TestAppSpiderXMLParser(TestCase):
@@ -25,4 +25,4 @@ class TestAppSpiderXMLParser(TestCase):
 
     def convert_severity(self):
         with self.subTest(val="0-Safe"):
-            self.assertIn(SEVERITIES, AppSpiderXMLParser.convert_severity("0-Safe"))
+            self.assertIn(Finding.SEVERITIES, AppSpiderXMLParser.convert_severity("0-Safe"))
