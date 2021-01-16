@@ -201,8 +201,8 @@ postgresql:
     port: 5432
   resources:
     limits:
-      cpu: 2
-      memory: 2Gi
+      cpu: 1
+      memory: 1Gi
     requests:
       cpu: 100m
       memory: 200Mi
