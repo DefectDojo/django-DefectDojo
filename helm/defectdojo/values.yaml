@@ -64,13 +64,6 @@ annotations: {}
 
 # Components
 celery:
-  resources:
-    requests:
-      cpu: 100m
-      memory: 128Mi
-    limits:
-      cpu: 500m
-      memory: 512Mi
   broker: rabbitmq
   logLevel: INFO
   beat:
@@ -199,13 +192,6 @@ postgresql:
     enabled: false
   service:
     port: 5432
-  resources:
-    limits:
-      cpu: 1
-      memory: 1Gi
-    requests:
-      cpu: 100m
-      memory: 200Mi
   securityContext:
     # Default is tue for K8s. Enabled needs to false for OpenShift restricted SCC and true for anyuid SCC
     enabled: true
