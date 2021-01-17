@@ -1,6 +1,6 @@
 {% load navigation_tags %}
 {% load display_tags %}
-{% load static from staticfiles %}
+{% load static %}
 
 {% if user|is_authorized_for_change:finding %}
     {% comment %} {{ similar_finding.related_actions }} {% endcomment %}

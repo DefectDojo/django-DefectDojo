@@ -212,7 +212,7 @@ def add_questionnaire(request, eid):
                 return HttpResponseRedirect(reverse(
                     'answer_questionnaire', args=(eid, survey.id)))
 
-            return HttpResponseRedirect('/engagement/%s' % eid)
+            return HttpResponseRedirect(reverse('view_engagement', args=(eid,)))
         else:
             messages.add_message(request,
                                  messages.ERROR,

@@ -6,8 +6,6 @@ from .parser_models import DefectDojoFinding
 # from memory_profiler import profile #Comment out this and profile in defectdojo repo
 import html2text
 
-logging.basicConfig(level=logging.ERROR)
-
 SCAN_NODE_TAG_NAME = "Scan"
 ACUNETIX_XML_SCAN_IGNORE_NODES = ['Technologies', 'Crawler']
 ACUNETIX_XML_REPORTITEM_IGNORE_NODES = ['CVEList', 'CVSS', 'CVSS3']
@@ -21,7 +19,7 @@ def get_root_node(filename):
     :return:
     """
     try:
-        tree = etree.parse(filename)
+        tree = etree.parse(filename, etree.XMLParser(resolve_entities=False))
         return tree.getroot()
     except XMLSyntaxError as xse:
         logging.error("ERROR : error parsing XML file {filename}".format(filename=filename))

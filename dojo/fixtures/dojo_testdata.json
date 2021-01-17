@@ -1660,7 +1660,7 @@
     "pk": 3,
     "model": "dojo.jira_instance",
     "fields": {
-      "username": "user2",
+      "username": "defect.dojo",
       "default_issue_type": "Task",
       "finding_text": "",
       "low_mapping_severity": "test severity",
@@ -1678,7 +1678,7 @@
     "pk": 4,
     "model": "dojo.jira_instance",
     "fields": {
-      "username": "user3",
+      "username": "defect.dojo",
       "default_issue_type": "Spike",
       "finding_text": "",
       "low_mapping_severity": "test severity",

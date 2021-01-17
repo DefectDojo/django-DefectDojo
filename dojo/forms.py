@@ -359,6 +359,7 @@ class ImportScanForm(forms.Form):
                          ("SpotBugs Scan", "SpotBugs Scan"),
                          ("AWS Scout2 Scan", "AWS Scout2 Scan"),
                          ("AWS Prowler Scan", "AWS Prowler Scan"),
+                         ("Scout Suite Scan", "Scout Suite Scan"),
                          ("IBM AppScan DAST", "IBM AppScan DAST"),
                          ("PHP Security Audit v2", "PHP Security Audit v2"),
                          ("PHP Symfony Security Check", "PHP Symfony Security Check"),
@@ -411,7 +412,10 @@ class ImportScanForm(forms.Form):
                          ("kube-bench Scan", "Kube-Bench Scan"),
                          ("CCVS Report", "CCVS Report"),
                          ("ORT evaluated model Importer", "ORT evaluated model Importer"),
-                         ("SARIF", "SARIF"))
+                         ("SARIF", "SARIF"),
+                         ("OssIndex Devaudit SCA Scan Importer", "OssIndex Devaudit SCA Scan Importer"),
+                         ("Scantist Scan", "Scantist Scan"),
+                         )
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
     scan_date = forms.DateTimeField(

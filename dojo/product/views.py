@@ -232,7 +232,11 @@ def identify_view(request):
     get_data = request.GET
     view = get_data.get('type', None)
     if view:
-        return view
+        # value of view is reflected in the template, make sure it's valid
+        # although any XSS should be catch by django autoescape, we see people sometimes using '|safe'...
+        if view in ['Endpoint', 'Finding']:
+            return view
+        raise ValueError('invalid view, view must be "Endpoint" or "Finding"')
     else:
         if get_data.get('finding__severity', None):
             return 'Endpoint'
@@ -659,6 +663,8 @@ def prefetch_for_view_engagements(engs):
         prefetched_engs = prefetched_engs.annotate(count_findings_all=Count('test__finding__id'))
         prefetched_engs = prefetched_engs.annotate(
             count_findings_open=Count('test__finding__id', filter=Q(test__finding__active=True)))
+        prefetched_engs = prefetched_engs.annotate(
+            count_findings_open_verified=Count('test__finding__id', filter=Q(test__finding__active=True) & Q(test__finding__verified=True)))
         prefetched_engs = prefetched_engs.annotate(
             count_findings_close=Count('test__finding__id', filter=Q(test__finding__is_Mitigated=True)))
         prefetched_engs = prefetched_engs.annotate(
