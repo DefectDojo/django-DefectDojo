@@ -55,6 +55,8 @@ class BaseClass():
                 # create a new instance first to make sure there's at least 1 instance with tags set by payload to trigger tag handling code
                 logger.debug('creating model with endpoints: %s', self.payload)
                 response = self.client.post(self.url, self.payload)
+                self.assertEqual(201, response.status_code, response.data)
+
                 # print('response:', response.data)
                 check_for_id = response.data['id']
                 # print('id: ', check_for_id)
@@ -74,7 +76,7 @@ class BaseClass():
                         tags_found = True
                 self.assertTrue(tags_found)
 
-            self.assertEqual(200, response.status_code)
+            self.assertEqual(200, response.status_code, response.data)
 
         @skipIfNotSubclass('CreateModelMixin')
         def test_create(self):
@@ -97,7 +99,7 @@ class BaseClass():
             current_objects = self.client.get(self.url, format='json').data
             relative_url = self.url + '%s/' % current_objects['results'][0]['id']
             response = self.client.get(relative_url)
-            self.assertEqual(200, response.status_code)
+            self.assertEqual(200, response.status_code, response.data)
             # sensitive data must be set to write_only so those are not returned in the response
             # https://github.com/DefectDojo/django-DefectDojo/security/advisories/GHSA-8q8j-7wc4-vjg5
             self.assertFalse('password' in response.data)
@@ -109,13 +111,15 @@ class BaseClass():
             current_objects = self.client.get(self.url, format='json').data
             relative_url = self.url + '%s/' % current_objects['results'][0]['id']
             response = self.client.delete(relative_url)
-            self.assertEqual(204, response.status_code)
+            self.assertEqual(204, response.status_code, response.data)
 
         @skipIfNotSubclass('UpdateModelMixin')
         def test_update(self):
             current_objects = self.client.get(self.url, format='json').data
             relative_url = self.url + '%s/' % current_objects['results'][0]['id']
             response = self.client.patch(relative_url, self.update_fields)
+
+            self.assertEqual(200, response.status_code, response.data)
 
             for key, value in self.update_fields.items():
                 # some exception as push_to_jira has been implemented strangely in the update methods in the api
@@ -135,7 +139,7 @@ class BaseClass():
 
             response = self.client.put(
                 relative_url, self.payload)
-            self.assertEqual(200, response.status_code)
+            self.assertEqual(200, response.status_code, response.data)
 
 
 class AppAnalysisTest(BaseClass.RESTEndpointTest):
@@ -244,7 +248,7 @@ class FindingRequestResponseTest(DojoAPITestCase):
 
     def test_request_response_get(self):
         response = self.client.get('/api/v2/findings/7/request_response/', format='json')
-        self.assertEqual(200, response.status_code)
+        self.assertEqual(200, response.status_code, response.data)
 
 
 class FindingsTest(BaseClass.RESTEndpointTest):
@@ -272,7 +276,7 @@ class FindingsTest(BaseClass.RESTEndpointTest):
             "references": "",
             "reporter": 3,
             "is_template": False,
-            "active": False,
+            "active": True,
             "verified": False,
             "false_p": False,
             "duplicate": False,
@@ -286,7 +290,7 @@ class FindingsTest(BaseClass.RESTEndpointTest):
             "dynamic_finding": False,
             "endpoints": [1, 2],
             "images": [],
-            "tags": ['tag1', 'tag_2']
+            "tags": ['tag1', 'tag_2'],
         }
         self.update_fields = {'active': True, "push_to_jira": "True", 'tags': ['finding_tag_new']}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
@@ -814,4 +818,4 @@ class ReimportScanTest(DojoAPITestCase):
                 "version": "1.0.1",
             })
         self.assertEqual(length, Test.objects.all().count())
-        self.assertEqual(201, response.status_code)
+        self.assertEqual(201, response.status_code, response.data)

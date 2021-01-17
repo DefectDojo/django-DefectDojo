@@ -829,6 +829,10 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
             if not self.instance.test.engagement.product.enable_simple_risk_acceptance:
                 raise serializers.ValidationError('Simple risk acceptance is disabled for this product, use the UI to accept this finding.')
 
+        if is_active and is_risk_accepted:
+            raise serializers.ValidationError('Active findings cannot '
+                                        'be risk accepted.')
+
         return data
 
     def build_relational_field(self, field_name, relation_info):
@@ -909,6 +913,17 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         if data['false_p'] and data['verified']:
             raise serializers.ValidationError('False positive findings cannot '
                                               'be verified.')
+
+        if 'risk_accepted' in data and data['risk_accepted']:
+            test = data['test']
+            # test = Test.objects.get(id=test_id)
+            if not test.engagement.product.enable_simple_risk_acceptance:
+                raise serializers.ValidationError('Simple risk acceptance is disabled for this product, use the UI to accept this finding.')
+
+        if data['active'] and 'risk_accepted' in data and data['risk_accepted']:
+            raise serializers.ValidationError('Active findings cannot '
+                                        'be risk accepted.')
+
         return data
 
 
