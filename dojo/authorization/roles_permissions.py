@@ -12,9 +12,18 @@ class Roles(IntEnum):
     def choices(cls):
         return [(key.value, key.name) for key in cls]
 
+    @classmethod
+    def has_value(cls, value):
+        try:
+            Roles(value)
+            return True
+        except ValueError:
+            return False
+        
 
 def django_enum(cls):
     # decorator needed to enable enums in django templates
+    # see https://stackoverflow.com/questions/35953132/how-to-access-enum-types-in-django-templates
     cls.do_not_call_in_templates = True
     return cls
 
@@ -40,6 +49,14 @@ class Permissions(IntEnum):
     Import_Scan_Result = 1104
     Finding_Edit = 1106
     Finding_Delete = 1107
+
+    @classmethod
+    def has_value(cls, value):
+        try:
+            Permissions(value)
+            return True
+        except ValueError:
+            return False
 
 
 def get_roles_with_permissions():

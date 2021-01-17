@@ -1,5 +1,5 @@
 from django.core.exceptions import PermissionDenied
-from dojo.authorization.roles_permissions import Permissions, get_roles_with_permissions
+from dojo.authorization.roles_permissions import Permissions, Roles, get_roles_with_permissions
 from dojo.models import Product_Type, Product_Type_Member, Product, Product_Member, Finding
 
 
@@ -30,15 +30,17 @@ def user_has_permission(user, obj, permission):
     elif isinstance(obj, Product_Type_Member) and permission == Permissions.Product_Type_Remove_Member:
         return obj.user == user or user_has_permission(user, obj.product_type, Permissions.Product_Type_Manage_Members)
     else:
-        raise Exception('No authorization implemented for class {}'.format(type(obj).__name__))
+        raise NoAuthorizationImplementedError('No authorization implemented for class {} and permission {}'.
+            format(type(obj).__name__, permission))
 
 
 def user_has_permission_or_403(user, obj, permission):
     if not user_has_permission(user, obj, permission):
         raise PermissionDenied
 
-
 def get_roles_for_permission(permission):
+    if not Permissions.has_value(permission):
+        raise PermissionDoesNotExistError('Permission {} does not exist'.format(permission))
     roles_for_permissions = set()
     roles = get_roles_with_permissions()
     for role in roles:
@@ -49,13 +51,23 @@ def get_roles_for_permission(permission):
 
 
 def role_has_permission(role, permission):
+    if not Roles.has_value(role):
+        raise RoleDoesNotExistError('Role {} does not exist'.format(role))
     roles = get_roles_with_permissions()
     permissions = roles.get(role)
-    if permissions is None:
-        raise RoleDoesNotExist("Role {} does not exist".format(role))
     return permission in permissions
 
 
-class RoleDoesNotExist(Exception):
+class NoAuthorizationImplementedError(Exception):
+    def __init__(self, message):
+        self.message = message
+
+
+class PermissionDoesNotExistError(Exception):
+    def __init__(self, message):
+        self.message = message
+
+
+class RoleDoesNotExistError(Exception):
     def __init__(self, message):
         self.message = message
