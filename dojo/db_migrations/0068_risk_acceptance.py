@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='risk_acceptance',
             name='recommendation',
-            field=models.CharField(choices=[('A', 'Accept'), ('V', 'Avoid'), ('C', 'Compensate'), ('R', 'Reduce'), ('T', 'Transfer')], default='R', help_text='Recommendation from the security team.', max_length=2, verbose_name='Security Recommendation'),
+            field=models.CharField(choices=[('A', 'Accept'), ('V', 'Avoid'), ('M', 'Mitigate'), ('F', 'Fix'), ('T', 'Transfer')], default='F', help_text='Recommendation from the security team.', max_length=2, verbose_name='Security Recommendation'),
         ),
         migrations.AddField(
             model_name='risk_acceptance',
@@ -90,7 +90,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='risk_acceptance',
             name='decision',
-            field=models.CharField(choices=[('A', 'Accept'), ('V', 'Avoid'), ('C', 'Compensate'), ('R', 'Reduce'), ('T', 'Transfer')], default='A', help_text='Risk treatment decision by risk owner', max_length=2),
+            field=models.CharField(choices=[('A', 'Accept'), ('V', 'Avoid'), ('M', 'Mitigate'), ('F', 'Fix'), ('T', 'Transfer')], default='A', help_text='Risk treatment decision by risk owner', max_length=2),
         ),
         migrations.AlterField(
             model_name='risk_acceptance',

@@ -2402,15 +2402,15 @@ class BurpRawRequestResponse(models.Model):
 class Risk_Acceptance(models.Model):
     TREATMENT_ACCEPT = 'A'
     TREATMENT_AVOID = 'V'
-    TREATMENT_COMPENSATE = 'C'
-    TREATMENT_REDUCE = 'R'
+    TREATMENT_MITIGATE = 'M'
+    TREATMENT_FIX = 'F'
     TREATMENT_TRANSFER = 'T'
 
     TREATMENT_CHOICES = [
         (TREATMENT_ACCEPT, 'Accept'),
         (TREATMENT_AVOID, 'Avoid'),
-        (TREATMENT_COMPENSATE, 'Compensate'),
-        (TREATMENT_REDUCE, 'Reduce'),
+        (TREATMENT_MITIGATE, 'Mitigate'),
+        (TREATMENT_FIX, 'Fix'),
         (TREATMENT_TRANSFER, 'Transfer'),
     ]
 
@@ -2418,7 +2418,7 @@ class Risk_Acceptance(models.Model):
 
     accepted_findings = models.ManyToManyField(Finding)
 
-    recommendation = models.CharField(choices=TREATMENT_CHOICES, max_length=2, null=False, default=TREATMENT_REDUCE, help_text="Recommendation from the security team.", verbose_name="Security Recommendation")
+    recommendation = models.CharField(choices=TREATMENT_CHOICES, max_length=2, null=False, default=TREATMENT_FIX, help_text="Recommendation from the security team.", verbose_name="Security Recommendation")
 
     recommendation_details = models.TextField(null=True,
                                       blank=True,
