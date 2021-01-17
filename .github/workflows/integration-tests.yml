@@ -22,18 +22,37 @@ jobs:
       - name: Set integration-test mode
         run: ln -s docker-compose.override.integration_tests.yml docker-compose.override.yml
 
-      # Pull the latest image to build, and avoid caching pull-only images.
-      # (docker pull is faster than caching in most cases.)
-      - run: docker-compose pull
-      # In this step, this action saves a list of existing images,
-      # the cache is created without them in the post run.
-      # It also restores the cache if it exists.
-      - uses: satackey/action-docker-layer-caching@master
-        # Ignore the failure of a step and avoid terminating the job.
-        continue-on-error: true
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@master
 
-      - name: Build the stack
-        run: docker-compose build
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build django
+        uses: docker/build-push-action@v2
+        with:
+          push: false
+          builder: ${{ steps.buildx.outputs.name }}
+          file: ./Dockerfile.django
+          context: .
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+
+      - name: Build nginx
+        uses: docker/build-push-action@v2
+        with:
+          push: false
+          builder: ${{ steps.buildx.outputs.name }}
+          file: ./Dockerfile.nginx
+          context: .
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
 
       # phased startup so we can use the exit code from integrationtest container
       - name: Start MySQL
