@@ -866,7 +866,8 @@ class AddFindingForm(forms.ModelForm):
     date = forms.DateField(required=True,
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     sla_start_date = forms.DateField(required=False,
-                           widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
+                           widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}),
+                           label='SLA Start Date')
     cwe = forms.IntegerField(required=False)
     cve = forms.CharField(max_length=28, required=False)
     cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'cvsscalculator', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
@@ -1005,7 +1006,8 @@ class FindingForm(forms.ModelForm):
     date = forms.DateField(required=True,
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     sla_start_date = forms.DateField(required=False,
-                           widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
+                           widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}),
+                           label='SLA Start Date')
     cwe = forms.IntegerField(required=False)
     cve = forms.CharField(max_length=28, required=False, strip=False)
     cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'cvsscalculator', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
