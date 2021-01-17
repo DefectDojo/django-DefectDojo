@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='finding',
             name='sla_start_date',
-            field=models.DateField(blank=True, help_text="The date used as start date for SLA calculation. Set by expiring risk acceptances. Empty by default, causing a fallback to 'date'.", null=True, verbose_name='SLA Start Date'),
+            field=models.DateField(blank=True, help_text="(readonly)The date used as start date for SLA calculation. Set by expiring risk acceptances. Empty by default, causing a fallback to 'date'.", null=True, verbose_name='SLA Start Date'),
         ),
         migrations.AddField(
             model_name='notifications',

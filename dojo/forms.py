@@ -865,9 +865,6 @@ class AddFindingForm(forms.ModelForm):
     title = forms.CharField(max_length=1000)
     date = forms.DateField(required=True,
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
-    sla_start_date = forms.DateField(required=False,
-                           widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}),
-                           label='SLA Start Date')
     cwe = forms.IntegerField(required=False)
     cve = forms.CharField(max_length=28, required=False)
     cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'cvsscalculator', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
@@ -887,10 +884,10 @@ class AddFindingForm(forms.ModelForm):
     is_template = forms.BooleanField(label="Create Template?", required=False,
                                      help_text="A new finding template will be created from this finding.")
 
-    # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
+    # the only reliable way without hacking internal fields to get predicatble ordering is to make it explicit
     field_order = ('title', 'date', 'cwe', 'cve', 'severity', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
                    'severity_justification', 'endpoints', 'references', 'is_template', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope',
-                   'risk_accepted', 'under_defect_review', 'sla_start_date')
+                   'risk_accepted', 'under_defect_review')
 
     def __init__(self, *args, **kwargs):
         req_resp = kwargs.pop('req_resp')
@@ -918,14 +915,12 @@ class AddFindingForm(forms.ModelForm):
         model = Finding
         order = ('title', 'severity', 'endpoints', 'description', 'impact')
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
-                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change', 'endpoint_status')
+                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change', 'endpoint_status', 'sla_start_date')
 
 
 class AdHocFindingForm(forms.ModelForm):
     title = forms.CharField(max_length=1000)
     date = forms.DateField(required=True,
-                           widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
-    sla_start_date = forms.DateField(required=False,
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     cwe = forms.IntegerField(required=False)
     cve = forms.CharField(max_length=28, required=False)
@@ -972,7 +967,7 @@ class AdHocFindingForm(forms.ModelForm):
     class Meta:
         model = Finding
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
-                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change', 'endpoint_status')
+                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change', 'endpoint_status', 'sla_start_date')
 
 
 class PromoteFindingForm(forms.ModelForm):
@@ -1005,9 +1000,6 @@ class FindingForm(forms.ModelForm):
     title = forms.CharField(max_length=1000)
     date = forms.DateField(required=True,
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
-    sla_start_date = forms.DateField(required=False,
-                           widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}),
-                           label='SLA Start Date')
     cwe = forms.IntegerField(required=False)
     cve = forms.CharField(max_length=28, required=False, strip=False)
     cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'cvsscalculator', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
@@ -1029,9 +1021,9 @@ class FindingForm(forms.ModelForm):
                                      help_text="A new finding template will be created from this finding.")
 
     # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
-    field_order = ('title', 'date', 'cwe', 'cve', 'severity', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
+    field_order = ('title', 'date', 'sla_start_date', 'cwe', 'cve', 'severity', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
                    'severity_justification', 'endpoints', 'references', 'is_template', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope',
-                   'risk_accepted', 'under_defect_review', 'sla_start_date')
+                   'risk_accepted', 'under_defect_review')
 
     def __init__(self, *args, **kwargs):
         template = kwargs.pop('template')
@@ -1061,6 +1053,8 @@ class FindingForm(forms.ModelForm):
             self.fields['duplicate'].help_text = "Original finding that is being duplicated here (readonly). Use view finding page to manage duplicate relationships. Unchecking duplicate here will reset this findings duplicate status, but will trigger deduplication logic."
         else:
             self.fields['duplicate'].help_text = "You can mark findings as duplicate only from the view finding page."
+
+        self.fields['sla_start_date'].disabled = True
 
     def clean(self):
         cleaned_data = super(FindingForm, self).clean()

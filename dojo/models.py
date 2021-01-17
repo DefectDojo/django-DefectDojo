@@ -1478,7 +1478,7 @@ class Finding(models.Model):
                             blank=True,
                             null=True,
                             verbose_name="SLA Start Date",
-                            help_text="The date used as start date for SLA calculation. Set by expiring risk acceptances. Empty by default, causing a fallback to 'date'.")
+                            help_text="(readonly)The date used as start date for SLA calculation. Set by expiring risk acceptances. Empty by default, causing a fallback to 'date'.")
 
     cwe = models.IntegerField(default=0, null=True, blank=True,
                               verbose_name="CWE",
