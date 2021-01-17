@@ -907,6 +907,10 @@ class AddFindingForm(forms.ModelForm):
         if cleaned_data['false_p'] and cleaned_data['verified']:
             raise forms.ValidationError('False positive findings cannot '
                                         'be verified.')
+        if cleaned_data['active'] and 'risk_accepted' in cleaned_data and cleaned_data['risk_accepted']:
+            raise forms.ValidationError('Active findings cannot '
+                                        'be risk accepted.')
+
         return cleaned_data
 
     class Meta:
