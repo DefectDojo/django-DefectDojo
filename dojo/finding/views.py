@@ -694,9 +694,9 @@ def edit_finding(request, fid):
 
             if 'risk_accepted' in form.cleaned_data and form['risk_accepted'].value():
                 if new_finding.test.engagement.product.enable_simple_risk_acceptance:
-                    ra_helper.simple_risk_accept(new_finding)
+                    ra_helper.simple_risk_accept(new_finding, perform_save=False)
             else:
-                ra_helper.risk_unaccept(new_finding)
+                ra_helper.risk_unaccept(new_finding, perform_save=False)
 
             create_template = new_finding.is_template
             # always false now since this will be deprecated soon in favor of new Finding_Template model

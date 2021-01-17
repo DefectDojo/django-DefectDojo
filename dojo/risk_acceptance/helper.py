@@ -210,12 +210,17 @@ def post_jira_comment(finding, message_factory, heads_up_days=0):
     if not finding or not finding.has_jira_issue:
         return
 
+    print('1')
+
     jira_project = jira_helper.get_jira_project(finding)
 
     if jira_project and jira_project.risk_acceptance_expiration_notification:
+        print('2')
         jira_instance = jira_helper.get_jira_instance(finding)
 
         if jira_instance:
+            print('3')
+
             jira_comment = message_factory(None, heads_up_days)
 
             logger.debug("Creating JIRA comment for something risk acceptance related")
@@ -259,28 +264,36 @@ def prefetch_for_expiration(risk_acceptances):
                                              )
 
 
-def simple_risk_accept(finding):
-    # risk accepted, so finding no longer considered active
+def simple_risk_accept(finding, perform_save=True):
+    logger.debug('accepting finding %i:%s', finding.id, finding)
     finding.risk_accepted = True
+    # risk accepted, so finding no longer considered active
     finding.active = False
-    finding.save(dedupe_option=False)
-    post_jira_comment(None, finding, accepted_message_creator)
+    if perform_save:
+        finding.save(dedupe_option=False)
+    # post_jira_comment might reload from database so see unaccepted finding. but the comment
+    # only contains some text so that's ok
+    post_jira_comment(finding, accepted_message_creator)
 
 
-def risk_unaccept(finding):
+def risk_unaccept(finding, perform_save=True):
     logger.debug('unaccepting finding %i:%s if it is currently risk accepted', finding.id, finding)
-    # removing from ManyToMany will not fail for non-existing entries
     if finding.risk_accepted:
+        logger.debug('unaccepting finding %i:%s', finding.id, finding)
         # keep reference to ra to for posting comments later
         risk_acceptance = finding.risk_acceptance
+        # removing from ManyToMany will not fail for non-existing entries
         remove_from_any_risk_acceptance(finding)
-        if not finding.mitigated and not finding.false_p and not finding.out_of_scope and not finding.risk_acceptance_set.exists():
+        if not finding.mitigated and not finding.false_p and not finding.out_of_scope:
             finding.active = True
-            finding.risk_accepted = False
+        finding.risk_accepted = False
+        if perform_save:
+            logger.debug('saving unaccepted finding %i:%s', finding.id, finding)
             finding.save(dedupe_option=False)
 
-        # logger.debug('posting comments for unaccept')
-        post_jira_comments(risk_acceptance, [finding], unaccepted_message_creator)
+        # post_jira_comment might reload from database so see unaccepted finding. but the comment
+        # only contains some text so that's ok
+        post_jira_comment(finding, unaccepted_message_creator)
 
 
 def remove_from_any_risk_acceptance(finding):
