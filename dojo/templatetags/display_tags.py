@@ -764,7 +764,7 @@ def finding_display_status(finding):
     # outputs html, so make sure to escape user provided fields
     display_status = finding.status()
     if 'Risk Accepted' in display_status:
-        ra = finding.active_risk_acceptance
+        ra = finding.risk_acceptance
         if ra:
             url = reverse('view_risk_acceptance', args=(finding.test.engagement.id, ra.id, ))
             info = ra.name_and_expiration_info

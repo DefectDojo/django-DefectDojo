@@ -396,7 +396,6 @@ def view_engagement(request, eid):
             'enabled': enabled,
             'check': check,
             'threat': eng.tmodel_path,
-            'risk': eng.risk_path,
             'form': form,
             'notes': notes,
             'risks_accepted': risks_accepted,

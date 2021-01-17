@@ -6,7 +6,7 @@ from dojo.jira_link.helper import escape_for_jira
 from dojo.notifications.helper import create_notification
 from django.urls import reverse
 from celery.decorators import task
-from dojo.models import System_Settings, Risk_Acceptance, Finding
+from dojo.models import System_Settings, Risk_Acceptance
 import logging
 
 logger = logging.getLogger(__name__)
@@ -21,6 +21,8 @@ def expire_now(risk_acceptance):
             if not finding.active:
                 logger.debug('%i:%s: unaccepting a.k.a reactivating finding.', finding.id, finding)
                 finding.active = True
+                finding.risk_accepted = False
+
                 if risk_acceptance.restart_sla_expired:
                     finding.sla_start_date = timezone.now().date()
 
@@ -62,6 +64,7 @@ def reinstate(risk_acceptance, old_expiration_date):
             if finding.active:
                 logger.debug('%i:%s: accepting a.k.a. deactivating finding', finding.id, finding)
                 finding.active = False
+                finding.risk_accepted = True
                 finding.save(dedupe_option=False)
                 reinstated_findings.append(finding)
             else:
@@ -79,6 +82,7 @@ def delete(eng, risk_acceptance):
     findings = risk_acceptance.accepted_findings.all()
     for finding in findings:
         finding.active = True
+        finding.risk_accepted = False
         finding.save(dedupe_option=False)
 
     # best effort jira integration, no status changes
@@ -99,6 +103,7 @@ def remove_finding_from_risk_acceptance(risk_acceptance, finding):
     logger.debug('removing finding %i from risk acceptance %i', finding.id, risk_acceptance.id)
     risk_acceptance.accepted_findings.remove(finding)
     finding.active = True
+    finding.risk_accepted = False
     finding.save(dedupe_option=False)
     # best effort jira integration, no status changes
     post_jira_comments(risk_acceptance, [finding], unaccepted_message_creator)
@@ -106,9 +111,9 @@ def remove_finding_from_risk_acceptance(risk_acceptance, finding):
 
 def add_findings_to_risk_acceptance(risk_acceptance, findings):
     for finding in findings:
-        if finding.active:
-            finding.active = False
-            finding.save(dedupe_option=False)
+        finding.active = False
+        finding.risk_accepted = True
+        finding.save(dedupe_option=False)
         risk_acceptance.accepted_findings.add(finding)
     risk_acceptance.save()
 
@@ -183,16 +188,38 @@ def reinstation_message_creator(risk_acceptance, heads_up_days=0):
 
 
 def accepted_message_creator(risk_acceptance, heads_up_days=0):
-    return 'Finding has been added to risk acceptance [(%s)|%s] with %i findings (expires on %s)' % \
-        (escape_for_jira(risk_acceptance.name),
-        get_full_url(reverse('view_risk_acceptance', args=(risk_acceptance.engagement.id, risk_acceptance.id))),
-        len(risk_acceptance.accepted_findings.all()), timezone.localtime(risk_acceptance.expiration_date).strftime("%b %d, %Y"))
+    if risk_acceptance:
+        return 'Finding has been added to risk acceptance [(%s)|%s] with %i findings (expires on %s)' % \
+            (escape_for_jira(risk_acceptance.name),
+            get_full_url(reverse('view_risk_acceptance', args=(risk_acceptance.engagement.id, risk_acceptance.id))),
+            len(risk_acceptance.accepted_findings.all()), timezone.localtime(risk_acceptance.expiration_date).strftime("%b %d, %Y"))
+    else:
+        return 'Finding has been risk accepted'
 
 
 def unaccepted_message_creator(risk_acceptance, heads_up_days=0):
-    return 'finding was unaccepted/deleted from risk acceptance [(%s)|%s]' % \
-        (escape_for_jira(risk_acceptance.name),
-        get_full_url(reverse('view_risk_acceptance', args=(risk_acceptance.engagement.id, risk_acceptance.id))))
+    if risk_acceptance:
+        return 'finding was unaccepted/deleted from risk acceptance [(%s)|%s]' % \
+            (escape_for_jira(risk_acceptance.name),
+            get_full_url(reverse('view_risk_acceptance', args=(risk_acceptance.engagement.id, risk_acceptance.id))))
+    else:
+        return 'Finding is no longer risk accepted'
+
+
+def post_jira_comment(finding, message_factory, heads_up_days=0):
+    if not finding or not finding.has_jira_issue:
+        return
+
+    jira_project = jira_helper.get_jira_project(finding)
+
+    if jira_project and jira_project.risk_acceptance_expiration_notification:
+        jira_instance = jira_helper.get_jira_instance(finding)
+
+        if jira_instance:
+            jira_comment = message_factory(None, heads_up_days)
+
+            logger.debug("Creating JIRA comment for something risk acceptance related")
+            jira_helper.add_simple_jira_comment(jira_instance, finding.jira_issue, jira_comment)
 
 
 def post_jira_comments(risk_acceptance, findings, message_factory, heads_up_days=0):
@@ -232,52 +259,24 @@ def prefetch_for_expiration(risk_acceptances):
                                              )
 
 
-# gets or creates the simple risk acceptance instance connected to the engagement. only contains this finding if it is simple accepted
-def get_simple_risk_acceptance(finding, create=True):
-    # check if has test, if not, return False to avoid errors on test being None later on. This can happen when creating a finding from a template
-    if not hasattr(finding, 'test'):
-        return None
-
-    if hasattr(finding.test.engagement, 'simple_risk_acceptance') and len(finding.test.engagement.simple_risk_acceptance) > 0:
-        return finding.test.engagement.simple_risk_acceptance[0]
-
-    simple_risk_acceptance = finding.test.engagement.risk_acceptance.filter(name=Finding.SIMPLE_RISK_ACCEPTANCE_NAME).prefetch_related('accepted_findings').first()
-    if simple_risk_acceptance is None and create:
-        from dojo.utils import get_current_user
-        user = get_current_user()
-        simple_risk_acceptance = Risk_Acceptance.objects.create(
-                owner=user if user else User.objects.first(),
-                name=Finding.SIMPLE_RISK_ACCEPTANCE_NAME,
-                decision=Risk_Acceptance.TREATMENT_ACCEPT,
-                decision_details='These findings are accepted using a simple risk acceptance without expiration date, '
-                'approval document or compensating control information. Unaccept and use full risk acceptance if you '
-                'need to have more control over those fields.'
-        )
-        find.test.engagement.risk_acceptance.add(simple_risk_acceptance)
-    return simple_risk_acceptance
-
-
 def simple_risk_accept(finding):
-    # adding to ManyToMany will not cause duplicate entries
-    risk_acceptance = get_simple_risk_acceptance(finding)
-    risk_acceptance.accepted_findings.add(finding)
     # risk accepted, so finding no longer considered active
+    finding.risk_accepted = True
     finding.active = False
     finding.save(dedupe_option=False)
-    post_jira_comments(risk_acceptance, [finding], accepted_message_creator)
+    post_jira_comment(None, finding, accepted_message_creator)
 
 
 def risk_unaccept(finding):
-    logger.debug('unaccepting finding %i:%s', finding.id, finding)
+    logger.debug('unaccepting finding %i:%s if it is currently risk accepted', finding.id, finding)
     # removing from ManyToMany will not fail for non-existing entries
-    risk_acceptance = finding.active_risk_acceptance
-    if risk_acceptance:
-        # for now also remove from any other risk acceptance as differianting between simple and full here would clutter the menu.
-        # also currently you can only add a finding to 1 risk acceptance, so this would only affect old findings added to multiple
-        # risk acceptances in some obcure way
+    if finding.risk_accepted:
+        # keep reference to ra to for posting comments later
+        risk_acceptance = finding.risk_acceptance
         remove_from_any_risk_acceptance(finding)
         if not finding.mitigated and not finding.false_p and not finding.out_of_scope and not finding.risk_acceptance_set.exists():
             finding.active = True
+            finding.risk_accepted = False
             finding.save(dedupe_option=False)
 
         # logger.debug('posting comments for unaccept')

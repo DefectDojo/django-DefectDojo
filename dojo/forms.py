@@ -889,7 +889,7 @@ class AddFindingForm(forms.ModelForm):
     # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
     field_order = ('title', 'date', 'cwe', 'cve', 'severity', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
                    'severity_justification', 'endpoints', 'references', 'is_template', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope',
-                   'simple_risk_accept', 'under_defect_review', 'sla_start_date')
+                   'risk_accepted', 'under_defect_review', 'sla_start_date')
 
     def __init__(self, *args, **kwargs):
         req_resp = kwargs.pop('req_resp')
@@ -944,7 +944,7 @@ class AdHocFindingForm(forms.ModelForm):
     # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
     field_order = ('title', 'date', 'cwe', 'cve', 'severity', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
                    'severity_justification', 'endpoints', 'references', 'is_template', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope',
-                   'simple_risk_accept', 'under_defect_review', 'sla_start_date')
+                   'risk_accepted', 'under_defect_review', 'sla_start_date')
 
     def __init__(self, *args, **kwargs):
         req_resp = kwargs.pop('req_resp')
@@ -1022,12 +1022,10 @@ class FindingForm(forms.ModelForm):
     is_template = forms.BooleanField(label="Create Template?", required=False,
                                      help_text="A new finding template will be created from this finding.")
 
-    simple_risk_accept = forms.BooleanField(label="Accept Risk", required=False, help_text="Check to accept this risk and deactivate the finding. Uncheck to unaccept the risk. Use full risk acceptance from the dropdown menu if you need advanced settings such as an expiry date.")
-
     # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
     field_order = ('title', 'date', 'cwe', 'cve', 'severity', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
                    'severity_justification', 'endpoints', 'references', 'is_template', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope',
-                   'simple_risk_accept', 'under_defect_review', 'sla_start_date')
+                   'risk_accepted', 'under_defect_review', 'sla_start_date')
 
     def __init__(self, *args, **kwargs):
         template = kwargs.pop('template')
@@ -1037,13 +1035,16 @@ class FindingForm(forms.ModelForm):
             req_resp = kwargs.pop('req_resp')
 
         super(FindingForm, self).__init__(*args, **kwargs)
-        print('instance: ', self.instance)
-        self.fields['simple_risk_accept'].initial = True if hasattr(self, 'instance') and self.instance.active_risk_acceptance else False
 
         # do not show checkbox if finding is not accepted and simple risk acceptance is disabled
-        # if chcked, always show to allow unaccept also with full risk acceptance enabled
-        if not self.instance.active_risk_acceptance and not self.instance.test.engagement.product.enable_simple_risk_acceptance:
-            del self.fields['simple_risk_accept']
+        # if checked, always show to allow unaccept also with full risk acceptance enabled
+        if not self.instance.risk_accepted and not self.instance.test.engagement.product.enable_simple_risk_acceptance:
+            del self.fields['risk_accepted']
+        else:
+            if self.instance.risk_accepted:
+                self.fields['risk_accepted'].help_text = "Uncheck to unaccept the risk. Use full risk acceptance from the dropdown menu if you need advanced settings such as an expiry date."
+            elif self.instance.test.engagement.product.enable_simple_risk_acceptance:
+                self.fields['risk_accepted'].help_text = "Check to accept the risk. Use full risk acceptance from the dropdown menu if you need advanced settings such as an expiry date."
 
         # self.fields['tags'].widget.choices = t
         if req_resp:
@@ -1065,9 +1066,9 @@ class FindingForm(forms.ModelForm):
         if cleaned_data['false_p'] and cleaned_data['verified']:
             raise forms.ValidationError('False positive findings cannot '
                                         'be verified.')
-        if cleaned_data['active'] and 'simple_risk_accept' in cleaned_data and cleaned_data['simple_risk_accept']:
+        if cleaned_data['active'] and 'risk_accepted' in cleaned_data and cleaned_data['risk_accepted']:
             raise forms.ValidationError('Active findings cannot '
-                                        'be simple risk accepted.')
+                                        'be risk accepted.')
 
         return cleaned_data
 

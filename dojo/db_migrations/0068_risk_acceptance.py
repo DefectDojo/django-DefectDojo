@@ -134,5 +134,4 @@ class Migration(migrations.Migration):
             name='expiration_date_warned',
             field=models.DateTimeField(blank=True, default=None, help_text='(readonly) When the risk acceptance expiration was warned for by the daily job.', null=True),
         ),
-
     ]

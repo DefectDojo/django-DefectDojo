@@ -462,11 +462,7 @@ class Product_Type(models.Model):
     # only used by bulk risk acceptance api
     @property
     def unaccepted_open_findings(self):
-        engagements = Engagement.objects.filter(product__prod_type=self)
-        accepted_findings = Finding.objects.filter(risk_acceptance__engagement__in=engagements)
-        accepted_ids = [f.id for f in accepted_findings.only('id')]
-        return Finding.objects.filter(active=True, verified=True, duplicate=False,
-                                      test__engagement__product__prod_type=self).exclude(id__in=accepted_ids)
+        return Finding.objects.filter(risk_accepted=False, active=True, verified=True, duplicate=False, test__engagement__product__prod_type=self)
 
     # def products_count(self):
     #     return Product.objects.filter(prod_type=self).count()
@@ -799,10 +795,6 @@ class Product(models.Model):
         return bc
 
     @property
-    def enable_risk_acceptance(self):
-        return self.enable_full_risk_acceptance or self.enable_simple_risk_acceptance
-
-    @property
     def get_product_type(self):
         return self.prod_type if self.prod_type is not None else 'unknown'
 
@@ -1051,8 +1043,6 @@ class Engagement(models.Model):
                                 default='threat_model', editable=False)
     tmodel_path = models.CharField(max_length=1000, default='none',
                                    editable=False, blank=True, null=True)
-    risk_path = models.CharField(max_length=1000, default='none',
-                                 editable=False, blank=True, null=True)
     risk_acceptance = models.ManyToManyField("Risk_Acceptance",
                                              default=None,
                                              editable=False,
@@ -1112,10 +1102,7 @@ class Engagement(models.Model):
     # only used by bulk risk acceptance api
     @property
     def unaccepted_open_findings(self):
-        accepted_findings = Finding.objects.filter(risk_acceptance__engagement=self)
-        accepted_ids = [f.id for f in accepted_findings.only('id')]
-        return Finding.objects.filter(active=True, verified=True, duplicate=False,
-                                      test__engagement=self).exclude(id__in=accepted_ids)
+        return Finding.objects.filter(risk_accepted=False, active=True, verified=True, duplicate=False, test__engagement=self)
 
     def accept_risks(self, accepted_risks):
         self.risk_acceptance.add(*accepted_risks)
@@ -1411,10 +1398,7 @@ class Test(models.Model):
     # only used by bulk risk acceptance api
     @property
     def unaccepted_open_findings(self):
-        accepted_findings = Finding.objects.filter(risk_acceptance__engagement=self.engagement)
-        accepted_ids = [f.id for f in accepted_findings.only('id')]
-        return Finding.objects.filter(active=True, verified=True, duplicate=False, test=self).exclude(
-            id__in=accepted_ids)
+        return Finding.objects.filter(risk_accepted=False, active=True, verified=True, duplicate=False, test=self)
 
     def accept_risks(self, accepted_risks):
         self.engagement.risk_acceptance.add(*accepted_risks)
@@ -1482,8 +1466,6 @@ class Sonarqube_Product(models.Model):
 
 
 class Finding(models.Model):
-
-    SIMPLE_RISK_ACCEPTANCE_NAME = 'Simple Builtin Risk Acceptance'
 
     title = models.CharField(max_length=511,
                              verbose_name="Title",
@@ -1586,6 +1568,9 @@ class Finding(models.Model):
     out_of_scope = models.BooleanField(default=False,
                                        verbose_name="Out Of Scope",
                                        help_text="Denotes if this flaw falls outside the scope of the test and/or engagement.")
+    risk_accepted = models.BooleanField(default=False,
+                                       verbose_name="Risk Accepted",
+                                       help_text="Denotes if this finding has been marked as an accepted risk.")
     under_review = models.BooleanField(default=False,
                                        verbose_name="Under Review",
                                        help_text="Denotes is this flaw is currently being reviewed.")
@@ -1817,12 +1802,15 @@ class Finding(models.Model):
     # only used by bulk risk acceptance api
     @classmethod
     def unaccepted_open_findings(cls):
-        return cls.objects.filter(active=True, verified=True, duplicate=False, risk_acceptance__isnull=True)
+        return cls.objects.filter(active=True, verified=True, duplicate=False, risk_accepted=False)
 
     @property
-    def active_risk_acceptance(self):
-        # risk_acceptance_set is normally prefetched so works better than count() or exists()
-        return next((ra for ra in self.risk_acceptance_set.all() if not ra.is_expired), None)
+    def risk_acceptance(self):
+        ras = self.risk_acceptance_set.all()
+        if ras:
+            return ras[0]
+
+        return None
 
     def compute_hash_code(self):
         if hasattr(settings, 'HASHCODE_FIELDS_PER_SCANNER') and hasattr(settings, 'HASHCODE_ALLOWS_NULL_CWE') and hasattr(settings, 'HASHCODE_ALLOWED_FIELDS'):
@@ -1974,7 +1962,6 @@ class Finding(models.Model):
         return self.title
 
     def status(self):
-        ra = self.active_risk_acceptance
         status = []
         if self.under_review:
             status += ['Under Review']
@@ -1992,7 +1979,7 @@ class Finding(models.Model):
             status += ['Out Of Scope']
         if self.duplicate:
             status += ['Duplicate']
-        if ra:
+        if self.risk_accepted:
             status += ['Risk Accepted']
         if not len(status):
             status += ['Initial']

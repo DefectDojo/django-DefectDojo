@@ -90,6 +90,7 @@ def _accept_risks(accepted_risks: List[AcceptedRisk], base_findings: QuerySet, o
                                                         decision_details=risk.justification,
                                                         accepted_by=risk.accepted_by[:200])
             acceptance.accepted_findings.set(findings)
+            findings.update(risk_accepted=True)
             acceptance.save()
             accepted.append(acceptance)
     return accepted

@@ -36,7 +36,7 @@ from dojo.forms import NoteForm, TypedNoteForm, CloseFindingForm, FindingForm, P
     DefectFindingForm, StubFindingForm, DeleteFindingForm, DeleteStubFindingForm, ApplyFindingTemplateForm, \
     FindingFormID, FindingBulkUpdateForm, MergeFindings
 from dojo.models import Finding, Notes, NoteHistory, Note_Type, \
-    BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, Risk_Acceptance, Endpoint_Status, \
+    BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, Endpoint_Status, \
     FindingImageAccessToken, GITHUB_PKey, GITHUB_Issue, Dojo_User, Cred_Mapping, Test, Product, User, Engagement
 from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_notifications, \
     get_system_setting, apply_cwe_to_template, Product_Tab, calculate_grade, \
@@ -45,7 +45,7 @@ from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_
 from dojo.notifications.helper import create_notification
 
 from django.template.defaultfilters import pluralize
-from django.db.models import Q, QuerySet, Prefetch, Count
+from django.db.models import Q, QuerySet, Count
 import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
 import dojo.finding.helper as finding_helper
@@ -692,7 +692,7 @@ def edit_finding(request, fid):
                 new_finding.severity)
             finding_helper.update_finding_status(new_finding, request.user, old_state_finding=old_finding)
 
-            if 'simple_risk_accept' in form.cleaned_data and form['simple_risk_accept'].value():
+            if 'risk_accepted' in form.cleaned_data and form['risk_accepted'].value():
                 if new_finding.test.engagement.product.enable_simple_risk_acceptance:
                     ra_helper.simple_risk_accept(new_finding)
             else:
@@ -1804,8 +1804,6 @@ def finding_bulk_update_all(request, pid=None):
                 calculate_grade(prod)
         else:
             if form.is_valid() and finding_to_update:
-                q_simple_risk_acceptance = Risk_Acceptance.objects.filter(name=Finding.SIMPLE_RISK_ACCEPTANCE_NAME)
-
                 finding_to_update = request.POST.getlist('finding_to_update')
                 finds = Finding.objects.filter(id__in=finding_to_update).order_by("finding__test__engagement__product__id")
 
@@ -1820,7 +1818,6 @@ def finding_bulk_update_all(request, pid=None):
                     )
 
                 finds = prefetch_for_findings(finds)
-                finds = finds.prefetch_related(Prefetch('test__engagement__risk_acceptance', queryset=q_simple_risk_acceptance, to_attr='simple_risk_acceptance'))
 
                 if form.cleaned_data['severity']:
                     finds.update(severity=form.cleaned_data['severity'],

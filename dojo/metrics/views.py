@@ -1046,7 +1046,7 @@ def view_engineer(request, eid):
         life = date.today() - find.date
         life = life.days
         status = 'Active'
-        if find.active_risk_acceptance:
+        if find.risk_accepted:
             status = 'Accepted'
         detail = [team, name, severity, description, life, status, find.reporter]
         details.append(detail)
