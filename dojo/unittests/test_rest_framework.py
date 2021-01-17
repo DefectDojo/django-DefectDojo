@@ -55,9 +55,9 @@ class BaseClass():
                 # create a new instance first to make sure there's at least 1 instance with tags set by payload to trigger tag handling code
                 logger.debug('creating model with endpoints: %s', self.payload)
                 response = self.client.post(self.url, self.payload)
-                self.assertEqual(201, response.status_code, response.data)
+                self.assertEqual(201, response.status_code, response.data[:1000])
 
-                # print('response:', response.data)
+                # print('response:', response.data[:1000])
                 check_for_id = response.data['id']
                 # print('id: ', check_for_id)
                 check_for_tags = self.payload.get('tags', None)
@@ -76,7 +76,7 @@ class BaseClass():
                         tags_found = True
                 self.assertTrue(tags_found)
 
-            self.assertEqual(200, response.status_code, response.data)
+            self.assertEqual(200, response.status_code, response.data[:1000])
 
         @skipIfNotSubclass('CreateModelMixin')
         def test_create(self):
@@ -85,7 +85,7 @@ class BaseClass():
             logger.debug('test_create_response:')
             logger.debug(response)
             logger.debug(response.data)
-            self.assertEqual(201, response.status_code, response.data)
+            self.assertEqual(201, response.status_code, response.data[:1000])
             self.assertEqual(self.endpoint_model.objects.count(), length + 1)
 
             if hasattr(self.endpoint_model, 'tags') and self.payload and self.payload.get('tags', None):
@@ -99,7 +99,7 @@ class BaseClass():
             current_objects = self.client.get(self.url, format='json').data
             relative_url = self.url + '%s/' % current_objects['results'][0]['id']
             response = self.client.get(relative_url)
-            self.assertEqual(200, response.status_code, response.data)
+            self.assertEqual(200, response.status_code, response.data[:1000])
             # sensitive data must be set to write_only so those are not returned in the response
             # https://github.com/DefectDojo/django-DefectDojo/security/advisories/GHSA-8q8j-7wc4-vjg5
             self.assertFalse('password' in response.data)
@@ -111,7 +111,7 @@ class BaseClass():
             current_objects = self.client.get(self.url, format='json').data
             relative_url = self.url + '%s/' % current_objects['results'][0]['id']
             response = self.client.delete(relative_url)
-            self.assertEqual(204, response.status_code, response.data)
+            self.assertEqual(204, response.status_code, response.data[:1000])
 
         @skipIfNotSubclass('UpdateModelMixin')
         def test_update(self):
@@ -119,7 +119,7 @@ class BaseClass():
             relative_url = self.url + '%s/' % current_objects['results'][0]['id']
             response = self.client.patch(relative_url, self.update_fields)
 
-            self.assertEqual(200, response.status_code, response.data)
+            self.assertEqual(200, response.status_code, response.data[:1000])
 
             for key, value in self.update_fields.items():
                 # some exception as push_to_jira has been implemented strangely in the update methods in the api
@@ -139,7 +139,7 @@ class BaseClass():
 
             response = self.client.put(
                 relative_url, self.payload)
-            self.assertEqual(200, response.status_code, response.data)
+            self.assertEqual(200, response.status_code, response.data[:1000])
 
 
 class AppAnalysisTest(BaseClass.RESTEndpointTest):
@@ -243,12 +243,12 @@ class FindingRequestResponseTest(DojoAPITestCase):
             "req_resp": [{"request": "POST", "response": "200"}]
         }
         response = self.client.post('/api/v2/findings/7/request_response/', dumps(payload), content_type='application/json')
-        self.assertEqual(200, response.status_code, response.data)
+        self.assertEqual(200, response.status_code, response.data[:1000])
         self.assertEqual(BurpRawRequestResponse.objects.count(), length + 1)
 
     def test_request_response_get(self):
         response = self.client.get('/api/v2/findings/7/request_response/', format='json')
-        self.assertEqual(200, response.status_code, response.data)
+        self.assertEqual(200, response.status_code, response.data[:1000])
 
 
 class FindingsTest(BaseClass.RESTEndpointTest):
@@ -818,4 +818,4 @@ class ReimportScanTest(DojoAPITestCase):
                 "version": "1.0.1",
             })
         self.assertEqual(length, Test.objects.all().count())
-        self.assertEqual(201, response.status_code, response.data)
+        self.assertEqual(201, response.status_code, response.data[:1000])

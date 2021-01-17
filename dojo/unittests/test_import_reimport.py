@@ -564,12 +564,12 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
         # f = open('response.html', 'w+')
         # f.write(str(response.content, 'utf-8'))
         # f.close()
-        self.assertEqual(302, response.status_code)
+        self.assertEqual(302, response.status_code, response.data[:1000])
         return {'test': test.id}
 
     def reimport_scan_ui(self, test, payload):
         response = self.client_ui.post(reverse('re_import_scan_results', args=(test, )), payload)
-        self.assertEqual(302, response.status_code)
+        self.assertEqual(302, response.status_code, response.data[:1000])
         test = Test.objects.get(id=response.url.split('/')[-1])
         return {'test': test.id}
 
