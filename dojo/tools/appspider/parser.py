@@ -3,10 +3,10 @@ from defusedxml import ElementTree
 from dojo.models import Endpoint, Finding
 import html2text
 import urllib.parse
-import logging
 
 
 class AppSpiderXMLParser(object):
+    """Parser for Rapid7 AppSpider reports"""
     def __init__(self, filename, test):
         self.items = []
 
