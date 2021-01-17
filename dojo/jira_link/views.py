@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 
 
 # for examples of incoming json, see the unit tests for the webhook: https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/unittests/test_jira_webhook.py
+# or the officials docs (which are not always clear): https://developer.atlassian.com/server/jira/platform/webhooks/
 @csrf_exempt
 @require_POST
 def webhook(request, secret=None):
