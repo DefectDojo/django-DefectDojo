@@ -316,6 +316,7 @@ class ImportScanForm(forms.Form):
     SCAN_TYPE_CHOICES = (("", "Please Select a Scan Type"),
                          ("Netsparker Scan", "Netsparker Scan"),
                          ("Burp Scan", "Burp Scan"),
+                         ("Burp REST API", "Burp REST API"),
                          ("Nessus Scan", "Nessus Scan"),
                          ("Nmap Scan", "Nmap Scan"),
                          ("Nexpose Scan", "Nexpose Scan"),
