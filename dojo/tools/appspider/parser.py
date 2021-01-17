@@ -13,10 +13,6 @@ class AppSpiderXMLParser(object):
         if filename is None:
             return
 
-        if "VulnerabilitiesSummary.xml" not in str(filename):
-            logging.warning('Please ensure that you are uploading AppSpider\'s VulnerabilitiesSummary.xml file.'
-                            'At this time it is the only file that is consumable by DefectDojo.')
-
         vscan = ElementTree.parse(filename)
         root = vscan.getroot()
 
