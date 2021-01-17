@@ -238,26 +238,32 @@
             </thead>
             <tbody>
             <tr>
-                <td>
-                    <a href="{% url 'download_risk_acceptance' eng.id risk_acceptance.id %}">{{ risk_acceptance.filename }}</a>
-                </td>
-                <td>
-                    {{ risk_acceptance.created }}
-                </td>
-                <td>
-                    {% if user|is_authorized_for_staff:risk_acceptance %}
-                        <form id="replace_risk_file" enctype="multipart/form-data" method="post">
-                            {% csrf_token %}
-                            <label class="btn btn-sm btn-primary">
-                                Replace File
-                                <input accept="application/pdf,image/*" id="id_path" name="path" type="file"/>
-                            </label>
-                            <input type="hidden" name="replace_file" value="Replace File"/>
-                        </form>
-                    {% else %}
-                        Not Authorized
-                    {% endif %}
-                </td>
+                {% if risk_acceptance.filename %}
+                    <td>
+                        <a href="{% url 'download_risk_acceptance' eng.id risk_acceptance.id %}">{{ risk_acceptance.filename }}</a>
+                    </td>
+                    <td>
+                        {{ risk_acceptance.created }}
+                    </td>
+                    <td>
+                        {% if user|is_authorized_for_staff:risk_acceptance %}
+                            <form id="replace_risk_file" enctype="multipart/form-data" method="post">
+                                {% csrf_token %}
+                                <label class="btn btn-sm btn-primary">
+                                    Replace File
+                                    <input accept="application/pdf,image/*" id="id_path" name="path" type="file"/>
+                                </label>
+                                <input type="hidden" name="replace_file" value="Replace File"/>
+                            </form>
+                        {% else %}
+                            Not Authorized
+                        {% endif %}
+                    </td>
+                {% else %}
+                    <td>None</td>
+                    <td>None</td>
+                    <td>None</td>
+                {% endif %}
             </tr>
             </tbody>
         </table>
