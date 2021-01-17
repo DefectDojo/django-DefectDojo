@@ -1,4 +1,5 @@
 from dojo.tools.burp.parser import BurpXmlParser
+from dojo.tools.burp_api.parser import BurpApiParser
 from dojo.tools.dsop.parser import DsopParser
 from dojo.tools.nessus.parser import NessusCSVParser, NessusXMLParser
 from dojo.tools.nmap.parser import NmapXMLParser
@@ -111,6 +112,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = BurpXmlParser(file, test)
     elif scan_type == "Burp Enterprise Scan":
         parser = BurpEnterpriseHtmlParser(file, test)
+    elif scan_type == "Burp REST API":
+        parser = BurpApiParser(file, test)
     elif scan_type == "Nessus Scan":
         filename = file.name.lower()
         if filename.endswith("csv"):
