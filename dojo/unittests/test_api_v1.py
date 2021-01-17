@@ -58,6 +58,7 @@ class ApiBasicOperationsTest(ResourceTestCaseMixin, TestCase):
         data = self.deserialize(r)
         self.assertEqual(p.id, data['id'])
 
+    @skip("Deprecated soon")
     def test_create_product(self):
         p_data = {
             'name': 'Fantastic Product',
@@ -73,7 +74,7 @@ class ApiBasicOperationsTest(ResourceTestCaseMixin, TestCase):
         p = Product.objects.get(id=obj_id)
         self.assertEqual('Fantastic Product', p.name)
 
-    # @skip("TODO: Test for product updating")
+    @skip("Deprecated soon")
     def test_update_product(self):
         new_p_data = {
             'name': 'Wonderful Product',
@@ -94,6 +95,7 @@ class ApiBasicOperationsTest(ResourceTestCaseMixin, TestCase):
     def test_delete_product(self):
         pass
 
+    @skip("Deprecated soon")
     def test_create_engagement(self):
         """
         Test for engagement creation, because it takes at least one reference
@@ -121,7 +123,8 @@ class ApiBasicOperationsTest(ResourceTestCaseMixin, TestCase):
         self.assertEqual('2018-01-01', e.target_start.strftime('%Y-%m-%d'))
         self.assertEqual('2025-12-31', e.target_end.strftime('%Y-%m-%d'))
 
-    def test_inclomplete_creation_request(self):
+    @skip("Deprecated soon")
+    def test_incomplete_creation_request(self):
         """
         Demonstrate what happens, if not all required fields are provided in a
         creation request.
