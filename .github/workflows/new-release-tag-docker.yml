@@ -51,7 +51,7 @@ jobs:
     needs: tag-and-release
     runs-on: ubuntu-latest
     strategy:
-      matrix: 
+      matrix:
           docker-image: [django, nginx]
     steps:
       - name: Login to DockerHub
@@ -59,16 +59,35 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+
       - name: Checkout tag
         uses: actions/checkout@v2
         with:
           ref: ${{ github.event.inputs.release_number }}
+
       - id: set-repo-org
         run: echo ::set-output name=repoorg::${GITHUB_REPOSITORY%%/*} | tr '[:upper:]' '[:lower:]'
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
+
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        id: buildx
+        uses: docker/setup-buildx-action@master
+
+      # - name: Get Date
+      #   id: get-date
+      #   run: |
+      #     echo "::set-output name=date::$(/bin/date -u "+%Y%m%d")"
+      #   shell: bash
+
+      # build with docker so we can use layer caching
+
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-django-${{ github.sha }
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
       - name: Build and push images
         env:
           REPO_ORG: ${{ steps.set-repo-org.outputs.repoorg }}
@@ -78,5 +97,8 @@ jobs:
           tags: ${{ env.REPO_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ github.event.inputs.release_number }}, ${{ env.REPO_ORG }}/defectdojo-${{ matrix.docker-image}}:latest
           file: ./Dockerfile.${{ matrix.docker-image }}
           context: .
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
