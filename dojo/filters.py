@@ -5,7 +5,7 @@ from datetime import timedelta, datetime
 from django.apps import apps
 from auditlog.models import LogEntry
 from django.contrib.auth.models import User
-from django.utils import six
+import six
 from django.utils.translation import ugettext_lazy as _
 from django_filters import FilterSet, CharFilter, OrderingFilter, \
     ModelMultipleChoiceFilter, ModelChoiceFilter, MultipleChoiceFilter, \
