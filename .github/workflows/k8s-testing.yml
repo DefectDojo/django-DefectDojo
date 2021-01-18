@@ -49,21 +49,39 @@ jobs:
       #   with:
       #     username: ${{ secrets.DOCKERHUB_USERNAME }}
       #     password: ${{ secrets.DOCKERHUB_TOKEN }}
+
       - name: Checkout
         uses: actions/checkout@v2
+
       - name: Read Docker Image Identifiers
         id: read-docker-image-identifiers
         run: echo "IMAGE_REPOSITORY=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
+
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
       # - name: Log into containers
         # uses: docker/login-action@v1
         # with:
         #   registry: ${{ env.GITHUB_CACHE_REPO }}
         #   username: ${{ github.actor }}
         #   password: ${{ secrets.PAT }}
+
+      # - name: Get Date
+      #   id: get-date
+      #   run: |
+      #     echo "::set-output name=date::$(/bin/date -u "+%Y%m%d")"
+      #   shell: bash
+
+      # build with docker so we can use layer caching
+
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
       - name: Build
         id: docker_build
         uses: docker/build-push-action@v2
@@ -75,8 +93,9 @@ jobs:
             ${{ env.GITHUB_CACHE_REPO }}/${{ env.IMAGE_REPOSITORY }}/${{ matrix.component }}:cache
           file: Dockerfile.${{ matrix.component }}
           outputs: type=docker,dest=${{ matrix.component }}_img
-          # cache-to: type=registry,ref=${{ env.GITHUB_CACHE_REPO }}/${{ env.IMAGE_REPOSITORY }}/${{ matrix.component }}:cache,mode=max
-          # cache-from: type=registry,ref=${{ env.GITHUB_CACHE_REPO }}/${{ env.IMAGE_REPOSITORY }}/${{ matrix.component }}:cache
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+
       - name: Upload image ${{ matrix.component }} as artifact
         uses:  actions/upload-artifact@v2
         with:
@@ -100,6 +119,7 @@ jobs:
 #          password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Checkout
         uses: actions/checkout@v2
+
       - name: Setup Minikube
         uses: manusa/actions-setup-minikube@v2.3.0
         with:
@@ -107,22 +127,27 @@ jobs:
           kubernetes version: 'v1.19.2'
           driver: docker
           start args: '--addons=ingress'
+
       - name: Status of minikube
         run: minikube status
+
       - name: Load images from artifacts
         uses: actions/download-artifact@v2
+
       - name: Load docker images
         run: |-
              eval $(minikube docker-env)
              docker load -i nginx/nginx_img
              docker load -i django/django_img
              docker images
+
       - name: Configure HELM repos
         run: |-
              helm repo add stable https://charts.helm.sh/stable
              helm repo add bitnami https://charts.bitnami.com/bitnami
              helm dependency list ./helm/defectdojo
              helm dependency update ./helm/defectdojo
+
       - name: Set confings into Outputs
         id: set
         run: |-
@@ -130,6 +155,7 @@ jobs:
               echo ::set-output name=mysql:: "${{ env.HELM_MYSQL_DATABASE_SETTINGS }}"
               echo ::set-output name=redis:: "${{ env.HELM_REDIS_BROKER_SETTINGS }}"
               echo ::set-output name=rabbit:: "${{ env.HELM_RABBIT_BROKER_SETTINGS }}"
+
       # - name: Create image pull Secrets
       #   run: |-
       #         kubectl create secret docker-registry defectdojoregistrykey --docker-username=${{ secrets.DOCKERHUB_USERNAME }} --docker-password=${{ secrets.DOCKERHUB_TOKEN }}
@@ -145,11 +171,13 @@ jobs:
                ${{ steps.set.outputs[matrix.brokers] }} \
                --set createSecret=true \
               #  --set imagePullSecrets=defectdojoregistrykey
+
       - name: Check deployment status
         run: |-
              kubectl get pods
              kubectl get ingress
              kubectl get services
+
       - name: Check Application
         run: |-
              to_complete () {
