@@ -1,5 +1,7 @@
 import logging
 
+from django.contrib.admin.utils import NestedObjects
+from django.db import DEFAULT_DB_ALIAS
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.urls import reverse
@@ -7,11 +9,13 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from dojo.filters import ProductTypeFilter
 from dojo.forms import Product_TypeForm, Product_TypeProductForm, Delete_Product_TypeForm
-from dojo.models import Product_Type
+from dojo.models import Product_Type, Product
 from dojo.utils import get_page_items, add_breadcrumb
 from dojo.notifications.helper import create_notification
 from django.db.models import Count, Q
 from django.db.models.query import QuerySet
+from dojo.user.helper import user_must_be_authorized
+from dojo.user.helper import objects_authorized
 
 logger = logging.getLogger(__name__)
 
@@ -23,10 +27,13 @@ Product Type views
 
 
 def product_type(request):
-    # query for names outside of query with prefetch to avoid the complex prefetch query from executing twice
-    name_words = Product_Type.objects.all().values_list('name', flat=True)
+    if request.user.is_staff:
+        prod_types = Product_Type.objects.all()
+    else:
+        prod_types = Product_Type.objects.filter(authorized_users__in=[request.user])
 
-    prod_types = Product_Type.objects.all()
+    # query for names outside of query with prefetch to avoid the complex prefetch query from executing twice
+    name_words = prod_types.values_list('name', flat=True)
 
     ptl = ProductTypeFilter(request.GET, queryset=prod_types)
     pts = get_page_items(request, ptl.qs, 25)
@@ -83,13 +90,51 @@ def add_product_type(request):
         'form': form,
     })
 
+@user_must_be_authorized(Product_Type, 'view', 'ptid')
+def view_product_type(request, ptid):
+    pt = get_object_or_404(Product_Type, pk=ptid)
+    products = Product.objects.filter(prod_type=pt)
+    add_breadcrumb(title="View Product Type", top_level=False, request=request)
+    return render(request, 'dojo/view_product_type.html', {
+        'name': 'View Product Type',
+        'user': request.user,
+        'pt': pt,
+        'products': products})
+
+
+@user_passes_test(lambda u: u.is_staff)
+def delete_product_type(request, ptid):
+    product_type = get_object_or_404(Product_Type, pk=ptid)
+    form = Delete_Product_TypeForm(instance=product_type)
+
+    if request.method == 'POST':
+        if 'id' in request.POST and str(product_type.id) == request.POST['id']:
+            form = Delete_Product_TypeForm(request.POST, instance=product_type)
+            if form.is_valid():
+                product_type.delete()
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     'Product  Type and relationships removed.',
+                                     extra_tags='alert-success')
+                return HttpResponseRedirect(reverse('product_type'))
+
+    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
+    collector.collect([product_type])
+    rels = collector.nested()
+
+    add_breadcrumb(title="Delete Product Type", top_level=False, request=request)
+    return render(request, 'dojo/delete_product_type.html',
+                  {'product_type': product_type,
+                   'form': form,
+                   'rels': rels,
+                   })
+
 
 @user_passes_test(lambda u: u.is_staff)
 def edit_product_type(request, ptid):
     pt = get_object_or_404(Product_Type, pk=ptid)
     authed_users = pt.authorized_users.all()
     pt_form = Product_TypeForm(instance=pt, initial={'authorized_users': authed_users})
-    delete_pt_form = Delete_Product_TypeForm(instance=pt)
     if request.method == "POST" and request.POST.get('edit_product_type'):
         pt_form = Product_TypeForm(request.POST, instance=pt)
         if pt_form.is_valid():
@@ -101,22 +146,6 @@ def edit_product_type(request, ptid):
                 'Product type updated successfully.',
                 extra_tags="alert-success",
             )
-            return HttpResponseRedirect(reverse("product_type"))
-    if request.method == "POST" and request.POST.get("delete_product_type"):
-        form2 = Delete_Product_TypeForm(request.POST, instance=pt)
-        if form2.is_valid():
-            pt.delete()
-            messages.add_message(
-                request,
-                messages.SUCCESS,
-                "Product type Deleted successfully.",
-                extra_tags="alert-success",
-            )
-            create_notification(event='other',
-                                title='Deletion of %s' % pt.name,
-                                description='The product type "%s" was deleted by %s' % (pt.name, request.user),
-                                url=request.build_absolute_uri(reverse('product_type')),
-                                icon="exclamation-triangle")
             return HttpResponseRedirect(reverse("product_type"))
     add_breadcrumb(title="Edit Product Type", top_level=False, request=request)
     return render(request, 'dojo/edit_product_type.html', {

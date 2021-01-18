@@ -405,6 +405,7 @@ class Notes(models.Model):
 
 class Product_Type(models.Model):
     name = models.CharField(max_length=255, unique=True)
+    description = models.CharField(max_length=4000, null=True)
     critical_product = models.BooleanField(default=False)
     key_product = models.BooleanField(default=False)
     updated = models.DateTimeField(auto_now=True, null=True)

@@ -151,6 +151,8 @@ class MonthYearWidget(Widget):
 
 
 class Product_TypeForm(forms.ModelForm):
+    description = forms.CharField(widget=forms.Textarea(attrs={}),
+                                  required=False)
     authorized_users = forms.ModelMultipleChoiceField(
         queryset=None,
         required=False, label="Authorized Users")
@@ -163,10 +165,13 @@ class Product_TypeForm(forms.ModelForm):
 
     class Meta:
         model = Product_Type
-        fields = ['name', 'authorized_users', 'critical_product', 'key_product']
+        fields = ['name', 'description', 'authorized_users', 'critical_product', 'key_product']
 
 
 class Delete_Product_TypeForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
     class Meta:
         model = Product_Type
         exclude = ['name', 'critical_product', 'key_product']
