@@ -10,7 +10,7 @@ $('a.delete-risk_acceptance').on('click', function (e) {
 $('a.reinstate-risk_acceptance').on('click', function (e) {
     return confirm('Are you sure you want reinstate this risk acceptance? ' +
         'All its findings will be deactivated and marked as accepted. ' +
-        'The default of {{ system_settings.risk_acceptance_form_default_days }} days from now will be the expirdation date.'
+        'The default of {{ system_settings.risk_acceptance_form_default_days }} days from now will be the expiration date.'
         )
 });
 
