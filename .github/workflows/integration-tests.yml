@@ -91,7 +91,7 @@ jobs:
           load: true
           tags: defectdojo/defectdojo-integration-tests:latest
           builder: ${{ steps.buildx.outputs.name }}
-          file: ./Dockerfile.integrationtests
+          file: ./Dockerfile.integration-tests
           context: .
           cache-from: type=local,src=/tmp/.buildx-cache-integration-tests
           cache-to: type=local,dest=/tmp/.buildx-cache-integration-tests
