@@ -52,6 +52,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-nginx-
 
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache-integration-tests
+          key: ${{ runner.os }}-buildx-integration-tests-${{ github.workflow }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-integration-tests-
+
       - name: Build
         uses: docker/build-push-action@v2
         with:
@@ -75,6 +83,18 @@ jobs:
           context: .
           cache-from: type=local,src=/tmp/.buildx-cache-nginx
           cache-to: type=local,dest=/tmp/.buildx-cache-nginx
+
+      - name: Build
+        uses: docker/build-push-action@v2
+        with:
+          push: false
+          load: true
+          tags: defectdojo/defectdojo-integration-tests:latest
+          builder: ${{ steps.buildx.outputs.name }}
+          file: ./Dockerfile.integrationtests
+          context: .
+          cache-from: type=local,src=/tmp/.buildx-cache-integration-tests
+          cache-to: type=local,dest=/tmp/.buildx-cache-integration-tests
 
       # but run with docker-compose
 
