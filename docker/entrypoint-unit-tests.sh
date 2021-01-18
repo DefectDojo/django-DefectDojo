@@ -37,4 +37,4 @@ EOF
 
 python3 manage.py migrate
 
-python3 manage.py test dojo.unittests -v 3 --no-input
+python3 manage.py test dojo.unittests -v 3 --no-input --parallel
