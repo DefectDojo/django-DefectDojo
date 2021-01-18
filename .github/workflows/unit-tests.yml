@@ -44,16 +44,20 @@ jobs:
         uses: actions/cache@v2
         with:
           path: /tmp/.buildx-cache-django
-          key: ${{ runner.os }}-buildx-django-${{ github.workflow }}-${{ github.sha }}
+          key: ${{ runner.os }}-buildx-django-${{ github.workflow }}-${{ github.sha }}-${{ github.run_id }}
           restore-keys: |
+            ${{ runner.os }}-buildx-django-${{ github.workflow }}-${{ github.sha }}
+            ${{ runner.os }}-buildx-django-${{ github.workflow }}
             ${{ runner.os }}-buildx-django-
 
       - name: Cache Docker layers
         uses: actions/cache@v2
         with:
           path: /tmp/.buildx-cache-nginx
-          key: ${{ runner.os }}-buildx-django-${{ github.workflow }}-${{ github.sha }}
+          key: ${{ runner.os }}-buildx-nginx-${{ github.workflow }}-${{ github.sha }}-${{ github.run_id }}
           restore-keys: |
+            ${{ runner.os }}-buildx-nginx-${{ github.workflow }}-${{ github.sha }}
+            ${{ runner.os }}-buildx-nginx-${{ github.workflow }}
             ${{ runner.os }}-buildx-nginx-
 
       - name: Build

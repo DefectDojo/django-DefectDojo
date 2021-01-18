@@ -84,8 +84,10 @@ jobs:
         uses: actions/cache@v2
         with:
           path: /tmp/.buildx-cache-${{ matrix.docker-image }}
-          key: ${{ runner.os }}-buildx-${{ matrix.docker-image }}-${{ github.workflow }}-${{ github.sha }}
+          key: ${{ runner.os }}-buildx-${{ matrix.docker-image }}-${{ github.workflow }}-${{ github.sha }}-${{ github.run_id }}
           restore-keys: |
+            ${{ runner.os }}-buildx-${{ matrix.docker-image }}-${{ github.workflow }}-${{ github.sha }}
+            ${{ runner.os }}-buildx-${{ matrix.docker-image }}-${{ github.workflow }}
             ${{ runner.os }}-buildx-${{ matrix.docker-image }}-
 
       - name: Build and push images
