@@ -37,4 +37,6 @@ EOF
 
 python3 manage.py migrate
 
+# --parallel fails on GitHub Actions
+#python3 manage.py test dojo.unittests -v 3 --no-input --parallel
 python3 manage.py test dojo.unittests -v 3 --no-input --parallel

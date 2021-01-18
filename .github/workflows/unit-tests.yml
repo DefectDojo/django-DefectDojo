@@ -42,13 +42,15 @@ jobs:
 
       - name: Cache Docker layers
         uses: actions/cache@v2
+        env:
+          docker-image: django
         with:
           path: /tmp/.buildx-cache-django
-          key: ${{ runner.os }}-buildx-django-${{ github.workflow }}-${{ github.sha }}-${{ github.run_id }}
+          key: ${{ runner.os }}-buildx-$docker-image-${{ github.workflow }}-${{ github.sha }}-${{ github.run_id }}
           restore-keys: |
-            ${{ runner.os }}-buildx-django-${{ github.workflow }}-${{ github.sha }}
-            ${{ runner.os }}-buildx-django-${{ github.workflow }}
-            ${{ runner.os }}-buildx-django-
+            ${{ runner.os }}-buildx-$docker-image-${{ github.workflow }}-${{ github.sha }}
+            ${{ runner.os }}-buildx-$docker-image-${{ github.workflow }}
+            ${{ runner.os }}-buildx-$docker-image-
 
       - name: Cache Docker layers
         uses: actions/cache@v2
