@@ -3,6 +3,7 @@ name: Unit tests
 # push:
 #      run on every push, which is when something gets merged also
 on:
+  workflow_dispatch:
   pull_request:
   push:
     branches:
