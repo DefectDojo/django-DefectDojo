@@ -2,7 +2,7 @@
 version: '3.7'
 services:
   nginx:
-    build: 
+    build:
       context: ./
       dockerfile: Dockerfile.busybox
     image: defectdojo/defectdojo-busybox:${NGINX_VERSION:-latest}
@@ -21,8 +21,8 @@ services:
     environment:
       DD_DATABASE_URL: ${DD_TEST_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/test_defectdojo}
   initializer:
-    environment:
-      DD_INITIALIZE: 'false'
+    image: busybox:1.32.0-musl
+
   mysql:
     ports:
       - target: 3306
