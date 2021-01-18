@@ -804,7 +804,6 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
         return tag_object
 
     def validate(self, data):
-        logger.debug('VALIDATE: %s', self.context['request'].method)
         if self.context['request'].method == 'PATCH':
             is_active = data.get('active', self.instance.active)
             is_verified = data.get('verified', self.instance.verified)
