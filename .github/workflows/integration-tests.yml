@@ -34,14 +34,23 @@ jobs:
       #   shell: bash
 
       # build with docker so we can use layer caching
+      # each image needs its own cache
 
       - name: Cache Docker layers
         uses: actions/cache@v2
         with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.workflow }}-${{ github.sha }}
+          path: /tmp/.buildx-cache-django
+          key: ${{ runner.os }}-buildx-django-${{ github.workflow }}-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-buildx-
+            ${{ runner.os }}-buildx-django-
+
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache-nginx
+          key: ${{ runner.os }}-buildx-django-${{ github.workflow }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-nginx-
 
       - name: Build
         uses: docker/build-push-action@v2
@@ -52,8 +61,8 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
           file: ./Dockerfile.django
           context: .
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache
+          cache-from: type=local,src=/tmp/.buildx-cache-django
+          cache-to: type=local,dest=/tmp/.buildx-cache-django
 
       - name: Build
         uses: docker/build-push-action@v2
@@ -64,8 +73,8 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
           file: ./Dockerfile.nginx
           context: .
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache
+          cache-from: type=local,src=/tmp/.buildx-cache-nginx
+          cache-to: type=local,dest=/tmp/.buildx-cache-nginx
 
       # but run with docker-compose
 

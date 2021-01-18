@@ -42,7 +42,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        component: [django, nginx]
+        docker-image: [django, nginx]
     steps:
       # - name: Login to DockerHub
       #   uses: docker/login-action@v1
@@ -77,10 +77,10 @@ jobs:
       - name: Cache Docker layers
         uses: actions/cache@v2
         with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.workflow }}-${{ github.sha }}
+          path: /tmp/.buildx-cache-${{ matrix.docker-image }}
+          key: ${{ runner.os }}-buildx-${{ matrix.docker-image }}-${{ github.workflow }}-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-buildx-
+            ${{ runner.os }}-buildx-${{ matrix.docker-image }}-
 
       - name: Build
         id: docker_build
@@ -89,18 +89,18 @@ jobs:
           context: .
           push: false
           tags: |
-            ${{ env.DD_DOCKER_REPO }}/defectdojo-${{ matrix.component }}:latest
-            ${{ env.GITHUB_CACHE_REPO }}/${{ env.IMAGE_REPOSITORY }}/${{ matrix.component }}:cache
-          file: Dockerfile.${{ matrix.component }}
-          outputs: type=docker,dest=${{ matrix.component }}_img
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache
+            ${{ env.DD_DOCKER_REPO }}/defectdojo-${{ matrix.docker-image }}:latest
+            ${{ env.GITHUB_CACHE_REPO }}/${{ env.IMAGE_REPOSITORY }}/${{ matrix.docker-image }}:cache
+          file: Dockerfile.${{ matrix.docker-image }}
+          outputs: type=docker,dest=${{ matrix.docker-image }}_img
+          cache-from: type=local,src=/tmp/.buildx-cache-${{ matrix.docker-image }}
+          cache-to: type=local,dest=/tmp/.buildx-cache-${{ matrix.docker-image }}
 
-      - name: Upload image ${{ matrix.component }} as artifact
+      - name: Upload image ${{ matrix.docker-image }} as artifact
         uses:  actions/upload-artifact@v2
         with:
-          name: ${{ matrix.component }}
-          path: ${{matrix.component}}_img
+          name: ${{ matrix.docker-image }}
+          path: ${{matrix.docker-image}}_img
           retention-days: 1
 
   setting_minikube_cluster:

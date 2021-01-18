@@ -83,10 +83,10 @@ jobs:
       - name: Cache Docker layers
         uses: actions/cache@v2
         with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.workflow }}-${{ github.sha }}
+          path: /tmp/.buildx-cache-${{ matrix.docker-image }}
+          key: ${{ runner.os }}-buildx-${{ matrix.docker-image }}-${{ github.workflow }}-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-buildx-
+            ${{ runner.os }}-buildx-${{ matrix.docker-image }}-
 
       - name: Build and push images
         env:
@@ -97,8 +97,8 @@ jobs:
           tags: ${{ env.REPO_ORG }}/defectdojo-${{ matrix.docker-image}}:${{ github.event.inputs.release_number }}, ${{ env.REPO_ORG }}/defectdojo-${{ matrix.docker-image}}:latest
           file: ./Dockerfile.${{ matrix.docker-image }}
           context: .
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache
+          cache-from: type=local,src=/tmp/.buildx-cache-${{ matrix.docker-image }}
+          cache-to: type=local,dest=/tmp/.buildx-cache-${{ matrix.docker-image }}
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
