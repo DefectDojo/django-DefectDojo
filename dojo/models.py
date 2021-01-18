@@ -2407,11 +2407,11 @@ class Risk_Acceptance(models.Model):
     TREATMENT_TRANSFER = 'T'
 
     TREATMENT_CHOICES = [
-        (TREATMENT_ACCEPT, 'Accept'),
-        (TREATMENT_AVOID, 'Avoid'),
-        (TREATMENT_MITIGATE, 'Mitigate'),
-        (TREATMENT_FIX, 'Fix'),
-        (TREATMENT_TRANSFER, 'Transfer'),
+        (TREATMENT_ACCEPT, 'Accept (The risk is acknowledged, yet remains)'),
+        (TREATMENT_AVOID, 'Avoid (Do not engage with whatever creates the risk)'),
+        (TREATMENT_MITIGATE, 'Mitigate (The risk still exists, yet compensating controls make it less of a threat)'),
+        (TREATMENT_FIX, 'Fix (The risk is eradicated)'),
+        (TREATMENT_TRANSFER, 'Transfer (The risk is transferred to a 3rd party)'),
     ]
 
     name = models.CharField(max_length=100, null=False, blank=False, help_text="Descriptive name which in the future may also be used to group risk acceptances together across engagements and products")
