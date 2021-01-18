@@ -22,6 +22,7 @@ services:
       DD_DATABASE_URL: ${DD_TEST_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/test_defectdojo}
   initializer:
     image: busybox:1.32.0-musl
+    entrypoint: ['echo', 'skipping', 'initializer']
 
   mysql:
     ports:
