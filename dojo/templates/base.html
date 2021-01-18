@@ -195,22 +195,24 @@
                                 {% elif request.user.is_authenticated %}
                                 <a href="{% url 'product' %}" title="Products" aria-label="Products"><i class="fa fa-list fa-fw"></i><span>Products</span></a>
                                 {% endif %}
-                                {% if request.user.is_staff %}
-                                    <ul class="nav nav-second-level">
-                                      {% if request.user.is_staff %}
-                                        <li>
-                                            <a href="{% url 'new_product' %}"> Add Product</a>
-                                        </li>
-                                      {% endif %}
-                                        <li>
-                                            <a href="{% url 'product' %}"> All Products</a>
-                                        </li>
-                                        <li>
-                                            <a href="{% url 'product_type' %}">View Product Types</a>
-                                        </li>
-
-                                    </ul>
-                                {% endif %}
+                                <ul class="nav nav-second-level">
+                                    {% if request.user.is_staff %}
+                                    <li>
+                                        <a href="{% url 'new_product' %}"> Add Product</a>
+                                    </li>
+                                    {% endif %}
+                                    <li>
+                                        <a href="{% url 'product' %}"> All Products</a>
+                                    </li>
+                                    {% if request.user.is_staff %}
+                                    <li>
+                                        <a href="{% url 'add_product_type' %}"> Add Product Type</a>
+                                    </li>
+                                    {% endif %}
+                                    <li>
+                                        <a href="{% url 'product_type' %}">All Product Types</a>
+                                    </li>
+                                </ul>
                                 <!-- /.nav-second-level -->
                             </li>
                             {% if request.user.is_staff %}
