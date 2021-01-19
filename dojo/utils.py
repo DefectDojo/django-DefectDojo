@@ -350,6 +350,7 @@ def is_duplicate_changed_status(new_finding, existing_finding):
             return True
     return False
 
+
 def set_existing_change_status(new_finding, existing_finding):
     if new_finding.mitigated and not existing_finding.mitigated:
         event = "marked mitigated"
