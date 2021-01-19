@@ -65,7 +65,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='risk_acceptance',
             name='accepted_by',
-            field=models.CharField(blank=True, default=None, help_text='The entity or person that accepts the risk, can be outside of defect dojo.', max_length=200, null=True, verbose_name='Accepted By'),
+            field=models.CharField(blank=True, default=None, help_text='The entity or person that accepts the risk, can be outside of DefectDojo.', max_length=200, null=True, verbose_name='Accepted By'),
         ),
         migrations.AlterField(
             model_name='risk_acceptance',
@@ -75,7 +75,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='risk_acceptance',
             name='owner',
-            field=models.ForeignKey(help_text='User in defect dojo owning this acceptance. Only the owner and staff users can edit the risk acceptance.', on_delete=django.db.models.deletion.CASCADE, to='dojo.Dojo_User'),
+            field=models.ForeignKey(help_text='User in DefectDojo owning this acceptance. Only the owner and staff users can edit the risk acceptance.', on_delete=django.db.models.deletion.CASCADE, to='dojo.Dojo_User'),
         ),
         migrations.AlterField(
             model_name='rule',
@@ -127,11 +127,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='risk_acceptance',
             name='expiration_date_handled',
-            field=models.DateTimeField(blank=True, default=None, help_text='(readonly) When the risk acceptance expiration was handled (manually or by the daily job.', null=True),
+            field=models.DateTimeField(blank=True, default=None, help_text='(readonly) When the risk acceptance expiration was handled (manually or by the daily job).', null=True),
         ),
         migrations.AddField(
             model_name='risk_acceptance',
             name='expiration_date_warned',
-            field=models.DateTimeField(blank=True, default=None, help_text='(readonly) When the risk acceptance expiration was warned for by the daily job.', null=True),
+            field=models.DateTimeField(blank=True, default=None, help_text='(readonly) Date at which the notice about the risk acceptance expiration was sent.', null=True),
         ),
     ]
