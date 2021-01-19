@@ -10,6 +10,9 @@ on:
       - master
       - dev
 
+env:
+  DD_DOCKER_REPO: defectdojo
+
 jobs:
   build:
     # build with docker so we can use layer caching
@@ -52,7 +55,7 @@ jobs:
           context: .
           push: false
           tags: |
-            defectdojo/defectdojo-${{ matrix.docker-image }}:latest
+            ${{ env.DD_DOCKER_REPO }}/defectdojo-${{ matrix.docker-image }}:latest
           file: Dockerfile.${{ matrix.docker-image }}
           outputs: type=docker,dest=${{ matrix.docker-image }}_img
           cache-from: type=local,src=/tmp/.buildx-cache-${{ matrix.docker-image }}
