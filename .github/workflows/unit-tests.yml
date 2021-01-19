@@ -52,7 +52,6 @@ jobs:
           context: .
           push: false
           tags: |
-            ${{ env.DD_DOCKER_REPO }}/defectdojo-${{ matrix.docker-image }}:latest
             defectdojo/defectdojo-${{ matrix.docker-image }}:latest
           file: Dockerfile.${{ matrix.docker-image }}
           outputs: type=docker,dest=${{ matrix.docker-image }}_img
