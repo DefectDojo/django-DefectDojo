@@ -91,24 +91,23 @@ jobs:
         run: |-
              docker load -i nginx/nginx_img
              docker load -i django/django_img
+             docker load -i django/integration-tests_img
              docker images
 
       - name: Set integration-test mode
         run: ln -s docker-compose.override.integration_tests.yml docker-compose.override.yml
 
       # phased startup so we can use the exit code from integrationtest container
-      - name: Start MySQL
-        run: docker-compose up -d
+
+      - name: Start Dojo
+        # implicity starts uwsgi and rabbitmq
+        run: docker-compose up -d mysql nginx celerybeat celeryworker
 
       - name: Initialize
         run: docker-compose up --exit-code-from initializer initializer
 
-      - name: Start Dojo
-        # implicity starts uwsgi and rabbitmq
-        run: docker-compose up -d nginx celerybeat celeryworker
-
       - name: Integration tests
-        run: docker-compose up --exit-code-from integrationtest integrationtest
+        run: docker-compose up --exit-code-from integration-tests integration-tests
 
       - name: Logs
         if: failure()
