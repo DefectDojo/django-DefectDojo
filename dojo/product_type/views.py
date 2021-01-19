@@ -11,11 +11,9 @@ from dojo.filters import ProductTypeFilter
 from dojo.forms import Product_TypeForm, Product_TypeProductForm, Delete_Product_TypeForm
 from dojo.models import Product_Type, Product
 from dojo.utils import get_page_items, add_breadcrumb
-from dojo.notifications.helper import create_notification
 from django.db.models import Count, Q
 from django.db.models.query import QuerySet
 from dojo.user.helper import user_must_be_authorized
-from dojo.user.helper import objects_authorized
 
 logger = logging.getLogger(__name__)
 
@@ -89,6 +87,7 @@ def add_product_type(request):
         'user': request.user,
         'form': form,
     })
+
 
 @user_must_be_authorized(Product_Type, 'view', 'ptid')
 def view_product_type(request, ptid):
