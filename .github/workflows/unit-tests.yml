@@ -11,7 +11,77 @@ on:
       - dev
 
 jobs:
+  build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        docker-image: [django, nginx]
+    steps:
+      # - name: Login to DockerHub
+      #   uses: docker/login-action@v1
+      #   with:
+      #     username: ${{ secrets.DOCKERHUB_USERNAME }}
+      #     password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Read Docker Image Identifiers
+        id: read-docker-image-identifiers
+        run: echo "IMAGE_REPOSITORY=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      # - name: Log into containers
+        # uses: docker/login-action@v1
+        # with:
+        #   registry: ${{ env.GITHUB_CACHE_REPO }}
+        #   username: ${{ github.actor }}
+        #   password: ${{ secrets.PAT }}
+
+      # - name: Get Date
+      #   id: get-date
+      #   run: |
+      #     echo "::set-output name=date::$(/bin/date -u "+%Y%m%d")"
+      #   shell: bash
+
+      # build with docker so we can use layer caching
+
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache-$${{ env.docker-image }}
+          key: ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ github.workflow }}-${{ github.sha }}-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ github.workflow }}-${{ github.sha }}
+            ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ github.workflow }}
+            ${{ runner.os }}-buildx-${{ env.docker-image }}
+
+      - name: Build
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: false
+          tags: |
+            ${{ env.DD_DOCKER_REPO }}/defectdojo-${{ matrix.docker-image }}:latest
+            ${{ env.GITHUB_CACHE_REPO }}/${{ env.IMAGE_REPOSITORY }}/${{ matrix.docker-image }}:cache
+          file: Dockerfile.${{ matrix.docker-image }}
+          outputs: type=docker,dest=${{ matrix.docker-image }}_img
+          cache-from: type=local,src=/tmp/.buildx-cache-${{ matrix.docker-image }}
+          cache-to: type=local,dest=/tmp/.buildx-cache-${{ matrix.docker-image }}
+
+      - name: Upload image ${{ matrix.docker-image }} as artifact
+        uses:  actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.docker-image }}
+          path: ${{matrix.docker-image}}_img
+          retention-days: 1
+
   unit_tests:
+    name: unit tests
+    needs: build
     runs-on: ubuntu-latest
     steps:
       # disabled login as it leaves plain text credentials behind
@@ -27,78 +97,24 @@ jobs:
       - name: Set unit-test mode
         run: docker/setEnv.sh unit_tests_cicd
 
-      - name: Set up Docker Buildx
-        id: buildx
-        uses: docker/setup-buildx-action@v1
+      - name: Load images from artifacts
+        uses: actions/download-artifact@v2
 
-      # - name: Get Date
-      #   id: get-date
-      #   run: |
-      #     echo "::set-output name=date::$(/bin/date -u "+%Y%m%d")"
-      #   shell: bash
-
-      # build with docker so we can use layer caching
-      # each image needs its own cache
-
-      - name: Cache Docker layers
-        uses: actions/cache@v2
-        env:
-          docker-image: django
-        with:
-          path: /tmp/.buildx-cache-django
-          key: ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ github.workflow }}-${{ github.sha }}-${{ github.run_id }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ github.workflow }}-${{ github.sha }}
-            ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ github.workflow }}
-            ${{ runner.os }}-buildx-${{ env.docker-image }}
-
-      - name: Cache Docker layers
-        uses: actions/cache@v2
-        env:
-          docker-image: nginx
-        with:
-          path: /tmp/.buildx-cache-django
-          key: ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ github.workflow }}-${{ github.sha }}-${{ github.run_id }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ github.workflow }}-${{ github.sha }}
-            ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ github.workflow }}
-            ${{ runner.os }}-buildx-${{ env.docker-image }}
-
-      - name: Build
-        uses: docker/build-push-action@v2
-        with:
-          push: false
-          load: true
-          tags: defectdojo/defectdojo-django:latest
-          builder: ${{ steps.buildx.outputs.name }}
-          file: ./Dockerfile.django
-          context: .
-          cache-from: type=local,src=/tmp/.buildx-cache-django
-          cache-to: type=local,dest=/tmp/.buildx-cache-django
-
-      - name: Build
-        uses: docker/build-push-action@v2
-        with:
-          push: false
-          load: true
-          tags: defectdojo/defectdojo-nginx:latest
-          builder: ${{ steps.buildx.outputs.name }}
-          file: ./Dockerfile.nginx
-          context: .
-          cache-from: type=local,src=/tmp/.buildx-cache-nginx
-          cache-to: type=local,dest=/tmp/.buildx-cache-nginx
-
-      # but run with docker-compose
+      - name: Load docker images
+        run: |-
+             docker load -i nginx/nginx_img
+             docker load -i django/django_img
+             docker images
 
       # phased startup so we can use the exit code from integrationtest container
       - name: Start MySQL
         run: docker-compose up -d
 
-      - name: Initialize
-        run: docker-compose up --exit-code-from initializer initializer
+      # - name: Initialize
+      #   run: docker-compose up --exit-code-from initializer initializer
 
       - name: Unit tests
-        run: docker-compose up --exit-code-from uwsgi uwsgi
+        run: docker-compose up --no-deps  --exit-code-from uwsgi uwsgi
 
       - name: Logs
         if: failure()

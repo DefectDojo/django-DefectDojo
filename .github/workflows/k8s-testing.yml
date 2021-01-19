@@ -38,7 +38,7 @@ env:
    "
 jobs:
   build_image:
-    name: Docker image build
+    name: Build Docker Image
     runs-on: ubuntu-latest
     strategy:
       matrix:
