@@ -2427,15 +2427,15 @@ class Risk_Acceptance(models.Model):
     decision = models.CharField(choices=TREATMENT_CHOICES, max_length=2, null=False, default=TREATMENT_ACCEPT, help_text="Risk treatment decision by risk owner")
     decision_details = models.TextField(default=None, blank=True, null=True, help_text="If a compensating control exists to mitigate the finding or reduce risk, then list the compensating control(s).")
 
-    accepted_by = models.CharField(max_length=200, default=None, null=True, blank=True, verbose_name='Accepted By', help_text="The entity or person that accepts the risk, can be outside of defect dojo.")
+    accepted_by = models.CharField(max_length=200, default=None, null=True, blank=True, verbose_name='Accepted By', help_text="The person that accepts the risk, can be outside of DefectDojo.")
     path = models.FileField(upload_to='risk/%Y/%m/%d',
                             editable=True, null=True,
                             blank=True, verbose_name="Proof")
-    owner = models.ForeignKey(Dojo_User, editable=True, on_delete=models.CASCADE, help_text="User in defect dojo owning this acceptance. Only the owner and staff users can edit the risk acceptance.")
+    owner = models.ForeignKey(Dojo_User, editable=True, on_delete=models.CASCADE, help_text="User in DefectDojo owning this acceptance. Only the owner and staff users can edit the risk acceptance.")
 
     expiration_date = models.DateTimeField(default=None, null=True, blank=True, help_text="When the risk acceptance expires, the findings will be reactivated (unless disabled below).")
-    expiration_date_warned = models.DateTimeField(default=None, null=True, blank=True, help_text="(readonly) When the risk acceptance expiration was warned for by the daily job.")
-    expiration_date_handled = models.DateTimeField(default=None, null=True, blank=True, help_text="(readonly) When the risk acceptance expiration was handled (manually or by the daily job.")
+    expiration_date_warned = models.DateTimeField(default=None, null=True, blank=True, help_text="(readonly) Date at which notice about the risk acceptance expiration was sent.")
+    expiration_date_handled = models.DateTimeField(default=None, null=True, blank=True, help_text="(readonly) When the risk acceptance expiration was handled (manually or by the daily job).")
     reactivate_expired = models.BooleanField(null=False, blank=False, default=True, verbose_name="Reactivate findings on expiration", help_text="Reactivate findings when risk acceptance expires?")
     restart_sla_expired = models.BooleanField(default=False, null=False, verbose_name="Restart SLA on expiration", help_text="When enabled, the SLA for findings is restarted when the risk acceptance expires.")
 
