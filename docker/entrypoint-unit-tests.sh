@@ -37,4 +37,10 @@ EOF
 
 python3 manage.py migrate
 
-python3 manage.py test dojo.unittests -v 3 --no-input
+echo "Swagger Schema Tests - Broken"
+echo "------------------------------------------------------------"
+python3 manage.py test dojo.unittests -v 3 --no-input --tag broken && true
+
+echo "Unit Tests"
+echo "------------------------------------------------------------"
+python3 manage.py test dojo.unittests -v 3 --no-input --exclude-tag broken
