@@ -16,7 +16,7 @@ env:
 jobs:
   build:
     # build with docker so we can use layer caching
-    name: Build Docker Image
+    name: Build Image
     runs-on: ubuntu-latest
     strategy:
       matrix:

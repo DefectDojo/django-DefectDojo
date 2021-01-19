@@ -2,10 +2,8 @@
 version: '3.7'
 services:
   nginx:
-    build:
-      context: ./
-      dockerfile: Dockerfile.busybox
-    image: defectdojo/defectdojo-busybox:${NGINX_VERSION:-latest}
+    image: busybox:1.32.0-musl
+    entrypoint: ['echo', 'skipping', 'nginx']
   uwsgi:
     entrypoint: ['/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/app/docker/entrypoint-unit-tests-devDocker.sh']
     volumes:
