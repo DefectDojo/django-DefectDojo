@@ -7,11 +7,35 @@ import multiselectfield.db.fields
 
 class Migration(migrations.Migration):
 
+    def set_risk_accepted_flag_on_findings(apps, schema_editor):
+        # We can't import the models directly as it may be a newer
+        # version than this migration expects. We use the historical version.
+        logger.info('Setting risk_accepted flag on findings that have an existing risk acceptance.')
+
+        accepted_findings = apps.get_model('dojo', 'Finding').objects.filter(risk_acceptance__isnull=False)
+
+        # logger.debug(accepted_findings.query)
+
+        logger.info('found %i findings', accepted_findings.count())
+
+        # bulk update is fast and we don't need any dedupe or other signals triggered by save()
+        accepted_findings.update(risk_accepted=True)
+
+        logger.info('marked %i findings as risk accepted', accepted_findings.count())
+
     dependencies = [
         ('dojo', '0067_max_dupes'),
     ]
 
     operations = [
+        migrations.AddField(
+            model_name='finding',
+            name='risk_accepted',
+            field=models.BooleanField(default=False, help_text='Denotes if this finding has been marked as an accepted risk.', verbose_name='Risk Accepted'),
+        ),
+
+        migrations.RunPython(set_risk_accepted_flag_on_findings, migrations.RunPython.noop),
+
         migrations.RemoveField(
             model_name='engagement',
             name='risk_path',
@@ -19,11 +43,6 @@ class Migration(migrations.Migration):
         migrations.RemoveField(
             model_name='risk_acceptance',
             name='compensating_control',
-        ),
-        migrations.AddField(
-            model_name='finding',
-            name='risk_accepted',
-            field=models.BooleanField(default=False, help_text='Denotes if this finding has been marked as an accepted risk.', verbose_name='Risk Accepted'),
         ),
         migrations.AddField(
             model_name='finding',
