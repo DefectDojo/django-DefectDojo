@@ -3,6 +3,8 @@
 from django.db import migrations, models
 import django.db.models.deletion
 import multiselectfield.db.fields
+import logging
+logger = logging.getLogger(__name__)
 
 
 class Migration(migrations.Migration):
