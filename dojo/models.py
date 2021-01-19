@@ -691,13 +691,21 @@ class Product(models.Model):
             return self.active_finding_count
         except AttributeError:
             # ideally it's always prefetched and we can remove this code in the future
-            self.active_finding_count = Finding.objects.filter(mitigated__isnull=True,
-                                            active=True,
-                                            false_p=False,
-                                            duplicate=False,
-                                            out_of_scope=False,
+            self.active_finding_count = Finding.objects.filter(active=True,
                                             test__engagement__product=self).count()
             return self.active_finding_count
+
+    @cached_property
+    def findings_active_verified_count(self):
+        try:
+            # if prefetched, it's already there
+            return self.active_verified_finding_count
+        except AttributeError:
+            # ideally it's always prefetched and we can remove this code in the future
+            self.active_verified_finding_count = Finding.objects.filter(active=True,
+                                            verified=True,
+                                            test__engagement__product=self).count()
+            return self.active_verified_finding_count
 
     # @property
     # def active_engagement_count(self):
@@ -3477,8 +3485,6 @@ class ChoiceAnswer(Answer):
 # auditlog.register(Answered_Survey)
 # auditlog.register(Question)
 # auditlog.register(Engagement_Survey)
-
-
 def enable_disable_auditlog(enable=True):
     if enable:
         # Register for automatic logging to database
@@ -3505,24 +3511,8 @@ def enable_disable_auditlog(enable=True):
         auditlog.unregister(Cred_User)
 
 
-def enable_disable_tag_pathcing(enable=True):
-    if enable:
-        # Patch to support prefetching
-        PrefetchingTagDescriptor.patch()
-
-
 from dojo.utils import get_system_setting
 enable_disable_auditlog(enable=get_system_setting('enable_auditlog'))  # on startup choose safe to retrieve system settiung)
-
-# Register tagging for models
-# tag_register(Product)
-# tag_register(Test)
-# tag_register(Finding)
-# tag_register(Engagement)
-# tag_register(Endpoint)
-# tag_register(Finding_Template)
-# tag_register(App_Analysis)
-# tag_register(Objects_Product)
 
 tagulous.admin.register(Product.tags)
 tagulous.admin.register(Test.tags)
@@ -3587,16 +3577,6 @@ admin.site.register(System_Settings, System_SettingsAdmin)
 admin.site.register(CWE)
 admin.site.register(Regulation)
 admin.site.register(Notifications)
-
-# watson.register(Test)
-# watson.register(Finding, fields=('id', 'title', 'cve', 'url', 'severity', 'description', 'mitigation', 'impact', 'steps_to_reproduce',
-#                                 'severity_justification', 'references', 'sourcefilepath', 'sourcefile', 'hash_code', 'file_path',
-#                                 'component_name', 'component_version', 'unique_id_from_tool', 'test__engagement__product__name'))
-# watson.register(Finding_Template)
-# watson.register(Endpoint)
-# watson.register(Engagement)
-# watson.register(App_Analysis)
-
 
 # SonarQube Integration
 admin.site.register(Sonarqube_Issue)
