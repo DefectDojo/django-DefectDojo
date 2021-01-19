@@ -1,15 +1,26 @@
 #!/bin/bash
 
-echo "Waiting 60s for services to start"
-# Wait for services to become available
-sleep 60
 echo "Testing DefectDojo Service"
-curl -s -o "/dev/null" $DD_BASE_URL -m 120
-CR=$(curl --insecure -s -m 10 -I "${DD_BASE_URL}login?next=/" | egrep "^HTTP" | cut  -d' ' -f2)
-if [ "$CR" != 200 ]; then
+
+echo "Waiting max 60s for services to start"
+# Wait for services to become available
+COUNTER=0
+while [  $COUNTER -lt 10 ]; do
+    curl -s -o "/dev/null" $DD_BASE_URL -m 120
+    CR=$(curl --insecure -s -m 10 -I "${DD_BASE_URL}login?next=/" | egrep "^HTTP" | cut  -d' ' -f2)
+    if [ "$CR" == 200 ]; then
+        break
+    fi
+    echo "Waiting: cannot display login screen; got HTTP code $CR"
+    sleep 10
+    let COUNTER=COUNTER+1
+done
+
+if [ $COUNTER -gt 10 ]; then
     echo "ERROR: cannot display login screen; got HTTP code $CR"
     exit 1
 fi
+
 
 # Run available unittests with a simple setup
 # All available Integrationtest Scripts are activated below
@@ -60,7 +71,7 @@ fi
 
 test="Product integration tests"
 echo "Running: $test"
-if python3 tests/product_test.py ; then 
+if python3 tests/product_test.py ; then
     success $test
 else
     fail $test
@@ -84,7 +95,7 @@ fi
 
 test="Environment integration tests"
 echo "Running: $test"
-if python3 tests/environment_test.py ; then 
+if python3 tests/environment_test.py ; then
     success $test
 else
     fail $test
@@ -152,7 +163,7 @@ fi
 
 # echo "Import Scanner integration test"
 # if python3 tests/import_scanner_test.py ; then
-#     echo "Success: Import Scanner integration tests passed" 
+#     echo "Success: Import Scanner integration tests passed"
 # else
 #     echo "Error: Import Scanner integration test failed"; exit 1
 # fi
