@@ -45,7 +45,7 @@ jobs:
       - name: Cache Docker layers
         uses: actions/cache@v2
         with:
-          path: /tmp/.buildx-cache-$${{ matrix.docker-image }}
+          path: /tmp/.buildx-cache-${{ matrix.docker-image }}
           key: ${{ runner.os }}-buildx-${{ matrix.docker-image }}-${{ github.workflow }}-${{ github.sha }}-${{ github.run_id }}
           restore-keys: |
             ${{ runner.os }}-buildx-${{ matrix.docker-image }}-${{ github.workflow }}-${{ github.sha }}
