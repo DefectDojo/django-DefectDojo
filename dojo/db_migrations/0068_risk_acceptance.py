@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='risk_acceptance',
             name='recommendation',
-            field=models.CharField(choices=[('A', 'Accept'), ('V', 'Avoid'), ('M', 'Mitigate'), ('F', 'Fix'), ('T', 'Transfer')], default='F', help_text='Recommendation from the security team.', max_length=2, verbose_name='Security Recommendation'),
+            field=models.CharField(choices=[('A', 'Accept (The risk is acknowledged, yet remains)'), ('V', 'Avoid (Do not engage with whatever creates the risk) '), ('M', 'Mitigate (The risk still exists, yet compensating controls make it less of a threat) '), ('F', 'Fix (The risk is eradicated)'), ('T', 'Transfer (The risk is transferred to a 3rd party)')], default='F', help_text='Recommendation from the security team.', max_length=2, verbose_name='Security Recommendation'),
         ),
         migrations.AddField(
             model_name='risk_acceptance',
@@ -90,7 +90,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='risk_acceptance',
             name='decision',
-            field=models.CharField(choices=[('A', 'Accept'), ('V', 'Avoid'), ('M', 'Mitigate'), ('F', 'Fix'), ('T', 'Transfer')], default='A', help_text='Risk treatment decision by risk owner', max_length=2),
+            field=models.CharField(choices=[('A', 'Accept (The risk is acknowledged, yet remains)'), ('V', 'Avoid (Do not engage with whatever creates the risk) '), ('M', 'Mitigate (The risk still exists, yet compensating controls make it less of a threat) '), ('F', 'Fix (The risk is eradicated)'), ('T', 'Transfer (The risk is transferred to a 3rd party)')], default='F', help_text='Risk treatment decision by risk owner', max_length=2),
         ),
         migrations.AlterField(
             model_name='risk_acceptance',
