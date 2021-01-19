@@ -91,7 +91,7 @@ jobs:
         run: |-
              docker load -i nginx/nginx_img
              docker load -i django/django_img
-             docker load -i django/integration-tests_img
+             docker load -i integration-tests/integration-tests_img
              docker images
 
       - name: Set integration-test mode
