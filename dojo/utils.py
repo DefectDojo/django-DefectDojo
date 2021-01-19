@@ -370,8 +370,9 @@ def set_existing_change_status(new_finding, existing_finding):
     existing_finding.active = new_finding.active
     existing_finding.verified = new_finding.verified
     existing_finding.notes.create(author=existing_finding.reporter,
-                                    entry="This finding has been automatically " + event +  " due to a new scan import.")
+                                  entry="This finding has been automatically " + event + " due to a new scan import.")
     existing_finding.save()
+
 
 @dojo_model_to_id
 @dojo_async_task
