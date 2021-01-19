@@ -72,6 +72,7 @@
                                 <th class="text-center">Tags</th>
                                 <th class="text-center">Criticality</th>
                                 <th class="text-center">Metadata</th>
+                                <th class="text-center">Active (Verified) Findings</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -95,7 +96,15 @@
                                     {{ product.external_audience|external_audience_icon }}
                                     {{ product.internet_accessible|internet_accessible_icon }}
                                     </td>
-                                </tr>
+                                    <td class="text-center">
+                                        {% if product.findings_count %}
+                                            <a href="{% url 'product_open_findings' product.id %}?test__engagement__product={{ product.id }}"><b>{{ product.findings_count }}</b></a>
+                                            &nbsp;(<a href="{% url 'product_verified_findings' product.id %}?test__engagement__product={{ product.id }}">{{ product.findings_active_verified_count }}</a>)
+                                        {% else %}
+                                            0
+                                        {% endif %}
+                                    </td>
+                                    </tr>
                             {% endfor %}
                             </tbody>
                         </table>
