@@ -1636,7 +1636,7 @@
     "model": "dojo.jira_instance",
     "fields": {
         "url": "https://defectdojo.atlassian.net/",
-        "username": "<YOUR_USER_HERE>",
+        "username": "defect.dojo",
         "password": "<YOUR_API_KEY_HERE>",
         "default_issue_type": "Task",
         "epic_name_id": 10942,
@@ -1654,7 +1654,7 @@
     "pk": 3,
     "model": "dojo.jira_instance",
     "fields": {
-      "username": "user2",
+      "username": "defect.dojo",
       "default_issue_type": "Task",
       "finding_text": "",
       "low_mapping_severity": "test severity",
@@ -1672,7 +1672,7 @@
     "pk": 4,
     "model": "dojo.jira_instance",
     "fields": {
-      "username": "user3",
+      "username": "defect.dojo",
       "default_issue_type": "Spike",
       "finding_text": "",
       "low_mapping_severity": "test severity",

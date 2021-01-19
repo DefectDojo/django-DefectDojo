@@ -441,6 +441,33 @@ class JIRAWebhookTest(DojoTestCase):
         self.assertEqual(200, response.status_code, response.content[:1000])
         self.assertEqual(notes_count_after, notes_count_before + 1)
 
+    # when a note is placed in defect dojo and sent to jira, it will trigger an incoming webhook request
+    # we want to ignore that one because the incoming comment from jira is the comment that was placed in dojo
+    def test_webhook_comment_on_finding_from_dojo_note(self):
+        self.system_settings(enable_jira=True, enable_jira_web_hook=True, disable_jira_webhook_secret=False, jira_webhook_secret=self.correct_secret)
+
+        # finding 5 has a JIRA issue in the initial fixture for unit tests with id=2
+
+        jira_issue = JIRA_Issue.objects.get(jira_id=2)
+        finding = jira_issue.finding
+        notes_count_before = finding.notes.count()
+
+        body = json.loads(json.dumps(self.jira_issue_comment_template_json))
+        body['comment']['updateAuthor']['key'] = "defect.dojo"
+        body['comment']['updateAuthor']['displayName'] = "Defect Dojo"
+
+        response = self.client.post(reverse('jira_web_hook_secret', args=(self.correct_secret, )),
+                                    body,
+                                    content_type="application/json")
+
+        jira_issue = JIRA_Issue.objects.get(jira_id=2)
+        finding = jira_issue.finding
+        notes_count_after = finding.notes.count()
+
+        self.assertEqual(200, response.status_code)
+        # incoming comment must be ignored
+        self.assertEqual(notes_count_after, notes_count_before)
+
     def test_webhook_comment_on_finding_jira_under_path(self):
         self.system_settings(enable_jira=True, enable_jira_web_hook=True, disable_jira_webhook_secret=False, jira_webhook_secret=self.correct_secret)
 
