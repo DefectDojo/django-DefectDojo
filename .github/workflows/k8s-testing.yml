@@ -180,9 +180,6 @@ jobs:
       - name: Check Application
         run: |-
              to_complete () {
-               set -x
-               set -e
-               set -v
                kubectl wait  --for=$1 $2 --timeout=500s --selector=$3
                if [[ ${?} != 0 ]]; then
                  echo "ERROR: $2"
