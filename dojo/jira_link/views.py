@@ -205,7 +205,7 @@ def webhook(request, secret=None):
                 logger.info('Unrecognized JIRA webhook event received: {}'.format(parsed.get('webhookEvent')))
         except Exception as e:
             if isinstance(e, Http404):
-                logger.warning('error processing JIRA webhook')
+                logger.warning('404 error processing JIRA webhook')
             else:
                 logger.exception(e)
 
