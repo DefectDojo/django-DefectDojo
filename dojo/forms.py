@@ -624,7 +624,7 @@ class UploadFileForm(forms.ModelForm):
 ManageFileFormSet = modelformset_factory(FileUpload, extra=3, max_num=10, fields=['title', 'file'], can_delete=True)
 
 
-class ReplaceRiskAcceptanceForm(forms.ModelForm):
+class ReplaceRiskAcceptanceProofForm(forms.ModelForm):
     path = forms.FileField(label="Proof", required=True, widget=forms.widgets.FileInput(attrs={"accept": ".jpg,.png,.pdf"}))
 
     class Meta:
