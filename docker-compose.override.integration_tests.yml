@@ -1,11 +1,11 @@
 ---
 version: '3.7'
 services:
-  integrationtest:
-    build: 
+  integration-tests:
+    build:
       context: ./
       dockerfile: Dockerfile.integration-tests
-    image: defectdojo/integration-tests:${INTEGRATION_TESTS_VERSION:-latest}
+    image: defectdojo/defectdojo-integration-tests:${INTEGRATION_TESTS_VERSION:-latest}
     depends_on:
       - nginx
       - uwsgi

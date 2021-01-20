@@ -403,6 +403,11 @@ class Notes(models.Model):
         return self.entry
 
 
+class FileUpload(models.Model):
+    title = models.CharField(max_length=100, unique=True)
+    file = models.FileField(upload_to=UniqueUploadNameProvider('uploaded_files'))
+
+
 class Product_Type(models.Model):
     name = models.CharField(max_length=255, unique=True)
     critical_product = models.BooleanField(default=False)
@@ -1033,6 +1038,7 @@ class Engagement(models.Model):
     pen_test = models.BooleanField(default=True)
     check_list = models.BooleanField(default=True)
     notes = models.ManyToManyField(Notes, blank=True, editable=False)
+    files = models.ManyToManyField(FileUpload, blank=True, editable=False)
     status = models.CharField(editable=True, max_length=2000, default='',
                               null=True,
                               choices=ENGAGEMENT_STATUS_CHOICES)
@@ -1359,6 +1365,7 @@ class Test(models.Model):
                                            editable=True)
     notes = models.ManyToManyField(Notes, blank=True,
                                    editable=False)
+    files = models.ManyToManyField(FileUpload, blank=True, editable=False)
     environment = models.ForeignKey(Development_Environment, null=True,
                                     blank=False, on_delete=models.CASCADE)
 
@@ -1636,7 +1643,11 @@ class Finding(models.Model):
                                     blank=True,
                                     verbose_name="Images",
                                     help_text="Image(s) / Screenshot(s) related to the flaw.")
-
+    files = models.ManyToManyField(FileUpload,
+                                   blank=True,
+                                   editable=False,
+                                   verbose_name="Files",
+                                   help_text="Files(s) related to the flaw.")
     line_number = models.CharField(null=True,
                                    blank=True,
                                    max_length=200,
@@ -3474,8 +3485,6 @@ class ChoiceAnswer(Answer):
 # auditlog.register(Answered_Survey)
 # auditlog.register(Question)
 # auditlog.register(Engagement_Survey)
-
-
 def enable_disable_auditlog(enable=True):
     if enable:
         # Register for automatic logging to database
@@ -3502,24 +3511,8 @@ def enable_disable_auditlog(enable=True):
         auditlog.unregister(Cred_User)
 
 
-def enable_disable_tag_pathcing(enable=True):
-    if enable:
-        # Patch to support prefetching
-        PrefetchingTagDescriptor.patch()
-
-
 from dojo.utils import get_system_setting
 enable_disable_auditlog(enable=get_system_setting('enable_auditlog'))  # on startup choose safe to retrieve system settiung)
-
-# Register tagging for models
-# tag_register(Product)
-# tag_register(Test)
-# tag_register(Finding)
-# tag_register(Engagement)
-# tag_register(Endpoint)
-# tag_register(Finding_Template)
-# tag_register(App_Analysis)
-# tag_register(Objects_Product)
 
 tagulous.admin.register(Product.tags)
 tagulous.admin.register(Test.tags)
@@ -3584,16 +3577,6 @@ admin.site.register(System_Settings, System_SettingsAdmin)
 admin.site.register(CWE)
 admin.site.register(Regulation)
 admin.site.register(Notifications)
-
-# watson.register(Test)
-# watson.register(Finding, fields=('id', 'title', 'cve', 'url', 'severity', 'description', 'mitigation', 'impact', 'steps_to_reproduce',
-#                                 'severity_justification', 'references', 'sourcefilepath', 'sourcefile', 'hash_code', 'file_path',
-#                                 'component_name', 'component_version', 'unique_id_from_tool', 'test__engagement__product__name'))
-# watson.register(Finding_Template)
-# watson.register(Endpoint)
-# watson.register(Engagement)
-# watson.register(App_Analysis)
-
 
 # SonarQube Integration
 admin.site.register(Sonarqube_Issue)
