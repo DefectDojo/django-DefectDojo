@@ -1,28 +1,20 @@
 import json
+from cvss import CVSS3
+import re
 from dojo.models import Finding
 
 
 class XrayJSONParser(object):
+    """JFrog Xray JSON reports"""
     def __init__(self, json_output, test):
+        # Start with an empty findings
+        self.items = []
+        # Exit if file is not provided
+        if json_output is None:
+            return
 
-        tree = self.parse_json(json_output)
-
-        if tree:
-            self.items = [data for data in self.get_items(tree, test)]
-        else:
-            self.items = []
-
-    def parse_json(self, json_output):
-        try:
-            data = json_output.read()
-            try:
-                tree = json.loads(str(data, 'utf-8'))
-            except:
-                tree = json.loads(data)
-        except:
-            raise Exception("Invalid format")
-
-        return tree
+        tree = json.load(json_output)
+        self.items = [data for data in self.get_items(tree, test)]
 
     def get_items(self, tree, test):
         items = {}
@@ -46,6 +38,13 @@ class XrayJSONParser(object):
         return list(items.values())
 
 
+def decode_cwe_number(value):
+    match = re.match(r"CWE-\d+", value, re.IGNORECASE)
+    if match is None:
+        return 0
+    return int(match[0].rsplit('-')[1])
+
+
 def get_item(vulnerability, test):
     # Following the CVSS Scoring per https://nvd.nist.gov/vuln-metrics/cvss
     if 'severity' in vulnerability:
@@ -59,28 +58,25 @@ def get_item(vulnerability, test):
 
     cve = "No CVE on file"
     cwe = 0
+    cvssv3 = None
     cvss_v3 = "No CVSS v3 score."
     cvss_v2 = "No CVSS v2 score."
     mitigation = "N/A"
     extra_desc = ""
     # Some entries have no CVE entries, despite they exist. Example CVE-2017-1000502.
-    if 'cves' in vulnerability['component_versions']['more_details']:
-        if 'cve' in vulnerability['component_versions']['more_details']['cves'][0]:
-            cve = vulnerability['component_versions']['more_details']['cves'][0]['cve']
-
-        if 'cwe' in vulnerability['component_versions']['more_details']['cves'][0]:
-            # take only the first one for now, limitation of DD model.
-            cwe = vulnerability['component_versions']['more_details']['cves'][0]['cwe'][0].split('-')[1]
-
-            # some can be "NVD-CWE-noinfo"
-            if not type(cwe) is int:
-                cwe = 0
-
-        if 'cvss_v3' in vulnerability['component_versions']['more_details']['cves'][0]:
-            cvss_v3 = vulnerability['component_versions']['more_details']['cves'][0]['cvss_v3']
-
-        if 'cvss_v2' in vulnerability['component_versions']['more_details']['cves'][0]:
-            cvss_v2 = vulnerability['component_versions']['more_details']['cves'][0]['cvss_v2']
+    cves = vulnerability['component_versions']['more_details'].get('cves', [])
+    if len(cves) > 0:
+        if 'cve' in cves[0]:
+            cve = cves[0]['cve']
+        # take only the first one for now, limitation of DD model.
+        if len(cves[0].get('cwe', [])) > 0:
+            cwe = decode_cwe_number(cves[0].get('cwe', [])[0])
+        if 'cvss_v3' in cves[0]:
+            cvss_v3 = cves[0]['cvss_v3']
+            # this dedicated package will clean the vector
+            cvssv3 = CVSS3.from_rh_vector(cvss_v3).clean_vector(output_prefix=False)
+        if 'cvss_v2' in cves[0]:
+            cvss_v2 = cves[0]['cvss_v2']
 
     if 'fixed_versions' in vulnerability['component_versions']:
         mitigation = "Versions containing a fix:\n"
@@ -114,6 +110,7 @@ def get_item(vulnerability, test):
         static_finding=True,
         dynamic_finding=False,
         references=vulnerability.get('component_versions').get('more_details').get('provider'),
-        impact=severity)
+        impact=severity,
+        cvssv3=cvssv3)
 
     return finding

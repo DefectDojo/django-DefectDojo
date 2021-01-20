@@ -100,6 +100,7 @@ env = environ.Env(
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID=(str, ''),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE=(str, 'https://graph.microsoft.com/'),
     DD_SOCIAL_AUTH_GITLAB_OAUTH2_ENABLED=(bool, False),
+    DD_SOCIAL_AUTH_GITLAB_PROJECT_AUTO_IMPORT=(bool, False),
     DD_SOCIAL_AUTH_GITLAB_KEY=(str, ''),
     DD_SOCIAL_AUTH_GITLAB_SECRET=(str, ''),
     DD_SOCIAL_AUTH_GITLAB_API_URL=(str, 'https://gitlab.com'),
@@ -154,12 +155,16 @@ env = environ.Env(
     DD_LOGGING_HANDLER=(str, 'console'),
     DD_ALERT_REFRESH=(bool, True),
     DD_DISABLE_ALERT_COUNTER=(bool, False),
+    # to disable deleting alerts per user set value to -1
+    DD_MAX_ALERTS_PER_USER=(int, 999),
     DD_TAG_PREFETCHING=(bool, True),
 
     # when enabled in sytem settings,  every minute a job run to delete excess duplicates
     # we limit the amount of duplicates that can be deleted in a single run of that job
     # to prevent overlapping runs of that job from occurrring
-    DD_DUPE_DELETE_MAX_PER_RUN=(int, 200)
+    DD_DUPE_DELETE_MAX_PER_RUN=(int, 200),
+    # APIv1 is depreacted and will be removed at 2021-06-30
+    DD_LEGACY_API_V1_ENABLE=(bool, False),
 )
 
 
@@ -235,6 +240,7 @@ TEST_RUNNER = env('DD_TEST_RUNNER')
 
 ALERT_REFRESH = env('DD_ALERT_REFRESH')
 DISABLE_ALERT_COUNTER = env("DD_DISABLE_ALERT_COUNTER")
+MAX_ALERTS_PER_USER = env("DD_MAX_ALERTS_PER_USER")
 
 TAG_PREFETCHING = env('DD_TAG_PREFETCHING')
 
@@ -363,6 +369,7 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.social_auth.associate_user',
     'social_core.pipeline.social_auth.load_extra_data',
     'social_core.pipeline.user.user_details',
+    'dojo.pipeline.update_product_access',
 )
 
 CLASSIC_AUTH_ENABLED = True
@@ -394,6 +401,7 @@ SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID = env('DD_SOCIAL_AUTH_AZUREAD_TENANT
 SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE = env('DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE')
 
 GITLAB_OAUTH2_ENABLED = env('DD_SOCIAL_AUTH_GITLAB_OAUTH2_ENABLED')
+GITLAB_PROJECT_AUTO_IMPORT = env('DD_SOCIAL_AUTH_GITLAB_PROJECT_AUTO_IMPORT')
 SOCIAL_AUTH_GITLAB_KEY = env('DD_SOCIAL_AUTH_GITLAB_KEY')
 SOCIAL_AUTH_GITLAB_SECRET = env('DD_SOCIAL_AUTH_GITLAB_SECRET')
 SOCIAL_AUTH_GITLAB_API_URL = env('DD_SOCIAL_AUTH_GITLAB_API_URL')
@@ -459,6 +467,8 @@ LOGIN_EXEMPT_URLS = (
     r'saml2/acs',
     r'empty_questionnaire/([\d]+)/answer'
 )
+
+LEGACY_API_V1_ENABLE = env('DD_LEGACY_API_V1_ENABLE')
 
 # ------------------------------------------------------------------------------
 # SECURITY DIRECTIVES
@@ -616,7 +626,6 @@ INSTALLED_APPS = (
     'tastypie_swagger',
     'watson',
     'tagging',  # not used, but still needed for migration 0065_django_tagulous.py (v1.10.0)
-    'custom_field',
     'imagekit',
     'multiselectfield',
     'rest_framework',
@@ -699,13 +708,17 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': timedelta(hours=1),
         'args': [timedelta(hours=1)]
     },
+    'cleanup-alerts': {
+        'task': 'dojo.tasks.cleanup_alerts',
+        'schedule': timedelta(hours=8),
+    },
     'dedupe-delete': {
         'task': 'dojo.tasks.async_dupe_delete',
         'schedule': timedelta(minutes=1),
         'args': [timedelta(minutes=1)]
     },
     'update-findings-from-source-issues': {
-        'task': 'dojo.tasks.async_update_findings_from_source_issues',
+        'task': 'dojo.tools.tool_issue_updater.update_findings_from_source_issues',
         'schedule': timedelta(hours=3),
     },
     'compute-sla-age-and-notify': {
@@ -745,6 +758,7 @@ if env('DD_DJANGO_METRICS_ENABLED'):
 HASHCODE_FIELDS_PER_SCANNER = {
     # In checkmarx, same CWE may appear with different severities: example "sql injection" (high) and "blind sql injection" (low).
     # Including the severity in the hash_code keeps those findings not duplicate
+    'Anchore Engine Scan': ['title', 'severity', 'component_name', 'component_version', 'file_path'],
     'Checkmarx Scan': ['cwe', 'severity', 'file_path'],
     'SonarQube Scan': ['cwe', 'severity', 'file_path'],
     'Dependency Check Scan': ['cve', 'file_path'],
@@ -770,6 +784,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
 # If False and cwe = 0, then the hash_code computation will fallback to legacy algorithm for the concerned finding
 # Default is True (if scanner is not configured here but is configured in HASHCODE_FIELDS_PER_SCANNER, it allows null cwe)
 HASHCODE_ALLOWS_NULL_CWE = {
+    'Anchore Engine Scan': True,
     'Checkmarx Scan': False,
     'SonarQube Scan': False,
     'Dependency Check Scan': True,
@@ -806,6 +821,7 @@ DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE = 'unique_id_from_tool_or_hash_code
 # Key = the scan_type from factory.py (= the test_type)
 # Default is DEDUPE_ALGO_LEGACY
 DEDUPLICATION_ALGORITHM_PER_PARSER = {
+    'Anchore Engine Scan': DEDUPE_ALGO_HASH_CODE,
     'Checkmarx Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Checkmarx Scan': DEDUPE_ALGO_HASH_CODE,
     'SonarQube Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,

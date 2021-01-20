@@ -43,8 +43,8 @@
                         <thead>
                         <tr>
                             <th>{% dojo_sort request 'Product Type' 'name' 'asc' %}</th>
-                            <th> # of Products</th>
-                            <th> # of active findings</th>
+                            <th> Product count</th>
+                            <th> Active (Verified) findings</th>
                             {% if user.is_staff %}
                                 <th> Actions</th>{% endif %}
                         </tr>
@@ -56,7 +56,7 @@
                                 <td><a href="{% url 'product_type_metrics' pt.id %}"> {{ pt.prod_count }} </a></td>
                                 <td>
                                     <a href="{% url 'open_findings' %}?test__engagement__product__prod_type={{ pt.id }}">
-                                        {{ pt.findings_count }}
+                                        {{ pt.active_findings_count }}&nbsp;({{pt.active_verified_findings_count}})
                                     </a>
                                 </td>
                                 {% if user.is_staff %}

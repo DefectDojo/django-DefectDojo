@@ -63,6 +63,12 @@ finding_related_action_title_dict = {
     'mark_finding_duplicate': 'Mark as duplicate'
 }
 
+supported_file_formats = [
+        'apng', 'avif', 'gif', 'jpg',
+        'jpeg', 'jfif', 'pjpeg', 'pjp',
+        'png', 'svg', 'webp', 'pdf'
+]
+
 
 @register.filter
 def markdown_render(value):
@@ -858,6 +864,13 @@ def jira_creation(obj):
 @register.filter
 def jira_change(obj):
     return jira_helper.get_jira_change(obj)
+
+
+@register.filter
+def get_thumbnail(filename):
+    from pathlib import Path
+    file_format = Path(filename).suffix[1:]
+    return file_format in supported_file_formats
 
 
 @register.filter

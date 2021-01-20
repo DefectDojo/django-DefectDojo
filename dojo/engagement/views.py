@@ -21,10 +21,9 @@ from django.db import DEFAULT_DB_ALIAS
 from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.filters import EngagementFilter
 from dojo.forms import CheckForm, \
-    UploadThreatForm, UploadRiskForm, NoteForm, \
+    UploadThreatForm, UploadRiskForm, NoteForm, DoneForm, \
     EngForm, TestForm, ReplaceRiskAcceptanceForm, AddFindingsRiskAcceptanceForm, DeleteEngagementForm, ImportScanForm, \
     CredMappingForm, JIRAEngagementForm, JIRAImportScanForm, TypedNoteForm, JIRAProjectForm
-
 from dojo.models import Finding, Product, Engagement, Test, \
     Check_List, Test_Type, Notes, \
     Risk_Acceptance, Development_Environment, BurpRawRequestResponse, Endpoint, \
@@ -269,7 +268,8 @@ def view_engagement(request, eid):
         Test.objects.filter(engagement=eng)
         .prefetch_related('tags', 'test_type')
         .annotate(count_findings_test_all=Count('finding__id'))
-        .annotate(count_findings_test_active_verified=Count('finding__id', filter=Q(finding__active=True)))
+        .annotate(count_findings_test_active=Count('finding__id', filter=Q(finding__active=True)))
+        .annotate(count_findings_test_active_verified=Count('finding__id', filter=Q(finding__active=True) & Q(finding__verified=True)))
         .annotate(count_findings_test_mitigated=Count('finding__id', filter=Q(finding__is_Mitigated=True)))
         .annotate(count_findings_test_dups=Count('finding__id', filter=Q(finding__duplicate=True)))
         .order_by('test_type__name', '-updated')
@@ -304,6 +304,8 @@ def view_engagement(request, eid):
     note_type_activation = Note_Type.objects.filter(is_active=True).count()
     if note_type_activation:
         available_note_types = find_available_notetypes(notes)
+    form = DoneForm()
+    files = eng.files.all()
     if request.method == 'POST' and request.user.is_staff:
         eng.progress = 'check_list'
         eng.save()
@@ -393,6 +395,7 @@ def view_engagement(request, eid):
             'risk': eng.risk_path,
             'form': form,
             'notes': notes,
+            'files': files,
             'risks_accepted': risks_accepted,
             'can_add_risk': eng_findings.count(),
             'jissue': jissue,
@@ -606,9 +609,10 @@ def import_scan_results(request, eid=None, pid=None):
                 # push_to_jira = jira_helper.is_push_to_jira(new_finding, jform.cleaned_data.get('push_to_jira'))
                 push_to_jira = push_all_jira_issues or (jform and jform.cleaned_data.get('push_to_jira'))
 
-                for item in parser.items:
-                    # print("item blowup")
-                    # print(item)
+                items = parser.items
+                logger.debug('starting reimport of %i items.', len(items))
+                i = 0
+                for item in items:
                     sev = item.severity
                     if sev == 'Information' or sev == 'Informational':
                         sev = 'Info'
@@ -627,6 +631,7 @@ def import_scan_results(request, eid=None, pid=None):
                         item.verified = verified
 
                     item.save(dedupe_option=False, false_history=True)
+                    logger.debug('%i: creating new finding: %i:%s:%s:%s', i, item.id, item, item.component_name, item.component_version)
 
                     if hasattr(item, 'unsaved_req_resp') and len(
                             item.unsaved_req_resp) > 0:
@@ -692,6 +697,7 @@ def import_scan_results(request, eid=None, pid=None):
                         item.tags = item.unsaved_tags
 
                     finding_count += 1
+                    i += 1
 
                 messages.add_message(
                     request,
