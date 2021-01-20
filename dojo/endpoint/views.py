@@ -254,8 +254,6 @@ def delete_endpoint(request, eid):
 def add_endpoint(request, pid):
     product = get_object_or_404(Product, id=pid)
     template = 'dojo/add_endpoint.html'
-    if '_popup' in request.GET:
-        template = 'dojo/add_related.html'
 
     form = AddEndpointForm(product=product)
     if request.method == 'POST':

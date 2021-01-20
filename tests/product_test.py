@@ -176,6 +176,20 @@ class ProductTest(BaseTestCase):
         # Any Text written to textarea automatically reflects in Editor field.
         driver.execute_script("document.getElementsByName('impact')[0].style.display = 'inline'")
         driver.find_element_by_name("impact").send_keys(Keys.TAB, "This has a very critical effect on production")
+        # Add an endpoint
+        main_window_handle = driver.current_window_handle
+        driver.find_element_by_id("add_id_endpoints").click()
+        popup_window = None
+        while not popup_window:
+            for handle in driver.window_handles:
+                if handle != main_window_handle:
+                    popup_window = handle
+                    break
+        driver.switch_to.window(popup_window)
+        driver.find_element_by_id("id_endpoint").clear()
+        driver.find_element_by_id("id_endpoint").send_keys("product.finding.com")
+        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+        driver.switch_to.window(main_window_handle)
         # "Click" the Done button to Add the finding with other defaults
         with WaitForPageLoad(driver, timeout=30):
             driver.find_element_by_xpath("//input[@name='_Finished']").click()
