@@ -111,6 +111,14 @@ def get_item(vulnerability, test):
     for item in vulnerability['references']:
         references += "**" + item['title'] + "**: " + item['url'] + "\n"
 
+    # Construct "file_path" removing versions
+    vulnPath = ''
+    for index, item in enumerate(vulnerability['from']):
+        if index == 0:
+            vulnPath += item.split("@")[0]
+        else:
+            vulnPath += " > " + item.split("@")[0]
+
     # create the finding object
     finding = Finding(
         title=vulnerability['from'][0] + ": " + vulnerability['title'],
@@ -136,7 +144,11 @@ def get_item(vulnerability, test):
         duplicate=False,
         out_of_scope=False,
         mitigated=None,
-        impact=severity)
+        impact=severity,
+        static_finding=True,
+        dynamic_finding=False,
+        file_path=vulnPath,
+        unique_id_from_tool=vulnerability['id'])
 
     finding.description = finding.description.strip()
 
