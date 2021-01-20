@@ -12,7 +12,7 @@ on:
 
 env:
   DD_DOCKER_REPO: defectdojo
-  docker-image: django
+  docker-image: django # we only need to build the django image for unit tests
 
 jobs:
   unit_tests:
