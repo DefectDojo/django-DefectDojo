@@ -174,7 +174,7 @@ class Delete_Product_TypeForm(forms.ModelForm):
 
     class Meta:
         model = Product_Type
-        exclude = ['name', 'critical_product', 'key_product']
+        exclude = ['name', 'description', 'critical_product', 'key_product', 'authorized_users']
 
 
 class Test_TypeForm(forms.ModelForm):

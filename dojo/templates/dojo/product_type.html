@@ -56,28 +56,28 @@
                                 <td>
                                     <ul>
                                         <li class="dropdown" style="list-style:none;position:absolute">
-                                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
-                                            <ul class="dropdown-menu">
-                                                <li>
+                                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true"  id="dropdownMenuPT">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                                            <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenuPT">
+                                                <li role="presentation">
                                                     <a class="" href="{% url 'view_product_type' pt.id %}">
                                                     <i class="fa fa-list-alt"></i> View</a>
                                                 </li>
                                                 {% if user.is_staff %}
-                                                <li>
+                                                <li role="presentation">
                                                     <a class="" href="{% url 'edit_product_type' pt.id %}">
                                                     <i class="fa fa-pencil-square-o"></i> Edit</a>
                                                 </li>
-                                                <li>
+                                                <li role="presentation">
                                                     <a class="" href="{% url 'add_product_to_product_type' pt.id %}">
                                                     <i class="fa fa-plus"></i> Add Product</a>
                                                 </li>
                                                 <li role="separator" class="divider"></li>
-                                                <li>
+                                                <li role="presentation">
                                                     <a class="" href="{% url 'product_type_report' pt.id %}">
                                                     <i class="fa fa-file-text-o"></i> Product Type Report</a>
                                                 </li>
                                                 <li role="separator" class="divider"></li>
-                                                <li>
+                                                <li role="presentation">
                                                     <a class="" href="{% url 'delete_product_type' pt.id %}">
                                                     <i class="fa fa-trash"></i> Delete</a>
                                                 </li>

@@ -19,11 +19,22 @@ class ProductTypeTest(BaseTestCase):
 
         self.assertTrue(self.is_success_message_present(text='Product type added successfully.'))
 
+    def test_view_product_type(self):
+        print("\n\nDebug Print Log: testing 'view product type' \n")
+        driver = self.driver
+        driver.get(self.base_url + "product/type")
+        driver.find_element_by_id("dropdownMenuPT").click()
+        driver.find_element_by_partial_link_text("View").click()
+        product_type_text = driver.find_element_by_id("id_heading").text
+
+        self.assertEqual('Product Type product test type', product_type_text)
+
     def test_edit_product_type(self):
         print("\n\nDebug Print Log: testing 'edit product type' \n")
         driver = self.driver
         driver.get(self.base_url + "product/type")
-        driver.find_element_by_link_text("Edit Product Type").click()
+        driver.find_element_by_id("dropdownMenuPT").click()
+        driver.find_element_by_partial_link_text("Edit").click()
         driver.find_element_by_id("id_name").clear()
         driver.find_element_by_id("id_name").send_keys("Edited product test type")
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
@@ -35,16 +46,18 @@ class ProductTypeTest(BaseTestCase):
         driver = self.driver
         driver.get(self.base_url + "product/type")
         # TODO this assumes the first product_type in the list is the one that we just created (and can safely be deleted)
-        driver.find_element_by_link_text("Edit Product Type").click()
-        driver.find_element_by_css_selector("input.btn.btn-danger").click()
+        driver.find_element_by_id("dropdownMenuPT").click()
+        driver.find_element_by_partial_link_text("Delete").click()
+        driver.find_element_by_css_selector("button.btn.btn-danger").click()
 
-        self.assertTrue(self.is_success_message_present(text='Product type Deleted successfully.'))
+        self.assertTrue(self.is_success_message_present(text='Product Type and relationships removed.'))
 
 
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(BaseTestCase('test_login'))
     suite.addTest(ProductTypeTest('test_create_product_type'))
+    suite.addTest(ProductTypeTest('test_view_product_type'))
     suite.addTest(ProductTypeTest('test_edit_product_type'))
     suite.addTest(ProductTypeTest('test_delete_product_type'))
     return suite
