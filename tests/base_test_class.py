@@ -256,7 +256,7 @@ class BaseTestCase(unittest.TestCase):
             Tooltips are attached to each object and operate fine at human speeds. Selenium moves too fast for tooltips to be
             cleaned up, edited, and displayed, so the issue is only present in the test
             """
-            accepted_javascript_messages = r'((zoom\-in\.cur.*)|(images\/finding_images\/.*))404\ \(Not\ Found\)|Cannot read property \'trigger\' of null'
+            accepted_javascript_messages = r'((zoom\-in\.cur.*)|(images\/finding_images\/.*)||(uploaded_files\/.*))404\ \(Not\ Found\)|Cannot read property \'trigger\' of null'
             # accepted_javascript_messages = r'((zoom\-in\.cur.*)|(images\/finding_images\/.*))404\ \(Not\ Found\)|(bootstrap\-chosen\.css\.map)'
 
             if (entry['level'] == 'SEVERE'):

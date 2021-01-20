@@ -143,6 +143,13 @@ else
     fail $test
 fi
 
+test="File Upload tests"
+echo "Running: $test"
+if python3 tests/file_test.py ; then
+    success $test
+else
+    fail $test
+fi
 
 test="Dedupe integration tests"
 echo "Running: $test"
