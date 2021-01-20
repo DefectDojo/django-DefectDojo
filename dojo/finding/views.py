@@ -862,6 +862,9 @@ def touch_finding(request, fid):
 def simple_risk_accept(request, fid):
     finding = get_object_or_404(Finding, id=fid)
 
+    if not finding.test.engagement.product.enable_simple_risk_acceptance:
+        raise PermissionDenied()
+
     ra_helper.simple_risk_accept(finding)
 
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id, )))
@@ -1838,12 +1841,22 @@ def finding_bulk_update_all(request, pid=None):
                                  last_reviewed=timezone.now(),
                                  last_reviewed_by=request.user)
 
+                skipped_risk_accept_count = 0
                 if form.cleaned_data['risk_acceptance']:
-                    for find in finds:
+                    for finding in finds:
                         if form.cleaned_data['risk_accept']:
-                            ra_helper.simple_risk_accept(find)
+                            if not finding.test.engagement.product.enable_simple_risk_acceptance:
+                                skipped_risk_accept_count += 1
+                            else:
+                                ra_helper.simple_risk_accept(finding)
                         elif form.cleaned_data['risk_unaccept']:
-                            ra_helper.risk_unaccept(find)
+                            ra_helper.risk_unaccept(finding)
+
+                if skipped_risk_accept_count > 0:
+                    messages.add_message(request,
+                                        messages.WARNING,
+                                        'Skipped simple risk acceptance of %i findings, simple risk acceptance is disabled on the related products' % skipped_risk_accept_count,
+                                        extra_tags='alert-warning')
 
                 if form.cleaned_data['push_to_github']:
                     logger.info('push selected findings to github')
