@@ -778,7 +778,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'DSOP Scan': ['cve'],
     'Acunetix Scan': ['title', 'description'],
     'Trivy Scan': ['title', 'severity', 'cve', 'cwe'],
-    'Snyk Scan': ['unique_id_from_tool', 'file_path', 'component_name', 'component_version'],
+    'Snyk Scan': ['vuln_id_from_tool', 'file_path', 'component_name', 'component_version'],
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
@@ -802,7 +802,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
 # List of fields that are known to be usable in hash_code computation)
 # 'endpoints' is a pseudo field that uses the endpoints (for dynamic scanners)
 # 'unique_id_from_tool' is often not needed here as it can be used directly in the dedupe algorithm, but it's also possible to use it for hashing
-HASHCODE_ALLOWED_FIELDS = ['title', 'cwe', 'cve', 'line', 'file_path', 'component_name', 'component_version', 'description', 'endpoints', 'unique_id_from_tool', 'severity']
+HASHCODE_ALLOWED_FIELDS = ['title', 'cwe', 'cve', 'line', 'file_path', 'component_name', 'component_version', 'description', 'endpoints', 'unique_id_from_tool', 'severity', 'vuln_id_from_tool']
 
 # ------------------------------------
 # Deduplication configuration

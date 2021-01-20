@@ -148,7 +148,7 @@ def get_item(vulnerability, test):
         static_finding=True,
         dynamic_finding=False,
         file_path=vulnPath,
-        unique_id_from_tool=vulnerability['id'])
+        vuln_id_from_tool=vulnerability['id'])
 
     finding.description = finding.description.strip()
 
