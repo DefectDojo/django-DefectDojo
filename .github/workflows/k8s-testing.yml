@@ -90,11 +90,14 @@ jobs:
           cache-from: type=local,src=/tmp/.buildx-cache-${{ env.docker-image }}
           cache-to: type=local,dest=/tmp/.buildx-cache-${{ env.docker-image }}
 
+      - name: Compress
+        run: gzip ${{ matrix.docker-image }}_img
+
       - name: Upload image ${{ env.docker-image }} as artifact
         uses:  actions/upload-artifact@v2
         with:
           name: ${{ matrix.docker-image }}
-          path: ${{ matrix.docker-image }}_img
+          path: ${{ matrix.docker-image }}_img.gz
           retention-days: 1
 
   setting_minikube_cluster:
@@ -131,6 +134,11 @@ jobs:
 
       - name: Load images from artifacts
         uses: actions/download-artifact@v2
+
+      - name: Decompress
+        run: |-
+            gunzip nginx/nginx_img.gz
+            gunzip django/django.gz
 
       - name: Load docker images
         run: |-
