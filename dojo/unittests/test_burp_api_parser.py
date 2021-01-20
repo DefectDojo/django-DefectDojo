@@ -26,6 +26,7 @@ class TestParser(TestCase):
             self.assertEqual('5605602767570803712', item.unique_id_from_tool)
             self.assertEqual('5243392', item.vuln_id_from_tool)
             self.assertGreater(3, item.scanner_confidence)
+            self.assertIsNotNone(item.impact)
 
     def test_validate(self):
         testfile = 'dojo/unittests/scans/burp_suite_pro/example.json'
@@ -36,6 +37,18 @@ class TestParser(TestCase):
             parser = BurpApiParser(f, test)
             for item in parser.items:
                 item.clean()
+                self.assertIsNotNone(item.impact)
+
+    def test_validate_more(self):
+        testfile = 'dojo/unittests/scans/burp_api/many_vulns.json'
+        with open(testfile) as f:
+            test = Test()
+            test.engagement = Engagement()
+            test.engagement.product = Product()
+            parser = BurpApiParser(f, test)
+            for item in parser.items:
+                item.clean()
+                self.assertIsNotNone(item.impact)
 
     def test_convert_severity(self):
         with self.subTest(severity='high'):

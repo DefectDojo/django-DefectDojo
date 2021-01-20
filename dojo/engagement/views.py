@@ -21,7 +21,7 @@ from django.db import DEFAULT_DB_ALIAS
 from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.filters import EngagementFilter
 from dojo.forms import CheckForm, \
-    UploadThreatForm, RiskAcceptanceForm, NoteForm, \
+    UploadThreatForm, RiskAcceptanceForm, NoteForm, DoneForm, \
     EngForm, TestForm, ReplaceRiskAcceptanceProofForm, AddFindingsRiskAcceptanceForm, DeleteEngagementForm, ImportScanForm, \
     CredMappingForm, JIRAEngagementForm, JIRAImportScanForm, TypedNoteForm, JIRAProjectForm, \
     EditRiskAcceptanceForm
@@ -310,6 +310,8 @@ def view_engagement(request, eid):
     note_type_activation = Note_Type.objects.filter(is_active=True).count()
     if note_type_activation:
         available_note_types = find_available_notetypes(notes)
+    form = DoneForm()
+    files = eng.files.all()
     if request.method == 'POST' and request.user.is_staff:
         eng.progress = 'check_list'
         eng.save()
@@ -398,6 +400,7 @@ def view_engagement(request, eid):
             'threat': eng.tmodel_path,
             'form': form,
             'notes': notes,
+            'files': files,
             'risks_accepted': risks_accepted,
             'jissue': jissue,
             'jira_project': jira_project,

@@ -691,6 +691,7 @@ def import_scan_results_prod(request, pid=None):
 def new_product(request):
     jira_project_form = None
     error = False
+    form = ProductForm()
     if request.method == 'POST':
         form = ProductForm(request.POST, instance=Product())
 
@@ -753,8 +754,6 @@ def new_product(request):
             else:
                 # engagement was saved, but JIRA errors, so goto edit_product
                 return HttpResponseRedirect(reverse('edit_product', args=(product.id,)))
-
-    form = ProductForm()
 
     jira_project_form = None
     if get_system_setting('enable_jira'):
