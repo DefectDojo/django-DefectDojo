@@ -1384,9 +1384,6 @@ class MetricsFindingFilter(FilterSet):
         # str() uses test_type
         self.form.fields['test'].queryset = self.form.fields['test'].queryset.prefetch_related('test_type')
 
-        # str() uses test_type
-        self.form.fields['test'].queryset = self.form.fields['test'].queryset.prefetch_related('test_type')
-
     class Meta:
         model = Finding
         exclude = ['url',
