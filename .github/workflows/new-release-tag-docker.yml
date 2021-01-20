@@ -3,6 +3,7 @@ name: "Release: 2. tag, release, docker push"
 env:
   GIT_USERNAME: "DefectDojo release bot"
   GIT_EMAIL: "dojo-release-bot@users.noreply.github.com"
+  workflow_name: 'release 2 tag release docker push' # needed in cache key, which doesn't support comma's
 on:
   workflow_dispatch:
     inputs:
@@ -79,10 +80,10 @@ jobs:
           docker-image: ${{ matrix.docker-image }}
         with:
           path: /tmp/.buildx-cache-${{ env.docker-image }}
-          key: ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ env.GITHUB_ACTION }}-${{ github.sha }}-${{ github.run_id }}
+          key: ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ env.workflow_name }}-${{ github.sha }}-${{ github.run_id }}
           restore-keys: |
-            ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ env.GITHUB_ACTION}}-${{ github.sha }}
-            ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ env.GITHUB_ACTION }}
+            ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ env.workflow_name}}-${{ github.sha }}
+            ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ env.workflow_name }}
             ${{ runner.os }}-buildx-${{ env.docker-image }}-
 
       - name: Build and push images
