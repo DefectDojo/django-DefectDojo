@@ -39,7 +39,7 @@ class TestDependencyTrackParser(TestCase):
         self.assertEqual(1, len(parser.items))
 
     def test_dependency_track_parser_v3_8_0(self):
-        testfile = open("dojo/unittests/scans/dependency_track_samples/dependency track 3.8.0 2021-01-18.json")
+        testfile = open("dojo/unittests/scans/dependency_track_samples/dependency_track_3.8.0_2021-01-18.json")
         parser = DependencyTrackParser(testfile, Test())
         testfile.close()
         self.assertEqual(9, len(parser.items))
