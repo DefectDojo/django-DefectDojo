@@ -165,3 +165,19 @@ def convert_kwargs_if_async(**kwargs):
             elif isinstance(value, QuerySet):
                 kwargs[key] = list_of_models_to_dict_with_tags(list(value))
     return kwargs
+
+
+def on_exception_log_kwarg(func):
+    def wrapper(self, *args, **kwargs):
+        try:
+            return func(self, *args, **kwargs)
+
+        except Exception as e:
+            print("exception occured at url:", self.driver.current_url)
+            print("page source:", self.driver.page_source)
+            f = open("selenium_page_source.html", "w", encoding='utf-8')
+            f.writelines(self.driver.page_source)
+            # time.sleep(30)
+            raise(e)
+
+    return wrapper
