@@ -123,7 +123,6 @@ jobs:
 
       - name: Load docker images
         run: |-
-             eval $(minikube docker-env)
              docker load -i nginx/nginx_img
              docker load -i django/django_img
              docker images
@@ -137,7 +136,9 @@ jobs:
           start args: '--addons=ingress'
 
       - name: Status of minikube
-        run: minikube status
+        run: |-
+          eval $(minikube docker-env)
+          minikube status
 
       - name: Configure HELM repos
         run: |-
