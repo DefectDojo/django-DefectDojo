@@ -171,6 +171,9 @@ class DependencyTrackParser(object):
             # might be no longer needed in the future, and is not needed if people use the default
             # hash code dedupe config for this parser
             file_path = component_purl
+        else:
+            file_path = 'unknown'
+
         # Append other info about vulnerability description info if it is present
         if 'title' in dependency_track_finding['vulnerability'] and dependency_track_finding['vulnerability']['title'] is not None:
             vulnerability_description = vulnerability_description + "\nVulnerability Title: {title}".format(title=dependency_track_finding['vulnerability']['title'])
