@@ -59,7 +59,7 @@ class TestSnykParser(TestCase):
             finding.severity_justification)
         self.assertEqual(
             "SNYK-JAVA-ORGAPACHESANTUARIO-460281",
-            finding.unique_id_from_tool)
+            finding.vuln_id_from_tool)
         self.assertEqual(
             "CVE-2019-12400",
             finding.cve)
