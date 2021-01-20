@@ -3,7 +3,7 @@ from dojo.models import Product, Engagement, Test, Finding, \
     User, ScanSettings, Scan, Stub_Finding, Endpoint, JIRA_Project, JIRA_Instance, \
     Finding_Template, Note_Type, App_Analysis, Endpoint_Status, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Notes, \
-    BurpRawRequestResponse, DojoMeta
+    BurpRawRequestResponse, DojoMeta, FileUpload
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraInstanceViewSet, \
     JiraIssuesViewSet, JiraProjectViewSet, ProductViewSet, ScanSettingsViewSet, \
@@ -23,6 +23,8 @@ from rest_framework.mixins import \
     DestroyModelMixin, UpdateModelMixin
 from dojo.api_v2.prefetch import PrefetchListMixin, PrefetchRetrieveMixin
 import logging
+import pathlib
+
 
 logger = logging.getLogger(__name__)
 
@@ -300,6 +302,44 @@ class FindingRequestResponseTest(DojoAPITestCase):
     def test_request_response_get(self):
         response = self.client.get('/api/v2/findings/7/request_response/', format='json')
         self.assertEqual(200, response.status_code)
+
+
+class FindingFilesTest(DojoAPITestCase):
+    fixtures = ['dojo_testdata.json']
+
+    def setUp(self):
+        testuser = User.objects.get(username='admin')
+        token = Token.objects.get(user=testuser)
+        self.client = APIClient()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+
+    def test_request_response_post(self):
+        url_levels = [
+            'findings/7',
+            'tests/3',
+            'engagements/1'
+        ]
+        path = pathlib.Path(__file__).parent.absolute()
+        print(path)
+        for level in url_levels:
+            length = FileUpload.objects.count()
+            payload = {
+                "title": level,
+                "file": open(str(path) + '/scans/acunetix/one_finding.xml')
+            }
+            response = self.client.post('/api/v2/' + level + '/files/', payload)
+            self.assertEqual(200, response.status_code, response.data)
+            self.assertEqual(FileUpload.objects.count(), length + 1)
+
+    def test_request_response_get(self):
+        url_levels = [
+            'findings/7',
+            'tests/3',
+            'engagements/1'
+        ]
+        for level in url_levels:
+            response = self.client.get('/api/v2/' + level + '/files/')
+            self.assertEqual(200, response.status_code)
 
 
 class FindingsTest(BaseClass.RESTEndpointTest):

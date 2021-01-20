@@ -15,9 +15,13 @@ services:
       DD_TEST_DATABASE_NAME: ${DD_TEST_DATABASE_NAME:-test_defectdojo}
       DD_DATABASE_NAME: ${DD_TEST_DATABASE_NAME:-test_defectdojo}
   celerybeat:
+    volumes:
+      - '.:/app:z'
     environment:
       DD_DATABASE_URL: ${DD_TEST_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/test_defectdojo}
   celeryworker:
+    volumes:
+      - '.:/app:z'
     environment:
       DD_DATABASE_URL: ${DD_TEST_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/test_defectdojo}
   initializer:

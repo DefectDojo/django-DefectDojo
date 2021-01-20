@@ -26,7 +26,7 @@ from dojo.models import Finding, Product_Type, Product, Note_Type, ScanSettings,
     Languages, Language_Type, App_Analysis, Objects_Product, Benchmark_Product, Benchmark_Requirement, \
     Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta, Sonarqube_Product, \
     Engagement_Survey, Answered_Survey, TextAnswer, ChoiceAnswer, Choice, Question, TextQuestion, \
-    ChoiceQuestion, General_Survey, Regulation
+    ChoiceQuestion, General_Survey, Regulation, FileUpload
 
 from dojo.tools import requires_file, SCAN_SONARQUBE_API
 from dojo.user.helper import user_is_authorized
@@ -587,6 +587,16 @@ class UploadRiskForm(forms.ModelForm):
     class Meta:
         model = Risk_Acceptance
         fields = ['name', 'accepted_findings', 'owner']
+
+
+class UploadFileForm(forms.ModelForm):
+
+    class Meta:
+        model = FileUpload
+        fields = ['title', 'file']
+
+
+ManageFileFormSet = modelformset_factory(FileUpload, extra=3, max_num=10, fields=['title', 'file'], can_delete=True)
 
 
 class ReplaceRiskAcceptanceForm(forms.ModelForm):
