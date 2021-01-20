@@ -1642,10 +1642,10 @@
     "model": "dojo.jira_instance",
     "fields": {
         "url": "https://defectdojo.atlassian.net/",
-        "username": "defect.dojo",
-        "password": "<YOUR_API_KEY_HERE>",
+        "username": "<your username>",
+        "password": "<your password>",
         "default_issue_type": "Task",
-        "epic_name_id": 10942,
+        "epic_name_id": 10011,
         "open_status_key": 11,
         "close_status_key": 41,
         "low_mapping_severity": "Low",
