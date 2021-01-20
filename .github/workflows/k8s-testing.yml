@@ -118,15 +118,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Load images from artifacts
-        uses: actions/download-artifact@v2
-
-      - name: Load docker images
-        run: |-
-             docker load -i nginx/nginx_img
-             docker load -i django/django_img
-             docker images
-
       - name: Setup Minikube
         uses: manusa/actions-setup-minikube@v2.3.0
         with:
@@ -137,8 +128,17 @@ jobs:
 
       - name: Status of minikube
         run: |-
-          eval $(minikube docker-env)
           minikube status
+
+      - name: Load images from artifacts
+        uses: actions/download-artifact@v2
+
+      - name: Load docker images
+        run: |-
+             eval $(minikube docker-env)
+             docker load -i nginx/nginx_img
+             docker load -i django/django_img
+             docker images
 
       - name: Configure HELM repos
         run: |-
