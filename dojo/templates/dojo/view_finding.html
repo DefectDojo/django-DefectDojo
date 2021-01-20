@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load display_tags %}
 {% load humanize %}
-{% load static from staticfiles %}
+{% load static %}
 {% load get_endpoint_status %}
 {% block add_styles %}
   .tooltip-inner {
@@ -58,6 +58,11 @@
                                 <li role="presentation">
                                     <a href="{% url 'manage_images' finding.id %}">
                                         <i class="fa fa-file-image-o"></i> Manage Images
+                                    </a>
+                                </li>
+                                <li role="presentation">
+                                    <a href="{% url 'manage_files' oid=finding.id obj_type='Finding' %}">
+                                        <i class="fa fa-file-image-o"></i> Manage Files
                                     </a>
                                 </li>
                                 <li role="separator" class="divider"></li>
@@ -672,6 +677,44 @@
                 </div>
             </div>
         {% endif %}
+
+        {% if finding.files.exists %}
+            <div class="row">
+                <div class="col-md-12" id="cred">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4>Files<span class="pull-right">
+                            <a data-toggle="collapse" href="#add_feat_files">
+                                <i class="glyphicon glyphicon-chevron-down"></i></a></span>
+                            <a title="Manage Files" name="Manage Files" class="btn btn-sm btn-primary pull-right"
+                                href="{% url 'manage_files' oid=finding.id obj_type='Finding' %}">
+                                <span class="fa fa-edit"></span></a>
+                            </h4>
+                        </div>
+                        
+                        <div id="add_feat_files" class="panel-body collapse {% if files %}in{% endif %}">
+                            {% for file in files %}
+                            <div class="col-md-2" style="text-align: center">
+                                <div class="row">
+                                    <a href="{{ request.scheme }}://{{ request.get_host }}{{ file.file.url }}" target="_blank">
+                                        {% if file.file.url|get_thumbnail %}
+                                            <img src="{{ file.file.url }}" alt="thumbnail" style="width:150px">
+                                        {% else %}
+                                            <span style="font-size: 50px;" class="glyphicon glyphicon-file"></span>
+                                        {% endif %}
+                                    </a>
+                                </div>
+                                <div class="row">
+                                    <caption style="text-align:center">{{ file.title }}</caption>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div> 
+        {% endif %}
+
         <div class="modal fade" id="findingImageModal" tabindex="-1" role="dialog"
              aria-labelledby="findingImageModalLabel">
             <div class="modal-dialog" role="document">

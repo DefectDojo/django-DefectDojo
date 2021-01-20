@@ -26,7 +26,7 @@ from dojo.models import Finding, Product_Type, Product, Note_Type, ScanSettings,
     Languages, Language_Type, App_Analysis, Objects_Product, Benchmark_Product, Benchmark_Requirement, \
     Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta, Sonarqube_Product, \
     Engagement_Survey, Answered_Survey, TextAnswer, ChoiceAnswer, Choice, Question, TextQuestion, \
-    ChoiceQuestion, General_Survey, Regulation
+    ChoiceQuestion, General_Survey, Regulation, FileUpload
 
 from dojo.tools import requires_file, SCAN_SONARQUBE_API
 from dojo.user.helper import user_is_authorized
@@ -316,6 +316,7 @@ class ImportScanForm(forms.Form):
     SCAN_TYPE_CHOICES = (("", "Please Select a Scan Type"),
                          ("Netsparker Scan", "Netsparker Scan"),
                          ("Burp Scan", "Burp Scan"),
+                         ("Burp REST API", "Burp REST API"),
                          ("Nessus Scan", "Nessus Scan"),
                          ("Nmap Scan", "Nmap Scan"),
                          ("Nexpose Scan", "Nexpose Scan"),
@@ -359,6 +360,7 @@ class ImportScanForm(forms.Form):
                          ("SpotBugs Scan", "SpotBugs Scan"),
                          ("AWS Scout2 Scan", "AWS Scout2 Scan"),
                          ("AWS Prowler Scan", "AWS Prowler Scan"),
+                         ("Scout Suite Scan", "Scout Suite Scan"),
                          ("IBM AppScan DAST", "IBM AppScan DAST"),
                          ("PHP Security Audit v2", "PHP Security Audit v2"),
                          ("PHP Symfony Security Check", "PHP Symfony Security Check"),
@@ -411,7 +413,10 @@ class ImportScanForm(forms.Form):
                          ("kube-bench Scan", "Kube-Bench Scan"),
                          ("CCVS Report", "CCVS Report"),
                          ("ORT evaluated model Importer", "ORT evaluated model Importer"),
-                         ("SARIF", "SARIF"))
+                         ("SARIF", "SARIF"),
+                         ("OssIndex Devaudit SCA Scan Importer", "OssIndex Devaudit SCA Scan Importer"),
+                         ("Scantist Scan", "Scantist Scan"),
+                         )
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
     scan_date = forms.DateTimeField(
@@ -474,16 +479,21 @@ class ReImportScanForm(forms.Form):
     verified = forms.BooleanField(help_text="Select if these findings have been verified.", required=False)
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
                                                widget=MultipleSelectWithPopPlusMinus(attrs={'size': '5'}))
-    tags = TagField(required=False, help_text="Add tags that help describe this scan.  "
+    tags = TagField(required=False, help_text="Modify existing tags that help describe this scan.  "
                     "Choose from the list or add new tags. Press Enter key to add.")
     file = forms.FileField(widget=forms.widgets.FileInput(
         attrs={"accept": ".xml, .csv, .nessus, .json, .html, .js, .zip, .xlsx"}),
         label="Choose report file",
         required=False)
+    close_old_findings = forms.BooleanField(help_text="Select if old findings get mitigated when importing.",
+                                            required=False, initial=True)
 
-    def __init__(self, *args, scan_type=None, **kwargs):
+    def __init__(self, *args, test=None, **kwargs):
         super(ReImportScanForm, self).__init__(*args, **kwargs)
-        self.scan_type = scan_type
+        self.scan_type = None
+        if test:
+            self.scan_type = test.test_type.name
+            self.fields['tags'].initial = test.tags.all()
 
     def clean(self):
         cleaned_data = super().clean()
@@ -577,6 +587,16 @@ class UploadRiskForm(forms.ModelForm):
     class Meta:
         model = Risk_Acceptance
         fields = ['name', 'accepted_findings', 'owner']
+
+
+class UploadFileForm(forms.ModelForm):
+
+    class Meta:
+        model = FileUpload
+        fields = ['title', 'file']
+
+
+ManageFileFormSet = modelformset_factory(FileUpload, extra=3, max_num=10, fields=['title', 'file'], can_delete=True)
 
 
 class ReplaceRiskAcceptanceForm(forms.ModelForm):

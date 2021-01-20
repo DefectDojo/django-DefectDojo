@@ -2,7 +2,7 @@
 {% load display_tags %}
 {% load humanize %}
 {% load survey_tags %}
-{% load static from staticfiles %}
+{% load static %}
 {% block add_styles %}
     .tooltip-inner {
       max-width: 350px;
@@ -240,7 +240,7 @@
                             <th>Date</th>
                             <th>Lead</th>
                             <th>Total Findings</th>
-                            <th>Active and Verified</th>
+                            <th>Active (Verified)</th>
                             <th>Mitigated</th>
                             <th>Duplicates</th>
                             <th>Notes</th>
@@ -305,7 +305,10 @@
                                   {% endif %}
                                 </td>
                                 <td><a href="{% url 'view_test' test.id %}">{{ test.count_findings_test_all }}</a></td>
-                                <td><a href="{% url 'view_test' test.id %}?active=true&verified=true">{{ test.count_findings_test_active_verified }}</a></td>
+                                <td>
+                                  <a href="{% url 'view_test' test.id %}?active=true">{{ test.count_findings_test_active }}</a>&nbsp;
+                                  (<a href="{% url 'view_test' test.id %}?active=true&verified=true">{{ test.count_findings_test_active_verified }}</a>)
+                                </td>
                                 <td><a href="{% url 'view_test' test.id %}?is_Mitigated=true">{{ test.count_findings_test_mitigated }}</a></td>
                                 <td><a href="{% url 'view_test' test.id %}?duplicate=true">{{ test.count_findings_test_dups }}</a></td>
                                 <td class="nowrap">
@@ -617,6 +620,42 @@
 
     </div>
 
+    <div class="panel panel-default">
+
+      <div class="panel-heading">
+        <h4>Files<span class="pull-right">
+          <a data-toggle="collapse" href="#add_feat_files">
+            <i class="glyphicon glyphicon-chevron-down"></i></a></span>
+          <a title="Manage Files" name="Manage Files" class="btn btn-sm btn-primary pull-right"
+            href="{% url 'manage_files' oid=eng.id obj_type='Engagement' %}">
+              <span class="fa fa-edit"></span></a>
+        </h4>
+      </div>
+
+      <div id="add_feat_files" class="panel-body collapse {% if files %}in{% endif %}">
+                {% for file in files %}
+                <div class="col-md-2" style="text-align: center">
+                    <div class="row">
+                        <a href="{{ request.scheme }}://{{ request.get_host }}{{ file.file.url }}" target="_blank">
+                            {% if file.file.url|get_thumbnail %}
+                                <img src="{{ file.file.url }}" alt="thumbnail" style="width:150px">
+                            {% else %}
+                                <span style="font-size: 50px;" class="glyphicon glyphicon-file"></span>
+                            {% endif %}
+                        </a>
+                    </div>
+                    <div class="row">
+                        <caption style="text-align:center">{{ file.title }}</caption>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        
+      </div>
+      
+      </div> 
+
+    </div>
   </div>
 </div>
 
@@ -728,7 +767,7 @@
             {% if jira_project.engagement is not eng %}
             <small>(inherited)</small>
             {% else %}
-            <small>(project)</small>              
+            <small>(project)</small>
             {% endif %}
             </a></td>
         </tr>

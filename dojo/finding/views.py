@@ -282,6 +282,7 @@ def view_finding(request, fid):
     dojo_user = get_object_or_404(Dojo_User, id=user.id)
 
     notes = finding.notes.all()
+    files = finding.files.all()
     note_type_activation = Note_Type.objects.filter(is_active=True).count()
     if note_type_activation:
         available_note_types = find_available_notetypes(notes)
@@ -362,6 +363,7 @@ def view_finding(request, fid):
             'dojo_user': dojo_user,
             'user': user,
             'notes': notes,
+            'files': files,
             'form': form,
             'cwe_template': cwe_template,
             'found_by': finding.found_by.all().distinct(),
@@ -1516,6 +1518,12 @@ def manage_images(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     images_formset = FindingImageFormSet(queryset=finding.images.all())
     error = False
+
+    messages.add_message(
+                request,
+                messages.INFO,
+                'Finding Images will be removed as of 06/31/2020. Please use the File Uploads instead.',
+                extra_tags='alert-danger')
 
     if request.method == 'POST':
         images_formset = FindingImageFormSet(
