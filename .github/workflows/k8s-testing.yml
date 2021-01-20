@@ -90,14 +90,11 @@ jobs:
           cache-from: type=local,src=/tmp/.buildx-cache-${{ env.docker-image }}
           cache-to: type=local,dest=/tmp/.buildx-cache-${{ env.docker-image }}
 
-      - name: Compress
-        run: gzip ${{ matrix.docker-image }}_img
-
       - name: Upload image ${{ env.docker-image }} as artifact
         uses:  actions/upload-artifact@v2
         with:
           name: ${{ matrix.docker-image }}
-          path: ${{ matrix.docker-image }}_img.gz
+          path: ${{ matrix.docker-image }}_img
           retention-days: 1
 
   setting_minikube_cluster:
@@ -121,6 +118,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Load images from artifacts
+        uses: actions/download-artifact@v2
+
+      - name: Load docker images
+        run: |-
+             eval $(minikube docker-env)
+             docker load -i nginx/nginx_img
+             docker load -i django/django_img
+             docker images
+
       - name: Setup Minikube
         uses: manusa/actions-setup-minikube@v2.3.0
         with:
@@ -131,21 +138,6 @@ jobs:
 
       - name: Status of minikube
         run: minikube status
-
-      - name: Load images from artifacts
-        uses: actions/download-artifact@v2
-
-      - name: Decompress
-        run: |-
-            gunzip nginx/nginx_img.gz
-            gunzip django/django.gz
-
-      - name: Load docker images
-        run: |-
-             eval $(minikube docker-env)
-             docker load -i nginx/nginx_img
-             docker load -i django/django_img
-             docker images
 
       - name: Configure HELM repos
         run: |-
