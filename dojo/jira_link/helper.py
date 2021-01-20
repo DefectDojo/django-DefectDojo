@@ -234,6 +234,13 @@ def get_jira_change(obj):
     return None
 
 
+def get_epic_name_field_name(jira_instance):
+    if not jira_instance or not jira_instance.epic_name_id:
+        return None
+
+    return 'customfield_' + str(jira_instance.epic_name_id)
+
+
 def has_jira_issue(obj):
     return get_jira_issue(obj) is not None
 
@@ -268,24 +275,26 @@ def get_jira_connection_raw(jira_server, jira_username, jira_password):
         else:
             log_jira_generic_alert('Unknown JIRA Connection Error', e)
 
-        messages.add_message(get_current_request(),
-                            messages.ERROR,
-                            'Unable to authenticate. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + e.text,
-                            extra_tags='alert-danger')
+        add_error_message_to_response('Unable to authenticate. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + e.message)
         raise e
 
     except requests.exceptions.RequestException as re:
         logger.exception(re)
         log_jira_generic_alert('Unknown JIRA Connection Error', re)
 
-        messages.add_message(get_current_request(),
-                            messages.ERROR,
-                            'Unable to authenticate. Please check the URL, username, password, IP whitelist, Network connection. Details in alert on top right.',
-                            extra_tags='alert-danger')
+        add_error_message_to_response('Unable to authenticate. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + str(re))
         raise re
 
     # except RequestException as re:
     #     logger.exception(re)
+
+
+def add_error_message_to_response(message):
+    if get_current_request():
+        messages.add_message(get_current_request(),
+                            messages.ERROR,
+                            message,
+                            extra_tags='alert-danger')
 
 
 # Gets a connection to a Jira server based on the finding
@@ -471,6 +480,12 @@ def add_jira_issue(find):
             if not meta:
                 meta = get_jira_meta(jira, jira_project)
 
+            epic_name_field = get_epic_name_field_name(jira_instance)
+            if epic_name_field in meta['projects'][0]['issuetypes'][0]['fields']:
+                # epic name is present in this issuetype
+                # epic name is always mandatory in jira, so we populate it
+                fields[epic_name_field] = fields['summary']
+
             if 'priority' in meta['projects'][0]['issuetypes'][0]['fields']:
                 fields['priority'] = {
                                         'name': jira_instance.get_priority(find.severity)
@@ -654,7 +669,11 @@ def update_jira_issue(find):
 # gets the metadata for the default issue type in this jira project
 def get_jira_meta(jira, jira_project):
     meta = jira.createmeta(projectKeys=jira_project.project_key, issuetypeNames=jira_project.jira_instance.default_issue_type, expand="projects.issuetypes.fields")
+    # meta = jira.createmeta(projectKeys=jira_project.project_key, expand="projects.issuetypes.fields")
     # logger.debug("get_jira_meta: %s", json.dumps(meta, indent=4))  # this is None safe
+    # with open('jira_meta.log', 'w') as outfile:
+    #     logger.debug('logging jira meta to file: %s', os.path.realpath(outfile.name))
+    #     json.dump(meta, outfile, indent=4)
     # meta['projects'][0]['issuetypes'][0]['fields']:
 
     meta_data_error = False
@@ -695,10 +714,8 @@ def get_jira_meta(jira, jira_project):
         logger.warn(message)
         logger.warn("get_jira_meta: %s", json.dumps(meta, indent=4))  # this is None safe
 
-        messages.add_message(get_current_request(),
-                            messages.ERROR,
-                            message,
-                            extra_tags='alert-danger')
+        add_error_message_to_response(message)
+
         raise JIRAError(text=message)
     else:
         return meta
@@ -788,11 +805,7 @@ def close_epic(eng, push_to_jira):
                 log_jira_generic_alert('Jira Engagement/Epic Close Error', str(e))
                 return False
     else:
-        messages.add_message(
-            get_current_request(),
-            messages.ERROR,
-            'Push to JIRA for Epic skipped because enable_engagement_epic_mapping is not checked for this engagement',
-            extra_tags='alert-danger')
+        add_error_message_to_response('Push to JIRA for Epic skipped because enable_engagement_epic_mapping is not checked for this engagement')
         return False
 
 
@@ -822,11 +835,8 @@ def update_epic(engagement):
             log_jira_generic_alert('Jira Engagement/Epic Update Error', str(e))
             return False
     else:
-        messages.add_message(
-            get_current_request(),
-            messages.ERROR,
-            'Push to JIRA for Epic skipped because enable_engagement_epic_mapping is not checked for this engagement',
-            extra_tags='alert-danger')
+        add_error_message_to_response('Push to JIRA for Epic skipped because enable_engagement_epic_mapping is not checked for this engagement')
+
         return False
 
 
@@ -854,7 +864,7 @@ def add_epic(engagement):
             'issuetype': {
                 'name': 'Epic'
             },
-            'customfield_' + str(jira_instance.epic_name_id): engagement.name,
+            get_epic_name_field_name(jira_instance): engagement.name,
         }
         try:
             jira = get_jira_connection(jira_instance)
@@ -884,11 +894,7 @@ def add_epic(engagement):
                                    message + error)
             return False
     else:
-        messages.add_message(
-            get_current_request(),
-            messages.ERROR,
-            'Push to JIRA for Epic skipped because enable_engagement_epic_mapping is not checked for this engagement',
-            extra_tags='alert-danger')
+        add_error_message_to_response('Push to JIRA for Epic skipped because enable_engagement_epic_mapping is not checked for this engagement')
         return False
 
 
