@@ -3,6 +3,7 @@ It seems that a lot of the json data does not have any securityData data
 So these are just skipped, since there is nothing much to do with them here
 """
 import json
+
 from dojo.models import Finding
 
 

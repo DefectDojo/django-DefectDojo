@@ -1,9 +1,7 @@
 import json
 import logging
 
-
 from dojo.models import Finding
-
 
 logger = logging.getLogger(__name__)
 

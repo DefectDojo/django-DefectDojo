@@ -1,6 +1,8 @@
 import json
-from cvss import CVSS3
 import re
+
+from cvss import CVSS3
+
 from dojo.models import Finding
 
 

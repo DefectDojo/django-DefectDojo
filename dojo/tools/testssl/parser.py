@@ -1,9 +1,10 @@
-import io
 import csv
 import hashlib
+import io
 import re
 from urllib.parse import urlparse
-from dojo.models import Finding, Endpoint
+
+from dojo.models import Endpoint, Finding
 
 __author__ = 'dr3dd589'
 

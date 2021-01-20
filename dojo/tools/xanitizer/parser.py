@@ -1,13 +1,15 @@
 __author__ = 'jankuehl'
 
 import re
+
 from defusedxml import ElementTree as ET
+
 from dojo.models import Finding
+from dojo.tools.factory import register_parser
 
 
 class XanitizerXMLParser(object):
-
-    def __init__(self, filename, test):
+    def get_findings(self, filename, test):
         self.items = []
 
         if filename is None:
@@ -183,3 +185,6 @@ class XanitizerXMLParser(object):
             return 'High'
 
         return 'Critical'
+
+
+register_parser("Xanitizer Scan", XanitizerXMLParser())

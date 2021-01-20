@@ -2,12 +2,11 @@ import hashlib
 import logging
 import re
 
+from cpe import CPE
 from defusedxml import ElementTree
+from packageurl import PackageURL
 
 from dojo.models import Finding
-
-from cpe import CPE
-from packageurl import PackageURL
 
 logger = logging.getLogger(__name__)
 

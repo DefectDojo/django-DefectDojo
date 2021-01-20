@@ -1,8 +1,9 @@
 __author__ = 'Aaron Weaver'
 
-from dojo.models import Endpoint, Finding
-from datetime import datetime
 import json
+from datetime import datetime
+
+from dojo.models import Endpoint, Finding
 
 
 class SSLlabsParser(object):

@@ -1,7 +1,7 @@
-import json
 import hashlib
-
+import json
 from collections import namedtuple
+
 from dojo.models import Finding
 
 

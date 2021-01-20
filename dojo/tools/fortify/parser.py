@@ -2,11 +2,13 @@ __guide__ = 'aaronweaver'
 __author__ = 'Rajarshi333'
 
 
-from defusedxml import ElementTree
-from dateutil import parser
-import re
-from dojo.models import Finding
 import logging
+import re
+
+from dateutil import parser
+from defusedxml import ElementTree
+
+from dojo.models import Finding
 
 logger = logging.getLogger(__name__)
 

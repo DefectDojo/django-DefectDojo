@@ -1,7 +1,8 @@
 
-import json
 import hashlib
+import json
 from urllib.parse import urlparse
+
 from dojo.models import Endpoint, Finding
 
 __author__ = 'dr3dd589'

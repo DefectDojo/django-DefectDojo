@@ -1,6 +1,7 @@
 __author__ = 'omerlh'
 
 import json
+
 from dojo.models import Finding
 
 

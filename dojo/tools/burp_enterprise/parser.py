@@ -1,9 +1,10 @@
-from lxml import etree
-from dojo.models import Endpoint, Finding
 import logging
 import re
 from urllib.parse import urlparse
 
+from lxml import etree
+
+from dojo.models import Endpoint, Finding
 
 logger = logging.getLogger(__name__)
 

@@ -1,5 +1,6 @@
 import json
 import re
+
 from dojo.models import Finding
 
 __author__ = "Roy Shoemake"

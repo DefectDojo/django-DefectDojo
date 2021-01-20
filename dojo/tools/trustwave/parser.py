@@ -1,13 +1,14 @@
 # Based on CSV, but rewrote because
 # values in different columns required concatinaton
 
-import io
 import csv
 import hashlib
-from dojo.models import Finding, Endpoint
+import io
 import re
-from urllib.parse import urlparse
 import socket
+from urllib.parse import urlparse
+
+from dojo.models import Endpoint, Finding
 
 MAPPINGS = {"title": "Vulnerability Name",
             'description': 'Description',

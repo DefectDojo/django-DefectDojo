@@ -1,5 +1,6 @@
 import json
 import math
+
 from dojo.models import Finding
 
 

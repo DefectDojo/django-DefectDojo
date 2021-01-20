@@ -1,7 +1,8 @@
 __author__ = "phylu"
 
-from dojo.models import Finding
 import json
+
+from dojo.models import Finding
 
 
 class CrashtestSecurityJsonParser(object):

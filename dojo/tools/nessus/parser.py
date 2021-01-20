@@ -1,8 +1,10 @@
-from xml.dom import NamespaceErr
-from defusedxml import ElementTree
-import os
 import csv
+import os
 import re
+from xml.dom import NamespaceErr
+
+from defusedxml import ElementTree
+
 from dojo.models import Endpoint, Finding
 
 __author__ = 'jay7958'

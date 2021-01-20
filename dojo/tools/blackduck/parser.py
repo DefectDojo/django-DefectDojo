@@ -1,6 +1,7 @@
 import hashlib
-from dojo.models import Finding
+
 import dojo.tools.blackduck.importer as import_helper
+from dojo.models import Finding
 
 
 class BlackduckHubCSVParser(object):

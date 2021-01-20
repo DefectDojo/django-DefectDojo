@@ -1,7 +1,8 @@
-import json
 import hashlib
-from dojo.models import Finding
+import json
 from datetime import datetime
+
+from dojo.models import Finding
 
 __author__ = 'Kirill Gotsman'
 

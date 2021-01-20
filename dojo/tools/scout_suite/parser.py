@@ -1,11 +1,13 @@
 __author__ = 'Hasan Tayyar Besik'
 
 # Cloned form aws_scout2 scanner
-from dojo.models import Finding
-from datetime import datetime
 import json
-from django.utils.text import Truncator
+from datetime import datetime
+
 from django.utils.html import strip_tags
+from django.utils.text import Truncator
+
+from dojo.models import Finding
 
 
 class ScoutSuiteParser(object):

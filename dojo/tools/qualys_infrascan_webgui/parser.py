@@ -9,7 +9,8 @@ __author__ = "Dennis Van Elst"
 import argparse
 import csv
 import logging
-from dojo.models import Finding, Endpoint
+
+from dojo.models import Endpoint, Finding
 
 logger = logging.getLogger(__name__)
 

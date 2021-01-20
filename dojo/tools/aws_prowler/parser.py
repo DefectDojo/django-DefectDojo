@@ -1,17 +1,20 @@
-__author__ = 'Aaron Weaver'
+
+import re
+from datetime import datetime
+
+import pandas as pd
+from django.utils.text import Truncator
 
 from dojo.models import Finding
-from datetime import datetime
-import pandas as pd
-import re
-from django.utils.text import Truncator
+from dojo.tools.factory import register_parser
 
 
 class AWSProwlerParser(object):
+    # FIXME move this variables!
     item_data = ""
     pdepth = 0
 
-    def __init__(self, filename, test):
+    def get_findings(self, filename, test):
         find_date = datetime.now()
         dupes = {}
         account = None
@@ -97,3 +100,6 @@ class AWSProwlerParser(object):
                 criticality = "High"
 
         return criticality
+
+
+register_parser("AWS Prowler Scan", AWSProwlerParser())

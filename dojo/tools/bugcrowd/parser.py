@@ -1,8 +1,9 @@
-import io
 import csv
 import hashlib
-from dojo.models import Finding, Endpoint
+import io
 from urllib.parse import urlparse
+
+from dojo.models import Endpoint, Finding
 
 
 class BugCrowdCSVParser(object):

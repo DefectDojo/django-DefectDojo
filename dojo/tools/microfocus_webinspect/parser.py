@@ -1,9 +1,11 @@
-from xml.dom import NamespaceErr
 import hashlib
-import html2text
-from urllib.parse import urlparse
 import re
+from urllib.parse import urlparse
+from xml.dom import NamespaceErr
+
+import html2text
 from defusedxml import ElementTree as ET
+
 from dojo.models import Endpoint, Finding
 
 

@@ -1,8 +1,10 @@
-from xml.dom import NamespaceErr
 import hashlib
-from urllib.parse import urlparse
 import re
+from urllib.parse import urlparse
+from xml.dom import NamespaceErr
+
 from defusedxml import ElementTree as ET
+
 from dojo.models import Endpoint, Finding
 
 __author__ = 'dr3dd589'

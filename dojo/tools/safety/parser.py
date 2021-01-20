@@ -1,6 +1,7 @@
 import json
 import logging
 import urllib
+
 from dojo.models import Finding
 
 logger = logging.getLogger(__name__)

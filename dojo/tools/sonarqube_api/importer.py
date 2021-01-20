@@ -1,13 +1,12 @@
 import logging
 import re
 
-from lxml import etree
 import html2text
+from lxml import etree
 
-from dojo.models import Finding
-from dojo.tools.sonarqube_api.api_client import SonarQubeAPI
-from dojo.models import Sonarqube_Issue
+from dojo.models import Finding, Sonarqube_Issue
 from dojo.notifications.helper import create_notification
+from dojo.tools.sonarqube_api.api_client import SonarQubeAPI
 
 logger = logging.getLogger(__name__)
 

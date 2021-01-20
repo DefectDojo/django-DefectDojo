@@ -1,6 +1,8 @@
-from defusedxml import ElementTree
-from dojo.models import Finding, Endpoint
 import logging
+
+from defusedxml import ElementTree
+
+from dojo.models import Endpoint, Finding
 
 logger = logging.getLogger(__name__)
 

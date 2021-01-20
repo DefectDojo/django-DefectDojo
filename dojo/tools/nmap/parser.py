@@ -1,5 +1,7 @@
 from xml.dom import NamespaceErr
+
 import lxml.etree as le
+
 from dojo.models import Endpoint, Finding
 
 __author__ = 'patriknordlen'

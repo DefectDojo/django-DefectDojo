@@ -1,14 +1,16 @@
-from xml.dom import NamespaceErr
-from defusedxml import ElementTree
-from dojo.models import Endpoint, Finding
-import html2text
 import urllib.parse
+from xml.dom import NamespaceErr
+
+import html2text
+from defusedxml import ElementTree
+
+from dojo.models import Endpoint, Finding
+from dojo.tools.factory import register_parser
 
 
 class AppSpiderXMLParser(object):
     """Parser for Rapid7 AppSpider reports"""
-    def __init__(self, filename, test):
-        self.items = []
+    def get_findings(self, filename, test):
 
         if filename is None:
             return
@@ -79,7 +81,7 @@ class AppSpiderXMLParser(object):
                                                        fragment=parts.fragment,
                                                        product=test.engagement.product))
 
-        self.items = list(dupes.values())
+        return list(dupes.values())
 
     @staticmethod
     def convert_severity(val):
@@ -95,3 +97,6 @@ class AppSpiderXMLParser(object):
         elif val == "4-High":
             severity = "Critical"
         return severity
+
+
+register_parser("AppSpider Scan", AppSpiderXMLParser())

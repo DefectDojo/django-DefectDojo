@@ -1,8 +1,10 @@
 __author__ = "phylu"
 
-from defusedxml import ElementTree as ET
-from dojo.models import Finding
 import re
+
+from defusedxml import ElementTree as ET
+
+from dojo.models import Finding
 
 
 class CrashtestSecurityXmlParser(object):

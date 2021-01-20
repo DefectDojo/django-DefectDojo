@@ -1,7 +1,9 @@
 __author__ = 'feeltheajf'
 
-from dateutil import parser
 import json
+
+from dateutil import parser
+
 from dojo.models import Finding
 
 

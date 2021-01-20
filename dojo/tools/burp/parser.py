@@ -5,15 +5,15 @@ See the file 'doc/LICENSE' for the license information
 
 """
 
+import re
+import string
 from urllib.parse import urlparse
 
-import re
+import html2text
 # from defusedxml import ElementTree as etree
 from lxml import etree
-import html2text
-import string
 
-from dojo.models import Finding, Endpoint
+from dojo.models import Endpoint, Finding
 
 __author__ = "Francisco Amato & @JamesCullum"
 __copyright__ = "Copyright (c) 2013, Infobyte LLC & Panasonic Information Systems Company Europe"

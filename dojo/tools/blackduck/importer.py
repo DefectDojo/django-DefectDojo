@@ -1,13 +1,14 @@
 
+import csv
+import io
+import re
+import zipfile
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from pathlib import Path
 from typing import Iterable
+
 from dojo.tools.blackduck.model import BlackduckFinding
-import csv
-import io
-import zipfile
-import re
 
 
 class Importer(ABC):

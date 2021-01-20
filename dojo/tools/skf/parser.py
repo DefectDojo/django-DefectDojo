@@ -1,9 +1,11 @@
-import io
 import csv
 import hashlib
-from dojo.models import Finding, Notes
-from django.contrib.auth.models import User
+import io
 from datetime import datetime
+
+from django.contrib.auth.models import User
+
+from dojo.models import Finding, Notes
 
 
 class ColumnMappingStrategy(object):

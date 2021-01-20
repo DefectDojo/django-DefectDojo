@@ -1591,13 +1591,14 @@ class ImportScanResource(MultipartResource, Resource):
         t.tags = bundle.data['tags']
 
         try:
-            parser = import_parser_factory(bundle.data.get('file', None), t, bundle.data['active'], bundle.data['verified'],
+            parser_found = import_parser_factory(bundle.data.get('file', None), t, bundle.data['active'], bundle.data['verified'],
                                            bundle.data['scan_type'])
+            parser_findings = parser_found.get_findings(bundle.data.get('file', None), t)
         except ValueError:
             raise NotFound("Parser ValueError")
 
         try:
-            for item in parser.items:
+            for item in parser_findings:
                 sev = item.severity
                 if sev == 'Information' or sev == 'Informational':
                     sev = 'Info'
@@ -1777,12 +1778,13 @@ class ReImportScanResource(MultipartResource, Resource):
         active = bundle.obj.__getattr__('active')
 
         try:
-            parser = import_parser_factory(bundle.data.get('file', None), test, active, verified, scan_type)
+            parser_found = import_parser_factory(bundle.data.get('file', None), test, active, verified, scan_type)
+            parser_findings = parser_found.get_findings(bundle.data.get('file', None), test)
         except ValueError:
             raise NotFound("Parser ValueError")
 
         try:
-            items = parser.items
+            items = parser_findings
             original_items = test.finding_set.all().values_list("id", flat=True)
             new_items = []
             mitigated_count = 0

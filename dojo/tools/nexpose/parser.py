@@ -6,9 +6,8 @@ See the file 'doc/LICENSE' for the license information
 '''
 
 
-from defusedxml import ElementTree as ET
-
 import html2text
+from defusedxml import ElementTree as ET
 
 from dojo.models import Endpoint, Finding
 

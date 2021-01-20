@@ -1,13 +1,13 @@
 __author__ = 'aaronweaver'
 
 import logging
-
-from defusedxml import ElementTree
-from dateutil import parser
 import ntpath
-from dojo.utils import add_language
+
+from dateutil import parser
+from defusedxml import ElementTree
 
 from dojo.models import Finding
+from dojo.utils import add_language
 
 logger = logging.getLogger(__name__)
 

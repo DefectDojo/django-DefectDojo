@@ -1,6 +1,6 @@
 # Author: apipia, wheelsvt
-from dojo.models import Finding
 import dojo.tools.blackduck_component_risk.importer as import_helper
+from dojo.models import Finding
 
 
 class BlackduckHubParser(object):

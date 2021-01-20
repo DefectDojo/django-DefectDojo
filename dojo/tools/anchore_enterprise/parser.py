@@ -1,18 +1,17 @@
 import json
 import logging
 import re
-from json.decoder import JSONDecodeError
 from datetime import datetime
+from json.decoder import JSONDecodeError
+
 from dojo.models import Finding
-
-# pylint: disable=R0914,R1702
-
+from dojo.tools.factory import register_parser
 
 logger = logging.getLogger(__name__)
 
 
 class AnchoreEnterprisePolicyCheckParser:
-    def __init__(self, filename, test):
+    def get_findings(self, filename, test):
         content = filename.read()
         try:
             data = json.loads(str(content, 'utf-8'))
@@ -101,3 +100,6 @@ def search_filepath(text):
         except IndexError:
             path = ""
     return path.strip()
+
+
+register_parser("Anchore Enterprise Policy Check", AnchoreEnterprisePolicyCheckParser())

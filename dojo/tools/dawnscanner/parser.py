@@ -1,10 +1,12 @@
 __author__ = 'jaguasch'
 
-from dateutil import parser
-import json
 import hashlib
-from dojo.models import Finding
+import json
 import re
+
+from dateutil import parser
+
+from dojo.models import Finding
 
 
 class DawnScannerParser(object):

@@ -1,8 +1,10 @@
 __author__ = 'aaronweaver'
 
-import pandas as pd
 import hashlib
-from dojo.models import Finding, Endpoint
+
+import pandas as pd
+
+from dojo.models import Endpoint, Finding
 
 
 class ContrastCSVParser(object):

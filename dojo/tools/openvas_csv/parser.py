@@ -1,14 +1,17 @@
 # Sorry for the lazyness but I just update the column name fields
 # Didn't change the class names, only the main one..
 
-import io
 import csv
 import hashlib
-from dojo.models import Finding, Endpoint
-from dateutil.parser import parse
+import io
 import re
-from urllib.parse import urlparse
 import socket
+from urllib.parse import urlparse
+
+from dateutil.parser import parse
+
+from dojo.models import Endpoint, Finding
+
 
 class ColumnMappingStrategy(object):
 

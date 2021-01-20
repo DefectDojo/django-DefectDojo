@@ -1,8 +1,11 @@
-from .parser_helper import get_defectdojo_findings
-from dojo.models import Finding
 import hashlib
 import logging
 import re
+
+from dojo.models import Finding
+from dojo.tools.factory import register_parser
+
+from .parser_helper import get_defectdojo_findings
 
 __author__ = "Vijay Bheemineni"
 __license__ = "MIT"
@@ -13,11 +16,9 @@ logger = logging.getLogger(__name__)
 
 
 class AcunetixScannerParser(object):
-    """
-        This class parse Acunetix XML file using helper methods from 'parser_helper.py'.
-    """
+    """Parser for Acunetix XML files."""
 
-    def __init__(self, xml_output, test):
+    def get_findings(self, xml_output, test):
         self.items = []
         if xml_output is None:
             return
@@ -108,3 +109,6 @@ def get_false_positive(false_p):
         return True
     else:
         return False
+
+
+register_parser("Acunetix Scan", AcunetixScannerParser())

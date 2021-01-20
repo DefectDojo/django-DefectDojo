@@ -1,8 +1,8 @@
-import io
 import csv
+import hashlib
+import io
 import json
 import logging
-import hashlib
 import textwrap
 
 from dojo.models import Finding

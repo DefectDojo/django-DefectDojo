@@ -1,7 +1,7 @@
 import json
 from json import JSONDecodeError
-from dojo.models import Finding
 
+from dojo.models import Finding
 
 # OssIndex Devaudit Results Parser
 # Parses files created by the Sonatype OssIndex Devaudit tool

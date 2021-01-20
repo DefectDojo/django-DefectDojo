@@ -1,4 +1,5 @@
 import json
+
 from dojo.models import Endpoint, Finding
 
 # Recommended cipher suites according to German BSI as of 2020

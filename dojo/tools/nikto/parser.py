@@ -1,12 +1,13 @@
 __author__ = 'aaronweaver'
 
-import re
-from defusedxml import ElementTree as ET
 import hashlib
-from urllib.parse import urlparse
 import logging
+import re
+from urllib.parse import urlparse
 
-from dojo.models import Finding, Endpoint
+from defusedxml import ElementTree as ET
+
+from dojo.models import Endpoint, Finding
 
 logger = logging.getLogger(__name__)
 

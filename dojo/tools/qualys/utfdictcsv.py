@@ -6,8 +6,8 @@
 # -*- coding:utf-8 -*-
 
 import codecs
-import io
 import csv
+import io
 
 ################################################################
 

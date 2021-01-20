@@ -1,7 +1,8 @@
-import logging
 import json
-from dojo.models import Finding, Endpoint
+import logging
 from urllib.parse import urlparse
+
+from dojo.models import Endpoint, Finding
 
 logger = logging.getLogger(__name__)
 
