@@ -1,5 +1,4 @@
 # #  tests
-
 import logging
 import operator
 import json
@@ -52,6 +51,7 @@ def view_test(request, tid):
     note_type_activation = Note_Type.objects.filter(is_active=True).count()
     if note_type_activation:
         available_note_types = find_available_notetypes(notes)
+    files = test.files.all()
     person = request.user.username
     findings = Finding.objects.filter(test=test).order_by('numerical_severity')
     findings = OpenFindingFilter(request.GET, queryset=findings)
@@ -146,6 +146,7 @@ def view_test(request, tid):
                    'component_words': component_words,
                    'form': form,
                    'notes': notes,
+                   'files': files,
                    'person': person,
                    'request': request,
                    'show_re_upload': show_re_upload,
