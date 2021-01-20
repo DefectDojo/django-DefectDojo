@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('dojo', '0067_max_dupes'),
+        ('dojo', '0068_file_upload.py'),
     ]
 
     operations = [
