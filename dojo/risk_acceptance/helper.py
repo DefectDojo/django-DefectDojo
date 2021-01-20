@@ -265,6 +265,9 @@ def prefetch_for_expiration(risk_acceptances):
 
 
 def simple_risk_accept(finding, perform_save=True):
+    if not finding.test.engagement.product.enable_simple_risk_acceptance:
+        raise PermissionDenied()
+
     logger.debug('accepting finding %i:%s', finding.id, finding)
     finding.risk_accepted = True
     # risk accepted, so finding no longer considered active
