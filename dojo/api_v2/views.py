@@ -10,7 +10,6 @@ from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser
 from rest_framework.exceptions import ParseError
 from django_filters.rest_framework import DjangoFilterBackend
-from django.utils.decorators import method_decorator
 from drf_yasg2 import openapi
 from drf_yasg2.utils import swagger_auto_schema, no_body
 import base64
@@ -35,7 +34,7 @@ from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from datetime import datetime
 from dojo.utils import get_period_counts_legacy, get_system_setting
-from dojo.api_v2 import serializers, permissions
+from dojo.api_v2 import serializers, permissions, prefetch, schema
 from django.db.models import Count, Q
 import dojo.jira_link.helper as jira_helper
 import logging
@@ -298,10 +297,8 @@ def _finding_related_fields_decorator():
         ])
 
 
-@method_decorator(name="list", decorator=_finding_related_fields_decorator())
-@method_decorator(name="retrieve", decorator=_finding_related_fields_decorator())
-class FindingViewSet(mixins.ListModelMixin,
-                     mixins.RetrieveModelMixin,
+class FindingViewSet(prefetch.PrefetchListMixin,
+                     prefetch.PrefetchRetrieveMixin,
                      mixins.UpdateModelMixin,
                      mixins.DestroyModelMixin,
                      mixins.CreateModelMixin,
@@ -322,6 +319,16 @@ class FindingViewSet(mixins.ListModelMixin,
                                                     'test__engagement__product__prod_type')
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ApiFindingFilter
+
+    _related_field_parameters = [openapi.Parameter(
+                name="related_fields",
+                in_=openapi.IN_QUERY,
+                description="Expand finding external relations (engagement, environment, product, product_type, test, test_type)",
+                type=openapi.TYPE_BOOLEAN)]
+    swagger_schema = prefetch.get_prefetch_schema(["findings_list", "findings_read"], serializers.FindingSerializer). \
+        composeWith(schema.ExtraParameters("findings_list", _related_field_parameters)). \
+        composeWith(schema.ExtraParameters("findings_read", _related_field_parameters)). \
+        to_schema()
 
     # Overriding mixins.UpdateModeMixin perform_update() method to grab push_to_jira
     # data and add that as a parameter to .save()
@@ -850,8 +857,8 @@ class DojoMetaViewSet(mixins.ListModelMixin,
     filter_fields = ('id', 'product', 'endpoint', 'name', 'finding')
 
 
-class ProductViewSet(mixins.ListModelMixin,
-                     mixins.RetrieveModelMixin,
+class ProductViewSet(prefetch.PrefetchListMixin,
+                     prefetch.PrefetchRetrieveMixin,
                      mixins.CreateModelMixin,
                      mixins.DestroyModelMixin,
                      mixins.UpdateModelMixin,
@@ -865,6 +872,8 @@ class ProductViewSet(mixins.ListModelMixin,
                           DjangoModelPermissions)
 
     filterset_class = ApiProductFilter
+    swagger_schema = prefetch.get_prefetch_schema(["products_list", "products_read"], serializers.ProductSerializer). \
+        to_schema()
 
     def get_queryset(self):
         if not self.request.user.is_staff:

@@ -17,19 +17,23 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 from .dojo_test_case import DojoAPITestCase
+from dojo.api_v2.prefetch.utils import _get_prefetchable_fields
+from rest_framework.mixins import \
+    ListModelMixin, RetrieveModelMixin, CreateModelMixin, \
+    DestroyModelMixin, UpdateModelMixin
+from dojo.api_v2.prefetch import PrefetchListMixin, PrefetchRetrieveMixin
 import logging
-# from unittest import skip
 import pathlib
 
 
 logger = logging.getLogger(__name__)
 
 
-def skipIfNotSubclass(baseclass_name):
+def skipIfNotSubclass(baseclass):
     def decorate(f):
         def wrapper(self, *args, **kwargs):
-            if baseclass_name not in self.view_mixins:
-                self.skipTest('This view is not %s' % baseclass_name)
+            if not issubclass(self.viewset, baseclass):
+                self.skipTest('This view does not inherit from %s' % baseclass)
             else:
                 f(self, *args, **kwargs)
         return wrapper
@@ -40,8 +44,6 @@ class BaseClass():
     class RESTEndpointTest(DojoAPITestCase):
         def __init__(self, *args, **kwargs):
             DojoAPITestCase.__init__(self, *args, **kwargs)
-            self.view_mixins = list(map(
-                (lambda x: x.__name__), self.viewset.__bases__))
 
         def setUp(self):
             testuser = User.objects.get(username='admin')
@@ -50,7 +52,7 @@ class BaseClass():
             self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
             self.url = reverse(self.viewname + '-list')
 
-        @skipIfNotSubclass('ListModelMixin')
+        @skipIfNotSubclass(ListModelMixin)
         def test_list(self):
             check_for_tags = False
             if hasattr(self.endpoint_model, 'tags') and self.payload and self.payload.get('tags', None):
@@ -78,7 +80,7 @@ class BaseClass():
 
             self.assertEqual(200, response.status_code)
 
-        @skipIfNotSubclass('CreateModelMixin')
+        @skipIfNotSubclass(CreateModelMixin)
         def test_create(self):
             length = self.endpoint_model.objects.count()
             response = self.client.post(self.url, self.payload)
@@ -94,7 +96,7 @@ class BaseClass():
                     # logger.debug('looking for tag %s in tag list %s', tag, response.data['tags'])
                     self.assertTrue(tag in response.data['tags'])
 
-        @skipIfNotSubclass('RetrieveModelMixin')
+        @skipIfNotSubclass(RetrieveModelMixin)
         def test_detail(self):
             current_objects = self.client.get(self.url, format='json').data
             relative_url = self.url + '%s/' % current_objects['results'][0]['id']
@@ -106,14 +108,14 @@ class BaseClass():
             self.assertFalse('ssh' in response.data)
             self.assertFalse('api_key' in response.data)
 
-        @skipIfNotSubclass('DestroyModelMixin')
+        @skipIfNotSubclass(DestroyModelMixin)
         def test_delete(self):
             current_objects = self.client.get(self.url, format='json').data
             relative_url = self.url + '%s/' % current_objects['results'][0]['id']
             response = self.client.delete(relative_url)
             self.assertEqual(204, response.status_code)
 
-        @skipIfNotSubclass('UpdateModelMixin')
+        @skipIfNotSubclass(UpdateModelMixin)
         def test_update(self):
             current_objects = self.client.get(self.url, format='json').data
             relative_url = self.url + '%s/' % current_objects['results'][0]['id']
@@ -138,6 +140,59 @@ class BaseClass():
             response = self.client.put(
                 relative_url, self.payload)
             self.assertEqual(200, response.status_code)
+
+        @skipIfNotSubclass(PrefetchRetrieveMixin)
+        def test_detail_prefetch(self):
+            print("=======================================================")
+            prefetchable_fields = [x[0] for x in _get_prefetchable_fields(self.viewset.serializer_class)]
+
+            current_objects = self.client.get(self.url, format='json').data
+            relative_url = self.url + '%s/' % current_objects['results'][0]['id']
+            response = self.client.get(relative_url, data={
+                "prefetch": ','.join(prefetchable_fields)
+            })
+
+            self.assertEqual(200, response.status_code)
+            obj = response.data
+            self.assertTrue("prefetch" in obj)
+
+            for field in prefetchable_fields:
+                field_value = obj.get(field, None)
+                if field_value is None:
+                    continue
+
+                self.assertTrue(field in obj["prefetch"])
+                values = field_value if type(field_value) is list else [field_value]
+
+                for value in values:
+                    self.assertTrue(value in obj["prefetch"][field])
+
+        @skipIfNotSubclass(PrefetchListMixin)
+        def test_list_prefetch(self):
+            prefetchable_fields = [x[0] for x in _get_prefetchable_fields(self.viewset.serializer_class)]
+
+            response = self.client.get(self.url, data={
+                "prefetch": ','.join(prefetchable_fields)
+            })
+
+            self.assertEqual(200, response.status_code)
+            objs = response.data
+            self.assertTrue("results" in objs)
+            self.assertTrue("prefetch" in objs)
+
+            for obj in objs["results"]:
+                for field in prefetchable_fields:
+                    field_value = obj.get(field, None)
+                    if field_value is None:
+                        continue
+
+                    self.assertTrue(field in objs["prefetch"])
+                    values = field_value if type(field_value) is list else [field_value]
+
+                    for value in values:
+                        if type(value) is not int:
+                            value = value['id']
+                        self.assertTrue(value in objs["prefetch"][field])
 
 
 class AppAnalysisTest(BaseClass.RESTEndpointTest):
