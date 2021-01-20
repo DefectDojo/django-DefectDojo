@@ -55,58 +55,64 @@ def webhook(request, secret=None):
         return HttpResponseBadRequest("only application/json supported")
 
     if request.method == 'POST':
-        # logger.debug('jira_webhook_body:')
-        # logger.debug(request.body.decode('utf-8'))
-        parsed = json.loads(request.body.decode('utf-8'))
-        if parsed.get('webhookEvent') == 'jira:issue_updated':
-            # xml examples at the end of file
-            jid = parsed['issue']['id']
-            jissue = get_object_or_404(JIRA_Issue, jira_id=jid)
-            if jissue.finding:
-                finding = jissue.finding
-                jira_instance = jira_helper.get_jira_instance(finding)
-                resolved = True
-                resolution = parsed['issue']['fields']['resolution']
+        try:
+            parsed = json.loads(request.body.decode('utf-8'))
+            if parsed.get('webhookEvent') == 'jira:issue_updated':
+                # xml examples at the end of file
+                jid = parsed['issue']['id']
+                jissue = get_object_or_404(JIRA_Issue, jira_id=jid)
+                if jissue.finding:
+                    finding = jissue.finding
+                    jira_instance = jira_helper.get_jira_instance(finding)
+                    resolved = True
+                    resolution = parsed['issue']['fields']['resolution']
 
-                #         "resolution":{
-                #             "self":"http://www.testjira.com/rest/api/2/resolution/11",
-                #             "id":"11",
-                #             "description":"Cancelled by the customer.",
-                #             "name":"Cancelled"
-                #         },
+                    #         "resolution":{
+                    #             "self":"http://www.testjira.com/rest/api/2/resolution/11",
+                    #             "id":"11",
+                    #             "description":"Cancelled by the customer.",
+                    #             "name":"Cancelled"
+                    #         },
 
-                # or
-                #         "resolution": null
+                    # or
+                    #         "resolution": null
 
-                if resolution is None:
-                    resolved = False
-                if finding.active == resolved:
-                    if finding.active:
-                        if jira_instance and resolution['name'] in jira_instance.accepted_resolutions:
-                            finding.active = False
-                            finding.mitigated = None
-                            finding.is_Mitigated = False
-                            finding.false_p = False
-                            assignee = parsed['issue']['fields'].get('assignee')
-                            assignee_name = assignee['name'] if assignee else None
-                            Risk_Acceptance.objects.create(
-                                accepted_by=assignee_name,
-                                owner=finding.reporter,
-                            ).accepted_findings.set([finding])
-                        elif jira_instance and resolution['name'] in jira_instance.false_positive_resolutions:
-                            finding.active = False
-                            finding.verified = False
-                            finding.mitigated = None
-                            finding.is_Mitigated = False
-                            finding.false_p = True
-                            ra_helper.remove_finding.from_any_risk_acceptance(finding)
+                    if resolution is None:
+                        resolved = False
+                    if finding.active == resolved:
+                        if finding.active:
+                            if jira_instance and resolution['name'] in jira_instance.accepted_resolutions:
+                                finding.active = False
+                                finding.mitigated = None
+                                finding.is_Mitigated = False
+                                finding.false_p = False
+                                assignee = parsed['issue']['fields'].get('assignee')
+                                assignee_name = assignee['name'] if assignee else None
+                                Risk_Acceptance.objects.create(
+                                    accepted_by=assignee_name,
+                                    owner=finding.reporter,
+                                ).accepted_findings.set([finding])
+                            elif jira_instance and resolution['name'] in jira_instance.false_positive_resolutions:
+                                finding.active = False
+                                finding.verified = False
+                                finding.mitigated = None
+                                finding.is_Mitigated = False
+                                finding.false_p = True
+                                finding.remove_from_any_risk_acceptance()
+                            else:
+                                # Mitigated by default as before
+                                now = timezone.now()
+                                finding.active = False
+                                finding.mitigated = now
+                                finding.is_Mitigated = True
+                                finding.endpoints.clear()
+                                finding.false_p = False
+                                finding.remove_from_any_risk_acceptance()
                         else:
-                            # Mitigated by default as before
-                            now = timezone.now()
-                            finding.active = False
-                            finding.mitigated = now
-                            finding.is_Mitigated = True
-                            finding.endpoints.clear()
+                            # Reopen / Open Jira issue
+                            finding.active = True
+                            finding.mitigated = None
+                            finding.is_Mitigated = False
                             finding.false_p = False
                             ra_helper.remove_finding.from_any_risk_acceptance(finding)
                     else:
@@ -117,95 +123,111 @@ def webhook(request, secret=None):
                         finding.false_p = False
                         ra_helper.remove_finding.from_any_risk_acceptance(finding)
 
+                        finding.jira_issue.jira_change = timezone.now()
+                        finding.jira_issue.save()
+                        finding.save()
+
+                elif jissue.engagement:
+                    # if parsed['issue']['fields']['resolution'] != None:
+                    #     eng.active = False
+                    #     eng.status = 'Completed'
+                    #     eng.save()
+                    return HttpResponse('Update for engagement ignored')
+                else:
+                    raise Http404('No finding or engagement found for this JIRA issue')
+
+            if parsed.get('webhookEvent') == 'comment_created':
+                """
+                    example incoming requests from JIRA Server 8.14.0
+                    {
+                    "timestamp":1610269967824,
+                    "webhookEvent":"comment_created",
+                    "comment":{
+                        "self":"https://jira.host.com/rest/api/2/issue/115254/comment/466578",
+                        "id":"466578",
+                        "author":{
+                            "self":"https://jira.host.com/rest/api/2/user?username=defect.dojo",
+                            "name":"defect.dojo",
+                            "key":"defect.dojo", # seems to be only present on JIRA Server, not on Cloud
+                            "avatarUrls":{
+                                "48x48":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=48",
+                                "24x24":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=24",
+                                "16x16":"https://www.gravatar.com/avatar9637bfb970eff6176357df615f548f1c?d=mm&s=16",
+                                "32x32":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=32"
+                            },
+                            "displayName":"Defect Dojo",
+                            "active":true,
+                            "timeZone":"Europe/Amsterdam"
+                        },
+                        "body":"(Valentijn Scholten):test4",
+                        "updateAuthor":{
+                            "self":"https://jira.host.com/rest/api/2/user?username=defect.dojo",
+                            "name":"defect.dojo",
+                            "key":"defect.dojo",
+                            "avatarUrls":{
+                                "48x48":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=48",
+                                "24x24""https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=24",
+                                "16x16":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=16",
+                                "32x32":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=32"
+                            },
+                            "displayName":"Defect Dojo",
+                            "active":true,
+                            "timeZone":"Europe/Amsterdam"
+                        },
+                        "created":"2021-01-10T10:12:47.824+0100",
+                        "updated":"2021-01-10T10:12:47.824+0100"
+                    }
+                    }
+                """
+
+                comment_text = parsed['comment']['body']
+                commentor = parsed['comment']['updateAuthor']['name']
+                commentor_display_name = parsed['comment']['updateAuthor']['displayName']
+                # example: body['comment']['self'] = "http://www.testjira.com/jira_under_a_path/rest/api/2/issue/666/comment/456843"
+                jid = parsed['comment']['self'].split('/')[-3]
+                jissue = get_object_or_404(JIRA_Issue, jira_id=jid)
+                logger.debug('jissue: %s', vars(jissue))
+                if jissue.finding:
+                    # logger.debug('finding: %s', vars(jissue.finding))
+                    jira_usernames = JIRA_Instance.objects.values_list('username', flat=True)
+                    for jira_userid in jira_usernames:
+                        # logger.debug('incoming username: %s jira config username: %s', commentor.lower(), jira_userid.lower())
+                        if jira_userid.lower() == commentor.lower():
+                            logger.debug('skipping incoming JIRA comment as the user id of the comment in JIRA (%s) matches the JIRA username in Defect Dojo (%s)', commentor.lower(), jira_userid.lower())
+                            return HttpResponse('')
+                            break
+                    finding = jissue.finding
+                    new_note = Notes()
+                    new_note.entry = '(%s (%s)): %s' % (commentor_display_name, commentor, comment_text)
+                    new_note.author, created = User.objects.get_or_create(username='JIRA')
+                    new_note.save()
+                    finding.notes.add(new_note)
                     finding.jira_issue.jira_change = timezone.now()
                     finding.jira_issue.save()
                     finding.save()
-            elif jissue.engagement:
-                # if parsed['issue']['fields']['resolution'] != None:
-                #     eng.active = False
-                #     eng.status = 'Completed'
-                #     eng.save()
-                return HttpResponse('Update for engagement ignored')
+                    create_notification(event='other', title='JIRA incoming comment - %s' % (jissue.finding), url=reverse("view_finding", args=(jissue.finding.id, )), icon='check')
+                elif jissue.engagement:
+                    return HttpResponse('Comment for engagement ignored')
+                else:
+                    raise Http404('No finding or engagement found for this JIRA issue')
+
+            if parsed.get('webhookEvent') not in ['comment_created', 'jira:issue_updated']:
+                logger.info('Unrecognized JIRA webhook event received: {}'.format(parsed.get('webhookEvent')))
+        except Exception as e:
+            if isinstance(e, Http404):
+                logger.warning('404 error processing JIRA webhook')
             else:
-                raise Http404('No finding or engagement found for this JIRA issue')
+                logger.exception(e)
 
-        if parsed.get('webhookEvent') == 'comment_created':
-            """
-                example incoming requests from JIRA Server 8.14.0
-                {
-                "timestamp":1610269967824,
-                "webhookEvent":"comment_created",
-                "comment":{
-                    "self":"https://jira.host.com/rest/api/2/issue/115254/comment/466578",
-                    "id":"466578",
-                    "author":{
-                        "self":"https://jira.host.com/rest/api/2/user?username=defect.dojo",
-                        "name":"defect.dojo",
-                        "key":"defect.dojo",
-                        "avatarUrls":{
-                            "48x48":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=48",
-                            "24x24":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=24",
-                            "16x16":"https://www.gravatar.com/avatar9637bfb970eff6176357df615f548f1c?d=mm&s=16",
-                            "32x32":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=32"
-                        },
-                        "displayName":"Defect Dojo",
-                        "active":true,
-                        "timeZone":"Europe/Amsterdam"
-                    },
-                    "body":"(Valentijn Scholten):test4",
-                    "updateAuthor":{
-                        "self":"https://jira.host.com/rest/api/2/user?username=defect.dojo",
-                        "name":"defect.dojo",
-                        "key":"defect.dojo",
-                        "avatarUrls":{
-                            "48x48":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=48",
-                            "24x24""https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=24",
-                            "16x16":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=16",
-                            "32x32":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=32"
-                        },
-                        "displayName":"Defect Dojo",
-                        "active":true,
-                        "timeZone":"Europe/Amsterdam"
-                    },
-                    "created":"2021-01-10T10:12:47.824+0100",
-                    "updated":"2021-01-10T10:12:47.824+0100"
-                }
-                }
-            """
+            try:
+                logger.debug('jira_webhook_body_parsed:')
+                logger.debug(json.dumps(parsed, indent=4))
+            except:
+                logger.debug('jira_webhook_body:')
+                logger.debug(request.body.decode('utf-8'))
 
-            comment_text = parsed['comment']['body']
-            commentor = parsed['comment']['updateAuthor']['key']
-            commentor_display_name = parsed['comment']['updateAuthor']['displayName']
-            # example: body['comment']['self'] = "http://www.testjira.com/jira_under_a_path/rest/api/2/issue/666/comment/456843"
-            jid = parsed['comment']['self'].split('/')[-3]
-            jissue = get_object_or_404(JIRA_Issue, jira_id=jid)
-            logger.debug('jissue: %s', vars(jissue))
-            if jissue.finding:
-                # logger.debug('finding: %s', vars(jissue.finding))
-                jira_usernames = JIRA_Instance.objects.values_list('username', flat=True)
-                for jira_userid in jira_usernames:
-                    # logger.debug('incoming username: %s jira config username: %s', commentor.lower(), jira_userid.lower())
-                    if jira_userid.lower() == commentor.lower():
-                        logger.debug('skipping incoming JIRA comment as the user id of the comment in JIRA (%s) matches the JIRA username in Defect Dojo (%s)', commentor.lower(), jira_userid.lower())
-                        return HttpResponse('')
-                        break
-                finding = jissue.finding
-                new_note = Notes()
-                new_note.entry = '(%s (%s)): %s' % (commentor_display_name, commentor, comment_text)
-                new_note.author, created = User.objects.get_or_create(username='JIRA')
-                new_note.save()
-                finding.notes.add(new_note)
-                finding.jira_issue.jira_change = timezone.now()
-                finding.jira_issue.save()
-                finding.save()
-                create_notification(event='other', title='JIRA incoming comment - %s' % (jissue.finding), url=reverse("view_finding", args=(jissue.finding.id, )), icon='check')
-            elif jissue.engagement:
-                return HttpResponse('Comment for engagement ignored')
-            else:
-                raise Http404('No finding or engagement found for this JIRA issue')
-
-        if parsed.get('webhookEvent') not in ['comment_created', 'jira:issue_updated']:
-            logger.info('Unrecognized JIRA webhook event received: {}'.format(parsed.get('webhookEvent')))
+            # reraise to make sure we don't silently swallow things
+            raise
     return HttpResponse('')
 
 

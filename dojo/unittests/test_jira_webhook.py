@@ -20,7 +20,6 @@ class JIRAWebhookTest(DojoTestCase):
                     "author": {
                         "self": "http://www.testjira.com/rest/api/2/user?username=valentijn",
                         "name": "valentijn",
-                        "key": "valentijn",
                         "avatarUrls": {
                             "48x48": "http://www.testjira.com/secure/useravatar?ownerId=valentijn&avatarId=11101",
                             "24x24": "http://www.testjira.com/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
@@ -35,7 +34,6 @@ class JIRAWebhookTest(DojoTestCase):
                     "updateAuthor": {
                         "self": "http://www.testjira.com/rest/api/2/user?username=valentijn",
                         "name": "valentijn",
-                        "key": "valentijn",
                         "avatarUrls": {
                             "48x48": "http://www.testjira.com/secure/useravatar?ownerId=valentijn&avatarId=11101",
                             "24x24": "http://www.testjira.com/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
@@ -59,7 +57,6 @@ class JIRAWebhookTest(DojoTestCase):
    "user":{
       "self":"https://jira.onpremise.org/rest/api/2/user?username=valentijn",
       "name":"valentijn",
-      "key":"valentijn",
       "emailAddress ":"valentijn.scholten@isaac.nl",
       "avatarUrls":{
          "48x48":"https://jira.onpremise.org/secure/useravatar?ownerId=valentijn&avatarId=11101",
@@ -151,7 +148,6 @@ class JIRAWebhookTest(DojoTestCase):
          "assignee":{
             "self":"https://jira.onpremise.org/rest/api/2/user?username=valentijn",
             "name":"valentijn",
-            "key":"valentijn",
             "emailAddress":"valentijn.scholten@isaac.nl",
             "avatarUrls":{
                "48x48":"https://jira.onpremise.org/secure/useravatar?ownerId=valentijn&avatarId=11101",
@@ -244,7 +240,6 @@ class JIRAWebhookTest(DojoTestCase):
                   "author":{
                      "self":"https://jira.onpremise.org/rest/api/2/user?username=valentijn",
                      "name":"valentijn",
-                     "key":"valentijn",
                      "emailAddress":"valentijn.scholten@isaac.nl",
                      "avatarUrls":{
                         "48x48":"https://jira.onpremise.org/secure/useravatar?ownerId=valentijn&avatarId=11101",
@@ -260,7 +255,6 @@ class JIRAWebhookTest(DojoTestCase):
                   "updateAuthor":{
                      "self":"https://jira.onpremise.org/rest/api/2/user?username=valentijn",
                      "name":"valentijn",
-                     "key":"valentijn",
                      "emailAddress":"valentijn.scholten@isaac.nl",
                      "avatarUrls":{
                         "48x48":"https://jira.onpremise.org/secure/useravatar?ownerId=valentijn&avatarId=11101",
@@ -281,7 +275,6 @@ class JIRAWebhookTest(DojoTestCase):
                   "author":{
                      "self":"https://jira.onpremise.org/rest/api/2/user?username=valentijn",
                      "name":"valentijn",
-                     "key":"valentijn",
                      "emailAddress":"valentijn.scholten@isaac.nl",
                      "avatarUrls":{
                         "48x48":"https://jira.onpremise.org/secure/useravatar?ownerId=valentijn&avatarId=11101",
@@ -297,7 +290,6 @@ class JIRAWebhookTest(DojoTestCase):
                   "updateAuthor":{
                      "self":"https://jira.onpremise.org/rest/api/2/user?username=valentijn",
                      "name":"valentijn",
-                     "key":"valentijn",
                      "emailAddress":"valentijn.scholten@isaac.nl",
                      "avatarUrls":{
                         "48x48":"https://jira.onpremise.org/secure/useravatar?ownerId=valentijn&avatarId=11101",
@@ -332,7 +324,6 @@ class JIRAWebhookTest(DojoTestCase):
       "author":{
          "self":"https://jira.onpremise.org/rest/api/2/user?username=valentijn",
          "name":"valentijn",
-         "key":"valentijn",
          "emailAddress":"valentijn.scholten@isaac.nl",
          "avatarUrls":{
             "48x48":"https://jira.onpremise.org/secure/useravatar?ownerId=valentijn&avatarId=11101",
@@ -348,7 +339,6 @@ class JIRAWebhookTest(DojoTestCase):
       "updateAuthor":{
          "self":"https://jira.onpremise.org/rest/api/2/user?username=valentijn",
          "name":"valentijn",
-         "key":"valentijn",
          "emailAddress":"valentijn.scholten@isaac.nl",
          "avatarUrls":{
             "48x48":"https://jira.onpremise.org/secure/useravatar?ownerId=valentijn&avatarId=11101",
@@ -453,7 +443,7 @@ class JIRAWebhookTest(DojoTestCase):
         notes_count_before = finding.notes.count()
 
         body = json.loads(json.dumps(self.jira_issue_comment_template_json))
-        body['comment']['updateAuthor']['key'] = "defect.dojo"
+        body['comment']['updateAuthor']['name'] = "defect.dojo"
         body['comment']['updateAuthor']['displayName'] = "Defect Dojo"
 
         response = self.client.post(reverse('jira_web_hook_secret', args=(self.correct_secret, )),
