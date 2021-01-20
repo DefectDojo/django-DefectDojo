@@ -113,7 +113,7 @@ def delete_product_type(request, ptid):
                 product_type.delete()
                 messages.add_message(request,
                                      messages.SUCCESS,
-                                     'Product  Type and relationships removed.',
+                                     'Product Type and relationships removed.',
                                      extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('product_type'))
 
