@@ -93,8 +93,8 @@ jobs:
       - name: Upload image ${{ env.docker-image }} as artifact
         uses:  actions/upload-artifact@v2
         with:
-          name: ${{ env.docker-image }}
-          path: ${{ env.docker-image }}_img
+          name: ${{ matrix.docker-image }}
+          path: ${{ matrix.docker-image }}_img
           retention-days: 1
 
   setting_minikube_cluster:

@@ -74,7 +74,7 @@ jobs:
         uses:  actions/upload-artifact@v2
         with:
           name: ${{ matrix.docker-image }}
-          path: ${{matrix.docker-image}}_img
+          path: ${{ matrix.docker-image }}_img
           retention-days: 1
 
   integration_tests:
