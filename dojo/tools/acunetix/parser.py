@@ -107,3 +107,6 @@ def get_false_positive(false_p):
         return True
     else:
         return False
+
+
+register_parser("Acunetix Scan", AcunetixScannerParser())
