@@ -1388,13 +1388,6 @@ class Test(models.Model):
                 'url': reverse('view_test', args=(self.id,))}]
         return bc
 
-    # def verified_finding_count(self):
-    #     # return self.finding_set.filter(verified=True).count()
-    #     # the above executes 1 query for each test, which is slow
-    #     # for now do the counting in python but using the prefetched finding_set
-    #     # this is only used in the metrics, which need a refactoring anyway
-    #     return sum(1 for finding in self.finding_set.all() if finding.verified)
-
     # only used by bulk risk acceptance api
     @property
     def unaccepted_open_findings(self):
