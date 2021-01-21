@@ -31,7 +31,7 @@ PyGithub==1.54.1
 lxml==4.6.2
 Markdown==3.3.3
 mysqlclient==2.0.3
-pandas==1.1.5
+pandas==1.2.1
 xlrd==1.2.0
 pdfkit==0.6.1
 Pillow==8.1.0  # required by django-imagekit
