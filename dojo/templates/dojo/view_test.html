@@ -413,23 +413,27 @@
                                         {% endif %}
                                     {% endif %}
                                     {% if user|is_authorized_for_staff:finding %}
-                                        {% if finding.risk_acceptance_set.all %}
+                                        {% if finding.risk_accepted %}
                                             <li role="presentation">
-                                            <a href="{% url 'simple_risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
+                                            <a href="{% url 'risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
                                                 <i class="fa fa-exclamation-circle"></i> Unaccept Risk
                                             </a>
                                             </li>
                                         {% else %}
-                                            <li role="presentation">
-                                                <a href="{% url 'simple_risk_accept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
-                                                    <i class="fa fa-exclamation-circle"></i> Accept Risk (simple), or
-                                                </a>
-                                            </li>
-                                            <li role="presentation">
-                                                <a href ="{% url 'upload_risk_acceptance$' finding.test.engagement.id%}">
-                                                    <i class="fa fa-exclamation-circle"></i> Add Full Risk Acceptance...
-                                                </a>
-                                            </li>
+                                            {% if finding.test.engagement.product.enable_simple_risk_acceptance %}
+                                                <li role="presentation">
+                                                    <a href="{% url 'simple_risk_accept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
+                                                        <i class="fa fa-exclamation-circle"></i> Accept Risk
+                                                    </a>
+                                                </li>
+                                            {% endif %}
+                                            {% if finding.test.engagement.product.enable_full_risk_acceptance %}
+                                                <li role="presentation">
+                                                    <a href ="{% url 'add_risk_acceptance' finding.test.engagement.id finding.id %}">
+                                                        <i class="fa fa-exclamation-circle"></i> Add Risk Acceptance...
+                                                    </a>
+                                                </li>
+                                            {% endif %}
                                         {% endif %}
                                     {% endif %}
                                     <li class="divider"></li>
@@ -550,7 +554,7 @@
             {% include "dojo/paging_snippet.html" with page=findings page_size=True %}
         </div>
 
-        <div class="panel panel-default to_highlight table-responsive potential-finding">
+        <div class="panel panel-default table-responsive potential-finding">
             <div class="panel-heading">
                 <div class="clearfix">
                     <h4 class="pull-left">Potential Findings</h4>
@@ -724,7 +728,7 @@
 </div>
 <!--Cred end -->
 
-<!--Files beign --> 
+<!--Files beign -->
 <div class="row">
     <div class="col-md-12" id="cred">
         <div class="panel panel-default">
@@ -737,7 +741,7 @@
                     <span class="fa fa-edit"></span></a>
                 </h4>
             </div>
-            
+
             <div id="add_feat_files" class="panel-body collapse {% if files %}in{% endif %}">
                 {% for file in files %}
                 <div class="col-md-2" style="text-align: center">
@@ -758,7 +762,7 @@
             </div>
         </div>
     </div>
-</div>    
+</div>
 <!--Files end -->
 
 {% include "dojo/snippets/comments.html" with notes=notes object=test destination="test" %}
