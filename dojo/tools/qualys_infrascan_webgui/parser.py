@@ -54,6 +54,8 @@ def issue_r(raw_row, vuln, scan_date):
 
     # FQDN
     issue_row['fqdn'] = raw_row.get('name')
+    if issue_row['fqdn'] == "No registered hostname":
+        issue_row['fqdn'] = False
 
     # Create Endpoint
     if issue_row['fqdn']:
