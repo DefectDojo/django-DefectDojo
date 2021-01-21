@@ -365,51 +365,51 @@ class JIRAWebhookTest(DojoTestCase):
 
     def test_webhook_get(self):
         response = self.client.get(reverse('jira_web_hook'))
-        self.assertEqual(405, response.status_code)
+        self.assertEqual(405, response.status_code, response.content[:1000])
 
     def test_webhook_jira_disabled(self):
         self.system_settings(enable_jira=False)
         response = self.client.post(reverse('jira_web_hook'))
-        self.assertEqual(404, response.status_code)
+        self.assertEqual(404, response.status_code, response.content[:1000])
 
     def test_webhook_disabled(self):
         self.system_settings(enable_jira=False, enable_jira_web_hook=False)
         response = self.client.post(reverse('jira_web_hook'))
-        self.assertEqual(404, response.status_code)
+        self.assertEqual(404, response.status_code, response.content[:1000])
 
     def test_webhook_invalid_content_type(self):
         self.system_settings(enable_jira=True, enable_jira_web_hook=True, disable_jira_webhook_secret=True)
         response = self.client.post(reverse('jira_web_hook'))
         # 400 due to incorrect content_type
-        self.assertEqual(400, response.status_code)
+        self.assertEqual(400, response.status_code, response.content[:1000])
 
     def test_webhook_secret_disabled_no_secret(self):
         self.system_settings(enable_jira=True, enable_jira_web_hook=True, disable_jira_webhook_secret=True)
         response = self.client.post(reverse('jira_web_hook'))
         # 400 due to incorrect content_type
-        self.assertEqual(400, response.status_code)
+        self.assertEqual(400, response.status_code, response.content[:1000])
 
     def test_webhook_secret_disabled_secret(self):
         self.system_settings(enable_jira=True, enable_jira_web_hook=True, disable_jira_webhook_secret=True)
         response = self.client.post(reverse('jira_web_hook_secret', args=(self.incorrect_secret, )))
         # 400 due to incorrect content_type
-        self.assertEqual(400, response.status_code)
+        self.assertEqual(400, response.status_code, response.content[:1000])
 
     def test_webhook_secret_enabled_no_secret(self):
         self.system_settings(enable_jira=True, enable_jira_web_hook=True, disable_jira_webhook_secret=False, jira_webhook_secret=self.correct_secret)
         response = self.client.post(reverse('jira_web_hook'))
-        self.assertEqual(403, response.status_code)
+        self.assertEqual(403, response.status_code, response.content[:1000])
 
     def test_webhook_secret_enabled_incorrect_secret(self):
         self.system_settings(enable_jira=True, enable_jira_web_hook=True, disable_jira_webhook_secret=False, jira_webhook_secret=self.correct_secret)
         response = self.client.post(reverse('jira_web_hook_secret', args=(self.incorrect_secret, )))
-        self.assertEqual(403, response.status_code)
+        self.assertEqual(403, response.status_code, response.content[:1000])
 
     def test_webhook_secret_enabled_correct_secret(self):
         self.system_settings(enable_jira=True, enable_jira_web_hook=True, disable_jira_webhook_secret=False, jira_webhook_secret=self.correct_secret)
         response = self.client.post(reverse('jira_web_hook_secret', args=(self.correct_secret, )))
         # 400 due to incorrect content_type
-        self.assertEqual(400, response.status_code)
+        self.assertEqual(400, response.status_code, response.content[:1000])
 
     def test_webhook_comment_on_finding(self):
         self.system_settings(enable_jira=True, enable_jira_web_hook=True, disable_jira_webhook_secret=False, jira_webhook_secret=self.correct_secret)
@@ -428,7 +428,7 @@ class JIRAWebhookTest(DojoTestCase):
         finding = jira_issue.finding
         notes_count_after = finding.notes.count()
 
-        self.assertEqual(200, response.status_code)
+        self.assertEqual(200, response.status_code, response.content[:1000])
         self.assertEqual(notes_count_after, notes_count_before + 1)
 
     # when a note is placed in defect dojo and sent to jira, it will trigger an incoming webhook request
@@ -478,7 +478,7 @@ class JIRAWebhookTest(DojoTestCase):
         finding = jira_issue.finding
         notes_count_after = finding.notes.count()
 
-        self.assertEqual(200, response.status_code)
+        self.assertEqual(200, response.status_code, response.content[:1000])
         self.assertEqual(notes_count_after, notes_count_before + 1)
 
     def test_webhook_comment_on_engagement(self):
@@ -493,7 +493,7 @@ class JIRAWebhookTest(DojoTestCase):
                                     content_type="application/json")
         print(response.content)
 
-        self.assertEqual(200, response.status_code)
+        self.assertEqual(200, response.status_code, response.content[:1000])
         self.assertEqual(b'Comment for engagement ignored', response.content)
 
     def test_webhook_update_engagement(self):
@@ -507,7 +507,7 @@ class JIRAWebhookTest(DojoTestCase):
                                     body,
                                     content_type="application/json")
 
-        self.assertEqual(200, response.status_code)
+        self.assertEqual(200, response.status_code, response.content[:1000])
         self.assertEqual(b'Update for engagement ignored', response.content)
 
     def test_webhook_comment_no_finding_no_engagement(self):
@@ -521,7 +521,7 @@ class JIRAWebhookTest(DojoTestCase):
                                     body,
                                     content_type="application/json")
 
-        self.assertEqual(404, response.status_code)
+        self.assertEqual(404, response.status_code, response.content[:1000])
 
     def test_webhook_update_no_finding_no_engagement(self):
         self.system_settings(enable_jira=True, enable_jira_web_hook=True, disable_jira_webhook_secret=False, jira_webhook_secret=self.correct_secret)
@@ -534,7 +534,7 @@ class JIRAWebhookTest(DojoTestCase):
                                     body,
                                     content_type="application/json")
 
-        self.assertEqual(404, response.status_code)
+        self.assertEqual(404, response.status_code, response.content[:1000])
 
     def test_webhook_comment_no_jira_issue_at_all(self):
         self.system_settings(enable_jira=True, enable_jira_web_hook=True, disable_jira_webhook_secret=False, jira_webhook_secret=self.correct_secret)
@@ -547,7 +547,7 @@ class JIRAWebhookTest(DojoTestCase):
                                     body,
                                     content_type="application/json")
 
-        self.assertEqual(404, response.status_code)
+        self.assertEqual(404, response.status_code, response.content[:1000])
 
     def test_webhook_update_no_jira_issue_at_all(self):
         self.system_settings(enable_jira=True, enable_jira_web_hook=True, disable_jira_webhook_secret=False, jira_webhook_secret=self.correct_secret)
@@ -560,4 +560,4 @@ class JIRAWebhookTest(DojoTestCase):
                                     body,
                                     content_type="application/json")
 
-        self.assertEqual(404, response.status_code)
+        self.assertEqual(404, response.status_code, response.content[:1000])
