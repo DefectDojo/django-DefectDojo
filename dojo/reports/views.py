@@ -9,26 +9,30 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
-from django.urls import reverse
-from django.http import Http404, HttpResponseRedirect, HttpResponseForbidden, JsonResponse
-from django.http import HttpResponse
-from django.shortcuts import render, get_object_or_404
-from django.utils import timezone
 from django.db.models import Q
+from django.http import (Http404, HttpResponse, HttpResponseForbidden,
+                         HttpResponseRedirect, JsonResponse)
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
+from django.utils import timezone
 
 from dojo.celery import app
 from dojo.endpoint.views import get_endpoint_ids
-from dojo.filters import ReportFindingFilter, ReportAuthedFindingFilter, EndpointReportFilter, ReportFilter, \
-    EndpointFilter
-from dojo.forms import ReportOptionsForm, DeleteReportForm
-from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
-    Dojo_User, Endpoint, Report, Risk_Acceptance
-from dojo.reports.widgets import CoverPage, PageBreak, TableOfContents, WYSIWYGContent, FindingList, EndpointList, \
-    CustomReportJsonForm, ReportOptions, report_widget_factory
-from dojo.tasks import async_pdf_report, async_custom_pdf_report
-from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, get_period_counts_legacy, Product_Tab, \
-    get_words_for_field, redirect
-from dojo.user.helper import user_must_be_authorized, check_auth_users_list
+from dojo.filters import (EndpointFilter, EndpointReportFilter,
+                          ReportAuthedFindingFilter, ReportFilter,
+                          ReportFindingFilter)
+from dojo.forms import DeleteReportForm, ReportOptionsForm
+from dojo.models import (Dojo_User, Endpoint, Engagement, Finding, Product,
+                         Product_Type, Report, Risk_Acceptance, Test)
+from dojo.reports.widgets import (CoverPage, CustomReportJsonForm,
+                                  EndpointList, FindingList, PageBreak,
+                                  ReportOptions, TableOfContents,
+                                  WYSIWYGContent, report_widget_factory)
+from dojo.tasks import async_custom_pdf_report, async_pdf_report
+from dojo.user.helper import check_auth_users_list, user_must_be_authorized
+from dojo.utils import (Product_Tab, add_breadcrumb, get_page_items,
+                        get_period_counts_legacy, get_system_setting,
+                        get_words_for_field, redirect)
 
 logger = logging.getLogger(__name__)
 
@@ -318,7 +322,7 @@ def reports(request):
 def regen_report(request, rid):
     report = get_object_or_404(Report, id=rid)
     if report.type != 'Custom':
-        return redirect(report.options + "&regen=" + rid)
+        return redirect(request, report.options + "&regen=" + rid)
     else:
         report.datetime = timezone.now()
         report.status = 'requested'
