@@ -1,28 +1,29 @@
-# # endpoints
-
 import logging
 from datetime import datetime
+
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
+from django.contrib.admin.utils import NestedObjects
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
-from django.urls import reverse
-from django.http import HttpResponseRedirect, HttpResponse
-from django.shortcuts import render, get_object_or_404
-from django.utils.html import escape
-from django.utils import timezone
-from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
-from django.db.models import Q, QuerySet, Count
+from django.db.models import Count, Q, QuerySet
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
+from django.utils import timezone
+from django.utils.html import escape
+
 from dojo.filters import EndpointFilter
-from dojo.forms import EditEndpointForm, \
-    DeleteEndpointForm, AddEndpointForm, DojoMetaDataForm
-from dojo.models import Product, Endpoint, Finding, System_Settings, DojoMeta, Endpoint_Status
-from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, get_system_setting, Product_Tab, \
-    calculate_grade, redirect
+from dojo.forms import (AddEndpointForm, DeleteEndpointForm, DojoMetaDataForm,
+                        EditEndpointForm)
+from dojo.models import (
+    DojoMeta, Endpoint, Endpoint_Status, Finding, Product, System_Settings)
 from dojo.notifications.helper import create_notification
 from dojo.user.helper import user_must_be_authorized
-
+from dojo.utils import (Product_Tab, add_breadcrumb, calculate_grade,
+                        get_page_items, get_period_counts, get_system_setting,
+                        redirect)
 
 logger = logging.getLogger(__name__)
 
@@ -442,7 +443,7 @@ def endpoint_status_bulk_update(request, fid):
                                     messages.ERROR,
                                     'Unable to process bulk update. Required fields were not selected.',
                                     extra_tags='alert-danger')
-    return redirect(post['return_url'])
+    return redirect(request, post['return_url'])
 
 
 def prefetch_for_endpoints(endpoints):
