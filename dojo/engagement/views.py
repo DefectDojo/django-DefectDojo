@@ -30,7 +30,7 @@ from dojo.models import Finding, Product, Engagement, Test, \
     Check_List, Test_Type, Notes, \
     Risk_Acceptance, Development_Environment, BurpRawRequestResponse, Endpoint, \
     Cred_Mapping, Dojo_User, System_Settings, Note_Type, Endpoint_Status
-from dojo.tools import handles_active_verified_statuses
+from dojo.tools.factory import handles_active_verified_statuses
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, message, Product_Tab, is_scan_file_too_large, \
@@ -545,7 +545,7 @@ def import_scan_results(request, eid=None, pid=None):
             scan_type = request.POST['scan_type']
             tags = form.cleaned_data['tags']
             if not any(scan_type in code
-                       for code in ImportScanForm.SCAN_TYPE_CHOICES):
+                       for code in ImportScanForm.SORTED_SCAN_TYPE_CHOICES):
                 raise Http404()
             if file and is_scan_file_too_large(file):
                 messages.add_message(request,
@@ -587,6 +587,7 @@ def import_scan_results(request, eid=None, pid=None):
 
             try:
                 parser = import_parser_factory(file, t, active, verified)
+                parser_findings = parser.get_findings(file, t)
             except Exception as e:
                 messages.add_message(request,
                                      messages.ERROR,
@@ -602,7 +603,7 @@ def import_scan_results(request, eid=None, pid=None):
                 # push_to_jira = jira_helper.is_push_to_jira(new_finding, jform.cleaned_data.get('push_to_jira'))
                 push_to_jira = push_all_jira_issues or (jform and jform.cleaned_data.get('push_to_jira'))
 
-                items = parser.items
+                items = parser_findings
                 logger.debug('starting reimport of %i items.', len(items))
                 i = 0
                 for item in items:

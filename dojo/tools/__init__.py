@@ -1,17 +1,9 @@
-__author__ = 'jay7958'
+from pkgutil import iter_modules
+from pathlib import Path
+from importlib import import_module
 
-SCAN_GENERIC_FINDING = 'Generic Findings Import'
-SCAN_SONARQUBE_API = 'SonarQube API Import'
-SCAN_QUALYS_REPORT = 'Qualys Scan'
-
-
-def requires_file(scan_type):
-    return (
-        scan_type and scan_type != SCAN_SONARQUBE_API
-    )
-
-
-def handles_active_verified_statuses(scan_type):
-    return scan_type in [
-        SCAN_GENERIC_FINDING, SCAN_SONARQUBE_API, SCAN_QUALYS_REPORT
-    ]
+# iterate through the modules in the current package
+package_dir = Path(__file__).resolve().parent
+for (_, module_name, _) in iter_modules([package_dir]):
+    # import the module and iterate through its attributes
+    module = import_module(f"{__name__}.{module_name}")

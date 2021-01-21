@@ -7,13 +7,15 @@ from django.utils.html import strip_tags
 from django.utils.text import Truncator
 
 from dojo.models import Finding
+from dojo.tools.factory import register_parser
 
 
 class AWSScout2Parser(object):
+    # FIXME bad very bad
     item_data = ""
     pdepth = 0
 
-    def __init__(self, filename, test):
+    def get_findings(self, filename, test):
         # filename is instance of class 'django.core.files.uploadedfile.TemporaryUploadedFile'>
         with open(filename.temporary_file_path(), "r") as fileobj:
             raw_data = fileobj.read()
@@ -136,3 +138,6 @@ class AWSScout2Parser(object):
             criticality = "Critical"
 
         return criticality
+
+
+register_parser("AWS Scout2 Scanner", AWSScout2Parser())
