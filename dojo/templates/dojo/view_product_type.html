@@ -9,7 +9,6 @@
                 <div class="panel-heading tight">
                   <div class="clearfix">
                     <h3 class="pull-left">Description</h3>
-                    {% if user|is_authorized_for_staff:pt %}
                     <div class="dropdown pull-right">
                       <div class="btn-group">
                         <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" aria-labelledby="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
@@ -17,11 +16,18 @@
                                       <span class="caret"></span>
                                   </button>
                         <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                            {% if user|is_authorized_for_staff:pt %}
                             <li>
                                 <a class="" href="{% url 'edit_product_type' pt.id %}">
                                 <i class="fa fa-pencil-square-o"></i> Edit</a>
                             </li>
                             <li role="separator" class="divider"></li>
+                            {% endif %}
+                            <li>
+                                <a class="" href="{% url 'product_type_metrics' pt.id %}">
+                                <i class="fa fa-line-chart"></i> Metrics</a>
+                            </li>
+                            {% if user|is_authorized_for_staff:pt %}
                             <li>
                                 <a class="" href="{% url 'product_type_report' pt.id %}">
                                 <i class="fa fa-file-text-o"></i> Product Type Report</a>
@@ -31,10 +37,10 @@
                                 <a class="" href="{% url 'delete_product_type' pt.id %}">
                                 <i class="fa fa-trash"></i> Delete</a>
                             </li>
+                            {% endif %}
                         </ul>
                       </div>
                     </div>
-                    {% endif %}
                 </div>
                 </div>
                 <div class="panel-body">
