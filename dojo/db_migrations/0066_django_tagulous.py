@@ -36,9 +36,18 @@ class Migration(migrations.Migration):
                     #     obj.save(dedupe_option=False, rules_option=False, issue_updater_option=False, push_to_jira=False)
                     # else:
                     try:
+                        if hasattr(obj, 'prod_type_id') and obj.prod_type_id == 0:
+                            logger.warning('product found without product type (prod_type==0), changing to: "_tag migration lost and found" product type')
+                            prod_type_lost_and_found, created = Product_Type.objects.get_or_create(name='_tag migration lost and found')
+                            obj.prod_type = prod_type_lost_and_found
+                            obj.save()
+                            logger.warning('product type succesfully changed to %i', prod_type_lost_and_found.id)
+
                         obj.save()
                     except Exception as e:
                         logger.error('Error saving old existing django-tagging tags to new string field')
+                        logger.error('Known errors are products with prod_type equal to 0. ')
+                        logger.error('Run UPDATE dojo_product set prod_type=<valid_id> to fix this problem')
                         logger.error('Details of object:')
                         logger.error(vars(obj))
                         logger.error('Model to dict:')
