@@ -1,9 +1,9 @@
 | Wrapper                     | APIV1  | APIV2  | Notes                   |
 | ----------------------------| -------|   ---- | ------------------------|
-| Specific python wrapper     | Yes    | Yes    | Python 2 only           |
-| Openapi python wrapper      | No     | Yes    |                         |
-| Bash wrapper                | No     | Yes    |                         |
-| Java wrapper                | No     | Yes    |                         |
+| Specific python wrapper     | Yes    | Yes    | working (21/1/2021      |
+| Openapi python wrapper      | No     | Yes    | proof of concept only   |
+| Bash wrapper                | No     | Yes    | might be outdated       |
+| Java wrapper                | No     | Yes    | might be outdated       |
 
 ### Specific python wrapper
 * Install the DefectDojo Python API via `pip install defectdojo_api` or clone
