@@ -216,6 +216,11 @@ cloudsql:
   # set CloudSQL instance: 'project:zone:instancename'
   instance: ""
 
+# Settings to make running the chart on GKE simpler
+gke:
+  # Set to true to configure the Ingress to use the GKE provided ingress controller
+  useGKEIngress: false
+
 rabbitmq:
   enabled: true
   replicaCount: 1

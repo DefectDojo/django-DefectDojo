@@ -10,9 +10,14 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "defectdojo.chart" . }}
-{{- with .Values.django.ingress.annotations }}
+{{- if or .Values.django.ingress.annotations .Values.gke.useGKEIngress }}
   annotations:
-{{ toYaml . | indent 4 }}
+  {{- with .Values.django.ingress.annotations }}
+  {{ toYaml . | indent 2 }}
+  {{- end }}
+  {{- if .Values.gke.useGKEIngress }}
+    kubernetes.io/ingress.class: gce
+  {{- end }}
 {{- end }}
 spec:
 {{- if .Values.django.ingress.activateTLS }}
