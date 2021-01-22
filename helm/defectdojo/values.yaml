@@ -220,6 +220,10 @@ cloudsql:
 gke:
   # Set to true to configure the Ingress to use the GKE provided ingress controller
   useGKEIngress: false
+  # Set to true to have GKE automatically provision a TLS certificate for the host specified
+  # Requires useGKEIngress to be set to true
+  # When using this option, be sure to set django.ingress.activateTLS to false
+  useManagedCertificate: false
 
 rabbitmq:
   enabled: true

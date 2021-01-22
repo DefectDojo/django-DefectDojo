@@ -17,6 +17,10 @@ metadata:
   {{- end }}
   {{- if .Values.gke.useGKEIngress }}
     kubernetes.io/ingress.class: gce
+    {{- if .Values.gke.useManagedCertificate }}
+    kubernetes.io/ingress.allow-http: "false"
+    networking.gke.io/managed-certificates: {{ $fullName }}-django
+    {{- end }}
   {{- end }}
 {{- end }}
 spec:
