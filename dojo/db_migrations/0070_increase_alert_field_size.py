@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='alerts',
             name='title',
-            field=models.CharField(default='', max_length=200),
+            field=models.CharField(default='', max_length=250),
         ),
     ]
