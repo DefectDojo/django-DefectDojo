@@ -265,25 +265,30 @@
                                        {% endif %}
                                        <li class="divider"></li>
                                         {% if user|is_authorized_for_staff:finding %}
-                                          {% if finding.risk_acceptance_set.all %}
+                                          {% if finding.risk_accepted %}
                                               <li role="presentation">
-                                              <a href="{% url 'simple_risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
+                                              <a href="{% url 'risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
                                                   <i class="fa fa-exclamation-circle"></i> Unaccept Risk
                                               </a>
                                               </li>
                                           {% else %}
-                                              <li role="presentation">
-                                                  <a href="{% url 'simple_risk_accept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
-                                                      <i class="fa fa-exclamation-circle"></i> Accept Risk (simple), or
-                                                  </a>
-                                              </li>
-                                              <li role="presentation">
-                                                  <a href ="{% url 'upload_risk_acceptance$' finding.test.engagement.id%}">
-                                                      <i class="fa fa-exclamation-circle"></i> Add Full Risk Acceptance...
-                                                  </a>
-                                              </li>
+                                              {% if finding.test.engagement.product.enable_simple_risk_acceptance %}
+                                                <li role="presentation">
+                                                    <a href="{% url 'simple_risk_accept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
+                                                        <i class="fa fa-exclamation-circle"></i> Accept Risk
+                                                    </a>
+                                                </li>
+                                              {% endif %}
+                                              {% if finding.test.engagement.product.enable_full_risk_acceptance %}
+                                                <li role="presentation">
+                                                    <a href ="{% url 'add_risk_acceptance' finding.test.engagement.id finding.id %}">
+                                                        <i class="fa fa-exclamation-circle"></i> Add Risk Acceptance...
+                                                    </a>
+                                                </li>
+                                              {% endif %}
                                           {% endif %}
-                                        {% endif %}                                       <li role="presentation">
+                                        {% endif %}
+                                        <li role="presentation">
                                            <a href="{% url 'action_history' finding|content_type finding.id %}">
                                                <i class="fa fa-history"></i> View History
                                            </a>

@@ -22,6 +22,8 @@ from dojo.utils import add_breadcrumb, get_system_setting
 from dojo.notifications.helper import create_notification
 from django.views.decorators.http import require_POST
 import dojo.jira_link.helper as jira_helper
+import dojo.risk_acceptance.helper as ra_helper
+
 
 logger = logging.getLogger(__name__)
 
@@ -112,11 +114,19 @@ def webhook(request, secret=None):
                             finding.mitigated = None
                             finding.is_Mitigated = False
                             finding.false_p = False
-                            finding.remove_from_any_risk_acceptance()
+                            ra_helper.remove_finding.from_any_risk_acceptance(finding)
+                    else:
+                        # Reopen / Open Jira issue
+                        finding.active = True
+                        finding.mitigated = None
+                        finding.is_Mitigated = False
+                        finding.false_p = False
+                        ra_helper.remove_finding.from_any_risk_acceptance(finding)
 
                         finding.jira_issue.jira_change = timezone.now()
                         finding.jira_issue.save()
                         finding.save()
+
                 elif jissue.engagement:
                     # if parsed['issue']['fields']['resolution'] != None:
                     #     eng.active = False

@@ -35,6 +35,7 @@ import crum
 from celery.decorators import task
 from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
 
+
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
@@ -1420,9 +1421,9 @@ def prepare_for_view(encrypted_value):
     return decrypted_value
 
 
-def get_system_setting(setting):
+def get_system_setting(setting, default=None):
     system_settings = System_Settings.objects.get()
-    return getattr(system_settings, setting, None)
+    return getattr(system_settings, setting, (default if default is not None else None))
 
 
 def calculate_grade(product):
@@ -1857,3 +1858,29 @@ def create_bleached_link(url, title):
     link += title
     link += '</a>'
     return bleach.clean(link, tags=['a'], attributes={'a': ['href', 'target', 'title']})
+
+
+def get_object_or_none(klass, *args, **kwargs):
+    """
+    Use get() to return an object, or return None
+    does not exist.
+    klass may be a Model, Manager, or QuerySet object. All other passed
+    arguments and keyword arguments are used in the get() query.
+    Like with QuerySet.get(), MultipleObjectsReturned is raised if more than
+    one object is found.
+    """
+    queryset = klass
+
+    if hasattr(klass, '_default_manager'):
+        queryset = klass._default_manager.all()
+
+    if not hasattr(queryset, 'get'):
+        klass__name = klass.__name__ if isinstance(klass, type) else klass.__class__.__name__
+        raise ValueError(
+            "First argument to get_object_or_None() must be a Model, Manager, "
+            "or QuerySet, not '%s'." % klass__name
+        )
+    try:
+        return queryset.get(*args, **kwargs)
+    except queryset.model.DoesNotExist:
+        return None

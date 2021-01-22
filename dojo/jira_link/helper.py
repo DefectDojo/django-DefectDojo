@@ -275,14 +275,15 @@ def get_jira_connection_raw(jira_server, jira_username, jira_password):
         else:
             log_jira_generic_alert('Unknown JIRA Connection Error', e)
 
-        add_error_message_to_response('Unable to authenticate. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + e.message)
+        add_error_message_to_response('Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + e.message)
         raise e
 
     except requests.exceptions.RequestException as re:
         logger.exception(re)
         log_jira_generic_alert('Unknown JIRA Connection Error', re)
 
-        add_error_message_to_response('Unable to authenticate. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + str(re))
+        add_error_message_to_response('Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + str(re))
+
         raise re
 
     # except RequestException as re:
@@ -1088,3 +1089,10 @@ def process_jira_epic_form(request, engagement=None):
         logger.debug('no jira_project for this engagement, skipping epic push')
 
     return not error, jira_epic_form
+
+
+# some character will mess with JIRA formatting, for example when constructing a link:
+# [name|url]. if name contains a '|' is will break it
+# so [%s|%s] % (escape_for_jira(name), url)
+def escape_for_jira(text):
+    return text.replace('|', '%7D')

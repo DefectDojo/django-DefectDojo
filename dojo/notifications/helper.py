@@ -7,7 +7,7 @@ from django.template.loader import render_to_string
 from django.db.models import Q, Count, Prefetch
 from django.urls import reverse
 from dojo.celery import app
-from dojo.decorators import we_want_async, dojo_async_task, convert_kwargs_if_async
+# from dojo.decorators import dojo_async_task, we_want_async, convert_kwargs_if_async
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +37,9 @@ def create_notification(event=None, **kwargs):
         if not product and 'finding' in kwargs:
             product = kwargs['finding'].test.engagement.product
 
-        kwargs = convert_kwargs_if_async(**kwargs)
+        # notifications are made synchronous again due to serialization bug in django-tagulous
+        # see https://github.com/DefectDojo/django-DefectDojo/issues/3677
+        # kwargs = convert_kwargs_if_async(**kwargs)
 
         # System notifications
         try:
@@ -117,7 +119,7 @@ def process_notifications(event, notifications=None, **kwargs):
         return
 
     # logger.debug('sync: %s %s', sync, vars(notifications))
-    logger.debug('sending notification ' + ('asynchronously' if we_want_async() else 'synchronously'))
+    # logger.debug('sending notification ' + ('asynchronously' if we_want_async() else 'synchronously'))
     logger.debug('process notifications for %s', notifications.user)
     logger.debug('notifications: %s', vars(notifications))
 
@@ -138,7 +140,9 @@ def process_notifications(event, notifications=None, **kwargs):
         send_alert_notification(event, notifications.user, **kwargs)
 
 
-@dojo_async_task
+# notifications are made synchronous again due to serialization bug in django-tagulous
+# see https://github.com/DefectDojo/django-DefectDojo/issues/3677
+# @dojo_async_task
 @app.task(name='send_slack_notification')
 def send_slack_notification(event, user=None, *args, **kwargs):
     from dojo.utils import get_system_setting
@@ -196,7 +200,9 @@ def send_slack_notification(event, user=None, *args, **kwargs):
         log_alert(e, 'Slack Notification', title=kwargs['title'], description=str(e), url=kwargs['url'])
 
 
-@dojo_async_task
+# notifications are made synchronous again due to serialization bug in django-tagulous
+# see https://github.com/DefectDojo/django-DefectDojo/issues/3677
+# @dojo_async_task
 @app.task(name='send_msteams_notification')
 def send_msteams_notification(event, user=None, *args, **kwargs):
     from dojo.utils import get_system_setting
@@ -222,7 +228,9 @@ def send_msteams_notification(event, user=None, *args, **kwargs):
         pass
 
 
-@dojo_async_task
+# notifications are made synchronous again due to serialization bug in django-tagulous
+# see https://github.com/DefectDojo/django-DefectDojo/issues/3677
+# @dojo_async_task
 @app.task(name='send_mail_notification')
 def send_mail_notification(event, user=None, *args, **kwargs):
     from dojo.utils import get_system_setting
