@@ -163,3 +163,5 @@ our [sponsorship information](SPONSORING.md) or email greg.anderson@owasp.org
 ## License
 
 DefectDojo is licensed under the [BSD Simplified license](LICENSE.md)
+
+
