@@ -6,7 +6,7 @@
 | Java wrapper                | No     | Yes    | might be outdated       |
 
 ### Specific python wrapper
-* Install the DefectDojo Python API via `pip install defectdojo_api` or clone
+* Install the DefectDojo Python API via `pip install defectdojo_api`(outdated) or clone
   the [repository](https://github.com/DefectDojo/defectdojo_api).
 * Browse the API on
   [SwaggerHub](https://app.swaggerhub.com/apis/DefectDojo/defect-dojo_api_v_2/1.0.0).
