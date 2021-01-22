@@ -8,7 +8,7 @@ on:
           The version to be associated with the GitHub release that's created or updated.
           This will override any version calculated by the release-drafter.
         required: false
-    
+
   push:
     # branches to consider in the event; optional, defaults to all
     branches:
