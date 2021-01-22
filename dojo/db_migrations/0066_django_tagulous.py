@@ -46,8 +46,6 @@ class Migration(migrations.Migration):
                         obj.save()
                     except Exception as e:
                         logger.error('Error saving old existing django-tagging tags to new string field')
-                        logger.error('Known errors are products with prod_type equal to 0. ')
-                        logger.error('Run UPDATE dojo_product set prod_type=<valid_id> to fix this problem')
                         logger.error('Details of object:')
                         logger.error(vars(obj))
                         logger.error('Model to dict:')
