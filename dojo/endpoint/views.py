@@ -1,5 +1,3 @@
-# # endpoints
-
 import logging
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
@@ -22,7 +20,6 @@ from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, get_sy
     calculate_grade, redirect
 from dojo.notifications.helper import create_notification
 from dojo.user.helper import user_must_be_authorized
-
 
 logger = logging.getLogger(__name__)
 
@@ -442,7 +439,7 @@ def endpoint_status_bulk_update(request, fid):
                                     messages.ERROR,
                                     'Unable to process bulk update. Required fields were not selected.',
                                     extra_tags='alert-danger')
-    return redirect(post['return_url'])
+    return redirect(request, post['return_url'])
 
 
 def prefetch_for_endpoints(endpoints):
