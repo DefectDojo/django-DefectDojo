@@ -2895,7 +2895,7 @@ class Tool_Product_History(models.Model):
 
 
 class Alerts(models.Model):
-    title = models.CharField(max_length=100, default='', null=False)
+    title = models.CharField(max_length=200, default='', null=False)
     description = models.CharField(max_length=2000, null=True)
     url = models.URLField(max_length=2000, null=True)
     source = models.CharField(max_length=100, default='Generic')
