@@ -224,6 +224,8 @@ gke:
   # Requires useGKEIngress to be set to true
   # When using this option, be sure to set django.ingress.activateTLS to false
   useManagedCertificate: false
+  # Workload Identity allows the K8s service account to assume the IAM access of a GCP service account to interact with other GCP services
+  workloadIdentityEmail: ""
 
 rabbitmq:
   enabled: true
