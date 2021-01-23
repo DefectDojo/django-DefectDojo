@@ -14,11 +14,6 @@ class BurpEnterpriseHtmlParser(object):
     def get_findings(self, filename, test, mode=None):
         parser = etree.HTMLParser()
         tree = etree.parse(filename, parser)
-        #if(mode in [None, 'detailed']):
-        #    self.mode = mode
-        #else:
-        #    raise Exception("Internal error: Invalid mode " + mode + ". Expected: one of None, 'detailed'")
-
         if tree:
             return self.get_items(tree, test)
         else:
