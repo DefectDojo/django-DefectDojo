@@ -817,74 +817,67 @@
     }
 },
 {
-    "model": "dojo.report_type",
+    "model": "dojo.test_type",
     "pk": 1,
     "fields": {
-        "name": "Type 1"
+        "name": "API Test",
+        "static_tool": false,
+        "dynamic_tool": false
     }
 },
 {
-    "model": "dojo.report_type",
+    "model": "dojo.test_type",
     "pk": 2,
     "fields": {
-        "name": "Type 2"
+        "name": "Static Check",
+        "static_tool": false,
+        "dynamic_tool": false
     }
 },
 {
-    "model": "dojo.report_type",
+    "model": "dojo.test_type",
     "pk": 3,
     "fields": {
-        "name": "Type 3"
+        "name": "Pen Test",
+        "static_tool": false,
+        "dynamic_tool": false
     }
 },
 {
-    "fields": {
-        "name": "API Test"
-    },
     "model": "dojo.test_type",
-    "pk": 1
+    "pk": 4,
+    "fields": {
+        "name": "Nessus Scan",
+        "static_tool": false,
+        "dynamic_tool": false
+    }
 },
 {
-    "fields": {
-        "name": "Static Check"
-    },
     "model": "dojo.test_type",
-    "pk": 2
+    "pk": 5,
+    "fields": {
+        "name": "Web Application Test",
+        "static_tool": false,
+        "dynamic_tool": false
+    }
 },
 {
-    "fields": {
-        "name": "Pen Test"
-    },
     "model": "dojo.test_type",
-    "pk": 3
+    "pk": 6,
+    "fields": {
+        "name": "Security Research",
+        "static_tool": false,
+        "dynamic_tool": false
+    }
 },
 {
-    "fields": {
-        "name": "Web Application Test"
-    },
     "model": "dojo.test_type",
-    "pk": 4
-},
-{
+    "pk": 7,
     "fields": {
-        "name": "Security Research"
-    },
-    "model": "dojo.test_type",
-    "pk": 5
-},
-{
-    "fields": {
-        "name": "Threat Modeling"
-    },
-    "model": "dojo.test_type",
-    "pk": 6
-},
-{
-    "fields": {
-        "name": "Manual Code Review"
-    },
-    "model": "dojo.test_type",
-    "pk": 7
+        "name": "Threat Modeling",
+        "static_tool": false,
+        "dynamic_tool": false
+    }
 },
 {
     "model": "dojo.product",
