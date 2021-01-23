@@ -11,10 +11,6 @@ def register_parser(scan_type, parser):
     # check double registration or registration with an existing key
     if scan_type in PARSERS:
         raise ValueError(f'Try to register an existing parser {scan_type}')
-    # create dynamicaly in DB
-    test_type, created = Test_Type.objects.get_or_create(name=scan_type)
-    if created:
-        test_type.save()
     PARSERS[scan_type] = parser
 
 
@@ -23,6 +19,10 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
     This fucntion exists only for backward compatibility
     """
     if scan_type in PARSERS:
+        # create dynamicaly in DB
+        test_type, created = Test_Type.objects.get_or_create(name=scan_type)
+        if created:
+            test_type.save()
         return PARSERS[scan_type]
     else:
         raise ValueError(f'Unknown Test Type {scan_type}')
