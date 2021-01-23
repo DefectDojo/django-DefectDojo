@@ -1,0 +1,20 @@
+name: Release Drafter Valentijn
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: |
+          The version to be associated with the GitHub release that's created or updated.
+          This will override any version calculated by the release-drafter.
+        required: false
+
+jobs:
+  update_release_draft:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: valentijnscholten/release-drafter@master
+        with:
+          version: ${{github.event.inputs.version}}  
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
