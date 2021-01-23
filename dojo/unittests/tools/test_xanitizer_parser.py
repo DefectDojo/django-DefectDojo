@@ -1,12 +1,13 @@
 from django.test import TestCase
 from dojo.tools.xanitizer.parser import XanitizerXMLParser
-from dojo.models import Engagement, Product, Test
+from dojo.models import Test
 
 
 class TestXanitizerXMLParser(TestCase):
 
     def test_parse_without_file_has_no_findings(self):
-        parser = XanitizerXMLParser(None, Test())
+        parser = XanitizerXMLParser()
+        findings = parser.get_findings(None, Test())
         self.assertEqual(0, len(findings))
 
     def test_parse_file_with_no_findings(self):

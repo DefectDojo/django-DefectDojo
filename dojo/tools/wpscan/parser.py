@@ -12,7 +12,7 @@ class WpscanJSONParser(object):
     """WPScan – WordPress Security Scanner"""
     def get_findings(self, file, test):
         if file is None:
-            return
+            return list()
         data = file.read()
         try:
             tree = json.loads(str(data, 'utf-8'))
