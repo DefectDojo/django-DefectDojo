@@ -9,7 +9,7 @@ __author__ = 'dr3dd589'
 
 
 class WpscanJSONParser(object):
-
+    """WPScan – WordPress Security Scanner"""
     def get_findings(self, file, test):
         if file is None:
             return
@@ -84,4 +84,4 @@ class WpscanJSONParser(object):
                             protocol=protocol,
                             query=query,
                             fragment=fragment,))
-            return dupes.values()
+        return dupes.values()
