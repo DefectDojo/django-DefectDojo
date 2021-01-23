@@ -23,6 +23,6 @@ jobs:
       - uses: valentijnscholten/release-drafter@prev-version-input
         with:
           version: ${{github.event.inputs.version}}  
-          last-release: ${{github.event.inputs.previous-version}} 
+          previous-version: ${{github.event.inputs.previous-version}} 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
