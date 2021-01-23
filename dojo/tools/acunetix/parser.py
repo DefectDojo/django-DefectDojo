@@ -21,7 +21,7 @@ class AcunetixScannerParser(object):
         if xml_output is None:
             return list()
         acunetix_defectdojo_findings = get_defectdojo_findings(xml_output)
-        return set_defectdojo_findings(acunetix_defectdojo_findings, test)
+        return self.set_defectdojo_findings(acunetix_defectdojo_findings, test)
 
     def set_defectdojo_findings(self, acunetix_defectdojo_findings, test):
         defectdojo_findings = dict()
