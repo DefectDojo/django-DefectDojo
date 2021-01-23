@@ -34,6 +34,8 @@ categories:
     labels:
       - 'dependencies'
       - 'maintenance'
+exclude-labels:
+  - 'skip-changelog'      
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 template: |
   ## Changes since $PREVIOUS_TAG
