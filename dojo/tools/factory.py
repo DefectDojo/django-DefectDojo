@@ -105,7 +105,10 @@ register_parser('Dependency Check Scan', Parser())
 register_parser('Dependency Track Finding Packaging Format (FPF) Export', Parser())
 register_parser('DrHeader JSON Importer', Parser())
 register_parser('DSOP Scan', Parser())
-register_parser('ESLint Scan', Parser())
+"""
+from .eslint.parser import ESLintParser
+register_parser('ESLint Scan', ESLintParser())
+"""
 register_parser('Fortify Scan', Parser())
 register_parser('Generic Findings Import', Parser())
 register_parser('Github Vulnerability Scan', Parser())
