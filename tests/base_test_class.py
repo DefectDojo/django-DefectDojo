@@ -87,6 +87,10 @@ class BaseTestCase(unittest.TestCase):
         self.wait_for_datatable_if_content("no_products", "products_wrapper")
         return driver
 
+    def goto_product_type_overview(self, driver):
+        driver.get(self.base_url + "product/type")
+        return driver
+
     def goto_component_overview(self, driver):
         driver.get(self.base_url + "components")
         return driver

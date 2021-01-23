@@ -63,6 +63,29 @@ class ProductTest(BaseTestCase):
             self.is_success_message_present(text='Product with this Name already exists.'))
 
     @on_exception_html_source_logger
+    def test_create_product_for_product_type(self):
+        # make sure no left overs from previous runs are left behind
+        self.delete_product_if_exists()
+
+        driver = self.driver
+        # Navigate to the product page
+        self.goto_product_type_overview(driver)
+
+        driver.find_element_by_link_text("Add Product").click()
+        # Fill in th product name
+        driver.find_element_by_id("id_name").clear()
+        driver.find_element_by_id("id_name").send_keys("QA Test")
+        # Tab into the description area to fill some text
+        # Couldnt find a way to get into the box with selenium
+        driver.find_element_by_id("id_name").send_keys("\tThis is just a test. Be very afraid.")
+        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+
+        # Assert ot the query to dtermine status of failure
+        # Also confirm success even if Product is returned as already exists for test sake
+        self.assertTrue(self.is_success_message_present(text='Product added successfully'))
+        self.assertFalse(self.is_error_message_present(text='JIRA Project config not stored due to errors'))
+
+    @on_exception_html_source_logger
     def test_list_products(self):
         driver = self.driver
         # Navigate to the product page
