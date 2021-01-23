@@ -695,26 +695,9 @@ class Product(models.Model):
                                             test__engagement__product=self).count()
             return self.active_verified_finding_count
 
-    # @property
-    # def active_engagement_count(self):
-    #     return Engagement.objects.filter(active=True, product=self).count()
-
-    # @property
-    # def closed_engagement_count(self):
-    #     return Engagement.objects.filter(active=False, product=self).count()
-
-    # @property
-    # def last_engagement_date(self):
-    #     return Engagement.objects.filter(product=self).first()
-
     @cached_property
     def endpoint_count(self):
-        # endpoints = Endpoint.objects.filter(
-        #     finding__test__engagement__product=self,
-        #     finding__active=True,
-        #     finding__verified=True,
-        #     finding__mitigated__isnull=True)
-
+        # active_endpoints is (should be) prefetched
         endpoints = self.active_endpoints
 
         hosts = []
@@ -835,12 +818,6 @@ class ScanSettings(models.Model):
         return bc
 
 
-"""
-Modified by Fatimah and Micheal
-removed ip_scans field
-"""
-
-
 class Scan(models.Model):
     scan_settings = models.ForeignKey(ScanSettings, default=1, editable=False, on_delete=models.CASCADE)
     date = models.DateTimeField(editable=False, blank=True,
@@ -860,14 +837,6 @@ class Scan(models.Model):
         bc += [{'title': self.__unicode__(),
                 'url': reverse('view_scan', args=(self.id,))}]
         return bc
-
-
-"""
-Modified by Fatimah and Micheal
-Changed services from a ManytToMany field to a formatted string
-"port,protocol,status"
-Added scan_id
-"""
 
 
 class IPScan(models.Model):
@@ -1700,16 +1669,6 @@ class Finding(models.Model):
                                    null=True,
                                    verbose_name="Created",
                                    help_text="The date the finding was created inside DefectDojo.")
-    # # deprecated, moved to jira_issue. left here as we don't want to delete data just yet
-    # jira_creation = models.DateTimeField(editable=True,
-    #                                      null=True,
-    #                                      verbose_name="Jira creation",
-    #                                      help_text="The date a Jira issue was created from this finding.")
-    # # deprecated, moved to jira_issue. left here as we don't want to delete data just yet
-    # jira_change = models.DateTimeField(editable=True,
-    #                                    null=True,
-    #                                    verbose_name="Jira change",
-    #                                    help_text="The date the linked Jira issue was last modified.")
     scanner_confidence = models.IntegerField(null=True,
                                              blank=True,
                                              default=None,
@@ -3453,9 +3412,6 @@ class Answer(PolymorphicModel, TimeStampedModel):
     '''
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
 
-#     content_type = models.ForeignKey(ContentType)
-#     object_id = models.PositiveIntegerField()
-#     content_object = generic.GenericForeignKey('content_type', 'object_id')
     answered_survey = models.ForeignKey(Answered_Survey,
                                         null=False,
                                         blank=False,
@@ -3484,11 +3440,6 @@ class ChoiceAnswer(Answer):
             return 'No Response'
 
 
-# Causing issues in various places.
-# auditlog.register(Answer)
-# auditlog.register(Answered_Survey)
-# auditlog.register(Question)
-# auditlog.register(Engagement_Survey)
 def enable_disable_auditlog(enable=True):
     if enable:
         # Register for automatic logging to database

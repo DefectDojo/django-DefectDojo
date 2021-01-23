@@ -800,8 +800,8 @@ def edit_product(request, pid):
         if form.is_valid():
             form.save()
             tags = request.POST.getlist('tags')
-            t = ", ".join('"{0}"'.format(w) for w in tags)
-            product.tags = t
+            # t = ", ".join('"{0}"'.format(w) for w in tags)
+            # product.tags = t
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Product updated successfully.',
@@ -863,7 +863,6 @@ def edit_product(request, pid):
 
     sonarqube_form = Sonarqube_ProductForm(instance=sonarqube_conf)
 
-    # # form.initial['tags'] = [tag.name for tag in prod.tags.all()]
     product_tab = Product_Tab(pid, title="Edit Product", tab="settings")
     return render(request,
                   'dojo/edit_product.html',

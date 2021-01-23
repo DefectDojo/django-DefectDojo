@@ -591,7 +591,6 @@ class FindingViewSet(prefetch.PrefetchListMixin,
                     return Response({"error": "'{}' is not a valid tag in list".format(tag)},
                         status=status.HTTP_400_BAD_REQUEST)
                 all_tags.remove(tag)
-            # t = ", ".join(all_tags)
             new_tags = tagulous.utils.render_tags(all_tags)
             finding.tags = new_tags
             finding.save()
