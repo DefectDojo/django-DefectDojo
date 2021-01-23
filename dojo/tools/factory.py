@@ -11,10 +11,6 @@ def register_parser(scan_type, parser):
     # check double registration or registration with an existing key
     if scan_type in PARSERS:
         raise ValueError(f'Try to register an existing parser {scan_type}')
-    # create dynamicaly in DB
-    test_type, created = Test_Type.objects.get_or_create(name=scan_type)
-    if created:
-        test_type.save()
     PARSERS[scan_type] = parser
 
 
