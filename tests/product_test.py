@@ -65,7 +65,7 @@ class ProductTest(BaseTestCase):
     @on_exception_html_source_logger
     def test_create_product_for_product_type(self):
         # make sure no left overs from previous runs are left behind
-        self.delete_product_if_exists()
+        self.delete_product_if_exists("QA Test PT")
 
         driver = self.driver
         # Navigate to the product page
@@ -74,7 +74,7 @@ class ProductTest(BaseTestCase):
         driver.find_element_by_link_text("Add Product").click()
         # Fill in th product name
         driver.find_element_by_id("id_name").clear()
-        driver.find_element_by_id("id_name").send_keys("QA Test")
+        driver.find_element_by_id("id_name").send_keys("QA Test PT")
         # Tab into the description area to fill some text
         # Couldnt find a way to get into the box with selenium
         driver.find_element_by_id("id_name").send_keys("\tThis is just a test. Be very afraid.")
@@ -351,23 +351,23 @@ class ProductTest(BaseTestCase):
         driver.find_element_by_partial_link_text('Metrics').click()
 
     @on_exception_html_source_logger
-    def delete_product_if_exists(self):
+    def delete_product_if_exists(self, name="QA Test"):
         driver = self.driver
         # Navigate to the product page
         self.goto_product_overview(driver)
         # Select the specific product to delete
-        qa_products = driver.find_elements(By.LINK_TEXT, "QA Test")
+        qa_products = driver.find_elements(By.LINK_TEXT, name)
 
         if len(qa_products) > 0:
-            self.test_delete_product()
+            self.test_delete_product(name)
 
     @on_exception_html_source_logger
-    def test_delete_product(self):
+    def test_delete_product(self, name="QA Test"):
         driver = self.driver
         # Navigate to the product page
         self.goto_product_overview(driver)
         # Select the specific product to delete
-        driver.find_element_by_link_text("QA Test").click()
+        driver.find_element_by_link_text(name).click()
         # Click the drop down menu
         # driver.execute_script("window.scrollTo(0, 0)")
         driver.find_element_by_id('dropdownMenu1').click()
