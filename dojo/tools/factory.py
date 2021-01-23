@@ -168,8 +168,9 @@ register_parser('Twistlock Image Scan', Parser())
 register_parser('VCG Scan', Parser())
 register_parser('Veracode Scan', Parser())
 register_parser('Wapiti Scan', Parser())
-register_parser('Whitesource Scan', Parser())
 """
+from .whitesource.parser import WhitesourceJSONParser
+register_parser('Whitesource Scan', WhitesourceJSONParser())
 from .wpscan.parser import WpscanJSONParser
 register_parser('Wpscan', WpscanJSONParser())
 from .xanitizer.parser import XanitizerXMLParser
