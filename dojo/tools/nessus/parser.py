@@ -56,7 +56,7 @@ class NessusCSVParser(object):
                     if not var:
                         continue
 
-                    var = re.sub("(\A(\\n)+|(\\n)+\Z|\\r)", "", var)
+                    var = re.sub(r"(\A(\\n)+|(\\n)+\Z|\\r)", "", var)
                     var = re.sub("(\\n)+", "\n", var)
 
                     if heading[i] == "CVE":
