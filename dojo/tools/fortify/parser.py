@@ -21,9 +21,9 @@ class FortifyXMLParser(object):
         # Get Date
         date_string = root.getchildren()[5].getchildren()[1].getchildren()[2].text
         date_list = date_string.split()[1:4]
-        date_act = "".join(date_list)
+        date_list = [item.replace(',', '') for item in date_list]
+        date_act = ".".join(date_list)
         find_date = parser.parse(date_act)
-
         # Get Language
         lang_string = root[8][4][2].text
         lang_need_string = re.findall("^.*com.fortify.sca.Phase0HigherOrder.Languages.*$",
