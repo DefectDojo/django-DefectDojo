@@ -18,11 +18,10 @@ class AcunetixScannerParser(object):
     """Parser for Acunetix XML files."""
 
     def get_findings(self, xml_output, test):
-        self.items = []
         if xml_output is None:
-            return
+            return list()
         acunetix_defectdojo_findings = get_defectdojo_findings(xml_output)
-        self.set_defectdojo_findings(acunetix_defectdojo_findings, test)
+        return set_defectdojo_findings(acunetix_defectdojo_findings, test)
 
     def set_defectdojo_findings(self, acunetix_defectdojo_findings, test):
         defectdojo_findings = dict()
@@ -48,7 +47,7 @@ class AcunetixScannerParser(object):
             else:
                 logger.debug("Duplicate finding : {defectdojo_title}".format(defectdojo_title=acunetix_defectdojo_finding.title))
 
-        self.items = list(defectdojo_findings.values())
+        return list(defectdojo_findings.values())
 
 
 def get_defectdojo_date(date):
@@ -77,7 +76,7 @@ def get_cwe_number(cwe):
     if cwe is None:
         return None
     else:
-        return cwe.split("-")[1]
+        return int(cwe.split("-")[1])
 
 
 def get_severity(severity):
