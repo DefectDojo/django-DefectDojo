@@ -24,7 +24,7 @@ def get_text_severity(severity_id):
 
 
 class NessusCSVParser(object):
-    def __init__(self, filename, test):
+    def get_findings(self, filename, test):
         content = open(filename.temporary_file_path(), "r").read().replace("\r", "\n")
         # content = re.sub("\"(.*?)\n(.*?)\"", "\"\1\2\"", content)
         # content = re.sub("(?<=\")\n", "\\\\n", content)
@@ -139,7 +139,7 @@ class NessusCSVParser(object):
                     find.unsaved_endpoints.append(endpoint)
         os.unlink(filename.temporary_file_path())
         os.unlink("%s-filtered" % filename.temporary_file_path())
-        self.items = list(dupes.values())
+        return list(dupes.values())
 
 
 class NessusXMLParser(object):
@@ -238,4 +238,4 @@ class NessusXMLParser(object):
                         find.unsaved_endpoints.append(Endpoint(host=fqdn,
                                                                protocol=protocol))
 
-        self.items = list(dupes.values())
+        return list(dupes.values())
