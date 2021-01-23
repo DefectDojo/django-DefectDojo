@@ -37,6 +37,7 @@ from dojo.user.helper import user_must_be_authorized
 import dojo.jira_link.helper as jira_helper
 import dojo.finding.helper as finding_helper
 from django.views.decorators.vary import vary_on_cookie
+from django.core.exceptions import MultipleObjectsReturned
 
 logger = logging.getLogger(__name__)
 parse_logger = logging.getLogger('dojo')
@@ -830,7 +831,6 @@ def re_import_scan_results(request, tid):
                     if finding:
                         finding_count += 1
                         for endpoint in item.unsaved_endpoints:
-                            from django.core.exceptions import MultipleObjectsReturned
                             try:
                                 ep, created = Endpoint.objects.get_or_create(protocol=endpoint.protocol,
                                                                             host=endpoint.host,
@@ -838,29 +838,54 @@ def re_import_scan_results(request, tid):
                                                                             query=endpoint.query,
                                                                             fragment=endpoint.fragment,
                                                                             product=test.engagement.product)
+                            except (MultipleObjectsReturned):
+                                ep = Endpoint.objects.filter(protocol=endpoint.protocol,
+                                                                            host=endpoint.host,
+                                                                            path=endpoint.path,
+                                                                            query=endpoint.query,
+                                                                            fragment=endpoint.fragment,
+                                                                            product=test.engagement.product).first()
+                            try:
                                 eps, created = Endpoint_Status.objects.get_or_create(
                                     finding=finding,
                                     endpoint=ep)
-                                ep.endpoint_status.add(eps)
+                            except (MultipleObjectsReturned):
+                                eps = Endpoint_Status.objects.filter(
+                                    finding=finding,
+                                    endpoint=ep).first()
 
+                                ep.endpoint_status.add(eps)
                                 finding.endpoints.add(ep)
                                 finding.endpoint_status.add(eps)
-                            except (MultipleObjectsReturned):
-                                pass
-                        for endpoint in form.cleaned_data['endpoints']:
-                            ep, created = Endpoint.objects.get_or_create(protocol=endpoint.protocol,
-                                                                         host=endpoint.host,
-                                                                         path=endpoint.path,
-                                                                         query=endpoint.query,
-                                                                         fragment=endpoint.fragment,
-                                                                         product=test.engagement.product)
-                            eps, created = Endpoint_Status.objects.get_or_create(
-                                finding=finding,
-                                endpoint=ep)
-                            ep.endpoint_status.add(eps)
 
+                        for endpoint in form.cleaned_data['endpoints']:
+                            try:
+                                ep, created = Endpoint.objects.get_or_create(protocol=endpoint.protocol,
+                                                                            host=endpoint.host,
+                                                                            path=endpoint.path,
+                                                                            query=endpoint.query,
+                                                                            fragment=endpoint.fragment,
+                                                                            product=test.engagement.product)
+                            except (MultipleObjectsReturned):
+                                ep = Endpoint.objects.filter(protocol=endpoint.protocol,
+                                                                            host=endpoint.host,
+                                                                            path=endpoint.path,
+                                                                            query=endpoint.query,
+                                                                            fragment=endpoint.fragment,
+                                                                            product=test.engagement.product).first()
+                            try:
+                                eps, created = Endpoint_Status.objects.get_or_create(
+                                    finding=finding,
+                                    endpoint=ep)
+                            except (MultipleObjectsReturned):
+                                eps = Endpoint_Status.objects.filter(
+                                    finding=finding,
+                                    endpoint=ep).first()
+
+                            ep.endpoint_status.add(eps)
                             finding.endpoints.add(ep)
                             finding.endpoint_status.add(eps)
+
                         if item.unsaved_tags is not None:
                             finding.tags = item.unsaved_tags
 
