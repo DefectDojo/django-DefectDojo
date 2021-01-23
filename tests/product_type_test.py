@@ -18,6 +18,7 @@ class ProductTypeTest(BaseTestCase):
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
 
         self.assertTrue(self.is_success_message_present(text='Product type added successfully.'))
+        self.assertFalse(self.is_error_message_present())
 
     @on_exception_html_source_logger
     def test_create_product_for_product_type(self):
@@ -40,7 +41,7 @@ class ProductTypeTest(BaseTestCase):
         # Assert ot the query to dtermine status of failure
         # Also confirm success even if Product is returned as already exists for test sake
         self.assertTrue(self.is_success_message_present(text='Product added successfully'))
-        self.assertFalse(self.is_error_message_present(text='JIRA Project config not stored due to errors'))
+        self.assertFalse(self.is_error_message_present())
 
     def test_edit_product_type(self):
         print("\n\nDebug Print Log: testing 'edit product type' \n")
