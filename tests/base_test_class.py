@@ -14,22 +14,6 @@ dd_driver = None
 dd_driver_options = None
 
 
-def on_exception_html_source_logger(func):
-    def wrapper(self, *args, **kwargs):
-        try:
-            return func(self, *args, **kwargs)
-
-        except Exception as e:
-            print("exception occured at url:", self.driver.current_url)
-            print("page source:", self.driver.page_source)
-            f = open("selenium_page_source.html", "w", encoding='utf-8')
-            f.writelines(self.driver.page_source)
-            # time.sleep(30)
-            raise(e)
-
-    return wrapper
-
-
 class BaseTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -346,3 +330,19 @@ class WebdriverOnlyNewLogFacade(object):
         self.last_timestamp = last_timestamp
 
         return filtered
+
+
+def on_exception_html_source_logger(func):
+    def wrapper(self, *args, **kwargs):
+        try:
+            return func(self, *args, **kwargs)
+
+        except Exception as e:
+            print("exception occured at url:", self.driver.current_url)
+            print("page source:", self.driver.page_source)
+            f = open("selenium_page_source.html", "w", encoding='utf-8')
+            f.writelines(self.driver.page_source)
+            # time.sleep(30)
+            raise(e)
+
+    return wrapper

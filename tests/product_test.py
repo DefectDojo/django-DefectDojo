@@ -369,6 +369,17 @@ class ProductTest(BaseTestCase):
         self.assertTrue(driver.find_element_by_xpath("//input[@name='scan_added' and @value='mail']").is_selected())
         self.assertFalse(driver.find_element_by_xpath("//input[@name='test_added' and @value='mail']").is_selected())
 
+    @on_exception_html_source_logger
+    def delete_product_if_exists(self):
+        driver = self.driver
+        # Navigate to the product page
+        self.goto_product_overview(driver)
+        # Select the specific product to delete
+        qa_products = driver.find_elements(By.LINK_TEXT, "QA Test")
+
+        if len(qa_products) > 0:
+            self.test_delete_product()
+
     def test_critical_product_metrics(self):
         # Test To Edit Product Tracking Files
         # login to site, password set to fetch from environ
