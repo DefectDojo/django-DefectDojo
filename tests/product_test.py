@@ -4,7 +4,6 @@ import unittest
 import sys
 import time
 from base_test_class import BaseTestCase, on_exception_html_source_logger
-from selenium.webdriver.common.by import By
 
 
 class WaitForPageLoad(object):
@@ -326,17 +325,6 @@ class ProductTest(BaseTestCase):
         # "Click" the dropdown option
         # driver.find_element_by_xpath("//span[contains(., 'Metrics')]").click()
         driver.find_element_by_partial_link_text('Metrics').click()
-
-    @on_exception_html_source_logger
-    def delete_product_if_exists(self, name="QA Test"):
-        driver = self.driver
-        # Navigate to the product page
-        self.goto_product_overview(driver)
-        # Select the specific product to delete
-        qa_products = driver.find_elements(By.LINK_TEXT, name)
-
-        if len(qa_products) > 0:
-            self.test_delete_product(name)
 
     @on_exception_html_source_logger
     def test_delete_product(self, name="QA Test"):
