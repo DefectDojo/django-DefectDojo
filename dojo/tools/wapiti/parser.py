@@ -27,9 +27,8 @@ class Severityfilter():
 
 
 class WapitiXMLParser(object):
-    def __init__(self, file, test):
-        self.dupes = dict()
-        self.items = ()
+    def get_findings(self, file, test):
+
         if file is None:
             return
 
@@ -40,6 +39,7 @@ class WapitiXMLParser(object):
         if 'report' not in root.tag:
             raise NamespaceErr("This doesn't seem to be a valid Wapiti xml file.")
 
+        dupes = dict()
         for result in root.findall('report/results/result'):
             family = result.find('nvt/family').text
             # check if vulnerability found in family then proceed.
@@ -64,14 +64,14 @@ class WapitiXMLParser(object):
                 # make dupe hash key
                 dupe_key = hashlib.md5(str(description + title + severity).encode('utf-8')).hexdigest()
                 # check if dupes are present.
-                if dupe_key in self.dupes:
-                    finding = self.dupes[dupe_key]
+                if dupe_key in dupes:
+                    finding = dupes[dupe_key]
                     if finding.description:
                         finding.description = finding.description
                     self.process_endpoints(finding, host)
-                    self.dupes[dupe_key] = finding
+                    dupes[dupe_key] = finding
                 else:
-                    self.dupes[dupe_key] = True
+                    dupes[dupe_key] = True
 
                     finding = Finding(title=title,
                                     test=test,
@@ -87,10 +87,10 @@ class WapitiXMLParser(object):
                                     references=reference,
                                     dynamic_finding=True)
 
-                    self.dupes[dupe_key] = finding
+                    dupes[dupe_key] = finding
                     self.process_endpoints(finding, host)
 
-            self.items = list(self.dupes.values())
+        return list(dupes.values())
 
     def process_endpoints(self, finding, host):
         protocol = "http"
@@ -104,12 +104,12 @@ class WapitiXMLParser(object):
             if path == host:
                 path = ""
 
-        rhost = re.search(
+        rhost = re.match(
             r"(http|https|ftp)\://([a-zA-Z0-9\.\-]+(\:[a-zA-Z0-9\.&amp;%\$\-]+)*@)*((25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9])\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])|localhost|([a-zA-Z0-9\-]+\.)*[a-zA-Z0-9\-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))[\:]*([0-9]+)*([/]*($|[a-zA-Z0-9\.\,\?\'\\\+&amp;%\$#\=~_\-]+)).*?$",
             host)
         try:
-            protocol = rhost.group(1)
-            host = rhost.group(4)
+            protocol = rhost[1]
+            host = rhost[4]
         except:
             pass
         try:
