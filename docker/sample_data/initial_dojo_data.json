@@ -343,67 +343,54 @@
     "pk": 1
   },
   {
-    "model": "dojo.test_type",
-    "pk": 1,
     "fields": {
-      "name": "API Test",
-      "static_tool": false,
-      "dynamic_tool": false
-    }
+      "name": "API Test"
+    },
+    "model": "dojo.test_type",
+    "pk": 1
   },
   {
-    "model": "dojo.test_type",
-    "pk": 2,
     "fields": {
-      "name": "Static Check",
-      "static_tool": false,
-      "dynamic_tool": false
-    }
+      "name": "Static Check"
+    },
+    "model": "dojo.test_type",
+    "pk": 2
   },
   {
-    "model": "dojo.test_type",
-    "pk": 3,
     "fields": {
-      "name": "Pen Test",
-      "static_tool": false,
-      "dynamic_tool": false
-    }
+      "name": "Pen Test"
+    },
+    "model": "dojo.test_type",
+    "pk": 3
   },
   {
-    "model": "dojo.test_type",
-    "pk": 4,
     "fields": {
-      "name": "Web Application Test",
-      "static_tool": false,
-      "dynamic_tool": false
-    }
+      "name": "Web Application Test"
+    },
+    "model": "dojo.test_type",
+    "pk": 4
   },
   {
-    "model": "dojo.test_type",
-    "pk": 5,
     "fields": {
-      "name": "Security Research",
-      "static_tool": false,
-      "dynamic_tool": false
-    }
+      "name": "Security Research"
+    },
+    "model": "dojo.test_type",
+    "pk": 5
   },
   {
-    "model": "dojo.test_type",
-    "pk": 6,
     "fields": {
-      "name": "Threat Modeling",
-      "static_tool": false,
-      "dynamic_tool": false
-    }
+      "name": "Threat Modeling"
+    },
+    "model": "dojo.test_type",
+    "pk": 6
+    
   },
   {
-    "model": "dojo.test_type",
-    "pk": 7,
     "fields": {
-      "name": "Manual Code Review",
-      "static_tool": false,
-      "dynamic_tool": false
-    }
+      "name": "Manual Code Review"
+    },
+    "model": "dojo.test_type",
+    "pk": 7
   },
   {
     "fields": {
