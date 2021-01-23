@@ -713,7 +713,7 @@ class ApiFindingFilter(DojoFilter):
 
     class Meta:
         model = Finding
-        exclude = ['url', 'is_template', 'thread_id', 'notes', 'images',
+        exclude = ['url', 'is_template', 'thread_id', 'notes', 'images', 'files',
                    'sourcefile', 'line', 'endpoint_status', 'tags_from_django_tagging']
 
 
@@ -807,7 +807,7 @@ class OpenFindingFilter(DojoFilter):
                    'duplicate_finding', 'hash_code', 'images', 'endpoint_status',
                    'line_number', 'reviewers', 'mitigated_by', 'sourcefile',
                    'created', 'jira_creation', 'jira_change', 'tags_from_django_tagging',
-                   'tags']
+                   'tags', 'files']
 
     def __init__(self, *args, **kwargs):
         self.user = None
@@ -925,7 +925,7 @@ class ClosedFindingFilter(DojoFilter):
                    'numerical_severity', 'reporter', 'endpoints', 'endpoint_status',
                    'last_reviewed', 'review_requested_by', 'defect_review_requested_by',
                    'last_reviewed_by', 'created', 'jira_creation', 'jira_change',
-                   'tags_from_django_tagging']
+                   'tags_from_django_tagging', 'files']
 
     def __init__(self, *args, **kwargs):
         self.pid = None
@@ -1017,7 +1017,7 @@ class AcceptedFindingFilter(DojoFilter):
                    'duplicate', 'duplicate_finding', 'thread_id', 'mitigated', 'notes',
                    'numerical_severity', 'reporter', 'endpoints', 'endpoint_status',
                    'last_reviewed', 'o', 'jira_creation', 'jira_change',
-                   'tags_from_django_tagging']
+                   'tags_from_django_tagging', 'files']
 
     def __init__(self, *args, **kwargs):
         self.pid = None
@@ -1096,7 +1096,7 @@ class ProductFindingFilter(DojoFilter):
                    'duplicate_finding', 'thread_id', 'mitigated', 'notes',
                    'numerical_severity', 'reporter', 'endpoints', 'endpoint_status',
                    'last_reviewed', 'jira_creation', 'jira_change',
-                   'tags_from_django_tagging']
+                   'tags_from_django_tagging', 'files']
 
     def __init__(self, *args, **kwargs):
         super(ProductFindingFilter, self).__init__(*args, **kwargs)
@@ -1407,7 +1407,8 @@ class MetricsFindingFilter(FilterSet):
                    'is_template',
                    'jira_creation',
                    'jira_change',
-                   'tags_from_django_tagging'
+                   'tags_from_django_tagging',
+                   'files'
                    ]
 
 
@@ -1522,7 +1523,8 @@ class ProductMetricsFindingFilter(FilterSet):
                    'is_template',
                    'jira_creation',
                    'jira_change',
-                   'tags_from_django_tagging'
+                   'tags_from_django_tagging',
+                   'files',
                    ]
 
 
