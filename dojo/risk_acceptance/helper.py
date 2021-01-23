@@ -210,16 +210,12 @@ def post_jira_comment(finding, message_factory, heads_up_days=0):
     if not finding or not finding.has_jira_issue:
         return
 
-    print('1')
-
     jira_project = jira_helper.get_jira_project(finding)
 
     if jira_project and jira_project.risk_acceptance_expiration_notification:
-        print('2')
         jira_instance = jira_helper.get_jira_instance(finding)
 
         if jira_instance:
-            print('3')
 
             jira_comment = message_factory(None, heads_up_days)
 

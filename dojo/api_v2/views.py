@@ -573,20 +573,15 @@ class FindingViewSet(prefetch.PrefetchListMixin,
         finding = get_object_or_404(Finding.objects, id=pk)
         delete_tags = serializers.TagSerializer(data=request.data)
         if delete_tags.is_valid():
-            print('delete_tags: %s' % delete_tags)
             all_tags = finding.tags
-            print('all1: %s' % all_tags)
             all_tags = serializers.TagSerializer({"tags": all_tags}).data['tags']
-            print('all2: %s' % all_tags)
 
             # serializer turns it into a string, but we need a list
             del_tags = tagulous.utils.parse_tags(delete_tags.validated_data['tags'])
             if len(del_tags) < 1:
                 return Response({"error": "Empty Tag List Not Allowed"},
                         status=status.HTTP_400_BAD_REQUEST)
-            print('deltags: %s' % del_tags)
             for tag in del_tags:
-                print('deltag: %s' % tag)
                 if tag not in all_tags:
                     return Response({"error": "'{}' is not a valid tag in list".format(tag)},
                         status=status.HTTP_400_BAD_REQUEST)

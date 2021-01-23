@@ -2779,22 +2779,12 @@ class Notifications(models.Model):
 
         result = None
         for notifications in notifications_list:
-            # print('id: ', notifications.id)
-            # print('not.user.get_full_name: ', notifications.user.get_full_name())
             if result is None:
                 # we start by copying the first instance, because creating a new instance would set all notification columns to 'alert' :-()
                 result = notifications
                 # result.pk = None # detach from db
             else:
-                # from dojo.utils import concat_comma_separated_strings
-                # print('combining: ' + str(result.scan_added) + ' with ' + str(notifications.scan_added))
-                # result.scan_added = (result.scan_added or []).extend(notifications.scan_added)
-                # if result.scan_added:
-                #     result.scan_added.extend(notifications.scan_added)
-                # else:
-                #     result.scan_added = notifications.scan_added
-
-                # This concat looks  better, but requires Python 3.6+
+                # TODO This concat looks  better, but requires Python 3.6+
                 # result.scan_added = [*result.scan_added, *notifications.scan_added]
                 from dojo.utils import merge_sets_safe
                 result.product_added = merge_sets_safe(result.product_added, notifications.product_added)

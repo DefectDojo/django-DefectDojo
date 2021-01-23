@@ -72,11 +72,6 @@ class DojoFilter(FilterSet):
         # for now we have only fields called "tags"
         for field in ['tags', 'test__tags', 'test__engagement__tags', 'test__engagement__product__tags']:
             if field in self.form.fields:
-                # print(self.filters)
-                # print(vars(self).keys())
-                # print(vars(self.filters['tags']))
-                # print(self._meta)
-
                 tags_filter = self.filters['tags']
                 model = tags_filter.model
 
@@ -527,28 +522,10 @@ class ProductFilter(DojoFilter):
                 'prod_type'].queryset = Product_Type.objects.filter(
                 authorized_users__in=[self.user])
 
-        # for field in ['tags', 'tags_and']:
-        #     self.form.fields[field] = Product._meta.get_field("tags").formfield()
-        #     self.form.fields[field].widget.attrs.update({'style': 'width=150px;'})
-        #     self.form.fields[field].widget.tag_options = \
-        #         self.form.fields[field].widget.tag_options + tagulous.models.options.TagOptions(autocomplete_settings={'width': '200px'})
-        # self.form.fields['tags_and'].label = self.form.fields['tags_and'].label + ' (and)'
-        # print(vars(self.form.fields[field].widget.tag_options))
-        # print(vars(self.form.fields[field]))
-
     class Meta:
         model = Product
         fields = ['name', 'prod_type', 'business_criticality', 'platform', 'lifecycle', 'origin', 'external_audience',
                   'internet_accessible', 'tags']
-        # exclude = ['tags']
-        # filter_overrides = {
-        #     tagulous.models.TagField: {
-        #         'filter_class': ModelMultipleChoiceFilter,
-        #         'extra': lambda f: {
-        #              'widget': tagulous.forms.TagWidget,
-        #         },
-        #     },
-        # }
 
 
 class ApiProductFilter(DojoFilter):

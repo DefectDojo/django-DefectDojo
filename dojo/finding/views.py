@@ -845,9 +845,6 @@ def touch_finding(request, fid):
     finding.last_reviewed = timezone.now()
     finding.last_reviewed_by = request.user
     finding.save()
-    # print('request:')
-    # print(vars(request))
-    # print(request.GET['return_url'])
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id, )))
 
 
