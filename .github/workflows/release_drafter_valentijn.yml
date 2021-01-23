@@ -5,7 +5,14 @@ on:
     inputs:
       version:
         description: |
-          The version to be associated with the GitHub release that's created or updated.
+          The version of the next release that is being created or updated.
+          This will override any version calculated by the release-drafter.
+        required: false
+      last-release:
+        description: |
+          The version (tag_name) of the previous release to use when calculating changsets. 
+          For bugfix releases this should be the latest patch release (i.e. 1.11.1) for normal/minor releases
+          this should be the latest minor release (i.e. 1.11.0)
           This will override any version calculated by the release-drafter.
         required: false
 
@@ -16,5 +23,6 @@ jobs:
       - uses: valentijnscholten/release-drafter@master
         with:
           version: ${{github.event.inputs.version}}  
+          last-release: ${{github.event.inputs.last-release}} 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
