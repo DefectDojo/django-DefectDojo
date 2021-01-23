@@ -7,11 +7,13 @@ from dojo.models import Test
 class TestDsopParser(TestCase):
 
     def test_zero_findings(self):
-        with (open('dojo/unittests/scans/dsop/zero_vuln.xlsx', 'rb')) as file:
-            parser = DsopParser(file, Test())
-        self.assertEquals(len(parser.items), 0)
+        testfile = open('dojo/unittests/scans/dsop/zero_vuln.xlsx', 'rb')
+        parser = DsopParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEquals(len(findings), 0)
 
     def test_many_findings(self):
-        with open('dojo/unittests/scans/dsop/many_vuln.xlsx', 'rb') as file:
-            parser = DsopParser(file, Test())
-        self.assertEquals(len(parser.items), 4)
+        testfile = open('dojo/unittests/scans/dsop/many_vuln.xlsx', 'rb')
+        parser = DsopParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEquals(len(findings), 4)
