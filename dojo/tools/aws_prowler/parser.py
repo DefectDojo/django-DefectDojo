@@ -99,6 +99,3 @@ class AWSProwlerParser(object):
                 criticality = "High"
 
         return criticality
-
-
-register_parser("AWS Prowler Scan", AWSProwlerParser())

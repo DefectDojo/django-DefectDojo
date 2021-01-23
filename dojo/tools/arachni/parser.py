@@ -197,6 +197,3 @@ def get_item(item_node, test):
     finding.unsaved_tags = tags
 
     return finding
-
-
-register_parser("Arachni Scan", ArachniJSONParser())

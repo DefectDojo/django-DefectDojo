@@ -5,7 +5,6 @@ import re
 from defusedxml import ElementTree as ET
 
 from dojo.models import Finding
-from dojo.tools.factory import register_parser
 
 
 class XanitizerXMLParser(object):
@@ -184,6 +183,3 @@ class XanitizerXMLParser(object):
             return 'High'
 
         return 'Critical'
-
-
-register_parser("Xanitizer Scan", XanitizerXMLParser())

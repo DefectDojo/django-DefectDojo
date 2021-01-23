@@ -254,6 +254,3 @@ class Item(object):
             return sub_node.text
 
         return None
-
-
-register_parser("ZAP Scan", ZapXmlParser())

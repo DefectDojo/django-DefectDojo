@@ -96,6 +96,3 @@ class AppSpiderXMLParser(object):
         elif val == "4-High":
             severity = "Critical"
         return severity
-
-
-register_parser("AppSpider Scan", AppSpiderXMLParser())

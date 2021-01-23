@@ -133,6 +133,3 @@ def severity_of(score):
         return "High"
     else:
         return "Critical"
-
-
-register_parser("Aqua Scan", AquaJSONParser())
