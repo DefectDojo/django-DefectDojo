@@ -36,5 +36,5 @@ categories:
       - 'maintenance'
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 template: |
-  ## Changes
+  ## Changes since $PREVIOUS_TAG
   $CHANGES
