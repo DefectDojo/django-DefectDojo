@@ -836,285 +836,55 @@
     "fields": {
         "name": "Type 3"
     }
+}
+{
+    "fields": {
+        "name": "API Test"
+    },
+    "model": "dojo.test_type",
+    "pk": 1
 },
 {
-    "model": "dojo.test_type",
-    "pk": 1,
     "fields": {
-        "name": "API Test",
-        "static_tool": false,
-        "dynamic_tool": false
-    }
+        "name": "Static Check"
+    },
+    "model": "dojo.test_type",
+    "pk": 2
 },
 {
-    "model": "dojo.test_type",
-    "pk": 2,
     "fields": {
-        "name": "Static Check",
-        "static_tool": false,
-        "dynamic_tool": false
-    }
+        "name": "Pen Test"
+    },
+    "model": "dojo.test_type",
+    "pk": 3
 },
 {
-    "model": "dojo.test_type",
-    "pk": 3,
     "fields": {
-        "name": "Pen Test",
-        "static_tool": false,
-        "dynamic_tool": false
-    }
+        "name": "Web Application Test"
+    },
+    "model": "dojo.test_type",
+    "pk": 4
 },
 {
-    "model": "dojo.test_type",
-    "pk": 4,
     "fields": {
-        "name": "Nessus Scan",
-        "static_tool": false,
-        "dynamic_tool": false
-    }
+        "name": "Security Research"
+    },
+    "model": "dojo.test_type",
+    "pk": 5
 },
 {
-    "model": "dojo.test_type",
-    "pk": 5,
     "fields": {
-        "name": "Web Application Test",
-        "static_tool": false,
-        "dynamic_tool": false
-    }
+        "name": "Threat Modeling"
+    },
+    "model": "dojo.test_type",
+    "pk": 6
 },
 {
-    "model": "dojo.test_type",
-    "pk": 6,
     "fields": {
-        "name": "Security Research",
-        "static_tool": false,
-        "dynamic_tool": false
-    }
-},
-{
+        "name": "Manual Code Review"
+    },
     "model": "dojo.test_type",
-    "pk": 7,
-    "fields": {
-        "name": "Threat Modeling",
-        "static_tool": false,
-        "dynamic_tool": false
-    }
-},
-{
-    "model": "dojo.test_type",
-    "pk": 8,
-    "fields": {
-        "name": "Veracode Scan",
-        "static_tool": false,
-        "dynamic_tool": false
-    }
-},
-{
-    "model": "dojo.test_type",
-    "pk": 9,
-    "fields": {
-        "name": "Burp Scan",
-        "static_tool": false,
-        "dynamic_tool": false
-    }
-},
-{
-    "model": "dojo.test_type",
-    "pk": 10,
-    "fields": {
-        "name": "Nexpose Scan",
-        "static_tool": false,
-        "dynamic_tool": false
-    }
-},
-{
-    "model": "dojo.test_type",
-    "pk": 11,
-    "fields": {
-        "name": "ZAP Scan",
-        "static_tool": false,
-        "dynamic_tool": false
-    }
-},
-{
-    "model": "dojo.test_type",
-    "pk": 12,
-    "fields": {
-        "name": "Checkmarx Scan",
-        "static_tool": false,
-        "dynamic_tool": false
-    }
-},
-{
-    "model": "dojo.test_type",
-    "pk": 13,
-    "fields": {
-        "name": "OpenVAS CSV",
-        "static_tool": false,
-        "dynamic_tool": false
-    }
-},
-{
-    "model": "dojo.test_type",
-    "pk": 14,
-    "fields": {
-        "name": "Bandit Scan",
-        "static_tool": false,
-        "dynamic_tool": false
-    }
-},
-{
-    "model": "dojo.test_type",
-    "pk": 15,
-    "fields": {
-        "name": "SSL Labs Scan",
-        "static_tool": false,
-        "dynamic_tool": false
-    }
-},
-{
-    "model": "dojo.test_type",
-    "pk": 16,
-    "fields": {
-        "name": "AppSpider Scan",
-        "static_tool": false,
-        "dynamic_tool": false
-    }
-},
-{
-    "model": "dojo.test_type",
-    "pk": 17,
-    "fields": {
-        "name": "Dependency Check Scan",
-        "static_tool": false,
-        "dynamic_tool": false
-    }
-},
-{
-    "model": "dojo.test_type",
-    "pk": 18,
-    "fields": {
-        "name": "Generic Findings Import",
-        "static_tool": false,
-        "dynamic_tool": false
-    }
-},
-{
-    "model": "dojo.test_type",
-    "pk": 19,
-    "fields": {
-        "name": "Nmap Scan",
-        "static_tool": false,
-        "dynamic_tool": false
-    }
-},
-{
-    "model": "dojo.test_type",
-    "pk": 20,
-    "fields": {
-        "name": "Node Security Platform Scan",
-        "static_tool": false,
-        "dynamic_tool": false
-    }
-},
-{
-    "model": "dojo.test_type",
-    "pk": 21,
-    "fields": {
-        "name": "Qualys Scan",
-        "static_tool": false,
-        "dynamic_tool": false
-    }
-},
-{
-    "model": "dojo.test_type",
-    "pk": 22,
-    "fields": {
-        "name": "Qualys Web App Scan",
-        "static_tool": false,
-        "dynamic_tool": false
-    }
-},
-{
-    "model": "dojo.test_type",
-    "pk": 23,
-    "fields": {
-        "name": "Retire.js Scan",
-        "static_tool": false,
-        "dynamic_tool": false
-    }
-},
-{
-    "model": "dojo.test_type",
-    "pk": 24,
-    "fields": {
-        "name": "SKF Scan",
-        "static_tool": false,
-        "dynamic_tool": false
-    }
-},
-{
-    "model": "dojo.test_type",
-    "pk": 25,
-    "fields": {
-        "name": "Snyk Scan",
-        "static_tool": false,
-        "dynamic_tool": false
-    }
-},
-{
-    "model": "dojo.test_type",
-    "pk": 27,
-    "fields": {
-        "name": "Trustwave",
-        "static_tool": false,
-        "dynamic_tool": false
-    }
-},
-{
-    "model": "dojo.test_type",
-    "pk": 28,
-    "fields": {
-        "name": "VCG Scan",
-        "static_tool": false,
-        "dynamic_tool": false
-    }
-},
-{
-    "model": "dojo.test_type",
-    "pk": 29,
-    "fields": {
-        "name": "Manual Code Review",
-        "static_tool": false,
-        "dynamic_tool": false
-    }
-},
-{
-    "model": "dojo.test_type",
-    "pk": 30,
-    "fields": {
-        "name": "Gosec Scanner",
-        "static_tool": false,
-        "dynamic_tool": false
-    }
-},
-{
-    "model": "dojo.test_type",
-    "pk": 31,
-    "fields": {
-        "name": "NPM Audit Scan",
-        "static_tool": false,
-        "dynamic_tool": false
-    }
-},
-{
-    "model": "dojo.test_type",
-    "pk": 32,
-    "fields": {
-        "name": "Clair Scan",
-        "static_tool": false,
-        "dynamic_tool": false
-    }
+    "pk": 7
 },
 {
     "model": "dojo.product",
