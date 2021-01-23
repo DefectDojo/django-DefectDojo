@@ -75,17 +75,6 @@ class BaseTestCase(unittest.TestCase):
     def test_login(self):
         return self.login_page()
 
-    @on_exception_html_source_logger
-    def delete_product_if_exists(self):
-        driver = self.driver
-        # Navigate to the product page
-        self.goto_product_overview(driver)
-        # Select the specific product to delete
-        qa_products = driver.find_elements(By.LINK_TEXT, "QA Test")
-
-        if len(qa_products) > 0:
-            self.test_delete_product()
-
     # used to load some page just to get started
     # we choose /user because it's lightweight and fast
     def goto_some_page(self):
