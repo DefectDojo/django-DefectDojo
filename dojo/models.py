@@ -452,25 +452,10 @@ class Product_Type(models.Model):
         else:
             return health
 
-    # def findings_count(self):
-    #     return Finding.objects.filter(mitigated__isnull=True,
-    #                                   verified=True,
-    #                                   false_p=False,
-    #                                   duplicate=False,
-    #                                   out_of_scope=False,
-    #                                   test__engagement__product__prod_type=self).filter(
-    #         Q(severity="Critical") |
-    #         Q(severity="High") |
-    #         Q(severity="Medium") |
-    #         Q(severity="Low")).count()
-
     # only used by bulk risk acceptance api
     @property
     def unaccepted_open_findings(self):
         return Finding.objects.filter(risk_accepted=False, active=True, verified=True, duplicate=False, test__engagement__product__prod_type=self)
-
-    # def products_count(self):
-    #     return Product.objects.filter(prod_type=self).count()
 
     class Meta:
         ordering = ('name',)

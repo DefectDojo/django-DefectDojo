@@ -57,7 +57,6 @@ def simple_search(request):
     if request.method == 'GET':
         form = SimpleSearchForm(request.GET)
         if form.is_valid():
-            # logger.debug('form vars: %s', vars(form))
             cookie = True
 
             clean_query = form.cleaned_data['query'] or ''
