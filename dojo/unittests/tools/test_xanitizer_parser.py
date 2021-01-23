@@ -1,6 +1,6 @@
 from django.test import TestCase
 from dojo.tools.xanitizer.parser import XanitizerXMLParser
-from dojo.models import Test
+from dojo.models import Engagement, Product, Test
 
 
 class TestXanitizerXMLParser(TestCase):

@@ -1,6 +1,6 @@
 from django.test import TestCase
 from dojo.tools.yarn_audit.parser import YarnAuditParser
-from dojo.models import Test
+from dojo.models import Engagement, Product, Test
 
 
 class TestYarnAuditParser(TestCase):
