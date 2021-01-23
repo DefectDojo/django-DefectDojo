@@ -60,6 +60,7 @@ class ProductTest(BaseTestCase):
         # Also confirm success even if Product is returned as already exists for test sake
         self.assertTrue(self.is_success_message_present(text='Product added successfully') or
             self.is_success_message_present(text='Product with this Name already exists.'))
+        self.assertFalse(self.is_error_message_present(text='JIRA Project config not stored due to errors'))
 
     @on_exception_html_source_logger
     def test_list_products(self):
@@ -102,6 +103,7 @@ class ProductTest(BaseTestCase):
         # Assert ot the query to dtermine status of failure
         self.assertTrue(self.is_success_message_present(text='Product updated successfully') or
             self.is_success_message_present(text='Product with this Name already exists.'))
+        self.assertFalse(self.is_error_message_present(text='JIRA Project config not stored due to errors'))
 
     @on_exception_html_source_logger
     def test_add_product_engagement(self):
