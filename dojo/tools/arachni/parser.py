@@ -6,7 +6,6 @@ import html2text
 from django.utils.encoding import force_str
 
 from dojo.models import Endpoint, Finding
-from dojo.tools.factory import register_parser
 
 
 class ArachniJSONParser(object):
@@ -198,6 +197,3 @@ def get_item(item_node, test):
     finding.unsaved_tags = tags
 
     return finding
-
-
-register_parser("Arachni Scan", ArachniJSONParser())

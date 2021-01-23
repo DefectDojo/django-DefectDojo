@@ -5,13 +5,13 @@ from dojo.models import Finding
 
 
 class AwsSecurityFindingFormatParser:
-    def __init__(self, filehandle, test):
+    def get_findings(self, filehandle, test):
         tree = self.parse_json(filehandle)
 
         if tree:
-            self.items = [data for data in self.get_items(tree, test)]
+            return get_items(tree, test)
         else:
-            self.items = []
+            return ()
 
     def parse_json(self, filehandle):
         try:

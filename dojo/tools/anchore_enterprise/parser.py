@@ -5,7 +5,6 @@ from datetime import datetime
 from json.decoder import JSONDecodeError
 
 from dojo.models import Finding
-from dojo.tools.factory import register_parser
 
 logger = logging.getLogger(__name__)
 
@@ -100,6 +99,3 @@ def search_filepath(text):
         except IndexError:
             path = ""
     return path.strip()
-
-
-register_parser("Anchore Enterprise Policy Check", AnchoreEnterprisePolicyCheckParser())

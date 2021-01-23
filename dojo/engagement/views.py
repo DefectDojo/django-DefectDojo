@@ -586,7 +586,7 @@ def import_scan_results(request, eid=None, pid=None):
                     new_f.save()
 
             try:
-                parser = import_parser_factory(file, t, active, verified)
+                parser = import_parser_factory(file, t, active, verified, scan_type)
                 parser_findings = parser.get_findings(file, t)
             except Exception as e:
                 messages.add_message(request,

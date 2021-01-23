@@ -8,7 +8,7 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Iterable
 
-from dojo.tools.blackduck.model import BlackduckFinding
+from .model import BlackduckFinding
 
 
 class Importer(ABC):

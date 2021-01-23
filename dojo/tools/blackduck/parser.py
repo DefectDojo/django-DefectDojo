@@ -1,7 +1,7 @@
 import hashlib
 
-import dojo.tools.blackduck.importer as import_helper
 from dojo.models import Finding
+from .importer import BlackduckImporter
 
 
 class BlackduckHubCSVParser(object):
@@ -10,20 +10,18 @@ class BlackduckHubCSVParser(object):
     - from a zip file containing a security.csv and files.csv
     - a single security.csv file
     """
-    def __init__(self, filename, test):
+    def get_findings(self, filename, test):
         normalized_findings = self.normalize_findings(filename)
-        self.ingest_findings(normalized_findings, test)
+        return ingest_findings(normalized_findings, test)
 
     def normalize_findings(self, filename):
-        importer = import_helper.BlackduckImporter()
+        importer = BlackduckImporter()
 
         findings = sorted(importer.parse_findings(filename), key=lambda f: f.vuln_id)
         return findings
 
     def ingest_findings(self, normalized_findings, test):
         dupes = dict()
-        self.items = normalized_findings
-
         for i in normalized_findings:
             cve = i.vuln_id
             cwe = 0  # need a way to automaticall retrieve that see #1119
@@ -69,7 +67,7 @@ class BlackduckHubCSVParser(object):
 
                 dupes[dupe_key] = finding
 
-        self.items = dupes.values()
+        return dupes.values()
 
     def format_title(self, i):
         if (i.channel_version_origin_id is not None):

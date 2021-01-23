@@ -1,7 +1,7 @@
 import jsonlines
 
 from dojo.models import Finding
-from dojo.tools.factory import register_parser
+
 
 class YarnAuditParser(object):
     def get_findings(self, json_output, test):
@@ -88,5 +88,3 @@ def get_item(item_node, test):
                       dynamic_finding=False)
 
     return dojo_finding
-
-register_parser("Yarn Audit Scan", YarnAuditParser())

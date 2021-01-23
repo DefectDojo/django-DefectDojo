@@ -5,7 +5,6 @@ import html2text
 from defusedxml import ElementTree
 
 from dojo.models import Endpoint, Finding
-from dojo.tools.factory import register_parser
 
 
 class AppSpiderXMLParser(object):
@@ -97,6 +96,3 @@ class AppSpiderXMLParser(object):
         elif val == "4-High":
             severity = "Critical"
         return severity
-
-
-register_parser("AppSpider Scan", AppSpiderXMLParser())

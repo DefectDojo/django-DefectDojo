@@ -6,7 +6,6 @@ import pandas as pd
 from django.utils.text import Truncator
 
 from dojo.models import Finding
-from dojo.tools.factory import register_parser
 
 
 class AWSProwlerParser(object):
@@ -100,6 +99,3 @@ class AWSProwlerParser(object):
                 criticality = "High"
 
         return criticality
-
-
-register_parser("AWS Prowler Scan", AWSProwlerParser())

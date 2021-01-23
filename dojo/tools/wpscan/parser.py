@@ -1,4 +1,4 @@
-
+import logging
 import hashlib
 import json
 from urllib.parse import urlparse
@@ -10,9 +10,7 @@ __author__ = 'dr3dd589'
 
 class WpscanJSONParser(object):
 
-    def __init__(self, file, test):
-        self.dupes = dict()
-        self.items = ()
+    def get_findings(self, file, test):
         if file is None:
             return
         data = file.read()
@@ -20,6 +18,9 @@ class WpscanJSONParser(object):
             tree = json.loads(str(data, 'utf-8'))
         except:
             tree = json.loads(data)
+
+        logging.debug("Parse Wpscan file")
+        dupes = dict()
         for content in tree:
             node = tree[content]
             vuln_arr = []
@@ -57,9 +58,9 @@ class WpscanJSONParser(object):
                     finding = self.dupes[dupe_key]
                     if finding.references:
                         finding.references = finding.references
-                    self.dupes[dupe_key] = finding
+                    dupes[dupe_key] = finding
                 else:
-                    self.dupes[dupe_key] = True
+                    dupes[dupe_key] = True
 
                     finding = Finding(
                         title=title,
@@ -73,7 +74,7 @@ class WpscanJSONParser(object):
                         references=references,
                         dynamic_finding=True,)
                     finding.unsaved_endpoints = list()
-                    self.dupes[dupe_key] = finding
+                    dupes[dupe_key] = finding
 
                     if target_url is not None:
                         finding.unsaved_endpoints.append(Endpoint(
@@ -83,4 +84,4 @@ class WpscanJSONParser(object):
                             protocol=protocol,
                             query=query,
                             fragment=fragment,))
-            self.items = self.dupes.values()
+            return dupes.values()

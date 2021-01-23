@@ -7,13 +7,10 @@ from dojo.models import Endpoint, Finding
 
 
 class BugCrowdCSVParser(object):
-    def __init__(self, filename, test):
-        self.dupes = dict()
-        self.items = ()
+    def get_findings(self, filename, test):
 
         if filename is None:
-            self.items = ()
-            return
+            return ()
 
         content = filename.read()
         if type(content) is bytes:
@@ -24,6 +21,7 @@ class BugCrowdCSVParser(object):
         for row in reader:
             csvarray.append(row)
 
+        dupes = dict()
         for row in csvarray:
             finding = Finding(test=test)
 
@@ -67,7 +65,7 @@ class BugCrowdCSVParser(object):
                 if key not in self.dupes:
                     self.dupes[key] = finding
 
-        self.items = list(self.dupes.values())
+        return list(self.dupes.values())
 
     def description_parse(self, ret):
         items = ['impact', 'steps to reproduce:', 'steps to reproduce', 'poc']

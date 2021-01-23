@@ -29,14 +29,14 @@ class ZapXmlParser(object):
     def get_findings(self, xml_output, test):
 
         if xml_output is None:
-            return []
+            return ()
 
         tree = self.parse_xml(xml_output)
 
         if tree:
             return self.get_items(tree, test)
         else:
-            return []
+            return ()
 
     def parse_xml(self, xml_output):
         """
@@ -254,6 +254,3 @@ class Item(object):
             return sub_node.text
 
         return None
-
-
-register_parser("ZAP Scan", ZapXmlParser())

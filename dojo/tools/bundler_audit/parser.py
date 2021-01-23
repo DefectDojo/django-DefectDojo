@@ -7,7 +7,10 @@ from dojo.models import Finding
 
 
 class BundlerAuditParser(object):
-    def __init__(self, filename, test):
+    def get_findings(self, filename, test):
+        if filename is None:
+            return ()
+
         lines = filename.read().decode('utf8')
         dupes = dict()
         find_date = datetime.now()
@@ -68,4 +71,4 @@ class BundlerAuditParser(object):
 
                 dupes[dupe_key] = find
 
-        self.items = list(dupes.values())
+        return list(dupes.values())

@@ -3,7 +3,6 @@ import logging
 import re
 
 from dojo.models import Finding
-from dojo.tools.factory import register_parser
 
 from .parser_helper import get_defectdojo_findings
 
@@ -109,6 +108,3 @@ def get_false_positive(false_p):
         return True
     else:
         return False
-
-
-register_parser("Acunetix Scan", AcunetixScannerParser())

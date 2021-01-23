@@ -1,5 +1,5 @@
 # Author: apipia, wheelsvt
-import dojo.tools.blackduck_component_risk.importer as import_helper
+from .importer import BlackduckCRImporter
 from dojo.models import Finding
 
 
@@ -26,7 +26,7 @@ class BlackduckHubParser(object):
         :param filename: Name of the zipfile. Passed in via Defect Dojo
         :return: Returns a tuple of dictionaries, Components and Securities.
         """
-        importer = import_helper.BlackduckCRImporter()
+        importer = BlackduckCRImporter()
 
         components, securities, sources = importer.parse_findings(filename)
         return components, securities, sources

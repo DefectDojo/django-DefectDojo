@@ -4,7 +4,6 @@ import json
 from datetime import datetime
 
 from dojo.models import Finding
-from dojo.tools.factory import register_parser
 
 
 class AnchoreEngineScanParser(object):
@@ -82,6 +81,3 @@ class AnchoreEngineScanParser(object):
                 dupes[dupe_key] = find
 
         return list(dupes.values())
-
-
-register_parser("Anchore Engine Scan", AnchoreEngineScanParser())

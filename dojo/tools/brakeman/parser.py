@@ -8,10 +8,9 @@ from dojo.models import Finding
 
 
 class BrakemanScanParser(object):
-    def __init__(self, filename, test):
+    def get_findings(self, filename, test):
         if filename is None:
-            self.items = ()
-            return
+            return ()
 
         tree = filename.read()
         try:
@@ -66,4 +65,4 @@ class BrakemanScanParser(object):
 
                 dupes[dupe_key] = find
 
-        self.items = list(dupes.values())
+        return list(dupes.values())

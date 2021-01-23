@@ -37,7 +37,7 @@ class BurpXmlParser(object):
     @param test A Dojo Test object
     """
 
-    def __init__(self, xml_output, test):
+    def get_findings(self, xml_output, test):
         self.target = None
         self.port = "80"
         self.host = None
@@ -47,9 +47,9 @@ class BurpXmlParser(object):
             tree = self.parse_xml(xml_output)
 
         if tree is not None:
-            self.items = [data for data in self.get_items(tree, test)]
+            return list([data for data in self.get_items(tree, test)])
         else:
-            self.items = []
+            return list()
 
     def parse_xml(self, xml_file):
         """
