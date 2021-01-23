@@ -817,24 +817,30 @@
     }
 },
 {
-    "model": "dojo.report_type",
+    "model": "dojo.test_type",
     "pk": 1,
     "fields": {
-        "name": "Type 1"
+        "name": "API Test",
+        "static_tool": false,
+        "dynamic_tool": false
     }
 },
 {
-    "model": "dojo.report_type",
+    "model": "dojo.test_type",
     "pk": 2,
     "fields": {
-        "name": "Type 2"
+        "name": "Static Check",
+        "static_tool": false,
+        "dynamic_tool": false
     }
 },
 {
-    "model": "dojo.report_type",
+    "model": "dojo.test_type",
     "pk": 3,
     "fields": {
-        "name": "Type 3"
+        "name": "Pen Test",
+        "static_tool": false,
+        "dynamic_tool": false
     }
 },
 {
