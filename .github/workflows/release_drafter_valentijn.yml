@@ -20,7 +20,7 @@ jobs:
   update_release_draft:
     runs-on: ubuntu-latest
     steps:
-      - uses: valentijnscholten/release-drafter@last-release-input
+      - uses: valentijnscholten/release-drafter@prev-version-input
         with:
           version: ${{github.event.inputs.version}}  
           last-release: ${{github.event.inputs.last-release}} 
