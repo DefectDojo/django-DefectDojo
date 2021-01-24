@@ -54,8 +54,8 @@ class WpscanJSONParser(object):
                 severity = 'Info'
                 description = '**Title : **' + title
                 dupe_key = hashlib.md5(str(references + title).encode('utf-8')).hexdigest()
-                if dupe_key in self.dupes:
-                    finding = self.dupes[dupe_key]
+                if dupe_key in dupes:
+                    finding = dupes[dupe_key]
                     if finding.references:
                         finding.references = finding.references
                     dupes[dupe_key] = finding
