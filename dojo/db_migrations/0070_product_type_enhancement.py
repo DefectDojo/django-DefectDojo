@@ -4,6 +4,7 @@ from django.conf import settings
 from django.db import migrations, models
 import multiselectfield.db.fields
 
+
 class Migration(migrations.Migration):
 
     dependencies = [
