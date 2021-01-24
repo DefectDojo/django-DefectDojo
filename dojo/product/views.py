@@ -29,13 +29,12 @@ from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, S
 from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, Product_Tab, get_punchcard_data, queryset_check
 from dojo.notifications.helper import create_notification
 from custom_field.models import CustomFieldValue, CustomField
-from tagging.models import Tag
-from tagging.utils import get_tag_list
 from django.db.models import Prefetch, F
 from django.db.models.query import QuerySet
 from github import Github
 from dojo.user.helper import user_must_be_authorized, user_is_authorized, check_auth_users_list
 import dojo.jira_link.helper as jira_helper
+import dojo.finding.helper as finding_helper
 
 logger = logging.getLogger(__name__)
 
@@ -62,16 +61,15 @@ def product(request):
     name_words = prods.values_list('name', flat=True)
 
     prod_filter = ProductFilter(request.GET, queryset=prods, user=request.user)
+
+    # print(vars(prod_filter))
+    # print(vars(prod_filter.form))
+    # print(vars(prod_filter.form.fields))
+
     prod_list = get_page_items(request, prod_filter.qs, 25)
 
     # perform annotation/prefetching by replacing the queryset in the page with an annotated/prefetched queryset.
     prod_list.object_list = prefetch_for_product(prod_list.object_list)
-
-    """
-    if 'tags' in request.GET:
-        tags = request.GET.getlist('tags', [])
-        initial_queryset = TaggedItem.objects.get_by_model(initial_queryset, Tag.objects.filter(name__in=tags))
-    """
 
     add_breadcrumb(title="Product List", top_level=not len(request.GET), request=request)
     return render(request,
@@ -96,7 +94,7 @@ def prefetch_for_product(prods):
                 finding__active=True,
                 finding__mitigated__isnull=True)
         prefetched_prods = prefetched_prods.prefetch_related(Prefetch('endpoint_set', queryset=active_endpoint_query, to_attr='active_endpoints'))
-        prefetched_prods = prefetched_prods.prefetch_related('tagged_items__tag')
+        prefetched_prods = prefetched_prods.prefetch_related('tags')
     else:
         logger.debug('unable to prefetch because query was already executed')
 
@@ -198,14 +196,18 @@ def identify_view(request):
     get_data = request.GET
     view = get_data.get('type', None)
     if view:
-        return view
+        # value of view is reflected in the template, make sure it's valid
+        # although any XSS should be catch by django autoescape, we see people sometimes using '|safe'...
+        if view in ['Endpoint', 'Finding']:
+            return view
+        raise ValueError('invalid view, view must be "Endpoint" or "Finding"')
     else:
         if get_data.get('finding__severity', None):
             return 'Endpoint'
         elif get_data.get('false_positive', None):
             return 'Endpoint'
     referer = request.META.get('HTTP_REFERER', None)
-    if not referer:
+    if referer:
         if referer.find('type=Endpoint') > -1:
             return 'Endpoint'
     return 'Finding'
@@ -218,29 +220,27 @@ def finding_querys(request, prod):
                                       severity__in=('Critical', 'High', 'Medium', 'Low', 'Info')).prefetch_related(
         'test__engagement',
         'test__engagement__risk_acceptance',
+        'found_by',
+        'test',
+        'test__test_type',
         'risk_acceptance_set',
-        'reporter').extra(
-        select={
-            'ra_count': 'SELECT COUNT(*) FROM dojo_risk_acceptance INNER JOIN '
-                        'dojo_risk_acceptance_accepted_findings ON '
-                        '( dojo_risk_acceptance.id = dojo_risk_acceptance_accepted_findings.risk_acceptance_id ) '
-                        'WHERE dojo_risk_acceptance_accepted_findings.finding_id = dojo_finding.id',
-        },
-    )
+        'reporter')
 
     findings = ProductMetricsFindingFilter(request.GET, queryset=findings_query, pid=prod)
     findings_qs = queryset_check(findings)
     filters['form'] = findings.form
 
-    if not findings_qs and not findings_query:
-        findings = findings_query
-        findings_qs = queryset_check(findings)
-        messages.add_message(request,
-                                     messages.ERROR,
-                                     'All objects have been filtered away. Displaying all objects',
-                                     extra_tags='alert-danger')
+    # if not findings_qs and not findings_query:
+    #     # logger.debug('all filtered')
+    #     findings = findings_query
+    #     findings_qs = queryset_check(findings)
+    #     messages.add_message(request,
+    #                                  messages.ERROR,
+    #                                  'All objects have been filtered away. Displaying all objects',
+    #                                  extra_tags='alert-danger')
 
     try:
+        # logger.debug(findings_qs.query)
         start_date = findings_qs.earliest('date').date
         start_date = datetime(start_date.year,
                             start_date.month, start_date.day,
@@ -249,7 +249,8 @@ def finding_querys(request, prod):
         end_date = datetime(end_date.year,
                             end_date.month, end_date.day,
                             tzinfo=timezone.get_current_timezone())
-    except:
+    except Exception as e:
+        logger.debug(e)
         start_date = timezone.now()
         end_date = timezone.now()
     week = end_date - timedelta(days=7)  # seven days and /newnewer are considered "new"
@@ -439,7 +440,7 @@ def view_product_metrics(request, pid):
     end_date = filters['end_date']
     week_date = filters['week']
 
-    tests = Test.objects.filter(engagement__product=prod).prefetch_related('finding_set')
+    tests = Test.objects.filter(engagement__product=prod).prefetch_related('finding_set', 'test_type')
 
     open_vulnerabilities = filters['open_vulns']
     all_vulnerabilities = filters['all_vulns']
@@ -540,6 +541,7 @@ def view_product_metrics(request, pid):
         else:
             test_data[t.test_type.name] = t.verified_finding_count()
     product_tab = Product_Tab(pid, title="Product", tab="metrics")
+
     return render(request,
                   'dojo/product_metrics.html',
                   {'prod': prod,
@@ -631,7 +633,7 @@ def prefetch_for_view_engagements(engs):
         prefetched_engs = prefetched_engs.annotate(count_findings_open=Count('test__finding__id', filter=Q(test__finding__active=True)))
         prefetched_engs = prefetched_engs.annotate(count_findings_close=Count('test__finding__id', filter=Q(test__finding__is_Mitigated=True)))
         prefetched_engs = prefetched_engs.annotate(count_findings_duplicate=Count('test__finding__id', filter=Q(test__finding__duplicate=True)))
-        prefetched_engs = prefetched_engs.prefetch_related('tagged_items__tag')
+        prefetched_engs = prefetched_engs.prefetch_related('tags')
     else:
         logger.debug('unable to prefetch because query was already executed')
 
@@ -661,9 +663,6 @@ def new_product(request):
 
         if form.is_valid():
             product = form.save()
-            tags = request.POST.getlist('tags')
-            t = ", ".join('"{0}"'.format(w) for w in tags)
-            product.tags = t
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Product added successfully.',
@@ -797,8 +796,13 @@ def edit_product(request, pid):
                 return HttpResponseRedirect(reverse('view_product', args=(pid,)))
 
     form = ProductForm(instance=product,
-                        initial={'auth_users': product.authorized_users.all(),
-                                'tags': get_tag_list(Tag.objects.get_for_object(product))})
+                        initial={'auth_users': product.authorized_users.all()})
+    #    initial={'auth_users': prod.authorized_users.all(),
+    #             'tags': get_tag_list(Tag.objects.get_for_object(prod))})
+
+    # print('tagulous product form:')
+    # print(vars(form))
+    # print(vars(form.fields['tags']))
 
     if jira_enabled:
         jira_project = jira_helper.get_jira_project(product)
@@ -809,16 +813,14 @@ def edit_product(request, pid):
     if github_enabled and (github_inst is not None):
         if github_inst is not None:
             gform = GITHUB_Product_Form(instance=github_inst)
-        else:
             gform = GITHUB_Product_Form()
-    elif github_enabled:
         gform = GITHUB_Product_Form()
     else:
         gform = None
 
     sonarqube_form = Sonarqube_ProductForm(instance=sonarqube_conf)
 
-    form.initial['tags'] = [tag.name for tag in product.tags]
+    # # form.initial['tags'] = [tag.name for tag in prod.tags.all()]
     product_tab = Product_Tab(pid, title="Edit Product", tab="settings")
     return render(request,
                   'dojo/edit_product.html',
@@ -841,8 +843,6 @@ def delete_product(request, pid):
         if 'id' in request.POST and str(product.id) == request.POST['id']:
             form = DeleteProductForm(request.POST, instance=product)
             if form.is_valid():
-                if product.tags:
-                    del product.tags
                 product.delete()
                 messages.add_message(request,
                                      messages.SUCCESS,
@@ -905,10 +905,7 @@ def new_eng_for_app(request, pid, cicd=False):
             engagement.active = True
 
             engagement.save()
-
-            tags = request.POST.getlist('tags')
-            t = ", ".join('"{0}"'.format(w) for w in tags)
-            engagement.tags = t
+            form.save_m2m()
 
             logger.debug('new_eng_for_app: process jira coming')
 
@@ -1105,10 +1102,7 @@ def ad_hoc_finding(request, pid):
             new_finding.reporter = request.user
             new_finding.numerical_severity = Finding.get_numerical_severity(
                 new_finding.severity)
-            if new_finding.false_p or new_finding.active is False:
-                new_finding.mitigated = timezone.now()
-                new_finding.mitigated_by = request.user
-                new_finding.is_Mitigated = True
+            finding_helper.update_finding_status(new_finding, request.user)
             create_template = new_finding.is_template
             # always false now since this will be deprecated soon in favor of new Finding_Template model
             new_finding.is_template = False

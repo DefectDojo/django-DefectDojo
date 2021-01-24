@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: {{ include "defectdojo.fullname" . }}-unit-tests
+  name: {{ $fullName }}-unit-tests
   labels:
     app.kubernetes.io/name: {{ include "defectdojo.name" . }}
     helm.sh/chart: {{ include "defectdojo.chart" . }}
@@ -11,6 +11,7 @@ metadata:
   annotations:
     helm.sh/hook: test-success
 spec:
+  serviceAccountName: {{ $fullName }}
   {{- if .Values.imagePullSecrets }}
   imagePullSecrets:
   - name: {{ .Values.imagePullSecrets }}
@@ -19,6 +20,8 @@ spec:
     - name: unit-tests
       image: '{{ .Values.repositoryPrefix }}/defectdojo-django:{{ .Values.tag }}'
       imagePullPolicy: {{ .Values.imagePullPolicy }}
+      securityContext:
+        {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 8 }}      
       command: ['/entrypoint-unit-tests.sh']
       envFrom:
         - configMapRef:
@@ -47,4 +50,16 @@ spec:
               key: {{ if eq .Values.database "postgresql" }}{{ .Values.database }}-password{{ end }}{{ if eq .Values.database "mysql" }}{{ .Values.database }}-root-password{{ end }}
         - name: DD_DEBUG
           value: 'True'
+        - name: DD_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ $fullName }}
+              key: DD_SECRET_KEY
+        - name: DD_CREDENTIAL_AES_256_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ $fullName }}
+              key: DD_CREDENTIAL_AES_256_KEY
+      resources:
+        {{- toYaml .Values.tests.unitTests.resources | nindent 8 }}
   restartPolicy: Never

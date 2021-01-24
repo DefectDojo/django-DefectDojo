@@ -13,12 +13,13 @@ from django.utils.html import escape
 from django.utils import timezone
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
-from django.db.models import Q
+from django.db.models import Q, QuerySet, Count
 from dojo.filters import EndpointFilter
 from dojo.forms import EditEndpointForm, \
     DeleteEndpointForm, AddEndpointForm, DojoMetaDataForm
 from dojo.models import Product, Endpoint, Finding, System_Settings, DojoMeta, Endpoint_Status
-from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, get_system_setting, Product_Tab, calculate_grade
+from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, get_system_setting, Product_Tab, \
+    calculate_grade, redirect
 from dojo.notifications.helper import create_notification
 from dojo.user.helper import user_must_be_authorized
 
@@ -190,18 +191,17 @@ def edit_endpoint(request, eid):
     if request.method == 'POST':
         form = EditEndpointForm(request.POST, instance=endpoint)
         if form.is_valid():
+            logger.debug('saving endpoint')
             endpoint = form.save()
-            tags = request.POST.getlist('tags')
-            t = ", ".join('"{0}"'.format(w) for w in tags)
-            endpoint.tags = t
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Endpoint updated successfully.',
                                  extra_tags='alert-success')
             return HttpResponseRedirect(reverse('view_endpoint', args=(endpoint.id,)))
-    add_breadcrumb(parent=endpoint, title="Edit", top_level=False, request=request)
-    form = EditEndpointForm(instance=endpoint)
-    form.initial['tags'] = [tag.name for tag in endpoint.tags]
+    else:
+        add_breadcrumb(parent=endpoint, title="Edit", top_level=False, request=request)
+        form = EditEndpointForm(instance=endpoint)
+        # form.initial['tags'] = [tag.name for tag in endpoint.tags.all()]
 
     product_tab = Product_Tab(endpoint.product.id, "Endpoint", tab="endpoints")
 
@@ -224,7 +224,6 @@ def delete_endpoint(request, eid):
         if 'id' in request.POST and str(endpoint.id) == request.POST['id']:
             form = DeleteEndpointForm(request.POST, instance=endpoint)
             if form.is_valid():
-                del endpoint.tags
                 endpoint.delete()
                 messages.add_message(request,
                                      messages.SUCCESS,
@@ -264,10 +263,10 @@ def add_endpoint(request, pid):
         form = AddEndpointForm(request.POST, product=product)
         if form.is_valid():
             endpoints = form.save()
-            tags = request.POST.getlist('tags')
-            t = ", ".join('"{0}"'.format(w) for w in tags)
+            tags = request.POST.get('tags')
             for e in endpoints:
-                e.tags = t
+                e.tags = tags
+                e.save()
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Endpoint added successfully.',
@@ -299,10 +298,10 @@ def add_product_endpoint(request):
         form = AddEndpointForm(request.POST)
         if form.is_valid():
             endpoints = form.save()
-            tags = request.POST.getlist('tags')
-            t = ", ".join('"{0}"'.format(w) for w in tags)
+            tags = request.POST.get('tags')
             for e in endpoints:
-                e.tags = t
+                e.tags = tags
+                e.save()
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Endpoint added successfully.',
@@ -443,4 +442,14 @@ def endpoint_status_bulk_update(request, fid):
                                     messages.ERROR,
                                     'Unable to process bulk update. Required fields were not selected.',
                                     extra_tags='alert-danger')
-    return HttpResponseRedirect(post['return_url'])
+    return redirect(post['return_url'])
+
+
+def prefetch_for_endpoints(endpoints):
+    if isinstance(endpoints, QuerySet):
+        endpoints = endpoints.prefetch_related('product', 'tags', 'product__tags')
+        endpoints = endpoints.annotate(active_finding_count=Count('finding__id', filter=Q(finding__active=True)))
+    else:
+        logger.debug('unable to prefetch because query was already executed')
+
+    return endpoints

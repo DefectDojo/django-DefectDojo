@@ -10,7 +10,7 @@ export DD_BASE_URL='http://localhost:8080/'
 
 
 echo "Running Product type integration tests"
-if python3 tests/Regulations_unit_test.py ; then
+if python3 tests/regulations_test.py ; then
     echo "Success: Regulation integration tests passed"
 else
     docker-compose logs uwsgi --tail=120
@@ -19,7 +19,7 @@ fi
 
 
 echo "Running Product type integration tests"
-if python3 tests/Product_type_unit_test.py ; then
+if python3 tests/product_type_test.py ; then
     echo "Success: Product type integration tests passed"
 else
     docker-compose logs uwsgi --tail=120
@@ -27,7 +27,7 @@ else
 fi
 
 echo "Running Product integration tests"
-if python3 tests/Product_unit_test.py ; then 
+if python3 tests/product_test.py ; then 
     echo "Success: Product integration tests passed"
 else
     docker-compose logs uwsgi --tail=120
@@ -35,7 +35,7 @@ else
 fi
 
 echo "Running Dedupe integration tests"
-if python3 tests/dedupe_unit_test.py ; then
+if python3 tests/dedupe_test.py ; then
     echo "Success: Dedupe integration tests passed"
 else
     docker-compose logs uwsgi --tail=120
@@ -43,7 +43,7 @@ else
 fi
 
 echo "Running Endpoint integration tests"
-if python3 tests/Endpoint_unit_test.py ; then
+if python3 tests/endpoint_test.py ; then
     echo "Success: Endpoint integration tests passed"
 else
     docker-compose logs uwsgi --tail=120
@@ -51,7 +51,7 @@ else
 fi
 
 echo "Running Engagement integration tests"
-if python3 tests/Engagement_unit_test.py ; then
+if python3 tests/engagement_test.py ; then
     echo "Success: Engagement integration tests passed"
 else
     docker-compose logs uwsgi --tail=120
@@ -59,7 +59,7 @@ else
 fi
 
 echo "Running Environment integration tests"
-if python3 tests/Environment_unit_test.py ; then 
+if python3 tests/environment_test.py ; then 
     echo "Success: Environment integration tests passed"
 else
     docker-compose logs uwsgi --tail=120
@@ -67,7 +67,7 @@ else
 fi
 
 echo "Running Finding integration tests"
-if python3 tests/Finding_unit_test.py ; then
+if python3 tests/finding_test.py ; then
     echo "Success: Finding integration tests passed"
 else
     docker-compose logs uwsgi --tail=120
@@ -75,7 +75,7 @@ else
 fi
 
 echo "Running Test integration tests"
-if python3 tests/Test_unit_test.py ; then
+if python3 tests/test_test.py ; then
     echo "Success: Test integration tests passed"
 else
     docker-compose logs uwsgi --tail=120
@@ -83,7 +83,7 @@ else
 fi
 
 echo "Running User integration tests"
-if python3 tests/User_unit_test.py ; then
+if python3 tests/user_test.py ; then
     echo "Success: User integration tests passed"
 else
     docker-compose logs uwsgi --tail=120
@@ -99,45 +99,38 @@ else
 fi
 
 echo "Running Report Builder integration tests"
-if python3 tests/Report_builder_unit_test.py ; then
+if python3 tests/report_builder_test.py ; then
     echo "Success: Report Builder integration tests passed"
 else
     docker-compose logs uwsgi --tail=120
     echo "Error: Report Builder integration test failed."; exit 1
 fi
 
-# everything in the smoke test is already covered by the other tests
-# echo "Running Smoke integration test"
-# if python3 tests/smoke_test.py ; then
-#     echo "Success: Smoke integration tests passed"
-# else
-#     docker-compose logs uwsgi --tail=120
-#     echo "Error: Smoke integration test failed"; exit 1
-# fi
-
-echo "Running Check Status test"
-if python3 tests/check_status.py ; then
-    echo "Success: check status tests passed"
+echo "Running Search integration test"
+if python3 tests/search_test.py ; then
+    echo "Success: Search integration tests passed"
 else
     docker-compose logs uwsgi --tail=120
-    echo "Error: Check status tests failed"; exit 1
+    echo "Error: Search integration test failed"; exit 1
 fi
+
+test="Check Various Pages integration test"
+echo "Running: $test"
+if python3 tests/check_various_pages.py ; then
+    success $test
+else
+    fail $test
+fi
+
 
 # The below tests are commented out because they are still an unstable work in progress
 ## Once Ready they can be uncommented.
 
 # echo "Running Import Scanner integration test"
-# if python3 tests/Import_scanner_unit_test.py ; then
+# if python3 tests/import_scanner_test.py ; then
 #     echo "Success: Import Scanner integration tests passed" 
 # else
 #     echo "Error: Import Scanner integration test failed"; exit 1
-# fi
-
-# echo "Running Check Status UI integration test"
-# if python3 tests/check_status_ui.py ; then
-#     echo "Success: Check Status UI tests passed"
-# else
-#     echo "Error: Check Status UI test failed"; exit 1
 # fi
 
 # echo "Running Zap integration test"

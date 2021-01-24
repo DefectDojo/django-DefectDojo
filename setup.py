@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name='DefectDojo',
-    version='1.10.4',
+    version='1.11.1',
     author='Greg Anderson',
     description="Tool for managing vulnerability engagements",
     install_requires=[
@@ -67,7 +67,7 @@ setup(
         'json-lines==1.2.0'  # requred by yarn audit parser
     ],
 
-    extras_require={'mysql': ['mysqlclient==2.0.1']},
+    extras_require={'mysql': ['mysqlclient==2.0.2']},
 
     dependency_links=[
         "https://github.com/grendel513/python-pdfkit/tarball/master#egg=pdfkit-0.5.0"

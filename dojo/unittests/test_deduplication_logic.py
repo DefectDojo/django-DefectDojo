@@ -6,9 +6,6 @@ import logging
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
-loglevel = logging.DEBUG
-logging.basicConfig(level=loglevel)
-
 # things to consider:
 # - cross scanner deduplication is still flaky as if some scanners don't provide severity, but another doesn, the hashcode will be different so no deduplication happens.
 #   so I couldn't create any good tests
@@ -632,6 +629,9 @@ class TestDuplicationLogic(TestCase):
         # first setup some finding with same unique_id in same engagement, but different test (same test_type)
         finding_new.test = Test.objects.get(id=66)
         finding_new.save()
+        print(finding_new.pk)
+        print(finding_new.hash_code)
+        print(finding_new.duplicate)
 
         # expect duplicate as dedupe_inside_engagement is True and the other test is in the same engagement
         self.assert_finding(finding_new, not_pk=124, duplicate=True, duplicate_finding_id=124, hash_code=finding_124.hash_code)
@@ -1345,6 +1345,7 @@ class TestDuplicationLogic(TestCase):
         if not_pk:
             self.assertNotEqual(finding.pk, not_pk)
 
+        logger.debug('asserting that finding %i is a duplicate of %i', finding.id, duplicate_finding_id)
         self.assertEqual(finding.duplicate, duplicate)
         if not duplicate:
             self.assertFalse(finding.duplicate_finding)  # False -> None
