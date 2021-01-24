@@ -817,6 +817,27 @@
     }
 },
 {
+    "model": "dojo.report_type",
+    "pk": 1,
+    "fields": {
+        "name": "Type 1"
+    }
+},
+{
+    "model": "dojo.report_type",
+    "pk": 2,
+    "fields": {
+        "name": "Type 2"
+    }
+},
+{
+    "model": "dojo.report_type",
+    "pk": 3,
+    "fields": {
+        "name": "Type 3"
+    }
+},
+{
     "model": "dojo.test_type",
     "pk": 1,
     "fields": {
