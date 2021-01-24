@@ -85,6 +85,11 @@ class DedupeTest(BaseTestCase):
         except TimeoutException:
             self.fail('Confirmation dialogue not shown, cannot delete previous findings')
 
+        # not sure if this is needed. the datatables js logic only kicks in
+        # if the dev with id "findings" is present
+        # so if it isn't, the no_findings div is available straight after
+        # the page load. but we see some errors here about the div not being there
+        # but when we log the page source, the no_findings div is present
         self.wait_for_datatable_if_content("no_findings", "findings_wrapper")
 
         text = None
