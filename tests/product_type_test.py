@@ -29,7 +29,8 @@ class ProductTypeTest(BaseTestCase):
         # Navigate to the product page
         self.goto_product_type_overview(driver)
 
-        driver.find_element_by_link_text("Add Product").click()
+        driver.find_element_by_id("dropdownMenuPT").click()
+        driver.find_element_by_partial_link_text("Add Product").click()
         # Fill in th product name
         driver.find_element_by_id("id_name").clear()
         driver.find_element_by_id("id_name").send_keys("QA Test PT")
