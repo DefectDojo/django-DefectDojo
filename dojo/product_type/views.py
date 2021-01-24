@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from dojo.filters import ProductTypeFilter
-from dojo.forms import Product_TypeForm, Product_TypeProductForm, Delete_Product_TypeForm
+from dojo.forms import Product_TypeForm, Delete_Product_TypeForm
 from dojo.models import Product_Type, Product
 from dojo.utils import get_page_items, add_breadcrumb
 from django.db.models import Count, Q
@@ -153,13 +153,3 @@ def edit_product_type(request, ptid):
         'user': request.user,
         'pt_form': pt_form,
         'pt': pt})
-
-
-@user_passes_test(lambda u: u.is_staff)
-def add_product_to_product_type(request, ptid):
-    pt = get_object_or_404(Product_Type, pk=ptid)
-    form = Product_TypeProductForm(initial={'prod_type': pt})
-    add_breadcrumb(title="New %s Product" % pt.name, top_level=False, request=request)
-    return render(request, 'dojo/new_product.html',
-                  {'form': form,
-                   })

@@ -7,7 +7,6 @@ import unittest
 import sys
 import os
 from base_test_class import BaseTestCase
-# from base_test_class import on_exception_html_source_logger
 from product_test import ProductTest
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -132,7 +131,6 @@ class ReportBuilderTest(BaseTestCase):
 
         driver.find_element_by_name('_generate').click()
 
-    # @on_exception_html_source_logger
     def test_product_endpoint_report(self):
         driver = self.driver
         self.goto_product_overview(driver)

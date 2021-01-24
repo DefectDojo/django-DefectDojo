@@ -688,10 +688,16 @@ def import_scan_results_prod(request, pid=None):
 
 
 @user_passes_test(lambda u: u.is_staff)
-def new_product(request):
+def new_product(request, ptid=None):
     jira_project_form = None
     error = False
-    form = ProductForm()
+    initial = None
+    if ptid is not None:
+        prod_type = get_object_or_404(Product_Type, pk=ptid)
+        initial = {'prod_type': prod_type}
+
+    form = ProductForm(initial=initial)
+
     if request.method == 'POST':
         form = ProductForm(request.POST, instance=Product())
 

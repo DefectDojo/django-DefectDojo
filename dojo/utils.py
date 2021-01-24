@@ -1668,8 +1668,8 @@ def redirect_to_return_url_or_else(request, or_else):
         return redirect(request, request.get_full_path())
 
 
-# only allow redirects to allowed_hosts to prevent open redirects
 def redirect(request, redirect_to):
+    """Only allow redirects to allowed_hosts to prevent open redirects"""
     if is_safe_url(redirect_to):
         return HttpResponseRedirect(redirect_to)
     raise ValueError('invalid redirect, host and scheme not in allowed_hosts')
