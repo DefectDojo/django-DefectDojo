@@ -79,11 +79,13 @@ class DedupeTest(BaseTestCase):
         driver.find_element_by_css_selector("i.fa.fa-trash").click()
         try:
             WebDriverWait(driver, 1).until(EC.alert_is_present(),
-                                        'Timed out waiting for PA creation ' +
+                                        'Timed out waiting for finding delete ' +
                                         'confirmation popup to appear.')
             driver.switch_to.alert.accept()
         except TimeoutException:
             self.fail('Confirmation dialogue not shown, cannot delete previous findings')
+
+        self.wait_for_datatable_if_content("no_findings", "findings_wrapper")
 
         text = None
         if self.element_exists_by_id("no_findings"):
