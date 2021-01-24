@@ -223,11 +223,8 @@ def get_jira_creation(obj):
 
 
 def get_jira_change(obj):
-    # logger.debug('get_jira_change')
     if isinstance(obj, Finding) or isinstance(obj, Engagement):
-        # logger.debug('get_jira_change2')
         if obj.has_jira_issue:
-            # logger.debug('get_jira_change3')
             return obj.jira_issue.jira_change
     else:
         logger.debug('get_jira_change unsupported object type: %s', obj)
@@ -636,46 +633,10 @@ def update_jira_issue(find):
         log_jira_alert(e.text, find)
         return False
 
-    # This appears to be unreachable.
-    # req_url = jira_instance.url + '/rest/api/latest/issue/' + \
-    #     j_issue.jira_id + '/transitions'
-    # if 'Inactive' in find.status() or 'Mitigated' in find.status(
-    # ) or 'False Positive' in find.status(
-    # ) or 'Out of Scope' in find.status() or 'Duplicate' in find.status():
-    #     # if 'Active' in old_status:
-    #     json_data = {'transition': {'id': jira_instance.close_status_key}}
-    #     r = requests.post(
-    #         url=req_url,
-    #         auth=HTTPBasicAuth(jira_instance.username, jira_instance.password),
-    #         json=json_data)
-    #     if r.status_code != 204:
-    #         logger.warn("JIRA transition failed with error: {}".format(r.text))
-    #     find.jira_issue.jira_change = timezone.now()
-    #     find.jira_issue.save()
-    #     find.save()
-    # elif 'Active' in find.status() and 'Verified' in find.status():
-    #     # if 'Inactive' in old_status:
-    #     json_data = {'transition': {'id': jira_instance.open_status_key}}
-    #     r = requests.post(
-    #         url=req_url,
-    #         auth=HTTPBasicAuth(jira_instance.username, jira_instance.password),
-    #         json=json_data)
-    #     if r.status_code != 204:
-    #         logger.warn("JIRA transition failed with error: {}".format(r.text))
-    #     find.jira_issue.jira_change = timezone.now()
-    #     find.jira_issue.save()
-    #     find.save()
-
 
 # gets the metadata for the default issue type in this jira project
 def get_jira_meta(jira, jira_project):
     meta = jira.createmeta(projectKeys=jira_project.project_key, issuetypeNames=jira_project.jira_instance.default_issue_type, expand="projects.issuetypes.fields")
-    # meta = jira.createmeta(projectKeys=jira_project.project_key, expand="projects.issuetypes.fields")
-    # logger.debug("get_jira_meta: %s", json.dumps(meta, indent=4))  # this is None safe
-    # with open('jira_meta.log', 'w') as outfile:
-    #     logger.debug('logging jira meta to file: %s', os.path.realpath(outfile.name))
-    #     json.dump(meta, outfile, indent=4)
-    # meta['projects'][0]['issuetypes'][0]['fields']:
 
     meta_data_error = False
     if len(meta['projects']) == 0:

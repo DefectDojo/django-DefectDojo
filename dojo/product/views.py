@@ -63,10 +63,6 @@ def product(request):
 
     prod_filter = ProductFilter(request.GET, queryset=prods, user=request.user)
 
-    # print(vars(prod_filter))
-    # print(vars(prod_filter.form))
-    # print(vars(prod_filter.form.fields))
-
     prod_list = get_page_items(request, prod_filter.qs, 25)
 
     # perform annotation/prefetching by replacing the queryset in the page with an annotated/prefetched queryset.
@@ -806,8 +802,6 @@ def edit_product(request, pid):
         if form.is_valid():
             form.save()
             tags = request.POST.getlist('tags')
-            t = ", ".join('"{0}"'.format(w) for w in tags)
-            product.tags = t
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Product updated successfully.',
@@ -846,12 +840,6 @@ def edit_product(request, pid):
 
     form = ProductForm(instance=product,
                        initial={'auth_users': product.authorized_users.all()})
-    #    initial={'auth_users': prod.authorized_users.all(),
-    #             'tags': get_tag_list(Tag.objects.get_for_object(prod))})
-
-    # print('tagulous product form:')
-    # print(vars(form))
-    # print(vars(form.fields['tags']))
 
     if jira_enabled:
         jira_project = jira_helper.get_jira_project(product)
@@ -869,7 +857,6 @@ def edit_product(request, pid):
 
     sonarqube_form = Sonarqube_ProductForm(instance=sonarqube_conf)
 
-    # # form.initial['tags'] = [tag.name for tag in prod.tags.all()]
     product_tab = Product_Tab(pid, title="Edit Product", tab="settings")
     return render(request,
                   'dojo/edit_product.html',
