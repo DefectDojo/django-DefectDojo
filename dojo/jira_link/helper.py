@@ -1007,9 +1007,11 @@ def process_jira_project_form(request, instance=None, product=None, engagement=N
     # jform = JIRAProjectForm(request.POST, instance=instance if instance else JIRA_Project(), product=product)
     jform = JIRAProjectForm(request.POST, instance=instance, product=product, engagement=engagement)
     # logging has_changed because it sometimes doesn't do what we expect
-    logger.debug('jform has changed: ' + str(jform.has_changed()))
+    logger.debug('jform has changed: %s', str(jform.has_changed()))
 
     if jform.has_changed():  # if no data was changed, no need to do anything!
+        logger.debug('jform changed_data: %s', jform.changed_data)
+        logger.debug('jform: %s', vars(jform))
         if jform.is_valid():
             try:
                 jira_project = jform.save(commit=False)
