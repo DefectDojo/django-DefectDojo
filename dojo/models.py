@@ -2802,6 +2802,7 @@ NOTIFICATION_CHOICES = (
 
 
 class Notifications(models.Model):
+    product_type_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     product_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     engagement_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     test_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
@@ -2854,6 +2855,7 @@ class Notifications(models.Model):
                 # This concat looks  better, but requires Python 3.6+
                 # result.scan_added = [*result.scan_added, *notifications.scan_added]
                 from dojo.utils import merge_sets_safe
+                result.product_type_added = merge_sets_safe(result.product_type_added, notifications.product_type_added)
                 result.product_added = merge_sets_safe(result.product_added, notifications.product_added)
                 result.engagement_added = merge_sets_safe(result.engagement_added, notifications.engagement_added)
                 result.test_added = merge_sets_safe(result.test_added, notifications.test_added)

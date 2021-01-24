@@ -11,6 +11,7 @@ from dojo.filters import ProductTypeFilter
 from dojo.forms import Product_TypeForm, Delete_Product_TypeForm
 from dojo.models import Product_Type, Product
 from dojo.utils import get_page_items, add_breadcrumb
+from dojo.notifications.helper import create_notification
 from django.db.models import Count, Q
 from django.db.models.query import QuerySet
 from dojo.user.helper import user_must_be_authorized
@@ -74,11 +75,13 @@ def add_product_type(request):
     if request.method == 'POST':
         form = Product_TypeForm(request.POST)
         if form.is_valid():
-            form.save()
+            product_type = form.save()
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Product type added successfully.',
                                  extra_tags='alert-success')
+            create_notification(event='product_type_added', title=product_type.name,
+                                url=reverse('view_product_type', args=(product_type.id,)))
             return HttpResponseRedirect(reverse('product_type'))
     add_breadcrumb(title="Add Product Type", top_level=False, request=request)
     return render(request, 'dojo/new_product_type.html', {
@@ -115,6 +118,11 @@ def delete_product_type(request, ptid):
                                      messages.SUCCESS,
                                      'Product Type and relationships removed.',
                                      extra_tags='alert-success')
+                create_notification(event='other',
+                                title='Deletion of %s' % product_type.name,
+                                description='The product type "%s" was deleted by %s' % (product_type.name, request.user),
+                                url=request.build_absolute_uri(reverse('product_type')),
+                                icon="exclamation-triangle")
                 return HttpResponseRedirect(reverse('product_type'))
 
     collector = NestedObjects(using=DEFAULT_DB_ALIAS)

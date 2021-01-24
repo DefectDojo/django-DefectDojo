@@ -2,7 +2,7 @@
 
 from django.conf import settings
 from django.db import migrations, models
-
+import multiselectfield.db.fields
 
 class Migration(migrations.Migration):
 
@@ -16,5 +16,10 @@ class Migration(migrations.Migration):
             model_name='product_type',
             name='description',
             field=models.CharField(max_length=4000, null=True),
+        ),
+        migrations.AddField(
+            model_name='notifications',
+            name='product_type_added',
+            field=multiselectfield.db.fields.MultiSelectField(blank=True, choices=[('slack', 'slack'), ('msteams', 'msteams'), ('mail', 'mail'), ('alert', 'alert')], default='alert', max_length=24),
         ),
     ]
