@@ -680,8 +680,6 @@ def get_punchcard_data(objs, start_date, weeks, view='Finding'):
 
             created = timezone.make_aware(datetime.combine(created, datetime.min.time()))
 
-            # print('%s %s %s', created, created.weekday(), calendar.day_name[created.weekday()], day_count)
-
             if created < start_of_week:
                 raise ValueError('date found outside supported range: ' + str(created))
             else:
