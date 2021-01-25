@@ -412,6 +412,14 @@ class FileUpload(models.Model):
 
 
 class Product_Type(models.Model):
+    """Product types represent the top level model, these can be business unit divisions, different offices or locations, development teams, or any other logical way of distinguishing “types” of products.
+
+       Examples:
+         * IAM Team
+         * Internal / 3rd Party
+         * Main company / Acquisition
+         * San Francisco / New York offices
+    """
     name = models.CharField(max_length=255, unique=True)
     description = models.CharField(max_length=4000, null=True)
     critical_product = models.BooleanField(default=False)
