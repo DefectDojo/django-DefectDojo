@@ -107,6 +107,4 @@ EOD
 
   echo "Installing watson search index"
   python3 manage.py installwatson
-  echo "Building watson search index"
-  python3 manage.py buildwatson
 fi
