@@ -4,7 +4,6 @@ import unittest
 import sys
 import time
 from base_test_class import BaseTestCase, on_exception_html_source_logger
-from selenium.webdriver.common.by import By
 
 
 class WaitForPageLoad(object):
@@ -61,6 +60,7 @@ class ProductTest(BaseTestCase):
         # Also confirm success even if Product is returned as already exists for test sake
         self.assertTrue(self.is_success_message_present(text='Product added successfully') or
             self.is_success_message_present(text='Product with this Name already exists.'))
+        self.assertFalse(self.is_error_message_present())
 
     @on_exception_html_source_logger
     def test_list_products(self):
@@ -103,6 +103,7 @@ class ProductTest(BaseTestCase):
         # Assert ot the query to dtermine status of failure
         self.assertTrue(self.is_success_message_present(text='Product updated successfully') or
             self.is_success_message_present(text='Product with this Name already exists.'))
+        self.assertFalse(self.is_error_message_present())
 
     @on_exception_html_source_logger
     def test_add_product_engagement(self):
@@ -342,23 +343,12 @@ class ProductTest(BaseTestCase):
         driver.find_element_by_partial_link_text('Metrics').click()
 
     @on_exception_html_source_logger
-    def delete_product_if_exists(self):
+    def test_delete_product(self, name="QA Test"):
         driver = self.driver
         # Navigate to the product page
         self.goto_product_overview(driver)
         # Select the specific product to delete
-        qa_products = driver.find_elements(By.LINK_TEXT, "QA Test")
-
-        if len(qa_products) > 0:
-            self.test_delete_product()
-
-    @on_exception_html_source_logger
-    def test_delete_product(self):
-        driver = self.driver
-        # Navigate to the product page
-        self.goto_product_overview(driver)
-        # Select the specific product to delete
-        driver.find_element_by_link_text("QA Test").click()
+        driver.find_element_by_link_text(name).click()
         # Click the drop down menu
         # driver.execute_script("window.scrollTo(0, 0)")
         driver.find_element_by_id('dropdownMenu1').click()

@@ -17,7 +17,7 @@
     <div class="panel panel-default">
         <div class="panel-heading">
             <div class="clearfix">
-                <h3 class="pull-left to_highlight finding-title">
+                <h3 class="pull-left finding-title">
                     {{ finding.title }}
                     {% if finding.tags %}
                         <sup>
@@ -86,7 +86,7 @@
                                         <i class="fa fa-clock-o"></i> Touch Finding
                                     </a>
                                 </li>
-                            {% endif %}                                                        
+                            {% endif %}
                             <li role="separator" class="divider"></li>
                             {% if user.is_staff%}
                                 <li role="presentation">
@@ -132,25 +132,29 @@
                                     </a>
                                 </li>
                                 {% endif %}
-                            {% endif %}                                  
+                            {% endif %}
                             {% if user|is_authorized_for_change:finding %}
-                                {% if finding.risk_acceptance_set.all %}
+                                {% if finding.risk_accepted %}
                                     <li role="presentation">
-                                    <a href="{% url 'simple_risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
+                                    <a href="{% url 'risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
                                         <i class="fa fa-exclamation-circle"></i> Unaccept Risk
                                     </a>
                                     </li>
                                 {% else %}
-                                    <li role="presentation">
-                                        <a href="{% url 'simple_risk_accept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
-                                            <i class="fa fa-exclamation-circle"></i> Accept Risk (simple), or
-                                        </a>
-                                    </li>
-                                    <li role="presentation">
-                                        <a href ="{% url 'upload_risk_acceptance$' finding.test.engagement.id%}">
-                                            <i class="fa fa-exclamation-circle"></i> Add Full Risk Acceptance...
-                                        </a>
-                                    </li>
+                                    {% if finding.test.engagement.product.enable_simple_risk_acceptance %}
+                                        <li role="presentation">
+                                            <a href="{% url 'simple_risk_accept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
+                                                <i class="fa fa-exclamation-circle"></i> Accept Risk
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                    {% if finding.test.engagement.product.enable_full_risk_acceptance %}
+                                        <li role="presentation">
+                                            <a href ="{% url 'add_risk_acceptance' finding.test.engagement.id finding.id %}?return_url={{ request.get_full_path|urlencode }}">
+                                                <i class="fa fa-exclamation-circle"></i> Add Risk Acceptance...
+                                            </a>
+                                        </li>
+                                    {% endif %}
                                 {% endif %}
                             {% endif %}
                             <li role="presentation">
@@ -255,7 +259,7 @@
                     <td> {{finding.get_scanner_confidence_text}}</td>
                     {% endif %}
                     <td>
-                        <div class="align-top">                    
+                        <div class="align-top">
                             {% comment %}
                             {% if finding.duplicate %}
                                 {% include "dojo/finding_related_actions.html" with similar_finding=finding finding_context=finding intro=finding|finding_display_status|safe %}
@@ -266,6 +270,17 @@
                             {{ finding|finding_display_status|safe }}
                         </div>
                     </td>
+                    {% if finding.risk_acceptance_set.all %}
+                        <td>
+                            {% for ra in finding.risk_acceptance_set.all|slice:":5" %}
+                                <a href="{% url 'view_risk_acceptance' finding.test.engagement.id ra.id %}"
+                                class="fa fa-exclamation-circle fa-lg has-popover {% if ra.is_expired %}lightgrey{% endif%}"
+                                data-trigger="hover" data-placement="right"
+                                data-content="{{ ra.name_and_expiration_info }}"
+                                data-container="body" data-original-title="Risk Acceptance"></a>
+                            {% endfor %}
+                        </td>
+                    {% endif %}
                     {% if finding.duplicate_finding %}
                         <td>
                             <div class="align-top">
@@ -290,8 +305,8 @@
                             <div class="dropdown">
                                 {% for duplicate in duplicate_cluster|slice:"5" %}
                                     <a class="fa fa-bug" href="{% url 'view_finding' duplicate.id %}" title="{{ duplicate|finding_extended_title }}"/>
-                                {%  endfor %}            
-                                {% if duplicate_cluster|length > 5 %}                                                    
+                                {%  endfor %}
+                                {% if duplicate_cluster|length > 5 %}
                                     <a href="#duplicate_cluster" onclick="$('#duplicate_tree_toggle').click()">...</a>
                                 {% endif %}
                                 <a href="#" data-toggle="dropdown">&nbsp;<i class="fa fa-ellipsis-v"></i>&nbsp;</a>
@@ -303,7 +318,7 @@
                                         </a>
                                     </li>
                                 {%  endfor %}
-                                {% if duplicate_cluster|length > 5 %}                                                    
+                                {% if duplicate_cluster|length > 5 %}
                                     <li>
                                         <a href="#duplicate_cluster" onclick="$('#duplicate_tree_toggle').click()">
                                         <i class="fa fa-bug"></i>... more below ...</i>
@@ -314,15 +329,6 @@
                             </div>
                         </div>
                     </td>
-                    {% endif %}
-                    {% if finding.risk_acceptance_set.all %}
-                        <td>
-                            {% for ra in finding.risk_acceptance_set.all|slice:":5" %}
-                                <a href="{% url 'view_risk' finding.test.engagement.id finding.risk_acceptance_set.all.0.id %}" class="fa fa-exclamation-circle fa-lg has-popover" data-trigger="hover" data-placement="right"
-                                data-content="{{ finding.risk_acceptance_set.all.0.name }}"
-                                data-container="body" data-original-title="Risk Acceptance"></a>
-                            {% endfor %}
-                        </td>
                     {% endif %}
                     <td>
                         {% if finding.static_finding and finding.dynamic_finding > 0 %}
@@ -369,7 +375,7 @@
     {% if finding.static_finding or finding.line > 0 %}
         {% if finding.sast_source_object or finding.sast_sink_object or finding.sast_source_file_path or finding.sast_source_line > 0 %}
         {# For tools that give information on both source (start) and sink (end) of the attack vector #}
-        
+
         <div class="panel panel-default">
             <table id="sast_source" class="table-striped table table-condensed table-hover centered">
                 <tr>
@@ -428,12 +434,12 @@
     <div class="panel panel-default">
         <table id="error_notes" class="table-striped table table-condensed table-hover centered">
             <tr>
-                {% if finding.file_path %}                
+                {% if finding.file_path %}
                 <th>Location</th>
                 {% endif %}
-                {% if finding.line %}                                
+                {% if finding.line %}
                 <th>Line Number</th>
-                {% endif %}                
+                {% endif %}
                 {% if finding.nb_occurences %}
                 <th>Nb occurences</th>
                 {% endif %}
@@ -445,10 +451,10 @@
                 {% endif %}
                 {% if finding.has_jira_configured or finding.jira_issue %}
                 <th>JIRA</th>
-                {% endif %}                    
+                {% endif %}
                 {% if finding.github_conf_new or finding.github_issue %}
                 <th>GitHub</th>
-                {% endif %}                    
+                {% endif %}
             </tr>
             <tr>
                 {% if finding.file_path %}
@@ -459,14 +465,14 @@
                         data-clipboard-text="{{finding.file_path}}"></i>
                     </span>
                 </td>
-                {% endif %}                
-                {% if finding.line %}                
+                {% endif %}
+                {% if finding.line %}
                 <td>
                     <span>
                         {{ finding.line }}
                     </span>
                 </td>
-                {% endif %}                
+                {% endif %}
                 {% if finding.nb_occurences %}
                 <td>
                     <span>
@@ -507,14 +513,14 @@
                 {% if finding.github_conf_new or finding.github_issue %}
                     <td>
                     {% if finding.github_issue %}
-                        <a href="{{ finding.github_issue.issue_url }}" target="_blank" title="{{ finding.github_issue.issue_url }}">#{{ finding.github_issue.issue_id }}</a>                            
+                        <a href="{{ finding.github_issue.issue_url }}" target="_blank" title="{{ finding.github_issue.issue_url }}">#{{ finding.github_issue.issue_id }}</a>
                     {% endif %}
                     </td>
                 {% endif %}
             </tr>
         </table>
     </div>
-    {% endif %}    
+    {% endif %}
     {% if finding.param or finding.payload %}
         <div class="panel panel-default">
             <table id="error_notes" class="table-striped table table-condensed table-hover">
@@ -541,7 +547,7 @@
             </table>
         </div>
     {% endif %}
-    
+
     {% if finding.duplicate_finding_set %}
         {% comment %}
             little extra div to serve as anchor, with some padding and padding cancelling margin to make sure it scrolls into view correctly
@@ -563,7 +569,7 @@
 
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h4 class="has-filters">Similar Findings ({{ similar_findings.count }}) 
+                <h4 class="has-filters">Similar Findings ({{ similar_findings.count }})
                     <span class="pull-right"><a data-toggle="collapse" href=".similar_findings"><i class="glyphicon glyphicon-chevron-down"></i></a></span>
                     {% comment %} <span class="pull-right similar_findings collapse" aria-expanded="false"><button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary dropdown" aria-expanded="false"> <i class="fa fa-filter"></i> <i class="caret"></i> </button></span> {% endcomment %}
                     <div class="similar_findings dropdown pull-right collapse"></div>
@@ -572,7 +578,7 @@
             <div id="the-filters" class="panel-body collapse">
                 {% include "dojo/filter_snippet.html" with form=similar_findings_filter.form %}
             </div>
-            {% if similar_findings_filter %}            
+            {% if similar_findings_filter %}
                 <div id="similar_findings" class="panel-body similar_findings collapse">
                     {% include "dojo/finding_related_list.html" with finding_context=finding finding_list=similar_findings %}
                 </div>
@@ -597,13 +603,13 @@
                     <li style="padding-left: 8px;">
                         <form action="{% url 'endpoints_status_bulk' finding.id %}" method="post" id="bulk_change_form">
                             {% csrf_token %}
-                            <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />                                            
+                            <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
                             <label style="font-size: 80%; font-weight: normal; display: block">
-                                <input id="id_bulk_active" label="active "name="active" type="checkbox"/> 
+                                <input id="id_bulk_active" label="active "name="active" type="checkbox"/>
                                 <span>Active</span>
                             </label>
                             <label style="font-size: 80%; font-weight: normal; display: block">
-                                <input id="id_bulk_false_p" label="false_positive name="false_positive" type="checkbox"/> 
+                                <input id="id_bulk_false_p" label="false_positive name="false_positive" type="checkbox"/>
                                 <span>False Positive</span>
                             </label>
                             <label style="font-size: 80%; font-weight: normal; display: block">
@@ -618,7 +624,7 @@
                                 <input id="id_bulk_risk_accepted" label="risk_accepted" name="risk_accepted" type="checkbox"/>
                                 <span>Risk Accepted</span>
                             </label>
-                            <br/>    
+                            <br/>
                             <input type="submit" class="btn btn-sm btn-primary" label="Submit" name="Submit" value="Submit"/>
                         </form>
                     </li>
@@ -629,7 +635,7 @@
 
     {% include "dojo/snippets/endpoints.html" with finding=finding destination="UI" %}
 
-    <div class="view-finding to_highlight">
+    <div class="view-finding">
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h4>Description <span class="pull-right"><a data-toggle="collapse" href="#vuln_desc"><i
@@ -678,7 +684,7 @@
             </div>
         {% endif %}
 
-        {% if finding.files.exists %}
+        {% if files %}
             <div class="row">
                 <div class="col-md-12" id="cred">
                     <div class="panel panel-default">
@@ -691,7 +697,7 @@
                                 <span class="fa fa-edit"></span></a>
                             </h4>
                         </div>
-                        
+
                         <div id="add_feat_files" class="panel-body collapse {% if files %}in{% endif %}">
                             {% for file in files %}
                             <div class="col-md-2" style="text-align: center">
@@ -712,7 +718,7 @@
                         </div>
                     </div>
                 </div>
-            </div> 
+            </div>
         {% endif %}
 
         <div class="modal fade" id="findingImageModal" tabindex="-1" role="dialog"
@@ -1005,11 +1011,11 @@
         $(document).on('keypress', null, 'e', function () {
             window.location.assign('{% url 'edit_finding' finding.id %}');
         });
-        
+
         $(document).on('keypress', null, 'p', function () {
             window.location.assign('{% url 'view_finding' prev_finding_id %}');
         });
-        
+
         $(document).on('keypress', null, 'n', function () {
             window.location.assign('{% url 'view_finding' next_finding_id %}');
         });
@@ -1068,7 +1074,7 @@
                 type: "post",
                 dataType:'json',
                 data: '',
-                context: this, 
+                context: this,
                 url: url,
                 // The ``X-CSRFToken`` evidently can't be set in the
                 // ``headers`` option, so force it here.
@@ -1087,7 +1093,7 @@
                 },
                 complete: function(e) {
                     console.log('complete')
-                    console.log(this)                        
+                    console.log(this)
                     location.reload()
                 }
             });
@@ -1261,7 +1267,7 @@
             var related_action_form = $('#related_action')
             {% comment %} alert(url) {% endcomment %}
             related_action_form.attr('action', url)
-            related_action.submit()        
+            related_action.submit()
         }
 
         {% comment %} $('#show-filters').on('click', function () {

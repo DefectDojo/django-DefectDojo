@@ -7,7 +7,7 @@ from rest_framework.test import APITestCase, APIClient
 from dojo.models import Product_Type, Product, Engagement, Test, Finding, User, Test_Type
 
 
-class TestRiskAcceptanceApi(APITestCase):
+class TestBulkRiskAcceptanceApi(APITestCase):
 
     @classmethod
     def setUpTestData(cls):

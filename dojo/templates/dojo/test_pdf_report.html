@@ -271,10 +271,13 @@
                                     </td>
                                     <td>{{ finding.status }}</td>
                                     {% if finding.risk_acceptance_set.all %}
-                                        <td>
-                                            <a href="{% url 'view_risk' finding.test.engagement.id finding.risk_acceptance_set.all.0.id %}">
-                                                View Risk Acceptance</a>
-                                        </td>
+                                    <td>
+                                        {% comment %} for some reason the font-awesome icons don't work with the report template{% endcomment %}
+                                        {% for ra in finding.risk_acceptance_set.all|slice:":5" %}
+                                            <a href="{% url 'view_risk_acceptance' finding.test.engagement.id ra.id %}"
+                                            class="{% if ra.is_expired %}lightgrey{% endif%}">acceptance</a>&nbsp;
+                                        {% endfor %}
+                                    </td>
                                     {% endif %}
                                     <td>{{ finding.date }}</td>
                                     <td>{{ finding.age }} days</td>
@@ -296,7 +299,7 @@
                             </table>
                         </div>
                     </div>
-                    
+
                     {% include "dojo/snippets/endpoints.html" with finding=finding destination="Report" %}
 
                      <h6>CVSSv3</h6>
@@ -393,7 +396,7 @@
     </div> <!-- /container -->
 {% endblock %}
 {% block js %}
-    
+
     <script src="{{ host }}{% static "jquery/dist/jquery.min.js" %}"></script>
     <!-- Flot Charts JavaScript -->
     <script src="{{ host }}{% static "flot/excanvas.min.js" %}"></script>
@@ -403,7 +406,7 @@
     <script src="{{ host }}{% static "flot/jquery.flot.stack.js" %}"></script>
     <script src="{{ host }}{% static "flot-axis/jquery.flot.axislabels.js" %}"></script>
     <script type="text/javascript">
-        
+
         {% if include_executive_summary %}
             $(function () {
 
@@ -692,7 +695,7 @@
                                 return str;
                             }
 
-                            
+
                             if(tags)
                             {
                                 openLevel = openLevel_t;
@@ -708,17 +711,17 @@
                             }
 
                             level = parseInt(openLevel);
-                            
+
                             var anchor = titleText.trim().replace(/ /g, "_");
 
                             if(tags)
                             {
                                 if (['Info', 'Low', 'Medium', 'High', 'Critical'].indexOf(titleText) >= 0) {
-                                    toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
+                                    toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
                                     "<span class=\"label severity severity-" + titleText + "\">" + titleText + "</span></a></li>";
                                 }
                                 else {
-                                    toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
+                                    toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
                                     titleText + "<sup>" + tags + "</sup></a></li>";
                                 }
 
@@ -728,11 +731,11 @@
                             else
                             {
                                 if (['Info', 'Low', 'Medium', 'High', 'Critical'].indexOf(titleText) >= 0) {
-                                    toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
+                                    toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
                                     "<span class=\"label severity severity-" + titleText + "\">" + titleText + "</span></a></li>";
                                 }
                                 else {
-                                    toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
+                                    toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
                                     titleText + "</a></li>";
                                 }
 
@@ -744,7 +747,7 @@
                                 + titleText + "<sup>" + tags + "</sup></h" + closeLevel + "></a>";
                         }
                     );
-                    
+
                 if (level) {
                     toc += (new Array(level + 1)).join("</ul>");
                 }

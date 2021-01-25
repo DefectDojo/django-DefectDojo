@@ -17,19 +17,16 @@ from django.db.models import Sum, Count, Q, Max
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS, connection
 from dojo.templatetags.display_tags import get_level
-from dojo.filters import ProductFilter, EngagementFilter, ProductMetricsEndpointFilter, ProductMetricsFindingFilter, \
-    ProductComponentFilter
-from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAProjectForm, JIRAFindingForm, \
-    AdHocFindingForm, \
-    EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm, ProductNotificationsForm, \
-    GITHUB_Product_Form, GITHUBFindingForm, App_AnalysisTypeForm, JIRAEngagementForm
-from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, \
-    GITHUB_PKey, Finding_Template, \
-    Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint_Status, \
-    Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, BurpRawRequestResponse
+from dojo.filters import ProductFilter, EngagementFilter, ProductMetricsEndpointFilter, ProductMetricsFindingFilter, ProductComponentFilter
+from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAProjectForm, JIRAFindingForm, AdHocFindingForm, \
+                       EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm, ProductNotificationsForm, \
+                       GITHUB_Product_Form, GITHUBFindingForm, App_AnalysisTypeForm, JIRAEngagementForm
+from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, ScanSettings, Test, GITHUB_PKey, Finding_Template, \
+                        Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint_Status, \
+                        Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, BurpRawRequestResponse
 
-from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, Product_Tab, get_punchcard_data, \
-    queryset_check
+from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, Product_Tab, get_punchcard_data, queryset_check
+
 from dojo.notifications.helper import create_notification
 from django.db.models import Prefetch, F
 from django.db.models.query import QuerySet
@@ -65,10 +62,6 @@ def product(request):
     name_words = prods.values_list('name', flat=True)
 
     prod_filter = ProductFilter(request.GET, queryset=prods, user=request.user)
-
-    # print(vars(prod_filter))
-    # print(vars(prod_filter.form))
-    # print(vars(prod_filter.form.fields))
 
     prod_list = get_page_items(request, prod_filter.qs, 25)
 
@@ -253,19 +246,22 @@ def finding_querys(request, prod):
     filters = dict()
 
     findings_query = Finding.objects.filter(test__engagement__product=prod,
-                                            severity__in=(
-                                                'Critical', 'High', 'Medium', 'Low', 'Info')).prefetch_related(
-        'test__engagement',
-        'test__engagement__risk_acceptance',
-        'found_by',
-        'test',
-        'test__test_type',
-        'risk_acceptance_set',
+                                      severity__in=('Critical', 'High', 'Medium', 'Low', 'Info'))
+
+    # prefetch only what's needed to avoid lots of repeated queries
+    findings_query = findings_query.prefetch_related(
+        # 'test__engagement',
+        # 'test__engagement__risk_acceptance',
+        # 'found_by',
+        # 'test',
+        # 'test__test_type',
+        # 'risk_acceptance_set',
         'reporter')
     findings = ProductMetricsFindingFilter(request.GET, queryset=findings_query, pid=prod)
     findings_qs = queryset_check(findings)
     filters['form'] = findings.form
 
+    # dead code:
     # if not findings_qs and not findings_query:
     #     # logger.debug('all filtered')
     #     findings = findings_query
@@ -291,8 +287,11 @@ def finding_querys(request, prod):
         end_date = timezone.now()
     week = end_date - timedelta(days=7)  # seven days and /newnewer are considered "new"
 
-    risk_acceptances = Risk_Acceptance.objects.filter(engagement__in=Engagement.objects.filter(product=prod))
-    filters['accepted'] = [finding for ra in risk_acceptances for finding in ra.accepted_findings.all()]
+    # risk_acceptances = Risk_Acceptance.objects.filter(engagement__in=Engagement.objects.filter(product=prod)).prefetch_related('accepted_findings')
+    # filters['accepted'] = [finding for ra in risk_acceptances for finding in ra.accepted_findings.all()]
+
+    from dojo.finding.views import ACCEPTED_FINDINGS_QUERY
+    filters['accepted'] = Finding.objects.filter(test__engagement__product=prod).filter(ACCEPTED_FINDINGS_QUERY).distinct()
 
     filters['verified'] = findings_qs.filter(date__range=[start_date, end_date],
                                              false_p=False,
@@ -469,6 +468,7 @@ def view_product_metrics(request, pid):
     week_date = filters['week']
 
     tests = Test.objects.filter(engagement__product=prod).prefetch_related('finding_set', 'test_type')
+    tests = tests.annotate(verified_finding_count=Count('finding__id', filter=Q(finding__verified=True)))
 
     open_vulnerabilities = filters['open_vulns']
     all_vulnerabilities = filters['all_vulns']
@@ -565,9 +565,9 @@ def view_product_metrics(request, pid):
     test_data = {}
     for t in tests:
         if t.test_type.name in test_data:
-            test_data[t.test_type.name] += t.verified_finding_count()
+            test_data[t.test_type.name] += t.verified_finding_count
         else:
-            test_data[t.test_type.name] = t.verified_finding_count()
+            test_data[t.test_type.name] = t.verified_finding_count
     product_tab = Product_Tab(pid, title="Product", tab="metrics")
 
     return render(request,
@@ -661,14 +661,12 @@ def prefetch_for_view_engagements(engs):
         prefetched_engs = prefetched_engs.prefetch_related('test_set')
         prefetched_engs = prefetched_engs.prefetch_related('test_set__test_type')  # test.name uses test_type
         prefetched_engs = prefetched_engs.annotate(count_findings_all=Count('test__finding__id'))
-        prefetched_engs = prefetched_engs.annotate(
-            count_findings_open=Count('test__finding__id', filter=Q(test__finding__active=True)))
-        prefetched_engs = prefetched_engs.annotate(
-            count_findings_open_verified=Count('test__finding__id', filter=Q(test__finding__active=True) & Q(test__finding__verified=True)))
-        prefetched_engs = prefetched_engs.annotate(
-            count_findings_close=Count('test__finding__id', filter=Q(test__finding__is_Mitigated=True)))
-        prefetched_engs = prefetched_engs.annotate(
-            count_findings_duplicate=Count('test__finding__id', filter=Q(test__finding__duplicate=True)))
+        prefetched_engs = prefetched_engs.annotate(count_findings_open=Count('test__finding__id', filter=Q(test__finding__active=True)))
+        prefetched_engs = prefetched_engs.annotate(count_findings_open_verified=Count('test__finding__id', filter=Q(test__finding__active=True) & Q(test__finding__verified=True)))
+        prefetched_engs = prefetched_engs.annotate(count_findings_close=Count('test__finding__id', filter=Q(test__finding__is_Mitigated=True)))
+        prefetched_engs = prefetched_engs.annotate(count_findings_duplicate=Count('test__finding__id', filter=Q(test__finding__duplicate=True)))
+        ACCEPTED_FINDINGS_QUERY = Q(test__finding__risk_accepted=True)
+        prefetched_engs = prefetched_engs.annotate(count_findings_accepted=Count('test__finding__id', filter=ACCEPTED_FINDINGS_QUERY))
         prefetched_engs = prefetched_engs.prefetch_related('tags')
     else:
         logger.debug('unable to prefetch because query was already executed')
@@ -686,10 +684,16 @@ def import_scan_results_prod(request, pid=None):
 
 
 @user_passes_test(lambda u: u.is_staff)
-def new_product(request):
+def new_product(request, ptid=None):
     jira_project_form = None
     error = False
-    form = ProductForm()
+    initial = None
+    if ptid is not None:
+        prod_type = get_object_or_404(Product_Type, pk=ptid)
+        initial = {'prod_type': prod_type}
+
+    form = ProductForm(initial=initial)
+
     if request.method == 'POST':
         form = ProductForm(request.POST, instance=Product())
 
@@ -798,8 +802,6 @@ def edit_product(request, pid):
         if form.is_valid():
             form.save()
             tags = request.POST.getlist('tags')
-            t = ", ".join('"{0}"'.format(w) for w in tags)
-            product.tags = t
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Product updated successfully.',
@@ -838,12 +840,6 @@ def edit_product(request, pid):
 
     form = ProductForm(instance=product,
                        initial={'auth_users': product.authorized_users.all()})
-    #    initial={'auth_users': prod.authorized_users.all(),
-    #             'tags': get_tag_list(Tag.objects.get_for_object(prod))})
-
-    # print('tagulous product form:')
-    # print(vars(form))
-    # print(vars(form.fields['tags']))
 
     if jira_enabled:
         jira_project = jira_helper.get_jira_project(product)
@@ -861,7 +857,6 @@ def edit_product(request, pid):
 
     sonarqube_form = Sonarqube_ProductForm(instance=sonarqube_conf)
 
-    # # form.initial['tags'] = [tag.name for tag in prod.tags.all()]
     product_tab = Product_Tab(pid, title="Edit Product", tab="settings")
     return render(request,
                   'dojo/edit_product.html',
