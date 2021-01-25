@@ -5,140 +5,119 @@ from xml.dom import NamespaceErr
 
 from defusedxml import ElementTree
 
-from dojo.models import Endpoint, Finding
-
-__author__ = 'jay7958'
-
-
-def get_text_severity(severity_id):
-    if severity_id == 4:
-        return 'Critical'
-    elif severity_id == 3:
-        return 'High'
-    elif severity_id == 2:
-        return 'Medium'
-    elif severity_id == 1:
-        return 'Low'
-    else:
-        return 'Info'
+from dojo.models import Endpoint, Finding, Test
 
 
 class NessusCSVParser(object):
+
     def get_findings(self, filename, test):
-        content = open(filename.temporary_file_path(), "r").read().replace("\r", "\n")
-        # content = re.sub("\"(.*?)\n(.*?)\"", "\"\1\2\"", content)
-        # content = re.sub("(?<=\")\n", "\\\\n", content)
-        with open("%s-filtered" % filename.temporary_file_path(), "w") as out:
-            out.write(content)
-            out.close()
+        if filename is None:
+            return list()
 
-        with open("%s-filtered" % filename.temporary_file_path(), "r") as scan_file:
-            reader = csv.reader(scan_file,
-                                lineterminator="\n",
-                                quoting=csv.QUOTE_ALL)
-            dupes = {}
-            first = True
-            for row in reader:
-                if first:
-                    heading = row
-                    first = False
+        reader = csv.reader(filename,
+                            lineterminator="\n",
+                            quoting=csv.QUOTE_ALL)
+        dupes = {}
+        first = True
+        for row in reader:
+            if first:
+                heading = row
+                first = False
+                continue
+
+            dat = {}
+            endpoint = None
+            for h in ["severity", "endpoint",
+                        "title", "description",
+                        "mitigation", "references",
+                        "impact", "plugin_output", "port"]:
+                dat[h] = None
+
+            for i, var in enumerate(row):
+                if not var:
                     continue
 
-                dat = {}
-                endpoint = None
-                for h in ["severity", "endpoint",
-                          "title", "description",
-                          "mitigation", "references",
-                          "impact", "plugin_output", "port"]:
-                    dat[h] = None
+                var = re.sub("(^(\\n)+|(\\n)+$|\\r)", "", var)
+                var = re.sub("(\\n)+", "\n", var)
 
-                for i, var in enumerate(row):
-                    if not var:
-                        continue
-
-                    var = re.sub(r"(\A(\\n)+|(\\n)+\Z|\\r)", "", var)
-                    var = re.sub("(\\n)+", "\n", var)
-
-                    if heading[i] == "CVE":
-                        if re.search("(CVE|CWE)", var) is None:
-                            var = "CVE-%s" % str(var)
-                        if dat['references'] is not None:
-                            dat['references'] = var + "\n" + dat['references']
+                if heading[i] == "CVE":
+                    if re.search("(CVE|CWE)", var) is None:
+                        var = "CVE-%s" % str(var)
+                    if dat['references'] is not None:
+                        dat['references'] = var + "\n" + dat['references']
+                    else:
+                        dat['references'] = var + "\n"
+                elif heading[i] == "Risk":
+                    if re.match("None", var) or not var:
+                        dat['severity'] = "Info"
+                    else:
+                        dat['severity'] = var
+                elif heading[i] == "Host":
+                    dat['endpoint'] = var
+                    endpoint = Endpoint(host=var)
+                elif heading[i] == "Port":
+                    if var != "None":
+                        if dat['description'] is not None:
+                            dat['description'] = "Ports:"
+                            + var + "\n" + dat['description']
                         else:
-                            dat['references'] = var + "\n"
-                    elif heading[i] == "Risk":
-                        if re.match("None", var) or not var:
-                            dat['severity'] = "Info"
-                        else:
-                            dat['severity'] = var
-                    elif heading[i] == "Host":
-                        dat['endpoint'] = var
-                        endpoint = Endpoint(host=var)
-                    elif heading[i] == "Port":
-                        if var != "None":
-                            if dat['description'] is not None:
-                                dat['description'] = "Ports:"
-                                + var + "\n" + dat['description']
-                            else:
-                                dat['description'] = "Ports:" + var + "\n"
+                            dat['description'] = "Ports:" + var + "\n"
 
-                            dat['port'] = var
-                            endpoint.host += ":" + var
-                        else:
-                            dat['port'] = 'n/a'
+                        dat['port'] = var
+                        endpoint.host += ":" + var
+                    else:
+                        dat['port'] = 'n/a'
 
-                    elif heading[i] == "Name":
-                        dat['title'] = var
-                    elif heading[i] == "Synopsis":
-                        dat['description'] = var
-                    elif heading[i] == "Description":
-                        dat['impact'] = var
-                    elif heading[i] == "Solution":
-                        dat['mitigation'] = var
-                    elif heading[i] == "See Also":
-                        if dat['references'] is not None:
-                            dat['references'] += var
-                        else:
-                            dat['references'] = var
-                    elif heading[i] == "Plugin Output":
-                        dat['plugin_output'] = "\nPlugin output(" + \
-                                               dat['endpoint'] + \
-                                               "):\n```\n" + str(var) + \
-                                               "\n```\n"
+                elif heading[i] == "Name":
+                    dat['title'] = var
+                elif heading[i] == "Synopsis":
+                    dat['description'] = var
+                elif heading[i] == "Description":
+                    dat['impact'] = var
+                elif heading[i] == "Solution":
+                    dat['mitigation'] = var
+                elif heading[i] == "See Also":
+                    if dat['references'] is not None:
+                        dat['references'] += var
+                    else:
+                        dat['references'] = var
+                elif heading[i] == "Plugin Output":
+                    dat['plugin_output'] = "\nPlugin output(" + \
+                                            dat['endpoint'] + \
+                                            "):\n```\n" + str(var) + \
+                                            "\n```\n"
 
-                if not dat['severity']:
-                    dat['severity'] = "Info"
-                if not dat['title']:
-                    continue
+            if not dat['severity']:
+                dat['severity'] = "Info"
+            if not dat['title']:
+                continue
 
-                dupe_key = dat['severity'] + dat['title']
+            dupe_key = dat['severity'] + dat['title']
 
-                if dupe_key in dupes:
-                    find = dupes[dupe_key]
-                    if dat['plugin_output'] is not None:
-                        find.description += dat['plugin_output']
-                else:
-                    if dat['plugin_output'] is not None:
-                        dat['description'] = dat['description'] + \
-                                             dat['plugin_output']
-                    find = Finding(title=dat['title'],
-                                   test=test,
-                                   active=False,
-                                   verified=False, description=dat['description'],
-                                   severity=dat['severity'],
-                                   numerical_severity=Finding.get_numerical_severity(dat['severity']),
-                                   mitigation=dat['mitigation'] if dat['mitigation'] is not None else 'N/A',
-                                   impact=dat['impact'],
-                                   references=dat['references'],
-                                   url=dat['endpoint'])
+            if dupe_key in dupes:
+                find = dupes[dupe_key]
+                if dat['plugin_output'] is not None:
+                    find.description += dat['plugin_output']
+            else:
+                if dat['plugin_output'] is not None:
+                    dat['description'] = dat['description'] + \
+                                            dat['plugin_output']
+                find = Finding(title=dat['title'],
+                                test=test,
+                                active=False,
+                                verified=False, description=dat['description'],
+                                severity=dat['severity'],
+                                numerical_severity=Finding.get_numerical_severity(dat['severity']),
+                                mitigation=dat['mitigation'] if dat['mitigation'] is not None else 'N/A',
+                                impact=dat['impact'],
+                                references=dat['references'],
+                                url=dat['endpoint'])
 
-                    find.unsaved_endpoints = list()
-                    dupes[dupe_key] = find
+                find.unsaved_endpoints = list()
+                dupes[dupe_key] = find
 
-                if endpoint:
-                    find.unsaved_endpoints.append(endpoint)
-        os.unlink(filename.temporary_file_path())
-        os.unlink("%s-filtered" % filename.temporary_file_path())
+            if endpoint:
+                find.unsaved_endpoints.append(endpoint)
         return list(dupes.values())
 
 
@@ -181,7 +160,7 @@ class NessusXMLParser(object):
                         description += plugin_output
 
                     nessus_severity_id = int(item.attrib["severity"])
-                    severity = get_text_severity(nessus_severity_id)
+                    severity = self.get_text_severity(nessus_severity_id)
 
                     impact = ""
                     if item.find("description"):
@@ -239,6 +218,19 @@ class NessusXMLParser(object):
                                                                protocol=protocol))
 
         return list(dupes.values())
+
+    def get_text_severity(severity_id):
+        """Convert data of the report into severity"""
+        if severity_id == 4:
+            return 'Critical'
+        elif severity_id == 3:
+            return 'High'
+        elif severity_id == 2:
+            return 'Medium'
+        elif severity_id == 1:
+            return 'Low'
+        else:
+            return 'Info'
 
 
 class NessusParser(object):
