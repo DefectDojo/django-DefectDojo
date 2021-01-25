@@ -29,7 +29,7 @@ class ProductTypeTest(BaseTestCase):
         # Navigate to the product page
         self.goto_product_type_overview(driver)
 
-        driver.find_element_by_id("dropdownMenuProduktType").click()
+        driver.find_element_by_id("dropdownMenuProductType").click()
         driver.find_element_by_partial_link_text("Add Product").click()
         # Fill in th product name
         driver.find_element_by_id("id_name").clear()
@@ -48,7 +48,7 @@ class ProductTypeTest(BaseTestCase):
         print("\n\nDebug Print Log: testing 'view product type' \n")
         driver = self.driver
         driver.get(self.base_url + "product/type")
-        driver.find_element_by_id("dropdownMenuProduktType").click()
+        driver.find_element_by_id("dropdownMenuProductType").click()
         driver.find_element_by_partial_link_text("View").click()
         product_type_text = driver.find_element_by_id("id_heading").text
 
@@ -58,7 +58,7 @@ class ProductTypeTest(BaseTestCase):
         print("\n\nDebug Print Log: testing 'edit product type' \n")
         driver = self.driver
         driver.get(self.base_url + "product/type")
-        driver.find_element_by_id("dropdownMenuProduktType").click()
+        driver.find_element_by_id("dropdownMenuProductType").click()
         driver.find_element_by_partial_link_text("Edit").click()
         driver.find_element_by_id("id_name").clear()
         driver.find_element_by_id("id_name").send_keys("Edited product test type")
@@ -71,7 +71,7 @@ class ProductTypeTest(BaseTestCase):
         driver = self.driver
         driver.get(self.base_url + "product/type")
         # TODO this assumes the first product_type in the list is the one that we just created (and can safely be deleted)
-        driver.find_element_by_id("dropdownMenuProduktType").click()
+        driver.find_element_by_id("dropdownMenuProductType").click()
         driver.find_element_by_partial_link_text("Delete").click()
         driver.find_element_by_css_selector("button.btn.btn-danger").click()
 
