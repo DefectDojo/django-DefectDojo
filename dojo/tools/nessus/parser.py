@@ -98,7 +98,7 @@ class NessusCSVParser(object):
 
                 # manage CVSS vector (only v3.x for now)
                 if 'CVSS V3 Vector' in row and row.get('CVSS V3 Vector') is not None:
-                    find.cvssv3 = CVSS3('CVSS:3.0/' + str(row.get('CVSS V3 Vector'))).clean_vector()
+                    find.cvssv3 = CVSS3('CVSS:3.0/' + str(row.get('CVSS V3 Vector'))).clean_vector(output_prefix=False)
                 # manage CPE data
                 detected_cpe = self._format_cpe(str(row.get('CPE')))
                 if detected_cpe:
