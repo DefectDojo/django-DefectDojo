@@ -93,5 +93,5 @@ class TestNessusParser(TestCase):
         testfile = open("dojo/unittests/scans/nessus/nessus_many_vuln2-all.csv", "rt")
         parser = NessusCSVParser(testfile, self.create_test())
         # FIXME Nessus CSV parser should be reliable with binary file
-        # testfile = open("dojo/unittests/scans/nessus/nessus_many_vuln2-all.csv", "rb")
-        # parser = NessusCSVParser(testfile, self.create_test())
+        testfile = open("dojo/unittests/scans/nessus/nessus_many_vuln2-all.csv", "rb")
+        parser = NessusCSVParser(testfile, self.create_test())

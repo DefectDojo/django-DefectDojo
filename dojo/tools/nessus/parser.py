@@ -7,7 +7,8 @@ import re
 from dojo.models import Endpoint, Finding, Test
 from cvss import CVSS3
 from cpe import CPE
-import codecs
+import numpy as np
+import pandas as pd
 
 LOGGER = logging.getLogger(__name__)
 
@@ -43,15 +44,11 @@ class NessusCSVParser(object):
         return None
 
     def get_findings(self, file, test: Test):
-        if file is None:
-            return list()
-        if isinstance(file, bytes):
-            reader = csv.DictReader(codecs.iterdecode(file, 'utf-8'), lineterminator='\n', quotechar='"')
-        else:
-            reader = csv.DictReader(file, lineterminator='\n', quotechar='"')
+        reader = pd.read_csv(file, lineterminator='\n', quotechar='"', na_values="None")
+        reader = reader.replace({np.nan: None})
         dupes = {}
         first = True
-        for row in reader:
+        for row in reader.to_dict(orient='records'):
             # manage severity from two possible columns 'Severity' and 'Risk'
             severity = 'Info'
             if 'Severity' in row:
@@ -66,13 +63,13 @@ class NessusCSVParser(object):
             if not title:
                 continue
             description = row.get('Synopsis')
-            mitigation = row.get('Solution', 'N/A')
+            mitigation = str(row.get('Solution'))
             impact = row.get('Description', 'N/A')
             references = row.get('See Also', 'N/A')
 
-            dupe_key = severity + title + row.get('Host', 'No host') + row.get('Port', 'No port') + row.get('Synopsis', 'No synopsis')
+            dupe_key = severity + title + row.get('Host', 'No host') + str(row.get('Port', 'No port')) + row.get('Synopsis', 'No synopsis')
 
-            detected_cve = self._format_cve(row.get('CVE'))
+            detected_cve = self._format_cve(str(row.get('CVE')))
             cve = None
             if detected_cve:
                 # FIXME support more than one CVE in Nessus CSV parser
@@ -86,7 +83,7 @@ class NessusCSVParser(object):
                     find.description += row.get('Plugin Output')
             else:
                 if 'Plugin Output' in row:
-                    description = description + row.get('Plugin Output')
+                    description = description + str(row.get('Plugin Output'))
                 find = Finding(title=title,
                                 test=test,
                                 active=False,
@@ -100,10 +97,10 @@ class NessusCSVParser(object):
                                 references=references)
 
                 # manage CVSS vector (only v3.x for now)
-                if 'CVSS V3 Vector' in row and "" != row.get('CVSS V3 Vector'):
-                    find.cvssv3 = CVSS3('CVSS:3.0/' + row.get('CVSS V3 Vector')).clean_vector()
+                if 'CVSS V3 Vector' in row and row.get('CVSS V3 Vector') is not None:
+                    find.cvssv3 = CVSS3('CVSS:3.0/' + str(row.get('CVSS V3 Vector'))).clean_vector()
                 # manage CPE data
-                detected_cpe = self._format_cpe(row.get('CPE'))
+                detected_cpe = self._format_cpe(str(row.get('CPE')))
                 if detected_cpe:
                     # FIXME support more than one CPE in Nessus CSV parser
                     if len(detected_cpe) > 1:
