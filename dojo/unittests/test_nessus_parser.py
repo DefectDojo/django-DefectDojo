@@ -31,6 +31,7 @@ class TestNessusParser(TestCase):
         self.assertEqual(0, len(findings))
 
     def test_parse_some_findings_csv(self):
+        """Test one report provided by a user"""
         testfile = open("dojo/unittests/scans/nessus/nessus_many_vuln.csv")
         parser = NessusCSVParser(testfile, self.create_test())
         findings = parser.items
@@ -55,6 +56,7 @@ class TestNessusParser(TestCase):
         self.assertEqual('CVE-2013-2566', finding.cve)
 
     def test_parse_some_findings_csv2(self):
+        """Test that use default columns of Nessus Pro 8.13.1 (#257)"""
         testfile = open("dojo/unittests/scans/nessus/nessus_many_vuln2-default.csv")
         parser = NessusCSVParser(testfile, self.create_test())
         findings = parser.items
@@ -72,6 +74,7 @@ class TestNessusParser(TestCase):
         self.assertEqual('CVE-2004-2761', finding.cve)
 
     def test_parse_some_findings_csv2_all(self):
+        """Test that use a report with all columns of Nessus Pro 8.13.1 (#257)"""
         testfile = open("dojo/unittests/scans/nessus/nessus_many_vuln2-all.csv")
         parser = NessusCSVParser(testfile, self.create_test())
         findings = parser.items
@@ -89,10 +92,10 @@ class TestNessusParser(TestCase):
         self.assertEqual('CVE-2004-2761', finding.cve)
 
     def test_parse_some_findings_csv_bytes(self):
+        """This tests is designed to test the parser with different read modes"""
         testfile = open("dojo/unittests/scans/nessus/nessus_many_vuln2-all.csv")
         parser = NessusCSVParser(testfile, self.create_test())
         testfile = open("dojo/unittests/scans/nessus/nessus_many_vuln2-all.csv", "rt")
         parser = NessusCSVParser(testfile, self.create_test())
-        # FIXME Nessus CSV parser should be reliable with binary file
         testfile = open("dojo/unittests/scans/nessus/nessus_many_vuln2-all.csv", "rb")
         parser = NessusCSVParser(testfile, self.create_test())
