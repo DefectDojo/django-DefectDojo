@@ -12,8 +12,9 @@ from django.utils import timezone
 from dojo.models import Finding, Engagement, Risk_Acceptance
 from django.db.models import Count
 from dojo.utils import add_breadcrumb, get_punchcard_data
-
+from dojo.finding.views import ACCEPTED_FINDINGS_QUERY
 from dojo.models import Answered_Survey
+
 
 logger = logging.getLogger(__name__)
 
@@ -39,8 +40,9 @@ def dashboard(request):
         mitigated_count = Finding.objects.filter(mitigated__date__range=[seven_days_ago,
                                                                    now]).count()
 
-        accepted_count = len([finding for ra in Risk_Acceptance.objects.filter(
-            created__date__range=[seven_days_ago, now]) for finding in ra.accepted_findings.all()])
+        accepted_findings = Finding.objects.filter(risk_acceptance__created__date__range=[seven_days_ago, now])
+        accepted_findings = accepted_findings.filter(ACCEPTED_FINDINGS_QUERY)
+        accepted_count = accepted_findings.count()
 
         # forever counts
         findings = Finding.objects.filter(verified=True, duplicate=False)

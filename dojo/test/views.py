@@ -1,5 +1,4 @@
 # #  tests
-
 import logging
 import operator
 import json
@@ -52,6 +51,7 @@ def view_test(request, tid):
     note_type_activation = Note_Type.objects.filter(is_active=True).count()
     if note_type_activation:
         available_note_types = find_available_notetypes(notes)
+    files = test.files.all()
     person = request.user.username
     findings = Finding.objects.filter(test=test).order_by('numerical_severity')
     findings = OpenFindingFilter(request.GET, queryset=findings)
@@ -146,6 +146,7 @@ def view_test(request, tid):
                    'component_words': component_words,
                    'form': form,
                    'notes': notes,
+                   'files': files,
                    'person': person,
                    'request': request,
                    'show_re_upload': show_re_upload,
@@ -201,7 +202,6 @@ def edit_test(request, tid):
 
     form.initial['target_start'] = test.target_start.date()
     form.initial['target_end'] = test.target_end.date()
-    # form.initial['tags'] = [tag.name for tag in test.tags.all()]
     form.initial['description'] = test.description
 
     product_tab = Product_Tab(test.engagement.product.id, title="Edit Test", tab="engagements")
@@ -632,7 +632,6 @@ def re_import_scan_results(request, tid):
     if get_system_setting('enable_jira') and jira_project:
         jform = JIRAImportScanForm(push_all=push_all_jira_issues, prefix='jiraform')
 
-    # form.initial['tags'] = [tag.name for tag in test.tags.all()]
     if request.method == "POST":
         form = ReImportScanForm(request.POST, request.FILES, test=test)
         if jira_project:

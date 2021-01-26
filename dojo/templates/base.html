@@ -1,6 +1,6 @@
 {% load navigation_tags %}
 {% load display_tags %}
-{% load static from staticfiles %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -247,13 +247,13 @@
                                             <a href="{% url 'open_findings' %}">Open Findings</a>
                                         </li>
                                         <li>
-                                            <a href="{% url 'accepted_findings' %}">Risk Accepted Findings</a>
-                                        </li>
-                                        <li>
                                             <a href="{% url 'all_findings' %}">All Findings</a>
                                         </li>
                                         <li>
                                             <a href="{% url 'closed_findings' %}">Closed Findings</a>
+                                        </li>
+                                        <li>
+                                            <a href="{% url 'accepted_findings' %}">Risk Accepted Findings</a>
                                         </li>
                                         <li>
                                             <a href="{% url 'templates' %}">Finding Templates</a>

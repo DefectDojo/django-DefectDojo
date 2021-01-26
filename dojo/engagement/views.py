@@ -21,9 +21,10 @@ from django.db import DEFAULT_DB_ALIAS
 from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.filters import EngagementFilter
 from dojo.forms import CheckForm, \
-    UploadThreatForm, UploadRiskForm, NoteForm, \
-    EngForm, TestForm, ReplaceRiskAcceptanceForm, AddFindingsRiskAcceptanceForm, DeleteEngagementForm, ImportScanForm, \
-    CredMappingForm, JIRAEngagementForm, JIRAImportScanForm, TypedNoteForm, JIRAProjectForm
+    UploadThreatForm, RiskAcceptanceForm, NoteForm, DoneForm, \
+    EngForm, TestForm, ReplaceRiskAcceptanceProofForm, AddFindingsRiskAcceptanceForm, DeleteEngagementForm, ImportScanForm, \
+    CredMappingForm, JIRAEngagementForm, JIRAImportScanForm, TypedNoteForm, JIRAProjectForm, \
+    EditRiskAcceptanceForm
 
 from dojo.models import Finding, Product, Engagement, Test, \
     Check_List, Test_Type, Notes, \
@@ -33,14 +34,18 @@ from dojo.tools import handles_active_verified_statuses
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, message, Product_Tab, is_scan_file_too_large, \
-    get_system_setting
+    get_system_setting, redirect_to_return_url_or_else, get_return_url
 from dojo.notifications.helper import create_notification
 from dojo.finding.views import find_available_notetypes
 from functools import reduce
 from django.db.models.query import QuerySet
 from dojo.user.helper import user_must_be_authorized, user_is_authorized, check_auth_users_list
 import dojo.jira_link.helper as jira_helper
+import dojo.risk_acceptance.helper as ra_helper
+from dojo.risk_acceptance.helper import prefetch_for_expiration
+from dojo.finding.views import NOT_ACCEPTED_FINDINGS_QUERY
 from django.views.decorators.vary import vary_on_cookie
+
 
 logger = logging.getLogger(__name__)
 parse_logger = logging.getLogger('dojo')
@@ -144,7 +149,6 @@ def prefetch_for_products_with_engagments(products_with_engagements):
     return products_with_engagements
 
 
-# @user_passes_test(lambda u: u.is_staff)
 @user_must_be_authorized(Engagement, 'change', 'eid')
 def edit_engagement(request, eid):
     engagement = Engagement.objects.get(pk=eid)
@@ -167,10 +171,6 @@ def edit_engagement(request, eid):
                 engagement.active = True
             engagement.save()
             form.save_m2m()
-
-            # tags = request.POST.getlist('tags')
-            # t = ", ".join('"{0}"'.format(w) for w in tags)
-            # engagement.tags = t
 
             messages.add_message(
                 request,
@@ -204,8 +204,6 @@ def edit_engagement(request, eid):
         logger.debug('showing jira-epic-form')
         jira_epic_form = JIRAEngagementForm(instance=engagement)
 
-    # form.initial['tags'] = [tag.name for tag in engagement.tags.all()]
-
     title = ' CI/CD' if is_ci_cd else ''
     product_tab = Product_Tab(engagement.product.id, title="Edit" + title + " Engagement", tab="engagements")
     product_tab.setEngagement(engagement)
@@ -219,7 +217,6 @@ def edit_engagement(request, eid):
     })
 
 
-# @user_passes_test(lambda u: u.is_staff)
 @user_must_be_authorized(Engagement, 'delete', 'eid')
 def delete_engagement(request, eid):
     engagement = get_object_or_404(Engagement, pk=eid)
@@ -305,6 +302,8 @@ def view_engagement(request, eid):
     note_type_activation = Note_Type.objects.filter(is_active=True).count()
     if note_type_activation:
         available_note_types = find_available_notetypes(notes)
+    form = DoneForm()
+    files = eng.files.all()
     if request.method == 'POST' and request.user.is_staff:
         eng.progress = 'check_list'
         eng.save()
@@ -391,11 +390,10 @@ def view_engagement(request, eid):
             'enabled': enabled,
             'check': check,
             'threat': eng.tmodel_path,
-            'risk': eng.risk_path,
             'form': form,
             'notes': notes,
+            'files': files,
             'risks_accepted': risks_accepted,
-            'can_add_risk': eng_findings.count(),
             'jissue': jissue,
             'jira_project': jira_project,
             'accepted_findings': accepted_findings,
@@ -407,7 +405,6 @@ def view_engagement(request, eid):
         })
 
 
-# @user_passes_test(lambda u: u.is_staff)
 @user_must_be_authorized(Engagement, 'staff', 'eid')
 def add_tests(request, eid):
     eng = Engagement.objects.get(id=eid)
@@ -489,8 +486,6 @@ def add_tests(request, eid):
     })
 
 
-# @user_passes_test(lambda u: u.is_staff)
-# @user_must_be_authorized(Product, 'staff', 'eid')
 # Cant use the easy decorator because of the potential for either eid/pid being used
 def import_scan_results(request, eid=None, pid=None):
     engagement = None
@@ -747,7 +742,6 @@ def import_scan_results(request, eid=None, pid=None):
     })
 
 
-# @user_passes_test(lambda u: u.is_staff)
 @user_must_be_authorized(Engagement, 'staff', 'eid')
 def close_eng(request, eid):
     eng = Engagement.objects.get(id=eid)
@@ -793,7 +787,6 @@ method to complete checklists from the engagement view
 """
 
 
-# @user_passes_test(lambda u: u.is_staff)
 @user_must_be_authorized(Engagement, 'staff', 'eid')
 def complete_checklist(request, eid):
     eng = get_object_or_404(Engagement, id=eid)
@@ -841,89 +834,132 @@ def complete_checklist(request, eid):
     })
 
 
-# @user_passes_test(lambda u: u.is_staff)
 @user_must_be_authorized(Engagement, 'staff', 'eid')
-def upload_risk(request, eid):
-    eng = Engagement.objects.get(id=eid)
+def add_risk_acceptance(request, eid, fid=None):
+    eng = get_object_or_404(Engagement, id=eid)
+    finding = None
+    if fid:
+        finding = get_object_or_404(Finding, id=fid)
 
-    unaccepted_findings = Finding.objects.filter(active="True", verified="True", duplicate="False", test__in=eng.test_set.all()) \
-        .exclude(risk_acceptance__isnull=False).order_by('title')
+    if not eng.product.enable_full_risk_acceptance:
+        raise PermissionDenied()
 
     if request.method == 'POST':
-        form = UploadRiskForm(request.POST, request.FILES)
+        form = RiskAcceptanceForm(request.POST, request.FILES)
         if form.is_valid():
-            findings = form.cleaned_data['accepted_findings']
-            for finding in findings:
-                finding.active = False
-                finding.save()
-            risk = form.save(commit=False)
-            risk.owner = form.cleaned_data['owner']
-            risk.expiration_date = form.cleaned_data['expiration_date']
-            risk.accepted_by = form.cleaned_data['accepted_by']
-            risk.compensating_control = form.cleaned_data['compensating_control']
-            risk.path = form.cleaned_data['path']
-            risk.save()  # have to save before findings can be added
-            risk.accepted_findings.set(findings)
+            try:
+                # we sometimes see a weird exception here, but are unable to reproduce.
+                # we add some logging in case it happens
+                risk_acceptance = form.save()
+            except Exception as e:
+                logger.debug(vars(request.POST))
+                logger.error(vars(form))
+                logger.exception(e)
+
+            eng.risk_acceptance.add(risk_acceptance)
+
             if form.cleaned_data['notes']:
                 notes = Notes(
                     entry=form.cleaned_data['notes'],
                     author=request.user,
                     date=timezone.now())
                 notes.save()
-                risk.notes.add(notes)
+                risk_acceptance.notes.add(notes)
 
-            risk.save()  # saving notes and findings
-            eng.risk_acceptance.add(risk)
-            eng.save()
+            findings = form.cleaned_data['accepted_findings']
+
+            risk_acceptance = ra_helper.add_findings_to_risk_acceptance(risk_acceptance, findings)
+
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                'Risk exception saved.',
+                'Risk acceptance saved.',
                 extra_tags='alert-success')
-            return HttpResponseRedirect(
-                reverse('view_engagement', args=(eid, )))
-    else:
-        form = UploadRiskForm(initial={'owner': request.user, 'name': 'Ad Hoc ' + timezone.now().strftime('%b %d, %Y, %H:%M:%S')})
 
-    form.fields["accepted_findings"].queryset = unaccepted_findings
-    product_tab = Product_Tab(eng.product.id, title="Upload Risk Exception", tab="engagements")
+            return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
+    else:
+        risk_acceptance_title_suggestion = 'Accept: %s' % finding
+        form = RiskAcceptanceForm(initial={'owner': request.user, 'name': risk_acceptance_title_suggestion})
+
+    finding_choices = Finding.objects.filter(duplicate=False, test__engagement=eng).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
+
+    form.fields['accepted_findings'].queryset = finding_choices
+    if fid:
+        form.fields['accepted_findings'].initial = {fid}
+    product_tab = Product_Tab(eng.product.id, title="Risk Acceptance", tab="engagements")
     product_tab.setEngagement(eng)
 
-    return render(request, 'dojo/up_risk.html', {
+    return render(request, 'dojo/add_risk_acceptance.html', {
                   'eng': eng,
                   'product_tab': product_tab,
                   'form': form
                   })
 
 
-def view_risk(request, eid, raid):
-    risk_approval = get_object_or_404(Risk_Acceptance, pk=raid)
-    eng = get_object_or_404(Engagement, pk=eid)
-    if request.user.is_staff or check_auth_users_list(request.user, eng):
-        pass
-    else:
-        raise PermissionDenied
+@user_must_be_authorized(Engagement, 'view', 'eid')
+def view_risk_acceptance(request, eid, raid):
+    return view_edit_risk_acceptance(request, eid=eid, raid=raid, edit_mode=False)
 
-    a_file = risk_approval.path
+
+@user_must_be_authorized(Engagement, 'staff', 'eid')
+def edit_risk_acceptance(request, eid, raid):
+    return view_edit_risk_acceptance(request, eid=eid, raid=raid, edit_mode=True)
+
+
+def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
+    risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
+    eng = get_object_or_404(Engagement, pk=eid)
+
+    if edit_mode and not eng.product.enable_full_risk_acceptance:
+        raise PermissionDenied()
+
+    risk_acceptance_form = None
+    errors = False
 
     if request.method == 'POST':
-        note_form = NoteForm(request.POST)
-        if note_form.is_valid():
-            new_note = note_form.save(commit=False)
-            new_note.author = request.user
-            new_note.date = timezone.now()
-            new_note.save()
-            risk_approval.notes.add(new_note)
-            messages.add_message(
-                request,
-                messages.SUCCESS,
-                'Note added successfully.',
-                extra_tags='alert-success')
+        # deleting before instantiating the form otherwise django messes up and we end up with an empty path value
+        if len(request.FILES) > 0:
+            logger.debug('new proof uploaded')
+            risk_acceptance.path.delete()
+
+        if 'decision' in request.POST:
+            old_expiration_date = risk_acceptance.expiration_date
+            risk_acceptance_form = EditRiskAcceptanceForm(request.POST, request.FILES, instance=risk_acceptance)
+            errors = errors or not risk_acceptance_form.is_valid()
+            if not errors:
+                logger.debug('path: %s', risk_acceptance_form.cleaned_data['path'])
+
+                risk_acceptance_form.save()
+
+                if risk_acceptance.expiration_date != old_expiration_date:
+                    # risk acceptance was changed, check if risk acceptance needs to be reinstated and findings made accepted again
+                    ra_helper.reinstate(risk_acceptance, old_expiration_date)
+
+                messages.add_message(
+                    request,
+                    messages.SUCCESS,
+                    'Risk Acceptance saved successfully.',
+                    extra_tags='alert-success')
+
+        if 'entry' in request.POST:
+            note_form = NoteForm(request.POST)
+            errors = errors or not note_form.is_valid()
+            if not errors:
+                new_note = note_form.save(commit=False)
+                new_note.author = request.user
+                new_note.date = timezone.now()
+                new_note.save()
+                risk_acceptance.notes.add(new_note)
+                messages.add_message(
+                    request,
+                    messages.SUCCESS,
+                    'Note added successfully.',
+                    extra_tags='alert-success')
 
         if 'delete_note' in request.POST:
             note = get_object_or_404(Notes, pk=request.POST['delete_note_id'])
             if note.author.username == request.user.username:
-                risk_approval.notes.remove(note)
+                risk_acceptance.notes.remove(note)
                 note.delete()
                 messages.add_message(
                     request,
@@ -940,36 +976,41 @@ def view_risk(request, eid, raid):
         if 'remove_finding' in request.POST:
             finding = get_object_or_404(
                 Finding, pk=request.POST['remove_finding_id'])
-            risk_approval.accepted_findings.remove(finding)
-            finding.active = True
-            finding.save()
+
+            ra_helper.remove_finding_from_risk_acceptance(risk_acceptance, finding)
+
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                'Finding removed successfully.',
+                'Finding removed successfully from risk acceptance.',
                 extra_tags='alert-success')
+
         if 'replace_file' in request.POST:
-            replace_form = ReplaceRiskAcceptanceForm(
-                request.POST, request.FILES, instance=risk_approval)
-            if replace_form.is_valid():
-                risk_approval.path.delete(save=False)
-                risk_approval.path = replace_form.cleaned_data['path']
-                risk_approval.save()
+            replace_form = ReplaceRiskAcceptanceProofForm(
+                request.POST, request.FILES, instance=risk_acceptance)
+
+            errors = errors or not replace_form.is_valid()
+            if not errors:
+                replace_form.save()
+
                 messages.add_message(
                     request,
                     messages.SUCCESS,
-                    'File replaced successfully.',
+                    'New Proof uploaded successfully.',
                     extra_tags='alert-success')
+            else:
+                logger.error(replace_form.errors)
+
         if 'add_findings' in request.POST:
             add_findings_form = AddFindingsRiskAcceptanceForm(
-                request.POST, request.FILES, instance=risk_approval)
-            if add_findings_form.is_valid():
+                request.POST, request.FILES, instance=risk_acceptance)
+
+            errors = errors or not add_findings_form.is_valid()
+            if not errors:
                 findings = add_findings_form.cleaned_data['accepted_findings']
-                for finding in findings:
-                    finding.active = False
-                    finding.save()
-                    risk_approval.accepted_findings.add(finding)
-                risk_approval.save()
+
+                ra_helper.add_findings_to_risk_acceptance(risk_acceptance, findings)
+
                 messages.add_message(
                     request,
                     messages.SUCCESS,
@@ -977,11 +1018,21 @@ def view_risk(request, eid, raid):
                                                        else ''),
                     extra_tags='alert-success')
 
-    note_form = NoteForm()
-    replace_form = ReplaceRiskAcceptanceForm()
-    add_findings_form = AddFindingsRiskAcceptanceForm()
+        if not errors:
+            logger.debug('redirecting to return_url')
+            return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
+        else:
+            logger.error('errors found')
 
-    accepted_findings = risk_approval.accepted_findings.order_by('numerical_severity')
+    else:
+        if edit_mode:
+            risk_acceptance_form = EditRiskAcceptanceForm(instance=risk_acceptance)
+
+    note_form = NoteForm()
+    replace_form = ReplaceRiskAcceptanceProofForm(instance=risk_acceptance)
+    add_findings_form = AddFindingsRiskAcceptanceForm(instance=risk_acceptance)
+
+    accepted_findings = risk_acceptance.accepted_findings.order_by('numerical_severity')
     fpage = get_page_items(request, accepted_findings, 15)
 
     unaccepted_findings = Finding.objects.filter(test__in=eng.test_set.all()) \
@@ -991,47 +1042,58 @@ def view_risk(request, eid, raid):
     add_findings_form.fields[
         "accepted_findings"].queryset = add_fpage.object_list
 
-    authorized = (request.user == risk_approval.owner.username or request.user.is_staff)
-
-    product_tab = Product_Tab(eng.product.id, title="Risk Exception", tab="engagements")
+    product_tab = Product_Tab(eng.product.id, title="Risk Acceptance", tab="engagements")
     product_tab.setEngagement(eng)
     return render(
-        request, 'dojo/view_risk.html', {
-            'risk_approval': risk_approval,
+        request, 'dojo/view_risk_acceptance.html', {
+            'risk_acceptance': risk_acceptance,
+            'engagement': eng,
             'product_tab': product_tab,
             'accepted_findings': fpage,
-            'notes': risk_approval.notes.all(),
-            'a_file': a_file,
+            'notes': risk_acceptance.notes.all(),
             'eng': eng,
+            'edit_mode': edit_mode,
+            'risk_acceptance_form': risk_acceptance_form,
             'note_form': note_form,
             'replace_form': replace_form,
             'add_findings_form': add_findings_form,
             # 'show_add_findings_form': len(unaccepted_findings),
             'request': request,
             'add_findings': add_fpage,
-            'authorized': authorized,
+            'return_url': get_return_url(request),
         })
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Engagement, 'delete', 'eid')
-def delete_risk(request, eid, raid):
-    risk_approval = get_object_or_404(Risk_Acceptance, pk=raid)
+@user_must_be_authorized(Engagement, 'staff', 'eid')
+def expire_risk_acceptance(request, eid, raid):
+    risk_acceptance = get_object_or_404(prefetch_for_expiration(Risk_Acceptance.objects.all()), pk=raid)
     eng = get_object_or_404(Engagement, pk=eid)
 
-    for finding in risk_approval.accepted_findings.all():
-        finding.active = True
-        finding.save()
+    ra_helper.expire_now(risk_acceptance)
 
-    risk_approval.accepted_findings.clear()
-    eng.risk_acceptance.remove(risk_approval)
-    eng.save()
+    return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
 
-    for note in risk_approval.notes.all():
-        note.delete()
 
-    risk_approval.path.delete()
-    risk_approval.delete()
+@user_must_be_authorized(Engagement, 'staff', 'eid')
+def reinstate_risk_acceptance(request, eid, raid):
+    risk_acceptance = get_object_or_404(prefetch_for_expiration(Risk_Acceptance.objects.all()), pk=raid)
+    eng = get_object_or_404(Engagement, pk=eid)
+
+    if not eng.product.enable_full_risk_acceptance:
+        raise PermissionDenied()
+
+    ra_helper.reinstate(risk_acceptance, risk_acceptance.expiration_date)
+
+    return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
+
+
+@user_must_be_authorized(Engagement, 'staff', 'eid')
+def delete_risk_acceptance(request, eid, raid):
+    risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
+    eng = get_object_or_404(Engagement, pk=eid)
+
+    ra_helper.delete(eng, risk_acceptance)
+
     messages.add_message(
         request,
         messages.SUCCESS,
@@ -1040,12 +1102,12 @@ def delete_risk(request, eid, raid):
     return HttpResponseRedirect(reverse("view_engagement", args=(eng.id, )))
 
 
-def download_risk(request, eid, raid):
+def download_risk_acceptance(request, eid, raid):
     import mimetypes
 
     mimetypes.init()
 
-    risk_approval = get_object_or_404(Risk_Acceptance, pk=raid)
+    risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
     en = get_object_or_404(Engagement, pk=eid)
     if request.user.is_staff or check_auth_users_list(request.user, en):
         pass
@@ -1054,10 +1116,10 @@ def download_risk(request, eid, raid):
 
     response = StreamingHttpResponse(
         FileIterWrapper(
-            open(settings.MEDIA_ROOT + "/" + risk_approval.path.name)))
+            open(settings.MEDIA_ROOT + "/" + risk_acceptance.path.name, mode='rb')))
     response['Content-Disposition'] = 'attachment; filename="%s"' \
-                                      % risk_approval.filename()
-    mimetype, encoding = mimetypes.guess_type(risk_approval.path.name)
+                                      % risk_acceptance.filename()
+    mimetype, encoding = mimetypes.guess_type(risk_acceptance.path.name)
     response['Content-Type'] = mimetype
     return response
 

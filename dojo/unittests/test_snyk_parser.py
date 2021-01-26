@@ -58,6 +58,9 @@ class TestSnykParser(TestCase):
             "Issue severity of: **Medium** from a base CVSS score of: **6.5**",
             finding.severity_justification)
         self.assertEqual(
+            "SNYK-JAVA-ORGAPACHESANTUARIO-460281",
+            finding.vuln_id_from_tool)
+        self.assertEqual(
             "CVE-2019-12400",
             finding.cve)
         self.assertEqual(
@@ -77,3 +80,6 @@ class TestSnykParser(TestCase):
             "504?jql=project%20%3D%20SANTUARIO\n**Security Release**: http://santuario.apache.org/secadv.data/" +
             "CVE-2019-12400.asc?version=1&modificationDate=1566573083000&api=v2\n",
             finding.references)
+        self.assertEqual(
+            "com.test:myframework > org.apache.santuario:xmlsec",
+            finding.file_path)

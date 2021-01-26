@@ -3,7 +3,8 @@ import logging
 from django.core.exceptions import PermissionDenied
 import functools
 from django.shortcuts import get_object_or_404
-from dojo.models import Finding, Test, Engagement, Product, Endpoint, Scan, ScanSettings, Product_Type
+from dojo.models import Finding, Test, Engagement, Product, Endpoint, Scan, ScanSettings, Product_Type, \
+    Risk_Acceptance
 from crum import get_current_user
 
 logger = logging.getLogger(__name__)
@@ -109,6 +110,8 @@ def check_auth_users_list(user, obj):
     if isinstance(obj, ScanSettings):
         is_authorized = user in obj.product.authorized_users.all()
         is_authorized = user in obj.product.prod_type.authorized_users.all() or is_authorized
+    if isinstance(obj, Risk_Acceptance):
+        return user.username == obj.owner.username or check_auth_users_list(user, obj.engagement_set.all()[0])
 
     return is_authorized
 
@@ -124,7 +127,13 @@ def user_is_authorized(user, perm_type, obj):
         raise ValueError('permtype ' + perm_type + ' not supported')
 
     if user.is_staff:
+        # print('is_staff, returning True')
         return True
+
+    # Risk Acceptance owner has always permission
+    if isinstance(obj, Risk_Acceptance):
+        if user.username == obj.owner.username:
+            return True
 
     authorized_staff = settings.AUTHORIZED_USERS_ALLOW_STAFF
 
