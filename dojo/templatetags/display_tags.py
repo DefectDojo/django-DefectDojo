@@ -775,7 +775,6 @@ def finding_display_status(finding):
             url = reverse('view_risk_acceptance', args=(finding.test.engagement.id, ra.id, ))
             info = ra.name_and_expiration_info
             link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-content="' + escape(info) + '" data-container="body" data-original-title="Risk Acceptance">Risk Accepted</a>'
-            # print(link)
             display_status = display_status.replace('Risk Accepted', link)
 
     if finding.under_review:
@@ -800,20 +799,17 @@ def finding_display_status(finding):
 
 @register.filter
 def is_authorized_for_change(user, obj):
-    # print('filter: is_authorized_for_change')
     return user_is_authorized(user, 'change', obj)
 
 
 @register.filter
 def is_authorized_for_delete(user, obj):
-    # print('filter: is_authorized_for_delete')
     return user_is_authorized(user, 'delete', obj)
 
 
 @register.filter
 def is_authorized_for_staff(user, obj):
     result = user_is_authorized(user, 'staff', obj)
-    # print('filter: is_authorized_for_staff: ' + str(result))
     return result
 
 
