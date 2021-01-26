@@ -412,7 +412,16 @@ class FileUpload(models.Model):
 
 
 class Product_Type(models.Model):
+    """Product types represent the top level model, these can be business unit divisions, different offices or locations, development teams, or any other logical way of distinguishing “types” of products.
+
+       Examples:
+         * IAM Team
+         * Internal / 3rd Party
+         * Main company / Acquisition
+         * San Francisco / New York offices
+    """
     name = models.CharField(max_length=255, unique=True)
+    description = models.CharField(max_length=4000, null=True)
     critical_product = models.BooleanField(default=False)
     key_product = models.BooleanField(default=False)
     updated = models.DateTimeField(auto_now=True, null=True)
@@ -2745,6 +2754,7 @@ NOTIFICATION_CHOICES = (
 
 
 class Notifications(models.Model):
+    product_type_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     product_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     engagement_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     test_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
@@ -2787,6 +2797,7 @@ class Notifications(models.Model):
                 # TODO This concat looks  better, but requires Python 3.6+
                 # result.scan_added = [*result.scan_added, *notifications.scan_added]
                 from dojo.utils import merge_sets_safe
+                result.product_type_added = merge_sets_safe(result.product_type_added, notifications.product_type_added)
                 result.product_added = merge_sets_safe(result.product_added, notifications.product_added)
                 result.engagement_added = merge_sets_safe(result.engagement_added, notifications.engagement_added)
                 result.test_added = merge_sets_safe(result.test_added, notifications.test_added)

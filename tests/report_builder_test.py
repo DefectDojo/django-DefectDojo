@@ -56,6 +56,7 @@ class ReportBuilderTest(BaseTestCase):
     def test_product_type_report(self):
         driver = self.driver
         driver.get(self.base_url + "product/type")
+        driver.find_element_by_id("dropdownMenuProductType").click()
         driver.find_element_by_partial_link_text('Report').click()
         my_select = Select(driver.find_element_by_id("id_include_finding_notes"))
         my_select.select_by_index(1)
