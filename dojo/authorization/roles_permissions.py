@@ -38,17 +38,33 @@ class Permissions(IntEnum):
     Product_Type_Delete = 1006
 
     Product_View = 1102
-    Product_Remove_Yourself = 1103
+    Product_Remove_Member = 1103
     Product_Manage_Members = 1104
     Product_Configure_Notifications = 1105
     Product_Edit = 1106
     Product_Delete = 1107
 
+    Engagement_View = 1202
+    Engagement_Add = 1203
+    Engagement_Edit = 1206
+    Engagement_Delete = 1207
+
+    Test_View = 1202
+    Test_Add = 1203
+    Test_Edit = 1206
+    Test_Delete = 1207
+
     Finding_View = 1402
-    Finding_Add = 1103
-    Import_Scan_Result = 1104
-    Finding_Edit = 1106
-    Finding_Delete = 1107
+    Finding_Add = 1403
+    Import_Scan_Result = 1404
+    Finding_Edit = 1406
+    Finding_Delete = 1407
+
+    Endpoint_View = 1502
+    Endpoint_Add = 1503
+    Endpoint_Edit = 1506
+    Endpoint_Delete = 1507
+
 
     @classmethod
     def has_value(cls, value):
@@ -66,9 +82,15 @@ def get_roles_with_permissions():
             Permissions.Product_Type_Remove_Member,
 
             Permissions.Product_View,
-            Permissions.Product_Remove_Yourself,
+            Permissions.Product_Remove_Member,
 
-            Permissions.Finding_View
+            Permissions.Engagement_View,
+
+            Permissions.Test_View,
+
+            Permissions.Finding_View,
+
+            Permissions.Endpoint_View
         },
         Roles.Technical_User: {
             Permissions.Import_Scan_Result
@@ -78,12 +100,24 @@ def get_roles_with_permissions():
             Permissions.Product_Type_Remove_Member,
 
             Permissions.Product_View,
-            Permissions.Product_Remove_Yourself,
+            Permissions.Product_Remove_Member,
+
+            Permissions.Engagement_View,
+            Permissions.Engagement_Add,
+            Permissions.Engagement_Edit,
+
+            Permissions.Test_View,
+            Permissions.Test_Add,
+            Permissions.Test_Edit,
 
             Permissions.Finding_View,
             Permissions.Finding_Add,
             Permissions.Import_Scan_Result,
-            Permissions.Finding_Edit
+            Permissions.Finding_Edit,
+
+            Permissions.Endpoint_View,
+            Permissions.Endpoint_Add,
+            Permissions.Endpoint_Edit
         },
         Roles.Maintainer: {
             Permissions.Product_Type_Add_Product,
@@ -93,16 +127,31 @@ def get_roles_with_permissions():
             Permissions.Product_Type_Edit,
 
             Permissions.Product_View,
-            Permissions.Product_Remove_Yourself,
+            Permissions.Product_Remove_Member,
             Permissions.Product_Manage_Members,
             Permissions.Product_Configure_Notifications,
             Permissions.Product_Edit,
+
+            Permissions.Engagement_View,
+            Permissions.Engagement_Add,
+            Permissions.Engagement_Edit,
+            Permissions.Engagement_Delete,
+
+            Permissions.Test_View,
+            Permissions.Test_Add,
+            Permissions.Test_Edit,
+            Permissions.Test_Delete,
 
             Permissions.Finding_View,
             Permissions.Finding_Add,
             Permissions.Import_Scan_Result,
             Permissions.Finding_Edit,
-            Permissions.Finding_Delete
+            Permissions.Finding_Delete,
+
+            Permissions.Endpoint_View,
+            Permissions.Endpoint_Add,
+            Permissions.Endpoint_Edit,
+            Permissions.Endpoint_Delete
         },
         Roles.Owner: {
             Permissions.Product_Type_Add_Product,
@@ -113,16 +162,31 @@ def get_roles_with_permissions():
             Permissions.Product_Type_Delete,
 
             Permissions.Product_View,
-            Permissions.Product_Remove_Yourself,
+            Permissions.Product_Remove_Member,
             Permissions.Product_Manage_Members,
             Permissions.Product_Configure_Notifications,
             Permissions.Product_Edit,
             Permissions.Product_Delete,
 
+            Permissions.Engagement_View,
+            Permissions.Engagement_Add,
+            Permissions.Engagement_Edit,
+            Permissions.Engagement_Delete,
+
+            Permissions.Test_View,
+            Permissions.Test_Add,
+            Permissions.Test_Edit,
+            Permissions.Test_Delete,
+
             Permissions.Finding_View,
             Permissions.Finding_Add,
             Permissions.Import_Scan_Result,
             Permissions.Finding_Edit,
-            Permissions.Finding_Delete
+            Permissions.Finding_Delete,
+
+            Permissions.Endpoint_View,
+            Permissions.Endpoint_Add,
+            Permissions.Endpoint_Edit,
+            Permissions.Endpoint_Delete
         }
     }
