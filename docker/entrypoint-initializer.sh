@@ -44,7 +44,9 @@ do
 done
 echo
 
+echo "Making migrations"
 python3 manage.py makemigrations dojo
+echo "Migrating"
 python3 manage.py migrate
 
 echo "Admin user: ${DD_ADMIN_USER}"
@@ -85,28 +87,24 @@ User.objects.create_superuser(
 )
 EOD
 
-  python3 manage.py loaddata system_settings
+  echo "Preparing survey fixture"
+  # surveys fixture needs to be modified as it contains an instance dependant polymorphic content id
+  python3 manage.py import_surveys
+  # load surveys all at once as that's much faster
+   echo "Importing fixtures all at once"
+   python3 manage.py loaddata system_settings initial_banner_conf product_type test_type \
+       development_environment benchmark_type benchmark_category benchmark_requirement \
+       language_type objects_review regulation initial_surveys
+
   echo "UPDATE dojo_system_settings SET jira_webhook_secret='$DD_JIRA_WEBHOOK_SECRET'" | python manage.py dbshell
 
-  python3 manage.py loaddata initial_banner_conf
-  python3 manage.py loaddata product_type
-  python3 manage.py loaddata test_type
-  python3 manage.py loaddata development_environment
-  python3 manage.py loaddata benchmark_type
-  python3 manage.py loaddata benchmark_category
-  python3 manage.py loaddata benchmark_requirement
-  python3 manage.py loaddata language_type
-  python3 manage.py loaddata objects_review
-  python3 manage.py loaddata regulation
-  python3 manage.py import_surveys
-  python3 manage.py loaddata initial_surveys
-
+  echo "Importing extra fixtures"
   # If there is extra fixtures, load them
   for i in $(ls dojo/fixtures/extra_*.json | sort -n 2>/dev/null) ; do
     echo "Loading $i"
     python3 manage.py loaddata ${i%.*}
   done
 
+  echo "Installing watson search index"
   python3 manage.py installwatson
-  exec python3 manage.py buildwatson
 fi
