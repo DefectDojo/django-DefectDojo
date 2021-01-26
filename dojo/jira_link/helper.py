@@ -272,7 +272,7 @@ def get_jira_connection_raw(jira_server, jira_username, jira_password):
         else:
             log_jira_generic_alert('Unknown JIRA Connection Error', e)
 
-        add_error_message_to_response('Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + e.message)
+        add_error_message_to_response('Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + e.text)
         raise e
 
     except requests.exceptions.RequestException as re:
