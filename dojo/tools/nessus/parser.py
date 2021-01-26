@@ -7,6 +7,7 @@ import re
 from dojo.models import Endpoint, Finding, Test
 from cvss import CVSS3
 from cpe import CPE
+import codecs
 
 LOGGER = logging.getLogger(__name__)
 
@@ -31,11 +32,23 @@ class NessusCSVParser(object):
             return cve_match
         return None
 
-    def get_findings(self, filename, test: Test):
-        if filename is None:
-            return list()
+    def _format_cpe(self, val):
+        if val is None:
+            return None
+        elif "" == val:
+            return None
+        cpe_match = re.findall(r"cpe:/[^\n\ ]+", val)
+        if cpe_match:
+            return cpe_match
+        return None
 
-        reader = csv.DictReader(filename, lineterminator='\n', quotechar='"') # quoting=csv.QUOTE_MINIMAL)
+    def get_findings(self, file, test: Test):
+        if file is None:
+            return list()
+        if isinstance(file, bytes):
+            reader = csv.DictReader(codecs.iterdecode(file, 'utf-8'), lineterminator='\n', quotechar='"')
+        else:
+            reader = csv.DictReader(file, lineterminator='\n', quotechar='"')
         dupes = {}
         first = True
         for row in reader:
@@ -49,8 +62,6 @@ class NessusCSVParser(object):
             title = row.get('Name')
             if title is None and 'Plugin Name' in row:
                 title = row.get('Plugin Name')
-            # import json
-            # print(f"{json.dumps(row.get('Name'))}")
             # special case to skip empty titles
             if not title:
                 continue
@@ -67,7 +78,7 @@ class NessusCSVParser(object):
                 # FIXME support more than one CVE in Nessus CSV parser
                 cve = detected_cve[0]
                 if len(detected_cve) > 1:
-                    LOGGER.warning(f"more than one CVE for a finding. NOT supported by Nessus CSV parser '{row.get('CVE')}'")
+                    LOGGER.warning("more than one CVE for a finding. NOT supported by Nessus CSV parser")
 
             if dupe_key in dupes:
                 find = dupes[dupe_key]
@@ -92,13 +103,14 @@ class NessusCSVParser(object):
                 if 'CVSS V3 Vector' in row and "" != row.get('CVSS V3 Vector'):
                     find.cvssv3 = CVSS3('CVSS:3.0/' + row.get('CVSS V3 Vector')).clean_vector()
                 # manage CPE data
-                # TODO for now we will ignore it
-                # current implementation is more SCA oriented
-                # if 'CPE' in row and "" != row.get('CPE'):
-                #     # FIXME this field could have more than one CPE string
-                #     cpe_decoded = CPE(row.get('CPE'))
-                #     find.component_name = cpe.get_product()[0] if len(cpe.get_product()) > 0 else None
-                #     find.component_version = cpe.get_version()[0] if len(cpe.get_version()) > 0 else None
+                detected_cpe = self._format_cpe(row.get('CPE'))
+                if detected_cpe:
+                    # FIXME support more than one CPE in Nessus CSV parser
+                    if len(detected_cpe) > 1:
+                        LOGGER.warning("more than one CPE for a finding. NOT supported by Nessus CSV parser")
+                    cpe_decoded = CPE(detected_cpe[0])
+                    find.component_name = cpe_decoded.get_product()[0] if len(cpe_decoded.get_product()) > 0 else None
+                    find.component_version = cpe_decoded.get_version()[0] if len(cpe_decoded.get_version()) > 0 else None
 
                 find.unsaved_endpoints = list()
                 dupes[dupe_key] = find

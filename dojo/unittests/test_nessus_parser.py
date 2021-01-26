@@ -45,8 +45,9 @@ class TestNessusParser(TestCase):
         self.assertEqual('CVE-2004-2761', finding.cve)
         self.assertEqual(1, len(finding.unsaved_endpoints))
         self.assertEqual('10.1.1.1', finding.unsaved_endpoints[0].host)
-        # TODO see if commponent attributes are meanfull for this parser
-        # self.assertIsNotNone(finding.component_name)
+        # TODO work on component attributes for Nessus CSV parser
+        self.assertIsNotNone(finding.component_name)
+        self.assertEqual('md5', finding.component_name)
         # this vuln have 'CVE-2013-2566,CVE-2015-2808' as CVE
         # current implementation return the first
         finding = findings[3]
@@ -85,3 +86,12 @@ class TestNessusParser(TestCase):
         self.assertEqual('SSL Certificate Signed Using Weak Hashing Algorithm (Known CA)', finding.title)
         self.assertEqual('Info', finding.severity)
         self.assertEqual('CVE-2004-2761', finding.cve)
+
+    def test_parse_some_findings_csv_bytes(self):
+        testfile = open("dojo/unittests/scans/nessus/nessus_many_vuln2-all.csv")
+        parser = NessusCSVParser(testfile, self.create_test())
+        testfile = open("dojo/unittests/scans/nessus/nessus_many_vuln2-all.csv", "rt")
+        parser = NessusCSVParser(testfile, self.create_test())
+        # FIXME Nessus CSV parser should be reliable with binary file
+        # testfile = open("dojo/unittests/scans/nessus/nessus_many_vuln2-all.csv", "rb")
+        # parser = NessusCSVParser(testfile, self.create_test())
