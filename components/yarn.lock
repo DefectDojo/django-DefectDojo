@@ -828,10 +828,10 @@ pdfkit@>=0.8.1, pdfkit@^0.11.0:
     linebreak "^1.0.2"
     png-js "^1.0.0"
 
-pdfmake@^0.1.69:
-  version "0.1.69"
-  resolved "https://registry.yarnpkg.com/pdfmake/-/pdfmake-0.1.69.tgz#e4c6dcc9b058ab7a639061e295518a8fd196097d"
-  integrity sha512-XGMtTpbgEwXsa9DcuKhMowOPVJ+8cnGuJz7LV/bE5pnMmxBXAlMGgidQVyEfEUPFywCU2Y/4xibeX1vEm0hd7g==
+pdfmake@^0.1.70:
+  version "0.1.70"
+  resolved "https://registry.yarnpkg.com/pdfmake/-/pdfmake-0.1.70.tgz#b5102799deef264defa675dbb2dbf12ad49a9bae"
+  integrity sha512-xPhkblaQ71U97qhRTPj/1HknAHHFZ3cPRmRdrqEWD2xXBcEjEM3Yw0MIjML8DRy9Dt9n6QRjHVf662f0eLtd7Q==
   dependencies:
     iconv-lite "^0.6.2"
     linebreak "^1.0.2"
