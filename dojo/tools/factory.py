@@ -32,7 +32,7 @@ def get_choices():
     res = list()
     for key in PARSERS:
         res.append((key, key))
-    return res
+    return tuple(res)
 
 
 def requires_file(scan_type):
@@ -94,9 +94,12 @@ register_parser('Checkmarx Scan', CheckmarxXMLParser())
 register_parser('Checkmarx Scan detailed', CheckmarxXMLParser())
 from .checkov.parser import CheckovParser
 register_parser('Checkov Scan', CheckovParser())
-# register_parser('Choctaw Hog Scan', Parser())
-# register_parser('Clair Klar Scan', Parser())
-# register_parser('Clair Scan', Parser())
+from .choctaw_hog.parser import ChoctawhogParser
+register_parser('Choctaw Hog Scan', ChoctawhogParser())
+from .clair_klar.parser import ClairKlarParser
+register_parser('Clair Klar Scan', ClairKlarParser())
+from .clair.parser import ClairParser
+register_parser('Clair Scan', ClairParser())
 # register_parser('Cobalt.io Scan', Parser())
 # register_parser('Contrast Scan', Parser())
 # register_parser('Crashtest Security JSON File', Parser())
