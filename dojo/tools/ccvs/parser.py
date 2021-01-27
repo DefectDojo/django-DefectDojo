@@ -5,20 +5,19 @@ from dojo.models import Finding
 
 
 class CCVSReportParser(object):
-
     """
     Read JSON data from CCVS compatible format and import it to DefectDojo
     """
-
-    def __init__(self, json_output, test):
-        self.items = []
+    def get_findings(self, json_output, test):
 
         if json_output is None:
-            return
+            return list()
 
         tree = self.parse_json(json_output)
         if tree:
-            self.items = [data for data in self.get_items(tree, test)]
+            return [data for data in self.get_items(tree, test)]
+        else:
+            return list()
 
     def parse_json(self, json_output):
         try:
