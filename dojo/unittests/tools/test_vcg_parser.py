@@ -29,7 +29,7 @@ class TestVCGXmlParser(TestCase):
 
     def test_parse_single_finding(self):
         single_finding = """<?xml version="1.0" encoding="utf-8"?>
-        <!--XML Export of VCG Results for directory: C:\Projects\WebGoat.Net. Scanned for C# security issues.-->
+        <!--XML Export of VCG Results for directory: C:\\Projects\\WebGoat.Net. Scanned for C# security issues.-->
         <CodeIssueCollection>
         <CodeIssue>
         <Priority>6</Priority>
@@ -50,7 +50,7 @@ class TestVCGXmlParser(TestCase):
 
     def test_parse_multiple_findings(self):
         findings = """<?xml version="1.0" encoding="utf-8"?>
-        <!--XML Export of VCG Results for directory: C:\Projects\WebGoat.Net. Scanned for C# security issues.-->
+        <!--XML Export of VCG Results for directory: C:\\Projects\\WebGoat.Net. Scanned for C# security issues.-->
         <CodeIssueCollection>
         <CodeIssue>
         <Priority>6</Priority>
@@ -83,7 +83,7 @@ class TestVCGXmlParser(TestCase):
 
     def test_parse_duplicate_findings_dedupes(self):
         duplicate_finding = """<?xml version="1.0" encoding="utf-8"?>
-        <!--XML Export of VCG Results for directory: C:\Projects\WebGoat.Net. Scanned for C# security issues.-->
+        <!--XML Export of VCG Results for directory: C:\\Projects\\WebGoat.Net. Scanned for C# security issues.-->
         <CodeIssueCollection>
         <CodeIssue>
         <Priority>6</Priority>
@@ -119,7 +119,7 @@ class TestVCGXmlParser(TestCase):
 
     def test_parseissuexml_with_issue_has_finding(self):
         single_finding = """<?xml version="1.0" encoding="utf-8"?>
-        <!--XML Export of VCG Results for directory: C:\Projects\WebGoat.Net. Scanned for C# security issues.-->
+        <!--XML Export of VCG Results for directory: C:\\Projects\\WebGoat.Net. Scanned for C# security issues.-->
         <CodeIssueCollection>
         <CodeIssue>
         <Priority>6</Priority>
@@ -153,7 +153,7 @@ class TestVCGCsvParser(TestCase):
 
     def test_parse_single_finding_single_result(self):
         findings = (
-            """6,Suspicious Comment,"Comment Indicates Potentially Unfinished Code","The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.",C:\Projects\WebGoat.Net\Core\Cart.cs,16,"TODO: Refactor this. Use LINQ with aggregation to get SUM.",False,"LawnGreen"""
+            """6,Suspicious Comment,"Comment Indicates Potentially Unfinished Code","The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.",C:\\Projects\\WebGoat.Net\\Core\\Cart.cs,16,"TODO: Refactor this. Use LINQ with aggregation to get SUM.",False,"LawnGreen"""
             ""
         )
         results = self.parser.parse(findings, Test())
@@ -161,8 +161,8 @@ class TestVCGCsvParser(TestCase):
 
     def test_parse_multiple_findings_multiple_results(self):
         findings = (
-            """6,Suspicious Comment,"Comment Indicates Potentially Unfinished Code","The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.",C:\Projects\WebGoat.Net\Core\Cart.cs,16,"TODO: Refactor this. Use LINQ with aggregation to get SUM.",False,"LawnGreen"
-6,Suspicious Comment,"Comment Indicates Potentially Unfinished Code","The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.",C:\Projects\WebGoat.Net\Core\Cart.cs,41,"TODO: Add ability to delete an orderDetail and to change quantities.",False,"LawnGreen"""
+            """6,Suspicious Comment,"Comment Indicates Potentially Unfinished Code","The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.",C:\\Projects\\WebGoat.Net\\Core\\Cart.cs,16,"TODO: Refactor this. Use LINQ with aggregation to get SUM.",False,"LawnGreen"
+6,Suspicious Comment,"Comment Indicates Potentially Unfinished Code","The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.",C:\\Projects\\WebGoat.Net\\Core\\Cart.cs,41,"TODO: Add ability to delete an orderDetail and to change quantities.",False,"LawnGreen"""
             ""
         )
         results = self.parser.parse(findings, Test())
@@ -170,8 +170,8 @@ class TestVCGCsvParser(TestCase):
 
     def test_parse_duplicate_findings_deduped_results(self):
         findings = (
-            """6,Suspicious Comment,"Comment Indicates Potentially Unfinished Code","The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.",C:\Projects\WebGoat.Net\Core\Cart.cs,16,"TODO: Refactor this. Use LINQ with aggregation to get SUM.",False,"LawnGreen"
-6,Suspicious Comment,"Comment Indicates Potentially Unfinished Code","The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.",C:\Projects\WebGoat.Net\Core\Cart.cs,16,"TODO: Refactor this. Use LINQ with aggregation to get SUM.",False,"LawnGreen"""
+            """6,Suspicious Comment,"Comment Indicates Potentially Unfinished Code","The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.",C:\\Projects\\WebGoat.Net\\Core\\Cart.cs,16,"TODO: Refactor this. Use LINQ with aggregation to get SUM.",False,"LawnGreen"
+6,Suspicious Comment,"Comment Indicates Potentially Unfinished Code","The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.",C:\\Projects\\WebGoat.Net\\Core\\_Cart.cs,16,"TODO: Refactor this. Use LINQ with aggregation to get SUM.",False,"LawnGreen"""
             ""
         )
         results = self.parser.parse(findings, Test())
@@ -188,7 +188,7 @@ class TestVCGCsvParser(TestCase):
 
     def test_parseissuerow_with_row_has_finding(self):
         findings = (
-            """6,Suspicious Comment,"Comment Indicates Potentially Unfinished Code","The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.",C:\Projects\WebGoat.Net\Core\Cart.cs,16,"TODO: Refactor this. Use LINQ with aggregation to get SUM.",False,"LawnGreen"""
+            """6,Suspicious Comment,"Comment Indicates Potentially Unfinished Code","The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.",C:\\Projects\\WebGoat.Net\\Core\\Cart.cs,16,"TODO: Refactor this. Use LINQ with aggregation to get SUM.",False,"LawnGreen"""
             ""
         )
         reader = csv.reader(io.StringIO(findings), delimiter=",", quotechar='"')
@@ -211,7 +211,7 @@ class TestVCGImport(TestCase):
 
     def test_can_parse_xml(self):
         content = """<?xml version="1.0" encoding="utf-8"?>
-        <!--XML Export of VCG Results for directory: C:\Projects\WebGoat.Net. Scanned for C# security issues.-->
+        <!--XML Export of VCG Results for directory: C:\\Projects\\WebGoat.Net. Scanned for C# security issues.-->
         <CodeIssueCollection>
         <CodeIssue>
         <Priority>6</Priority>
@@ -232,7 +232,7 @@ class TestVCGImport(TestCase):
 
     def test_can_parse_csv(self):
         content = (
-            """6,Suspicious Comment,"Comment Indicates Potentially Unfinished Code","The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.",C:\Projects\WebGoat.Net\Core\Cart.cs,16,"TODO: Refactor this. Use LINQ with aggregation to get SUM.",False,"LawnGreen"""
+            """6,Suspicious Comment,"Comment Indicates Potentially Unfinished Code","The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.",C:\\Projects\\WebGoat.Net\\Core\\Cart.cs,16,"TODO: Refactor this. Use LINQ with aggregation to get SUM.",False,"LawnGreen"""
             ""
         )
         filename = TestFile("data.csv", content)
