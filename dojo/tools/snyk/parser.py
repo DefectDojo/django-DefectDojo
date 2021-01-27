@@ -5,10 +5,6 @@ from dojo.models import Finding
 
 class SnykParser(object):
     def get_findings(self, json_output, test):
-        self.items = []
-
-        if json_output is None:
-            return
 
         reportTree = self.parse_json(json_output)
 
@@ -16,9 +12,9 @@ class SnykParser(object):
             temp = []
             for moduleTree in reportTree:
                 temp += self.process_tree(moduleTree, test)
-            self.items = temp
+            return temp.values()
         else:
-            self.items = self.process_tree(reportTree, test)
+            return self.process_tree(reportTree, test)
 
     def process_tree(self, tree, test):
         if tree:
