@@ -42,7 +42,8 @@ class TestSnykParser(TestCase):
 
     def test_snykParser_allprojects_has_many_findings(self):
         testfile = open("dojo/unittests/scans/snyk/all-projects_many_vulns.json")
-        parser = SnykParser(testfile, Test())
+        parser = SnykParser()
+        findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(4, len(findings))
 

@@ -67,20 +67,19 @@ class TestSarifParser(TestCase):
 
     def test_example_report_ms(self):
         """Report file come from Microsoft SARIF sdk on GitHub"""
-        testfile = "dojo/unittests/scans/sarif/SuppressionTestCurrent.sarif"
+        testfile = open("dojo/unittests/scans/sarif/SuppressionTestCurrent.sarif")
         test = Test()
-        with open(testfile) as f:
-            parser = SarifParser(f, test)
+        parser = SarifParser()
+        findings = parser.get_findings(testfile, test)
         self.assertIsNotNone(test.title)
         self.assertEqual(4, len(findings))
         item = findings[0]
         self.assertEqual("New suppressed result.", item.title)
 
     def test_example_report_semgrep(self):
-        testfile = "dojo/unittests/scans/sarif/semgrepowasp-benchmark-sample.sarif"
-        test = Test()
-        with open(testfile) as f:
-            parser = SarifParser(f, test)
+        testfile = open("dojo/unittests/scans/sarif/semgrepowasp-benchmark-sample.sarif")
+        parser = SarifParser()
+        findings = parser.get_findings(testfile, test)
         self.assertIsNotNone(test.title)
         item = findings[0]
         self.assertEqual(

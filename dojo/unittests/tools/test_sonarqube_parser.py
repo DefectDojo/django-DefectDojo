@@ -44,10 +44,10 @@ class TestSonarQubeParser(TestCase):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/sonarqube/sonar-single-finding.html"
         )
-        self.parser = SonarQubeHtmlParser()
+        parser = SonarQubeHtmlParser()
         findings = parser.get_findings(my_file_handle, test)
         # common verifications
-        self.check_parse_file_with_single_vulnerability_has_single_finding()
+        self.assertEqual(1, len(findings))
         # specific verifications
         item = findings[0]
         self.assertEqual(str, type(item.description))
@@ -95,7 +95,7 @@ class TestSonarQubeParser(TestCase):
         parser = SonarQubeHtmlParser()
         findings = parser.get_findings(my_file_handle, test, "detailed")
         # common verifications
-        self.check_parse_file_with_single_vulnerability_has_single_finding()
+        self.assertEqual(1, len(findings))
         # specific verifications
         item = findings[0]
         self.assertEqual(str, type(item.description))
