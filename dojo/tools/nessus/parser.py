@@ -239,3 +239,17 @@ class NessusXMLParser(object):
                                                                protocol=protocol))
 
         return list(dupes.values())
+
+
+class NessusParser(object):
+    def get_findings(self, filename, test):
+
+        if filename is None:
+            return list()
+
+        if filename.name.lower().endswith('.xml'):
+            return list(NessusXMLParser().parse(filename, test).values())
+        elif filename.name.lower().endswith('.csv'):
+            return list(NessusCSVParser().parse(filename, test).values())
+        else:
+            raise ValueError('Unknown File Format')
