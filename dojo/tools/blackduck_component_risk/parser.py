@@ -8,7 +8,7 @@ class BlackduckHubParser(object):
     Can import as exported from Blackduck:
     - from a zip file containing a security.csv, sources.csv and components.csv
     """
-    def __init__(self, filename, test):
+    def get_findings(self, filename, test):
         """
         Function initializes the parser with a file and sets the
         self.items (eventually).

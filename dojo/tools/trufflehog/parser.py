@@ -5,7 +5,7 @@ from dojo.models import Finding
 
 
 class TruffleHogJSONParser(object):
-    def __init__(self, filename, test):
+    def get_findings(self, filename, test):
 
         data = filename.read()
         self.dupes = dict()

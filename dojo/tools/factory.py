@@ -100,80 +100,113 @@ from .clair_klar.parser import ClairKlarParser
 register_parser('Clair Klar Scan', ClairKlarParser())
 from .clair.parser import ClairParser
 register_parser('Clair Scan', ClairParser())
-# register_parser('Cobalt.io Scan', Parser())
-# register_parser('Contrast Scan', Parser())
-# register_parser('Crashtest Security JSON File', Parser())
-# register_parser('Crashtest Security XML File', Parser())
-# register_parser('DawnScanner Scan', Parser())
-# register_parser('Dependency Check Scan', Parser())
-# register_parser('Dependency Track Finding Packaging Format (FPF) Export', Parser())
-# register_parser('DrHeader JSON Importer', Parser())
+from .cobalt.parser import CobaltCSVParser
+register_parser('Cobalt.io Scan', CobaltCSVParser())
+from .contrast.parser import ContrastCSVParser
+register_parser('Contrast Scan', ContrastCSVParser())
+from .crashtest_security_json.parser import CrashtestSecurityJsonParser
+register_parser('Crashtest Security JSON File', CrashtestSecurityJsonParser())
+from .crashtest_security_xml.parser import CrashtestSecurityXmlParser
+register_parser('Crashtest Security XML File', CrashtestSecurityXmlParser())
+from .dawnscanner.parser import DawnScannerParser
+register_parser('DawnScanner Scan', DawnScannerParser())
+from .dependency_check.parser import DependencyCheckParser
+register_parser('Dependency Check Scan', DependencyCheckParser())
+from .dependency_track.parser import DependencyTrackParser
+register_parser('Dependency Track Finding Packaging Format (FPF) Export', DependencyTrackParser())
+from .drheader.parser import DrHeaderJSONParser
+register_parser('DrHeader JSON Importer', DrHeaderJSONParser())
 from .dsop.parser import DsopParser
 register_parser('DSOP Scan', DsopParser())
 from .eslint.parser import ESLintParser
 register_parser('ESLint Scan', ESLintParser())
-# register_parser('Fortify Scan', Parser())
-# register_parser('Generic Findings Import', Parser())
-# register_parser('Github Vulnerability Scan', Parser())
-# register_parser('GitLab Dependency Scanning Report', Parser())
-# register_parser('GitLab SAST Report', Parser())
-# register_parser('Gitleaks Scan', Parser())
-# register_parser('Gosec Scanner', Parser())
-# register_parser('HackerOne Cases', Parser())
-# register_parser('Hadolint Dockerfile check', Parser())
-# register_parser('Harbor Vulnerability Scan', Parser())
-# register_parser('HuskyCI Report', Parser())
-# register_parser('IBM AppScan DAST', Parser())
-# register_parser('Immuniweb Scan', Parser())
-# register_parser('JFrog Xray Scan', Parser())
-# register_parser('Kiuwan Scan', Parser())
-# register_parser('kube-bench Scan', Parser())
-# register_parser('Microfocus Webinspect Scan', Parser())
-# register_parser('MobSF Scan', Parser())
-# register_parser('Mozilla Observatory Scan', Parser())
-# register_parser('Nessus Scan', Parser())
-# register_parser('Netsparker Scan', Parser())
-# register_parser('Nexpose Scan', Parser())
-# register_parser('Nikto Scan', Parser())
-# register_parser('Nmap Scan', Parser())
-# register_parser('Node Security Platform Scan', Parser())
-# register_parser('NPM Audit Scan', Parser())
-# register_parser('Openscap Vulnerability Scan', Parser())
+from .fortify.parser import FortifyXMLParser
+register_parser('Fortify Scan', FortifyXMLParser())
+from .generic.parser import GenericFindingUploadCsvParser
+register_parser('Generic Findings Import', GenericFindingUploadCsvParser())
+register_parser('Github Vulnerability Scan', Parser())
+register_parser('GitLab Dependency Scanning Report', Parser())
+register_parser('GitLab SAST Report', Parser())
+register_parser('Gitleaks Scan', Parser())
+register_parser('Gosec Scanner', Parser())
+register_parser('HackerOne Cases', Parser())
+register_parser('Hadolint Dockerfile check', Parser())
+register_parser('Harbor Vulnerability Scan', Parser())
+register_parser('HuskyCI Report', Parser())
+register_parser('IBM AppScan DAST', Parser())
+register_parser('Immuniweb Scan', Parser())
+register_parser('JFrog Xray Scan', Parser())
+register_parser('Kiuwan Scan', Parser())
+register_parser('kube-bench Scan', Parser())
+register_parser('Microfocus Webinspect Scan', Parser())
+register_parser('MobSF Scan', Parser())
+register_parser('Mozilla Observatory Scan', Parser())
+register_parser('Nessus Scan', Parser())
+register_parser('Netsparker Scan', Parser())
+register_parser('Nexpose Scan', Parser())
+register_parser('Nikto Scan', Parser())
+register_parser('Nmap Scan', Parser())
+register_parser('Node Security Platform Scan', Parser())
+register_parser('NPM Audit Scan', Parser())
+register_parser('Openscap Vulnerability Scan', Parser())
 from .openvas_csv.parser import OpenVASUploadCsvParser
 register_parser('OpenVAS CSV', OpenVASUploadCsvParser())
-# register_parser('ORT evaluated model Importer', Parser())
-# register_parser('OssIndex Devaudit SCA Scan Importer', Parser())
-# register_parser('Outpost24 Scan', Parser())
-# register_parser('PHP Security Audit v2', Parser())
-# register_parser('PHP Symfony Security Check', Parser())
-# register_parser('Qualys Infrastructure Scan (WebGUI XML)', Parser())
-# register_parser('Qualys Scan', Parser())
-# register_parser('Qualys Webapp Scan', Parser())
-# register_parser('Retire.js Scan', Parser())
-# register_parser('Risk Recon API Importer', Parser())
-# register_parser('Safety Scan', Parser())
-# register_parser('SARIF', Parser())
-# register_parser('Scantist Scan', Parser())
-# register_parser('Scout Suite Scan', Parser())
-# register_parser('Semgrep JSON Report', Parser())
-# register_parser('SKF Scan', Parser())
-# register_parser('Snyk Scan', Parser())
-# register_parser('SonarQube API Import', Parser())
-# register_parser('SonarQube Scan', Parser())
-# register_parser('SonarQube Scan detailed', Parser())
-# register_parser('Sonatype Application Scan', Parser())
-# register_parser('SpotBugs Scan', Parser())
-# register_parser('SSL Labs Scan', Parser())
-# register_parser('Sslscan', Parser())
-# register_parser('SSLyze 3 Scan (JSON)', Parser())
-# register_parser('Sslyze Scan', Parser())
-# register_parser('Testssl Scan', Parser())
-# register_parser('Trivy Scan', Parser())
-# register_parser('Trufflehog Scan', Parser())
-# register_parser('Trustwave Scan (CSV)', Parser())
-# register_parser('Twistlock Image Scan', Parser())
-# register_parser('VCG Scan', Parser())
-# register_parser('Veracode Scan', Parser())
+register_parser('ORT evaluated model Importer', Parser())
+register_parser('OssIndex Devaudit SCA Scan Importer', Parser())
+register_parser('Outpost24 Scan', Parser())
+register_parser('PHP Security Audit v2', Parser())
+register_parser('PHP Symfony Security Check', Parser())
+register_parser('Qualys Infrastructure Scan (WebGUI XML)', Parser())
+register_parser('Qualys Scan', Parser())
+register_parser('Qualys Webapp Scan', Parser())
+register_parser('Retire.js Scan', Parser())
+from .risk_recon.parser import RiskReconParser
+register_parser('Risk Recon API Importer', RiskReconParser())
+from .safety.parser import SafetyParser
+register_parser('Safety Scan', SafetyParser())
+from .sarif.parser import SarifParser
+register_parser('SARIF', SarifParser())
+from .scantist.parser import ScantistJSONParser
+register_parser('Scantist Scan', ScantistJSONParser())
+from .scout_suite.parser import ScoutSuiteParser
+register_parser('Scout Suite Scan', ScoutSuiteParser())
+from .semgrep.parser import SemgrepJSONParser
+register_parser('Semgrep JSON Report', SemgrepJSONParser())
+from .skf.parser import SKFCsvParser
+register_parser('SKF Scan', SKFCsvParser())
+from .snyk.parser import SnykParser
+register_parser('Snyk Scan', SnykParser())
+from .sonarqube_api.parser import SonarQube
+register_parser('SonarQube API Import', SonarQube())
+from .sonarqube.parser import SonarQubeHtmlParser
+register_parser('SonarQube Scan', SonarQubeHtmlParser())
+register_parser('SonarQube Scan detailed', SonarQubeHtmlParser())
+from .sonatype.parser import SonatypeJSONParser
+register_parser('Sonatype Application Scan', SonatypeJSONParser())
+from .spotbugs.parser import SpotbugsXMLParser
+register_parser('SpotBugs Scan', SpotbugsXMLParser())
+from .ssl_labs.parser import SSLlabsParser
+register_parser('SSL Labs Scan', SSLlabsParser())
+from .sslscan.parser import SslscanXMLParser
+register_parser('Sslscan', Parser())
+from .sslyze.parser_json import SSLyzeJSONParser
+register_parser('SSLyze 3 Scan (JSON)', SSLyzeJSONParser())
+from .sslyze.parser_xml import SSLyzeXMLParser
+register_parser('Sslyze Scan', SSLyzeXMLParser())
+from .testssl.parser import TestsslCSVParser
+register_parser('Testssl Scan', TestsslCSVParser())
+from .trivy.parser import TrivyParser
+register_parser('Trivy Scan', TrivyParser())
+from .trufflehog.parser import TruffleHogJSONParser
+register_parser('Trufflehog Scan', TruffleHogJSONParser())
+from .trustwave.parser import TrustwaveUploadCsvParser
+register_parser('Trustwave Scan (CSV)', TrustwaveUploadCsvParser())
+from .twistlock.parser import TwistlockParser
+register_parser('Twistlock Image Scan', TwistlockParser())
+from .vcg.parser import VCGParser
+register_parser('VCG Scan', VCGParser())
+from .veracode.parser import VeracodeXMLParser
+register_parser('Veracode Scan', VeracodeXMLParser())
 from .wapiti.parser import WapitiXMLParser
 register_parser('Wapiti Scan', WapitiXMLParser())
 from .whitesource.parser import WhitesourceJSONParser

@@ -15,7 +15,7 @@ class SarifParser(object):
 
     https://www.oasis-open.org/committees/tc_home.php?wg_abbrev=sarif
     """
-    def __init__(self, filehandle, test):
+    def get_findings(self, filehandle, test):
         tree = self.parse_json(filehandle)
 
         # by default give the test a title linked to the first tool in the report

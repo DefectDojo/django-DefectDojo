@@ -5,7 +5,7 @@ from dojo.tools.risk_recon.api import RiskReconAPI
 
 
 class RiskReconParser(object):
-    def __init__(self, filename, test):
+    def get_findings(self, filename, test):
         self.items = []
         if filename:
             tree = filename.read()

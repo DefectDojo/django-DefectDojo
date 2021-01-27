@@ -12,7 +12,7 @@ class HackerOneJSONParser(object):
     A class that can be used to parse the Get All Reports JSON export from HackerOne API.
     """
 
-    def __init__(self, file, test):
+    def get_findings(self, file, test):
         """
         Converts a HackerOne reports to a DefectDojo finding
         """

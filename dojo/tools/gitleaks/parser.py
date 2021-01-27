@@ -9,7 +9,7 @@ class GitleaksJSONParser(object):
     A class that can be used to parse the Gitleaks JSON report files
     """
 
-    def __init__(self, filename, test):
+    def get_findings(self, filename, test):
         """
         Converts a Gitleaks report to DefectDojo findings
         """

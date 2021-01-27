@@ -8,16 +8,15 @@ from dojo.models import Endpoint, Finding
 
 
 class ContrastCSVParser(object):
-
-    def __init__(self, filename, test):
-        dupes = dict()
-        self.items = ()
+    """Contrast Scanner CSV Report"""
+    def get_findings(self, filename, test):
 
         if filename is None:
             self.items = ()
             return
 
         df = pd.read_csv(filename, header=0)
+        dupes = dict()
 
         for i, row in df.iterrows():
             # Vulnerability Name,Vulnerability ID,Category,Rule Name,Severity,Status,Number of Events,First Seen,Last Seen,Application Name,Application ID,Application Code,CWE ID,Request Method,Request Port,Request Protocol,Request Version,Request URI,Request Qs,Request Body
@@ -57,13 +56,12 @@ class ContrastCSVParser(object):
                                   mitigation=mitigation,
                                   impact=impact,
                                   references=references,
-                                  url='N/A',
                                   dynamic_finding=True)
 
                 dupes[dupe_key] = finding
                 self.process_endpoints(finding, df, i)
 
-        self.items = list(dupes.values())
+        return list(dupes.values())
 
     def format_description(self, df, i):
         description = "Request URI: " + str(df.ix[i, 'Request URI']) + "\n"

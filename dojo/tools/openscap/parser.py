@@ -11,7 +11,7 @@ __author__ = 'dr3dd589'
 
 
 class OpenscapXMLParser(object):
-    def __init__(self, file, test):
+    def get_findings(self, file, test):
         self.dupes = dict()
         self.items = ()
         if file is None:

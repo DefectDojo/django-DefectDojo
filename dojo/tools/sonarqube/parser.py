@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 class SonarQubeHtmlParser(object):
 
-    def __init__(self, filename, test, mode=None):
+    def get_findings(self, filename, test, mode=None):
         parser = etree.HTMLParser()
         tree = etree.parse(filename, parser)
         if(mode in [None, 'detailed']):

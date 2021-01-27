@@ -12,7 +12,7 @@ SEV = ['INFO', 'LOW', 'HIGH', 'WARN']
 
 
 class TestsslCSVParser(object):
-    def __init__(self, filename, test):
+    def get_findings(self, filename, test):
         self.dupes = dict()
         self.items = ()
 

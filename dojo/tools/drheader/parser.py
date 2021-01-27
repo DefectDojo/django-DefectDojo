@@ -14,7 +14,7 @@ class DrHeaderJSONParser(object):
         else:
             return None
 
-    def __init__(self, filename, test):
+    def get_findings(self, filename, test):
         self.items = []
         if filename is None:
             return

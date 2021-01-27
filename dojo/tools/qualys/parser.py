@@ -269,5 +269,5 @@ if __name__ == "__main__":
 
 
 class QualysParser(object):
-    def __init__(self, file, test):
+    def get_findings(self, file, test):
         self.items = qualys_parser(file)

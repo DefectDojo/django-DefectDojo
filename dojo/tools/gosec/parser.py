@@ -4,7 +4,7 @@ from dojo.models import Finding
 
 
 class GosecScannerParser(object):
-    def __init__(self, filename, test):
+    def get_findings(self, filename, test):
         tree = filename.read()
         try:
             data = json.loads(str(tree, 'utf-8'))

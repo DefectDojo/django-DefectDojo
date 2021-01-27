@@ -11,7 +11,7 @@ from dojo.models import Finding
 
 
 class SpotbugsXMLParser(object):
-    def __init__(self, filename, test):
+    def get_findings(self, filename, test):
         bug_patterns = dict()
         dupes = dict()
 

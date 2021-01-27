@@ -6,7 +6,7 @@ from dojo.tools.semgrep.models import SemgrepJSONResult
 
 class SemgrepJSONParser(object):
 
-    def __init__(self, filehandle, test):
+    def get_findings(self, filehandle, test):
         tree = self.parse_json(filehandle)
 
         self.items = []

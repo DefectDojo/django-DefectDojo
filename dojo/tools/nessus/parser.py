@@ -143,7 +143,7 @@ class NessusCSVParser(object):
 
 
 class NessusXMLParser(object):
-    def __init__(self, file, test):
+    def get_findings(self, file, test):
         nscan = ElementTree.parse(file)
         root = nscan.getroot()
 

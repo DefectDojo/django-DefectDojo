@@ -19,7 +19,7 @@ class ScantistJSONParser(object):
 
     Website: https://scantist.com/
     """
-    def __init__(self, file, test):
+    def get_findings(self, file, test):
         self.items = []
 
         if file is None:

@@ -59,7 +59,7 @@ PROTOCOLS = [
 
 class SSLyzeXMLParser(object):
 
-    def __init__(self, file, test):
+    def get_findings(self, file, test):
         self.dupes = dict()
         self.items = ()
         if file is None:

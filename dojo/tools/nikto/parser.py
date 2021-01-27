@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 class NiktoXMLParser(object):
 
-    def __init__(self, filename, test):
+    def get_findings(self, filename, test):
         dupes = dict()
         self.items = ()
 

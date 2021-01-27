@@ -11,7 +11,7 @@ from dojo.models import Endpoint, Finding
 
 class MicrofocusWebinspectXMLParser(object):
     """Micro Focus Webinspect XML report parser"""
-    def __init__(self, file, test):
+    def get_findings(self, file, test):
         self.dupes = dict()
         self.items = ()
         if file is None:

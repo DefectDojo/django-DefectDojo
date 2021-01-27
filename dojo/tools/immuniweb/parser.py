@@ -10,7 +10,7 @@ __author__ = 'properam'
 
 
 class ImmuniwebXMLParser(object):
-    def __init__(self, file, test):
+    def get_findings(self, file, test):
         self.items = ()
         if file is None:
             return

@@ -10,7 +10,7 @@ __author__ = 'dr3dd589'
 
 
 class SslscanXMLParser(object):
-    def __init__(self, file, test):
+    def get_findings(self, file, test):
         self.dupes = dict()
         self.items = ()
         if file is None:

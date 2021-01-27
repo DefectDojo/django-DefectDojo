@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 class FortifyXMLParser(object):
     language_list = []
 
-    def __init__(self, filename, test):
+    def get_findings(self, filename, test):
         fortify_scan = ElementTree.parse(filename)
         root = fortify_scan.getroot()
 

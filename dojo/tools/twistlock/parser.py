@@ -162,7 +162,7 @@ def convert_severity(severity):
 
 class TwistlockParser(object):
 
-    def __init__(self, filename, test):
+    def get_findings(self, filename, test):
         self.dupes = dict()
 
         if filename is None:

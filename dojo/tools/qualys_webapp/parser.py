@@ -251,5 +251,5 @@ def qualys_webapp_parser(qualys_xml_file, test):
 
 
 class QualysWebAppParser(object):
-    def __init__(self, file, test):
+    def get_findings(self, file, test):
         self.items = qualys_webapp_parser(file, test)

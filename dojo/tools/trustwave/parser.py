@@ -92,7 +92,7 @@ class Severityfilter():
 
 class TrustwaveUploadCsvParser(object):
 
-    def __init__(self, filename, test):
+    def get_findings(self, filename, test):
         self.dupes = dict()
         self.items = ()
 

@@ -14,20 +14,20 @@ SEVERITY = ['Info', 'Low', 'Medium', 'High', 'Critical']
 
 
 class DependencyCheckParser(object):
-    def add_finding(self, finding):
+    def add_finding(self, finding, dupes):
         if finding is not None:
             key_str = '{}|{}|{}'.format(finding.severity,
                                             finding.title,
                                             finding.description)
             key = hashlib.md5(key_str.encode('utf-8')).hexdigest()
 
-            if key not in self.dupes:
-                self.dupes[key] = finding
+            if key not in dupes:
+                dupes[key] = finding
             # else:
                 # print('skipping: ' + finding.title)
 
     def get_field_value(self, parent_node, field_name):
-        field_node = parent_node.find(self.namespace + field_name)
+        field_node = parent_node.find(namespace + field_name)
         field_value = '' if field_node is None else field_node.text
         return field_value
 
@@ -46,7 +46,7 @@ class DependencyCheckParser(object):
         component_name, component_version = None, None
         # big try catch to avoid crashint the parser on some unexpected stuff
         try:
-            identifiers_node = dependency.find(self.namespace + 'identifiers')
+            identifiers_node = dependency.find(namespace + 'identifiers')
             if identifiers_node:
                 # <identifiers>
                 #     <identifier type="cpe" confidence="HIGHEST">
@@ -74,7 +74,7 @@ class DependencyCheckParser(object):
                 #     </package>
                 # </identifiers>
 
-                package_node = identifiers_node.find('.//' + self.namespace + 'package')
+                package_node = identifiers_node.find('.//' + namespace + 'package')
                 if package_node:
                     logger.debug('package string: ' + self.get_field_value(package_node, 'id'))
                     id = self.get_field_value(package_node, 'id')
@@ -88,7 +88,7 @@ class DependencyCheckParser(object):
                     component_version = purl_parts['version'] if purl_parts['version'] and len(purl_parts['version']) > 0 else ''
                     return component_name, component_version
 
-                cpe_node = identifiers_node.find('.//' + self.namespace + 'identifier[@type="cpe"]')
+                cpe_node = identifiers_node.find('.//' + namespace + 'identifier[@type="cpe"]')
                 if cpe_node:
                     # logger.debug('cpe string: ' + self.get_field_value(cpe_node, 'name'))
                     cpe = CPE(self.get_field_value(cpe_node, 'name'))
@@ -106,7 +106,7 @@ class DependencyCheckParser(object):
                     # logger.debug('get_update: ' + str(cpe.get_update()))
                     return component_name, component_version
 
-                maven_node = identifiers_node.find('.//' + self.namespace + 'identifier[@type="maven"]')
+                maven_node = identifiers_node.find('.//' + namespace + 'identifier[@type="maven"]')
                 if maven_node:
                     # logger.debug('maven_string: ' + self.get_field_value(maven_node, 'name'))
                     maven_parts = self.get_field_value(maven_node, 'name').split(':')
@@ -129,7 +129,7 @@ class DependencyCheckParser(object):
                         #     </vulnerabilityIds>
 
             # TODO what happens when there multiple evidencecollectednodes with product or version as type?
-            evidence_collected_node = dependency.find(self.namespace + 'evidenceCollected')
+            evidence_collected_node = dependency.find(namespace + 'evidenceCollected')
             if evidence_collected_node:
                 # <evidenceCollected>
                 # <evidence type="product" confidence="HIGH">
@@ -145,10 +145,10 @@ class DependencyCheckParser(object):
                 # will find the first product and version node. if there are multiple it may not pick the best
                 # since 6.0.0 howoever it seems like there's always a packageurl above so not sure if we need the effort to
                 # implement more logic here
-                product_node = evidence_collected_node.find('.//' + self.namespace + 'evidence[@type="product"]')
+                product_node = evidence_collected_node.find('.//' + namespace + 'evidence[@type="product"]')
                 if product_node:
                     component_name = self.get_field_value(product_node, 'value')
-                    version_node = evidence_collected_node.find('.//' + self.namespace + 'evidence[@type="version"]')
+                    version_node = evidence_collected_node.find('.//' + namespace + 'evidence[@type="version"]')
                     if version_node:
                         component_version = self.get_field_value(version_node, 'value')
 
@@ -168,7 +168,7 @@ class DependencyCheckParser(object):
             return None
 
         name = self.get_field_value(vulnerability, 'name')
-        cwes_node = vulnerability.find(self.namespace + 'cwes')
+        cwes_node = vulnerability.find(namespace + 'cwes')
         if cwes_node is not None:
             cwe_field = self.get_field_value(cwes_node, 'cwe')
         else:
@@ -192,8 +192,8 @@ class DependencyCheckParser(object):
         # some changes in v6.0.0 around CVSS version information
         # https://github.com/jeremylong/DependencyCheck/pull/2781
 
-        cvssv2_node = vulnerability.find(self.namespace + 'cvssV2')
-        cvssv3_node = vulnerability.find(self.namespace + 'cvssV3')
+        cvssv2_node = vulnerability.find(namespace + 'cvssV2')
+        cvssv3_node = vulnerability.find(namespace + 'cvssV3')
         if cvssv3_node is not None:
             severity = self.get_field_value(cvssv3_node, 'baseSeverity').lower().capitalize()
         elif cvssv2_node is not None:
@@ -210,11 +210,11 @@ class DependencyCheckParser(object):
             severity = "Medium"
 
         reference_detail = None
-        references_node = vulnerability.find(self.namespace + 'references')
+        references_node = vulnerability.find(namespace + 'references')
 
         if references_node is not None:
             reference_detail = ''
-            for reference_node in references_node.findall(self.namespace +
+            for reference_node in references_node.findall(namespace +
                                                           'reference'):
                 name = self.get_field_value(reference_node, 'name')
                 source = self.get_field_value(reference_node, 'source')
@@ -241,14 +241,13 @@ class DependencyCheckParser(object):
             component_name=component_name,
             component_version=component_version)
 
-    def __init__(self, filename, test):
-        self.dupes = dict()
-        self.items = ()
-        self.namespace = ''
+    def get_findings(self, filename, test):
 
         if filename is None:
-            return
+            return list()
 
+        dupes = dict()
+        namespace = ''
         content = filename.read()
 
         if content is None:
@@ -258,20 +257,20 @@ class DependencyCheckParser(object):
         regex = r"{.*}"
         matches = re.match(regex, scan.tag)
         try:
-            self.namespace = matches.group(0)
+            namespace = matches.group(0)
         except:
-            self.namespace = ""
+            namespace = ""
 
-        dependencies = scan.find(self.namespace + 'dependencies')
+        dependencies = scan.find(namespace + 'dependencies')
 
         if dependencies:
-            for dependency in dependencies.findall(self.namespace +
+            for dependency in dependencies.findall(namespace +
                                                    'dependency'):
-                vulnerabilities = dependency.find(self.namespace +
+                vulnerabilities = dependency.find(namespace +
                                                   'vulnerabilities')
                 if vulnerabilities is not None:
                     for vulnerability in vulnerabilities.findall(
-                            self.namespace + 'vulnerability'):
+                            namespace + 'vulnerability'):
 
                         finding = self.get_finding_from_vulnerability(dependency, None,
                             vulnerability, test)
@@ -311,13 +310,13 @@ class DependencyCheckParser(object):
                         #     </identifiers>
                         # </relatedDependency>
 
-                        relatedDependencies = dependency.find(self.namespace + 'relatedDependencies')
+                        relatedDependencies = dependency.find(namespace + 'relatedDependencies')
                         if relatedDependencies:
-                            for relatedDependency in relatedDependencies.findall(self.namespace + 'relatedDependency'):
+                            for relatedDependency in relatedDependencies.findall(namespace + 'relatedDependency'):
                                 finding = self.get_finding_from_vulnerability(dependency, relatedDependency, vulnerability, test)
-                                self.add_finding(finding)
+                                self.add_finding(finding, dupes)
 
-        self.items = list(self.dupes.values())
+        return list(self.dupes.values())
 
 
 # future idea include vulnerablesoftware in description?
