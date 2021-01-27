@@ -416,6 +416,27 @@ def get_in_period_details(findings):
     return in_period_counts, in_period_details, age_detail
 
 
+def get_accepted_in_period_details(findings):
+    accepted_in_period_details = {}
+    for obj in findings:
+        if obj.test.engagement.product.name not in accepted_in_period_details:
+            accepted_in_period_details[obj.test.engagement.product.name] = {
+                'path': reverse('accepted_findings') + '?test__engagement__product=' + str(obj.test.engagement.product.id),
+                'Critical': 0,
+                'High': 0,
+                'Medium': 0,
+                'Low': 0,
+                'Info': 0,
+                'Total': 0
+            }
+        accepted_in_period_details[
+            obj.test.engagement.product.name
+        ][obj.severity] += 1
+        accepted_in_period_details[obj.test.engagement.product.name]['Total'] += 1
+
+    return accepted_in_period_details
+
+
 @cache_page(60 * 5)  # cache for 5 minutes
 @vary_on_cookie
 def metrics(request, mtype):
@@ -427,7 +448,6 @@ def metrics(request, mtype):
     closed_in_period_counts = {"Critical": 0, "High": 0, "Medium": 0,
                                "Low": 0, "Info": 0, "Total": 0}
     closed_in_period_details = {}
-    accepted_in_period_details = {}
 
     if mtype != 'All':
         pt = Product_Type.objects.filter(id=mtype)
@@ -459,19 +479,10 @@ def metrics(request, mtype):
         for obj in queryset_check(filters['all'])
     ])
 
-    for obj in filters['accepted']:
-        if view == 'Endpoint':
-            obj = obj.finding
-
-        if obj.test.engagement.product.name not in accepted_in_period_details:
-            accepted_in_period_details[obj.test.engagement.product.name] = {
-                'path': reverse('accepted_findings') + '?test__engagement__product=' + str(
-                    obj.test.engagement.product.id),
-                'Critical': 0, 'High': 0, 'Medium': 0, 'Low': 0, 'Info': 0, 'Total': 0}
-        accepted_in_period_details[
-            obj.test.engagement.product.name
-        ][obj.severity] += 1
-        accepted_in_period_details[obj.test.engagement.product.name]['Total'] += 1
+    accepted_in_period_details = get_accepted_in_period_details([
+        obj.finding if view == 'Endpoint' else obj
+        for obj in filters['accepted']
+    ])
 
     for obj in filters['closed']:
         if view == 'Endpoint':
