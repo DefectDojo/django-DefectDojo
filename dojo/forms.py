@@ -181,56 +181,35 @@ class Delete_Product_TypeForm(forms.ModelForm):
         exclude = ['name', 'description', 'critical_product', 'key_product', 'authorized_users']
 
 
-class Add_Product_Type_MemberForm(forms.ModelForm):
-
-    user = forms.ModelChoiceField(
-        queryset=None,
-        required=True, label="User")
-
-    role = forms.ChoiceField(choices=Roles.choices())
-
-    def __init__(self, *args, **kwargs):
-        super(Add_Product_Type_MemberForm, self).__init__(*args, **kwargs)
-        self.fields['product_type'].disabled = True
-        current_members = Product_Type_Member.objects.filter(product_type=self.initial["product_type"]).values_list('user', flat=True)
-        self.fields['user'].queryset = Dojo_User.objects.exclude(Q(is_superuser=True) | Q(id__in=current_members)).exclude(is_active=False).order_by('first_name', 'last_name')
-
-    class Meta:
-        model = Product_Type_Member
-        fields = ['product_type', 'user', 'role']
-
-
 class Edit_Product_Type_MemberForm(forms.ModelForm):
-
+    user = forms.ModelChoiceField(queryset=None, required=True)
     role = forms.ChoiceField(choices=Roles.choices())
 
     def __init__(self, *args, **kwargs):
-        users = Dojo_User.objects.order_by('first_name', 'last_name')
         super(Edit_Product_Type_MemberForm, self).__init__(*args, **kwargs)
         self.fields['product_type'].disabled = True
+        self.fields['user'].queryset = Dojo_User.objects.order_by('first_name', 'last_name')
         self.fields['user'].disabled = True
-        self.fields['user'].queryset = users
 
     class Meta:
         model = Product_Type_Member
         fields = ['product_type', 'user', 'role']
 
 
-class Delete_Product_Type_MemberForm(forms.ModelForm):
-
-    role = forms.ChoiceField(choices=Roles.choices())
-
+class Add_Product_Type_MemberForm(Edit_Product_Type_MemberForm):
     def __init__(self, *args, **kwargs):
-        users = Dojo_User.objects.order_by('first_name', 'last_name')
-        super(Delete_Product_Type_MemberForm, self).__init__(*args, **kwargs)
-        self.fields['product_type'].disabled = True
-        self.fields['user'].disabled = True
-        self.fields['user'].queryset = users
-        self.fields['role'].disabled = True
+        super(Add_Product_Type_MemberForm, self).__init__(*args, **kwargs)
+        current_members = Product_Type_Member.objects.filter(product_type=self.initial["product_type"]).values_list('user', flat=True)
+        self.fields['user'].queryset = Dojo_User.objects.exclude(
+            Q(is_superuser=True) | 
+            Q(id__in=current_members)).exclude(is_active=False).order_by('first_name', 'last_name')
+        self.fields['user'].disabled = False
 
-    class Meta:
-        model = Product_Type_Member
-        fields = ['product_type', 'user', 'role']
+
+class Delete_Product_Type_MemberForm(Edit_Product_Type_MemberForm):
+    def __init__(self, *args, **kwargs):
+        super(Delete_Product_Type_MemberForm, self).__init__(*args, **kwargs)
+        self.fields['role'].disabled = True
 
 
 class Test_TypeForm(forms.ModelForm):

@@ -37,6 +37,7 @@ from dojo.components.sql_group_concat import Sql_GroupConcat
 import dojo.jira_link.helper as jira_helper
 import dojo.finding.helper as finding_helper
 from dojo.authorization.roles_permissions import Permissions
+from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.product.queries import get_authorized_products
 
 logger = logging.getLogger(__name__)
@@ -679,7 +680,7 @@ def import_scan_results_prod(request, pid=None):
     return import_scan_results(request, pid=pid)
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
 def new_product(request, ptid=None):
     jira_project_form = None
     error = False
@@ -699,6 +700,8 @@ def new_product(request, ptid=None):
             gform = None
 
         if form.is_valid():
+            product_type = form.instance.prod_type
+            user_has_permission_or_403(request.user, product_type, Permissions.Product_Type_Add_Product)
             product = form.save()
             messages.add_message(request,
                                  messages.SUCCESS,
