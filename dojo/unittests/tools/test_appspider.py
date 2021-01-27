@@ -6,7 +6,7 @@ from dojo.models import Product, Engagement, Test, Finding
 class TestAppSpiderXMLParser(TestCase):
     def test_appspider_parser_has_no_finding(self):
         parser = AppSpiderXMLParser(None, Test())
-        self.assertEqual(0, len(parser.items))
+        self.assertEqual(0, len(findings))
 
     def test_appspider_parser_has_one_finding(self):
         test = Test()
@@ -15,8 +15,8 @@ class TestAppSpiderXMLParser(TestCase):
         testfile = open("dojo/unittests/scans/appspider/one_vuln.xml")
         parser = AppSpiderXMLParser(testfile, test)
         testfile.close()
-        self.assertEqual(1, len(parser.items))
-        item = parser.items[0]
+        self.assertEqual(1, len(findings))
+        item = findings[0]
         with self.subTest(item=0):
             self.assertEqual(525, item.cwe)
 
@@ -24,7 +24,7 @@ class TestAppSpiderXMLParser(TestCase):
     #     testfile = open("dojo/unittests/scans/aqua/many_vulns.json")
     #     parser = AquaJSONParser(testfile, Test())
     #     testfile.close()
-    #     self.assertEqual(24, len(parser.items))
+    #     self.assertEqual(24, len(findings))
 
     def convert_severity(self):
         with self.subTest(val="0-Safe"):

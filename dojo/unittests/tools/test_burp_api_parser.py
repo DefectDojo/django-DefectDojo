@@ -8,7 +8,7 @@ from dojo.tools.burp_api.parser import convert_severity, convert_confidence
 class TestParser(TestCase):
     def test_burp_without_file_has_no_findings(self):
         parser = BurpApiParser(None, Test())
-        self.assertEqual(0, len(parser.items))
+        self.assertEqual(0, len(findings))
 
     def test_example_report(self):
         testfile = 'dojo/unittests/scans/burp_suite_pro/example.json'
@@ -18,9 +18,9 @@ class TestParser(TestCase):
         with open(testfile) as f:
             parser = BurpApiParser(f, test)
         self.assertIsNotNone(test.title)
-        self.assertEqual(5, len(parser.items))
+        self.assertEqual(5, len(findings))
         with self.subTest(i=0):
-            item = parser.items[0]
+            item = findings[0]
             self.assertEqual('Info', item.severity)
             self.assertEqual('TLS cookie without secure flag set', item.title)
             self.assertEqual('5605602767570803712', item.unique_id_from_tool)
@@ -35,7 +35,7 @@ class TestParser(TestCase):
             test.engagement = Engagement()
             test.engagement.product = Product()
             parser = BurpApiParser(f, test)
-            for item in parser.items:
+            for item in findings:
                 item.clean()
                 self.assertIsNotNone(item.impact)
 
@@ -46,7 +46,7 @@ class TestParser(TestCase):
             test.engagement = Engagement()
             test.engagement.product = Product()
             parser = BurpApiParser(f, test)
-            for item in parser.items:
+            for item in findings:
                 item.clean()
                 self.assertIsNotNone(item.impact)
 

@@ -7,10 +7,10 @@ class TestDrHeaderJSONParser(TestCase):
 
     def test_parse_without_file_has_no_finding(self):
         parser = DrHeaderJSONParser(None, Test())
-        self.assertEqual(0, len(parser.items))
+        self.assertEqual(0, len(findings))
 
     def test_parse_file_has_many_finding_one_tool(self):
         testfile = open("dojo/unittests/scans/drheader/scan.json")
         parser = DrHeaderJSONParser(testfile, Test())
         testfile.close()
-        self.assertEqual(6, len(parser.items))
+        self.assertEqual(6, len(findings))

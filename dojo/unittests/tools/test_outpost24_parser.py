@@ -8,9 +8,9 @@ class TestOutpost24Parser(TestCase):
     def assert_file_has_n_items(self, filename, item_count):
         with open(filename) as file:
             parser = Outpost24Parser(file, Test())
-        self.assertEquals(item_count, len(parser.items))
+        self.assertEquals(item_count, len(findings))
         if item_count > 0:
-            for item in parser.items:
+            for item in findings:
                 endpoint_count = len(item.unsaved_endpoints)
                 self.assertGreater(endpoint_count, 0)
 

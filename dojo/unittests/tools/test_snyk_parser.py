@@ -6,49 +6,49 @@ from dojo.models import Test
 class TestSnykParser(TestCase):
     def test_snykParser_without_file_has_no_finding(self):
         parser = SnykParser(None, Test())
-        self.assertEqual(0, len(parser.items))
+        self.assertEqual(0, len(findings))
 
     def test_snykParser_single_has_no_finding(self):
         testfile = open("dojo/unittests/scans/snyk/single_project_no_vulns.json")
         parser = SnykParser(testfile, Test())
-        self.assertEqual(0, len(parser.items))
+        self.assertEqual(0, len(findings))
         testfile.close()
 
     def test_snykParser_allprojects_has_no_finding(self):
         testfile = open("dojo/unittests/scans/snyk/all-projects_no_vulns.json")
         parser = SnykParser(testfile, Test())
-        self.assertEqual(0, len(parser.items))
+        self.assertEqual(0, len(findings))
         testfile.close()
 
     def test_snykParser_single_has_one_finding(self):
         testfile = open("dojo/unittests/scans/snyk/single_project_one_vuln.json")
         parser = SnykParser(testfile, Test())
-        self.assertEqual(1, len(parser.items))
+        self.assertEqual(1, len(findings))
         testfile.close()
 
     def test_snykParser_allprojects_has_one_finding(self):
         testfile = open("dojo/unittests/scans/snyk/all-projects_one_vuln.json")
         parser = SnykParser(testfile, Test())
         testfile.close()
-        self.assertEqual(1, len(parser.items))
+        self.assertEqual(1, len(findings))
 
     def test_snykParser_single_has_many_findings(self):
         testfile = open("dojo/unittests/scans/snyk/single_project_many_vulns.json")
         parser = SnykParser(testfile, Test())
         testfile.close()
-        self.assertEqual(41, len(parser.items))
+        self.assertEqual(41, len(findings))
 
     def test_snykParser_allprojects_has_many_findings(self):
         testfile = open("dojo/unittests/scans/snyk/all-projects_many_vulns.json")
         parser = SnykParser(testfile, Test())
         testfile.close()
-        self.assertEqual(4, len(parser.items))
+        self.assertEqual(4, len(findings))
 
     def test_snykParser_finding_has_fields(self):
         testfile = open("dojo/unittests/scans/snyk/single_project_one_vuln.json")
         parser = SnykParser(testfile, Test())
         testfile.close()
-        finding = parser.items[0]
+        finding = findings[0]
         self.assertEqual(
             "com.test:myframework@1.0.0-SNAPSHOT: XML External Entity (XXE) Injection",
             finding.title)

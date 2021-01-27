@@ -8,10 +8,10 @@ class TesthadolintParser(TestCase):
         testfile = open("dojo/unittests/scans/hadolint/one_dockerfile.json")
         parser = HadolintParser(testfile, Test())
         testfile.close()
-        self.assertEqual(4, len(parser.items))
+        self.assertEqual(4, len(findings))
 
     def test_parse_file_with_many_dockerfile(self):
         testfile = open("dojo/unittests/scans/hadolint/many_dockerfile.json")
         parser = HadolintParser(testfile, Test())
         testfile.close()
-        self.assertEqual(12, len(parser.items))
+        self.assertEqual(12, len(findings))

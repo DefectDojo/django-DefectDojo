@@ -27,18 +27,18 @@ class TestAwsProwlerParser(TestCase):
 
     def test_aws_prowler_parser_with_no_vuln_has_no_findings(self):
         parser = self.setup(open("dojo/unittests/scans/aws_prowler/no_vuln.csv"))
-        self.assertEqual(0, len(parser.items))
+        self.assertEqual(0, len(findings))
 
     def test_aws_prowler_parser_with_critical_vuln_has_one_findings(self):
         parser = self.setup(open("dojo/unittests/scans/aws_prowler/one_vuln.csv"))
-        self.assertEqual(1, len(parser.items))
-        self.assertEqual('Avoid the use of the root account (Scored)', parser.items[0].title)
+        self.assertEqual(1, len(findings))
+        self.assertEqual('Avoid the use of the root account (Scored)', findings[0].title)
 
     def test_aws_prowler_parser_with_many_vuln_has_many_findings(self):
         parser = self.setup(open("dojo/unittests/scans/aws_prowler/many_vuln.csv"))
-        self.assertEqual(5, len(parser.items))
-        self.assertEqual('Vuln A', parser.items[0].title)
-        self.assertEqual('Vuln B', parser.items[1].title)
-        self.assertEqual('Info A', parser.items[2].title)
-        self.assertEqual('Vuln C', parser.items[3].title)
-        self.assertEqual('Info B', parser.items[4].title)
+        self.assertEqual(5, len(findings))
+        self.assertEqual('Vuln A', findings[0].title)
+        self.assertEqual('Vuln B', findings[1].title)
+        self.assertEqual('Info A', findings[2].title)
+        self.assertEqual('Vuln C', findings[3].title)
+        self.assertEqual('Info B', findings[4].title)

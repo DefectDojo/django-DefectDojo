@@ -17,10 +17,10 @@ class TestTrivyParser(TestCase):
     def test_mixed_scan(self):
         with open(sample_path('trivy_mix.json')) as test_file:
             trivy_parser = TrivyParser(test_file, self.dojo_test)
-        self.assertEqual(len(trivy_parser.items), 6)
-        self.check_title(trivy_parser.items)
-        self.check_cve(trivy_parser.items)
-        self.check_cwe(trivy_parser.items)
+        self.assertEqual(len(trivy_findings), 6)
+        self.check_title(trivy_findings)
+        self.check_cve(trivy_findings)
+        self.check_cwe(trivy_findings)
 
     def check_title(self, trivy_findings):
         self.assertEqual(trivy_findings[0].title, 'CVE-2018-16487 lodash 4.17.4')

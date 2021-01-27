@@ -35,8 +35,8 @@ class TestScoutSuiteParser(TestCase):
 
     def test_scout_suite_parser_with_no_vuln_has_no_findings(self):
         parser = self.setup("dojo/unittests/scans/scout_suite/no_vuln.js")
-        self.assertEqual(0, len(parser.items))
+        self.assertEqual(0, len(findings))
 
     def test_scout_suite_parser_with_two_findings(self):
         parser = self.setup("dojo/unittests/scans/scout_suite/two_findings.js")
-        self.assertEqual(2, len(parser.items))
+        self.assertEqual(2, len(findings))

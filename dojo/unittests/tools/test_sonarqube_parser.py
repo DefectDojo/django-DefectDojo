@@ -36,7 +36,7 @@ class TestSonarQubeParser(TestCase):
 
     # common verifications
     def check_parse_file_with_no_vulnerabilities_has_no_findings(self):
-        self.assertEqual(0, len(self.parser.items))
+        self.assertEqual(0, len(findings))
 
     # SonarQube Scan - report with one vuln
     def test_file_name_aggregated_parse_file_with_single_vulnerability_has_single_finding(self):
@@ -46,7 +46,7 @@ class TestSonarQubeParser(TestCase):
         # common verifications
         self.check_parse_file_with_single_vulnerability_has_single_finding()
         # specific verifications
-        item = self.parser.items[0]
+        item = findings[0]
         self.assertEqual(str, type(item.description))
         self.assertMultiLineEqual("Because it is easy to extract strings from a compiled application, credentials should never be hard-coded. Do so, and they're almost guaranteed to\n"
             "end up in the hands of an attacker. This is particularly true for applications that are distributed.\n"
@@ -90,7 +90,7 @@ class TestSonarQubeParser(TestCase):
         # common verifications
         self.check_parse_file_with_single_vulnerability_has_single_finding()
         # specific verifications
-        item = self.parser.items[0]
+        item = findings[0]
         self.assertEqual(str, type(item.description))
         self.assertMultiLineEqual("Because it is easy to extract strings from a compiled application, credentials should never be hard-coded. Do so, and they're almost guaranteed to\n"
             "end up in the hands of an attacker. This is particularly true for applications that are distributed.\n"
@@ -124,11 +124,11 @@ class TestSonarQubeParser(TestCase):
         self.assertEqual("AWK40IMu-pl6AHs22MnV", item.unique_id_from_tool)
 
     def check_parse_file_with_single_vulnerability_has_single_finding(self):
-        self.assertEqual(1, len(self.parser.items))
+        self.assertEqual(1, len(findings))
 
         # check content
-        item = self.parser.items[0]
-        self.assertEqual(str, type(self.parser.items[0].title))
+        item = findings[0]
+        self.assertEqual(str, type(findings[0].title))
         self.assertEqual("Credentials should not be hard-coded", item.title)
         self.assertEqual(int, type(item.cwe))
         # This is only the first CWE in the list!
@@ -176,18 +176,18 @@ class TestSonarQubeParser(TestCase):
         self.check_parse_file_with_multiple_vulnerabilities_has_multiple_findings()
 
     def check_parse_file_with_multiple_vulnerabilities_has_multiple_findings(self):
-        self.assertEqual(6, len(self.parser.items))
+        self.assertEqual(6, len(findings))
 
     # Test parsing when the vulnerability details include a table, with tr and td that should be ignored when looking for list of rules
     def test_detailed_parse_file_with_table_in_table(self):
         my_file_handle, product, engagement, test = self.init("dojo/unittests/scans/sonarqube/sonar-table-in-table.html")
         self.parser = SonarQubeHtmlParser(my_file_handle, test, 'detailed')
         self.teardown(my_file_handle)
-        self.assertEqual(1, len(self.parser.items))
+        self.assertEqual(1, len(findings))
 
         # check content
-        item = self.parser.items[0]
-        self.assertEqual(str, type(self.parser.items[0].title))
+        item = findings[0]
+        self.assertEqual(str, type(findings[0].title))
         self.assertEqual("\"clone\" should not be overridden", item.title)
         self.assertEqual(int, type(item.cwe))
         self.assertEqual(0, item.cwe)
@@ -256,11 +256,11 @@ class TestSonarQubeParser(TestCase):
         my_file_handle, product, engagement, test = self.init("dojo/unittests/scans/sonarqube/sonar-rule-undefined.html")
         self.parser = SonarQubeHtmlParser(my_file_handle, test, 'detailed')
         self.teardown(my_file_handle)
-        self.assertEqual(1, len(self.parser.items))
+        self.assertEqual(1, len(findings))
 
         # check content
-        item = self.parser.items[0]
-        self.assertEqual(str, type(self.parser.items[0].title))
+        item = findings[0]
+        self.assertEqual(str, type(findings[0].title))
         self.assertEqual("\"clone\" should not be overridden", item.title)
         self.assertEqual(int, type(item.cwe))
         # no rule found -> 0
@@ -296,10 +296,10 @@ class TestSonarQubeParser(TestCase):
         self.parser = SonarQubeHtmlParser(my_file_handle, test)
         self.teardown(my_file_handle)
         # specific verifications
-        self.assertEqual(2, len(self.parser.items))
+        self.assertEqual(2, len(findings))
         # checking both items because they aren't always in the same order
-        item1 = self.parser.items[0]
-        item2 = self.parser.items[1]
+        item1 = findings[0]
+        item2 = findings[1]
         if item1.nb_occurences == 3:
             aggregatedItem = item1
             # there is nothing to aggregate on the other finding
@@ -354,4 +354,4 @@ class TestSonarQubeParser(TestCase):
         self.parser = SonarQubeHtmlParser(my_file_handle, test, 'detailed')
         self.teardown(my_file_handle)
         # specific verifications
-        self.assertEqual(4, len(self.parser.items))
+        self.assertEqual(4, len(findings))

@@ -11,6 +11,7 @@ class TestOrtParser(TestCase):
 
     def test_parse_file_has_many_finding_one_tool(self):
         testfile = open("dojo/unittests/scans/ort/evaluated-model-reporter-test-output.json")
-        parser = OrtParser(testfile, Test())
+        parser = OrtParser()
+        findings = parser.get_findings(testfile, Test())
         testfile.close()
-        self.assertEqual(2, len(parser.items))
+        self.assertEqual(2, len(findings))

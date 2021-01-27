@@ -7,7 +7,7 @@ class TestMobSFParser(TestCase):
     # TODO fix this use case
     # def test_parse_without_file_has_no_findings(self):
     #     parser = MobSFParser(None, Test())
-    #     self.assertEqual(0, len(parser.items))
+    #     self.assertEqual(0, len(findings))
 
     def test_parse_file(self):
         test = Test()
@@ -18,8 +18,8 @@ class TestMobSFParser(TestCase):
         parser = MobSFParser(testfile, test)
         testfile.close()
         # TODO add more checks dedicated to this file
-        # self.assertEqual(1, len(parser.items))
-        # item = parser.items[0]
+        # self.assertEqual(1, len(findings))
+        # item = findings[0]
         # self.assertEquals('debian:stretch:libx11', item.component_name)
         # self.assertEquals('2:1.6.4-3', item.component_version)
 

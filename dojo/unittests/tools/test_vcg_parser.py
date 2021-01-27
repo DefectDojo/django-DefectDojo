@@ -224,10 +224,10 @@ class TestVCGImport(TestCase):
         </CodeIssueCollection>"""
         filename = TestFile('data.xml', content)
         self.parser = VCGParser(filename, Test())
-        self.assertEqual(1, len(self.parser.items))
+        self.assertEqual(1, len(findings))
 
     def test_can_parse_csv(self):
         content = """6,Suspicious Comment,"Comment Indicates Potentially Unfinished Code","The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.",C:\Projects\WebGoat.Net\Core\Cart.cs,16,"TODO: Refactor this. Use LINQ with aggregation to get SUM.",False,"LawnGreen"""""
         filename = TestFile('data.csv', content)
         self.parser = VCGParser(filename, Test())
-        self.assertEqual(1, len(self.parser.items))
+        self.assertEqual(1, len(findings))

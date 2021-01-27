@@ -11,7 +11,7 @@ class TestSarifParser(TestCase):
         with open(testfile) as f:
             parser = SarifParser(f, test)
         self.assertIsNotNone(test.title)
-        self.assertEqual(510, len(parser.items))
+        self.assertEqual(510, len(findings))
 
     def test_example2_report(self):
         testfile = 'dojo/unittests/scans/sarif/appendix_k.sarif'
@@ -19,8 +19,8 @@ class TestSarifParser(TestCase):
         with open(testfile) as f:
             parser = SarifParser(f, test)
         self.assertIsNotNone(test.title)
-        self.assertEqual(1, len(parser.items))
-        item = parser.items[0]
+        self.assertEqual(1, len(findings))
+        item = findings[0]
         self.assertEqual('collections/list.h', item.file_path)
         self.assertEqual(15, item.line)
         self.assertEqual('Critical', item.severity)
@@ -35,7 +35,7 @@ class TestSarifParser(TestCase):
         with open(testfile) as f:
             parser = SarifParser(f, test)
         self.assertIsNotNone(test.title)
-        self.assertEqual(0, len(parser.items))
+        self.assertEqual(0, len(findings))
 
     def test_example_k2_report(self):
         testfile = 'dojo/unittests/scans/sarif/appendix_k2.sarif'
@@ -43,8 +43,8 @@ class TestSarifParser(TestCase):
         with open(testfile) as f:
             parser = SarifParser(f, test)
         self.assertIsNotNone(test.title)
-        self.assertEqual(1, len(parser.items))
-        item = parser.items[0]
+        self.assertEqual(1, len(findings))
+        item = findings[0]
         self.assertEqual("src/collections/list.cpp", item.file_path)
         self.assertEqual(15, item.line)
         self.assertEquals("A variable was used without being initialized. This can result in runtime errors such as null reference exceptions.", item.description)
@@ -55,8 +55,8 @@ class TestSarifParser(TestCase):
         with open(testfile) as f:
             parser = SarifParser(f, test)
         self.assertIsNotNone(test.title)
-        self.assertEqual(1, len(parser.items))
-        item = parser.items[0]
+        self.assertEqual(1, len(findings))
+        item = findings[0]
         self.assertEqual('The insecure method "Crypto.Sha1.Encrypt" should not be used.', item.title)
 
     def test_example_report_ms(self):
@@ -67,8 +67,8 @@ class TestSarifParser(TestCase):
         with open(testfile) as f:
             parser = SarifParser(f, test)
         self.assertIsNotNone(test.title)
-        self.assertEqual(4, len(parser.items))
-        item = parser.items[0]
+        self.assertEqual(4, len(findings))
+        item = findings[0]
         self.assertEqual('New suppressed result.', item.title)
 
     def test_example_report_semgrep(self):
@@ -77,5 +77,5 @@ class TestSarifParser(TestCase):
         with open(testfile) as f:
             parser = SarifParser(f, test)
         self.assertIsNotNone(test.title)
-        item = parser.items[0]
+        item = findings[0]
         self.assertEqual('src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02660.java', item.file_path)
