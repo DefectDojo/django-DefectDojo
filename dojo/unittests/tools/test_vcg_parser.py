@@ -203,11 +203,6 @@ class TestVCGCsvParser(TestCase):
 
 
 class TestVCGImport(TestCase):
-    def setUp(self):
-        self.parser = VCGParser(None, Test())
-
-    def test_caninitialize(self):
-        self.assertIsInstance(self.parser, VCGParser)
 
     def test_can_parse_xml(self):
         content = """<?xml version="1.0" encoding="utf-8"?>
@@ -227,7 +222,8 @@ class TestVCGImport(TestCase):
         </CodeIssue>
         </CodeIssueCollection>"""
         filename = TestFile("data.xml", content)
-        self.parser = VCGParser(filename, Test())
+        parser = VCGParser()
+        findings = parser.get_findings(filename, Test())
         self.assertEqual(1, len(findings))
 
     def test_can_parse_csv(self):
@@ -236,5 +232,6 @@ class TestVCGImport(TestCase):
             ""
         )
         filename = TestFile("data.csv", content)
-        self.parser = VCGParser(filename, Test())
+        parser = VCGParser()
+        findings = parser.get_findings(filename, Test())
         self.assertEqual(1, len(findings))

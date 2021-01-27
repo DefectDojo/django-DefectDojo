@@ -9,7 +9,7 @@ __author__ = 'dr3dd589'
 class WhitesourceJSONParser(object):
     def get_findings(self, file, test):
         if file is None:
-            return
+            return list()
 
         data = file.read()
         try:

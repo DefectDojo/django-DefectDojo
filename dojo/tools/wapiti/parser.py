@@ -30,7 +30,7 @@ class WapitiXMLParser(object):
     def get_findings(self, file, test):
 
         if file is None:
-            return
+            return list()
 
         tree = ET.parse(file)
         # get root of tree.

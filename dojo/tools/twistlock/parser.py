@@ -163,15 +163,13 @@ def convert_severity(severity):
 class TwistlockParser(object):
 
     def get_findings(self, filename, test):
-        self.dupes = dict()
 
         if filename is None:
-            self.items = []
-            return
+            return list()
 
         if filename.name.lower().endswith('.json'):
-            self.items = TwistlockJsonParser().parse(filename, test)
+            return TwistlockJsonParser().parse(filename, test)
         elif filename.name.lower().endswith('.csv'):
-            self.items = TwistlockCSVParser().parse(filename, test)
+            return TwistlockCSVParser().parse(filename, test)
         else:
             raise Exception('Unknown File Format')
