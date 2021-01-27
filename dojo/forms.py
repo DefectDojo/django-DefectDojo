@@ -410,6 +410,8 @@ class ImportScanForm(forms.Form):
         queryset=Development_Environment.objects.all().order_by('name'))
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
                                                widget=MultipleSelectWithPopPlusMinus(attrs={'size': '5'}))
+    version = forms.CharField(max_length=100, required=False, help_text="Version that will be set on the Test object that will be created.")
+
     tags = TagField(required=False, help_text="Add tags that help describe this scan.  "
                     "Choose from the list or add new tags. Press Enter key to add.")
     file = forms.FileField(widget=forms.widgets.FileInput(
@@ -462,6 +464,7 @@ class ReImportScanForm(forms.Form):
         required=False)
     close_old_findings = forms.BooleanField(help_text="Select if old findings get mitigated when importing.",
                                             required=False, initial=True)
+    version = forms.CharField(max_length=100, required=False, help_text="Version that will be set on existing Test object. Leave empty to leave existing value in place.")
 
     def __init__(self, *args, test=None, **kwargs):
         super(ReImportScanForm, self).__init__(*args, **kwargs)
