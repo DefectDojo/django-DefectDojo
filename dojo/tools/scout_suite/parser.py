@@ -102,7 +102,7 @@ class ScoutSuiteParser(object):
                                 date=find_date,
                                 dynamic_finding=True)
                 dupes[dupe_key] = find
-        self.items = list(dupes.values())
+        return list(dupes.values())
 
     def formatview(self, depth):
         if depth > 1:
