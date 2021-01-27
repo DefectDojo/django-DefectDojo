@@ -52,13 +52,13 @@ def get_item(item_node, test):
     finding = Finding(title=item_node['title'] + " - " + "(" + item_node['module'] + ", " + item_node['version'] + ")",
                       test=test,
                       severity=severity,
-                      description=item_node['overview'] + "\n Vulnerable Module: "
-                      + item_node['module'] + "\n Vulnerable Versions: "
-                      + str(item_node['vulnerable_versions']) + "\n Current Version: "
-                      + str(item_node['version']) + "\n Patched Version: "
-                      + str(item_node['patched_versions']) + "\n Vulnerable Path: " + " > ".join(item_node['path']) + "\n CVSS Score: "
-                      + str(item_node['cvss_score']) + "\n CVSS Vector: "
-                      + str(item_node['cvss_vector']),
+                      description=item_node['overview'] + "\n Vulnerable Module: " +
+                       item_node['module'] + "\n Vulnerable Versions: " +
+                       str(item_node['vulnerable_versions']) + "\n Current Version: " +
+                       str(item_node['version']) + "\n Patched Version: " +
+                       str(item_node['patched_versions']) + "\n Vulnerable Path: " + " > ".join(item_node['path']) + "\n CVSS Score: " +
+                       str(item_node['cvss_score']) + "\n CVSS Vector: " +
+                       str(item_node['cvss_vector']),
                       mitigation=item_node['recommendation'],
                       references=item_node['advisory'],
                       active=False,
