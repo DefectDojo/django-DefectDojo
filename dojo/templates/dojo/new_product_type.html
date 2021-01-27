@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static from staticfiles %}
+{% load static %}
 {% block add_css %}
     <link rel="stylesheet" href="{% static "easymde/dist/easymde.min.css" %}">
 {% endblock %}
@@ -27,7 +27,6 @@
     <script type="application/javascript">
         $(function () {
             $("textarea").each(function (index, elem) {
-
                 if (elem.hasAttribute("required")) {
                     elem.removeAttribute("required");
                     elem.id = "req"

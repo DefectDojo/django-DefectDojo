@@ -1,7 +1,7 @@
 {% load navigation_tags %}
 {% load display_tags %}
 {% load authorization_tags %}
-{% load static from staticfiles %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -214,7 +214,6 @@
                                         <li>
                                             <a href="{% url 'product_type' %}">All Product Types</a>
                                         </li>
-
                                     </ul>
                                 {% endif %}
                                 <!-- /.nav-second-level -->
@@ -253,13 +252,13 @@
                                             <a href="{% url 'open_findings' %}">Open Findings</a>
                                         </li>
                                         <li>
-                                            <a href="{% url 'accepted_findings' %}">Risk Accepted Findings</a>
-                                        </li>
-                                        <li>
                                             <a href="{% url 'all_findings' %}">All Findings</a>
                                         </li>
                                         <li>
                                             <a href="{% url 'closed_findings' %}">Closed Findings</a>
+                                        </li>
+                                        <li>
+                                            <a href="{% url 'accepted_findings' %}">Risk Accepted Findings</a>
                                         </li>
                                         <li>
                                             <a href="{% url 'templates' %}">Finding Templates</a>
@@ -354,14 +353,14 @@
                                     </ul>
                                     <!-- /.nav-second-level -->
                                 </li>
-                            {% endif %}                                
+                            {% endif %}
                                 <li id="menu_configuration">
 				                    <a href="#" aria-expanded="false" aria-label="Configuration">
                                         <i class="fa fa-cog fa-fw"></i>
                                         <span>Configuration</span>
                                     </a>
                                     <ul class="nav nav-second-level">
-                                        {% if request.user.is_superuser %}                            
+                                        {% if request.user.is_superuser %}
                                         <li><a href="{% url 'cred' %}">Credential Manager </a></li>
                                         {% if system_settings.enable_jira %}
                                         <li><a href="{% url 'jira' %}">JIRA </a></li>
@@ -450,7 +449,8 @@
                     <span class="hidden-xs"> Findings{% if product_tab.findings > 0 %} <span class="badge">{{ product_tab.findings }}</span>{% endif %}</span>
                     <span class="caret"></span></a>
                     <ul class="dropdown-menu">
-                      <li><a href="{% url 'product_open_findings' product_tab.product.id %}?active=2&false_p=3&duplicate=2&out_of_scope=1&test__engagement__product={{ product_tab.product.id }}"><i class="fa fa-list-alt"></i> View Open Findings</a></li>
+                      <li><a href="{% url 'product_open_findings' product_tab.product.id %}?active=20&false_p=3&duplicate=2&out_of_scope=1&test__engagement__product={{ product_tab.product.id }}"><i class="fa fa-list-alt"></i> View Active Findings</a></li>
+                      <li><a href="{% url 'product_open_findings' product_tab.product.id %}?active=2&verified=2&false_p=3&duplicate=2&out_of_scope=1&test__engagement__product={{ product_tab.product.id }}"><i class="fa fa-list-alt"></i> View Active Verified Findings</a></li>
                       <li><a href="{% url 'product_open_findings' product_tab.product.id %}?active=2&false_p=3&duplicate=2&out_of_scope=1&test__engagement__product={{ product_tab.product.id }}&severity=Critical"><i class="fa fa-exclamation-triangle"></i> View Critical Findings</a></li>
                       <li><a href="{% url 'product_open_findings' product_tab.product.id %}?active=2&false_p=3&duplicate=2&out_of_scope=1&test__engagement__product={{ product_tab.product.id }}&date=2"><i class="fa fa-calendar"></i> View Findings from Last 7 Days </a></li>
                       <li role="separator" class="divider"></li>
@@ -660,11 +660,11 @@
         $('.has-popover').popover({'trigger':'hover'});
         {% if request.user.is_authenticated %}
             $('.dropdown-toggle').click(function() {
-                if (disable_count == "False" || refresh == 'True') { 
-                    get_alerts(); 
+                if (disable_count == "False" || refresh == 'True') {
+                    get_alerts();
                 }
             });
-            
+
             if (disable_count == "False") {
                 if(refresh == 'True') {
                     setInterval(function() {
@@ -706,7 +706,7 @@
                   var display_description = description ? description.length < 100 ? description : jQuery.trim(description).substring(0,100).trim(this) + '...': ''
                   var dropdown_alert = "alert-list" + i;
                   $('.dropdown-alerts').append('<li><div style="padding: 3px 20px;"><i class="fa fa-' + htmlEscape(elem.fields.icon) +
-                                                ' fa-fw"></i><a href="' + htmlEscape(elem.fields.url) + '" id=' + dropdown_alert + 
+                                                ' fa-fw"></i><a href="' + htmlEscape(elem.fields.url) + '" id=' + dropdown_alert +
                                                 ' title="' + htmlEscape(display_description) + '"></a><span class="pull-right text-muted small">' +
                                                htmlEscape(elem.fields.source) + '</span></div></li><li class="divider"></li>');
                   $("#" + dropdown_alert).text(display_title);

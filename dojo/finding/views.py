@@ -36,7 +36,7 @@ from dojo.forms import NoteForm, TypedNoteForm, CloseFindingForm, FindingForm, P
     DefectFindingForm, StubFindingForm, DeleteFindingForm, DeleteStubFindingForm, ApplyFindingTemplateForm, \
     FindingFormID, FindingBulkUpdateForm, MergeFindings
 from dojo.models import Finding, Notes, NoteHistory, Note_Type, \
-    BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, Risk_Acceptance, Endpoint_Status, \
+    BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, Endpoint_Status, \
     FindingImageAccessToken, GITHUB_PKey, GITHUB_Issue, Dojo_User, Cred_Mapping, Test, Product, User, Engagement
 from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_notifications, \
     get_system_setting, apply_cwe_to_template, Product_Tab, calculate_grade, \
@@ -45,8 +45,9 @@ from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_
 from dojo.notifications.helper import create_notification
 
 from django.template.defaultfilters import pluralize
-from django.db.models import Q, QuerySet, Prefetch, Count
+from django.db.models import Q, QuerySet, Count
 import dojo.jira_link.helper as jira_helper
+import dojo.risk_acceptance.helper as ra_helper
 import dojo.finding.helper as finding_helper
 
 from dojo.authorization.roles_permissions import Permissions
@@ -59,7 +60,9 @@ VERIFIED_FINDINGS_QUERY = Q(verified=True)
 OUT_OF_SCOPE_FINDINGS_QUERY = Q(active=False, out_of_scope=True)
 FALSE_POSITIVE_FINDINGS_QUERY = Q(active=False, duplicate=False, false_p=True)
 INACTIVE_FINDINGS_QUERY = Q(active=False, duplicate=False, is_Mitigated=False, false_p=False, out_of_scope=False)
-ACCEPTED_FINDINGS_QUERY = Q(risk_acceptance__isnull=False)
+ACCEPTED_FINDINGS_QUERY = Q(risk_accepted=True)
+NOT_ACCEPTED_FINDINGS_QUERY = Q(risk_accepted=False)
+WAS_ACCEPTED_FINDINGS_QUERY = Q(risk_acceptance__isnull=False) & Q(risk_acceptance__expiration_date_handled__isnull=False)
 CLOSED_FINDINGS_QUERY = Q(is_Mitigated=True)
 
 
@@ -285,6 +288,7 @@ def view_finding(request, fid):
     dojo_user = get_object_or_404(Dojo_User, id=user.id)
 
     notes = finding.notes.all()
+    files = finding.files.all()
     note_type_activation = Note_Type.objects.filter(is_active=True).count()
     if note_type_activation:
         available_note_types = find_available_notetypes(notes)
@@ -365,6 +369,7 @@ def view_finding(request, fid):
             'dojo_user': dojo_user,
             'user': user,
             'notes': notes,
+            'files': files,
             'form': form,
             'cwe_template': cwe_template,
             'found_by': finding.found_by.all().distinct(),
@@ -642,16 +647,11 @@ def edit_finding(request, fid):
     else:
         req_resp = None
     form = FindingForm(instance=finding, template=False, req_resp=req_resp)
-    # form.initial['tags'] = [tag.name for tag in finding.tags.all()]
     form_error = False
     jform = None
     push_all_jira_issues = jira_helper.is_push_all_issues(finding)
     gform = None
     use_jira = jira_helper.get_jira_project(finding) is not None
-
-    # for key, value in request.POST.items():
-    #     print(f'Key: {key}')
-    #     print(f'Value: {value}')
 
     github_enabled = finding.has_github_issue()
 
@@ -692,10 +692,11 @@ def edit_finding(request, fid):
                 new_finding.severity)
             finding_helper.update_finding_status(new_finding, request.user, old_state_finding=old_finding)
 
-            if form['simple_risk_accept'].value():
-                new_finding.simple_risk_accept()
+            if 'risk_accepted' in form.cleaned_data and form['risk_accepted'].value():
+                if new_finding.test.engagement.product.enable_simple_risk_acceptance:
+                    ra_helper.simple_risk_accept(new_finding, perform_save=False)
             else:
-                new_finding.simple_risk_unaccept()
+                ra_helper.risk_unaccept(new_finding, perform_save=False)
 
             create_template = new_finding.is_template
             # always false now since this will be deprecated soon in favor of new Finding_Template model
@@ -827,7 +828,6 @@ def edit_finding(request, fid):
         form.fields['endpoints'].queryset = form.cleaned_data['endpoints']
     else:
         form.fields['endpoints'].queryset = finding.endpoints.all()
-    # form.initial['tags'] = [tag.name for tag in finding.tags.all()]
 
     product_tab = Product_Tab(finding.test.engagement.product.id, title="Edit Finding", tab="findings")
 
@@ -848,9 +848,6 @@ def touch_finding(request, fid):
     finding.last_reviewed = timezone.now()
     finding.last_reviewed_by = request.user
     finding.save()
-    # print('request:')
-    # print(vars(request))
-    # print(request.GET['return_url'])
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id, )))
 
 
@@ -858,15 +855,20 @@ def touch_finding(request, fid):
 @user_must_be_authorized(Finding, 'staff', 'fid')
 def simple_risk_accept(request, fid):
     finding = get_object_or_404(Finding, id=fid)
-    finding.simple_risk_accept()
+
+    if not finding.test.engagement.product.enable_simple_risk_acceptance:
+        raise PermissionDenied()
+
+    ra_helper.simple_risk_accept(finding)
+
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id, )))
 
 
 # @user_passes_test(lambda u: u.is_staff)
 @user_must_be_authorized(Finding, 'staff', 'fid')
-def simple_risk_unaccept(request, fid):
+def risk_unaccept(request, fid):
     finding = get_object_or_404(Finding, id=fid)
-    finding.simple_risk_unaccept()
+    ra_helper.risk_unaccept(finding)
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id, )))
 
 
@@ -1459,7 +1461,6 @@ def edit_template(request, tid):
                 extra_tags='alert-danger')
 
     count = apply_cwe_mitigation(True, template, False)
-    # form.initial['tags'] = [tag.name for tag in template.tags.all()]
     add_breadcrumb(title="Edit Template", top_level=False, request=request)
     return render(request, 'dojo/add_template.html', {
         'form': form,
@@ -1506,6 +1507,12 @@ def manage_images(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     images_formset = FindingImageFormSet(queryset=finding.images.all())
     error = False
+
+    messages.add_message(
+                request,
+                messages.INFO,
+                'Finding Images will be removed as of 06/31/2020. Please use the File Uploads instead.',
+                extra_tags='alert-danger')
 
     if request.method == 'POST':
         images_formset = FindingImageFormSet(
@@ -1798,8 +1805,6 @@ def finding_bulk_update_all(request, pid=None):
                 calculate_grade(prod)
         else:
             if form.is_valid() and finding_to_update:
-                q_simple_risk_acceptance = Risk_Acceptance.objects.filter(name=Finding.SIMPLE_RISK_ACCEPTANCE_NAME)
-
                 finding_to_update = request.POST.getlist('finding_to_update')
                 finds = Finding.objects.filter(id__in=finding_to_update).order_by("finding__test__engagement__product__id")
 
@@ -1814,7 +1819,6 @@ def finding_bulk_update_all(request, pid=None):
                     )
 
                 finds = prefetch_for_findings(finds)
-                finds = finds.prefetch_related(Prefetch('test__engagement__risk_acceptance', queryset=q_simple_risk_acceptance, to_attr='simple_risk_acceptance'))
 
                 if form.cleaned_data['severity']:
                     finds.update(severity=form.cleaned_data['severity'],
@@ -1830,12 +1834,22 @@ def finding_bulk_update_all(request, pid=None):
                                  last_reviewed=timezone.now(),
                                  last_reviewed_by=request.user)
 
+                skipped_risk_accept_count = 0
                 if form.cleaned_data['risk_acceptance']:
-                    for find in finds:
+                    for finding in finds:
                         if form.cleaned_data['risk_accept']:
-                            find.simple_risk_accept()
+                            if not finding.test.engagement.product.enable_simple_risk_acceptance:
+                                skipped_risk_accept_count += 1
+                            else:
+                                ra_helper.simple_risk_accept(finding)
                         elif form.cleaned_data['risk_unaccept']:
-                            find.simple_risk_unaccept()
+                            ra_helper.risk_unaccept(finding)
+
+                if skipped_risk_accept_count > 0:
+                    messages.add_message(request,
+                                        messages.WARNING,
+                                        'Skipped simple risk acceptance of %i findings, simple risk acceptance is disabled on the related products' % skipped_risk_accept_count,
+                                        extra_tags='alert-warning')
 
                 if form.cleaned_data['push_to_github']:
                     logger.info('push selected findings to github')

@@ -705,6 +705,20 @@
 	},
         "model": "dojo.test_type",
         "pk": 192
+    },
+    {
+        "fields": {
+            "name": "ScoutSuite Multi-Cloud Security Auditing Tool"
+        },
+        "model": "dojo.test_type",
+        "pk": 193
+    },
+    {
+        "fields": {
+            "name": "Burp REST API"
+        },
+        "model": "dojo.test_type",
+        "pk": 194
     }
 
 ]

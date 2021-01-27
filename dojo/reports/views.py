@@ -318,7 +318,7 @@ def reports(request):
 def regen_report(request, rid):
     report = get_object_or_404(Report, id=rid)
     if report.type != 'Custom':
-        return redirect(report.options + "&regen=" + rid)
+        return redirect(request, report.options + "&regen=" + rid)
     else:
         report.datetime = timezone.now()
         report.status = 'requested'

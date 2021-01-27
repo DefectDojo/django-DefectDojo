@@ -1,6 +1,7 @@
 from dojo.tools.sonarqube_api.api_client import SonarQubeAPI
 from dojo.models import Finding, Risk_Acceptance
 from django.utils import timezone
+import dojo.risk_acceptance.helper as ra_helper
 
 import logging
 
@@ -53,7 +54,7 @@ class SonarQubeApiUpdaterFromSource(object):
             target_status = 'FALSE-POSITIVE'
         elif finding.mitigated or finding.is_Mitigated:
             target_status = 'FIXED'
-        elif finding.risk_acceptance_set.all():
+        elif finding.risk_accepted:
             target_status = 'WONTFIX'
         elif finding.active:
             if finding.verified:
@@ -70,7 +71,7 @@ class SonarQubeApiUpdaterFromSource(object):
             finding.false_p = False
             finding.mitigated = None
             finding.is_Mitigated = False
-            finding.remove_from_any_risk_acceptance()
+            ra_helper.remove_finding.from_any_risk_acceptance(finding)
 
         elif sonarqube_status == 'CONFIRMED':
             finding.active = True
@@ -78,7 +79,7 @@ class SonarQubeApiUpdaterFromSource(object):
             finding.false_p = False
             finding.mitigated = None
             finding.is_Mitigated = False
-            finding.remove_from_any_risk_acceptance()
+            ra_helper.remove_finding.from_any_risk_acceptance(finding)
 
         elif sonarqube_status == 'FIXED':
             finding.active = False
@@ -86,7 +87,7 @@ class SonarQubeApiUpdaterFromSource(object):
             finding.false_p = False
             finding.mitigated = timezone.now()
             finding.is_Mitigated = True
-            finding.remove_from_any_risk_acceptance()
+            ra_helper.remove_finding.from_any_risk_acceptance(finding)
 
         elif sonarqube_status == 'WONTFIX':
             finding.active = False
@@ -104,6 +105,6 @@ class SonarQubeApiUpdaterFromSource(object):
             finding.false_p = True
             finding.mitigated = None
             finding.is_Mitigated = False
-            finding.remove_from_any_risk_acceptance()
+            ra_helper.remove_finding.from_any_risk_acceptance(finding)
 
         finding.save(issue_updater_option=False, dedupe_option=False)

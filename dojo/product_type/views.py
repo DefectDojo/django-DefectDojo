@@ -55,14 +55,14 @@ def prefetch_for_product_type(prod_types):
     prefetch_prod_types = prod_types
 
     if isinstance(prefetch_prod_types, QuerySet):  # old code can arrive here with prods being a list because the query was already executed
-        active_findings_query = Q(prod_type__engagement__test__finding__active=True,
-                                prod_type__engagement__test__finding__mitigated__isnull=True,
-                                prod_type__engagement__test__finding__verified=True,
-                                prod_type__engagement__test__finding__false_p=False,
-                                prod_type__engagement__test__finding__duplicate=False,
-                                prod_type__engagement__test__finding__out_of_scope=False)
+        active_findings_query = Q(prod_type__engagement__test__finding__active=True)
+        active_verified_findings_query = Q(prod_type__engagement__test__finding__active=True,
+                                prod_type__engagement__test__finding__verified=True)
         prefetch_prod_types = prefetch_prod_types.prefetch_related('authorized_users')
-        prefetch_prod_types = prefetch_prod_types.annotate(findings_count=Count('prod_type__engagement__test__finding__id', filter=active_findings_query))
+        prefetch_prod_types = prefetch_prod_types.annotate(
+            active_findings_count=Count('prod_type__engagement__test__finding__id', filter=active_findings_query))
+        prefetch_prod_types = prefetch_prod_types.annotate(
+            active_verified_findings_count=Count('prod_type__engagement__test__finding__id', filter=active_verified_findings_query))
         prefetch_prod_types = prefetch_prod_types.annotate(prod_count=Count('prod_type', distinct=True))
         prefetch_prod_types = prefetch_prod_types.annotate(user_count=Count('authorized_users', distinct=True))
     else:
@@ -87,6 +87,8 @@ def add_product_type(request):
                                  messages.SUCCESS,
                                  'Product type added successfully.',
                                  extra_tags='alert-success')
+            create_notification(event='product_type_added', title=product_type.name,
+                                url=reverse('view_product_type', args=(product_type.id,)))
             return HttpResponseRedirect(reverse('product_type'))
     add_breadcrumb(title="Add Product Type", top_level=False, request=request)
     return render(request, 'dojo/new_product_type.html', {
@@ -125,8 +127,13 @@ def delete_product_type(request, ptid):
                 product_type.delete()
                 messages.add_message(request,
                                      messages.SUCCESS,
-                                     'Product  Type and relationships removed.',
+                                     'Product Type and relationships removed.',
                                      extra_tags='alert-success')
+                create_notification(event='other',
+                                title='Deletion of %s' % product_type.name,
+                                description='The product type "%s" was deleted by %s' % (product_type.name, request.user),
+                                url=request.build_absolute_uri(reverse('product_type')),
+                                icon="exclamation-triangle")
                 return HttpResponseRedirect(reverse('product_type'))
 
     collector = NestedObjects(using=DEFAULT_DB_ALIAS)

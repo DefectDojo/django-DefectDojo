@@ -721,13 +721,17 @@ CELERY_BEAT_SCHEDULE = {
         'args': [timedelta(minutes=1)]
     },
     'update-findings-from-source-issues': {
-        'task': 'dojo.tasks.async_update_findings_from_source_issues',
+        'task': 'dojo.tools.tool_issue_updater.update_findings_from_source_issues',
         'schedule': timedelta(hours=3),
     },
     'compute-sla-age-and-notify': {
         'task': 'dojo.tasks.async_sla_compute_and_notify',
         'schedule': crontab(hour=7, minute=30),
-    }
+    },
+    'risk_acceptance_expiration_handler': {
+        'task': 'dojo.risk_acceptance.helper.expiration_handler',
+        'schedule': crontab(minute=0, hour='*/3'),  # every 3 hours
+    },
 }
 
 # ------------------------------------
@@ -761,9 +765,11 @@ if env('DD_DJANGO_METRICS_ENABLED'):
 HASHCODE_FIELDS_PER_SCANNER = {
     # In checkmarx, same CWE may appear with different severities: example "sql injection" (high) and "blind sql injection" (low).
     # Including the severity in the hash_code keeps those findings not duplicate
+    'Anchore Engine Scan': ['title', 'severity', 'component_name', 'component_version', 'file_path'],
     'Checkmarx Scan': ['cwe', 'severity', 'file_path'],
     'SonarQube Scan': ['cwe', 'severity', 'file_path'],
     'Dependency Check Scan': ['cve', 'file_path'],
+    'Dependency Track Finding Packaging Format (FPF) Export': ['component', 'vuln_id_from_tool'],
     # possible improvment: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
     'NPM Audit Scan': ['title', 'severity', 'file_path', 'cve', 'cwe'],
     # possible improvment: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
@@ -780,12 +786,14 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'DSOP Scan': ['cve'],
     'Acunetix Scan': ['title', 'description'],
     'Trivy Scan': ['title', 'severity', 'cve', 'cwe'],
+    'Snyk Scan': ['vuln_id_from_tool', 'file_path', 'component_name', 'component_version'],
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
 # If False and cwe = 0, then the hash_code computation will fallback to legacy algorithm for the concerned finding
 # Default is True (if scanner is not configured here but is configured in HASHCODE_FIELDS_PER_SCANNER, it allows null cwe)
 HASHCODE_ALLOWS_NULL_CWE = {
+    'Anchore Engine Scan': True,
     'Checkmarx Scan': False,
     'SonarQube Scan': False,
     'Dependency Check Scan': True,
@@ -802,7 +810,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
 # List of fields that are known to be usable in hash_code computation)
 # 'endpoints' is a pseudo field that uses the endpoints (for dynamic scanners)
 # 'unique_id_from_tool' is often not needed here as it can be used directly in the dedupe algorithm, but it's also possible to use it for hashing
-HASHCODE_ALLOWED_FIELDS = ['title', 'cwe', 'cve', 'line', 'file_path', 'component_name', 'component_version', 'description', 'endpoints', 'unique_id_from_tool', 'severity']
+HASHCODE_ALLOWED_FIELDS = ['title', 'cwe', 'cve', 'line', 'file_path', 'component_name', 'component_version', 'description', 'endpoints', 'unique_id_from_tool', 'severity', 'vuln_id_from_tool']
 
 # ------------------------------------
 # Deduplication configuration
@@ -822,8 +830,10 @@ DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE = 'unique_id_from_tool_or_hash_code
 # Key = the scan_type from factory.py (= the test_type)
 # Default is DEDUPE_ALGO_LEGACY
 DEDUPLICATION_ALGORITHM_PER_PARSER = {
+    'Anchore Engine Scan': DEDUPE_ALGO_HASH_CODE,
     'Checkmarx Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Checkmarx Scan': DEDUPE_ALGO_HASH_CODE,
+    'Dependency Track Finding Packaging Format (FPF) Export': DEDUPE_ALGO_HASH_CODE,
     'SonarQube Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'SonarQube Scan': DEDUPE_ALGO_HASH_CODE,
     'Dependency Check Scan': DEDUPE_ALGO_HASH_CODE,
@@ -842,6 +852,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'DSOP Scan': DEDUPE_ALGO_HASH_CODE,
     'Trivy Scan': DEDUPE_ALGO_HASH_CODE,
     'HackerOne Cases': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    'Snyk Scan': DEDUPE_ALGO_HASH_CODE,
 }
 
 DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')

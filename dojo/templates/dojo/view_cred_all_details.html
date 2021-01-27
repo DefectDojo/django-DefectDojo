@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load display_tags %}
 {% load get_config_setting %}
-{% load static from staticfiles %}
+{% load static %}
 {% block add_styles %}
     ul#select_by_severity a:hover, ul#bulk_edit a:hover {
     cursor: pointer;
@@ -122,7 +122,7 @@
         </div>
     </div>
 
-    <div class="panel panel-default to_highlight table-responsive">
+    <div class="panel panel-default table-responsive">
         <div class="panel-heading">
             <h3>Notes</h3>
         </div>

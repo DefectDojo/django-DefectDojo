@@ -57,7 +57,6 @@ def import_object_eng(request, engagement, json_data):
     review_status = Objects_Review.objects.get(pk=review_status_id)
 
     for file in data:
-        # print(file["path"])
         # Save the file if the object isn't in object table
         file_type, found_object = find_item(file["path"], object_queryset)
 
