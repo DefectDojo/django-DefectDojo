@@ -8,11 +8,15 @@ from dojo.models import Finding
 # Oss Review Toolkit Parser
 class OrtParser(object):
     def get_findings(self, json_output, test):
+
+        if json_output is None:
+            return list()
+
         evaluated_model = self.parse_json(json_output)
         if evaluated_model:
-            self.items = [data for data in self.get_items(evaluated_model, test)]
+            return self.get_items(evaluated_model, test)
         else:
-            self.items = []
+            return list()
 
     def parse_json(self, json_output):
         try:

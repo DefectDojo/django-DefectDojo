@@ -5,8 +5,9 @@ from dojo.models import Test
 
 class TestOrtParser(TestCase):
     def test_parse_without_file_has_no_finding(self):
-        with self.assertRaisesRegex(Exception, "Invalid format"):
-            parser = OrtParser(None, Test())
+        parser = OrtParser()
+        findings = parser.get_findings(None, Test())
+        self.assertEqual(0, len(findings))
 
     def test_parse_file_has_many_finding_one_tool(self):
         testfile = open(
