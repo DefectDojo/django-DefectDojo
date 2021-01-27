@@ -127,13 +127,17 @@ def finding_querys(prod_type, request):
             Q(test__engagement__product__authorized_users__in=[request.user]) |
             Q(test__engagement__product__prod_type__authorized_users__in=[request.user]))
 
-    active_findings_query = Finding.objects.filter(verified=True, active=True,
-                                      severity__in=('Critical', 'High', 'Medium', 'Low', 'Info')).prefetch_related(
+    active_findings_query = Finding.objects.filter(
+        verified=True,
+        active=True,
+        severity__in=('Critical', 'High', 'Medium', 'Low', 'Info')
+    ).prefetch_related(
         'test__engagement__product',
         'test__engagement__product__prod_type',
         'test__engagement__risk_acceptance',
         'risk_acceptance_set',
-        'reporter')
+        'reporter'
+    )
 
     if not request.user.is_staff:
         active_findings_query = active_findings_query.filter(
