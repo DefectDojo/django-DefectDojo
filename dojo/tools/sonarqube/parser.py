@@ -19,7 +19,7 @@ class SonarQubeHtmlParser(object):
 
         return self.get_items(tree, test, mode)
 
-    def get_items(self, tree):
+    def get_items(self, tree, test, mode):
         # Check that there is at least one vulnerability (the vulnerabilities table is absent when no vuln are found)
         detailTbody = tree.xpath("/html/body/div[contains(@class,'detail')]/table/tbody")
         dupes = dict()
@@ -59,15 +59,15 @@ class SonarQubeHtmlParser(object):
                     vuln_cwe = 0
                 if mode is None:
                     self.process_result_file_name_aggregated(
-                        dupes, vuln_title, vuln_cwe, vuln_description, vuln_file_path, vuln_line, vuln_severity, vuln_mitigation, vuln_references)
+                        test, dupes, vuln_title, vuln_cwe, vuln_description, vuln_file_path, vuln_line, vuln_severity, vuln_mitigation, vuln_references)
                 else:
                     self.process_result_detailed(
-                        dupes, vuln_title, vuln_cwe, vuln_description, vuln_file_path, vuln_line, vuln_severity, vuln_mitigation, vuln_references, vuln_key)
+                        test, dupes, vuln_title, vuln_cwe, vuln_description, vuln_file_path, vuln_line, vuln_severity, vuln_mitigation, vuln_references, vuln_key)
         return list(dupes.values())
 
     # Process one vuln from the report for "SonarQube Scan detailed"
     # Create the finding and add it into the dupes list
-    def process_result_detailed(self, dupes, vuln_title, vuln_cwe, vuln_description, vuln_file_path, vuln_line, vuln_severity, vuln_mitigation, vuln_references, vuln_key):
+    def process_result_detailed(self, test, dupes, vuln_title, vuln_cwe, vuln_description, vuln_file_path, vuln_line, vuln_severity, vuln_mitigation, vuln_references, vuln_key):
         # vuln_key is the unique id from tool which means that there is basically no aggregation except real duplicates
         aggregateKeys = "{}{}{}{}{}".format(vuln_cwe, vuln_title, vuln_description, vuln_file_path, vuln_key)
         find = Finding(title=vuln_title,
@@ -75,7 +75,7 @@ class SonarQubeHtmlParser(object):
                        description=vuln_description,
                        file_path=vuln_file_path,
                        line=vuln_line,
-                       test=self.test,
+                       test=test,
                        severity=vuln_severity,
                        mitigation=vuln_mitigation,
                        references=vuln_references,
@@ -85,7 +85,7 @@ class SonarQubeHtmlParser(object):
                        duplicate=False,
                        out_of_scope=False,
                        mitigated=None,
-                       impact=self.impact,
+                       impact="No impact provided",
                        numerical_severity=Finding.get_numerical_severity(vuln_severity),
                        static_finding=True,
                        dynamic_finding=False,
@@ -97,16 +97,16 @@ class SonarQubeHtmlParser(object):
     # For aggregated findings:
     #  - the description is enriched with each finding line number
     #  - the mitigation (message) is concatenated with each finding's mitigation value
-    def process_result_file_name_aggregated(self, dupes, vuln_title, vuln_cwe, vuln_description, vuln_file_path, vuln_line, vuln_severity, vuln_mitigation, vuln_references):
+    def process_result_file_name_aggregated(self, test, dupes, vuln_title, vuln_cwe, vuln_description, vuln_file_path, vuln_line, vuln_severity, vuln_mitigation, vuln_references):
         aggregateKeys = "{}{}{}{}".format(vuln_cwe, vuln_title, vuln_description, vuln_file_path)
         descriptionOneOccurence = "Line: {}".format(vuln_line)
-        if not(aggregateKeys in self.dupes):
+        if aggregateKeys not in dupes:
             find = Finding(title=vuln_title,
                            cwe=int(vuln_cwe),
                            description=vuln_description + '\n\n-----\nOccurences:\n' + descriptionOneOccurence,
                            file_path=vuln_file_path,
                            # No line number because we have aggregated different vulnerabilities that may have different line numbers
-                           test=self.test,
+                           test=test,
                            severity=vuln_severity,
                            mitigation=vuln_mitigation,
                            references=vuln_references,

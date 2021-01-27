@@ -17,9 +17,6 @@ class TestSonarQubeParser(TestCase):
         test.engagement = engagement
         return my_file_handle, product, engagement, test
 
-    def teardown(self, my_file_handle):
-        my_file_handle.close()
-
     # SonarQube Scan - no finding
     def test_file_name_aggregated_parse_file_with_no_vulnerabilities_has_no_findings(
         self,
@@ -27,9 +24,8 @@ class TestSonarQubeParser(TestCase):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/sonarqube/sonar-no-finding.html"
         )
-        self.parser = SonarQubeHtmlParser()
+        parser = SonarQubeHtmlParser()
         findings = parser.get_findings(my_file_handle, test)
-        self.teardown(my_file_handle)
         self.check_parse_file_with_no_vulnerabilities_has_no_findings()
 
     # SonarQube Scan detailed - no finding
@@ -37,12 +33,8 @@ class TestSonarQubeParser(TestCase):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/sonarqube/sonar-no-finding.html"
         )
-        self.parser = SonarQubeHtmlParser(my_file_handle, test, "detailed")
-        self.teardown(my_file_handle)
-        self.check_parse_file_with_no_vulnerabilities_has_no_findings()
-
-    # common verifications
-    def check_parse_file_with_no_vulnerabilities_has_no_findings(self):
+        parser = SonarQubeHtmlParser()
+        findings = parser.get_findings(my_file_handle, test, "detailed")
         self.assertEqual(0, len(findings))
 
     # SonarQube Scan - report with one vuln
@@ -54,7 +46,6 @@ class TestSonarQubeParser(TestCase):
         )
         self.parser = SonarQubeHtmlParser()
         findings = parser.get_findings(my_file_handle, test)
-        self.teardown(my_file_handle)
         # common verifications
         self.check_parse_file_with_single_vulnerability_has_single_finding()
         # specific verifications
@@ -101,9 +92,8 @@ class TestSonarQubeParser(TestCase):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/sonarqube/sonar-single-finding.html"
         )
-        self.parser = SonarQubeHtmlParser()
+        parser = SonarQubeHtmlParser()
         findings = parser.get_findings(my_file_handle, test, "detailed")
-        self.teardown(my_file_handle)
         # common verifications
         self.check_parse_file_with_single_vulnerability_has_single_finding()
         # specific verifications
@@ -192,8 +182,8 @@ class TestSonarQubeParser(TestCase):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/sonarqube/sonar-6-findings.html"
         )
-        self.parser = SonarQubeHtmlParser(my_file_handle, test, "detailed")
-        self.teardown(my_file_handle)
+        parser = SonarQubeHtmlParser()
+        findings = parser.get_findings(my_file_handle, test, "detailed")
         # common verifications
         self.assertEqual(6, len(findings))
 
@@ -205,7 +195,6 @@ class TestSonarQubeParser(TestCase):
         )
         parser = SonarQubeHtmlParser()
         findings = parser.get_findings(my_file_handle, test, "detailed")
-        self.teardown(my_file_handle)
         # common verifications
         # (there is no aggregation to be done here)
         self.assertEqual(6, len(findings))
@@ -215,9 +204,8 @@ class TestSonarQubeParser(TestCase):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/sonarqube/sonar-table-in-table.html"
         )
-        self.parser = SonarQubeHtmlParser()
+        parser = SonarQubeHtmlParser()
         findings = parser.get_findings(my_file_handle, test, "detailed")
-        self.teardown(my_file_handle)
         self.assertEqual(1, len(findings))
 
         # check content
@@ -298,7 +286,6 @@ class TestSonarQubeParser(TestCase):
         )
         parser = SonarQubeHtmlParser()
         findings = parser.get_findings(my_file_handle, test, "detailed")
-        self.teardown(my_file_handle)
         self.assertEqual(1, len(findings))
 
         # check content
@@ -345,7 +332,6 @@ class TestSonarQubeParser(TestCase):
         )
         parser = SonarQubeHtmlParser()
         findings = parser.get_findings(my_file_handle, test)
-        self.teardown(my_file_handle)
         # specific verifications
         self.assertEqual(2, len(findings))
         # checking both items because they aren't always in the same order
@@ -408,6 +394,5 @@ class TestSonarQubeParser(TestCase):
         )
         parser = SonarQubeHtmlParser()
         findings = parser.get_findings(my_file_handle, test, "detailed")
-        self.teardown(my_file_handle)
         # specific verifications
         self.assertEqual(4, len(findings))
