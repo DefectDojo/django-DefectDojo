@@ -437,6 +437,34 @@ def get_accepted_in_period_details(findings):
     return accepted_in_period_details
 
 
+def get_closed_in_period_details(findings):
+    closed_in_period_counts = {"Critical": 0, "High": 0, "Medium": 0,
+                               "Low": 0, "Info": 0, "Total": 0}
+    closed_in_period_details = {}
+
+    for obj in findings:
+        closed_in_period_counts[obj.severity] += 1
+        closed_in_period_counts['Total'] += 1
+
+        if obj.test.engagement.product.name not in closed_in_period_details:
+            closed_in_period_details[obj.test.engagement.product.name] = {
+                'path': reverse('closed_findings') + '?test__engagement__product=' + str(
+                    obj.test.engagement.product.id),
+                'Critical': 0,
+                'High': 0,
+                'Medium': 0,
+                'Low': 0,
+                'Info': 0,
+                'Total': 0
+            }
+        closed_in_period_details[
+            obj.test.engagement.product.name
+        ][obj.severity] += 1
+        closed_in_period_details[obj.test.engagement.product.name]['Total'] += 1
+
+    return closed_in_period_counts, closed_in_period_details
+
+
 @cache_page(60 * 5)  # cache for 5 minutes
 @vary_on_cookie
 def metrics(request, mtype):
@@ -444,10 +472,6 @@ def metrics(request, mtype):
     show_pt_filter = True
     view = identify_view(request)
     page_name = 'Product Type Metrics by '
-
-    closed_in_period_counts = {"Critical": 0, "High": 0, "Medium": 0,
-                               "Low": 0, "Info": 0, "Total": 0}
-    closed_in_period_details = {}
 
     if mtype != 'All':
         pt = Product_Type.objects.filter(id=mtype)
@@ -484,21 +508,10 @@ def metrics(request, mtype):
         for obj in filters['accepted']
     ])
 
-    for obj in filters['closed']:
-        if view == 'Endpoint':
-            obj = obj.finding
-        closed_in_period_counts[obj.severity] += 1
-        closed_in_period_counts['Total'] += 1
-
-        if obj.test.engagement.product.name not in closed_in_period_details:
-            closed_in_period_details[obj.test.engagement.product.name] = {
-                'path': reverse('closed_findings') + '?test__engagement__product=' + str(
-                    obj.test.engagement.product.id),
-                'Critical': 0, 'High': 0, 'Medium': 0, 'Low': 0, 'Info': 0, 'Total': 0}
-        closed_in_period_details[
-            obj.test.engagement.product.name
-        ][obj.severity] += 1
-        closed_in_period_details[obj.test.engagement.product.name]['Total'] += 1
+    closed_in_period_counts, closed_in_period_details = get_closed_in_period_details([
+        obj.finding if view == 'Endpoint' else obj
+        for obj in filters['closed']
+    ])
 
     punchcard = list()
     ticks = list()
