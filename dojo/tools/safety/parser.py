@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 class SafetyParser(object):
-    def __init__(self, json_output, test):
+    def get_findings(self, json_output, test):
 
         # Grab Safety DB for CVE lookup
         url = "https://raw.githubusercontent.com/pyupio/safety-db/master/data/insecure_full.json"

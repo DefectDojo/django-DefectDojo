@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 class NpmAuditParser(object):
-    def __init__(self, json_output, test):
+    def get_findings(self, json_output, test):
 
         tree = self.parse_json(json_output)
 

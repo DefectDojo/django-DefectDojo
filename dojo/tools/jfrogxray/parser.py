@@ -8,7 +8,7 @@ from dojo.models import Finding
 
 class XrayJSONParser(object):
     """JFrog Xray JSON reports"""
-    def __init__(self, json_output, test):
+    def get_findings(self, json_output, test):
         # Start with an empty findings
         self.items = []
         # Exit if file is not provided

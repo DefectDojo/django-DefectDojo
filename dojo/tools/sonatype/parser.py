@@ -9,7 +9,7 @@ from dojo.models import Finding
 
 class SonatypeJSONParser(object):
     # This parser does not deal with licenses information.
-    def __init__(self, json_output, test):
+    def get_findings(self, json_output, test):
         tree = self.parse_json(json_output)
 
         if tree:

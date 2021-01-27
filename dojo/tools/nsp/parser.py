@@ -4,7 +4,7 @@ from dojo.models import Finding
 
 
 class NspParser(object):
-    def __init__(self, json_output, test):
+    def get_findings(self, json_output, test):
 
         tree = self.parse_json(json_output)
 

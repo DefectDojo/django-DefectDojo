@@ -17,8 +17,8 @@ class SonarQubeApiImporter(object):
      findings.
     """
 
-    def __init__(self, test):
-        self.items = self.import_issues(test)
+    def get_findings(self, filename, test):
+        return self.import_issues(test)
 
     @staticmethod
     def is_confirmed(state):

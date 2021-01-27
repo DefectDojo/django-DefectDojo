@@ -5,7 +5,7 @@ from dojo.models import Finding
 
 
 class RetireJsParser(object):
-    def __init__(self, json_output, test):
+    def get_findings(self, json_output, test):
         self.target = None
         self.port = "80"
         self.host = None

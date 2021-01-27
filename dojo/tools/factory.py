@@ -210,8 +210,8 @@ from .skf.parser import SKFCsvParser
 register_parser('SKF Scan', SKFCsvParser())
 from .snyk.parser import SnykParser
 register_parser('Snyk Scan', SnykParser())
-from .sonarqube_api.parser import SonarQube
-register_parser('SonarQube API Import', SonarQube())
+from dojo.tools.sonarqube_api.importer import SonarQubeApiImporter
+register_parser('SonarQube API Import', SonarQubeApiImporter())
 from .sonarqube.parser import SonarQubeHtmlParser
 register_parser('SonarQube Scan', SonarQubeHtmlParser())
 register_parser('SonarQube Scan detailed', SonarQubeHtmlParser())
