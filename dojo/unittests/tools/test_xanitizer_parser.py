@@ -4,7 +4,6 @@ from dojo.models import Test
 
 
 class TestXanitizerXMLParser(TestCase):
-
     def test_parse_without_file_has_no_findings(self):
         parser = XanitizerXMLParser()
         findings = parser.get_findings(None, Test())
@@ -29,7 +28,9 @@ class TestXanitizerXMLParser(TestCase):
         self.assertEqual(9, len(findings))
 
     def test_parse_file_with_multiple_findings_no_details(self):
-        testfile = open("dojo/unittests/scans/xanitizer/multiple-findings-no-details.xml")
+        testfile = open(
+            "dojo/unittests/scans/xanitizer/multiple-findings-no-details.xml"
+        )
         parser = XanitizerXMLParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(9, len(findings))

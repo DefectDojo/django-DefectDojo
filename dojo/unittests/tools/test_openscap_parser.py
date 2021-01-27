@@ -4,7 +4,6 @@ from dojo.models import Test
 
 
 class TestOpenscapXMLParser(TestCase):
-
     def test_openscap_parser_without_file_has_no_findings(self):
         parser = OpenscapXMLParser(None, Test())
         self.assertEqual(0, len(findings))

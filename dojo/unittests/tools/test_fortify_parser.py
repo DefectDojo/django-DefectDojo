@@ -5,7 +5,6 @@ from datetime import datetime
 
 
 class TestFortifyParser(TestCase):
-
     def test_fortify_many_findings(self):
         testfile = "dojo/unittests/scans/fortify/fortify_many_findings.xml"
         parser = FortifyXMLParser(testfile, Test())

@@ -21,31 +21,41 @@ class TestCheckmarxParser(TestCase):
     def teardown(self, my_file_handle):
         my_file_handle.close()
 
-# ----------------------------------------------------------------------------
-# no_finding
-# ----------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------
+    # no_finding
+    # ----------------------------------------------------------------------------
     # Default checkmarx scanner, aggregated by sink file_path
-    def test_file_name_aggregated_parse_file_with_no_vulnerabilities_has_no_findings(self):
-        my_file_handle, product, engagement, test = self.init('dojo/unittests/scans/checkmarx/no_finding.xml')
+    def test_file_name_aggregated_parse_file_with_no_vulnerabilities_has_no_findings(
+        self,
+    ):
+        my_file_handle, product, engagement, test = self.init(
+            "dojo/unittests/scans/checkmarx/no_finding.xml"
+        )
         self.parser = CheckmarxXMLParser(my_file_handle, test)
         self.teardown(my_file_handle)
         self.check_parse_file_with_no_vulnerabilities_has_no_findings(self.parser)
 
     # Checkmarx detailed scanner, with all vulnerabilities from checkmarx
     def test_detailed_parse_file_with_no_vulnerabilities_has_no_findings(self):
-        my_file_handle, product, engagement, test = self.init("dojo/unittests/scans/checkmarx/no_finding.xml")
-        self.parser = CheckmarxXMLParser(my_file_handle, test, 'detailed')
+        my_file_handle, product, engagement, test = self.init(
+            "dojo/unittests/scans/checkmarx/no_finding.xml"
+        )
+        self.parser = CheckmarxXMLParser(my_file_handle, test, "detailed")
         self.teardown(my_file_handle)
         self.check_parse_file_with_no_vulnerabilities_has_no_findings(self.parser)
 
-# ----------------------------------------------------------------------------
-# single finding and verify all findings fields
-# ----------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------
+    # single finding and verify all findings fields
+    # ----------------------------------------------------------------------------
     def check_parse_file_with_no_vulnerabilities_has_no_findings(self, parser):
         self.assertEqual(0, len(findings))
 
-    def test_file_name_aggregated_parse_file_with_single_vulnerability_has_single_finding(self):
-        my_file_handle, product, engagement, test = self.init("dojo/unittests/scans/checkmarx/single_finding.xml")
+    def test_file_name_aggregated_parse_file_with_single_vulnerability_has_single_finding(
+        self,
+    ):
+        my_file_handle, product, engagement, test = self.init(
+            "dojo/unittests/scans/checkmarx/single_finding.xml"
+        )
         self.parser = CheckmarxXMLParser()
         findings = parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
@@ -54,7 +64,8 @@ class TestCheckmarxParser(TestCase):
         # Fields that differ from detailed scanner
         item = findings[0]
         self.assertEqual(str, type(item.description))
-        self.assertMultiLineEqual("**Category:** PCI DSS v3.2;PCI DSS (3.2) - 6.5.7 - Cross-site scripting (XSS),OWASP Top 10 2013;A3-Cross-Site Scripting (XSS),FISMA 2014;System And Information Integrity,NIST SP 800-53;SI-15 Information Output Filtering (P0),OWASP Top 10 2017;A7-Cross-Site Scripting (XSS)\n"
+        self.assertMultiLineEqual(
+            "**Category:** PCI DSS v3.2;PCI DSS (3.2) - 6.5.7 - Cross-site scripting (XSS),OWASP Top 10 2013;A3-Cross-Site Scripting (XSS),FISMA 2014;System And Information Integrity,NIST SP 800-53;SI-15 Information Output Filtering (P0),OWASP Top 10 2017;A7-Cross-Site Scripting (XSS)\n"
             "**Language:** Java\n"
             "**Group:** Java High Risk\n"
             "**Status:** New\n"
@@ -68,19 +79,23 @@ class TestCheckmarxParser(TestCase):
             "<b>Sink filename: </b>WebGoat/webgoat-lessons/missing-function-ac/src/main/java/org/owasp/webgoat/plugin/Users.java\n"
             "<b>Sink line number: </b> 58\n"
             "<b>Sink object: </b> allUsersMap",
-            item.description)
+            item.description,
+        )
         self.assertEqual(1, item.nb_occurences)
 
     def test_detailed_parse_file_with_single_vulnerability_has_single_finding(self):
-        my_file_handle, product, engagement, test = self.init("dojo/unittests/scans/checkmarx/single_finding.xml")
-        self.parser = CheckmarxXMLParser(my_file_handle, test, 'detailed')
+        my_file_handle, product, engagement, test = self.init(
+            "dojo/unittests/scans/checkmarx/single_finding.xml"
+        )
+        self.parser = CheckmarxXMLParser(my_file_handle, test, "detailed")
         self.teardown(my_file_handle)
         # Verifications common to both parsers
         self.check_parse_file_with_single_vulnerability_has_single_finding(self.parser)
         # Fields that differ from aggregated scanner
         item = findings[0]
         self.assertEqual(str, type(item.description))
-        self.assertMultiLineEqual("**Category:** PCI DSS v3.2;PCI DSS (3.2) - 6.5.7 - Cross-site scripting (XSS),OWASP Top 10 2013;A3-Cross-Site Scripting (XSS),FISMA 2014;System And Information Integrity,NIST SP 800-53;SI-15 Information Output Filtering (P0),OWASP Top 10 2017;A7-Cross-Site Scripting (XSS)\n"
+        self.assertMultiLineEqual(
+            "**Category:** PCI DSS v3.2;PCI DSS (3.2) - 6.5.7 - Cross-site scripting (XSS),OWASP Top 10 2013;A3-Cross-Site Scripting (XSS),FISMA 2014;System And Information Integrity,NIST SP 800-53;SI-15 Information Output Filtering (P0),OWASP Top 10 2017;A7-Cross-Site Scripting (XSS)\n"
             "**Language:** Java\n"
             "**Group:** Java High Risk\n"
             "**Status:** New\n"
@@ -115,19 +130,19 @@ class TestCheckmarxParser(TestCase):
             "**Column:** 64\n"
             "**Source Object:** getString\n"
             "**Number:** 53\n"
-            "**Code:** userMap.put(\"cookie\", results.getString(5));\n"
+            '**Code:** userMap.put("cookie", results.getString(5));\n'
             "-----\n"
             "**Line Number:** 53\n"
             "**Column:** 36\n"
             "**Source Object:** put\n"
             "**Number:** 53\n"
-            "**Code:** userMap.put(\"cookie\", results.getString(5));\n"
+            '**Code:** userMap.put("cookie", results.getString(5));\n'
             "-----\n"
             "**Line Number:** 54\n"
             "**Column:** 25\n"
             "**Source Object:** userMap\n"
             "**Number:** 54\n"
-            "**Code:** userMap.put(\"loginCOunt\",Integer.toString(results.getInt(6)));\n"
+            '**Code:** userMap.put("loginCOunt",Integer.toString(results.getInt(6)));\n'
             "-----\n"
             "**Line Number:** 55\n"
             "**Column:** 44\n"
@@ -147,7 +162,8 @@ class TestCheckmarxParser(TestCase):
             "**Number:** 58\n"
             "**Code:** return allUsersMap;\n"
             "-----\n",
-            item.description)
+            item.description,
+        )
         self.assertEqual(str, type(item.line))
         self.assertEqual("58", item.line)
         # Added field for detailed scanner
@@ -161,7 +177,10 @@ class TestCheckmarxParser(TestCase):
         self.assertEqual(str, type(item.sast_source_line))
         self.assertEqual("39", item.sast_source_line)
         self.assertEqual(str, type(item.sast_source_file_path))
-        self.assertEqual("WebGoat/webgoat-lessons/missing-function-ac/src/main/java/org/owasp/webgoat/plugin/Users.java", item.sast_source_file_path)
+        self.assertEqual(
+            "WebGoat/webgoat-lessons/missing-function-ac/src/main/java/org/owasp/webgoat/plugin/Users.java",
+            item.sast_source_file_path,
+        )
         self.assertIsNone(item.nb_occurences)
 
     def check_parse_file_with_single_vulnerability_has_single_finding(self, parser):
@@ -187,7 +206,10 @@ class TestCheckmarxParser(TestCase):
         self.assertEqual(str, type(item.references))
         self.assertEqual("", item.references)
         self.assertEqual(str, type(item.file_path))
-        self.assertEqual("WebGoat/webgoat-lessons/missing-function-ac/src/main/java/org/owasp/webgoat/plugin/Users.java", item.file_path)
+        self.assertEqual(
+            "WebGoat/webgoat-lessons/missing-function-ac/src/main/java/org/owasp/webgoat/plugin/Users.java",
+            item.file_path,
+        )
         self.assertEqual(str, type(item.url))
         self.assertEqual("N/A", item.url)
         # ScanStart
@@ -196,19 +218,25 @@ class TestCheckmarxParser(TestCase):
         self.assertEqual(bool, type(item.static_finding))
         self.assertEqual(True, item.static_finding)
 
-# ----------------------------------------------------------------------------
-# single finding false positive
-# ----------------------------------------------------------------------------
-    def test_file_name_aggregated_parse_file_with_false_positive_is_false_positive(self):
-        my_file_handle, product, engagement, test = self.init("dojo/unittests/scans/checkmarx/single_finding_false_positive.xml")
+    # ----------------------------------------------------------------------------
+    # single finding false positive
+    # ----------------------------------------------------------------------------
+    def test_file_name_aggregated_parse_file_with_false_positive_is_false_positive(
+        self,
+    ):
+        my_file_handle, product, engagement, test = self.init(
+            "dojo/unittests/scans/checkmarx/single_finding_false_positive.xml"
+        )
         self.parser = CheckmarxXMLParser(my_file_handle, test)
         self.teardown(my_file_handle)
         # Verifications common to both parsers
         self.check_parse_file_with_false_positive_is_false_positive(self.parser)
 
     def test_detailed_parse_file_with_false_positive_is_false_positive(self):
-        my_file_handle, product, engagement, test = self.init("dojo/unittests/scans/checkmarx/single_finding_false_positive.xml")
-        self.parser = CheckmarxXMLParser(my_file_handle, test, 'detailed')
+        my_file_handle, product, engagement, test = self.init(
+            "dojo/unittests/scans/checkmarx/single_finding_false_positive.xml"
+        )
+        self.parser = CheckmarxXMLParser(my_file_handle, test, "detailed")
         self.teardown(my_file_handle)
         # Verifications common to both parsers
         self.check_parse_file_with_false_positive_is_false_positive(self.parser)
@@ -224,13 +252,17 @@ class TestCheckmarxParser(TestCase):
         self.assertEqual(bool, type(item.false_p))
         self.assertEqual(True, item.false_p)
 
-# ----------------------------------------------------------------------------
-# two findings with the same aggregate keys, but one is false positive
-# the result should be one exploitable finding, even though the first one found was false positive
-# ----------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------
+    # two findings with the same aggregate keys, but one is false positive
+    # the result should be one exploitable finding, even though the first one found was false positive
+    # ----------------------------------------------------------------------------
 
-    def test_file_name_aggregated_parse_file_with_two_aggregated_findings_one_is_false_p(self):
-        my_file_handle, product, engagement, test = self.init("dojo/unittests/scans/checkmarx/two_aggregated_findings_one_is_false_positive.xml")
+    def test_file_name_aggregated_parse_file_with_two_aggregated_findings_one_is_false_p(
+        self,
+    ):
+        my_file_handle, product, engagement, test = self.init(
+            "dojo/unittests/scans/checkmarx/two_aggregated_findings_one_is_false_positive.xml"
+        )
         self.parser = CheckmarxXMLParser(my_file_handle, test)
         self.teardown(my_file_handle)
         self.assertEqual(1, len(findings))
@@ -244,28 +276,40 @@ class TestCheckmarxParser(TestCase):
         self.assertEqual(bool, type(item.false_p))
         self.assertEqual(False, item.false_p)
 
-# ----------------------------------------------------------------------------
-# multiple_findings : source filename = sink filename.
-# ----------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------
+    # multiple_findings : source filename = sink filename.
+    # ----------------------------------------------------------------------------
 
-    def test_file_name_aggregated_parse_file_with_multiple_vulnerabilities_has_multiple_findings(self):
-        my_file_handle, product, engagement, test = self.init("dojo/unittests/scans/checkmarx/multiple_findings.xml")
+    def test_file_name_aggregated_parse_file_with_multiple_vulnerabilities_has_multiple_findings(
+        self,
+    ):
+        my_file_handle, product, engagement, test = self.init(
+            "dojo/unittests/scans/checkmarx/multiple_findings.xml"
+        )
         self.parser = CheckmarxXMLParser(my_file_handle, test)
         self.teardown(my_file_handle)
         # checkmarx says 3 but we're down to 2 due to the aggregation on sink filename rather than source filename + source line number + sink filename + sink line number
         self.assertEqual(2, len(findings))
 
-    def test_detailed_parse_file_with_multiple_vulnerabilities_has_multiple_findings(self):
-        my_file_handle, product, engagement, test = self.init("dojo/unittests/scans/checkmarx/multiple_findings.xml")
-        self.parser = CheckmarxXMLParser(my_file_handle, test, 'detailed')
+    def test_detailed_parse_file_with_multiple_vulnerabilities_has_multiple_findings(
+        self,
+    ):
+        my_file_handle, product, engagement, test = self.init(
+            "dojo/unittests/scans/checkmarx/multiple_findings.xml"
+        )
+        self.parser = CheckmarxXMLParser(my_file_handle, test, "detailed")
         self.teardown(my_file_handle)
         self.assertEqual(3, len(findings))
 
-# ----------------------------------------------------------------------------
-# multiple_findings : different sourceFilename but same sinkFilename
-# ----------------------------------------------------------------------------
-    def test_file_name_aggregated_parse_file_with_different_sourceFilename_same_sinkFilename_is_aggregated(self):
-        my_file_handle, product, engagement, test = self.init("dojo/unittests/scans/checkmarx/multiple_findings_different_sourceFilename_same_sinkFilename.xml")
+    # ----------------------------------------------------------------------------
+    # multiple_findings : different sourceFilename but same sinkFilename
+    # ----------------------------------------------------------------------------
+    def test_file_name_aggregated_parse_file_with_different_sourceFilename_same_sinkFilename_is_aggregated(
+        self,
+    ):
+        my_file_handle, product, engagement, test = self.init(
+            "dojo/unittests/scans/checkmarx/multiple_findings_different_sourceFilename_same_sinkFilename.xml"
+        )
         self.parser = CheckmarxXMLParser(my_file_handle, test)
         self.teardown(my_file_handle)
         # aggregation is on sink filename so all vuln with different source filenames are aggregated
@@ -274,35 +318,49 @@ class TestCheckmarxParser(TestCase):
         # nb_occurences counts the number of aggregated vulnerabilities from tool
         self.assertEqual(2, findings[0].nb_occurences)
 
-    def test_detailed_parse_file_with_different_sourceFilename_same_sinkFilename_is_not_aggregated(self):
-        my_file_handle, product, engagement, test = self.init("dojo/unittests/scans/checkmarx/multiple_findings_different_sourceFilename_same_sinkFilename.xml")
-        self.parser = CheckmarxXMLParser(my_file_handle, test, 'detailed')
+    def test_detailed_parse_file_with_different_sourceFilename_same_sinkFilename_is_not_aggregated(
+        self,
+    ):
+        my_file_handle, product, engagement, test = self.init(
+            "dojo/unittests/scans/checkmarx/multiple_findings_different_sourceFilename_same_sinkFilename.xml"
+        )
+        self.parser = CheckmarxXMLParser(my_file_handle, test, "detailed")
         self.teardown(my_file_handle)
         self.assertEqual(2, len(findings))
         self.assertIsNone(findings[0].nb_occurences)
         self.assertIsNone(findings[1].nb_occurences)
 
-# ----------------------------------------------------------------------------
-# multiple_findings : same sourceFilename but different sinkFilename
-# ----------------------------------------------------------------------------
-    def test_file_name_aggregated_parse_file_with_same_sourceFilename_different_sinkFilename_is_not_aggregated(self):
-        my_file_handle, product, engagement, test = self.init("dojo/unittests/scans/checkmarx/multiple_findings_same_sourceFilename_different_sinkFilename.xml")
+    # ----------------------------------------------------------------------------
+    # multiple_findings : same sourceFilename but different sinkFilename
+    # ----------------------------------------------------------------------------
+    def test_file_name_aggregated_parse_file_with_same_sourceFilename_different_sinkFilename_is_not_aggregated(
+        self,
+    ):
+        my_file_handle, product, engagement, test = self.init(
+            "dojo/unittests/scans/checkmarx/multiple_findings_same_sourceFilename_different_sinkFilename.xml"
+        )
         self.parser = CheckmarxXMLParser(my_file_handle, test)
         self.teardown(my_file_handle)
         # aggregation is on sink filename but sink filename differ -> not aggregated
         self.assertEqual(2, len(findings))
 
-    def test_detailed_parse_file_with_same_sourceFilename_different_sinkFilename_is_not_aggregated(self):
-        my_file_handle, product, engagement, test = self.init("dojo/unittests/scans/checkmarx/multiple_findings_same_sourceFilename_different_sinkFilename.xml")
-        self.parser = CheckmarxXMLParser(my_file_handle, test, 'detailed')
+    def test_detailed_parse_file_with_same_sourceFilename_different_sinkFilename_is_not_aggregated(
+        self,
+    ):
+        my_file_handle, product, engagement, test = self.init(
+            "dojo/unittests/scans/checkmarx/multiple_findings_same_sourceFilename_different_sinkFilename.xml"
+        )
+        self.parser = CheckmarxXMLParser(my_file_handle, test, "detailed")
         self.teardown(my_file_handle)
         self.assertEqual(2, len(findings))
 
-# ----------------------------------------------------------------------------
-# utf-8 replacement char in various fields of the report. check all finding elements
-# ----------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------
+    # utf-8 replacement char in various fields of the report. check all finding elements
+    # ----------------------------------------------------------------------------
     def test_file_name_aggregated_parse_file_with_utf8_replacement_char(self):
-        my_file_handle, product, engagement, test = self.init("dojo/unittests/scans/checkmarx/utf8_replacement_char.xml")
+        my_file_handle, product, engagement, test = self.init(
+            "dojo/unittests/scans/checkmarx/utf8_replacement_char.xml"
+        )
         self.parser = CheckmarxXMLParser(my_file_handle, test)
         self.teardown(my_file_handle)
         # Verifications common to both parsers
@@ -310,7 +368,8 @@ class TestCheckmarxParser(TestCase):
         # Fields that differ from detailed scanner
         item = findings[0]
         self.assertEqual(str, type(item.description))
-        self.assertMultiLineEqual("**Category:** PCI DSS v3.2;PCI DSS (3.2) - 6.5.7 - Cross-site scripting (XSS),OWASP Top 10 2013;A3-Cross-Site Scripting (XSS),FISMA 2014;System And Information Integrity,NIST SP 800-53;SI-15 Information Output Filtering (P0),OWASP Top 10 2017;A7-Cross-Site Scripting (XSS)\n"
+        self.assertMultiLineEqual(
+            "**Category:** PCI DSS v3.2;PCI DSS (3.2) - 6.5.7 - Cross-site scripting (XSS),OWASP Top 10 2013;A3-Cross-Site Scripting (XSS),FISMA 2014;System And Information Integrity,NIST SP 800-53;SI-15 Information Output Filtering (P0),OWASP Top 10 2017;A7-Cross-Site Scripting (XSS)\n"
             "**Language:** Java\n"
             "**Group:** Java High Risk\n"
             "**Status:** New\n"
@@ -324,19 +383,23 @@ class TestCheckmarxParser(TestCase):
             "<b>Sink filename: </b>WebGoat/webgoat-lessons/missing-function-ac/src/main/java/org/owasp/webgoat/plugin/Users.java�\n"
             "<b>Sink line number: </b> 58\n"
             "<b>Sink object: </b> allUsersMap�",
-            item.description)
+            item.description,
+        )
         self.assertIsNone(item.line)
 
     def test_detailed_parse_file_with_utf8_replacement_char(self):
-        my_file_handle, product, engagement, test = self.init("dojo/unittests/scans/checkmarx/utf8_replacement_char.xml")
-        self.parser = CheckmarxXMLParser(my_file_handle, test, 'detailed')
+        my_file_handle, product, engagement, test = self.init(
+            "dojo/unittests/scans/checkmarx/utf8_replacement_char.xml"
+        )
+        self.parser = CheckmarxXMLParser(my_file_handle, test, "detailed")
         self.teardown(my_file_handle)
         # Verifications common to both parsers
         self.check_parse_file_with_utf8_replacement_char(self.parser)
         # Fields that differ from aggregated scanner
         item = findings[0]
         self.assertEqual(str, type(item.description))
-        self.assertMultiLineEqual("**Category:** PCI DSS v3.2;PCI DSS (3.2) - 6.5.7 - Cross-site scripting (XSS),OWASP Top 10 2013;A3-Cross-Site Scripting (XSS),FISMA 2014;System And Information Integrity,NIST SP 800-53;SI-15 Information Output Filtering (P0),OWASP Top 10 2017;A7-Cross-Site Scripting (XSS)\n"
+        self.assertMultiLineEqual(
+            "**Category:** PCI DSS v3.2;PCI DSS (3.2) - 6.5.7 - Cross-site scripting (XSS),OWASP Top 10 2013;A3-Cross-Site Scripting (XSS),FISMA 2014;System And Information Integrity,NIST SP 800-53;SI-15 Information Output Filtering (P0),OWASP Top 10 2017;A7-Cross-Site Scripting (XSS)\n"
             "**Language:** Java\n"
             "**Group:** Java High Risk\n"
             "**Status:** New\n"
@@ -371,19 +434,19 @@ class TestCheckmarxParser(TestCase):
             "**Column:** 64\n"
             "**Source Object:** getString\n"
             "**Number:** 53\n"
-            "**Code:** userMap.put(\"cookie\", results.getString(5));\n"
+            '**Code:** userMap.put("cookie", results.getString(5));\n'
             "-----\n"
             "**Line Number:** 53\n"
             "**Column:** 36\n"
             "**Source Object:** put\n"
             "**Number:** 53\n"
-            "**Code:** userMap.put(\"cookie\", results.getString(5));\n"
+            '**Code:** userMap.put("cookie", results.getString(5));\n'
             "-----\n"
             "**Line Number:** 54\n"
             "**Column:** 25\n"
             "**Source Object:** userMap\n"
             "**Number:** 54\n"
-            "**Code:** userMap.put(\"loginCOunt\",Integer.toString(results.getInt(6)));\n"
+            '**Code:** userMap.put("loginCOunt",Integer.toString(results.getInt(6)));\n'
             "-----\n"
             "**Line Number:** 55\n"
             "**Column:** 44\n"
@@ -403,7 +466,8 @@ class TestCheckmarxParser(TestCase):
             "**Number:** 58\n"
             "**Code:** return allUsersMap;\n"
             "-----\n",
-            item.description)
+            item.description,
+        )
         self.assertEqual(str, type(item.line))
         self.assertEqual("58", item.line)
 
@@ -430,7 +494,10 @@ class TestCheckmarxParser(TestCase):
         self.assertEqual(str, type(item.references))
         self.assertEqual("", item.references)
         self.assertEqual(str, type(item.file_path))
-        self.assertEqual("WebGoat/webgoat-lessons/missing-function-ac/src/main/java/org/owasp/webgoat/plugin/Users.java�", item.file_path)
+        self.assertEqual(
+            "WebGoat/webgoat-lessons/missing-function-ac/src/main/java/org/owasp/webgoat/plugin/Users.java�",
+            item.file_path,
+        )
         self.assertEqual(str, type(item.url))
         self.assertEqual("N/A", item.url)
         # ScanStart
@@ -439,11 +506,13 @@ class TestCheckmarxParser(TestCase):
         self.assertEqual(bool, type(item.static_finding))
         self.assertEqual(True, item.static_finding)
 
-# ----------------------------------------------------------------------------
-# more utf-8 non-ascii chars.
-# ----------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------
+    # more utf-8 non-ascii chars.
+    # ----------------------------------------------------------------------------
     def test_file_name_aggregated_parse_file_with_utf8_various_non_ascii_char(self):
-        my_file_handle, product, engagement, test = self.init("dojo/unittests/scans/checkmarx/utf8_various_non_ascii_char.xml")
+        my_file_handle, product, engagement, test = self.init(
+            "dojo/unittests/scans/checkmarx/utf8_various_non_ascii_char.xml"
+        )
         self.parser = CheckmarxXMLParser(my_file_handle, test)
         self.teardown(my_file_handle)
         # Verifications common to both parsers
@@ -451,7 +520,8 @@ class TestCheckmarxParser(TestCase):
         # Fields that differ from detailed scanner
         item = findings[0]
         self.assertEqual(str, type(item.description))
-        self.assertMultiLineEqual("**Category:** PCI DSS v3.2;PCI DSS (3.2) - 6.5.7 - Cross-site scripting (XSS),OWASP Top 10 2013;A3-Cross-Site Scripting (XSS),FISMA 2014;System And Information Integrity,NIST SP 800-53;SI-15 Information Output Filtering (P0),OWASP Top 10 2017;A7-Cross-Site Scripting (XSS)\n"
+        self.assertMultiLineEqual(
+            "**Category:** PCI DSS v3.2;PCI DSS (3.2) - 6.5.7 - Cross-site scripting (XSS),OWASP Top 10 2013;A3-Cross-Site Scripting (XSS),FISMA 2014;System And Information Integrity,NIST SP 800-53;SI-15 Information Output Filtering (P0),OWASP Top 10 2017;A7-Cross-Site Scripting (XSS)\n"
             "**Language:** Java\n"
             "**Group:** Java High Risk\n"
             "**Status:** New\n"
@@ -465,19 +535,23 @@ class TestCheckmarxParser(TestCase):
             "<b>Sink filename: </b>WebGoat/webgoat-lessons/missing-function-ac/src/main/java/org/owasp/webgoat/plugin/¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿĀāĂăĄąĆćĈĉĊċČčĎďĐđĒēĔĕĖėĘęĚěĜĝĞğĠġĢģĤĥĦħĨĩĪīĬĭĮįİıĲĳĴĵĶķĸĹĺĻļĽľĿŀŁłŃńŅņŇňŉŊŋŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŲųŴŵŶŷŸŹźŻżŽžſUsers.java\n"
             "<b>Sink line number: </b> 58\n"
             "<b>Sink object: </b> allUsersMap¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿĀāĂăĄąĆćĈĉĊċČčĎďĐđĒēĔĕĖėĘęĚěĜĝĞğĠġĢģĤĥĦħĨĩĪīĬĭĮįİıĲĳĴĵĶķĸĹĺĻļĽľĿŀŁłŃńŅņŇňŉŊŋŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŲųŴŵŶŷŸŹźŻżŽžſ",
-            item.description)
+            item.description,
+        )
         self.assertIsNone(item.line)
 
     def test_detailed_parse_file_with_utf8_various_non_ascii_char(self):
-        my_file_handle, product, engagement, test = self.init("dojo/unittests/scans/checkmarx/utf8_various_non_ascii_char.xml")
-        self.parser = CheckmarxXMLParser(my_file_handle, test, 'detailed')
+        my_file_handle, product, engagement, test = self.init(
+            "dojo/unittests/scans/checkmarx/utf8_various_non_ascii_char.xml"
+        )
+        self.parser = CheckmarxXMLParser(my_file_handle, test, "detailed")
         self.teardown(my_file_handle)
         # Verifications common to both parsers
         self.check_parse_file_with_utf8_various_non_ascii_char(self.parser)
         # Fields that differ from aggregated scanner
         item = findings[0]
         self.assertEqual(str, type(item.description))
-        self.assertMultiLineEqual("**Category:** PCI DSS v3.2;PCI DSS (3.2) - 6.5.7 - Cross-site scripting (XSS),OWASP Top 10 2013;A3-Cross-Site Scripting (XSS),FISMA 2014;System And Information Integrity,NIST SP 800-53;SI-15 Information Output Filtering (P0),OWASP Top 10 2017;A7-Cross-Site Scripting (XSS)\n"
+        self.assertMultiLineEqual(
+            "**Category:** PCI DSS v3.2;PCI DSS (3.2) - 6.5.7 - Cross-site scripting (XSS),OWASP Top 10 2013;A3-Cross-Site Scripting (XSS),FISMA 2014;System And Information Integrity,NIST SP 800-53;SI-15 Information Output Filtering (P0),OWASP Top 10 2017;A7-Cross-Site Scripting (XSS)\n"
             "**Language:** Java\n"
             "**Group:** Java High Risk\n"
             "**Status:** New\n"
@@ -512,19 +586,19 @@ class TestCheckmarxParser(TestCase):
             "**Column:** 64\n"
             "**Source Object:** getString\n"
             "**Number:** 53\n"
-            "**Code:** userMap.put(\"cookie\", results.getString(5));\n"
+            '**Code:** userMap.put("cookie", results.getString(5));\n'
             "-----\n"
             "**Line Number:** 53\n"
             "**Column:** 36\n"
             "**Source Object:** put\n"
             "**Number:** 53\n"
-            "**Code:** userMap.put(\"cookie\", results.getString(5));\n"
+            '**Code:** userMap.put("cookie", results.getString(5));\n'
             "-----\n"
             "**Line Number:** 54\n"
             "**Column:** 25\n"
             "**Source Object:** userMap\n"
             "**Number:** 54\n"
-            "**Code:** userMap.put(\"loginCOunt\",Integer.toString(results.getInt(6)));\n"
+            '**Code:** userMap.put("loginCOunt",Integer.toString(results.getInt(6)));\n'
             "-----\n"
             "**Line Number:** 55\n"
             "**Column:** 44\n"
@@ -544,7 +618,8 @@ class TestCheckmarxParser(TestCase):
             "**Number:** 58\n"
             "**Code:** return allUsersMap;\n"
             "-----\n",
-            item.description)
+            item.description,
+        )
         self.assertEqual(str, type(item.line))
         self.assertEqual("58", item.line)
 
@@ -553,7 +628,10 @@ class TestCheckmarxParser(TestCase):
         # check content
         item = findings[0]
         self.assertEqual(str, type(findings[0].title))
-        self.assertEqual("Stored XSS (¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿĀāĂăĄąĆćĈĉĊċČčĎďĐđĒēĔĕĖėĘęĚěĜĝĞğĠġĢģĤĥĦħĨĩĪīĬĭĮįİıĲĳĴĵĶķĸĹĺĻļĽľĿŀŁłŃńŅņŇňŉŊŋŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŲųŴŵŶŷŸŹźŻżŽžſUsers.java)", item.title)
+        self.assertEqual(
+            "Stored XSS (¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿĀāĂăĄąĆćĈĉĊċČčĎďĐđĒēĔĕĖėĘęĚěĜĝĞğĠġĢģĤĥĦħĨĩĪīĬĭĮįİıĲĳĴĵĶķĸĹĺĻļĽľĿŀŁłŃńŅņŇňŉŊŋŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŲųŴŵŶŷŸŹźŻżŽžſUsers.java)",
+            item.title,
+        )
         self.assertEqual(int, type(item.cwe))
         self.assertEqual(79, item.cwe)
         self.assertEqual(bool, type(item.active))
@@ -571,7 +649,10 @@ class TestCheckmarxParser(TestCase):
         self.assertEqual(str, type(item.references))
         self.assertEqual("", item.references)
         self.assertEqual(str, type(item.file_path))
-        self.assertEqual("WebGoat/webgoat-lessons/missing-function-ac/src/main/java/org/owasp/webgoat/plugin/¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿĀāĂăĄąĆćĈĉĊċČčĎďĐđĒēĔĕĖėĘęĚěĜĝĞğĠġĢģĤĥĦħĨĩĪīĬĭĮįİıĲĳĴĵĶķĸĹĺĻļĽľĿŀŁłŃńŅņŇňŉŊŋŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŲųŴŵŶŷŸŹźŻżŽžſUsers.java", item.file_path)
+        self.assertEqual(
+            "WebGoat/webgoat-lessons/missing-function-ac/src/main/java/org/owasp/webgoat/plugin/¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿĀāĂăĄąĆćĈĉĊċČčĎďĐđĒēĔĕĖėĘęĚěĜĝĞğĠġĢģĤĥĦħĨĩĪīĬĭĮįİıĲĳĴĵĶķĸĹĺĻļĽľĿŀŁłŃńŅņŇňŉŊŋŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŲųŴŵŶŷŸŹźŻżŽžſUsers.java",
+            item.file_path,
+        )
         self.assertEqual(str, type(item.url))
         self.assertEqual("N/A", item.url)
         # ScanStart

@@ -4,7 +4,6 @@ from dojo.models import Test, Engagement, Product
 
 
 class TestZAPXML(TestCase):
-
     def get_test(self):
         test = Test()
         test.engagement = Engagement()
@@ -47,7 +46,9 @@ class TestZAPXML(TestCase):
         self.assertIsInstance(findings, list)
 
     def test_parse_some_findings_3(self):
-        testfile = open("dojo/unittests/scans/zap/3_zap_sampl_0_and_different_severities.xml")
+        testfile = open(
+            "dojo/unittests/scans/zap/3_zap_sampl_0_and_different_severities.xml"
+        )
         parser = ZapXmlParser()
         findings = parser.get_findings(testfile, self.get_test())
         self.assertIsInstance(findings, list)

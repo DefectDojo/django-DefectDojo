@@ -6,7 +6,9 @@ from pathlib import Path
 
 class TestBlackduckHubCRParser(TestCase):
     def test_blackduck_enhanced_zip_upload(self):
-        testfile = Path("dojo/unittests/scans/blackduck_component_risk/"
-                        "blackduck_hub_component_risk.zip")
+        testfile = Path(
+            "dojo/unittests/scans/blackduck_component_risk/"
+            "blackduck_hub_component_risk.zip"
+        )
         parser = BlackduckHubParser(testfile, Test())
         self.assertEqual(12, len(findings))

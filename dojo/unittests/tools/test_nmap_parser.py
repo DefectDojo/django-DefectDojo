@@ -4,7 +4,6 @@ from dojo.models import Test
 
 
 class TestNmapParser(TestCase):
-
     def test_parse_without_file_has_no_findings(self):
         parser = NmapXMLParser(None, Test())
         self.assertEqual(0, len(findings))

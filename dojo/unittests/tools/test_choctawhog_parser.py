@@ -1,4 +1,3 @@
-
 from django.test import TestCase
 from dojo.tools.choctaw_hog.parser import ChoctawhogParser
 from dojo.models import Test

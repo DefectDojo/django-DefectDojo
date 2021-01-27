@@ -4,7 +4,6 @@ from dojo.models import Test
 
 
 class TestBrakemanScanParser(TestCase):
-
     def test_parse_without_file_has_no_finding(self):
         parser = BrakemanScanParser(None, Test())
         self.assertEqual(0, len(findings))

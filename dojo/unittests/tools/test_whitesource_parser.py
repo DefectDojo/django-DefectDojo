@@ -4,7 +4,6 @@ from dojo.models import Test
 
 
 class TestWhitesourceJSONParser(TestCase):
-
     def test_parse_without_file_has_no_findings(self):
         parser = WhitesourceJSONParser()
         findings = parser.get_findings(None, Test())
@@ -29,7 +28,9 @@ class TestWhitesourceJSONParser(TestCase):
         self.assertEqual(6, len(findings))
 
     def test_parse_file_with_multiple_vuln_cli_output(self):
-        testfile = open("dojo/unittests/scans/whitesource_sample/cli_generated_many_vulns.json")
+        testfile = open(
+            "dojo/unittests/scans/whitesource_sample/cli_generated_many_vulns.json"
+        )
         parser = WhitesourceJSONParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(20, len(findings))

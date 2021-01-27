@@ -28,4 +28,6 @@ class TestAppSpiderXMLParser(TestCase):
 
     def convert_severity(self):
         with self.subTest(val="0-Safe"):
-            self.assertIn(Finding.SEVERITIES, AppSpiderXMLParser.convert_severity("0-Safe"))
+            self.assertIn(
+                Finding.SEVERITIES, AppSpiderXMLParser.convert_severity("0-Safe")
+            )

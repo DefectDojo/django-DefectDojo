@@ -4,7 +4,6 @@ from dojo.models import Test
 
 
 class TestVeracodeScannerParser(SimpleTestCase):
-
     def test_parse_without_file(self):
         parser = VeracodeXMLParser(None, Test())
         self.assertEqual(0, len(findings))

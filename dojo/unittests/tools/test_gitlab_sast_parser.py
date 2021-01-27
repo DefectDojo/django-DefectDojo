@@ -4,7 +4,6 @@ from dojo.models import Test
 
 
 class TestGitlabSastReportParser(TestCase):
-
     def test_parse_without_file_has_no_findings(self):
         parser = GitlabSastReportParser(None, Test())
         self.assertEqual(0, len(findings))
@@ -20,18 +19,24 @@ class TestGitlabSastReportParser(TestCase):
         self.assertEqual(1, len(findings))
 
     def test_parse_file_with_multiple_vuln_has_multiple_findings(self):
-        testfile = open("dojo/unittests/scans/gitlab_sast/gl-sast-report-many-vuln.json")
+        testfile = open(
+            "dojo/unittests/scans/gitlab_sast/gl-sast-report-many-vuln.json"
+        )
         parser = GitlabSastReportParser(testfile, Test())
         self.assertTrue(len(findings) > 2)
 
     def test_parse_file_with_various_confidences(self):
-        testfile = open("dojo/unittests/scans/gitlab_sast/gl-sast-report-confidence.json")
+        testfile = open(
+            "dojo/unittests/scans/gitlab_sast/gl-sast-report-confidence.json"
+        )
         parser = GitlabSastReportParser(testfile, Test())
         self.assertTrue(len(findings) == 8)
         i = 0
         for item in findings:
             self.assertTrue(item.cwe is None or isinstance(item.cwe, int))
-            self.assertEqual(item.get_scanner_confidence_text(), get_confidence_defectdojo(i))
+            self.assertEqual(
+                item.get_scanner_confidence_text(), get_confidence_defectdojo(i)
+            )
             i = i + 1
 
     def test_parse_file_with_various_cwes(self):
@@ -45,13 +50,13 @@ class TestGitlabSastReportParser(TestCase):
 
 def get_confidence_defectdojo(argument):
     switcher = {
-        0: '',
-        1: '',
-        2: '',
-        3: 'Tentative',
-        4: 'Tentative',
-        5: 'Firm',
-        6: 'Firm',
-        7: 'Certain'
+        0: "",
+        1: "",
+        2: "",
+        3: "Tentative",
+        4: "Tentative",
+        5: "Firm",
+        6: "Firm",
+        7: "Certain",
     }
     return switcher.get(argument, None)

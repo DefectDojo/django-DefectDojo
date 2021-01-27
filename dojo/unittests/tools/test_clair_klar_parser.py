@@ -3,7 +3,6 @@ from dojo.tools.clair_klar.parser import ClairKlarParser
 
 
 class TestFile(object):
-
     def read(self):
         return self.content
 
@@ -13,7 +12,6 @@ class TestFile(object):
 
 
 class TestClairKlarParser(TestCase):
-
     def test_parse_no_structure_exception(self):
         with self.assertRaises(Exception):
             ClairKlarParser(None, None)

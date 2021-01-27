@@ -4,7 +4,6 @@ from dojo.models import Test
 
 
 class TestScantistJSONParser(TestCase):
-
     def test_parse_without_file_has_no_findings(self):
         parser = ScantistJSONParser(None, Test())
         self.assertEqual(0, len(findings))
@@ -20,7 +19,7 @@ class TestScantistJSONParser(TestCase):
         self.assertEqual(1, len(findings))
 
         findings = findings[0]
-        self.assertEqual(findings.title, findings.cve + '|' + findings.component_name)
+        self.assertEqual(findings.title, findings.cve + "|" + findings.component_name)
         self.assertEqual(
             findings.description,
             "Integer overflow in the crypt_raw method in the key-stretching implementation in jBCrypt before 0.4 "

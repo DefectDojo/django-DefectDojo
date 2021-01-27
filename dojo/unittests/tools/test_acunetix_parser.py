@@ -4,7 +4,6 @@ from dojo.models import Test
 
 
 class TestAcunetixScannerParser(TestCase):
-
     def test_parse_without_file(self):
         parser = AcunetixScannerParser()
         findings = parser.get_findings(None, Test())

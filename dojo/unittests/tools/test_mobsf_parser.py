@@ -4,10 +4,10 @@ from dojo.tools.mobsf.parser import MobSFParser
 
 
 class TestMobSFParser(TestCase):
-    # TODO fix this use case
-    # def test_parse_without_file_has_no_findings(self):
-    #     parser = MobSFParser(None, Test())
-    #     self.assertEqual(0, len(findings))
+    def test_parse_without_file_has_no_findings(self):
+        parser = MobSFParser()
+        findings = parser.get_findings(None, Test())
+        self.assertEqual(0, len(findings))
 
     def test_parse_file(self):
         test = Test()
@@ -29,7 +29,8 @@ class TestMobSFParser(TestCase):
         engagement.product = Product()
         test.engagement = engagement
         testfile = open("dojo/unittests/scans/mobsf/report2.json")
-        parser = MobSFParser(testfile, test)
+        parser = MobSFParser()
+        findings = parser.get_findings(testfile, test)
         testfile.close()
         # TODO add more checks dedicated to this file
 
@@ -38,7 +39,8 @@ class TestMobSFParser(TestCase):
         engagement = Engagement()
         engagement.product = Product()
         test.engagement = engagement
-        testfile = open("dojo/unittests/scans/mobsf/android.json")
+        testfile = open()
+        findings = parser.get_findings("dojo/unittests/scans/mobsf/android.json")
         parser = MobSFParser(testfile, test)
         testfile.close()
         # TODO add more checks dedicated to this file
@@ -49,6 +51,7 @@ class TestMobSFParser(TestCase):
         engagement.product = Product()
         test.engagement = engagement
         testfile = open("dojo/unittests/scans/mobsf/ios.json")
-        parser = MobSFParser(testfile, test)
+        parser = MobSFParser()
+        findings = parser.get_findings(testfile, test)
         testfile.close()
         # TODO add more checks dedicated to this file

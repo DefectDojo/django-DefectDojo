@@ -4,7 +4,6 @@ from dojo.models import Test
 
 
 class TestGitleaksParser(TestCase):
-
     def test_parse_without_file_has_no_finding(self):
         parser = GitleaksJSONParser(None, Test())
         self.assertEqual(0, len(findings))

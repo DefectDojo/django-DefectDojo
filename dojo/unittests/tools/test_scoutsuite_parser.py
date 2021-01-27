@@ -4,8 +4,7 @@ from django.utils import timezone
 from dojo.models import Test, Engagement, Product, Product_Type, Test_Type
 
 
-class MockFileObject():
-
+class MockFileObject:
     def __init__(self, filepath):
         self.filepath = filepath
 
@@ -14,7 +13,6 @@ class MockFileObject():
 
 
 class TestScoutSuiteParser(TestCase):
-
     def setup(self, testfile):
         file = MockFileObject(testfile)
         product_type = Product_Type(critical_product=True, key_product=False)
@@ -26,10 +24,20 @@ class TestScoutSuiteParser(TestCase):
         product = Product(prod_type=product_type)
         product.save()
 
-        engagement = Engagement(product=product, target_start=timezone.now(), target_end=timezone.now())
+        engagement = Engagement(
+            product=product, target_start=timezone.now(), target_end=timezone.now()
+        )
         engagement.save()
 
-        parser = ScoutSuiteParser(file, Test(engagement=engagement, test_type=test_type, target_start=timezone.now(), target_end=timezone.now()))
+        parser = ScoutSuiteParser(
+            file,
+            Test(
+                engagement=engagement,
+                test_type=test_type,
+                target_start=timezone.now(),
+                target_end=timezone.now(),
+            ),
+        )
 
         return parser
 

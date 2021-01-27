@@ -5,7 +5,6 @@ from dojo.models import Test, Engagement, Product, Product_Type, Test_Type
 
 
 class TestAwsProwlerParser(TestCase):
-
     def setup(self, testfile):
         product_type = Product_Type(critical_product=True, key_product=False)
         product_type.save()
@@ -16,10 +15,20 @@ class TestAwsProwlerParser(TestCase):
         product = Product(prod_type=product_type)
         product.save()
 
-        engagement = Engagement(product=product, target_start=timezone.now(), target_end=timezone.now())
+        engagement = Engagement(
+            product=product, target_start=timezone.now(), target_end=timezone.now()
+        )
         engagement.save()
 
-        parser = AWSProwlerParser(testfile, Test(engagement=engagement, test_type=test_type, target_start=timezone.now(), target_end=timezone.now()))
+        parser = AWSProwlerParser(
+            testfile,
+            Test(
+                engagement=engagement,
+                test_type=test_type,
+                target_start=timezone.now(),
+                target_end=timezone.now(),
+            ),
+        )
 
         testfile.close()
 
@@ -32,13 +41,15 @@ class TestAwsProwlerParser(TestCase):
     def test_aws_prowler_parser_with_critical_vuln_has_one_findings(self):
         parser = self.setup(open("dojo/unittests/scans/aws_prowler/one_vuln.csv"))
         self.assertEqual(1, len(findings))
-        self.assertEqual('Avoid the use of the root account (Scored)', findings[0].title)
+        self.assertEqual(
+            "Avoid the use of the root account (Scored)", findings[0].title
+        )
 
     def test_aws_prowler_parser_with_many_vuln_has_many_findings(self):
         parser = self.setup(open("dojo/unittests/scans/aws_prowler/many_vuln.csv"))
         self.assertEqual(5, len(findings))
-        self.assertEqual('Vuln A', findings[0].title)
-        self.assertEqual('Vuln B', findings[1].title)
-        self.assertEqual('Info A', findings[2].title)
-        self.assertEqual('Vuln C', findings[3].title)
-        self.assertEqual('Info B', findings[4].title)
+        self.assertEqual("Vuln A", findings[0].title)
+        self.assertEqual("Vuln B", findings[1].title)
+        self.assertEqual("Info A", findings[2].title)
+        self.assertEqual("Vuln C", findings[3].title)
+        self.assertEqual("Info B", findings[4].title)

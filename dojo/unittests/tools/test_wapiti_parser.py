@@ -4,7 +4,6 @@ from dojo.models import Test
 
 
 class TestWapitiParser(TestCase):
-
     def test_parse_without_file_has_no_findings(self):
         parser = WapitiXMLParser()
         findings = parser.get_findings(None, Test())

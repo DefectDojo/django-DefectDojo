@@ -4,7 +4,6 @@ from dojo.models import Test
 
 
 class TestDrHeaderJSONParser(TestCase):
-
     def test_parse_without_file_has_no_finding(self):
         parser = DrHeaderJSONParser(None, Test())
         self.assertEqual(0, len(findings))

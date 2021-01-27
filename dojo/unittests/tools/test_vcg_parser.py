@@ -11,7 +11,6 @@ from dojo.tools.vcg.parser import VCGXmlParser
 
 
 class TestFile(object):
-
     def read(self):
         return self.content
 
@@ -21,7 +20,6 @@ class TestFile(object):
 
 
 class TestVCGXmlParser(TestCase):
-
     def setUp(self):
         self.parser = VCGXmlParser()
 
@@ -138,16 +136,13 @@ class TestVCGXmlParser(TestCase):
         </CodeIssueCollection>"""
 
         vcgscan = ElementTree.fromstring(single_finding)
-        finding = self.parser.parse_issue(vcgscan.findall('CodeIssue')[0],
-                                          Test())
-        self.assertEqual('Info', finding.severity)
-        self.assertEqual('S4', finding.numerical_severity)
-        self.assertEqual('Comment Indicates Potentially Unfinished Code',
-                         finding.title)
+        finding = self.parser.parse_issue(vcgscan.findall("CodeIssue")[0], Test())
+        self.assertEqual("Info", finding.severity)
+        self.assertEqual("S4", finding.numerical_severity)
+        self.assertEqual("Comment Indicates Potentially Unfinished Code", finding.title)
 
 
 class TestVCGCsvParser(TestCase):
-
     def setUp(self):
         self.parser = VCGCsvParser()
 
@@ -157,19 +152,28 @@ class TestVCGCsvParser(TestCase):
         self.assertEqual(0, len(results))
 
     def test_parse_single_finding_single_result(self):
-        findings = """6,Suspicious Comment,"Comment Indicates Potentially Unfinished Code","The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.",C:\Projects\WebGoat.Net\Core\Cart.cs,16,"TODO: Refactor this. Use LINQ with aggregation to get SUM.",False,"LawnGreen"""""
+        findings = (
+            """6,Suspicious Comment,"Comment Indicates Potentially Unfinished Code","The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.",C:\Projects\WebGoat.Net\Core\Cart.cs,16,"TODO: Refactor this. Use LINQ with aggregation to get SUM.",False,"LawnGreen"""
+            ""
+        )
         results = self.parser.parse(findings, Test())
         self.assertEqual(1, len(results))
 
     def test_parse_multiple_findings_multiple_results(self):
-        findings = """6,Suspicious Comment,"Comment Indicates Potentially Unfinished Code","The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.",C:\Projects\WebGoat.Net\Core\Cart.cs,16,"TODO: Refactor this. Use LINQ with aggregation to get SUM.",False,"LawnGreen"
-6,Suspicious Comment,"Comment Indicates Potentially Unfinished Code","The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.",C:\Projects\WebGoat.Net\Core\Cart.cs,41,"TODO: Add ability to delete an orderDetail and to change quantities.",False,"LawnGreen"""""
+        findings = (
+            """6,Suspicious Comment,"Comment Indicates Potentially Unfinished Code","The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.",C:\Projects\WebGoat.Net\Core\Cart.cs,16,"TODO: Refactor this. Use LINQ with aggregation to get SUM.",False,"LawnGreen"
+6,Suspicious Comment,"Comment Indicates Potentially Unfinished Code","The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.",C:\Projects\WebGoat.Net\Core\Cart.cs,41,"TODO: Add ability to delete an orderDetail and to change quantities.",False,"LawnGreen"""
+            ""
+        )
         results = self.parser.parse(findings, Test())
         self.assertEqual(2, len(results))
 
     def test_parse_duplicate_findings_deduped_results(self):
-        findings = """6,Suspicious Comment,"Comment Indicates Potentially Unfinished Code","The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.",C:\Projects\WebGoat.Net\Core\Cart.cs,16,"TODO: Refactor this. Use LINQ with aggregation to get SUM.",False,"LawnGreen"
-6,Suspicious Comment,"Comment Indicates Potentially Unfinished Code","The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.",C:\Projects\WebGoat.Net\Core\Cart.cs,16,"TODO: Refactor this. Use LINQ with aggregation to get SUM.",False,"LawnGreen"""""
+        findings = (
+            """6,Suspicious Comment,"Comment Indicates Potentially Unfinished Code","The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.",C:\Projects\WebGoat.Net\Core\Cart.cs,16,"TODO: Refactor this. Use LINQ with aggregation to get SUM.",False,"LawnGreen"
+6,Suspicious Comment,"Comment Indicates Potentially Unfinished Code","The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.",C:\Projects\WebGoat.Net\Core\Cart.cs,16,"TODO: Refactor this. Use LINQ with aggregation to get SUM.",False,"LawnGreen"""
+            ""
+        )
         results = self.parser.parse(findings, Test())
         self.assertEqual(1, len(results))
 
@@ -183,22 +187,22 @@ class TestVCGCsvParser(TestCase):
         self.assertIsNone(finding)
 
     def test_parseissuerow_with_row_has_finding(self):
-        findings = """6,Suspicious Comment,"Comment Indicates Potentially Unfinished Code","The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.",C:\Projects\WebGoat.Net\Core\Cart.cs,16,"TODO: Refactor this. Use LINQ with aggregation to get SUM.",False,"LawnGreen"""""
-        reader = csv.reader(io.StringIO(findings), delimiter=',',
-                            quotechar='"')
+        findings = (
+            """6,Suspicious Comment,"Comment Indicates Potentially Unfinished Code","The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.",C:\Projects\WebGoat.Net\Core\Cart.cs,16,"TODO: Refactor this. Use LINQ with aggregation to get SUM.",False,"LawnGreen"""
+            ""
+        )
+        reader = csv.reader(io.StringIO(findings), delimiter=",", quotechar='"')
         finding = None
         for row in reader:
             finding = self.parser.parse_issue(row, Test())
 
         self.assertIsNotNone(finding)
-        self.assertEqual('Info', finding.severity)
-        self.assertEqual('S4', finding.numerical_severity)
-        self.assertEqual('Comment Indicates Potentially Unfinished Code',
-                         finding.title)
+        self.assertEqual("Info", finding.severity)
+        self.assertEqual("S4", finding.numerical_severity)
+        self.assertEqual("Comment Indicates Potentially Unfinished Code", finding.title)
 
 
 class TestVCGImport(TestCase):
-
     def setUp(self):
         self.parser = VCGParser(None, Test())
 
@@ -222,12 +226,15 @@ class TestVCGImport(TestCase):
         <CheckColour>LawnGreen</CheckColour>
         </CodeIssue>
         </CodeIssueCollection>"""
-        filename = TestFile('data.xml', content)
+        filename = TestFile("data.xml", content)
         self.parser = VCGParser(filename, Test())
         self.assertEqual(1, len(findings))
 
     def test_can_parse_csv(self):
-        content = """6,Suspicious Comment,"Comment Indicates Potentially Unfinished Code","The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.",C:\Projects\WebGoat.Net\Core\Cart.cs,16,"TODO: Refactor this. Use LINQ with aggregation to get SUM.",False,"LawnGreen"""""
-        filename = TestFile('data.csv', content)
+        content = (
+            """6,Suspicious Comment,"Comment Indicates Potentially Unfinished Code","The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.",C:\Projects\WebGoat.Net\Core\Cart.cs,16,"TODO: Refactor this. Use LINQ with aggregation to get SUM.",False,"LawnGreen"""
+            ""
+        )
+        filename = TestFile("data.csv", content)
         self.parser = VCGParser(filename, Test())
         self.assertEqual(1, len(findings))

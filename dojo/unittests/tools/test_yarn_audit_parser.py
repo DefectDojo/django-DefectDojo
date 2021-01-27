@@ -4,7 +4,6 @@ from dojo.models import Engagement, Product, Test
 
 
 class TestYarnAuditParser(TestCase):
-
     def get_test(self):
         test = Test()
         test.engagement = Engagement()
@@ -29,8 +28,8 @@ class TestYarnAuditParser(TestCase):
         findings = parser.get_findings(testfile, self.get_test())
         testfile.close()
         self.assertEqual(1, len(findings))
-        self.assertEqual('handlebars', findings[0].component_name)
-        self.assertEqual('4.5.2', findings[0].component_version)
+        self.assertEqual("handlebars", findings[0].component_name)
+        self.assertEqual("4.5.2", findings[0].component_version)
 
     def test_yarn_audit_parser_with_many_vuln_has_many_findings(self):
         testfile = open("dojo/unittests/scans/yarn_audit/yarn_audit_many_vul.json")
@@ -45,5 +44,7 @@ class TestYarnAuditParser(TestCase):
             parser = YarnAuditParser()
             findings = parser.get_findings(testfile, self.get_test())
             testfile.close()
-            self.assertTrue('yarn audit report contains errors:' in str(context.exception))
-            self.assertTrue('ECONNREFUSED' in str(context.exception))
+            self.assertTrue(
+                "yarn audit report contains errors:" in str(context.exception)
+            )
+            self.assertTrue("ECONNREFUSED" in str(context.exception))
