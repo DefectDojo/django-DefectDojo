@@ -352,6 +352,9 @@ class EngagementFilter(DojoFilter):
         queryset=User.objects.filter(
             engagement__lead__isnull=False).distinct(),
         label="Lead")
+    engagement__version = CharFilter(field_name='engagement__version', lookup_expr='icontains', label='Engagement version')
+    engagement__test__version = CharFilter(field_name='engagement__test__version', lookup_expr='icontains', label='Test version')
+
     name = CharFilter(lookup_expr='icontains')
     prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.all().order_by('name'),
@@ -383,7 +386,7 @@ class EngagementFilter(DojoFilter):
 
     class Meta:
         model = Product
-        fields = ['name', 'prod_type', 'version']
+        fields = ['name', 'prod_type']
 
 
 class ApiEngagementFilter(DojoFilter):
