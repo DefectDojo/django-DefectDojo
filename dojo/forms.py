@@ -230,7 +230,7 @@ class Delete_Product_Type_MemberForm(forms.ModelForm):
 
     class Meta:
         model = Product_Type_Member
-        fields = ['product_type', 'user']
+        fields = ['product_type', 'user', 'role']
 
 
 class Test_TypeForm(forms.ModelForm):

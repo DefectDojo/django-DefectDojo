@@ -253,7 +253,6 @@ def delete_product_type_member(request, ptid, memberid):
     memberform = Delete_Product_Type_MemberForm(instance=member)
     if request.method == 'POST':
         memberform = Delete_Product_Type_MemberForm(request.POST, instance=member)
-#        if memberform.is_valid():
         member = memberform.instance
         if member.role == Roles.Owner:
             owners = Product_Type_Member.objects.filter(product_type=member.product_type, role=Roles.Owner).count()
