@@ -2,7 +2,7 @@
 asteval==0.9.21
 bleach==3.2.2
 celery==4.4.7
-coverage==5.3.1
+coverage==5.4
 defusedxml==0.6.0
 django_celery_results==2.0.1
 django-auditlog==1.0a1
