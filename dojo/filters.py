@@ -383,7 +383,7 @@ class EngagementFilter(DojoFilter):
 
     class Meta:
         model = Product
-        fields = ['name', 'prod_type']
+        fields = ['name', 'prod_type', 'version']
 
 
 class ApiEngagementFilter(DojoFilter):
@@ -1600,7 +1600,7 @@ class ApiTestFilter(DojoFilter):
         model = Test
         fields = ['id', 'title', 'test_type', 'target_start',
                      'target_end', 'notes', 'percent_complete',
-                     'actual_time', 'engagement']
+                     'actual_time', 'engagement', 'version']
 
 
 class ApiAppAnalysisFilter(DojoFilter):
