@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('dojo', '0067_max_dupes'),
+        ('dojo', '0071_product_type_enhancement'),
     ]
 
     operations = [
@@ -40,10 +40,5 @@ class Migration(migrations.Migration):
             model_name='product_type',
             name='members',
             field=models.ManyToManyField(blank=True, related_name='prod_type_members', through='dojo.Product_Type_Member', to=settings.AUTH_USER_MODEL),
-        ),
-        migrations.AddField(
-            model_name='product_type',
-            name='description',
-            field=models.CharField(max_length=4000, null=True),
         ),
     ]

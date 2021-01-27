@@ -8,8 +8,8 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from dojo.filters import ProductTypeFilter
-from dojo.forms import Product_TypeForm, Product_TypeProductForm, Delete_Product_TypeForm, \
-    Add_Product_Type_MemberForm, Edit_Product_Type_MemberForm, Delete_Product_Type_MemberForm
+from dojo.forms import Product_TypeForm, Delete_Product_TypeForm, Add_Product_Type_MemberForm, \
+    Edit_Product_Type_MemberForm, Delete_Product_Type_MemberForm
 from dojo.models import Product_Type, Product_Type_Member
 from dojo.utils import get_page_items, add_breadcrumb
 from dojo.notifications.helper import create_notification
@@ -44,7 +44,6 @@ def product_type(request):
     return render(request, 'dojo/product_type.html', {
         'name': 'Product Type List',
         'Permissions': Permissions,
-        'metric': False,
         'user': request.user,
         'pts': pts,
         'ptl': ptl,
@@ -93,7 +92,6 @@ def add_product_type(request):
     add_breadcrumb(title="Add Product Type", top_level=False, request=request)
     return render(request, 'dojo/new_product_type.html', {
         'name': 'Add Product Type',
-        'metric': False,
         'user': request.user,
         'form': form,
     })
@@ -108,7 +106,6 @@ def view_product_type(request, ptid):
     return render(request, 'dojo/view_product_type.html', {
         'name': 'View Product Type',
         'Permissions': Permissions,
-        'metric': False,
         'user': request.user,
         'pt': pt,
         'products': products,
@@ -169,21 +166,10 @@ def edit_product_type(request, ptid):
     add_breadcrumb(title="Edit Product Type", top_level=False, request=request)
     return render(request, 'dojo/edit_product_type.html', {
         'name': 'Edit Product Type',
-        'metric': False,
         'user': request.user,
         'pt_form': pt_form,
         'pt': pt,
         'members': members})
-
-
-@user_is_authorized(Product_Type, Permissions.Product_Type_Add_Product, 'ptid')
-def add_product_to_product_type(request, ptid):
-    pt = get_object_or_404(Product_Type, pk=ptid)
-    form = Product_TypeProductForm(initial={'prod_type': pt})
-    add_breadcrumb(title="New %s Product" % pt.name, top_level=False, request=request)
-    return render(request, 'dojo/new_product.html',
-                  {'form': form,
-                   })
 
 
 @user_is_authorized(Product_Type, Permissions.Product_Type_Manage_Members, 'ptid')
@@ -217,7 +203,6 @@ def add_product_type_member(request, ptid):
     return render(request, 'dojo/new_product_type_member.html', {
         'name': 'Add Product Type Member',
         'pt': pt,
-        'metric': False,
         'user': request.user,
         'form': memberform,
     })
@@ -258,7 +243,6 @@ def edit_product_type_member(request, ptid, memberid):
         'name': 'Edit Product Type Member',
         'ptid': ptid,
         'memberid': memberid,
-        'metric': False,
         'form': memberform,
     })
 
@@ -295,6 +279,5 @@ def delete_product_type_member(request, ptid, memberid):
         'name': 'Delete Product Type Member',
         'ptid': ptid,
         'memberid': memberid,
-        'metric': False,
         'form': memberform,
     })

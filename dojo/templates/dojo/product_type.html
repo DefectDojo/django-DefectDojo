@@ -58,47 +58,47 @@
                         {% for pt in pts %}
                             <tr>
                                 {% if user|feature_new_permissions_or_user_is_staff %}
-                                    <td>
-                                        <ul>
-                                            <li class="dropdown" style="list-style:none;position:absolute">
-                                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" id="dropdownMenuProductType">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
-                                                <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenuProductType">
-                                                    <li role="presentation">
-                                                        <a class="" href="{% url 'view_product_type' pt.id %}">
-                                                        <i class="fa fa-list-alt"></i> View</a>
-                                                    </li>
-                                                    {% if pt|has_object_permission:Permissions.Product_Type_Edit %}
-                                                    <li role="presentation">
-                                                        <a class="" href="{% url 'edit_product_type' pt.id %}">
-                                                        <i class="fa fa-pencil-square-o"></i> Edit</a>
-                                                    </li>
-                                                    {% endif %}
-                                                    {% if pt|has_object_permission:Permissions.Product_Type_Add_Product %}
-                                                    <li role="presentation">
-                                                        <a class="" href="{% url 'add_product_to_product_type' pt.id %}">
-                                                        <i class="fa fa-plus"></i> Add Product</a>
-                                                    </li>
-                                                    {% endif %}
-                                                    <li role="separator" class="divider"></li>
-                                                    <li role="presentation">
-                                                        <a class="" href="{% url 'product_type_metrics' pt.id %}">
-                                                        <i class="fa fa-line-chart"></i> Metrics</a>
-                                                    </li>
-                                                    <li role="presentation">
-                                                        <a class="" href="{% url 'product_type_report' pt.id %}">
-                                                        <i class="fa fa-file-text-o"></i> Product Type Report</a>
-                                                    </li>
-                                                    {% if pt|has_object_permission:Permissions.Product_Type_Delete %}
-                                                    <li role="separator" class="divider"></li>
-                                                    <li role="presentation">
-                                                        <a class="" href="{% url 'delete_product_type' pt.id %}">
-                                                        <i class="fa fa-trash"></i> Delete</a>
-                                                    </li>
-                                                    {% endif %}
-                                                </ul>
-                                            </li>
-                                        </ul>
-                                    </td>
+                                <td>
+                                    <ul>
+                                        <li class="dropdown" style="list-style:none;position:absolute">
+                                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" id="dropdownMenuProductType">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                                            <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenuProductType">
+                                                <li role="presentation">
+                                                    <a class="" href="{% url 'view_product_type' pt.id %}">
+                                                    <i class="fa fa-list-alt"></i> View</a>
+                                                </li>
+                                                {% if pt|has_object_permission:Permissions.Product_Type_Edit %}
+                                                <li role="presentation">
+                                                    <a class="" href="{% url 'edit_product_type' pt.id %}">
+                                                    <i class="fa fa-pencil-square-o"></i> Edit</a>
+                                                </li>
+                                                {% endif %}
+                                                {% if pt|has_object_permission:Permissions.Product_Type_Add_Product %}
+                                                <li role="presentation">
+                                                    <a class="" href="{% url 'add_product_to_product_type' pt.id %}">
+                                                    <i class="fa fa-plus"></i> Add Product</a>
+                                                </li>
+                                                {% endif %}
+                                                <li role="separator" class="divider"></li>
+                                                <li role="presentation">
+                                                    <a class="" href="{% url 'product_type_metrics' pt.id %}">
+                                                    <i class="fa fa-line-chart"></i> Metrics</a>
+                                                </li>
+                                                <li role="presentation">
+                                                    <a class="" href="{% url 'product_type_report' pt.id %}">
+                                                    <i class="fa fa-file-text-o"></i> Product Type Report</a>
+                                                </li>
+                                                {% if pt|has_object_permission:Permissions.Product_Type_Delete %}
+                                                <li role="separator" class="divider"></li>
+                                                <li role="presentation">
+                                                    <a class="" href="{% url 'delete_product_type' pt.id %}">
+                                                    <i class="fa fa-trash"></i> Delete</a>
+                                                </li>
+                                                {% endif %}
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </td>
                                 {% endif %}
                                 <td><a href="{% url 'view_product_type' pt.id %}">{{ pt.name }}</a></td>
                                 <td><a href="{% url 'product' %}?prod_type={{ pt.id }}"> {{ pt.prod_count }} </a></td>
