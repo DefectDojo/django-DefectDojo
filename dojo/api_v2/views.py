@@ -912,8 +912,6 @@ class ProductTypeViewSet(mixins.ListModelMixin,
     queryset = Product_Type.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'name', 'critical_product', 'key_product', 'created', 'updated')
-    permission_classes = (permissions.UserHasProductTypePermission,
-                          DjangoModelPermissions)
 
     def get_queryset(self):
         if not self.request.user.is_staff:
