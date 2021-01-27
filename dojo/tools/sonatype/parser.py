@@ -10,24 +10,8 @@ from dojo.models import Finding
 class SonatypeJSONParser(object):
     # This parser does not deal with licenses information.
     def get_findings(self, json_output, test):
-        tree = self.parse_json(json_output)
-
-        if tree:
-            self.items = [data for data in self.get_items(tree, test)]
-        else:
-            self.items = []
-
-    def parse_json(self, json_output):
-        try:
-            data = json_output.read()
-            try:
-                tree = json.loads(str(data, 'utf-8'))
-            except:
-                tree = json.loads(data)
-        except:
-            raise Exception("Invalid format")
-
-        return tree
+        tree = json.load(json_output)
+        return self.get_items(tree, test)
 
     def get_items(self, tree, test):
         items = {}

@@ -29,7 +29,8 @@ class TestScoutSuiteParser(TestCase):
         )
         engagement.save()
 
-        parser = ScoutSuiteParser(
+        parser = ScoutSuiteParser()
+        return parser.get_findings(
             file,
             Test(
                 engagement=engagement,
@@ -38,8 +39,6 @@ class TestScoutSuiteParser(TestCase):
                 target_end=timezone.now(),
             ),
         )
-
-        return parser
 
     def test_scout_suite_parser_with_no_vuln_has_no_findings(self):
         parser = self.setup("dojo/unittests/scans/scout_suite/no_vuln.js")

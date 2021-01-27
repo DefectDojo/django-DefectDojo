@@ -4,10 +4,6 @@ from dojo.models import Test
 
 
 class TestSslyzeJSONParser(TestCase):
-    def test_parse_without_file_has_no_findings(self):
-        parser = SSLyzeJSONParser()
-        findings = parser.get_findings(None, Test())
-        self.assertEqual(0, len(findings))
 
     def test_parse_file_with_one_target_has_zero_vuln(self):
         testfile = open("dojo/unittests/scans/sslyze/one_target_zero_vuln.json")
