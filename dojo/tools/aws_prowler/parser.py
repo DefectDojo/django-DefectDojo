@@ -53,13 +53,13 @@ class AWSProwlerParser(object):
                                date=find_date,
                                dynamic_finding=True)
                 dupes[dupe_key] = find
-        self.items = list(dupes.values())
 
         if account:
             test_description = ""
             test_description = "%s\n* **AWS Account:** %s\n" % (test_description, str(account))
             test.description = test_description
             test.save()
+        return list(dupes.values())
 
     def formatview(self, depth):
         if depth > 1:

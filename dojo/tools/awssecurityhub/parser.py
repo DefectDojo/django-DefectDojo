@@ -6,25 +6,8 @@ from dojo.models import Finding
 
 class AwsSecurityFindingFormatParser:
     def get_findings(self, filehandle, test):
-        tree = self.parse_json(filehandle)
-
-        if tree:
-            return get_items(tree, test)
-        else:
-            return ()
-
-    def parse_json(self, filehandle):
-        try:
-            data = filehandle.read()
-        except:
-            return None
-
-        try:
-            tree = json.loads(data)
-        except:
-            raise Exception("Invalid format")
-
-        return tree
+        tree = json.load(filehandle)
+        return self.get_items(tree, test)
 
     def get_items(self, tree, test):
         items = {}
