@@ -19,7 +19,7 @@ class Roles(IntEnum):
             return True
         except ValueError:
             return False
-        
+
 
 def django_enum(cls):
     # decorator needed to enable enums in django templates
@@ -64,7 +64,6 @@ class Permissions(IntEnum):
     Endpoint_Add = 1503
     Endpoint_Edit = 1506
     Endpoint_Delete = 1507
-
 
     @classmethod
     def has_value(cls, value):

@@ -15,7 +15,7 @@ def user_has_permission(user, obj, permission):
         except Product_Type_Member.DoesNotExist:
             return False
         return role_has_permission(member.role, permission)
-    elif (isinstance(obj, Product) and 
+    elif (isinstance(obj, Product) and
             permission.value >= Permissions.Product_View.value):
         # Products inherit permissions of their product type
         if user_has_permission(user, obj.prod_type, permission):
@@ -27,26 +27,26 @@ def user_has_permission(user, obj, permission):
         except Product_Member.DoesNotExist:
             return False
         return role_has_permission(member.role, permission)
-    elif (isinstance(obj, Engagement) and 
-            permission.value >= Permissions.Engagement_View.value and 
+    elif (isinstance(obj, Engagement) and
+            permission.value >= Permissions.Engagement_View.value and
             permission.value <= Permissions.Engagement_Delete.value):
         return user_has_permission(user, obj.product, permission)
-    elif (isinstance(obj, Test) and 
-            permission.value >= Permissions.Test_View.value and 
+    elif (isinstance(obj, Test) and
+            permission.value >= Permissions.Test_View.value and
             permission.value <= Permissions.Test_Delete.value):
         return user_has_permission(user, obj.engagement.product, permission)
-    elif (isinstance(obj, Finding) and 
-            permission.value >= Permissions.Finding_View.value and 
+    elif (isinstance(obj, Finding) and
+            permission.value >= Permissions.Finding_View.value and
             permission.value <= Permissions.Finding_Delete.value):
         return user_has_permission(user, obj.test.engagement.product, permission)
-    elif (isinstance(obj, Endpoint) and 
-            permission.value >= Permissions.Endpoint_View.value and 
+    elif (isinstance(obj, Endpoint) and
+            permission.value >= Permissions.Endpoint_View.value and
             permission.value <= Permissions.Endpoint_Delete.value):
         return user_has_permission(user, obj.product, permission)
-    elif (isinstance(obj, Product_Type_Member) and 
+    elif (isinstance(obj, Product_Type_Member) and
             permission == Permissions.Product_Type_Remove_Member):
         return obj.user == user or user_has_permission(user, obj.product_type, Permissions.Product_Type_Manage_Members)
-    elif (isinstance(obj, Product_Member) and 
+    elif (isinstance(obj, Product_Member) and
             permission == Permissions.Product_Remove_Member):
         return obj.user == user or user_has_permission(user, obj.product, Permissions.Product_Manage_Members)
     else:
@@ -57,6 +57,7 @@ def user_has_permission(user, obj, permission):
 def user_has_permission_or_403(user, obj, permission):
     if not user_has_permission(user, obj, permission):
         raise PermissionDenied
+
 
 def get_roles_for_permission(permission):
     if not Permissions.has_value(permission):

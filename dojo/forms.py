@@ -36,7 +36,6 @@ import logging
 from crum import get_current_user
 from dojo.authorization.roles_permissions import Permissions, Roles
 from dojo.product_type.queries import get_authorized_product_types
-from dojo.feature_decisions import new_permissions_enabled
 
 logger = logging.getLogger(__name__)
 
@@ -201,7 +200,7 @@ class Add_Product_Type_MemberForm(Edit_Product_Type_MemberForm):
         super(Add_Product_Type_MemberForm, self).__init__(*args, **kwargs)
         current_members = Product_Type_Member.objects.filter(product_type=self.initial["product_type"]).values_list('user', flat=True)
         self.fields['user'].queryset = Dojo_User.objects.exclude(
-            Q(is_superuser=True) | 
+            Q(is_superuser=True) |
             Q(id__in=current_members)).exclude(is_active=False).order_by('first_name', 'last_name')
         self.fields['user'].disabled = False
 
