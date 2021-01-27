@@ -12,10 +12,6 @@ from dojo.models import Endpoint, Finding
 class MicrofocusWebinspectXMLParser(object):
     """Micro Focus Webinspect XML report parser"""
     def get_findings(self, file, test):
-        self.dupes = dict()
-        self.items = ()
-        if file is None:
-            return
 
         tree = ET.parse(file)
         # get root of tree.
@@ -23,6 +19,7 @@ class MicrofocusWebinspectXMLParser(object):
         if 'Sessions' not in root.tag:
             raise NamespaceErr("This doesn't seem to be a valid Webinspect xml file.")
 
+        dupes = dict()
         for session in root:
             url = session.find('URL').text
             parts = urlparse(url)
@@ -64,13 +61,13 @@ class MicrofocusWebinspectXMLParser(object):
                 # make dupe hash key
                 dupe_key = hashlib.md5(str(description + title + severity).encode('utf-8')).hexdigest()
                 # check if dupes are present.
-                if dupe_key in self.dupes:
-                    finding = self.dupes[dupe_key]
+                if dupe_key in dupes:
+                    finding = dupes[dupe_key]
                     if finding.description:
                         finding.description = finding.description
-                    self.dupes[dupe_key] = finding
+                    dupes[dupe_key] = finding
                 else:
-                    self.dupes[dupe_key] = True
+                    dupes[dupe_key] = True
 
                     finding = Finding(title=title,
                                     test=test,
@@ -89,9 +86,9 @@ class MicrofocusWebinspectXMLParser(object):
                         finding.unique_id_from_tool = issue.attrib.get("id")
                     # manage endpoint
                     finding.unsaved_endpoints.append(endpoint)
-                    self.dupes[dupe_key] = finding
+                    dupes[dupe_key] = finding
 
-            self.items = list(self.dupes.values())
+        return list(dupes.values())
 
     @staticmethod
     def convert_severity(val):

@@ -12,7 +12,7 @@ class SnykParser(object):
             temp = []
             for moduleTree in reportTree:
                 temp += self.process_tree(moduleTree, test)
-            return temp.values()
+            return temp
         else:
             return self.process_tree(reportTree, test)
 

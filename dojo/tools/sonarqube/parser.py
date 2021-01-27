@@ -14,28 +14,16 @@ class SonarQubeHtmlParser(object):
     def get_findings(self, filename, test, mode=None):
         parser = etree.HTMLParser()
         tree = etree.parse(filename, parser)
-        if(mode in [None, 'detailed']):
-            self.mode = mode
-        else:
-            raise Exception("Internal error: Invalid mode " + mode + ". Expected: one of None, 'detailed'")
+        if mode not in [None, 'detailed']:
+            raise ValueError("Internal error: Invalid mode " + mode + ". Expected: one of None, 'detailed'")
 
-        # Dictonary to hold the aggregated findings with:
-        #  - key: the concatenated aggregate keys
-        #  - value: the finding
-        self.dupes = dict()
-
-        self.test = test
-        self.impact = "No impact provided"
-
-        if tree:
-            self.items = self.get_items(tree)
-        else:
-            self.items = []
+        return self.get_items(tree, test, mode)
 
     def get_items(self, tree):
         # Check that there is at least one vulnerability (the vulnerabilities table is absent when no vuln are found)
         detailTbody = tree.xpath("/html/body/div[contains(@class,'detail')]/table/tbody")
-        if(len(detailTbody) == 2):
+        dupes = dict()
+        if (len(detailTbody) == 2):
             # First is "Detail of the Detected Vulnerabilities" (not present if no vuln)
             # Second is "Known Security Rules"
             vulnerabilities_table = list(detailTbody[0].iter("tr"))
@@ -69,21 +57,17 @@ class SonarQubeHtmlParser(object):
                     vuln_description = "No description provided"
                     vuln_references = ""
                     vuln_cwe = 0
-                if(self.mode is None):
+                if mode is None:
                     self.process_result_file_name_aggregated(
-                        vuln_title, vuln_cwe, vuln_description, vuln_file_path, vuln_line, vuln_severity, vuln_mitigation, vuln_references)
-                elif (self.mode == 'detailed'):
+                        dupes, vuln_title, vuln_cwe, vuln_description, vuln_file_path, vuln_line, vuln_severity, vuln_mitigation, vuln_references)
+                else:
                     self.process_result_detailed(
-                        vuln_title, vuln_cwe, vuln_description, vuln_file_path, vuln_line, vuln_severity, vuln_mitigation, vuln_references, vuln_key)
-            items = list(self.dupes.values())
-        else:
-            # No vuln were found
-            items = list()
-        return items
+                        dupes, vuln_title, vuln_cwe, vuln_description, vuln_file_path, vuln_line, vuln_severity, vuln_mitigation, vuln_references, vuln_key)
+        return list(dupes.values())
 
     # Process one vuln from the report for "SonarQube Scan detailed"
     # Create the finding and add it into the dupes list
-    def process_result_detailed(self, vuln_title, vuln_cwe, vuln_description, vuln_file_path, vuln_line, vuln_severity, vuln_mitigation, vuln_references, vuln_key):
+    def process_result_detailed(self, dupes, vuln_title, vuln_cwe, vuln_description, vuln_file_path, vuln_line, vuln_severity, vuln_mitigation, vuln_references, vuln_key):
         # vuln_key is the unique id from tool which means that there is basically no aggregation except real duplicates
         aggregateKeys = "{}{}{}{}{}".format(vuln_cwe, vuln_title, vuln_description, vuln_file_path, vuln_key)
         find = Finding(title=vuln_title,
@@ -106,14 +90,14 @@ class SonarQubeHtmlParser(object):
                        static_finding=True,
                        dynamic_finding=False,
                        unique_id_from_tool=vuln_key)
-        self.dupes[aggregateKeys] = find
+        dupes[aggregateKeys] = find
 
     # Process one vuln from the report for "SonarQube Scan"
     # Create the finding and add it into the dupes list
     # For aggregated findings:
     #  - the description is enriched with each finding line number
     #  - the mitigation (message) is concatenated with each finding's mitigation value
-    def process_result_file_name_aggregated(self, vuln_title, vuln_cwe, vuln_description, vuln_file_path, vuln_line, vuln_severity, vuln_mitigation, vuln_references):
+    def process_result_file_name_aggregated(self, dupes, vuln_title, vuln_cwe, vuln_description, vuln_file_path, vuln_line, vuln_severity, vuln_mitigation, vuln_references):
         aggregateKeys = "{}{}{}{}".format(vuln_cwe, vuln_title, vuln_description, vuln_file_path)
         descriptionOneOccurence = "Line: {}".format(vuln_line)
         if not(aggregateKeys in self.dupes):
@@ -132,15 +116,15 @@ class SonarQubeHtmlParser(object):
                            duplicate=False,
                            out_of_scope=False,
                            mitigated=None,
-                           impact=self.impact,
+                           impact="No impact provided",
                            numerical_severity=Finding.get_numerical_severity(vuln_severity),
                            static_finding=True,
                            dynamic_finding=False,
                            nb_occurences=1)
-            self.dupes[aggregateKeys] = find
+            dupes[aggregateKeys] = find
         else:
             # We have already created a finding for this aggregate: updates the description, nb_occurences and mitigation (message field in the report which may vary for each vuln)
-            find = self.dupes[aggregateKeys]
+            find = dupes[aggregateKeys]
             find.description = "{}\n{}".format(find.description, descriptionOneOccurence)
             find.mitigation = "{}\n______\n{}".format(find.mitigation, vuln_mitigation)
             find.nb_occurences = find.nb_occurences + 1

@@ -4,10 +4,6 @@ from dojo.models import Test
 
 
 class TestSSLyzeXMLParser(TestCase):
-    def test_parse_without_file_has_no_findings(self):
-        parser = SSLyzeXMLParser()
-        findings = parser.get_findings(None, Test())
-        self.assertEqual(0, len(findings))
 
     def test_parse_file_with_one_target_has_one_vuln(self):
         testfile = open("dojo/unittests/scans/sslyze/report_one_target_one_vuln.xml")
