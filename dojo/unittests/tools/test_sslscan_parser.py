@@ -4,13 +4,8 @@ from dojo.models import Test
 
 
 class TestSslscanParser(TestCase):
-    def test_parse_without_file_has_no_findings(self):
-        parser = SslscanXMLParser()
-        findings = parser.get_findings(None, Test())
-        self.assertEqual(0, len(findings))
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
-
         testfile = open("dojo/unittests/scans/sslscan/sslscan_no_vuln.xml")
         parser = SslscanXMLParser()
         findings = parser.get_findings(testfile, Test())
