@@ -30,7 +30,6 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
 
 def get_choices():
     res = list()
-    res.append(("", "Please Select a Scan Type"))
     for key in PARSERS:
         res.append((key, key))
     return res
@@ -88,10 +87,13 @@ from .burp_api.parser import BurpApiParser
 register_parser('Burp REST API', BurpApiParser())
 from .burp.parser import BurpXmlParser
 register_parser('Burp Scan', BurpXmlParser())
-# register_parser('CCVS Report', Parser())
-# register_parser('Checkmarx Scan', Parser())
-# register_parser('Checkmarx Scan detailed', Parser())
-# register_parser('Checkov Scan', Parser())
+from .ccvs.parser import CCVSReportParser
+register_parser('CCVS Report', CCVSReportParser())
+from .checkmarx.parser import CheckmarxXMLParser
+register_parser('Checkmarx Scan', CheckmarxXMLParser())
+register_parser('Checkmarx Scan detailed', CheckmarxXMLParser())
+from .checkov.parser import CheckovParser
+register_parser('Checkov Scan', CheckovParser())
 # register_parser('Choctaw Hog Scan', Parser())
 # register_parser('Clair Klar Scan', Parser())
 # register_parser('Clair Scan', Parser())
@@ -169,7 +171,8 @@ register_parser('OpenVAS CSV', OpenVASUploadCsvParser())
 # register_parser('Twistlock Image Scan', Parser())
 # register_parser('VCG Scan', Parser())
 # register_parser('Veracode Scan', Parser())
-# register_parser('Wapiti Scan', Parser())
+from .wapiti.parser import WapitiXMLParser
+register_parser('Wapiti Scan', WapitiXMLParser())
 from .whitesource.parser import WhitesourceJSONParser
 register_parser('Whitesource Scan', WhitesourceJSONParser())
 from .wpscan.parser import WpscanJSONParser
