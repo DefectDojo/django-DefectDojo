@@ -29,8 +29,7 @@ Fixed version: {fixed_version}
 
 class TrivyParser:
 
-    def __init__(self, scan_file, test):
-        self.items = []
+    def get_findings(self, scan_file, test):
 
         scan_data = scan_file.read()
 
@@ -40,8 +39,9 @@ class TrivyParser:
             data = json.loads(scan_data)
 
         if not isinstance(data, list):
-            return
+            return list()
 
+        items = list()
         for target_data in data:
             if not isinstance(target_data, dict) or 'Target' not in target_data:
                 continue
@@ -76,7 +76,7 @@ class TrivyParser:
                     fixed_version=mitigation,
                     description_text=vuln.get('Description', ''),
                 )
-                self.items.append(
+                items.append(
                     Finding(
                         test=test,
                         title=title,
@@ -92,3 +92,4 @@ class TrivyParser:
                         dynamic_finding=False,
                     )
                 )
+        return items
