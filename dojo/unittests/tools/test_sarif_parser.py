@@ -54,7 +54,7 @@ class TestSarifParser(TestCase):
         )
 
     def test_example_k3_report(self):
-        testfile =  open("dojo/unittests/scans/sarif/appendix_k3.sarif")
+        testfile = open("dojo/unittests/scans/sarif/appendix_k3.sarif")
         test = Test()
         parser = SarifParser()
         findings = parser.get_findings(testfile, test)
