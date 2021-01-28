@@ -27,11 +27,11 @@ class TestAquaParser(TestCase):
     def test_aqua_parser_v2_has_one_finding(self):
         with open("dojo/unittests/scans/aqua/one_v2.json") as testfile:
             parser = AquaJSONParser()
-        findings = parser.get_findings(testfile, Test())
-        self.assertEqual(1, len(findings))
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(1, len(findings))
 
     def test_aqua_parser_v2_has_many_findings(self):
         with open("dojo/unittests/scans/aqua/many_v2.json") as testfile:
             parser = AquaJSONParser()
-        findings = parser.get_findings(testfile, Test())
-        self.assertEqual(3, len(findings))
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(3, len(findings))
