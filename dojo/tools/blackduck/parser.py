@@ -12,7 +12,7 @@ class BlackduckHubCSVParser(object):
     """
     def get_findings(self, filename, test):
         normalized_findings = self.normalize_findings(filename)
-        return ingest_findings(normalized_findings, test)
+        return self.ingest_findings(normalized_findings, test)
 
     def normalize_findings(self, filename):
         importer = BlackduckImporter()
