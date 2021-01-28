@@ -45,7 +45,6 @@ def product_type(request):
     return render(request, 'dojo/product_type.html', {
         'name': 'Product Type List',
         'Permissions': Permissions,
-        'user': request.user,
         'pts': pts,
         'ptl': ptl,
         'name_words': name_words})
