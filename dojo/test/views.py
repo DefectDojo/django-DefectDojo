@@ -659,7 +659,7 @@ def re_import_scan_results(request, tid):
                 return HttpResponseRedirect(reverse('re_import_scan_results', args=(test.id,)))
 
             try:
-                parser = import_parser_factory(file, test, active, verified)
+                parser = import_parser_factory(file, test, active, verified, scan_type=scan_type)
                 parser_findings = parser.get_findings(file, test)
             except ValueError:
                 raise Http404()
