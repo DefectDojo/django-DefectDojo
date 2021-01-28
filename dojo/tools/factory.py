@@ -31,6 +31,10 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
 def get_choices():
     res = list()
     for key in PARSERS:
+        # create dynamicaly in DB
+        test_type, created = Test_Type.objects.get_or_create(name=key)
+        if created:
+            test_type.save()
         res.append((key, key))
     return tuple(res)
 
