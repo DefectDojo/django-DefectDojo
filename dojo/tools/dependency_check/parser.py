@@ -26,15 +26,15 @@ class DependencyCheckParser(object):
             # else:
                 # print('skipping: ' + finding.title)
 
-    def get_field_value(self, parent_node, field_name):
+    def get_field_value(self, parent_node, field_name, namespace):
         field_node = parent_node.find(namespace + field_name)
         field_value = '' if field_node is None else field_node.text
         return field_value
 
-    def get_filename_and_path_from_dependency(self, dependency, related_dependency):
+    def get_filename_and_path_from_dependency(self, dependency, related_dependency, namespace):
         if related_dependency:
-            if self.get_field_value(related_dependency, 'fileName'):
-                return self.get_field_value(related_dependency, 'fileName'), self.get_field_value(related_dependency, 'filePath')
+            if self.get_field_value(related_dependency, 'fileName', namespace):
+                return self.get_field_value(related_dependency, 'fileName', namespace), self.get_field_value(related_dependency, 'filePath', namespace)
             else:
                 # without filename, it would be just a duplicate finding so we have to skip it. filename is only present for relateddependencies since v6.0.0
                 # logger.debug('related_dependency: %s', ElementTree.tostring(related_dependency, encoding='utf8', method='xml'))
@@ -160,8 +160,8 @@ class DependencyCheckParser(object):
 
         return component_name, component_version
 
-    def get_finding_from_vulnerability(self, dependency, related_dependency, vulnerability, test):
-        dependency_filename, dependency_filepath = self.get_filename_and_path_from_dependency(dependency, related_dependency)
+    def get_finding_from_vulnerability(self, dependency, related_dependency, vulnerability, test, namespace):
+        dependency_filename, dependency_filepath = self.get_filename_and_path_from_dependency(dependency, related_dependency, namespace)
         # logger.debug('dependency_filename: %s', dependency_filename)
 
         if dependency_filename is None:
@@ -313,10 +313,10 @@ class DependencyCheckParser(object):
                         relatedDependencies = dependency.find(namespace + 'relatedDependencies')
                         if relatedDependencies:
                             for relatedDependency in relatedDependencies.findall(namespace + 'relatedDependency'):
-                                finding = self.get_finding_from_vulnerability(dependency, relatedDependency, vulnerability, test)
+                                finding = self.get_finding_from_vulnerability(dependency, relatedDependency, vulnerability, test, namespace)
                                 self.add_finding(finding, dupes)
 
-        return list(self.dupes.values())
+        return list(dupes.values())
 
 
 # future idea include vulnerablesoftware in description?

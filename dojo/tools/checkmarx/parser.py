@@ -86,7 +86,7 @@ class CheckmarxXMLParser(object):
         for lang in self.language_list:
             add_language(test.engagement.product, lang)
 
-        self.items = list(dupes.values())
+        return list(dupes.values())
 
     # Process one result = one pathId for default "Checkmarx Scan"
     # Create the finding and add it into the dupes list

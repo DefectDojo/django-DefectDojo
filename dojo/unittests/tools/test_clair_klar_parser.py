@@ -15,21 +15,21 @@ class TestClairKlarParser(TestCase):
 
     def test_parse_no_content_no_findings(self):
         my_file_handle = open("dojo/unittests/scans/clair-klar/empty.json")
-        self.parser = ClairKlarParser()
+        parser = ClairKlarParser()
         findings = parser.get_findings(my_file_handle, None)
         my_file_handle.close()
         self.assertEqual(0, len(findings))
 
     def test_high_findings(self):
         my_file_handle = open("dojo/unittests/scans/clair-klar/high.json")
-        self.parser = ClairKlarParser()
+        parser = ClairKlarParser()
         findings = parser.get_findings(my_file_handle, None)
         my_file_handle.close()
         self.assertEqual(6, len(findings))
 
     def test_mixed_findings(self):
         my_file_handle = open("dojo/unittests/scans/clair-klar/mixed.json")
-        self.parser = ClairKlarParser()
+        parser = ClairKlarParser()
         findings = parser.get_findings(my_file_handle, None)
         my_file_handle.close()
         self.assertEqual(6, len(findings))
