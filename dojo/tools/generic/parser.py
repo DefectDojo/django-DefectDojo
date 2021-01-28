@@ -297,7 +297,7 @@ class GenericFindingUploadCsvParser(object):
             self.column_names[index] = column
             index += 1
 
-    def get_findings(self, filename, test, active, verified):
+    def get_findings(self, filename, test, active=False, verified=False):
         self.chain = None
         self.column_names = dict()
         self.create_chain()
