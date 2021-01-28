@@ -60,8 +60,4 @@ class Outpost24Parser:
                     port = 0
                 finding.unsaved_endpoints.append(Endpoint(protocol=protocol, host=host, port=port))
             items.append(finding)
-        self._items = items
-
-    @property
-    def items(self):
-        return self._items
+        return items

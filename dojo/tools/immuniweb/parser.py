@@ -11,9 +11,6 @@ __author__ = 'properam'
 
 class ImmuniwebXMLParser(object):
     def get_findings(self, file, test):
-        self.items = ()
-        if file is None:
-            return
 
         ImmuniScanTree = ElementTree.parse(file)
         root = ImmuniScanTree.getroot()
@@ -21,7 +18,7 @@ class ImmuniwebXMLParser(object):
         if 'Vulnerabilities' not in root.tag:
             raise NamespaceErr("This does not look like a valid expected Immuniweb XML file.")
 
-        self.dupes = dict()
+        dupes = dict()
 
         for vulnerability in root.iter("Vulnerability"):
             """
@@ -64,8 +61,8 @@ class ImmuniwebXMLParser(object):
             dupe_key = hashlib.md5(str(description + title + severity).encode('utf-8')).hexdigest()
 
             # check if finding is a duplicate
-            if dupe_key in self.dupes:
-                finding = self.dupes[dupe_key]  # fetch finding
+            if dupe_key in dupes:
+                finding = dupes[dupe_key]  # fetch finding
                 if description is not None:
                     finding.description += description
             else:  # finding is not a duplicate
@@ -86,7 +83,7 @@ class ImmuniwebXMLParser(object):
                     dynamic_finding=True)
 
                 finding.unsaved_endpoints = list()
-                self.dupes[dupe_key] = finding
+                dupes[dupe_key] = finding
 
                 finding.unsaved_endpoints.append(Endpoint(
                         host=host, port=port,
@@ -94,4 +91,4 @@ class ImmuniwebXMLParser(object):
                         protocol=protocol,
                         query=query, fragment=fragment))
 
-        self.items = list(self.dupes.values())
+        return list(dupes.values())

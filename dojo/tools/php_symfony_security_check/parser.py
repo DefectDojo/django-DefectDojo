@@ -5,13 +5,8 @@ from dojo.models import Finding
 
 class PhpSymfonySecurityCheckParser(object):
     def get_findings(self, json_file, test):
-
         tree = self.parse_json(json_file)
-
-        if tree:
-            self.items = [data for data in self.get_items(tree, test)]
-        else:
-            self.items = []
+        return self.get_items(tree, test)
 
     def parse_json(self, json_file):
         if json_file is None:

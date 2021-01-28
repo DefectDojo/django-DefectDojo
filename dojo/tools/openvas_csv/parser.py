@@ -306,7 +306,7 @@ class OpenVASUploadCsvParser(object):
 
         column_names = dict()
         dupes = dict()
-        chain = create_chain()
+        chain = self.create_chain()
 
         if filename is None:
             return ()

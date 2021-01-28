@@ -4,9 +4,6 @@ from dojo.models import Test, Engagement, Product
 
 
 class TestMicrofocusWebinspectXMLParser(TestCase):
-    def test_parse_without_file_has_no_findings(self):
-        parser = MicrofocusWebinspectXMLParser(None, Test())
-        self.assertEqual(0, len(findings))
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
         test = Test()

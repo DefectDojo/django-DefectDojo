@@ -18,13 +18,12 @@ class AnchoreEnterprisePolicyCheckParser:
             data = json.loads(content)
 
         find_date = datetime.now()
-
+        items = list()
         try:
             for checks in data:
                 for policies in checks.values():
                     for images in policies.values():
                         for evaluation in images:
-                            self.items = list()
                             try:
                                 results = evaluation['detail']['result']
                                 imageid = results['image_id']
@@ -55,12 +54,13 @@ class AnchoreEnterprisePolicyCheckParser:
                                         date=find_date,
                                         static_finding=True,
                                         dynamic_finding=False)
-                                    self.items.append(find)
+                                    items.append(find)
                             except (KeyError, IndexError) as err:
                                 raise Exception("Invalid format: {} key not found".format(err))
         except AttributeError as err:
             # import empty policies without error (e.g. policies or images objects are not a dictionary)
             logger.warning('Exception at %s', 'parsing anchore policy', exc_info=err)
+        return items
 
 
 def map_gate_action_to_severity(gate):

@@ -4,10 +4,6 @@ from dojo.tools.jfrogxray.parser import XrayJSONParser, decode_cwe_number
 
 
 class TestJfrogXrayJSONParser(TestCase):
-    def test_parse_without_file_has_no_finding(self):
-        parser = XrayJSONParser()
-        findings = parser.get_findings(None, Test())
-        self.assertEqual(0, len(findings))
 
     def test_parse_file_with_one_vuln(self):
         testfile = open("dojo/unittests/scans/jfrogxray/one_vuln.json")

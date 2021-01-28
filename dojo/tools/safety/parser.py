@@ -23,11 +23,7 @@ class SafetyParser(object):
             f.close()
 
         tree = self.parse_json(json_output)
-
-        if tree:
-            self.items = [data for data in self.get_items(tree, test, safety_db)]
-        else:
-            self.items = []
+        return self.get_items(tree, test, safety_db)
 
     def parse_json(self, json_output):
         data = json_output.read() or '[]'

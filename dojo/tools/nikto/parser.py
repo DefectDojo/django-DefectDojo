@@ -16,11 +16,6 @@ class NiktoXMLParser(object):
 
     def get_findings(self, filename, test):
         dupes = dict()
-        self.items = ()
-
-        if filename is None:
-            self.items = ()
-            return
 
         tree = ET.parse(filename)
         root = tree.getroot()
@@ -33,6 +28,7 @@ class NiktoXMLParser(object):
             # This find statement below is to support new file format while not breaking older Nikto scan files versions.
             for scan in root.findall('./niktoscan/scandetails'):
                 self.process_scandetail(scan, test, dupes)
+        return dupes
 
     def process_scandetail(self, scan, test, dupes):
         for item in scan.findall('item'):

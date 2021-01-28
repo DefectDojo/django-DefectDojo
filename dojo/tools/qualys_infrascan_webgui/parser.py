@@ -211,4 +211,4 @@ if __name__ == "__main__":
 # still need to import this in Dojo
 class QualysInfraScanParser(object):
     def get_findings(self, file, test):
-        self.items = qualys_infrascan_parser(file)
+        return qualys_infrascan_parser(file)
