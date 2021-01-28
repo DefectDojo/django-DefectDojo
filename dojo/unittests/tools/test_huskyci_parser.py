@@ -4,10 +4,6 @@ from dojo.models import Test
 
 
 class TestHuskyCIReportParser(TestCase):
-    def test_parse_without_file_has_no_finding(self):
-        parser = HuskyCIReportParser()
-        findings = parser.get_findings(None, Test())
-        self.assertEqual(0, len(findings))
 
     def test_parse_file_no_finding(self):
         testfile = open("dojo/unittests/scans/huskyci/huskyci_report_no_finding.json")

@@ -4,9 +4,6 @@ from dojo.models import Test
 
 
 class TestDependencyTrackParser(TestCase):
-    def test_dependency_track_parser_without_file_has_no_findings(self):
-        parser = DependencyTrackParser(None, Test())
-        self.assertEqual(0, len(findings))
 
     def test_dependency_track_parser_with_empty_list_for_findings_key_has_no_findings(
         self,
@@ -14,7 +11,8 @@ class TestDependencyTrackParser(TestCase):
         testfile = open(
             "dojo/unittests/scans/dependency_track_samples/no_findings_because_findings_key_is_empty_list.json"
         )
-        parser = DependencyTrackParser(testfile, Test())
+        parser = DependencyTrackParser()
+        findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(0, len(findings))
 
@@ -22,7 +20,8 @@ class TestDependencyTrackParser(TestCase):
         testfile = open(
             "dojo/unittests/scans/dependency_track_samples/no_findings_because_findings_key_is_missing.json"
         )
-        parser = DependencyTrackParser(testfile, Test())
+        parser = DependencyTrackParser()
+        findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(0, len(findings))
 
@@ -30,7 +29,8 @@ class TestDependencyTrackParser(TestCase):
         testfile = open(
             "dojo/unittests/scans/dependency_track_samples/no_findings_because_findings_key_is_null.json"
         )
-        parser = DependencyTrackParser(testfile, Test())
+        parser = DependencyTrackParser()
+        findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(0, len(findings))
 
@@ -38,7 +38,8 @@ class TestDependencyTrackParser(TestCase):
         testfile = open(
             "dojo/unittests/scans/dependency_track_samples/many_findings.json"
         )
-        parser = DependencyTrackParser(testfile, Test())
+        parser = DependencyTrackParser()
+        findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(4, len(findings))
 
@@ -46,7 +47,8 @@ class TestDependencyTrackParser(TestCase):
         testfile = open(
             "dojo/unittests/scans/dependency_track_samples/one_finding.json"
         )
-        parser = DependencyTrackParser(testfile, Test())
+        parser = DependencyTrackParser()
+        findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(1, len(findings))
 
@@ -54,7 +56,8 @@ class TestDependencyTrackParser(TestCase):
         testfile = open(
             "dojo/unittests/scans/dependency_track_samples/dependency_track_3.8.0_2021-01-18.json"
         )
-        parser = DependencyTrackParser(testfile, Test())
+        parser = DependencyTrackParser()
+        findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(9, len(findings))
         self.assertTrue(all(item.file_path is not None for item in findings))

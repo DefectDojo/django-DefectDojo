@@ -15,7 +15,7 @@ class DrHeaderJSONParser(object):
             return None
 
     def get_findings(self, filename, test):
-        self.items = []
+        items = []
         if filename is None:
             return
         tree = filename.read()
@@ -39,4 +39,5 @@ class DrHeaderJSONParser(object):
                            numerical_severity=Finding.get_numerical_severity(sev),
                            static_finding=False)
 
-            self.items.append(find)
+            items.append(find)
+        return items

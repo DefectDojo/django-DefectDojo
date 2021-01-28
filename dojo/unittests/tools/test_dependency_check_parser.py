@@ -14,9 +14,6 @@ class TestFile(object):
 
 
 class TestDependencyCheckParser(TestCase):
-    def test_parse_without_file_has_no_findings(self):
-        parser = DependencyCheckParser(None, Test())
-        self.assertEqual(0, len(findings))
 
     def test_parse_file_with_no_vulnerabilities_has_no_findings(self):
         content = """<?xml version="1.0"?>
@@ -79,7 +76,8 @@ class TestDependencyCheckParser(TestCase):
 </analysis>
  """
         testfile = TestFile("dependency-check-report.xml", content)
-        parser = DependencyCheckParser(testfile, Test())
+        parser = DependencyCheckParser()
+        findings = parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
     def test_parse_file_with_single_vulnerability_has_single_finding(self):
@@ -179,7 +177,8 @@ class TestDependencyCheckParser(TestCase):
 </analysis>
  """
         testfile = TestFile("dependency-check-report.xml", content)
-        parser = DependencyCheckParser(testfile, Test())
+        parser = DependencyCheckParser()
+        findings = parser.get_findings(testfile, Test())
         items = findings
         self.assertEqual(1, len(items))
         self.assertEqual(items[0].title, "component2.dll | CVE-0000-0001")
@@ -597,7 +596,8 @@ class TestDependencyCheckParser(TestCase):
 </analysis>
  """
         testfile = TestFile("dependency-check-report.xml", content)
-        parser = DependencyCheckParser(testfile, Test())
+        parser = DependencyCheckParser()
+        findings = parser.get_findings(testfile, Test())
         items = findings
         self.assertEqual(9, len(items))
         # test also different component_name formats
