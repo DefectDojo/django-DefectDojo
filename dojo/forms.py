@@ -36,6 +36,7 @@ import logging
 from crum import get_current_user
 from dojo.authorization.roles_permissions import Permissions, Roles
 from dojo.product_type.queries import get_authorized_product_types
+from dojo.feature_decisions import new_authorization_enabled
 
 logger = logging.getLogger(__name__)
 
@@ -155,20 +156,25 @@ class MonthYearWidget(Widget):
 class Product_TypeForm(forms.ModelForm):
     description = forms.CharField(widget=forms.Textarea(attrs={}),
                                   required=False)
-    authorized_users = forms.ModelMultipleChoiceField(
-        queryset=None,
-        required=False, label="Authorized Users")
+    if not new_authorization_enabled():
+        authorized_users = forms.ModelMultipleChoiceField(
+            queryset=None,
+            required=False, label="Authorized Users")
 
     def __init__(self, *args, **kwargs):
         non_staff = Dojo_User.objects.exclude(is_staff=True) \
             .exclude(is_active=False).order_by('first_name', 'last_name')
         super(Product_TypeForm, self).__init__(*args, **kwargs)
 
-        self.fields['authorized_users'].queryset = non_staff
+        if not new_authorization_enabled():
+            self.fields['authorized_users'].queryset = non_staff
 
     class Meta:
         model = Product_Type
-        fields = ['name', 'description', 'authorized_users', 'critical_product', 'key_product']
+        if new_authorization_enabled():
+            fields = ['name', 'description', 'critical_product', 'key_product']
+        else:
+            fields = ['name', 'description', 'authorized_users', 'critical_product', 'key_product']
 
 
 class Delete_Product_TypeForm(forms.ModelForm):

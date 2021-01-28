@@ -167,7 +167,7 @@ env = environ.Env(
     DD_LEGACY_API_V1_ENABLE=(bool, False),
 
     # feature flag for the new permissions
-    DD_FEATURE_NEW_PERMISSIONS=(bool, True)
+    DD_FEATURE_NEW_AUTHORIZATION=(bool, True)
 )
 
 
@@ -996,4 +996,4 @@ TAGULOUS_AUTOCOMPLETE_JS = (
 TAGULOUS_AUTOCOMPLETE_SETTINGS = {'placeholder': "Enter some tags (comma separated, use enter to select / create a new tag)", 'width': '70%'}
 
 # Feature toggles
-FEATURE_NEW_PERMISSIONS = env('DD_FEATURE_NEW_PERMISSIONS')
+FEATURE_NEW_AUTHORIZATION = env('DD_FEATURE_NEW_AUTHORIZATION')

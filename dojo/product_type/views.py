@@ -20,6 +20,7 @@ from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.product_type.queries import get_authorized_product_types, get_authorized_members
 from dojo.product.queries import get_authorized_products
+from dojo.feature_decisions import new_authorization_enabled
 
 logger = logging.getLogger(__name__)
 
@@ -92,7 +93,6 @@ def add_product_type(request):
     add_breadcrumb(title="Add Product Type", top_level=False, request=request)
     return render(request, 'dojo/new_product_type.html', {
         'name': 'Add Product Type',
-        'user': request.user,
         'form': form,
     })
 
@@ -106,7 +106,6 @@ def view_product_type(request, ptid):
     return render(request, 'dojo/view_product_type.html', {
         'name': 'View Product Type',
         'Permissions': Permissions,
-        'user': request.user,
         'pt': pt,
         'products': products,
         'members': members})
@@ -154,7 +153,8 @@ def edit_product_type(request, ptid):
     if request.method == "POST" and request.POST.get('edit_product_type'):
         pt_form = Product_TypeForm(request.POST, instance=pt)
         if pt_form.is_valid():
-            pt.authorized_users.set(pt_form.cleaned_data['authorized_users'])
+            if not new_authorization_enabled():
+                pt.authorized_users.set(pt_form.cleaned_data['authorized_users'])
             pt = pt_form.save()
             messages.add_message(
                 request,
@@ -166,7 +166,6 @@ def edit_product_type(request, ptid):
     add_breadcrumb(title="Edit Product Type", top_level=False, request=request)
     return render(request, 'dojo/edit_product_type.html', {
         'name': 'Edit Product Type',
-        'user': request.user,
         'pt_form': pt_form,
         'pt': pt,
         'members': members})
@@ -203,7 +202,6 @@ def add_product_type_member(request, ptid):
     return render(request, 'dojo/new_product_type_member.html', {
         'name': 'Add Product Type Member',
         'pt': pt,
-        'user': request.user,
         'form': memberform,
     })
 

@@ -196,7 +196,7 @@
                                 {% elif request.user.is_authenticated %}
                                 <a href="{% url 'product' %}" title="Products" aria-label="Products"><i class="fa fa-list fa-fw"></i><span>Products</span></a>
                                 {% endif %}
-                                {% if request.user|feature_new_permissions_or_user_is_staff %}
+                                {% if request.user|feature_new_authorization_or_user_is_staff %}
                                 <ul class="nav nav-second-level">
                                     {% if request.user.is_staff %}
                                     <li>

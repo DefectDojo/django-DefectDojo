@@ -1,7 +1,7 @@
 import functools
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
-from dojo.feature_decisions import new_permissions_enabled
+from dojo.feature_decisions import new_authorization_enabled
 from dojo.authorization.authorization import user_has_permission
 
 
@@ -24,12 +24,9 @@ def user_is_authorized(model, permission, arg, lookup="pk", func=None):
             lookup_value = kwargs.get(arg)
 
         # object must exist
-        obj = get_object_or_404(
-            # model.objects.for_user(request), **{lookup: lookup_value}
-            model.objects.filter(**{lookup: lookup_value})
-        )
+        obj = get_object_or_404(model.objects.filter(**{lookup: lookup_value}))
 
-        if new_permissions_enabled():
+        if new_authorization_enabled():
             if not user_has_permission(request.user, obj, permission) and not request.user.is_superuser:
                 raise PermissionDenied()
         else:

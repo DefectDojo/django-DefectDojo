@@ -122,8 +122,8 @@
                     </div>
                 {% endif %}
             </div>
-        {% feature_new_permissions as feature_new_permissions_flag %}
-            {% if feature_new_permissions_flag %}
+        {% feature_new_authorization as feature_new_authorization_flag %}
+            {% if feature_new_authorization_flag %}
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <div class="clearfix">
@@ -213,8 +213,8 @@
                             <td style="width: 150px;"><strong>Key product</strong></td>
                             <td>{{ pt.key_product }}</td>
                         </tr>
-                        {% feature_new_permissions as feature_new_permissions_flag %}
-                        {% if feature_new_permissions_flag is False %}
+                        {% feature_new_authorization as feature_new_authorization_flag %}
+                        {% if feature_new_authorization_flag is False %}
                         <tr>
                             <td style="width: 150px;"><strong>Authorized Users</strong></td>
                             <td>

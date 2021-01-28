@@ -1,7 +1,7 @@
 from crum import get_current_user
 from dojo.models import Product, Product_Member, Product_Type_Member
 from django.db.models import Exists, OuterRef, Q
-from dojo.feature_decisions import new_permissions_enabled
+from dojo.feature_decisions import new_authorization_enabled
 from dojo.authorization.authorization import get_roles_for_permission
 
 
@@ -11,7 +11,7 @@ def get_authorized_products(permission):
         return Product.objects.all().order_by('name')
 
     roles = get_roles_for_permission(permission)
-    if new_permissions_enabled():
+    if new_authorization_enabled():
         authorized_product_type_roles = Product_Type_Member.objects.filter(
             product_type=OuterRef('prod_type_id'),
             user=user,
