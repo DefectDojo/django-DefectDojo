@@ -477,7 +477,7 @@ class TestCheckmarxParser(TestCase):
         self.assertEqual(str, type(item.line))
         self.assertEqual("58", item.line)
 
-    def check_parse_file_with_utf8_replacement_char(self, parser):
+    def check_parse_file_with_utf8_replacement_char(self, findings):
         self.assertEqual(1, len(findings))
         # check content
         item = findings[0]

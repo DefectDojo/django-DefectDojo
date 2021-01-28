@@ -4,16 +4,14 @@ from dojo.models import Product, Engagement, Test, Finding
 
 
 class TestAppSpiderXMLParser(TestCase):
-    def test_appspider_parser_has_no_finding(self):
-        parser = AppSpiderXMLParser(None, Test())
-        self.assertEqual(0, len(findings))
 
     def test_appspider_parser_has_one_finding(self):
         test = Test()
         test.engagement = Engagement()
         test.engagement.product = Product()
         testfile = open("dojo/unittests/scans/appspider/one_vuln.xml")
-        parser = AppSpiderXMLParser(testfile, test)
+        parser = AppSpiderXMLParser()
+        findings = parser.get_findings(testfile, test)
         testfile.close()
         self.assertEqual(1, len(findings))
         item = findings[0]

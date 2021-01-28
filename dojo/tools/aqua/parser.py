@@ -5,13 +5,8 @@ from dojo.models import Finding
 
 class AquaJSONParser(object):
     def get_findings(self, json_output, test):
-
-        tree = self.parse_json(json_output)
-
-        if tree:
-            return [data for data in self.get_items(tree, test)]
-        else:
-            return []
+        tree = json.load(json_output)
+        return self.get_items(tree, test)
 
     def parse_json(self, json_output):
         try:

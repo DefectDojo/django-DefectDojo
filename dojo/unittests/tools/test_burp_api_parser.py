@@ -6,9 +6,6 @@ from dojo.tools.burp_api.parser import convert_severity, convert_confidence
 
 
 class TestParser(TestCase):
-    def test_burp_without_file_has_no_findings(self):
-        parser = BurpApiParser(None, Test())
-        self.assertEqual(0, len(findings))
 
     def test_example_report(self):
         testfile = "dojo/unittests/scans/burp_suite_pro/example.json"
@@ -16,7 +13,8 @@ class TestParser(TestCase):
         test.engagement = Engagement()
         test.engagement.product = Product()
         with open(testfile) as f:
-            parser = BurpApiParser(f, test)
+            parser = BurpApiParser()
+            findings = parser.get_findings(f, test)
         self.assertIsNotNone(test.title)
         self.assertEqual(5, len(findings))
         with self.subTest(i=0):
@@ -34,7 +32,8 @@ class TestParser(TestCase):
             test = Test()
             test.engagement = Engagement()
             test.engagement.product = Product()
-            parser = BurpApiParser(f, test)
+            parser = BurpApiParser()
+            findings = parser.get_findings(f, test)
             for item in findings:
                 item.clean()
                 self.assertIsNotNone(item.impact)
@@ -45,7 +44,8 @@ class TestParser(TestCase):
             test = Test()
             test.engagement = Engagement()
             test.engagement.product = Product()
-            parser = BurpApiParser(f, test)
+            parser = BurpApiParser()
+            findings = parser.get_findings(f, test)
             for item in findings:
                 item.clean()
                 self.assertIsNotNone(item.impact)

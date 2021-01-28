@@ -20,7 +20,8 @@ class TestAwsProwlerParser(TestCase):
         )
         engagement.save()
 
-        parser = AWSProwlerParser(
+        parser = AWSProwlerParser()
+        findings = parser.get_findings(
             testfile,
             Test(
                 engagement=engagement,
@@ -32,7 +33,7 @@ class TestAwsProwlerParser(TestCase):
 
         testfile.close()
 
-        return parser
+        return findings
 
     def test_aws_prowler_parser_with_no_vuln_has_no_findings(self):
         parser = self.setup(open("dojo/unittests/scans/aws_prowler/no_vuln.csv"))
