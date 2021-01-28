@@ -6,18 +6,18 @@ from dojo.tools.sarif.parser import SarifParser
 
 class TestSarifParser(TestCase):
     def test_example_report(self):
-        testfile = "dojo/unittests/scans/sarif/DefectDojo_django-DefectDojo__2020-12-11_13 42 10__export.sarif"
+        testfile = open("dojo/unittests/scans/sarif/DefectDojo_django-DefectDojo__2020-12-11_13 42 10__export.sarif")
         test = Test()
-        with open(testfile) as f:
-            parser = SarifParser(f, test)
+        parser = SarifParser()
+        findings = parser.get_findings(testfile, test)
         self.assertIsNotNone(test.title)
         self.assertEqual(510, len(findings))
 
     def test_example2_report(self):
-        testfile = "dojo/unittests/scans/sarif/appendix_k.sarif"
+        testfile = open("dojo/unittests/scans/sarif/appendix_k.sarif")
         test = Test()
-        with open(testfile) as f:
-            parser = SarifParser(f, test)
+        parser = SarifParser()
+        findings = parser.get_findings(testfile, test)
         self.assertIsNotNone(test.title)
         self.assertEqual(1, len(findings))
         item = findings[0]
@@ -31,18 +31,18 @@ class TestSarifParser(TestCase):
         self.assertEqual(False, item.dynamic_finding)
 
     def test_example_k1_report(self):
-        testfile = "dojo/unittests/scans/sarif/appendix_k1.sarif"
+        testfile = open("dojo/unittests/scans/sarif/appendix_k1.sarif")
         test = Test()
-        with open(testfile) as f:
-            parser = SarifParser(f, test)
+        parser = SarifParser()
+        findings = parser.get_findings(testfile, test)
         self.assertIsNotNone(test.title)
         self.assertEqual(0, len(findings))
 
     def test_example_k2_report(self):
-        testfile = "dojo/unittests/scans/sarif/appendix_k2.sarif"
+        testfile = open("dojo/unittests/scans/sarif/appendix_k2.sarif")
         test = Test()
-        with open(testfile) as f:
-            parser = SarifParser(f, test)
+        parser = SarifParser()
+        findings = parser.get_findings(testfile, test)
         self.assertIsNotNone(test.title)
         self.assertEqual(1, len(findings))
         item = findings[0]
@@ -54,10 +54,10 @@ class TestSarifParser(TestCase):
         )
 
     def test_example_k3_report(self):
-        testfile = "dojo/unittests/scans/sarif/appendix_k3.sarif"
+        testfile =  open("dojo/unittests/scans/sarif/appendix_k3.sarif")
         test = Test()
-        with open(testfile) as f:
-            parser = SarifParser(f, test)
+        parser = SarifParser()
+        findings = parser.get_findings(testfile, test)
         self.assertIsNotNone(test.title)
         self.assertEqual(1, len(findings))
         item = findings[0]
@@ -78,6 +78,7 @@ class TestSarifParser(TestCase):
 
     def test_example_report_semgrep(self):
         testfile = open("dojo/unittests/scans/sarif/semgrepowasp-benchmark-sample.sarif")
+        test = Test()
         parser = SarifParser()
         findings = parser.get_findings(testfile, test)
         self.assertIsNotNone(test.title)

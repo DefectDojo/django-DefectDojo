@@ -51,7 +51,7 @@ class TrivyParser:
                 if not isinstance(vuln, dict):
                     continue
                 try:
-                    vuln_id = vuln['VulnerabilityID']
+                    vuln_id = int(vuln.get('VulnerabilityID', '0'))
                     package_name = vuln['PkgName']
                     severity = TRIVY_SEVERITIES[vuln['Severity']]
                 except KeyError as exc:

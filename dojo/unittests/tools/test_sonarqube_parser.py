@@ -26,7 +26,7 @@ class TestSonarQubeParser(TestCase):
         )
         parser = SonarQubeHtmlParser()
         findings = parser.get_findings(my_file_handle, test)
-        self.check_parse_file_with_no_vulnerabilities_has_no_findings()
+        self.assertEqual(0, len(findings))
 
     # SonarQube Scan detailed - no finding
     def test_detailed_parse_file_with_no_vulnerabilities_has_no_findings(self):

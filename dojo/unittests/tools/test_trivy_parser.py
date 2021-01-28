@@ -14,8 +14,8 @@ class TestTrivyParser(TestCase):
         self.dojo_test = Test()
 
     def test_mixed_scan(self):
-        with open(sample_path("trivy_mix.json")) as test_file:
-            parser = TrivyParser()
+        test_file = open(sample_path("trivy_mix.json"))
+        parser = TrivyParser()
         trivy_findings = parser.get_findings(test_file, self.dojo_test)
         self.assertEqual(len(trivy_findings), 6)
         self.check_title(trivy_findings)

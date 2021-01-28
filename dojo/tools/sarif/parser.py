@@ -16,28 +16,11 @@ class SarifParser(object):
     https://www.oasis-open.org/committees/tc_home.php?wg_abbrev=sarif
     """
     def get_findings(self, filehandle, test):
-        tree = self.parse_json(filehandle)
+        tree = json.load(filehandle)
 
         # by default give the test a title linked to the first tool in the report
         test.title = f"SARIF ({tree['runs'][0]['tool']['driver']['name']})"
-
-        if tree:
-            self.items = [data for data in self.get_items(tree, test)]
-        else:
-            self.items = []
-
-    def parse_json(self, filehandle):
-        try:
-            data = filehandle.read()
-        except:
-            return None
-
-        try:
-            tree = json.loads(data)
-        except:
-            raise Exception("Invalid format")
-
-        return tree
+        return self.get_items(tree, test)
 
     def get_items(self, tree, test):
         items = list()
