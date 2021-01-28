@@ -240,7 +240,7 @@ class TestCheckmarxParser(TestCase):
         # Verifications common to both parsers
         self.check_parse_file_with_false_positive_is_false_positive(findings)
 
-    def check_parse_file_with_false_positive_is_false_positive(self, parser):
+    def check_parse_file_with_false_positive_is_false_positive(self, findings):
         self.assertEqual(1, len(findings))
         # check content
         item = findings[0]
@@ -633,7 +633,7 @@ class TestCheckmarxParser(TestCase):
         self.assertEqual(str, type(item.line))
         self.assertEqual("58", item.line)
 
-    def check_parse_file_with_utf8_various_non_ascii_char(self, parser):
+    def check_parse_file_with_utf8_various_non_ascii_char(self, findings):
         self.assertEqual(1, len(findings))
         # check content
         item = findings[0]

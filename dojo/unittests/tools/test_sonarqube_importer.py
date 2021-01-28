@@ -37,5 +37,6 @@ class TestSonarqubeImporter(TestCase):
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_rule', dummy_rule)
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_issues', dummy_issues)
     def test_parse_file_with_one_cwe_and_one_no_cwe_vulns(self):
-        parser = SonarQubeApiImporter(self.test)
-        self.assertEqual(2, len(parser.items))
+        parser = SonarQubeApiImporter()
+        findings = parser.get_findings(None, self.test)
+        self.assertEqual(2, len(findings))

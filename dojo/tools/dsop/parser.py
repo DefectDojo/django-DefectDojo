@@ -13,7 +13,7 @@ class DsopParser:
         f = pd.ExcelFile(file)
         self.__parse_disa(pd.read_excel(f, sheet_name='OpenSCAP - DISA Compliance', parse_dates=['scanned_date'],
                                         dtype={'result': 'category', 'severity': 'category'}), test, items)
-        self.__parse_oval(pd.read_excel(f, sheet_name='OpenSCAP - OVAL Results'))
+        self.__parse_oval(pd.read_excel(f, sheet_name='OpenSCAP - OVAL Results'), test, items)
         self.__parse_twistlock(
             pd.read_excel(f, sheet_name='Twistlock Vulnerability Results', dtype={'severity': 'category'}), test, items)
         self.__parse_anchore(pd.read_excel(f, sheet_name='Anchore CVE Results', dtype={'severity': 'category'}), test, items)
