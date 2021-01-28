@@ -31,7 +31,7 @@ from dojo.models import Finding, Product, Engagement, Test, \
     Risk_Acceptance, Development_Environment, BurpRawRequestResponse, Endpoint, \
     Cred_Mapping, Dojo_User, System_Settings, Note_Type, Endpoint_Status
 from dojo.tools.factory import handles_active_verified_statuses
-from dojo.tools.factory import import_parser_factory
+from dojo.tools.factory import import_parser_factory, get_choices
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, message, Product_Tab, is_scan_file_too_large, \
     get_system_setting, redirect_to_return_url_or_else, get_return_url
@@ -732,15 +732,17 @@ def import_scan_results(request, eid=None, pid=None):
         jform = JIRAImportScanForm(push_all=push_all_jira_issues, prefix='jiraform')
 
     form.fields['endpoints'].queryset = Endpoint.objects.filter(product__id=product_tab.product.id)
-    return render(request, 'dojo/import_scan_results.html', {
-        'form': form,
-        'product_tab': product_tab,
-        'engagement_or_product': engagement_or_product,
-        'custom_breadcrumb': custom_breadcrumb,
-        'title': title,
-        'cred_form': cred_form,
-        'jform': jform
-    })
+    return render(request,
+        'dojo/import_scan_results.html',
+        {'form': form,
+         'product_tab': product_tab,
+         'engagement_or_product': engagement_or_product,
+         'custom_breadcrumb': custom_breadcrumb,
+         'title': title,
+         'cred_form': cred_form,
+         'jform': jform,
+         'scan_types': get_choices(),
+         })
 
 
 @user_must_be_authorized(Engagement, 'staff', 'eid')
