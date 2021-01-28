@@ -62,10 +62,10 @@ class BugCrowdCSVParser(object):
 
                 key = hashlib.md5((finding.title + '|' + finding.description).encode("utf-8")).hexdigest()
 
-                if key not in self.dupes:
-                    self.dupes[key] = finding
+                if key not in dupes:
+                    dupes[key] = finding
 
-        return list(self.dupes.values())
+        return list(dupes.values())
 
     def description_parse(self, ret):
         items = ['impact', 'steps to reproduce:', 'steps to reproduce', 'poc']

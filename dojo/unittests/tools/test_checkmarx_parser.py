@@ -56,7 +56,7 @@ class TestCheckmarxParser(TestCase):
         findings = parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
         # Verifications common to both parsers
-        self.check_parse_file_with_single_vulnerability_has_single_finding(parser)
+        self.check_parse_file_with_single_vulnerability_has_single_finding(findings)
         # Fields that differ from detailed scanner
         item = findings[0]
         self.assertEqual(str, type(item.description))
@@ -87,7 +87,7 @@ class TestCheckmarxParser(TestCase):
         findings = parser.get_findings(my_file_handle, test, "detailed")
         self.teardown(my_file_handle)
         # Verifications common to both parsers
-        self.check_parse_file_with_single_vulnerability_has_single_finding(parser)
+        self.check_parse_file_with_single_vulnerability_has_single_finding(findings)
         # Fields that differ from aggregated scanner
         item = findings[0]
         self.assertEqual(str, type(item.description))
@@ -228,7 +228,7 @@ class TestCheckmarxParser(TestCase):
         findings = parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
         # Verifications common to both parsers
-        self.check_parse_file_with_false_positive_is_false_positive(parser)
+        self.check_parse_file_with_false_positive_is_false_positive(findings)
 
     def test_detailed_parse_file_with_false_positive_is_false_positive(self):
         my_file_handle, product, engagement, test = self.init(
@@ -238,7 +238,7 @@ class TestCheckmarxParser(TestCase):
         findings = parser.get_findings(my_file_handle, test, "detailed")
         self.teardown(my_file_handle)
         # Verifications common to both parsers
-        self.check_parse_file_with_false_positive_is_false_positive(parser)
+        self.check_parse_file_with_false_positive_is_false_positive(findings)
 
     def check_parse_file_with_false_positive_is_false_positive(self, parser):
         self.assertEqual(1, len(findings))
@@ -327,7 +327,8 @@ class TestCheckmarxParser(TestCase):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/checkmarx/multiple_findings_different_sourceFilename_same_sinkFilename.xml"
         )
-        parser = CheckmarxXMLParser(my_file_handle, test, "detailed")
+        parser = CheckmarxXMLParser()
+        findings = parser.get_findings(my_file_handle, test, "detailed")
         self.teardown(my_file_handle)
         self.assertEqual(2, len(findings))
         self.assertIsNone(findings[0].nb_occurences)
@@ -354,7 +355,8 @@ class TestCheckmarxParser(TestCase):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/checkmarx/multiple_findings_same_sourceFilename_different_sinkFilename.xml"
         )
-        parser = CheckmarxXMLParser(my_file_handle, test, "detailed")
+        parser = CheckmarxXMLParser()
+        findings = parser.get_findings(my_file_handle, test, "detailed")
         self.teardown(my_file_handle)
         self.assertEqual(2, len(findings))
 
@@ -369,7 +371,7 @@ class TestCheckmarxParser(TestCase):
         findings = parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
         # Verifications common to both parsers
-        self.check_parse_file_with_utf8_replacement_char(parser)
+        self.check_parse_file_with_utf8_replacement_char(findings)
         # Fields that differ from detailed scanner
         item = findings[0]
         self.assertEqual(str, type(item.description))
@@ -400,7 +402,7 @@ class TestCheckmarxParser(TestCase):
         findings = parser.get_findings(my_file_handle, test, "detailed")
         self.teardown(my_file_handle)
         # Verifications common to both parsers
-        self.check_parse_file_with_utf8_replacement_char(parser)
+        self.check_parse_file_with_utf8_replacement_char(findings)
         # Fields that differ from aggregated scanner
         item = findings[0]
         self.assertEqual(str, type(item.description))
@@ -523,7 +525,7 @@ class TestCheckmarxParser(TestCase):
         findings = parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
         # Verifications common to both parsers
-        self.check_parse_file_with_utf8_various_non_ascii_char(parser)
+        self.check_parse_file_with_utf8_various_non_ascii_char(findings)
         # Fields that differ from detailed scanner
         item = findings[0]
         self.assertEqual(str, type(item.description))
@@ -554,7 +556,7 @@ class TestCheckmarxParser(TestCase):
         findings = parser.get_findings(my_file_handle, test, "detailed")
         self.teardown(my_file_handle)
         # Verifications common to both parsers
-        self.check_parse_file_with_utf8_various_non_ascii_char(parser)
+        self.check_parse_file_with_utf8_various_non_ascii_char(findings)
         # Fields that differ from aggregated scanner
         item = findings[0]
         self.assertEqual(str, type(item.description))
