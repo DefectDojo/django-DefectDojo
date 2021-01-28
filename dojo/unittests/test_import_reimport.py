@@ -42,7 +42,7 @@ logger = logging.getLogger(__name__)
 # test methods to be used both by API Test and UI Test
 class ImportReimportMixin(object):
     def __init__(self, *args, **kwargs):
-        self.scans_path = 'dojo/unittests/tools/scans/'
+        self.scans_path = 'dojo/unittests/scans/'
         self.zap_sample0_filename = self.scans_path + 'zap/0_zap_sample.xml'
         self.zap_sample1_filename = self.scans_path + 'zap/1_zap_sample_0_and_new_absent.xml'
         self.zap_sample2_filename = self.scans_path + 'zap/2_zap_sample_0_and_new_endpoint.xml'
