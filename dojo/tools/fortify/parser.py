@@ -121,7 +121,7 @@ class FortifyXMLParser(object):
                     unique_id_from_tool=issue_key
                 ))
                 dupes.add(title)
-        return list(dupes)
+        return list(dupes.values())
 
     def format_title(self, category, filename, line_no):
         """

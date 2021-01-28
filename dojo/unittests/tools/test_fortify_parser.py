@@ -10,18 +10,18 @@ class TestFortifyParser(TestCase):
         parser = FortifyXMLParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(324, len(findings))
-        self.assertEqual(findings[0].date, datetime(2019, 12, 17))
+        self.assertEqual(datetime(2019, 12, 17), findings[0].date)
 
     def test_fortify_few_findings(self):
         testfile = "dojo/unittests/scans/fortify/fortify_few_findings.xml"
         parser = FortifyXMLParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(2, len(findings))
-        self.assertEqual(findings[0].date, datetime(2019, 5, 7))
+        self.assertEqual(datetime(2019, 5, 7), findings[0].date)
 
     def test_fortify_few_findings_count_chart(self):
         testfile = "dojo/unittests/scans/fortify/fortify_few_findings_count_chart.xml"
         parser = FortifyXMLParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(3, len(findings))
-        self.assertEqual(findings[0].date, datetime(2019, 5, 7))
+        self.assertEqual(datetime(2019, 5, 7), findings[0].date)
