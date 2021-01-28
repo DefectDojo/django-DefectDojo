@@ -300,8 +300,6 @@ class GenericFindingUploadCsvParser(object):
     def get_findings(self, filename, test, active, verified):
         self.chain = None
         self.column_names = dict()
-        self.dupes = dict()
-        self.items = ()
         self.create_chain()
         self.active = active
         self.verified = verified
@@ -314,6 +312,8 @@ class GenericFindingUploadCsvParser(object):
             content = content.decode('utf-8')
         row_number = 0
         reader = csv.reader(io.StringIO(content), delimiter=',', quotechar='"')
+
+        dupes = dict()
         for row in reader:
             finding = Finding(test=test)
 
@@ -335,9 +335,9 @@ class GenericFindingUploadCsvParser(object):
             if finding is not None:
                 key = hashlib.md5((finding.severity + '|' + finding.title + '|' + finding.description).encode("utf-8")).hexdigest()
 
-                if key not in self.dupes:
-                    self.dupes[key] = finding
+                if key not in dupes:
+                    dupes[key] = finding
 
             row_number += 1
 
-        self.items = list(self.dupes.values())
+        return list(dupes.values())

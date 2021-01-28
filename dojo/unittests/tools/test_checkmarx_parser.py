@@ -180,7 +180,7 @@ class TestCheckmarxParser(TestCase):
         )
         self.assertIsNone(item.nb_occurences)
 
-    def check_parse_file_with_single_vulnerability_has_single_finding(self, parser):
+    def check_parse_file_with_single_vulnerability_has_single_finding(self, findings):
         self.assertEqual(1, len(findings))
         # check content
         item = findings[0]

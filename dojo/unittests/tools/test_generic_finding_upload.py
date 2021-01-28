@@ -28,14 +28,14 @@ class TestGenericFindingUploadCsvParser(TestCase):
     def test_parse_no_csv_content_no_findings(self):
         findings = ""
         file = TestFile("findings.csv", findings)
-        self.parser = GenericFindingUploadCsvParser()
+        parser = GenericFindingUploadCsvParser()
         findings = parser.get_findings(file, self.test, True, True)
         self.assertEqual(0, len(findings))
 
     def test_parse_csv_with_only_headers_results_in_no_findings(self):
         content = "Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active,Verified"
         file = TestFile("findings.csv", content)
-        self.parser = GenericFindingUploadCsvParser()
+        parser = GenericFindingUploadCsvParser()
         findings = parser.get_findings(file, self.test, True, True)
         self.assertEqual(0, len(findings))
 
@@ -48,7 +48,7 @@ Line:18
 Code Line: Response.Write(output);",None,,,TRUE,FALSE
 """
         file = TestFile("findings.csv", content)
-        self.parser = GenericFindingUploadCsvParser()
+        parser = GenericFindingUploadCsvParser()
         findings = parser.get_findings(file, self.test, True, True)
         self.assertEqual(1, len(findings))
 
@@ -65,7 +65,7 @@ Line:42
 Code Line: strSQL=""SELECT * FROM users WHERE user_id="" + request_user_id",None,,,TRUE,FALSE
 """
         file = TestFile("findings.csv", content)
-        self.parser = GenericFindingUploadCsvParser()
+        parser = GenericFindingUploadCsvParser()
         findings = parser.get_findings(file, self.test, True, True)
         self.assertEqual(2, len(findings))
 
@@ -81,7 +81,7 @@ Line:18
 Code Line: Response.Write(output);",None,,,TRUE,FALSE
 """
         file = TestFile("findings.csv", content)
-        self.parser = GenericFindingUploadCsvParser()
+        parser = GenericFindingUploadCsvParser()
         findings = parser.get_findings(file, self.test, True, True)
         self.assertEqual(1, len(findings))
 
@@ -93,7 +93,7 @@ Line:18
 Code Line: Response.Write(output);",None,,,TRUE,FALSE
 """
         file = TestFile("findings.csv", content)
-        self.parser = GenericFindingUploadCsvParser()
+        parser = GenericFindingUploadCsvParser()
         findings = parser.get_findings(file, self.test, True, True)
         self.assertEqual(datetime.date(2015, 11, 7), findings[0].date)
 
@@ -105,7 +105,7 @@ Line:18
 Code Line: Response.Write(output);",None,,,TRUE,FALSE
 """
         file = TestFile("findings.csv", content)
-        self.parser = GenericFindingUploadCsvParser()
+        parser = GenericFindingUploadCsvParser()
         findings = parser.get_findings(file, self.test, True, True)
         self.assertEqual('Potential XSS Vulnerability',
                          findings[0].title)
@@ -118,7 +118,7 @@ Line:18
 Code Line: Response.Write(output);",None,,,TRUE,FALSE
 """
         file = TestFile("findings.csv", content)
-        self.parser = GenericFindingUploadCsvParser()
+        parser = GenericFindingUploadCsvParser()
         findings = parser.get_findings(file, self.test, True, True)
         self.assertEqual(79, findings[0].cwe)
 
@@ -130,7 +130,7 @@ Line:18
 Code Line: Response.Write(output);",None,,,TRUE,FALSE
 """
         file = TestFile("findings.csv", content)
-        self.parser = GenericFindingUploadCsvParser()
+        parser = GenericFindingUploadCsvParser()
         findings = parser.get_findings(file, self.test, True, True)
         self.assertEqual('http://localhost/default.aspx',
                          findings[0].url)
@@ -143,7 +143,7 @@ Line:18
 Code Line: Response.Write(output);",None,,,TRUE,FALSE
 """
         file = TestFile("findings.csv", content)
-        self.parser = GenericFindingUploadCsvParser()
+        parser = GenericFindingUploadCsvParser()
         findings = parser.get_findings(file, self.test, True, True)
         self.assertEqual('High', findings[0].severity)
 
@@ -155,7 +155,7 @@ Line:18
 Code Line: Response.Write(output);",None,,,TRUE,FALSE
 """
         file = TestFile("findings.csv", content)
-        self.parser = GenericFindingUploadCsvParser()
+        parser = GenericFindingUploadCsvParser()
         findings = parser.get_findings(file, self.test, True, True)
         self.assertEqual('Info', findings[0].severity)
 
@@ -167,7 +167,7 @@ Line:18
 Code Line: Response.Write(output);",None,,,TRUE,FALSE
 """
         file = TestFile("findings.csv", content)
-        self.parser = GenericFindingUploadCsvParser()
+        parser = GenericFindingUploadCsvParser()
         findings = parser.get_findings(file, self.test, True, True)
         self.assertEqual(
             'FileName: default.aspx.cs\nDescription: Potential XSS Vulnerability\nLine:18\nCode Line: Response.Write(output);',
@@ -181,7 +181,7 @@ Line:18
 Code Line: Response.Write(output);","None Currently Available",,,TRUE,FALSE
 """
         file = TestFile("findings.csv", content)
-        self.parser = GenericFindingUploadCsvParser()
+        parser = GenericFindingUploadCsvParser()
         findings = parser.get_findings(file, self.test, True, True)
         self.assertEqual('None Currently Available',
                          findings[0].mitigation)
@@ -194,7 +194,7 @@ Line:18
 Code Line: Response.Write(output);","None Currently Available","Impact is currently unknown",,TRUE,FALSE
 """
         file = TestFile("findings.csv", content)
-        self.parser = GenericFindingUploadCsvParser()
+        parser = GenericFindingUploadCsvParser()
         findings = parser.get_findings(file, self.test, True, True)
         self.assertEqual('Impact is currently unknown',
                          findings[0].impact)
@@ -207,7 +207,7 @@ Line:18
 Code Line: Response.Write(output);","None Currently Available","Impact is currently unknown","Finding has references.",TRUE,FALSE
 """
         file = TestFile("findings.csv", content)
-        self.parser = GenericFindingUploadCsvParser()
+        parser = GenericFindingUploadCsvParser()
         findings = parser.get_findings(file, self.test, True, True)
         self.assertEqual('Finding has references.',
                          findings[0].references)
@@ -220,7 +220,7 @@ Line:18
 Code Line: Response.Write(output);","None Currently Available","Impact is currently unknown","Finding has references.",TRUE,FALSE
 """
         file = TestFile("findings.csv", content)
-        self.parser = GenericFindingUploadCsvParser()
+        parser = GenericFindingUploadCsvParser()
         findings = parser.get_findings(file, self.test, True, True)
         self.assertEqual(True, findings[0].active)
 
@@ -232,7 +232,7 @@ Line:18
 Code Line: Response.Write(output);","None Currently Available","Impact is currently unknown","Finding has references.",FALSE,FALSE
 """
         file = TestFile("findings.csv", content)
-        self.parser = GenericFindingUploadCsvParser()
+        parser = GenericFindingUploadCsvParser()
         findings = parser.get_findings(file, self.test, True, True)
         self.assertEqual(False, findings[0].active)
 
@@ -244,7 +244,7 @@ Line:18
 Code Line: Response.Write(output);","None Currently Available","Impact is currently unknown","Finding has references.",FALSE,TRUE
 """
         file = TestFile("findings.csv", content)
-        self.parser = GenericFindingUploadCsvParser()
+        parser = GenericFindingUploadCsvParser()
         findings = parser.get_findings(file, self.test, True, True)
         self.assertEqual(True, findings[0].verified)
 
@@ -256,7 +256,7 @@ Line:18
 Code Line: Response.Write(output);","None Currently Available","Impact is currently unknown","Finding has references.",FALSE,FALSE
 """
         file = TestFile("findings.csv", content)
-        self.parser = GenericFindingUploadCsvParser()
+        parser = GenericFindingUploadCsvParser()
         findings = parser.get_findings(file, self.test, True, True)
         self.assertEqual(False, findings[0].verified)
 
@@ -268,7 +268,7 @@ Line:18
 Code Line: Response.Write(output);","None Currently Available","Impact is currently unknown","Finding has references.",FALSE,FALSE,TRUE
 """
         file = TestFile("findings.csv", content)
-        self.parser = GenericFindingUploadCsvParser()
+        parser = GenericFindingUploadCsvParser()
         findings = parser.get_findings(file, self.test, True, True)
         self.assertEqual(True, findings[0].false_p)
 
@@ -280,7 +280,7 @@ Line:18
 Code Line: Response.Write(output);","None Currently Available","Impact is currently unknown","Finding has references.",FALSE,FALSE,FALSE
 """
         file = TestFile("findings.csv", content)
-        self.parser = GenericFindingUploadCsvParser()
+        parser = GenericFindingUploadCsvParser()
         findings = parser.get_findings(file, self.test, True, True)
         self.assertEqual(False, findings[0].false_p)
 
@@ -292,7 +292,7 @@ Line:18
 Code Line: Response.Write(output);","None Currently Available","Impact is currently unknown","Finding has references.",FALSE,FALSE,FALSE,TRUE
 """
         file = TestFile("findings.csv", content)
-        self.parser = GenericFindingUploadCsvParser()
+        parser = GenericFindingUploadCsvParser()
         findings = parser.get_findings(file, self.test, True, True)
         self.assertEqual(True, findings[0].duplicate)
 
@@ -304,14 +304,14 @@ Line:18
 Code Line: Response.Write(output);","None Currently Available","Impact is currently unknown","Finding has references.",FALSE,FALSE,FALSE,FALSE
 """
         file = TestFile("findings.csv", content)
-        self.parser = GenericFindingUploadCsvParser()
+        parser = GenericFindingUploadCsvParser()
         findings = parser.get_findings(file, self.test, True, True)
         self.assertEqual(False, findings[0].duplicate)
 
     def test_missing_columns_is_fine(self):
         content = """Date,Title,Url,Severity,Description,References,Active,Verified"""
         file = TestFile("findings.csv", content)
-        self.parser = GenericFindingUploadCsvParser()
+        parser = GenericFindingUploadCsvParser()
         findings = parser.get_findings(file, self.test, True, True)
 
     def test_column_order_is_flexible(self):
@@ -327,9 +327,9 @@ True,11/7/2015,Title,0,Url,Severity,Description,Mitigation,Impact,References,Tru
         file2 = TestFile("findings.csv", content2)
 
         parser1 = GenericFindingUploadCsvParser()
-        findings1 = parser.get_findings(file1, self.test, True, True)
+        findings1 = parser1.get_findings(file1, self.test, True, True)
         parser2 = GenericFindingUploadCsvParser()
-        findings2 = parser.get_findings(file2, self.test, True, True)
+        findings2 = parser2.get_findings(file2, self.test, True, True)
 
         finding1 = findings1[0]
         finding2 = findings2[0]
