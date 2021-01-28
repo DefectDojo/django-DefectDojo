@@ -29,6 +29,10 @@ docker-compose logs initializer | grep "Admin password:"
 
 Navigate to <http://localhost:8080>.
 
+Alternatively, try out the demo sever at [demo.defectdojo.org](https://demo.defectdojo.org)
+
+Log in with `admin / defectdojo@demo#appsec` and please note that the demo server is refreshed regularly.
+
 ## Documentation
 
 For detailed documentation you can visit

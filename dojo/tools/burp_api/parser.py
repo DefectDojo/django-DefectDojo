@@ -64,7 +64,7 @@ class BurpApiParser(object):
                     duplicate=False,
                     out_of_scope=False,
                     mitigated=None,
-                    impact=None,
+                    impact="No impact provided",
                     static_finding=False,  # by definition
                     dynamic_finding=True,  # by definition
                     unique_id_from_tool=str(
