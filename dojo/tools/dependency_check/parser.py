@@ -40,9 +40,9 @@ class DependencyCheckParser(object):
                 # logger.debug('related_dependency: %s', ElementTree.tostring(related_dependency, encoding='utf8', method='xml'))
                 return None, None
         else:
-            return self.get_field_value(dependency, 'fileName'), self.get_field_value(dependency, 'filePath')
+            return self.get_field_value(dependency, 'fileName', namespace), self.get_field_value(dependency, 'filePath', namespace)
 
-    def get_component_name_and_version_from_dependency(self, dependency, related_dependency):
+    def get_component_name_and_version_from_dependency(self, dependency, related_dependency, namespace):
         component_name, component_version = None, None
         # big try catch to avoid crashint the parser on some unexpected stuff
         try:
@@ -76,8 +76,8 @@ class DependencyCheckParser(object):
 
                 package_node = identifiers_node.find('.//' + namespace + 'package')
                 if package_node:
-                    logger.debug('package string: ' + self.get_field_value(package_node, 'id'))
-                    id = self.get_field_value(package_node, 'id')
+                    logger.debug('package string: ' + self.get_field_value(package_node, 'id', namespace))
+                    id = self.get_field_value(package_node, 'id', namespace)
 
                     purl = PackageURL.from_string(id)
                     purl_parts = purl.to_dict()
@@ -109,7 +109,7 @@ class DependencyCheckParser(object):
                 maven_node = identifiers_node.find('.//' + namespace + 'identifier[@type="maven"]')
                 if maven_node:
                     # logger.debug('maven_string: ' + self.get_field_value(maven_node, 'name'))
-                    maven_parts = self.get_field_value(maven_node, 'name').split(':')
+                    maven_parts = self.get_field_value(maven_node, 'name', namespace).split(':')
                     # logger.debug('maven_parts:' + str(maven_parts))
                     if len(maven_parts) == 3:
                         component_name = maven_parts[0] + ':' + maven_parts[1]
@@ -147,10 +147,10 @@ class DependencyCheckParser(object):
                 # implement more logic here
                 product_node = evidence_collected_node.find('.//' + namespace + 'evidence[@type="product"]')
                 if product_node:
-                    component_name = self.get_field_value(product_node, 'value')
+                    component_name = self.get_field_value(product_node, 'value', namespace)
                     version_node = evidence_collected_node.find('.//' + namespace + 'evidence[@type="version"]')
                     if version_node:
-                        component_version = self.get_field_value(version_node, 'value')
+                        component_version = self.get_field_value(version_node, 'value', namespace)
 
                     return component_name, component_version
 
@@ -167,13 +167,13 @@ class DependencyCheckParser(object):
         if dependency_filename is None:
             return None
 
-        name = self.get_field_value(vulnerability, 'name')
+        name = self.get_field_value(vulnerability, 'name', namespace)
         cwes_node = vulnerability.find(namespace + 'cwes')
         if cwes_node is not None:
-            cwe_field = self.get_field_value(cwes_node, 'cwe')
+            cwe_field = self.get_field_value(cwes_node, 'cwe', namespace)
         else:
-            cwe_field = self.get_field_value(vulnerability, 'cwe')
-        description = self.get_field_value(vulnerability, 'description')
+            cwe_field = self.get_field_value(vulnerability, 'cwe', namespace)
+        description = self.get_field_value(vulnerability, 'description', namespace)
 
         title = '{0} | {1}'.format(dependency_filename, name)
         cve = name[:28]
@@ -195,11 +195,11 @@ class DependencyCheckParser(object):
         cvssv2_node = vulnerability.find(namespace + 'cvssV2')
         cvssv3_node = vulnerability.find(namespace + 'cvssV3')
         if cvssv3_node is not None:
-            severity = self.get_field_value(cvssv3_node, 'baseSeverity').lower().capitalize()
+            severity = self.get_field_value(cvssv3_node, 'baseSeverity', namespace).lower().capitalize()
         elif cvssv2_node is not None:
-            severity = self.get_field_value(cvssv2_node, 'severity').lower().capitalize()
+            severity = self.get_field_value(cvssv2_node, 'severity', namespace).lower().capitalize()
         else:
-            severity = self.get_field_value(vulnerability, 'severity').lower().capitalize()
+            severity = self.get_field_value(vulnerability, 'severity', namespace).lower().capitalize()
         # logger.debug("severity: " + severity)
         if severity in SEVERITY:
             severity = severity
@@ -216,14 +216,14 @@ class DependencyCheckParser(object):
             reference_detail = ''
             for reference_node in references_node.findall(namespace +
                                                           'reference'):
-                name = self.get_field_value(reference_node, 'name')
-                source = self.get_field_value(reference_node, 'source')
-                url = self.get_field_value(reference_node, 'url')
+                name = self.get_field_value(reference_node, 'name', namespace)
+                source = self.get_field_value(reference_node, 'source', namespace)
+                url = self.get_field_value(reference_node, 'url', namespace)
                 reference_detail += 'name: {0}\n' \
                                      'source: {1}\n' \
                                      'url: {2}\n\n'.format(name, source, url)
 
-        component_name, component_version = self.get_component_name_and_version_from_dependency(dependency, related_dependency)
+        component_name, component_version = self.get_component_name_and_version_from_dependency(dependency, related_dependency, namespace)
 
         return Finding(
             title=title,
@@ -250,9 +250,6 @@ class DependencyCheckParser(object):
         namespace = ''
         content = filename.read()
 
-        if content is None:
-            return
-
         scan = ElementTree.fromstring(content)
         regex = r"{.*}"
         matches = re.match(regex, scan.tag)
@@ -273,9 +270,9 @@ class DependencyCheckParser(object):
                             namespace + 'vulnerability'):
 
                         finding = self.get_finding_from_vulnerability(dependency, None,
-                            vulnerability, test)
+                            vulnerability, test, namespace)
 
-                        self.add_finding(finding)
+                        self.add_finding(finding, dupes)
 
                         # TODO relateddependencies are ignored in this parser, but should be imported because you might miss vulnerable dependencies otherwise
                         # <relatedDependencies>
