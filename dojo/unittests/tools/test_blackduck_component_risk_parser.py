@@ -10,5 +10,6 @@ class TestBlackduckHubCRParser(TestCase):
             "dojo/unittests/scans/blackduck_component_risk/"
             "blackduck_hub_component_risk.zip"
         )
-        parser = BlackduckHubParser(testfile, Test())
+        parser = BlackduckHubParser()
+        findings = parser.get_findings(testfile, Test())
         self.assertEqual(12, len(findings))

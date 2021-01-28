@@ -16,7 +16,7 @@ class BlackduckHubParser(object):
         :param test:
         """
         components, securities, sources = self.import_data(filename)
-        self.ingest_findings(components, securities, sources, test)
+        return self.ingest_findings(components, securities, sources, test)
 
     def import_data(self, filename) -> (dict, dict, dict):
         """
@@ -41,7 +41,7 @@ class BlackduckHubParser(object):
         :param test:
         :return:
         """
-        self.items = []
+        items = []
         # License Risk
         license_risk = []
         for component_id, component in components.items():
@@ -92,7 +92,7 @@ class BlackduckHubParser(object):
                                   static_finding=True,
                                   unique_id_from_tool=component_id)
                 license_risk.append(finding)
-        self.items.extend(license_risk)
+        items.extend(license_risk)
 
         # Security Risk
         security_risk = []
@@ -119,7 +119,8 @@ class BlackduckHubParser(object):
                               file_path=file_path,
                               unique_id_from_tool=component_id)
             security_risk.append(finding)
-        self.items.extend(security_risk)
+        items.extend(security_risk)
+        return items
 
     def license_title(self, component):
         """
