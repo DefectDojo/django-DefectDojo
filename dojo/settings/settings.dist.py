@@ -724,7 +724,11 @@ CELERY_BEAT_SCHEDULE = {
     'compute-sla-age-and-notify': {
         'task': 'dojo.tasks.async_sla_compute_and_notify',
         'schedule': crontab(hour=7, minute=30),
-    }
+    },
+    'risk_acceptance_expiration_handler': {
+        'task': 'dojo.risk_acceptance.helper.expiration_handler',
+        'schedule': crontab(minute=0, hour='*/3'),  # every 3 hours
+    },
 }
 
 # ------------------------------------
@@ -762,6 +766,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Checkmarx Scan': ['cwe', 'severity', 'file_path'],
     'SonarQube Scan': ['cwe', 'severity', 'file_path'],
     'Dependency Check Scan': ['cve', 'file_path'],
+    'Dependency Track Finding Packaging Format (FPF) Export': ['component', 'vuln_id_from_tool'],
     # possible improvment: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
     'NPM Audit Scan': ['title', 'severity', 'file_path', 'cve', 'cwe'],
     # possible improvment: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
@@ -778,6 +783,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'DSOP Scan': ['cve'],
     'Acunetix Scan': ['title', 'description'],
     'Trivy Scan': ['title', 'severity', 'cve', 'cwe'],
+    'Snyk Scan': ['vuln_id_from_tool', 'file_path', 'component_name', 'component_version'],
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
@@ -801,7 +807,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
 # List of fields that are known to be usable in hash_code computation)
 # 'endpoints' is a pseudo field that uses the endpoints (for dynamic scanners)
 # 'unique_id_from_tool' is often not needed here as it can be used directly in the dedupe algorithm, but it's also possible to use it for hashing
-HASHCODE_ALLOWED_FIELDS = ['title', 'cwe', 'cve', 'line', 'file_path', 'component_name', 'component_version', 'description', 'endpoints', 'unique_id_from_tool', 'severity']
+HASHCODE_ALLOWED_FIELDS = ['title', 'cwe', 'cve', 'line', 'file_path', 'component_name', 'component_version', 'description', 'endpoints', 'unique_id_from_tool', 'severity', 'vuln_id_from_tool']
 
 # ------------------------------------
 # Deduplication configuration
@@ -824,6 +830,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Anchore Engine Scan': DEDUPE_ALGO_HASH_CODE,
     'Checkmarx Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Checkmarx Scan': DEDUPE_ALGO_HASH_CODE,
+    'Dependency Track Finding Packaging Format (FPF) Export': DEDUPE_ALGO_HASH_CODE,
     'SonarQube Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'SonarQube Scan': DEDUPE_ALGO_HASH_CODE,
     'Dependency Check Scan': DEDUPE_ALGO_HASH_CODE,
@@ -842,6 +849,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'DSOP Scan': DEDUPE_ALGO_HASH_CODE,
     'Trivy Scan': DEDUPE_ALGO_HASH_CODE,
     'HackerOne Cases': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    'Snyk Scan': DEDUPE_ALGO_HASH_CODE,
 }
 
 DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')

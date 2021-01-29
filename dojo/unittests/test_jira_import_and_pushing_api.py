@@ -1,4 +1,4 @@
-from dojo.models import User, Finding
+from dojo.models import User, Finding, JIRA_Instance
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase, APIClient
 from .dojo_test_case import DojoVCRAPITestCase
@@ -95,6 +95,19 @@ class JIRAConfigAndPushTestApi(DojoVCRAPITestCase):
         return test_id
 
     def test_import_with_push_to_jira(self):
+        import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True)
+        test_id = import0['test']
+        self.assert_jira_issue_count_in_test(test_id, 2)
+        # by asserting full cassette is played we know issues have been updated in JIRA
+        self.assert_cassette_played()
+        return test_id
+
+    def test_import_with_push_to_jira_epic(self):
+        jira_instance = JIRA_Instance.objects.get(id=2)
+        # we choose issue type Epic and test if it can be created succesfully.
+        # if yes, it means we have succesfully populated the Epic Name custom field which is mandatory in JIRA
+        jira_instance.default_issue_type = "Epic"
+        jira_instance.save()
         import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True)
         test_id = import0['test']
         self.assert_jira_issue_count_in_test(test_id, 2)

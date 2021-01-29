@@ -187,6 +187,8 @@ class FindingTest(BaseTestCase):
         self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
         driver.find_element_by_link_text("App Vulnerable to XSS").click()
+        # Get the status of the current endpoint
+        pre_status = driver.find_element_by_xpath('//*[@id="vuln_endpoints"]/tbody/tr/td[3]').text
         # Click on the 'dropdownMenu1 button'
         driver.find_element_by_id("dropdownMenu1").click()
         # Click on `Close Finding`
@@ -196,9 +198,39 @@ class FindingTest(BaseTestCase):
         # click 'close Finding' submission button
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
         # Query the site to determine if the finding has been added
-
         # Assert ot the query to dtermine status of failure
         self.assertTrue(self.is_success_message_present(text='Finding closed.'))
+        # Check to see if the endpoint was mitigated
+        # Select and click on the particular finding to edit
+        driver.find_element_by_link_text("App Vulnerable to XSS").click()
+        # Get the status of the current endpoint
+        # This will throw exception if the test fails due to invalid xpath
+        post_status = driver.find_element_by_xpath('//*[@id="remd_endpoints"]/tbody/tr/td[3]').text
+        # Assert ot the query to dtermine status of failure
+        self.assertTrue(pre_status != post_status)
+
+    def test_open_finding(self):
+        driver = self.driver
+        # Navigate to All Finding page
+        self.goto_all_findings_list(driver)
+        # Select and click on the particular finding to edit
+        driver.find_element_by_link_text("App Vulnerable to XSS").click()
+        # Get the status of the current endpoint
+        pre_status = driver.find_element_by_xpath('//*[@id="remd_endpoints"]/tbody/tr/td[3]').text
+        # Click on the 'dropdownMenu1 button'
+        driver.find_element_by_id("dropdownMenu1").click()
+        # Click on `Open Finding`
+        driver.find_element_by_link_text("Open Finding").click()
+        # Assert ot the query to dtermine status of failure
+        self.assertTrue(self.is_success_message_present(text='Finding Reopened.'))
+        # Check to see if the endpoint was set to active again
+        # Select and click on the particular finding to edit
+        driver.find_element_by_link_text("App Vulnerable to XSS").click()
+        # Get the status of the current endpoint
+        # This will throw exception if the test fails due to invalid xpath
+        post_status = driver.find_element_by_xpath('//*[@id="vuln_endpoints"]/tbody/tr/td[3]').text
+        # Assert ot the query to dtermine status of failure
+        self.assertTrue(pre_status != post_status)
 
     def test_make_finding_a_template(self):
         driver = self.driver
@@ -344,6 +376,7 @@ def add_finding_tests_to_suite(suite, jira=False, github=False, block_execution=
     suite.addTest(FindingTest('test_mark_finding_for_review'))
     suite.addTest(FindingTest('test_clear_review_from_finding'))
     suite.addTest(FindingTest('test_close_finding'))
+    suite.addTest(FindingTest('test_open_finding'))
     suite.addTest(FindingTest('test_make_finding_a_template'))
     suite.addTest(FindingTest('test_apply_template_to_a_finding'))
     suite.addTest(FindingTest('test_import_scan_result'))

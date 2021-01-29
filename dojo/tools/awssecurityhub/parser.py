@@ -49,7 +49,7 @@ def get_item(finding, test):
     references = finding.get('Remediation', {}).get('Recommendation', {}).get('Url')
     cve = None
     cwe = None
-    active = True
+    active = False
     verified = False
     false_p = False
     duplicate = False
