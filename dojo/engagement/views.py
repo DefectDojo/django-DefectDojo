@@ -675,21 +675,13 @@ def import_scan_results(request, eid=None, pid=None):
                                 fragment=endpoint.fragment,
                                 product=t.engagement.product)
                         except (MultipleObjectsReturned):
-                            ep = Endpoint.objects.filter(
-                                protocol=endpoint.protocol,
-                                host=endpoint.host,
-                                path=endpoint.path,
-                                query=endpoint.query,
-                                fragment=endpoint.fragment,
-                                product=t.engagement.product).first()
+                            pass
                         try:
                             eps, created = Endpoint_Status.objects.get_or_create(
                                 finding=item,
                                 endpoint=ep)
                         except (MultipleObjectsReturned):
-                            eps = Endpoint_Status.objects.filter(
-                                finding=item,
-                                endpoint=ep).first()
+                            pass
 
                         ep.endpoint_status.add(eps)
                         item.endpoints.add(ep)
@@ -705,21 +697,13 @@ def import_scan_results(request, eid=None, pid=None):
                                 fragment=endpoint.fragment,
                                 product=t.engagement.product)
                         except (MultipleObjectsReturned):
-                            ep = Endpoint.objects.filter(
-                                protocol=endpoint.protocol,
-                                host=endpoint.host,
-                                path=endpoint.path,
-                                query=endpoint.query,
-                                fragment=endpoint.fragment,
-                                product=t.engagement.product).first()
+                            pass
                         try:
                             eps, created = Endpoint_Status.objects.get_or_create(
                                 finding=item,
                                 endpoint=ep)
                         except (MultipleObjectsReturned):
-                            eps = Endpoint_Status.objects.filter(
-                                finding=item,
-                                endpoint=ep).first()
+                            pass
 
                         ep.endpoint_status.add(eps)
                         item.endpoints.add(ep)

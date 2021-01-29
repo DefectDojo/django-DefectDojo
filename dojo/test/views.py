@@ -839,20 +839,13 @@ def re_import_scan_results(request, tid):
                                                                             fragment=endpoint.fragment,
                                                                             product=test.engagement.product)
                             except (MultipleObjectsReturned):
-                                ep = Endpoint.objects.filter(protocol=endpoint.protocol,
-                                                                            host=endpoint.host,
-                                                                            path=endpoint.path,
-                                                                            query=endpoint.query,
-                                                                            fragment=endpoint.fragment,
-                                                                            product=test.engagement.product).first()
+                                pass
                             try:
                                 eps, created = Endpoint_Status.objects.get_or_create(
                                     finding=finding,
                                     endpoint=ep)
                             except (MultipleObjectsReturned):
-                                eps = Endpoint_Status.objects.filter(
-                                    finding=finding,
-                                    endpoint=ep).first()
+                                pass
 
                                 ep.endpoint_status.add(eps)
                                 finding.endpoints.add(ep)
@@ -867,20 +860,13 @@ def re_import_scan_results(request, tid):
                                                                             fragment=endpoint.fragment,
                                                                             product=test.engagement.product)
                             except (MultipleObjectsReturned):
-                                ep = Endpoint.objects.filter(protocol=endpoint.protocol,
-                                                                            host=endpoint.host,
-                                                                            path=endpoint.path,
-                                                                            query=endpoint.query,
-                                                                            fragment=endpoint.fragment,
-                                                                            product=test.engagement.product).first()
+                                pass
                             try:
                                 eps, created = Endpoint_Status.objects.get_or_create(
                                     finding=finding,
                                     endpoint=ep)
                             except (MultipleObjectsReturned):
-                                eps = Endpoint_Status.objects.filter(
-                                    finding=finding,
-                                    endpoint=ep).first()
+                                pass
 
                             ep.endpoint_status.add(eps)
                             finding.endpoints.add(ep)

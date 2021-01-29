@@ -1164,22 +1164,14 @@ class ImportScanSerializer(serializers.Serializer):
                             fragment=endpoint.fragment,
                             product=test.engagement.product)
                     except (MultipleObjectsReturned):
-                        ep = Endpoint.objects.filter(
-                            protocol=endpoint.protocol,
-                            host=endpoint.host,
-                            path=endpoint.path,
-                            query=endpoint.query,
-                            fragment=endpoint.fragment,
-                            product=test.engagement.product).first()
+                        pass
 
                     try:
                         eps, created = Endpoint_Status.objects.get_or_create(
                             finding=item,
                             endpoint=ep)
                     except (MultipleObjectsReturned):
-                        eps = Endpoint_Status.objects.filter(
-                            finding=item,
-                            endpoint=ep).first()
+                        pass
 
                     ep.endpoint_status.add(eps)
                     item.endpoint_status.add(eps)
@@ -1191,9 +1183,7 @@ class ImportScanSerializer(serializers.Serializer):
                             finding=item,
                             endpoint=endpoint_to_add)
                     except (MultipleObjectsReturned):
-                        eps = Endpoint_Status.objects.filter(
-                            finding=item,
-                            endpoint=endpoint_to_add).first()
+                        pass
 
                     endpoint_to_add.endpoint_status.add(eps)
                     item.endpoint_status.add(eps)
@@ -1477,22 +1467,14 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                                 fragment=endpoint.fragment,
                                 product=test.engagement.product)
                         except (MultipleObjectsReturned):
-                            ep = Endpoint.objects.filter(
-                                protocol=endpoint.protocol,
-                                host=endpoint.host,
-                                path=endpoint.path,
-                                query=endpoint.query,
-                                fragment=endpoint.fragment,
-                                product=test.engagement.product).first()
+                            pass
 
                         try:
                             eps, created = Endpoint_Status.objects.get_or_create(
                                 finding=finding,
                                 endpoint=ep)
                         except (MultipleObjectsReturned):
-                            eps = Endpoint_Status.objects.filter(
-                                finding=finding,
-                                endpoint=ep).first()
+                            pass
 
                         ep.endpoint_status.add(eps)
                         finding.endpoints.add(ep)
@@ -1503,13 +1485,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                                 finding=finding,
                                 endpoint=endpoint_to_add)
                         except (MultipleObjectsReturned):
-                            eps = Endpoint_Status.objects.filter(
-                                finding=finding,
-                                endpoint=endpoint_to_add).first()
-
-                        eps, created = Endpoint_Status.objects.get_or_create(
-                            finding=finding,
-                            endpoint=endpoint_to_add)
+                            pass
                         finding.endpoints.add(endpoint_to_add)
                         endpoint_to_add.endpoint_status.add(eps)
                         finding.endpoint_status.add(eps)
