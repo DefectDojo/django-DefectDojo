@@ -321,7 +321,7 @@ def endpoint_querys(prod_type, request):
                 Q(endpoint__product__prod_type__authorized_users__in=[request.user]))
         accepted_endpoints_counts = severity_count(accepted_endpoints_counts, 'aggregate', 'finding__severity')
     else:
-        endpoints_closed = Endpoint_Status.objects.filter(mitigated__date__range=[start_date, end_date]).prefetch_related(
+        endpoints_closed = Endpoint_Status.objects.filter(date__range=[start_date, end_date]).prefetch_related(
             'finding__test__engagement__product')
         accepted_endpoints = Endpoint_Status.objects.filter(date__range=[start_date, end_date], risk_accepted=True). \
             prefetch_related('finding__test__engagement__product')
