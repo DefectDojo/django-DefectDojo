@@ -20,7 +20,6 @@ class JIRAWebhookTest(DojoTestCase):
                     "author": {
                         "self": "http://www.testjira.com/rest/api/2/user?username=valentijn",
                         "name": "valentijn",
-                        "emailAddress": "darthvaalor@testme.nl",
                         "avatarUrls": {
                             "48x48": "http://www.testjira.com/secure/useravatar?ownerId=valentijn&avatarId=11101",
                             "24x24": "http://www.testjira.com/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
@@ -35,6 +34,43 @@ class JIRAWebhookTest(DojoTestCase):
                     "updateAuthor": {
                         "self": "http://www.testjira.com/rest/api/2/user?username=valentijn",
                         "name": "valentijn",
+                        "avatarUrls": {
+                            "48x48": "http://www.testjira.com/secure/useravatar?ownerId=valentijn&avatarId=11101",
+                            "24x24": "http://www.testjira.com/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
+                            "16x16": "http://www.testjira.com/secure/useravatar?size=xsmall&ownerId=valentijn&avatarId=11101",
+                            "32x32": "http://www.testjira.com/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101"
+                        },
+                        "displayName": "Valentijn Scholten",
+                        "active": "true",
+                        "timeZone": "Europe/Amsterdam"
+                    },
+                    "created": "2020-11-11T18:55:21.425+0100",
+                    "updated": "2020-11-11T18:55:21.425+0100"
+        }
+    }
+
+    jira_issue_comment_template_json_with_email = {
+        "timestamp": 1605117321425,
+        "webhookEvent": "comment_created",
+        "comment": {
+                    "self": "http://www.testjira.com/rest/api/2/issue/2/comment/456843",
+                    "id": "456843",
+                    "author": {
+                        "self": "http://www.testjira.com/rest/api/2/user?username=valentijn",
+                        "emailAddress": "darthvaalor@testme.nl",
+                        "avatarUrls": {
+                            "48x48": "http://www.testjira.com/secure/useravatar?ownerId=valentijn&avatarId=11101",
+                            "24x24": "http://www.testjira.com/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
+                            "16x16": "http://www.testjira.com/secure/useravatar?size=x small&ownerId=valentijn&avatarId=11101",
+                            "32x32": "http://www.testjira.com/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101"
+                        },
+                        "displayName": "Valentijn Scholten",
+                        "active": "true",
+                        "timeZone": "Europe/Amsterdam"
+                    },
+                    "body": "test2",
+                    "updateAuthor": {
+                        "self": "http://www.testjira.com/rest/api/2/user?username=valentijn",
                         "emailAddress": "darthvaalor@testme.nl",
                         "avatarUrls": {
                             "48x48": "http://www.testjira.com/secure/useravatar?ownerId=valentijn&avatarId=11101",
@@ -472,9 +508,9 @@ class JIRAWebhookTest(DojoTestCase):
         finding = jira_issue.finding
         notes_count_before = finding.notes.count()
 
-        body = json.loads(json.dumps(self.jira_issue_comment_template_json))
-        body['comment']['updateAuthor']['name'] = "defect.dojo"
+        body = json.loads(json.dumps(self.jira_issue_comment_template_json_with_email))
         body['comment']['updateAuthor']['emailAddress'] = "defect.dojo@testme.com"
+        body['comment']['updateAuthor']['displayName'] = "Defect Dojo"
 
         response = self.client.post(reverse('jira_web_hook_secret', args=(self.correct_secret, )),
                                     body,
