@@ -509,7 +509,7 @@ class JIRAWebhookTest(DojoTestCase):
 
         # modify jira_instance to use email instead of name to perform testj
         jira_instance = jira_helper.get_jira_instance(finding)
-        jira_instance.user_name = "defect.dojo@testme.com"
+        jira_instance.username = "defect.dojo@testme.com"
         jira_instance.save()
 
         body = json.loads(json.dumps(self.jira_issue_comment_template_json_with_email))
@@ -526,7 +526,7 @@ class JIRAWebhookTest(DojoTestCase):
 
         # reset jira_instance to use name to avoid confusion for potential later tests
         jira_instance = jira_helper.get_jira_instance(finding)
-        jira_instance.user_name = "defect.dojo"
+        jira_instance.username = "defect.dojo"
         jira_instance.save()
 
         self.assertEqual(200, response.status_code)
