@@ -1,11 +1,11 @@
 import json
+
 from dojo.models import Finding
 from dojo.tools.risk_recon.api import RiskReconAPI
 
 
 class RiskReconParser(object):
-    def __init__(self, filename, test):
-        self.items = []
+    def get_findings(self, filename, test):
         if filename:
             tree = filename.read()
             try:
@@ -24,9 +24,9 @@ class RiskReconParser(object):
             else:
                 findings = data.get('findings')
 
-            self.items = self.get_findings(findings, test)
+            return self._get_findings_internal(findings, test)
 
-    def get_findings(self, findings, test):
+    def _get_findings_internal(self, findings, test):
         dupes = dict()
         for item in findings:
             findingdetail = ''

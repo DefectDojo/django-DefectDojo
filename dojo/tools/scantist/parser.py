@@ -1,5 +1,6 @@
 import hashlib
 import json
+
 from dojo.models import Finding
 
 __author__ = 'mohcer'
@@ -18,22 +19,9 @@ class ScantistJSONParser(object):
 
     Website: https://scantist.com/
     """
-    def __init__(self, file, test):
-        self.items = []
-
-        if file is None:
-            return
-
-        result_data = file.read()
-        try:
-            content = json.loads(str(result_data, 'utf-8'))
-        except:
-            content = json.loads(result_data)
-
-        if content is None:
-            return
-
-        self.items = [data for data in self.get_items(content, test)]
+    def get_findings(self, file, test):
+        tree = json.load(file)
+        return self.get_items(tree, test)
 
     def get_items(self, tree, test):
         """
