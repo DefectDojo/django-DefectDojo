@@ -27,7 +27,7 @@ from dojo.forms import NoteForm, TestForm, FindingForm, \
     FindingBulkUpdateForm
 from dojo.models import Finding, Test, Notes, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, \
     Finding_Template, Cred_Mapping, Dojo_User, System_Settings, Endpoint_Status
-from dojo.tools.factory import import_parser_factory
+from dojo.tools.factory import import_parser_factory, get_choices
 from dojo.utils import get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting, \
     Product_Tab, max_safe, is_scan_file_too_large, get_words_for_field
 from dojo.notifications.helper import create_notification
@@ -93,7 +93,7 @@ def view_test(request, tid):
 
     paged_findings, total_findings_count = get_page_items_and_count(request, prefetch_for_findings(findings.qs), 25)
     paged_stub_findings = get_page_items(request, stub_findings, 25)
-    show_re_upload = any(test.test_type.name in code for code in ImportScanForm.SCAN_TYPE_CHOICES)
+    show_re_upload = any(test.test_type.name in code for code in ImportScanForm.SORTED_SCAN_TYPE_CHOICES)
 
     product_tab = Product_Tab(prod.id, title="Test", tab="engagements")
     product_tab.setEngagement(test.engagement)
@@ -203,7 +203,6 @@ def edit_test(request, tid):
 
     form.initial['target_start'] = test.target_start.date()
     form.initial['target_end'] = test.target_end.date()
-    # form.initial['tags'] = [tag.name for tag in test.tags.all()]
     form.initial['description'] = test.description
 
     product_tab = Product_Tab(test.engagement.product.id, title="Edit Test", tab="engagements")
@@ -634,7 +633,6 @@ def re_import_scan_results(request, tid):
     if get_system_setting('enable_jira') and jira_project:
         jform = JIRAImportScanForm(push_all=push_all_jira_issues, prefix='jiraform')
 
-    # form.initial['tags'] = [tag.name for tag in test.tags.all()]
     if request.method == "POST":
         form = ReImportScanForm(request.POST, request.FILES, test=test)
         if jira_project:
@@ -651,6 +649,8 @@ def re_import_scan_results(request, tid):
             active = form.cleaned_data['active']
             verified = form.cleaned_data['verified']
             tags = form.cleaned_data['tags']
+            if 'version' in form.cleaned_data and form.cleaned_data['version']:
+                test.version = form.cleaned_data['version']
             close_old_findings = form.cleaned_data.get('close_old_findings', True)
             # Tags are replaced, same behaviour as with django-tagging
             test.tags = tags
@@ -662,7 +662,8 @@ def re_import_scan_results(request, tid):
                 return HttpResponseRedirect(reverse('re_import_scan_results', args=(test.id,)))
 
             try:
-                parser = import_parser_factory(file, test, active, verified)
+                parser = import_parser_factory(file, test, active, verified, scan_type=scan_type)
+                parser_findings = parser.get_findings(file, test)
             except ValueError:
                 raise Http404()
             except Exception as e:
@@ -676,7 +677,7 @@ def re_import_scan_results(request, tid):
                 return HttpResponseRedirect(reverse('re_import_scan_results', args=(test.id,)))
 
             try:
-                items = parser.items
+                items = parser_findings
                 original_items = list(test.finding_set.all())
                 new_items = []
                 mitigated_count = 0
@@ -973,4 +974,5 @@ def re_import_scan_results(request, tid):
                    'eid': engagement.id,
                    'additional_message': additional_message,
                    'jform': jform,
+                   'scan_types': get_choices(),
                    })

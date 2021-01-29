@@ -1,7 +1,7 @@
-from pathlib import Path
 import csv
 import io
 import zipfile
+from pathlib import Path
 
 __author__ = 'Apipia'
 

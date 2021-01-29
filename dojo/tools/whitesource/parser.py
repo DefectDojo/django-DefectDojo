@@ -1,18 +1,15 @@
 import hashlib
 import json
+
 from dojo.models import Finding
 
 __author__ = 'dr3dd589'
 
 
 class WhitesourceJSONParser(object):
-    def __init__(self, file, test):
-        self.dupes = dict()
-        self.items = ()
-        dupe_key = None
-
+    def get_findings(self, file, test):
         if file is None:
-            return
+            return list()
 
         data = file.read()
         try:
@@ -90,16 +87,16 @@ class WhitesourceJSONParser(object):
                      'component_version': component_version
                     }
 
-        def _dedup_and_create_finding(vuln):
+        def _dedup_and_create_finding(dupes, vuln):
             dupe_key = hashlib.md5(vuln.get('description').encode('utf-8') + vuln.get('title').encode('utf-8')).hexdigest()
 
-            if dupe_key in self.dupes:
-                finding = self.dupes[dupe_key]
+            if dupe_key in dupes:
+                finding = dupes[dupe_key]
                 if finding.description:
                     finding.description = finding.description
-                self.dupes[dupe_key] = finding
+                dupes[dupe_key] = finding
             else:
-                self.dupes[dupe_key] = True
+                dupes[dupe_key] = True
 
                 finding = Finding(title=vuln.get('title'),
                                 test=test,
@@ -117,7 +114,7 @@ class WhitesourceJSONParser(object):
                                 severity_justification=vuln.get('severity_justification'),
                                 dynamic_finding=True)
 
-                self.dupes[dupe_key] = finding
+                dupes[dupe_key] = finding
 
         output = []
         if "libraries" in content:
@@ -138,7 +135,8 @@ class WhitesourceJSONParser(object):
             for node in tree_node:
                 output.append(_build_common_output(node))
 
+        dupes = dict()
         for vuln in output:
-            _dedup_and_create_finding(vuln)
+            _dedup_and_create_finding(dupes, vuln)
 
-        self.items = self.dupes.values()
+        return dupes.values()

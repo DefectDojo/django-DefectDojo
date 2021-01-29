@@ -9,8 +9,7 @@ from dojo.models import Product, Engagement, Test, Finding, \
     System_Settings, FileUpload
 
 from dojo.forms import ImportScanForm, SEVERITY_CHOICES
-from dojo.tools import requires_file
-from dojo.tools.factory import import_parser_factory
+from dojo.tools.factory import import_parser_factory, requires_file
 from dojo.utils import max_safe, is_scan_file_too_large
 from dojo.notifications.helper import create_notification
 from django.urls import reverse
@@ -1027,7 +1026,7 @@ class ImportScanSerializer(serializers.Serializer):
     active = serializers.BooleanField(default=True)
     verified = serializers.BooleanField(default=True)
     scan_type = serializers.ChoiceField(
-        choices=ImportScanForm.SCAN_TYPE_CHOICES)
+        choices=ImportScanForm.SORTED_SCAN_TYPE_CHOICES)
     endpoint_to_add = serializers.PrimaryKeyRelatedField(queryset=Endpoint.objects.all(),
                                                          required=False,
                                                          default=None)
@@ -1104,6 +1103,7 @@ class ImportScanSerializer(serializers.Serializer):
                                            active,
                                            verified,
                                            data['scan_type'],)
+            parser_findings = parser.get_findings(data.get('file', None), test)
         except ValueError:
             raise Exception('FileParser ValueError')
         except:
@@ -1112,7 +1112,7 @@ class ImportScanSerializer(serializers.Serializer):
         new_findings = []
         skipped_hashcodes = []
         try:
-            items = parser.items
+            items = parser_findings
             logger.debug('starting import of %i items.', len(items))
             i = 0
             for item in items:
@@ -1280,7 +1280,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     active = serializers.BooleanField(default=True)
     verified = serializers.BooleanField(default=True)
     scan_type = serializers.ChoiceField(
-        choices=ImportScanForm.SCAN_TYPE_CHOICES)
+        choices=ImportScanForm.SORTED_SCAN_TYPE_CHOICES)
     endpoint_to_add = serializers.PrimaryKeyRelatedField(queryset=Endpoint.objects.all(),
                                                           default=None,
                                                           required=False)
@@ -1306,20 +1306,24 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             scan_date_time = timezone.make_aware(scan_date_time, timezone.get_default_timezone())
         verified = data['verified']
         active = data['active']
+        version = None
+        if 'version' in data:
+            version = data['version']
 
         try:
             parser = import_parser_factory(data.get('file', None),
                                            test,
                                            active,
                                            verified,
-                                           data['scan_type'],)
+                                           data['scan_type'])
+            parser_findings = parser.get_findings(data.get('file', None), test)
         except ValueError:
             raise Exception("Parser ValueError")
         except:
             raise Exception('Error while parsing the report, did you specify the correct scan type ?')
 
         try:
-            items = parser.items
+            items = parser_findings
             original_items = list(test.finding_set.all())
             new_items = []
             mitigated_count = 0
@@ -1535,13 +1539,10 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 test.target_end = max_safe([scan_date_time, test.target_end])
                 test.engagement.target_end = max_safe([scan_date, test.engagement.target_end])
 
+            if version:
+                test.version = version
             test.save()
             test.engagement.save()
-
-            # print(len(new_items))
-            # print(reactivated_count)
-            # print(mitigated_count)
-            # print(unchanged_count - mitigated_count)
 
             updated_count = mitigated_count + reactivated_count + len(new_items)
             if updated_count > 0:

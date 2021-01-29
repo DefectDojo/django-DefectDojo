@@ -85,6 +85,8 @@ def create_description(event, *args, **kwargs):
     if "description" not in kwargs.keys():
         if event == 'product_added':
             kwargs["description"] = "Product " + kwargs['title'] + " has been created successfully."
+        elif event == 'product_type_added':
+            kwargs["description"] = "Product Type " + kwargs['title'] + " has been created successfully."
         else:
             kwargs["description"] = "Event " + str(event) + " has occured."
 
@@ -272,7 +274,7 @@ def send_alert_notification(event, user=None, *args, **kwargs):
         icon = kwargs.get('icon', 'info-circle')
         alert = Alerts(
             user_id=user,
-            title=kwargs.get('title')[:100],
+            title=kwargs.get('title')[:250],
             description=create_notification_message(event, user, 'alert', *args, **kwargs)[:2000],
             url=kwargs.get('url', reverse('alerts')),
             icon=icon[:25],
@@ -331,8 +333,8 @@ def log_alert(e, notification_type=None, *args, **kwargs):
     for user in users:
         alert = Alerts(
             user_id=user,
-            url=kwargs.get('url', reverse('alerts'))[:100],
-            title=kwargs.get('title', 'Notification issue'),
+            url=kwargs.get('url', reverse('alerts')),
+            title=kwargs.get('title', 'Notification issue')[:250],
             description=kwargs.get('description', '%s' % e)[:2000],
             icon="exclamation-triangle",
             source=notification_type[:100] if notification_type else kwargs.get('source', 'unknown')[:100])

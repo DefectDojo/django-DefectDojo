@@ -14,6 +14,22 @@ dd_driver = None
 dd_driver_options = None
 
 
+def on_exception_html_source_logger(func):
+    def wrapper(self, *args, **kwargs):
+        try:
+            return func(self, *args, **kwargs)
+
+        except Exception as e:
+            print("exception occured at url:", self.driver.current_url)
+            print("page source:", self.driver.page_source)
+            f = open("selenium_page_source.html", "w", encoding='utf-8')
+            f.writelines(self.driver.page_source)
+            # time.sleep(30)
+            raise(e)
+
+    return wrapper
+
+
 class BaseTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -31,7 +47,7 @@ class BaseTestCase(unittest.TestCase):
 
             # the next 2 maybe needed in some scenario's for example on WSL or other headless situations
             dd_driver_options.add_argument("--no-sandbox")
-            # dd_driver_options.add_argument("--disable-dev-shm-usage")
+            dd_driver_options.add_argument("--disable-dev-shm-usage")
             dd_driver_options.add_argument("--disable-gpu")  # on windows sometimes chrome can't start with certain gpu driver versions, even in headless mode
 
             # start maximized or at least with sufficient with because datatables will hide certain controls when the screen is too narrow
@@ -75,6 +91,17 @@ class BaseTestCase(unittest.TestCase):
     def test_login(self):
         return self.login_page()
 
+    @on_exception_html_source_logger
+    def delete_product_if_exists(self, name="QA Test"):
+        driver = self.driver
+        # Navigate to the product page
+        self.goto_product_overview(driver)
+        # Select the specific product to delete
+        qa_products = driver.find_elements(By.LINK_TEXT, name)
+
+        if len(qa_products) > 0:
+            self.test_delete_product(name)
+
     # used to load some page just to get started
     # we choose /user because it's lightweight and fast
     def goto_some_page(self):
@@ -85,6 +112,10 @@ class BaseTestCase(unittest.TestCase):
     def goto_product_overview(self, driver):
         driver.get(self.base_url + "product")
         self.wait_for_datatable_if_content("no_products", "products_wrapper")
+        return driver
+
+    def goto_product_type_overview(self, driver):
+        driver.get(self.base_url + "product/type")
         return driver
 
     def goto_component_overview(self, driver):
@@ -319,19 +350,3 @@ class WebdriverOnlyNewLogFacade(object):
         self.last_timestamp = last_timestamp
 
         return filtered
-
-
-def on_exception_html_source_logger(func):
-    def wrapper(self, *args, **kwargs):
-        try:
-            return func(self, *args, **kwargs)
-
-        except Exception as e:
-            print("exception occured at url:", self.driver.current_url)
-            print("page source:", self.driver.page_source)
-            f = open("selenium_page_source.html", "w", encoding='utf-8')
-            f.writelines(self.driver.page_source)
-            # time.sleep(30)
-            raise(e)
-
-    return wrapper

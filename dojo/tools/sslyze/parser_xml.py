@@ -1,13 +1,14 @@
-from xml.dom import NamespaceErr
 import hashlib
-from defusedxml import ElementTree as ET
 from urllib.parse import urlparse
-from dojo.models import Endpoint, Finding
+from xml.dom import NamespaceErr
 
+from defusedxml import ElementTree as ET
+
+from dojo.models import Endpoint, Finding
 
 __author__ = 'dr3dd589'
 
-
+# FIXME discuss this list as maintenance subject
 WEAK_CIPHER_LIST = [
     "TLS_DHE_RSA_WITH_AES_128_CBC_SHA",
     "TLS_DHE_RSA_WITH_AES_128_CBC_SHA256",
@@ -58,11 +59,7 @@ PROTOCOLS = [
 
 class SSLyzeXMLParser(object):
 
-    def __init__(self, file, test):
-        self.dupes = dict()
-        self.items = ()
-        if file is None:
-            return
+    def get_findings(self, file, test):
 
         tree = ET.parse(file)
         # get root of tree.
@@ -71,6 +68,7 @@ class SSLyzeXMLParser(object):
             raise NamespaceErr("This doesn't seem to be a valid sslyze xml file.")
 
         results = root.find('results')
+        dupes = dict()
         for target in results:
             url = target.attrib['host']
             port = target.attrib['port']
@@ -124,13 +122,13 @@ class SSLyzeXMLParser(object):
                                     "**Weak Ciphers** : " + ",\n\n".join(weak_cipher[element.tag])
                 if title and description is not None:
                     dupe_key = hashlib.md5(str(description + title).encode('utf-8')).hexdigest()
-                    if dupe_key in self.dupes:
-                        finding = self.dupes[dupe_key]
+                    if dupe_key in dupes:
+                        finding = dupes[dupe_key]
                         if finding.references:
                             finding.references = finding.references
-                        self.dupes[dupe_key] = finding
+                        dupes[dupe_key] = finding
                     else:
-                        self.dupes[dupe_key] = True
+                        dupes[dupe_key] = True
 
                         finding = Finding(
                             title=title,
@@ -142,7 +140,7 @@ class SSLyzeXMLParser(object):
                             numerical_severity=Finding.get_numerical_severity(severity),
                             dynamic_finding=True,)
                         finding.unsaved_endpoints = list()
-                        self.dupes[dupe_key] = finding
+                        dupes[dupe_key] = finding
 
                         if url is not None:
                             finding.unsaved_endpoints.append(Endpoint(
@@ -152,4 +150,4 @@ class SSLyzeXMLParser(object):
                                 protocol=protocol,
                                 query=query,
                                 fragment=fragment,))
-                self.items = self.dupes.values()
+        return dupes.values()

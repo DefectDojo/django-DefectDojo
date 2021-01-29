@@ -31,8 +31,8 @@ from dojo.models import Finding, Product, Engagement, Test, \
     Check_List, Test_Type, Notes, \
     Risk_Acceptance, Development_Environment, BurpRawRequestResponse, Endpoint, \
     Cred_Mapping, Dojo_User, System_Settings, Note_Type, Endpoint_Status
-from dojo.tools import handles_active_verified_statuses
-from dojo.tools.factory import import_parser_factory
+from dojo.tools.factory import handles_active_verified_statuses
+from dojo.tools.factory import import_parser_factory, get_choices
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, message, Product_Tab, is_scan_file_too_large, \
     get_system_setting, redirect_to_return_url_or_else, get_return_url
@@ -150,7 +150,6 @@ def prefetch_for_products_with_engagments(products_with_engagements):
     return products_with_engagements
 
 
-# @user_passes_test(lambda u: u.is_staff)
 @user_must_be_authorized(Engagement, 'change', 'eid')
 def edit_engagement(request, eid):
     engagement = Engagement.objects.get(pk=eid)
@@ -173,10 +172,6 @@ def edit_engagement(request, eid):
                 engagement.active = True
             engagement.save()
             form.save_m2m()
-
-            # tags = request.POST.getlist('tags')
-            # t = ", ".join('"{0}"'.format(w) for w in tags)
-            # engagement.tags = t
 
             messages.add_message(
                 request,
@@ -210,8 +205,6 @@ def edit_engagement(request, eid):
         logger.debug('showing jira-epic-form')
         jira_epic_form = JIRAEngagementForm(instance=engagement)
 
-    # form.initial['tags'] = [tag.name for tag in engagement.tags.all()]
-
     title = ' CI/CD' if is_ci_cd else ''
     product_tab = Product_Tab(engagement.product.id, title="Edit" + title + " Engagement", tab="engagements")
     product_tab.setEngagement(engagement)
@@ -225,7 +218,6 @@ def edit_engagement(request, eid):
     })
 
 
-# @user_passes_test(lambda u: u.is_staff)
 @user_must_be_authorized(Engagement, 'delete', 'eid')
 def delete_engagement(request, eid):
     engagement = get_object_or_404(Engagement, pk=eid)
@@ -414,7 +406,6 @@ def view_engagement(request, eid):
         })
 
 
-# @user_passes_test(lambda u: u.is_staff)
 @user_must_be_authorized(Engagement, 'staff', 'eid')
 def add_tests(request, eid):
     eng = Engagement.objects.get(id=eid)
@@ -496,8 +487,6 @@ def add_tests(request, eid):
     })
 
 
-# @user_passes_test(lambda u: u.is_staff)
-# @user_must_be_authorized(Product, 'staff', 'eid')
 # Cant use the easy decorator because of the potential for either eid/pid being used
 def import_scan_results(request, eid=None, pid=None):
     engagement = None
@@ -535,6 +524,8 @@ def import_scan_results(request, eid=None, pid=None):
 
         if form.is_valid() and (jform is None or jform.is_valid()):
             # Allows for a test to be imported with an engagement created on the fly
+            version = form.cleaned_data['version']
+
             if engagement is None:
                 engagement = Engagement()
                 # product = get_object_or_404(Product, id=pid)
@@ -548,6 +539,7 @@ def import_scan_results(request, eid=None, pid=None):
                 engagement.product = product
                 engagement.active = True
                 engagement.status = 'In Progress'
+                engagement.version = version
                 engagement.save()
             file = request.FILES.get('file', None)
             scan_date = form.cleaned_data['scan_date']
@@ -556,8 +548,9 @@ def import_scan_results(request, eid=None, pid=None):
             verified = form.cleaned_data['verified']
             scan_type = request.POST['scan_type']
             tags = form.cleaned_data['tags']
+
             if not any(scan_type in code
-                       for code in ImportScanForm.SCAN_TYPE_CHOICES):
+                       for code in ImportScanForm.SORTED_SCAN_TYPE_CHOICES):
                 raise Http404()
             if file and is_scan_file_too_large(file):
                 messages.add_message(request,
@@ -579,6 +572,7 @@ def import_scan_results(request, eid=None, pid=None):
                 target_end=scan_date,
                 environment=environment,
                 percent_complete=100,
+                version=version,
                 tags=tags)
             t.lead = user
             t.full_clean()
@@ -598,7 +592,8 @@ def import_scan_results(request, eid=None, pid=None):
                     new_f.save()
 
             try:
-                parser = import_parser_factory(file, t, active, verified)
+                parser = import_parser_factory(file, t, active, verified, scan_type)
+                parser_findings = parser.get_findings(file, t)
             except Exception as e:
                 messages.add_message(request,
                                      messages.ERROR,
@@ -614,7 +609,7 @@ def import_scan_results(request, eid=None, pid=None):
                 # push_to_jira = jira_helper.is_push_to_jira(new_finding, jform.cleaned_data.get('push_to_jira'))
                 push_to_jira = push_all_jira_issues or (jform and jform.cleaned_data.get('push_to_jira'))
 
-                items = parser.items
+                items = parser_findings
                 logger.debug('starting reimport of %i items.', len(items))
                 i = 0
                 for item in items:
@@ -756,18 +751,19 @@ def import_scan_results(request, eid=None, pid=None):
         jform = JIRAImportScanForm(push_all=push_all_jira_issues, prefix='jiraform')
 
     form.fields['endpoints'].queryset = Endpoint.objects.filter(product__id=product_tab.product.id)
-    return render(request, 'dojo/import_scan_results.html', {
-        'form': form,
-        'product_tab': product_tab,
-        'engagement_or_product': engagement_or_product,
-        'custom_breadcrumb': custom_breadcrumb,
-        'title': title,
-        'cred_form': cred_form,
-        'jform': jform
-    })
+    return render(request,
+        'dojo/import_scan_results.html',
+        {'form': form,
+         'product_tab': product_tab,
+         'engagement_or_product': engagement_or_product,
+         'custom_breadcrumb': custom_breadcrumb,
+         'title': title,
+         'cred_form': cred_form,
+         'jform': jform,
+         'scan_types': get_choices(),
+         })
 
 
-# @user_passes_test(lambda u: u.is_staff)
 @user_must_be_authorized(Engagement, 'staff', 'eid')
 def close_eng(request, eid):
     eng = Engagement.objects.get(id=eid)
@@ -813,7 +809,6 @@ method to complete checklists from the engagement view
 """
 
 
-# @user_passes_test(lambda u: u.is_staff)
 @user_must_be_authorized(Engagement, 'staff', 'eid')
 def complete_checklist(request, eid):
     eng = get_object_or_404(Engagement, id=eid)
@@ -1089,117 +1084,6 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
             'add_findings': add_fpage,
             'return_url': get_return_url(request),
         })
-
-
-# @user_must_be_authorized(Engagement, 'staff', 'eid')
-# def edit_risk_acceptance(request, eid, raid):
-#     risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
-#     eng = get_object_or_404(Engagement, pk=eid)
-
-#     if request.method == 'POST':
-#         note_form = NoteForm(request.POST)
-#         if note_form.is_valid():
-#             new_note = note_form.save(commit=False)
-#             new_note.author = request.user
-#             new_note.date = timezone.now()
-#             new_note.save()
-#             risk_acceptance.notes.add(new_note)
-#             messages.add_message(
-#                 request,
-#                 messages.SUCCESS,
-#                 'Note added successfully.',
-#                 extra_tags='alert-success')
-
-#         if 'delete_note' in request.POST:
-#             note = get_object_or_404(Notes, pk=request.POST['delete_note_id'])
-#             if note.author.username == request.user.username:
-#                 risk_acceptance.notes.remove(note)
-#                 note.delete()
-#                 messages.add_message(
-#                     request,
-#                     messages.SUCCESS,
-#                     'Note deleted successfully.',
-#                     extra_tags='alert-success')
-#             else:
-#                 messages.add_message(
-#                     request,
-#                     messages.ERROR,
-#                     "Since you are not the note's author, it was not deleted.",
-#                     extra_tags='alert-danger')
-
-#         if 'remove_finding' in request.POST:
-#             finding = get_object_or_404(
-#                 Finding, pk=request.POST['remove_finding_id'])
-#             risk_acceptance.accepted_findings.remove(finding)
-#             finding.active = True
-#             finding.save()
-#             messages.add_message(
-#                 request,
-#                 messages.SUCCESS,
-#                 'Finding removed successfully.',
-#                 extra_tags='alert-success')
-#         if 'replace_file' in request.POST:
-#             replace_form = ReplaceRiskAcceptanceProofForm(
-#                 request.POST, request.FILES, instance=risk_acceptance)
-#             if replace_form.is_valid():
-#                 risk_acceptance.path.delete(save=False)
-#                 risk_acceptance.path = replace_form.cleaned_data['path']
-#                 risk_acceptance.save()
-#                 messages.add_message(
-#                     request,
-#                     messages.SUCCESS,
-#                     'File replaced successfully.',
-#                     extra_tags='alert-success')
-#         if 'add_findings' in request.POST:
-#             add_findings_form = AddFindingsRiskAcceptanceForm(
-#                 request.POST, request.FILES, instance=risk_acceptance)
-#             if add_findings_form.is_valid():
-#                 findings = add_findings_form.cleaned_data['accepted_findings']
-#                 for finding in findings:
-#                     finding.active = False
-#                     finding.save()
-#                     risk_acceptance.accepted_findings.add(finding)
-#                 risk_acceptance.save()
-#                 messages.add_message(
-#                     request,
-#                     messages.SUCCESS,
-#                     'Finding%s added successfully.' % ('s' if len(findings) > 1
-#                                                        else ''),
-#                     extra_tags='alert-success')
-
-#     note_form = NoteForm()
-#     replace_form = ReplaceRiskAcceptanceProofForm()
-#     add_findings_form = AddFindingsRiskAcceptanceForm()
-
-#     accepted_findings = risk_acceptance.accepted_findings.order_by('numerical_severity')
-#     fpage = get_page_items(request, accepted_findings, 15)
-
-#     unaccepted_findings = Finding.objects.filter(test__in=eng.test_set.all()) \
-#         .exclude(id__in=accepted_findings).order_by("title")
-#     add_fpage = get_page_items(request, unaccepted_findings, 10, 'apage')
-#     # on this page we need to add unaccepted findings as possible findings to add as accepted
-#     add_findings_form.fields[
-#         "accepted_findings"].queryset = add_fpage.object_list
-
-#     authorized = (request.user == risk_acceptance.owner.username or request.user.is_staff)
-
-#     product_tab = Product_Tab(eng.product.id, title="Risk Acceptance", tab="engagements")
-#     product_tab.setEngagement(eng)
-#     return render(
-#         request, 'dojo/view_risk_acceptance.html', {
-#             'risk_acceptance': risk_acceptance,
-#             'product_tab': product_tab,
-#             'accepted_findings': fpage,
-#             'notes': risk_acceptance.notes.all(),
-#             'eng': eng,
-#             'note_form': note_form,
-#             'replace_form': replace_form,
-#             'add_findings_form': add_findings_form,
-#             # 'show_add_findings_form': len(unaccepted_findings),
-#             'request': request,
-#             'add_findings': add_fpage,
-#             'authorized': authorized,
-#         })
 
 
 @user_must_be_authorized(Engagement, 'staff', 'eid')

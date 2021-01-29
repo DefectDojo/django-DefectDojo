@@ -8,7 +8,6 @@ from django.db import IntegrityError
 from rest_framework.permissions import DjangoModelPermissions
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser
-from rest_framework.exceptions import ParseError
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg2 import openapi
 from drf_yasg2.utils import swagger_auto_schema, no_body
@@ -573,25 +572,19 @@ class FindingViewSet(prefetch.PrefetchListMixin,
         finding = get_object_or_404(Finding.objects, id=pk)
         delete_tags = serializers.TagSerializer(data=request.data)
         if delete_tags.is_valid():
-            print('delete_tags: %s' % delete_tags)
             all_tags = finding.tags
-            print('all1: %s' % all_tags)
             all_tags = serializers.TagSerializer({"tags": all_tags}).data['tags']
-            print('all2: %s' % all_tags)
 
             # serializer turns it into a string, but we need a list
             del_tags = tagulous.utils.parse_tags(delete_tags.validated_data['tags'])
             if len(del_tags) < 1:
                 return Response({"error": "Empty Tag List Not Allowed"},
                         status=status.HTTP_400_BAD_REQUEST)
-            print('deltags: %s' % del_tags)
             for tag in del_tags:
-                print('deltag: %s' % tag)
                 if tag not in all_tags:
                     return Response({"error": "'{}' is not a valid tag in list".format(tag)},
                         status=status.HTTP_400_BAD_REQUEST)
                 all_tags.remove(tag)
-            # t = ", ".join(all_tags)
             new_tags = tagulous.utils.render_tags(all_tags)
             finding.tags = new_tags
             finding.save()
@@ -1266,10 +1259,7 @@ class ImportScanView(mixins.CreateModelMixin,
             push_to_jira = push_to_jira or jira_project.push_all_issues
 
         logger.debug('push_to_jira: %s', serializer.validated_data.get('push_to_jira'))
-        try:
-            serializer.save(push_to_jira=push_to_jira)
-        except Exception as e:
-            raise ParseError(detail=e)
+        serializer.save(push_to_jira=push_to_jira)
 
 
 class ReImportScanView(mixins.CreateModelMixin,
@@ -1287,10 +1277,7 @@ class ReImportScanView(mixins.CreateModelMixin,
             push_to_jira = push_to_jira or jira_project.push_all_issues
 
         logger.debug('push_to_jira: %s', serializer.validated_data.get('push_to_jira'))
-        try:
-            serializer.save(push_to_jira=push_to_jira)
-        except Exception as e:
-            raise ParseError(detail=e)
+        serializer.save(push_to_jira=push_to_jira)
 
 
 class NoteTypeViewSet(mixins.ListModelMixin,

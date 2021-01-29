@@ -419,7 +419,13 @@ def close_finding(request, fid):
                 finding.is_Mitigated = True
                 finding.last_reviewed = finding.mitigated
                 finding.last_reviewed_by = request.user
-                finding.endpoints.clear()
+                endpoint_status = finding.endpoint_status.all()
+                for status in endpoint_status:
+                    status.mitigated_by = request.user
+                    status.mitigated_time = timezone.now()
+                    status.mitigated = True
+                    status.last_modified = timezone.now()
+                    status.save()
 
                 # only push to JIRA if there is an issue, otherwise a new one is created
                 if jira_helper.is_push_all_issues(finding) and finding.has_jira_issue:
@@ -545,6 +551,13 @@ def reopen_finding(request, fid):
     finding.is_Mitigated = False
     finding.last_reviewed = finding.mitigated
     finding.last_reviewed_by = request.user
+    endpoint_status = finding.endpoint_status.all()
+    for status in endpoint_status:
+        status.mitigated_by = None
+        status.mitigated_time = None
+        status.mitigated = False
+        status.last_modified = timezone.now()
+        status.save()
 
     # only push to JIRA if there is an issue, otherwise a new one is created
     if jira_helper.is_push_all_issues(finding) and finding.has_jira_issue:
@@ -644,16 +657,11 @@ def edit_finding(request, fid):
     else:
         req_resp = None
     form = FindingForm(instance=finding, template=False, req_resp=req_resp)
-    # form.initial['tags'] = [tag.name for tag in finding.tags.all()]
     form_error = False
     jform = None
     push_all_jira_issues = jira_helper.is_push_all_issues(finding)
     gform = None
     use_jira = jira_helper.get_jira_project(finding) is not None
-
-    # for key, value in request.POST.items():
-    #     print(f'Key: {key}')
-    #     print(f'Value: {value}')
 
     github_enabled = finding.has_github_issue()
 
@@ -830,7 +838,6 @@ def edit_finding(request, fid):
         form.fields['endpoints'].queryset = form.cleaned_data['endpoints']
     else:
         form.fields['endpoints'].queryset = finding.endpoints.all()
-    # form.initial['tags'] = [tag.name for tag in finding.tags.all()]
 
     product_tab = Product_Tab(finding.test.engagement.product.id, title="Edit Finding", tab="findings")
 
@@ -851,9 +858,6 @@ def touch_finding(request, fid):
     finding.last_reviewed = timezone.now()
     finding.last_reviewed_by = request.user
     finding.save()
-    # print('request:')
-    # print(vars(request))
-    # print(request.GET['return_url'])
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id, )))
 
 
@@ -1467,7 +1471,6 @@ def edit_template(request, tid):
                 extra_tags='alert-danger')
 
     count = apply_cwe_mitigation(True, template, False)
-    # form.initial['tags'] = [tag.name for tag in template.tags.all()]
     add_breadcrumb(title="Edit Template", top_level=False, request=request)
     return render(request, 'dojo/add_template.html', {
         'form': form,

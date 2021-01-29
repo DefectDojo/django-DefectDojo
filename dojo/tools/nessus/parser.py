@@ -1,8 +1,10 @@
-from xml.dom import NamespaceErr
-from defusedxml import ElementTree
-import os
 import csv
+import os
 import re
+from xml.dom import NamespaceErr
+
+from defusedxml import ElementTree
+
 from dojo.models import Endpoint, Finding
 
 __author__ = 'jay7958'
@@ -22,7 +24,7 @@ def get_text_severity(severity_id):
 
 
 class NessusCSVParser(object):
-    def __init__(self, filename, test):
+    def get_findings(self, filename, test):
         content = open(filename.temporary_file_path(), "r").read().replace("\r", "\n")
         # content = re.sub("\"(.*?)\n(.*?)\"", "\"\1\2\"", content)
         # content = re.sub("(?<=\")\n", "\\\\n", content)
@@ -54,7 +56,7 @@ class NessusCSVParser(object):
                     if not var:
                         continue
 
-                    var = re.sub("(\A(\\n)+|(\\n)+\Z|\\r)", "", var)
+                    var = re.sub(r"(\A(\\n)+|(\\n)+\Z|\\r)", "", var)
                     var = re.sub("(\\n)+", "\n", var)
 
                     if heading[i] == "CVE":
@@ -137,11 +139,11 @@ class NessusCSVParser(object):
                     find.unsaved_endpoints.append(endpoint)
         os.unlink(filename.temporary_file_path())
         os.unlink("%s-filtered" % filename.temporary_file_path())
-        self.items = list(dupes.values())
+        return list(dupes.values())
 
 
 class NessusXMLParser(object):
-    def __init__(self, file, test):
+    def get_findings(self, file, test):
         nscan = ElementTree.parse(file)
         root = nscan.getroot()
 
@@ -236,4 +238,18 @@ class NessusXMLParser(object):
                         find.unsaved_endpoints.append(Endpoint(host=fqdn,
                                                                protocol=protocol))
 
-        self.items = list(dupes.values())
+        return list(dupes.values())
+
+
+class NessusParser(object):
+    def get_findings(self, filename, test):
+
+        if filename is None:
+            return list()
+
+        if filename.name.lower().endswith('.xml'):
+            return list(NessusXMLParser().parse(filename, test).values())
+        elif filename.name.lower().endswith('.csv'):
+            return list(NessusCSVParser().parse(filename, test).values())
+        else:
+            raise ValueError('Unknown File Format')
