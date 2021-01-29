@@ -402,7 +402,7 @@ class TestSonarQubeParser(TestCase):
         see: https://github.com/DefectDojo/django-DefectDojo/issues/3725
         """
         my_file_handle, product, engagement, test = self.init("dojo/unittests/scans/sonarqube/sonar.html")
-        self.parser = SonarQubeHtmlParser()
+        parser = SonarQubeHtmlParser()
         findings = parser.get_findings(my_file_handle, test, 'detailed')
         self.teardown(my_file_handle)
         # specific verifications
