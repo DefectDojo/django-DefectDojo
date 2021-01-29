@@ -648,6 +648,8 @@ def re_import_scan_results(request, tid):
             active = form.cleaned_data['active']
             verified = form.cleaned_data['verified']
             tags = form.cleaned_data['tags']
+            if 'version' in form.cleaned_data and form.cleaned_data['version']:
+                test.version = form.cleaned_data['version']
             close_old_findings = form.cleaned_data.get('close_old_findings', True)
             # Tags are replaced, same behaviour as with django-tagging
             test.tags = tags

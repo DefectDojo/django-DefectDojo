@@ -523,6 +523,8 @@ def import_scan_results(request, eid=None, pid=None):
 
         if form.is_valid() and (jform is None or jform.is_valid()):
             # Allows for a test to be imported with an engagement created on the fly
+            version = form.cleaned_data['version']
+
             if engagement is None:
                 engagement = Engagement()
                 # product = get_object_or_404(Product, id=pid)
@@ -536,6 +538,7 @@ def import_scan_results(request, eid=None, pid=None):
                 engagement.product = product
                 engagement.active = True
                 engagement.status = 'In Progress'
+                engagement.version = version
                 engagement.save()
             file = request.FILES.get('file', None)
             scan_date = form.cleaned_data['scan_date']
@@ -544,6 +547,7 @@ def import_scan_results(request, eid=None, pid=None):
             verified = form.cleaned_data['verified']
             scan_type = request.POST['scan_type']
             tags = form.cleaned_data['tags']
+
             if not any(scan_type in code
                        for code in ImportScanForm.SORTED_SCAN_TYPE_CHOICES):
                 raise Http404()
@@ -567,6 +571,7 @@ def import_scan_results(request, eid=None, pid=None):
                 target_end=scan_date,
                 environment=environment,
                 percent_complete=100,
+                version=version,
                 tags=tags)
             t.lead = user
             t.full_clean()
