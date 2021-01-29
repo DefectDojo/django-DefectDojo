@@ -9,8 +9,7 @@ from dojo.models import Product, Engagement, Test, Finding, \
     System_Settings, FileUpload
 
 from dojo.forms import ImportScanForm, SEVERITY_CHOICES
-from dojo.tools import requires_file
-from dojo.tools.factory import import_parser_factory
+from dojo.tools.factory import import_parser_factory, requires_file
 from dojo.utils import max_safe, is_scan_file_too_large
 from dojo.notifications.helper import create_notification
 from django.urls import reverse
@@ -1026,7 +1025,7 @@ class ImportScanSerializer(serializers.Serializer):
     active = serializers.BooleanField(default=True)
     verified = serializers.BooleanField(default=True)
     scan_type = serializers.ChoiceField(
-        choices=ImportScanForm.SCAN_TYPE_CHOICES)
+        choices=ImportScanForm.SORTED_SCAN_TYPE_CHOICES)
     endpoint_to_add = serializers.PrimaryKeyRelatedField(queryset=Endpoint.objects.all(),
                                                          required=False,
                                                          default=None)
@@ -1103,6 +1102,7 @@ class ImportScanSerializer(serializers.Serializer):
                                            active,
                                            verified,
                                            data['scan_type'],)
+            parser_findings = parser.get_findings(data.get('file', None), test)
         except ValueError:
             raise Exception('FileParser ValueError')
         except:
@@ -1111,7 +1111,7 @@ class ImportScanSerializer(serializers.Serializer):
         new_findings = []
         skipped_hashcodes = []
         try:
-            items = parser.items
+            items = parser_findings
             logger.debug('starting import of %i items.', len(items))
             i = 0
             for item in items:
@@ -1267,7 +1267,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     active = serializers.BooleanField(default=True)
     verified = serializers.BooleanField(default=True)
     scan_type = serializers.ChoiceField(
-        choices=ImportScanForm.SCAN_TYPE_CHOICES)
+        choices=ImportScanForm.SORTED_SCAN_TYPE_CHOICES)
     endpoint_to_add = serializers.PrimaryKeyRelatedField(queryset=Endpoint.objects.all(),
                                                           default=None,
                                                           required=False)
@@ -1299,14 +1299,15 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                                            test,
                                            active,
                                            verified,
-                                           data['scan_type'],)
+                                           data['scan_type'])
+            parser_findings = parser.get_findings(data.get('file', None), test)
         except ValueError:
             raise Exception("Parser ValueError")
         except:
             raise Exception('Error while parsing the report, did you specify the correct scan type ?')
 
         try:
-            items = parser.items
+            items = parser_findings
             original_items = list(test.finding_set.all())
             new_items = []
             mitigated_count = 0

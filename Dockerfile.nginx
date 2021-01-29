@@ -54,15 +54,14 @@ RUN pip3 install \
 	-r ./requirements.txt
 
 COPY components/ ./components/
+RUN \
+  cd components && \
+  yarn
+
 COPY manage.py ./
 COPY dojo/ ./dojo/
 
-RUN \
-  cd components && \
-  yarn && \
-  cd .. && \
-  env DD_SECRET_KEY='.' python3 manage.py collectstatic --noinput && \
-  true
+RUN env DD_SECRET_KEY='.' python3 manage.py collectstatic --noinput && true
 
 FROM nginx:1.19.6-alpine@sha256:01747306a7247dbe928db991eab42e4002118bf636dd85b4ffea05dd907e5b66
 ARG uid=1001

@@ -1,14 +1,16 @@
 __author__ = 'Aaron Weaver'
 
-from dojo.models import Finding
-from datetime import datetime
 import json
-from django.utils.text import Truncator
+from datetime import datetime
+
 from django.utils.html import strip_tags
+from django.utils.text import Truncator
+
+from dojo.models import Finding
 
 
 class MobSFParser(object):
-    def __init__(self, filename, test):
+    def get_findings(self, filename, test):
         tree = filename.read()
         try:
             data = json.loads(str(tree, 'utf-8'))

@@ -27,7 +27,7 @@ from dojo.forms import NoteForm, TestForm, FindingForm, \
     FindingBulkUpdateForm
 from dojo.models import Finding, Test, Notes, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, \
     Finding_Template, Cred_Mapping, Dojo_User, System_Settings, Endpoint_Status
-from dojo.tools.factory import import_parser_factory
+from dojo.tools.factory import import_parser_factory, get_choices
 from dojo.utils import get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting, \
     Product_Tab, max_safe, is_scan_file_too_large, get_words_for_field
 from dojo.notifications.helper import create_notification
@@ -92,7 +92,7 @@ def view_test(request, tid):
 
     paged_findings, total_findings_count = get_page_items_and_count(request, prefetch_for_findings(findings.qs), 25)
     paged_stub_findings = get_page_items(request, stub_findings, 25)
-    show_re_upload = any(test.test_type.name in code for code in ImportScanForm.SCAN_TYPE_CHOICES)
+    show_re_upload = any(test.test_type.name in code for code in ImportScanForm.SORTED_SCAN_TYPE_CHOICES)
 
     product_tab = Product_Tab(prod.id, title="Test", tab="engagements")
     product_tab.setEngagement(test.engagement)
@@ -659,7 +659,8 @@ def re_import_scan_results(request, tid):
                 return HttpResponseRedirect(reverse('re_import_scan_results', args=(test.id,)))
 
             try:
-                parser = import_parser_factory(file, test, active, verified)
+                parser = import_parser_factory(file, test, active, verified, scan_type=scan_type)
+                parser_findings = parser.get_findings(file, test)
             except ValueError:
                 raise Http404()
             except Exception as e:
@@ -673,7 +674,7 @@ def re_import_scan_results(request, tid):
                 return HttpResponseRedirect(reverse('re_import_scan_results', args=(test.id,)))
 
             try:
-                items = parser.items
+                items = parser_findings
                 original_items = list(test.finding_set.all())
                 new_items = []
                 mitigated_count = 0
@@ -960,4 +961,5 @@ def re_import_scan_results(request, tid):
                    'eid': engagement.id,
                    'additional_message': additional_message,
                    'jform': jform,
+                   'scan_types': get_choices(),
                    })
