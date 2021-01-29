@@ -1293,6 +1293,9 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             scan_date_time = timezone.make_aware(scan_date_time, timezone.get_default_timezone())
         verified = data['verified']
         active = data['active']
+        version = None
+        if 'version' in data:
+            version = data['version']
 
         try:
             parser = import_parser_factory(data.get('file', None),
@@ -1512,6 +1515,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 test.target_end = max_safe([scan_date_time, test.target_end])
                 test.engagement.target_end = max_safe([scan_date, test.engagement.target_end])
 
+            if version:
+                test.version = version
             test.save()
             test.engagement.save()
 
