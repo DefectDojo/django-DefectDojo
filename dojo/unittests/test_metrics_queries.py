@@ -181,19 +181,7 @@ class EndpointQueriesTest(TestCase):
             )
             self.assertSequenceEqual(
                 endpoint_queries['closed'].values(),
-                [
-                    {
-                        'id': 1,
-                        'date': datetime(2020, 7, 1, 0, 0, tzinfo=timezone.utc),
-                        'last_modified': datetime(2020, 7, 1, 17, 45, 39, 791907, tzinfo=timezone.utc),
-                        'mitigated': False, 'mitigated_time': None,
-                        'mitigated_by_id': None, 'false_positive': False,
-                        'out_of_scope': False,
-                        'risk_accepted': False,
-                        'endpoint_id': 2,
-                        'finding_id': 2
-                    }
-                ],
+                [],
             )
             self.assertSequenceEqual(
                 endpoint_queries['accepted'].values(),
