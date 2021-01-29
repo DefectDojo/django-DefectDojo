@@ -9,7 +9,8 @@ __author__ = "Dennis Van Elst"
 import argparse
 import csv
 import logging
-from dojo.models import Finding, Endpoint
+
+from dojo.models import Endpoint, Finding
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +43,7 @@ def report_writer(report_dic, output_filename):
         csvWriter = utfdictcsv.DictUnicodeWriter(outFile, REPORT_HEADERS, quoting=csv.QUOTE_ALL)
         csvWriter.writerow(CUSTOM_HEADERS)
         csvWriter.writerows(report_dic)
-    print("Successfully parsed.")
+    logger.debug("Successfully parsed.")
 
 
 def issue_r(raw_row, vuln, scan_date):
@@ -168,7 +169,7 @@ def issue_r(raw_row, vuln, scan_date):
 def qualys_infrascan_parser(qualys_xml_file):
     master_list = []
     if qualys_xml_file is not None:
-        parser = etree.XMLParser(remove_blank_text=True, no_network=True, recover=True)
+        parser = etree.XMLParser(resolve_entities=False, remove_blank_text=True, no_network=True, recover=True)
         d = etree.parse(qualys_xml_file, parser)
 
         # fetch scan date e.g.: <KEY value="DATE">2020-01-30T09:45:41Z</KEY>
@@ -203,11 +204,11 @@ if __name__ == "__main__":
     try:
         qualys_parser(args.qualys_xml_file)
     except IOError:
-        print("[!] Error processing file: {}".format(args.qualys_xml_file))
+        logger.error("[!] Error processing file: {}".format(args.qualys_xml_file))
         exit()
 
 
 # still need to import this in Dojo
 class QualysInfraScanParser(object):
-    def __init__(self, file, test):
-        self.items = qualys_infrascan_parser(file)
+    def get_findings(self, file, test):
+        return qualys_infrascan_parser(file)

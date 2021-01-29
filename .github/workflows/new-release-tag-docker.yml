@@ -1,0 +1,103 @@
+name: "Release: 2. tag, release, docker push"
+
+env:
+  GIT_USERNAME: "DefectDojo release bot"
+  GIT_EMAIL: "dojo-release-bot@users.noreply.github.com"
+  workflow_name: 'release 2 tag release docker push' # needed in cache key, which doesn't support comma's
+on:
+  workflow_dispatch:
+    inputs:
+      # the actual branch that can be chosen on the UI is made irrelevant by further steps
+      # because someone will forget one day to change it.
+      release_number:
+        description: 'Release version (x.y.z format)'
+        required: true
+
+jobs:
+  tag-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: master
+      - name: Configure git
+        run: |
+          git config --global user.name "${{ env.GIT_USERNAME }}"
+          git config --global user.email "${{ env.GIT_EMAIL }}"
+      - name: Create new tag ${{ github.event.inputs.release_number }}
+        # at this point, the PR from the 1st workflow is merged into master.
+        run: |
+          git tag -a ${{ github.event.inputs.release_number }} -m "[bot] release ${{ github.event.inputs.release_number }}"
+          git push origin ${{ github.event.inputs.release_number }}
+      - name: Create release ${{ github.event.inputs.release_number }}
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.event.inputs.release_number }}  # this does not create a tag
+          release_name: Release ${{ github.event.inputs.release_number }}
+          body: |
+            Fill in with release drafter information manually for now, then publish.
+          draft: true
+          prerelease: false
+
+
+  job-build-and-push:
+    needs: tag-and-release
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+          docker-image: [django, nginx]
+    steps:
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Checkout tag
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.inputs.release_number }}
+
+      - id: set-repo-org
+        run: echo ::set-output name=repoorg::${GITHUB_REPOSITORY%%/*} | tr '[:upper:]' '[:lower:]'
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        env:
+          docker-image: ${{ matrix.docker-image }}
+        with:
+          path: /tmp/.buildx-cache-${{ env.docker-image }}
+          key: ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ env.workflow_name }}-${{ github.sha }}-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ env.workflow_name}}-${{ github.sha }}
+            ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ env.workflow_name }}
+            ${{ runner.os }}-buildx-${{ env.docker-image }}-
+
+      - name: Build and push images
+        uses: docker/build-push-action@v2
+        env:
+          REPO_ORG: ${{ steps.set-repo-org.outputs.repoorg }}
+          docker-image: ${{ matrix.docker-image }}
+        with:
+          push: true
+          tags: ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }}, ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:latest
+          file: ./Dockerfile.${{ env.docker-image }}
+          context: .
+          cache-from: type=local,src=/tmp/.buildx-cache-${{ env.docker-image }}
+          cache-to: type=local,dest=/tmp/.buildx-cache-${{ env.docker-image }}
+
+      - name: Image digest
+        run: echo ${{ steps.docker_build.outputs.digest }}

@@ -64,7 +64,6 @@ class DojoSytemSettingsMiddleware(object):
         return response
 
     def process_exception(self, request, exception):
-        logger.debug('cleaning up during exception')
         self.cleanup()
 
     @classmethod
@@ -76,7 +75,6 @@ class DojoSytemSettingsMiddleware(object):
 
     @classmethod
     def cleanup(cls, *args, **kwargs):
-        logger.debug('removing thread local system_settings')
         if hasattr(cls._thread_local, 'system_settings'):
             del cls._thread_local.system_settings
 
@@ -91,7 +89,7 @@ class DojoSytemSettingsMiddleware(object):
 class System_Settings_Manager(models.Manager):
 
     def get_from_db(self, *args, **kwargs):
-        logger.debug('refreshing system_settings from db')
+        # logger.debug('refreshing system_settings from db')
         try:
             from_db = super(System_Settings_Manager, self).get(*args, **kwargs)
         except:
@@ -104,13 +102,13 @@ class System_Settings_Manager(models.Manager):
 
     def get(self, no_cache=False, *args, **kwargs):
         if no_cache:
-            logger.debug('no_cache specified or cached value found, loading system settings from db')
+            # logger.debug('no_cache specified or cached value found, loading system settings from db')
             return self.get_from_db(*args, **kwargs)
 
         from_cache = DojoSytemSettingsMiddleware.get_system_settings()
 
         if not from_cache:
-            logger.debug('no cached value found, loading system settings from db')
+            # logger.debug('no cached value found, loading system settings from db')
             return self.get_from_db(*args, **kwargs)
 
         return from_cache

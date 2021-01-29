@@ -28,6 +28,9 @@
                             <th>Product</th>
                             <th>Product Type</th>
                             <th>Engagement Name</th>
+                            {% if system_settings.enable_jira %}                            
+                                <th>JIRA</th>
+                            {% endif %}                                
                             <th>Status</th>
                             <th>Period</th>
                             <th>Lead</th>
@@ -45,9 +48,9 @@
 
                                     <td class="prod_name"><a href="{% url 'view_product' p.id %}">{{ p.name }}</a>
                                         <sup>
-                                            {% for tag in p.tags %}
+                                            {% for tag in p.tags.all %}
                                             <a title="Search {{ tag }}" class="tag-label tag-color"
-                                            href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                            href="{% url 'simple_search' %}?query=product-tag:{{ tag }}">{{ tag }}</a>
                                             {% endfor %}
                                         </sup>
                                     </td>
@@ -60,15 +63,20 @@
                                             {% if e.name %}{{ e.name }} {% endif %}
                                         </a>
                                         <sup>
-                                            {% for tag in e.tags %}
+                                            {% for tag in e.tags.all %}
                                             <a title="Search {{ tag }}" class="tag-label tag-color"
-                                            href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                            href="{% url 'simple_search' %}?query=engagement-tag:{{ tag }}">{{ tag }}</a>
                                             {% endfor %}
                                         </sup>
                                         <br>
                                     </td>
+                                    {% if system_settings.enable_jira %}
+                                    <td class="text-center">
+                                      {{ e|jira_project_tag }}
+                                    </td>
+                                    {% endif %}     
                                     <td> {{ e.status }} </td>
-                                    <td> {{ e.target_start|date }} - {{ e.target_end|date }} 
+                                    <td> {{ e.target_start|date:"SHORT_DATE_FORMAT" }} - {{ e.target_end|date:"SHORT_DATE_FORMAT" }}
                                         {% if e.is_overdue %}<sup><div class="tag-label warning-color">{{ e.target_end|overdue }} overdue</div></sup>
                                         {% endif %}
                                     </td>
@@ -146,8 +154,9 @@
 
             // Mapping of table columns to objects for proper cleanup and data formatting
             var dojoTable = $('#engagements').DataTable({
+                colReorder: true,                
                 columnDefs: [
-                    { 
+                    {
                         "orderable": false,
                         "targets": [0]
                     },

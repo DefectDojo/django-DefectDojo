@@ -1,13 +1,13 @@
 __author__ = 'aaronweaver'
 
 import logging
-
-from defusedxml import ElementTree
-from dateutil import parser
 import ntpath
-from dojo.utils import add_language
+
+from dateutil import parser
+from defusedxml import ElementTree
 
 from dojo.models import Finding
+from dojo.utils import add_language
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +33,7 @@ class CheckmarxXMLParser(object):
     # mode:
     # None (default): aggregates vulnerabilites per sink filename (legacy behavior)
     # 'detailed' : No aggregation
-    def __init__(self, filename, test, mode=None):
+    def get_findings(self, filename, test, mode=None):
         cxscan = ElementTree.parse(filename)
         self.test = test
         root = cxscan.getroot()
@@ -86,7 +86,7 @@ class CheckmarxXMLParser(object):
         for lang in self.language_list:
             add_language(test.engagement.product, lang)
 
-        self.items = list(dupes.values())
+        return list(dupes.values())
 
     # Process one result = one pathId for default "Checkmarx Scan"
     # Create the finding and add it into the dupes list
@@ -97,7 +97,7 @@ class CheckmarxXMLParser(object):
         description, lastPathnode = self.get_description_file_name_aggregated(query, result)
         sinkFilename = lastPathnode.find('FileName').text
         title = "{} ({})".format(titleStart, ntpath.basename(sinkFilename))
-
+        false_p = result.get('FalsePositive')
         aggregateKeys = "{}{}{}{}".format(categories, cwe, name, sinkFilename)
 
         if not(aggregateKeys in dupes):
@@ -107,7 +107,8 @@ class CheckmarxXMLParser(object):
                            test=self.test,
                            active=False,
                            verified=False,
-                           false_p=result.get('FalsePositive') == "True",
+                           # this may be overwritten later by another member of the aggregate, see "else" below
+                           false_p=(false_p == "True"),
                            # Concatenates the query information with this specific finding information
                            description=findingdetail + '-----\n' + description,
                            severity=sev,
@@ -127,6 +128,9 @@ class CheckmarxXMLParser(object):
             find = dupes[aggregateKeys]
             find.description = "{}\n-----\n{}".format(find.description, description)
             find.nb_occurences = find.nb_occurences + 1
+            # If at least one of the findings in the aggregate is exploitable, the defectdojo finding should not be "false positive"
+            if(false_p == "False"):
+                dupes[aggregateKeys].false_p = False
 
     # Iterate over function calls / assignments to extract finding description and last pathnode
     def get_description_file_name_aggregated(self, query, result):

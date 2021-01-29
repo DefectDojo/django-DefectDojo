@@ -30,10 +30,43 @@ You can manage your notification settings here: <a href="{{ notification_url|ful
 </p>
 {% endautoescape %}
 </body>
-<html>
+</html>
 
 {% elif type == 'alert' %}
     The engagement "{{ engagement.name }}" has been created in the product "{{ engagement.product }}".
 {% elif type == 'slack' %}
     The engagement "{{ engagement.name }}" has been created in the product "{{ engagement.product }}". It can be viewed here: {{ url|full_url }}
+{% elif type == 'msteams' %}
+    {
+        "@context": "https://schema.org/extensions",
+        "@type": "MessageCard",
+        "title": "Engagement added",
+        "summary": "Engagement added",
+        "sections": [
+            {
+                "activityTitle": "DefectDojo",
+                "activityImage": "https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/master/dojo/static/dojo/img/chop.png",
+                "text": "A new engagement has been added.",
+                "facts": [
+                    {
+                        "name": "Product:",
+                        "value": "{{ engagement.product.name }}"
+                    },
+                    {
+                        "name": "Engagement:",
+                        "value": "{{ engagement.name }}"
+                    }
+                ]
+            }
+        ],
+        "potentialAction": [
+            {
+            "@type": "OpenUri",
+            "name": "View",
+            "targets": [
+                { "os": "default", "uri": "{{ url|full_url }}" }
+                ]
+            }
+        ]
+    }
 {% endif %}

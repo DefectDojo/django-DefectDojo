@@ -32,7 +32,8 @@ helm repo update
 
 Helm >= v3
 ```zsh
-helm repo add stable https://kubernetes-charts.storage.googleapis.com/
+helm repo add stable https://charts.helm.sh/stable
+helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo update
 ```
 Then pull the dependent charts:
@@ -42,20 +43,20 @@ helm dependency update ./helm/defectdojo
 
 Now, install the helm chart into minikube.
 
-If you have setup an ingress controller: 
+If you have setup an ingress controller:
 ```zsh
 DJANGO_INGRESS_ENABLED=true
 ```
-else: 
+else:
 ```zsh
 DJANGO_INGRESS_ENABLED=false
 ```
 
-If you have configured TLS: 
+If you have configured TLS:
 ```zsh
 DJANGO_INGRESS_ACTIVATE_TLS=true
 ```
-else: 
+else:
 ```zsh
 DJANGO_INGRESS_ACTIVATE_TLS=false
 ```
@@ -91,9 +92,9 @@ helm install \
   --set createMysqlSecret=true \
   --set createPostgresqlSecret=true
 ```
-Note that you need only one of: 
+Note that you need only one of:
 - postgresql or mysql
-- rabbitmq or redis 
+- rabbitmq or redis
 
 It usually takes up to a minute for the services to startup and the
 status of the containers can be viewed by starting up ```minikube dashboard```.
@@ -141,7 +142,7 @@ Use the same commands as before but add:
 ```
 
 ### Installing from a private registry
-If you have stored your images in a private registry, you can install defectdojo chart with (helm 3). 
+If you have stored your images in a private registry, you can install defectdojo chart with (helm 3).
 
 - First create a secret named "defectdojoregistrykey" based on the credentials that can pull from the registry: see https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
 - Then install the chart with the same commands as before but adding:
@@ -164,10 +165,20 @@ docker build --build-arg http_proxy=http://myproxy.com:8080 --build-arg https_pr
 docker build --build-arg http_proxy=http://myproxy.com:8080 --build-arg https_proxy=http://myproxy.com:8080 -t defectdojo/defectdojo-nginx -f Dockerfile.nginx .
 ```
 
+### Debug uWSGI with ptvsd
+
+You can set breakpoints in code that is handled by uWSGI. The feature is meant to be used when you run locally on minikube, and mimics [what can be done with docker-compose](DOCKER.md#run-with-docker-compose-in-development-mode-with-ptvsd-remote-debug).
+
+The port is currently hard-coded to 3000.
+
+* In `values.yaml`, ensure the value for `enable_ptvsd` is set to `true` (the default is `false`). Make sure the change is taken into account in your deployment.
+* Have `DD_DEBUG` set to `True`.
+* Port forward port 3000 to the pod, such as `kubectl port-forward defectdojo-django-7886f49466-7cwm7 3000`.
+
 ### Upgrade the chart
 If you want to change kubernetes configuration of use an updated docker image (evolution of defectDojo code), upgrade the application:
 ```
-kubectl delete job defectdojo-initializer 
+kubectl delete job defectdojo-initializer
 helm upgrade  defectdojo ./helm/defectdojo/ \
    --set django.ingress.enabled=${DJANGO_INGRESS_ENABLED} \
    --set django.ingress.activateTLS=${DJANGO_INGRESS_ACTIVATE_TLS}
@@ -307,6 +318,10 @@ However, that doesn't work and I haven't found out why. In a production
 environment, a redundant PostgreSQL cluster is the better option. As it uses
 statefulsets that are kept by default, the problem doesn't exist there.
 
+### Prometheus metrics
+
+It's possible to enable Nginx prometheus exporter by setting `--set monitoring.enabled=true` and `--set monitoring.prometheus.enabled=true`. This adds the Nginx exporter sidecar and the standard Prometheus pod annotations to django deployment.
+
 ## Useful stuff
 
 ```zsh
@@ -317,7 +332,7 @@ kubectl logs $(kubectl get pod --selector=defectdojo.org/component=${POD} \
 # Open a shell in a specific pod
 kubectl exec -it $(kubectl get pod --selector=defectdojo.org/component=${POD} \
   -o jsonpath="{.items[0].metadata.name}") -- /bin/bash
-# Or: 
+# Or:
 kubectl exec defectdojo-django-<xxx-xxx> -c uwsgi -it /bin/sh
 
 # Open a Python shell in a specific pod
@@ -337,7 +352,7 @@ Helm >= v3
 helm uninstall defectdojo
 ```
 
-To remove persistent objects not removed by uninstall (this will remove any database):  
+To remove persistent objects not removed by uninstall (this will remove any database):
 ```
 kubectl delete secrets defectdojo defectdojo-redis-specific defectdojo-rabbitmq-specific defectdojo-postgresql-specific defectdojo-mysql-specific
 kubectl delete pvc data-defectdojo-rabbitmq-0 data-defectdojo-postgresql-0

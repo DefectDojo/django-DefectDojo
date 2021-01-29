@@ -2,41 +2,49 @@ __guide__ = 'aaronweaver'
 __author__ = 'Rajarshi333'
 
 
-from defusedxml import ElementTree
-from dateutil import parser
+import logging
 import re
+
+from dateutil import parser
+from defusedxml import ElementTree
+
 from dojo.models import Finding
+
+logger = logging.getLogger(__name__)
 
 
 class FortifyXMLParser(object):
-    language_list = []
 
-    def __init__(self, filename, test):
+    def get_findings(self, filename, test):
         fortify_scan = ElementTree.parse(filename)
         root = fortify_scan.getroot()
 
+        language_list = []
         # Get Date
         date_string = root.getchildren()[5].getchildren()[1].getchildren()[2].text
         date_list = date_string.split()[1:4]
-        date_act = "".join(date_list)
+        date_list = [item.replace(',', '') for item in date_list]
+        date_act = ".".join(date_list)
         find_date = parser.parse(date_act)
-
         # Get Language
         lang_string = root[8][4][2].text
         lang_need_string = re.findall("^.*com.fortify.sca.Phase0HigherOrder.Languages.*$",
                                       lang_string, re.MULTILINE)
         lang_my_string = lang_need_string[0]
         language = lang_my_string.split('=')[1]
-        if language not in self.language_list:
-            self.language_list.append(language)
+        if language not in language_list:
+            language_list.append(language)
 
         # Get Category Information:
         # Abstract, Explanation, Recommendation, Tips
         cat_meta = {}
         # Get all issues
         issues = []
+        meta_pair = ({}, {})
+        issue_pair = ([], [])
         for ReportSection in root.findall('ReportSection'):
-            if ReportSection.findtext('Title') == "Results Outline":
+            if ReportSection.findtext('Title') in ["Results Outline", "Issue Count by Category"]:
+                place = 0 if ReportSection.findtext('Title') == "Results Outline" else 1
                 # Get information on the vulnerability like the Abstract, Explanation,
                 # Recommendation, and Tips
                 for group in ReportSection.iter("GroupingSection"):
@@ -44,42 +52,59 @@ class FortifyXMLParser(object):
                     maj_attr_summary = group.find("MajorAttributeSummary")
                     if maj_attr_summary:
                         meta_info = maj_attr_summary.findall("MetaInfo")
-                        cat_meta[title] = {x.findtext("Name"): x.findtext("Value")
+                        meta_pair[place][title] = {x.findtext("Name"): x.findtext("Value")
                                            for x in meta_info}
                 # Collect all issues
                 for issue in ReportSection.iter("Issue"):
-                    issues.append(issue)
+                    issue_pair[place].append(issue)
+
+        if len(issue_pair[0]) > len(issue_pair[1]):
+            issues = issue_pair[0]
+            cat_meta = meta_pair[0]
+        else:
+            issues = issue_pair[1]
+            cat_meta = meta_pair[1]
 
         # All issues obtained, create a map for reference
         issue_map = {}
-        for issue in issues:
-            details = {
-                "Category": issue.find("Category").text,
-                "Folder": issue.find("Folder").text, "Kingdom": issue.find("Kingdom").text,
-                "Abstract": issue.find("Abstract").text,
-                "Friority": issue.find("Friority").text,
-                "FileName": issue.find("Primary").find("FileName").text,
-                "FilePath": issue.find("Primary").find("FilePath").text,
-                "LineStart": issue.find("Primary").find("LineStart").text,
-                "Snippet": issue.find("Primary").find("Snippet").text}
+        issue_id = "N/A"
+        try:
+            for issue in issues:
+                issue_id = issue.attrib['iid']
+                details = {
+                    "Category": issue.find("Category").text,
+                    "Folder": issue.find("Folder").text, "Kingdom": issue.find("Kingdom").text,
+                    "Abstract": issue.find("Abstract").text,
+                    "Friority": issue.find("Friority").text,
+                    "FileName": issue.find("Primary").find("FileName").text,
+                    "FilePath": issue.find("Primary").find("FilePath").text,
+                    "LineStart": issue.find("Primary").find("LineStart").text}
 
-            if issue.find("Source"):
-                source = {
-                    "FileName": issue.find("Source").find("FileName").text,
-                    "FilePath": issue.find("Source").find("FilePath").text,
-                    "LineStart": issue.find("Source").find("LineStart").text,
-                    "Snippet": issue.find("Source").find("Snippet").text}
-                details["Source"] = source
+                if issue.find("Primary").find("Snippet"):
+                    details["Snippet"] = issue.find("Primary").find("Snippet").text
+                else:
+                    details["Snippet"] = "n/a"
 
-            issue_map.update({issue.attrib['iid']: details})
+                if issue.find("Source"):
+                    source = {
+                        "FileName": issue.find("Source").find("FileName").text,
+                        "FilePath": issue.find("Source").find("FilePath").text,
+                        "LineStart": issue.find("Source").find("LineStart").text,
+                        "Snippet": issue.find("Source").find("Snippet").text}
+                    details["Source"] = source
+
+                issue_map.update({issue.attrib['iid']: details})
+        except AttributeError:
+            logger.warning("XML Parsing error on issue number: %s", issue_id)
+            raise
         # map created
 
-        self.items = []
+        items = []
         dupes = set()
         for issue_key, issue in issue_map.items():
             title = self.format_title(issue["Category"], issue["FileName"], issue["LineStart"])
             if title not in dupes:
-                self.items.append(Finding(
+                items.append(Finding(
                     title=title,
                     severity=issue["Friority"],
                     numerical_severity=Finding.get_numerical_severity(issue["Friority"]),
@@ -96,6 +121,7 @@ class FortifyXMLParser(object):
                     unique_id_from_tool=issue_key
                 ))
                 dupes.add(title)
+        return items
 
     def format_title(self, category, filename, line_no):
         """

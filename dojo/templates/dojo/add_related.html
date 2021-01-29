@@ -1,4 +1,4 @@
-{% load static from staticfiles %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -77,7 +77,7 @@
 <script src="{% static "moment/min/moment.min.js" %}"></script>
 <script src="{% static "fullcalendar/dist/fullcalendar.min.js" %}"></script>
 <!-- our JS -->
-<script type="application/javascript" src="{% static "chosen/chosen.jquery.min.js" %}"></script>
+<script type="application/javascript" src="{% static "chosen-js/chosen.jquery.min.js" %}"></script>
 
 <script type="text/javascript" src="{% static "admin/js/jquery.init.js"%}"></script>
 <script type="application/javascript" src="{% static "admin/js/admin/RelatedObjectLookups.js" %}"></script>
@@ -93,22 +93,6 @@
             endpoints += "\n";
         });
         $('textarea#id_endpoint').text(endpoints);
-        $('#id_tags').chosen({
-            'placeholder_text_multiple': 'Select or add some tags...',
-            'no_results_text': "Tag not found, press TAB key to add.",
-        });
-
-        $(".search-field").find("input").on("keydown", function (evt) {
-            var stroke;
-            stroke = (_ref = evt.which) != null ? _ref : evt.keyCode;
-            if (stroke == 9) { // 9 = tab key
-                var o = new Option($(this).val(), $(this).val(), true, true);
-			    $("#id_tags").append(o);
-                $('#id_tags').trigger('chosen:updated');
-                $('#id_tags').focus();
-                return false;
-            }
-        });
     });
 </script>
 </body>

@@ -1,10 +1,8 @@
+import logging
 from collections import deque
 
-from dojo.tools.sonarqube_api.api_client import SonarQubeAPI
 from dojo.models import Sonarqube_Issue_Transition
-
-import logging
-
+from dojo.tools.sonarqube_api.api_client import SonarQubeAPI
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +56,7 @@ class SonarQubeApiUpdater(object):
             target_status = 'RESOLVED / FALSE-POSITIVE'
         elif finding.mitigated or finding.is_Mitigated:
             target_status = 'RESOLVED / FIXED'
-        elif finding.risk_acceptance_set.all():
+        elif finding.risk_accepted:
             target_status = 'RESOLVED / WONTFIX'
         elif finding.active:
             if finding.verified:

@@ -4,10 +4,8 @@ from django.contrib.auth.decorators import user_passes_test
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
-from dojo.models import Product, Objects, Objects_Engagement, Engagement
-from tagging.models import Tag
+from dojo.models import Product, Objects_Product, Objects_Engagement, Engagement
 from dojo.forms import ObjectSettingsForm, DeleteObjectsSettingsForm
-from tagging.utils import get_tag_list
 from dojo.utils import Product_Tab
 
 logger = logging.getLogger(__name__)
@@ -22,10 +20,6 @@ def new_object(request, pid):
             new_prod = tform.save(commit=False)
             new_prod.product = prod
             new_prod.save()
-
-            tags = request.POST.getlist('tags')
-            t = ", ".join('"{0}"'.format(w) for w in tags)
-            new_prod.tags = t
 
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -44,7 +38,7 @@ def new_object(request, pid):
 
 @user_passes_test(lambda u: u.is_staff)
 def view_objects(request, pid):
-    object_queryset = Objects.objects.filter(product=pid).order_by('path', 'folder', 'artifact')
+    object_queryset = Objects_Product.objects.filter(product=pid).order_by('path', 'folder', 'artifact')
 
     product_tab = Product_Tab(pid, title="Tracked Product Files, Paths and Artifacts", tab="settings")
     return render(request,
@@ -58,16 +52,12 @@ def view_objects(request, pid):
 
 @user_passes_test(lambda u: u.is_staff)
 def edit_object(request, pid, ttid):
-    object = Objects.objects.get(pk=ttid)
+    object = Objects_Product.objects.get(pk=ttid)
 
     if request.method == 'POST':
         tform = ObjectSettingsForm(request.POST, instance=object)
         if tform.is_valid():
             tform.save()
-
-            tags = request.POST.getlist('tags')
-            t = ", ".join('"{0}"'.format(w) for w in tags)
-            object.tags = t
 
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -75,10 +65,8 @@ def edit_object(request, pid, ttid):
                                  extra_tags='alert-success')
             return HttpResponseRedirect(reverse('view_objects', args=(pid,)))
     else:
-        tform = ObjectSettingsForm(instance=object,
-                                    initial={'tags': get_tag_list(Tag.objects.get_for_object(object))})
+        tform = ObjectSettingsForm(instance=object)
 
-    tform.initial['tags'] = [tag.name for tag in object.tags]
     product_tab = Product_Tab(pid, title="Edit Tracked Files", tab="settings")
     return render(request,
                   'dojo/edit_object.html',
@@ -90,7 +78,7 @@ def edit_object(request, pid, ttid):
 
 @user_passes_test(lambda u: u.is_staff)
 def delete_object(request, pid, ttid):
-    object = Objects.objects.get(pk=ttid)
+    object = Objects_Product.objects.get(pk=ttid)
 
     if request.method == 'POST':
         tform = ObjectSettingsForm(request.POST, instance=object)

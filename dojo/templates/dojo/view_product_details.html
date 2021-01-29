@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static from staticfiles %}
+{% load static %}
 {% load humanize %}
 {% load display_tags %}
 {% block add_styles %}
@@ -21,64 +21,69 @@
                             <span class="caret"></span>
                         </button>
               <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                {% if user.is_staff %}
-                <li role="presentation">
-                  <a class="" href="{% url 'edit_product' prod.id %}">
-                                        <i class="fa fa-pencil-square-o"></i> Edit
-                                    </a>
-                </li>
-                <li role="separator" class="divider"></li>
-                <li role="presentation">
-                  <a class="" href="{% url 'add_meta_data' prod.id %}">
-                                        <i class="fa fa-list-alt"></i> Add Custom Fields
-                                    </a>
+                {% if user|is_authorized_for_change:prod %}
+                  <li role="presentation">
+                    <a class="" href="{% url 'edit_product' prod.id %}">
+                                          <i class="fa fa-pencil-square-o"></i> Edit
+                                      </a>
                   </li>
-                <li role="presentation">
-                  <a title="Edit Custom Fields"
-                     href="{% url 'edit_meta_data' prod.id %}">
-                      <i class="fa fa-pencil-square-o"></i> Edit Custom Fields
-                  </a>
-                </li>
-                <li role="separator" class="divider"></li>
-                <li role="presentation">
-                  <a class="" href="{% url 'new_object' prod.id %}">
-                                        <i class="fa fa-list-alt"></i> Add Product Tracking Files
-                                    </a>
-                </li>
-                <li role="presentation">
-                  <a href="{% url 'view_objects' prod.id %}">
-                                    <i class="fa fa-history"></i> View Product Tracking Files
-                                </a>
-                </li>
-                <li role="separator" class="divider"></li>
+                {% endif %}
+                {% if user|is_authorized_for_staff:prod %}
+                  <li role="separator" class="divider"></li>
+                  <li role="presentation">
+                    <a class="" href="{% url 'add_meta_data' prod.id %}">
+                        <i class="fa fa-list-alt"></i> Add Custom Fields
+                    </a>
+                  </li>
+                  <li role="presentation">
+                    <a title="Edit Custom Fields"
+                      href="{% url 'edit_meta_data' prod.id %}">
+                        <i class="fa fa-pencil-square-o"></i> Edit Custom Fields
+                    </a>
+                  </li>
+                  <li role="separator" class="divider"></li>
+                  <li role="presentation">
+                    <a class="" href="{% url 'new_object' prod.id %}">
+                        <i class="fa fa-list-alt"></i> Add Product Tracking Files
+                    </a>
+                  </li>
+                  <li role="presentation">
+                    <a href="{% url 'view_objects' prod.id %}">
+                        <i class="fa fa-history"></i> View Product Tracking Files
+                    </a>
+                  </li>
+                  <li role="separator" class="divider"></li>
                 {% endif %}
                 <li role="presentation">
                   <a href="{% url 'product_report' prod.id %}?title=&active=1&verified=1&false_p=2&duplicate=2">
-                                    <i class="fa fa-file-text-o"></i> Product Report
-                                </a>
+                      <i class="fa fa-file-text-o"></i> Product Report
+                  </a>
                 </li>
-                {% if system_settings.enable_benchmark and benchmark_type %}
-                <li role="separator" class="divider"></li>
-                {% for bt in benchmark_type %}
-                <li role="presentation">
-                  <a title="{{ bt.name }}" href="{% url 'view_product_benchmark' prod.id bt.id %}">
-                                    <span class="fa fa-list"></span> {{ bt.name }} {{ bt.version }}
-                                </a>
-                </li>
-                {% endfor %} {% endif %}
-                <li role="separator" class="divider"></li>
-                <li role="presentation">
-                  <a href="{% url 'action_history' prod|content_type prod.id %}">
-                                    <i class="fa fa-history"></i> View History
-                                </a>
-                </li>
-                {% if user.is_staff %}
-                <li role="separator" class="divider"></li>
-                <li role="presentation">
-                  <a class="text-danger" href="{% url 'delete_product' prod.id %}">
-                                        <i class="fa fa-trash"></i> Delete
+                {% if user|is_authorized_for_staff:prod %}
+                  {% if system_settings.enable_benchmark and benchmark_type %}
+                    <li role="separator" class="divider"></li>
+                    {% for bt in benchmark_type %}
+                    <li role="presentation">
+                      <a title="{{ bt.name }}" href="{% url 'view_product_benchmark' prod.id bt.id %}">
+                                        <span class="fa fa-list"></span> {{ bt.name }} {{ bt.version }}
                                     </a>
-                </li>
+                    </li>
+                    {% endfor %} 
+                  {% endif %}
+                  <li role="separator" class="divider"></li>
+                  <li role="presentation">
+                    <a href="{% url 'action_history' prod|content_type prod.id %}">
+                        <i class="fa fa-history"></i> View History
+                    </a>
+                  </li>
+                {% endif %}
+                {% if user|is_authorized_for_delete:prod %}
+                  <li role="separator" class="divider"></li>
+                  <li role="presentation">
+                    <a class="text-danger" href="{% url 'delete_product' prod.id %}">
+                        <i class="fa fa-trash"></i> Delete
+                    </a>
+                  </li>
                 {% endif %}
               </ul>
             </div>
@@ -117,7 +122,9 @@
   <div class="col-md-6">
     <div class="panel panel-default">
       <div class="panel-heading">
-        <h3 class="panel-title"><span class="fa fa-bolt" aria-hidden="true"></span> Technologies {%if app_analysis%}({{ app_analysis.count }}){%endif%}</h3>
+        <h3 class="panel-title"><span class="fa fa-bolt" aria-hidden="true"></span> Technologies {%if app_analysis%}({{ app_analysis.count }}){%endif%}
+          <a title="Add New Technology" class="pull-right btn btn-sm btn-primary" href="/product/{{ prod.id }}/new_technology"><span class="fa fa-plus"></span> </a>
+        </h3>      
       </div>
       <ul class="list-group">
       {% for app in app_analysis %}
@@ -226,6 +233,14 @@
               {% endif %}
             </td>
           </tr>
+          {% with jira_project=prod|jira_project %}
+            {% if jira_project %}
+            <tr>
+              <td><strong>JIRA</strong></td>
+              <td><a href="{{ prod | jira_project_url }}" target="_blank"><i class="fa fa-external-link"></i> {{ prod | jira_key }}</a></td>
+            </tr>
+            {% endif %}
+          {% endwith %}
         </tbody>
       </table>
     </div>
@@ -296,6 +311,7 @@
           <tr>
             <td><strong>Authorized Users</strong></td>
             <td>
+
               {% if prod.authorized_users.all %}
                 {% if prod.authorized_users.all.count > 1 %}
                   {% for au in prod.authorized_users.all %}
@@ -303,6 +319,14 @@
                   {% endfor %}
                 {% else %}
                   {{ prod.authorized_users.all.0 }}
+                {% endif %}
+              {% elif prod.prod_type.authorized_users.all %}
+                {% if prod.prod_type.authorized_users.all.count > 1 %}
+                  {% for au in prod.prod_type.authorized_users.all %}
+                     {{au}}{%if not forloop.last%},{%endif%}
+                  {% endfor %}
+                {% else %}
+                  {{ prod.prod_type.authorized_users.all.0 }}
                 {% endif %}
               {% else %}
                 {{ prod.authorized_users.all|notspecified }}
@@ -319,7 +343,7 @@
   <div class="panel-heading">
     {% url 'notifications' as notifications_url %}
     <h3 class="panel-title"><span class="fa fa-users fa-fw" aria-hidden="true"></span> Notifications
-      <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="These are your personal settings for this product, next to your <a href='{{notifications_url}}'>global notifications</a>." data-placement="right" data-container="body"></i>
+      <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="These are your personal settings for this product." data-placement="right" data-container="body"></i>
     </h3>
   </div>
   <form id="edit_notifications_form" class="form-horizontal" method="post" action="{% url 'edit_notifications' prod.id %}">{% csrf_token %}
@@ -327,7 +351,11 @@
       <table class="table table-striped">
         <tbody>
           <tr>
-              <td id="saving_notifications">&nbsp;</td><td class="centered">Slack</td><td class="centered">HipChat</td><td class="centered">Mail</td><td class="centered">Alert</td>
+              <td id="saving_notifications">&nbsp;</td>
+              <td class="centered">Slack</td>
+              <td class="centered">Microsoft Teams</td>
+              <td class="centered">Mail</td>
+              <td class="centered">Alert</td>
           </tr>
           {% for field in personal_notifications_form.visible_fields %}
           <tr>

@@ -15,8 +15,6 @@ urlpatterns = [
         name='delete_test'),
     url(r'^test/(?P<tid>\d+)/add_findings$', views.add_findings,
         name='add_findings'),
-    url(r'^test/(?P<tid>\d+)/bulk', views.finding_bulk_update,
-        name='finding_bulk_update'),
     url(r'^test/(?P<tid>\d+)/add_findings/(?P<fid>\d+)$',
         views.add_temp_finding, name='add_temp_finding'),
     url(r'^test/(?P<tid>\d+)/search$', views.search, name='search'),

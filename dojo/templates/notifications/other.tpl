@@ -1,8 +1,10 @@
 {% if type == 'mail' %}
+{% load navigation_tags %}
+{% load display_tags %}
     Hello,
 
     {{ description|safe }}{% if url is not None %}
-    More information on this event can be found here: {{ url }}
+    More information on this event can be found here: {{ url|full_url }}
     {% endif %}
 
     Kind regards,
@@ -11,6 +13,29 @@
     {{ description|safe }}
 {% elif type == 'slack' %}
     {{ description|safe }}{% if url is not None %}
-More information on this event can be found here: {{ url }}
+More information on this event can be found here: {{ url|full_url }}
     {% endif %}
+{% elif type == 'msteams' %}
+    {
+        "@context": "https://schema.org/extensions",
+        "@type": "MessageCard",
+        "title": "Event",
+        "summary": "Event",
+        "sections": [
+            {
+                "activityTitle": "DefectDojo",
+                "activityImage": "https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/master/dojo/static/dojo/img/chop.png",
+                "text": "{% autoescape on %} {{ description }} {% endautoescape %}"
+            }
+        ],
+        "potentialAction": [
+            {
+            "@type": "OpenUri",
+            "name": "View",
+            "targets": [
+                { "os": "default", "uri": "{{ url|full_url }}" }
+                ]
+            }
+        ]
+    }
 {% endif %}

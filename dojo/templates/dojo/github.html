@@ -47,8 +47,9 @@
                                         {{ conf.configuration_name }}
                                 </td>
                                 <td class="text-right">
-                                    <a class="text-danger" href="{% url 'delete_github' conf.id %}" >
-                                    <i class="fa fa-trash"></i> Delete
+                                    <a href="{% url 'delete_github' conf.id %}" class="btn btn-sm btn-warning">
+                                        <i class="fa fa-trash"></i>
+                                        Delete
                                     </a>
                                 </td>
                             </tr>

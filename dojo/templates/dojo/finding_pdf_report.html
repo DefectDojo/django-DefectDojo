@@ -1,5 +1,5 @@
 {% extends "report_base.html" %}
-{% load static from staticfiles %}
+{% load static %}
 {% load display_tags %}
 {% load humanize %}
 {% load get_endpoint_status %}
@@ -69,7 +69,7 @@
                                     Finding {{ finding.id }}: {{ finding.title }}
                                     {% if finding.tags %}
                                         <sup>
-                                            {% for tag in finding.tags %}
+                                            {% for tag in finding.tags.all %}
                                             {{ tag }}
                                             {% endfor %}
                                         </sup>
@@ -109,8 +109,11 @@
                                     <td>{{ finding.status }}</td>
                                     {% if finding.risk_acceptance_set.all %}
                                         <td>
-                                            <a href="{% url 'view_risk' finding.test.engagement.id finding.risk_acceptance_set.all.0.id %}">
-                                                View Risk Acceptance</a>
+                                            {% comment %} for some reason the font-awesome icons don't work with the report template{% endcomment %}
+                                            {% for ra in finding.risk_acceptance_set.all|slice:":5" %}
+                                                <a href="{% url 'view_risk_acceptance' finding.test.engagement.id ra.id %}"
+                                                class="{% if ra.is_expired %}lightgrey{% endif%}">acceptance</a>&nbsp;
+                                            {% endfor %}
                                         </td>
                                     {% endif %}
                                     <td>{{ finding.date }}</td>
@@ -133,110 +136,11 @@
                             </table>
                         </div>
                     </div>
-                    {% with endpoints=finding.endpoints.all|get_vulnerable_endpoints %}
-                        {% if endpoints %}
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="panel panel-info endpoints table-responsive">
-                                        <div class="panel-heading">
-                                            {% if finding.file_path %}
-                                            <h6> Location </h6>
-                                            {%  else %}
-                                            <h6>Vulnerable Endpoints / Systems</h6>
-                                            {% endif %}
-                                        </div>
 
-                                        {% if endpoints %}
-                                            {% colgroup endpoints into 2 cols as grouped_items %}
-                                            <table class="table-striped table table table-condensed table-hover finding-endpoints">
-                                                {% for row in grouped_items %}
-                                                    <tr>
-                                                        {% for item in row %}
-                                                            <td>{% if item %}<i class="fa fa-circle"></i>
-                                                                {{ item }}{% endif %}
-                                                            </td>
-                                                        {% endfor %}
-                                                    </tr>
-                                                {% endfor %}
-                                            </table>
-                                        {% elif finding.file_path %}
-                                            <table class="table-striped table table table-condensed table-hover finding-endpoints">
-                                                <tr>
-                                                    <th style="text-align: center;padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">
-                                                        File Path
-                                                    </th>
-                                                    <th style="text-align: center;padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">
-                                                        Line Number
-                                                    </th>
-                                                </tr>
-                                                <tr>
-                                                    <td style="padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">{{ finding.file_path }}</td>
-                                                    <td style=" text-align:center; padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">{{ finding.line }}</td>
-                                                </tr>
-                                            </table>
-                                        {% else %}
-                                            <div id="vuln_endpoints" class="panel-body endpoint-panel table-responsive">
-                                                No endpoints.
-                                            </div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                        {% endif %}
-                    {% endwith %}
+                    {% include "dojo/snippets/endpoints.html" with finding=finding destination="Report" %}
 
-                    {% with endpoints=finding.endpoints.all|get_remediated_endpoints %}
-                        {% if endpoints %}
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="panel panel-info endpoints table-responsive">
-                                        <div class="panel-heading">
-                                            {% if finding.file_path %}
-                                            <h6> Location </h6>
-                                            {%  else %}
-                                            <h6>Remediated Endpoints / Systems</h6>
-                                            {% endif %}
-                                        </div>
-
-                                        {% if endpoints %}
-                                            {% colgroup endpoints into 2 cols as grouped_items %}
-                                            <table class="table-striped table table table-condensed table-hover finding-endpoints">
-                                                {% for row in grouped_items %}
-                                                    <tr>
-                                                        {% for item in row %}
-                                                            <td>{% if item %}<i class="fa fa-circle"></i>
-                                                                {{ item }}{% endif %}
-                                                            </td>
-                                                        {% endfor %}
-                                                    </tr>
-                                                {% endfor %}
-                                            </table>
-                                        {% elif finding.file_path %}
-                                            <table class="table-striped table table table-condensed table-hover finding-endpoints">
-                                                <tr>
-                                                    <th style="text-align: center;padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">
-                                                        File Path
-                                                    </th>
-                                                    <th style="text-align: center;padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">
-                                                        Line Number
-                                                    </th>
-                                                </tr>
-                                                <tr>
-                                                    <td style="padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">{{ finding.file_path }}</td>
-                                                    <td style=" text-align:center; padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">{{ finding.line }}</td>
-                                                </tr>
-                                            </table>
-                                        {% else %}
-                                            <div id="vuln_endpoints" class="panel-body endpoint-panel table-responsive">
-                                                No endpoints.
-                                            </div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                        {% endif %}
-                    {% endwith %}
-
+                    <h6>CVSSv3</h6>
+                    <pre>{{ finding.cvssv3 }}</pre>
                     <h6>Description</h6>
                     <pre>{{ finding.description }}</pre>
                     <h6>Mitigation</h6>
@@ -557,17 +461,17 @@
                         }
 
                         level = parseInt(openLevel);
-                        
+
                         var anchor = titleText.trim().replace(/ /g, "_");
 
                         if(tags)
                         {
                             if (['Info', 'Low', 'Medium', 'High', 'Critical'].indexOf(titleText) >= 0) {
-                                toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
+                                toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
                                 "<span class=\"label severity severity-" + titleText + "\">" + titleText + "</span></a></li>";
                             }
                             else {
-                                toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
+                                toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
                                 titleText + "<sup>" + tags + "</sup></a></li>";
                             }
 
@@ -577,11 +481,11 @@
                         else
                         {
                             if (['Info', 'Low', 'Medium', 'High', 'Critical'].indexOf(titleText) >= 0) {
-                                toc += "<br><li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
+                                toc += "<br><li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
                                 "<span class=\"label severity severity-" + titleText + "\">" + titleText + "</span></a></li><br>";
                             }
                             else {
-                                toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
+                                toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
                                 titleText + "</a></li>";
                             }
 
@@ -593,7 +497,7 @@
                             + titleText + "<sup>" + tags + "</sup></h" + closeLevel + "></a>";
                     }
                 );
-                
+
             if (level) {
                 toc += (new Array(level + 1)).join("</ul>");
             }

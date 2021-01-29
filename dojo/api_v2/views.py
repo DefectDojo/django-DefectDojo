@@ -1,31 +1,45 @@
 from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
+from django.db import IntegrityError
 from rest_framework.permissions import DjangoModelPermissions
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_yasg.utils import swagger_auto_schema, no_body
-
+from drf_yasg2 import openapi
+from drf_yasg2.utils import swagger_auto_schema, no_body
+import base64
 from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Finding, \
     User, ScanSettings, Scan, Stub_Finding, Finding_Template, Notes, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
-    Endpoint, JIRA_PKey, JIRA_Conf, DojoMeta, Development_Environment, \
-    Dojo_User, Note_Type, System_Settings
+    Endpoint, JIRA_Project, JIRA_Instance, DojoMeta, Development_Environment, \
+    Dojo_User, Note_Type, System_Settings, App_Analysis, Endpoint_Status, \
+    Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation, \
+    BurpRawRequestResponse, FileUpload
 
 from dojo.endpoint.views import get_endpoint_ids
-from dojo.reports.views import report_url_resolver
-from dojo.filters import ReportFindingFilter, ReportAuthedFindingFilter
+from dojo.reports.views import report_url_resolver, prefetch_related_findings_for_report
+from dojo.finding.views import set_finding_as_original_internal, reset_finding_duplicate_status_internal, \
+    duplicate_cluster
+from dojo.filters import ReportFindingFilter, ReportAuthedFindingFilter, \
+    ApiFindingFilter, ApiProductFilter, ApiEngagementFilter, ApiEndpointFilter, \
+    ApiAppAnalysisFilter, ApiTestFilter, ApiTemplateFindingFilter
 from dojo.risk_acceptance import api as ra_api
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from datetime import datetime
 from dojo.utils import get_period_counts_legacy, get_system_setting
-from dojo.api_v2 import serializers, permissions
+from dojo.api_v2 import serializers, permissions, prefetch, schema
 from django.db.models import Count, Q
+import dojo.jira_link.helper as jira_helper
+import logging
+import tagulous
+
+logger = logging.getLogger(__name__)
 
 
 class EndPointViewSet(mixins.ListModelMixin,
@@ -37,12 +51,14 @@ class EndPointViewSet(mixins.ListModelMixin,
     serializer_class = serializers.EndpointSerializer
     queryset = Endpoint.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'host', 'product')
+    filter_class = ApiEndpointFilter
 
     def get_queryset(self):
         if not self.request.user.is_staff:
             return Endpoint.objects.filter(
-                product__authorized_users__in=[self.request.user])
+                Q(product__authorized_users__in=[self.request.user]) |
+                Q(product__prod_type__authorized_users__in=[self.request.user])
+            )
         else:
             return Endpoint.objects.all()
 
@@ -71,6 +87,19 @@ class EndPointViewSet(mixins.ListModelMixin,
         return Response(report.data)
 
 
+class EndpointStatusViewSet(mixins.ListModelMixin,
+                      mixins.RetrieveModelMixin,
+                      mixins.UpdateModelMixin,
+                      mixins.DestroyModelMixin,
+                      mixins.CreateModelMixin,
+                      viewsets.GenericViewSet):
+    serializer_class = serializers.EndpointStatusSerializer
+    queryset = Endpoint_Status.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('mitigated', 'false_positive', 'out_of_scope',
+                     'risk_accepted', 'mitigated_by', 'finding', 'endpoint')
+
+
 class EngagementViewSet(mixins.ListModelMixin,
                         mixins.RetrieveModelMixin,
                         mixins.UpdateModelMixin,
@@ -81,10 +110,7 @@ class EngagementViewSet(mixins.ListModelMixin,
     serializer_class = serializers.EngagementSerializer
     queryset = Engagement.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'active', 'eng_type', 'target_start',
-                     'target_end', 'requester', 'report_type',
-                     'updated', 'threat_model', 'api_test',
-                     'pen_test', 'status', 'product', 'name', 'version')
+    filter_class = ApiEngagementFilter
 
     @property
     def risk_application_model_class(self):
@@ -93,7 +119,9 @@ class EngagementViewSet(mixins.ListModelMixin,
     def get_queryset(self):
         if not self.request.user.is_staff:
             return Engagement.objects.filter(
-                product__authorized_users__in=[self.request.user])
+                Q(product__authorized_users__in=[self.request.user]) |
+                Q(product__prod_type__authorized_users__in=[self.request.user])
+            )
         else:
             return Engagement.objects.all()
 
@@ -139,6 +167,104 @@ class EngagementViewSet(mixins.ListModelMixin,
         report = serializers.ReportGenerateSerializer(data)
         return Response(report.data)
 
+    @action(detail=True, methods=["get", "post", "patch"])
+    def notes(self, request, pk=None):
+        engagement = get_object_or_404(Engagement.objects, id=pk)
+        if request.method == 'POST':
+            new_note = serializers.AddNewNoteOptionSerializer(data=request.data)
+            if new_note.is_valid():
+                entry = new_note.validated_data['entry']
+                private = new_note.validated_data['private']
+                note_type = new_note.validated_data['note_type']
+            else:
+                return Response(new_note.errors,
+                    status=status.HTTP_400_BAD_REQUEST)
+
+            author = request.user
+            note = Notes(entry=entry, author=author, private=private, note_type=note_type)
+            note.save()
+            engagement.notes.add(note)
+
+            serialized_note = serializers.NoteSerializer({
+                "author": author, "entry": entry,
+                "private": private
+            })
+            result = serializers.EngagementToNotesSerializer({
+                "engagement_id": engagement, "notes": [serialized_note.data]
+            })
+            return Response(serialized_note.data,
+                status=status.HTTP_200_OK)
+        notes = engagement.notes.all()
+
+        serialized_notes = []
+        if notes:
+            serialized_notes = serializers.EngagementToNotesSerializer({
+                    "engagement_id": engagement, "notes": notes
+            })
+            return Response(serialized_notes.data,
+                    status=status.HTTP_200_OK)
+
+        return Response(serialized_notes,
+                status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        method='get',
+        responses={status.HTTP_200_OK: serializers.EngagementToFilesSerializer}
+    )
+    @swagger_auto_schema(
+        methods=['post', 'patch'],
+        request_body=serializers.AddNewFileOptionSerializer,
+        responses={status.HTTP_200_OK: serializers.FileSerializer}
+    )
+    @action(detail=True, methods=["get", "post", "patch"])
+    def files(self, request, pk=None):
+        engagement = get_object_or_404(Engagement.objects, id=pk)
+        if request.method == 'POST':
+            new_file = serializers.FileSerializer(data=request.data)
+            if new_file.is_valid():
+                title = new_file.validated_data['title']
+                file = new_file.validated_data['file']
+            else:
+                return Response(new_file.errors,
+                    status=status.HTTP_400_BAD_REQUEST)
+
+            file = FileUpload(title=title, file=file)
+            file.save()
+            engagement.files.add(file)
+
+            serialized_file = serializers.FileSerializer({
+                "title": title, "file": file,
+            })
+            result = serializers.EngagementToFilesSerializer({
+                "engagement_id": engagement, "files": [serialized_file.data]
+            })
+            return Response(serialized_file.data,
+                status=status.HTTP_200_OK)
+        files = engagement.files.all()
+
+        serialized_files = []
+        if files:
+            serialized_files = serializers.EngagementToFilesSerializer({
+                    "engagement_id": engagement, "files": files
+            })
+            return Response(serialized_files.data,
+                    status=status.HTTP_200_OK)
+
+        return Response(serialized_files,
+                status=status.HTTP_200_OK)
+
+
+class AppAnalysisViewSet(mixins.ListModelMixin,
+                        mixins.RetrieveModelMixin,
+                        mixins.UpdateModelMixin,
+                        mixins.DestroyModelMixin,
+                        mixins.CreateModelMixin,
+                        viewsets.GenericViewSet):
+    serializer_class = serializers.AppAnalysisSerializer
+    queryset = App_Analysis.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filter_class = ApiAppAnalysisFilter
+
 
 class FindingTemplatesViewSet(mixins.ListModelMixin,
                               mixins.RetrieveModelMixin,
@@ -148,8 +274,7 @@ class FindingTemplatesViewSet(mixins.ListModelMixin,
     serializer_class = serializers.FindingTemplateSerializer
     queryset = Finding_Template.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'title', 'cwe', 'severity', 'description',
-                     'mitigation')
+    filter_class = ApiTemplateFindingFilter
 
     # def get_queryset(self):
     #     if not self.request.user.is_staff:
@@ -159,46 +284,82 @@ class FindingTemplatesViewSet(mixins.ListModelMixin,
     #         return Finding_Template.objects.all()
 
 
-class FindingViewSet(mixins.ListModelMixin,
-                     mixins.RetrieveModelMixin,
+def _finding_related_fields_decorator():
+    return swagger_auto_schema(
+        responses={status.HTTP_200_OK: serializers.FindingSerializer},
+        manual_parameters=[
+            openapi.Parameter(
+                name="related_fields",
+                in_=openapi.IN_QUERY,
+                description="Expand finding external relations (engagement, environment, product, product_type, test, test_type)",
+                type=openapi.TYPE_BOOLEAN)
+        ])
+
+
+class FindingViewSet(prefetch.PrefetchListMixin,
+                     prefetch.PrefetchRetrieveMixin,
                      mixins.UpdateModelMixin,
                      mixins.DestroyModelMixin,
                      mixins.CreateModelMixin,
                      ra_api.AcceptedFindingsMixin,
                      viewsets.GenericViewSet):
     serializer_class = serializers.FindingSerializer
-    queryset = Finding.objects.all()
+    queryset = Finding.objects.all().prefetch_related('endpoints',
+                                                    'reviewers',
+                                                    'images',
+                                                    'found_by',
+                                                    'notes',
+                                                    'risk_acceptance_set',
+                                                    'test',
+                                                    'test__test_type',
+                                                    'test__engagement',
+                                                    'test__environment',
+                                                    'test__engagement__product',
+                                                    'test__engagement__product__prod_type')
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'title', 'date', 'severity', 'description',
-                     'mitigated', 'endpoints', 'test', 'active', 'verified',
-                     'false_p', 'reporter', 'url', 'out_of_scope',
-                     'duplicate', 'test__engagement__product',
-                     'test__engagement', 'unique_id_from_tool')
+    filterset_class = ApiFindingFilter
+
+    _related_field_parameters = [openapi.Parameter(
+                name="related_fields",
+                in_=openapi.IN_QUERY,
+                description="Expand finding external relations (engagement, environment, product, product_type, test, test_type)",
+                type=openapi.TYPE_BOOLEAN)]
+    swagger_schema = prefetch.get_prefetch_schema(["findings_list", "findings_read"], serializers.FindingSerializer). \
+        composeWith(schema.ExtraParameters("findings_list", _related_field_parameters)). \
+        composeWith(schema.ExtraParameters("findings_read", _related_field_parameters)). \
+        to_schema()
 
     # Overriding mixins.UpdateModeMixin perform_update() method to grab push_to_jira
     # data and add that as a parameter to .save()
     def perform_update(self, serializer):
-        enabled = False
-        push_to_jira = serializer.validated_data.get('push_to_jira')
         # IF JIRA is enabled and this product has a JIRA configuration
-        if get_system_setting('enable_jira') and \
-                serializer.instance.test.engagement.product.jira_pkey_set.first() is not None:
-            # Check if push_all_issues is set on this product
-            enabled = serializer.instance.test.engagement.product.jira_pkey_set.first().push_all_issues
+        push_to_jira = serializer.validated_data.get('push_to_jira')
+        jira_project = jira_helper.get_jira_project(serializer.instance)
+        if get_system_setting('enable_jira') and jira_project:
+            push_to_jira = push_to_jira or jira_project.push_all_issues
 
-        # If push_all_issues is set:
-        if enabled:
-            push_to_jira = True
-
-        # add a check for the product having push all issues enabled right here.
         serializer.save(push_to_jira=push_to_jira)
 
     def get_queryset(self):
         if not self.request.user.is_staff:
-            return Finding.objects.filter(
-                reporter_id__in=[self.request.user])
+            findings = Finding.objects.filter(
+                Q(test__engagement__product__authorized_users__in=[self.request.user]) |
+                Q(test__engagement__product__prod_type__authorized_users__in=[self.request.user])
+            )
         else:
-            return Finding.objects.all()
+            findings = Finding.objects.all()
+        return findings.prefetch_related('endpoints',
+                                        'reviewers',
+                                        'images',
+                                        'found_by',
+                                        'notes',
+                                        'risk_acceptance_set',
+                                        'test',
+                                        'test__test_type',
+                                        'test__engagement',
+                                        'test__environment',
+                                        'test__engagement__product',
+                                        'test__engagement__product__prod_type')
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
@@ -225,11 +386,11 @@ class FindingViewSet(mixins.ListModelMixin,
                 all_tags = finding.tags
                 all_tags = serializers.TagSerializer({"tags": all_tags}).data['tags']
 
-                for tag in new_tags.validated_data['tags']:
+                for tag in tagulous.utils.parse_tags(new_tags.validated_data['tags']):
                     if tag not in all_tags:
                         all_tags.append(tag)
-                t = ", ".join(all_tags)
-                finding.tags = t
+                new_tags = tagulous.utils.render_tags(all_tags)
+                finding.tags = new_tags
                 finding.save()
             else:
                 return Response(new_tags.errors,
@@ -237,6 +398,43 @@ class FindingViewSet(mixins.ListModelMixin,
         tags = finding.tags
         serialized_tags = serializers.TagSerializer({"tags": tags})
         return Response(serialized_tags.data)
+
+    @swagger_auto_schema(
+        method='get',
+        responses={status.HTTP_200_OK: serializers.BurpRawRequestResponseSerializer}
+    )
+    @swagger_auto_schema(
+        method='post',
+        request_body=serializers.BurpRawRequestResponseSerializer,
+        responses={status.HTTP_200_OK: serializers.BurpRawRequestResponseSerializer}
+    )
+    @action(detail=True, methods=['get', 'post'])
+    def request_response(self, request, pk=None):
+        finding = get_object_or_404(Finding.objects, id=pk)
+
+        if request.method == 'POST':
+            burps = serializers.BurpRawRequestResponseSerializer(data=request.data, many=isinstance(request.data, list))
+            if burps.is_valid():
+                for pair in burps.validated_data['req_resp']:
+                    burp_rr = BurpRawRequestResponse(
+                                    finding=finding,
+                                    burpRequestBase64=base64.b64encode(pair["request"].encode("utf-8")),
+                                    burpResponseBase64=base64.b64encode(pair["response"].encode("utf-8")),
+                                )
+                    burp_rr.clean()
+                    burp_rr.save()
+            else:
+                return Response(burps.errors,
+                    status=status.HTTP_400_BAD_REQUEST)
+
+        burp_req_resp = BurpRawRequestResponse.objects.filter(finding=finding)
+        burp_list = []
+        for burp in burp_req_resp:
+            request = burp.get_request()
+            response = burp.get_response()
+            burp_list.append({'request': request, 'response': response})
+        serialized_burps = serializers.BurpRawRequestResponseSerializer({'req_resp': burp_list})
+        return Response(serialized_burps.data)
 
     @swagger_auto_schema(
         method='get',
@@ -254,8 +452,8 @@ class FindingViewSet(mixins.ListModelMixin,
             new_note = serializers.AddNewNoteOptionSerializer(data=request.data)
             if new_note.is_valid():
                 entry = new_note.validated_data['entry']
-                private = new_note.validated_data['private']
-                note_type = new_note.validated_data['note_type']
+                private = new_note.validated_data['private'] if 'private' in new_note.validated_data else False
+                note_type = new_note.validated_data['note_type'] if 'note_type' in new_note.validated_data else None
             else:
                 return Response(new_note.errors,
                     status=status.HTTP_400_BAD_REQUEST)
@@ -264,6 +462,9 @@ class FindingViewSet(mixins.ListModelMixin,
             note = Notes(entry=entry, author=author, private=private, note_type=note_type)
             note.save()
             finding.notes.add(note)
+
+            if finding.has_jira_issue:
+                jira_helper.add_comment(finding, note)
 
             serialized_note = serializers.NoteSerializer({
                 "author": author, "entry": entry,
@@ -285,6 +486,52 @@ class FindingViewSet(mixins.ListModelMixin,
                     status=status.HTTP_200_OK)
 
         return Response(serialized_notes,
+                status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        method='get',
+        responses={status.HTTP_200_OK: serializers.FindingToFilesSerializer}
+    )
+    @swagger_auto_schema(
+        methods=['post', 'patch'],
+        request_body=serializers.AddNewFileOptionSerializer,
+        responses={status.HTTP_200_OK: serializers.FindingToFilesSerializer}
+    )
+    @action(detail=True, methods=["get", "post", "patch"])
+    def files(self, request, pk=None):
+        finding = get_object_or_404(Finding.objects, id=pk)
+        if request.method == 'POST':
+            new_file = serializers.FileSerializer(data=request.data)
+            if new_file.is_valid():
+                title = new_file.validated_data['title']
+                file = new_file.validated_data['file']
+            else:
+                return Response(new_file.errors,
+                    status=status.HTTP_400_BAD_REQUEST)
+
+            file = FileUpload(title=title, file=file)
+            file.save()
+            finding.files.add(file)
+
+            serialized_file = serializers.FileSerializer({
+                "title": title, "file": file,
+            })
+            result = serializers.FindingToFilesSerializer({
+                "finding_id": finding, "files": [serialized_file.data]
+            })
+            return Response(serialized_file.data,
+                status=status.HTTP_200_OK)
+        files = finding.files.all()
+
+        serialized_files = []
+        if files:
+            serialized_files = serializers.FindingToFilesSerializer({
+                    "finding_id": finding, "files": files
+            })
+            return Response(serialized_files.data,
+                    status=status.HTTP_200_OK)
+
+        return Response(serialized_files,
                 status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
@@ -315,7 +562,7 @@ class FindingViewSet(mixins.ListModelMixin,
             status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
-        responses={status.HTTP_200_OK: None},
+        responses={status.HTTP_200_OK: ""},
         methods=['put', 'patch'],
         request_body=serializers.TagSerializer
     )
@@ -327,7 +574,9 @@ class FindingViewSet(mixins.ListModelMixin,
         if delete_tags.is_valid():
             all_tags = finding.tags
             all_tags = serializers.TagSerializer({"tags": all_tags}).data['tags']
-            del_tags = delete_tags.validated_data['tags']
+
+            # serializer turns it into a string, but we need a list
+            del_tags = tagulous.utils.parse_tags(delete_tags.validated_data['tags'])
             if len(del_tags) < 1:
                 return Response({"error": "Empty Tag List Not Allowed"},
                         status=status.HTTP_400_BAD_REQUEST)
@@ -336,14 +585,47 @@ class FindingViewSet(mixins.ListModelMixin,
                     return Response({"error": "'{}' is not a valid tag in list".format(tag)},
                         status=status.HTTP_400_BAD_REQUEST)
                 all_tags.remove(tag)
-            t = ", ".join(all_tags)
-            finding.tags = t
+            new_tags = tagulous.utils.render_tags(all_tags)
+            finding.tags = new_tags
             finding.save()
             return Response({"success": "Tag(s) Removed"},
                 status=status.HTTP_200_OK)
         else:
             return Response(delete_tags.errors,
                 status=status.HTTP_400_BAD_REQUEST)
+
+    @swagger_auto_schema(
+        responses={status.HTTP_200_OK: serializers.FindingSerializer(many=True)}
+    )
+    @action(detail=True, methods=['get'], url_path=r'duplicate')
+    def get_duplicate_status(self, request, pk):
+        finding = get_object_or_404(Finding, id=pk)
+        result = duplicate_cluster(request, finding)
+        serializer = serializers.FindingSerializer(instance=result, many=True,
+                                                   context={"request": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        responses={status.HTTP_200_OK: ""},
+        request_body=no_body
+    )
+    @action(detail=True, methods=['post'], url_path=r'duplicate/reset')
+    def reset_finding_duplicate_status(self, request, pk):
+        checked_duplicate_id = reset_finding_duplicate_status_internal(request.user, pk)
+        if checked_duplicate_id is None:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        responses={status.HTTP_200_OK: ""},
+        request_body=no_body
+    )
+    @action(detail=True, methods=['post'], url_path=r'original/(?P<new_fid>\d+)')
+    def set_finding_as_original(self, request, pk, new_fid):
+        success = set_finding_as_original_internal(request.user, pk, new_fid)
+        if not success:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
         request_body=serializers.ReportGenerateOptionSerializer,
@@ -368,15 +650,126 @@ class FindingViewSet(mixins.ListModelMixin,
         report = serializers.ReportGenerateSerializer(data)
         return Response(report.data)
 
+    def _get_metadata(self, request, finding):
+        metadata = DojoMeta.objects.filter(finding=finding)
+        serializer = serializers.FindingMetaSerializer(instance=metadata, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-class JiraConfigurationsViewSet(mixins.ListModelMixin,
+    def _edit_metadata(self, request, finding):
+        metadata_name = request.query_params.get("name", None)
+        if metadata_name is None:
+            return Response("Metadata name is required", status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            DojoMeta.objects.update_or_create(
+                name=metadata_name, finding=finding,
+                defaults={
+                    "name": request.data.get("name"),
+                    "value": request.data.get("value")
+                }
+            )
+
+            return Response(data=request.data, status=status.HTTP_200_OK)
+        except IntegrityError:
+            return Response("Update failed because the new name already exists",
+                status=status.HTTP_400_BAD_REQUEST)
+
+    def _add_metadata(self, request, finding):
+        metadata_data = serializers.FindingMetaSerializer(data=request.data)
+
+        if metadata_data.is_valid():
+            name = metadata_data.validated_data["name"]
+            value = metadata_data.validated_data["value"]
+
+            metadata = DojoMeta(finding=finding, name=name, value=value)
+            try:
+                metadata.validate_unique()
+                metadata.save()
+            except ValidationError:
+                return Response("Create failed probably because the name of the metadata already exists", status=status.HTTP_400_BAD_REQUEST)
+
+            return Response(data=metadata_data.data, status=status.HTTP_200_OK)
+        else:
+            return Response(metadata_data.errors,
+                status=status.HTTP_400_BAD_REQUEST)
+
+    def _remove_metadata(self, request, finding):
+        name = request.query_params.get("name", None)
+        if name is None:
+            return Response("A metadata name must be provided", status=status.HTTP_400_BAD_REQUEST)
+
+        metadata = get_object_or_404(DojoMeta.objects, finding=finding, name=name)
+        metadata.delete()
+
+        return Response("Metadata deleted", status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        responses={
+            status.HTTP_200_OK: serializers.FindingMetaSerializer(many=True),
+            status.HTTP_404_NOT_FOUND: "Returned if finding does not exist"
+        },
+        methods=['get']
+    )
+    @swagger_auto_schema(
+        responses={
+            status.HTTP_200_OK: "Returned if the metadata was correctly deleted",
+            status.HTTP_404_NOT_FOUND: "Returned if finding does not exist",
+            status.HTTP_400_BAD_REQUEST: "Returned if there was a problem with the metadata information"
+        },
+        methods=['delete'],
+        manual_parameters=[openapi.Parameter(
+            name="name", in_=openapi.IN_QUERY, required=True, type=openapi.TYPE_STRING,
+            description="name of the metadata to retrieve. If name is empty, return all the \
+                            metadata associated with the finding")]
+    )
+    @swagger_auto_schema(
+        responses={
+            status.HTTP_200_OK: serializers.FindingMetaSerializer,
+            status.HTTP_404_NOT_FOUND: "Returned if finding does not exist",
+            status.HTTP_400_BAD_REQUEST: "Returned if there was a problem with the metadata information"
+        },
+        methods=['put'],
+        manual_parameters=[openapi.Parameter(
+            name="name", in_=openapi.IN_QUERY, required=True, type=openapi.TYPE_STRING,
+            description="name of the metadata to edit")],
+        request_body=serializers.FindingMetaSerializer
+    )
+    @swagger_auto_schema(
+        responses={
+            status.HTTP_200_OK: serializers.FindingMetaSerializer,
+            status.HTTP_404_NOT_FOUND: "Returned if finding does not exist",
+            status.HTTP_400_BAD_REQUEST: "Returned if there was a problem with the metadata information"
+        },
+        methods=['post'],
+        request_body=serializers.FindingMetaSerializer
+    )
+    @action(detail=True, methods=["post", "put", "delete", "get"])
+    def metadata(self, request, pk=None):
+        finding = get_object_or_404(Finding.objects, id=pk)
+
+        if request.method == "GET":
+            return self._get_metadata(request, finding)
+        elif request.method == "POST":
+            return self._add_metadata(request, finding)
+        elif request.method == "PUT":
+            return self._edit_metadata(request, finding)
+        elif request.method == "PATCH":
+            return self._edit_metadata(request, finding)
+        elif request.method == "DELETE":
+            return self._remove_metadata(request, finding)
+
+        return Response({"error", "unsupported method"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class JiraInstanceViewSet(mixins.ListModelMixin,
                                 mixins.RetrieveModelMixin,
                                 mixins.DestroyModelMixin,
                                 mixins.UpdateModelMixin,
                                 mixins.CreateModelMixin,
                                 viewsets.GenericViewSet):
-    serializer_class = serializers.JIRAConfSerializer
-    queryset = JIRA_Conf.objects.all()
+    serializer_class = serializers.JIRAInstanceSerializer
+    queryset = JIRA_Instance.objects.all()
+
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'url')
 
@@ -393,18 +786,56 @@ class JiraIssuesViewSet(mixins.ListModelMixin,
     filter_fields = ('id', 'jira_id', 'jira_key', 'finding_id')
 
 
-class JiraViewSet(mixins.ListModelMixin,
+class JiraProjectViewSet(mixins.ListModelMixin,
                   mixins.RetrieveModelMixin,
                   mixins.DestroyModelMixin,
                   mixins.UpdateModelMixin,
                   mixins.CreateModelMixin,
                   viewsets.GenericViewSet):
-    serializer_class = serializers.JIRASerializer
-    queryset = JIRA_PKey.objects.all()
+    serializer_class = serializers.JIRAProjectSerializer
+    queryset = JIRA_Project.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'conf', 'product', 'component', 'project_key',
+    filter_fields = ('id', 'jira_instance', 'product', 'component', 'project_key',
                      'push_all_issues', 'enable_engagement_epic_mapping',
                      'push_notes')
+
+
+class SonarqubeIssueViewSet(mixins.ListModelMixin,
+                                mixins.RetrieveModelMixin,
+                                mixins.DestroyModelMixin,
+                                mixins.UpdateModelMixin,
+                                mixins.CreateModelMixin,
+                                viewsets.GenericViewSet):
+    serializer_class = serializers.SonarqubeIssueSerializer
+    queryset = Sonarqube_Issue.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'key', 'status', 'type')
+
+
+class SonarqubeIssueTransitionViewSet(mixins.ListModelMixin,
+                        mixins.RetrieveModelMixin,
+                        mixins.DestroyModelMixin,
+                        mixins.CreateModelMixin,
+                        mixins.UpdateModelMixin,
+                        viewsets.GenericViewSet):
+    serializer_class = serializers.SonarqubeIssueTransitionSerializer
+    queryset = Sonarqube_Issue_Transition.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'sonarqube_issue', 'finding_status',
+                     'sonarqube_status', 'transitions')
+
+
+class SonarqubeProductViewSet(mixins.ListModelMixin,
+                  mixins.RetrieveModelMixin,
+                  mixins.DestroyModelMixin,
+                  mixins.UpdateModelMixin,
+                  mixins.CreateModelMixin,
+                  viewsets.GenericViewSet):
+    serializer_class = serializers.SonarqubeProductSerializer
+    queryset = Sonarqube_Product.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'product', 'sonarqube_project_key',
+                     'sonarqube_tool_config')
 
 
 class DojoMetaViewSet(mixins.ListModelMixin,
@@ -416,12 +847,13 @@ class DojoMetaViewSet(mixins.ListModelMixin,
     serializer_class = serializers.MetaSerializer
     queryset = DojoMeta.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'product', 'endpoint', 'name')
+    filter_fields = ('id', 'product', 'endpoint', 'name', 'finding')
 
 
-class ProductViewSet(mixins.ListModelMixin,
-                     mixins.RetrieveModelMixin,
+class ProductViewSet(prefetch.PrefetchListMixin,
+                     prefetch.PrefetchRetrieveMixin,
                      mixins.CreateModelMixin,
+                     mixins.DestroyModelMixin,
                      mixins.UpdateModelMixin,
                      viewsets.GenericViewSet):
     serializer_class = serializers.ProductSerializer
@@ -432,12 +864,16 @@ class ProductViewSet(mixins.ListModelMixin,
     permission_classes = (permissions.UserHasProductPermission,
                           DjangoModelPermissions)
 
-    filter_fields = ('id', 'name', 'prod_type', 'created', 'authorized_users')
+    filterset_class = ApiProductFilter
+    swagger_schema = prefetch.get_prefetch_schema(["products_list", "products_read"], serializers.ProductSerializer). \
+        to_schema()
 
     def get_queryset(self):
         if not self.request.user.is_staff:
             return self.queryset.filter(
-                authorized_users__in=[self.request.user])
+                Q(authorized_users__in=[self.request.user]) |
+                Q(prod_type__authorized_users__in=[self.request.user])
+            )
         else:
             return self.queryset
 
@@ -530,7 +966,9 @@ class ScanSettingsViewSet(mixins.ListModelMixin,
     def get_queryset(self):
         if not self.request.user.is_staff:
             return ScanSettings.objects.filter(
-                product__authorized_users__in=[self.request.user])
+                Q(product__authorized_users__in=[self.request.user]) |
+                Q(product__prod_type__authorized_users__in=[self.request.user])
+            )
         else:
             return ScanSettings.objects.all()
 
@@ -549,7 +987,9 @@ class ScansViewSet(mixins.ListModelMixin,
     def get_queryset(self):
         if not self.request.user.is_staff:
             return Scan.objects.filter(
-                scan_settings__product__authorized_users__in=[self.request.user])
+                Q(scan_settings__product__authorized_users__in=[self.request.user]) |
+                Q(scan_settings__product__prod_type__authorized_users__in=[self.request.user])
+            )
         else:
             return Scan.objects.all()
 
@@ -567,7 +1007,9 @@ class StubFindingsViewSet(mixins.ListModelMixin,
     def get_queryset(self):
         if not self.request.user.is_staff:
             return Finding.objects.filter(
-                reporter_id__in=[self.request.user])
+                Q(test__engagement__product__authorized_users__in=[self.request.user]) |
+                Q(test__engagement__product__prod_type__authorized_users__in=[self.request.user])
+            )
         else:
             return Finding.objects.all()
 
@@ -581,6 +1023,7 @@ class StubFindingsViewSet(mixins.ListModelMixin,
 class DevelopmentEnvironmentViewSet(mixins.ListModelMixin,
                                     mixins.RetrieveModelMixin,
                                     mixins.CreateModelMixin,
+                                    mixins.DestroyModelMixin,
                                     mixins.UpdateModelMixin,
                                     viewsets.GenericViewSet):
     serializer_class = serializers.DevelopmentEnvironmentSerializer
@@ -598,9 +1041,7 @@ class TestsViewSet(mixins.ListModelMixin,
     serializer_class = serializers.TestSerializer
     queryset = Test.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'title', 'test_type', 'target_start',
-                     'target_end', 'notes', 'percent_complete',
-                     'actual_time', 'engagement')
+    filter_class = ApiTestFilter
 
     @property
     def risk_application_model_class(self):
@@ -645,6 +1086,92 @@ class TestsViewSet(mixins.ListModelMixin,
         report = serializers.ReportGenerateSerializer(data)
         return Response(report.data)
 
+    @action(detail=True, methods=["get", "post", "patch"])
+    def notes(self, request, pk=None):
+        test = get_object_or_404(Test.objects, id=pk)
+        if request.method == 'POST':
+            new_note = serializers.AddNewNoteOptionSerializer(data=request.data)
+            if new_note.is_valid():
+                entry = new_note.validated_data['entry']
+                private = new_note.validated_data['private']
+                note_type = new_note.validated_data['note_type']
+            else:
+                return Response(new_note.errors,
+                    status=status.HTTP_400_BAD_REQUEST)
+
+            author = request.user
+            note = Notes(entry=entry, author=author, private=private, note_type=note_type)
+            note.save()
+            test.notes.add(note)
+
+            serialized_note = serializers.NoteSerializer({
+                "author": author, "entry": entry,
+                "private": private
+            })
+            result = serializers.TestToNotesSerializer({
+                "test_id": test, "notes": [serialized_note.data]
+            })
+            return Response(serialized_note.data,
+                status=status.HTTP_200_OK)
+        notes = test.notes.all()
+
+        serialized_notes = []
+        if notes:
+            serialized_notes = serializers.TestToNotesSerializer({
+                    "test_id": test, "notes": notes
+            })
+            return Response(serialized_notes.data,
+                    status=status.HTTP_200_OK)
+
+        return Response(serialized_notes,
+                status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        method='get',
+        responses={status.HTTP_200_OK: serializers.TestToFilesSerializer}
+    )
+    @swagger_auto_schema(
+        methods=['post', 'patch'],
+        request_body=serializers.AddNewFileOptionSerializer,
+        responses={status.HTTP_200_OK: serializers.FileSerializer}
+    )
+    @action(detail=True, methods=["get", "post", "patch"])
+    def files(self, request, pk=None):
+        test = get_object_or_404(Test.objects, id=pk)
+        if request.method == 'POST':
+            new_file = serializers.FileSerializer(data=request.data)
+            if new_file.is_valid():
+                title = new_file.validated_data['title']
+                file = new_file.validated_data['file']
+            else:
+                return Response(new_file.errors,
+                    status=status.HTTP_400_BAD_REQUEST)
+
+            file = FileUpload(title=title, file=file)
+            file.save()
+            test.files.add(file)
+
+            serialized_file = serializers.FileSerializer({
+                "title": title, "file": file,
+            })
+            result = serializers.TestToFilesSerializer({
+                "test_id": test, "files": [serialized_file.data]
+            })
+            return Response(serialized_file.data,
+                status=status.HTTP_200_OK)
+        files = test.files.all()
+
+        serialized_files = []
+        if files:
+            serialized_files = serializers.TestToFilesSerializer({
+                    "test_id": test, "files": files
+            })
+            return Response(serialized_files.data,
+                    status=status.HTTP_200_OK)
+
+        return Response(serialized_files,
+                status=status.HTTP_200_OK)
+
 
 class TestTypesViewSet(mixins.ListModelMixin,
                        mixins.RetrieveModelMixin,
@@ -654,6 +1181,7 @@ class TestTypesViewSet(mixins.ListModelMixin,
     serializer_class = serializers.TestTypeSerializer
     queryset = Test_Type.objects.all()
     filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('name',)
 
 
 class ToolConfigurationsViewSet(mixins.ListModelMixin,
@@ -693,7 +1221,21 @@ class ToolTypesViewSet(mixins.ListModelMixin,
     filter_fields = ('id', 'name', 'description')
 
 
-class UsersViewSet(mixins.ListModelMixin,
+class RegulationsViewSet(mixins.ListModelMixin,
+                         mixins.RetrieveModelMixin,
+                         mixins.CreateModelMixin,
+                         mixins.DestroyModelMixin,
+                         mixins.UpdateModelMixin,
+                         viewsets.GenericViewSet):
+    serializer_class = serializers.RegulationSerializer
+    queryset = Regulation.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'name', 'description')
+
+
+class UsersViewSet(mixins.CreateModelMixin,
+                   mixins.UpdateModelMixin,
+                   mixins.ListModelMixin,
                    mixins.RetrieveModelMixin,
                    viewsets.GenericViewSet):
     serializer_class = serializers.UserSerializer
@@ -709,19 +1251,14 @@ class ImportScanView(mixins.CreateModelMixin,
     queryset = Test.objects.all()
 
     def perform_create(self, serializer):
-        # Override CreateModeMixin to pass in push_to_jira if needed.
-        enabled = False
-        push_to_jira = serializer.validated_data.get('push_to_jira')
-        # IF JIRA is enabled and this product has a JIRA configuration
         engagement = serializer.validated_data['engagement']
-        jira_config = engagement.product.jira_pkey_set.first() is not None
-        if get_system_setting('enable_jira') and jira_config:
-            # Check if push_all_issues is set on this product
-            enabled = engagement.product.jira_pkey_set.first().push_all_issues
+        jira_project = jira_helper.get_jira_project(engagement)
 
-        # If push_all_issues is set:
-        if enabled:
-            push_to_jira = True
+        push_to_jira = serializer.validated_data.get('push_to_jira')
+        if get_system_setting('enable_jira') and jira_project:
+            push_to_jira = push_to_jira or jira_project.push_all_issues
+
+        logger.debug('push_to_jira: %s', serializer.validated_data.get('push_to_jira'))
         serializer.save(push_to_jira=push_to_jira)
 
 
@@ -732,19 +1269,14 @@ class ReImportScanView(mixins.CreateModelMixin,
     queryset = Test.objects.all()
 
     def perform_create(self, serializer):
-        # Override CreateModeMixin to pass in push_to_jira if needed.
-        enabled = False
-        push_to_jira = serializer.validated_data.get('push_to_jira')
         test = serializer.validated_data['test']
-        jira_config = test.engagement.product.jira_pkey_set.first() is not None
-        # IF JIRA is enabled and this product has a JIRA configuration
-        if get_system_setting('enable_jira') and jira_config:
-            # Check if push_all_issues is set on this product
-            enabled = test.engagement.product.jira_pkey_set.first().push_all_issues
+        jira_project = jira_helper.get_jira_project(test)
 
-        # If push_all_issues is set:
-        if enabled:
-            push_to_jira = True
+        push_to_jira = serializer.validated_data.get('push_to_jira')
+        if get_system_setting('enable_jira') and jira_project:
+            push_to_jira = push_to_jira or jira_project.push_all_issues
+
+        logger.debug('push_to_jira: %s', serializer.validated_data.get('push_to_jira'))
         serializer.save(push_to_jira=push_to_jira)
 
 
@@ -814,10 +1346,8 @@ def report_generate(request, obj, options):
         report_title = "Product Type Report"
         report_subtitle = str(product_type)
 
-        findings = ReportFindingFilter(request.GET, queryset=Finding.objects.filter(
-            test__engagement__product__prod_type=product_type).distinct().prefetch_related('test',
-                                                                                           'test__engagement__product',
-                                                                                           'test__engagement__product__prod_type'))
+        findings = ReportFindingFilter(request.GET, prod_type=prod_type, queryset=prefetch_related_findings_for_report(Finding.objects.filter(
+            test__engagement__product__prod_type=product_type)))
         products = Product.objects.filter(prod_type=product_type,
                                           engagement__test__finding__in=findings.qs).distinct()
         engagements = Engagement.objects.filter(product__prod_type=product_type,
@@ -846,10 +1376,8 @@ def report_generate(request, obj, options):
         report_name = "Product Report: " + str(product)
         report_title = "Product Report"
         report_subtitle = str(product)
-        findings = ReportFindingFilter(request.GET, queryset=Finding.objects.filter(
-            test__engagement__product=product).distinct().prefetch_related('test',
-                                                                           'test__engagement__product',
-                                                                           'test__engagement__product__prod_type'))
+        findings = ReportFindingFilter(request.GET, product=product, queryset=prefetch_related_findings_for_report(Finding.objects.filter(
+            test__engagement__product=product)))
         ids = set(finding.id for finding in findings.qs)
         engagements = Engagement.objects.filter(test__finding__id__in=ids).distinct()
         tests = Test.objects.filter(finding__id__in=ids).distinct()
@@ -858,13 +1386,8 @@ def report_generate(request, obj, options):
 
     elif type(obj).__name__ == "Engagement":
         engagement = obj
-        findings = ReportFindingFilter(request.GET, queryset=Finding.objects.filter(
-            test__engagement=engagement,
-        ).prefetch_related(
-            'test',
-            'test__engagement__product',
-            'test__engagement__product__prod_type'
-        ).distinct())
+        findings = ReportFindingFilter(request.GET, engagement=engagement,
+                                       queryset=prefetch_related_findings_for_report(Finding.objects.filter(test__engagement=engagement)))
         report_name = "Engagement Report: " + str(engagement)
 
         report_title = "Engagement Report"
@@ -877,11 +1400,10 @@ def report_generate(request, obj, options):
 
     elif type(obj).__name__ == "Test":
         test = obj
-        findings = ReportFindingFilter(request.GET,
-                                       queryset=Finding.objects.filter(test=test).prefetch_related(
-                                            'test',
-                                            'test__engagement__product',
-                                            'test__engagement__product__prod_type').distinct())
+        findings = ReportFindingFilter(request.GET, engagement=test.engagement,
+                                       queryset=prefetch_related_findings_for_report(Finding.objects.filter(test=test)))
+        filename = "test_finding_report.pdf"
+        template = "dojo/test_pdf_report.html"
         report_name = "Test Report: " + str(test)
         report_title = "Test Report"
         report_subtitle = str(test)
@@ -896,23 +1418,13 @@ def report_generate(request, obj, options):
         report_title = "Endpoint Report"
         report_subtitle = host
         findings = ReportFindingFilter(request.GET,
-            queryset=Finding.objects.filter(
-                endpoints__in=endpoints,
-            ).prefetch_related(
-                'test',
-                'test__engagement__product',
-                'test__engagement__product__prod_type'
-            ).distinct())
+                                       queryset=prefetch_related_findings_for_report(Finding.objects.filter(endpoints__in=endpoints)))
 
     elif type(obj).__name__ == "QuerySet":
         findings = ReportAuthedFindingFilter(request.GET,
-            queryset=obj.prefetch_related(
-                'test',
-                'test__engagement__product',
-                'test__engagement__product__prod_type'
-            ).distinct(),
-            user=request.user
-        )
+                                             queryset=prefetch_related_findings_for_report(obj).distinct(),
+                                             user=request.user)
+
         report_name = 'Finding'
         report_type = 'Finding'
         report_title = "Finding Report"

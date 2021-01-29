@@ -1,12 +1,13 @@
 __author__ = 'jaguasch'
 
 import json
-from dojo.models import Finding
 from datetime import datetime
+
+from dojo.models import Finding
 
 
 class AnchoreEngineScanParser(object):
-    def __init__(self, filename, test):
+    def get_findings(self, filename, test):
         tree = filename.read()
         try:
             data = json.loads(str(tree, 'utf-8'))
@@ -25,7 +26,7 @@ class AnchoreEngineScanParser(object):
             title = ''
             group = ''
             status = ''
-            cve = ''
+            cve = None
 
             title = item['vuln'] + ' - ' + item['package'] + '(' + item['package_type'] + ')'
 
@@ -79,4 +80,4 @@ class AnchoreEngineScanParser(object):
 
                 dupes[dupe_key] = find
 
-        self.items = list(dupes.values())
+        return list(dupes.values())

@@ -4,14 +4,9 @@ from dojo.models import Finding
 
 
 class PhpSymfonySecurityCheckParser(object):
-    def __init__(self, json_file, test):
-
+    def get_findings(self, json_file, test):
         tree = self.parse_json(json_file)
-
-        if tree:
-            self.items = [data for data in self.get_items(tree, test)]
-        else:
-            self.items = []
+        return self.get_items(tree, test)
 
     def parse_json(self, json_file):
         if json_file is None:
@@ -29,17 +24,20 @@ class PhpSymfonySecurityCheckParser(object):
         return tree
 
     def get_items(self, tree, test):
-        print(('tree: ', tree))
+        # print(('tree: ', tree))
         items = {}
 
         for dependency_name, dependency_data in list(tree.items()):
             advisories = dependency_data.get('advisories')
             dependency_version = dependency_data['version']
+            if dependency_version and dependency_version.startswith('v'):
+                dependency_version = dependency_version[1:]
+
             for advisory in advisories:
                 item = get_item(dependency_name, dependency_version, advisory, test)
                 unique_key = str(dependency_name) + str(dependency_data['version'] + str(advisory['cve']))
                 items[unique_key] = item
-                print(('item: ', item))
+                # print(('item: ', item))
 
         return list(items.values())
 
@@ -64,6 +62,8 @@ def get_item(dependency_name, dependency_version, advisory, test):
                       mitigated=None,
                       impact="No impact provided",
                       static_finding=True,
-                      dynamic_finding=False)
+                      dynamic_finding=False,
+                      component_name=dependency_name,
+                      component_version=dependency_version)
 
     return finding

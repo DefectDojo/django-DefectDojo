@@ -1,6 +1,7 @@
 __author__ = 'omerlh'
 
 import json
+
 from dojo.models import Finding
 
 
@@ -13,14 +14,14 @@ class ESLintParser(object):
         else:
             return None
 
-    def __init__(self, filename, test):
-        self.items = []
+    def get_findings(self, filename, test):
         tree = filename.read()
         try:
             data = json.loads(str(tree, 'utf-8'))
         except:
             data = json.loads(tree)
 
+        items = list()
         for item in data:
             findingdetail = ''
 
@@ -28,9 +29,15 @@ class ESLintParser(object):
                 continue
 
             for message in item["messages"]:
-                title = message["message"] + " Test ID: " + message["ruleId"]
 
-                #  ##### Finding details information ######
+                if message["message"] is None:
+                    title = str("Finding Not defined")
+                else:
+                    title = str(message["message"])
+
+                if message["ruleId"] is not None:
+                    title = title + ' Test ID: ' + str(message["ruleId"])
+
                 findingdetail += "Filename: " + item["filePath"] + "\n"
                 findingdetail += "Line number: " + str(message["line"]) + "\n"
 
@@ -50,4 +57,5 @@ class ESLintParser(object):
                             mitigation='N/A',
                             impact='N/A')
 
-                self.items.append(find)
+                items.append(find)
+        return items

@@ -1,7 +1,6 @@
 import re
 from datetime import datetime, date
 from urllib.parse import urlsplit, urlunsplit
-
 import pickle
 from crispy_forms.bootstrap import InlineRadios, InlineCheckboxes
 from crispy_forms.helper import FormHelper
@@ -18,18 +17,26 @@ from django.forms.widgets import Widget, Select
 from django.utils.dates import MONTHS
 from django.utils.safestring import mark_safe
 from django.utils import timezone
-from tagging.models import Tag
+
 from dojo.models import Finding, Product_Type, Product, Note_Type, ScanSettings, VA, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
     Development_Environment, Dojo_User, Scan, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage, \
-    JIRA_Issue, JIRA_PKey, JIRA_Conf, GITHUB_Issue, GITHUB_PKey, GITHUB_Conf, UserContactInfo, Tool_Type, \
+    JIRA_Issue, JIRA_Project, JIRA_Instance, GITHUB_Issue, GITHUB_PKey, GITHUB_Conf, UserContactInfo, Tool_Type, \
     Tool_Configuration, Tool_Product_Settings, Cred_User, Cred_Mapping, System_Settings, Notifications, \
-    Languages, Language_Type, App_Analysis, Objects, Benchmark_Product, Benchmark_Requirement, \
+    Languages, Language_Type, App_Analysis, Objects_Product, Benchmark_Product, Benchmark_Requirement, \
     Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta, Sonarqube_Product, \
     Engagement_Survey, Answered_Survey, TextAnswer, ChoiceAnswer, Choice, Question, TextQuestion, \
-    ChoiceQuestion, General_Survey
+    ChoiceQuestion, General_Survey, Regulation, FileUpload
 
-from dojo.tools import requires_file, SCAN_SONARQUBE_API
+from dojo.tools.factory import requires_file, get_choices
+from dojo.user.helper import user_is_authorized
+from django.urls import reverse
+from tagulous.forms import TagField
+import logging
+from crum import get_current_user
+from dojo.utils import get_system_setting
+
+logger = logging.getLogger(__name__)
 
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')
 
@@ -145,15 +152,30 @@ class MonthYearWidget(Widget):
 
 
 class Product_TypeForm(forms.ModelForm):
+    description = forms.CharField(widget=forms.Textarea(attrs={}),
+                                  required=False)
+    authorized_users = forms.ModelMultipleChoiceField(
+        queryset=None,
+        required=False, label="Authorized Users")
+
+    def __init__(self, *args, **kwargs):
+        non_staff = Dojo_User.objects.exclude(is_staff=True) \
+            .exclude(is_active=False).order_by('first_name', 'last_name')
+        super(Product_TypeForm, self).__init__(*args, **kwargs)
+        self.fields['authorized_users'].queryset = non_staff
+
     class Meta:
         model = Product_Type
-        fields = ['name', 'critical_product', 'key_product']
+        fields = ['name', 'description', 'authorized_users', 'critical_product', 'key_product']
 
 
 class Delete_Product_TypeForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
     class Meta:
         model = Product_Type
-        exclude = ['name', 'critical_product', 'key_product']
+        exclude = ['name', 'description', 'critical_product', 'key_product', 'authorized_users']
 
 
 class Test_TypeForm(forms.ModelForm):
@@ -178,10 +200,7 @@ class ProductForm(forms.ModelForm):
     name = forms.CharField(max_length=50, required=True)
     description = forms.CharField(widget=forms.Textarea(attrs={}),
                                   required=True)
-    tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
-                           required=False,
-                           help_text="Add tags that help describe this product.  "
-                                     "Choose from the list or add new tags.  Press TAB key to add.")
+
     prod_type = forms.ModelChoiceField(label='Product Type',
                                        queryset=Product_Type.objects.all().order_by('name'),
                                        required=True)
@@ -190,23 +209,25 @@ class ProductForm(forms.ModelForm):
         queryset=None,
         required=False, label="Authorized Users")
 
+    app_analysis = forms.ModelMultipleChoiceField(label='Technologies',
+                                           queryset=App_Analysis.objects.all().order_by('name'),
+                                           required=False)
+
     product_manager = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'), required=False)
     technical_contact = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'), required=False)
-    product_manager = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'), required=False)
+    team_manager = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'), required=False)
 
     def __init__(self, *args, **kwargs):
         non_staff = Dojo_User.objects.exclude(is_staff=True) \
             .exclude(is_active=False).order_by('first_name', 'last_name')
-        tags = Tag.objects.usage_for_model(Product)
-        t = [(tag.name, tag.name) for tag in tags]
         super(ProductForm, self).__init__(*args, **kwargs)
         self.fields['authorized_users'].queryset = non_staff
-        self.fields['tags'].widget.choices = t
 
     class Meta:
         model = Product
-        fields = ['name', 'description', 'tags', 'product_manager', 'technical_contact', 'team_manager', 'prod_type', 'regulations',
-                  'authorized_users', 'business_criticality', 'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience', 'internet_accessible']
+        fields = ['name', 'description', 'tags', 'product_manager', 'technical_contact', 'team_manager', 'prod_type', 'regulations', 'app_analysis',
+                  'authorized_users', 'business_criticality', 'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience',
+                  'internet_accessible', 'enable_simple_risk_acceptance', 'enable_full_risk_acceptance']
 
 
 class DeleteProductForm(forms.ModelForm):
@@ -271,125 +292,8 @@ class DojoMetaDataForm(forms.ModelForm):
         fields = '__all__'
 
 
-class Product_TypeProductForm(forms.ModelForm):
-    name = forms.CharField(max_length=50, required=True)
-    description = forms.CharField(widget=forms.Textarea(attrs={}),
-                                  required=True)
-    tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
-                           required=False,
-                           help_text="Add tags that help describe this product.  "
-                                     "Choose from the list or add new tags.  Press TAB key to add.")
-    authorized_users = forms.ModelMultipleChoiceField(
-        queryset=None,
-        required=False, label="Authorized Users")
-    prod_type = forms.ModelChoiceField(label='Product Type',
-                                       queryset=Product_Type.objects.all().order_by('name'),
-                                       required=True)
-
-    def __init__(self, *args, **kwargs):
-        non_staff = User.objects.exclude(is_staff=True) \
-            .exclude(is_active=False)
-        tags = Tag.objects.usage_for_model(Product)
-        t = [(tag.name, tag.name) for tag in tags]
-        super(Product_TypeProductForm, self).__init__(*args, **kwargs)
-        self.fields['authorized_users'].queryset = non_staff
-        self.fields['tags'].widget.choices = t
-
-    class Meta:
-        model = Product
-        fields = ['name', 'description', 'tags', 'product_manager', 'technical_contact', 'team_manager', 'prod_type', 'regulations',
-                  'authorized_users', 'business_criticality', 'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience', 'internet_accessible']
-
-
 class ImportScanForm(forms.Form):
-    SCAN_TYPE_CHOICES = (("", "Please Select a Scan Type"),
-                         ("Netsparker Scan", "Netsparker Scan"),
-                         ("Burp Scan", "Burp Scan"),
-                         ("Nessus Scan", "Nessus Scan"),
-                         ("Nmap Scan", "Nmap Scan"),
-                         ("Nexpose Scan", "Nexpose Scan"),
-                         ("AppSpider Scan", "AppSpider Scan"),
-                         ("Veracode Scan", "Veracode Scan"),
-                         ("Checkmarx Scan", "Checkmarx Scan"),
-                         ("Checkmarx Scan detailed", "Checkmarx Scan detailed"),
-                         ("Crashtest Security JSON File", "Crashtest Security JSON File"),
-                         ("Crashtest Security XML File", "Crashtest Security XML File"),
-                         ("ZAP Scan", "ZAP Scan"),
-                         ("Arachni Scan", "Arachni Scan"),
-                         ("VCG Scan", "VCG Scan"),
-                         ("Dependency Check Scan", "Dependency Check Scan"),
-                         ("Dependency Track Finding Packaging Format (FPF) Export", "Dependency Track Finding Packaging Format (FPF) Export"),
-                         ("Retire.js Scan", "Retire.js Scan"),
-                         ("Node Security Platform Scan", "Node Security Platform Scan"),
-                         ("NPM Audit Scan", "NPM Audit Scan"),
-                         ("Qualys Scan", "Qualys Scan"),
-                         ("Qualys Infrastructure Scan (WebGUI XML)", "Qualys Infrastructure Scan (WebGUI XML)"),
-                         ("Qualys Webapp Scan", "Qualys Webapp Scan"),
-                         ("OpenVAS CSV", "OpenVAS CSV"),
-                         ("Snyk Scan", "Snyk Scan"),
-                         ("Generic Findings Import", "Generic Findings Import"),
-                         ("Trustwave Scan (CSV)", "Trustwave Scan (CSV)"),
-                         ("SKF Scan", "SKF Scan"),
-                         ("Clair Klar Scan", "Clair Klar Scan"),
-                         ("Bandit Scan", "Bandit Scan"),
-                         ("ESLint Scan", "ESLint Scan"),
-                         ("SSL Labs Scan", "SSL Labs Scan"),
-                         ("Acunetix Scan", "Acunetix Scan"),
-                         ("Fortify Scan", "Fortify Scan"),
-                         ("Gosec Scanner", "Gosec Scanner"),
-                         ("SonarQube Scan", "SonarQube Scan"),
-                         ("SonarQube Scan detailed", "SonarQube Scan detailed"),
-                         (SCAN_SONARQUBE_API, SCAN_SONARQUBE_API),
-                         ("MobSF Scan", "MobSF Scan"),
-                         ("Trufflehog Scan", "Trufflehog Scan"),
-                         ("Nikto Scan", "Nikto Scan"),
-                         ("Clair Scan", "Clair Scan"),
-                         ("Brakeman Scan", "Brakeman Scan"),
-                         ("SpotBugs Scan", "SpotBugs Scan"),
-                         ("AWS Scout2 Scan", "AWS Scout2 Scan"),
-                         ("AWS Prowler Scan", "AWS Prowler Scan"),
-                         ("IBM AppScan DAST", "IBM AppScan DAST"),
-                         ("PHP Security Audit v2", "PHP Security Audit v2"),
-                         ("PHP Symfony Security Check", "PHP Symfony Security Check"),
-                         ("Safety Scan", "Safety Scan"),
-                         ("DawnScanner Scan", "DawnScanner Scan"),
-                         ("Anchore Engine Scan", "Anchore Engine Scan"),
-                         ("Bundler-Audit Scan", "Bundler-Audit Scan"),
-                         ("Twistlock Image Scan", "Twistlock Image Scan"),
-                         ("Kiuwan Scan", "Kiuwan Scan"),
-                         ("Blackduck Hub Scan", "Blackduck Hub Scan"),
-                         ("Blackduck Component Risk", "Blackduck Component Risk"),
-                         ("Openscap Vulnerability Scan", "Openscap Vulnerability Scan"),
-                         ("Wapiti Scan", "Wapiti Scan"),
-                         ("Immuniweb Scan", "Immuniweb Scan"),
-                         ("Sonatype Application Scan", "Sonatype Application Scan"),
-                         ("Cobalt.io Scan", "Cobalt.io Scan"),
-                         ("Mozilla Observatory Scan", "Mozilla Observatory Scan"),
-                         ("Whitesource Scan", "Whitesource Scan"),
-                         ("Contrast Scan", "Contrast Scan"),
-                         ("Microfocus Webinspect Scan", "Microfocus Webinspect Scan"),
-                         ("Wpscan", "Wpscan"),
-                         ("Sslscan", "Sslscan"),
-                         ("JFrog Xray Scan", "JFrog Xray Scan"),
-                         ("Sslyze Scan", "Sslyze Scan"),
-                         ("Testssl Scan", "Testssl Scan"),
-                         ("Hadolint Dockerfile check", "Hadolint Dockerfile check"),
-                         ("Aqua Scan", "Aqua Scan"),
-                         ("HackerOne Cases", "HackerOne Cases"),
-                         ("Xanitizer Scan", "Xanitizer Scan"),
-                         ("Outpost24 Scan", "Outpost24 Scan"),
-                         ("Burp Enterprise Scan", "Burp Enterprise Scan"),
-                         ("DSOP Scan", "DSOP Scan"),
-                         ("Trivy Scan", "Trivy Scan"),
-                         ("Anchore Enterprise Policy Check", "Anchore Enterprise Policy Check"),
-                         ("Gitleaks Scan", "Gitleaks Scan"),
-                         ("Choctaw Hog Scan", "Choctaw Hog Scan"),
-                         ("Harbor Vulnerability Scan", "Harbor Vulnerability Scan"),
-                         ("Yarn Audit Scan", "Yarn Audit Scan"),
-                         ("BugCrowd Scan", "BugCrowd Scan"),
-                         ("GitLab SAST Report", "GitLab SAST Report"))
-
-    SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
+    SORTED_SCAN_TYPE_CHOICES = sorted(get_choices(), key=lambda x: x[1])
     scan_date = forms.DateTimeField(
         required=True,
         label="Scan Completion Date",
@@ -399,25 +303,22 @@ class ImportScanForm(forms.Form):
     minimum_severity = forms.ChoiceField(help_text='Minimum severity level to be imported',
                                          required=True,
                                          choices=SEVERITY_CHOICES)
-    active = forms.BooleanField(help_text="Select if these findings are currently active.", required=False)
+    active = forms.BooleanField(help_text="Select if these findings are currently active.", required=False, initial=True)
     verified = forms.BooleanField(help_text="Select if these findings have been verified.", required=False)
     scan_type = forms.ChoiceField(required=True, choices=SORTED_SCAN_TYPE_CHOICES)
+    environment = forms.ModelChoiceField(
+        queryset=Development_Environment.objects.all().order_by('name'))
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
                                                widget=MultipleSelectWithPopPlusMinus(attrs={'size': '5'}))
-    tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
-                           required=False,
-                           help_text="Add tags that help describe this scan.  "
-                                     "Choose from the list or add new tags.  Press TAB key to add.")
+    tags = TagField(required=False, help_text="Add tags that help describe this scan.  "
+                    "Choose from the list or add new tags. Press Enter key to add.")
     file = forms.FileField(widget=forms.widgets.FileInput(
-        attrs={"accept": ".xml, .csv, .nessus, .json, .html, .js, .zip, .xlsx"}),
+        attrs={"accept": ".xml, .csv, .nessus, .json, .html, .js, .zip, .xlsx, .txt, .sarif"}),
         label="Choose report file",
         required=False)
 
     def __init__(self, *args, **kwargs):
-        tags = Tag.objects.usage_for_model(Test)
-        t = [(tag.name, tag.name) for tag in tags]
         super(ImportScanForm, self).__init__(*args, **kwargs)
-        self.fields['tags'].widget.choices = t
 
     def clean(self):
         cleaned_data = super().clean()
@@ -449,31 +350,31 @@ class ReImportScanForm(forms.Form):
     minimum_severity = forms.ChoiceField(help_text='Minimum severity level to be imported',
                                          required=True,
                                          choices=SEVERITY_CHOICES[0:4])
-    active = forms.BooleanField(help_text="Select if these findings are currently active.", required=False)
+    active = forms.BooleanField(help_text="Select if these findings are currently active.", required=False, initial=True)
     verified = forms.BooleanField(help_text="Select if these findings have been verified.", required=False)
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
                                                widget=MultipleSelectWithPopPlusMinus(attrs={'size': '5'}))
-    tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
-                           required=False,
-                           help_text="Add tags that help describe this scan.  "
-                                     "Choose from the list or add new tags.  Press TAB key to add.")
+    tags = TagField(required=False, help_text="Modify existing tags that help describe this scan.  "
+                    "Choose from the list or add new tags. Press Enter key to add.")
     file = forms.FileField(widget=forms.widgets.FileInput(
-        attrs={"accept": ".xml, .csv, .nessus, .json, .html, .js, .zip, .xlsx"}),
+        attrs={"accept": ".xml, .csv, .nessus, .json, .html, .js, .zip, .xlsx, .txt, .sarif"}),
         label="Choose report file",
         required=False)
+    close_old_findings = forms.BooleanField(help_text="Select if old findings get mitigated when importing.",
+                                            required=False, initial=True)
 
-    def __init__(self, *args, **kwargs):
-        tags = Tag.objects.usage_for_model(Test)
-        t = [(tag.name, tag.name) for tag in tags]
+    def __init__(self, *args, test=None, **kwargs):
         super(ReImportScanForm, self).__init__(*args, **kwargs)
-        self.fields['tags'].widget.choices = t
+        self.scan_type = None
+        if test:
+            self.scan_type = test.test_type.name
+            self.fields['tags'].initial = test.tags.all()
 
     def clean(self):
         cleaned_data = super().clean()
-        scan_type = cleaned_data.get("scan_type")
         file = cleaned_data.get("file")
-        if requires_file(scan_type) and not file:
-            raise forms.ValidationError('Uploading a Report File is required for {}'.format(scan_type))
+        if requires_file(self.scan_type) and not file:
+            raise forms.ValidationError("Uploading a report file is required for re-uploading findings.")
         return cleaned_data
 
     # date can only be today or in the past, not the future
@@ -541,37 +442,67 @@ class MergeFindings(forms.ModelForm):
         fields = ['append_description', 'add_endpoints', 'append_reference']
 
 
-class UploadRiskForm(forms.ModelForm):
-    # name = forms.CharField()
-    path = forms.FileField(label="Select File",
-                           required=False,
-                           widget=forms.widgets.FileInput(
-                               attrs={"accept": ".jpg,.png,.pdf"}))
+class EditRiskAcceptanceForm(forms.ModelForm):
+    # unfortunately django forces us to repeat many things here. choices, default, required etc.
+    recommendation = forms.ChoiceField(choices=Risk_Acceptance.TREATMENT_CHOICES, initial=Risk_Acceptance.TREATMENT_ACCEPT, widget=forms.RadioSelect, label="Security Recommendation")
+    decision = forms.ChoiceField(choices=Risk_Acceptance.TREATMENT_CHOICES, initial=Risk_Acceptance.TREATMENT_ACCEPT, widget=forms.RadioSelect)
+
+    path = forms.FileField(label="Proof", required=False, widget=forms.widgets.FileInput(attrs={"accept": ".jpg,.png,.pdf"}))
+    expiration_date = forms.DateTimeField(required=False, widget=forms.TextInput(attrs={'class': 'datepicker'}))
+
+    class Meta:
+        model = Risk_Acceptance
+        exclude = ['accepted_findings', 'notes']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['path'].help_text = 'Existing proof uploaded: %s' % self.instance.filename() if self.instance.filename() else 'None'
+        self.fields['expiration_date_warned'].disabled = True
+        self.fields['expiration_date_handled'].disabled = True
+
+
+class RiskAcceptanceForm(EditRiskAcceptanceForm):
+    # path = forms.FileField(label="Proof", required=False, widget=forms.widgets.FileInput(attrs={"accept": ".jpg,.png,.pdf"}))
+    # expiration_date = forms.DateTimeField(required=False, widget=forms.TextInput(attrs={'class': 'datepicker'}))
     accepted_findings = forms.ModelMultipleChoiceField(
         queryset=Finding.objects.all(), required=True,
         widget=forms.widgets.SelectMultiple(attrs={'size': 10}),
         help_text=('Active, verified findings listed, please select to add findings.'))
-    accepted_by = forms.CharField(help_text="The entity or person that accepts the risk.", required=False)
-    expiration_date = forms.DateTimeField(label='Date Risk Exception Expires', required=False, widget=forms.TextInput(attrs={'class': 'datepicker'}))
-    compensating_control = forms.CharField(label='Compensating Control', help_text="Compensating control (if applicable) for this risk acceptance", required=False, max_length=2400, widget=forms.Textarea)
     notes = forms.CharField(required=False, max_length=2400,
                             widget=forms.Textarea,
                             label='Notes')
 
     class Meta:
         model = Risk_Acceptance
-        fields = ['name', 'accepted_findings', 'owner']
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        expiration_delta_days = get_system_setting('risk_acceptance_form_default_days')
+        logger.debug('expiration_delta_days: %i', expiration_delta_days)
+        if expiration_delta_days > 0:
+            expiration_date = timezone.now().date() + relativedelta(days=expiration_delta_days)
+            # logger.debug('setting default expiration_date: %s', expiration_date)
+            self.fields['expiration_date'].initial = expiration_date
+        # self.fields['path'].help_text = 'Existing proof uploaded: %s' % self.instance.filename() if self.instance.filename() else 'None'
 
 
-class ReplaceRiskAcceptanceForm(forms.ModelForm):
-    path = forms.FileField(label="Select File",
-                           required=True,
-                           widget=forms.widgets.FileInput(
-                               attrs={"accept": ".jpg,.png,.pdf"}))
+class UploadFileForm(forms.ModelForm):
+
+    class Meta:
+        model = FileUpload
+        fields = ['title', 'file']
+
+
+ManageFileFormSet = modelformset_factory(FileUpload, extra=3, max_num=10, fields=['title', 'file'], can_delete=True)
+
+
+class ReplaceRiskAcceptanceProofForm(forms.ModelForm):
+    path = forms.FileField(label="Proof", required=True, widget=forms.widgets.FileInput(attrs={"accept": ".jpg,.png,.pdf"}))
 
     class Meta:
         model = Risk_Acceptance
-        exclude = ('name', 'owner', 'accepted_findings', 'notes')
+        fields = ['path']
 
 
 class AddFindingsRiskAcceptanceForm(forms.ModelForm):
@@ -582,7 +513,8 @@ class AddFindingsRiskAcceptanceForm(forms.ModelForm):
 
     class Meta:
         model = Risk_Acceptance
-        exclude = ('name', 'owner', 'path', 'notes', 'accepted_by', 'expiration_date', 'compensating_control')
+        fields = ['accepted_findings']
+        # exclude = ('name', 'owner', 'path', 'notes', 'accepted_by', 'expiration_date', 'compensating_control')
 
 
 class ScanSettingsForm(forms.ModelForm):
@@ -679,16 +611,12 @@ class EngForm(forms.ModelForm):
     product = forms.ModelChoiceField(label='Product',
                                        queryset=Product.objects.all().order_by('name'),
                                        required=True)
-    tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
-                           required=False,
-                           help_text="Add tags that help describe this engagement.  "
-                                     "Choose from the list or add new tags.  Press TAB key to add.")
     target_start = forms.DateField(widget=forms.TextInput(
         attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     target_end = forms.DateField(widget=forms.TextInput(
         attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     lead = forms.ModelChoiceField(
-        queryset=User.objects.exclude(is_staff=False),
+        queryset=None,
         required=True, label="Testing Lead")
     test_strategy = forms.URLField(required=False, label="Test Strategy URL")
 
@@ -701,12 +629,22 @@ class EngForm(forms.ModelForm):
         if 'product' in kwargs:
             product = kwargs.pop('product')
 
-        tags = Tag.objects.usage_for_model(Engagement)
-        t = [(tag.name, tag.name) for tag in tags]
+        self.user = None
+        if 'user' in kwargs:
+            self.user = kwargs.pop('user')
+
         super(EngForm, self).__init__(*args, **kwargs)
-        self.fields['tags'].widget.choices = t
+
         if product:
             self.fields['preset'] = forms.ModelChoiceField(help_text="Settings and notes for performing this engagement.", required=False, queryset=Engagement_Presets.objects.filter(product=product))
+            staff_users = [user.id for user in User.objects.all() if user_is_authorized(user, 'staff', product)]
+            self.fields['lead'].queryset = User.objects.filter(id__in=staff_users)
+        else:
+            self.fields['lead'].queryset = User.objects.exclude(is_staff=False)
+
+        if self.user is not None and not self.user.is_staff and not self.user.is_superuser:
+            self.fields['product'].queryset = Product.objects.all().filter(authorized_users__in=[self.user])
+
         # Don't show CICD fields on a interactive engagement
         if cicd is False:
             del self.fields['build_id']
@@ -739,54 +677,6 @@ class EngForm(forms.ModelForm):
                    'product', 'threat_model', 'api_test', 'pen_test', 'check_list', 'engagement_type')
 
 
-class EngForm2(forms.ModelForm):
-    name = forms.CharField(max_length=300,
-                           required=False,
-                           help_text="Add a descriptive name to identify " +
-                                     "this engagement. Without a name the target " +
-                                     "start date will be used in listings.")
-    description = forms.CharField(widget=forms.Textarea(attrs={}),
-                                  required=False)
-    tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
-                           required=False,
-                           help_text="Add tags that help describe this engagement.  "
-                                     "Choose from the list or add new tags.  Press TAB key to add.")
-    product = forms.ModelChoiceField(queryset=Product.objects.all())
-    target_start = forms.DateField(widget=forms.TextInput(
-        attrs={'class': 'datepicker', 'autocomplete': 'off'}))
-    target_end = forms.DateField(widget=forms.TextInput(
-        attrs={'class': 'datepicker', 'autocomplete': 'off'}))
-    test_options = (('API', 'API Test'), ('Static', 'Static Check'),
-                    ('Pen', 'Pen Test'), ('Web App', 'Web Application Test'))
-    lead = forms.ModelChoiceField(
-        queryset=User.objects.exclude(is_staff=False),
-        required=True, label="Testing Lead")
-    test_strategy = forms.URLField(required=False, label="Test Strategy URL")
-
-    def __init__(self, *args, **kwargs):
-        tags = Tag.objects.usage_for_model(Engagement)
-        t = [(tag.name, tag.name) for tag in tags]
-        super(EngForm2, self).__init__(*args, **kwargs)
-        self.fields['tags'].widget.choices = t
-
-    def is_valid(self):
-        valid = super(EngForm2, self).is_valid()
-
-        # we're done now if not valid
-        if not valid:
-            return valid
-        if self.cleaned_data['target_start'] > self.cleaned_data['target_end']:
-            self.add_error('target_start', 'Your target start date exceeds your target end date')
-            self.add_error('target_end', 'Your target start date exceeds your target end date')
-            return False
-        return True
-
-    class Meta:
-        model = Engagement
-        exclude = ('first_contacted', 'version', 'eng_type', 'real_start',
-                   'real_end', 'requester', 'reason', 'updated', 'report_type')
-
-
 class DeleteEngagementForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
                             widget=forms.widgets.HiddenInput())
@@ -803,6 +693,7 @@ class DeleteEngagementForm(forms.ModelForm):
 
 class TestForm(forms.ModelForm):
     title = forms.CharField(max_length=255, required=False)
+    description = forms.CharField(widget=forms.Textarea(attrs={'rows': '3'}), required=False)
     test_type = forms.ModelChoiceField(queryset=Test_Type.objects.all().order_by('name'))
     environment = forms.ModelChoiceField(
         queryset=Development_Environment.objects.all().order_by('name'))
@@ -811,23 +702,31 @@ class TestForm(forms.ModelForm):
         attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     target_end = forms.DateTimeField(widget=forms.TextInput(
         attrs={'class': 'datepicker', 'autocomplete': 'off'}))
-    tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
-                           required=False,
-                           help_text="Add tags that help describe this test.  "
-                                     "Choose from the list or add new tags.  Press TAB key to add.")
+
     lead = forms.ModelChoiceField(
-        queryset=User.objects.exclude(is_staff=False),
+        queryset=None,
         required=False, label="Testing Lead")
 
     def __init__(self, *args, **kwargs):
-        tags = Tag.objects.usage_for_model(Test)
-        t = [(tag.name, tag.name) for tag in tags]
+        obj = None
+
+        if 'engagement' in kwargs:
+            obj = kwargs.pop('engagement')
+
+        if 'instance' in kwargs:
+            obj = kwargs.get('instance')
+
         super(TestForm, self).__init__(*args, **kwargs)
-        self.fields['tags'].widget.choices = t
+
+        if obj:
+            staff_users = [user.id for user in User.objects.all() if user_is_authorized(user, 'staff', obj)]
+        else:
+            staff_users = [user.id for user in User.objects.exclude(is_staff=False)]
+        self.fields['lead'].queryset = User.objects.filter(id__in=staff_users)
 
     class Meta:
         model = Test
-        fields = ['title', 'test_type', 'target_start', 'target_end',
+        fields = ['title', 'test_type', 'target_start', 'target_end', 'description',
                   'environment', 'percent_complete', 'tags', 'lead', 'version']
 
 
@@ -853,6 +752,7 @@ class AddFindingForm(forms.ModelForm):
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     cwe = forms.IntegerField(required=False)
     cve = forms.CharField(max_length=28, required=False)
+    cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'cvsscalculator', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -861,11 +761,25 @@ class AddFindingForm(forms.ModelForm):
             'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
     mitigation = forms.CharField(widget=forms.Textarea)
     impact = forms.CharField(widget=forms.Textarea)
+    request = forms.CharField(widget=forms.Textarea, required=False)
+    response = forms.CharField(widget=forms.Textarea, required=False)
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
                                                widget=MultipleSelectWithPopPlusMinus(attrs={'size': '11'}))
     references = forms.CharField(widget=forms.Textarea, required=False)
     is_template = forms.BooleanField(label="Create Template?", required=False,
                                      help_text="A new finding template will be created from this finding.")
+
+    # the only reliable way without hacking internal fields to get predicatble ordering is to make it explicit
+    field_order = ('title', 'date', 'cwe', 'cve', 'severity', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
+                   'severity_justification', 'endpoints', 'references', 'is_template', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope',
+                   'risk_accepted', 'under_defect_review')
+
+    def __init__(self, *args, **kwargs):
+        req_resp = kwargs.pop('req_resp')
+        super(AddFindingForm, self).__init__(*args, **kwargs)
+        if req_resp:
+            self.fields['request'].initial = req_resp[0]
+            self.fields['response'].initial = req_resp[1]
 
     def clean(self):
         # self.fields['endpoints'].queryset = Endpoint.objects.all()
@@ -876,13 +790,17 @@ class AddFindingForm(forms.ModelForm):
         if cleaned_data['false_p'] and cleaned_data['verified']:
             raise forms.ValidationError('False positive findings cannot '
                                         'be verified.')
+        if cleaned_data['active'] and 'risk_accepted' in cleaned_data and cleaned_data['risk_accepted']:
+            raise forms.ValidationError('Active findings cannot '
+                                        'be risk accepted.')
+
         return cleaned_data
 
     class Meta:
         model = Finding
         order = ('title', 'severity', 'endpoints', 'description', 'impact')
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
-                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change')
+                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change', 'endpoint_status', 'sla_start_date')
 
 
 class AdHocFindingForm(forms.ModelForm):
@@ -891,6 +809,7 @@ class AdHocFindingForm(forms.ModelForm):
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     cwe = forms.IntegerField(required=False)
     cve = forms.CharField(max_length=28, required=False)
+    cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'cvsscalculator', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -899,11 +818,25 @@ class AdHocFindingForm(forms.ModelForm):
             'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
     mitigation = forms.CharField(widget=forms.Textarea)
     impact = forms.CharField(widget=forms.Textarea)
+    request = forms.CharField(widget=forms.Textarea, required=False)
+    response = forms.CharField(widget=forms.Textarea, required=False)
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
                                                widget=MultipleSelectWithPopPlusMinus(attrs={'size': '11'}))
     references = forms.CharField(widget=forms.Textarea, required=False)
     is_template = forms.BooleanField(label="Create Template?", required=False,
                                      help_text="A new finding template will be created from this finding.")
+
+    # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
+    field_order = ('title', 'date', 'cwe', 'cve', 'severity', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
+                   'severity_justification', 'endpoints', 'references', 'is_template', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope',
+                   'risk_accepted', 'under_defect_review', 'sla_start_date')
+
+    def __init__(self, *args, **kwargs):
+        req_resp = kwargs.pop('req_resp')
+        super(AdHocFindingForm, self).__init__(*args, **kwargs)
+        if req_resp:
+            self.fields['request'].initial = req_resp[0]
+            self.fields['response'].initial = req_resp[1]
 
     def clean(self):
         # self.fields['endpoints'].queryset = Endpoint.objects.all()
@@ -918,9 +851,8 @@ class AdHocFindingForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        order = ('title', 'severity', 'endpoints', 'description', 'impact')
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
-                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change')
+                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change', 'endpoint_status', 'sla_start_date')
 
 
 class PromoteFindingForm(forms.ModelForm):
@@ -929,6 +861,7 @@ class PromoteFindingForm(forms.ModelForm):
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     cwe = forms.IntegerField(required=False)
     cve = forms.CharField(max_length=28, required=False)
+    cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'cvsscalculator', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -944,7 +877,7 @@ class PromoteFindingForm(forms.ModelForm):
     class Meta:
         model = Finding
         order = ('title', 'severity', 'endpoints', 'description', 'impact')
-        exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'active', 'false_p', 'verified', 'is_template',
+        exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'active', 'false_p', 'verified', 'is_template', 'endpoint_status'
                    'duplicate', 'out_of_scope', 'images', 'under_review', 'reviewers', 'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change')
 
 
@@ -953,7 +886,8 @@ class FindingForm(forms.ModelForm):
     date = forms.DateField(required=True,
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     cwe = forms.IntegerField(required=False)
-    cve = forms.CharField(max_length=28, required=False)
+    cve = forms.CharField(max_length=28, required=False, strip=False)
+    cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'cvsscalculator', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -962,44 +896,71 @@ class FindingForm(forms.ModelForm):
             'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
     mitigation = forms.CharField(widget=forms.Textarea)
     impact = forms.CharField(widget=forms.Textarea)
+    request = forms.CharField(widget=forms.Textarea, required=False)
+    response = forms.CharField(widget=forms.Textarea, required=False)
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
                                                widget=MultipleSelectWithPopPlusMinus(attrs={'size': '11'}))
     references = forms.CharField(widget=forms.Textarea, required=False)
-    tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
-                           required=False,
-                           help_text="Add tags that help describe this finding.  "
-                                     "Choose from the list or add new tags.  Press TAB key to add.")
+
     is_template = forms.BooleanField(label="Create Template?", required=False,
                                      help_text="A new finding template will be created from this finding.")
 
+    # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
+    field_order = ('title', 'date', 'sla_start_date', 'cwe', 'cve', 'severity', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
+                   'severity_justification', 'endpoints', 'references', 'is_template', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope',
+                   'risk_accepted', 'under_defect_review')
+
     def __init__(self, *args, **kwargs):
         template = kwargs.pop('template')
-        # Get tags from a template
-        if template:
-            tags = Tag.objects.usage_for_model(Finding_Template)
-        # Get tags from a finding
-        else:
-            tags = Tag.objects.usage_for_model(Finding)
 
-        t = [(tag.name, tag.name) for tag in tags]
+        req_resp = None
+        if 'req_resp' in kwargs:
+            req_resp = kwargs.pop('req_resp')
+
         super(FindingForm, self).__init__(*args, **kwargs)
-        self.fields['tags'].widget.choices = t
+
+        # do not show checkbox if finding is not accepted and simple risk acceptance is disabled
+        # if checked, always show to allow unaccept also with full risk acceptance enabled
+        if not self.instance.risk_accepted and not self.instance.test.engagement.product.enable_simple_risk_acceptance:
+            del self.fields['risk_accepted']
+        else:
+            if self.instance.risk_accepted:
+                self.fields['risk_accepted'].help_text = "Uncheck to unaccept the risk. Use full risk acceptance from the dropdown menu if you need advanced settings such as an expiry date."
+            elif self.instance.test.engagement.product.enable_simple_risk_acceptance:
+                self.fields['risk_accepted'].help_text = "Check to accept the risk. Use full risk acceptance from the dropdown menu if you need advanced settings such as an expiry date."
+
+        # self.fields['tags'].widget.choices = t
+        if req_resp:
+            self.fields['request'].initial = req_resp[0]
+            self.fields['response'].initial = req_resp[1]
+
+        if self.instance.duplicate:
+            self.fields['duplicate'].help_text = "Original finding that is being duplicated here (readonly). Use view finding page to manage duplicate relationships. Unchecking duplicate here will reset this findings duplicate status, but will trigger deduplication logic."
+        else:
+            self.fields['duplicate'].help_text = "You can mark findings as duplicate only from the view finding page."
+
+        self.fields['sla_start_date'].disabled = True
 
     def clean(self):
         cleaned_data = super(FindingForm, self).clean()
+
+        cleaned_data['cve'] = None if cleaned_data['cve'] == '' else cleaned_data['cve']
         if (cleaned_data['active'] or cleaned_data['verified']) and cleaned_data['duplicate']:
             raise forms.ValidationError('Duplicate findings cannot be'
                                         ' verified or active')
         if cleaned_data['false_p'] and cleaned_data['verified']:
             raise forms.ValidationError('False positive findings cannot '
                                         'be verified.')
+        if cleaned_data['active'] and 'risk_accepted' in cleaned_data and cleaned_data['risk_accepted']:
+            raise forms.ValidationError('Active findings cannot '
+                                        'be risk accepted.')
+
         return cleaned_data
 
     class Meta:
         model = Finding
-        order = ('title', 'severity', 'endpoints', 'description', 'impact')
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
-                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change', 'sonarqube_issue')
+                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change', 'sonarqube_issue', 'endpoint_status')
 
 
 class StubFindingForm(forms.ModelForm):
@@ -1028,6 +989,7 @@ class ApplyFindingTemplateForm(forms.Form):
 
     cwe = forms.IntegerField(label="CWE", required=False)
     cve = forms.CharField(label="CVE", max_length=28, required=False)
+    cvssv3 = forms.CharField(label="CVSSv3", max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'btn btn-secondary dropdown-toggle', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
 
     severity = forms.ChoiceField(required=False, choices=SEVERITY_CHOICES, error_messages={'required': 'Select valid choice: In Progress, On Hold, Completed', 'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
 
@@ -1035,17 +997,12 @@ class ApplyFindingTemplateForm(forms.Form):
     mitigation = forms.CharField(widget=forms.Textarea)
     impact = forms.CharField(widget=forms.Textarea)
     references = forms.CharField(widget=forms.Textarea, required=False)
-    tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
-                           required=False,
-                           help_text="Add tags that help describe this finding template.  "
-                                     "Choose from the list or add new tags.  Press TAB key to add.")
+
+    tags = TagField(required=False, help_text="Add tags that help describe this finding template. Choose from the list or add new tags. Press Enter key to add.", initial=Finding.tags.tag_model.objects.all().order_by('name'))
 
     def __init__(self, template=None, *args, **kwargs):
-        # django-tagging apparently can not filter for multiple models at once
-        tags = Tag.objects.usage_for_model(Finding_Template) + Tag.objects.usage_for_model(Finding)
-        t = sorted({(tag.name, tag.name) for tag in tags})
         super(ApplyFindingTemplateForm, self).__init__(*args, **kwargs)
-        self.fields['tags'].widget.choices = t
+        self.fields['tags'].autocomplete_tags = Finding.tags.tag_model.objects.all().order_by('name')
         self.template = template
 
     def clean(self):
@@ -1060,19 +1017,17 @@ class ApplyFindingTemplateForm(forms.Form):
         return cleaned_data
 
     class Meta:
-        fields = ['title', 'cwe', 'cve', 'severity', 'description', 'mitigation', 'impact', 'references', 'tags']
-        order = ('title', 'cwe', 'cve', 'severity', 'description', 'impact', 'is_Mitigated')
+        fields = ['title', 'cwe', 'cve', 'cvssv3', 'severity', 'description', 'mitigation', 'impact', 'references', 'tags']
+        order = ('title', 'cwe', 'cve', 'cvssv3', 'severity', 'description', 'impact', 'is_Mitigated')
 
 
 class FindingTemplateForm(forms.ModelForm):
     apply_to_findings = forms.BooleanField(required=False, help_text="Apply template to all findings that match this CWE. (Update will overwrite mitigation, impact and references for any active, verified findings.)")
     title = forms.CharField(max_length=1000, required=True)
-    tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
-                           required=False,
-                           help_text="Add tags that help describe this finding template.  "
-                                     "Choose from the list or add new tags.  Press TAB key to add.")
+
     cwe = forms.IntegerField(label="CWE", required=False)
     cve = forms.CharField(label="CVE", max_length=28, required=False)
+    cvssv3 = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'btn btn-secondary dropdown-toggle', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
     severity = forms.ChoiceField(
         required=False,
         choices=SEVERITY_CHOICES,
@@ -1080,18 +1035,16 @@ class FindingTemplateForm(forms.ModelForm):
             'required': 'Select valid choice: In Progress, On Hold, Completed',
             'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
 
-    field_order = ['title', 'cwe', 'cve', 'severity', 'description', 'mitigation', 'impact', 'references', 'tags', 'template_match', 'template_match_cwe', 'template_match_title', 'apply_to_findings']
+    field_order = ['title', 'cwe', 'cve', 'cvssv3', 'severity', 'description', 'mitigation', 'impact', 'references', 'tags', 'template_match', 'template_match_cwe', 'template_match_title', 'apply_to_findings']
 
     def __init__(self, *args, **kwargs):
-        tags = Tag.objects.usage_for_model(Finding_Template)
-        t = [(tag.name, tag.name) for tag in tags]
         super(FindingTemplateForm, self).__init__(*args, **kwargs)
-        self.fields['tags'].widget.choices = t
+        self.fields['tags'].autocomplete_tags = Finding.tags.tag_model.objects.all().order_by('name')
 
     class Meta:
         model = Finding_Template
-        order = ('title', 'cwe', 'cve', 'severity', 'description', 'impact')
-        exclude = ('numerical_severity', 'is_Mitigated', 'last_used')
+        order = ('title', 'cwe', 'cve', 'cvssv3', 'severity', 'description', 'impact')
+        exclude = ('numerical_severity', 'is_Mitigated', 'last_used', 'endpoint_status')
 
 
 class DeleteFindingTemplateForm(forms.ModelForm):
@@ -1105,10 +1058,14 @@ class DeleteFindingTemplateForm(forms.ModelForm):
 
 class FindingBulkUpdateForm(forms.ModelForm):
     status = forms.BooleanField(required=False)
+    risk_acceptance = forms.BooleanField(required=False)
+    risk_accept = forms.BooleanField(required=False)
+    risk_unaccept = forms.BooleanField(required=False)
+
     push_to_jira = forms.BooleanField(required=False)
+    # unlink_from_jira = forms.BooleanField(required=False)
     push_to_github = forms.BooleanField(required=False)
-    tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
-                           required=False)
+    tags = TagField(required=False, autocomplete_tags=Finding.tags.tag_model.objects.all().order_by('name'))
 
     def __init__(self, *args, **kwargs):
         super(FindingBulkUpdateForm, self).__init__(*args, **kwargs)
@@ -1131,10 +1088,6 @@ class FindingBulkUpdateForm(forms.ModelForm):
 
 
 class EditEndpointForm(forms.ModelForm):
-    tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
-                           required=False,
-                           help_text="Add tags that help describe this endpoint.  "
-                                     "Choose from the list or add new tags.  Press TAB key to add.")
 
     class Meta:
         model = Endpoint
@@ -1143,13 +1096,10 @@ class EditEndpointForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.product = None
         self.endpoint_instance = None
-        tags = Tag.objects.usage_for_model(Endpoint)
-        t = [(tag.name, tag.name) for tag in tags]
         super(EditEndpointForm, self).__init__(*args, **kwargs)
         if 'instance' in kwargs:
             self.endpoint_instance = kwargs.pop('instance')
             self.product = self.endpoint_instance.product
-            self.fields['tags'].widget.choices = t
 
     def clean(self):
         from django.core.validators import URLValidator, validate_ipv46_address
@@ -1222,15 +1172,12 @@ class AddEndpointForm(forms.Form):
     product = forms.CharField(required=True,
                               widget=forms.widgets.HiddenInput(), help_text="The product this endpoint should be "
                                                                             "associated with.")
-    tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
-                           required=False,
-                           help_text="Add tags that help describe this endpoint.  "
-                                     "Choose from the list or add new tags.  Press TAB key to add.")
+    tags = TagField(required=False,
+                    help_text="Add tags that help describe this endpoint.  "
+                              "Choose from the list or add new tags. Press Enter key to add.")
 
     def __init__(self, *args, **kwargs):
         product = None
-        tags = Tag.objects.usage_for_model(Endpoint)
-        t = [(tag.name, tag.name) for tag in tags]
         if 'product' in kwargs:
             product = kwargs.pop('product')
         super(AddEndpointForm, self).__init__(*args, **kwargs)
@@ -1241,7 +1188,6 @@ class AddEndpointForm(forms.Form):
 
         self.product = product
         self.endpoints_to_process = []
-        self.fields['tags'].widget.choices = t
 
     def save(self):
         processed_endpoints = []
@@ -1342,11 +1288,11 @@ class NoteForm(forms.ModelForm):
         fields = ['entry', 'private']
 
 
-class FindingNoteForm(NoteForm):
+class TypedNoteForm(NoteForm):
 
     def __init__(self, *args, **kwargs):
         queryset = kwargs.pop('available_note_types')
-        super(FindingNoteForm, self).__init__(*args, **kwargs)
+        super(TypedNoteForm, self).__init__(*args, **kwargs)
         self.fields['note_type'] = forms.ModelChoiceField(queryset=queryset, label='Note Type', required=True)
 
     class Meta():
@@ -1460,7 +1406,7 @@ class SimpleMetricsForm(forms.Form):
 
 
 class SimpleSearchForm(forms.Form):
-    query = forms.CharField()
+    query = forms.CharField(required=False)
 
 
 class DateRangeMetrics(forms.Form):
@@ -1516,6 +1462,9 @@ class AddDojoUserForm(forms.ModelForm):
     authorized_products = forms.ModelMultipleChoiceField(
         queryset=Product.objects.all(), required=False,
         help_text='Select the products this user should have access to.')
+    authorized_product_types = forms.ModelMultipleChoiceField(
+        queryset=Product_Type.objects.all(), required=False,
+        help_text='Select the product types this user should have access to.')
 
     class Meta:
         model = Dojo_User
@@ -1557,6 +1506,12 @@ class ProductTypeCountsForm(forms.Form):
                                           error_messages={
                                               'required': '*'})
 
+    def __init__(self, *args, **kwargs):
+        super(ProductTypeCountsForm, self).__init__(*args, **kwargs)
+        if get_current_user() is not None and not get_current_user().is_staff:
+            self.fields['product_type'].queryset = Product_Type.objects.filter(
+                authorized_users__in=[get_current_user()])
+
 
 class APIKeyForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
@@ -1583,7 +1538,7 @@ class CustomReportOptionsForm(forms.Form):
     report_name = forms.CharField(required=False, max_length=100)
     include_finding_notes = forms.ChoiceField(required=False, choices=yes_no)
     include_finding_images = forms.ChoiceField(choices=yes_no, label="Finding Images")
-    report_type = forms.ChoiceField(required=False, choices=(('AsciiDoc', 'AsciiDoc'),))
+    report_type = forms.ChoiceField(choices=(('HTML', 'HTML'), ('AsciiDoc', 'AsciiDoc')))
 
 
 class DeleteReportForm(forms.ModelForm):
@@ -1677,9 +1632,14 @@ class JIRA_IssueForm(forms.ModelForm):
 class JIRAForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput, required=True)
 
+    def __init__(self, *args, **kwargs):
+        super(JIRAForm, self).__init__(*args, **kwargs)
+        if self.instance:
+            self.fields['password'].required = False
+
     class Meta:
-        model = JIRA_Conf
-        exclude = ['product']
+        model = JIRA_Instance
+        exclude = ['']
 
 
 class ExpressJIRAForm(forms.ModelForm):
@@ -1687,7 +1647,7 @@ class ExpressJIRAForm(forms.ModelForm):
     issue_key = forms.CharField(required=True, help_text='A valid issue ID is required to gather the necessary information.')
 
     class Meta:
-        model = JIRA_Conf
+        model = JIRA_Instance
         exclude = ['product', 'epic_name_id', 'open_status_key',
                     'close_status_key', 'info_mapping_severity',
                     'low_mapping_severity', 'medium_mapping_severity',
@@ -1710,11 +1670,11 @@ class DeleteBenchmarkForm(forms.ModelForm):
         exclude = ['product', 'benchmark_type', 'desired_level', 'current_level', 'asvs_level_1_benchmark', 'asvs_level_1_score', 'asvs_level_2_benchmark', 'asvs_level_2_score', 'asvs_level_3_benchmark', 'asvs_level_3_score', 'publish']
 
 
-class JIRA_PKeyForm(forms.ModelForm):
+# class JIRA_ProjectForm(forms.ModelForm):
 
-    class Meta:
-        model = JIRA_PKey
-        exclude = ['product']
+#     class Meta:
+#         model = JIRA_Project
+#         exclude = ['product']
 
 
 class Sonarqube_ProductForm(forms.ModelForm):
@@ -1734,18 +1694,24 @@ class Sonarqube_ProductForm(forms.ModelForm):
         exclude = ['product']
 
 
-class DeleteJIRAConfForm(forms.ModelForm):
+class DeleteJIRAInstanceForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
                             widget=forms.widgets.HiddenInput())
 
     class Meta:
-        model = JIRA_Conf
+        model = JIRA_Instance
         fields = ('id',)
 
 
 class ToolTypeForm(forms.ModelForm):
     class Meta:
         model = Tool_Type
+        exclude = ['product']
+
+
+class RegulationForm(forms.ModelForm):
+    class Meta:
+        model = Regulation
         exclude = ['product']
 
 
@@ -1795,7 +1761,7 @@ class DeleteObjectsSettingsForm(forms.ModelForm):
                             widget=forms.widgets.HiddenInput())
 
     class Meta:
-        model = Objects
+        model = Objects_Product
         exclude = ['tool_type']
 
 
@@ -1834,21 +1800,18 @@ class ToolProductSettingsForm(forms.ModelForm):
 
 class ObjectSettingsForm(forms.ModelForm):
 
-    tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
-                           required=False,
-                           help_text="Add tags that help describe this object.  "
-                                     "Choose from the list or add new tags.  Press TAB key to add.")
+    # tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
+    #                        required=False,
+    #                        help_text="Add tags that help describe this object.  "
+    #                                  "Choose from the list or add new tags.  Press TAB key to add.")
 
     class Meta:
-        model = Objects
-        fields = ['path', 'folder', 'artifact', 'name', 'review_status']
+        model = Objects_Product
+        fields = ['path', 'folder', 'artifact', 'name', 'review_status', 'tags']
         exclude = ['product']
 
     def __init__(self, *args, **kwargs):
-        tags = Tag.objects.usage_for_model(Objects)
-        t = [(tag.name, tag.name) for tag in tags]
         super(ObjectSettingsForm, self).__init__(*args, **kwargs)
-        self.fields['tags'].widget.choices = t
 
     def clean(self):
         form_data = self.cleaned_data
@@ -1931,10 +1894,12 @@ class ProductNotificationsForm(forms.ModelForm):
             self.initial['engagement_added'] = ''
             self.initial['test_added'] = ''
             self.initial['scan_added'] = ''
+            self.initial['sla_breach'] = ''
+            self.initial['risk_acceptance_expiration'] = ''
 
     class Meta:
         model = Notifications
-        fields = ['engagement_added', 'test_added', 'scan_added']
+        fields = ['engagement_added', 'test_added', 'scan_added', 'sla_breach', 'risk_acceptance_expiration']
 
 
 class AjaxChoiceField(forms.ChoiceField):
@@ -1987,12 +1952,50 @@ class GITHUB_Product_Form(forms.ModelForm):
         exclude = ['product']
 
 
-class JIRAPKeyForm(forms.ModelForm):
-    conf = forms.ModelChoiceField(queryset=JIRA_Conf.objects.all(), label='JIRA Configuration', required=False)
+class JIRAProjectForm(forms.ModelForm):
+    jira_instance = forms.ModelChoiceField(queryset=JIRA_Instance.objects.all(), label='JIRA Instance', required=False)
+
+    prefix = 'jira-project-form'
 
     class Meta:
-        model = JIRA_PKey
-        exclude = ['product']
+        model = JIRA_Project
+        exclude = ['product', 'engagement']
+
+    def __init__(self, *args, **kwargs):
+        # if the form is shown for an engagement, we set a placeholder text around inherited settings from product
+        self.target = kwargs.pop('target', 'product')
+        self.product = kwargs.pop('product', None)
+        self.engagement = kwargs.pop('engagement', None)
+        super().__init__(*args, **kwargs)
+
+        # logger.debug('self.target: %s, self.product: %s, self.instance: %s', self.target, self.product, self.instance)
+        if self.target == 'engagement':
+            product_name = self.product.name if self.product else self.engagement.product.name if self.engagement.product else ''
+
+            self.fields['project_key'].widget = forms.TextInput(attrs={'placeholder': 'JIRA settings inherited from product ''%s''' % product_name})
+            self.fields['project_key'].help_text = 'JIRA settings are inherited from product ''%s'', unless configured differently here.' % product_name
+            self.fields['jira_instance'].help_text = 'JIRA settings are inherited from product ''%s'' , unless configured differently here.' % product_name
+
+        # if we don't have an instance, django will insert a blank empty one :-(
+        # so we have to check for id to make sure we only trigger this when there is a real instance from db
+        if self.instance.id:
+            self.fields['jira_instance'].required = True
+            self.fields['project_key'].required = True
+
+    def clean(self):
+        logger.debug('validating jira project form')
+        cleaned_data = super().clean()
+
+        project_key = self.cleaned_data.get('project_key')
+        jira_instance = self.cleaned_data.get('jira_instance')
+
+        if project_key and jira_instance:
+            return cleaned_data
+
+        if not project_key and not jira_instance:
+            return cleaned_data
+
+        raise ValidationError('JIRA Project needs a JIRA Instance and JIRA Project Key, or leave both empty')
 
 
 class GITHUBFindingForm(forms.Form):
@@ -2008,13 +2011,19 @@ class GITHUBFindingForm(forms.Form):
 
 class JIRAFindingForm(forms.Form):
     def __init__(self, *args, **kwargs):
-        self.enabled = kwargs.pop('enabled') or False
+        self.push_all = kwargs.pop('push_all', False)
+        self.instance = kwargs.pop('instance', None)
+        self.jira_project = kwargs.pop('jira_project', None)
+
+        if self.instance is None and self.jira_project is None:
+            raise ValueError('either and finding instance or jira_project is needed')
+
         super(JIRAFindingForm, self).__init__(*args, **kwargs)
         self.fields['push_to_jira'] = forms.BooleanField()
         self.fields['push_to_jira'].required = False
         self.fields['push_to_jira'].help_text = "Checking this will overwrite content of your JIRA issue, or create one."
         self.fields['push_to_jira'].label = "Push to JIRA"
-        if self.enabled:
+        if self.push_all:
             # This will show the checkbox as checked and greyed out, this way the user is aware
             # that issues will be pushed to JIRA, given their product-level settings.
             self.fields['push_to_jira'].help_text = \
@@ -2023,7 +2032,95 @@ class JIRAFindingForm(forms.Form):
             self.fields['push_to_jira'].widget.attrs['checked'] = 'checked'
             self.fields['push_to_jira'].disabled = True
 
+        if self.instance:
+            if self.instance.has_jira_issue:
+                self.initial['jira_issue'] = self.instance.jira_issue.jira_key
+                self.fields['push_to_jira'].widget.attrs['checked'] = 'checked'
+
+        self.fields['jira_issue'].widget = forms.TextInput(attrs={'placeholder': 'Leave empty and check push to jira to create a new JIRA issue'})
+
+    def clean(self):
+        import dojo.jira_link.helper as jira_helper
+        logger.debug('validating jirafindingform')
+        cleaned_data = super(JIRAFindingForm, self).clean()
+        jira_issue_key_new = self.cleaned_data.get('jira_issue')
+        finding = self.instance
+        jira_project = self.jira_project
+        if jira_issue_key_new:
+            if finding:
+                # in theory there can multiple jira instances that have similar projects
+                # so checking by only the jira issue key can lead to false positives
+                # so we check also the jira internal id of the jira issue
+                # if the key and id are equal, it is probably the same jira instance and the same issue
+                # the database model is lacking some relations to also include the jira config name or url here
+                # and I don't want to change too much now. this should cover most usecases.
+
+                jira_issue_need_to_exist = False
+                # changing jira link on finding
+                if finding.has_jira_issue and jira_issue_key_new != finding.jira_issue.jira_key:
+                    jira_issue_need_to_exist = True
+
+                # adding existing jira issue to finding without jira link
+                if not finding.has_jira_issue:
+                    jira_issue_need_to_exist = True
+
+            else:
+                jira_issue_need_to_exist = True
+
+            if jira_issue_need_to_exist:
+                jira_issue_new = jira_helper.jira_get_issue(jira_project, jira_issue_key_new)
+                if not jira_issue_new:
+                    raise ValidationError('JIRA issue ' + jira_issue_key_new + ' does not exist or cannot be retrieved')
+
+                logger.debug('checking if provided jira issue id already is linked to another finding')
+                jira_issues = JIRA_Issue.objects.filter(jira_id=jira_issue_new.id, jira_key=jira_issue_key_new).exclude(engagement__isnull=False)
+
+                if self.instance:
+                    # just be sure we exclude the finding that is being edited
+                    jira_issues = jira_issues.exclude(finding=finding)
+
+                if len(jira_issues) > 0:
+                    raise ValidationError('JIRA issue ' + jira_issue_key_new + ' already linked to ' + reverse('view_finding', args=(jira_issues[0].finding_id,)))
+
+    jira_issue = forms.CharField(required=False, label="Linked JIRA Issue",
+                validators=[validators.RegexValidator(
+                    regex=r'^[A-Z][A-Z_0-9]+-\d+$',
+                    message='JIRA issue key must be in XXXX-nnnn format ([A-Z][A-Z_0-9]+-\\d+)')])
     push_to_jira = forms.BooleanField(required=False, label="Push to JIRA")
+
+
+class JIRAImportScanForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        self.push_all = kwargs.pop('push_all', False)
+
+        super(JIRAImportScanForm, self).__init__(*args, **kwargs)
+        if self.push_all:
+            # This will show the checkbox as checked and greyed out, this way the user is aware
+            # that issues will be pushed to JIRA, given their product-level settings.
+            self.fields['push_to_jira'].help_text = \
+                "Push all issues is enabled on this product. If you do not wish to push all issues" \
+                " to JIRA, please disable Push all issues on this product."
+            self.fields['push_to_jira'].widget.attrs['checked'] = 'checked'
+            self.fields['push_to_jira'].disabled = True
+
+    push_to_jira = forms.BooleanField(required=False, label="Push to JIRA", help_text="Checking this will create a new jira issue for each new finding.")
+
+
+class JIRAEngagementForm(forms.Form):
+    prefix = 'jira-epic-form'
+
+    def __init__(self, *args, **kwargs):
+        self.instance = kwargs.pop('instance', None)
+
+        super(JIRAEngagementForm, self).__init__(*args, **kwargs)
+
+        if self.instance:
+            if self.instance.has_jira_issue:
+                self.fields['push_to_jira'].widget.attrs['checked'] = 'checked'
+                self.fields['push_to_jira'].label = 'Update JIRA Epic'
+                self.fields['push_to_jira'].help_text = 'Checking this will update the existing EPIC in JIRA.'
+
+    push_to_jira = forms.BooleanField(required=False, label="Create EPIC", help_text="Checking this will create an EPIC in JIRA for this engagement.")
 
 
 class GoogleSheetFieldsForm(forms.Form):
@@ -2259,12 +2356,12 @@ class ChoiceQuestionForm(QuestionForm):
         choice_answer.save()
 
 
-class Add_Survey_Form(forms.ModelForm):
+class Add_Questionnaire_Form(forms.ModelForm):
     survey = forms.ModelChoiceField(
         queryset=Engagement_Survey.objects.all(),
         required=True,
         widget=forms.widgets.Select(),
-        help_text='Select the Survey to add.')
+        help_text='Select the Questionnaire to add.')
 
     class Meta:
         model = Answered_Survey
@@ -2275,12 +2372,12 @@ class Add_Survey_Form(forms.ModelForm):
                    'assignee')
 
 
-class AddGeneralSurveyForm(forms.ModelForm):
+class AddGeneralQuestionnaireForm(forms.ModelForm):
     survey = forms.ModelChoiceField(
         queryset=Engagement_Survey.objects.all(),
         required=True,
         widget=forms.widgets.Select(),
-        help_text='Select the Survey to add.')
+        help_text='Select the Questionnaire to add.')
     expiration = forms.DateField(widget=forms.TextInput(
         attrs={'class': 'datepicker', 'autocomplete': 'off'}))
 
@@ -2289,7 +2386,7 @@ class AddGeneralSurveyForm(forms.ModelForm):
         exclude = ('num_responses', 'generated')
 
 
-class Delete_Survey_Form(forms.ModelForm):
+class Delete_Questionnaire_Form(forms.ModelForm):
     id = forms.IntegerField(required=True,
                             widget=forms.widgets.HiddenInput())
 
@@ -2303,7 +2400,7 @@ class Delete_Survey_Form(forms.ModelForm):
                    'assignee')
 
 
-class DeleteGeneralSurveyForm(forms.ModelForm):
+class DeleteGeneralQuestionnaireForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
                             widget=forms.widgets.HiddenInput())
 
@@ -2327,17 +2424,17 @@ class Delete_Eng_Survey_Form(forms.ModelForm):
                    'active')
 
 
-class CreateSurveyForm(forms.ModelForm):
+class CreateQuestionnaireForm(forms.ModelForm):
     class Meta:
         model = Engagement_Survey
         exclude = ['questions']
 
 
-class EditSurveyQuestionsForm(forms.ModelForm):
+class EditQuestionnaireQuestionsForm(forms.ModelForm):
     questions = forms.ModelMultipleChoiceField(
         Question.objects.all(),
         required=True,
-        help_text="Select questions to include on this survey.  Field can be used to search available questions.",
+        help_text="Select questions to include on this questionnaire.  Field can be used to search available questions.",
         widget=MultipleSelectWithPop(attrs={'size': '11'}))
 
     class Meta:
@@ -2466,4 +2563,4 @@ class AddEngagementForm(forms.Form):
         queryset=Product.objects.all(),
         required=True,
         widget=forms.widgets.Select(),
-        help_text='Select which product to attach Engagment')
+        help_text='Select which product to attach Engagement')

@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static from staticfiles %}
+{% load static %}
 {% block add_css_before %}
     <!-- TastyPie Swagger CSS -->
     <link href='{% static "tastypie_swagger/css/highlight.default.css" %}' media='screen' rel='stylesheet'
@@ -12,6 +12,9 @@
 {% block content %}
     <div class="row">
         <div class="col-md-12">
+            <div class="alert alert-danger">
+                <p><b>APIv1 will be deprecated after 31 december 2020 and will be removed from Defect Dojo by June 2021.</b></p>
+            </div>
             <div class="well">
                 <p>Copy your authorization header value from <a href="{% url 'api_key' %}">here</a> and paste into this
                     form. Click explore to apply the key, you should now be able to test each call.</p>

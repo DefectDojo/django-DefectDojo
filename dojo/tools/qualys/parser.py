@@ -9,9 +9,10 @@
 
 import argparse
 import csv
-import logging
 import datetime
-from dojo.models import Finding, Endpoint
+import logging
+
+from dojo.models import Endpoint, Finding
 
 logger = logging.getLogger(__name__)
 ################################################################
@@ -85,7 +86,7 @@ def report_writer(report_dic, output_filename):
         csvWriter = utfdictcsv.DictUnicodeWriter(outFile, REPORT_HEADERS, quoting=csv.QUOTE_ALL)
         csvWriter.writerow(CUSTOM_HEADERS)
         csvWriter.writerows(report_dic)
-    print("Successfully parsed.")
+    logger.debug("Successfully parsed.")
 
 ################################################################
 
@@ -133,7 +134,11 @@ def issue_r(raw_row, vuln):
         else:
             _temp['active'] = False
             _temp['mitigated'] = True
-            _temp['mitigation_date'] = datetime.datetime.strptime(vuln_details.findtext('LAST_FIXED'), "%Y-%m-%dT%H:%M:%SZ").date()
+            last_fixed = vuln_details.findtext('LAST_FIXED')
+            if last_fixed is not None:
+                _temp['mitigation_date'] = datetime.datetime.strptime(last_fixed, "%Y-%m-%dT%H:%M:%SZ").date()
+            else:
+                _temp['mitigation_date'] = None
         search = "//GLOSSARY/VULN_DETAILS_LIST/VULN_DETAILS[@id='{}']".format(_gid)
         vuln_item = vuln.find(search)
         if vuln_item is not None:
@@ -204,7 +209,7 @@ def issue_r(raw_row, vuln):
                               references=refs,
                               impact=_temp['IMPACT'],
                               date=_temp['date'],
-                              unique_id_from_tool=_gid,
+                              vuln_id_from_tool=_gid,
                               )
 
         else:
@@ -215,7 +220,7 @@ def issue_r(raw_row, vuln):
                               references=_gid,
                               impact=_temp['IMPACT'],
                               date=_temp['date'],
-                              unique_id_from_tool=_gid,
+                              vuln_id_from_tool=_gid,
                               )
         finding.mitigated = _temp['mitigation_date']
         finding.is_Mitigated = _temp['mitigated']
@@ -264,5 +269,5 @@ if __name__ == "__main__":
 
 
 class QualysParser(object):
-    def __init__(self, file, test):
+    def get_findings(self, file, test):
         self.items = qualys_parser(file)

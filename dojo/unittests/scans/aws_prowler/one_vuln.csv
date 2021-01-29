@@ -1,0 +1,2 @@
+PROFILE,ACCOUNT_NUM,REGION,TITLE_ID,RESULT,SCORED,LEVEL,TITLE_TEXT,NOTES
+,012345678910,eu-central-1,1.1,FAIL,Scored,Level 1,[check11] Avoid the use of the root account (Scored),Root user in the account wasn't accessed in the last 1 days

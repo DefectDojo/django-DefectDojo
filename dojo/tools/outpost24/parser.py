@@ -1,9 +1,14 @@
+import logging
+
 from defusedxml import ElementTree
-from dojo.models import Finding, Endpoint
+
+from dojo.models import Endpoint, Finding
+
+logger = logging.getLogger(__name__)
 
 
 class Outpost24Parser:
-    def __init__(self, file, test):
+    def get_findings(self, file, test):
         tree = ElementTree.parse(file)
         items = list()
         for detail in tree.iterfind('//detaillist/detail'):
@@ -51,12 +56,8 @@ class Outpost24Parser:
                 try:
                     port = int(detail.findtext('./portinfo/portnumber'))
                 except ValueError as ve:
-                    print("General port given. Assigning 0 as default.")
+                    logger.debug("General port given. Assigning 0 as default.")
                     port = 0
                 finding.unsaved_endpoints.append(Endpoint(protocol=protocol, host=host, port=port))
             items.append(finding)
-        self._items = items
-
-    @property
-    def items(self):
-        return self._items
+        return items

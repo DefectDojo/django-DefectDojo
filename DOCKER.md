@@ -49,6 +49,7 @@ or
 docker-compose build nginx
 ```
 
+> **_NOTE:_**  It's possible to add extra fixtures in folder "/docker/extra_fixtures".
 
 ## Run with Docker compose in release mode
 To run the application based on previously built image (or based on dockerhub images if none was locally built), run: 
@@ -68,8 +69,8 @@ In this setup, you need to rebuild django and/or nginx images after each code ch
 For development, use: 
 
 ```zsh
-cp dojo/settings/settings.dist.py dojo/settings/settings.py
 docker/setEnv.sh dev
+docker-compose build
 docker-compose up
 ```
 
@@ -93,9 +94,7 @@ To update changes in static resources, served by nginx, just refresh the browser
 
 *Notes about volume permissions*
 
-*The manual copy of settings.py is sometimes required once after cloning the repository, on linux hosts when the host files cannot be modified from within the django container. In that case that copy in entrypoint-uwsgi-dev.sh fails.* 
-
-*Another way to fix this is changing `USER 1001` in Dockerfile.django to match your user uid and then rebuild the images. Get your user id with* 
+*If you run into permission issues with the mounted volumes, a way to fix this is changing `USER 1001` in Dockerfile.django to match your user uid and then rebuild the images. Get your user id with* 
 
 ```
 id -u
@@ -108,7 +107,6 @@ If you want to be able to step in your code, you can activate ptvsd.Server.
 You can launch your local dev instance of DefectDojo as
 
 ```zsh
-cp dojo/settings/settings.dist.py dojo/settings/settings.py
 docker/setEnv.sh ptvsd
 docker-compose up
 ```
@@ -153,6 +151,38 @@ docker-compose logs initializer | grep "Admin password:"
 ```
 
 Make sure you write down the first password generated as you'll need it when re-starting the application.
+
+## Option to change the password 
+* If you dont have admin password use the below command to change the password. 
+* After starting the container and open another tab in the same folder.  
+* django-defectdojo_uwsgi_1 -- name obtained from running containers using ```zsh docker ps ``` command
+
+```zsh
+docker exec -it django-defectdojo_uwsgi_1 ./manage.py changepassword admin
+```
+
+# Logging
+For docker-compose release mode the log level is INFO. In the other modes the log level is DEBUG. Logging is configured in `settings.dist.py` and can be tuned using a `local_settings.py`, see [template for local_settings.py](dojo/settings/template-local_settings). For example the deduplication logger can be set to DEBUG in a local_settings.py file:
+
+
+```
+LOGGING['loggers']['dojo.specific-loggers.deduplication']['level'] = 'DEBUG'
+```
+
+Or you can modify `settings.dist.py` directly, but this adds the risk of having conflicts when `settings.dist.py` gets updated upstream. 
+
+```
+          'dojo.specific-loggers.deduplication': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        }
+```
+
+## Debug Toolbar
+In the `dojo/settings/template-local_settings.py` you'll find instructions on how to enable the [Django Debug Toolbar](https://github.com/jazzband/django-debug-toolbar).
+This toolbar allows you to debug SQL queries, and shows some other interesting information.
+
 
 # Exploitation, versioning
 ## Disable the database initialization
@@ -254,7 +284,6 @@ The integration-tests are under `tests`
 This will run all unit-tests and leave the uwsgi container up: 
 
 ```
-cp dojo/settings/settings.dist.py dojo/settings/settings.py
 docker/setEnv.sh unit_tests
 docker-compose up
 ```
@@ -285,7 +314,6 @@ python manage.py test dojo.unittests.test_dependency_check_parser.TestDependency
 This will run all integration-tests and leave the containers up: 
 
 ```
-cp dojo/settings/settings.dist.py dojo/settings/settings.py
 docker/setEnv.sh integration_tests
 docker-compose up
 ```

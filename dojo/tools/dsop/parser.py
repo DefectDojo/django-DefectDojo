@@ -8,20 +8,20 @@ __author__ = 'Matt Sicker'
 
 
 class DsopParser:
-    def __init__(self, file, test):
-        self._test = test
-        self._items = []
+    def get_findings(self, file, test):
+        items = list()
         f = pd.ExcelFile(file)
         self.__parse_disa(pd.read_excel(f, sheet_name='OpenSCAP - DISA Compliance', parse_dates=['scanned_date'],
-                                        dtype={'result': 'category', 'severity': 'category'}))
-        self.__parse_oval(pd.read_excel(f, sheet_name='OpenSCAP - OVAL Results'))
+                                        dtype={'result': 'category', 'severity': 'category'}), test, items)
+        self.__parse_oval(pd.read_excel(f, sheet_name='OpenSCAP - OVAL Results'), test, items)
         self.__parse_twistlock(
-            pd.read_excel(f, sheet_name='Twistlock Vulnerability Results', dtype={'severity': 'category'}))
-        self.__parse_anchore(pd.read_excel(f, sheet_name='Anchore CVE Results', dtype={'severity': 'category'}))
+            pd.read_excel(f, sheet_name='Twistlock Vulnerability Results', dtype={'severity': 'category'}), test, items)
+        self.__parse_anchore(pd.read_excel(f, sheet_name='Anchore CVE Results', dtype={'severity': 'category'}), test, items)
         self.__parse_anchore_compliance(
-            pd.read_excel(f, sheet_name='Anchore Compliance Results', dtype={'severity': 'category'}))
+            pd.read_excel(f, sheet_name='Anchore Compliance Results', dtype={'severity': 'category'}), test, items)
+        return items
 
-    def __parse_disa(self, df: pd.DataFrame):
+    def __parse_disa(self, df: pd.DataFrame, test, items):
         for row in df.itertuples(index=False):
             if row.result not in ('fail', 'notchecked'):
                 continue
@@ -39,12 +39,12 @@ class DsopParser:
             tags = "disa"
 
             finding = Finding(title=title, date=date, cve=cve, severity=severity, description=description,
-                        impact=impact, references=references, test=self._test, unique_id_from_tool=unique_id,
+                        impact=impact, references=references, test=test, unique_id_from_tool=unique_id,
                          static_finding=True, dynamic_finding=False)
             finding.unsaved_tags = tags
-            self._items.append(finding)
+            items.append(finding)
 
-    def __parse_oval(self, df: pd.DataFrame):
+    def __parse_oval(self, df: pd.DataFrame, test, items):
         severity_pattern = re.compile(r'\((.*)\)')
         for row in df.itertuples(index=False):
             if not row.result or row.result in ('false'):
@@ -68,11 +68,11 @@ class DsopParser:
             tags = "oval"
 
             finding = Finding(title=title, cve=cve, severity=severity, unique_id_from_tool=unique_id,
-                    test=self._test, static_finding=True, dynamic_finding=False)
+                    test=test, static_finding=True, dynamic_finding=False)
             finding.unsaved_tags = tags
-            self._items.append(finding)
+            items.append(finding)
 
-    def __parse_twistlock(self, df: pd.DataFrame):
+    def __parse_twistlock(self, df: pd.DataFrame, test, items):
         for row in df.itertuples(index=False):
             cve = row.id
             description = row.desc
@@ -92,12 +92,12 @@ class DsopParser:
 
             finding = Finding(title=title, cve=cve, url=url, severity=severity, description=description,
                                     component_name=component_name, component_version=component_version,
-                                    severity_justification=severity_justification, test=self._test,
+                                    severity_justification=severity_justification, test=test,
                                     static_finding=True, dynamic_finding=False)
             finding.unsaved_tags = tags
-            self._items.append(finding)
+            items.append(finding)
 
-    def __parse_anchore(self, df: pd.DataFrame):
+    def __parse_anchore(self, df: pd.DataFrame, test, items):
         for row in df.itertuples(index=False):
             cve = row.cve
             severity = row.severity
@@ -110,13 +110,13 @@ class DsopParser:
 
             finding = Finding(title=title, cve=cve, severity=severity,
                                     mitigation=mitigation, component_name=component,
-                                    description=description, test=self._test,
+                                    description=description, test=test,
                                     static_finding=True, dynamic_finding=False,
                                     file_path=file_path)
             finding.unsaved_tags = tags
-            self._items.append(finding)
+            items.append(finding)
 
-    def __parse_anchore_compliance(self, df: pd.DataFrame):
+    def __parse_anchore_compliance(self, df: pd.DataFrame, test, items):
         for row in df.itertuples(index=False):
             if row.policy_id != "DoDFileChecks":
                 continue
@@ -135,11 +135,7 @@ class DsopParser:
 
             finding = Finding(title=title, severity=severity,
                                     mitigation=mitigation,
-                                    description=description, test=self._test,
+                                    description=description, test=test,
                                     static_finding=True, dynamic_finding=False)
             finding.unsaved_tags = tags
-            self._items.append(finding)
-
-    @property
-    def items(self):
-        return self._items
+            items.append(finding)

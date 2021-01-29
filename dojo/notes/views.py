@@ -12,8 +12,8 @@ from django.utils import timezone
 
 
 # Local application/library imports
-from dojo.forms import DeleteNoteForm, NoteForm, FindingNoteForm
-from dojo.models import Notes, Test, Finding, NoteHistory, Note_Type
+from dojo.forms import DeleteNoteForm, NoteForm, TypedNoteForm
+from dojo.models import Notes, Engagement, Test, Finding, NoteHistory, Note_Type
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +23,12 @@ def delete_issue(request, id, page, objid):
     note = get_object_or_404(Notes, id=id)
     reverse_url = None
     object_id = None
-    if page == "test":
+
+    if page == "engagement":
+        object = get_object_or_404(Engagement, id=objid)
+        object_id = object.id
+        reverse_url = "view_engagement"
+    elif page == "test":
         object = get_object_or_404(Test, id=objid)
         object_id = object.id
         reverse_url = "view_test"
@@ -59,22 +64,26 @@ def edit_issue(request, id, page, objid):
     if page is None or str(request.user) != note.author.username and not request.user.is_staff:
         raise PermissionDenied
 
-    if page == "test":
+    if page == "engagement":
+        object = get_object_or_404(Engagement, id=objid)
+        object_id = object.id
+        reverse_url = "view_engagement"
+    elif page == "test":
         object = get_object_or_404(Test, id=objid)
         object_id = object.id
         reverse_url = "view_test"
-        note_type_activation = 0
     elif page == "finding":
         object = get_object_or_404(Finding, id=objid)
         object_id = object.id
         reverse_url = "view_finding"
-        note_type_activation = Note_Type.objects.filter(is_active=True).count()
-        if note_type_activation:
-            available_note_types = find_available_notetypes(object, note)
+
+    note_type_activation = Note_Type.objects.filter(is_active=True).count()
+    if note_type_activation:
+        available_note_types = find_available_notetypes(object, note)
 
     if request.method == 'POST':
-        if page == "finding" and note_type_activation:
-            form = FindingNoteForm(request.POST, available_note_types=available_note_types, instance=note)
+        if note_type_activation:
+            form = TypedNoteForm(request.POST, available_note_types=available_note_types, instance=note)
         else:
             form = NoteForm(request.POST, instance=note)
         if form.is_valid():
@@ -82,7 +91,7 @@ def edit_issue(request, id, page, objid):
             note.edited = True
             note.editor = request.user
             note.edit_time = timezone.now()
-            if page == "finding" and note_type_activation:
+            if note_type_activation:
                 history = NoteHistory(note_type=note.note_type,
                                       data=note.entry,
                                       time=note.edit_time,
@@ -109,8 +118,8 @@ def edit_issue(request, id, page, objid):
                                 'Note was not succesfully edited.',
                                 extra_tags='alert-danger')
     else:
-        if page == "finding" and note_type_activation:
-            form = FindingNoteForm(available_note_types=available_note_types, instance=note)
+        if note_type_activation:
+            form = TypedNoteForm(available_note_types=available_note_types, instance=note)
         else:
             form = NoteForm(instance=note)
 
@@ -129,7 +138,11 @@ def note_history(request, id, page, objid):
     reverse_url = None
     object_id = None
 
-    if page == "test":
+    if page == "engagement":
+        object = get_object_or_404(Engagement, id=objid)
+        object_id = object.id
+        reverse_url = "view_engagement"
+    elif page == "test":
         object = get_object_or_404(Test, id=objid)
         object_id = object.id
         reverse_url = "view_test"

@@ -1,0 +1,122 @@
+name: Integration tests
+# pull requests:
+# push:
+#      run on every push, which is when something gets merged also
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - master
+      - dev
+      - release/**
+      - hotfix/**
+
+env:
+  DD_DOCKER_REPO: defectdojo
+
+jobs:
+  build:
+    # build with docker so we can use layer caching
+    name: Build Image
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        docker-image: [django, nginx, integration-tests]
+    steps:
+      # - name: Login to DockerHub
+      #   uses: docker/login-action@v1
+      #   with:
+      #     username: ${{ secrets.DOCKERHUB_USERNAME }}
+      #     password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Read Docker Image Identifiers
+        id: read-docker-image-identifiers
+        run: echo "IMAGE_REPOSITORY=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        env:
+          docker-image: ${{ matrix.docker-image }}
+        with:
+          path: /tmp/.buildx-cache-${{ env.docker-image }}
+          key: ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ github.workflow }}-${{ github.sha }}-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ github.workflow }}-${{ github.sha }}
+            ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ github.workflow }}
+            ${{ runner.os }}-buildx-${{ env.docker-image }}
+
+      - name: Build
+        id: docker_build
+        uses: docker/build-push-action@v2
+        env:
+          docker-image: ${{ matrix.docker-image }}
+        with:
+          context: .
+          push: false
+          tags: |
+            ${{ env.DD_DOCKER_REPO }}/defectdojo-${{ env.docker-image }}:latest
+          file: Dockerfile.${{ env.docker-image }}
+          outputs: type=docker,dest=${{ env.docker-image }}_img
+          cache-from: type=local,src=/tmp/.buildx-cache-${{ env.docker-image }}
+          cache-to: type=local,dest=/tmp/.buildx-cache-${{ env.docker-image }}
+
+      # export docker images to be used in next jobs below
+      - name: Upload image ${{ matrix.docker-image }} as artifact
+        uses:  actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.docker-image }}
+          path: ${{ matrix.docker-image }}_img
+          retention-days: 1
+
+  integration_tests:
+    # run tests with docker-compose
+    name: integration tests
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      # load docker images from build jobs
+      - name: Load images from artifacts
+        uses: actions/download-artifact@v2
+
+      - name: Load docker images
+        run: |-
+             docker load -i nginx/nginx_img
+             docker load -i django/django_img
+             docker load -i integration-tests/integration-tests_img
+             docker images
+
+      - name: Set integration-test mode
+        run: ln -s docker-compose.override.integration_tests.yml docker-compose.override.yml
+
+      # phased startup so we can use the exit code from integrationtest container
+
+      - name: Start Dojo
+        # implicity starts uwsgi and rabbitmq
+        run: docker-compose up -d mysql nginx celerybeat celeryworker
+
+      - name: Initialize
+        run: docker-compose up --exit-code-from initializer initializer
+
+      - name: Integration tests
+        run: docker-compose up --exit-code-from integration-tests integration-tests
+
+      - name: Logs
+        if: failure()
+        run: docker-compose logs --tail="2500" uwsgi
+
+      - name: Shutdown
+        if: always()
+        run: docker-compose down

@@ -1,19 +1,22 @@
 ---
 version: '3.7'
 services:
-  integrationtest:
-    build: 
+  integration-tests:
+    build:
       context: ./
       dockerfile: Dockerfile.integration-tests
-    image: defectdojo/integration-tests:${INTEGRATION_TESTS_VERSION:-latest}
+    image: defectdojo/defectdojo-integration-tests:${INTEGRATION_TESTS_VERSION:-latest}
     depends_on:
       - nginx
       - uwsgi
-    entrypoint: ['/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/entrypoint-integration-tests.sh']
+    entrypoint: ['/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/app/docker/entrypoint-integration-tests.sh']
+    volumes:
+      - '.:/app:z'
     environment:
       DD_BASE_URL: 'http://nginx:8080/'
       DD_ADMIN_USER: ${DD_ADMIN_USER:-admin}
       DD_ADMIN_PASSWORD: ${DD_ADMIN_PASSWORD:-AdminsLoveIntegrationtests!}
+      DD_SECRET_KEY: ${DD_SECRET_KEY:-.}
   uwsgi:
     entrypoint: ['/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/entrypoint-uwsgi-dev.sh']
     volumes:
@@ -21,6 +24,7 @@ services:
     environment:
       DD_DEBUG: 'True'
       DD_DATABASE_URL: ${DD_TEST_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/test_defectdojo}
+      DD_SECRET_KEY: ${DD_SECRET_KEY:-.}
   celerybeat:
     environment:
       DD_DATABASE_URL: ${DD_TEST_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/test_defectdojo}
@@ -32,6 +36,7 @@ services:
       DD_INITIALIZE: 'true'
       DD_DATABASE_URL: ${DD_TEST_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/test_defectdojo}
       DD_ADMIN_PASSWORD: ${DD_ADMIN_PASSWORD:-AdminsLoveIntegrationtests!}
+      DD_SECRET_KEY: ${DD_SECRET_KEY:-.}
   mysql:
     ports:
       - target: 3306

@@ -8,7 +8,6 @@ class TestNexposeParser(TestCase):
         testfile = open("dojo/unittests/scans/nexpose/no_vuln.xml")
         parser = NexposeFullXmlParser()
         findings = parser.get_findings(testfile, Test())
-        testfile.close()
         self.assertEqual(0, len(findings))
 
     def test_nexpose_parser_has_many_finding(self):

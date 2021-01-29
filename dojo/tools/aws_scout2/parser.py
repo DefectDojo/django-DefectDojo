@@ -1,19 +1,24 @@
 __author__ = 'Aaron Weaver'
 
-from dojo.models import Finding
-from datetime import datetime
 import json
-from django.utils.text import Truncator
+from datetime import datetime
+
 from django.utils.html import strip_tags
+from django.utils.text import Truncator
+
+from dojo.models import Finding
 
 
 class AWSScout2Parser(object):
+    # FIXME bad very bad
     item_data = ""
     pdepth = 0
 
-    def __init__(self, filename, test):
-        raw_data = filename.read()
-        raw_data = raw_data.replace("aws_info =", "")
+    def get_findings(self, filename, test):
+        # filename is instance of class 'django.core.files.uploadedfile.TemporaryUploadedFile'>
+        with open(filename.temporary_file_path(), "r") as fileobj:
+            raw_data = fileobj.read()
+            raw_data = raw_data.replace("aws_info =", "")
         data = json.loads(raw_data)
         find_date = datetime.now()
         dupes = {}
@@ -100,7 +105,7 @@ class AWSScout2Parser(object):
     def formatview(self, depth):
         if depth > 1:
             return "* "
-            print("depth hit")
+            # print("depth hit")
         else:
             return ""
 

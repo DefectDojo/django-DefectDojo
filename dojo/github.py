@@ -7,12 +7,17 @@ from github import Github
 
 # Dojo related imports
 from dojo.models import Engagement, Product, GITHUB_PKey, GITHUB_Issue
+from django.template.loader import render_to_string
 
 # Create global
 logger = logging.getLogger(__name__)
 
 
 def reopen_external_issue_github(find, note, prod, eng):
+
+    from dojo.utils import get_system_setting
+    if not get_system_setting('enable_github'):
+        return
 
     # Check if we have github info related to the product
     if GITHUB_PKey.objects.filter(product=prod).count() == 0:
@@ -41,6 +46,10 @@ def reopen_external_issue_github(find, note, prod, eng):
 
 def close_external_issue_github(find, note, prod, eng):
 
+    from dojo.utils import get_system_setting
+    if not get_system_setting('enable_github'):
+        return
+
     # Check if we have github info related to the product
     if GITHUB_PKey.objects.filter(product=prod).count() == 0:
         return
@@ -68,6 +77,10 @@ def close_external_issue_github(find, note, prod, eng):
 
 def update_external_issue_github(find, prod, eng):
 
+    from dojo.utils import get_system_setting
+    if not get_system_setting('enable_github'):
+        return
+
     # Check if we have github info related to the product
     if GITHUB_PKey.objects.filter(product=prod).count() == 0:
         return
@@ -84,13 +97,17 @@ def update_external_issue_github(find, prod, eng):
         g_ctx = Github(github_conf.api_key)
         repo = g_ctx.get_repo(github_product.git_project)
         issue = repo.get_issue(int(g_issue.issue_id))
-        issue.edit(title=find.title, body=find.long_desc(), labels=["defectdojo", "security / " + find.severity])
+        issue.edit(title=find.title, body=github_body(find), labels=["defectdojo", "security / " + find.severity])
     except:
         e = sys.exc_info()[0]
         logger.error('cannot update finding in github: ' + e)
 
 
 def add_external_issue_github(find, prod, eng):
+
+    from dojo.utils import get_system_setting
+    if not get_system_setting('enable_github'):
+        return
 
     # Check if we have github info related to the product
     if GITHUB_PKey.objects.filter(product=prod).count() == 0:
@@ -118,10 +135,17 @@ def add_external_issue_github(find, prod, eng):
             logger.debug('Look for project: ' + github_product_key.git_project)
             repo = g.get_repo(github_product_key.git_project)
             logger.debug('Found repo: ' + str(repo.url))
-            issue = repo.create_issue(title=find.title, body=find.long_desc(), labels=["defectdojo", "security / " + find.severity])
+            issue = repo.create_issue(title=find.title, body=github_body(find), labels=["defectdojo", "security / " + find.severity])
             logger.debug('created issue: ' + str(issue.html_url))
             g_issue = GITHUB_Issue(issue_id=issue.number, issue_url=issue.html_url, finding=find)
             g_issue.save()
         except:
             e = sys.exc_info()[0]
             logger.error('cannot create finding in github: ' + e)
+
+
+def github_body(find):
+    template = 'issue-trackers/github-body.tpl'
+    kwargs = {}
+    kwargs['finding'] = find
+    return render_to_string(template, kwargs)

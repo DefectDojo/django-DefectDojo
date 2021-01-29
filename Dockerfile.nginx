@@ -1,9 +1,9 @@
 # code: language=Dockerfile
 
-# The code for the build image should be idendical with the code in
+# The code for the build image should be identical with the code in
 # Dockerfile.django to use the caching mechanism of Docker.
 
-FROM python:3.6.10-slim-buster@sha256:cf53095d28a6c1af7636357a4f1c87d56fd30a86694ab9c028737d2150eb331e as build
+FROM python:3.6.12-slim-buster@sha256:e5259113df5a7c4dae16ad37c2ca53b1cf722e051cfd5f624e7b76aa72389e0c as build
 WORKDIR /app
 RUN \
   apt-get -y update && \
@@ -15,6 +15,7 @@ RUN \
     postgresql-client \
     xmlsec1 \
     git \
+    uuid-runtime \
     && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists && \
@@ -53,27 +54,26 @@ RUN pip3 install \
 	-r ./requirements.txt
 
 COPY components/ ./components/
-COPY manage.py ./
-COPY dojo/ ./dojo/
-RUN \
-  cp dojo/settings/settings.dist.py dojo/settings/settings.py
 RUN \
   cd components && \
-  yarn && \
-  cd .. && \
-  python3 manage.py collectstatic --noinput && \
-  true
+  yarn
 
-FROM nginx:1.19.0@sha256:0efad4d09a419dc6d574c3c3baacb804a530acd61d5eba72cb1f14e1f5ac0c8f
+COPY manage.py ./
+COPY dojo/ ./dojo/
+
+RUN env DD_SECRET_KEY='.' python3 manage.py collectstatic --noinput && true
+
+FROM nginx:1.19.6-alpine@sha256:01747306a7247dbe928db991eab42e4002118bf636dd85b4ffea05dd907e5b66
+ARG uid=1001
+ARG appuser=defectdojo
 COPY --from=collectstatic /app/static/ /usr/share/nginx/html/static/
 COPY wsgi_params nginx/nginx.conf nginx/nginx_TLS.conf /etc/nginx/
 COPY docker/entrypoint-nginx.sh /
 RUN \
-  apt-get -y update && \
-  apt-get -y install openssl && \
-  apt-get clean && \
+  apk add --no-cache openssl && \
   chmod -R g=u /var/cache/nginx && \
-  chmod -R g=u /var/run && \
+  mkdir /var/run/defectdojo && \
+  chmod -R g=u /var/run/defectdojo && \
   mkdir -p /etc/nginx/ssl && \
   chmod -R g=u /etc/nginx && \
   true
@@ -86,6 +86,6 @@ ENV \
   NGINX_METRICS_ENABLED="false" \
   METRICS_HTTP_AUTH_USER="" \
   METRICS_HTTP_AUTH_PASSWORD=""
-USER 1001
+USER ${uid}
 EXPOSE 8080
 ENTRYPOINT ["/entrypoint-nginx.sh"]

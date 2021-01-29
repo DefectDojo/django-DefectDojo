@@ -38,9 +38,10 @@
                         {% for p in products %}
                             <tr>
                                 <td class="prod_name"><a href="{% url 'view_product' p.id %}">{{ p.name }}</a>
+                                    {{ p|jira_project_tag }}
                                   <sup>
-                                   {% for tag in p.tags %}
-                                        <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                   {% for tag in p.tags.all %}
+                                        <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=product-tag:{{ tag }}">{{ tag }}</a>
                                     {% endfor %}
                                   </sup>
                                 </td>
@@ -50,27 +51,28 @@
                                 <td>
                                     {% for e in p.engagement_set.all %}
                                         {% if e.active %}
-						<div class="lineContainer">
-							<a  style="display: inline" class="eng_link" href="{% url 'view_engagement' e.id %}">
+                                            <div class="lineContainer">
+                                                <a  style="display: inline" class="eng_link" href="{% url 'view_engagement' e.id %}">
                                                 {% if e.name %}{{ e.name }} {% endif %}{{ e.target_start|date }} - {{ e.target_end|date }}</a>
                                                 <sup>
-                                                    {% for tag in e.tags %}
-                                                         <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                                    {% for tag in e.tags.all %}
+                                                         <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=engagement-tag:{{ tag }}">{{ tag }}</a>
                                                      {% endfor %}
                                                 </sup>                                                
-                                                {% if e.is_overdue %}<sup><div class="tag-label warning-color">{{ e.target_end|overdue }} overdue</div></sup>
+                                                {% if e.is_overdue %}
+                                                <sup><div class="tag-label warning-color">{{ e.target_end|overdue }} overdue</div></sup>
                                                 {% endif %}                                                
-							| Lead: {{ e.lead.first_name }}
-                                                        |
-                                                        {%  for test in e.test_set.all %}
-								{% if test.lead %}
+							                    | Lead: {{ e.lead.first_name }}
+                                                | 
+                                                {% for test in e.test_set.all %}
+								                    {% if test.lead %}
                                                                 <a href="{% url 'view_test' test.id %}"> {{ test }}: {{ test.lead.first_name }} ({{ test.updated|date}})</a> |
-								{% else %}
+								                    {% else %}
                                                                 <a href="{% url 'view_test' test.id %}"> {{ test }} ({{ test.updated|date}})</a> |
-								{% endif %}
-                                                        {% endfor %}
-						</div>
-
+								                    {% endif %}
+                                                {% endfor %}
+                                                {{ e|jira_project_tag }}
+						                    </div>
                                         {% endif %}
                                     {% endfor %}
                                 </td>

@@ -2,21 +2,27 @@
 {% load get_banner %}
 {% block content %}
     <h3>Login</h3>
-    <form class="form-horizontal" method="POST"> {% csrf_token %}
+    <form class="form-horizontal" method="POST" autocomplete="off"> {% csrf_token %}
         <fieldset class="col-md-offset-3 col-md-6">
             {% if "banner_enable"|get_banner %}
                 <div class="well">
                 {{ "banner_message"|get_banner }}
                 </div>
             {% endif %}
-            {% include "dojo/form_fields.html" with form=form %}
+
+            {% if SHOW_LOGIN_FORM %}
+               {% include "dojo/form_fields.html" with form=form %}
+            {% endif %}
+
             <!-- Button -->
             <div class="form-group">
-                <div class="col-sm-offset-1 col-sm-4" id="toggleBox" onclick="togglePassVisibility()">
-                    <i class="fa fa-eye"></i>
-                    <span><b>Show Password</b></span>
-                </div>
-                {% if CLASSIC_AUTH_ENABLED %}
+                {% if SHOW_LOGIN_FORM %}
+                    <div class="col-sm-offset-1 col-sm-4" id="toggleBox" onclick="togglePassVisibility()">
+                        <i class="fa fa-eye"></i>
+                        <span><b>Show Password</b></span>
+                    </div>
+                {% endif %}
+                {% if CLASSIC_AUTH_ENABLED and SHOW_LOGIN_FORM %}
                     <div class="col-sm-offset-1 col-sm-1">
                         <button class="btn btn-success">Login</button>
                     </div>
@@ -59,6 +65,14 @@
                     <div class="col-sm-offset-1 col-sm-2">
                         <button class="btn btn-success" type="button">
                             <a href="{% url 'social:begin' 'auth0' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)">Login with Auth0</a>
+                        </button>
+                    </div>
+                {% endif %}
+
+                {% if SAML2_ENABLED is True %}
+                    <div class="col-sm-offset-1 col-sm-2">
+                        <button class="btn btn-success" type="button">
+                            <a href="/saml2/login" style="color: rgb(255,255,255)">Login with SAML</a>
                         </button>
                     </div>
                 {% endif %}

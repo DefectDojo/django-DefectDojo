@@ -2,13 +2,14 @@ import random
 from unittest import skip
 
 from django.contrib.auth.models import User
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from tastypie.models import ApiKey
 from tastypie.test import ResourceTestCaseMixin
 
 from dojo.models import Product, Engagement, Product_Type
 
 
+@override_settings(LEGACY_API_V1_ENABLE=True)
 class ApiBasicOperationsTest(ResourceTestCaseMixin, TestCase):
     def setUp(self):
         super(ApiBasicOperationsTest, self).setUp()
@@ -141,3 +142,29 @@ class ApiBasicOperationsTest(ResourceTestCaseMixin, TestCase):
             'engagements': {'status': ['This field is required.'],
                              'target_end': ['This field is required.'],
                              'target_start': ['This field is required.']}})
+
+
+@override_settings(LEGACY_API_V1_ENABLE=False)
+class ApiV1Disabled(ResourceTestCaseMixin, TestCase):
+    def setUp(self):
+        super(ApiV1Disabled, self).setUp()
+        self.username = 'test_user'
+        self.password = 'p4ss'
+        self.user = User.objects.create_user(self.username, 'user@mail.com',
+                                             self.password, is_active=True,
+                                             is_staff=True, is_superuser=True)
+        self.api_key = ApiKey.objects.create(user=self.user)
+
+        self.prod_type = Product_Type.objects.create(name='WebApp')
+
+    def get_credentials(self):
+        return self.create_apikey(self.username, self.user.api_key.key)
+
+    def test_api_v1_disabled(self):
+        r = self.api_client.get('/api/v1/products/',
+                                authentication=self.get_credentials())
+
+        self.assertHttpBadRequest(r)
+        data = self.deserialize(r)
+        print(data)
+        self.assertTrue('666' in str(data))

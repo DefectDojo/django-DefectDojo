@@ -1,5 +1,3 @@
-# # endpoints
-
 import logging
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
@@ -13,28 +11,32 @@ from django.utils.html import escape
 from django.utils import timezone
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
+from django.db.models import Q, QuerySet, Count
 from dojo.filters import EndpointFilter
 from dojo.forms import EditEndpointForm, \
     DeleteEndpointForm, AddEndpointForm, DojoMetaDataForm
-from dojo.models import Product, Endpoint, Finding, System_Settings, DojoMeta
-from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, get_system_setting, Product_Tab, calculate_grade
+from dojo.models import Product, Endpoint, Finding, System_Settings, DojoMeta, Endpoint_Status
+from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, get_system_setting, Product_Tab, \
+    calculate_grade, redirect
 from dojo.notifications.helper import create_notification
+from dojo.user.helper import user_must_be_authorized
 
 logger = logging.getLogger(__name__)
 
 
 def vulnerable_endpoints(request):
     endpoints = Endpoint.objects.filter(finding__active=True, finding__verified=True, finding__false_p=False,
-                                        finding__duplicate=False, finding__out_of_scope=False, remediated=False).distinct()
+                                        finding__duplicate=False, finding__out_of_scope=False, mitigated=False).distinct()
 
     # are they authorized
     if request.user.is_staff:
         pass
     else:
-        products = Product.objects.filter(authorized_users__in=[request.user])
-        if products.exists():
-            endpoints = endpoints.filter(product__in=products.all())
-        else:
+        endpoints = Endpoint.objects.filter(
+            Q(product__authorized_users__in=[request.user]) |
+            Q(product__prod_type__authorized_users__in=[request.user])
+        )
+        if not endpoints:
             raise PermissionDenied
 
     product = None
@@ -71,10 +73,11 @@ def all_endpoints(request):
     if request.user.is_staff:
         pass
     else:
-        products = Product.objects.filter(authorized_users__in=[request.user])
-        if products.exists():
-            endpoints = endpoints.filter(product__in=products.all())
-        else:
+        endpoints = Endpoint.objects.filter(
+            Q(product__authorized_users__in=[request.user]) |
+            Q(product__prod_type__authorized_users__in=[request.user])
+        )
+        if not endpoints:
             raise PermissionDenied
 
     product = None
@@ -125,16 +128,12 @@ def get_endpoint_ids(endpoints):
     return ids
 
 
+@user_must_be_authorized(Endpoint, 'view', 'eid')
 def view_endpoint(request, eid):
     endpoint = get_object_or_404(Endpoint, id=eid)
     host = endpoint.host_no_port
     endpoints = Endpoint.objects.filter(host__regex="^" + host + ":?",
                                         product=endpoint.product).distinct()
-
-    if (request.user in endpoint.product.authorized_users.all()) or request.user.is_staff:
-        pass
-    else:
-        raise PermissionDenied
 
     endpoint_metadata = dict(endpoint.endpoint_meta.values_list('name', 'value'))
 
@@ -181,25 +180,24 @@ def view_endpoint(request, eid):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Endpoint, 'change', 'eid')
 def edit_endpoint(request, eid):
     endpoint = get_object_or_404(Endpoint, id=eid)
 
     if request.method == 'POST':
         form = EditEndpointForm(request.POST, instance=endpoint)
         if form.is_valid():
+            logger.debug('saving endpoint')
             endpoint = form.save()
-            tags = request.POST.getlist('tags')
-            t = ", ".join('"{0}"'.format(w) for w in tags)
-            endpoint.tags = t
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Endpoint updated successfully.',
                                  extra_tags='alert-success')
             return HttpResponseRedirect(reverse('view_endpoint', args=(endpoint.id,)))
-    add_breadcrumb(parent=endpoint, title="Edit", top_level=False, request=request)
-    form = EditEndpointForm(instance=endpoint)
-    form.initial['tags'] = [tag.name for tag in endpoint.tags]
+    else:
+        add_breadcrumb(parent=endpoint, title="Edit", top_level=False, request=request)
+        form = EditEndpointForm(instance=endpoint)
 
     product_tab = Product_Tab(endpoint.product.id, "Endpoint", tab="endpoints")
 
@@ -211,7 +209,8 @@ def edit_endpoint(request, eid):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Endpoint, 'delete', 'eid')
 def delete_endpoint(request, eid):
     endpoint = get_object_or_404(Endpoint, pk=eid)
     product = endpoint.product
@@ -221,7 +220,6 @@ def delete_endpoint(request, eid):
         if 'id' in request.POST and str(endpoint.id) == request.POST['id']:
             form = DeleteEndpointForm(request.POST, instance=endpoint)
             if form.is_valid():
-                del endpoint.tags
                 endpoint.delete()
                 messages.add_message(request,
                                      messages.SUCCESS,
@@ -248,22 +246,21 @@ def delete_endpoint(request, eid):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Product, 'staff', 'pid')
 def add_endpoint(request, pid):
     product = get_object_or_404(Product, id=pid)
     template = 'dojo/add_endpoint.html'
-    if '_popup' in request.GET:
-        template = 'dojo/add_related.html'
 
     form = AddEndpointForm(product=product)
     if request.method == 'POST':
         form = AddEndpointForm(request.POST, product=product)
         if form.is_valid():
             endpoints = form.save()
-            tags = request.POST.getlist('tags')
-            t = ", ".join('"{0}"'.format(w) for w in tags)
+            tags = request.POST.get('tags')
             for e in endpoints:
-                e.tags = t
+                e.tags = tags
+                e.save()
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Endpoint added successfully.',
@@ -295,10 +292,10 @@ def add_product_endpoint(request):
         form = AddEndpointForm(request.POST)
         if form.is_valid():
             endpoints = form.save()
-            tags = request.POST.getlist('tags')
-            t = ", ".join('"{0}"'.format(w) for w in tags)
+            tags = request.POST.get('tags')
             for e in endpoints:
-                e.tags = t
+                e.tags = tags
+                e.save()
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Endpoint added successfully.',
@@ -312,7 +309,8 @@ def add_product_endpoint(request):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Endpoint, 'staff', 'eid')
 def add_meta_data(request, eid):
     endpoint = Endpoint.objects.get(id=eid)
     if request.method == 'POST':
@@ -340,7 +338,8 @@ def add_meta_data(request, eid):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Endpoint, 'change', 'eid')
 def edit_meta_data(request, eid):
     endpoint = Endpoint.objects.get(id=eid)
 
@@ -354,8 +353,11 @@ def edit_meta_data(request, eid):
                 if value:
                     cfv.value = value
                     cfv.save()
-                else:
-                    cfv.delete()
+            if key.startswith('delete_'):
+                cfv_id = int(key.split('_')[2])
+                cfv = get_object_or_404(DojoMeta, id=cfv_id)
+                cfv.delete()
+
         messages.add_message(request,
                              messages.SUCCESS,
                              'Metadata edited successfully.',
@@ -385,7 +387,7 @@ def endpoint_bulk_update_all(request, pid=None):
                 endpoints_to_update = request.POST.getlist('endpoints_to_update')
                 finds = Endpoint.objects.filter(id__in=endpoints_to_update).order_by("endpoint_meta__product__id")
                 for endpoint in finds:
-                    endpoint.remediated = not endpoint.remediated
+                    endpoint.mitigated = not endpoint.mitigated
                     endpoint.save()
                 messages.add_message(request,
                                      messages.SUCCESS,
@@ -398,3 +400,50 @@ def endpoint_bulk_update_all(request, pid=None):
                                      'Unable to process bulk update. Required fields were not selected.',
                                      extra_tags='alert-danger')
     return HttpResponseRedirect(reverse('endpoints', args=()))
+
+
+# @user_passes_test(lambda u: u.is_staff)
+@user_must_be_authorized(Finding, 'staff', 'fid')
+def endpoint_status_bulk_update(request, fid):
+    if request.method == "POST":
+        post = request.POST
+        endpoints_to_update = post.getlist('endpoints_to_update')
+        status_list = ['active', 'false_positive', 'mitigated', 'out_of_scope', 'risk_accepted']
+        enable = [item for item in status_list if item in list(post.keys())]
+
+        if endpoints_to_update and len(enable) > 0:
+            endpoints = Endpoint.objects.filter(id__in=endpoints_to_update).order_by("endpoint_meta__product__id")
+            for endpoint in endpoints:
+                endpoint_status = Endpoint_Status.objects.get(
+                    endpoint=endpoint,
+                    finding__id=fid)
+                for status in status_list:
+                    if status in enable:
+                        endpoint_status.__setattr__(status, True)
+                        if status == 'mitigated':
+                            endpoint_status.mitigated_by = request.user
+                            endpoint_status.mitigated_time = timezone.now()
+                    else:
+                        endpoint_status.__setattr__(status, False)
+                endpoint_status.last_modified = timezone.now()
+                endpoint_status.save()
+            messages.add_message(request,
+                                    messages.SUCCESS,
+                                    'Bulk edit of endpoints was successful. Check to make sure it is what you intended.',
+                                    extra_tags='alert-success')
+        else:
+            messages.add_message(request,
+                                    messages.ERROR,
+                                    'Unable to process bulk update. Required fields were not selected.',
+                                    extra_tags='alert-danger')
+    return redirect(request, post['return_url'])
+
+
+def prefetch_for_endpoints(endpoints):
+    if isinstance(endpoints, QuerySet):
+        endpoints = endpoints.prefetch_related('product', 'tags', 'product__tags')
+        endpoints = endpoints.annotate(active_finding_count=Count('finding__id', filter=Q(finding__active=True)))
+    else:
+        logger.debug('unable to prefetch because query was already executed')
+
+    return endpoints

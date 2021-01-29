@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static from staticfiles %}
+{% load static %}
 {% block content %}
     <link href="{% static "google-code-prettify/src/prettify.css" %}" rel="stylesheet"/>
     <div class="row">
@@ -55,7 +55,6 @@
     <script src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
     <script src="{% static "google-code-prettify/src/prettify.js" %}"></script>
     <script src="{% static "bootstrap-wysiwyg/src/bootstrap-wysiwyg.js" %}"></script>
-    <script type="application/javascript" src="{% static "chosen/chosen.jquery.min.js" %}"></script>
     <script>
         function setUpFindingFilters() {
             $(".report-filter-set :input").not("button").addClass("form-control input-sm");
@@ -89,7 +88,7 @@
                 handle: "div.panel div.panel-heading",
                 connectWith: ".in-use-widgets ul",
                 placeholder: "ui-state-highlight",
-                cursor: 'url({% static 'dojo/img/closedhand.cur' %}), default',
+                cursor: 'default',
                 opacity: 0.65,
                 remove: function (event, ui) {
                     if (ui.item.children(":first").data("multiple")) {
@@ -115,7 +114,7 @@
                 handle: "div.panel div.panel-heading",
                 connectWith: ".available-widgets ul",
                 placeholder: "ui-state-highlight",
-                cursor: 'url({% static 'dojo/img/closedhand.cur' %}), default',
+                cursor: 'default',
                 opacity: 0.65,
                 remove: function (event, ui) {
                     if (ui.item.children(":first").data("multiple")) {
@@ -229,7 +228,7 @@
                         var _form = $(this);
 
                         $(this).find('.editor').each(function () {
-                            _form.find('input[name="hidden_content"]').attr('value', $(this).cleanHtml());
+                            _form.find('input[name="hidden_content"]').attr('value', $(this).html().replace( /(<br>|\s|<div><br><\/div>|&nbsp;)*$/, ""));                                                                                                
                         });
 
                         sr = $(this).serializeArray();

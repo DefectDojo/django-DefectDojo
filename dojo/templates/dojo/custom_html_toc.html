@@ -1,0 +1,84 @@
+{% load static %}
+
+<div class="table_of_contents">
+    <h1 id="table_of_contents">{{ title }}</h1>
+    <div id="toc"></div>
+</div>
+
+<script type="text/javascript">
+    window.onload = function () {
+        var toc = "";
+        var level = 3;
+        var contents = "finding_list_content"
+
+        if(document.getElementById("endpoint_content") && document.getElementById("finding_list_content") == null) {
+            contents = "endpoint_content"
+        }
+
+        document.getElementById(contents).innerHTML =
+            document.getElementById(contents).innerHTML.replace(
+                /<h([\d])([^<]*)>([^<]+)<\/h([\d])>|<h([\d])([^>]*)>([^<]+)<sup>([^<]*)<\/sup>([^<]*)<\/h([\d])>/gi,
+                function (str, openLevel, id, titleText, closeLevel, openLevel_t, id_t, titleText_t, tags, junk, closeLevel_t) {
+                    if (openLevel != closeLevel || openLevel > 5) {
+                        return str;
+                    }
+
+                    if(tags)
+                    {
+                        openLevel = openLevel_t;
+                        id = id_t;
+                        titleText = titleText_t;
+                        closeLevel = closeLevel_t;
+                    }
+
+                    if (openLevel > level) {
+                        toc += (new Array(openLevel - level + 1)).join("<ul>");
+                    } else if (openLevel < level) {
+                        toc += (new Array(level - openLevel + 1)).join("</ul>");
+                    }
+
+                    level = parseInt(openLevel);
+                    
+                    var anchor = titleText.trim().replace(/ /g, "_");
+
+                    if(tags)
+                    {
+                        if (['Info', 'Low', 'Medium', 'High', 'Critical'].indexOf(titleText) >= 0) {
+                            toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
+                            "<span class=\"label severity severity-" + titleText + "\">" + titleText + "</span></a></li>";
+                        }
+                        else {
+                            toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
+                            titleText + "<sup>" + tags + "</sup></a></li>";
+                        }
+
+                        return "<a style=\"color:black;\" name=\"" + anchor + "\"><h" + openLevel + "" + id + ">"
+                            + titleText + "<sup>" + tags + "</sup></h" + closeLevel + "></a>";
+                    }
+                    else
+                    {
+                        if (['Info', 'Low', 'Medium', 'High', 'Critical'].indexOf(titleText) >= 0) {
+                            toc += "<br><li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
+                            "<span class=\"label severity severity-" + titleText + "\">" + titleText + "</span></a></li><br>";
+                        }
+                        else {
+                            toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
+                            titleText + "</a></li>";
+                        }
+
+                        return "<a style=\"color:black;\" name=\"" + anchor + "\"><h" + openLevel + "" + id + ">"
+                            + titleText + "</h" + closeLevel + "></a>";
+                    }
+
+                    return "<a style=\"color:black;\" name=\"" + anchor + "\"><h" + openLevel + "" + id + ">"
+                        + titleText + "<sup>" + tags + "</sup></h" + closeLevel + "></a>";
+                }
+            );
+            
+        if (level) {
+            toc += (new Array(level + 1)).join("</ul>");
+        }
+
+        document.getElementById("toc").innerHTML += toc;
+    };
+</script>

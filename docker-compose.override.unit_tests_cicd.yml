@@ -1,0 +1,35 @@
+---
+version: '3.7'
+services:
+  nginx:
+    image: busybox:1.33.0-musl
+    entrypoint: ['echo', 'skipping', 'nginx']
+  uwsgi:
+    entrypoint: ['/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/app/docker/entrypoint-unit-tests.sh']
+    volumes:
+      - '.:/app:z'
+    environment:
+      DD_DEBUG: 'True'
+      DD_TEST_DATABASE_NAME: ${DD_TEST_DATABASE_NAME:-test_defectdojo}
+      DD_DATABASE_NAME: ${DD_TEST_DATABASE_NAME:-test_defectdojo}
+  celerybeat:
+    image: busybox:1.33.0-musl
+    entrypoint: ['echo', 'skipping', 'celery beat']
+  celeryworker:
+    image: busybox:1.33.0-musl
+    entrypoint: ['echo', 'skipping', 'celery worker']
+  initializer:
+    image: busybox:1.33.0-musl
+    entrypoint: ['echo', 'skipping', 'initializer']
+  mysql:
+    ports:
+      - target: 3306
+        published: 3306
+        protocol: tcp
+        mode: host
+    environment:
+      MYSQL_DATABASE: ${DD_TEST_DATABASE_NAME:-test_defectdojo}
+    volumes:
+       - defectdojo_data_unittest:/var/lib/mysql
+volumes:
+  defectdojo_data_unittest: {}

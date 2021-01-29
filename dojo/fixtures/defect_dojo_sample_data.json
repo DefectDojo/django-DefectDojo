@@ -54,6 +54,26 @@
     }
 },
 {
+    "model": "dojo.tagulous_product_tags",
+    "pk": 1,
+    "fields": {
+        "name": "retire",
+        "slug": "retire",
+        "count": 1,
+        "protected": false
+    }
+},
+{
+    "model": "dojo.tagulous_engagement_tags",
+    "pk": 2,
+    "fields": {
+        "name": "pci",
+        "slug": "pci",
+        "count": 1,
+        "protected": false
+    }
+},
+{
     "model": "sessions.session",
     "pk": "0fy0ogscdoq7gy7k3rsgp39zumcidfu9",
     "fields": {
@@ -683,10 +703,8 @@
         "slack_channel": "",
         "slack_token": "",
         "slack_username": "",
-        "enable_hipchat_notifications": false,
-        "hipchat_site": "",
-        "hipchat_channel": "",
-        "hipchat_token": "",
+        "enable_msteams_notifications": false,
+        "msteams_url": "",
         "enable_mail_notifications": false,
         "mail_notifications_from": "from@example.com",
         "mail_notifications_to": "",
@@ -728,7 +746,6 @@
         "github_username": null,
         "slack_username": null,
         "slack_user_id": null,
-        "hipchat_username": null,
         "block_execution": false
     }
 },
@@ -746,7 +763,6 @@
         "github_username": null,
         "slack_username": null,
         "slack_user_id": null,
-        "hipchat_username": null,
         "block_execution": false
     }
 },
@@ -764,7 +780,6 @@
         "github_username": null,
         "slack_username": null,
         "slack_user_id": null,
-        "hipchat_username": null,
         "block_execution": false
     }
 },
@@ -1143,6 +1158,9 @@
         "regulations": [
             13,
             1
+        ],
+        "tags": [
+            "retire"
         ]
     }
 },
@@ -1447,7 +1465,6 @@
         "status": "In Progress",
         "progress": "threat_model",
         "tmodel_path": "none",
-        "risk_path": "none",
         "done_testing": false,
         "engagement_type": "Interactive",
         "build_id": null,
@@ -1491,7 +1508,6 @@
         "status": "Completed",
         "progress": "threat_model",
         "tmodel_path": "none",
-        "risk_path": "none",
         "done_testing": false,
         "engagement_type": "Interactive",
         "build_id": null,
@@ -1535,7 +1551,6 @@
         "status": "Completed",
         "progress": "threat_model",
         "tmodel_path": "none",
-        "risk_path": "none",
         "done_testing": false,
         "engagement_type": "Interactive",
         "build_id": null,
@@ -1579,7 +1594,6 @@
         "status": "Completed",
         "progress": "other",
         "tmodel_path": "none",
-        "risk_path": "none",
         "done_testing": false,
         "engagement_type": "Interactive",
         "build_id": null,
@@ -1623,7 +1637,6 @@
         "status": "Not Started",
         "progress": "other",
         "tmodel_path": "none",
-        "risk_path": "none",
         "done_testing": false,
         "engagement_type": "Interactive",
         "build_id": null,
@@ -1633,7 +1646,10 @@
         "source_code_management_server": null,
         "source_code_management_uri": null,
         "orchestration_engine": null,
-        "risk_acceptance": []
+        "risk_acceptance": [],
+        "tags": [
+            "pci"
+        ]
     }
 },
 {
@@ -1665,7 +1681,6 @@
         "status": "",
         "progress": "threat_model",
         "tmodel_path": "none",
-        "risk_path": "none",
         "done_testing": false,
         "engagement_type": "Interactive",
         "build_id": null,
@@ -1709,7 +1724,6 @@
         "status": "Not Started",
         "progress": "other",
         "tmodel_path": "none",
-        "risk_path": "none",
         "done_testing": false,
         "engagement_type": "Interactive",
         "build_id": null,
@@ -1753,7 +1767,6 @@
         "status": "Completed",
         "progress": "threat_model",
         "tmodel_path": "none",
-        "risk_path": "none",
         "done_testing": false,
         "engagement_type": "Interactive",
         "build_id": null,
@@ -1763,7 +1776,10 @@
         "source_code_management_server": null,
         "source_code_management_uri": null,
         "orchestration_engine": null,
-        "risk_acceptance": []
+        "risk_acceptance": [],
+        "tags": [
+            "pci"
+        ]
     }
 },
 {
@@ -1797,7 +1813,6 @@
         "status": "Blocked",
         "progress": "other",
         "tmodel_path": "none",
-        "risk_path": "none",
         "done_testing": false,
         "engagement_type": "Interactive",
         "build_id": null,
@@ -1841,7 +1856,6 @@
         "status": "Completed",
         "progress": "other",
         "tmodel_path": "none",
-        "risk_path": "none",
         "done_testing": false,
         "engagement_type": "CI/CD",
         "build_id": "89",
@@ -1883,7 +1897,6 @@
         "status": "In Progress",
         "progress": "threat_model",
         "tmodel_path": "none",
-        "risk_path": "none",
         "done_testing": false,
         "engagement_type": "Interactive",
         "build_id": null,
@@ -24204,15 +24217,14 @@
     "model": "dojo.risk_acceptance",
     "pk": 1,
     "fields": {
+        "name": "Simple Builtin Risk Acceptance",
         "path": "",
+        "accepted_by": null,
         "expiration_date": null,
-        "accepted_by": "",
-        "reporter": [
-            "admin"
-        ],
-        "compensating_control": "",
-        "created": "2018-08-24T14:00:56.984Z",
-        "updated": "2018-08-24T14:00:56.984Z",
+        "owner": 1,
+        "decision_details": "These findings are accepted using a simple risk acceptance without expiration date, approval document or compensating control information. Unaccept and use full risk acceptance if you need to have more control over those fields.",
+        "created": "2020-11-09T23:13:08.520Z",
+        "updated": "2020-11-09T23:13:08.520Z",
         "accepted_findings": [
             2
         ],
@@ -24234,7 +24246,7 @@
     }
 },
 {
-    "model": "dojo.jira_conf",
+    "model": "dojo.jira_instance",
     "pk": 2,
     "fields": {
         "url": "http://www.testjira.com",
@@ -24252,7 +24264,7 @@
     }
 },
 {
-    "model": "dojo.jira_conf",
+    "model": "dojo.jira_instance",
     "pk": 3,
     "fields": {
         "url": "http://www.testjira.com",
@@ -24270,7 +24282,7 @@
     }
 },
 {
-    "model": "dojo.jira_conf",
+    "model": "dojo.jira_instance",
     "pk": 4,
     "fields": {
         "url": "http://www.testjira.com",
@@ -24284,7 +24296,8 @@
         "medium_mapping_severity": "test severity",
         "high_mapping_severity": "test severity",
         "critical_mapping_severity": "test severity",
-        "finding_text": ""
+        "finding_text": "",
+        "global_jira_sla_notification": false
     }
 },
 {
@@ -24308,12 +24321,12 @@
     }
 },
 {
-    "model": "dojo.jira_pkey",
+    "model": "dojo.jira_project",
     "pk": 1,
     "fields": {
         "project_key": "key1",
         "product": 1,
-        "conf": 2,
+        "jira_instance": 2,
         "component": "",
         "push_all_issues": false,
         "enable_engagement_epic_mapping": true,
@@ -24321,12 +24334,12 @@
     }
 },
 {
-    "model": "dojo.jira_pkey",
+    "model": "dojo.jira_project",
     "pk": 2,
     "fields": {
         "project_key": "key2",
         "product": 2,
-        "conf": 3,
+        "jira_instance": 3,
         "component": "",
         "push_all_issues": true,
         "enable_engagement_epic_mapping": true,
@@ -24334,12 +24347,12 @@
     }
 },
 {
-    "model": "dojo.jira_pkey",
+    "model": "dojo.jira_project",
     "pk": 3,
     "fields": {
         "project_key": "key3",
         "product": 3,
-        "conf": 4,
+        "jira_instance": 4,
         "component": "",
         "push_all_issues": false,
         "enable_engagement_epic_mapping": false,
@@ -40627,56 +40640,6 @@
         "content": "Cleartext submission of password None High URL: http://localhost:8888/bodgeit/password.jsp\n\nThe page contains a form with the following action URL, which is submitted over clear-text HTTP:\n\n  * http://localhost:8888/bodgeit/password.jsp\n\nThe form contains the following password fields:\n  * password1\n  * password2\n\n\n\nURL: http://localhost:8888/bodgeit/register.jsp\n\nThe page contains a form with the following action URL, which is submitted over clear-text HTTP:\n\n  * http://localhost:8888/bodgeit/register.jsp\n\nThe form contains the following password fields:\n  * password1\n  * password2\n\n\n\nURL: http://localhost:8888/bodgeit/login.jsp\n\nThe page contains a form with the following action URL, which is submitted over clear-text HTTP:\n\n  * http://localhost:8888/bodgeit/login.jsp\n\nThe form contains the following password field:\n  * password\n\n\n\n \n\nApplications should use transport-level encryption (SSL or TLS) to protect all sensitive communications passing between the client and the server. Communications that should be protected include the login mechanism and related functionality, and any functions where sensitive data can be accessed or privileged actions can be performed. These areas should employ their own session handling mechanism, and the session tokens used should never be transmitted over unencrypted communications. If HTTP cookies are used for transmitting session tokens, then the secure flag should be set to prevent transmission over clear-text HTTP.\n Some applications transmit passwords over unencrypted connections, making them vulnerable to interception. To exploit this vulnerability, an attacker must be suitably positioned to eavesdrop on the victim's network traffic. This scenario typically occurs when a client communicates with the server over an insecure connection such as public Wi-Fi, or a corporate or home network that is shared with a compromised computer. Common defenses such as switched networks are not sufficient to prevent this. An attacker situated in the user's ISP or the application's hosting infrastructure could also perform this attack. Note that an advanced adversary could potentially target any connection made over the Internet's core infrastructure.\n\nVulnerabilities that result in the disclosure of users' passwords can result in compromises that are extremely difficult to investigate due to obscured audit trails. Even if the application itself only handles non-sensitive information, exposing passwords puts users who have re-used their password elsewhere at risk.\n None None  S1 None None None None None cef2dcb7c7787157edc70e85d5017e72d1dbca1fd80909f5d76cda85a9bdec2c None",
         "url": "",
         "meta_encoded": "{}"
-    }
-},
-{
-    "model": "tagging.tag",
-    "pk": 1,
-    "fields": {
-        "name": "retire"
-    }
-},
-{
-    "model": "tagging.tag",
-    "pk": 2,
-    "fields": {
-        "name": "pci"
-    }
-},
-{
-    "model": "tagging.taggeditem",
-    "pk": 1,
-    "fields": {
-        "tag": 1,
-        "content_type": [
-            "dojo",
-            "product"
-        ],
-        "object_id": 1
-    }
-},
-{
-    "model": "tagging.taggeditem",
-    "pk": 2,
-    "fields": {
-        "tag": 2,
-        "content_type": [
-            "dojo",
-            "engagement"
-        ],
-        "object_id": 6
-    }
-},
-{
-    "model": "tagging.taggeditem",
-    "pk": 3,
-    "fields": {
-        "tag": 2,
-        "content_type": [
-            "dojo",
-            "engagement"
-        ],
-        "object_id": 10
     }
 },
 {

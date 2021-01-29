@@ -59,7 +59,7 @@
                                 <br><br>The engagement also included the following tests which may be reported here:<br>
                                 <br>
                                 {% for t in eng.test_set.all %}
-                                    * {{ t.test_type.name }}
+                                    * {{ t }}
                                     ({{ t.environment.name|default:"unknown" }}):
                                     {{ t.target_start|date:"SHORT_DATE_FORMAT" }}<br>
                                 {% endfor %}
@@ -96,7 +96,7 @@
                     {% if eng.test_set %}
                         <br><br>The engagement also included the following tests which may be reported here:<br><br>
                         {% for t in eng.test_set.all %}
-                            * {{ t.test_type.name }}
+                            * {{ t }}
                             ({{ t.environment.name|default:"unknown" }}): {{ t.target_start|date:"SHORT_DATE_FORMAT" }}
                             <br>
                         {% endfor %}
@@ -130,7 +130,7 @@
             {% if engagement.test_set %}
                 <br><br>The engagement also included the following tests which may be reported here:<br><br>
                 {% for t in engagement.test_set.all %}
-                    * {{ t.test_type.name }}
+                    * {{ t }}
                     ({{ t.environment.name|default:"unknown" }}): {{ t.target_start|date:"SHORT_DATE_FORMAT" }}<br>
                 {% endfor %}
             {% endif %}
@@ -145,7 +145,7 @@
         {% endif %}
         {% if test %}
             <br>
-            A {{ test.test_type.name }} was conducted in the {{ test.environment.name }} environment
+            A {{ test }} was conducted in the {{ test.environment.name }} environment
             {% if test.target_end %}
                 from {{ test.target_start|date:"SHORT_DATE_FORMAT" }} to {{ test.target_end|date:"SHORT_DATE_FORMAT" }}
             {% else %}
@@ -170,7 +170,7 @@
                 The engagement also included the following tests which are not reported here:<br><br>
                 {% for t in test.engagement.test_set.all %}
                     {% if test.id != t.id %}
-                        * {{ t.test_type.name }}
+                        * {{ t }}
                         ({{ t.environment.name|default:"unknown" }}): {{ t.target_start|date:"SHORT_DATE_FORMAT" }}<br>
                     {% endif %}
                 {% endfor %}
@@ -236,7 +236,7 @@
             {% if find.tags %}
                 <sup>
                     [
-                    {% for tag in find.tags %}
+                    {% for tag in find.tags.all %}
                     {{ tag }}
                     {% endfor %}
                     ]
@@ -252,6 +252,11 @@
         <p><b>==== Status: ====</b>
             <br>
             {{ find.status }}
+        </p>
+        <br>
+        <p><b>==== CVSSv3: ====</b>
+            <br>
+            {{ find.cvssv3 }}
         </p>
         <br>
         <p><b>==== Severity: ====</b>
@@ -276,7 +281,7 @@
         </p>
         <br>
 
-        {% with endpoints=find.endpoints.all|get_vulnerable_endpoints %}
+        {% with endpoints=find|get_vulnerable_endpoints %}
             {% if endpoints %}
                 <p><b>==== Systems Vulnerable: ====</b><br>
                     {% for endpoint in endpoints %}
@@ -287,7 +292,7 @@
             {% endif %}
         {% endwith %}
 
-        {% with endpoints=find.endpoints.all|get_remediated_endpoints %}
+        {% with endpoints=find|get_mitigated_endpoints %}
             {% if endpoints %}
                 <p><b>==== Systems Remediated: ====</b><br>
                     {% for endpoint in endpoints %}
@@ -440,7 +445,7 @@
                     {{ find.impact|linebreaksasciidocbr }}
                 </p>
                 <br>
-                {% with endpoints=find.endpoints.all|get_vulnerable_endpoints %}
+                {% with endpoints=find|get_vulnerable_endpoints %}
                     {% if endpoints %}
                         <p><b>==== Systems Vulnerable: ====</b><br>
                             {% for endpoint in endpoints %}
@@ -451,7 +456,7 @@
                     {% endif %}
                 {% endwith %}
 
-                {% with endpoints=find.endpoints.all|get_remediated_endpoints %}
+                {% with endpoints=find|get_mitigated_endpoints %}
                     {% if endpoints %}
                         <p><b>==== Systems Remediated: ====</b><br>
                             {% for endpoint in endpoints %}
@@ -544,17 +549,17 @@
                         }
 
                         level = parseInt(openLevel);
-                        
+
                         var anchor = titleText.trim().replace(/ /g, "_");
 
                         if(tags)
                         {
                             if (['Info', 'Low', 'Medium', 'High', 'Critical'].indexOf(titleText) >= 0) {
-                                toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
+                                toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
                                 "<span class=\"label severity severity-" + titleText + "\">" + titleText + "</span></a></li>";
                             }
                             else {
-                                toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
+                                toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
                                 titleText + "<sup>" + tags + "</sup></a></li>";
                             }
 
@@ -564,11 +569,11 @@
                         else
                         {
                             if (['Info', 'Low', 'Medium', 'High', 'Critical'].indexOf(titleText) >= 0) {
-                                toc += "<br><li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
+                                toc += "<br><li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
                                 "<span class=\"label severity severity-" + titleText + "\">" + titleText + "</span></a></li><br>";
                             }
                             else {
-                                toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
+                                toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
                                 titleText + "</a></li>";
                             }
 
@@ -580,7 +585,7 @@
                             + titleText + "<sup>" + tags + "</sup></h" + closeLevel + "></a>";
                     }
                 );
-                
+
             if (level) {
                 toc += (new Array(level + 1)).join("</ul>");
             }
@@ -612,9 +617,9 @@
                         level = parseInt(openLevel);
                         var anchor = titleText.trim().replace(/ /g, "_");
 
-                        toc += "<li><a style=\"font-size:" + (140 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
-                            titleText.replace(/=/g, "") + "</a></li>";                        
-                        
+                        toc += "<li><a style=\"font-size:" + (140 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
+                            titleText.replace(/=/g, "") + "</a></li>";
+
                         return "<a style=\"color:black;\" name=\"" + anchor + "\"><h" + openLevel + "" + id + ">"
                             + titleText + "</h" + closeLevel + "></a>";
                     }
@@ -638,14 +643,14 @@
                         level = parseInt(openLevel);
                         var anchor = titleText.trim().replace(/ /g, "_");
 
-                        toc += "<li><a style=\"font-size:" + (140 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
+                        toc += "<li><a style=\"font-size:" + (140 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
                         titleText.replace(/=/g, "") + "<sup>" + tags + "</sup></a></li>";
-                        
+
                         return "<a style=\"color:black;\" name=\"" + anchor + "\"><h" + openLevel + "" + id + ">"
                             + titleText + "<sup>" + tags + "</sup></h" + closeLevel + "></a>";
                     }
                 );
-                
+
             if (level) {
                 toc += (new Array(level + 1)).join("</ul>");
             }
@@ -655,4 +660,3 @@
 */
     </script>
 {% endblock %}
-

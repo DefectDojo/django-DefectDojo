@@ -1,5 +1,32 @@
 #!/bin/sh
 
+# Allow for bind-mount setting.py overrides
+FILE=/app/docker/extra_settings/settings.dist.py
+if test -f "$FILE"; then
+    echo "============================================================"
+    echo "     Overriding DefectDojo's settings.dist.py with $FILE."
+    echo "============================================================"
+    cp "$FILE" /app/dojo/settings/settings.dist.py
+fi
+
+# Allow for bind-mount setting.py overrides
+FILE=/app/docker/extra_settings/settings.py
+if test -f "$FILE"; then
+    echo "============================================================"
+    echo "     Overriding DefectDojo's settings.py with $FILE."
+    echo "============================================================"
+    cp "$FILE" /app/dojo/settings/settings.py
+fi
+
+# Allow for bind-mount setting.py overrides
+FILE=/app/docker/extra_settings/local_settings.py
+if test -f "$FILE"; then
+    echo "============================================================"
+    echo "     Overriding DefectDojo's local_settings.py with $FILE."
+    echo "============================================================"
+    cp "$FILE" /app/dojo/settings/local_settings.py
+fi
+
 umask 0002
 
 if [ "${DD_INITIALIZE}" = false ]
@@ -17,7 +44,9 @@ do
 done
 echo
 
+echo "Making migrations"
 python3 manage.py makemigrations dojo
+echo "Migrating"
 python3 manage.py migrate
 
 echo "Admin user: ${DD_ADMIN_USER}"
@@ -38,6 +67,12 @@ then
   echo "Admin password: ${DD_ADMIN_PASSWORD}"
 fi
 
+if [ -z "${DD_JIRA_WEBHOOK_SECRET}" ]
+then
+  export DD_JIRA_WEBHOOK_SECRET="$(uuidgen)"
+  echo "JIRA Webhook Secret: ${DD_JIRA_WEBHOOK_SECRET}"
+fi
+
 if [ -z "${ADMIN_EXISTS}" ]
 then
 cat <<EOD | python manage.py shell
@@ -52,19 +87,24 @@ User.objects.create_superuser(
 )
 EOD
 
-  python3 manage.py loaddata system_settings
-  python3 manage.py loaddata initial_banner_conf
-  python3 manage.py loaddata product_type
-  python3 manage.py loaddata test_type
-  python3 manage.py loaddata development_environment
-  python3 manage.py loaddata benchmark_type
-  python3 manage.py loaddata benchmark_category
-  python3 manage.py loaddata benchmark_requirement
-  python3 manage.py loaddata language_type
-  python3 manage.py loaddata objects_review
-  python3 manage.py loaddata regulation
+  echo "Preparing survey fixture"
+  # surveys fixture needs to be modified as it contains an instance dependant polymorphic content id
   python3 manage.py import_surveys
-  python3 manage.py loaddata initial_surveys
+  # load surveys all at once as that's much faster
+   echo "Importing fixtures all at once"
+   python3 manage.py loaddata system_settings initial_banner_conf product_type test_type \
+       development_environment benchmark_type benchmark_category benchmark_requirement \
+       language_type objects_review regulation initial_surveys
+
+  echo "UPDATE dojo_system_settings SET jira_webhook_secret='$DD_JIRA_WEBHOOK_SECRET'" | python manage.py dbshell
+
+  echo "Importing extra fixtures"
+  # If there is extra fixtures, load them
+  for i in $(ls dojo/fixtures/extra_*.json | sort -n 2>/dev/null) ; do
+    echo "Loading $i"
+    python3 manage.py loaddata ${i%.*}
+  done
+
+  echo "Installing watson search index"
   python3 manage.py installwatson
-  exec python3 manage.py buildwatson
 fi

@@ -1,16 +1,15 @@
 import logging
-from lxml import etree
-from lxml.etree import XMLSyntaxError
-from .parser_models import AcunetixScanReport
-from .parser_models import DefectDojoFinding
+
 # from memory_profiler import profile #Comment out this and profile in defectdojo repo
 import html2text
+from lxml import etree
+from lxml.etree import XMLSyntaxError
 
-logging.basicConfig(level=logging.ERROR)
+from .parser_models import AcunetixScanReport, DefectDojoFinding
 
 SCAN_NODE_TAG_NAME = "Scan"
 ACUNETIX_XML_SCAN_IGNORE_NODES = ['Technologies', 'Crawler']
-ACUNETIX_XML_REPORTITEM_IGNORE_NODES = ['TechnicalDetails', 'CVEList', 'CVSS', 'CVSS3']
+ACUNETIX_XML_REPORTITEM_IGNORE_NODES = ['CVEList', 'CVSS', 'CVSS3']
 
 
 # @profile
@@ -21,7 +20,7 @@ def get_root_node(filename):
     :return:
     """
     try:
-        tree = etree.parse(filename)
+        tree = etree.parse(filename, etree.XMLParser(resolve_entities=False))
         return tree.getroot()
     except XMLSyntaxError as xse:
         logging.error("ERROR : error parsing XML file {filename}".format(filename=filename))
@@ -106,6 +105,8 @@ def get_scan_report_items_details(report_items_node):
                     elif child.tag == 'CWEList':
                         cwe_id = get_cwe_id(child)
                         report_item['CWEId'] = cwe_id
+                    elif child.tag == 'TechnicalDetails':
+                        report_item['TechnicalDetails'] = child[0].text
                     else:
                         report_item[child.tag] = child.text
 
@@ -175,12 +176,20 @@ def get_defectdojo_findings(filename):
     for report_item in acunetix_scan_report.ReportItems:
         defectdojo_finding = dict()
 
-        defectdojo_finding['title'] = report_item['Name']
+        if "Affects" in report_item:
+            affects = (" ({})".format(report_item['Affects']))
+        else:
+            affects = ""
+        defectdojo_finding['title'] = "{}{}".format(report_item['Name'], affects)
         defectdojo_finding['date'] = acunetix_scan_report.StartTime
         defectdojo_finding['cwe'] = report_item['CWEId']
         defectdojo_finding['url'] = acunetix_scan_report.StartURL
         defectdojo_finding['severity'] = report_item['Severity']
         defectdojo_finding['description'] = get_html2text(report_item['Description'])
+        if "Details" in report_item and len(report_item['Details'].strip()):
+            defectdojo_finding['description'] += "\n**Details:**\n{}\n".format(report_item['Details'])
+        if "TechnicalDetails" in report_item and len(report_item['TechnicalDetails'].strip()):
+            defectdojo_finding['description'] += "\n**Technical Details:**\n{}\n".format(report_item['TechnicalDetails'])
         defectdojo_finding['mitigation'] = get_html2text(report_item['Recommendation'])
         defectdojo_finding['impact'] = get_html2text(report_item['Impact'])
         defectdojo_finding['references'] = ''

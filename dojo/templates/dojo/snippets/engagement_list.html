@@ -4,7 +4,7 @@
     <div class="panel panel-default table-responsive">
         <div class="panel-heading">
             <h4> {% if status == "open" %}Active{% elif status == "paused" %}Paused {% else %}Closed{% endif %} {% if type == "CI/CD" %}CI/CD{% endif %} Engagements ({{ count }})
-              {% if user.is_staff %}
+              {% if user|is_authorized_for_staff:prod %}
                 {% if type == "CI/CD" %}
                 <a title="Add New Engagement" class="pull-right btn btn-sm btn-primary" href="{% url 'new_eng_for_prod_cicd' prod.id %}"><span
                       class="fa fa-plus"></span> </a>
@@ -25,15 +25,20 @@
                     <th></th>
                     <th>Name</th>
                     <th>Lead</th>
-                    <th>Date</th>
-                    <th>Length</th>
-                    <th>Tests</th>
-                    <th>Open</th>
-                    <th>All</th>
-                    <th>Duplicate</th>
-                    <th>Updated</th>
+                    <th class="text-left">Date</th>
+                    <th class="text-left">Length</th>
+                    {% if system_settings.enable_jira %}
+                    <th class="text-center">JIRA</td>
+                    {% endif %}
+                    <th class="text-center">Tests</th>
+                    <th class="text-center">Active (Verified)</th>
+                    <th class="text-center">Mitigated</th>
+                    <th class="text-center">Accepted</th>
+                    <th class="text-center">All</th>
+                    <th class="text-center">Duplicates</th>
+                    <th class="text-left">Updated</th>
                     {% if status == "paused" or status == "closed" %}
-                      <th>Status</th>
+                      <th class="text-left">Status</th>
                     {% endif %}
                 </tr>
                 </thead>
@@ -79,16 +84,31 @@
                             </li>
                             <li class="divider"></li>
                             <li role="presentation">
-                              <a href="{% url 'engagment_open_findings' eng.id %}?active=2&verified=2&false_p=3&duplicate=2&out_of_scope=1&test__engagement={{ eng.id }}">
-                                <i class="fa fa-file-text-o"></i> View Open Findings
+                              <a href="{% url 'engagment_open_findings' eng.id %}?active=2&false_p=3&duplicate=2&out_of_scope=1&test__engagement={{ eng.id }}">
+                                <i class="fa fa-file-text-o"></i> View Active Findings
                               </a>
                             </li>
+                            <li role="presentation">
+                              <a href="{% url 'engagment_open_findings' eng.id %}?active=2&verified=2&false_p=3&duplicate=2&out_of_scope=1&test__engagement={{ eng.id }}">
+                                <i class="fa fa-file-text-o"></i> View Active and Verified Findings
+                              </a>
+                            </li>
+                            <li role="presentation">
+                              <a href="{% url 'engagment_closed_findings' eng.id %}?is_Mitigated=2&test__engagement={{ eng.id }}">
+                                <i class="fa fa-file-text-o"></i> View Mitigated Findings
+                              </a>
+                            </li>
+                            <li role="presentation">
+                                <a href="{% url 'engagment_open_findings' eng.id %}?test__engagement__risk_acceptance=1&test__engagement={{ eng.id }}">
+                                    <i class="fa fa-file-text-o"></i> View Accepted Findings
+                                </a>
+                              </li>
                             <li role="presentation">
                               <a href="{% url 'engagment_all_findings' eng.id %}?test__engagement={{ eng.id }}">
                                   <i class="fa fa-file-text-o"></i> View All Findings
                               </a>
                             </li>
-                            <li class="divider"></li>
+                              <li class="divider"></li>
                             <li role="presentation">
                               <a href="{% url 'engagement_report' eng.id %}?title=&active=1&verified=1&false_p=2&duplicate=2">
                                   <i class="fa fa-file-text-o"></i> Engagement Report
@@ -104,7 +124,7 @@
                          </li>
                      </ul>
                     </td>
-                    <td style="width: 250px;">
+                    <td class="text-center" style="width: 250px;">
                     <a href="{% url 'view_engagement' eng.id %}" data-toggle="tooltip" data-placement="bottom" title="{{ eng.name|default:"N/A" }}">
                     {{ eng.name|truncatechars_html:35|default:"N/A" }}</a>
                     {% if eng.version %}
@@ -115,8 +135,8 @@
                     {% endif %}
                     {% if eng.tags %}
                         <sup>
-                            {% for tag in eng.tags %}
-                            <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                            {% for tag in eng.tags.all %}
+                            <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=engagement-tag:{{ tag }}">{{ tag }}</a>
                             {% endfor %}
                         </sup>
                     {% endif %}
@@ -128,12 +148,12 @@
                           {{ eng.lead |default_if_none:""}}
                       {% endif %}
                     </td>
-                    <td style="width: 200px;">
+                    <td class="text-left" style="width: 200px;">
                       <a target="#" data-toggle="tooltip" data-placement="bottom" title="{{ eng.target_start|date:"l, jS F Y" }} - {{ eng.target_end|date:"l, jS F Y" }}">
                       {{ eng.target_start|date:"jS F" }} {% if eng.target_start|datediff_time:eng.target_end != "1 day" %} - {{ eng.target_end|date:"jS F" }}{% endif %}
                     </a>
                     </td>
-                    <td class="nowrap">{{ eng.target_start|datediff_time:eng.target_end }}
+                    <td class="text-left" class="nowrap">{{ eng.target_start|datediff_time:eng.target_end }}
                       {% if status == "open" %}
                         {% if eng.is_overdue %}
                         <sup>
@@ -158,7 +178,12 @@
                         {% endif %}
                       {% endif %}
                     </td>
-                    <td class="nowrap">
+                    {% if system_settings.enable_jira %}
+                    <td class="text-center">
+                      {{ eng|jira_project_tag }}
+                    </td>
+                    {% endif %}
+                    <td class="text-center" class="nowrap">
                       <div class="align-top">
                       {% if eng.test_set.all|length %}
                       <div class="dropdown">
@@ -178,14 +203,16 @@
                       {% endif %}
                       </div>
                     </td>
-                    <td>{{ eng.count_findings_open }}</td>
-                    <td>{{ eng.count_findings_all }}</td>
-                    <td>{{ eng.count_findings_duplicate }}</td>
-                    <td><a target="_blank" data-toggle="tooltip" data-placement="bottom" title="{{ eng.updated|default_if_none:"" }}">
+                    <td class="text-center">{{ eng.count_findings_open }}&nbsp;({{ eng.count_findings_open_verified}})</td>
+                    <td class="text-center">{{ eng.count_findings_close }}</td>
+                    <td class="text-center">{{ eng.count_findings_accepted }}</td>
+                    <td class="text-center">{{ eng.count_findings_all }}</td>
+                    <td class="text-center">{{ eng.count_findings_duplicate }}</td>
+                    <td class="text-left"><a target="_blank" data-toggle="tooltip" data-placement="bottom" title="{{ eng.updated|default_if_none:"" }}">
                     {{ eng.updated|naturaltime|default_if_none:"" }}</a>
                     </td>
                     {% if status == "paused" or status == "closed" %}
-                    <td>
+                    <td class="text-left">
                       {% if eng.status == "Blocked" %}
                       <em class="text-danger">
                       {% elif eng.status == "On Hold" %}
@@ -201,7 +228,7 @@
                 </tbody>
             </table>
         {% else %}
-            <div class="panel-body">
+            <div id='no_{% if status == "open" %}active{% elif status == "paused" %}paused{% else %}closed{% endif %}_engagements' class="panel-body">
                 <p class="text-muted">No {% if status == "open" %}active{% elif status == "paused" %}paused{% else %}closed{% endif %} engagements found.</p>
             </div>
         {% endif %}
@@ -211,7 +238,6 @@
     </div>
 </div>
 {% block postscript %}
-<script src="/static/jquery/dist/jquery.js"></script>
 <script>
         // DataTables setup
         $(document).ready(function() {
@@ -231,14 +257,20 @@
 
             // Mapping of table columns to objects for proper cleanup and data formatting
             var dojoTable = $('#{{status}}').DataTable({
+                colReorder: true,
                 "columns": [
                     { "data": "action" },
                     { "data": "eng_name" },
                     { "data": "lead" },
                     { "data": "date" },
                     { "data": "length" },
+                    {% if system_settings.enable_jira %}
+                        { "data": "jira" },
+                    {% endif %}
                     { "data": "tests" },
                     { "data": "open" },
+                    { "data": "mitigated" },
+                    { "data": "accepted" },
                     { "data": "all" },
                     { "data": "dups" },
                     { "data": "updated" },
@@ -247,7 +279,7 @@
                     {% endif %}
                 ],
                 columnDefs: [
-                    { 
+                    {
                         "orderable": false,
                         "targets": [0]
                     },
