@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% load authorization_tags %}
 {% load static %}
 {% block add_css %}
     <link rel="stylesheet" href="{% static "easymde/dist/easymde.min.css" %}">
@@ -46,9 +45,9 @@
                         "guide"
                     ]
                 });
-                mde.render();
+            mde.render();
             });
-            $('#id_authorized_users').chosen({'placeholder_text_multiple': 'Select some users...'});
+            $('#id_authorized_users').chosen({'placeholder_text_multiple': 'Select some product types...'});
         });
     </script>
 {% endblock %}
