@@ -1,14 +1,16 @@
 __author__ = 'jaguasch'
 
-from dateutil import parser
-import json
 import hashlib
-from dojo.models import Finding
+import json
 import re
+
+from dateutil import parser
+
+from dojo.models import Finding
 
 
 class DawnScannerParser(object):
-    def __init__(self, filename, test):
+    def get_findings(self, filename, test):
         tree = filename.read()
         try:
             data = json.loads(str(tree, 'utf-8'))
@@ -31,6 +33,7 @@ class DawnScannerParser(object):
 
             title = item['name'].upper()
             if "CVE" in title:
+                # FIXME switch to a function
                 cve = re.findall(r'CVE-\d{4}-\d{4,7}', title)[0]
             else:
                 cve = None
@@ -64,5 +67,4 @@ class DawnScannerParser(object):
                     static_finding=True)
 
                 dupes[dupe_key] = find
-        # raise Exception('Stopping import')
-        self.items = list(dupes.values())
+        return list(dupes.values())
