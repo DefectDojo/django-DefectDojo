@@ -1,5 +1,6 @@
 import json
 import re
+
 from dojo.models import Finding
 
 __author__ = "Roy Shoemake"
@@ -16,7 +17,7 @@ def cleantags(text=''):
 
 
 class NetsparkerParser(object):
-    def __init__(self, filename, test):
+    def get_findings(self, filename, test):
         tree = filename.read()
         try:
             data = json.loads(str(tree, 'utf-8-sig'))

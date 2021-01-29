@@ -154,6 +154,7 @@ class ScannerTest(BaseTestCase):
             print()
         assert len(missing_forms) == 0
 
+    @unittest.skip("Deprecated since Dynamic Parser infrastructure")
     def test_check_for_options(self):
         template_path = dir_path[:-5] + 'dojo/templates/dojo/import_scan_results.html'
         file = open(template_path, 'r+')

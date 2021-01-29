@@ -1,7 +1,9 @@
-import io
 import csv
 import hashlib
+import io
+
 from defusedxml import ElementTree
+
 from dojo.models import Finding
 
 
@@ -181,19 +183,17 @@ class VCGCsvParser(object):
 
 
 class VCGParser(object):
-
-    def __init__(self, filename, test):
-        self.dupes = dict()
+    """VCG (VisualCodeGrepper) support CSV and XML"""
+    def get_findings(self, filename, test):
 
         if filename is None:
-            self.items = ()
-            return
+            return list()
 
         content = filename.read()
 
         if filename.name.lower().endswith('.xml'):
-            self.items = list(VCGXmlParser().parse(content, test).values())
+            return list(VCGXmlParser().parse(content, test).values())
         elif filename.name.lower().endswith('.csv'):
-            self.items = list(VCGCsvParser().parse(content, test).values())
+            return list(VCGCsvParser().parse(content, test).values())
         else:
             raise Exception('Unknown File Format')

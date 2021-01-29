@@ -1,11 +1,13 @@
 __author__ = 'Hasan Tayyar Besik'
 
 # Cloned form aws_scout2 scanner
-from dojo.models import Finding
-from datetime import datetime
 import json
-from django.utils.text import Truncator
+from datetime import datetime
+
 from django.utils.html import strip_tags
+from django.utils.text import Truncator
+
+from dojo.models import Finding
 
 
 class ScoutSuiteParser(object):
@@ -14,7 +16,7 @@ class ScoutSuiteParser(object):
     item_data = ""
     pdepth = 0
 
-    def __init__(self, filename, test):
+    def get_findings(self, filename, test):
         with open(filename.temporary_file_path(), "r") as fileobj:
             raw_data = fileobj.read()
             raw_data = raw_data.replace("scoutsuite_results =", "")
@@ -100,7 +102,7 @@ class ScoutSuiteParser(object):
                                 date=find_date,
                                 dynamic_finding=True)
                 dupes[dupe_key] = find
-        self.items = list(dupes.values())
+        return list(dupes.values())
 
     def formatview(self, depth):
         if depth > 1:
