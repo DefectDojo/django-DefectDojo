@@ -468,7 +468,7 @@ class JIRAWebhookTest(DojoTestCase):
 
         # finding 5 has a JIRA issue in the initial fixture for unit tests with id=2
 
-        jira_issue = JIRA_Issue.objects.get(jira_id=2)
+        jira_issue = JIRA_Issue.objects.get(jira_id=5)
         finding = jira_issue.finding
         notes_count_before = finding.notes.count()
 

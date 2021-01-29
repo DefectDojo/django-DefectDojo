@@ -185,7 +185,7 @@ def webhook(request, secret=None):
                 if 'name' in parsed['comment']['updateAuthor']:
                     commentor = parsed['comment']['updateAuthor']['name']
                 elif 'emailAddress' in parsed['comment']['updateAuthor']:
-                    commentor = parsed['comment']['updateAuthor']['emailAddress'].split("@")[0]
+                    commentor = parsed['comment']['updateAuthor']['emailAddress']
                 else:
                     logger.debug('Could not find the author of this jira comment!')
                 commentor_display_name = parsed['comment']['updateAuthor']['displayName']

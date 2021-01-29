@@ -1687,6 +1687,24 @@
     }
   },
   {
+    "pk": 5,
+    "model": "dojo.jira_instance",
+    "fields": {
+      "username": "defect.dojo@testme.com",
+      "default_issue_type": "Bug",
+      "finding_text": "",
+      "low_mapping_severity": "test severity",
+      "url": "http://www.testjira.com",
+      "medium_mapping_severity": "test severity",
+      "open_status_key": 333,
+      "close_status_key": 334,
+      "critical_mapping_severity": "test severity",
+      "high_mapping_severity": "test severity",
+      "password": "user69",
+      "epic_name_id": 666
+    }
+  },
+  {
     "pk": 2,
     "model": "dojo.jira_issue",
     "fields": {
