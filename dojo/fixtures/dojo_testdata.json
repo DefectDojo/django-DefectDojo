@@ -662,7 +662,37 @@
       "deduplication_on_engagement": true
     }
   },
-
+  {
+    "pk": 7,
+    "model": "dojo.engagement",
+    "fields": {
+      "product": 3,
+      "pen_test": true,
+      "report_type": null,
+      "first_contacted": null,
+      "tmodel_path": "none",
+      "risk_acceptance": [],
+      "lead": 1,
+      "version": null,
+      "progress": "threat_model",
+      "threat_model": true,
+      "test_strategy": null,
+      "status": "Completed",
+      "updated": null,
+      "description": "test Engagement",
+      "reason": null,
+      "requester": null,
+      "eng_type": null,
+      "active": true,
+      "done_testing": false,
+      "target_end": "2018-04-12",
+      "name": "Whatever monthly engagement",
+      "check_list": true,
+      "target_start": "2018-04-12",
+      "api_test": true,
+      "deduplication_on_engagement": true
+    }
+  },
   {
     "pk": 1,
     "model": "dojo.endpoint",
@@ -864,6 +894,24 @@
       "estimated_time": "02:00:00",
       "test_type": 1,
       "engagement": 1,
+      "environment": 1,
+      "target_start": "2017-12-01T00:00:00Z",
+      "notes": [
+        1
+      ],
+      "percent_complete": 100,
+      "actual_time": "00:30:00",
+      "target_end": "2017-12-10T00:00:00Z"
+    }
+  },
+  {
+    "pk": 15,
+    "model": "dojo.test",
+    "fields": {
+      "lead": null,
+      "estimated_time": "02:00:00",
+      "test_type": 1,
+      "engagement": 7,
       "environment": 1,
       "target_start": "2017-12-01T00:00:00Z",
       "notes": [
@@ -1545,6 +1593,57 @@
     }
   },
   {
+    "pk": 226,
+    "model": "dojo.finding",
+    "fields": {
+      "line_number": null,
+      "last_reviewed_by": null,
+      "reviewers": [],
+      "static_finding": false,
+      "date": "2018-01-01",
+      "references": "",
+      "images": [],
+      "payload": null,
+      "under_defect_review": false,
+      "impact": "Low",
+      "false_p": false,
+      "verified": true,
+      "severity": "Low",
+      "title": "UID Impact Test Finding bla",
+      "sourcefilepath": null,
+      "param": null,
+      "duplicate": true,
+      "mitigation": "test mitigation",
+      "found_by": [
+        1
+      ],
+      "numerical_severity": "S0",
+      "test": 15,
+      "out_of_scope": false,
+      "cwe": null,
+      "file_path": "/dev/urandom/x",
+      "duplicate_finding": 224,
+      "description": "test finding",
+      "mitigated_by": null,
+      "reporter": 1,
+      "sourcefile": null,
+      "mitigated": null,
+      "active": true,
+      "line": 123,
+      "under_review": false,
+      "defect_review_requested_by": 1,
+      "review_requested_by": 1,
+      "thread_id": 11,
+      "url": null,
+      "notes": [],
+      "dynamic_finding": false,
+      "hash_code": "5c5e9d1ec77aea19dd2bbf3aa51f585fc0da876174be8cac885966db1271f147",
+      "is_template": false,
+      "endpoints": [],
+      "last_reviewed": null
+    }
+  },
+  {
     "pk": 1,
     "model": "dojo.burprawrequestresponse",
     "fields": {
@@ -1735,6 +1834,16 @@
     }
   },
   {
+    "pk": 5,
+    "model": "dojo.jira_issue",
+    "fields": {
+      "jira_key": "NTESTEMAIL-1010",
+      "finding": "226",
+      "jira_id": "345435",
+      "engagement": null
+    }
+  },
+  {
     "pk": 1,
     "model": "dojo.jira_project",
     "fields": {
@@ -1758,6 +1867,19 @@
       "enable_engagement_epic_mapping": true,
       "jira_instance": 2,
       "project_key": "NTEST"
+    }
+  },
+  {
+    "pk": 3,
+    "model": "dojo.jira_project",
+    "fields": {
+      "push_notes": true,
+      "product": 3,
+      "push_all_issues": false,
+      "component": "",
+      "enable_engagement_epic_mapping": true,
+      "jira_instance": 5,
+      "project_key": "NTESTEMAIL"
     }
   },
   {
