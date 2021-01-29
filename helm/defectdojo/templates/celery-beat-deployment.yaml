@@ -53,8 +53,10 @@ spec:
         name: celery
         image: "{{ template "celery.repository" . }}:{{ .Values.tag }}"
         imagePullPolicy: {{ .Values.imagePullPolicy }}
+        {{- if .Values.securityContext.enabled }}
         securityContext:
-          {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 10 }}    
+          {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 10 }}
+        {{- end }}          
         envFrom:
         - configMapRef:
             name: {{ $fullName }}

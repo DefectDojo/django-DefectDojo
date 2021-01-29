@@ -1,7 +1,7 @@
 {% load navigation_tags %}
 {% load display_tags %}
 {% load get_endpoint_status %}
-{% load static from staticfiles %}
+{% load static %}
 {% block findings_list %}
     <div class="row">
         <div class="col-md-12">
@@ -38,7 +38,7 @@
                             <form action="{% url 'finding_bulk_update_all' %}" method="post" id="bulk_change_form">
                           {% endif %}
                                 {% csrf_token %}
-                                <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />                                            
+                                <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
                                 <label style="display: block" for="severity">Severity</label>
                                 <select name="severity" id="severity" style="font-size: 80%">
                                     <option value="">Choose...</option>
@@ -95,10 +95,10 @@
                                 {% endif %}
                                 <label style="display: block">Tags</label>
                                 {% comment %}
-                                    Quick hack to make bulk edit work without refactoring the whole bulk edit form                                
+                                    Quick hack to make bulk edit work without refactoring the whole bulk edit form
                                     {{ bulk_edit_form.media.css }}
                                     {{ bulk_edit_form.media.js }}
-                                {% endcomment %}                                
+                                {% endcomment %}
                                 {{ bulk_edit_form.tags }}
                                 <input type="submit" class="btn btn-sm btn-primary" value="Submit"/>
                             </form>
@@ -155,7 +155,7 @@
                             <th class="nowrap centered">{% dojo_sort request 'Severity' 'numerical_severity' 'asc' %}</th>
                             <th class="nowrap">{% dojo_sort request 'Name' 'title' %}</th>
                             <th>CWE</th>
-                            <th>CVE</th>                            
+                            <th>CVE</th>
                             {% if filter_name == 'Closed' %}
                             <th class="nowrap">{% dojo_sort request 'Closed Date' 'mitigated'%}</th>
                             {% else %}
@@ -229,14 +229,14 @@
                                               </li>
                                           {% endif %}
                                        {% endif %}
-                                       {% if user|is_authorized_for_change:finding %}                                       
+                                       {% if user|is_authorized_for_change:finding %}
                                           <li role="presentation">
                                               <a href="{% url 'touch_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
                                                   <i class="fa fa-clock-o"></i> Touch Finding
                                               </a>
                                           </li>
-                                       {% endif %}                                       
-                                       {% if user.is_staff %}                                       
+                                       {% endif %}
+                                       {% if user.is_staff %}
                                           <li role="presentation">
                                               <a href="{% url 'mktemplate' finding.id %}">
                                                   <i class="fa fa-copy"></i> Make Finding a Template
@@ -247,7 +247,7 @@
                                                   <i class="fa fa-copy"></i> Apply Template to Finding
                                               </a>
                                           </li>
-                                       {% endif %}                                       
+                                       {% endif %}
                                        {% if user|is_authorized_for_change:finding %}
                                         {% if finding.active %}
                                             <li role="presentation">
@@ -262,28 +262,33 @@
                                                 </a>
                                             </li>
                                         {% endif %}
-                                       {% endif %}                                       
+                                       {% endif %}
                                        <li class="divider"></li>
                                         {% if user|is_authorized_for_staff:finding %}
-                                          {% if finding.risk_acceptance_set.all %}
+                                          {% if finding.risk_accepted %}
                                               <li role="presentation">
-                                              <a href="{% url 'simple_risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
+                                              <a href="{% url 'risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
                                                   <i class="fa fa-exclamation-circle"></i> Unaccept Risk
                                               </a>
                                               </li>
                                           {% else %}
-                                              <li role="presentation">
-                                                  <a href="{% url 'simple_risk_accept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
-                                                      <i class="fa fa-exclamation-circle"></i> Accept Risk (simple), or
-                                                  </a>
-                                              </li>
-                                              <li role="presentation">
-                                                  <a href ="{% url 'upload_risk_acceptance$' finding.test.engagement.id%}">
-                                                      <i class="fa fa-exclamation-circle"></i> Add Full Risk Acceptance...
-                                                  </a>
-                                              </li>
+                                              {% if finding.test.engagement.product.enable_simple_risk_acceptance %}
+                                                <li role="presentation">
+                                                    <a href="{% url 'simple_risk_accept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
+                                                        <i class="fa fa-exclamation-circle"></i> Accept Risk
+                                                    </a>
+                                                </li>
+                                              {% endif %}
+                                              {% if finding.test.engagement.product.enable_full_risk_acceptance %}
+                                                <li role="presentation">
+                                                    <a href ="{% url 'add_risk_acceptance' finding.test.engagement.id finding.id %}">
+                                                        <i class="fa fa-exclamation-circle"></i> Add Risk Acceptance...
+                                                    </a>
+                                                </li>
+                                              {% endif %}
                                           {% endif %}
-                                        {% endif %}                                       <li role="presentation">
+                                        {% endif %}
+                                        <li role="presentation">
                                            <a href="{% url 'action_history' finding|content_type finding.id %}">
                                                <i class="fa fa-history"></i> View History
                                            </a>
@@ -356,14 +361,14 @@
                                         <i class="fa fa-external-link"></i> {{ finding.cwe|default:"" }}
                                     </a>
                                   {% endif %}
-                                </td> 
+                                </td>
                                 <td class="nowrap">
                                   {% if finding.cve %}
                                     <a target="_blank" href="{{ finding.cve|cve_url }}">
                                         <i class="fa fa-external-link"></i> {{ finding.cve|default:"" }}
                                     </a>
                                   {% endif %}
-                                </td>                               
+                                </td>
                                 {% if filter_name == 'Closed' %}
                                   <td class="nowrap">{{ finding.mitigated|date }}</td>
                                 {% else %}
@@ -391,16 +396,16 @@
                                   {% if jira_project and product_tab or not product_tab %}
                                     <td class="nowrap">
                                       {% if finding.has_jira_issue %}
-                                        <a href="{{ finding | jira_issue_url }}" target="_blank" 
-                                            alt="Jira Bug - {{finding | jira_key}}" data-toggle="tooltip" data-placement="bottom" title="{{finding | jira_key}}"><i class="fa fa-bug fa-fw"></i></a>
+                                        <a href="{{ finding | jira_issue_url }}" target="_blank"
+                                            alt="Jira Bug - {{finding | jira_key}}" data-toggle="tooltip" data-placement="bottom" title="{{finding | jira_key}}">{{finding | jira_key}}</a>
                                       {% endif %}
                                     </td>
                                     <td class="nowrap">
-                                      {{ finding | jira_creation | timesince }} 
+                                      {{ finding | jira_creation | timesince }}
                                     </td>
                                     <td class="nowrap">
-                                      {{ finding | jira_change | timesince }} 
-                                    </td> 
+                                      {{ finding | jira_change | timesince }}
+                                    </td>
                                   {% endif %}
                                 {% endif %}
                                 {% if show_product_column and product_tab is None %}
@@ -418,7 +423,7 @@
                     {% include "dojo/paging_snippet.html" with page=findings page_size=True%}
                 </div>
             {% else %}
-                <div id="no_findings"><p class="text-center">No findings found.</p></div>                
+                <div id="no_findings"><p class="text-center">No findings found.</p></div>
             {% endif %}
         </div>
     </div>
@@ -489,11 +494,11 @@
                 drawCallback: function(){
                       $('.has-popover').popover({'trigger':'hover'});
                 },
-                colReorder: true,                
+                colReorder: true,
                 "columns": columns,
                 order: [],
                 columnDefs: [
-                    { 
+                    {
                         "orderable": false,
                         "targets": [0, 1]
                     },

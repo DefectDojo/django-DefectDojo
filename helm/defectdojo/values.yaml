@@ -24,6 +24,7 @@ repositoryPrefix: defectdojo
 tag: latest
 
 securityContext:
+  enabled: true
   djangoSecurityContext:
     # django dockerfile sets USER=1001
     runAsUser: 1001
@@ -191,6 +192,24 @@ postgresql:
     enabled: false
   service:
     port: 5432
+  securityContext:
+    # Default is tue for K8s. Enabled needs to false for OpenShift restricted SCC and true for anyuid SCC
+    enabled: true
+    # fsGroup specification below is not applied if enabled=false. enabled=false is the required setting for OpenShift "restricted SCC" to work successfully.
+    fsGroup: 1001
+  containerSecurityContext:
+    # Default is tue for K8s. Enabled needs to false for OpenShift restricted SCC and true for anyuid SCC
+    enabled: true
+    # runAsUser specification below is not applied if enabled=false. enabled=false is the required setting for OpenShift "restricted SCC" to work successfully.
+    runAsUser: 1001
+  volumePermissions:
+    enabled: true
+    # if using restricted SCC set runAsUser: "auto" and if running under anyuid SCC - runAsUser needs to match the line above
+    securityContext:
+      runAsUser: 1001
+  shmVolume:
+    chmod:
+      enabled: false
 
   # To use an external PostgreSQL instance, set enabled to false and uncomment
   # the line below:
@@ -244,6 +263,10 @@ rabbitmq:
     limits:
       cpu: 500m
       memory: 512Mi
+  podSecurityContext:
+    enabled: true
+    fsGroup: 1001
+    runAsUser: 1001
 
 redis:
   enabled: false

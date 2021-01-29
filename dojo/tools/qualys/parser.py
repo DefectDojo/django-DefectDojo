@@ -9,9 +9,10 @@
 
 import argparse
 import csv
-import logging
 import datetime
-from dojo.models import Finding, Endpoint
+import logging
+
+from dojo.models import Endpoint, Finding
 
 logger = logging.getLogger(__name__)
 ################################################################
@@ -208,7 +209,7 @@ def issue_r(raw_row, vuln):
                               references=refs,
                               impact=_temp['IMPACT'],
                               date=_temp['date'],
-                              unique_id_from_tool=_gid,
+                              vuln_id_from_tool=_gid,
                               )
 
         else:
@@ -219,7 +220,7 @@ def issue_r(raw_row, vuln):
                               references=_gid,
                               impact=_temp['IMPACT'],
                               date=_temp['date'],
-                              unique_id_from_tool=_gid,
+                              vuln_id_from_tool=_gid,
                               )
         finding.mitigated = _temp['mitigation_date']
         finding.is_Mitigated = _temp['mitigated']
@@ -268,5 +269,5 @@ if __name__ == "__main__":
 
 
 class QualysParser(object):
-    def __init__(self, file, test):
+    def get_findings(self, file, test):
         self.items = qualys_parser(file)

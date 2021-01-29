@@ -134,10 +134,11 @@ class DependencyTrackParser(object):
         else:
             component_version = None
         if component_version is not None:
-            version_description = 'version {component_version} of '.format(component_version=component_version)
+            version_description = component_version
         else:
             version_description = ''
-        title = "Vulnerability Id {vuln_id} from {source} affecting {version_description}the {component_name} component"\
+
+        title = "{component_name}:{version_description} affected by: {vuln_id} ({source})"\
             .format(vuln_id=vuln_id, source=source, version_description=version_description, component_name=component_name)
 
         # The vulnId is not always a CVE (e.g. if the vulnerability is not from the NVD source)
@@ -165,6 +166,14 @@ class DependencyTrackParser(object):
         if 'purl' in dependency_track_finding['component'] and dependency_track_finding['component']['purl'] is not None:
             component_purl = dependency_track_finding['component']['purl']
             vulnerability_description = vulnerability_description + "\nThe purl of the affected component is: {purl}.".format(purl=component_purl)
+            # there is no file_path in the report, but defect dojo needs it otherwise it skips deduplication:
+            # see https://github.com/DefectDojo/django-DefectDojo/issues/3647
+            # might be no longer needed in the future, and is not needed if people use the default
+            # hash code dedupe config for this parser
+            file_path = component_purl
+        else:
+            file_path = 'unknown'
+
         # Append other info about vulnerability description info if it is present
         if 'title' in dependency_track_finding['vulnerability'] and dependency_track_finding['vulnerability']['title'] is not None:
             vulnerability_description = vulnerability_description + "\nVulnerability Title: {title}".format(title=dependency_track_finding['vulnerability']['title'])
@@ -172,6 +181,8 @@ class DependencyTrackParser(object):
             vulnerability_description = vulnerability_description + "\nVulnerability Subtitle: {subtitle}".format(subtitle=dependency_track_finding['vulnerability']['subtitle'])
         if 'description' in dependency_track_finding['vulnerability'] and dependency_track_finding['vulnerability']['description'] is not None:
             vulnerability_description = vulnerability_description + "\nVulnerability Description: {description}".format(description=dependency_track_finding['vulnerability']['description'])
+        if 'uuid' in dependency_track_finding['vulnerability'] and dependency_track_finding['vulnerability']['uuid'] is not None:
+            vuln_id_from_tool = dependency_track_finding['vulnerability']['uuid']
 
         # Get severity according to Dependency Track and convert it to a severity DefectDojo understands
         dependency_track_severity = dependency_track_finding['vulnerability']['severity']
@@ -198,36 +209,35 @@ class DependencyTrackParser(object):
             false_p=is_false_positive,
             component_name=component_name,
             component_version=component_version,
+            file_path=file_path,
+            vuln_id_from_tool=vuln_id_from_tool,
             static_finding=True,
             dynamic_finding=False)
 
-    def __init__(self, file, test):
-        # Start with an empty list of findings
-        self.items = []
+    def get_findings(self, file, test):
 
         # Exit if file is not provided
         if file is None:
-            return
+            return list()
 
         # Load the contents of the JSON file into a dictionary
+        data = file.read()
         try:
-            data = file.read()
-            try:
-                findings_export_dict = json.loads(str(data, 'utf-8'))
-            except:
-                findings_export_dict = json.loads(data)
+            findings_export_dict = json.loads(str(data, 'utf-8'))
         except:
-            logger.exception("Invalid file format!")
-            raise
+            findings_export_dict = json.loads(data)
 
         # Exit if file is an empty JSON dictionary
         if len(findings_export_dict.keys()) == 0:
-            return
+            return list()
 
         # Make sure the findings key exists in the dictionary and that it is not null or an empty list
         # If it is null or an empty list then exit
         if 'findings' not in findings_export_dict or not findings_export_dict['findings']:
-            return
+            return list()
+
+        # Start with an empty list of findings
+        items = list()
 
         # If we have gotten this far then there should be one or more findings
         # Loop through each finding from Dependency Track
@@ -236,4 +246,5 @@ class DependencyTrackParser(object):
             dojo_finding = self._convert_dependency_track_finding_to_dojo_finding(dependency_track_finding, test)
 
             # Append DefectDojo finding to list
-            self.items.append(dojo_finding)
+            items.append(dojo_finding)
+        return items

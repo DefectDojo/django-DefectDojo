@@ -57,7 +57,6 @@ def simple_search(request):
     if request.method == 'GET':
         form = SimpleSearchForm(request.GET)
         if form.is_valid():
-            # logger.debug('form vars: %s', vars(form))
             cookie = True
 
             clean_query = form.cleaned_data['query'] or ''
@@ -468,13 +467,11 @@ def apply_tag_filters(qs, operators, skip_relations=False):
         if tag_filter in operators:
             value = operators[tag_filter]
             value = ','.join(value)  # contains needs a single value
-            print('adding filter: ' + str('%stags__name__contains' % tag_filters[tag_filter]))
             qs = qs.filter(**{'%stags__name__contains' % tag_filters[tag_filter]: value})
 
     for tag_filter in tag_filters:
         if tag_filter + 's' in operators:
             value = operators[tag_filter + 's']
-            print('adding filter: ' + str('%stags__name__contains' % tag_filters[tag_filter]))
             qs = qs.filter(**{'%stags__name__in' % tag_filters[tag_filter]: value})
 
     return qs

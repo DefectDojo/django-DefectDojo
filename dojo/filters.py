@@ -5,14 +5,14 @@ from datetime import timedelta, datetime
 from django.apps import apps
 from auditlog.models import LogEntry
 from django.contrib.auth.models import User
-from django.utils import six
+import six
 from django.utils.translation import ugettext_lazy as _
 from django_filters import FilterSet, CharFilter, OrderingFilter, \
     ModelMultipleChoiceFilter, ModelChoiceFilter, MultipleChoiceFilter, \
     BooleanFilter, NumberFilter, DateFilter
 from django_filters import rest_framework as filters
 from django_filters.filters import ChoiceFilter, _truncate, DateTimeFilter
-from pytz import timezone
+import pytz
 from django.db.models import Q
 from dojo.models import Dojo_User, Product_Type, Finding, Product, Test_Type, \
     Endpoint, Development_Environment, Finding_Template, Report, Note_Type, \
@@ -27,7 +27,7 @@ from crum import get_current_user
 
 logger = logging.getLogger(__name__)
 
-local_tz = timezone(get_system_setting('time_zone'))
+local_tz = pytz.timezone(get_system_setting('time_zone'))
 
 SEVERITY_CHOICES = (('Info', 'Info'), ('Low', 'Low'), ('Medium', 'Medium'),
                     ('High', 'High'), ('Critical', 'Critical'))
@@ -72,11 +72,6 @@ class DojoFilter(FilterSet):
         # for now we have only fields called "tags"
         for field in ['tags', 'test__tags', 'test__engagement__tags', 'test__engagement__product__tags']:
             if field in self.form.fields:
-                # print(self.filters)
-                # print(vars(self).keys())
-                # print(vars(self.filters['tags']))
-                # print(self._meta)
-
                 tags_filter = self.filters['tags']
                 model = tags_filter.model
 
@@ -200,19 +195,28 @@ class ReportBooleanFilter(ChoiceFilter):
 
 
 class ReportRiskAcceptanceFilter(ChoiceFilter):
+
     def any(self, qs, name):
         return qs.all()
 
     def accepted(self, qs, name):
-        return qs.filter(risk_acceptance__isnull=False)
+        # return qs.filter(risk_acceptance__isnull=False)
+        from dojo.finding.views import ACCEPTED_FINDINGS_QUERY
+        return qs.filter(ACCEPTED_FINDINGS_QUERY)
 
     def not_accepted(self, qs, name):
-        return qs.filter(risk_acceptance__isnull=True)
+        from dojo.finding.views import NOT_ACCEPTED_FINDINGS_QUERY
+        return qs.filter(NOT_ACCEPTED_FINDINGS_QUERY)
+
+    def was_accepted(self, qs, name):
+        from dojo.finding.views import WAS_ACCEPTED_FINDINGS_QUERY
+        return qs.filter(WAS_ACCEPTED_FINDINGS_QUERY)
 
     options = {
         '': (_('Either'), any),
         1: (_('Yes'), accepted),
         2: (_('No'), not_accepted),
+        3: (_('Was'), was_accepted),
     }
 
     def __init__(self, *args, **kwargs):
@@ -335,12 +339,12 @@ class ProductComponentFilter(DojoFilter):
 
 
 class ComponentFilter(ProductComponentFilter):
-    test__engagement__product = ModelMultipleChoiceFilter(
-        queryset=Product.objects.all(),
-        label="Product Type")
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.all().order_by('name'),
         label="Product Type")
+    test__engagement__product = ModelMultipleChoiceFilter(
+        queryset=Product.objects.all(),
+        label="Product")
 
 
 class EngagementFilter(DojoFilter):
@@ -348,6 +352,9 @@ class EngagementFilter(DojoFilter):
         queryset=User.objects.filter(
             engagement__lead__isnull=False).distinct(),
         label="Lead")
+    engagement__version = CharFilter(field_name='engagement__version', lookup_expr='icontains', label='Engagement version')
+    engagement__test__version = CharFilter(field_name='engagement__test__version', lookup_expr='icontains', label='Test version')
+
     name = CharFilter(lookup_expr='icontains')
     prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.all().order_by('name'),
@@ -518,28 +525,10 @@ class ProductFilter(DojoFilter):
                 'prod_type'].queryset = Product_Type.objects.filter(
                 authorized_users__in=[self.user])
 
-        # for field in ['tags', 'tags_and']:
-        #     self.form.fields[field] = Product._meta.get_field("tags").formfield()
-        #     self.form.fields[field].widget.attrs.update({'style': 'width=150px;'})
-        #     self.form.fields[field].widget.tag_options = \
-        #         self.form.fields[field].widget.tag_options + tagulous.models.options.TagOptions(autocomplete_settings={'width': '200px'})
-        # self.form.fields['tags_and'].label = self.form.fields['tags_and'].label + ' (and)'
-        # print(vars(self.form.fields[field].widget.tag_options))
-        # print(vars(self.form.fields[field]))
-
     class Meta:
         model = Product
         fields = ['name', 'prod_type', 'business_criticality', 'platform', 'lifecycle', 'origin', 'external_audience',
                   'internet_accessible', 'tags']
-        # exclude = ['tags']
-        # filter_overrides = {
-        #     tagulous.models.TagField: {
-        #         'filter_class': ModelMultipleChoiceFilter,
-        #         'extra': lambda f: {
-        #              'widget': tagulous.forms.TagWidget,
-        #         },
-        #     },
-        # }
 
 
 class ApiProductFilter(DojoFilter):
@@ -704,7 +693,7 @@ class ApiFindingFilter(DojoFilter):
 
     class Meta:
         model = Finding
-        exclude = ['url', 'is_template', 'thread_id', 'notes', 'images',
+        exclude = ['url', 'is_template', 'thread_id', 'notes', 'images', 'files',
                    'sourcefile', 'line', 'endpoint_status', 'tags_from_django_tagging']
 
 
@@ -734,6 +723,11 @@ class OpenFindingFilter(DojoFilter):
                                 lookup_expr='isnull',
                                 exclude=True,
                                 label='has JIRA')
+
+    has_component = BooleanFilter(field_name='component_name',
+                                lookup_expr='isnull',
+                                exclude=True,
+                                label='has Component')
 
     jira_issue__jira_key = CharFilter(field_name='jira_issue__jira_key', lookup_expr='icontains', label="JIRA issue")
 
@@ -793,7 +787,7 @@ class OpenFindingFilter(DojoFilter):
                    'duplicate_finding', 'hash_code', 'images', 'endpoint_status',
                    'line_number', 'reviewers', 'mitigated_by', 'sourcefile',
                    'created', 'jira_creation', 'jira_change', 'tags_from_django_tagging',
-                   'tags']
+                   'tags', 'files']
 
     def __init__(self, *args, **kwargs):
         self.user = None
@@ -911,7 +905,7 @@ class ClosedFindingFilter(DojoFilter):
                    'numerical_severity', 'reporter', 'endpoints', 'endpoint_status',
                    'last_reviewed', 'review_requested_by', 'defect_review_requested_by',
                    'last_reviewed_by', 'created', 'jira_creation', 'jira_change',
-                   'tags_from_django_tagging']
+                   'tags_from_django_tagging', 'files']
 
     def __init__(self, *args, **kwargs):
         self.pid = None
@@ -1003,7 +997,7 @@ class AcceptedFindingFilter(DojoFilter):
                    'duplicate', 'duplicate_finding', 'thread_id', 'mitigated', 'notes',
                    'numerical_severity', 'reporter', 'endpoints', 'endpoint_status',
                    'last_reviewed', 'o', 'jira_creation', 'jira_change',
-                   'tags_from_django_tagging']
+                   'tags_from_django_tagging', 'files']
 
     def __init__(self, *args, **kwargs):
         self.pid = None
@@ -1082,7 +1076,7 @@ class ProductFindingFilter(DojoFilter):
                    'duplicate_finding', 'thread_id', 'mitigated', 'notes',
                    'numerical_severity', 'reporter', 'endpoints', 'endpoint_status',
                    'last_reviewed', 'jira_creation', 'jira_change',
-                   'tags_from_django_tagging']
+                   'tags_from_django_tagging', 'files']
 
     def __init__(self, *args, **kwargs):
         super(ProductFindingFilter, self).__init__(*args, **kwargs)
@@ -1393,7 +1387,8 @@ class MetricsFindingFilter(FilterSet):
                    'is_template',
                    'jira_creation',
                    'jira_change',
-                   'tags_from_django_tagging'
+                   'tags_from_django_tagging',
+                   'files'
                    ]
 
 
@@ -1508,7 +1503,8 @@ class ProductMetricsFindingFilter(FilterSet):
                    'is_template',
                    'jira_creation',
                    'jira_change',
-                   'tags_from_django_tagging'
+                   'tags_from_django_tagging',
+                   'files',
                    ]
 
 
@@ -1607,7 +1603,7 @@ class ApiTestFilter(DojoFilter):
         model = Test
         fields = ['id', 'title', 'test_type', 'target_start',
                      'target_end', 'notes', 'percent_complete',
-                     'actual_time', 'engagement']
+                     'actual_time', 'engagement', 'version']
 
 
 class ApiAppAnalysisFilter(DojoFilter):

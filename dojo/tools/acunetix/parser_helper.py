@@ -1,10 +1,11 @@
 import logging
-from lxml import etree
-from lxml.etree import XMLSyntaxError
-from .parser_models import AcunetixScanReport
-from .parser_models import DefectDojoFinding
+
 # from memory_profiler import profile #Comment out this and profile in defectdojo repo
 import html2text
+from lxml import etree
+from lxml.etree import XMLSyntaxError
+
+from .parser_models import AcunetixScanReport, DefectDojoFinding
 
 SCAN_NODE_TAG_NAME = "Scan"
 ACUNETIX_XML_SCAN_IGNORE_NODES = ['Technologies', 'Crawler']
