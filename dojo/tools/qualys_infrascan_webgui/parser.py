@@ -9,7 +9,8 @@ __author__ = "Dennis Van Elst"
 import argparse
 import csv
 import logging
-from dojo.models import Finding, Endpoint
+
+from dojo.models import Endpoint, Finding
 
 logger = logging.getLogger(__name__)
 
@@ -209,5 +210,5 @@ if __name__ == "__main__":
 
 # still need to import this in Dojo
 class QualysInfraScanParser(object):
-    def __init__(self, file, test):
-        self.items = qualys_infrascan_parser(file)
+    def get_findings(self, file, test):
+        return qualys_infrascan_parser(file)

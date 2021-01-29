@@ -58,7 +58,7 @@
                             {% if system_settings.enable_github %}
                             <th class="text-center">GitHub</th>
                             {% endif %}
-                            <th class="text-center"> Findings</th>
+                            <th class="text-center"> Active (Verified) Findings</th>
                             <th class="text-center"> Endpoints</th>
                             <th> Contact</th>
                             <th>{% dojo_sort request 'Product Type' 'prod_type__name' %}</th>
@@ -197,7 +197,7 @@
                                     <i style="position:absolute;" class="fa fa-calendar happy-green-color has-popover" title="<i class='fa fa-bullseye'></i> <b>Engagements</b>" data-trigger="hover" data-placement="bottom" data-container="body" data-html="true"
                                     data-content="{{ prod.active_engagement_count }} Active,
                                     {{ prod.closed_engagement_count }} Closed<br>
-                                    <b>Last Assessed:</b> {{ prod.last_engagement_date.target_end }}"></i>
+                                    <b>Last Assessed:</b> {{ prod.last_engagement_date }}"></i>
                                   {% else %}
                                     <i class="fa fa-calendar text-danger has-popover" title="<i class='fa fa-bullseye'></i> <b>Engagements</b>" data-trigger="hover" data-container="body" data-placement="bottom" data-html="true"
                                     data-content="No Engagements Exist"></i>
@@ -226,6 +226,7 @@
                                 <td class="text-center">
                                     {% if prod.findings_count %}
                                         <a href="{% url 'product_open_findings' prod.id %}?test__engagement__product={{ prod.id }}"><b>{{ prod.findings_count }}</b></a>
+                                        &nbsp;(<a href="{% url 'product_verified_findings' prod.id %}?test__engagement__product={{ prod.id }}">{{ prod.findings_active_verified_count }}</a>)
                                     {% else %}
                                         0
                                     {% endif %}
@@ -345,7 +346,7 @@
                 ],
                 order: [],
                 columnDefs: [
-                    { 
+                    {
                         "orderable": false,
                         "targets": [0]
                     },

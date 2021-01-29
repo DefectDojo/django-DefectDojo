@@ -1,5 +1,3 @@
-# # endpoints
-
 import logging
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
@@ -18,10 +16,10 @@ from dojo.filters import EndpointFilter
 from dojo.forms import EditEndpointForm, \
     DeleteEndpointForm, AddEndpointForm, DojoMetaDataForm
 from dojo.models import Product, Endpoint, Finding, System_Settings, DojoMeta, Endpoint_Status
-from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, get_system_setting, Product_Tab, calculate_grade
+from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, get_system_setting, Product_Tab, \
+    calculate_grade, redirect
 from dojo.notifications.helper import create_notification
 from dojo.user.helper import user_must_be_authorized
-
 
 logger = logging.getLogger(__name__)
 
@@ -200,7 +198,6 @@ def edit_endpoint(request, eid):
     else:
         add_breadcrumb(parent=endpoint, title="Edit", top_level=False, request=request)
         form = EditEndpointForm(instance=endpoint)
-        # form.initial['tags'] = [tag.name for tag in endpoint.tags.all()]
 
     product_tab = Product_Tab(endpoint.product.id, "Endpoint", tab="endpoints")
 
@@ -254,8 +251,6 @@ def delete_endpoint(request, eid):
 def add_endpoint(request, pid):
     product = get_object_or_404(Product, id=pid)
     template = 'dojo/add_endpoint.html'
-    if '_popup' in request.GET:
-        template = 'dojo/add_related.html'
 
     form = AddEndpointForm(product=product)
     if request.method == 'POST':
@@ -441,7 +436,7 @@ def endpoint_status_bulk_update(request, fid):
                                     messages.ERROR,
                                     'Unable to process bulk update. Required fields were not selected.',
                                     extra_tags='alert-danger')
-    return HttpResponseRedirect(post['return_url'])
+    return redirect(request, post['return_url'])
 
 
 def prefetch_for_endpoints(endpoints):

@@ -1,21 +1,18 @@
 from xml.dom import NamespaceErr
+
 import lxml.etree as le
+
 from dojo.models import Endpoint, Finding
 
 __author__ = 'patriknordlen'
 
 
 class NmapXMLParser(object):
-    def __init__(self, file, test):
-        self.dupes = dict()
-        self.items = ()
-        if file is None:
-            return
-
+    def get_findings(self, file, test):
         parser = le.XMLParser(resolve_entities=False)
         nmap_scan = le.parse(file, parser)
         root = nmap_scan.getroot()
-
+        dupes = dict()
         if 'nmaprun' not in root.tag:
             raise NamespaceErr("This doesn't seem to be a valid Nmap xml file.")
 
@@ -66,8 +63,8 @@ class NmapXMLParser(object):
 
                 severity = "Info"
                 dupe_key = port
-                if dupe_key in self.dupes:
-                    find = self.dupes[dupe_key]
+                if dupe_key in dupes:
+                    find = dupes[dupe_key]
                     if description is not None:
                         find.description += description
                 else:
@@ -79,7 +76,7 @@ class NmapXMLParser(object):
                                    severity=severity,
                                    numerical_severity=Finding.get_numerical_severity(severity))
                     find.unsaved_endpoints = list()
-                    self.dupes[dupe_key] = find
+                    dupes[dupe_key] = find
 
                 find.unsaved_endpoints.append(Endpoint(host=ip, fqdn=fqdn, port=port, protocol=protocol))
-        self.items = list(self.dupes.values())
+        return list(dupes.values())

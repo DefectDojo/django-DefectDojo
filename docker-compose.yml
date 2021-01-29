@@ -91,7 +91,7 @@ services:
           source: ./docker/extra_settings
           target: /app/docker/extra_settings
   mysql:
-    image: mysql:5.7.32@sha256:b3b2703de646600b008cbb2de36b70b21e51e7e93a7fca450d2b08151658b2dd
+    image: mysql:5.7.33@sha256:b3d1eff023f698cd433695c9506171f0d08a8f92a0c8063c1a4d9db9a55808df
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
       DD_DATABASE_URL: ${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}
@@ -102,6 +102,6 @@ services:
     volumes:
        - defectdojo_data:/var/lib/mysql
   rabbitmq:
-    image: rabbitmq:3.8.9@sha256:1142acbc5466d5517921b6fa630d719baf18c1c7134245e53d640e000e719d84
+    image: rabbitmq:3.8.11@sha256:52e73c649b3ef628fb2b0dafd5b043c0b397bd188a0326a6514d37662d84b425
 volumes:
   defectdojo_data: {}

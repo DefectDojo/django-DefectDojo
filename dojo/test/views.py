@@ -1,5 +1,4 @@
 # #  tests
-
 import logging
 import operator
 import json
@@ -28,7 +27,7 @@ from dojo.forms import NoteForm, TestForm, FindingForm, \
     FindingBulkUpdateForm
 from dojo.models import Finding, Test, Notes, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, \
     Finding_Template, Cred_Mapping, Dojo_User, System_Settings, Endpoint_Status
-from dojo.tools.factory import import_parser_factory
+from dojo.tools.factory import import_parser_factory, get_choices
 from dojo.utils import get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting, \
     Product_Tab, max_safe, is_scan_file_too_large, get_words_for_field
 from dojo.notifications.helper import create_notification
@@ -36,10 +35,12 @@ from dojo.finding.views import find_available_notetypes
 from functools import reduce
 from dojo.user.helper import user_must_be_authorized
 import dojo.jira_link.helper as jira_helper
-
+import dojo.finding.helper as finding_helper
+from django.views.decorators.vary import vary_on_cookie
 
 logger = logging.getLogger(__name__)
 parse_logger = logging.getLogger('dojo')
+deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 
 @user_must_be_authorized(Test, 'view', 'tid')
@@ -50,6 +51,7 @@ def view_test(request, tid):
     note_type_activation = Note_Type.objects.filter(is_active=True).count()
     if note_type_activation:
         available_note_types = find_available_notetypes(notes)
+    files = test.files.all()
     person = request.user.username
     findings = Finding.objects.filter(test=test).order_by('numerical_severity')
     findings = OpenFindingFilter(request.GET, queryset=findings)
@@ -90,7 +92,7 @@ def view_test(request, tid):
 
     paged_findings, total_findings_count = get_page_items_and_count(request, prefetch_for_findings(findings.qs), 25)
     paged_stub_findings = get_page_items(request, stub_findings, 25)
-    show_re_upload = any(test.test_type.name in code for code in ImportScanForm.SCAN_TYPE_CHOICES)
+    show_re_upload = any(test.test_type.name in code for code in ImportScanForm.SORTED_SCAN_TYPE_CHOICES)
 
     product_tab = Product_Tab(prod.id, title="Test", tab="engagements")
     product_tab.setEngagement(test.engagement)
@@ -144,6 +146,7 @@ def view_test(request, tid):
                    'component_words': component_words,
                    'form': form,
                    'notes': notes,
+                   'files': files,
                    'person': person,
                    'request': request,
                    'show_re_upload': show_re_upload,
@@ -199,7 +202,6 @@ def edit_test(request, tid):
 
     form.initial['target_start'] = test.target_start.date()
     form.initial['target_end'] = test.target_end.date()
-    # form.initial['tags'] = [tag.name for tag in test.tags.all()]
     form.initial['description'] = test.description
 
     product_tab = Product_Tab(test.engagement.product.id, title="Edit Test", tab="engagements")
@@ -252,6 +254,7 @@ def delete_test(request, tid):
 
 @user_passes_test(lambda u: u.is_staff)
 @cache_page(60 * 5)  # cache for 5 minutes
+@vary_on_cookie
 def test_calendar(request):
     if 'lead' not in request.GET or '0' in request.GET.getlist('lead'):
         tests = Test.objects.all()
@@ -263,6 +266,9 @@ def test_calendar(request):
             filters.append(Q(lead__isnull=True))
         filters.append(Q(lead__in=leads))
         tests = Test.objects.filter(reduce(operator.or_, filters))
+
+    tests = tests.prefetch_related('test_type', 'lead', 'engagement__product')
+
     add_breadcrumb(title="Test Calendar", top_level=True, request=request)
     return render(request, 'dojo/calendar.html', {
         'caltype': 'tests',
@@ -348,10 +354,7 @@ def add_findings(request, tid):
             new_finding.reporter = request.user
             new_finding.numerical_severity = Finding.get_numerical_severity(
                 new_finding.severity)
-            if new_finding.false_p or new_finding.active is False:
-                new_finding.mitigated = timezone.now()
-                new_finding.mitigated_by = request.user
-                new_finding.is_Mitigated = True
+            finding_helper.update_finding_status(new_finding, request.user)
             create_template = new_finding.is_template
             # always false now since this will be deprecated soon in favor of new Finding_Template model
             new_finding.is_template = False
@@ -506,10 +509,7 @@ def add_temp_finding(request, tid, fid):
             new_finding.numerical_severity = Finding.get_numerical_severity(
                 new_finding.severity)
             new_finding.date = datetime.today()
-            if new_finding.false_p or new_finding.active is False:
-                new_finding.mitigated = timezone.now()
-                new_finding.mitigated_by = request.user
-                new_finding.is_Mitigated = True
+            finding_helper.update_finding_status(new_finding, request.user)
 
             create_template = new_finding.is_template
             # is template always False now in favor of new model Finding_Template
@@ -623,7 +623,7 @@ def re_import_scan_results(request, tid):
     test = get_object_or_404(Test, id=tid)
     scan_type = test.test_type.name
     engagement = test.engagement
-    form = ReImportScanForm()
+    form = ReImportScanForm(test=test)
     jform = None
     jira_project = jira_helper.get_jira_project(test)
     push_all_jira_issues = jira_helper.is_push_all_issues(test)
@@ -632,12 +632,10 @@ def re_import_scan_results(request, tid):
     if get_system_setting('enable_jira') and jira_project:
         jform = JIRAImportScanForm(push_all=push_all_jira_issues, prefix='jiraform')
 
-    # form.initial['tags'] = [tag.name for tag in test.tags.all()]
     if request.method == "POST":
-        form = ReImportScanForm(request.POST, request.FILES)
+        form = ReImportScanForm(request.POST, request.FILES, test=test)
         if jira_project:
             jform = JIRAImportScanForm(request.POST, push_all=push_all_jira_issues, prefix='jiraform')
-
         if form.is_valid() and (jform is None or jform.is_valid()):
             scan_date = form.cleaned_data['scan_date']
 
@@ -647,10 +645,10 @@ def re_import_scan_results(request, tid):
 
             min_sev = form.cleaned_data['minimum_severity']
             file = request.FILES.get('file', None)
-            scan_type = test.test_type.name
             active = form.cleaned_data['active']
             verified = form.cleaned_data['verified']
             tags = form.cleaned_data['tags']
+            close_old_findings = form.cleaned_data.get('close_old_findings', True)
             # Tags are replaced, same behaviour as with django-tagging
             test.tags = tags
             if file and is_scan_file_too_large(file):
@@ -661,7 +659,8 @@ def re_import_scan_results(request, tid):
                 return HttpResponseRedirect(reverse('re_import_scan_results', args=(test.id,)))
 
             try:
-                parser = import_parser_factory(file, test, active, verified)
+                parser = import_parser_factory(file, test, active, verified, scan_type=scan_type)
+                parser_findings = parser.get_findings(file, test)
             except ValueError:
                 raise Http404()
             except Exception as e:
@@ -675,8 +674,8 @@ def re_import_scan_results(request, tid):
                 return HttpResponseRedirect(reverse('re_import_scan_results', args=(test.id,)))
 
             try:
-                items = parser.items
-                original_items = test.finding_set.all().values_list("id", flat=True)
+                items = parser_findings
+                original_items = list(test.finding_set.all())
                 new_items = []
                 mitigated_count = 0
                 finding_count = 0
@@ -690,8 +689,9 @@ def re_import_scan_results(request, tid):
                 # push_to_jira = jira_helper.is_push_to_jira(new_finding, jform.cleaned_data.get('push_to_jira'))
                 push_to_jira = push_all_jira_issues or (jform and jform.cleaned_data.get('push_to_jira'))
 
+                logger.debug('starting reimport of %i items.', len(items))
+                i = 0
                 for item in items:
-
                     sev = item.severity
                     if sev == 'Information' or sev == 'Informational':
                         sev = 'Info'
@@ -711,21 +711,40 @@ def re_import_scan_results(request, tid):
                     from titlecase import titlecase
                     item.title = titlecase(item.title)
                     if scan_type == 'Veracode Scan' or scan_type == 'Arachni Scan':
-                        finding = Finding.objects.filter(title=item.title,
+                        findings = Finding.objects.filter(title=item.title,
                                                         test__id=test.id,
                                                         severity=sev,
                                                         numerical_severity=Finding.get_numerical_severity(sev),
                                                         description=item.description)
 
                     else:
-                        finding = Finding.objects.filter(title=item.title,
+                        findings = Finding.objects.filter(title=item.title,
                                                       test__id=test.id,
                                                       severity=sev,
                                                       numerical_severity=Finding.get_numerical_severity(sev))
 
-                    if len(finding) == 1:
-                        finding = finding[0]
+                    # some parsers generate 1 finding for each vulnerable file for each vulnerability
+                    # i.e
+                    # #: title                     : sev : file_path
+                    # 1: CVE-2020-1234 jquery      : 1   : /file1.jar
+                    # 2: CVE-2020-1234 jquery      : 1   : /file2.jar
+                    #
+                    # if we don't filter on file_path, we would find 2 existing findings
+                    # and the logic below will get confused and map all incoming findings
+                    # from the reimport on the first finding
+                    #
+                    # for Anchore we fix this here, we may need a broader fix (and testcases)
+                    # or we may need to change the matching logic here to use the same logic
+                    # as the deduplication logic (hashcode fields)
+
+                    if scan_type == 'Anchore Engine Scan':
+                        if item.file_path:
+                            findings = findings.filter(file_path=item.file_path)
+
+                    if findings:
+                        finding = findings[0]
                         if finding.mitigated or finding.is_Mitigated:
+                            logger.debug('%i: reactivating: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
                             # it was once fixed, but now back
                             finding.mitigated = None
                             finding.is_Mitigated = False
@@ -737,7 +756,8 @@ def re_import_scan_results(request, tid):
                             finding.component_name = finding.component_name if finding.component_name else component_name
                             finding.component_version = finding.component_version if finding.component_version else component_version
 
-                            finding.save()
+                            # don't run dedupe when reactivating
+                            finding.save(dedupe_option=False)
                             note = Notes(
                                 entry="Re-activated by %s re-upload." % scan_type,
                                 author=request.user)
@@ -756,10 +776,11 @@ def re_import_scan_results(request, tid):
                             reactivated_count += 1
                         else:
                             # existing findings may be from before we had component_name/version fields
+                            logger.debug('%i: updating existing finding: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
                             if not finding.component_name or not finding.component_version:
                                 finding.component_name = finding.component_name if finding.component_name else component_name
                                 finding.component_version = finding.component_version if finding.component_version else component_version
-                                finding.save(dedupe_option=False, push_to_jira=False)
+                                finding.save(dedupe_option=False)
                             unchanged_items.append(finding)
                             unchanged_count += 1
 
@@ -771,11 +792,13 @@ def re_import_scan_results(request, tid):
                         item.verified = verified
                         item.active = active
 
-                        # Save it
+                        # Save it. Don't dedupe before endpoints are added.
                         item.save(dedupe_option=False)
+                        logger.debug('%i: creating new finding: %i:%s:%s:%s', i, item.id, item, item.component_name, item.component_version)
+                        deduplicationLogger.debug('reimport found multiple identical existing findings for %i, a non-exact match. these are ignored and a new finding has been created', item.id)
                         finding_added_count += 1
                         # Add it to the new items
-                        new_items.append(item.id)
+                        new_items.append(item)
                         finding = item
 
                         if hasattr(item, 'unsaved_req_resp') and len(item.unsaved_req_resp) > 0:
@@ -802,22 +825,27 @@ def re_import_scan_results(request, tid):
                                                              )
                             burp_rr.clean()
                             burp_rr.save()
+
                     if finding:
                         finding_count += 1
                         for endpoint in item.unsaved_endpoints:
-                            ep, created = Endpoint.objects.get_or_create(protocol=endpoint.protocol,
-                                                                         host=endpoint.host,
-                                                                         path=endpoint.path,
-                                                                         query=endpoint.query,
-                                                                         fragment=endpoint.fragment,
-                                                                         product=test.engagement.product)
-                            eps, created = Endpoint_Status.objects.get_or_create(
-                                finding=finding,
-                                endpoint=ep)
-                            ep.endpoint_status.add(eps)
+                            from django.core.exceptions import MultipleObjectsReturned
+                            try:
+                                ep, created = Endpoint.objects.get_or_create(protocol=endpoint.protocol,
+                                                                            host=endpoint.host,
+                                                                            path=endpoint.path,
+                                                                            query=endpoint.query,
+                                                                            fragment=endpoint.fragment,
+                                                                            product=test.engagement.product)
+                                eps, created = Endpoint_Status.objects.get_or_create(
+                                    finding=finding,
+                                    endpoint=ep)
+                                ep.endpoint_status.add(eps)
 
-                            finding.endpoints.add(ep)
-                            finding.endpoint_status.add(eps)
+                                finding.endpoints.add(ep)
+                                finding.endpoint_status.add(eps)
+                            except (MultipleObjectsReturned):
+                                pass
                         for endpoint in form.cleaned_data['endpoints']:
                             ep, created = Endpoint.objects.get_or_create(protocol=endpoint.protocol,
                                                                          host=endpoint.host,
@@ -837,32 +865,37 @@ def re_import_scan_results(request, tid):
 
                     # Save it. This may be the second time we save it in this function.
                     finding.save(push_to_jira=push_to_jira)
+                    i += 1
                 # calculate the difference
                 to_mitigate = set(original_items) - set(reactivated_items) - set(unchanged_items)
                 mitigated_findings = []
-                for finding_id in to_mitigate:
-                    finding = Finding.objects.get(id=finding_id)
-                    if not finding.mitigated or not finding.is_Mitigated:
-                        finding.mitigated = scan_date_time
-                        finding.is_Mitigated = True
-                        finding.mitigated_by = request.user
-                        finding.active = False
+                if close_old_findings:
+                    for finding in to_mitigate:
+                        # finding = Finding.objects.get(id=finding_id)
+                        if not finding.mitigated or not finding.is_Mitigated:
+                            logger.debug('mitigating finding: %i:%s', finding.id, finding)
+                            finding.mitigated = scan_date_time
+                            finding.is_Mitigated = True
+                            finding.mitigated_by = request.user
+                            finding.active = False
 
-                        finding.save()
-                        note = Notes(entry="Mitigated by %s re-upload." % scan_type,
-                                    author=request.user)
-                        note.save()
-                        finding.notes.add(note)
-                        mitigated_findings.append(finding)
-                        mitigated_count += 1
+                            # if we're mitigating a finding, we don't want to run dedupe
+                            # finding.save(push_to_jira=push_to_jira)
+                            finding.save(push_to_jira=push_to_jira, dedupe_option=False)
+                            note = Notes(entry="Mitigated by %s re-upload." % scan_type,
+                                        author=request.user)
+                            note.save()
+                            finding.notes.add(note)
+                            mitigated_findings.append(finding)
+                            mitigated_count += 1
 
-                        endpoint_status = finding.endpoint_status.all()
-                        for status in endpoint_status:
-                            status.mitigated_by = request.user
-                            status.mitigated_time = timezone.now()
-                            status.mitigated = True
-                            status.last_modified = timezone.now()
-                            status.save()
+                            endpoint_status = finding.endpoint_status.all()
+                            for status in endpoint_status:
+                                status.mitigated_by = request.user
+                                status.mitigated_time = timezone.now()
+                                status.mitigated = True
+                                status.last_modified = timezone.now()
+                                status.save()
 
                 untouched = set(unchanged_items) - set(to_mitigate)
 
@@ -905,6 +938,11 @@ def re_import_scan_results(request, tid):
                     create_notification(event='scan_added', title=title, findings_new=new_items, findings_mitigated=mitigated_findings, findings_reactivated=reactivated_items,
                                         finding_count=updated_count, test=test, engagement=test.engagement, product=test.engagement.product, findings_untouched=untouched,
                                         url=reverse('view_test', args=(test.id,)))
+                else:
+                    messages.add_message(request,
+                                         messages.SUCCESS,
+                                         'No findings were added/updated/closed/reactivated as the findings in Defect Dojo are identical to those in the uploaded report.',
+                                         extra_tags='alert-success')
 
                 return HttpResponseRedirect(reverse('view_test', args=(test.id,)))
             except SyntaxError:
@@ -923,4 +961,5 @@ def re_import_scan_results(request, tid):
                    'eid': engagement.id,
                    'additional_message': additional_message,
                    'jform': jform,
+                   'scan_types': get_choices(),
                    })

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load humanize %}
 {% load display_tags %}
-{% load static from staticfiles %}
+{% load static %}
 {% block add_styles %}
     .graph {min-height: 158px;}
     h3 { margin-top: 5px; margin-bottom: 5px; font-size: 20px; line-height: 22px;}
@@ -13,7 +13,7 @@
     <div class="panel panel-default">
         <div class="panel-heading">
             <div class="clearfix">
-                <h4 class="pull-left to_highlight finding-title">
+                <h4 class="pull-left finding-title">
                     {{ endpoint.host_no_port }}
                     {% if endpoint.mitigated %}
                         - Mitigated

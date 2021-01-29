@@ -89,6 +89,9 @@ def get_jira_project(obj, use_inheritance=True):
     if isinstance(obj, JIRA_Project):
         return obj
 
+    if isinstance(obj, JIRA_Issue):
+        return obj.jira_project
+
     if isinstance(obj, Finding):
         finding = obj
         return get_jira_project(finding.test)
@@ -144,13 +147,13 @@ def get_jira_url(obj):
     logger.debug('getting jira url')
 
     # finding + engagement
-    if hasattr(obj, 'has_jira_issue') and obj.has_jira_issue:
-        return get_jira_issue_url(obj)
-    else:
+    issue = get_jira_issue(obj)
+    if issue is not None:
+        return get_jira_issue_url(issue)
+    elif isinstance(obj, Finding):
         # finding must only have url if there is a jira_issue
         # engagement can continue to show url of jiraproject instead of jira issue
-        if isinstance(obj, Finding):
-            return None
+        return None
 
     if isinstance(obj, JIRA_Project):
         return get_jira_project_url(obj)
@@ -158,20 +161,18 @@ def get_jira_url(obj):
     return get_jira_project_url(get_jira_project(obj))
 
 
-def get_jira_issue_url(obj):
+def get_jira_issue_url(issue):
     logger.debug('getting jira issue url')
-    if obj.has_jira_issue:
-        jira_project = get_jira_project(obj)
-        jira_instance = get_jira_instance(obj)
-        if jira_project and jira_instance:
-            # example http://jira.com/browser/SEC-123
-            return jira_project.jira_instance.url + '/browse/' + obj.jira_issue.jira_key
+    jira_project = get_jira_project(issue)
+    jira_instance = get_jira_instance(jira_project)
+    if jira_instance is None:
+        return None
 
-    return None
+    # example http://jira.com/browser/SEC-123
+    return jira_instance.url + '/browse/' + issue.jira_key
 
 
 def get_jira_project_url(obj):
-
     logger.debug('getting jira project url')
     if not isinstance(obj, JIRA_Project):
         jira_project = get_jira_project(obj)
@@ -222,15 +223,19 @@ def get_jira_creation(obj):
 
 
 def get_jira_change(obj):
-    # logger.debug('get_jira_change')
     if isinstance(obj, Finding) or isinstance(obj, Engagement):
-        # logger.debug('get_jira_change2')
         if obj.has_jira_issue:
-            # logger.debug('get_jira_change3')
             return obj.jira_issue.jira_change
     else:
         logger.debug('get_jira_change unsupported object type: %s', obj)
     return None
+
+
+def get_epic_name_field_name(jira_instance):
+    if not jira_instance or not jira_instance.epic_name_id:
+        return None
+
+    return 'customfield_' + str(jira_instance.epic_name_id)
 
 
 def has_jira_issue(obj):
@@ -267,24 +272,27 @@ def get_jira_connection_raw(jira_server, jira_username, jira_password):
         else:
             log_jira_generic_alert('Unknown JIRA Connection Error', e)
 
-        messages.add_message(get_current_request(),
-                            messages.ERROR,
-                            'Unable to authenticate. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + e.text,
-                            extra_tags='alert-danger')
+        add_error_message_to_response('Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + e.message)
         raise e
 
     except requests.exceptions.RequestException as re:
         logger.exception(re)
         log_jira_generic_alert('Unknown JIRA Connection Error', re)
 
-        messages.add_message(get_current_request(),
-                            messages.ERROR,
-                            'Unable to authenticate. Please check the URL, username, password, IP whitelist, Network connection. Details in alert on top right.',
-                            extra_tags='alert-danger')
+        add_error_message_to_response('Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + str(re))
+
         raise re
 
     # except RequestException as re:
     #     logger.exception(re)
+
+
+def add_error_message_to_response(message):
+    if get_current_request():
+        messages.add_message(get_current_request(),
+                            messages.ERROR,
+                            message,
+                            extra_tags='alert-danger')
 
 
 # Gets a connection to a Jira server based on the finding
@@ -470,6 +478,12 @@ def add_jira_issue(find):
             if not meta:
                 meta = get_jira_meta(jira, jira_project)
 
+            epic_name_field = get_epic_name_field_name(jira_instance)
+            if epic_name_field in meta['projects'][0]['issuetypes'][0]['fields']:
+                # epic name is present in this issuetype
+                # epic name is always mandatory in jira, so we populate it
+                fields[epic_name_field] = fields['summary']
+
             if 'priority' in meta['projects'][0]['issuetypes'][0]['fields']:
                 fields['priority'] = {
                                         'name': jira_instance.get_priority(find.severity)
@@ -508,8 +522,6 @@ def add_jira_issue(find):
             issue = jira.issue(new_issue.id)
 
             find.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
-
-            jira_issue_url = get_jira_issue_url(find)
 
             # Upload dojo finding screenshots to Jira
             for pic in find.images.all():
@@ -621,42 +633,10 @@ def update_jira_issue(find):
         log_jira_alert(e.text, find)
         return False
 
-    # This appears to be unreachable.
-    # req_url = jira_instance.url + '/rest/api/latest/issue/' + \
-    #     j_issue.jira_id + '/transitions'
-    # if 'Inactive' in find.status() or 'Mitigated' in find.status(
-    # ) or 'False Positive' in find.status(
-    # ) or 'Out of Scope' in find.status() or 'Duplicate' in find.status():
-    #     # if 'Active' in old_status:
-    #     json_data = {'transition': {'id': jira_instance.close_status_key}}
-    #     r = requests.post(
-    #         url=req_url,
-    #         auth=HTTPBasicAuth(jira_instance.username, jira_instance.password),
-    #         json=json_data)
-    #     if r.status_code != 204:
-    #         logger.warn("JIRA transition failed with error: {}".format(r.text))
-    #     find.jira_issue.jira_change = timezone.now()
-    #     find.jira_issue.save()
-    #     find.save()
-    # elif 'Active' in find.status() and 'Verified' in find.status():
-    #     # if 'Inactive' in old_status:
-    #     json_data = {'transition': {'id': jira_instance.open_status_key}}
-    #     r = requests.post(
-    #         url=req_url,
-    #         auth=HTTPBasicAuth(jira_instance.username, jira_instance.password),
-    #         json=json_data)
-    #     if r.status_code != 204:
-    #         logger.warn("JIRA transition failed with error: {}".format(r.text))
-    #     find.jira_issue.jira_change = timezone.now()
-    #     find.jira_issue.save()
-    #     find.save()
-
 
 # gets the metadata for the default issue type in this jira project
 def get_jira_meta(jira, jira_project):
     meta = jira.createmeta(projectKeys=jira_project.project_key, issuetypeNames=jira_project.jira_instance.default_issue_type, expand="projects.issuetypes.fields")
-    # logger.debug("get_jira_meta: %s", json.dumps(meta, indent=4))  # this is None safe
-    # meta['projects'][0]['issuetypes'][0]['fields']:
 
     meta_data_error = False
     if len(meta['projects']) == 0:
@@ -696,10 +676,8 @@ def get_jira_meta(jira, jira_project):
         logger.warn(message)
         logger.warn("get_jira_meta: %s", json.dumps(meta, indent=4))  # this is None safe
 
-        messages.add_message(get_current_request(),
-                            messages.ERROR,
-                            message,
-                            extra_tags='alert-danger')
+        add_error_message_to_response(message)
+
         raise JIRAError(text=message)
     else:
         return meta
@@ -789,11 +767,7 @@ def close_epic(eng, push_to_jira):
                 log_jira_generic_alert('Jira Engagement/Epic Close Error', str(e))
                 return False
     else:
-        messages.add_message(
-            get_current_request(),
-            messages.ERROR,
-            'Push to JIRA for Epic skipped because enable_engagement_epic_mapping is not checked for this engagement',
-            extra_tags='alert-danger')
+        add_error_message_to_response('Push to JIRA for Epic skipped because enable_engagement_epic_mapping is not checked for this engagement')
         return False
 
 
@@ -823,11 +797,8 @@ def update_epic(engagement):
             log_jira_generic_alert('Jira Engagement/Epic Update Error', str(e))
             return False
     else:
-        messages.add_message(
-            get_current_request(),
-            messages.ERROR,
-            'Push to JIRA for Epic skipped because enable_engagement_epic_mapping is not checked for this engagement',
-            extra_tags='alert-danger')
+        add_error_message_to_response('Push to JIRA for Epic skipped because enable_engagement_epic_mapping is not checked for this engagement')
+
         return False
 
 
@@ -855,7 +826,7 @@ def add_epic(engagement):
             'issuetype': {
                 'name': 'Epic'
             },
-            'customfield_' + str(jira_instance.epic_name_id): engagement.name,
+            get_epic_name_field_name(jira_instance): engagement.name,
         }
         try:
             jira = get_jira_connection(jira_instance)
@@ -885,11 +856,7 @@ def add_epic(engagement):
                                    message + error)
             return False
     else:
-        messages.add_message(
-            get_current_request(),
-            messages.ERROR,
-            'Push to JIRA for Epic skipped because enable_engagement_epic_mapping is not checked for this engagement',
-            extra_tags='alert-danger')
+        add_error_message_to_response('Push to JIRA for Epic skipped because enable_engagement_epic_mapping is not checked for this engagement')
         return False
 
 
@@ -1001,9 +968,11 @@ def process_jira_project_form(request, instance=None, product=None, engagement=N
     # jform = JIRAProjectForm(request.POST, instance=instance if instance else JIRA_Project(), product=product)
     jform = JIRAProjectForm(request.POST, instance=instance, product=product, engagement=engagement)
     # logging has_changed because it sometimes doesn't do what we expect
-    logger.debug('jform has changed: ' + str(jform.has_changed()))
+    logger.debug('jform has changed: %s', str(jform.has_changed()))
 
     if jform.has_changed():  # if no data was changed, no need to do anything!
+        logger.debug('jform changed_data: %s', jform.changed_data)
+        logger.debug('jform: %s', vars(jform))
         if jform.is_valid():
             try:
                 jira_project = jform.save(commit=False)
@@ -1083,3 +1052,10 @@ def process_jira_epic_form(request, engagement=None):
         logger.debug('no jira_project for this engagement, skipping epic push')
 
     return not error, jira_epic_form
+
+
+# some character will mess with JIRA formatting, for example when constructing a link:
+# [name|url]. if name contains a '|' is will break it
+# so [%s|%s] % (escape_for_jira(name), url)
+def escape_for_jira(text):
+    return text.replace('|', '%7D')

@@ -3,7 +3,7 @@
 from django.db import migrations, models
 # import django.db.models.deletion
 from tagging.registry import register as tag_register
-
+from django.forms.models import model_to_dict
 import tagulous.models.fields
 import tagulous.models.models
 import logging
@@ -35,7 +35,21 @@ class Migration(migrations.Migration):
                     # if model_name == 'finding2':
                     #     obj.save(dedupe_option=False, rules_option=False, issue_updater_option=False, push_to_jira=False)
                     # else:
-                    obj.save()
+                    try:
+                        if hasattr(obj, 'prod_type_id') and obj.prod_type_id == 0:
+                            logger.warning('product found without product type (prod_type==0), changing to: "_tag migration lost and found" product type')
+                            prod_type_lost_and_found, created = Product_Type.objects.get_or_create(name='_tag migration lost and found')
+                            obj.prod_type = prod_type_lost_and_found
+                            obj.save()
+                            logger.warning('product type succesfully changed to %i', prod_type_lost_and_found.id)
+
+                        obj.save()
+                    except Exception as e:
+                        logger.error('Error saving old existing django-tagging tags to new string field')
+                        logger.error('Details of object:')
+                        logger.error(vars(obj))
+                        logger.error('Model to dict:')
+                        logger.error(model_to_dict(obj))
 
     def copy_tags_from_django_tagging_field_to_new_tagulous_tags_field(apps, schema_editor):
         # We can't import the models directly as it may be a newer
@@ -50,9 +64,15 @@ class Migration(migrations.Migration):
                 if obj.tags_from_django_tagging:
                     logger.debug('%s:%s:%s: found tags: %s', model_class, obj.id, obj, obj.tags_from_django_tagging)
                     obj.tags = obj.tags_from_django_tagging
-                    obj.save()
 
-        # raise ValueError('fake error to fail migration')
+                    try:
+                        obj.save()
+                    except Exception as e:
+                        logger.error('Error saving tags to new tagulous m2m field')
+                        logger.error('Details of object:')
+                        logger.error(vars(obj))
+                        logger.error('Model to dict:')
+                        logger.error(model_to_dict(obj))
 
     dependencies = [
         ('dojo', '0065_delete_empty_jira_project_configs'),

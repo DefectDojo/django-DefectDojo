@@ -1,27 +1,24 @@
 import json
+
 from dojo.models import Finding
 
 
 class GitlabSastReportParser(object):
-    def __init__(self, json_output, test):
-        self.items = []
+    def get_findings(self, json_output, test):
 
         if json_output is None:
             return
 
         tree = self.parse_json(json_output)
         if tree:
-            self.items = [data for data in self.get_items(tree, test)]
+            return self.get_items(tree, test)
 
     def parse_json(self, json_output):
+        data = json_output.read()
         try:
-            data = json_output.read()
-            try:
-                tree = json.loads(str(data, 'utf-8'))
-            except:
-                tree = json.loads(data)
+            tree = json.loads(str(data, 'utf-8'))
         except:
-            raise Exception("Invalid format")
+            tree = json.loads(data)
 
         return tree
 
@@ -90,7 +87,7 @@ def get_item(vuln, test):
         title = '[{} severity] {}'.format(severity, title)
         severity = 'Info'
     numerical_severity = Finding.get_numerical_severity(severity)
-    scanner_confidence = Finding.get_number_severity(vuln['confidence'])
+    scanner_confidence = get_confidence_numeric(vuln.get('confidence', 'Unkown'))
 
     mitigation = ''
     if 'solution' in vuln:
@@ -102,7 +99,10 @@ def get_item(vuln, test):
     if 'identifiers' in vuln:
         for identifier in vuln['identifiers']:
             if identifier['type'].lower() == 'cwe':
-                cwe = identifier['value']
+                if isinstance(identifier['value'], int):
+                    cwe = identifier['value']
+                elif identifier['value'].isdigit():
+                    cwe = int(identifier['value'])
             elif identifier['type'].lower() == 'cve':
                 cve = identifier['value']
             else:
@@ -137,3 +137,14 @@ def get_item(vuln, test):
                       dynamic_finding=False)
 
     return finding
+
+
+def get_confidence_numeric(argument):
+    switcher = {
+        'Confirmed': 1,    # Certain
+        'High': 3,         # Firm
+        'Medium': 4,       # Firm
+        'Low': 6,          # Tentative
+        'Experimental': 7  # Tentative
+    }
+    return switcher.get(argument, None)

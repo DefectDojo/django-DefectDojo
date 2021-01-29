@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load humanize %}
-{% load static from staticfiles %}
+{% load static %}
 {% block content %}
     <h3> Edit Note</h3><br></br>
     <form class="form-horizontal" action="{% url 'edit_note' note.id page objid %}" method="post">{% csrf_token %}

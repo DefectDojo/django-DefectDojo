@@ -556,12 +556,6 @@ def new_cred_finding(request, fid):
             cred_lookup = Cred_Mapping.objects.filter(
                 cred_id=cred_user.cred_id, finding=finding.id)
 
-            # if cred_lookup:
-            #     print("Cred lookup valid")
-
-            # if cred_user:
-            #     print("Cred user")
-
             message = "Credential already associated."
             status_tag = 'alert-danger'
 

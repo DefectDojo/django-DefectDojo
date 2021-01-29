@@ -1,6 +1,6 @@
 {% load navigation_tags %}
 {% load display_tags %}
-{% load static from staticfiles %}
+{% load static %}
 <tr>
     {% if similar_finding.duplicate_finding == finding_context %}
         <td title="The finding on the top of this page is the original for this related finding">Duplicate{% if finding_context == similar_finding %}(this){% endif %}</td>
