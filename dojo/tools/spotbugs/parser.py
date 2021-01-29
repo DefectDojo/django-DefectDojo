@@ -3,15 +3,15 @@ __maintainer__ = "Igor Bakalo"
 __email__ = "bigorigor.ua@gmail.com"
 __status__ = "Development"
 
-from defusedxml import ElementTree as ET
-
 import re
+
+from defusedxml import ElementTree as ET
 
 from dojo.models import Finding
 
 
 class SpotbugsXMLParser(object):
-    def __init__(self, filename, test):
+    def get_findings(self, filename, test):
         bug_patterns = dict()
         dupes = dict()
 

@@ -1,26 +1,26 @@
 import json
 from json import JSONDecodeError
+
 from dojo.models import Finding
 
 
-# OssIndex Devaudit Results Parser
-# Parses files created by the Sonatype OssIndex Devaudit tool
-# https://github.com/sonatype-nexus-community/DevAudit
-
 class OssIndexDevauditParser(object):
-    def __init__(self, json_file, test):
+    """OssIndex Devaudit Results Parser
+    Parses files created by the Sonatype OssIndex Devaudit tool
+    https://github.com/sonatype-nexus-community/DevAudit
+    """
+    def get_findings(self, json_file, test):
 
         tree = self.parse_json(json_file)
 
         if tree:
-            self.items = [data for data in self.get_items(tree, test)]
+            return list([data for data in self.get_items(tree, test)])
         else:
-            self.items = []
+            return list()
 
     def parse_json(self, json_file):
         if json_file is None:
-            self.items = []
-            return
+            return None
         try:
             tree = json.load(json_file)
         except JSONDecodeError:

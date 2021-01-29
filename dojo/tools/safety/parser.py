@@ -1,13 +1,14 @@
 import json
 import logging
 import urllib
+
 from dojo.models import Finding
 
 logger = logging.getLogger(__name__)
 
 
 class SafetyParser(object):
-    def __init__(self, json_output, test):
+    def get_findings(self, json_output, test):
 
         # Grab Safety DB for CVE lookup
         url = "https://raw.githubusercontent.com/pyupio/safety-db/master/data/insecure_full.json"
@@ -22,11 +23,7 @@ class SafetyParser(object):
             f.close()
 
         tree = self.parse_json(json_output)
-
-        if tree:
-            self.items = [data for data in self.get_items(tree, test, safety_db)]
-        else:
-            self.items = []
+        return self.get_items(tree, test, safety_db)
 
     def parse_json(self, json_output):
         data = json_output.read() or '[]'

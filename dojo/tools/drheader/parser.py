@@ -1,6 +1,7 @@
 __author__ = 'Spoint42'
 
 import json
+
 from dojo.models import Finding
 
 
@@ -13,8 +14,8 @@ class DrHeaderJSONParser(object):
         else:
             return None
 
-    def __init__(self, filename, test):
-        self.items = []
+    def get_findings(self, filename, test):
+        items = []
         if filename is None:
             return
         tree = filename.read()
@@ -38,4 +39,5 @@ class DrHeaderJSONParser(object):
                            numerical_severity=Finding.get_numerical_severity(sev),
                            static_finding=False)
 
-            self.items.append(find)
+            items.append(find)
+        return items
