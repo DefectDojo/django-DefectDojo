@@ -11,30 +11,20 @@ class TestNessusParser(TestCase):
         test.engagement.product = Product()
         return test
 
-    def test_parse_without_file_has_no_findings(self):
-        parser = NessusXMLParser(None, self.create_test())
-        findings = parser.items
-        self.assertEqual(0, len(findings))
-
     def test_parse_some_findings(self):
         testfile = open("dojo/unittests/scans/nessus/nessus_many_vuln.xml")
-        parser = NessusXMLParser(testfile, self.create_test())
-        findings = parser.items
+        parser = NessusXMLParser()
+        findings = parser.get_findings(testfile, self.create_test())
         self.assertEqual(6, len(findings))
         finding = findings[0]
         self.assertEqual('Info', finding.severity)
         self.assertIsNone(finding.cwe)
 
-    def test_parse_without_file_has_no_findings_csv(self):
-        parser = NessusCSVParser(None, self.create_test())
-        findings = parser.items
-        self.assertEqual(0, len(findings))
-
     def test_parse_some_findings_csv(self):
         """Test one report provided by a user"""
         testfile = open("dojo/unittests/scans/nessus/nessus_many_vuln.csv")
-        parser = NessusCSVParser(testfile, self.create_test())
-        findings = parser.items
+        parser = NessusCSVParser()
+        findings = parser.get_findings(testfile, self.create_test())
         self.assertEqual(4, len(findings))
         for i in [0, 1, 2, 3]:
             finding = findings[i]
@@ -58,8 +48,8 @@ class TestNessusParser(TestCase):
     def test_parse_some_findings_csv2(self):
         """Test that use default columns of Nessus Pro 8.13.1 (#257)"""
         testfile = open("dojo/unittests/scans/nessus/nessus_many_vuln2-default.csv")
-        parser = NessusCSVParser(testfile, self.create_test())
-        findings = parser.items
+        parser = NessusCSVParser()
+        findings = parser.get_findings(testfile, self.create_test())
         self.assertEqual(29, len(findings))
         finding = findings[0]
         self.assertIn(finding.severity, Finding.SEVERITIES)
@@ -76,8 +66,8 @@ class TestNessusParser(TestCase):
     def test_parse_some_findings_csv2_all(self):
         """Test that use a report with all columns of Nessus Pro 8.13.1 (#257)"""
         testfile = open("dojo/unittests/scans/nessus/nessus_many_vuln2-all.csv")
-        parser = NessusCSVParser(testfile, self.create_test())
-        findings = parser.items
+        parser = NessusCSVParser()
+        findings = parser.get_findings(testfile, self.create_test())
         self.assertEqual(29, len(findings))
         finding = findings[0]
         self.assertIn(finding.severity, Finding.SEVERITIES)
@@ -94,8 +84,11 @@ class TestNessusParser(TestCase):
     def test_parse_some_findings_csv_bytes(self):
         """This tests is designed to test the parser with different read modes"""
         testfile = open("dojo/unittests/scans/nessus/nessus_many_vuln2-all.csv")
-        parser = NessusCSVParser(testfile, self.create_test())
+        parser = NessusCSVParser()
+        findings = parser.get_findings(testfile, self.create_test())
         testfile = open("dojo/unittests/scans/nessus/nessus_many_vuln2-all.csv", "rt")
-        parser = NessusCSVParser(testfile, self.create_test())
+        parser = NessusCSVParser()
+        findings = parser.get_findings(testfile, self.create_test())
         testfile = open("dojo/unittests/scans/nessus/nessus_many_vuln2-all.csv", "rb")
-        parser = NessusCSVParser(testfile, self.create_test())
+        parser = NessusCSVParser()
+        findings = parser.get_findings(testfile, self.create_test())

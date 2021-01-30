@@ -1,11 +1,10 @@
 import csv
+import io
 import logging
-import os
 import re
+import sys
 from xml.dom import NamespaceErr
 
-import numpy as np
-import pandas as pd
 from cpe import CPE
 from cvss import CVSS3
 from defusedxml import ElementTree
@@ -45,12 +44,14 @@ class NessusCSVParser(object):
             return cpe_match
         return None
 
-    def get_findings(self, file, test: Test):
-        reader = pd.read_csv(file, lineterminator='\n', quotechar='"', na_values="None")
-        reader = reader.replace({np.nan: None})
-        dupes = {}
-        first = True
-        for row in reader.to_dict(orient='records'):
+    def get_findings(self, filename, test: Test):
+        content = filename.read()
+        if type(content) is bytes:
+            content = content.decode('utf-8')
+        csv.field_size_limit(int(sys.maxsize / 10))  # the request/resp are big
+        reader = csv.DictReader(io.StringIO(content))
+        dupes = dict()
+        for row in reader:
             # manage severity from two possible columns 'Severity' and 'Risk'
             severity = 'Info'
             if 'Severity' in row:
@@ -99,7 +100,7 @@ class NessusCSVParser(object):
                                 references=references)
 
                 # manage CVSS vector (only v3.x for now)
-                if 'CVSS V3 Vector' in row and row.get('CVSS V3 Vector') is not None:
+                if 'CVSS V3 Vector' in row and '' != row.get('CVSS V3 Vector'):
                     find.cvssv3 = CVSS3('CVSS:3.0/' + str(row.get('CVSS V3 Vector'))).clean_vector(output_prefix=False)
                 # manage CPE data
                 detected_cpe = self._format_cpe(str(row.get('CPE')))
@@ -239,10 +240,8 @@ class NessusXMLParser(object):
 
 
 class NessusParser(object):
-    def get_findings(self, filename, test):
 
-        if filename is None:
-            return list()
+    def get_findings(self, filename, test):
 
         if filename.name.lower().endswith('.xml'):
             return list(NessusXMLParser().parse(filename, test).values())
