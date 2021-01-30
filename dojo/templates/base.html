@@ -200,21 +200,23 @@
                                 </ul>
                                 <!-- /.nav-second-level -->
                             </li>
-                            {% if request.user.is_staff %}
-                                <li>
-                                    <a href="{% url 'engagement' %}" aria-expanded="false" aria-label="Engagements">
-                                        <i class="fa fa-inbox fa-fw"></i>
-                                        <span>Engagements</span>
-                                        <span class="glyphicon arrow"></span>
-                                    </a>
-                                    <ul class="nav nav-second-level">
-                                        <li><a href="{% url 'engagement' %}">Active Engagements</a></li>
+                            <li>
+                                <a href="{% url 'engagement' %}" aria-expanded="false" aria-label="Engagements">
+                                    <i class="fa fa-inbox fa-fw"></i>
+                                    <span>Engagements</span>
+                                    <span class="glyphicon arrow"></span>
+                                </a>
+                                <ul class="nav nav-second-level">
+                                    <li><a href="{% url 'engagement' %}">Active Engagements</a></li>
+                                    {% if request.user.is_staff %}
                                         <li><a href="{% url 'engagements_all' %}">All Engagements</a></li>
                                         <li><a href="{% url 'test_type' %}">Test Types</a></li>
                                         <li><a href="{% url 'dev_env' %}">Environments</a></li>
-                                    </ul>
-                                    <!-- /.nav-second-level -->
-                                </li>
+                                    {% endif %}
+                                </ul>
+                                <!-- /.nav-second-level -->
+                            </li>
+                            {% if request.user.is_staff %}
                                 <li>
                                     <a href="{% url 'open_findings' %}" aria-expanded="false" aria-label="Findings">
                                         <i class="fa fa-bug fa-fw"></i>
