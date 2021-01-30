@@ -417,12 +417,6 @@ def pic_token(context, image, size):
 
 @register.simple_tag
 def severity_value(value):
-    try:
-        if get_system_setting('s_finding_severity_naming'):
-            value = Finding.get_numerical_severity(value)
-    except:
-        pass
-
     return value
 
 

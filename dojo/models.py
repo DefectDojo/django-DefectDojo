@@ -175,13 +175,6 @@ class System_Settings(models.Model):
                                                blank=True)
     mail_notifications_to = models.CharField(max_length=200, default='',
                                              blank=True)
-    s_finding_severity_naming = \
-        models.BooleanField(default=False, blank=False,
-                            help_text='With this setting turned on, Dojo '
-                                      'will display S0, S1, S2, etc in most '
-                                      'places, whereas if turned off '
-                                      'Critical, High, Medium, etc will '
-                                      'be displayed.')
     false_positive_history = models.BooleanField(default=False, help_text="DefectDojo will automatically mark the finding as a false positive if the finding has been previously marked as a false positive. Not needed when using deduplication, advised to not combine these two.")
 
     url_prefix = models.CharField(max_length=300, default='', blank=True, help_text="URL prefix if DefectDojo is installed in it's own virtual subdirectory.")
@@ -2146,15 +2139,8 @@ class Finding(models.Model):
                     setattr(self, field, "No %s given" % field)
 
     def severity_display(self):
-        try:
-            system_settings = System_Settings.objects.get()
-            if system_settings.s_finding_severity_naming:
-                return self.numerical_severity
-            else:
-                return self.severity
-
-        except:
-            return self.severity
+        system_settings = System_Settings.objects.get()
+        return self.severity
 
     def get_breadcrumbs(self):
         bc = self.test.get_breadcrumbs()
