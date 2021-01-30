@@ -23,7 +23,7 @@ class GoogleSheetsConfigurationTest(BaseTestCase):
         # submit
         driver.find_element_by_name("update").click()
         # Assert ot the query to determine status of failure
-        self.assertTrue(self.is_success_message_present(text='Files updated successfully'))
+        self.assertTrue(self.is_success_message_present(text='Google Drive configuration saved successfully.'))
 
 
 def add_file_tests_to_suite(suite):
