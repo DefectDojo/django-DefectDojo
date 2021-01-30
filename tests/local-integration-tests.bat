@@ -2,10 +2,6 @@ set DD_ADMIN_USER=admin
 set DD_ADMIN_PASSWORD=admin
 set DD_BASE_URL=http://localhost:8080/
 
-echo "Running Google Sheets integration test"
-python tests/google_sheets_test.py
-if %ERRORLEVEL% NEQ 0 GOTO END
-
 echo "Running Product type integration tests"
 python tests/product_type_test.py
 if %ERRORLEVEL% NEQ 0 GOTO END

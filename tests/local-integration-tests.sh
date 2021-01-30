@@ -8,14 +8,6 @@ export DD_BASE_URL='http://localhost:8080/'
 # If any script is unsuccessful a failure message is printed and the test script
 # Exits with status code of 1
 
-test="Check Google Sheets integration test"
-echo "Running: $test"
-if python3 tests/google_sheets_test.py ; then
-    success $test
-else
-    fail $test
-fi
-
 echo "Running Product type integration tests"
 if python3 tests/regulations_test.py ; then
     echo "Success: Regulation integration tests passed"

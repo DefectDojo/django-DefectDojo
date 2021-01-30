@@ -38,14 +38,6 @@ function success() {
     echo "Success: $1 test passed\n"
 }
 
-test="Check Google Sheets integration test"
-echo "Running: $test"
-if python3 tests/google_sheets_test.py ; then
-    success $test
-else
-    fail $test
-fi
-
 test="Report Builder tests"
 echo "Running: $test"
 if python3 tests/report_builder_test.py ; then
