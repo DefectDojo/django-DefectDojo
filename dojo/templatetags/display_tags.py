@@ -863,7 +863,6 @@ def jira_project_tag(product_or_engagement, autoescape=True):
     jira_project = jira_helper.get_jira_project(product_or_engagement)
 
     if not jira_project:
-        logger.debug('no JIRA project!: %s', product_or_engagement)
         return ''
 
     html = """
@@ -906,3 +905,72 @@ def full_name(user):
     # not in all templates we have access to a Dojo_User instance, so we use a filter
     # see https://github.com/DefectDojo/django-DefectDojo/pull/3278
     return Dojo_User.generate_full_name(user)
+
+
+@register.filter(needs_autoescape=True)
+def import_settings_tag(test_import, autoescape=True):
+    if not test_import or not test_import.import_settings:
+        return ''
+
+    if autoescape:
+        esc = conditional_escape
+    else:
+        esc = lambda x: x
+
+    html = """
+
+    <i class="fa %s has-popover %s"
+        title="<i class='fa %s'></i> <b>Import Settings</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="bottom"
+        data-content="
+            <b>Active:</b> %s<br/>
+            <b>Verified:</b> %s<br/>
+            <b>Minimum Severity:</b> %s<br/>
+            <b>Close Old Findings:</b> %s<br/>
+            <b>Push to jira:</b> %s<br/>
+            <b>Endpoint:</b> %s<br/>
+            <b>Version:</b> %s<br/>
+        "
+    </i>
+    """
+
+    icon = 'fa-info-circle'
+    color = ''
+
+    return mark_safe(html % (icon, color, icon,
+                                esc(test_import.import_settings.get('active', None)),
+                                esc(test_import.import_settings.get('verified', None)),
+                                esc(test_import.import_settings.get('minimum_severity', None)),
+                                esc(test_import.import_settings.get('close_old_findings', None)),
+                                esc(test_import.import_settings.get('push_to_jira', None)),
+                                esc(test_import.import_settings.get('endpoint', None)),
+                                esc(test_import.import_settings.get('version', None))))
+
+
+@register.filter(needs_autoescape=True)
+def import_history(finding, autoescape=True):
+    if not finding or not settings.TRACK_IMPORT_HISTORY:
+        return ''
+
+    if autoescape:
+        esc = conditional_escape
+    else:
+        esc = lambda x: x
+
+    status_changes = finding.test_import_finding_action_set.all()
+
+    if not status_changes:
+        return ''
+
+    html = """
+
+    <i class="fa fa-history has-popover"
+        title="<i class='fa fa-history'></i> <b>Import History</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="right"
+        data-content="%s<br/>Currently only showing status changes made by reimport."
+    </i>
+    """
+
+    list_of_status_changes = ''
+    for status_change in status_changes:
+        list_of_status_changes += '<b>' + status_change.created.strftime('%b %d, %Y, %H:%M:%S') + '</b>: ' + status_change.get_action_display() + '<br/>'
+
+    return mark_safe(html % (list_of_status_changes))

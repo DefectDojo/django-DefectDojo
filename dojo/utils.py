@@ -1177,22 +1177,27 @@ def template_search_helper(fields=None, query_string=None):
     return found_entries
 
 
-def get_page_items(request, items, page_size, param_name='page'):
-    size = request.GET.get('page_size', page_size)
+def get_page_items(request, items, page_size, prefix=''):
+    return get_page_items_and_count(request, items, page_size, prefix=prefix, do_count=False)
+
+
+def get_page_items_and_count(request, items, page_size, prefix='', do_count=True):
+    page_param = prefix + 'page'
+    page_size_param = prefix + 'page_size'
+
+    page = request.GET.get(page_param, 1)
+    size = request.GET.get(page_size_param, page_size)
     paginator = Paginator(items, size)
-    page = request.GET.get(param_name)
 
     # new get_page method will handle invalid page value, out of bounds pages, etc
-    return paginator.get_page(page)
+    page = paginator.get_page(page)
 
+    # we add the total_count here which is usually before prefetching
+    # which is goog in this case because for counting we don't want to join too many tables
+    if do_count:
+        page.total_count = paginator.count
 
-def get_page_items_and_count(request, items, page_size, param_name='page'):
-    size = request.GET.get('page_size', page_size)
-    paginator = Paginator(items, size)
-    page = request.GET.get(param_name)
-
-    # new get_page method will handle invalid page value, out of bounds pages, etc
-    return paginator.get_page(page), paginator.count
+    return page
 
 
 def handle_uploaded_threat(f, eng):

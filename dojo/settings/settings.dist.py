@@ -165,6 +165,9 @@ env = environ.Env(
     DD_DUPE_DELETE_MAX_PER_RUN=(int, 200),
     # APIv1 is depreacted and will be removed at 2021-06-30
     DD_LEGACY_API_V1_ENABLE=(bool, False),
+
+    # new experimental feature that tracks history across multiple reimports for the same test
+    DD_TRACK_IMPORT_HISTORY=(bool, False)
 )
 
 
@@ -636,6 +639,7 @@ INSTALLED_APPS = (
     'social_django',
     'drf_yasg2',
     'tagulous',
+    'django_jsonfield_backport',
 )
 
 # ------------------------------------------------------------------------------
@@ -859,6 +863,8 @@ DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')
 
 DISABLE_FINDING_MERGE = env('DD_DISABLE_FINDING_MERGE')
 
+TRACK_IMPORT_HISTORY = env('DD_TRACK_IMPORT_HISTORY')
+
 # ------------------------------------------------------------------------------
 # JIRA
 # ------------------------------------------------------------------------------
@@ -994,3 +1000,4 @@ TAGULOUS_AUTOCOMPLETE_JS = (
 
 # using 'element' for width should take width from css defined in template, but it doesn't. So set to 70% here.
 TAGULOUS_AUTOCOMPLETE_SETTINGS = {'placeholder': "Enter some tags (comma separated, use enter to select / create a new tag)", 'width': '70%'}
+USE_L10N = True

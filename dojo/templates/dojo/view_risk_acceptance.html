@@ -216,7 +216,7 @@
                     {% include "dojo/form_fields.html" with form=add_findings_form %}
                 </div>
                 <div class="panel-body">
-                    {% include "dojo/paging_snippet.html" with page=add_findings parm_name="apage" %}
+                    {% include "dojo/paging_snippet.html" with page=add_findings prefix="apage" %}
                 </div>
                 <div class="panel-footer text-center">
                     <input class="btn btn-primary" name="add_findings" type="submit" value="Add Selected Findings"/>

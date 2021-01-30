@@ -16,7 +16,7 @@
               </h4>
         </div>
         <div class="clearfix">
-            {% include "dojo/paging_snippet.html" with page=engs parm_name=parm_name page_size=True %}
+            {% include "dojo/paging_snippet.html" with page=engs prefix=prefix page_size=True %}
         </div>
         {% if engs %}
             <table id={{ status }} class="tablesorter-bootstrap table table-condensed table-striped table-hover">
@@ -234,7 +234,7 @@
         {% endif %}
     </div>
     <div class="clearfix">
-        {% include "dojo/paging_snippet.html" with page=engs parm_name=parm_name page_size=True %}
+        {% include "dojo/paging_snippet.html" with page=engs prefix=prefix page_size=True %}
     </div>
 </div>
 {% block postscript %}

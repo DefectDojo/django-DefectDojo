@@ -72,3 +72,4 @@ vcrpy-unittest==0.1.7
 django-tagulous==1.1.0
 PyJWT==1.7.1
 cvss==2.2
+django-jsonfield-backport==1.0.2

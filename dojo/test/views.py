@@ -2,6 +2,7 @@
 import logging
 import operator
 import json
+from django.db.models.query import Prefetch
 import httplib2
 import base64
 from datetime import datetime
@@ -25,8 +26,10 @@ from dojo.forms import NoteForm, TestForm, FindingForm, \
     DeleteTestForm, AddFindingForm, TypedNoteForm, \
     ImportScanForm, ReImportScanForm, JIRAFindingForm, JIRAImportScanForm, \
     FindingBulkUpdateForm
-from dojo.models import Finding, Test, Notes, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, \
-    Finding_Template, Cred_Mapping, Dojo_User, System_Settings, Endpoint_Status
+from dojo.models import Finding, IMPORT_CLOSED_FINDING, IMPORT_CREATED_FINDING, IMPORT_REACTIVATED_FINDING, Test, Notes, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, \
+    Finding_Template, Cred_Mapping, Dojo_User, System_Settings, Endpoint_Status, Test_Import, Test_Import_Finding_Action
+# IMPORT_CREATED_FINDING, IMPORT_CLOSED_FINDING, IMPORT_REACTIVATED_FINDING, IMPORT_UPDATED_FINDING, \
+# IMPORT_ACTIONS
 from dojo.tools.factory import import_parser_factory, get_choices
 from dojo.utils import get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting, \
     Product_Tab, max_safe, is_scan_file_too_large, get_words_for_field
@@ -45,7 +48,14 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 @user_must_be_authorized(Test, 'view', 'tid')
 def view_test(request, tid):
-    test = get_object_or_404(Test, pk=tid)
+    tests_prefetched = Test.objects.all()
+    tests_prefetched = tests_prefetched.annotate(total_reimport_count=Count('test_import__id'))
+    tests_prefetched = tests_prefetched.prefetch_related(Prefetch('test_import_set', queryset=Test_Import.objects.filter(~Q(findings=None))))
+    tests_prefetched = tests_prefetched.prefetch_related('test_import_set__test_import_finding_action_set')
+
+    test = get_object_or_404(tests_prefetched, pk=tid)
+    # test = get_object_or_404(Test, pk=tid)
+
     prod = test.engagement.product
     notes = test.notes.all()
     note_type_activation = Note_Type.objects.filter(is_active=True).count()
@@ -90,7 +100,10 @@ def view_test(request, tid):
     title_words = get_words_for_field(findings.qs, 'title')
     component_words = get_words_for_field(findings.qs, 'component_name')
 
-    paged_findings, total_findings_count = get_page_items_and_count(request, prefetch_for_findings(findings.qs), 25)
+    # test_imports = test.test_import_set.all()
+    paged_test_imports = get_page_items_and_count(request, test.test_import_set.all(), 5, prefix='test_imports')
+
+    paged_findings = get_page_items_and_count(request, prefetch_for_findings(findings.qs), 25)
     paged_stub_findings = get_page_items(request, stub_findings, 25)
     show_re_upload = any(test.test_type.name in code for code in ImportScanForm.SORTED_SCAN_TYPE_CHOICES)
 
@@ -140,7 +153,6 @@ def view_test(request, tid):
                    'product_tab': product_tab,
                    'findings': paged_findings,
                    'filtered': findings,
-                   'findings_count': total_findings_count,
                    'stub_findings': paged_stub_findings,
                    'title_words': title_words,
                    'component_words': component_words,
@@ -156,6 +168,7 @@ def view_test(request, tid):
                    'show_export': google_sheets_enabled,
                    'sheet_url': sheet_url,
                    'bulk_edit_form': bulk_edit_form,
+                   'paged_test_imports': paged_test_imports,
                    })
 
 
@@ -172,6 +185,7 @@ def prefetch_for_findings(findings):
         # we could try to prefetch only the latest note with SubQuery and OuterRef, but I'm getting that MySql doesn't support limits in subqueries.
         prefetched_findings = prefetched_findings.prefetch_related('notes')
         prefetched_findings = prefetched_findings.prefetch_related('tags')
+        prefetched_findings = prefetched_findings.prefetch_related('test_import_finding_action_set')
         prefetched_findings = prefetched_findings.prefetch_related('endpoints')
         prefetched_findings = prefetched_findings.prefetch_related('endpoint_status')
         prefetched_findings = prefetched_findings.prefetch_related('endpoint_status__endpoint')
@@ -183,6 +197,18 @@ def prefetch_for_findings(findings):
         logger.debug('unable to prefetch because query was already executed')
 
     return prefetched_findings
+
+
+# def prefetch_for_test_imports(test_imports):
+#     prefetched_test_imports = test_imports
+#     if isinstance(test_imports, QuerySet):  # old code can arrive here with prods being a list because the query was already executed
+#         #could we make this dynamic, i.e for action_type in IMPORT_ACTIONS: prefetch
+#         prefetched_test_imports = prefetched_test_imports.annotate(created_findings_count=Count('findings', filter=Q(test_import_finding_action__action=IMPORT_CREATED_FINDING)))
+#         prefetched_test_imports = prefetched_test_imports.annotate(closed_findings_count=Count('findings', filter=Q(test_import_finding_action__action=IMPORT_CLOSED_FINDING)))
+#         prefetched_test_imports = prefetched_test_imports.annotate(reactivated_findings_count=Count('findings', filter=Q(test_import_finding_action__action=IMPORT_REACTIVATED_FINDING)))
+#         prefetched_test_imports = prefetched_test_imports.annotate(updated_findings_count=Count('findings', filter=Q(test_import_finding_action__action=IMPORT_UPDATED_FINDING)))
+
+#     return prefetch_for_test_imports
 
 
 # @user_passes_test(lambda u: u.is_staff)
@@ -648,11 +674,11 @@ def re_import_scan_results(request, tid):
             active = form.cleaned_data['active']
             verified = form.cleaned_data['verified']
             tags = form.cleaned_data['tags']
-            if 'version' in form.cleaned_data and form.cleaned_data['version']:
-                test.version = form.cleaned_data['version']
+            version = form.cleaned_data.get('version', None)
             close_old_findings = form.cleaned_data.get('close_old_findings', True)
             # Tags are replaced, same behaviour as with django-tagging
             test.tags = tags
+            test.version = version
             if file and is_scan_file_too_large(file):
                 messages.add_message(request,
                                      messages.ERROR,
@@ -932,6 +958,32 @@ def re_import_scan_results(request, tid):
                                          extra_tags='alert-success')
 
                 # create_notification(event='scan_added', title=str(finding_count) + " findings for " + test.engagement.product.name, finding_count=finding_count, test=test, engagement=test.engagement, url=reverse('view_test', args=(test.id,)))
+
+                if settings.TRACK_IMPORT_HISTORY:
+                    import_settings = {}  # json field
+                    import_settings['active'] = active
+                    import_settings['verified'] = verified
+                    import_settings['minimum_severity'] = min_sev
+                    import_settings['close_old_findings'] = close_old_findings
+                    import_settings['push_to_jira'] = push_to_jira
+                    # tags=tags TODO no tags field in api for reimport it seems
+                    import_settings['endpoint'] = ','.join(form.cleaned_data['endpoints'])
+
+                    test_import = Test_Import(test=test, import_settings=import_settings, version=version)
+                    test_import.save()
+
+                    test_import_finding_action_list = []
+                    for finding in mitigated_findings:
+                        logger.debug('preparing Test_Import_Finding_Action for finding: %i', finding.id)
+                        test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_CLOSED_FINDING))
+                    for finding in new_items:
+                        logger.debug('preparing Test_Import_Finding_Action for finding: %i', finding.id)
+                        test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_CREATED_FINDING))
+                    for finding in reactivated_items:
+                        logger.debug('preparing Test_Import_Finding_Action for finding: %i', finding.id)
+                        test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_REACTIVATED_FINDING))
+
+                    Test_Import_Finding_Action.objects.bulk_create(test_import_finding_action_list)
 
                 updated_count = mitigated_count + reactivated_count + len(new_items)
                 if updated_count > 0:

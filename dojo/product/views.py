@@ -615,7 +615,7 @@ def view_engagements(request, pid, engagement_type="Interactive"):
     engs = Engagement.objects.filter(product=prod, active=True, status="In Progress",
                                      engagement_type=engagement_type).order_by('-updated')
     active_engs = EngagementFilter(request.GET, queryset=engs)
-    result_active_engs = get_page_items(request, active_engs.qs, default_page_num, param_name="engs")
+    result_active_engs = get_page_items(request, active_engs.qs, default_page_num, prefix="engs")
     # prefetch only after creating the filters to avoid https://code.djangoproject.com/ticket/23771 and https://code.djangoproject.com/ticket/25375
     result_active_engs.object_list = prefetch_for_view_engagements(result_active_engs.object_list)
 
@@ -623,14 +623,14 @@ def view_engagements(request, pid, engagement_type="Interactive"):
     engs = Engagement.objects.filter(~Q(status="In Progress"), product=prod, active=True,
                                      engagement_type=engagement_type).order_by('-updated')
     queued_engs = EngagementFilter(request.GET, queryset=engs)
-    result_queued_engs = get_page_items(request, queued_engs.qs, default_page_num, param_name="queued_engs")
+    result_queued_engs = get_page_items(request, queued_engs.qs, default_page_num, prefix="queued_engs")
     result_queued_engs.object_list = prefetch_for_view_engagements(result_queued_engs.object_list)
 
     # Cancelled or Completed Engagements
     engs = Engagement.objects.filter(product=prod, active=False, engagement_type=engagement_type).order_by(
         '-target_end')
     result_inactive = EngagementFilter(request.GET, queryset=engs)
-    result_inactive_engs_page = get_page_items(request, result_inactive.qs, default_page_num, param_name="i_engs")
+    result_inactive_engs_page = get_page_items(request, result_inactive.qs, default_page_num, prefix="i_engs")
     result_inactive_engs_page.object_list = prefetch_for_view_engagements(result_inactive_engs_page.object_list)
 
     title = "All Engagements"

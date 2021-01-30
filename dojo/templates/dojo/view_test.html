@@ -111,8 +111,14 @@
                     {% if test.percent_complete > 0 %}
                         <th>Progress</th>
                     {% endif %}
-                    {% if test.version != '' %}
-                        <th>Version</th>
+                    <th>Version</th>
+                    {% if 'TRACK_IMPORT_HISTORY'|setting_enabled and test.test_import_set.all %}
+                        <th>Reimports
+                            <i class="fa fa-question-circle has-popover" data-trigger="hover"
+                                data-content="Total numbers of reimports done for this test."
+                                data-placement="right" data-container="body" data-original-title="" title="">
+                            </i>
+                        </th>
                     {% endif %}
                 </tr>
                 <tr>
@@ -140,8 +146,9 @@
                             </div>
                         </td>
                     {% endif %}
-                    {% if test.version != '' %}
                     <td>{{ test.version }}</td>
+                    {% if 'TRACK_IMPORT_HISTORY'|setting_enabled and test.test_import_set.all %}
+                        <td>{{ test.total_reimport_count }}</td>
                     {% endif %}
                 </tr>
             </table>
@@ -163,10 +170,86 @@
     </div>
     {% endif %}
 
+    <!--Import History begin -->
+    {% if 'TRACK_IMPORT_HISTORY'|setting_enabled and test.test_import_set.all %}
+        <div class="panel panel-default collapse in">
+            <div class="panel-heading">
+                <div class="clearfix">
+                    <h4>Import History ({{ paged_test_imports.total_count }})
+                        <i class="fa fa-question-circle has-popover" data-trigger="hover"
+                            data-content="List of reimports that created/closed/reactivated any findings in this test."
+                            data-placement="right" data-container="body" data-original-title="" title="">
+                        </i>
+                        <span class="pull-right">
+                            <a data-toggle="collapse" href="#import_history">
+                                <i class="glyphicon glyphicon-chevron-down"></i>
+                            </a>
+                        </span>
+                    </h4>
+                </div>
+            </div>
+            <div id="import_history" class="panel panel-body table-responsive collapse">
+                {% if paged_test_imports %}
+                    <table class="table-striped tablesorter-bootstrap table table-hover centered">
+                        <thead>
+                            <tr>
+                                <th>Date/Time</th>
+                                <th class="centered">ID</th>
+                                <th>Actions</th>
+                                <th>Version</th>
+                                <th>Endpoint</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for test_import in paged_test_imports %}
+                            {% if True or test_import.test_import_finding_action_set.all %}
+                            <tr class="">
+                                <td>
+                                    {{ test_import.created|date:"DATETIME_FORMAT" }}
+                                    {{ test_import|import_settings_tag }}
+                                </td>
+                                <td class="centered">
+                                    <a href="{% url 'engagment_all_findings' test.engagement.id %}?test={{test.id}}&test_import_finding_action__test_import={{ test_import.id }}">
+                                        {{ test_import.id }}
+                                    </a>
+                                </td>
+                                <td>
+                                    {% regroup test_import.test_import_finding_action_set.all by get_action_display as finding_action_list %}
+                                    <a href="{% url 'engagment_all_findings' test.engagement.id %}?test={{test.id}}&test_import_finding_action__test_import={{ test_import.id }}">
+                                        {% for action in finding_action_list %}
+                                        {{ action.grouper }} {{ action.list|length }} finding{{ action.list|pluralize }}{% if not forloop.last %},{% endif %}
+                                        {% endfor %}
+                                    </a>
+                                </td>
+                                <td>
+                                    {{ test_import.version|default_if_none:"" }}
+                                </td>
+                                <td>
+                                    {{ test_import.import_settings.endpoint|default_if_none:"" }}
+                                </td>
+                            </tr>
+                            {% endif %}
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <div class="panel-body">
+                        <p class="text-center">No import history found.</p>
+                    </div>
+                {% endif %}
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=paged_test_imports prefix='test_imports' page_size=True %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    <!--Import activity end -->
+
+
     <div class="panel panel-default">
         <div class="panel-heading tight">
             <div class="clearfix">
-                <h4 class="has-filters"> Findings ({{findings_count}}) <small>{{ test.id|get_severity_count:"test" }}</small>
+                <h4 class="has-filters"> Findings ({{findings.total_count}}) <small>{{ test.id|get_severity_count:"test" }}</small>
                     <div class="dropdown pull-right"></div>
                     <div id="test-pulldown" class="dropdown pull-right">
                         <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
@@ -196,7 +279,7 @@
     </div>
     {% if findings %}
         <div class="clearfix">
-            {% include "dojo/paging_snippet.html" with page=findings page_size=True %}
+            {% include "dojo/paging_snippet.html" with page=findings prefix=findings page_size=True %}
         </div>
 
         <div class="dropdown hidden" style="padding-bottom: 5px;" id="bulk_edit_menu">
@@ -284,7 +367,7 @@
     {% endif %}
      <div class="panel panel-default table-responsive">
         {% if findings %}
-            <table id="test_findings" class="tablesorter-bootstrap table table-condensed table-hover">
+            <table id="test_findings" class="table-striped tablesorter-bootstrap table table-condensed table-hover">
                 <thead>
                         <tr>
                             {% if user|is_authorized_for_change:test or user|is_authorized_for_delete:test %}
@@ -313,6 +396,7 @@
                             <th class="centered">Severity</th>
                             <th>Name</th>
                             <th>CWE</th>
+                            <th>CVE</th>
                             <th>Date</th>
                             <th>Age</th>
                             {% if system_settings.enable_finding_sla %}
@@ -506,6 +590,13 @@
                           </a>
                         {% endif %}
                         </td>
+                        <td class="nowrap">
+                            {% if finding.cve %}
+                              <a target="_blank" href="{{ finding.cve|cve_url }}">
+                                  <i class="fa fa-external-link"></i> {{ finding.cve|default:"" }}
+                              </a>
+                            {% endif %}
+                        </td>
                         <td class="nowrap">{{ finding.date }}</td>
                         <td>{{ finding.age }}</td>
                         {% if system_settings.enable_finding_sla %}
@@ -520,7 +611,7 @@
                               {{ finding.reporter }}
                           {% endif %}
                         </td>
-                        <td>{{ finding|finding_display_status|safe }}
+                        <td class="nowrap">{{ finding|finding_display_status|safe }}&nbsp;{{ finding|import_history }}
                         </td>
                         {% if system_settings.enable_jira %}
                             {% if jira_project and product_tab or not product_tab %}
@@ -551,7 +642,7 @@
             </div>
         {% endif %}
         <div class="clearfix">
-            {% include "dojo/paging_snippet.html" with page=findings page_size=True %}
+            {% include "dojo/paging_snippet.html" with page=findings prefix=findings page_size=True %}
         </div>
 
         <div class="panel panel-default table-responsive potential-finding">
@@ -868,6 +959,11 @@
         });
 
         $(function () {
+            $("a[data-toggle='collapse']").on('click', function () {
+                var i = $($(this).find('i').get(0));
+                i.toggleClass('glyphicon-chevron-up').toggleClass('glyphicon-chevron-down');
+            })
+
           $(".chosen-select").chosen({
             'placeholder_text_multiple': 'Select or add some tags...',
             'no_results_text': "Tag not found, press TAB key to add."
