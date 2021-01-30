@@ -1,8 +1,11 @@
+from collections import defaultdict
 from datetime import timedelta
+from typing import Dict
+
 from dateutil.relativedelta import relativedelta
 
 from django.urls import reverse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse, HttpRequest
 from django.shortcuts import render
 from django.utils import timezone
 
@@ -12,11 +15,11 @@ from dojo.utils import add_breadcrumb, get_punchcard_data
 from dojo.models import Answered_Survey
 
 
-def home(request):
+def home(request: HttpRequest) -> HttpResponse:
     return HttpResponseRedirect(reverse('dashboard'))
 
 
-def dashboard(request):
+def dashboard(request: HttpRequest) -> HttpResponse:
     if request.user.is_staff:
         engagements = Engagement.objects.all()
         findings = Finding.objects.all()
@@ -49,80 +52,53 @@ def dashboard(request):
 
     severity_count_all = get_severities_all(findings)
     severity_count_by_month = get_severities_by_month(findings, today)
+    punchcard, ticks = get_punchcard_data(findings, today - relativedelta(weeks=26), 26)
 
-    start_date = today - relativedelta(weeks=26)
-    punchcard, ticks = get_punchcard_data(findings, start_date, 26)
-
-    unassigned_surveys = Answered_Survey.objects.all().filter(
-        assignee_id__isnull=True, completed__gt=0)
+    unassigned_surveys = Answered_Survey.objects.filter(assignee_id__isnull=True, completed__gt=0)
 
     add_breadcrumb(request=request, clear=True)
-    return render(request,
-                  'dojo/dashboard.html',
-                  {'engagement_count': engagement_count,
-                   'finding_count': finding_count,
-                   'mitigated_count': mitigated_count,
-                   'accepted_count': accepted_count,
-                   'critical': severity_count_all['Critical'],
-                   'high': severity_count_all['High'],
-                   'medium': severity_count_all['Medium'],
-                   'low': severity_count_all['Low'],
-                   'info': severity_count_all['Info'],
-                   'by_month': severity_count_by_month,
-                   'punchcard': punchcard,
-                   'ticks': ticks,
-                   'surveys': unassigned_surveys})
+    return render(request, 'dojo/dashboard.html', {
+        'engagement_count': engagement_count,
+        'finding_count': finding_count,
+        'mitigated_count': mitigated_count,
+        'accepted_count': accepted_count,
+        'critical': severity_count_all['Critical'],
+        'high': severity_count_all['High'],
+        'medium': severity_count_all['Medium'],
+        'low': severity_count_all['Low'],
+        'info': severity_count_all['Info'],
+        'by_month': severity_count_by_month,
+        'punchcard': punchcard,
+        'ticks': ticks,
+        'surveys': unassigned_surveys,
+    })
 
 
-def get_severities_all(findings):
-    # order_by is needed due to ordering being present in Meta of Finding
+def get_severities_all(findings) -> Dict[str, int]:
     severities_all = findings.values('severity').annotate(count=Count('severity')).order_by()
-
-    # make sure all keys are present
-    sev_counts_all = {'Critical': 0,
-                  'High': 0,
-                  'Medium': 0,
-                  'Low': 0,
-                  'Info': 0}
-
-    for s in severities_all:
-        sev_counts_all[s['severity']] = s['count']
-
-    return sev_counts_all
+    return defaultdict(lambda: 0, {s['severity']: s['count'] for s in severities_all})
 
 
 def get_severities_by_month(findings, today):
-    by_month = list()
+    severities_by_month = findings\
+        .filter(created__date__gte=(today - relativedelta(months=6)))\
+        .values('created__year', 'created__month', 'severity')\
+        .annotate(count=Count('severity'))\
+        .order_by()
 
-    # order_by is needed due to ordering being present in Meta of Finding
-    # severities_all = findings.values('severity').annotate(count=Count('severity')).order_by()
-    severities_by_month = findings.filter(created__gte=today + relativedelta(months=-6)) \
-                                .values('created__year', 'created__month', 'severity').annotate(count=Count('severity')).order_by('created__year', 'created__month')
+    # The chart expects a, b, c, d, e instead of Critical, High, ...
+    SEVERITY_MAP = {
+        'Critical': 'a',
+        'High':     'b',  # noqa: E241
+        'Medium':   'c',  # noqa: E241
+        'Low':      'd',  # noqa: E241
+        'Info':     'e',  # noqa: E241
+    }
 
     results = {}
     for ms in severities_by_month:
-        year = str(ms['created__year'])
-        month = str(ms['created__month']).zfill(2)
-        key = year + '-' + month
+        key = f"{ms['created__year']}-{ms['created__month']:02}"
+        month_stats = results.setdefault(key, {'y': key, 'a': 0, 'b': 0, 'c': 0, 'd': 0, 'e': 0, None: 0})
+        month_stats[SEVERITY_MAP.get(ms['severity'])] += ms['count']
 
-        if key not in results:
-            # graph expects a, b, c, d, e instead of Critical, High, ...
-            sourcedata = {'y': key, 'a': 0, 'b': 0,
-                    'c': 0, 'd': 0, 'e': 0}
-            results[key] = sourcedata
-
-        month_stats = results[key]
-
-        if ms['severity'] == 'Critical':
-            month_stats['a'] = ms['count']
-        elif ms['severity'] == 'High':
-            month_stats['b'] = ms['count']
-        elif ms['severity'] == 'Medium':
-            month_stats['c'] = ms['count']
-        elif ms['severity'] == 'Low':
-            month_stats['d'] = ms['count']
-        elif ms['severity'] == 'Info':
-            month_stats['e'] = ms['count']
-
-    by_month = [v for k, v in sorted(results.items())]
-    return by_month
+    return [v for k, v in sorted(results.items())]

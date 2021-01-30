@@ -187,8 +187,8 @@ class TestDashboard(TestCase):
         self.assertEqual(1, response.context['info'])
 
         expected = [
-            {'y': f"{self.month_ago.year}-{self.month_ago.month:02}", 'a': 1, 'b': 1, 'c': 1, 'd': 1, 'e': 1},
-            {'y': f"{self.now.year}-{self.now.month:02}",             'a': 1, 'b': 0, 'c': 0, 'd': 0, 'e': 0},  # noqa: E241
+            {'y': f"{self.month_ago.year}-{self.month_ago.month:02}", 'a': 1, 'b': 1, 'c': 1, 'd': 1, 'e': 1, None: 2},
+            {'y': f"{self.now.year}-{self.now.month:02}",             'a': 1, 'b': 0, 'c': 0, 'd': 0, 'e': 0, None: 0},  # noqa: E241
         ]
         self.assertEqual(expected, response.context['by_month'])
 
@@ -205,8 +205,8 @@ class TestDashboard(TestCase):
         self.assertEqual(1, response.context['info'])
 
         expected = [
-            {'y': f"{self.month_ago.year}-{self.month_ago.month:02}", 'a': 1, 'b': 1, 'c': 1, 'd': 1, 'e': 1},
-            {'y': f"{self.now.year}-{self.now.month:02}",             'a': 1, 'b': 0, 'c': 0, 'd': 0, 'e': 0},  # noqa: E241
+            {'y': f"{self.month_ago.year}-{self.month_ago.month:02}", 'a': 1, 'b': 1, 'c': 1, 'd': 1, 'e': 1, None: 2},
+            {'y': f"{self.now.year}-{self.now.month:02}",             'a': 1, 'b': 0, 'c': 0, 'd': 0, 'e': 0, None: 0},  # noqa: E241
         ]
         self.assertEqual(expected, response.context['by_month'])
 
