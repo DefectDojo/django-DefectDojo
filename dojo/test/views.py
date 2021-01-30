@@ -966,6 +966,7 @@ def re_import_scan_results(request, tid):
                     import_settings['minimum_severity'] = min_sev
                     import_settings['close_old_findings'] = close_old_findings
                     import_settings['push_to_jira'] = push_to_jira
+                    import_settings['version'] = version
                     # tags=tags TODO no tags field in api for reimport it seems
                     import_settings['endpoint'] = ','.join(form.cleaned_data['endpoints'])
 

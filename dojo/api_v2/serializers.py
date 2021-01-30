@@ -1529,6 +1529,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 import_settings['minimum_severity'] = min_sev
                 import_settings['close_old_findings'] = close_old_findings
                 import_settings['push_to_jira'] = push_to_jira
+                import_settings['version'] = version
                 # tags=tags TODO no tags field in api for reimport it seems
                 if endpoint_to_add:
                     import_settings['endpoint'] = endpoint_to_add
