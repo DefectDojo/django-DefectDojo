@@ -110,11 +110,19 @@ jobs:
       - name: Initialize
         run: docker-compose up --exit-code-from initializer initializer
 
-      - name: Integration tests
+      - name: Set variables
         env:
           GOOGLE_SHEETS_MADCHAP_PRIVATE_JSON: ${{ secrets.GOOGLE_SHEETS_MADCHAP_PRIVATE_JSON }}
           GOOGLE_SHEETS_MADCHAP_GDRIVE_FOLDER: ${{ secrets.GOOGLE_SHEETS_MADCHAP_GDRIVE_FOLDER }}
           GOOGLE_SHEETS_MADCHAP_EMAIL: ${{ secrets.GOOGLE_SHEETS_MADCHAP_EMAIL }}
+        run: |
+          env
+
+      - name: DEBUG - show env
+        run: |
+          env
+
+      - name: Integration tests
         run: docker-compose up --exit-code-from integration-tests integration-tests
 
       - name: Logs
