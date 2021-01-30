@@ -123,7 +123,7 @@ class BaseTestCase(unittest.TestCase):
         return driver
 
     def goto_google_sheets_configuration_form(self, driver):
-        # if something is terribly wrong, it will fail, even if system_settings is disabled.
+        # if something is terribly wrong, it may still fail, even if system_settings is disabled.
         # See https://github.com/DefectDojo/django-DefectDojo/issues/3742 for reference.
         driver.get(self.base_url + "configure_google_sheets")
         return driver
