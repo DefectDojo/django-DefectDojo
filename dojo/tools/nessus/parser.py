@@ -1,14 +1,16 @@
-import logging
-from xml.dom import NamespaceErr
-from defusedxml import ElementTree
 import csv
+import logging
 import os
 import re
-from dojo.models import Endpoint, Finding, Test
-from cvss import CVSS3
-from cpe import CPE
+from xml.dom import NamespaceErr
+
 import numpy as np
 import pandas as pd
+from cpe import CPE
+from cvss import CVSS3
+from defusedxml import ElementTree
+
+from dojo.models import Endpoint, Finding, Test
 
 LOGGER = logging.getLogger(__name__)
 
