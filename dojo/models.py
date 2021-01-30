@@ -1748,7 +1748,7 @@ class Finding(models.Model):
         if hasattr(settings, 'HASHCODE_FIELDS_PER_SCANNER') and hasattr(settings, 'HASHCODE_ALLOWS_NULL_CWE') and hasattr(settings, 'HASHCODE_ALLOWED_FIELDS'):
             # Default fields
             if self.dynamic_finding:
-                deduplicationLogger.debug('dynamic finding, so including endpoints in hash_code computation as default')
+                deduplicationLogger.debug('dynamic finding, so including endpoints in hash_code computation in default fields (they may be overriden by configuration)')
                 hashcodeFields = ['title', 'cwe', 'line', 'file_path', 'description', 'endpoints']
             else:
                 hashcodeFields = ['title', 'cwe', 'line', 'file_path', 'description']
@@ -1807,18 +1807,37 @@ class Finding(models.Model):
         deduplicationLogger.debug("compute_hash_code_legacy - fields_to_hash = " + fields_to_hash)
         return self.hash_fields(fields_to_hash)
 
-    # Get endpoints from self.unsaved_endpoints
-    # This sometimes reports "None" for some endpoints but we keep it to avoid hash_code change due to this historically behavior
+    # Get endpoints to use for hash_code computation
+    # (This sometimes reports "None")
     def get_endpoints(self):
         endpoint_str = ''
         if len(self.unsaved_endpoints) > 0 and self.id is None:
-            deduplicationLogger.debug("get_endpoints: there are unsaved_endpoints and self.id is None")
-            for e in self.unsaved_endpoints:
-                endpoint_str += str(e.host_with_port)
+            deduplicationLogger.debug("get_endpoints before the finding was saved")
+            # convert list of unsaved endpoints to the list of their canonical representation
+            endpoint_str_list = list(
+                map(
+                    lambda endpoint: str(endpoint),
+                    self.unsaved_endpoints
+                ))
+            # deduplicate (usually done upon saving finding) and sort endpoints
+            endpoint_str = ''.join(
+                sorted(
+                    list(
+                        dict.fromkeys(endpoint_str_list)
+                    )))
         else:
-            deduplicationLogger.debug("get_endpoints: there aren't unsaved_endpoints or self.id is not None. endpoints count: " + str(self.endpoints.count()))
-            for e in self.endpoints.all():
-                endpoint_str += str(e.host_with_port)
+            deduplicationLogger.debug("get_endpoints: after the finding was saved. Endpoints count: " + str(self.endpoints.count()))
+            # convert list of endpoints to the list of their canonical representation
+            endpoint_str_list = list(
+                map(
+                    lambda endpoint: str(endpoint),
+                    self.endpoints.all()
+                ))
+            # sort endpoints strings
+            endpoint_str = ''.join(
+                sorted(
+                    endpoint_str_list
+                ))
         return endpoint_str
 
     # Compute the hash_code from the fields to hash
