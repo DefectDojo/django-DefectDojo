@@ -20,6 +20,9 @@ class GoogleSheetsConfigurationTest(BaseTestCase):
         tmpfile.write(json_file.read())
         driver.find_element_by_name("cred_file").send_keys(tmpfile.name)
         tmpfile.close()
+        # enable the service - will also set the system_settings.enable_google_sheets automatically
+        if not driver.find_element_by_id("id_enable_service").is_selected():
+            driver.find_element_by_id("id_enable_service").click()
         # submit
         driver.find_element_by_name("update").click()
         # Assert ot the query to determine status of failure

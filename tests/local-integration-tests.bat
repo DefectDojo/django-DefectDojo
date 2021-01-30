@@ -2,6 +2,10 @@ set DD_ADMIN_USER=admin
 set DD_ADMIN_PASSWORD=admin
 set DD_BASE_URL=http://localhost:8080/
 
+echo "Running Google Sheets integration test"
+python tests/google_sheets_test.py
+if %ERRORLEVEL% NEQ 0 GOTO END
+
 echo "Running Product type integration tests"
 python tests/product_type_test.py
 if %ERRORLEVEL% NEQ 0 GOTO END
@@ -52,10 +56,6 @@ if %ERRORLEVEL% NEQ 0 GOTO END
 
 echo "Running Check Various Pages integration test"
 python tests/check_various_pages.py
-if %ERRORLEVEL% NEQ 0 GOTO END
-
-echo "Running Google Sheets integration test"
-python tests/google_sheets_test.py
 if %ERRORLEVEL% NEQ 0 GOTO END
 
 REM REM  The below tests are commented out because they are still an unstable work in progress

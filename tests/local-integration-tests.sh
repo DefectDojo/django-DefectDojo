@@ -8,6 +8,13 @@ export DD_BASE_URL='http://localhost:8080/'
 # If any script is unsuccessful a failure message is printed and the test script
 # Exits with status code of 1
 
+test="Check Google Sheets integration test"
+echo "Running: $test"
+if python3 tests/google_sheets_test.py ; then
+    success $test
+else
+    fail $test
+fi
 
 echo "Running Product type integration tests"
 if python3 tests/regulations_test.py ; then
@@ -16,7 +23,6 @@ else
     docker-compose logs uwsgi --tail=120
     echo "Error: Regulation integration test failed."; exit 1
 fi
-
 
 echo "Running Product type integration tests"
 if python3 tests/product_type_test.py ; then
@@ -121,15 +127,6 @@ if python3 tests/check_various_pages.py ; then
 else
     fail $test
 fi
-
-test="Check Google Sheets integration test"
-echo "Running: $test"
-if python3 tests/google_sheets_test.py ; then
-    success $test
-else
-    fail $test
-fi
-
 
 # The below tests are commented out because they are still an unstable work in progress
 ## Once Ready they can be uncommented.
