@@ -49,6 +49,7 @@ RUN \
   rm -rf /var/lib/apt/lists && \
   true
 
+RUN pip3 install --no-cache-dir --upgrade pip
 RUN pip3 install \
 	--no-cache-dir \
 	--no-index \
