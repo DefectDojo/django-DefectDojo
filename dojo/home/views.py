@@ -1,75 +1,56 @@
-# #  dojo home pages
-import logging
-from datetime import datetime, timedelta
+from datetime import timedelta
 from dateutil.relativedelta import relativedelta
 
-from django.contrib.auth.decorators import user_passes_test
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils import timezone
 
-from dojo.models import Finding, Engagement, Risk_Acceptance
-from django.db.models import Count
+from dojo.models import Finding, Engagement
+from django.db.models import Count, Q
 from dojo.utils import add_breadcrumb, get_punchcard_data
-from dojo.finding.views import ACCEPTED_FINDINGS_QUERY
 from dojo.models import Answered_Survey
 
 
-logger = logging.getLogger(__name__)
-
-
 def home(request):
-    if request.user.is_authenticated and request.user.is_staff:
-        return HttpResponseRedirect(reverse('dashboard'))
-    return HttpResponseRedirect(reverse('product'))
+    return HttpResponseRedirect(reverse('dashboard'))
 
 
-@user_passes_test(lambda u: u.is_staff)
 def dashboard(request):
-    now = timezone.now()
-    seven_days_ago = now - timedelta(days=6)  # 6 days plus today
-
-    if request.user.is_superuser or request.user.is_staff:
-        engagement_count = Engagement.objects.filter(active=True).count()
-        finding_count = Finding.objects.filter(verified=True,
-                                               mitigated=None,
-                                               duplicate=False,
-                                               date__range=[seven_days_ago,
-                                                            now]).count()
-        mitigated_count = Finding.objects.filter(mitigated__date__range=[seven_days_ago,
-                                                                   now]).count()
-
-        accepted_findings = Finding.objects.filter(risk_acceptance__created__date__range=[seven_days_ago, now])
-        accepted_findings = accepted_findings.filter(ACCEPTED_FINDINGS_QUERY)
-        accepted_count = accepted_findings.count()
-
-        # forever counts
-        findings = Finding.objects.filter(verified=True, duplicate=False)
+    if request.user.is_staff:
+        engagements = Engagement.objects.all()
+        findings = Finding.objects.all()
     else:
-        engagement_count = Engagement.objects.filter(lead=request.user,
-                                                     active=True).count()
-        finding_count = Finding.objects.filter(reporter=request.user,
-                                               verified=True,
-                                               duplicate=False,
-                                               mitigated=None,
-                                               date__range=[seven_days_ago,
-                                                            now]).count()
-        mitigated_count = Finding.objects.filter(mitigated_by=request.user,
-                                                 mitigated__date__range=[seven_days_ago,
-                                                                   now]).count()
+        engagements = Engagement.objects.filter(
+            Q(product__authorized_users=request.user) |
+            Q(product__prod_type__authorized_users=request.user)
+        ).distinct()
+        findings = Finding.objects.filter(
+            Q(test__engagement__product__authorized_users=request.user) |
+            Q(test__engagement__product__prod_type__authorized_users=request.user)
+        ).distinct()
 
-        accepted_count = len([finding for ra in Risk_Acceptance.objects.filter(
-            owner=request.user, created__date__range=[seven_days_ago, now]) for finding in ra.accepted_findings.all()])
+    findings = findings.filter(duplicate=False)
 
-        # forever counts
-        findings = Finding.objects.filter(reporter=request.user,
-                                          verified=True, duplicate=False)
+    engagement_count = engagements.filter(active=True).count()
+
+    today = timezone.now().date()
+
+    date_range = [today - timedelta(days=6), today]  # 7 days (6 days plus today)
+    finding_count = findings\
+        .filter(created__date__range=date_range)\
+        .count()
+    mitigated_count = findings\
+        .filter(mitigated__date__range=date_range)\
+        .count()
+    accepted_count = findings\
+        .filter(risk_acceptance__created__date__range=date_range)\
+        .count()
 
     severity_count_all = get_severities_all(findings)
-    severity_count_by_month = get_severities_by_month(findings)
+    severity_count_by_month = get_severities_by_month(findings, today)
 
-    start_date = timezone.now() - relativedelta(weeks=26)
+    start_date = today - relativedelta(weeks=26)
     punchcard, ticks = get_punchcard_data(findings, start_date, 26)
 
     unassigned_surveys = Answered_Survey.objects.all().filter(
@@ -110,13 +91,12 @@ def get_severities_all(findings):
     return sev_counts_all
 
 
-def get_severities_by_month(findings):
+def get_severities_by_month(findings, today):
     by_month = list()
 
     # order_by is needed due to ordering being present in Meta of Finding
     # severities_all = findings.values('severity').annotate(count=Count('severity')).order_by()
-    start_date = timezone.make_aware(datetime.combine(timezone.localdate(), datetime.min.time()))
-    severities_by_month = findings.filter(created__gte=start_date + relativedelta(months=-6)) \
+    severities_by_month = findings.filter(created__gte=today + relativedelta(months=-6)) \
                                 .values('created__year', 'created__month', 'severity').annotate(count=Count('severity')).order_by('created__year', 'created__month')
 
     results = {}
