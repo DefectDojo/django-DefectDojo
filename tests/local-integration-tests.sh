@@ -27,7 +27,7 @@ else
 fi
 
 echo "Running Product integration tests"
-if python3 tests/product_test.py ; then 
+if python3 tests/product_test.py ; then
     echo "Success: Product integration tests passed"
 else
     docker-compose logs uwsgi --tail=120
@@ -59,7 +59,7 @@ else
 fi
 
 echo "Running Environment integration tests"
-if python3 tests/environment_test.py ; then 
+if python3 tests/environment_test.py ; then
     echo "Success: Environment integration tests passed"
 else
     docker-compose logs uwsgi --tail=120
@@ -122,13 +122,21 @@ else
     fail $test
 fi
 
+test="Check Google Sheets integration test"
+echo "Running: $test"
+if python3 tests/google_sheets_test.py ; then
+    success $test
+else
+    fail $test
+fi
+
 
 # The below tests are commented out because they are still an unstable work in progress
 ## Once Ready they can be uncommented.
 
 # echo "Running Import Scanner integration test"
 # if python3 tests/import_scanner_test.py ; then
-#     echo "Success: Import Scanner integration tests passed" 
+#     echo "Success: Import Scanner integration tests passed"
 # else
 #     echo "Error: Import Scanner integration test failed"; exit 1
 # fi
