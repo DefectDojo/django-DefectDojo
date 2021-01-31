@@ -52,8 +52,7 @@ class NexposeFullXmlParser(object):
         if tag == 'orderedlist':
             i = 1
             for item in list(node):
-                ret += "<ol>" + str(i) + " " + \
-                    self.parse_html_type(item) + "</ol>"
+                ret += "<ol>" + str(i) + " " + self.parse_html_type(item) + "</ol>"
                 i += 1
         if tag == 'paragraph':
             if len(list(node)) > 0:
@@ -184,8 +183,7 @@ class NexposeFullXmlParser(object):
                         for services in endpoint.iter('services'):
                             for service in list(services):
                                 svc['name'] = service.get('name')
-                                svc['vulns'] = self.parse_tests_type(
-                                    service, vulns)
+                                svc['vulns'] = self.parse_tests_type(service, vulns)
 
                                 for configs in service.iter('configurations'):
                                     for config in list(configs):
