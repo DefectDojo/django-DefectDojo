@@ -15,12 +15,12 @@ from dojo.utils import get_page_items, add_breadcrumb
 from dojo.notifications.helper import create_notification
 from django.db.models import Count, Q
 from django.db.models.query import QuerySet
+from django.conf import settings
 from dojo.authorization.roles_permissions import Permissions, Roles
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.product_type.queries import get_authorized_product_types, get_authorized_members
 from dojo.product.queries import get_authorized_products
-from dojo.feature_decisions import new_authorization_enabled
 
 logger = logging.getLogger(__name__)
 
@@ -152,7 +152,7 @@ def edit_product_type(request, ptid):
     if request.method == "POST" and request.POST.get('edit_product_type'):
         pt_form = Product_TypeForm(request.POST, instance=pt)
         if pt_form.is_valid():
-            if not new_authorization_enabled():
+            if not settings.FEATURE_NEW_AUTHORIZATION:
                 pt.authorized_users.set(pt_form.cleaned_data['authorized_users'])
             pt = pt_form.save()
             messages.add_message(

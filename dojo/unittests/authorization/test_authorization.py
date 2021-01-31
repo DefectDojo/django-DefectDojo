@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.test import TestCase
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 from dojo.models import Product_Type, Product_Type_Member, Product, Product_Member, Engagement, \
     Test, Finding, Endpoint
 from dojo.authorization.authorization import role_has_permission, get_roles_for_permission, \

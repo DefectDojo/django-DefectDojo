@@ -34,9 +34,9 @@ from django.urls import reverse
 from tagulous.forms import TagField
 import logging
 from crum import get_current_user
+from django.conf import settings
 from dojo.authorization.roles_permissions import Permissions, Roles
 from dojo.product_type.queries import get_authorized_product_types
-from dojo.feature_decisions import new_authorization_enabled
 
 logger = logging.getLogger(__name__)
 
@@ -156,7 +156,7 @@ class MonthYearWidget(Widget):
 class Product_TypeForm(forms.ModelForm):
     description = forms.CharField(widget=forms.Textarea(attrs={}),
                                   required=False)
-    if not new_authorization_enabled():
+    if not settings.FEATURE_NEW_AUTHORIZATION:
         authorized_users = forms.ModelMultipleChoiceField(
             queryset=None,
             required=False, label="Authorized Users")
@@ -166,12 +166,12 @@ class Product_TypeForm(forms.ModelForm):
             .exclude(is_active=False).order_by('first_name', 'last_name')
         super(Product_TypeForm, self).__init__(*args, **kwargs)
 
-        if not new_authorization_enabled():
+        if not settings.FEATURE_NEW_AUTHORIZATION:
             self.fields['authorized_users'].queryset = non_staff
 
     class Meta:
         model = Product_Type
-        if new_authorization_enabled():
+        if settings.FEATURE_NEW_AUTHORIZATION:
             fields = ['name', 'description', 'critical_product', 'key_product']
         else:
             fields = ['name', 'description', 'authorized_users', 'critical_product', 'key_product']
