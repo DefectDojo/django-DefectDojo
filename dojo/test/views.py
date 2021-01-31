@@ -848,9 +848,9 @@ def re_import_scan_results(request, tid):
                             except (MultipleObjectsReturned):
                                 pass
 
-                                ep.endpoint_status.add(eps)
-                                finding.endpoints.add(ep)
-                                finding.endpoint_status.add(eps)
+                            ep.endpoint_status.add(eps)
+                            finding.endpoints.add(ep)
+                            finding.endpoint_status.add(eps)
 
                         for endpoint in form.cleaned_data['endpoints']:
                             try:
