@@ -1443,6 +1443,9 @@ class Test_Import_Finding_Action(TimeStampedModel):
         unique_together = (('test_import', 'finding'))
         ordering = ('test_import', 'action', 'finding')
 
+    def __str__(self):
+        return '%i: %s' % (self.finding.id, self.action)
+
 
 class VA(models.Model):
     address = models.TextField(editable=False, default="none")
