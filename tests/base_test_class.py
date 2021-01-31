@@ -47,7 +47,7 @@ class BaseTestCase(unittest.TestCase):
 
             # the next 2 maybe needed in some scenario's for example on WSL or other headless situations
             dd_driver_options.add_argument("--no-sandbox")
-            # dd_driver_options.add_argument("--disable-dev-shm-usage")
+            dd_driver_options.add_argument("--disable-dev-shm-usage")
             dd_driver_options.add_argument("--disable-gpu")  # on windows sometimes chrome can't start with certain gpu driver versions, even in headless mode
 
             # start maximized or at least with sufficient with because datatables will hide certain controls when the screen is too narrow

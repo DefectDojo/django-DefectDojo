@@ -5,15 +5,15 @@ See the file 'doc/LICENSE' for the license information
 
 """
 
+import re
+import string
 from urllib.parse import urlparse
 
-import re
+import html2text
 # from defusedxml import ElementTree as etree
 from lxml import etree
-import html2text
-import string
 
-from dojo.models import Finding, Endpoint
+from dojo.models import Endpoint, Finding
 
 __author__ = "Francisco Amato & @JamesCullum"
 __copyright__ = "Copyright (c) 2013, Infobyte LLC & Panasonic Information Systems Company Europe"
@@ -37,7 +37,7 @@ class BurpXmlParser(object):
     @param test A Dojo Test object
     """
 
-    def __init__(self, xml_output, test):
+    def get_findings(self, xml_output, test):
         self.target = None
         self.port = "80"
         self.host = None
@@ -47,9 +47,9 @@ class BurpXmlParser(object):
             tree = self.parse_xml(xml_output)
 
         if tree is not None:
-            self.items = [data for data in self.get_items(tree, test)]
+            return list([data for data in self.get_items(tree, test)])
         else:
-            self.items = []
+            return list()
 
     def parse_xml(self, xml_file):
         """
