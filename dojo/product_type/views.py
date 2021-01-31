@@ -198,14 +198,13 @@ def add_product_type_member(request, ptid):
                 return HttpResponseRedirect(reverse('view_product_type', args=(ptid, )))
     add_breadcrumb(title="Add Product Type Member", top_level=False, request=request)
     return render(request, 'dojo/new_product_type_member.html', {
-        'name': 'Add Product Type Member',
         'pt': pt,
         'form': memberform,
     })
 
 
-@user_is_authorized(Product_Type, Permissions.Product_Type_Manage_Members, 'ptid')
-def edit_product_type_member(request, ptid, memberid):
+@user_is_authorized(Product_Type_Member, Permissions.Product_Type_Manage_Members, 'memberid')
+def edit_product_type_member(request, memberid):
     member = get_object_or_404(Product_Type_Member, pk=memberid)
     memberform = Edit_Product_Type_MemberForm(instance=member)
     if request.method == 'POST':
@@ -218,10 +217,10 @@ def edit_product_type_member(request, ptid, memberid):
                                         messages.SUCCESS,
                                         'There must be at least one owner.',
                                         extra_tags='alert-warning')
-                    return HttpResponseRedirect(reverse('view_product_type', args=(ptid, )))
+                    return HttpResponseRedirect(reverse('view_product_type', args=(member.product_type.id, )))
 
             if not request.user.is_superuser:
-                own_member = Product_Type_Member.objects.get(user=request.user, product_type=ptid)
+                own_member = Product_Type_Member.objects.get(user=request.user, product_type=member.product_type.id)
             if not request.user.is_superuser and memberform.instance.role > own_member.role:
                 messages.add_message(request,
                                     messages.WARNING,
@@ -233,18 +232,16 @@ def edit_product_type_member(request, ptid, memberid):
                                     messages.SUCCESS,
                                     'Product type member updated successfully.',
                                     extra_tags='alert-success')
-                return HttpResponseRedirect(reverse('view_product_type', args=(ptid, )))
+                return HttpResponseRedirect(reverse('view_product_type', args=(member.product_type.id, )))
     add_breadcrumb(title="Edit Product Type Member", top_level=False, request=request)
     return render(request, 'dojo/edit_product_type_member.html', {
-        'name': 'Edit Product Type Member',
-        'ptid': ptid,
         'memberid': memberid,
         'form': memberform,
     })
 
 
 @user_is_authorized(Product_Type_Member, Permissions.Product_Type_Remove_Member, 'memberid')
-def delete_product_type_member(request, ptid, memberid):
+def delete_product_type_member(request, memberid):
     member = get_object_or_404(Product_Type_Member, pk=memberid)
     memberform = Delete_Product_Type_MemberForm(instance=member)
     if request.method == 'POST':
@@ -257,7 +254,7 @@ def delete_product_type_member(request, ptid, memberid):
                                     messages.SUCCESS,
                                     'There must be at least one owner.',
                                     extra_tags='alert-warning')
-                return HttpResponseRedirect(reverse('view_product_type', args=(ptid, )))
+                return HttpResponseRedirect(reverse('view_product_type', args=(member.product_type.id, )))
 
         user = member.user
         member.delete()
@@ -268,11 +265,9 @@ def delete_product_type_member(request, ptid, memberid):
         if user == request.user:
             return HttpResponseRedirect(reverse('product_type'))
         else:
-            return HttpResponseRedirect(reverse('view_product_type', args=(ptid, )))
+            return HttpResponseRedirect(reverse('view_product_type', args=(member.product_type.id, )))
     add_breadcrumb(title="Delete Product Type Member", top_level=False, request=request)
     return render(request, 'dojo/delete_product_type_member.html', {
-        'name': 'Delete Product Type Member',
-        'ptid': ptid,
         'memberid': memberid,
         'form': memberform,
     })

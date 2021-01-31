@@ -43,11 +43,13 @@ def user_has_permission(user, obj, permission):
             permission.value >= Permissions.Endpoint_View.value and
             permission.value <= Permissions.Endpoint_Delete.value):
         return user_has_permission(user, obj.product, permission)
-    elif (isinstance(obj, Product_Type_Member) and
-            permission == Permissions.Product_Type_Remove_Member):
+    elif (isinstance(obj, Product_Type_Member) and (
+            permission == Permissions.Product_Type_Remove_Member or
+            permission == Permissions.Product_Type_Manage_Members)):
         return obj.user == user or user_has_permission(user, obj.product_type, Permissions.Product_Type_Manage_Members)
-    elif (isinstance(obj, Product_Member) and
-            permission == Permissions.Product_Remove_Member):
+    elif (isinstance(obj, Product_Member) and (
+            permission == Permissions.Product_Remove_Member) or
+            permission == Permissions.Product_Manage_Members):
         return obj.user == user or user_has_permission(user, obj.product, Permissions.Product_Manage_Members)
     else:
         raise NoAuthorizationImplementedError('No authorization implemented for class {} and permission {}'.

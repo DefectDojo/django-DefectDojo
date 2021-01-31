@@ -35,7 +35,8 @@ from tagulous.forms import TagField
 import logging
 from crum import get_current_user
 from django.conf import settings
-from dojo.authorization.roles_permissions import Roles
+from dojo.authorization.roles_permissions import Permissions, Roles
+from dojo.product_type.queries import get_authorized_product_types
 
 logger = logging.getLogger(__name__)
 
@@ -240,7 +241,7 @@ class ProductForm(forms.ModelForm):
                                   required=True)
 
     prod_type = forms.ModelChoiceField(label='Product Type',
-                                       queryset=Product_Type.objects.all().order_by('name'),
+                                       queryset=None,
                                        required=True)
 
     authorized_users = forms.ModelMultipleChoiceField(
@@ -260,6 +261,7 @@ class ProductForm(forms.ModelForm):
             .exclude(is_active=False).order_by('first_name', 'last_name')
         super(ProductForm, self).__init__(*args, **kwargs)
         self.fields['authorized_users'].queryset = non_staff
+        self.fields['prod_type'].queryset = get_authorized_product_types(Permissions.Product_Type_Add_Product)
 
     class Meta:
         model = Product

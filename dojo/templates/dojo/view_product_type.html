@@ -166,13 +166,13 @@
                                                 <ul class="dropdown-menu">
                                                     {% if pt|has_object_permission:Permissions.Product_Type_Manage_Members %}
                                                     <li>
-                                                        <a class="" href="{% url 'edit_product_type_member' pt.id member.id %}">
+                                                        <a class="" href="{% url 'edit_product_type_member' member.id %}">
                                                         <i class="fa fa-pencil-square-o"></i> Edit</a>
                                                     </li>
                                                     {% endif %}
                                                     {% if member|has_object_permission:Permissions.Product_Type_Remove_Member %}
                                                     <li>
-                                                        <a class="" href="{% url 'delete_product_type_member' pt.id member.id %}">
+                                                        <a class="" href="{% url 'delete_product_type_member' member.id %}">
                                                         <i class="fa fa-trash"></i> Delete</a>
                                                     </li>
                                                     {% endif %}
