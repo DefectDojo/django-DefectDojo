@@ -868,6 +868,7 @@ def edit_product(request, pid):
                    })
 
 
+# @user_passes_test(lambda u: u.is_staff)
 @user_must_be_authorized(Product, 'staff', 'pid')
 def delete_product(request, pid):
     product = get_object_or_404(Product, pk=pid)

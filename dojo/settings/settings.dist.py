@@ -167,7 +167,7 @@ env = environ.Env(
     DD_LEGACY_API_V1_ENABLE=(bool, False),
 
     # feature flag for the new permissions
-    DD_FEATURE_NEW_AUTHORIZATION=(bool, True)
+    DD_FEATURE_NEW_AUTHORIZATION=(bool, False)
 )
 
 
