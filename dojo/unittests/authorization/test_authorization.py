@@ -9,6 +9,7 @@ from dojo.authorization.authorization import role_has_permission, get_roles_for_
     RoleDoesNotExistError, PermissionDoesNotExistError, NoAuthorizationImplementedError
 from dojo.authorization.roles_permissions import Permissions, Roles
 
+
 class TestAuthorization(TestCase):
 
     @classmethod
@@ -50,7 +51,7 @@ class TestAuthorization(TestCase):
 
     def test_role_has_permission_exception(self):
         with self.assertRaisesMessage(RoleDoesNotExistError,
-            'Role 9999 does not exist'):
+                'Role 9999 does not exist'):
             role_has_permission(9999, Permissions.Product_Type_Edit)
 
     def test_role_has_permission_true(self):
@@ -62,8 +63,8 @@ class TestAuthorization(TestCase):
         self.assertFalse(result)
 
     def test_get_roles_for_permission_exception(self):
-        with self.assertRaisesMessage(PermissionDoesNotExistError, 
-            'Permission 9999 does not exist'):
+        with self.assertRaisesMessage(PermissionDoesNotExistError,
+                'Permission 9999 does not exist'):
             get_roles_for_permission(9999)
 
     def test_get_roles_for_permission_success(self):
@@ -85,8 +86,8 @@ class TestAuthorization(TestCase):
         self.assertEqual(mock_get.call_args[1]['product_type'], self.product_type)
 
     def test_user_has_permission_exception(self):
-        with self.assertRaisesMessage(NoAuthorizationImplementedError, 
-            'No authorization implemented for class Product_Type_Member and permission 1006'):
+        with self.assertRaisesMessage(NoAuthorizationImplementedError,
+                'No authorization implemented for class Product_Type_Member and permission 1006'):
             user_has_permission(self.user, self.product_type_member, Permissions.Product_Type_Delete)
 
     def test_user_has_permission_product_type_no_member(self):
