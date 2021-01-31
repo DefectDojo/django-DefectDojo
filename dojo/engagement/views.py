@@ -717,7 +717,7 @@ def import_scan_results(request, eid=None, pid=None):
                     test_import.save()
 
                     test_import_finding_action_list = []
-                    # for finding in old_findings:
+                    # for finding in old_findings:  # not implemented via UI
                     #     logger.debug('preparing Test_Import_Finding_Action for finding: %i', finding.id)
                     #     test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_CLOSED_FINDING))
                     for finding in new_findings:
