@@ -35,6 +35,7 @@ from tagulous.forms import TagField
 import logging
 from crum import get_current_user
 from dojo.utils import get_system_setting
+from django.conf import settings
 from dojo.authorization.roles_permissions import Permissions, Roles
 from dojo.product_type.queries import get_authorized_product_types
 
