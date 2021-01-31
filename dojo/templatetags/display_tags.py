@@ -927,6 +927,7 @@ def import_settings_tag(test_import, autoescape=True):
             <b>Minimum Severity:</b> %s<br/>
             <b>Close Old Findings:</b> %s<br/>
             <b>Push to jira:</b> %s<br/>
+            <b>Tags:</b> %s<br/>
             <b>Endpoint:</b> %s<br/>
             <b>Version:</b> %s<br/>
         "
@@ -942,6 +943,7 @@ def import_settings_tag(test_import, autoescape=True):
                                 esc(test_import.import_settings.get('minimum_severity', None)),
                                 esc(test_import.import_settings.get('close_old_findings', None)),
                                 esc(test_import.import_settings.get('push_to_jira', None)),
+                                esc(test_import.import_settings.get('tags', None)),
                                 esc(test_import.import_settings.get('endpoint', None)),
                                 esc(test_import.import_settings.get('version', None))))
 
@@ -958,14 +960,15 @@ def import_history(finding, autoescape=True):
 
     status_changes = finding.test_import_finding_action_set.all()
 
-    if not status_changes:
+    if not status_changes or len(status_changes) < 2:
+        # assumption is that the first status_change is the initial import
         return ''
 
     html = """
 
     <i class="fa fa-history has-popover"
         title="<i class='fa fa-history'></i> <b>Import History</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="right"
-        data-content="%s<br/>Currently only showing status changes made by reimport."
+        data-content="%s<br/>Currently only showing status changes made by import/reimport."
     </i>
     """
 

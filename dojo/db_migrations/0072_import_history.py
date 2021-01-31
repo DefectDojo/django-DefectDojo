@@ -21,6 +21,7 @@ class Migration(migrations.Migration):
                 ('modified', django_extensions.db.fields.ModificationDateTimeField(auto_now=True, verbose_name='modified')),
                 ('import_settings', django_jsonfield_backport.models.JSONField(null=True)),
                 ('version', models.CharField(blank=True, max_length=100, null=True)),
+                ('type', models.CharField(default='unknown', max_length=64, null=False)),
             ],
             options={
                 'ordering': ('-id',),
@@ -43,7 +44,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='test_import',
-            name='findings',
+            name='findings_affected',
             field=models.ManyToManyField(through='dojo.Test_Import_Finding_Action', to='dojo.Finding'),
         ),
         migrations.AddField(
@@ -51,4 +52,9 @@ class Migration(migrations.Migration):
             name='test',
             field=models.ForeignKey(editable=False, on_delete=django.db.models.deletion.CASCADE, to='dojo.Test'),
         ),
+        migrations.AddIndex(
+            model_name='test_import',
+            index=models.Index(fields=['created', 'test', 'type'], name='dojo_test_i_created_951f4e_idx'),
+        ),
+
     ]

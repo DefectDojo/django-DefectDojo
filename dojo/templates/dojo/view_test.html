@@ -177,7 +177,7 @@
                 <div class="clearfix">
                     <h4>Import History ({{ paged_test_imports.total_count }})
                         <i class="fa fa-question-circle has-popover" data-trigger="hover"
-                            data-content="List of reimports that created/closed/reactivated any findings in this test."
+                            data-content="List of imports/reimports that created/closed/reactivated any findings in this test."
                             data-placement="right" data-container="body" data-original-title="" title="">
                         </i>
                         <span class="pull-right">
@@ -232,13 +232,6 @@
                             </tr>
                             {% endif %}
                         {% endfor %}
-                            <tr>
-                                <td>{{ test.created|date:"DATETIME_FORMAT" }}</td>
-                                <td></td>
-                                <td>initial import</td>
-                                <td></td>
-                                <td></td>
-                            </tr>
                         </tbody>
                     </table>
                 {% else %}

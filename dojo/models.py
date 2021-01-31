@@ -1405,10 +1405,15 @@ class Test(models.Model):
 
 
 class Test_Import(TimeStampedModel):
+
+    IMPORT_TYPE = 'import'
+    REIMPORT_TYPE = 'reimport'
+
     test = models.ForeignKey(Test, editable=False, null=False, blank=False, on_delete=models.CASCADE)
-    findings = models.ManyToManyField('Finding', through='Test_Import_Finding_Action')
+    findings_affected = models.ManyToManyField('Finding', through='Test_Import_Finding_Action')
     import_settings = JSONField(null=True)
     version = models.CharField(max_length=100, null=True, blank=True)
+    type = models.CharField(max_length=64, null=False, blank=False, default='unknown')
 
     def get_queryset(self):
         logger.debug('prefetch test_import counts')
@@ -1421,6 +1426,9 @@ class Test_Import(TimeStampedModel):
 
     class Meta:
         ordering = ('-id',)
+        indexes = [
+            models.Index(fields=['created', 'test', 'type']),
+        ]
 
     def __str__(self):
         return self.created.strftime("%Y-%m-%d %H:%M:%S")

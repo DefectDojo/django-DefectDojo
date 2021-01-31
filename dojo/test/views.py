@@ -49,8 +49,8 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 @user_must_be_authorized(Test, 'view', 'tid')
 def view_test(request, tid):
     tests_prefetched = Test.objects.all()
-    tests_prefetched = tests_prefetched.annotate(total_reimport_count=Count('test_import__id'))
-    tests_prefetched = tests_prefetched.prefetch_related(Prefetch('test_import_set', queryset=Test_Import.objects.filter(~Q(findings=None))))
+    tests_prefetched = tests_prefetched.annotate(total_reimport_count=Count('test_import__id', filter=Q(test_import__type=Test_Import.REIMPORT_TYPE), distinct=True))
+    tests_prefetched = tests_prefetched.prefetch_related(Prefetch('test_import_set', queryset=Test_Import.objects.filter(~Q(findings_affected=None))))
     tests_prefetched = tests_prefetched.prefetch_related('test_import_set__test_import_finding_action_set')
 
     test = get_object_or_404(tests_prefetched, pk=tid)
@@ -970,7 +970,7 @@ def re_import_scan_results(request, tid):
                     # tags=tags TODO no tags field in api for reimport it seems
                     import_settings['endpoint'] = ','.join(form.cleaned_data['endpoints'])
 
-                    test_import = Test_Import(test=test, import_settings=import_settings, version=version)
+                    test_import = Test_Import(test=test, import_settings=import_settings, version=version, type=Test_Import.REIMPORT_TYPE)
                     test_import.save()
 
                     test_import_finding_action_list = []

@@ -26,8 +26,8 @@ from dojo.forms import CheckForm, \
     CredMappingForm, JIRAEngagementForm, JIRAImportScanForm, TypedNoteForm, JIRAProjectForm, \
     EditRiskAcceptanceForm
 
-from dojo.models import Finding, Product, Engagement, Test, \
-    Check_List, Test_Type, Notes, \
+from dojo.models import Finding, IMPORT_CREATED_FINDING, Product, Engagement, Test, \
+    Check_List, Test_Import, Test_Import_Finding_Action, Test_Type, Notes, \
     Risk_Acceptance, Development_Environment, BurpRawRequestResponse, Endpoint, \
     Cred_Mapping, Dojo_User, System_Settings, Note_Type, Endpoint_Status
 from dojo.tools.factory import handles_active_verified_statuses
@@ -270,7 +270,7 @@ def view_engagement(request, eid):
         .annotate(count_findings_test_active_verified=Count('finding__id', filter=Q(finding__active=True) & Q(finding__verified=True), distinct=True))
         .annotate(count_findings_test_mitigated=Count('finding__id', filter=Q(finding__is_Mitigated=True), distinct=True))
         .annotate(count_findings_test_dups=Count('finding__id', filter=Q(finding__duplicate=True), distinct=True))
-        .annotate(total_reimport_count=Count('test_import__id', distinct=True))
+        .annotate(total_reimport_count=Count('test_import__id', filter=Q(test_import__type=Test_Import.REIMPORT_TYPE), distinct=True))
         .order_by('test_type__name', '-updated')
     )
 
@@ -612,6 +612,7 @@ def import_scan_results(request, eid=None, pid=None):
                 items = parser_findings
                 logger.debug('starting reimport of %i items.', len(items))
                 i = 0
+                new_findings = []
                 for item in items:
                     sev = item.severity
                     if sev == 'Information' or sev == 'Informational':
@@ -692,12 +693,38 @@ def import_scan_results(request, eid=None, pid=None):
                         item.endpoint_status.add(eps)
 
                     item.save(false_history=True, push_to_jira=push_to_jira)
+                    new_findings.append(item)
 
                     if item.unsaved_tags is not None:
                         item.tags = item.unsaved_tags
 
                     finding_count += 1
                     i += 1
+
+                if settings.TRACK_IMPORT_HISTORY:
+                    import_settings = {}  # json field
+                    import_settings['active'] = active
+                    import_settings['verified'] = verified
+                    import_settings['minimum_severity'] = min_sev
+                    import_settings['close_old_findings'] = None  # not implemented via UI
+                    import_settings['push_to_jira'] = push_to_jira
+                    import_settings['version'] = version
+                    import_settings['tags'] = tags
+                    # if endpoint_to_add:    # not implemented via UI
+                    #     import_settings['endpoint'] = endpoint_to_add
+
+                    test_import = Test_Import(test=t, import_settings=import_settings, version=version, type=Test_Import.IMPORT_TYPE)
+                    test_import.save()
+
+                    test_import_finding_action_list = []
+                    # for finding in old_findings:
+                    #     logger.debug('preparing Test_Import_Finding_Action for finding: %i', finding.id)
+                    #     test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_CLOSED_FINDING))
+                    for finding in new_findings:
+                        logger.debug('preparing Test_Import_Finding_Action for finding: %i', finding.id)
+                        test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_CREATED_FINDING))
+
+                    Test_Import_Finding_Action.objects.bulk_create(test_import_finding_action_list)
 
                 messages.add_message(
                     request,

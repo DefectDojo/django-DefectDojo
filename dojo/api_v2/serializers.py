@@ -1070,6 +1070,7 @@ class ImportScanSerializer(serializers.Serializer):
         close_old_findings = data['close_old_findings']
         active = data['active']
         verified = data['verified']
+        min_sev = data['minimum_severity']
         test_type, created = Test_Type.objects.get_or_create(
             name=data.get('test_type', data['scan_type']))
         endpoint_to_add = data['endpoint_to_add']
@@ -1078,13 +1079,20 @@ class ImportScanSerializer(serializers.Serializer):
         if settings.USE_TZ:
             scan_date_time = timezone.make_aware(scan_date_time, timezone.get_default_timezone())
 
-        version = ''
+        version = None
         if 'version' in data:
             version = data['version']
+
         # Will save in the provided environment or in the `Development` one if absent
         environment_name = data.get('environment', 'Development')
-        environment = Development_Environment.objects.get(name=environment_name)
 
+        environment = Development_Environment.objects.get(name=environment_name)
+        tags = None
+        if 'tags' in data:
+            logger.debug('import scan tags: %s', data['tags'])
+            tags = data['tags']
+
+        print(tags)
         test = Test(
             engagement=data['engagement'],
             lead=data['lead'],
@@ -1093,15 +1101,12 @@ class ImportScanSerializer(serializers.Serializer):
             target_end=data['scan_date'],
             environment=environment,
             percent_complete=100,
-            version=version)
+            version=version,
+            tags=tags)
         try:
             test.full_clean()
         except ValidationError:
             pass
-
-        if 'tags' in data:
-            logger.debug('import scan tags: %s', data['tags'])
-            test.tags = data['tags']
 
         test.save()
         # return the id of the created test, can't find a better way because this is not a ModelSerializer....
@@ -1244,6 +1249,31 @@ class ImportScanSerializer(serializers.Serializer):
 
                 old_finding.tags.add('stale')
                 old_finding.save(dedupe_option=False)
+
+        if settings.TRACK_IMPORT_HISTORY:
+            import_settings = {}  # json field
+            import_settings['active'] = active
+            import_settings['verified'] = verified
+            import_settings['minimum_severity'] = min_sev
+            import_settings['close_old_findings'] = close_old_findings
+            import_settings['push_to_jira'] = push_to_jira
+            import_settings['version'] = version
+            import_settings['tags'] = tags
+            if endpoint_to_add:
+                import_settings['endpoint'] = endpoint_to_add
+
+            test_import = Test_Import(test=test, import_settings=import_settings, version=version, type=Test_Import.IMPORT_TYPE)
+            test_import.save()
+
+            test_import_finding_action_list = []
+            for finding in old_findings:
+                logger.debug('preparing Test_Import_Finding_Action for finding: %i', finding.id)
+                test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_CLOSED_FINDING))
+            for finding in new_findings:
+                logger.debug('preparing Test_Import_Finding_Action for finding: %i', finding.id)
+                test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_CREATED_FINDING))
+
+            Test_Import_Finding_Action.objects.bulk_create(test_import_finding_action_list)
 
         logger.debug('done importing findings')
 
@@ -1550,7 +1580,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 if endpoint_to_add:
                     import_settings['endpoint'] = endpoint_to_add
 
-                test_import = Test_Import(test=test, import_settings=import_settings, version=version)
+                test_import = Test_Import(test=test, import_settings=import_settings, version=version, type=Test_Import.REIMPORT_TYPE)
                 test_import.save()
 
                 test_import_finding_action_list = []
