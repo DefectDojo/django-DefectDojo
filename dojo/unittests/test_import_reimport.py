@@ -537,6 +537,7 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
         # self.url = reverse(self.viewname + '-list')
 
 
+@override_settings(TRACK_IMPORT_HISTORY=True)
 class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
     fixtures = ['dojo_testdata.json']
     client_ui = Client()
