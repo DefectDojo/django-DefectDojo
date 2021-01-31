@@ -225,6 +225,8 @@ postgresql:
 cloudsql:
   # To use CloudSQL in GKE set 'enable: true'
   enabled: false
+  # By default, the proxy has verbose logging. Set this to false to make it less verbose
+  verbose: true
   image:
     # set repo and image tag of gce-proxy
     repository: gcr.io/cloudsql-docker/gce-proxy
@@ -232,6 +234,17 @@ cloudsql:
     pullPolicy: IfNotPresent
   # set CloudSQL instance: 'project:zone:instancename'
   instance: ""
+
+# Settings to make running the chart on GKE simpler
+gke:
+  # Set to true to configure the Ingress to use the GKE provided ingress controller
+  useGKEIngress: false
+  # Set to true to have GKE automatically provision a TLS certificate for the host specified
+  # Requires useGKEIngress to be set to true
+  # When using this option, be sure to set django.ingress.activateTLS to false
+  useManagedCertificate: false
+  # Workload Identity allows the K8s service account to assume the IAM access of a GCP service account to interact with other GCP services
+  workloadIdentityEmail: ""
 
 rabbitmq:
   enabled: true
