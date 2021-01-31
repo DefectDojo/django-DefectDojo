@@ -17,7 +17,6 @@ from django.db.models import Count, Q
 from django.db.models.query import QuerySet
 from django.conf import settings
 from dojo.authorization.roles_permissions import Permissions, Roles
-from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.product_type.queries import get_authorized_product_types, get_authorized_members
 from dojo.product.queries import get_authorized_products
