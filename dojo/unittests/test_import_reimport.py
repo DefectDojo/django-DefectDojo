@@ -5,6 +5,7 @@ from rest_framework.test import APIClient
 from django.test.client import Client
 from .dojo_test_case import DojoAPITestCase
 from .test_utils import assertTestImportModelsCreated
+from django.test import override_settings
 # from unittest import skip
 import logging
 
@@ -517,6 +518,7 @@ class ImportReimportMixin(object):
         self.assertEqual(notes_count_before, self.db_notes_count())
 
 
+@override_settings(TRACK_IMPORT_HISTORY=True)
 class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
     fixtures = ['dojo_testdata.json']
 
