@@ -25,7 +25,7 @@ from dojo.api import UserResource, ProductResource, EngagementResource, \
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraInstanceViewSet, \
     JiraIssuesViewSet, JiraProjectViewSet, ProductViewSet, ScanSettingsViewSet, \
-    ScansViewSet, StubFindingsViewSet, TestsViewSet, TestTypesViewSet, \
+    ScansViewSet, StubFindingsViewSet, TestImportViewSet, TestsViewSet, TestTypesViewSet, \
     ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
     UsersViewSet, ImportScanView, ReImportScanView, ProductTypeViewSet, DojoMetaViewSet, \
     DevelopmentEnvironmentViewSet, NotesViewSet, NoteTypeViewSet, SystemSettingsViewSet, \
@@ -124,6 +124,7 @@ v2_api.register(r'sonarqube_product_configurations', SonarqubeProductViewSet)
 v2_api.register(r'stub_findings', StubFindingsViewSet)
 v2_api.register(r'tests', TestsViewSet)
 v2_api.register(r'test_types', TestTypesViewSet)
+v2_api.register(r'test_imports', TestImportViewSet)
 v2_api.register(r'tool_configurations', ToolConfigurationsViewSet)
 v2_api.register(r'tool_product_settings', ToolProductSettingsViewSet)
 v2_api.register(r'tool_types', ToolTypesViewSet)

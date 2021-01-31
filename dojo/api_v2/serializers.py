@@ -678,6 +678,21 @@ class TestToFilesSerializer(serializers.Serializer):
     files = FileSerializer(many=True)
 
 
+class TestImportFindingActionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Test_Import_Finding_Action
+        fields = '__all__'
+
+
+class TestImportSerializer(serializers.ModelSerializer):
+    # findings = TestImportFindingActionSerializer(source='test_import_finding_action', many=True, read_only=True)
+    test_import_finding_action_set = TestImportFindingActionSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Test_Import
+        fields = '__all__'
+
+
 class RiskAcceptanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Risk_Acceptance
@@ -864,7 +879,8 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
         return super().build_relational_field(field_name, relation_info)
 
     def get_request_response(self, obj):
-        burp_req_resp = BurpRawRequestResponse.objects.filter(finding=obj)
+        # burp_req_resp = BurpRawRequestResponse.objects.filter(finding=obj)
+        burp_req_resp = obj.burprawrequestresponse_set.all()
         burp_list = []
         for burp in burp_req_resp:
             request = burp.get_request()
