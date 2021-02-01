@@ -12,7 +12,7 @@ def get_root_node(filename):
     :return:
     """
     try:
-        tree = etree.parse(filename)
+        tree = etree.parse(filename, etree.XMLParser(resolve_entities=False))
         return tree.getroot()
     except XMLSyntaxError as xse:
         logging.error("ERROR : error parsing XML file {filename}".format(filename=filename))

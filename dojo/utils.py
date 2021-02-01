@@ -35,6 +35,7 @@ import crum
 from celery.decorators import task
 from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
 
+
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
@@ -131,8 +132,9 @@ def do_dedupe_finding(new_finding, *args, **kwargs):
             elif(deduplicationAlgorithm == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE):
                 deduplicate_uid_or_hash_code(new_finding)
             else:
+                logger.debug('dedupe legacy start')
                 deduplicate_legacy(new_finding)
-                logger.debug('done legacy')
+                logger.debug('dedupe legacy start.done.')
         else:
             deduplicationLogger.debug("no configuration per parser found; using legacy algorithm")
             deduplicate_legacy(new_finding)
@@ -677,8 +679,6 @@ def get_punchcard_data(objs, start_date, weeks, view='Finding'):
             day_count = day['count']
 
             created = timezone.make_aware(datetime.combine(created, datetime.min.time()))
-
-            # print('%s %s %s', created, created.weekday(), calendar.day_name[created.weekday()], day_count)
 
             if created < start_of_week:
                 raise ValueError('date found outside supported range: ' + str(created))
@@ -1419,9 +1419,9 @@ def prepare_for_view(encrypted_value):
     return decrypted_value
 
 
-def get_system_setting(setting):
+def get_system_setting(setting, default=None):
     system_settings = System_Settings.objects.get()
-    return getattr(system_settings, setting, None)
+    return getattr(system_settings, setting, (default if default is not None else None))
 
 
 def calculate_grade(product):
@@ -1630,6 +1630,18 @@ def merge_sets_safe(set1, set2):
     # return {*set1, *set2}
 
 
+def is_safe_url(url):
+    try:
+        # available in django 3+
+        from django.utils.http import url_has_allowed_host_and_scheme
+    except ImportError:
+        # django < 3
+        from django.utils.http import \
+            is_safe_url as url_has_allowed_host_and_scheme
+
+    return url_has_allowed_host_and_scheme(url, allowed_hosts=None)
+
+
 def get_return_url(request):
     return_url = request.POST.get('return_url', None)
     # print('return_url from POST: ', return_url)
@@ -1643,13 +1655,22 @@ def get_return_url(request):
 
 def redirect_to_return_url_or_else(request, or_else):
     return_url = get_return_url(request)
+
     if return_url:
-        return HttpResponseRedirect(return_url.strip())
+        # logger.debug('redirecting to %s: ', return_url.strip())
+        return redirect(request, return_url.strip())
     elif or_else:
-        return HttpResponseRedirect(or_else)
+        return redirect(request, or_else)
     else:
         messages.add_message(request, messages.ERROR, 'Unable to redirect anywhere.', extra_tags='alert-danger')
-        return HttpResponseRedirect(request.get_full_path())
+        return redirect(request, request.get_full_path())
+
+
+def redirect(request, redirect_to):
+    """Only allow redirects to allowed_hosts to prevent open redirects"""
+    if is_safe_url(redirect_to):
+        return HttpResponseRedirect(redirect_to)
+    raise ValueError('invalid redirect, host and scheme not in allowed_hosts')
 
 
 def file_size_mb(file_obj):
@@ -1835,3 +1856,29 @@ def create_bleached_link(url, title):
     link += title
     link += '</a>'
     return bleach.clean(link, tags=['a'], attributes={'a': ['href', 'target', 'title']})
+
+
+def get_object_or_none(klass, *args, **kwargs):
+    """
+    Use get() to return an object, or return None
+    does not exist.
+    klass may be a Model, Manager, or QuerySet object. All other passed
+    arguments and keyword arguments are used in the get() query.
+    Like with QuerySet.get(), MultipleObjectsReturned is raised if more than
+    one object is found.
+    """
+    queryset = klass
+
+    if hasattr(klass, '_default_manager'):
+        queryset = klass._default_manager.all()
+
+    if not hasattr(queryset, 'get'):
+        klass__name = klass.__name__ if isinstance(klass, type) else klass.__class__.__name__
+        raise ValueError(
+            "First argument to get_object_or_None() must be a Model, Manager, "
+            "or QuerySet, not '%s'." % klass__name
+        )
+    try:
+        return queryset.get(*args, **kwargs)
+    except queryset.model.DoesNotExist:
+        return None

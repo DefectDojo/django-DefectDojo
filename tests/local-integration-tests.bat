@@ -3,75 +3,66 @@ set DD_ADMIN_PASSWORD=admin
 set DD_BASE_URL=http://localhost:8080/
 
 echo "Running Product type integration tests"
-python tests/Product_type_unit_test.py
+python tests/product_type_test.py
 if %ERRORLEVEL% NEQ 0 GOTO END
 
 echo "Running Product integration tests"
-python tests/Product_unit_test.py
+python tests/product_test.py
 if %ERRORLEVEL% NEQ 0 GOTO END
 
 echo "Running Endpoint integration tests"
-python tests/Endpoint_unit_test.py
+python tests/endpoint_test.py
 if %ERRORLEVEL% NEQ 0 GOTO END
 
 echo "Running Engagement integration tests"
-python tests/Engagement_unit_test.py
+python tests/engagement_test.py
 if %ERRORLEVEL% NEQ 0 GOTO END
 
 echo "Running Environment integration tests"
-python tests/Environment_unit_test.py 
+python tests/environment_test.py 
 if %ERRORLEVEL% NEQ 0 GOTO END
 
 echo "Running Finding integration tests"
-python tests/Finding_unit_test.py
+python tests/finding_test.py
 if %ERRORLEVEL% NEQ 0 GOTO END
 
 echo "Running Test integration tests"
-python tests/Test_unit_test.py
+python tests/test_test.py
 if %ERRORLEVEL% NEQ 0 GOTO END
 
 echo "Running User integration tests"
-python tests/User_unit_test.py
+python tests/user_test.py
 if %ERRORLEVEL% NEQ 0 GOTO END
 
 echo "Running Ibm Appscan integration test"
 python tests/ibm_appscan_test.py
 if %ERRORLEVEL% NEQ 0 GOTO END
 
-everything in the smoke test is already covered by the other tests
-echo "Running Smoke integration test"
-python tests/smoke_test.py
-if %ERRORLEVEL% NEQ 0 GOTO END
-
-echo "Running Check Status test"
-python tests/check_status.py
+echo "Running Search integration test"
+python tests/search_test.py
 if %ERRORLEVEL% NEQ 0 GOTO END
 
 echo "Running Dedupe integration tests"
-python tests/dedupe_unit_test.py
+python tests/dedupe_test.py
 if %ERRORLEVEL% NEQ 0 GOTO END
 
 echo "Running Report Builder integration tests"
-python tests/Report_builder_unit_test.py
+python tests/report_builder_test.py
 if %ERRORLEVEL% NEQ 0 GOTO END
 
+echo "Running Check Various Pages integration test"
+python tests/check_various_pages.py
+if %ERRORLEVEL% NEQ 0 GOTO END
 
 
 REM REM  The below tests are commented out because they are still an unstable work in progress
 REM REM Once Ready they can be uncommented.
 
 REM REM echo "Running Import Scanner integration test"
-REM REM python tests/Import_scanner_unit_test.py
+rem rem python tests/import_scanner_test.py
 REM REM     echo "Success: Import Scanner integration tests passed" 
 REM REM else
 REM REM     echo "Error: Import Scanner integration test failed"; exit 1
-REM REM fi
-
-REM REM echo "Running Check Status UI integration test"
-REM REM python tests/check_status_ui.py
-REM REM     echo "Success: Check Status UI tests passed"
-REM REM else
-REM REM     echo "Error: Check Status UI test failed"; exit 1
 REM REM fi
 
 REM REM echo "Running Zap integration test"

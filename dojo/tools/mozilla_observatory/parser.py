@@ -1,17 +1,15 @@
-import json
 import hashlib
+import json
 from urllib.parse import urlparse
+
 from dojo.models import Endpoint, Finding
 
 __author__ = 'dr3dd589'
 
 
 class MozillaObservatoryJSONParser(object):
-    def __init__(self, file, test):
-        self.dupes = dict()
-        self.items = ()
-        if file is None:
-            return
+    def get_findings(self, file, test):
+        dupes = dict()
         data = file.read()
         try:
             tree = json.loads(str(data, 'utf-8'))
@@ -46,13 +44,13 @@ class MozillaObservatoryJSONParser(object):
 
                 dupe_key = hashlib.md5(str(description + title).encode('utf-8')).hexdigest()
 
-                if dupe_key in self.dupes:
-                    finding = self.dupes[dupe_key]
+                if dupe_key in dupes:
+                    finding = dupes[dupe_key]
                     if finding.description:
                         finding.description = finding.description
-                    self.dupes[dupe_key] = finding
+                    dupes[dupe_key] = finding
                 else:
-                    self.dupes[dupe_key] = True
+                    dupes[dupe_key] = True
 
                     finding = Finding(title=title,
                                     test=test,
@@ -67,7 +65,7 @@ class MozillaObservatoryJSONParser(object):
                                     references=references,
                                     dynamic_finding=True)
                     finding.unsaved_endpoints = list()
-                    self.dupes[dupe_key] = finding
+                    dupes[dupe_key] = finding
 
                     if url is not None:
                         finding.unsaved_endpoints.append(Endpoint(
@@ -75,7 +73,7 @@ class MozillaObservatoryJSONParser(object):
                                 path=path,
                                 protocol=protocol,
                                 query=query, fragment=fragment))
-            self.items = self.dupes.values()
+        return dupes.values()
 
     def get_severity(self, num_severity):
         if num_severity >= -10:

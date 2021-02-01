@@ -2,17 +2,17 @@ __author__ = 'Jay Paz'
 import collections
 import logging
 from datetime import timedelta, datetime
-
+from django.apps import apps
 from auditlog.models import LogEntry
 from django.contrib.auth.models import User
-from django.utils import six
+import six
 from django.utils.translation import ugettext_lazy as _
 from django_filters import FilterSet, CharFilter, OrderingFilter, \
     ModelMultipleChoiceFilter, ModelChoiceFilter, MultipleChoiceFilter, \
     BooleanFilter, NumberFilter, DateFilter
 from django_filters import rest_framework as filters
 from django_filters.filters import ChoiceFilter, _truncate, DateTimeFilter
-from pytz import timezone
+import pytz
 from django.db.models import Q
 from dojo.models import Dojo_User, Product_Type, Finding, Product, Test_Type, \
     Endpoint, Development_Environment, Finding_Template, Report, Note_Type, \
@@ -27,7 +27,7 @@ from crum import get_current_user
 
 logger = logging.getLogger(__name__)
 
-local_tz = timezone(get_system_setting('time_zone'))
+local_tz = pytz.timezone(get_system_setting('time_zone'))
 
 SEVERITY_CHOICES = (('Info', 'Info'), ('Low', 'Low'), ('Medium', 'Medium'),
                     ('High', 'High'), ('Critical', 'Critical'))
@@ -54,13 +54,12 @@ class CharFieldInFilter(filters.BaseInFilter, filters.CharFilter):
         super(CharFilter, self).__init__(*args, **kwargs)
 
 
-def get_earliest_finding():
-    global EARLIEST_FINDING
-    if EARLIEST_FINDING is not None:
-        return EARLIEST_FINDING
+def get_earliest_finding(queryset=None):
+    if queryset is None:  # don't to 'if not queryset' which will trigger the query
+        queryset = Finding.objects.all()
 
     try:
-        EARLIEST_FINDING = Finding.objects.earliest('date')
+        EARLIEST_FINDING = queryset.earliest('date')
     except Finding.DoesNotExist:
         EARLIEST_FINDING = None
     return EARLIEST_FINDING
@@ -71,20 +70,34 @@ class DojoFilter(FilterSet):
         super(DojoFilter, self).__init__(*args, **kwargs)
 
         # for now we have only fields called "tags"
-        for field in ['tags']:
+        for field in ['tags', 'test__tags', 'test__engagement__tags', 'test__engagement__product__tags']:
             if field in self.form.fields:
-                # print(self.filters)
-                # print(vars(self).keys())
-                # print(vars(self.filters['tags']))
-                # print(self._meta)
-
                 tags_filter = self.filters['tags']
                 model = tags_filter.model
 
                 self.form.fields[field] = model._meta.get_field("tags").formfield()
                 self.form.fields[field].widget.tag_options = \
                     self.form.fields[field].widget.tag_options + tagulous.models.options.TagOptions(autocomplete_settings={'width': '200px'})
-            # form.fields['tags_and'].label = self.form.fields['tags_and'].label + ' (and)'
+                tagged_model = get_tags_model_from_field_name(field)
+                if tagged_model:  # only if not the normal tags field
+                    self.form.fields[field].label = get_tags_label_from_model(tagged_model)
+                    self.form.fields[field].autocomplete_tags = tagged_model.tags.tag_model.objects.all().order_by('name')
+
+
+def get_tags_model_from_field_name(field):
+    try:
+        parts = field.split('__')
+        model_name = parts[-2]
+        return apps.get_model('dojo.%s' % model_name, require_ready=True)
+    except Exception as e:
+        return None
+
+
+def get_tags_label_from_model(model):
+    if model:
+        return 'Tags (%s)' % model.__name__.title()
+    else:
+        return 'Tags (Unknown)'
 
 
 class DateRangeFilter(ChoiceFilter):
@@ -182,19 +195,28 @@ class ReportBooleanFilter(ChoiceFilter):
 
 
 class ReportRiskAcceptanceFilter(ChoiceFilter):
+
     def any(self, qs, name):
         return qs.all()
 
     def accepted(self, qs, name):
-        return qs.filter(risk_acceptance__isnull=False)
+        # return qs.filter(risk_acceptance__isnull=False)
+        from dojo.finding.views import ACCEPTED_FINDINGS_QUERY
+        return qs.filter(ACCEPTED_FINDINGS_QUERY)
 
     def not_accepted(self, qs, name):
-        return qs.filter(risk_acceptance__isnull=True)
+        from dojo.finding.views import NOT_ACCEPTED_FINDINGS_QUERY
+        return qs.filter(NOT_ACCEPTED_FINDINGS_QUERY)
+
+    def was_accepted(self, qs, name):
+        from dojo.finding.views import WAS_ACCEPTED_FINDINGS_QUERY
+        return qs.filter(WAS_ACCEPTED_FINDINGS_QUERY)
 
     options = {
         '': (_('Either'), any),
         1: (_('Yes'), accepted),
         2: (_('No'), not_accepted),
+        3: (_('Was'), was_accepted),
     }
 
     def __init__(self, *args, **kwargs):
@@ -212,9 +234,10 @@ class ReportRiskAcceptanceFilter(ChoiceFilter):
 
 class MetricsDateRangeFilter(ChoiceFilter):
     def any(self, qs, name):
-        if get_earliest_finding() is not None:
+        earliest_finding = get_earliest_finding(qs)
+        if earliest_finding is not None:
             start_date = local_tz.localize(datetime.combine(
-                get_earliest_finding().date, datetime.min.time())
+                earliest_finding.date, datetime.min.time())
             )
             self.start_date = _truncate(start_date - timedelta(days=1))
             self.end_date = _truncate(now() + timedelta(days=1))
@@ -279,9 +302,10 @@ class MetricsDateRangeFilter(ChoiceFilter):
     def filter(self, qs, value):
         if value == 8:
             return qs
-        if get_earliest_finding() is not None:
+        earliest_finding = get_earliest_finding(qs)
+        if earliest_finding is not None:
             start_date = local_tz.localize(datetime.combine(
-                get_earliest_finding().date, datetime.min.time())
+                earliest_finding.date, datetime.min.time())
             )
             self.start_date = _truncate(start_date - timedelta(days=1))
             self.end_date = _truncate(now() + timedelta(days=1))
@@ -315,12 +339,12 @@ class ProductComponentFilter(DojoFilter):
 
 
 class ComponentFilter(ProductComponentFilter):
-    test__engagement__product = ModelMultipleChoiceFilter(
-        queryset=Product.objects.all(),
-        label="Product Type")
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.all().order_by('name'),
         label="Product Type")
+    test__engagement__product = ModelMultipleChoiceFilter(
+        queryset=Product.objects.all(),
+        label="Product")
 
 
 class EngagementFilter(DojoFilter):
@@ -328,6 +352,9 @@ class EngagementFilter(DojoFilter):
         queryset=User.objects.filter(
             engagement__lead__isnull=False).distinct(),
         label="Lead")
+    engagement__version = CharFilter(field_name='engagement__version', lookup_expr='icontains', label='Engagement version')
+    engagement__test__version = CharFilter(field_name='engagement__test__version', lookup_expr='icontains', label='Test version')
+
     name = CharFilter(lookup_expr='icontains')
     prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.all().order_by('name'),
@@ -498,28 +525,10 @@ class ProductFilter(DojoFilter):
                 'prod_type'].queryset = Product_Type.objects.filter(
                 authorized_users__in=[self.user])
 
-        # for field in ['tags', 'tags_and']:
-        #     self.form.fields[field] = Product._meta.get_field("tags").formfield()
-        #     self.form.fields[field].widget.attrs.update({'style': 'width=150px;'})
-        #     self.form.fields[field].widget.tag_options = \
-        #         self.form.fields[field].widget.tag_options + tagulous.models.options.TagOptions(autocomplete_settings={'width': '200px'})
-        # self.form.fields['tags_and'].label = self.form.fields['tags_and'].label + ' (and)'
-        # print(vars(self.form.fields[field].widget.tag_options))
-        # print(vars(self.form.fields[field]))
-
     class Meta:
         model = Product
         fields = ['name', 'prod_type', 'business_criticality', 'platform', 'lifecycle', 'origin', 'external_audience',
                   'internet_accessible', 'tags']
-        # exclude = ['tags']
-        # filter_overrides = {
-        #     tagulous.models.TagField: {
-        #         'filter_class': ModelMultipleChoiceFilter,
-        #         'extra': lambda f: {
-        #              'widget': tagulous.forms.TagWidget,
-        #         },
-        #     },
-        # }
 
 
 class ApiProductFilter(DojoFilter):
@@ -684,7 +693,7 @@ class ApiFindingFilter(DojoFilter):
 
     class Meta:
         model = Finding
-        exclude = ['url', 'is_template', 'thread_id', 'notes', 'images',
+        exclude = ['url', 'is_template', 'thread_id', 'notes', 'images', 'files',
                    'sourcefile', 'line', 'endpoint_status', 'tags_from_django_tagging']
 
 
@@ -715,6 +724,11 @@ class OpenFindingFilter(DojoFilter):
                                 exclude=True,
                                 label='has JIRA')
 
+    has_component = BooleanFilter(field_name='component_name',
+                                lookup_expr='isnull',
+                                exclude=True,
+                                label='has Component')
+
     jira_issue__jira_key = CharFilter(field_name='jira_issue__jira_key', lookup_expr='icontains', label="JIRA issue")
 
     has_notes = BooleanFilter(field_name='notes',
@@ -729,6 +743,26 @@ class OpenFindingFilter(DojoFilter):
         # label='tags', # doesn't work with tagulous, need to set in __init__ below
     )
 
+    test__tags = ModelMultipleChoiceFilter(
+        field_name='test__tags__name',
+        to_field_name='name',
+        queryset=Finding.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    test__engagement__tags = ModelMultipleChoiceFilter(
+        field_name='test__engagement__tags__name',
+        to_field_name='name',
+        queryset=Finding.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    test__engagement__product__tags = ModelMultipleChoiceFilter(
+        field_name='test__engagement__product__tags__name',
+        to_field_name='name',
+        queryset=Finding.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
     tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
 
     o = OrderingFilter(
@@ -752,7 +786,8 @@ class OpenFindingFilter(DojoFilter):
                    'numerical_severity', 'reporter', 'last_reviewed', 'line',
                    'duplicate_finding', 'hash_code', 'images', 'endpoint_status',
                    'line_number', 'reviewers', 'mitigated_by', 'sourcefile',
-                   'created', 'jira_creation', 'jira_change', 'tags_from_django_tagging']
+                   'created', 'jira_creation', 'jira_change', 'tags_from_django_tagging',
+                   'tags', 'files']
 
     def __init__(self, *args, **kwargs):
         self.user = None
@@ -870,7 +905,7 @@ class ClosedFindingFilter(DojoFilter):
                    'numerical_severity', 'reporter', 'endpoints', 'endpoint_status',
                    'last_reviewed', 'review_requested_by', 'defect_review_requested_by',
                    'last_reviewed_by', 'created', 'jira_creation', 'jira_change',
-                   'tags_from_django_tagging']
+                   'tags_from_django_tagging', 'files']
 
     def __init__(self, *args, **kwargs):
         self.pid = None
@@ -962,7 +997,7 @@ class AcceptedFindingFilter(DojoFilter):
                    'duplicate', 'duplicate_finding', 'thread_id', 'mitigated', 'notes',
                    'numerical_severity', 'reporter', 'endpoints', 'endpoint_status',
                    'last_reviewed', 'o', 'jira_creation', 'jira_change',
-                   'tags_from_django_tagging']
+                   'tags_from_django_tagging', 'files']
 
     def __init__(self, *args, **kwargs):
         self.pid = None
@@ -1041,7 +1076,7 @@ class ProductFindingFilter(DojoFilter):
                    'duplicate_finding', 'thread_id', 'mitigated', 'notes',
                    'numerical_severity', 'reporter', 'endpoints', 'endpoint_status',
                    'last_reviewed', 'jira_creation', 'jira_change',
-                   'tags_from_django_tagging']
+                   'tags_from_django_tagging', 'files']
 
     def __init__(self, *args, **kwargs):
         super(ProductFindingFilter, self).__init__(*args, **kwargs)
@@ -1088,6 +1123,27 @@ class SimilarFindingFilter(DojoFilter):
 
     tags = ModelMultipleChoiceFilter(
         field_name='tags__name',
+        to_field_name='name',
+        queryset=Finding.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    test__tags = ModelMultipleChoiceFilter(
+        field_name='test__tags__name',
+        to_field_name='name',
+        queryset=Finding.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    test__engagement__tags = ModelMultipleChoiceFilter(
+        field_name='test__engagement__tags__name',
+        to_field_name='name',
+        queryset=Finding.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    test__engagement__product__tags = ModelMultipleChoiceFilter(
+        field_name='test__engagement__product__tags__name',
         to_field_name='name',
         queryset=Finding.tags.tag_model.objects.all().order_by('name'),
         # label='tags', # doesn't work with tagulous, need to set in __init__ below
@@ -1253,9 +1309,10 @@ class FindingStatusFilter(ChoiceFilter):
         super(FindingStatusFilter, self).__init__(*args, **kwargs)
 
     def filter(self, qs, value):
-        if get_earliest_finding() is not None:
+        earliest_finding = get_earliest_finding(qs)
+        if earliest_finding is not None:
             start_date = local_tz.localize(datetime.combine(
-                get_earliest_finding().date, datetime.min.time())
+                earliest_finding.date, datetime.min.time())
             )
             self.start_date = _truncate(start_date - timedelta(days=1))
             self.end_date = _truncate(now() + timedelta(days=1))
@@ -1304,10 +1361,8 @@ class MetricsFindingFilter(FilterSet):
                 'test'].queryset = Test.objects.filter(
                 Q(engagement__product__authorized_users__in=[get_current_user()]) |
                 Q(engagement__product__prod_type__authorized_users__in=[get_current_user()]))
-            self.form.fields[
-                'duplicate_finding'].queryset = Finding.objects.filter(
-                Q(test__engagement__product__authorized_users__in=[get_current_user()]) |
-                Q(test__engagement__product__prod_type__authorized_users__in=[get_current_user()]))
+        # str() uses test_type
+        self.form.fields['test'].queryset = self.form.fields['test'].queryset.prefetch_related('test_type')
 
     class Meta:
         model = Finding
@@ -1332,7 +1387,8 @@ class MetricsFindingFilter(FilterSet):
                    'is_template',
                    'jira_creation',
                    'jira_change',
-                   'tags_from_django_tagging'
+                   'tags_from_django_tagging',
+                   'files'
                    ]
 
 
@@ -1379,7 +1435,7 @@ class MetricsEndpointFilter(FilterSet):
 class ProductMetricsFindingFilter(FilterSet):
     start_date = DateFilter(field_name='date', label='Start Date', lookup_expr=('gt'))
     end_date = DateFilter(field_name='date', label='End Date', lookup_expr=('lt'))
-    date = MetricsDateRangeFilter()
+    # date = MetricsDateRangeFilter()
     test__engagement = ModelMultipleChoiceFilter(
         queryset=Engagement.objects.all().order_by('name'),
         label="Engagement")
@@ -1397,8 +1453,10 @@ class ProductMetricsFindingFilter(FilterSet):
     tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
 
     def __init__(self, *args, **kwargs):
+        # logger.debug('query before super: %s', kwargs.get('queryset', None).query)
         if args[0]:
             if args[0].get('start_date', '') != '' or args[0].get('end_date', '') != '':
+                logger.debug('doing magic with args0')
                 args[0]._mutable = True
                 args[0]['date'] = 8
                 args[0]._mutable = False
@@ -1406,6 +1464,7 @@ class ProductMetricsFindingFilter(FilterSet):
         if 'pid' in kwargs:
             self.pid = kwargs.pop('pid')
         super(ProductMetricsFindingFilter, self).__init__(*args, **kwargs)
+        # logger.debug('query after init: %s', self.queryset.query)
         self.form.fields['severity'].choices = self.queryset.order_by(
             'numerical_severity'
         ).values_list('severity', 'severity').distinct()
@@ -1414,12 +1473,18 @@ class ProductMetricsFindingFilter(FilterSet):
             self.form.fields['test__engagement'].queryset = Engagement.objects.filter(
                 product_id=self.pid
             ).all()
+            self.form.fields['test'].queryset = Test.objects.filter(
+                engagement__product_id=self.pid
+            ).all()
+
+        # str() uses test_type
+        self.form.fields['test'].queryset = self.form.fields['test'].queryset.prefetch_related('test_type')
 
     class Meta:
         model = Finding
         exclude = ['url',
                    'description',
-                   'duplicate_finding'
+                   'duplicate_finding',
                    'mitigation',
                    'unsaved_endpoints',
                    'unsaved_request',
@@ -1438,7 +1503,8 @@ class ProductMetricsFindingFilter(FilterSet):
                    'is_template',
                    'jira_creation',
                    'jira_change',
-                   'tags_from_django_tagging'
+                   'tags_from_django_tagging',
+                   'files',
                    ]
 
 
@@ -1537,7 +1603,7 @@ class ApiTestFilter(DojoFilter):
         model = Test
         fields = ['id', 'title', 'test_type', 'target_start',
                      'target_end', 'notes', 'percent_complete',
-                     'actual_time', 'engagement']
+                     'actual_time', 'engagement', 'version']
 
 
 class ApiAppAnalysisFilter(DojoFilter):

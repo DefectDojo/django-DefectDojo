@@ -8,8 +8,11 @@ on:
     inputs:
       # the actual branch that can be chosen on the UI is made irrelevant by further steps
       # because someone will forget one day to change it.
+      release_number_new:
+        description: "New current released version (x.y.z format)"
+        required: true
       release_number_dev:
-        description: "Release version for dev branch (x.y.z-dev format)"
+        description: "Future release version for dev branch (x.y.z-dev format)"
         required: true
 
 jobs:
@@ -70,7 +73,7 @@ jobs:
             github.pulls.create({
               owner: '${{ env.REPO_ORG }}',
               repo: 'django-DefectDojo',
-              title: 'Release: Merge back master into dev from: ${{ env.NEW_BRANCH }}',
+              title: 'Release: Merge back ${{ github.event.inputs.release_number_new }} into dev from: ${{ env.NEW_BRANCH }}',
               body: `Release triggered by \`${ process.env.GITHUB_ACTOR }\``,
               head: '${{ env.NEW_BRANCH }}',
               base: 'dev'

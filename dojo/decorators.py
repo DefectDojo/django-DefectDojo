@@ -139,6 +139,11 @@ def model_to_dict_with_tags(model):
     if 'tags' in converted:
         # further conversion needed from Tag Queryset to strings
         converted['tags'] = converted['tags'].values_list()
+
+    # dirty hack to now barf on accepted_findings... we may need to rethink all this mess with celery
+    if 'accepted_findings' in converted:
+        converted['accepted_findings'] = list_of_models_to_dict_with_tags(converted['accepted_findings'])
+
     logger.debug('dict: %s', converted)
     return converted
 
@@ -158,10 +163,30 @@ def convert_kwargs_if_async(**kwargs):
         # and any models with tags cannot be sent to celery due to serialization problems with celery
         # we convert all model instances into dictionaries
         for key, value in kwargs.items():
+            # logger.debug('converting: %s', key)
             if isinstance(value, models.Model):
+                # logger.debug('model_to_dict_with_tags')
                 kwargs[key] = model_to_dict_with_tags(value)
             elif isinstance(value, list):
                 kwargs[key] = list_of_models_to_dict_with_tags(value)
             elif isinstance(value, QuerySet):
+                # logger.debug('queryset')
                 kwargs[key] = list_of_models_to_dict_with_tags(list(value))
+
     return kwargs
+
+
+def on_exception_log_kwarg(func):
+    def wrapper(self, *args, **kwargs):
+        try:
+            return func(self, *args, **kwargs)
+
+        except Exception as e:
+            print("exception occured at url:", self.driver.current_url)
+            print("page source:", self.driver.page_source)
+            f = open("selenium_page_source.html", "w", encoding='utf-8')
+            f.writelines(self.driver.page_source)
+            # time.sleep(30)
+            raise(e)
+
+    return wrapper

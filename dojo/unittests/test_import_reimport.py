@@ -1,6 +1,8 @@
-from dojo.models import User
+from django.urls import reverse
+from dojo.models import User, Test
 from rest_framework.authtoken.models import Token
-from rest_framework.test import APITestCase, APIClient
+from rest_framework.test import APIClient
+from django.test.client import Client
 from .dojo_test_case import DojoAPITestCase
 # from unittest import skip
 import logging
@@ -37,25 +39,17 @@ logger = logging.getLogger(__name__)
 # 4 absent
 # 5 active sev medium
 
-class DedupeTest(DojoAPITestCase):
-    fixtures = ['dojo_testdata.json']
-
+# test methods to be used both by API Test and UI Test
+class ImportReimportMixin(object):
     def __init__(self, *args, **kwargs):
-        # TODO remove __init__ if it does nothing...
-        APITestCase.__init__(self, *args, **kwargs)
+        self.scans_path = 'dojo/unittests/scans/'
+        self.zap_sample0_filename = self.scans_path + 'zap/0_zap_sample.xml'
+        self.zap_sample1_filename = self.scans_path + 'zap/1_zap_sample_0_and_new_absent.xml'
+        self.zap_sample2_filename = self.scans_path + 'zap/2_zap_sample_0_and_new_endpoint.xml'
+        self.zap_sample3_filename = self.scans_path + 'zap/3_zap_sampl_0_and_different_severities.xml'
 
-    def setUp(self):
-        testuser = User.objects.get(username='admin')
-        token = Token.objects.get(user=testuser)
-        self.client = APIClient()
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
-        # self.url = reverse(self.viewname + '-list')
-
-        self.scans_path = 'dojo/unittests/scans/zap/'
-        self.zap_sample0_filename = self.scans_path + '0_zap_sample.xml'
-        self.zap_sample1_filename = self.scans_path + '1_zap_sample_0_and_new_absent.xml'
-        self.zap_sample2_filename = self.scans_path + '2_zap_sample_0_and_new_endpoint.xml'
-        self.zap_sample3_filename = self.scans_path + '3_zap_sampl_0_and_different_severities.xml'
+        self.anchore_file_name = self.scans_path + 'anchore/one_vuln_many_files.json'
+        self.scan_type_anchore = 'Anchore Engine Scan'
 
     # import zap scan, testing:
     # - import
@@ -448,6 +442,177 @@ class DedupeTest(DojoAPITestCase):
         # - zap2 and zap5 closed
         self.assertEqual(notes_count_before + 2, self.db_notes_count())
 
+    # import 1 and then reimport 2 without closing old findings
+    # - reimport should not mitigate the zap1
+    def test_import_reimport_without_closing_old_findings(self):
+        logger.debug('reimporting updated zap xml report and keep old findings open')
+
+        import1 = self.import_scan_with_params(self.zap_sample1_filename)
+
+        test_id = import1['test']
+        findings = self.get_test_findings_api(test_id)
+        self.assert_finding_count_json(4, findings)
+
+        reimport1 = self.reimport_scan_with_params(test_id, self.zap_sample2_filename, close_old_findings=False)
+
+        test_id = reimport1['test']
+        self.assertEqual(test_id, test_id)
+
+        findings = self.get_test_findings_api(test_id, verified=False)
+        self.assert_finding_count_json(0, findings)
+
+        findings = self.get_test_findings_api(test_id, verified=True)
+        self.assert_finding_count_json(5, findings)
+
+        mitigated = 0
+        not_mitigated = 0
+        for finding in findings['results']:
+            logger.debug(finding)
+            if finding['is_Mitigated']:
+                mitigated += 1
+            else:
+                not_mitigated += 1
+        self.assertEqual(mitigated, 0)
+        self.assertEqual(not_mitigated, 5)
+
+    # some parsers generate 1 finding for each vulnerable file for each vulnerability
+    # i.e
+    # #: title                     : sev : file_path
+    # 1: CVE-2020-1234 jquery      : 1   : /file1.jar
+    # 2: CVE-2020-1234 jquery      : 1   : /file2.jar
+    #
+    # if we don't filter on file_path, we would find 2 existing findings
+    # and the logic below will get confused and just create a new finding
+    # and close the two existing ones. including and duplicates.
+    #
+    def test_import_0_reimport_0_anchore_file_path(self):
+        import0 = self.import_scan_with_params(self.anchore_file_name, scan_type=self.scan_type_anchore)
+
+        test_id = import0['test']
+
+        active_findings_before = self.get_test_findings_api(test_id, active=True)
+        self.log_finding_summary_json_api(active_findings_before)
+
+        active_findings_count_before = active_findings_before['count']
+        notes_count_before = self.db_notes_count()
+
+        # reimport exact same report
+        reimport0 = self.reimport_scan_with_params(test_id, self.anchore_file_name, scan_type=self.scan_type_anchore)
+
+        active_findings_after = self.get_test_findings_api(test_id, active=True)
+        self.log_finding_summary_json_api(active_findings_after)
+        self.assert_finding_count_json(active_findings_count_before, active_findings_after)
+
+        # reimporting the exact same scan shouldn't create any notes
+        self.assertEqual(notes_count_before, self.db_notes_count())
+
+
+class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        # TODO remove __init__ if it does nothing...
+        ImportReimportMixin.__init__(self, *args, **kwargs)
+        # super(ImportReimportMixin, self).__init__(*args, **kwargs)
+        # super(DojoAPITestCase, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
+
+    def setUp(self):
+        testuser = User.objects.get(username='admin')
+        token = Token.objects.get(user=testuser)
+        self.client = APIClient()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        # self.url = reverse(self.viewname + '-list')
+
+
+class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
+    fixtures = ['dojo_testdata.json']
+    client_ui = Client()
+
+    def __init__(self, *args, **kwargs):
+        # TODO remove __init__ if it does nothing...
+        ImportReimportMixin.__init__(self, *args, **kwargs)
+        # super(ImportReimportMixin, self).__init__(*args, **kwargs)
+        # super(DojoAPITestCase, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
+
+    def setUp(self):
+        # still using the API to verify results
+        testuser = User.objects.get(username='admin')
+        token = Token.objects.get(user=testuser)
+        self.client = APIClient()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        # self.url = reverse(self.viewname + '-list')
+
+        self.client_ui = Client()
+        self.client_ui.force_login(self.get_test_admin())
+
+    # override methods to use UI
+    def import_scan_with_params(self, *args, **kwargs):
+        return self.import_scan_with_params_ui(*args, **kwargs)
+
+    def reimport_scan_with_params(self, *args, **kwargs):
+        return self.reimport_scan_with_params_ui(*args, **kwargs)
+
+    def import_scan_ui(self, engagement, payload):
+        logger.debug('import_scan payload %s', payload)
+        # response = self.client_ui.post(reverse('import_scan_results', args=(engagement, )), urlencode(payload), content_type='application/x-www-form-urlencoded')
+        response = self.client_ui.post(reverse('import_scan_results', args=(engagement, )), payload)
+        # print(vars(response))
+        print('url: ' + response.url)
+        test = Test.objects.get(id=response.url.split('/')[-1])
+        # f = open('response.html', 'w+')
+        # f.write(str(response.content, 'utf-8'))
+        # f.close()
+        self.assertEqual(302, response.status_code, response.content[:1000])
+        return {'test': test.id}
+
+    def reimport_scan_ui(self, test, payload):
+        response = self.client_ui.post(reverse('re_import_scan_results', args=(test, )), payload)
+        self.assertEqual(302, response.status_code, response.content[:1000])
+        test = Test.objects.get(id=response.url.split('/')[-1])
+        return {'test': test.id}
+
+    def import_scan_with_params_ui(self, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None, tags=None, close_old_findings=False):
+        payload = {
+                "scan_date": '2020-06-04',
+                "minimum_severity": minimum_severity,
+                "active": active,
+                "verified": verified,
+                "scan_type": scan_type,
+                "file": open(filename),
+                "environment": 1
+                # "version": "1.0.1",
+                # "close_old_findings": close_old_findings,
+        }
+
+        if push_to_jira is not None:
+            payload['push_to_jira'] = push_to_jira
+
+        if tags is not None:
+            payload['tags'] = tags
+
+        return self.import_scan_ui(engagement, payload)
+
+    def reimport_scan_with_params_ui(self, test_id, filename, scan_type='ZAP Scan', minimum_severity='Low', active=True, verified=True, push_to_jira=None, tags=None, close_old_findings=True):
+        payload = {
+                "scan_date": '2020-06-04',
+                "minimum_severity": minimum_severity,
+                "active": active,
+                "verified": verified,
+                "scan_type": scan_type,
+                "file": open(filename),
+                "version": "1.0.1",
+                "close_old_findings": close_old_findings,
+        }
+
+        if push_to_jira is not None:
+            payload['push_to_jira'] = push_to_jira
+
+        if tags is not None:
+            payload['tags'] = tags
+
+        return self.reimport_scan_ui(test_id, payload)
 
 # Observations:
 # - When reopening a mitigated finding, almost no fields are updated such as title, description, severity, impact, references, ....

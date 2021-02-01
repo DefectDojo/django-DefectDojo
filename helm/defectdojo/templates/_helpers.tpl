@@ -64,6 +64,19 @@ Create chart name and version as used by the chart label.
 {{- end -}}
 
 {{/*
+  Determine the protocol to use for Redis.
+*/}}
+{{- define "redis.scheme" -}}
+{{- if eq .Values.celery.broker "redis" -}}
+{{- if .Values.redis.transportEncryption.enabled -}}
+{{- printf "rediss" -}}
+{{- else -}}
+{{- printf "redis" -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
   Builds the repository names for use with local or private registries
 */}}
 {{- define "celery.repository" -}}

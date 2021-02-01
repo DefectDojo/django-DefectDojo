@@ -11,7 +11,7 @@ from django.utils.http import urlencode
 from dojo.celery import app
 from celery.utils.log import get_task_logger
 from celery.decorators import task
-from dojo.models import Product, Finding, Engagement, System_Settings
+from dojo.models import Alerts, Product, Finding, Engagement, System_Settings, User
 from django.utils import timezone
 from dojo.utils import calculate_grade
 from dojo.reports.widgets import report_widget_factory
@@ -73,6 +73,24 @@ def add_alerts(self, runinterval):
         products = Product.objects.all()
         for product in products:
             calculate_grade(product)
+
+
+@app.task(bind=True)
+def cleanup_alerts(*args, **kwargs):
+    try:
+        max_alerts_per_user = settings.MAX_ALERTS_PER_USER
+    except System_Settings.DoesNotExist:
+        max_alerts_per_user = -1
+
+    if max_alerts_per_user > -1:
+        total_deleted_count = 0
+        logger.info('start deleting oldest alerts if a user has more than %s alerts', max_alerts_per_user)
+        users = User.objects.all()
+        for user in users:
+            alerts_to_delete = Alerts.objects.filter(user_id=user.id).order_by('-created')[max_alerts_per_user:].values_list("id", flat=True)
+            total_deleted_count += len(alerts_to_delete)
+            Alerts.objects.filter(pk__in=list(alerts_to_delete)).delete()
+        logger.info('total number of alerts deleted: %s', total_deleted_count)
 
 
 @app.task(bind=True)

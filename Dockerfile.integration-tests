@@ -28,6 +28,8 @@ RUN \
   rm -rf /var/lib/apt/lists && \
   true
 
+RUN pip install --no-cache-dir selenium requests
+
 # Installing Chromium Driver and Selenium for test automation
 RUN LATEST_VERSION=$(curl -s https://chromedriver.storage.googleapis.com/LATEST_RELEASE) && \
     wget -O /tmp/chromedriver.zip https://chromedriver.storage.googleapis.com/$LATEST_VERSION/chromedriver_linux64.zip && \
@@ -35,12 +37,11 @@ RUN LATEST_VERSION=$(curl -s https://chromedriver.storage.googleapis.com/LATEST_
     rm /tmp/chromedriver.zip && \
     chmod 777 /usr/local/bin/chromedriver;
 
-RUN pip install --no-cache-dir selenium requests
-
-COPY tests/ ./tests/
 COPY docker/wait-for-it.sh \
   docker/entrypoint-integration-tests.sh \
   /
+
+COPY tests/ ./tests/
 
 RUN chmod -R 0777 /app
 USER 1001

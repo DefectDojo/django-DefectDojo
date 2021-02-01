@@ -1,8 +1,10 @@
 # see tastypie documentation at http://django-tastypie.readthedocs.org/en
 from django.core.exceptions import ImproperlyConfigured, ValidationError
+from django.http import HttpResponse
 from django.urls import resolve, get_script_prefix
 import base64
 from tastypie import fields
+from tastypie import http
 from tastypie.fields import RelatedField
 from tastypie.authentication import ApiKeyAuthentication
 from tastypie.authorization import Authorization
@@ -10,13 +12,16 @@ from tastypie.authorization import DjangoAuthorization
 from tastypie.constants import ALL, ALL_WITH_RELATIONS
 from tastypie.exceptions import Unauthorized, ImmediateHttpResponse, NotFound
 from tastypie.http import HttpCreated
-from tastypie.resources import ModelResource, Resource
+from tastypie.resources import ModelResource, Resource, sanitize
 from tastypie.serializers import Serializer
 from tastypie.validation import FormValidation, Validation
+from tastypie.exceptions import BadRequest
 from django.urls.exceptions import Resolver404
 from django.utils import timezone
 from django.db.models import Count, Q
-
+from django.conf import settings
+from django.utils.cache import patch_cache_control, patch_vary_headers
+from django.views.decorators.csrf import csrf_exempt
 from dojo.models import Product, Engagement, Test, Finding, \
     User, ScanSettings, IPScan, Scan, Stub_Finding, Risk_Acceptance, \
     Finding_Template, Test_Type, Development_Environment, \
@@ -30,8 +35,7 @@ from dojo.forms import ProductForm, EngForm, TestForm, \
     JIRA_IssueForm, ToolConfigForm, ToolProductSettingsForm, \
     ToolTypeForm, LanguagesTypeForm, Languages_TypeTypeForm, App_AnalysisTypeForm, \
     Development_EnvironmentForm, Product_TypeForm, Test_TypeForm, NoteTypeForm
-from dojo.tools import requires_file
-from dojo.tools.factory import import_parser_factory
+from dojo.tools.factory import import_parser_factory, requires_file
 from datetime import datetime
 from .object.parser import import_object_eng
 
@@ -90,6 +94,78 @@ class ModelFormValidation(FormValidation):
 
 
 class BaseModelResource(ModelResource):
+
+    def wrap_view(self, view):
+        """
+        Wraps views to check if APIv1 is enabled
+        """
+        @csrf_exempt
+        def wrapper(request, *args, **kwargs):
+            try:
+                api_v1_deprecation_warning = 'APIv1 is deprecated and may contain vulnerabilities. It is disabled by default. '
+                if not settings.LEGACY_API_V1_ENABLE:
+                    raise BadRequest({'code': 666, 'message': api_v1_deprecation_warning + 'It can be enabled at your own risk by setting DD_LEGACY_API_V1_ENABLE to True, or by setting LEGACY_API_V1_ENABLE to True in  settings(.dist).py or local_settings.py. APIv1 will be removed at 2021-06-30'})
+
+                callback = getattr(self, view)
+                response = callback(request, *args, **kwargs)
+
+                # Our response can vary based on a number of factors, use
+                # the cache class to determine what we should ``Vary`` on so
+                # caches won't return the wrong (cached) version.
+                varies = getattr(self._meta.cache, "varies", [])
+
+                if varies:
+                    patch_vary_headers(response, varies)
+
+                if self._meta.cache.cacheable(request, response):
+                    if self._meta.cache.cache_control():
+                        # If the request is cacheable and we have a
+                        # ``Cache-Control`` available then patch the header.
+                        patch_cache_control(response, **self._meta.cache.cache_control())
+
+                if request.is_ajax() and not response.has_header("Cache-Control"):
+                    # IE excessively caches XMLHttpRequests, so we're disabling
+                    # the browser cache here.
+                    # See http://www.enhanceie.com/ie/bugs.asp for details.
+                    patch_cache_control(response, no_cache=True)
+
+                # official header for deprecation
+                response['Deprecation'] = 'true'
+
+                # official header for warning (666 is not official)
+                response['Warning'] = '666 APIv1 ' + api_v1_deprecation_warning + 'At your own or your admins risk it has been enabled. APIv1 will be removed at 2021-06-30'
+
+                return response
+            except (BadRequest, fields.ApiFieldError) as e:
+                data = {"error": sanitize(e.args[0]) if getattr(e, 'args') else ''}
+                return self.error_response(request, data, response_class=http.HttpBadRequest)
+            except ValidationError as e:
+                data = {"error": sanitize(e.messages)}
+                return self.error_response(request, data, response_class=http.HttpBadRequest)
+            except Exception as e:
+                # Prevent muting non-django's exceptions
+                # i.e. RequestException from 'requests' library
+                if hasattr(e, 'response') and isinstance(e.response, HttpResponse):
+                    return e.response
+
+                # A real, non-expected exception.
+                # Handle the case where the full traceback is more helpful
+                # than the serialized error.
+                if settings.DEBUG and getattr(settings, 'TASTYPIE_FULL_DEBUG', False):
+                    raise
+
+                # Re-raise the error to get a proper traceback when the error
+                # happend during a test case
+                if request.META.get('SERVER_NAME') == 'testserver':
+                    raise
+
+                # Rather than re-raising, we're going to things similar to
+                # what Django does. The difference is returning a serialized
+                # error message.
+                return self._handle_500(request, e)
+
+        return wrapper
+
     @classmethod
     def get_fields(cls, fields=None, excludes=None):
         """
@@ -1364,7 +1440,7 @@ class ImportScanValidation(Validation):
                 get_pk_from_uri(uri=bundle.data['engagement'])
             except NotFound:
                 errors.setdefault('engagement', []).append('A valid engagement must be supplied. Ex. /api/v1/engagements/1/')
-        scan_type_list = list([x[0] for x in ImportScanForm.SCAN_TYPE_CHOICES])
+        scan_type_list = list([x[0] for x in ImportScanForm.SORTED_SCAN_TYPE_CHOICES])
         if 'scan_type' in bundle.data:
             if bundle.data['scan_type'] not in scan_type_list:
                 errors.setdefault('scan_type', []).append('scan_type must be one of the following: ' + ', '.join(scan_type_list))
@@ -1516,11 +1592,12 @@ class ImportScanResource(MultipartResource, Resource):
         try:
             parser = import_parser_factory(bundle.data.get('file', None), t, bundle.data['active'], bundle.data['verified'],
                                            bundle.data['scan_type'])
+            parser_findings = parser.get_findings(bundle.data.get('file', None), t)
         except ValueError:
             raise NotFound("Parser ValueError")
 
         try:
-            for item in parser.items:
+            for item in parser_findings:
                 sev = item.severity
                 if sev == 'Information' or sev == 'Informational':
                     sev = 'Info'
@@ -1610,7 +1687,7 @@ class ReImportScanValidation(Validation):
                 get_pk_from_uri(uri=bundle.data['test'])
             except NotFound:
                 errors.setdefault('test', []).append('A valid test must be supplied. Ex. /api/v1/tests/1/')
-        scan_type_list = list([x[0] for x in ImportScanForm.SCAN_TYPE_CHOICES])
+        scan_type_list = list([x[0] for x in ImportScanForm.SORTED_SCAN_TYPE_CHOICES])
         if 'scan_type' in bundle.data:
             if bundle.data['scan_type'] not in scan_type_list:
                 errors.setdefault('scan_type', []).append('scan_type must be one of the following: ' + ', '.join(scan_type_list))
@@ -1701,11 +1778,12 @@ class ReImportScanResource(MultipartResource, Resource):
 
         try:
             parser = import_parser_factory(bundle.data.get('file', None), test, active, verified, scan_type)
+            parser_findings = parser.get_findings(bundle.data.get('file', None), test)
         except ValueError:
             raise NotFound("Parser ValueError")
 
         try:
-            items = parser.items
+            items = parser_findings
             original_items = test.finding_set.all().values_list("id", flat=True)
             new_items = []
             mitigated_count = 0

@@ -1,4 +1,4 @@
-{% load static from staticfiles %}
+{% load static %}
 <script type="application/javascript" src="{% static "chosen-js/chosen.jquery.min.js" %}"></script>
 <script type="application/javascript">
     $(function () {
@@ -16,6 +16,8 @@
         toggle.on('click', function () {
             $(this).toggleClass("dropup");
         })
+
+        $('.select2-selection').addClass("form-control input-sm")
 
         $('.{{ request.path|slugify }}-filters select[multiple=multiple]').each(function () {
             var id = this.id

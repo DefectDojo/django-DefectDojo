@@ -23,6 +23,25 @@ repositoryPrefix: defectdojo
 # imagePullSecrets: defectdojoregistrykey
 tag: latest
 
+securityContext:
+  enabled: true
+  djangoSecurityContext:
+    # django dockerfile sets USER=1001
+    runAsUser: 1001
+  nginxSecurityContext:
+    # nginx dockerfile sets USER=1001
+    runAsUser: 1001
+
+tests:
+  unitTests:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
 admin:
   user: admin
   password:
@@ -72,7 +91,7 @@ celery:
         memory: 128Mi
       limits:
         cpu: 2000m
-        memory: 256Mi
+        memory: 512Mi
     tolerations: []
     app_settings:
       pool_type: solo
@@ -130,6 +149,7 @@ django:
     app_settings:
       processes: 2
       threads: 2
+    enable_ptvsd: false  # this also requires DD_DEBUG to be set to True
 
 initializer:
   run: true
@@ -157,9 +177,10 @@ mysql:
   # the line below:
   mysqlServer: "127.0.0.1"
 
-
 postgresql:
   enabled: true
+  serviceAccount:
+    enabled: true
   postgresqlUsername: defectdojo
   postgresqlPassword: ""
   postgresqlDatabase: defectdojo
@@ -170,9 +191,29 @@ postgresql:
   replication:
     enabled: false
   service:
+    port: 5432
+  securityContext:
+    # Default is tue for K8s. Enabled needs to false for OpenShift restricted SCC and true for anyuid SCC
+    enabled: true
+    # fsGroup specification below is not applied if enabled=false. enabled=false is the required setting for OpenShift "restricted SCC" to work successfully.
+    fsGroup: 1001
+  containerSecurityContext:
+    # Default is tue for K8s. Enabled needs to false for OpenShift restricted SCC and true for anyuid SCC
+    enabled: true
+    # runAsUser specification below is not applied if enabled=false. enabled=false is the required setting for OpenShift "restricted SCC" to work successfully.
+    runAsUser: 1001
+  volumePermissions:
+    enabled: true
+    # if using restricted SCC set runAsUser: "auto" and if running under anyuid SCC - runAsUser needs to match the line above
+    securityContext:
+      runAsUser: 1001
+  shmVolume:
+    chmod:
+      enabled: false
+
   # To use an external PostgreSQL instance, set enabled to false and uncomment
   # the line below:
-  postgresServer: "127.0.0.1"
+  # postgresServer: "127.0.0.1"
   master:
     affinity: {}
     nodeSelector: {}
@@ -184,17 +225,30 @@ postgresql:
 cloudsql:
   # To use CloudSQL in GKE set 'enable: true'
   enabled: false
+  # By default, the proxy has verbose logging. Set this to false to make it less verbose
+  verbose: true
   image:
     # set repo and image tag of gce-proxy
     repository: gcr.io/cloudsql-docker/gce-proxy
     tag: 1.17
     pullPolicy: IfNotPresent
-  # set CloudSQL instance: 'project:zone:instancname'
+  # set CloudSQL instance: 'project:zone:instancename'
   instance: ""
+
+# Settings to make running the chart on GKE simpler
+gke:
+  # Set to true to configure the Ingress to use the GKE provided ingress controller
+  useGKEIngress: false
+  # Set to true to have GKE automatically provision a TLS certificate for the host specified
+  # Requires useGKEIngress to be set to true
+  # When using this option, be sure to set django.ingress.activateTLS to false
+  useManagedCertificate: false
+  # Workload Identity allows the K8s service account to assume the IAM access of a GCP service account to interact with other GCP services
+  workloadIdentityEmail: ""
 
 rabbitmq:
   enabled: true
-  replicas: 1
+  replicaCount: 1
   auth:
     password: ""
     erlangCookie: ""
@@ -202,9 +256,23 @@ rabbitmq:
     existingErlangSecret: defectdojo-rabbitmq-specific
     affinity: {}
     nodeSelector: {}
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  podSecurityContext:
+    enabled: true
+    fsGroup: 1001
+    runAsUser: 1001
 
 redis:
   enabled: false
+  transportEncryption:
+    enabled: false
+    params: ''
   existingSecret: defectdojo-redis-specific
   secretKey: redis-password
   password: ""

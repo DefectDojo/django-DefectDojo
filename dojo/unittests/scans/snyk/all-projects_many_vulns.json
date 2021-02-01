@@ -1,0 +1,599 @@
+[
+  {
+    "vulnerabilities": [
+      {
+        "CVSSv3": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N/RL:O",
+        "alternativeIds": [],
+        "creationTime": "2020-10-02T14:16:13.342479Z",
+        "credit": [
+          "Jonathan Leitschuh"
+        ],
+        "cvssScore": 5.5,
+        "description": "## Overview\n[com.google.guava:guava](https://github.com/google/guava) is a set of core libraries that includes new collection types (such as multimap and multiset,immutable collections, a graph library, functional types, an in-memory cache and more.\n\nAffected versions of this package are vulnerable to Information Disclosure. The file permissions on the file created by com.google.common.io.Files.createTempDir allows an attacker running a malicious program co-resident on the same machine can steal secrets stored in this directory. This is because by default on unix-like operating systems the /temp directory is shared between all users, so if the correct file permissions aren't set by the directory/file creator, the file becomes readable by all other users on that system.\r\n\r\n### PoC\r\n```\r\nFile guavaTempDir = com.google.common.io.Files.createTempDir();\r\nSystem.out.println(\"Guava Temp Dir: \" + guavaTempDir.getName());\r\nrunLS(guavaTempDir.getParentFile(), guavaTempDir); // Prints the file permissions -> drwxr-xr-x\r\nFile child = new File(guavaTempDir, \"guava-child.txt\");\r\nchild.createNewFile();\r\nrunLS(guavaTempDir, child); // Prints the file permissions -> -rw-r--r--\r\n```\n## Remediation\nUpgrade `com.google.guava:guava` to version 30.0-android, 30.0-jre or higher.\n## References\n- [GitHub Commit](https://github.com/google/guava/commit/fec0dbc4634006a6162cfd4d0d09c962073ddf40)\n- [GitHub Issue](https://github.com/google/guava/issues/4011)\n",
+        "disclosureTime": "2020-10-02T04:56:54Z",
+        "exploit": "Not Defined",
+        "fixedIn": [
+          "30.0-android",
+          "30.0-jre"
+        ],
+        "functions": [
+          {
+            "functionId": {
+              "className": "Files",
+              "filePath": "com/google/common/io/Files.java",
+              "functionName": "createTempDir"
+            },
+            "version": [
+              "[,30.0)"
+            ]
+          }
+        ],
+        "functions_new": [
+          {
+            "functionId": {
+              "className": "com.google.common.io.Files",
+              "functionName": "createTempDir"
+            },
+            "version": [
+              "[,30.0)"
+            ]
+          }
+        ],
+        "id": "SNYK-JAVA-COMGOOGLEGUAVA-1015415",
+        "identifiers": {
+          "CVE": [
+            "CVE-2020-8908"
+          ],
+          "CWE": [
+            "CWE-200"
+          ]
+        },
+        "language": "java",
+        "mavenModuleName": {
+          "artifactId": "guava",
+          "groupId": "com.google.guava"
+        },
+        "modificationTime": "2020-11-05T10:11:21.061172Z",
+        "moduleName": "com.google.guava:guava",
+        "packageManager": "maven",
+        "packageName": "com.google.guava:guava",
+        "patches": [],
+        "proprietary": false,
+        "publicationTime": "2020-10-23T15:50:35Z",
+        "references": [
+          {
+            "title": "GitHub Commit",
+            "url": "https://github.com/google/guava/commit/fec0dbc4634006a6162cfd4d0d09c962073ddf40"
+          },
+          {
+            "title": "GitHub Issue",
+            "url": "https://github.com/google/guava/issues/4011"
+          }
+        ],
+        "semver": {
+          "vulnerable": [
+            "[, 30.0-android)",
+            "(30.0-android, 30.0-jre)"
+          ]
+        },
+        "severity": "medium",
+        "severityWithCritical": "medium",
+        "title": "Information Disclosure",
+        "from": [
+          "com.test:version-collision@0.0.1-SNAPSHOT",
+          "com.test:project-collision@0.0.1-SNAPSHOT",
+          "com.test:project-a@0.0.1-SNAPSHOT",
+          "com.google.guava:guava@29.0-jre"
+        ],
+        "upgradePath": [],
+        "isUpgradable": false,
+        "isPatchable": false,
+        "name": "com.google.guava:guava",
+        "version": "29.0-jre"
+      }
+    ],
+    "ok": false,
+    "dependencyCount": 14,
+    "org": "myorg",
+    "policy": "# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.\nversion: v1.19.0\nignore: {}\npatch: {}\n",
+    "isPrivate": true,
+    "licensesPolicy": {
+      "severities": {},
+      "orgLicenseRules": {}
+    },
+    "packageManager": "maven",
+    "ignoreSettings": {
+      "adminOnly": false,
+      "reasonRequired": false,
+      "disregardFilesystemIgnores": false
+    },
+    "summary": "1 vulnerable dependency path",
+    "remediation": {
+      "unresolved": [
+        {
+          "CVSSv3": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N/RL:O",
+          "alternativeIds": [],
+          "creationTime": "2020-10-02T14:16:13.342479Z",
+          "credit": [
+            "Jonathan Leitschuh"
+          ],
+          "cvssScore": 5.5,
+          "description": "## Overview\n[com.google.guava:guava](https://github.com/google/guava) is a set of core libraries that includes new collection types (such as multimap and multiset,immutable collections, a graph library, functional types, an in-memory cache and more.\n\nAffected versions of this package are vulnerable to Information Disclosure. The file permissions on the file created by com.google.common.io.Files.createTempDir allows an attacker running a malicious program co-resident on the same machine can steal secrets stored in this directory. This is because by default on unix-like operating systems the /temp directory is shared between all users, so if the correct file permissions aren't set by the directory/file creator, the file becomes readable by all other users on that system.\r\n\r\n### PoC\r\n```\r\nFile guavaTempDir = com.google.common.io.Files.createTempDir();\r\nSystem.out.println(\"Guava Temp Dir: \" + guavaTempDir.getName());\r\nrunLS(guavaTempDir.getParentFile(), guavaTempDir); // Prints the file permissions -> drwxr-xr-x\r\nFile child = new File(guavaTempDir, \"guava-child.txt\");\r\nchild.createNewFile();\r\nrunLS(guavaTempDir, child); // Prints the file permissions -> -rw-r--r--\r\n```\n## Remediation\nUpgrade `com.google.guava:guava` to version 30.0-android, 30.0-jre or higher.\n## References\n- [GitHub Commit](https://github.com/google/guava/commit/fec0dbc4634006a6162cfd4d0d09c962073ddf40)\n- [GitHub Issue](https://github.com/google/guava/issues/4011)\n",
+          "disclosureTime": "2020-10-02T04:56:54Z",
+          "exploit": "Not Defined",
+          "fixedIn": [
+            "30.0-android",
+            "30.0-jre"
+          ],
+          "functions": [
+            {
+              "functionId": {
+                "className": "Files",
+                "filePath": "com/google/common/io/Files.java",
+                "functionName": "createTempDir"
+              },
+              "version": [
+                "[,30.0)"
+              ]
+            }
+          ],
+          "functions_new": [
+            {
+              "functionId": {
+                "className": "com.google.common.io.Files",
+                "functionName": "createTempDir"
+              },
+              "version": [
+                "[,30.0)"
+              ]
+            }
+          ],
+          "id": "SNYK-JAVA-COMGOOGLEGUAVA-1015415",
+          "identifiers": {
+            "CVE": [
+              "CVE-2020-8908"
+            ],
+            "CWE": [
+              "CWE-200"
+            ]
+          },
+          "language": "java",
+          "mavenModuleName": {
+            "artifactId": "guava",
+            "groupId": "com.google.guava"
+          },
+          "modificationTime": "2020-11-05T10:11:21.061172Z",
+          "moduleName": "com.google.guava:guava",
+          "packageManager": "maven",
+          "packageName": "com.google.guava:guava",
+          "patches": [],
+          "proprietary": false,
+          "publicationTime": "2020-10-23T15:50:35Z",
+          "references": [
+            {
+              "title": "GitHub Commit",
+              "url": "https://github.com/google/guava/commit/fec0dbc4634006a6162cfd4d0d09c962073ddf40"
+            },
+            {
+              "title": "GitHub Issue",
+              "url": "https://github.com/google/guava/issues/4011"
+            }
+          ],
+          "semver": {
+            "vulnerable": [
+              "[, 30.0-android)",
+              "(30.0-android, 30.0-jre)"
+            ]
+          },
+          "severity": "medium",
+          "severityWithCritical": "medium",
+          "title": "Information Disclosure",
+          "from": [
+            "com.test:version-collision@0.0.1-SNAPSHOT",
+            "com.test:project-collision@0.0.1-SNAPSHOT",
+            "com.test:project-a@0.0.1-SNAPSHOT",
+            "com.google.guava:guava@29.0-jre"
+          ],
+          "upgradePath": [],
+          "isUpgradable": false,
+          "isPatchable": false,
+          "isPinnable": false,
+          "name": "com.google.guava:guava",
+          "version": "29.0-jre"
+        }
+      ],
+      "upgrade": {},
+      "patch": {},
+      "ignore": {},
+      "pin": {}
+    },
+    "filesystemPolicy": false,
+    "filtered": {
+      "ignore": [],
+      "patch": []
+    },
+    "uniqueCount": 1,
+    "projectName": "com.test:version-collision",
+    "foundProjectCount": 3,
+    "displayTargetFile": "pom.xml",
+    "path": "C:\\workspace"
+  },
+  {
+    "vulnerabilities": [
+      {
+        "CVSSv3": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N/RL:O",
+        "alternativeIds": [],
+        "creationTime": "2020-10-02T14:16:13.342479Z",
+        "credit": [
+          "Jonathan Leitschuh"
+        ],
+        "cvssScore": 5.5,
+        "description": "## Overview\n[com.google.guava:guava](https://github.com/google/guava) is a set of core libraries that includes new collection types (such as multimap and multiset,immutable collections, a graph library, functional types, an in-memory cache and more.\n\nAffected versions of this package are vulnerable to Information Disclosure. The file permissions on the file created by com.google.common.io.Files.createTempDir allows an attacker running a malicious program co-resident on the same machine can steal secrets stored in this directory. This is because by default on unix-like operating systems the /temp directory is shared between all users, so if the correct file permissions aren't set by the directory/file creator, the file becomes readable by all other users on that system.\r\n\r\n### PoC\r\n```\r\nFile guavaTempDir = com.google.common.io.Files.createTempDir();\r\nSystem.out.println(\"Guava Temp Dir: \" + guavaTempDir.getName());\r\nrunLS(guavaTempDir.getParentFile(), guavaTempDir); // Prints the file permissions -> drwxr-xr-x\r\nFile child = new File(guavaTempDir, \"guava-child.txt\");\r\nchild.createNewFile();\r\nrunLS(guavaTempDir, child); // Prints the file permissions -> -rw-r--r--\r\n```\n## Remediation\nUpgrade `com.google.guava:guava` to version 30.0-android, 30.0-jre or higher.\n## References\n- [GitHub Commit](https://github.com/google/guava/commit/fec0dbc4634006a6162cfd4d0d09c962073ddf40)\n- [GitHub Issue](https://github.com/google/guava/issues/4011)\n",
+        "disclosureTime": "2020-10-02T04:56:54Z",
+        "exploit": "Not Defined",
+        "fixedIn": [
+          "30.0-android",
+          "30.0-jre"
+        ],
+        "functions": [
+          {
+            "functionId": {
+              "className": "Files",
+              "filePath": "com/google/common/io/Files.java",
+              "functionName": "createTempDir"
+            },
+            "version": [
+              "[,30.0)"
+            ]
+          }
+        ],
+        "functions_new": [
+          {
+            "functionId": {
+              "className": "com.google.common.io.Files",
+              "functionName": "createTempDir"
+            },
+            "version": [
+              "[,30.0)"
+            ]
+          }
+        ],
+        "id": "SNYK-JAVA-COMGOOGLEGUAVA-1015415",
+        "identifiers": {
+          "CVE": [
+            "CVE-2020-8908"
+          ],
+          "CWE": [
+            "CWE-200"
+          ]
+        },
+        "language": "java",
+        "mavenModuleName": {
+          "artifactId": "guava",
+          "groupId": "com.google.guava"
+        },
+        "modificationTime": "2020-11-05T10:11:21.061172Z",
+        "moduleName": "com.google.guava:guava",
+        "packageManager": "maven",
+        "packageName": "com.google.guava:guava",
+        "patches": [],
+        "proprietary": false,
+        "publicationTime": "2020-10-23T15:50:35Z",
+        "references": [
+          {
+            "title": "GitHub Commit",
+            "url": "https://github.com/google/guava/commit/fec0dbc4634006a6162cfd4d0d09c962073ddf40"
+          },
+          {
+            "title": "GitHub Issue",
+            "url": "https://github.com/google/guava/issues/4011"
+          }
+        ],
+        "semver": {
+          "vulnerable": [
+            "[, 30.0-android)",
+            "(30.0-android, 30.0-jre)"
+          ]
+        },
+        "severity": "medium",
+        "severityWithCritical": "medium",
+        "title": "Information Disclosure",
+        "from": [
+          "com.test:project-a@0.0.1-SNAPSHOT",
+          "com.google.guava:guava@22.0"
+        ],
+        "upgradePath": [
+          false,
+          "com.google.guava:guava@30.0-android"
+        ],
+        "isUpgradable": true,
+        "isPatchable": false,
+        "name": "com.google.guava:guava",
+        "version": "22.0"
+      },
+      {
+        "CVSSv3": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H",
+        "alternativeIds": [],
+        "creationTime": "2018-04-25T07:28:15.755000Z",
+        "credit": [
+          "Apostolos Giannakidis"
+        ],
+        "cvssScore": 5.9,
+        "description": "## Overview\n[com.google.guava:guava](https://github.com/google/guava) is a set of core libraries that includes new collection types (such as multimap and multiset,immutable collections, a graph library, functional types, an in-memory cache and more.\n\nAffected versions of this package are vulnerable to Deserialization of Untrusted Data. During deserialization, two Guava classes accept a caller-specified size parameter and eagerly allocate an array of that size:\r\n* `AtomicDoubleArray` (when serialized with Java serialization)\r\n* `CompoundOrdering` (when serialized with GWT serialization)\r\n\r\nAn attacker may be able to send a specially crafted request which with then cause the server to allocate all it's memory, without validation whether the data size is reasonable.\n\n## Details\n\nSerialization is a process of converting an object into a sequence of bytes which can be persisted to a disk or database or can be sent through streams. The reverse process of creating object from sequence of bytes is called deserialization. Serialization is commonly used for communication (sharing objects between multiple hosts) and persistence (store the object state in a file or a database). It is an integral part of popular protocols like _Remote Method Invocation (RMI)_, _Java Management Extension (JMX)_, _Java Messaging System (JMS)_, _Action Message Format (AMF)_, _Java Server Faces (JSF) ViewState_, etc.\n\n_Deserialization of untrusted data_ ([CWE-502](https://cwe.mitre.org/data/definitions/502.html)), is when the application deserializes untrusted data without sufficiently verifying that the resulting data will be valid, letting the attacker to control the state or the flow of the execution.\n\nJava deserialization issues have been known for years. However, interest in the issue intensified greatly in 2015, when classes that could be abused to achieve remote code execution were found in a [popular library (Apache Commons Collection)](https://snyk.io/vuln/SNYK-JAVA-COMMONSCOLLECTIONS-30078). These classes were used in zero-days affecting IBM WebSphere, Oracle WebLogic and many other products.\n\n  \nAn attacker just needs to identify a piece of software that has both a vulnerable class on its path, and performs deserialization on untrusted data. Then all they need to do is send the payload into the deserializer, getting the command executed.\n  \n\n> Developers put too much trust in Java Object Serialization. Some even de-serialize objects pre-authentication. When deserializing an Object in Java you typically cast it to an expected type, and therefore Java's strict type system will ensure you only get valid object trees. Unfortunately, by the time the type checking happens, platform code has already created and executed significant logic. So, before the final type is checked a lot of code is executed from the readObject() methods of various objects, all of which is out of the developer's control. By combining the readObject() methods of various classes which are available on the classpath of the vulnerable application an attacker can execute functions (including calling Runtime.exec() to execute local OS commands).\n\n- Apache Blog\n  \n## Remediation\nUpgrade `com.google.guava:guava` to version 24.1.1-android, 24.1.1-jre or higher.\n## References\n- [GitHub Commit](https://github.com/google/guava/commit/7ec8718f1e6e2814dabaa4b9f96b6b33a813101c)\n- [Google Group Forum](https://groups.google.com/forum/#!topic/guava-announce/xqWALw4W1vs/discussion)\n- [RedHat Bugzilla Bug](https://bugzilla.redhat.com/show_bug.cgi?id=1573391)\n",
+        "disclosureTime": "2018-04-25T07:28:15Z",
+        "exploit": "Not Defined",
+        "fixedIn": [
+          "24.1.1-android",
+          "24.1.1-jre"
+        ],
+        "functions": [
+          {
+            "functionId": {
+              "className": "AtomicDoubleArray",
+              "filePath": "com/google/common/util/concurrent/AtomicDoubleArray.java",
+              "functionName": "readObject"
+            },
+            "version": [
+              "[11.0, 24.1.1-android)",
+              "(24.1.1-android, 24.1.1-jre)"
+            ]
+          }
+        ],
+        "functions_new": [
+          {
+            "functionId": {
+              "className": "com.google.common.util.concurrent.AtomicDoubleArray",
+              "functionName": "readObject"
+            },
+            "version": [
+              "[11.0, 24.1.1-android)",
+              "(24.1.1-android, 24.1.1-jre)"
+            ]
+          }
+        ],
+        "id": "SNYK-JAVA-COMGOOGLEGUAVA-32236",
+        "identifiers": {
+          "CVE": [
+            "CVE-2018-10237"
+          ],
+          "CWE": [
+            "CWE-119"
+          ],
+          "GHSA": [
+            "GHSA-mvr2-9pj6-7w5j"
+          ]
+        },
+        "language": "java",
+        "mavenModuleName": {
+          "artifactId": "guava",
+          "groupId": "com.google.guava"
+        },
+        "modificationTime": "2020-06-12T14:37:04.235662Z",
+        "moduleName": "com.google.guava:guava",
+        "packageManager": "maven",
+        "packageName": "com.google.guava:guava",
+        "patches": [],
+        "proprietary": false,
+        "publicationTime": "2018-05-02T13:38:04Z",
+        "references": [
+          {
+            "title": "GitHub Commit",
+            "url": "https://github.com/google/guava/commit/7ec8718f1e6e2814dabaa4b9f96b6b33a813101c"
+          },
+          {
+            "title": "Google Group Forum",
+            "url": "https://groups.google.com/forum/%23%21topic/guava-announce/xqWALw4W1vs/discussion"
+          },
+          {
+            "title": "RedHat Bugzilla Bug",
+            "url": "https://bugzilla.redhat.com/show_bug.cgi?id=1573391"
+          }
+        ],
+        "semver": {
+          "vulnerable": [
+            "[11.0, 24.1.1-android)",
+            "(24.1.1-android, 24.1.1-jre)"
+          ]
+        },
+        "severity": "medium",
+        "severityWithCritical": "medium",
+        "title": "Deserialization of Untrusted Data",
+        "from": [
+          "com.test:project-a@0.0.1-SNAPSHOT",
+          "com.google.guava:guava@22.0"
+        ],
+        "upgradePath": [
+          false,
+          "com.google.guava:guava@24.1.1-android"
+        ],
+        "isUpgradable": true,
+        "isPatchable": false,
+        "name": "com.google.guava:guava",
+        "version": "22.0"
+      }
+    ],
+    "ok": false,
+    "dependencyCount": 9,
+    "org": "myorg",
+    "policy": "# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.\nversion: v1.19.0\nignore: {}\npatch: {}\n",
+    "isPrivate": true,
+    "licensesPolicy": {
+      "severities": {},
+      "orgLicenseRules": {}
+    },
+    "packageManager": "maven",
+    "ignoreSettings": {
+      "adminOnly": false,
+      "reasonRequired": false,
+      "disregardFilesystemIgnores": false
+    },
+    "summary": "2 vulnerable dependency paths",
+    "remediation": {
+      "unresolved": [],
+      "upgrade": {
+        "com.google.guava:guava@22.0": {
+          "upgradeTo": "com.google.guava:guava@30.0-android",
+          "upgrades": [
+            "com.google.guava:guava@22.0",
+            "com.google.guava:guava@22.0"
+          ],
+          "vulns": [
+            "SNYK-JAVA-COMGOOGLEGUAVA-1015415",
+            "SNYK-JAVA-COMGOOGLEGUAVA-32236"
+          ]
+        }
+      },
+      "patch": {},
+      "ignore": {},
+      "pin": {}
+    },
+    "filesystemPolicy": false,
+    "filtered": {
+      "ignore": [],
+      "patch": []
+    },
+    "uniqueCount": 2,
+    "projectName": "com.test:project-a",
+    "foundProjectCount": 3,
+    "displayTargetFile": "project-a\\pom.xml",
+    "path": "C:\\workspace"
+  },
+  {
+    "vulnerabilities": [
+      {
+        "CVSSv3": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N/RL:O",
+        "alternativeIds": [],
+        "creationTime": "2020-10-02T14:16:13.342479Z",
+        "credit": [
+          "Jonathan Leitschuh"
+        ],
+        "cvssScore": 5.5,
+        "description": "## Overview\n[com.google.guava:guava](https://github.com/google/guava) is a set of core libraries that includes new collection types (such as multimap and multiset,immutable collections, a graph library, functional types, an in-memory cache and more.\n\nAffected versions of this package are vulnerable to Information Disclosure. The file permissions on the file created by com.google.common.io.Files.createTempDir allows an attacker running a malicious program co-resident on the same machine can steal secrets stored in this directory. This is because by default on unix-like operating systems the /temp directory is shared between all users, so if the correct file permissions aren't set by the directory/file creator, the file becomes readable by all other users on that system.\r\n\r\n### PoC\r\n```\r\nFile guavaTempDir = com.google.common.io.Files.createTempDir();\r\nSystem.out.println(\"Guava Temp Dir: \" + guavaTempDir.getName());\r\nrunLS(guavaTempDir.getParentFile(), guavaTempDir); // Prints the file permissions -> drwxr-xr-x\r\nFile child = new File(guavaTempDir, \"guava-child.txt\");\r\nchild.createNewFile();\r\nrunLS(guavaTempDir, child); // Prints the file permissions -> -rw-r--r--\r\n```\n## Remediation\nUpgrade `com.google.guava:guava` to version 30.0-android, 30.0-jre or higher.\n## References\n- [GitHub Commit](https://github.com/google/guava/commit/fec0dbc4634006a6162cfd4d0d09c962073ddf40)\n- [GitHub Issue](https://github.com/google/guava/issues/4011)\n",
+        "disclosureTime": "2020-10-02T04:56:54Z",
+        "exploit": "Not Defined",
+        "fixedIn": [
+          "30.0-android",
+          "30.0-jre"
+        ],
+        "functions": [
+          {
+            "functionId": {
+              "className": "Files",
+              "filePath": "com/google/common/io/Files.java",
+              "functionName": "createTempDir"
+            },
+            "version": [
+              "[,30.0)"
+            ]
+          }
+        ],
+        "functions_new": [
+          {
+            "functionId": {
+              "className": "com.google.common.io.Files",
+              "functionName": "createTempDir"
+            },
+            "version": [
+              "[,30.0)"
+            ]
+          }
+        ],
+        "id": "SNYK-JAVA-COMGOOGLEGUAVA-1015415",
+        "identifiers": {
+          "CVE": [
+            "CVE-2020-8908"
+          ],
+          "CWE": [
+            "CWE-200"
+          ]
+        },
+        "language": "java",
+        "mavenModuleName": {
+          "artifactId": "guava",
+          "groupId": "com.google.guava"
+        },
+        "modificationTime": "2020-11-05T10:11:21.061172Z",
+        "moduleName": "com.google.guava:guava",
+        "packageManager": "maven",
+        "packageName": "com.google.guava:guava",
+        "patches": [],
+        "proprietary": false,
+        "publicationTime": "2020-10-23T15:50:35Z",
+        "references": [
+          {
+            "title": "GitHub Commit",
+            "url": "https://github.com/google/guava/commit/fec0dbc4634006a6162cfd4d0d09c962073ddf40"
+          },
+          {
+            "title": "GitHub Issue",
+            "url": "https://github.com/google/guava/issues/4011"
+          }
+        ],
+        "semver": {
+          "vulnerable": [
+            "[, 30.0-android)",
+            "(30.0-android, 30.0-jre)"
+          ]
+        },
+        "severity": "medium",
+        "severityWithCritical": "medium",
+        "title": "Information Disclosure",
+        "from": [
+          "com.test:project-b@0.0.1-SNAPSHOT",
+          "com.google.guava:guava@29.0-jre"
+        ],
+        "upgradePath": [
+          false,
+          "com.google.guava:guava@30.0-jre"
+        ],
+        "isUpgradable": true,
+        "isPatchable": false,
+        "name": "com.google.guava:guava",
+        "version": "29.0-jre"
+      }
+    ],
+    "ok": false,
+    "dependencyCount": 11,
+    "org": "myorg",
+    "policy": "# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.\nversion: v1.19.0\nignore: {}\npatch: {}\n",
+    "isPrivate": true,
+    "licensesPolicy": {
+      "severities": {},
+      "orgLicenseRules": {}
+    },
+    "packageManager": "maven",
+    "ignoreSettings": {
+      "adminOnly": false,
+      "reasonRequired": false,
+      "disregardFilesystemIgnores": false
+    },
+    "summary": "1 vulnerable dependency path",
+    "remediation": {
+      "unresolved": [],
+      "upgrade": {
+        "com.google.guava:guava@29.0-jre": {
+          "upgradeTo": "com.google.guava:guava@30.0-jre",
+          "upgrades": [
+            "com.google.guava:guava@29.0-jre"
+          ],
+          "vulns": [
+            "SNYK-JAVA-COMGOOGLEGUAVA-1015415"
+          ]
+        }
+      },
+      "patch": {},
+      "ignore": {},
+      "pin": {}
+    },
+    "filesystemPolicy": false,
+    "filtered": {
+      "ignore": [],
+      "patch": []
+    },
+    "uniqueCount": 1,
+    "projectName": "com.test:project-b",
+    "foundProjectCount": 3,
+    "displayTargetFile": "project-b\\pom.xml",
+    "path": "C:\\workspace"
+  }
+]
