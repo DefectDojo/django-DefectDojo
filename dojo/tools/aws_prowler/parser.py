@@ -30,12 +30,13 @@ class AWSProwlerParser(object):
             result = row.get('RESULT')
             scored = row.get('SCORED')
             level = row.get('LEVEL')
+            severity = row.get('SEVERITY')
             title_text = row.get('TITLE_TEXT')
             title_text = re.sub(r'\[.*\]\s', '', title_text)
             title_text_trunc = Truncator(title_text).words(8)
             notes = row.get('NOTES')
 
-            sev = self.getCriticalityRating(result, level)
+            sev = self.getCriticalityRating(result, level, severity)
             description = "**Region:** " + region + "\n\n" + notes + "\n"
             dupe_key = sev + title_text
             if dupe_key in dupes:
@@ -71,14 +72,17 @@ class AWSProwlerParser(object):
             return ""
 
     # Criticality rating
-    def getCriticalityRating(self, result, level):
+    def getCriticalityRating(self, result, level, severity):
         criticality = "Info"
         if result == "INFO" or result == "PASS":
             criticality = "Info"
         elif result == "FAIL":
-            if level == "Level 1":
-                criticality = "Critical"
+            if severity:
+                return severity
             else:
-                criticality = "High"
+                if level == "Level 1":
+                    criticality = "Critical"
+                else:
+                    criticality = "High"
 
         return criticality
