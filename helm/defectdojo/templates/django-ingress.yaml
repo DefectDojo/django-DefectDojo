@@ -12,9 +12,9 @@ metadata:
     helm.sh/chart: {{ include "defectdojo.chart" . }}
 {{- if or .Values.django.ingress.annotations .Values.gke.useGKEIngress }}
   annotations:
-  {{- with .Values.django.ingress.annotations }}
-  {{ toYaml . | indent 2 }}
-  {{- end }}
+{{- with .Values.django.ingress.annotations }}
+{{ toYaml . | indent 4 }}
+{{- end }}
   {{- if .Values.gke.useGKEIngress }}
     kubernetes.io/ingress.class: gce
     {{- if .Values.gke.useManagedCertificate }}
