@@ -115,11 +115,12 @@ def view_test(request, tid):
                                                   spaces='drive',
                                                   pageSize=10,
                                                   fields='files(id, name)').execute()
+
         except googleapiclient.errors.HttpError:
             messages.add_message(
                 request,
                 messages.ERROR,
-                "There is a problem with the Google Sheets Sync Configuration. Contact your system admin to solve the issue. Until fixed Google Shet Sync feature can not be used.",
+                "There is a problem with the Google Sheets Sync Configuration. Contact your system admin to solve the issue. Until fixed, the Google Sheets Sync feature cannot be used.",
                 extra_tags="alert-danger",
             )
             google_sheets_enabled = False
