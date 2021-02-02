@@ -368,6 +368,13 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         self.assertEqual(200, response.status_code, response.content[:1000])
         return response.data
 
+    def create_engagement_epic(self, engagement):
+        return jira_helper.add_epic_sync(engagement)
+
+    def assert_epic_issue_count(self, engagement, count):
+        jira_issues = jira_helper.get_epic_issues(engagement)
+        self.assertEqual(count, len(jira_issues))
+
     def get_jira_issue_severity(self, finding_id):
         finding = Finding.objects.get(id=finding_id)
         status = jira_helper.get_jira_status(finding)

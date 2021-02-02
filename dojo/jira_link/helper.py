@@ -529,11 +529,16 @@ def add_jira_issue(find):
                     find, jira, issue,
                     settings.MEDIA_ROOT + pic.image_large.name)
 
-                # if jira_project.enable_engagement_epic_mapping:
-                #      epic = get_jira_issue(eng)
-                #      issue_list = [j_issue.jira_id,]
-                #      jira.add_jira_issues_to_epic(epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
+            if jira_project.enable_engagement_epic_mapping:
+                eng = find.test.engagement
+                logger.debug('Adding to EPIC Map: %s', eng.name)
+                epic = get_jira_issue(eng)
+                if epic:
+                    jira.add_issues_to_epic(epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
+                else:
+                    logger.info('The following EPIC does not exist: %s', eng.name)
 
+            logger.info('Created the following jira issue for %d:%s', find.id, find.title)
             return True
         except JIRAError as e:
             logger.exception(e)
@@ -625,6 +630,8 @@ def update_jira_issue(find):
         find.jira_issue.jira_change = timezone.now()
         find.jira_issue.save()
         find.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
+
+        logger.info('Updated the following linked jira issue for %d:%s', find.id, find.title)
         return True
 
     except JIRAError as e:
@@ -807,6 +814,14 @@ def update_epic(engagement):
 @task
 @dojo_model_from_id(model=Engagement)
 def add_epic(engagement):
+    add_epic_sync(engagement)
+
+
+# This code was not being tested, but calling it
+# as a task was not working. Using block execution
+# would not either here because this method is called
+# explicitly instead of through a save function
+def add_epic_sync(engagement):
     logger.info('trying to create a new jira EPIC for %d:%s', engagement.id, engagement.name)
 
     if not is_jira_configured_and_enabled(engagement):
@@ -872,6 +887,16 @@ def jira_get_issue(jira_project, issue_key):
         logger.exception(jira_error)
         log_jira_generic_alert('error retrieving jira issue ' + issue_key, str(jira_error))
         return None
+
+
+# Return a list of jira issue in json format.
+def get_epic_issues(engagement):
+    instance = get_jira_instance(engagement)
+    jira = get_jira_connection(instance)
+    epic_id = get_jira_issue_key(engagement)
+    url = instance.url.strip('/') + '/rest/agile/1.0/epic/' + epic_id + '/issue'
+    response = jira._session.get(url).json()
+    return response.get('issues', [])
 
 
 @dojo_model_to_id(parameter=1)

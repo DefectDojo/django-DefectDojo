@@ -223,6 +223,15 @@ class JIRAConfigAndPushTestApi(DojoVCRAPITestCase):
         # duplicates shouldn't be sent to JIRA
         self.assert_jira_issue_count_in_test(test_id1, 0)
 
+    def test_engagement_epic_mapping(self):
+        eng = self.get_engagement(3)
+        self.create_engagement_epic(eng)
+        import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True, engagement=3)
+        test_id = import0['test']
+        self.assert_jira_issue_count_in_test(test_id, 2)
+        self.assert_epic_issue_count(eng, 2)
+        self.assert_cassette_played()
+
     def test_create_edit_update_finding_no_push_to_jira(self):
         import0 = self.import_scan_with_params(self.zap_sample5_filename)
         test_id = import0['test']
