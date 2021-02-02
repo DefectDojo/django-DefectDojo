@@ -39,7 +39,7 @@ class AcceptedRisksMixin(ABC):
     )
     @action(methods=['post'], detail=True, permission_classes=[IsAdminUser], serializer_class=AcceptedRiskSerializer)
     def accept_risks(self, request, pk=None):
-        model = get_object_or_404(self.risk_application_model_class, pk=pk)
+        model = self.get_object()
         serializer = AcceptedRiskSerializer(data=request.data, many=True)
         if serializer.is_valid():
             accepted_risks = serializer.save()
