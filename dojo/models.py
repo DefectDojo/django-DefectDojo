@@ -2217,6 +2217,15 @@ class Finding(models.Model):
         return self.references
 
 
+class FindingAdmin(admin.ModelAdmin):
+    # For efficiency with large databases, display many-to-many fields with raw
+    # IDs rather than multi-select
+    raw_id_fields = (
+        'endpoints',
+        'endpoint_status',
+    )
+
+
 Finding.endpoints.through.__unicode__ = lambda \
     x: "Endpoint: " + x.endpoint.host
 
@@ -3499,7 +3508,7 @@ admin.site.register(Languages)
 admin.site.register(Language_Type)
 admin.site.register(App_Analysis)
 admin.site.register(Test)
-admin.site.register(Finding)
+admin.site.register(Finding, FindingAdmin)
 admin.site.register(FindingImage)
 admin.site.register(FindingImageAccessToken)
 admin.site.register(Stub_Finding)

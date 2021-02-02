@@ -35,7 +35,6 @@ import crum
 from celery.decorators import task
 from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
 
-
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
