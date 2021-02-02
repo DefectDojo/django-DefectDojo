@@ -112,15 +112,19 @@ def identify_view(request):
 
 
 def finding_querys(prod_type, request):
-    filters = dict()
-
-    findings_query = Finding.objects.filter(verified=True,
-                                      severity__in=('Critical', 'High', 'Medium', 'Low', 'Info')).prefetch_related(
+    findings_query = Finding.objects.filter(
+        verified=True,
+        severity__in=('Critical', 'High', 'Medium', 'Low', 'Info')
+    ).select_related(
+        'reporter',
+        'test',
         'test__engagement__product',
         'test__engagement__product__prod_type',
-        'test__engagement__risk_acceptance',
+    ).prefetch_related(
         'risk_acceptance_set',
-        'reporter')
+        'test__engagement__risk_acceptance',
+        'test__test_type',
+    )
 
     if not request.user.is_staff:
         findings_query = findings_query.filter(
@@ -131,12 +135,15 @@ def finding_querys(prod_type, request):
         verified=True,
         active=True,
         severity__in=('Critical', 'High', 'Medium', 'Low', 'Info')
-    ).prefetch_related(
+    ).select_related(
+        'reporter',
+        'test',
         'test__engagement__product',
         'test__engagement__product__prod_type',
-        'test__engagement__risk_acceptance',
+    ).prefetch_related(
         'risk_acceptance_set',
-        'reporter'
+        'test__engagement__risk_acceptance',
+        'test__test_type',
     )
 
     if not request.user.is_staff:
@@ -238,23 +245,21 @@ def finding_querys(prod_type, request):
             Q(prod_type__authorized_users__in=[request.user]))
     top_ten = severity_count(top_ten, 'annotate', 'engagement__test__finding__severity').order_by('-critical', '-high', '-medium', '-low')[:10]
 
-    filters['all'] = findings
-    filters['closed'] = findings_closed
-    filters['accepted'] = accepted_findings
-    filters['accepted_count'] = accepted_findings_counts
-    filters['top_ten'] = top_ten
-    filters['monthly_counts'] = monthly_counts
-    filters['weekly_counts'] = weekly_counts
-    filters['weeks_between'] = weeks_between
-    filters['start_date'] = start_date
-    filters['end_date'] = end_date
-
-    return filters
+    return {
+        'all': findings,
+        'closed': findings_closed,
+        'accepted': accepted_findings,
+        'accepted_count': accepted_findings_counts,
+        'top_ten': top_ten,
+        'monthly_counts': monthly_counts,
+        'weekly_counts': weekly_counts,
+        'weeks_between': weeks_between,
+        'start_date': start_date,
+        'end_date': end_date,
+    }
 
 
 def endpoint_querys(prod_type, request):
-    filters = dict()
-
     endpoints_query = Endpoint_Status.objects.filter(mitigated=False,
                                       finding__severity__in=('Critical', 'High', 'Medium', 'Low', 'Info')).prefetch_related(
         'finding__test__engagement__product',
@@ -371,18 +376,18 @@ def endpoint_querys(prod_type, request):
             Q(prod_type__authorized_users__in=[request.user]))
     top_ten = severity_count(top_ten, 'annotate', 'engagement__test__finding__severity').order_by('-critical', '-high', '-medium', '-low')[:10]
 
-    filters['all'] = endpoints
-    filters['closed'] = endpoints_closed
-    filters['accepted'] = accepted_endpoints
-    filters['accepted_count'] = accepted_endpoints_counts
-    filters['top_ten'] = top_ten
-    filters['monthly_counts'] = monthly_counts
-    filters['weekly_counts'] = weekly_counts
-    filters['weeks_between'] = weeks_between
-    filters['start_date'] = start_date
-    filters['end_date'] = end_date
-
-    return filters
+    return {
+        'all': endpoints,
+        'closed': endpoints_closed,
+        'accepted': accepted_endpoints,
+        'accepted_count': accepted_endpoints_counts,
+        'top_ten': top_ten,
+        'monthly_counts': monthly_counts,
+        'weekly_counts': weekly_counts,
+        'weeks_between': weeks_between,
+        'start_date': start_date,
+        'end_date': end_date,
+    }
 
 
 def get_in_period_details(findings):
@@ -519,10 +524,8 @@ def metrics(request, mtype):
 
     punchcard = list()
     ticks = list()
-    monthly_counts = filters['monthly_counts']
-    weekly_counts = filters['weekly_counts']
 
-    if 'view' in request.GET and 'dashboard' == request.GET['view']:
+    if request.GET.get('view') == 'dashboard':
         punchcard, ticks = get_punchcard_data(queryset_check(filters['all']), filters['start_date'], filters['weeks_between'], view)
         page_name = (get_system_setting('team_name')) + " Metrics"
         template = 'dojo/dashboard-metrics.html'
@@ -534,11 +537,11 @@ def metrics(request, mtype):
         'start_date': filters['start_date'],
         'end_date': filters['end_date'],
         'findings': filters['all'],
-        'opened_per_month': monthly_counts['opened_per_period'],
-        'active_per_month': monthly_counts['active_per_period'],
-        'opened_per_week': weekly_counts['opened_per_period'],
-        'accepted_per_month': monthly_counts['accepted_per_period'],
-        'accepted_per_week': weekly_counts['accepted_per_period'],
+        'opened_per_month': filters['monthly_counts']['opened_per_period'],
+        'active_per_month': filters['monthly_counts']['active_per_period'],
+        'opened_per_week': filters['weekly_counts']['opened_per_period'],
+        'accepted_per_month': filters['monthly_counts']['accepted_per_period'],
+        'accepted_per_week': filters['weekly_counts']['accepted_per_period'],
         'top_ten_products': filters['top_ten'],
         'age_detail': age_detail,
         'in_period_counts': in_period_counts,
