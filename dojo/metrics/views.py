@@ -412,13 +412,7 @@ def get_in_period_details(findings):
         if obj.test.engagement.product.name not in in_period_details:
             in_period_details[obj.test.engagement.product.name] = {
                 'path': reverse('product_open_findings', args=(obj.test.engagement.product.id,)),
-                'Critical': 0,
-                'High': 0,
-                'Medium': 0,
-                'Low': 0,
-                'Info': 0,
-                'Total': 0
-            }
+                'Critical': 0, 'High': 0, 'Medium': 0, 'Low': 0, 'Info': 0, 'Total': 0}
         in_period_details[obj.test.engagement.product.name][obj.severity] += 1
         in_period_details[obj.test.engagement.product.name]['Total'] += 1
 
@@ -431,13 +425,7 @@ def get_accepted_in_period_details(findings):
         if obj.test.engagement.product.name not in accepted_in_period_details:
             accepted_in_period_details[obj.test.engagement.product.name] = {
                 'path': reverse('accepted_findings') + '?test__engagement__product=' + str(obj.test.engagement.product.id),
-                'Critical': 0,
-                'High': 0,
-                'Medium': 0,
-                'Low': 0,
-                'Info': 0,
-                'Total': 0
-            }
+                'Critical': 0, 'High': 0, 'Medium': 0, 'Low': 0, 'Info': 0, 'Total': 0}
         accepted_in_period_details[
             obj.test.engagement.product.name
         ][obj.severity] += 1
@@ -459,13 +447,7 @@ def get_closed_in_period_details(findings):
             closed_in_period_details[obj.test.engagement.product.name] = {
                 'path': reverse('closed_findings') + '?test__engagement__product=' + str(
                     obj.test.engagement.product.id),
-                'Critical': 0,
-                'High': 0,
-                'Medium': 0,
-                'Low': 0,
-                'Info': 0,
-                'Total': 0
-            }
+                'Critical': 0, 'High': 0, 'Medium': 0, 'Low': 0, 'Info': 0, 'Total': 0}
         closed_in_period_details[
             obj.test.engagement.product.name
         ][obj.severity] += 1
@@ -525,7 +507,7 @@ def metrics(request, mtype):
     punchcard = list()
     ticks = list()
 
-    if request.GET.get('view') == 'dashboard':
+    if 'view' in request.GET and 'dashboard' == request.GET['view']:
         punchcard, ticks = get_punchcard_data(queryset_check(filters['all']), filters['start_date'], filters['weeks_between'], view)
         page_name = (get_system_setting('team_name')) + " Metrics"
         template = 'dojo/dashboard-metrics.html'
@@ -1160,8 +1142,8 @@ def research_metrics(request):
         test__test_type__name='Security Research')
     findings = findings.filter(date__year=now.year, date__month=now.month)
     verified_month = findings.filter(verified=True)
-    month_all_by_product, _ = count_findings(findings)
-    month_verified_by_product, _ = count_findings(
+    month_all_by_product, month_all_aggregate = count_findings(findings)
+    month_verified_by_product, month_verified_aggregate = count_findings(
         verified_month)
 
     remaining_by_product, remaining_aggregate = count_findings(

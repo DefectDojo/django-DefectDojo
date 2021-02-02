@@ -35,6 +35,7 @@ import crum
 from celery.decorators import task
 from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
 
+
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
@@ -644,7 +645,7 @@ def get_punchcard_data(objs, start_date, weeks, view='Finding'):
                                         .annotate(count=Count('id')) \
                                         .order_by('date')
         # return empty stuff if no findings to be statted
-        if len(severities_by_day) == 0:
+        if severities_by_day.count() <= 0:
             return None, None
 
         # day of the week numbers:
