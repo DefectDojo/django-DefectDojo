@@ -1,6 +1,3 @@
-# from dojo.models import User
-# from rest_framework.authtoken.models import Token
-# from rest_framework.test import APITestCase, APIClient
 from .dojo_test_case import DojoVCRTestCase
 from .dojo_test_case import DojoTestCase
 import logging
@@ -55,13 +52,32 @@ class GoogleSheetsConfigTestApi(DojoVCRTestCase):
 
     def test_config_google_sheets(self):
         with open('tests/defectdojo-sheets-localdev.json', 'rb') as f:
-            data = {
-                'email_address': 'fred.blaise@gmail.com',
-                'drive_folder_ID': 'xxxxx',
-                'enable_service': 'true',
-                'cred_file': f
-            }
+            data = {}
+            # fail on purpose to get all the fields dynamically
+            response = self.client.post(reverse('configure_google_sheets'), data, follow=True)
+            form = response.context['form']
+            self.assertEqual(form.is_valid(), False)
 
-            response = self.client.post(reverse('configure_google_sheets'), data)
+            for field in form:
+                # Select Hide by default
+                data.update({field.html_name: 0})
+                data.update({
+                    'email_address': 'fred.blaise@gmail.com',
+                    'drive_folder_ID': 'xxxxxx',
+                    'enable_service': 'true',
+                    'cred_file': f
+                })
+
+            logger.debug("final data dict {}".format(data))
+            response = self.client.post(reverse('configure_google_sheets'), data, follow=True)
+            form = response.context['form']
+            # should be redirected to home page
+            logger.debug("redirect chain {} ".format(response.redirect_chain))
             logger.debug(response)
+            # logger.debug(response.content)
+            if form.is_valid() is False:
+                logger.info(form.errors)
+            self.assertEqual(form.is_valid(), True)
+            self.assertContains(response, "successfully")
+            self.assertEqual(len(self.cassette), 1)
             # self.assert_cassette_played()
