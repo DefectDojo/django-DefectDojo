@@ -2,7 +2,6 @@ from django.conf import settings
 from django.conf.urls import include, url
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import path
 from tastypie.api import Api
 from tastypie_swagger.views import SwaggerView, ResourcesView, SchemaView
 from rest_framework.routers import DefaultRouter
@@ -12,7 +11,7 @@ from drf_yasg2.views import get_schema_view
 from drf_yasg2 import openapi
 from django.http import HttpResponse
 import django_saml2_auth.views
-import debug_toolbar
+
 
 from dojo import views
 from dojo.api import UserResource, ProductResource, EngagementResource, \
@@ -215,7 +214,6 @@ urlpatterns = [
     url(r'^api/v2/api-token-auth/', tokenviews.obtain_auth_token),
     url(r'^api/v2/doc/', schema_view.with_ui('swagger', cache_timeout=0), name='api_v2_schema'),
     url(r'^robots.txt', lambda x: HttpResponse("User-Agent: *\nDisallow: /", content_type="text/plain"), name="robots_file"),
-    url(r'^manage_files/(?P<oid>\d+)/(?P<obj_type>\w+)$', views.manage_files, name='manage_files'),
 ]
 
 urlpatterns += survey_urls
@@ -235,8 +233,3 @@ if settings.DEBUG:
 # sometimes urlpatterns needed be added from local_settings.py to avoid having to modify core defect dojo files
 if hasattr(settings, 'EXTRA_URL_PATTERNS'):
     urlpatterns += settings.EXTRA_URL_PATTERNS
-
-
-urlpatterns += [
-    path('__debug__/', include(debug_toolbar.urls)),
-]
