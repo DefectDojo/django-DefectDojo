@@ -1297,7 +1297,7 @@ class UsersViewSet(mixins.CreateModelMixin,
     permission_classes = (IsAdminUser, DjangoModelPermissions)
 
 
-# Authorization: superuser
+# Authorization: staff
 class ImportScanView(mixins.CreateModelMixin,
                      viewsets.GenericViewSet):
     serializer_class = serializers.ImportScanSerializer
@@ -1320,7 +1320,7 @@ class ImportScanView(mixins.CreateModelMixin,
             raise ParseError(detail=e)
 
 
-# Authorization: superuser
+# Authorization: staff
 class ReImportScanView(mixins.CreateModelMixin,
                        viewsets.GenericViewSet):
     serializer_class = serializers.ReImportScanSerializer
