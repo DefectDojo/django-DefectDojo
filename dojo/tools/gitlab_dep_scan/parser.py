@@ -66,21 +66,8 @@ def get_item(vuln, test):
 
     location = vuln['location']
     file_path = location['file'] if 'file' in location else None
-    sourcefile = location['file'] if 'file' in location else None
-
-    line = location['start_line'] if 'start_line' in location else None
-    if 'end_line' in location:
-        line = location['end_line']
-
-    sast_source_line = location['start_line'] if 'start_line' in location else None
-
-    sast_object = None
-    if 'class' in location and 'method' in location:
-        sast_object = '{}#{}'.format(location['class'], location['method'])
-    elif 'class' in location:
-        sast_object = location['class']
-    elif 'method' in location:
-        sast_object = location['method']
+    component_name = location['dependency']['package']['name']
+    component_version = location['dependency']['version']
 
     severity = vuln['severity']
     if severity == 'Undefined' or severity == 'Unknown':
@@ -126,12 +113,8 @@ def get_item(vuln, test):
                       unique_id_from_tool=unique_id_from_tool,
                       references=references,
                       file_path=file_path,
-                      sourcefile=sourcefile,
-                      line=line,
-                      sast_source_object=sast_object,
-                      sast_sink_object=sast_object,
-                      sast_source_file_path=file_path,
-                      sast_source_line=sast_source_line,
+                      component_name=component_name,
+                      component_version=component_version,
                       cwe=cwe,
                       cve=cve,
                       static_finding=True,
