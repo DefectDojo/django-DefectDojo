@@ -21,6 +21,14 @@ class TestGitlabDepScanReportParser(TestCase):
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(1, len(findings))
 
+    def test_parse_file_with_one_vuln_missing_component_has_one_finding(self):
+        testfile = open(
+            "dojo/unittests/scans/gitlab_dep_scan/gl-dependency-scanning-report-1-vuln-missing-component.json"
+        )
+        parser = GitlabDepScanReportParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(1, len(findings))
+
     def test_parse_file_with_multiple_vuln_has_multiple_findings(self):
         testfile = open(
             "dojo/unittests/scans/gitlab_dep_scan/gl-dependency-scanning-report-many-vuln.json"
