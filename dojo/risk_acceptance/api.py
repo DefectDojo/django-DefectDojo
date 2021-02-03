@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from typing import NamedTuple, List
 
 from django.db.models import QuerySet
-from django.shortcuts import get_object_or_404
 from rest_framework import serializers, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser

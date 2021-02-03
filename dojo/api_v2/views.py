@@ -35,7 +35,7 @@ from django.conf import settings
 from datetime import datetime
 from dojo.utils import get_period_counts_legacy, get_system_setting
 from dojo.api_v2 import serializers, permissions, prefetch, schema
-from django.db.models import Count, Q, Prefetch
+from django.db.models import Count, Q
 import dojo.jira_link.helper as jira_helper
 import logging
 import tagulous
@@ -121,8 +121,8 @@ class EngagementViewSet(mixins.ListModelMixin,
                         ra_api.AcceptedRisksMixin,
                         viewsets.GenericViewSet):
     serializer_class = serializers.EngagementSerializer
-    queryset = Engagement.objects.all().prefetch_related(Prefetch(
-                                                    'notes', queryset=Notes.objects.filter(private=False)),
+    queryset = Engagement.objects.all().prefetch_related(
+                                                    'notes',
                                                     'risk_acceptance',
                                                     'files')
     filter_backends = (DjangoFilterBackend,)
@@ -210,7 +210,7 @@ class EngagementViewSet(mixins.ListModelMixin,
             })
             return Response(serialized_note.data,
                 status=status.HTTP_200_OK)
-        notes = engagement.notes.filter(private=False)
+        notes = engagement.notes.all()
 
         serialized_notes = []
         if notes:
@@ -331,7 +331,7 @@ class FindingViewSet(prefetch.PrefetchListMixin,
                                                     'reviewers',
                                                     'images',
                                                     'found_by',
-                                                    Prefetch('notes', queryset=Notes.objects.filter(private=False)),
+                                                    'notes',
                                                     'risk_acceptance_set',
                                                     'test',
                                                     'test__test_type',
@@ -486,7 +486,7 @@ class FindingViewSet(prefetch.PrefetchListMixin,
             })
             return Response(serialized_note.data,
                 status=status.HTTP_200_OK)
-        notes = finding.notes.filter(private=False)
+        notes = finding.notes.all()
 
         serialized_notes = []
         if notes:
@@ -553,7 +553,7 @@ class FindingViewSet(prefetch.PrefetchListMixin,
     def remove_note(self, request, pk=None):
         """Remove Note From Finding Note"""
         finding = self.get_object()
-        notes = finding.notes.filter(private=False)
+        notes = finding.notes.all()
         if request.data['note_id']:
             note = get_object_or_404(Notes.objects, id=request.data['note_id'])
             if note not in notes:
@@ -1076,9 +1076,9 @@ class TestsViewSet(mixins.ListModelMixin,
                    ra_api.AcceptedRisksMixin,
                    viewsets.GenericViewSet):
     serializer_class = serializers.TestSerializer
-    queryset = Test.objects.all().prefetch_related(Prefetch(
-                                                    'notes', queryset=Notes.objects.filter(private=False)),
-                                                    'files')
+    queryset = Test.objects.all().prefetch_related(
+                                                'notes',
+                                                'files')
     filter_backends = (DjangoFilterBackend,)
     filter_class = ApiTestFilter
 
@@ -1154,7 +1154,7 @@ class TestsViewSet(mixins.ListModelMixin,
             })
             return Response(serialized_note.data,
                 status=status.HTTP_200_OK)
-        notes = test.notes.filter(private=False)
+        notes = test.notes.all()
 
         serialized_notes = []
         if notes:
@@ -1297,13 +1297,13 @@ class UsersViewSet(mixins.CreateModelMixin,
     permission_classes = (IsAdminUser, DjangoModelPermissions)
 
 
-# Authorization: staff
+# Authorization: authenticated users, DjangoModelPermissions
 class ImportScanView(mixins.CreateModelMixin,
                      viewsets.GenericViewSet):
     serializer_class = serializers.ImportScanSerializer
     parser_classes = [MultiPartParser]
     queryset = Test.objects.all()
-    permission_classes = (IsAdminUser, )
+    permission_classes = (IsAuthenticated, DjangoModelPermissions)
 
     def perform_create(self, serializer):
         engagement = serializer.validated_data['engagement']
@@ -1320,13 +1320,13 @@ class ImportScanView(mixins.CreateModelMixin,
             raise ParseError(detail=e)
 
 
-# Authorization: staff
+# Authorization: authenticated users, DjangoModelPermissions
 class ReImportScanView(mixins.CreateModelMixin,
                        viewsets.GenericViewSet):
     serializer_class = serializers.ReImportScanSerializer
     parser_classes = [MultiPartParser]
     queryset = Test.objects.all()
-    permission_classes = (IsAdminUser, )
+    permission_classes = (IsAuthenticated, DjangoModelPermissions)
 
     def perform_create(self, serializer):
         test = serializer.validated_data['test']
@@ -1363,7 +1363,7 @@ class NotesViewSet(mixins.ListModelMixin,
                    mixins.UpdateModelMixin,
                    viewsets.GenericViewSet):
     serializer_class = serializers.NoteSerializer
-    queryset = Notes.objects.filter(private=False)
+    queryset = Notes.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'entry', 'author',
                     'private', 'date', 'edited',
