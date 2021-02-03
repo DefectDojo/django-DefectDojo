@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('dojo', '0070_increase_alert_field_size'),
+        ('dojo', '0071_product_type_enhancement'),
     ]
 
     operations = [
