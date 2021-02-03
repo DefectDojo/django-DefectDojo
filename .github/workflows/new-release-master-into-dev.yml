@@ -16,7 +16,7 @@ on:
         required: true
 
 jobs:
-  create_pr:
+  create_pr_for_merg_back_into_dev:
     runs-on: ubuntu-latest
     steps:
       - name: Login to DockerHub
