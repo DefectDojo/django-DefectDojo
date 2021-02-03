@@ -31,5 +31,3 @@ class TestSafetyParser(TestCase):
         with open(testfile) as f:
             parser = SafetyParser(f, Test())
         self.assertEqual(1, len(parser.items))
-        cves = parser.items[0].cve.split(',')
-        self.assertEqual(2, len(cves))
