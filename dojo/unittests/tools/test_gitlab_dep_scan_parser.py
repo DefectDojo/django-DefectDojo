@@ -28,6 +28,9 @@ class TestGitlabDepScanReportParser(TestCase):
         parser = GitlabDepScanReportParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(1, len(findings))
+        finding = findings[0]
+        self.assertEqual(None, finding.component_name)
+        self.assertEqual(None, finding.component_version)
 
     def test_parse_file_with_multiple_vuln_has_multiple_findings(self):
         testfile = open(
