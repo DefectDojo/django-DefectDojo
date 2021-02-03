@@ -61,7 +61,7 @@ drf_yasg2==1.19.4
 jsonlines==2.0.0  # requred by yarn audit parser
 django-saml2-auth==2.2.1
 cpe==1.2.1
-packageurl-python==0.9.3
+packageurl-python==0.9.4
 django-crum==0.7.9
 JSON-log-formatter==0.3.0
 django-split-settings==1.0.1
