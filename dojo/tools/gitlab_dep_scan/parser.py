@@ -66,8 +66,13 @@ def get_item(vuln, test):
 
     location = vuln['location']
     file_path = location['file'] if 'file' in location else None
-    component_name = location['dependency']['package']['name']
-    component_version = location['dependency']['version']
+
+    component_name = None
+    component_version = None
+    if 'dependency' in location:
+        component_version = location['dependency']['version'] if 'version' in location['dependency'] else None
+        if 'package' in location['dependency']:
+            component_name = location['dependency']['package']['name'] if 'name' in location['dependency']['package'] else None
 
     severity = vuln['severity']
     if severity == 'Undefined' or severity == 'Unknown':
