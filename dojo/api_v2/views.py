@@ -1050,7 +1050,9 @@ class TestsViewSet(mixins.ListModelMixin,
     def get_queryset(self):
         if not self.request.user.is_staff:
             return Test.objects.filter(
-                engagement__product__authorized_users__in=[self.request.user])
+                Q(engagement__product__authorized_users__in=[self.request.user]) |
+                Q(engagement__product__prod_type_authorized_users__in=[self.request.user])
+            )
         else:
             return Test.objects.all()
 
