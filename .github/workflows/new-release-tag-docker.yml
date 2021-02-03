@@ -50,11 +50,12 @@ jobs:
 
 
   job-build-and-push:
-    needs: tag-and-release
+#     needs: tag-and-release
     runs-on: ubuntu-latest
     strategy:
       matrix:
-          docker-image: [django, nginx]
+#           docker-image: [django, nginx]
+          docker-image: [django]
     steps:
       - name: Login to DockerHub
         uses: docker/login-action@v1
