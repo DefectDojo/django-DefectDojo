@@ -767,6 +767,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'SonarQube Scan': ['cwe', 'severity', 'file_path'],
     'Dependency Check Scan': ['cve', 'file_path'],
     'Dependency Track Finding Packaging Format (FPF) Export': ['component', 'vuln_id_from_tool'],
+    'Nessus Scan': ['title', 'severity', 'cve', 'cwe', 'endpoints'],
     # possible improvment: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
     'NPM Audit Scan': ['title', 'severity', 'file_path', 'cve', 'cwe'],
     # possible improvment: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
@@ -794,6 +795,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'Checkmarx Scan': False,
     'SonarQube Scan': False,
     'Dependency Check Scan': True,
+    'Nessus Scan': True,
     'NPM Audit Scan': True,
     'Yarn Audit Scan': True,
     'Whitesource Scan': True,
@@ -834,6 +836,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'SonarQube Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'SonarQube Scan': DEDUPE_ALGO_HASH_CODE,
     'Dependency Check Scan': DEDUPE_ALGO_HASH_CODE,
+    'Nessus Scan': DEDUPE_ALGO_HASH_CODE,
     'NPM Audit Scan': DEDUPE_ALGO_HASH_CODE,
     'Yarn Audit Scan': DEDUPE_ALGO_HASH_CODE,
     'Whitesource Scan': DEDUPE_ALGO_HASH_CODE,

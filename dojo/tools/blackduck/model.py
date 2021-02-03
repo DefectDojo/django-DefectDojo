@@ -1,6 +1,5 @@
 from collections import namedtuple
 
-
 # this class can be updated to use @dataclass in Python 3.7
 # note that all types are strings except for 'locations' which is a set of strings
 BlackduckFinding = namedtuple('BlackduckFinding', [

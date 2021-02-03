@@ -1,13 +1,13 @@
 __author__ = 'aaronweaver'
 
 import logging
-
-from defusedxml import ElementTree
-from dateutil import parser
 import ntpath
-from dojo.utils import add_language
+
+from dateutil import parser
+from defusedxml import ElementTree
 
 from dojo.models import Finding
+from dojo.utils import add_language
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +33,7 @@ class CheckmarxXMLParser(object):
     # mode:
     # None (default): aggregates vulnerabilites per sink filename (legacy behavior)
     # 'detailed' : No aggregation
-    def __init__(self, filename, test, mode=None):
+    def get_findings(self, filename, test, mode=None):
         cxscan = ElementTree.parse(filename)
         self.test = test
         root = cxscan.getroot()
@@ -86,7 +86,7 @@ class CheckmarxXMLParser(object):
         for lang in self.language_list:
             add_language(test.engagement.product, lang)
 
-        self.items = list(dupes.values())
+        return list(dupes.values())
 
     # Process one result = one pathId for default "Checkmarx Scan"
     # Create the finding and add it into the dupes list

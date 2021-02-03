@@ -85,6 +85,8 @@ def create_description(event, *args, **kwargs):
     if "description" not in kwargs.keys():
         if event == 'product_added':
             kwargs["description"] = "Product " + kwargs['title'] + " has been created successfully."
+        elif event == 'product_type_added':
+            kwargs["description"] = "Product Type " + kwargs['title'] + " has been created successfully."
         else:
             kwargs["description"] = "Event " + str(event) + " has occured."
 
