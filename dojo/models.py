@@ -1733,6 +1733,7 @@ class Finding(models.Model):
     class Meta:
         ordering = ('numerical_severity', '-date', 'title')
         indexes = [
+            models.Index(fields=['test', 'active', 'verified']),
             models.Index(fields=['cve']),
             models.Index(fields=['cwe']),
             models.Index(fields=['out_of_scope']),
