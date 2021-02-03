@@ -863,6 +863,11 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
 
         return data
 
+    def build_relational_field(self, field_name, relation_info):
+        if field_name == 'notes':
+            return NoteSerializer, {'many': True, 'read_only': True}
+        return super().build_relational_field(field_name, relation_info)
+
     def get_request_response(self, obj):
         burp_req_resp = BurpRawRequestResponse.objects.filter(finding=obj)
         burp_list = []

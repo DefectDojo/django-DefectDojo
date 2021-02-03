@@ -35,7 +35,7 @@ from django.conf import settings
 from datetime import datetime
 from dojo.utils import get_period_counts_legacy, get_system_setting
 from dojo.api_v2 import serializers, permissions, prefetch, schema
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Prefetch
 import dojo.jira_link.helper as jira_helper
 import logging
 import tagulous
@@ -121,7 +121,10 @@ class EngagementViewSet(mixins.ListModelMixin,
                         ra_api.AcceptedRisksMixin,
                         viewsets.GenericViewSet):
     serializer_class = serializers.EngagementSerializer
-    queryset = Engagement.objects.all()
+    queryset = Engagement.objects.all().prefetch_related(Prefetch(
+                                                    'notes', queryset=Notes.objects.filter(private=False)),
+                                                    'risk_acceptance',
+                                                    'files')
     filter_backends = (DjangoFilterBackend,)
     filter_class = ApiEngagementFilter
 
@@ -131,12 +134,12 @@ class EngagementViewSet(mixins.ListModelMixin,
 
     def get_queryset(self):
         if not self.request.user.is_staff:
-            return Engagement.objects.filter(
+            return self.queryset.filter(
                 Q(product__authorized_users__in=[self.request.user]) |
                 Q(product__prod_type__authorized_users__in=[self.request.user])
             )
         else:
-            return Engagement.objects.all()
+            return self.queryset
 
     @swagger_auto_schema(
         request_body=no_body, responses={status.HTTP_200_OK: ""}
@@ -328,7 +331,7 @@ class FindingViewSet(prefetch.PrefetchListMixin,
                                                     'reviewers',
                                                     'images',
                                                     'found_by',
-                                                    'notes',
+                                                    Prefetch('notes', queryset=Notes.objects.filter(private=False)),
                                                     'risk_acceptance_set',
                                                     'test',
                                                     'test__test_type',
@@ -362,24 +365,12 @@ class FindingViewSet(prefetch.PrefetchListMixin,
 
     def get_queryset(self):
         if not self.request.user.is_staff:
-            findings = Finding.objects.filter(
+            return self.queryset.filter(
                 Q(test__engagement__product__authorized_users__in=[self.request.user]) |
                 Q(test__engagement__product__prod_type__authorized_users__in=[self.request.user])
             )
         else:
-            findings = Finding.objects.all()
-        return findings.prefetch_related('endpoints',
-                                        'reviewers',
-                                        'images',
-                                        'found_by',
-                                        'notes',
-                                        'risk_acceptance_set',
-                                        'test',
-                                        'test__test_type',
-                                        'test__engagement',
-                                        'test__environment',
-                                        'test__engagement__product',
-                                        'test__engagement__product__prod_type')
+            return self.queryset
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
@@ -1085,7 +1076,9 @@ class TestsViewSet(mixins.ListModelMixin,
                    ra_api.AcceptedRisksMixin,
                    viewsets.GenericViewSet):
     serializer_class = serializers.TestSerializer
-    queryset = Test.objects.all()
+    queryset = Test.objects.all().prefetch_related(Prefetch(
+                                                    'notes', queryset=Notes.objects.filter(private=False)),
+                                                    'files')
     filter_backends = (DjangoFilterBackend,)
     filter_class = ApiTestFilter
 
@@ -1095,12 +1088,12 @@ class TestsViewSet(mixins.ListModelMixin,
 
     def get_queryset(self):
         if not self.request.user.is_staff:
-            return Test.objects.filter(
+            return self.queryset.filter(
                 Q(engagement__product__authorized_users__in=[self.request.user]) |
                 Q(engagement__product__prod_type__authorized_users__in=[self.request.user])
             )
         else:
-            return Test.objects.all()
+            return self.queryset
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
