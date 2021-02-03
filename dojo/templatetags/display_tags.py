@@ -1,5 +1,4 @@
 from itertools import chain
-import random
 from django import template
 from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import stringfilter
@@ -244,42 +243,6 @@ def version_num(value):
     return version
 
 
-@register.filter(name='count_findings_test_all')
-def count_findings_test_all(test):
-    open_findings = Finding.objects.filter(test=test).count()
-    return open_findings
-
-
-@register.filter(name='count_findings_test_duplicate')
-def count_findings_test_duplicate(test):
-    duplicate_findings = Finding.objects.filter(test=test, duplicate=True).count()
-    return duplicate_findings
-
-
-@register.filter(name='paginator')
-def paginator(page):
-    page_value = paginator_value(page)
-    if page_value:
-        page_value = "&page=" + page_value
-    return page_value
-
-
-@register.filter(name='paginator_form')
-def paginator_form(page):
-    return paginator_value(page)
-
-
-def paginator_value(page):
-    page_value = ""
-    # isinstance(page, int):
-    try:
-        if int(page):
-            page_value = str(page)
-    except:
-        pass
-    return page_value
-
-
 @register.filter(name='finding_sla')
 def finding_sla(finding):
     if not get_system_setting('enable_finding_sla'):
@@ -343,21 +306,6 @@ def display_index(data, index):
     return data[index]
 
 
-@register.filter
-def finding_status(finding, duplicate):
-    findingFilter = None
-    if finding:
-        findingFilter = finding.filter(duplicate=duplicate)
-    return findingFilter
-
-
-@register.simple_tag
-def random_html():
-    def r(): return random.randint(0, 255)
-
-    return ('#%02X%02X%02X' % (r(), r(), r()))
-
-
 @register.filter(is_safe=True, needs_autoescape=False)
 @stringfilter
 def action_log_entry(value, autoescape=None):
@@ -375,13 +323,6 @@ def action_log_entry(value, autoescape=None):
 def dojo_body_class(context):
     request = context['request']
     return request.COOKIES.get('dojo-sidebar', 'min')
-
-
-@register.simple_tag
-def random_value():
-    import string
-    import random
-    return ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(12))
 
 
 @register.filter(name='datediff_time')

@@ -1,10 +1,8 @@
+import logging
 from collections import deque
 
-from dojo.tools.sonarqube_api.api_client import SonarQubeAPI
 from dojo.models import Sonarqube_Issue_Transition
-
-import logging
-
+from dojo.tools.sonarqube_api.api_client import SonarQubeAPI
 
 logger = logging.getLogger(__name__)
 
