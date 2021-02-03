@@ -10,10 +10,10 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        # migrations.AddIndex(
-        #     model_name='finding',
-        #     index=models.Index(fields=['test', 'active', 'verified'], name='dojo_findin_test_id_bfc47c_idx'),
-        # ),
+        migrations.AddIndex(
+            model_name='finding',
+            index=models.Index(fields=['test', 'active', 'verified'], name='dojo_findin_test_id_bfc47c_idx'),
+        ),
         migrations.AddIndex(
             model_name='endpoint',
             index=models.Index(fields=['product', 'mitigated'], name='dojo_endpoi_product_b80e9a_idx'),
