@@ -1,4 +1,5 @@
 from dojo.models import User, Finding, JIRA_Instance
+from dojo.jira_link import helper as jira_helper
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase, APIClient
 from .dojo_test_case import DojoVCRAPITestCase
@@ -223,15 +224,6 @@ class JIRAConfigAndPushTestApi(DojoVCRAPITestCase):
         # duplicates shouldn't be sent to JIRA
         self.assert_jira_issue_count_in_test(test_id1, 0)
 
-    def test_engagement_epic_mapping(self):
-        eng = self.get_engagement(3)
-        self.create_engagement_epic(eng)
-        import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True, engagement=3)
-        test_id = import0['test']
-        self.assert_jira_issue_count_in_test(test_id, 2)
-        self.assert_epic_issue_count(eng, 2)
-        self.assert_cassette_played()
-
     def test_create_edit_update_finding_no_push_to_jira(self):
         import0 = self.import_scan_with_params(self.zap_sample5_filename)
         test_id = import0['test']
@@ -301,3 +293,85 @@ class JIRAConfigAndPushTestApi(DojoVCRAPITestCase):
         # by asserting full cassette is played we know all calls to JIRA have been made as expected
         self.assert_cassette_played()
         return test_id
+
+    def test_engagement_epic_creation(self):
+        eng = self.get_engagement(3)
+        # Set epic_mapping to true
+        self.toggle_jira_project_epic_mapping(eng, True)
+        self.create_engagement_epic(eng)
+        self.assertTrue(eng.has_jira_issue)
+
+        self.assert_cassette_played()
+
+    def test_engagement_epic_mapping_enabled_create_epic_and_push_findings(self):
+        eng = self.get_engagement(3)
+        # Set epic_mapping to true
+        self.toggle_jira_project_epic_mapping(eng, True)
+        self.create_engagement_epic(eng)
+        import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True, engagement=3)
+        test_id = import0['test']
+        # Correct number of issues are pushed to jira
+        self.assert_jira_issue_count_in_test(test_id, 2)
+        # Correct number of issues are in the epic
+        self.assert_epic_issue_count(eng, 2)
+        # Ensure issue are actually in the correct epic
+        finding = Finding.objects.filter(test__id=test_id).first()
+        self.assert_jira_issue_in_epic(finding, eng, issue_in_epic=True)
+
+        self.assert_cassette_played()
+
+    def test_engagement_epic_mapping_enabled_no_epic_and_push_findings(self):
+        eng = self.get_engagement(3)
+        # Set epic_mapping to true
+        self.toggle_jira_project_epic_mapping(eng, True)
+        import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True, engagement=3)
+        test_id = import0['test']
+        # Correct number of issues are pushed to jira
+        self.assert_jira_issue_count_in_test(test_id, 2)
+        # Correct number of issues are in the epic
+        self.assert_epic_issue_count(eng, 0)
+        # Ensure issue are actually not in the correct epic
+        finding = Finding.objects.filter(test__id=test_id).first()
+        self.assert_jira_issue_in_epic(finding, eng, issue_in_epic=False)
+
+        self.assert_cassette_played()
+
+    def test_engagement_epic_mapping_disabled_create_epic_and_push_findings(self):
+        eng = self.get_engagement(3)
+        # Set epic_mapping to true
+        self.toggle_jira_project_epic_mapping(eng, False)
+        self.create_engagement_epic(eng)
+        import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True, engagement=3)
+        test_id = import0['test']
+        # Correct number of issues are pushed to jira
+        self.assert_jira_issue_count_in_test(test_id, 2)
+        # Correct number of issues are in the epic
+        self.assert_epic_issue_count(eng, 0)
+        # Ensure issue are actually in the correct epic
+        finding = Finding.objects.filter(test__id=test_id).first()
+        self.assert_jira_issue_in_epic(finding, eng, issue_in_epic=False)
+
+        self.assert_cassette_played()
+
+    def test_engagement_epic_mapping_disabled_no_epic_and_push_findings(self):
+        eng = self.get_engagement(3)
+        # Set epic_mapping to true
+        self.toggle_jira_project_epic_mapping(eng, False)
+        import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True, engagement=3)
+        test_id = import0['test']
+        # Correct number of issues are pushed to jira
+        self.assert_jira_issue_count_in_test(test_id, 2)
+        # Correct number of issues are in the epic
+        self.assert_epic_issue_count(eng, 0)
+        # Ensure issue are actually not in the correct epic
+        finding = Finding.objects.filter(test__id=test_id).first()
+        self.assert_jira_issue_in_epic(finding, eng, issue_in_epic=False)
+
+        self.assert_cassette_played()
+
+    def create_engagement_epic(self, engagement):
+        return jira_helper.add_epic_sync(engagement)
+
+    def assert_epic_issue_count(self, engagement, count):
+        jira_issues = self.get_epic_issues(engagement)
+        self.assertEqual(count, len(jira_issues))

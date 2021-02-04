@@ -9,6 +9,7 @@ import json
 from django.test import TestCase
 from itertools import chain
 from dojo.jira_link import helper as jira_helper
+from dojo.jira_link.views import get_custom_field
 import logging
 import pprint
 import copy
@@ -254,6 +255,49 @@ class DojoTestUtilsMixin(object):
         self.assertEqual(self.db_jira_project_count(), jira_project_count_before + expected_delta_jira_project_db)
         return response
 
+    def get_jira_issue_severity(self, finding_id):
+        finding = Finding.objects.get(id=finding_id)
+        status = jira_helper.get_jira_status(finding)
+        return status
+
+    # Toggle epic mapping on jira product
+    def toggle_jira_project_epic_mapping(self, obj, value):
+        project = jira_helper.get_jira_project(obj)
+        project.enable_engagement_epic_mapping = value
+        project.save()
+
+    # Return a list of jira issue in json format.
+    def get_epic_issues(self, engagement):
+        instance = jira_helper.get_jira_instance(engagement)
+        jira = jira_helper.get_jira_connection(instance)
+        epic_id = jira_helper.get_jira_issue_key(engagement)
+        response = {}
+        if epic_id:
+            url = instance.url.strip('/') + '/rest/agile/1.0/epic/' + epic_id + '/issue'
+            response = jira._session.get(url).json()
+        return response.get('issues', [])
+
+    # Determine whether an issue is in an epic
+    def assert_jira_issue_in_epic(self, finding, engagement, issue_in_epic=True):
+        instance = jira_helper.get_jira_instance(engagement)
+        jira = jira_helper.get_jira_connection(instance)
+        epic_id = jira_helper.get_jira_issue_key(engagement)
+        issue_id = jira_helper.get_jira_issue_key(finding)
+        epic_link_field = 'customfield_' + str(get_custom_field(jira, 'Epic Link'))
+        url = instance.url.strip('/') + '/rest/api/latest/issue/' + issue_id
+        response = jira._session.get(url).json().get('fields', {})
+        epic_link = response.get(epic_link_field, None)
+        print(epic_id, epic_link_field, epic_link)
+        import pprint
+        pprint.pprint(response)
+        if epic_id is None and epic_link is None or issue_in_epic:
+            self.assertTrue(epic_id == epic_link)
+        else:
+            self.assertTrue(epic_id != epic_link)
+
+    def assert_jira_status_change(self, old_status, new_status):
+        self.assertFalse(old_status == new_status)
+
 
 class DojoTestCase(TestCase, DojoTestUtilsMixin):
 
@@ -367,21 +411,6 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         response = self.client.patch(reverse('finding-list') + '%s/' % finding_id, payload, format='json')
         self.assertEqual(200, response.status_code, response.content[:1000])
         return response.data
-
-    def create_engagement_epic(self, engagement):
-        return jira_helper.add_epic_sync(engagement)
-
-    def assert_epic_issue_count(self, engagement, count):
-        jira_issues = jira_helper.get_epic_issues(engagement)
-        self.assertEqual(count, len(jira_issues))
-
-    def get_jira_issue_severity(self, finding_id):
-        finding = Finding.objects.get(id=finding_id)
-        status = jira_helper.get_jira_status(finding)
-        return status
-
-    def assert_jira_status_change(self, old_status, new_status):
-        self.assertFalse(old_status == new_status)
 
     def assert_finding_count_json(self, count, findings_content_json):
         self.assertEqual(findings_content_json['count'], count)

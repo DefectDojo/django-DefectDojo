@@ -556,7 +556,7 @@ def add_jira_issue(find):
 @task
 @dojo_model_from_id
 def update_jira_issue(find):
-    logger.info('trying to update a linked jira issue for %d:%s', find.id, find.title)
+    logger.debug('trying to update a linked jira issue for %d:%s', find.id, find.title)
 
     if not is_jira_enabled():
         return False
@@ -631,7 +631,7 @@ def update_jira_issue(find):
         find.jira_issue.save()
         find.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
 
-        logger.info('Updated the following linked jira issue for %d:%s', find.id, find.title)
+        logger.debug('Updated the following linked jira issue for %d:%s', find.id, find.title)
         return True
 
     except JIRAError as e:
@@ -783,7 +783,7 @@ def close_epic(eng, push_to_jira):
 @task
 @dojo_model_from_id(model=Engagement)
 def update_epic(engagement):
-    logger.info('trying to update jira EPIC for %d:%s', engagement.id, engagement.name)
+    logger.debug('trying to update jira EPIC for %d:%s', engagement.id, engagement.name)
 
     if not is_jira_configured_and_enabled(engagement):
         return False
@@ -822,7 +822,7 @@ def add_epic(engagement):
 # would not either here because this method is called
 # explicitly instead of through a save function
 def add_epic_sync(engagement):
-    logger.info('trying to create a new jira EPIC for %d:%s', engagement.id, engagement.name)
+    logger.debug('trying to create a new jira EPIC for %d:%s', engagement.id, engagement.name)
 
     if not is_jira_configured_and_enabled(engagement):
         return False
@@ -887,16 +887,6 @@ def jira_get_issue(jira_project, issue_key):
         logger.exception(jira_error)
         log_jira_generic_alert('error retrieving jira issue ' + issue_key, str(jira_error))
         return None
-
-
-# Return a list of jira issue in json format.
-def get_epic_issues(engagement):
-    instance = get_jira_instance(engagement)
-    jira = get_jira_connection(instance)
-    epic_id = get_jira_issue_key(engagement)
-    url = instance.url.strip('/') + '/rest/agile/1.0/epic/' + epic_id + '/issue'
-    response = jira._session.get(url).json()
-    return response.get('issues', [])
 
 
 @dojo_model_to_id(parameter=1)
