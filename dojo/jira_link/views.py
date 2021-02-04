@@ -13,8 +13,6 @@ from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import PermissionDenied
-import requests
-
 # Local application/library imports
 from dojo.forms import JIRAForm, DeleteJIRAInstanceForm, ExpressJIRAForm
 from dojo.models import User, JIRA_Instance, JIRA_Issue, Notes, Risk_Acceptance
